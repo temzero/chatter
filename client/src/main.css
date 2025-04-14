@@ -1,0 +1,199 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+
+  --header-height: 60px;
+  --primary-color: #247cff;
+  --primary-green: #00ae80;
+
+  /* light theme defaults */
+  color: black;
+  background-color: #ffffff;
+  --sidebar-color: #eee;
+  --input-color: rgba(150, 150, 150, 0.1);
+  --input-border-color: rgba(0, 0, 0, 0.3);
+  --border-color: rgba(0, 0, 0, 0.2);
+  --hover-color: #ddd;
+  --message-color: #eee;
+  --scrollbar-color: #c1c1c1;
+  --scrollbar-hover-color: #a8a8a8;
+}
+
+html {
+  margin: 0;
+  overflow: none;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+/* Dark mode styles */
+html[data-theme="dark"] {
+  color-scheme: dark;
+
+  color: white;
+  background-color: #121212;
+  --sidebar-color: #222;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --input-color: rgba(0, 0, 0, 0.1);
+  --input-border-color: rgba(255, 255, 255, 0.2);
+  --hover-color: rgba(122, 122, 122, 0.2);
+  --message-color: #303030;
+  --scrollbar-color: #5f5f5f;
+  --scrollbar-hover-color: #d0d0d0;
+}
+
+button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  text-align: center;
+  cursor: pointer;
+  padding-left: 6px;
+  padding-right: 6px;
+  background-color: var(--input-color);
+  border: 2px solid var(--border-color);
+  font-size: 1rem;
+  min-width: 60px;
+  height: 28px;
+}
+button:hover {
+  opacity: 0.9;
+}
+button:disabled {
+  color: var(--text-color);
+  background-color: var(--border-color);
+  opacity: 0.8;
+  pointer-events: none;
+}
+button:disabled:hover {
+  opacity: 1;
+}
+button.primary {
+  border: none;
+  background: var(--primary-color);
+  color: white;
+}
+
+input, textarea {
+  padding: 1px !important;
+  outline: none;
+  border: none;
+  border-radius: 4px !important;
+  box-shadow: none;
+  background-color: transparent !important;
+  resize: none;
+}
+
+input:focus, textarea:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Hide the datepicker dropdown but keep the input */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+/* Optional: Hide the dropdown arrow in Firefox */
+input[type="date"]::-moz-calendar-picker-indicator {
+  display: none;
+}
+
+.input {
+  height: 36px;
+  width: 100%;
+  padding: 6px; 
+  border: 2px solid var(--input-border-color);
+  background-color: var(--input-color);
+  border-radius: 4px;
+}
+
+select {
+  border: none !important;
+  background-color: transparent !important;
+}
+select:focus {
+  border-radius: 4px !important;
+  background-color: var(--bg-color) !important;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-color);
+  border: 2px solid transparent;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  width: 8px;
+  background-color: var(--scrollbar-hover-color);
+}
+
+/* icon */
+.material-symbols-outlined.filled {
+  font-variation-settings: 'FILL' 1;
+}
+
+.custom-border {
+  border: 1px solid var(--border-color);
+}
+.custom-border-t {
+  border-top: 1px solid var(--border-color);
+}
+.custom-border-l {
+  border-left: 1px solid var(--border-color);
+}
+.custom-border-r {
+  border-right: 1px solid var(--border-color);
+}
+.custom-border-b {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar-button {
+  display: flex;
+  align-items: center;
+  height: 54px;
+  gap: 16px;
+  padding: 20px 16px;
+  cursor: pointer;
+}
+.sidebar-button:hover {
+  background-color: var(--hover-color);
+}
+
+.message-bubble {
+  display: inline-block;
+  padding: 6px;
+  padding-bottom: 8px;
+  border-radius: 4px;
+  background-color: var(--message-color);
+  word-break: break-word;
+  width: fit-content;
+  cursor: pointer;
+  
+  /* Set transform origin and transition */
+  transform-origin: bottom left;
+  transition: 
+    transform 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
+}
+
+.message-bubble:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: scale(1.06);
+}
+
+/* Right-aligned bubbles (like for self messages) */
+.message-bubble.self-message {
+  background-color: var(--primary-green);
+  transform-origin: bottom right;
+}
