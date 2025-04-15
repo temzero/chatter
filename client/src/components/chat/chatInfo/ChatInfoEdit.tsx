@@ -36,7 +36,7 @@ const ChatInfoEdit: React.FC = () => {
   };
 
   return (
-    <aside className="flex flex-col w-full h-full relative">
+    <aside className="relative w-[var(--sidebar-width)] border-l-2 h-full flex flex-col shadow border-[var(--border-color)] bg-[var(--sidebar-color)]">
         <header className="flex w-full justify-between px-2 items-center min-h-[var(--header-height)] custom-border-b">
         <div className='flex gap-1 items-center'>
             <a className="flex items-center rounded-full p-2 cursor-pointer opacity-70 hover:opacity-80"
@@ -47,7 +47,7 @@ const ChatInfoEdit: React.FC = () => {
         </div>
         <a className="flex items-center rounded-full p-2 cursor-pointer opacity-70 hover:opacity-80"
             onClick={() => setChatInfoMode('view')}>
-            <i className="material-symbols-outlined text-green-500">check</i>
+            <i className="material-symbols-outlined text-green-300 text-3xl">check</i>
         </a>
         </header>
 

@@ -3,7 +3,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 const ThemeSwitcher = () => {
   const { theme, setTheme } = useTheme();
 
-  const getButtonClass = (value) =>
+  const getButtonClass = (value: string) =>
     `flex items-center gap-2 px-2 py-1 justify-center rounded-full transition-opacity cursor-pointer 
      ${theme === value ? 'opacity-100' : 'opacity-30'} hover:opacity-80`;
 

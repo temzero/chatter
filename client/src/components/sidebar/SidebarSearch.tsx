@@ -1,7 +1,7 @@
-import React from 'react';
+import React, {useState} from 'react';
 import SearchBar from '@/components/ui/SearchBar';
 import { useSidebar } from '@/contexts/SidebarContext';
-import logo from '@/assets/icon/logo.svg';
+import ChatListContainer from '../ui/ChatListContainer';
 
 const dummyChats = [
   { id: 1, name: 'Alice', avatar: '', lastMessage: 'Hey there!', time: '10:45 AM' },
@@ -16,17 +16,42 @@ const dummyChats = [
   { id: 10, name: 'Jake', avatar: '', lastMessage: 'No worries, take care.', time: 'Friday' },
 ];
 
+const chatTypes = ['all', 'friends', 'work', 'study', 'groups'];
+
 const SidebarSearch: React.FC = () => {
   const { setSidebar } = useSidebar();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedChatType, setSelectedChatType] = useState<string>('all');
+  const [direction, setDirection] = useState<number>(1); // 1 for right, -1 for left
   
-  const getGroupClass = () =>
-    `flex items-center justify-center opacity-40 hover:opacity-80 cursor-pointer`;
+  const getGroupClass = (type: string) =>
+    `flex items-center justify-center cursor-pointer ${
+      selectedChatType === type ? 'opacity-100 font-bold' : 'opacity-50 hover:opacity-80'
+    }`;
+
+  const filteredChats = dummyChats.filter(chat => 
+    chat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    chat.lastMessage.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleChatTypeChange = (type: string) => {
+    if (type === selectedChatType) return;
+
+    const currentIndex = chatTypes.indexOf(selectedChatType);
+    const newIndex = chatTypes.indexOf(type);
+    
+    setDirection(newIndex > currentIndex ? 1 : -1);
+    setSelectedChatType(type);
+  };
 
   return (
-    <aside className="w-80 border-r-2 h-full flex flex-col shadow border-[var(--border-color)] bg-[var(--sidebar-color)]">
+    <aside className="w-[var(--sidebar-width)] border-r-2 h-full flex flex-col shadow border-[var(--border-color)] bg-[var(--sidebar-color)] z-50">
       {/* Header */}
       <header id="logo-container" className="flex w-full items-center h-[var(--header-height)] p-2 gap-1 justify-between">
-        <SearchBar/>
+        <SearchBar 
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
 
         <a className="cursor-pointer select-none flex items-center opacity-40 hover:opacity-80">
           <i className="material-symbols-outlined text-2xl" 
@@ -34,40 +59,28 @@ const SidebarSearch: React.FC = () => {
         </a>
       </header>
 
+      {/* Chat Type Selector */}
       <div className="flex justify-around items-center custom-border-t custom-border-b w-full h-[40px] backdrop-blur-[120px]">
-        <a className={getGroupClass()}>All</a>
-        <a className={getGroupClass()}>Groups</a>
-        <a className={getGroupClass()}>Friends</a>
-        <a className={getGroupClass()}>Work</a>
-        <a className={getGroupClass()}>Study</a>
-        <i className="material-symbols-outlined opacity-40 hover:opacity-100 cursor-pointer text-sm -mr-2">arrow_forward_ios</i>
+          <>
+            {chatTypes.map((type) => (
+              <a 
+                key={type}
+                className={getGroupClass(type)}
+                onClick={() => handleChatTypeChange(type)}
+              >
+                {type.charAt(0).toUpperCase() + type.slice(1)}
+              </a>
+            ))}
+            <i className="material-symbols-outlined opacity-40 hover:opacity-100 cursor-pointer text-sm -mr-2">arrow_forward_ios</i>
+          </>
       </div>
 
     {/* Users */}
-    <div className="flex-1 overflow-y-auto">
-      {dummyChats.map((chat) => (
-        <>
-        <div key={chat.id} className="relative flex items-center w-full h-24 gap-2 p-3 transition-all duration-300 ease-in-out cursor-pointer hover:bg-[var(--hover-color)]">
-          <div className="h-16 w-16 custom-border rounded-full flex items-center justify-center overflow-hidden">
-            {chat.avatar ? (
-              <img className="h-full w-full object-cover" src={chat.avatar} alt={`${chat.name}'s avatar`} />
-            ) : (
-              <i className="material-symbols-outlined text-6xl opacity-20">mood</i>
-            )}
-          </div>
-
-          <div className="flex justify-center flex-col gap-1">
-            <h1 className="text-xl font-semibold">{chat.name}</h1>
-            <p className="opacity-60 overflow-hidden text-xs line-clamp-2">{chat.lastMessage}</p>
-          </div>
-
-          <p className="absolute top-3 right-4 text-xs opacity-40">{chat.time}</p>
-        </div>
-        <div className="w-[90%] mx-auto custom-border-b"></div>
-        </>
-
-      ))}
-    </div>
+    <ChatListContainer
+        selectedChatType={selectedChatType}
+        direction={direction}
+        chats={filteredChats}
+    />
 
     </aside>
   );

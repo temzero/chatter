@@ -4,7 +4,7 @@ const ChatHeader: React.FC = () => {
   const { toggleChatInfo } = useChat();
 
   return (
-    <header className="absolute top-0 w-full cursor-pointer hover:shadow-2xl flex items-center justify-between h-[var(--header-height)] px-4 shadow border-b border-[var(--border-color)] backdrop-blur-[199px] z-50"
+    <header className="absolute top-0 w-full cursor-pointer hover:shadow-2xl flex items-center justify-between h-[var(--header-height)] px-4 shadow border-b border-[var(--border-color)] backdrop-blur-[199px] z-40"
       onClick={toggleChatInfo}>
       <a className="flex gap-3 items-center cursor-pointer">
         <div className="h-11 w-11 custom-border rounded-full flex items-center justify-center overflow-hidden">

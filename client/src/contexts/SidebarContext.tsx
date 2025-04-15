@@ -33,6 +33,7 @@ export const SidebarProvider: React.FC<{children: React.ReactNode}> = ({ childre
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === '`') {
+        e.preventDefault(); // Prevent default tab behavior
         toggleCompact();
       }
     };

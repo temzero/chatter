@@ -14,7 +14,7 @@ const ChatInfoView: React.FC = () => {
     const { setChatInfoMode } = useChat();
 
   return (
-    <aside className="flex flex-col w-full h-full">
+    <aside className="w-[var(--sidebar-width)] border-l-2 h-full flex flex-col shadow border-[var(--border-color)] bg-[var(--sidebar-color)]">
         <header className="flex w-full justify-around items-center min-h-[var(--header-height)] custom-border-b">
             <a className="flex items-center rounded-full p-2 cursor-pointer opacity-50 hover:opacity-100">
                 <i className="material-symbols-outlined">notifications</i>
@@ -92,22 +92,16 @@ const ChatInfoView: React.FC = () => {
                 </a>
             </div>
         
-            <div>
-            <div className="flex">
-            <img className="w-full h-28 object-cover cursor-pointer hover:border-4" src={image1} />
-            <img className="w-full h-28 object-cover cursor-pointer hover:border-4" src={image2} />
-            <img className="w-full h-28 object-cover cursor-pointer hover:border-4" src={image3} />
-            </div>
-            <div className="flex">
-            <img className="w-full h-28 object-cover cursor-pointer hover:border-4" src={image4} />
-            <img className="w-full h-28 object-cover cursor-pointer hover:border-4" src={image5} />
-            <img className="w-full h-28 object-cover cursor-pointer hover:border-4" src={image6} />
-            </div>
-            <div className="flex">
-            <img className="w-full h-28 object-cover cursor-pointer hover:border-4" src={image7} />
-            <img className="w-full h-28 object-cover cursor-pointer hover:border-4" src={image8} />
-            <img className="w-full h-28 object-cover cursor-pointer hover:border-4" src={image9} />
-            </div>
+            <div className="grid grid-cols-3">
+                {[image1, image2, image3, image4, image5, image6, image7, image8, image9].map((image, index) => (
+                    <div key={index} className="relative overflow-hidden aspect-square">
+                        <img
+                            className="w-full h-full custom-border object-cover cursor-pointer transition-all duration-300 ease-in-out hover:scale-125 hover:brightness-110"
+                            src={image}
+                            alt={`Gallery image ${index + 1}`}
+                        />
+                    </div>
+                ))}
             </div>
 
             <div className='flex justify-center items-center cursor-pointer opacity-50 hover:opacity-80'>

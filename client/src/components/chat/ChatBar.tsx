@@ -38,9 +38,15 @@ const ChatBar: React.FC = () => {
 
     // Add global keydown listener for '/' shortcut
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      if (e.key === '/' || e.key === 'Enter' && !input && document.activeElement !== inputRef.current) {
-        e.preventDefault();
+      if (e.key === '/' && document.activeElement !== inputRef.current) {
         inputRef.current?.focus();
+
+        setTimeout(() => {
+          const el = inputRef.current;
+          if (el) {
+            el.value = el.value.slice(0, -1);
+          }
+        }, 0);
       }
     };
 
@@ -75,8 +81,10 @@ const ChatBar: React.FC = () => {
   };
 
   return (
-    <div className="absolute bottom-0 backdrop-blur-[199px] w-full flex items-center p-4 custom-border-t justify-between shadow border-[var(--border-color)] z-50">
+    <div className="absolute bottom-0 backdrop-blur-[199px] w-full flex items-center p-4 justify-between shadow border-[var(--border-color)] z-50">
+
       <div className="input gap-1 flex items-center w-full">
+
         <input
           ref={inputRef}
           type="text"
@@ -84,29 +92,35 @@ const ChatBar: React.FC = () => {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           className="w-full outline-none bg-transparent"
-          placeholder="Press Enter or / to focus"
+          placeholder="Press / to focus"
           aria-label="Type your message"
         />
-        <div className="flex gap-2">
-          <a 
-            className="material-symbols-outlined opacity-50 hover:opacity-90 rotate-45 cursor-pointer"
-            aria-label="Attach file"
-          >
-            attach_file
-          </a>
-          <a 
-            className="material-symbols-outlined opacity-50 hover:opacity-90 cursor-pointer"
-            aria-label="Use microphone"
-          >
-            mic
-          </a>
-          <a 
-            className="material-symbols-outlined opacity-50 hover:opacity-90 cursor-pointer"
+        <div className="flex items-center gap-2 h-full">
+          {/* <a className="material-symbols-outlined opacity-50 hover:opacity-90 cursor-pointer"
             onClick={handleSend}
             aria-label="Send message"
           >
-            send
+            sentiment_satisfied
+          </a> */}
+
+          <a className="material-symbols-outlined opacity-50 hover:opacity-90 cursor-pointer"aria-label="Attach file">
+            attach_file
           </a>
+
+          {/* {!input && 
+            <a className="material-symbols-outlined opacity-50 hover:opacity-90 cursor-pointer"aria-label="Use microphone">
+              mic
+            </a>
+          } */}
+
+          {input && 
+            <a className="material-symbols-outlined hover:opacity-90 cursor-pointer"
+              onClick={handleSend}
+              aria-label="Send message"
+            >
+              send
+            </a>
+          }
         </div>
       </div>
     </div>

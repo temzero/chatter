@@ -1,3 +1,4 @@
+import { motion, AnimatePresence } from 'framer-motion';
 import ChatInfo from './chatInfo/ChatInfo';
 import ChatHeader from './ChatHeader';
 import ChatBar from './ChatBar';
@@ -15,7 +16,18 @@ const Chat: React.FC = () => {
         <ChatBar />
       </section>
 
-      {isChatInfoVisible && <ChatInfo />}
+      <AnimatePresence>
+        {isChatInfoVisible && (
+          <motion.div
+            initial={{ opacity: 0, width: 0 }}
+            animate={{ opacity: 1, width: 'var(--sidebar-width)' }}
+            exit={{ opacity: 0, width: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          >
+            <ChatInfo />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };

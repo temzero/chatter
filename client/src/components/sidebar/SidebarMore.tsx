@@ -49,8 +49,8 @@ const SidebarMore: React.FC = () => {
   ];
 
   return (
-    <aside className={`h-full flex flex-col shadow border-[var(--border-color)] bg-[var(--sidebar-color)] border-r-2 transition-all duration-300 ease-in-out overflow-hidden
-        ${isCompact ? 'w-24' : 'w-80'}`}
+    <aside className={`h-full flex flex-col shadow border-[var(--border-color)] bg-[var(--sidebar-color)] border-r-2 transition-all duration-300 ease-in-out overflow-hidden z-50
+        ${isCompact ? 'w-[var(--sidebar-width-small)]' : 'w-[var(--sidebar-width)]'}`}
     >
         {/* Header */}
         <header className="flex w-full justify-between p-2 items-center min-h-[var(--header-height)] custom-border-b">
@@ -88,11 +88,10 @@ const SidebarMore: React.FC = () => {
                 <div className="flex items-center justify-center h-10 w-10">
                     <i className="material-symbols-outlined text-3xl">{button.icon}</i>
                 </div>
-                {(!isCompact || button.showText) && <p>{button.text}</p>}
+                {isCompact || <p className="whitespace-nowrap text-ellipsis">{button.text}</p>}
                 </div>
             )
         ))}
-
     </aside>
   )
 }

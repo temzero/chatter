@@ -1,29 +1,50 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSidebar } from '@/contexts/SidebarContext';
 import logo from '@/assets/icon/logo.svg';
+import ChatListContainer from '@/components/ui/ChatListContainer';
 
 const dummyChats = [
-  { id: 1, name: 'Alice', avatar: '', lastMessage: 'Hey there!', time: '10:45 AM' },
-  { id: 2, name: 'Bob', avatar: '', lastMessage: 'See you later', time: '9:20 AM' },
-  { id: 3, name: 'Charlie', avatar: '', lastMessage: 'Let’s meet up tomorrow.', time: '8:15 AM' },
-  { id: 4, name: 'Diana', avatar: '', lastMessage: 'Got it, thanks!', time: '7:05 AM' },
-  { id: 5, name: 'Eve', avatar: '', lastMessage: 'Did you finish the project?', time: 'Yesterday' },
-  { id: 6, name: 'Frank', avatar: '', lastMessage: 'Call me when you’re free.', time: 'Yesterday' },
-  { id: 7, name: 'Grace', avatar: '', lastMessage: 'I’ll be late.', time: 'Monday' },
-  { id: 8, name: 'Hank', avatar: '', lastMessage: 'Awesome job!', time: 'Sunday' },
-  { id: 9, name: 'Ivy', avatar: '', lastMessage: 'Can we reschedule?', time: 'Saturday' },
-  { id: 10, name: 'Jake', avatar: '', lastMessage: 'No worries, take care.', time: 'Friday' },
+  { id: 1, name: 'Alice', avatar: '', lastMessage: 'Hey there!', time: '10:45 AM', type: 'friends' },
+  { id: 2, name: 'Bob', avatar: '', lastMessage: 'See you later', time: '9:20 AM', type: 'work' },
+  { id: 3, name: 'Charlie', avatar: '', lastMessage: 'Lets meet up tomorrow.', time: '8:15 AM', type: 'study' },
+  { id: 4, name: 'Diana', avatar: '', lastMessage: 'Got it, thanks!', time: '7:05 AM', type: 'friends' },
+  { id: 5, name: 'Eve', avatar: '', lastMessage: 'Did you finish the project?', time: 'Yesterday', type: 'work' },
+  { id: 6, name: 'Frank', avatar: '', lastMessage: 'Call me when you are free.', time: 'Yesterday', type: 'friends' },
+  { id: 7, name: 'Grace', avatar: '', lastMessage: 'Ill be late.', time: 'Monday', type: 'work' },
+  { id: 8, name: 'Hank', avatar: '', lastMessage: 'Awesome job!', time: 'Sunday', type: 'study' },
+  { id: 9, name: 'Ivy', avatar: '', lastMessage: 'Can we reschedule?', time: 'Saturday', type: 'work' },
+  { id: 10, name: 'Jake', avatar: '', lastMessage: 'No worries, take care.', time: 'Friday', type: 'friends' },
 ];
+
+const chatTypes = ['all', 'friends', 'work', 'study', 'groups'];
 
 const ChatSidebar: React.FC = () => {
   const { setSidebar, isCompact } = useSidebar();
+  const [selectedChatType, setSelectedChatType] = useState<string>('all');
+  const [direction, setDirection] = useState<number>(1); // 1 for right, -1 for left
   
-  const getGroupClass = () =>
-    `flex items-center justify-center opacity-40 hover:opacity-80 cursor-pointer`;
+  const getGroupClass = (type: string) =>
+    `flex items-center justify-center cursor-pointer ${
+      selectedChatType === type ? 'opacity-100 font-bold' : 'opacity-50 hover:opacity-80'
+    }`;
+
+  const filteredChats = selectedChatType === 'all' 
+    ? dummyChats 
+    : dummyChats.filter(chat => chat.type === selectedChatType);
+
+  const handleChatTypeChange = (type: string) => {
+    if (type === selectedChatType) return;
+
+    const currentIndex = chatTypes.indexOf(selectedChatType);
+    const newIndex = chatTypes.indexOf(type);
+    
+    setDirection(newIndex > currentIndex ? 1 : -1);
+    setSelectedChatType(type);
+  };
 
   return (
-    <aside className={`h-full flex flex-col shadow border-[var(--border-color)] bg-[var(--sidebar-color)] border-r-2 transition-all duration-300 ease-in-out
-        ${isCompact ? 'w-24' : 'w-80'}`}
+    <aside className={`h-full flex flex-col shadow border-[var(--border-color)] bg-[var(--sidebar-color)] border-r-2 transition-all duration-300 ease-in-out z-50
+        ${isCompact ? 'w-[var(--sidebar-width-small)]' : 'w-[var(--sidebar-width)]'}`}
     >
       {/* Header */}
       <header id="logo-container" className={`flex w-full items-center h-[var(--header-height)] justify-between ${isCompact ? '' : 'pl-4'}`}>
@@ -35,16 +56,16 @@ const ChatSidebar: React.FC = () => {
         </a>
 
         {isCompact ||
-        <div className="flex gap-2">
-          <a className="cursor-pointer select-none flex items-center opacity-40 hover:opacity-80"
+        <div className="flex">
+          <a className="cursor-pointer select-none flex items-center opacity-40 hover:opacity-80 p-1 rounded"
             onClick={() => setSidebar('newChat')}>
             <i className="material-symbols-outlined text-2xl">add</i>
           </a>
-          <a className="cursor-pointer select-none flex items-center opacity-40 hover:opacity-80"
+          <a className="cursor-pointer select-none flex items-center opacity-40 hover:opacity-80 pl-1 rounded"
            onClick={() => setSidebar('search')}>
             <i className="material-symbols-outlined text-2xl">search</i>
           </a>
-          <a className="cursor-pointer select-none flex items-center opacity-40 hover:opacity-80">
+          <a className="cursor-pointer select-none flex items-center opacity-40 hover:opacity-80 p-1 rounded">
             <i className="material-symbols-outlined text-2xl" 
               onClick={() => setSidebar('more')}>more_vert</i>
           </a>
@@ -52,53 +73,33 @@ const ChatSidebar: React.FC = () => {
         }
       </header>
 
-      {/* Groups */}
+      {/* Chat Type Selector */}
       <div className="flex justify-around items-center custom-border-t custom-border-b w-full h-[40px] backdrop-blur-[120px]">
         {isCompact ? (
-          <a className={getGroupClass()}>All</a>
+            selectedChatType.charAt(0).toUpperCase() + selectedChatType.slice(1)
         ) : (
           <>
-            <a className={getGroupClass()}>All</a>
-            <a className={getGroupClass()}>Groups</a>
-            <a className={getGroupClass()}>Friends</a>
-            <a className={getGroupClass()}>Work</a>
-            <a className={getGroupClass()}>Study</a>
+            {chatTypes.map((type) => (
+              <a 
+                key={type}
+                className={getGroupClass(type)}
+                onClick={() => handleChatTypeChange(type)}
+              >
+                {type.charAt(0).toUpperCase() + type.slice(1)}
+              </a>
+            ))}
             <i className="material-symbols-outlined opacity-40 hover:opacity-100 cursor-pointer text-sm -mr-2">arrow_forward_ios</i>
           </>
         )}
       </div>
 
-    {/* Users */}
-    <div className="flex-1 overflow-y-auto overflow-x-hidden">
-      {dummyChats.map((chat) => (
-        <>
-        <div key={chat.id} className="relative flex items-center w-full h-24 gap-2 p-3 transition-all duration-300 ease-in-out cursor-pointer hover:bg-[var(--hover-color)]">
-          <div className="h-16 w-16 min-w-16 custom-border rounded-full flex items-center justify-center overflow-hidden">
-            {chat.avatar ? (
-              <img className="h-full w-full object-cover" src={chat.avatar} alt={`${chat.name}'s avatar`} />
-            ) : (
-              <i className="material-symbols-outlined text-6xl opacity-20">mood</i>
-            )}
-          </div>
-          
-          {isCompact || 
-          <>
-            <div className="flex justify-center flex-col gap-1">
-              <h1 className="text-lg font-semibold">{chat.name}</h1>
-              <p className="opacity-60 overflow-hidden text-xs line-clamp-2">{chat.lastMessage}</p>
-            </div>
-
-            <p className="absolute top-3 right-4 text-xs opacity-40">{chat.time}</p>
-          </>
-          }
-
-        </div>
-
-        {isCompact || <div className="w-[90%] mx-auto custom-border-b"></div>}
-        </>
-      ))}
-    </div>
-
+      {/* Chat List Container */}
+      <ChatListContainer
+        selectedChatType={selectedChatType}
+        direction={direction}
+        chats={filteredChats}
+        isCompact={isCompact}
+      />
     </aside>
   );
 };

@@ -20,10 +20,11 @@ const SidebarNewChat: React.FC = () => {
   );
 
   return (
-    <aside className="w-80 border-r-2 h-full flex flex-col shadow border-[var(--border-color)] bg-[var(--sidebar-color)]">
+    <aside className="w-[var(--sidebar-width)] border-r-2 h-full flex flex-col shadow border-[var(--border-color)] bg-[var(--sidebar-color)] z-50">
       {/* Header */}
       <header className="flex w-full items-center h-[var(--header-height)] p-2 gap-1 justify-between">
         <SearchBar 
+          type='add'
           placeholder='New Chat'
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}

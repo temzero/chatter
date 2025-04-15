@@ -4,7 +4,7 @@ const SidebarProfile: React.FC = () => {
     const { setSidebar } = useSidebar();
 
   return (
-    <aside className="w-80 border-l-2 h-full flex flex-col shadow border-[var(--border-color)] bg-[var(--sidebar-color)]">
+    <aside className="w-[var(--sidebar-width)] border-r-2 h-full flex flex-col shadow border-[var(--border-color)] bg-[var(--sidebar-color)] z-50">
         {/* Header */}
         <header className="flex w-full justify-between p-2 items-center min-h-[var(--header-height)] custom-border-b">
             <div className="flex items-center gap-2">

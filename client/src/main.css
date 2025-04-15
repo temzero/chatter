@@ -6,6 +6,11 @@
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
 
   --header-height: 60px;
+
+  --sidebar-width: 300px;
+  --sidebar-width-small: 96px;
+  --sidebar-width-large: 400px;
+
   --primary-color: #247cff;
   --primary-green: #00ae80;
 
@@ -27,6 +32,7 @@ html {
   overflow: none;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 /* Dark mode styles */
@@ -197,3 +203,10 @@ select:focus {
   background-color: var(--primary-green);
   transform-origin: bottom right;
 }
+
+
+
+
+
+
+

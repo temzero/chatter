@@ -5,7 +5,7 @@ const SidebarSettings: React.FC = () => {
     const { setSidebar } = useSidebar();
 
   return (
-    <aside id="settings-sidebar" className="w-80 border-r-2 h-full flex flex-col shadow border-[var(--border-color)] bg-[var(--sidebar-color)]">
+    <aside id="settings-sidebar" className="w-[var(--sidebar-width)] border-r-2 h-full flex flex-col shadow border-[var(--border-color)] bg-[var(--sidebar-color)] z-50">
         {/* Header */}
         <header className="flex w-full p-2 gap-2 items-center h-[var(--header-height)] custom-border-b">
             <i className="material-symbols-outlined cursor-pointer opacity-70 hover:opacity-80"
