@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SearchBar from '@/components/ui/SearchBar';
 import { useSidebar } from '@/contexts/SidebarContext';
 
@@ -18,6 +18,17 @@ const SidebarNewChat: React.FC = () => {
   const filteredChats = dummyChats.filter(chat =>
     chat.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSidebar('default');
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [setSidebar]);
 
   return (
     <aside className="w-[var(--sidebar-width)] border-r-2 h-full flex flex-col shadow border-[var(--border-color)] bg-[var(--sidebar-color)] z-50">

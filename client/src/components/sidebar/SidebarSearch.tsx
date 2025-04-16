@@ -1,19 +1,20 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import SearchBar from '@/components/ui/SearchBar';
 import { useSidebar } from '@/contexts/SidebarContext';
-import ChatListContainer from '../ui/ChatListContainer';
+import SlidingContainer from '@/components/ui/SlidingContainer';
+import ChatList from '@/components/ui/ChatList';
 
 const dummyChats = [
-  { id: 1, name: 'Alice', avatar: '', lastMessage: 'Hey there!', time: '10:45 AM' },
-  { id: 2, name: 'Bob', avatar: '', lastMessage: 'See you later', time: '9:20 AM' },
-  { id: 3, name: 'Charlie', avatar: '', lastMessage: 'Let’s meet up tomorrow.', time: '8:15 AM' },
-  { id: 4, name: 'Diana', avatar: '', lastMessage: 'Got it, thanks!', time: '7:05 AM' },
-  { id: 5, name: 'Eve', avatar: '', lastMessage: 'Did you finish the project?', time: 'Yesterday' },
-  { id: 6, name: 'Frank', avatar: '', lastMessage: 'Call me when you’re free.', time: 'Yesterday' },
-  { id: 7, name: 'Grace', avatar: '', lastMessage: 'I’ll be late.', time: 'Monday' },
-  { id: 8, name: 'Hank', avatar: '', lastMessage: 'Awesome job!', time: 'Sunday' },
-  { id: 9, name: 'Ivy', avatar: '', lastMessage: 'Can we reschedule?', time: 'Saturday' },
-  { id: 10, name: 'Jake', avatar: '', lastMessage: 'No worries, take care.', time: 'Friday' },
+  { id: 1, name: 'Alice', avatar: '', lastMessage: 'Hey there!', time: '10:45 AM', type: 'friends' },
+  { id: 2, name: 'Bob', avatar: '', lastMessage: 'See you later', time: '9:20 AM', type: 'work' },
+  { id: 3, name: 'Charlie', avatar: '', lastMessage: 'Lets meet up tomorrow.', time: '8:15 AM', type: 'study' },
+  { id: 4, name: 'Diana', avatar: '', lastMessage: 'Got it, thanks!', time: '7:05 AM', type: 'friends' },
+  { id: 5, name: 'Eve', avatar: '', lastMessage: 'Did you finish the project?', time: 'Yesterday', type: 'work' },
+  { id: 6, name: 'Frank', avatar: '', lastMessage: 'Call me when you are free.', time: 'Yesterday', type: 'friends' },
+  { id: 7, name: 'Grace', avatar: '', lastMessage: 'Ill be late.', time: 'Monday', type: 'work' },
+  { id: 8, name: 'Hank', avatar: '', lastMessage: 'Awesome job!', time: 'Sunday', type: 'study' },
+  { id: 9, name: 'Ivy', avatar: '', lastMessage: 'Can we reschedule?', time: 'Saturday', type: 'work' },
+  { id: 10, name: 'Jake', avatar: '', lastMessage: 'No worries, take care.', time: 'Friday', type: 'friends' },
 ];
 
 const chatTypes = ['all', 'friends', 'work', 'study', 'groups'];
@@ -21,12 +22,12 @@ const chatTypes = ['all', 'friends', 'work', 'study', 'groups'];
 const SidebarSearch: React.FC = () => {
   const { setSidebar } = useSidebar();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedChatType, setSelectedChatType] = useState<string>('all');
-  const [direction, setDirection] = useState<number>(1); // 1 for right, -1 for left
+  const [selectedType, setSelectedType] = useState<string>(chatTypes[0]);
+  const [direction, setDirection] = useState<number>(1);
   
-  const getGroupClass = (type: string) =>
+  const getTypeClass = (type: string) =>
     `flex items-center justify-center cursor-pointer ${
-      selectedChatType === type ? 'opacity-100 font-bold' : 'opacity-50 hover:opacity-80'
+      selectedType === type ? 'opacity-100 font-bold' : 'opacity-50 hover:opacity-80'
     }`;
 
   const filteredChats = dummyChats.filter(chat => 
@@ -35,14 +36,25 @@ const SidebarSearch: React.FC = () => {
   );
 
   const handleChatTypeChange = (type: string) => {
-    if (type === selectedChatType) return;
+    if (type === selectedType) return;
 
-    const currentIndex = chatTypes.indexOf(selectedChatType);
+    const currentIndex = chatTypes.indexOf(selectedType);
     const newIndex = chatTypes.indexOf(type);
     
     setDirection(newIndex > currentIndex ? 1 : -1);
-    setSelectedChatType(type);
+    setSelectedType(type);
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSidebar('default');
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [setSidebar]);
 
   return (
     <aside className="w-[var(--sidebar-width)] border-r-2 h-full flex flex-col shadow border-[var(--border-color)] bg-[var(--sidebar-color)] z-50">
@@ -65,7 +77,7 @@ const SidebarSearch: React.FC = () => {
             {chatTypes.map((type) => (
               <a 
                 key={type}
-                className={getGroupClass(type)}
+                className={getTypeClass(type)}
                 onClick={() => handleChatTypeChange(type)}
               >
                 {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -75,12 +87,9 @@ const SidebarSearch: React.FC = () => {
           </>
       </div>
 
-    {/* Users */}
-    <ChatListContainer
-        selectedChatType={selectedChatType}
-        direction={direction}
-        chats={filteredChats}
-    />
+      <SlidingContainer selectedType={selectedType} direction={direction}>
+        <ChatList chats={filteredChats}/>
+      </SlidingContainer>
 
     </aside>
   );

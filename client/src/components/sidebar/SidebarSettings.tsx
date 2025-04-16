@@ -10,7 +10,7 @@ const SidebarSettings: React.FC = () => {
         <header className="flex w-full p-2 gap-2 items-center h-[var(--header-height)] custom-border-b">
             <i className="material-symbols-outlined cursor-pointer opacity-70 hover:opacity-80"
              onClick={() => setSidebar('more')}>arrow_back</i>
-            <h1 className="text-xl">Settings</h1>
+            <h1 className="text-xl font-semibold">Settings</h1>
         </header>
 
         {/* Settings */}

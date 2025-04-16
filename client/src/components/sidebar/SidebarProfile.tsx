@@ -10,7 +10,7 @@ const SidebarProfile: React.FC = () => {
             <div className="flex items-center gap-2">
                 <i className="material-symbols-outlined cursor-pointer opacity-70 hover:opacity-80"
                  onClick={() => setSidebar('more')}>arrow_back</i>
-                <h1 className="text-xl">My Profile</h1>
+                <h1 className="text-xl font-semibold">My Profile</h1>
             </div>
             <div className="flex items-center gap-2">
                 <i className="material-symbols-outlined cursor-pointer opacity-70 hover:opacity-80">edit</i>

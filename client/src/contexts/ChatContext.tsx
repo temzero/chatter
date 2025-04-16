@@ -1,19 +1,22 @@
 // contexts/ChatContext.tsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-type ChatInfoMode = 'view' | 'edit';
+type ChatInfoMode = 'view' | 'media' | 'saved' | 'edit';
 
 interface ChatContextType {
   isChatInfoVisible: boolean;
   chatInfoMode: ChatInfoMode;
+  activeChat: number | null; // Add active chat
   toggleChatInfo: () => void;
   setChatInfoMode: (mode: ChatInfoMode) => void;
+  setActiveChat: (id: number | null) => void; // Add setter for active chat
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
-// Key for localStorage
+// Keys for localStorage
 const CHAT_INFO_VISIBILITY_KEY = 'chatInfoVisibility';
+const ACTIVE_CHAT_KEY = 'activeChat'; // New key for active chat
 
 export const ChatProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
   // Load initial visibility state from localStorage
@@ -23,6 +26,15 @@ export const ChatProvider: React.FC<{children: React.ReactNode}> = ({ children }
       return saved === 'true';
     }
     return false;
+  });
+
+  // Load active chat from localStorage
+  const [activeChat, setActiveChat] = useState<number | null>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(ACTIVE_CHAT_KEY);
+      return saved ? Number(saved) : null;
+    }
+    return null;
   });
 
   // Always start in 'view' mode
@@ -36,7 +48,11 @@ export const ChatProvider: React.FC<{children: React.ReactNode}> = ({ children }
   useEffect(() => {
     localStorage.setItem(CHAT_INFO_VISIBILITY_KEY, String(isChatInfoVisible));
   }, [isChatInfoVisible]);
-  
+
+  useEffect(() => {
+    localStorage.setItem(ACTIVE_CHAT_KEY, String(activeChat));
+  }, [activeChat]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'F1') {
@@ -53,8 +69,10 @@ export const ChatProvider: React.FC<{children: React.ReactNode}> = ({ children }
     <ChatContext.Provider value={{
       isChatInfoVisible,
       chatInfoMode,
+      activeChat,
       toggleChatInfo,
-      setChatInfoMode
+      setChatInfoMode,
+      setActiveChat
     }}>
       {children}
     </ChatContext.Provider>

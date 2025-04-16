@@ -3,7 +3,7 @@ import classNames from 'classnames';
 
 type MessageProps = {
   isOwn?: boolean;
-  avatarUrl: string;
+  avatarUrl?: string;
   name: string;
   time: string;
   text: string;
@@ -43,7 +43,7 @@ const Message: React.FC<MessageProps> = ({ isOwn = false, avatarUrl, name, time,
         {text}
         <i
           className={classNames(
-            'material-symbols-outlined absolute opacity-0 group-hover:opacity-80 transition-opacity duration-200 cursor-pointer', // Hide by default, show on hover
+            'material-symbols-outlined absolute opacity-0 group-hover:opacity-80 transition-opacity duration-200 cursor-pointer',
             {
               '-bottom-6 left-0': isOwn,
               '-bottom-6 right-0': !isOwn,
@@ -53,7 +53,6 @@ const Message: React.FC<MessageProps> = ({ isOwn = false, avatarUrl, name, time,
           favorite
         </i>
       </div>
-
 
         <div className="text-xs opacity-0 group-hover:opacity-40">{time}</div>
 

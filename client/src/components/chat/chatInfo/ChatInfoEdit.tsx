@@ -36,14 +36,14 @@ const ChatInfoEdit: React.FC = () => {
   };
 
   return (
-    <aside className="relative w-[var(--sidebar-width)] border-l-2 h-full flex flex-col shadow border-[var(--border-color)] bg-[var(--sidebar-color)]">
+    <aside className="relative w-full h-full overflow-hidden flex flex-col">
         <header className="flex w-full justify-between px-2 items-center min-h-[var(--header-height)] custom-border-b">
         <div className='flex gap-1 items-center'>
             <a className="flex items-center rounded-full p-2 cursor-pointer opacity-70 hover:opacity-80"
                 onClick={() => setChatInfoMode('view')}>
                 <i className="material-symbols-outlined">arrow_back</i>
             </a>
-            <h1 className="text-xl">Edit</h1>
+            <h1 className="text-xl font-semibold">Edit</h1>
         </div>
         <a className="flex items-center rounded-full p-2 cursor-pointer opacity-70 hover:opacity-80"
             onClick={() => setChatInfoMode('view')}>
@@ -61,7 +61,7 @@ const ChatInfoEdit: React.FC = () => {
                 <i className="material-symbols-outlined text-8xl opacity-20">mood</i>
               )}
             </div>
-            <label className="absolute bottom-1 right-1 flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 cursor-pointer opacity-90 hover:opacity-100">
+            <label className="absolute bottom-1 right-1 flex items-center justify-center w-10 h-10 rounded-full bg-[var(--sidebar-bg)] custom-border cursor-pointer hover:opacity-100">
               <i className="material-symbols-outlined text-lg">edit</i>
               <input 
                 type="file" 

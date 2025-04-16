@@ -1,4 +1,5 @@
 import React from 'react';
+import { useChat } from '@/contexts/ChatContext';
 
 interface Chat {
   id: number;
@@ -17,15 +18,17 @@ interface ChatListProps {
 
 const ChatList: React.FC<ChatListProps> = ({ 
   chats,
-  isCompact,
+  isCompact = false,
 }) => {
+    const { activeChat, setActiveChat } = useChat();
+  
 
   return (
     <div className="flex-1 overflow-y-auto overflow-x-hidden relative">
-
           {chats.map((chat) => (
             <React.Fragment key={chat.id}>
-              <div className="relative flex items-center w-full h-24 gap-2 p-3 transition-all duration-300 ease-in-out cursor-pointer hover:bg-[var(--hover-color)]">
+              <div className="relative flex items-center w-full h-24 gap-2 p-3 transition-all duration-300 ease-in-out cursor-pointer hover:bg-[var(--hover-color)]"
+                onClick={() => {setActiveChat(chat.id);}}>
                 <div className="h-16 w-16 min-w-16 custom-border rounded-full flex items-center justify-center overflow-hidden">
                   {chat.avatar ? (
                     <img 
@@ -61,7 +64,6 @@ const ChatList: React.FC<ChatListProps> = ({
               )}
             </React.Fragment>
           ))}
-
     </div>
   );
 };
