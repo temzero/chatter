@@ -22,18 +22,79 @@ const Sidebar = () => {
   // Define different animations for each sidebar
   const sidebarAnimations = {
     default: {
-      initial: { opacity: 0 },
-      animate: { opacity: 1 },
-      exit: { opacity: 0 },
-      transition: { duration: 0.2, ease: "easeInOut" }
+      initial: { opacity: 0, scale: .9 },
+      animate: { 
+        opacity: 1,
+        scale: 1,
+        transition: { duration: 0.2, ease: "easeOut" }
+      },
+      exit: { 
+        opacity: 0,
+        transition: { 
+          duration: 0,
+        } 
+      }
     },
-
-    // Default animation if mode isn't specified
+    search: {
+      initial: { opacity: 0, y: 400 },
+      animate: { 
+        opacity: 1,
+        y: 0,
+        transition: { 
+          type: 'spring', 
+          stiffness: 300, 
+          damping: 28,
+          bounce: 0.2
+        }
+      },
+      exit: { 
+        opacity: 0,
+        y: 400,
+        transition: { 
+          duration: 0.2,
+        } 
+      }
+    },
+    newChat: {
+      initial: { opacity: 0, y: 400 },
+      animate: { 
+        opacity: 1,
+        y: 0,
+        transition: { 
+          type: 'spring', 
+          stiffness: 300, 
+          damping: 28,
+          bounce: 0.2
+        }
+      },
+      exit: { 
+        opacity: 0,
+        y: 400,
+        transition: { 
+          duration: 0.2,
+        } 
+      }
+    },
     fallback: {
       initial: { opacity: 0, x: -300 },
-      animate: { opacity: 1, x: 0 },
-      exit: { opacity: 0, x: -300 },
-      transition: { duration: 0.2 }
+      animate: { 
+        opacity: 1, 
+        x: 0,
+        transition: { 
+          type: 'spring', 
+          stiffness: 300, 
+          damping: 28,
+          bounce: 0.2
+        }
+      },
+
+      exit: { 
+        opacity: 0,
+        x: -300,
+        transition: { 
+          duration: 0.2,
+        } 
+      }
     }
   };
 
@@ -41,6 +102,7 @@ const Sidebar = () => {
   const currentAnimation = sidebarAnimations[currentSidebar] || sidebarAnimations.fallback;
 
   return (
+    <div className="bg-[var(--sidebar-color)] h-full flex flex-col shadow border-[var(--border-color)] border-r-2 transition-all duration-300 ease-in-out z-50">
     <AnimatePresence mode="wait">
       <motion.div
         key={currentSidebar}
@@ -53,6 +115,7 @@ const Sidebar = () => {
         {sidebars[currentSidebar]}
       </motion.div>
     </AnimatePresence>
+    </div>
   );
 };
 

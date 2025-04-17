@@ -1,5 +1,5 @@
 import React from 'react';
-import { useChat } from '@/contexts/ChatContext';
+import { useChatInfo } from '@/contexts/ChatInfoContext';
 import avatar1 from '@/assets/image/avatar1.jpg';
 import avatar2 from '@/assets/image/avatar2.jpg';
 import classNames from 'classnames';
@@ -88,28 +88,28 @@ const messages = [
 ];
 
 const ChatInfoSaved: React.FC = () => {
-  const { setChatInfoMode } = useChat();
+  const { setChatInfoMode } = useChatInfo();
 
   return (
     <aside className="w-full h-full overflow-hidden flex flex-col">
-      <header className="flex w-full items-center min-h-[var(--header-height)] custom-border-b">
-        <a 
+      <header className="flex px-4 w-full items-center min-h-[var(--header-height)] custom-border-b">
+        {/* <a 
           className="flex items-center rounded-full p-2 cursor-pointer opacity-50 hover:opacity-100"
-          onClick={() => setChatInfoMode('view')}
+          onClick={() => setChatInfoMode('default')}
         >
           <i className="material-symbols-outlined">arrow_back</i>
-        </a>
+        </a> */}
         <h1 className='text-xl font-semibold'>Saved Messages</h1>
 
         <a 
-          className="flex items-center rounded-full p-2 cursor-pointer opacity-50 hover:opacity-100 ml-auto"
-          onClick={() => setChatInfoMode('view')}
+          className="flex items-center rounded-full cursor-pointer opacity-50 hover:opacity-100 ml-auto"
+          onClick={() => setChatInfoMode('default')}
         >
           <i className="material-symbols-outlined">edit</i>
         </a>
       </header>
       
-      <div className="flex-1 overflow-y-auto p-2 space-y-2">
+      <div className="flex-1 overflow-y-auto p-2 space-y-2 pb-20">
         {messages.map((msg) => {
           const isOwn = msg.sender === 'me';
           return (
@@ -146,6 +146,11 @@ const ChatInfoSaved: React.FC = () => {
           );
         })}
       </div>
+
+      <a className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-10 flex items-center justify-center cursor-pointer opacity-50 hover:opacity-90 bg-[var(--sidebar-color)]"
+          onClick={()=> setChatInfoMode('default')}>
+          <i className="material-symbols-outlined rotate-90">arrow_forward_ios</i>
+      </a>
     </aside>
   );
 };

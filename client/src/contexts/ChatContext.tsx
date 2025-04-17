@@ -1,85 +1,104 @@
-// contexts/ChatContext.tsx
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, {createContext, useState, useEffect, useContext, ReactNode, Dispatch, SetStateAction} from 'react';
+import { dummyChats } from './data';
 
-type ChatInfoMode = 'view' | 'media' | 'saved' | 'edit';
-
-interface ChatContextType {
-  isChatInfoVisible: boolean;
-  chatInfoMode: ChatInfoMode;
-  activeChat: number | null; // Add active chat
-  toggleChatInfo: () => void;
-  setChatInfoMode: (mode: ChatInfoMode) => void;
-  setActiveChat: (id: number | null) => void; // Add setter for active chat
+export interface Chat {
+  id: number;
+  name: string;
+  avatar: string;
+  lastMessage: string;
+  time: string;
+  type: 'friends' | 'work' | 'study';
+  phone?: string;
+  email?: string;
+  bio?: string;
+  birthday?: string;
+  isGroup?: boolean;
+  members?: string[];
 }
 
+// Context value type
+interface ChatContextType {
+  chats: Chat[];
+  activeChat: Chat | null;
+  setActiveChat: Dispatch<SetStateAction<Chat | null>>;
+  searchTerm: string;
+  setSearchTerm: Dispatch<SetStateAction<string>>;
+  addChat: (newChat: Chat) => void;
+  updateChat: (id: number, updatedData: Partial<Chat>) => void;
+  deleteChat: (id: number) => void;
+}
+
+// Create context with default undefined
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
-// Keys for localStorage
-const CHAT_INFO_VISIBILITY_KEY = 'chatInfoVisibility';
-const ACTIVE_CHAT_KEY = 'activeChat'; // New key for active chat
+// Provider props
+interface ChatProviderProps {
+  children: ReactNode;
+}
 
-export const ChatProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
-  // Load initial visibility state from localStorage
-  const [isChatInfoVisible, setIsChatInfoVisible] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(CHAT_INFO_VISIBILITY_KEY);
-      return saved === 'true';
-    }
-    return false;
+export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
+  const [chats, setChats] = useState<Chat[]>(dummyChats);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [activeChat, setActiveChat] = useState<Chat | null>(() => {
+    // Load active chat from localStorage on initial render
+    const savedChatId = localStorage.getItem('activeChatId');
+    return savedChatId 
+      ? dummyChats.find(chat => chat.id === Number(savedChatId)) || null
+      : null;
   });
 
-  // Load active chat from localStorage
-  const [activeChat, setActiveChat] = useState<number | null>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(ACTIVE_CHAT_KEY);
-      return saved ? Number(saved) : null;
+  // Update localStorage whenever activeChat changes
+  useEffect(() => {
+    if (activeChat) {
+      localStorage.setItem('activeChatId', activeChat.id.toString());
+    } else {
+      localStorage.removeItem('activeChatId');
     }
-    return null;
-  });
-
-  // Always start in 'view' mode
-  const [chatInfoMode, setChatInfoMode] = useState<ChatInfoMode>('view');
-
-  const toggleChatInfo = () => {
-    setIsChatInfoVisible(prev => !prev);
-    setChatInfoMode('view'); // Always reset to view mode when toggling
-  };
-
-  useEffect(() => {
-    localStorage.setItem(CHAT_INFO_VISIBILITY_KEY, String(isChatInfoVisible));
-  }, [isChatInfoVisible]);
-
-  useEffect(() => {
-    localStorage.setItem(ACTIVE_CHAT_KEY, String(activeChat));
   }, [activeChat]);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'F1') {
-        e.preventDefault();
-        toggleChatInfo();
-      }
-    };
-  
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  const filteredChats = chats.filter((chat) =>
+    [chat.name, chat.lastMessage, chat.type]
+      .join(' ')
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  );
+
+  const addChat = (newChat: Chat) => {
+    setChats([newChat, ...chats]);
+  };
+
+  const updateChat = (id: number, updatedData: Partial<Chat>) => {
+    setChats(
+      chats.map((chat) =>
+        chat.id === id ? { ...chat, ...updatedData } : chat
+      )
+    );
+  };
+
+  const deleteChat = (id: number) => {
+    setChats(chats.filter((chat) => chat.id !== id));
+  };
 
   return (
-    <ChatContext.Provider value={{
-      isChatInfoVisible,
-      chatInfoMode,
-      activeChat,
-      toggleChatInfo,
-      setChatInfoMode,
-      setActiveChat
-    }}>
+    <ChatContext.Provider
+      value={{
+        chats: filteredChats,
+        activeChat,
+        setActiveChat,
+        searchTerm,
+        setSearchTerm,
+        addChat,
+        updateChat,
+        deleteChat,
+      }}
+    >
       {children}
     </ChatContext.Provider>
   );
 };
 
-export const useChat = () => {
+// Custom hook
+export const useChat = (): ChatContextType => {
   const context = useContext(ChatContext);
   if (!context) {
     throw new Error('useChat must be used within a ChatProvider');

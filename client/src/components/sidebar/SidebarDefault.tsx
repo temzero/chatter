@@ -1,34 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useChat } from '@/contexts/ChatContext';
 import { useSidebar } from '@/contexts/SidebarContext';
 import logo from '@/assets/icon/logo.svg';
 import SlidingContainer from '@/components/ui/SlidingContainer';
 import ChatList from '@/components/ui/ChatList';
 
-const dummyChats = [
-  { id: 1, name: 'Alice', avatar: '', lastMessage: 'Hey there!', time: '10:45 AM', type: 'friends' },
-  { id: 2, name: 'Bob', avatar: '', lastMessage: 'See you later', time: '9:20 AM', type: 'work' },
-  { id: 3, name: 'Charlie', avatar: '', lastMessage: 'Lets meet up tomorrow.', time: '8:15 AM', type: 'study' },
-  { id: 4, name: 'Diana', avatar: '', lastMessage: 'Got it, thanks!', time: '7:05 AM', type: 'friends' },
-  { id: 5, name: 'Eve', avatar: '', lastMessage: 'Did you finish the project?', time: 'Yesterday', type: 'work' },
-  { id: 6, name: 'Frank', avatar: '', lastMessage: 'Call me when you are free.', time: 'Yesterday', type: 'friends' },
-  { id: 7, name: 'Grace', avatar: '', lastMessage: 'Ill be late.', time: 'Monday', type: 'work' },
-  { id: 8, name: 'Hank', avatar: '', lastMessage: 'Awesome job!', time: 'Sunday', type: 'study' },
-  { id: 9, name: 'Ivy', avatar: '', lastMessage: 'Can we reschedule?', time: 'Saturday', type: 'work' },
-  { id: 10, name: 'Jake', avatar: '', lastMessage: 'No worries, take care.', time: 'Friday', type: 'friends' },
-];
-
 const chatTypes = ['all', 'friends', 'work', 'study', 'groups'];
 
 const ChatSidebar: React.FC = () => {
-  const { setSidebar, isCompact } = useSidebar();
+  const { chats } = useChat();
+  const { setSidebar, isCompact, toggleCompact } = useSidebar();
   const [selectedType, setSelectedType] = useState<string>(chatTypes[0]);
   const [direction, setDirection] = useState<number>(1);
 
   const filteredChats = React.useMemo(() => {
-    return selectedType === 'all'
-      ? dummyChats
-      : dummyChats.filter((chat) => chat.type === selectedType);
-  }, [selectedType]);
+    if (selectedType === 'all') {
+      return chats;
+    } else if (selectedType === 'groups') {
+      return chats.filter(chat => chat.isGroup === true);
+    } else {
+      return chats.filter(chat => chat.type === selectedType && !chat.isGroup);
+    }
+  }, [selectedType, chats]);
   
   const getTypeClass = React.useCallback((type: string) => 
     `flex items-center justify-center cursor-pointer p-2 ${
@@ -47,9 +40,21 @@ const ChatSidebar: React.FC = () => {
     setSelectedType(type);
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '`') {
+        e.preventDefault();
+        toggleCompact();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [toggleCompact]);
+
   return (
     <aside
-      className={`h-full flex flex-col shadow border-[var(--border-color)] bg-[var(--sidebar-color)] border-r-2 transition-all duration-300 ease-in-out z-50 ${
+      className={`h-full flex flex-col transition-all duration-300 ease-in-out ${
         isCompact ? 'w-[var(--sidebar-width-small)]' : 'w-[var(--sidebar-width)]'
       }`}
     >
@@ -67,7 +72,7 @@ const ChatSidebar: React.FC = () => {
           <div className={`w-8 h-8 flex items-center justify-center ${isCompact ? 'mx-auto' : ''}`}>
             <img className="h-full w-full" src={logo} alt="Logo" />
           </div>
-          {isCompact || <span className="text-2xl">Chatter</span>}
+          {isCompact || <span className="text-2xl font-semibold">Chatter</span>}
         </a>
 
         {!isCompact && (
@@ -97,9 +102,11 @@ const ChatSidebar: React.FC = () => {
       </header>
 
       {/* Chat Type Selector */}
-      <div className="flex justify-around items-center custom-border-t custom-border-b w-full backdrop-blur-[120px]">
+      <div className="flex justify-around items-center custom-border-t custom-border-b w-full shadow">
         {isCompact ? (
-          selectedType.charAt(0).toUpperCase() + selectedType.slice(1)
+            <a className={getTypeClass(selectedType)}>
+              {selectedType.charAt(0).toUpperCase() + selectedType.slice(1)}
+            </a>
         ) : (
           <>
             {chatTypes.map((type) => (
@@ -107,7 +114,7 @@ const ChatSidebar: React.FC = () => {
                 {type.charAt(0).toUpperCase() + type.slice(1)}
               </a>
             ))}
-            <i className="material-symbols-outlined opacity-40 hover:opacity-100 cursor-pointer text-sm -mr-2">
+            <i className="material-symbols-outlined opacity-40 hover:opacity-100 cursor-pointer text-sm">
               arrow_forward_ios
             </i>
           </>

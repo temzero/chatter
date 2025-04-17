@@ -3,6 +3,15 @@ import Message from './Message';
 import avatar1 from '@/assets/image/avatar1.jpg';
 import avatar2 from '@/assets/image/avatar2.jpg';
 
+interface ChatHeaderProps {
+  chatData?: {
+    id: number;
+    name: string;
+    avatar?: string;
+    type: string;
+  };
+}
+
 const ChatBox: React.FC = () => {
   const [messages, setMessages] = useState([
     {
@@ -96,6 +105,7 @@ const ChatBox: React.FC = () => {
   ]);
   
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);

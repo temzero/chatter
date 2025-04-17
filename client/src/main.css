@@ -18,6 +18,7 @@
   color: black;
   background-color: #ffffff;
   --sidebar-color: #eee;
+  --active-chat-color: #2bffc687; /* or any color you prefer */
   --input-color: rgba(150, 150, 150, 0.1);
   --input-border-color: rgba(0, 0, 0, 0.3);
   --border-color: rgba(0, 0, 0, 0.2);

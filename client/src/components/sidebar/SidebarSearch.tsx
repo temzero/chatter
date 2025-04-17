@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import SearchBar from '@/components/ui/SearchBar';
 import { useSidebar } from '@/contexts/SidebarContext';
 import SlidingContainer from '@/components/ui/SlidingContainer';
@@ -45,27 +45,16 @@ const SidebarSearch: React.FC = () => {
     setSelectedType(type);
   };
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setSidebar('default');
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [setSidebar]);
-
   return (
-    <aside className="w-[var(--sidebar-width)] border-r-2 h-full flex flex-col shadow border-[var(--border-color)] bg-[var(--sidebar-color)] z-50">
+    <aside className="w-[var(--sidebar-width)] h-full flex flex-col transition-all duration-300 ease-in-out">
       {/* Header */}
-      <header id="logo-container" className="flex w-full items-center h-[var(--header-height)] p-2 gap-1 justify-between">
+      <header id="logo-container" className="flex w-full items-center h-[var(--header-height)] p-2 pr-1 gap-1 justify-between">
         <SearchBar 
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
 
-        <a className="cursor-pointer select-none flex items-center opacity-40 hover:opacity-80">
+        <a className="cursor-pointer select-none flex items-center opacity-40 hover:opacity-80 h-full">
           <i className="material-symbols-outlined text-2xl" 
             onClick={() => setSidebar('default')}>close</i>
         </a>

@@ -1,25 +1,56 @@
 import { useTheme } from '@/contexts/ThemeContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const ThemeSwitcher = () => {
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
 
-  const getButtonClass = (value: string) =>
-    `flex items-center gap-2 px-2 py-1 justify-center rounded-full transition-opacity cursor-pointer 
-     ${theme === value ? 'opacity-100' : 'opacity-30'} hover:opacity-80`;
+  const toggleTheme = () => {
+    setTheme(resolvedTheme === 'light' ? 'dark' : 'light');
+  };
+
+  // Animation variants
+  const iconVariants = {
+    initial: { scale: 0.6, opacity: 0, rotate: -90 },
+    animate: { scale: 1, opacity: 1, rotate: 0 },
+    exit: { scale: 0.6, opacity: 0, rotate: 90 }
+  };
 
   return (
-    <div id="theme-switcher" className="flex overflow-hidden rounded-full gap-1">
-      <a className={getButtonClass('light')} onClick={() => setTheme('light')}>
-        <i className="material-symbols-outlined">light_mode</i>
-      </a>
-
-      <a className={getButtonClass('dark')} onClick={() => setTheme('dark')}>
-        <i className="material-symbols-outlined">dark_mode</i>
-      </a>
-
-      <a className={getButtonClass('auto')} onClick={() => setTheme('auto')}>
-        <i className="material-symbols-outlined">routine</i>
-      </a>
+    <div
+      id="theme-switcher"
+      className="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer opacity-80 hover:opacity-100"
+      onClick={toggleTheme}
+      aria-label={`Toggle ${resolvedTheme === 'light' ? 'dark' : 'light'} mode`}
+    >
+      <div className="relative w-6 h-6">
+        <AnimatePresence mode="wait">
+          {resolvedTheme === 'light' ? (
+            <motion.i
+              key="light"
+              className="material-symbols-outlined absolute inset-0"
+              variants={iconVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.2, type: 'spring' }}
+            >
+              light_mode
+            </motion.i>
+          ) : (
+            <motion.i
+              key="dark"
+              className="material-symbols-outlined absolute inset-0"
+              variants={iconVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.2, type: 'spring' }}
+            >
+              dark_mode
+            </motion.i>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 };

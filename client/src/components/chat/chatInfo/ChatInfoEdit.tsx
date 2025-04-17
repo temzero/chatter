@@ -1,15 +1,32 @@
+import { useState, useEffect } from 'react';
 import { useChat } from '@/contexts/ChatContext';
-import { useState } from 'react';
+import { useChatInfo } from '@/contexts/ChatInfoContext';
 
 const ChatInfoEdit: React.FC = () => {
-  const { setChatInfoMode } = useChat();
+  const { activeChat } = useChat();
+  const { setChatInfoMode } = useChatInfo();
+
+  // Initialize formData with all necessary fields from activeChat
   const [formData, setFormData] = useState({
-    name: 'User Full Name',
-    phone: '0123456789',
-    email: 'user@email.com',
-    birthday: '28/04/2000',
-    avatar: ''
+    name: activeChat?.name || '',
+    phone: activeChat?.phone || '',
+    email: activeChat?.email || '',
+    birthday: activeChat?.birthday || '',
+    avatar: activeChat?.avatar || ''
   });
+
+  // Update formData when activeChat changes
+  useEffect(() => {
+    if (activeChat) {
+      setFormData({
+        name: activeChat.name || '',
+        phone: activeChat.phone || '',
+        email: activeChat.email || '',
+        birthday: activeChat.birthday || '',
+        avatar: activeChat.avatar || ''
+      });
+    }
+  }, [activeChat]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -18,9 +35,7 @@ const ChatInfoEdit: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically send the data to your backend
-    console.log('Form submitted:', formData);
-    setChatInfoMode('view');
+    setChatInfoMode('default');
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,17 +53,17 @@ const ChatInfoEdit: React.FC = () => {
   return (
     <aside className="relative w-full h-full overflow-hidden flex flex-col">
         <header className="flex w-full justify-between px-2 items-center min-h-[var(--header-height)] custom-border-b">
-        <div className='flex gap-1 items-center'>
-            <a className="flex items-center rounded-full p-2 cursor-pointer opacity-70 hover:opacity-80"
-                onClick={() => setChatInfoMode('view')}>
-                <i className="material-symbols-outlined">arrow_back</i>
+          <h1 className="text-xl font-semibold ml-2">Edit</h1>
+          <div className="flex gap-2">
+            <a className="flex items-center justify-center rounded-full cursor-pointer hover:opacity-100 text-green-400 h-10 w-10 hover:bg-green-500 hover:text-white"
+                onClick={() => setChatInfoMode('default')}>
+                <i className="material-symbols-outlined text-3xl">check</i>
             </a>
-            <h1 className="text-xl font-semibold">Edit</h1>
-        </div>
-        <a className="flex items-center rounded-full p-2 cursor-pointer opacity-70 hover:opacity-80"
-            onClick={() => setChatInfoMode('view')}>
-            <i className="material-symbols-outlined text-green-300 text-3xl">check</i>
-        </a>
+            <a className="flex items-center rounded-full p-2 cursor-pointer opacity-70 hover:opacity-80 h-10 w-10 hover:bg-red-500"
+                  onClick={() => setChatInfoMode('default')}>
+                  <i className="material-symbols-outlined">close</i>
+            </a>
+          </div>
         </header>
 
       <form onSubmit={handleSubmit} className="overflow-y-auto h-screen">
@@ -80,55 +95,35 @@ const ChatInfoEdit: React.FC = () => {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full p-2 rounded border border-[var(--border-color)]"
+                className="w-full border border-[var(--border-color)]"
               />
+              <div className="border border-[var(--border-color)]"></div>
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-sm opacity-70">Phone Number</label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                className="w-full p-2 rounded border border-[var(--border-color)]"
-              />
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label className="text-sm opacity-70">Email</label>
+              <label className="text-sm opacity-70">Nickname</label>
               <input
                 type="email"
                 name="email"
-                value={formData.email}
                 onChange={handleChange}
                 className="w-full p-2 rounded border border-[var(--border-color)]"
               />
+              <div className="border border-[var(--border-color)]"></div>
             </div>
-
             <div className="flex flex-col gap-1">
-              <label className="text-sm opacity-70">Birthday</label>
+              <label className="text-sm opacity-70">Description</label>
               <input
-                type="date"
-                name="birthday"
-                value={formData.birthday}
+                type="email"
+                name="email"
                 onChange={handleChange}
                 className="w-full p-2 rounded border border-[var(--border-color)]"
               />
+              <div className="border border-[var(--border-color)]"></div>
             </div>
           </div>
         </div>
 
-        <div className="px-4 pb-4">
-          <button 
-            type="submit"
-            className="w-full py-3 rounded-full bg-[var(--primary-green)] text-white font-medium"
-          >
-            Save Changes
-          </button>
-        </div>
-
-        <div className='flex justify-center items-center cursor-pointer text-red-500 gap-2 p-2 custom-border-t absolute bottom-0 w-full'>
+        <div className='flex justify-center items-center cursor-pointer p-2 text-red-500 custom-border-t absolute bottom-0 w-full'>
           <i className="material-symbols-outlined">delete</i>
           <span className="font-medium">Delete...</span>
         </div>

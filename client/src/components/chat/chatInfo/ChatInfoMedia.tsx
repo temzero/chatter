@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useChat } from '@/contexts/ChatContext';
+import { useChatInfo } from '@/contexts/ChatInfoContext';
 import SlidingContainer from '@/components/ui/SlidingContainer';
 
 // Import your images
@@ -23,7 +24,8 @@ const mediaData = {
 };
 
 const ChatInfoMedia: React.FC = () => {
-    const { setChatInfoMode } = useChat();
+    const {activeChat} = useChat();
+    const { setChatInfoMode } = useChatInfo();
     const [selectedType, setSelectedType] = useState<string>(mediaTypes[0]);
     const [direction, setDirection] = useState<number>(1);
 
@@ -74,13 +76,13 @@ const ChatInfoMedia: React.FC = () => {
         <aside className="relative w-full h-full overflow-hidden flex flex-col">
             <header className="flex p-4 w-full items-center min-h-[var(--header-height)] custom-border-b">
                 {/* <a className="flex items-center rounded-full p-2 cursor-pointer opacity-50 hover:opacity-100"
-                onClick={()=> setChatInfoMode('view')}>
+                onClick={()=> setChatInfoMode('default')}>
                     <i className="material-symbols-outlined">arrow_back</i>
                 </a> */}
                 <h1 className='text-xl font-semibold'>Media & Files</h1>
 
                 <a className="flex items-center rounded-full cursor-pointer opacity-50 hover:opacity-100 ml-auto"
-                onClick={()=> setChatInfoMode('view')}>
+                onClick={()=> setChatInfoMode('default')}>
                     <i className="material-symbols-outlined">edit</i>
                 </a>
             </header>
@@ -101,8 +103,8 @@ const ChatInfoMedia: React.FC = () => {
                     {renderMediaContent()}
                 </SlidingContainer>
             </div>
-            <a className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-10 flex items-center justify-center cursor-pointer opacity-50 hover:opacity-80 bg-[var(--sidebar-color)]  backdrop-blur-[12x]"
-                onClick={()=> setChatInfoMode('view')}>
+            <a className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-10 flex items-center justify-center cursor-pointer opacity-50 hover:opacity-90 bg-[var(--sidebar-color)]"
+                onClick={()=> setChatInfoMode('default')}>
                 <i className="material-symbols-outlined rotate-90">arrow_forward_ios</i>
             </a>
 

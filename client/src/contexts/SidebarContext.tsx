@@ -1,5 +1,4 @@
-// contexts/SidebarContext.tsx
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 type SidebarType = 'default' | 'newChat' | 'search' | 'more' | 'profile' | 'settings';
 
@@ -15,7 +14,6 @@ const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 export const SidebarProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
   const [currentSidebar, setSidebar] = useState<SidebarType>('default');
   const [isCompact, setIsCompact] = useState(() => {
-    // Try to get the saved state from localStorage
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('sidebar-compact');
       return saved === 'true';
@@ -23,24 +21,25 @@ export const SidebarProvider: React.FC<{children: React.ReactNode}> = ({ childre
     return false;
   });
 
-  const toggleCompact = () => {
+  const toggleCompact = useCallback(() => {
     const newCompactState = !isCompact;
     setIsCompact(newCompactState);
-    // Save to localStorage whenever it changes
     localStorage.setItem('sidebar-compact', String(newCompactState));
-  };
+  }, [isCompact]);
+
+  // Handle Escape key to reset sidebar to default
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape' && currentSidebar !== 'default') {
+      e.preventDefault();
+      setSidebar('default');
+      e.stopPropagation();
+    }
+  }, [currentSidebar]);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === '`') {
-        e.preventDefault(); // Prevent default tab behavior
-        toggleCompact();
-      }
-    };
-
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isCompact]);
+  }, [handleKeyDown]);
 
   return (
     <SidebarContext.Provider value={{ 

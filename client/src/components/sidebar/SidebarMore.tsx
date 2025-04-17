@@ -1,7 +1,21 @@
+import { useEffect } from "react";
 import { useSidebar } from "@/contexts/SidebarContext";
+import ThemeSwitcher from "../ui/ThemeSwitcher";
 
 const SidebarMore: React.FC = () => {
-  const { setSidebar, isCompact } = useSidebar();
+  const { setSidebar, isCompact, toggleCompact } = useSidebar();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '`') {
+        e.preventDefault();
+        toggleCompact();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [toggleCompact]);  
 
   const sidebarButtons = [
     {
@@ -45,11 +59,11 @@ const SidebarMore: React.FC = () => {
       icon: 'block',
       text: 'Blocked',
       onClick: null
-    }
+    },
   ];
 
   return (
-    <aside className={`h-full flex flex-col shadow border-[var(--border-color)] bg-[var(--sidebar-color)] border-r-2 transition-all duration-300 ease-in-out overflow-hidden z-50
+    <aside className={`relative h-full flex flex-col justify-between transition-all duration-300 ease-in-out
         ${isCompact ? 'w-[var(--sidebar-width-small)]' : 'w-[var(--sidebar-width)]'}`}
     >
         {/* Header */}
@@ -57,10 +71,9 @@ const SidebarMore: React.FC = () => {
             <i className="material-symbols-outlined cursor-pointer opacity-70 hover:opacity-100"
                 onClick={() => setSidebar('default')}>arrow_back</i>
 
-            <div className="flex gap-3 items-center">
-            <i className="material-symbols-outlined text-2xl opacity-70 hover:opacity-100 cursor-pointer"
-                onClick={() => setSidebar('settings')}>settings</i>
-            </div>
+            <i className="material-symbols-outlined cursor-pointer opacity-70 hover:opacity-80 ml-auto"
+             onClick={() => setSidebar('default')}>close</i>
+
         </header>
 
         {/* User Info */}
@@ -75,23 +88,41 @@ const SidebarMore: React.FC = () => {
             </div>
             }
         </div>
+        
+        <div className="overflow-x-hidden overflow-y-auto">
+          {sidebarButtons.map((button, index) => (
+              button.type === 'divider' ? (
+                  <div key={`divider-${index}`} className="border-b-[6px] custom-border-b"></div>
+              ) : (
+                  <div 
+                  key={button.text} 
+                      className={`sidebar-button ${isCompact ? 'justify-center' : ''}`}
+                  onClick={button.onClick || undefined}
+                  >
+                  <div className="flex items-center justify-center h-10 w-10">
+                      <i className="material-symbols-outlined text-3xl">{button.icon}</i>
+                  </div>
+                  {isCompact || <p className="whitespace-nowrap text-ellipsis">{button.text}</p>}
+                  </div>
+              )
+          ))}
+        </div>
 
-        {sidebarButtons.map((button, index) => (
-            button.type === 'divider' ? (
-                <div key={`divider-${index}`} className="border-b-[6px] custom-border-b"></div>
-            ) : (
-                <div 
-                key={button.text} 
-                    className={`sidebar-button ${isCompact ? 'justify-center' : ''}`}
-                onClick={button.onClick || undefined}
-                >
-                <div className="flex items-center justify-center h-10 w-10">
-                    <i className="material-symbols-outlined text-3xl">{button.icon}</i>
-                </div>
-                {isCompact || <p className="whitespace-nowrap text-ellipsis">{button.text}</p>}
-                </div>
-            )
-        ))}
+
+        <div className={`w-full flex custom-border-t backdrop-blur-[20px] shadow mt-auto ${isCompact ? 'justify-center' : 'justify-between'}`} >
+          <div className={`flex items-center cursor-pointer hover:bg-[var(--hover-color)] rounded w-full p-1 px-4 ${isCompact ? 'justify-center' : 'gap-3'}`} onClick={() => setSidebar('settings')}>
+            <div className="flex items-center justify-center h-10 w-10">
+              <i className="material-symbols-outlined text-3xl">settings</i>
+            </div>
+            {!isCompact && <p className="whitespace-nowrap text-ellipsis">Settings</p>}
+          </div>
+
+          {!isCompact && 
+          <div className=" flex items-center justify-center px-2">
+            <ThemeSwitcher/>
+          </div>
+          }
+        </div>
     </aside>
   )
 }
