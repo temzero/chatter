@@ -1,4 +1,3 @@
-// contexts/ChatInfoContext.tsx
 import React, { createContext, useCallback, useContext, useState, useEffect } from 'react';
 
 type ChatInfoMode = 'default' | 'media' | 'saved' | 'edit';

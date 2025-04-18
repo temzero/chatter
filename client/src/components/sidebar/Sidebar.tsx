@@ -4,7 +4,9 @@ import SidebarSearch from '@/components/sidebar/SidebarSearch';
 import SidebarNewChat from '@/components/sidebar/SidebarNewChat';
 import SidebarMore from '@/components/sidebar/SidebarMore';
 import SidebarProfile from '@/components/sidebar/SidebarProfile';
+import SidebarProfileEdit from '@/components/sidebar/SidebarProfileEdit';
 import SidebarSettings from '@/components/sidebar/SidebarSettings';
+import SidebarSettingsAccount from './SidebarSettingsAccount';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Sidebar = () => {
@@ -16,7 +18,9 @@ const Sidebar = () => {
     search: <SidebarSearch />,
     more: <SidebarMore />,
     profile: <SidebarProfile />,
+    profileEdit: <SidebarProfileEdit />,
     settings: <SidebarSettings />,
+    settingsAccount: <SidebarSettingsAccount />,
   };
 
   // Define different animations for each sidebar
@@ -75,6 +79,7 @@ const Sidebar = () => {
         } 
       }
     },
+
     fallback: {
       initial: { opacity: 0, x: -300 },
       animate: { 
@@ -102,7 +107,7 @@ const Sidebar = () => {
   const currentAnimation = sidebarAnimations[currentSidebar] || sidebarAnimations.fallback;
 
   return (
-    <div className="bg-[var(--sidebar-color)] h-full flex flex-col shadow border-[var(--border-color)] border-r-2 transition-all duration-300 ease-in-out z-50">
+    <div className="bg-[var(--sidebar-color)] h-full flex flex-col shadow border-[var(--border-color)] border-r-2 transition-all duration-300 ease-in-out overflow-hidden z-50">
     <AnimatePresence mode="wait">
       <motion.div
         key={currentSidebar}

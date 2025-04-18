@@ -1,30 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useChat } from '@/contexts/ChatContext';
 import { useChatInfo } from '@/contexts/ChatInfoContext';
 import SlidingContainer from '@/components/ui/SlidingContainer';
 
-// Import your images
-import image1 from '@/assets/image/image1.jpg';
-import image2 from '@/assets/image/image2.jpg';
-import image3 from '@/assets/image/image3.jpg';
-import image4 from '@/assets/image/image4.jpg';
-import image5 from '@/assets/image/image5.jpg';
-import image6 from '@/assets/image/image6.jpg';
-import image7 from '@/assets/image/image7.jpg';
-import image8 from '@/assets/image/image8.jpg';
-import image9 from '@/assets/image/image9.jpg';
-
 const mediaTypes = ['photos', 'videos', 'voice', 'files'];
 
-const mediaData = {
-    photos: [image1, image2, image3, image4, image5, image6, image7, image8, image9, image5, image6, image7, image8, image9,image1, image2, image3, image4, image5, image6, image7, image8, image9, image5, image6, image7, image8, image9],
-    videos: [],
-    voice: [],
-    files: [],
-};
-
 const ChatInfoMedia: React.FC = () => {
-    const {activeChat} = useChat();
+    const {activeRoomMedia} = useChat();
     const { setChatInfoMode } = useChatInfo();
     const [selectedType, setSelectedType] = useState<string>(mediaTypes[0]);
     const [direction, setDirection] = useState<number>(1);
@@ -47,7 +29,7 @@ const ChatInfoMedia: React.FC = () => {
     };
 
     const renderMediaContent = () => {
-        const currentMedia = mediaData[selectedType as keyof typeof mediaData];
+        const currentMedia = activeRoomMedia[selectedType as keyof typeof activeRoomMedia];
         
         if (currentMedia.length === 0) {
             return (

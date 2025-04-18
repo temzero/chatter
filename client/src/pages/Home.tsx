@@ -26,9 +26,9 @@ const Home: React.FC = () => {
 
 // Chat content component
 const ChatContent: React.FC = () => {
-  const { activeChat } = useChat();
+  const { activeRoom } = useChat();
 
-  if (activeChat) {
+  if (activeRoom) {
     return <Chat />;
   }
 

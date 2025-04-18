@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import SearchBar from '@/components/ui/SearchBar';
 import { useSidebar } from '@/contexts/SidebarContext';
 import SlidingContainer from '@/components/ui/SlidingContainer';
-import ChatList from '@/components/ui/ChatList';
+import ChatList from '@/components/ui/ChatRooms';
 
 const dummyChats = [
   { id: 1, name: 'Alice', avatar: '', lastMessage: 'Hey there!', time: '10:45 AM', type: 'friends' },

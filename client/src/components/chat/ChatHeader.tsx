@@ -3,7 +3,7 @@ import { useChatInfo } from '@/contexts/ChatInfoContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const ChatHeader: React.FC = () => {
-  const { activeChat } = useChat();
+  const { activeRoom } = useChat();
   const { toggleChatInfo } = useChatInfo();
 
   return (
@@ -13,7 +13,7 @@ const ChatHeader: React.FC = () => {
     >
       <AnimatePresence mode="wait">
         <motion.div 
-          key={activeChat?.id || "no-chat"}
+          key={activeRoom?.id || "no-chat"}
           className="flex gap-3 items-center cursor-pointer"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ 
@@ -31,12 +31,12 @@ const ChatHeader: React.FC = () => {
             transition: { duration: 0.1 }
           }}
         >
-          {!activeChat?.isGroup ?
+          {!activeRoom?.isGroup ?
           <div className="h-11 w-11 custom-border rounded-full flex items-center justify-center overflow-hidden">
-            {activeChat?.avatar ? (
+            {activeRoom?.avatar ? (
               <img 
-                src={activeChat.avatar} 
-                alt={activeChat.name}
+                src={activeRoom.avatar} 
+                alt={activeRoom.name}
                 className="h-full w-full object-cover"
               />
             ) : (
@@ -44,7 +44,7 @@ const ChatHeader: React.FC = () => {
             )}
           </div>
           :
-            <div className='h-12 w-12 custom-border grid grid-cols-2 grid-rows-2 overflow-hidden rounded-lg'>
+            <div className='h-12 w-12 custom-border grid grid-cols-2 grid-rows-2 overflow-hidden rounded-xl'>
               <i className="material-symbols-outlined text-2xl opacity-20 flex items-center justify-center border rounded-full">mood</i>
               <i className="material-symbols-outlined text-2xl opacity-20 flex items-center justify-center border rounded-full">mood</i>
               <i className="material-symbols-outlined text-2xl opacity-20 flex items-center justify-center border rounded-full">mood</i>
@@ -53,12 +53,12 @@ const ChatHeader: React.FC = () => {
           }
 
           <h1 className="text-xl font-medium">
-            {activeChat?.name || "Select a chat"}
+            {activeRoom?.name || "Select a chat"}
           </h1>
         </motion.div>
       </AnimatePresence>
 
-      {activeChat && (
+      {activeRoom && (
         <div className="flex gap-2">
           <a className="flex items-center cursor-pointer rounded-full opacity-60 hover:opacity-100 p-1">
             <i className="material-symbols-outlined text-2xl">phone_enabled</i>

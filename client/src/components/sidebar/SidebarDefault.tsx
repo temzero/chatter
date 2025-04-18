@@ -3,25 +3,30 @@ import { useChat } from '@/contexts/ChatContext';
 import { useSidebar } from '@/contexts/SidebarContext';
 import logo from '@/assets/icon/logo.svg';
 import SlidingContainer from '@/components/ui/SlidingContainer';
-import ChatList from '@/components/ui/ChatList';
+import ChatRooms from '@/components/ui/ChatRooms';
+import { motion } from 'framer-motion';
 
 const chatTypes = ['all', 'friends', 'work', 'study', 'groups'];
 
 const ChatSidebar: React.FC = () => {
-  const { chats } = useChat();
+  const { chatRooms } = useChat();
   const { setSidebar, isCompact, toggleCompact } = useSidebar();
   const [selectedType, setSelectedType] = useState<string>(chatTypes[0]);
   const [direction, setDirection] = useState<number>(1);
 
   const filteredChats = React.useMemo(() => {
+    // Convert chatRooms (an object) to an array
+    const chatRoomsArray = Object.values(chatRooms);
+  
     if (selectedType === 'all') {
-      return chats;
+      return chatRoomsArray;
     } else if (selectedType === 'groups') {
-      return chats.filter(chat => chat.isGroup === true);
+      return chatRoomsArray.filter(chat => chat.isGroup === true);
     } else {
-      return chats.filter(chat => chat.type === selectedType && !chat.isGroup);
+      return chatRoomsArray.filter(chat => chat.type === selectedType && !chat.isGroup);
     }
-  }, [selectedType, chats]);
+  }, [selectedType, chatRooms]);
+  
   
   const getTypeClass = React.useCallback((type: string) => 
     `flex items-center justify-center cursor-pointer p-2 ${
@@ -59,44 +64,43 @@ const ChatSidebar: React.FC = () => {
       }`}
     >
       {/* Header */}
-      <header
-        id="logo-container"
-        className={`flex w-full items-center h-[var(--header-height)] justify-between ${
-          isCompact ? '' : 'pl-4'
-        }`}
-      >
-        <a
-          className="flex gap-2 items-center cursor-pointer w-full"
+      <header id="logo-container" className='flex w-full items-center h-[var(--header-height)] justify-between'>
+        <motion.a 
+          id='branding' 
+          className="flex items-center cursor-pointer -ml-[62px]" 
           onClick={() => setSidebar('more')}
+          whileHover={{ x: 33, }} // This will move the element 5 pixels to the right on hover
+          transition={{ type: 'spring', stiffness: 600, damping: 30 }} // Spring animation for a bouncy effect
         >
+          {isCompact || <span className="material-symbols-outlined text-6xl cursor-pointer mr-3">trending_flat</span>}
           <div className={`w-8 h-8 flex items-center justify-center ${isCompact ? 'mx-auto' : ''}`}>
             <img className="h-full w-full" src={logo} alt="Logo" />
           </div>
-          {isCompact || <span className="text-2xl font-semibold">Chatter</span>}
-        </a>
+          {isCompact || <span className="text-2xl font-semibold px-1">Chatter</span>}
+        </motion.a>
 
         {!isCompact && (
           <div className="flex">
             <a
-              className="cursor-pointer select-none flex items-center opacity-40 hover:opacity-80 p-1 rounded"
+              className="cursor-pointer select-none flex items-center opacity-40 hover:opacity-100 p-2 pr-1 rounded"
               onClick={() => setSidebar('newChat')}
             >
-              <i className="material-symbols-outlined text-2xl">add</i>
+              <i className="material-symbols-outlined text-2xl ">add</i>
             </a>
             <a
-              className="cursor-pointer select-none flex items-center opacity-40 hover:opacity-80 pl-1 rounded"
+              className="cursor-pointer select-none flex items-center opacity-40 hover:opacity-100 p-2 pr-3 rounded"
               onClick={() => setSidebar('search')}
             >
               <i className="material-symbols-outlined text-2xl">search</i>
             </a>
-            <a className="cursor-pointer select-none flex items-center opacity-40 hover:opacity-80 p-1 rounded">
+            {/* <a className="cursor-pointer select-none flex items-center opacity-40 hover:opacity-100 p-1 rounded">
               <i
                 className="material-symbols-outlined text-2xl"
                 onClick={() => setSidebar('more')}
               >
                 more_vert
               </i>
-            </a>
+            </a> */}
           </div>
         )}
       </header>
@@ -123,7 +127,7 @@ const ChatSidebar: React.FC = () => {
 
       {/* Chat List Container */}
       <SlidingContainer selectedType={selectedType} direction={direction}>
-        <ChatList chats={filteredChats} isCompact={isCompact} />
+        <ChatRooms chatRooms={filteredChats} isCompact={isCompact} />
       </SlidingContainer>
     </aside>
   );

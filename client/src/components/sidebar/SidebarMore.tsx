@@ -1,8 +1,11 @@
 import { useEffect } from "react";
+import { useGlobalContext } from "@/contexts/GlobalContext";
 import { useSidebar } from "@/contexts/SidebarContext";
 import ThemeSwitcher from "../ui/ThemeSwitcher";
 
 const SidebarMore: React.FC = () => {
+  const { myProfile } = useGlobalContext();
+
   const { setSidebar, isCompact, toggleCompact } = useSidebar();
 
   useEffect(() => {
@@ -23,17 +26,18 @@ const SidebarMore: React.FC = () => {
       text: 'Saved Messages',
       onClick: null
     },
-    {
-      icon: 'add',
-      text: 'New Chat',
-      onClick: () => setSidebar('newChat')
-    },
-    {
-      icon: 'search',
-      text: 'Search',
-      onClick: () => setSidebar('search')
-    },
-    { type: 'divider' }, // This will render the border divider
+    { type: 'divider' },
+    // {
+    //   icon: 'add',
+    //   text: 'New Chat',
+    //   onClick: () => setSidebar('newChat')
+    // },
+    // {
+    //   icon: 'search',
+    //   text: 'Search',
+    //   onClick: () => setSidebar('search')
+    // },
+    // { type: 'divider' }, 
     {
       icon: 'call',
       text: 'Call',
@@ -44,10 +48,10 @@ const SidebarMore: React.FC = () => {
       text: 'Contacts',
       onClick: null
     },
-    { type: 'divider' }, // Another divider
+    { type: 'divider' },
     {
       icon: 'folder',
-      text: 'Folder',
+      text: 'Folders',
       onClick: null
     },
     {
@@ -67,24 +71,34 @@ const SidebarMore: React.FC = () => {
         ${isCompact ? 'w-[var(--sidebar-width-small)]' : 'w-[var(--sidebar-width)]'}`}
     >
         {/* Header */}
-        <header className="flex w-full justify-between p-2 items-center min-h-[var(--header-height)] custom-border-b">
-            <i className="material-symbols-outlined cursor-pointer opacity-70 hover:opacity-100"
+        <header className="flex w-full justify-center items-center min-h-[var(--header-height)] custom-border-b">
+            <i className="material-symbols-outlined nav-btn"
                 onClick={() => setSidebar('default')}>arrow_back</i>
-
-            <i className="material-symbols-outlined cursor-pointer opacity-70 hover:opacity-80 ml-auto"
+            {isCompact ||
+            <i className="material-symbols-outlined nav-btn ml-auto"
              onClick={() => setSidebar('default')}>close</i>
-
+            }
         </header>
 
         {/* User Info */}
         <div className="flex items-center p-4 gap-4 w-full custom-border-b cursor-pointer hover:bg-[var(--hover-color)]" onClick={() => setSidebar('profile')}>
             <a className="h-16 w-16 min-w-16 flex items-center justify-center rounded-full custom-border overflow-hidden">
-                <i className="material-symbols-outlined text-8xl opacity-20">mood</i>
+              {myProfile?.avatar ? (
+                  <img 
+                      src={myProfile.avatar} 
+                      alt="Profile" 
+                      className="h-full w-full rounded-full object-cover"
+                  />
+              ) : (
+                  <i className="material-symbols-outlined text-8xl opacity-20">mood</i>
+              )}
             </a>
             {isCompact ||
-            <div className="flex flex-col font-light min-w-60">
-                <h1 className="font-semibold rounded hover:opacity-80">User Full Name</h1>
-                <a className="rounded hover:opacity-80">0123456789</a>
+            <div className="flex flex-col font-light gap-2 whitespace-nowrap text-ellipsis">
+                <h1 className="text-xl font-semibold">
+                  {myProfile?.firstName} {myProfile?.lastName}
+                </h1>
+                <h2 className="text-sm opacity-70 -mt-2">@{myProfile?.username}</h2>
             </div>
             }
         </div>
@@ -110,7 +124,7 @@ const SidebarMore: React.FC = () => {
 
 
         <div className={`w-full flex custom-border-t backdrop-blur-[20px] shadow mt-auto ${isCompact ? 'justify-center' : 'justify-between'}`} >
-          <div className={`flex items-center cursor-pointer hover:bg-[var(--hover-color)] rounded w-full p-1 px-4 ${isCompact ? 'justify-center' : 'gap-3'}`} onClick={() => setSidebar('settings')}>
+          <div className={`flex items-center cursor-pointer hover:bg-[var(--hover-color)] w-full p-1 px-4 ${isCompact ? 'justify-center' : 'gap-3'}`} onClick={() => setSidebar('settings')}>
             <div className="flex items-center justify-center h-10 w-10">
               <i className="material-symbols-outlined text-3xl">settings</i>
             </div>

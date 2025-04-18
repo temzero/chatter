@@ -3,30 +3,30 @@ import { useChat } from '@/contexts/ChatContext';
 import { useChatInfo } from '@/contexts/ChatInfoContext';
 
 const ChatInfoEdit: React.FC = () => {
-  const { activeChat } = useChat();
+  const { activeRoom } = useChat();
   const { setChatInfoMode } = useChatInfo();
 
-  // Initialize formData with all necessary fields from activeChat
+  // Initialize formData with all necessary fields from activeRoom
   const [formData, setFormData] = useState({
-    name: activeChat?.name || '',
-    phone: activeChat?.phone || '',
-    email: activeChat?.email || '',
-    birthday: activeChat?.birthday || '',
-    avatar: activeChat?.avatar || ''
+    name: activeRoom?.name || '',
+    phone: activeRoom?.phone || '',
+    email: activeRoom?.email || '',
+    birthday: activeRoom?.birthday || '',
+    avatar: activeRoom?.avatar || ''
   });
 
-  // Update formData when activeChat changes
+  // Update formData when activeRoom changes
   useEffect(() => {
-    if (activeChat) {
+    if (activeRoom) {
       setFormData({
-        name: activeChat.name || '',
-        phone: activeChat.phone || '',
-        email: activeChat.email || '',
-        birthday: activeChat.birthday || '',
-        avatar: activeChat.avatar || ''
+        name: activeRoom.name || '',
+        phone: activeRoom.phone || '',
+        email: activeRoom.email || '',
+        birthday: activeRoom.birthday || '',
+        avatar: activeRoom.avatar || ''
       });
     }
-  }, [activeChat]);
+  }, [activeRoom]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -59,7 +59,7 @@ const ChatInfoEdit: React.FC = () => {
                 onClick={() => setChatInfoMode('default')}>
                 <i className="material-symbols-outlined text-3xl">check</i>
             </a>
-            <a className="flex items-center rounded-full p-2 cursor-pointer opacity-70 hover:opacity-80 h-10 w-10 hover:bg-red-500"
+            <a className="flex items-center rounded-full p-2 cursor-pointer opacity-70 hover:opacity-80 h-10 w-10 hover:bg-[var(--hover-color)]"
                   onClick={() => setChatInfoMode('default')}>
                   <i className="material-symbols-outlined">close</i>
             </a>
@@ -76,8 +76,8 @@ const ChatInfoEdit: React.FC = () => {
                 <i className="material-symbols-outlined text-8xl opacity-20">mood</i>
               )}
             </div>
-            <label className="absolute bottom-1 right-1 flex items-center justify-center w-10 h-10 rounded-full bg-[var(--sidebar-bg)] custom-border cursor-pointer hover:opacity-100">
-              <i className="material-symbols-outlined text-lg">edit</i>
+            <label className="w-10 h-10 absolute bottom-0 right-0 bg-gray-600 text-white rounded-full p-2 cursor-pointer hover:bg-gray-700 flex items-center justify-center">
+              <i className="material-symbols-outlined">edit</i>
               <input 
                 type="file" 
                 accept="image/*"
@@ -122,13 +122,12 @@ const ChatInfoEdit: React.FC = () => {
             </div>
           </div>
         </div>
-
-        <div className='flex justify-center items-center cursor-pointer p-2 text-red-500 custom-border-t absolute bottom-0 w-full'>
-          <i className="material-symbols-outlined">delete</i>
-          <span className="font-medium">Delete...</span>
-        </div>
-
       </form>
+      
+      <div className='flex justify-center items-center cursor-pointer p-2 text-red-500 custom-border-t absolute bottom-0 w-full'>
+        <i className="material-symbols-outlined">delete</i>
+        <span className="font-medium">Delete...</span>
+      </div>
     </aside>
   );
 };
