@@ -4,7 +4,9 @@ import SidebarSearch from '@/components/sidebar/SidebarSearch';
 import SidebarNewChat from '@/components/sidebar/SidebarNewChat';
 import SidebarMore from '@/components/sidebar/SidebarMore';
 import SidebarProfile from '@/components/sidebar/SidebarProfile';
+import SidebarProfileEdit from '@/components/sidebar/SidebarProfileEdit';
 import SidebarSettings from '@/components/sidebar/SidebarSettings';
+import SidebarSettingsAccount from './SidebarSettingsAccount';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Sidebar = () => {
@@ -16,7 +18,9 @@ const Sidebar = () => {
     search: <SidebarSearch />,
     more: <SidebarMore />,
     profile: <SidebarProfile />,
+    profileEdit: <SidebarProfileEdit />,
     settings: <SidebarSettings />,
+    settingsAccount: <SidebarSettingsAccount />
   };
 
   // Define different animations for each sidebar

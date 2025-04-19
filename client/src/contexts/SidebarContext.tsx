@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
-type SidebarType = 'default' | 'newChat' | 'search' | 'more' | 'profile' | 'settings';
+type SidebarType = 'default' | 'newChat' | 'search' | 'more' | 'profile' | 'profileEdit' | 'settings' | 'settingsAccount';
 
 interface SidebarContextType {
   currentSidebar: SidebarType;

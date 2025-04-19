@@ -39,22 +39,7 @@ interface ChatProviderProps {
 export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   const [chats, setChats] = useState<Chat[]>(dummyChats);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [activeChat, setActiveChat] = useState<Chat | null>(() => {
-    // Load active chat from localStorage on initial render
-    const savedChatId = localStorage.getItem('activeChatId');
-    return savedChatId 
-      ? dummyChats.find(chat => chat.id === Number(savedChatId)) || null
-      : null;
-  });
-
-  // Update localStorage whenever activeChat changes
-  useEffect(() => {
-    if (activeChat) {
-      localStorage.setItem('activeChatId', activeChat.id.toString());
-    } else {
-      localStorage.removeItem('activeChatId');
-    }
-  }, [activeChat]);
+  const [activeChat, setActiveChat] = useState<Chat | null>();
 
   const filteredChats = chats.filter((chat) =>
     [chat.name, chat.lastMessage, chat.type]

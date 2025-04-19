@@ -48,16 +48,13 @@ const SidebarSearch: React.FC = () => {
   return (
     <aside className="w-[var(--sidebar-width)] h-full flex flex-col transition-all duration-300 ease-in-out">
       {/* Header */}
-      <header id="logo-container" className="flex w-full items-center h-[var(--header-height)] p-2 pr-1 gap-1 justify-between">
+      <header id="logo-container" className="flex w-full items-center h-[var(--header-height)] p-2 pr-0 justify-between">
         <SearchBar 
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-
-        <a className="cursor-pointer select-none flex items-center opacity-40 hover:opacity-80 h-full">
-          <i className="material-symbols-outlined text-2xl" 
-            onClick={() => setSidebar('default')}>close</i>
-        </a>
+        <i className="material-symbols-outlined text-2xl opacity-60 hover:opacity-100 p-1 cursor-pointer" 
+          onClick={() => setSidebar('default')}>close</i>
       </header>
 
       {/* Chat Type Selector */}
