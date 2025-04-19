@@ -1,6 +1,7 @@
 import { useChat } from '@/contexts/ChatContext';
 import { useChatInfo } from '@/contexts/ChatInfoContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ChatAvatar } from '@/components/ui/ChatAvatar';
 
 const ChatHeader: React.FC = () => {
   const { activeChat } = useChat();
@@ -8,49 +9,23 @@ const ChatHeader: React.FC = () => {
 
   return (
     <header 
-      className="absolute top-0 w-full cursor-pointer hover:shadow-2xl flex items-center justify-between h-[var(--header-height)] px-4 shadow border-b border-[var(--border-color)] backdrop-blur-[199px] z-40"
+      className="w-full cursor-pointer hover:shadow-2xl flex items-center justify-between min-h-[var(--header-height)] max-h-[var(--header-height)] px-4 shadow border-b border-[var(--border-color)] backdrop-blur-[199px] z-40"
       onClick={toggleChatInfo}
     >
       <AnimatePresence mode="wait">
         <motion.div 
           key={activeChat?.id || "no-chat"}
           className="flex gap-3 items-center cursor-pointer"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ 
-            opacity: 1,
-            scale: 1,
-            transition: { 
-              type: 'spring', 
-              stiffness: 300, 
-              damping: 20,
-              bounce: 0.2
-            }
-          }}
-          exit={{ 
-            opacity: 0,
-            transition: { duration: 0.1 }
+          initial={{ opacity: 0.2, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0.2, scale: 0.9 }}
+          transition={{ 
+            type: 'tween',
+            duration: 0.1,
+            ease: 'easeInOut'
           }}
         >
-          {!activeChat?.isGroup ?
-          <div className="h-11 w-11 custom-border rounded-full flex items-center justify-center overflow-hidden">
-            {activeChat?.avatar ? (
-              <img 
-                src={activeChat.avatar} 
-                alt={activeChat.name}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <i className="material-symbols-outlined text-5xl opacity-40">mood</i>
-            )}
-          </div>
-          :
-            <div className='h-12 w-12 custom-border grid grid-cols-2 grid-rows-2 overflow-hidden rounded-lg'>
-              <i className="material-symbols-outlined text-2xl opacity-20 flex items-center justify-center border rounded-full">mood</i>
-              <i className="material-symbols-outlined text-2xl opacity-20 flex items-center justify-center border rounded-full">mood</i>
-              <i className="material-symbols-outlined text-2xl opacity-20 flex items-center justify-center border rounded-full">mood</i>
-              <i className="material-symbols-outlined text-2xl opacity-20 flex items-center justify-center border rounded-full">mood</i>
-            </div>
-          }
+          <ChatAvatar chat={activeChat} type='header'/>
 
           <h1 className="text-xl font-medium">
             {activeChat?.name || "Select a chat"}
@@ -59,9 +34,12 @@ const ChatHeader: React.FC = () => {
       </AnimatePresence>
 
       {activeChat && (
+        
         <div className="flex gap-2">
           <a className="flex items-center cursor-pointer rounded-full opacity-60 hover:opacity-100 p-1">
-            <i className="material-symbols-outlined text-2xl">phone_enabled</i>
+            {activeChat.type === 'private' && <i className="material-symbols-outlined text-3xl">phone_enabled</i>}
+            {activeChat.type === 'group' && <i className="material-symbols-outlined text-3xl">videocam</i>}
+            {activeChat.type === 'channel' && <i className="material-symbols-outlined text-3xl">connected_tv</i>}
           </a>
         </div>
       )}

@@ -3,6 +3,7 @@ import { useChat } from '@/contexts/ChatContext';
 import { useChatInfo } from '@/contexts/ChatInfoContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import ContactInfoItem from '@/components/ui/contactInfoItem';
+import { ChatAvatar } from '@/components/ui/ChatAvatar';
 import image1 from '@/assets/image/image1.jpg';
 import image2 from '@/assets/image/image2.jpg';
 import image3 from '@/assets/image/image3.jpg';
@@ -43,25 +44,8 @@ const ChatInfoDefault: React.FC = () => {
             <div className='overflow-x-hidden overflow-y-auto h-screen'>
                 <div className="flex flex-col justify-center items-center p-4 gap-2 w-full pb-[70px]">
                     <div className="relative">
-                        {activeChat.isGroup ? (
-                            <div className='h-32 w-32 custom-border grid grid-cols-2 grid-rows-2 overflow-hidden rounded-2xl cursor-pointer'>
-                                {[...Array(4)].map((_, i) => (
-                                    <i key={i} className="material-symbols-outlined text-8xl opacity-20 flex items-center justify-center border rounded-full">mood</i>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="h-32 w-32 custom-border rounded-full flex items-center justify-center overflow-hidden">
-                                {activeChat.avatar ? (
-                                    <img 
-                                        src={activeChat.avatar} 
-                                        alt={activeChat.name}
-                                        className="h-full w-full object-cover"
-                                    />
-                                ) : (
-                                    <i className="material-symbols-outlined text-5xl opacity-40">mood</i>
-                                )}
-                            </div>
-                        )}
+                        <ChatAvatar chat={activeChat} type='info' />
+                        
 
                         <a className="absolute bottom-0 right-0 flex items-center rounded-full cursor-pointer opacity-40 hover:opacity-80">
                             <i className="material-symbols-outlined">favorite</i>
@@ -70,10 +54,12 @@ const ChatInfoDefault: React.FC = () => {
             
                     <h1 className="text-xl font-semibold">{activeChat.name}</h1>
 
-                    <p className="text-sm text-center font-light opacity-80 w-full min-w-[240px] text-ellipsis">
-                        {activeChat.bio || "No bio available"}
-                    </p>
-                    
+                    {(activeChat.bio || activeChat.description) && (
+                        <p className="text-sm text-center font-light opacity-80 w-full min-w-[240px] text-ellipsis">
+                            {activeChat.bio || activeChat.description}
+                        </p>
+                    )}
+
                     <AnimatePresence>
                         {isChatInfoVisible && (
                             <motion.div
@@ -83,7 +69,7 @@ const ChatInfoDefault: React.FC = () => {
                                 transition={{ type: 'spring', stiffness: 300, damping: 28 }}
                                 className="flex flex-col gap-2 w-full mt-4 min-w-[240px]"
                             >
-                                {!activeChat.isGroup && (
+                                {activeChat?.type === 'private' && (
                                     <div className="w-full flex flex-col items-center rounded font-light custom-border overflow-hidden">
                                          <ContactInfoItem
                                                 icon="alternate_email"
@@ -136,7 +122,7 @@ const ChatInfoDefault: React.FC = () => {
                                     </div>
                                 </div>
 
-                                {activeChat.isGroup && activeChat.members && (
+                                {activeChat.members && (
                                     <div className="flex flex-col rounded overflow-hidden custom-border">
                                         {activeChat.members.map((member, index) => (
                                             <div key={`${member}-${index}`} className="flex items-center gap-2 hover:bg-[var(--hover-color)] p-2 cursor-pointer">

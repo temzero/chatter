@@ -36,10 +36,10 @@ const ContactInfoItem: React.FC<ContactInfoItemProps> = ({
 
   return (
     <div 
-      className={`flex cursor-pointer p-1 hover:bg-[var(--hover-color)] w-full justify-between ${className}`}
+      className={`flex cursor-pointer p-1 px-2 hover:bg-[var(--hover-color)] w-full justify-between ${className}`}
       onClick={handleCopy}
     >
-      <i className="material-symbols-outlined">{icon}</i>
+      <i className="material-symbols-outlined opacity-70">{icon}</i>
       {copied === copyType ? (
         <span className="text-green-500">
           {copyType.charAt(0).toUpperCase() + copyType.slice(1)} copied!

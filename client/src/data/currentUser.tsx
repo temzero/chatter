@@ -2,7 +2,7 @@ import avatar from '@/assets/image/avatar1.jpg'
  import { MyProfileProps } from './types';
  
  export const currentUserProfileData: MyProfileProps = {
-   id: '0',
+   id: 'Me',
    username: 'temzero',
    firstName: 'Nhan',
    lastName: 'Nguyen',

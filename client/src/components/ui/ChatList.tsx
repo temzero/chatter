@@ -1,19 +1,10 @@
 import React from 'react';
 import { useChat } from '@/contexts/ChatContext';
-import { motion, AnimatePresence } from 'framer-motion';
-
-interface Chat {
-  id: number;
-  name: string;
-  avatar: string;
-  lastMessage: string;
-  time: string;
-  type: string;
-  isGroup?: boolean;
-}
+import { ChatProps } from '@/contexts/data';
+import { ChatAvatar } from './ChatAvatar';
 
 interface ChatListProps {
-  chats: Chat[];
+  chats: ChatProps[];
   isCompact?: boolean;
 }
 
@@ -34,26 +25,7 @@ const ChatList: React.FC<ChatListProps> = ({
       {chats.map((chat) => (
         <React.Fragment key={chat.id}>
           <div className={getUserItemClass(chat.id)} onClick={() => setActiveChat(chat)}>
-            {!chat.isGroup ?
-              <div className='h-16 w-16 min-w-[4rem] custom-border flex items-center justify-center overflow-hidden rounded-full'>
-                {chat.avatar ? (
-                  <img 
-                    className="h-full w-full object-cover" 
-                    src={chat.avatar} 
-                    alt={`${chat.name}'s avatar`} 
-                  />
-                ) : (
-                  <i className="material-symbols-outlined text-6xl opacity-20">mood</i>
-                )}
-              </div>
-              :
-              <div className='h-16 w-16 min-w-[4rem] custom-border grid grid-cols-2 grid-rows-2 overflow-hidden rounded-lg'>
-                <i className="material-symbols-outlined text-2xl opacity-20 flex items-center justify-center border rounded-full">mood</i>
-                <i className="material-symbols-outlined text-2xl opacity-20 flex items-center justify-center border rounded-full">mood</i>
-                <i className="material-symbols-outlined text-2xl opacity-20 flex items-center justify-center border rounded-full">mood</i>
-                <i className="material-symbols-outlined text-2xl opacity-20 flex items-center justify-center border rounded-full">mood</i>
-              </div>
-            }
+            <ChatAvatar chat={chat} type='sidebar'/>
             
             {!isCompact && (
               <>
@@ -67,7 +39,7 @@ const ChatList: React.FC<ChatListProps> = ({
                 </div>
 
                 <p className="absolute top-2 right-4 text-xs opacity-40">
-                  {chat.time}
+                  {chat.lastMessageTime}
                 </p>
               </>
             )}

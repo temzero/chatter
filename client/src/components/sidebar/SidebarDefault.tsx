@@ -72,8 +72,8 @@ const ChatSidebar: React.FC = () => {
           whileHover={{ x: 33, }} // This will move the element 5 pixels to the right on hover
           transition={{ type: 'spring', stiffness: 600, damping: 30 }} // Spring animation for a bouncy effect
         >
-          {isCompact || <span className="material-symbols-outlined text-6xl cursor-pointer mr-3">trending_flat</span>}
-          <div className={`w-8 h-8 flex items-center justify-center ${isCompact ? 'mx-auto' : ''}`}>
+          <span className={`material-symbols-outlined text-6xl cursor-pointer ${isCompact ? 'mr-8' : 'mr-3'}`}>trending_flat</span>
+          <div className={`w-8 h-8 flex items-center justify-center`}>
             <img className="h-full w-full" src={logo} alt="Logo" />
           </div>
           {isCompact || <span className="text-2xl font-semibold px-1">Chatter</span>}

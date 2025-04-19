@@ -59,7 +59,7 @@ const ChatInfoEdit: React.FC = () => {
                 onClick={() => setChatInfoMode('default')}>
                 <i className="material-symbols-outlined text-3xl">check</i>
             </a>
-            <a className="flex items-center rounded-full p-2 cursor-pointer opacity-70 hover:opacity-80 h-10 w-10 hover:bg-red-500"
+            <a className="flex items-center rounded-full p-2 cursor-pointer opacity-70 hover:opacity-80 h-10 w-10 hover:bg-[var(--hover-color)]"
                   onClick={() => setChatInfoMode('default')}>
                   <i className="material-symbols-outlined">close</i>
             </a>
@@ -76,14 +76,26 @@ const ChatInfoEdit: React.FC = () => {
                 <i className="material-symbols-outlined text-8xl opacity-20">mood</i>
               )}
             </div>
-            <label className="absolute bottom-1 right-1 flex items-center justify-center w-10 h-10 rounded-full bg-[var(--sidebar-bg)] custom-border cursor-pointer hover:opacity-100">
-              <i className="material-symbols-outlined text-lg">edit</i>
-              <input 
-                type="file" 
-                accept="image/*"
-                className="hidden"
-                onChange={handleAvatarChange}
-              />
+            <label className="w-10 h-10 absolute bottom-0 right-0 bg-gray-600 text-white rounded-full p-2 cursor-pointer hover:bg-gray-700 flex items-center justify-center">
+                             <i className="material-symbols-outlined">edit</i>
+                             <input 
+                                 type="file" 
+                                 className="hidden" 
+                                 accept="image/*"
+                                 onChange={(e) => {
+                                     if (e.target.files?.[0]) {
+                                         const file = e.target.files[0];
+                                         const reader = new FileReader();
+                                         reader.onload = (event) => {
+                                             setFormData(prev => ({
+                                                 ...prev,
+                                                 avatar: event.target?.result as string
+                                             }));
+                                         };
+                                         reader.readAsDataURL(file);
+                                     }
+                                 }}
+                             />
             </label>
           </div>
 

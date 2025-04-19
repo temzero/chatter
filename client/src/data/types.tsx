@@ -44,7 +44,7 @@ export interface UserProps {
     readBy?: string[]; // array of user IDs who read the message
   }
   
-  export interface ChatRoomProps {
+  export interface ChatProps {
     id: string;
     name?: string; // for groups/channels
     description?: string; // for groups/channels

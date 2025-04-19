@@ -38,7 +38,7 @@ const SidebarProfile: React.FC = () => {
                         {currentUser?.bio || ""}
                     </p>
 
-                    <div className="w-full flex flex-col rounded font-light py-2 my-2 custom-border-t custom-border-b">
+                    <div className="w-full flex flex-col font-light py-2 my-2 custom-border-t custom-border-b">
                         <div>
                             <ContactInfoItem
                                 icon="alternate_email"
@@ -49,7 +49,7 @@ const SidebarProfile: React.FC = () => {
                             
                             <ContactInfoItem
                                 icon="call"
-                                value={currentUser?.phone}
+                                value={currentUser?.phoneNumber}
                                 copyType="phone"
                             />
                             
