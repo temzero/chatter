@@ -4,19 +4,11 @@ import { useChatInfo } from '@/contexts/ChatInfoContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import ContactInfoItem from '@/components/ui/contactInfoItem';
 import { ChatAvatar } from '@/components/ui/ChatAvatar';
-import image1 from '@/assets/image/image1.jpg';
-import image2 from '@/assets/image/image2.jpg';
-import image3 from '@/assets/image/image3.jpg';
+import RenderMedia from '@/components/ui/RenderMedia';
 
-const mediaData = {
-    photos: [image1, image2, image3],
-    videos: [],
-    voice: [],
-    files: [],
-};
 
 const ChatInfoDefault: React.FC = () => {
-    const {activeChat} = useChat();
+    const {activeChat, activeMedia} = useChat();
     const { setChatInfoMode, isChatInfoVisible } = useChatInfo();
 
     if (!activeChat) return null;
@@ -45,7 +37,6 @@ const ChatInfoDefault: React.FC = () => {
                 <div className="flex flex-col justify-center items-center p-4 gap-2 w-full pb-[70px]">
                     <div className="relative">
                         <ChatAvatar chat={activeChat} type='info' />
-                        
 
                         <a className="absolute bottom-0 right-0 flex items-center rounded-full cursor-pointer opacity-40 hover:opacity-80">
                             <i className="material-symbols-outlined">favorite</i>
@@ -142,15 +133,16 @@ const ChatInfoDefault: React.FC = () => {
                     <i className="material-symbols-outlined opacity-70">keyboard_control_key</i>
                     <h1 className='-mt-1 mb-2'>Media & Files</h1>
                     <div className="grid grid-cols-3">
-                        {mediaData.photos.map((image, index) => (
-                            <div key={`media-${index}`} className="overflow-hidden aspect-square">
-                                <img
-                                    className="w-full h-full custom-border object-cover"
-                                    src={image}
-                                    alt={`Gallery image ${index + 1}`}
-                                />
-                            </div>
-                        ))}
+
+                    {activeMedia.slice(0, 3).map((media, index) => (
+                        <div key={`${media.messageId}-${index}`} className="overflow-hidden aspect-square">
+                            <RenderMedia
+                                media={media}
+                                className="hover:none custom-border"
+                            />
+                        </div>
+                    ))}
+                    
                     </div>
                 </div>
             </div>

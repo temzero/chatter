@@ -24,7 +24,7 @@ const ChatBox: React.FC = () => {
   const isChannel = activeChat?.type === 'channel';
 
   return (
-    <div className="flex-1 h-full flex flex-col overflow-y-auto p-6 backdrop-blur-sm">
+    <div className="flex-1 h-full flex flex-col overflow-x-hidden overflow-y-auto p-6 backdrop-blur-sm">
       {activeMessages.length > 0 ? (
         activeMessages.map((msg) =>
           isChannel ? (
@@ -34,6 +34,7 @@ const ChatBox: React.FC = () => {
               senderName={msg.senderId}
               time={msg.time}
               text={msg.text}
+              media={msg.media}  // Pass media prop to ChannelMessage
             />
           ) : (
             <Message
@@ -43,11 +44,12 @@ const ChatBox: React.FC = () => {
               senderName={msg.senderId}
               time={msg.time}
               text={msg.text}
+              media={msg.media}  // Pass media prop to Message
             />
           )
         )
       ) : (
-        <div className="text-xl text-center opacity-40 italic">No messages yet!</div>
+        <div className="h-full w-full flex items-center justify-center opacity-50 italic text-xl">No messages yet!</div>
       )}
       <div ref={messagesEndRef} />
     </div>

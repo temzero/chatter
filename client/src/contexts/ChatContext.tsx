@@ -8,8 +8,8 @@ import React, {
   useMemo,
 } from 'react';
 import { ChatsData } from './data';
-import { MessagesData } from '@/data/messages';
-import type { MessageProps } from '@/data/messages';
+import { MessagesData } from '@/data/message';
+import type { MessageProps } from '@/data/message';
 import type { ChatProps } from '@/data/types';
 
 // Modified getMessagesByChatId to accept current messages list
@@ -17,10 +17,23 @@ const getMessagesByChatId = (chatId: number, messages: MessageProps[]) => {
   return messages.filter((msg) => msg.chatId === chatId);
 };
 
+// Helper to get all media from messages
+const getMediaFromMessages = (messages: MessageProps[]) => {
+  return messages
+    .filter((msg) => msg.media)
+    .map((msg) => ({
+      ...msg.media!,
+      messageId: msg.id,
+      chatId: msg.chatId,
+      timestamp: msg.time,
+    }));
+};
+
 interface ChatContextType {
   chats: ChatProps[];
   activeChat: ChatProps | null;
   activeMessages: MessageProps[];
+  activeMedia: MediaProps[]; // New field for active media
   setActiveChat: Dispatch<SetStateAction<ChatProps | null>>;
   searchTerm: string;
   setSearchTerm: Dispatch<SetStateAction<string>>;
@@ -28,6 +41,7 @@ interface ChatContextType {
   updateChat: (id: number, updatedData: Partial<ChatProps>) => void;
   deleteChat: (id: number) => void;
   addMessage: (newMessage: MessageProps) => void;
+  getChatMedia: (chatId: number) => MediaProps[]; // New method
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -46,6 +60,11 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     return activeChat ? getMessagesByChatId(activeChat.id, messages) : [];
   }, [activeChat, messages]);
 
+  // New: Active media derived from active messages
+  const activeMedia = useMemo(() => {
+    return getMediaFromMessages(activeMessages);
+  }, [activeMessages]);
+
   const filteredChats = useMemo(() => {
     return chats.filter((chat) =>
       [chat.name, chat.lastMessage, chat.type]
@@ -54,6 +73,12 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         .includes(searchTerm.toLowerCase())
     );
   }, [chats, searchTerm]);
+
+  // New: Helper to get media for any chat
+  const getChatMedia = (chatId: number) => {
+    const chatMessages = getMessagesByChatId(chatId, messages);
+    return getMediaFromMessages(chatMessages);
+  };
 
   const addChat = (newChat: ChatProps) => {
     setChats([newChat, ...chats]);
@@ -92,6 +117,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         chats: filteredChats,
         activeChat,
         activeMessages,
+        activeMedia, // Include activeMedia in context
         setActiveChat,
         searchTerm,
         setSearchTerm,
@@ -99,6 +125,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         updateChat,
         deleteChat,
         addMessage,
+        getChatMedia, // Include getChatMedia in context
       }}
     >
       {children}
@@ -113,3 +140,12 @@ export const useChat = (): ChatContextType => {
   }
   return context;
 };
+
+// MediaProps interface (add this if not already defined elsewhere)
+interface MediaProps {
+  type: 'photo' | 'video' | 'audio' | 'file';
+  url: string;
+  messageId: number;
+  chatId: number;
+  timestamp: string;
+}

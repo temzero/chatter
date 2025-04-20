@@ -1,6 +1,8 @@
 import React from 'react';
 import classNames from 'classnames';
 import { useChat } from '@/contexts/ChatContext';
+import RenderMedia from '../ui/RenderMedia';
+import type { MediaProps } from '@/data/media';
 
 type MessageProps = {
   isMe?: boolean;
@@ -8,9 +10,10 @@ type MessageProps = {
   senderName: string;
   time: string;
   text: string;
+  media?: MediaProps;
 };
 
-const Message: React.FC<MessageProps> = ({ isMe = false, avatar, senderName, time, text }) => {
+const Message: React.FC<MessageProps> = ({ isMe = false, avatar, senderName, time, text, media = null }) => {
   const { activeChat } = useChat();
   const isGroupChat = activeChat?.type === 'group';
 
@@ -34,36 +37,49 @@ const Message: React.FC<MessageProps> = ({ isMe = false, avatar, senderName, tim
         </div>
       )}
 
-      <div className="flex flex-col gap-1">
+      <div className="flex relative flex-col gap-1">
         {/* Sender name - only shown for group chats */}
         {isGroupChat && (
           <div className={classNames('text-sm font-semibold opacity-60 mb-1', {
-            'text-right': isMe,
-            'text-left': !isMe,
+            'text-left': isMe,
+            'text-right': !isMe,
           })}>
             {senderName}
           </div>
         )}
 
-        <div
-          className={classNames('', {
-            'message-bubble self-message ml-auto': isMe,
-            'message-bubble': !isMe,
-          })}
-        >
-          {text}
-          <i
-            className={classNames(
-              'material-symbols-outlined absolute opacity-0 group-hover:opacity-80 transition-opacity duration-200 cursor-pointer',
-              {
-                '-bottom-6 left-0': isMe,
-                '-bottom-6 right-0': !isMe,
-              }
-            )}
+        {media ? (
+          <div
+            className={classNames('message-media-bubble', {
+              'self-message': isMe,
+            })}
           >
-            favorite
-          </i>
-        </div>
+            <RenderMedia media={media} />
+            {text && <h1 className='p-2 max-w-[var(--media-width)]'>{text}</h1>}
+            
+          </div>
+        ) : (
+          <div
+            className={classNames('message-bubble', {
+              'self-message ml-auto': isMe,
+            })}
+          >
+            {text}
+          </div>
+        )}
+
+        <i
+          className={classNames(
+            'material-symbols-outlined absolute opacity-0 group-hover:opacity-80 transition-opacity duration-200 cursor-pointer z-20',
+            {
+              '-bottom-1 left-0': isMe,
+              '-bottom-1 right-0': !isMe,
+            }
+          )}
+          onClick={() => alert('Liked')}
+        >
+          favorite
+        </i>
 
         <div className="text-xs opacity-0 group-hover:opacity-40">{time}</div>
       </div>

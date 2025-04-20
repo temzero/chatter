@@ -1,16 +1,24 @@
 import React from 'react';
+import RenderMedia from '../ui/RenderMedia';
+import type { MediaProps } from '@/data/media';
 
 type MessageProps = {
   time: string;
-  text: string;
+  text?: string;
+  media?: MediaProps;
 };
 
-const Message: React.FC<MessageProps> = ({ time, text }) => {
+const Message: React.FC<MessageProps> = ({ time, text, media }) => {
   return (
     <>
     <div className='relative flex flex-col gap-1 items-center justify-center group custom-border-b'>
       <div className='relative py-8 w-[70%]'>
-        {text}
+        {media && 
+          <div className="rounded border mb-2">
+            <RenderMedia media={media}/>
+          </div>
+        }
+        {text && <p>{text}</p>}
       <i className='material-symbols-outlined absolute -bottom-1 left-0 opacity-0 group-hover:opacity-80 transition-opacity duration-200 cursor-pointer'>
         favorite
       </i>

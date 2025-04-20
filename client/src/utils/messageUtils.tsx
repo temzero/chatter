@@ -1,5 +1,5 @@
 // utils/messageUtils.ts
-import type { MessageProps } from '@/data/messages';
+import type { MessageProps } from '@/data/message';
 
 export function createMessagesIndex(messages: MessageProps[]): Map<number, MessageProps[]> {
   const index = new Map<number, MessageProps[]>();

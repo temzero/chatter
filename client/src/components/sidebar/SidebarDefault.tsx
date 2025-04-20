@@ -67,12 +67,12 @@ const ChatSidebar: React.FC = () => {
       >
         <motion.a 
           id='branding' 
-          className="flex items-center cursor-pointer -ml-[62px]" 
+          className="flex items-center cursor-pointer -ml-[64px]" 
           onClick={() => setSidebar('more')}
           whileHover={{ x: 33, }} // This will move the element 5 pixels to the right on hover
           transition={{ type: 'spring', stiffness: 600, damping: 30 }} // Spring animation for a bouncy effect
         >
-          <span className={`material-symbols-outlined text-6xl cursor-pointer ${isCompact ? 'mr-8' : 'mr-3'}`}>trending_flat</span>
+          <span className={`material-symbols-outlined text-6xl cursor-pointer ${isCompact ? 'mr-10' : 'mr-3'}`}>trending_flat</span>
           <div className={`w-8 h-8 flex items-center justify-center`}>
             <img className="h-full w-full" src={logo} alt="Logo" />
           </div>

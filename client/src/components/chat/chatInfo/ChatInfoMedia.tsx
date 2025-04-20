@@ -1,33 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import { useChat } from '@/contexts/ChatContext';
+import React, { useState, useMemo } from 'react';
 import { useChatInfo } from '@/contexts/ChatInfoContext';
+import { useChat } from '@/contexts/ChatContext';
 import SlidingContainer from '@/components/ui/SlidingContainer';
+import RenderMedia from '@/components/ui/RenderMedia'
 
-// Import your images
-import image1 from '@/assets/image/image1.jpg';
-import image2 from '@/assets/image/image2.jpg';
-import image3 from '@/assets/image/image3.jpg';
-import image4 from '@/assets/image/image4.jpg';
-import image5 from '@/assets/image/image5.jpg';
-import image6 from '@/assets/image/image6.jpg';
-import image7 from '@/assets/image/image7.jpg';
-import image8 from '@/assets/image/image8.jpg';
-import image9 from '@/assets/image/image9.jpg';
-
-const mediaTypes = ['photos', 'videos', 'voice', 'files'];
-
-const mediaData = {
-    photos: [image1, image2, image3, image4, image5, image6, image7, image8, image9, image5, image6, image7, image8, image9,image1, image2, image3, image4, image5, image6, image7, image8, image9, image5, image6, image7, image8, image9],
-    videos: [],
-    voice: [],
-    files: [],
-};
+const mediaTypes = ['photos', 'videos', 'audio', 'files'];
 
 const ChatInfoMedia: React.FC = () => {
-    const {activeChat} = useChat();
     const { setChatInfoMode } = useChatInfo();
+    const { activeMedia } = useChat();
     const [selectedType, setSelectedType] = useState<string>(mediaTypes[0]);
     const [direction, setDirection] = useState<number>(1);
+
+    // Filter media by type
+    const filteredMedia = useMemo(() => {
+        return activeMedia.filter(media => {
+            switch (selectedType) {
+                case 'photos':
+                    return media.type === 'photo';
+                case 'videos':
+                    return media.type === 'video';
+                case 'audio':
+                    return media.type === 'audio';
+                case 'files':
+                    return media.type === 'file';
+                default:
+                    return false;
+            }
+        });
+    }, [activeMedia, selectedType]);
 
     const getTypeClass = React.useCallback((type: string) => 
         `flex items-center justify-center cursor-pointer p-2 ${
@@ -47,24 +48,34 @@ const ChatInfoMedia: React.FC = () => {
     };
 
     const renderMediaContent = () => {
-        const currentMedia = mediaData[selectedType as keyof typeof mediaData];
-        
-        if (currentMedia.length === 0) {
+        if (filteredMedia.length === 0) {
             return (
                 <div className="flex justify-center items-center h-32 opacity-50">
                     No {selectedType} available
                 </div>
             );
         }
-
+    
         return (
-            <div className="grid grid-cols-3 pb-10">
-                {currentMedia.map((image, index) => (
-                    <div key={index} className="overflow-hidden aspect-square">
-                        <img
-                            className="w-full h-full custom-border object-cover cursor-pointer transition-all duration-300 ease-in-out hover:scale-125 hover:brightness-110"
-                            src={image}
-                            alt={`Gallery image ${index + 1}`}
+            <div className={selectedType === 'files' || selectedType === 'audio' 
+                ? 'flex flex-col' 
+                : 'grid grid-cols-3 gap-1 pb-10'}>
+                {filteredMedia.map((media, index) => (
+                    <div 
+                        key={`${media.messageId}-${index}`}
+                        className={
+                            selectedType === 'files' || selectedType === 'audio'
+                                ? 'w-full px-3'
+                                : 'overflow-hidden aspect-square'
+                        }
+                    >
+                        <RenderMedia
+                            media={media}
+                            className={
+                                selectedType === 'files' || selectedType === 'audio'
+                                    ? 'w-full'
+                                    : 'w-full h-full object-cover cursor-pointer'
+                            }
                         />
                     </div>
                 ))}
@@ -75,17 +86,13 @@ const ChatInfoMedia: React.FC = () => {
     return (
         <aside className="relative w-full h-full overflow-hidden flex flex-col">
             <header className="flex p-4 w-full items-center min-h-[var(--header-height)] custom-border-b">
-                {/* <a className="flex items-center rounded-full p-2 cursor-pointer opacity-50 hover:opacity-100"
-                onClick={()=> setChatInfoMode('default')}>
-                    <i className="material-symbols-outlined">arrow_back</i>
-                </a> */}
                 <h1 className='text-xl font-semibold'>Media & Files</h1>
-
                 <a className="flex items-center rounded-full cursor-pointer opacity-50 hover:opacity-100 ml-auto"
-                onClick={()=> setChatInfoMode('default')}>
+                onClick={() => setChatInfoMode('default')}>
                     <i className="material-symbols-outlined">edit</i>
                 </a>
             </header>
+            
             <div className="flex justify-around items-center custom-border-b w-full backdrop-blur-[120px]">
                 {mediaTypes.map((type) => (
                     <a 
@@ -103,11 +110,11 @@ const ChatInfoMedia: React.FC = () => {
                     {renderMediaContent()}
                 </SlidingContainer>
             </div>
+            
             <a className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-10 flex items-center justify-center cursor-pointer opacity-50 hover:opacity-90 bg-[var(--sidebar-color)]"
-                onClick={()=> setChatInfoMode('default')}>
+                onClick={() => setChatInfoMode('default')}>
                 <i className="material-symbols-outlined rotate-90">arrow_forward_ios</i>
             </a>
-
         </aside>
     );
 };
