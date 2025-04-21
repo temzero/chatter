@@ -9,7 +9,6 @@ const CustomEmojiPicker = ({ onSelect }) => {
   });
 
   const pickerRef = useRef(null);
-  const categoryRefs = useRef({}); // To hold references to each category header
   const [currentCategory, setCurrentCategory] = useState(
     recentEmojis.length > 0 ? 'Recently' : emojiCategories[0]?.name || ''
   );
@@ -42,7 +41,7 @@ const CustomEmojiPicker = ({ onSelect }) => {
     });
   };
 
-  function scrollToCategory(categoryName) {
+  function scrollToCategory(categoryName: string) {
     const categoryId = categoryName.toLowerCase().replace(/ /g, '-');
     const element = document.getElementById(`category-${categoryId}`);
     if (element) {
@@ -81,6 +80,19 @@ const CustomEmojiPicker = ({ onSelect }) => {
     };
   }, [combinedCategories]); // Re-run when categories change
 
+    useEffect(() => {
+      const handleGlobalKeyDown = (e: KeyboardEvent) => {
+
+        if (e.ctrlKey && e.key === 'e') {
+          e.preventDefault();
+          setIsOpen(pre => !pre);
+        }
+      };
+  
+      document.addEventListener('keydown', handleGlobalKeyDown);
+      return () => document.removeEventListener('keydown', handleGlobalKeyDown);
+    }, []);
+
   return (
     <div className="" ref={pickerRef}>
       <a
@@ -98,9 +110,7 @@ const CustomEmojiPicker = ({ onSelect }) => {
               <div key={category.name}>
                 <h3
                   id={`category-${category.name.toLowerCase().replace(/ /g, '-')}`}
-                  className={`text-sm font-semibold bg-[var(--sidebar-color)] custom-border-b top-0 p-2 pl-3 z-10 ${
-                    currentCategory.toLowerCase() === category.name.toLowerCase() ? 'font-bold text-primary-color' : ''
-                  }`}
+                  className={`font-semibold bg-[var(--sidebar-color)] custom-border-b p-1 px-3`}
                 >
                   {category.name}
                 </h3>
