@@ -24,7 +24,7 @@ const ChatBox: React.FC = () => {
   const isChannel = activeChat?.type === 'channel';
 
   return (
-    <div className="flex-1 h-full flex flex-col overflow-x-hidden overflow-y-auto p-6 backdrop-blur-sm">
+    <div className="absolute z-0 flex-1 py-32 h-full w-full flex flex-col overflow-x-hidden overflow-y-auto p-6 backdrop-blur-sm">
       {activeMessages.length > 0 ? (
         activeMessages.map((msg) =>
           isChannel ? (

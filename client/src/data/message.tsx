@@ -30,7 +30,7 @@ export const MessagesData: MessageProps[] = [
         id: 2,
         chatId: 1,
         senderId: 'Me',
-        text: "I'm good, thanks! How about you?",
+        text: "I'm good, thanks! How about you? I'm good, thanks! How about you? I'm good, thanks! How about you? I'm good, thanks! How about you? I'm good, thanks! How about you?",
         time: '10:42 AM',
     },
     {

@@ -11,14 +11,14 @@
   --sidebar-width-small: 96px;
   --sidebar-width-large: 400px;
   --media-width: 320px;
-  --media-height: 500px;
+  --media-height: 420px;
 
   --primary-color: #247cff;
   --primary-green: #00ae80;
 
   /* light theme defaults */
-  color: black;
-  background-color: #ffffff;
+  --color: black;
+  --background-color: #ffffff;
   --sidebar-color: #eee;
   --active-chat-color: #2bffc687; /* or any color you prefer */
   --input-color: rgba(150, 150, 150, 0.1);
@@ -30,20 +30,12 @@
   --scrollbar-hover-color: #a8a8a8;
 }
 
-html {
-  margin: 0;
-  overflow: none;
-  min-width: 320px;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
 /* Dark mode styles */
 html[data-theme="dark"] {
   color-scheme: dark;
 
-  color: white;
-  background-color: #121212;
+  --color: white;
+  --background-color: #121212;
   --sidebar-color: #222;
   --border-color: rgba(255, 255, 255, 0.1);
   --input-color: rgba(0, 0, 0, 0.1);
@@ -54,20 +46,22 @@ html[data-theme="dark"] {
   --scrollbar-hover-color: #d0d0d0;
 }
 
+html {
+  margin: 0;
+  overflow: none;
+  min-width: 320px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
 button {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 3px;
+  border-radius: 4px;
   text-align: center;
   cursor: pointer;
-  padding-left: 6px;
-  padding-right: 6px;
-  background-color: var(--input-color);
-  border: 2px solid var(--border-color);
   font-size: 1rem;
-  min-width: 60px;
-  height: 28px;
 }
 button:hover {
   opacity: 0.9;
@@ -207,7 +201,7 @@ select:focus {
 
 /* Right-aligned bubbles (like for self messages) */
 .message-bubble.self-message {
-  background-color: var(--primary-green);
+  background-color: var(--active-chat-color);
   transform-origin: bottom right;
 }
 
@@ -231,7 +225,7 @@ select:focus {
 }
 
 .message-media-bubble.self-message {
-  background-color: var(--primary-green);
+  background-color: var(--active-chat-color);
   transform-origin: bottom right;
 }
 

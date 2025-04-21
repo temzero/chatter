@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useGlobalContext } from '@/contexts/GlobalContext';
 import { useChat } from '@/contexts/ChatContext';
+import CustomEmojiPicker from '../ui/CustomEmojiPicker';
 
 const ChatBar: React.FC = () => {
   const { currentUser } = useGlobalContext();
@@ -18,6 +19,10 @@ const ChatBar: React.FC = () => {
         e.preventDefault();
         inputRef.current?.focus();
       }
+
+      if (e.ctrlKey && e.key === 'e') {
+        e.preventDefault();
+      }
     };
 
     document.addEventListener('keydown', handleGlobalKeyDown);
@@ -26,13 +31,10 @@ const ChatBar: React.FC = () => {
 
   useEffect(() => {
     if (inputRef.current) {
-      // Reset height to get the correct scrollHeight
       inputRef.current.style.height = 'auto';
-      // Set the height based on the content, with a max of 100px
       const newHeight = Math.min(inputRef.current.scrollHeight, 100);
       inputRef.current.style.height = `${newHeight}px`;
-      
-      // Adjust the container height to match
+
       if (containerRef.current) {
         containerRef.current.style.height = `${newHeight + 13}px`;
       }
@@ -43,25 +45,23 @@ const ChatBar: React.FC = () => {
     const trimmedInput = input.trim();
     if (trimmedInput && activeChat) {
       const newMessage = {
-        id: Date.now(), // Using timestamp as ID
+        id: Date.now(),
         chatId: activeChat.id,
         senderId: currentUser?.id || 'me',
         text: trimmedInput,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        time: new Date().toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
       };
-      
+
       addMessage(newMessage);
       setInput('');
-      
-      // Reset heights after sending
-      if (inputRef.current) {
-        inputRef.current.style.height = 'auto';
-      }
-      if (containerRef.current) {
-        containerRef.current.style.height = 'auto';
-      }
+      if (inputRef.current) inputRef.current.style.height = 'auto';
+      if (containerRef.current) containerRef.current.style.height = 'auto';
       inputRef.current?.focus();
     }
+    close();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -73,10 +73,19 @@ const ChatBar: React.FC = () => {
     }
   };
 
+  function handleEmojiSelect(emoji: string) {
+    setInput((prev) => prev + emoji);
+    inputRef.current?.focus();
+  };
+
+  function handleAttatchFileClick() {
+    alert('Attaching')
+  }
+
   return (
-    <div className="backdrop-blur-[199px] w-full flex items-center p-4 justify-between shadow border-[var(--border-color)] z-50">
-      <div 
-        id='input-container' 
+    <div className="backdrop-blur-[199px] w-full flex items-center p-4 justify-between shadow border-[var(--border-color)] z-40 relative">
+      <div
+        id="input-container"
         ref={containerRef}
         className="input gap-1 flex items-end w-full transition-[height] duration-200 ease-in-out"
       >
@@ -85,32 +94,36 @@ const ChatBar: React.FC = () => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="w-full outline-none bg-transparent resize-none overflow-hidden py-2 border"
-          placeholder={activeChat ? "Type your message..." : "Select a chat to start messaging"}
+          className="w-full outline-none bg-transparent resize-none py-2 border"
+          placeholder={
+            activeChat
+              ? 'Type your message...'
+              : 'Select a chat to start messaging'
+          }
           aria-label="Type your message"
           rows={1}
           disabled={!activeChat}
         />
-        
-        <div id='chat-buttons-container' className="flex items-center gap-2 h-[24px]">
+
+        <div
+          id="chat-buttons-container"
+          className="flex items-center gap-2 h-[24px]"
+        >
           {activeChat && (
             <>
               <motion.div
-                animate={{ 
-                  transition: { type: 'spring', stiffness: 300, damping: 20 }
+                animate={{
+                  transition: { type: 'spring', stiffness: 300, damping: 20 },
                 }}
                 className="flex gap-2 items-center"
               >
-                <motion.a 
-                  className="material-symbols-outlined opacity-50 hover:opacity-90 cursor-pointer scale-x-[-1]"
-                  aria-label="Emoji picker"
-                >
-                  sentiment_satisfied
-                </motion.a>
-                
-                <motion.a 
-                  className="material-symbols-outlined opacity-50 hover:opacity-90 cursor-pointer"
+
+                <CustomEmojiPicker onSelect={handleEmojiSelect} />
+
+                <motion.a
+                  className="material-symbols-outlined opacity-50 hover:opacity-90 cursor-pointer rounded select-none"
                   aria-label="Attach file"
+                  onClick={handleAttatchFileClick}
                 >
                   attach_file
                 </motion.a>
@@ -118,13 +131,13 @@ const ChatBar: React.FC = () => {
 
               <motion.div
                 initial={false}
-                animate={{ 
+                animate={{
                   width: input ? 24 : 0,
                   opacity: input ? 1 : 0,
                   marginLeft: input ? 0 : -8,
-                  transition: { type: 'spring', stiffness: 300, damping: 20 }
+                  transition: { type: 'spring', stiffness: 300, damping: 20 },
                 }}
-                className="material-symbols-outlined cursor-pointer overflow-hidden"
+                className="material-symbols-outlined cursor-pointer rounded"
                 onClick={handleSend}
                 aria-label="Send message"
               >
@@ -134,6 +147,7 @@ const ChatBar: React.FC = () => {
           )}
         </div>
       </div>
+
     </div>
   );
 };
