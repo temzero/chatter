@@ -17,16 +17,17 @@ const getMessagesByChatId = (chatId: number, messages: MessageProps[]) => {
   return messages.filter((msg) => msg.chatId === chatId);
 };
 
-// Helper to get all media from messages
 const getMediaFromMessages = (messages: MessageProps[]) => {
   return messages
-    .filter((msg) => msg.media)
-    .map((msg) => ({
-      ...msg.media!,
-      messageId: msg.id,
-      chatId: msg.chatId,
-      timestamp: msg.time,
-    }));
+    .filter((msg) => msg.media && msg.media.length > 0)  // Ensure media is not empty
+    .flatMap((msg) => 
+      msg.media!.map((mediaItem) => ({
+        ...mediaItem,               // Spread media item properties
+        messageId: msg.id,          // Add messageId
+        chatId: msg.chatId,         // Add chatId
+        timestamp: msg.time,        // Add timestamp
+      }))
+    );
 };
 
 interface ChatContextType {
@@ -41,7 +42,9 @@ interface ChatContextType {
   updateChat: (id: number, updatedData: Partial<ChatProps>) => void;
   deleteChat: (id: number) => void;
   addMessage: (newMessage: MessageProps) => void;
-  getChatMedia: (chatId: number) => MediaProps[]; // New method
+  getChatMedia: (chatId: number) => MediaProps[];
+  setDraftMessage: (chatId: string, draft: string) => void;
+  getDraftMessage: (chatId: string) => string;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -55,10 +58,13 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [activeChat, setActiveChat] = useState<ChatProps | null>(null);
   const [messages, setMessages] = useState<MessageProps[]>(MessagesData);
+  const [drafts, setDrafts] = useState<Record<number, string>>({});
 
   const activeMessages = useMemo(() => {
     return activeChat ? getMessagesByChatId(activeChat.id, messages) : [];
+    
   }, [activeChat, messages]);
+  console.log('activeMessages' , activeMessages)
 
   // New: Active media derived from active messages
   const activeMedia = useMemo(() => {
@@ -111,13 +117,21 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     }
   };
 
+  const setDraftMessage = (chatId: number, text: string) => {
+    setDrafts((prev) => ({ ...prev, [chatId]: text }));
+  };
+  
+  const getDraftMessage = (chatId: number) => {
+    return drafts[chatId] || '';
+  };
+
   return (
     <ChatContext.Provider
       value={{
         chats: filteredChats,
         activeChat,
         activeMessages,
-        activeMedia, // Include activeMedia in context
+        activeMedia,
         setActiveChat,
         searchTerm,
         setSearchTerm,
@@ -125,7 +139,9 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         updateChat,
         deleteChat,
         addMessage,
-        getChatMedia, // Include getChatMedia in context
+        getChatMedia,
+        setDraftMessage,
+        getDraftMessage,
       }}
     >
       {children}

@@ -173,66 +173,44 @@ select:focus {
   background-color: var(--hover-color);
 }
 
-.message-bubble {
+/* Shared Styles for Both Bubbles */
+.message-bubble, .message-media-bubble {
   display: inline-block;
-  padding: 6px;
-  padding-bottom: 8px;
   border-radius: 8px;
   background-color: var(--message-color);
   word-break: break-word;
   width: fit-content;
   cursor: pointer;
-  
-  /* Set transform origin and transition */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transform-origin: bottom left;
-  transition: 
-    transform 0.2s ease-in-out,
-    box-shadow 0.2s ease-in-out;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+.message-bubble { padding: 8px; }
+/* Hover Effect */
+.message-bubble:hover, .message-media-bubble:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: scale(1.06);
 }
 
+/* Self Message Bubbles (Right-Aligned) */
+.message-bubble.self-message, .message-media-bubble.self-message {
+  background-color: var(--active-chat-color);
+  transform-origin: bottom right;
+}
+
+/* Channel-specific Bubble (Optional Adjustment) */
 .channel-message-bubble {
   transform-origin: center;
 }
 
-.message-bubble:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transform: scale(1.06);
-}
-
-/* Right-aligned bubbles (like for self messages) */
-.message-bubble.self-message {
-  background-color: var(--active-chat-color);
-  transform-origin: bottom right;
-}
-
+/* Media Bubble Adjustments */
 .message-media-bubble {
-  display: inline-block;
-  border-radius: 8px;
-  background-color: var(--message-color);
-  word-break: break-word;
-  width: fit-content;
-  cursor: pointer;
   object-fit: cover;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  
-  /* Set transform origin and transition */
-  transform-origin: bottom left;
-  transition: 
-    transform 0.2s ease-in-out,
-    box-shadow 0.2s ease-in-out;
 }
 
-.message-media-bubble.self-message {
-  background-color: var(--active-chat-color);
-  transform-origin: bottom right;
-}
-
-.message-media-bubble:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transform: scale(1.06);
-}
 
 .nav-btn {
   display: flex;

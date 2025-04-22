@@ -1,19 +1,19 @@
 import React from 'react';
 import classNames from 'classnames';
 import { useChat } from '@/contexts/ChatContext';
-import RenderMedia from '../ui/RenderMedia';
+import RenderMultipleMedia from '../ui/RenderMultipleMedia';
 import type { MediaProps } from '@/data/media';
 
-type MessageProps = {
+type RenderMessageProps = {
   isMe?: boolean;
   avatar?: string;
   senderName: string;
   time: string;
   text: string;
-  media?: MediaProps;
+  media?: MediaProps[];
 };
 
-const Message: React.FC<MessageProps> = ({ isMe = false, avatar, senderName, time, text, media = null }) => {
+const Message: React.FC<RenderMessageProps> = ({ isMe = false, avatar, senderName, time, text, media = null }) => {
   const { activeChat } = useChat();
   const isGroupChat = activeChat?.type === 'group';
   const alignmentClass = (isMe: boolean) => ({
@@ -42,16 +42,16 @@ const Message: React.FC<MessageProps> = ({ isMe = false, avatar, senderName, tim
       )}
 
       <div className="flex relative flex-col">
-        {media ? (
-          <div className={classNames('message-media-bubble  shadow', {'self-message': isMe,})}>
-            <RenderMedia media={media} />
-            {text && <h1 className='p-2 max-w-[var(--media-width)]'>{text}</h1>}
-          </div>
-        ) : (
-          <div className={classNames('message-bubble shadow', {'self-message ml-auto': isMe,})}>
-            {text}
-          </div>
-        )}
+          {media && media.length > 0 ? (
+            <div className={classNames('message-media-bubble', {'self-message ml-auto': isMe})}>
+              <RenderMultipleMedia media={media} />
+              <h1 className='p-2'>{text}</h1>
+            </div>
+          ) : (
+            <div className={classNames('message-bubble', {'self-message ml-auto': isMe})}>
+              {text}
+            </div>
+          )}
 
           <div className={classNames("flex items-end h-5",alignmentClass(isMe))}>
             {isGroupChat && !isMe && 

@@ -1,11 +1,11 @@
 import React from 'react';
-import RenderMedia from '../ui/RenderMedia';
+import RenderMultipleMedia from '../ui/RenderMultipleMedia';
 import type { MediaProps } from '@/data/media';
 
 type MessageProps = {
   time: string;
   text?: string;
-  media?: MediaProps;
+  media?: MediaProps[];
 };
 
 const Message: React.FC<MessageProps> = ({ time, text, media }) => {
@@ -15,7 +15,7 @@ const Message: React.FC<MessageProps> = ({ time, text, media }) => {
       <div className='relative py-8 w-[70%]'>
         {media && 
           <div className="rounded border mb-2">
-            <RenderMedia media={media}/>
+            <RenderMultipleMedia media={media}/>
           </div>
         }
         {text && <p>{text}</p>}

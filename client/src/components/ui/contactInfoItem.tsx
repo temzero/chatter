@@ -41,7 +41,7 @@ const ContactInfoItem: React.FC<ContactInfoItemProps> = ({
     >
       <i className="material-symbols-outlined opacity-70">{icon}</i>
       {copied === copyType ? (
-        <span className="text-green-500">
+        <span className="text-green-400">
           {copyType.charAt(0).toUpperCase() + copyType.slice(1)} copied!
         </span>
       ) : (

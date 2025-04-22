@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { useGlobalContext } from '@/contexts/GlobalContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useSidebar } from "@/contexts/SidebarContext";
 
 const SidebarProfileEdit: React.FC = () => {
-    const { currentUser, setCurrentUser } = useGlobalContext();
+    const { currentUser, setCurrentUser } = useAuth();
     const { setSidebar } = useSidebar();
     const [formData, setFormData] = useState({
         firstName: currentUser?.firstName || '',

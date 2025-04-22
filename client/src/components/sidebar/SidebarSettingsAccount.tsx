@@ -1,8 +1,8 @@
-import { useGlobalContext } from "@/contexts/GlobalContext";
+import { useAuth } from "@/contexts/AuthContext";
  import { useSidebar } from "@/contexts/SidebarContext";
  
  const SidebarSettingsAccount: React.FC = () => {
-     const {currentUser} = useGlobalContext();
+     const {currentUser} = useAuth();
      const { setSidebar } = useSidebar();
  
    return (

@@ -1,10 +1,10 @@
 import { useEffect } from "react";
-import { useGlobalContext } from "@/contexts/GlobalContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useSidebar } from "@/contexts/SidebarContext";
 import ThemeSwitcher from "../ui/ThemeSwitcher";
 
 const SidebarMore: React.FC = () => {
-  const {currentUser} = useGlobalContext()
+  const {currentUser} = useAuth()
   const { setSidebar, isCompact, toggleCompact } = useSidebar();
 
   useEffect(() => {

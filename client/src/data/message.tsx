@@ -1,5 +1,5 @@
 import { createMessagesIndex } from '@/utils/messageUtils';
-import { MediaProps, getMediaByMessageId } from './media';
+import { MediaProps, getAllMediaByMessageId } from './media';
 
 export interface MessageProps {
     id: number;
@@ -7,7 +7,7 @@ export interface MessageProps {
     senderId?: string;
     time: string;
     text?: string;
-    media?: MediaProps;
+    media?: MediaProps[];
 }
 
 export const MessagesData: MessageProps[] = [
@@ -53,14 +53,15 @@ export const MessagesData: MessageProps[] = [
         senderId: 'Alice',
         text: 'Check out this UI I designed!',
         time: '10:50 AM',
-        media: getMediaByMessageId(100)
+        media: getAllMediaByMessageId(100)
     },
     {
         id: 1001,
         chatId: 1,
         senderId: 'Alice',
         time: '10:50 AM',
-        media: getMediaByMessageId(1001)
+        text: 'Look at these images',
+        media: getAllMediaByMessageId(1001)
     },
     {
         id: 101,
@@ -68,7 +69,7 @@ export const MessagesData: MessageProps[] = [
         senderId: 'Me',
         text: 'Looks great! Here\'s my version',
         time: '10:52 AM',
-        media: getMediaByMessageId(101)
+        media: getAllMediaByMessageId(101)
     },
 
     // Bob (id: 2)
@@ -99,7 +100,7 @@ export const MessagesData: MessageProps[] = [
         senderId: 'Bob',
         text: 'Here\'s the project document for review Here\'s the project document for review Here\'s the project document for review',
         time: '9:25 AM',
-        media: getMediaByMessageId(102)
+        media: getAllMediaByMessageId(102)
     },
 
     // Charlie (id: 3)
@@ -130,7 +131,7 @@ export const MessagesData: MessageProps[] = [
         senderId: 'Charlie',
         text: 'This is the book we should reference',
         time: '8:20 AM',
-        media: getMediaByMessageId(103)
+        media: getAllMediaByMessageId(103)
     },
 
     // Diana (id: 4)
@@ -161,7 +162,7 @@ export const MessagesData: MessageProps[] = [
         senderId: 'Diana',
         text: 'Heres a quick demo of the animations Heres a quick demo of the animations Heres a quick demo of the animations',
         time: '7:10 AM',
-        media: getMediaByMessageId(104)
+        media: getAllMediaByMessageId(104)
     },
 
     // Eve (id: 5)
@@ -185,7 +186,7 @@ export const MessagesData: MessageProps[] = [
         senderId: 'Eve',
         text: 'Perfect. Here\'s the reference material I used',
         time: 'Yesterday, 5:00 PM',
-        media: getMediaByMessageId(16)
+        media: getAllMediaByMessageId(16)
     },
 
     // Frank (id: 6)
@@ -209,7 +210,7 @@ export const MessagesData: MessageProps[] = [
         senderId: 'Frank',
         text: 'Let\'s grab coffee later this week. Here\'s a photo from last time!',
         time: 'Yesterday, 3:30 PM',
-        media: getMediaByMessageId(19)
+        media: getAllMediaByMessageId(19)
     },
 
     // React Enthusiasts group (id: 21)
@@ -247,7 +248,7 @@ export const MessagesData: MessageProps[] = [
         senderId: 'Alice',
         text: 'Here\'s a screenshot of the implementation',
         time: '11:35 AM',
-        media: getMediaByMessageId(105)
+        media: getAllMediaByMessageId(105)
     },
     {
         id: 106,
@@ -255,7 +256,7 @@ export const MessagesData: MessageProps[] = [
         senderId: 'Jack',
         text: 'Here\'s my version of that hook',
         time: '11:40 AM',
-        media: getMediaByMessageId(106)
+        media: getAllMediaByMessageId(106)
     },
 
     // Work Team group (id: 22)
@@ -293,7 +294,7 @@ export const MessagesData: MessageProps[] = [
         senderId: 'Grace',
         text: 'Attached is the report template',
         time: '10:25 AM',
-        media: getMediaByMessageId(107)
+        media: getAllMediaByMessageId(107)
     },
 
     // Weekend Warriors group (id: 23)
@@ -331,7 +332,7 @@ export const MessagesData: MessageProps[] = [
         senderId: 'Frank',
         text: 'This is the trail I was thinking of',
         time: 'Yesterday, 2:40 PM',
-        media: getMediaByMessageId(108)
+        media: getAllMediaByMessageId(108)
     },
     {
         id: 109,
@@ -339,7 +340,7 @@ export const MessagesData: MessageProps[] = [
         senderId: 'Diana',
         text: 'Looks perfect! Here\'s a photo from last time',
         time: 'Yesterday, 2:45 PM',
-        media: getMediaByMessageId(109)
+        media: getAllMediaByMessageId(109)
     },
 
     // Study Group CS101 (id: 24)
@@ -363,7 +364,7 @@ export const MessagesData: MessageProps[] = [
         senderId: 'Henry',
         text: 'I shared the notes in the drive',
         time: 'Monday, 6:30 PM',
-        media: getMediaByMessageId(34)
+        media: getAllMediaByMessageId(34)
     },
     {
         id: 35,
@@ -401,7 +402,7 @@ export const MessagesData: MessageProps[] = [
         senderId: 'Me',
         text: 'Great work everyone! Heres our progress so far',
         time: 'Sunday, 2:00 PM',
-        media: getMediaByMessageId(39)
+        media: getAllMediaByMessageId(39)
     },
 
     // Dev Channel (id: 26)
@@ -422,7 +423,7 @@ export const MessagesData: MessageProps[] = [
         chatId: 26,   
         text: 'Heads up: theres a small glitch on the login screen in mobile view.',
         time: 'Today, 9:10 AM',
-        media: getMediaByMessageId(100)
+        media: getAllMediaByMessageId(100)
     },
     {
         id: 43,
@@ -441,7 +442,7 @@ export const MessagesData: MessageProps[] = [
         chatId: 26,   
         text: 'Sure, here are the updated docs',
         time: 'Today, 9:17 AM',
-        media: getMediaByMessageId(101)
+        media: getAllMediaByMessageId(101)
     }
 ];
 

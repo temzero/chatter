@@ -1,11 +1,11 @@
 import React, { useRef, useEffect, useState } from 'react';
 import Message from './Message';
 import ChannelMessage from './MessageChannel';
-import { useGlobalContext } from '@/contexts/GlobalContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/contexts/ChatContext';
 
 const ChatBox: React.FC = () => {
-  const { currentUser } = useGlobalContext();
+  const { currentUser } = useAuth();
   const { activeChat, activeMessages } = useChat();
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -17,7 +17,7 @@ const ChatBox: React.FC = () => {
       setIsInitialLoad(false);
     } else if (!isInitialLoad) {
       // On subsequent updates, scroll smoothly
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      messagesEndRef.current?.scrollIntoView();
     }
   }, [activeMessages, isInitialLoad]);
 
@@ -30,8 +30,6 @@ const ChatBox: React.FC = () => {
           isChannel ? (
             <ChannelMessage
               key={msg.id}
-              avatar={msg.avatar}
-              senderName={msg.senderId}
               time={msg.time}
               text={msg.text}
               media={msg.media}  // Pass media prop to ChannelMessage
