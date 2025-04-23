@@ -206,8 +206,6 @@ select:focus {
 /* Media Bubble Adjustments */
 .message-media-bubble {
   object-fit: cover;
-  width: 100%;
-  height: 100%;
   overflow: hidden;
 }
 
@@ -225,4 +223,12 @@ select:focus {
 
 .nav-btn:hover {
   opacity: 1;
+}
+
+/* styles.css */
+.two-line-truncate {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }

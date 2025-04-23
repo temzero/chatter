@@ -45,7 +45,7 @@ const Message: React.FC<RenderMessageProps> = ({ isMe = false, avatar, senderNam
           {media && media.length > 0 ? (
             <div className={classNames('message-media-bubble', {'self-message ml-auto': isMe})}>
               <RenderMultipleMedia media={media} />
-              <h1 className='p-2'>{text}</h1>
+              {text && <h1 className='p-2'>{text}</h1>}
             </div>
           ) : (
             <div className={classNames('message-bubble', {'self-message ml-auto': isMe})}>

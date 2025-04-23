@@ -4,6 +4,7 @@ import { useChat } from '@/contexts/ChatContext';
 import { motion } from 'framer-motion';
 import EmojiPicker from '../ui/EmojiPicker';
 import AttachFile from '../ui/AttachFile';
+import FileImportPreviews from '../ui/FileImportPreview';
 
 const ChatBar: React.FC = () => {
   const { currentUser } = useAuth();
@@ -12,8 +13,8 @@ const ChatBar: React.FC = () => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [attachedImages, setAttachedImages] = useState<File[]>([]);
-  const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const [filePreviewUrls, setFilePreviewUrls] = useState<string[]>([]);
 
   // Focus input on load and when '/' is pressed
   useEffect(() => {
@@ -37,8 +38,8 @@ const ChatBar: React.FC = () => {
       setInput(draft || '');
     }
 
-    setAttachedImages([]);
-    setImagePreviewUrls([]);
+    setAttachedFiles([]); // Reset attached files
+    setFilePreviewUrls([]); // Reset file previews
   }, [activeChat, getDraftMessage]);
 
   // Adjust input height
@@ -56,24 +57,36 @@ const ChatBar: React.FC = () => {
 
   const handleSend = () => {
     const trimmedInput = input.trim();
-    if ((trimmedInput || attachedImages.length > 0) && activeChat) {
+    if ((trimmedInput || attachedFiles.length > 0) && activeChat) {
       const newMessage = {
         id: Date.now(),
         chatId: activeChat.id,
         senderId: currentUser?.id || 'me',
         text: trimmedInput,
-        media: attachedImages[0],
+        // media: attachedFiles,
+        media: attachedFiles.map((file, index) => ({
+          id: Date.now() + index, // or use a UUID
+          messageId: Date.now(), // or the actual message ID
+          type: file.type.startsWith('image') ? 'photo' :
+                file.type.startsWith('video') ? 'video' :
+                file.type.startsWith('audio') ? 'audio' : 'file', // Added audio type
+          fileName: file.name,
+          url: URL.createObjectURL(file),
+        })),
+        
         time: new Date().toLocaleTimeString([], {
           hour: '2-digit',
           minute: '2-digit',
         }),
       };
 
+      console.log('attachedFiles', attachedFiles)
+
       addMessage(newMessage);
       setInput('');
       setDraftMessage(activeChat.id, '');
-      setAttachedImages([]);
-      setImagePreviewUrls([]);
+      setAttachedFiles([]); // Reset files after sending
+      setFilePreviewUrls([]); // Reset previews after sending
 
       if (inputRef.current) inputRef.current.style.height = 'auto';
       if (containerRef.current) containerRef.current.style.height = 'auto';
@@ -101,61 +114,41 @@ const ChatBar: React.FC = () => {
   }
 
   function handleFileSelect(fileList: FileList) {
-    const newFiles = Array.from(fileList).filter((file) =>
-      file.type.startsWith('image/')
-    );
-
+    const newFiles = Array.from(fileList);
+  
     if (newFiles.length === 0) return;
-
+  
     const newPreviews: string[] = [];
     let loadedCount = 0;
-
+  
     newFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onloadend = () => {
         newPreviews.push(reader.result as string);
         loadedCount++;
         if (loadedCount === newFiles.length) {
-          setAttachedImages((prev) => [...prev, ...newFiles]);
-          setImagePreviewUrls((prev) => [...prev, ...newPreviews]);
+          setAttachedFiles((prev) => [...prev, ...newFiles]);
+          setFilePreviewUrls((prev) => [...prev, ...newPreviews]);
         }
       };
       reader.readAsDataURL(file);
     });
   }
+  
 
   return (
     <div className="backdrop-blur-[199px] w-full flex flex-col items-center p-4 justify-between shadow border-[var(--border-color)] z-40 relative">
-      {imagePreviewUrls.length > 0 &&
-        <div className="flex gap-2 mb-2 w-full flex-wrap">
-          {imagePreviewUrls.map((url, index) => (
-            <motion.div
-              key={index}
-              className="relative w-[80px] h-[80px] group"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 50 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-            >
-              <img
-                src={url}
-                alt={`Preview ${index}`}
-                className="w-full h-full object-cover rounded"
-              />
-              <button
-                onClick={() => {
-                  setAttachedImages((prev) => prev.filter((_, i) => i !== index));
-                  setImagePreviewUrls((prev) => prev.filter((_, i) => i !== index));
-                }}
-                className="absolute inset-0 flex items-center justify-center bg-black/50 text-white text-3xl rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                aria-label="Remove image"
-              >
-                ×
-              </button>
-            </motion.div>
-          ))}
-        </div>
-      }
+
+      {filePreviewUrls.length > 0 && (
+        <FileImportPreviews
+        files={attachedFiles}
+        urls={filePreviewUrls}
+        onRemove={(index) => {
+          setAttachedFiles((prev) => prev.filter((_, i) => i !== index));
+          setFilePreviewUrls((prev) => prev.filter((_, i) => i !== index));
+        }}
+        />
+      )}
 
       <div
         id="input-container"
@@ -171,11 +164,7 @@ const ChatBar: React.FC = () => {
           }}
           onKeyDown={handleKeyDown}
           className="w-full outline-none bg-transparent resize-none py-2 border"
-          placeholder={
-            activeChat
-              ? 'Type your message...'
-              : 'Select a chat to start messaging'
-          }
+          placeholder={activeChat ? 'Type your message...' : 'Select a chat to start messaging'}
           aria-label="Type your message"
           rows={1}
           disabled={!activeChat}
@@ -208,9 +197,9 @@ const ChatBar: React.FC = () => {
               <motion.div
                 initial={false}
                 animate={{
-                  width: input || attachedImages.length ? 24 : 0,
-                  opacity: input || attachedImages.length ? 1 : 0,
-                  marginLeft: input || attachedImages.length ? 0 : -8,
+                  width: input || attachedFiles.length ? 24 : 0,
+                  opacity: input || attachedFiles.length ? 1 : 0,
+                  marginLeft: input || attachedFiles.length ? 0 : -8,
                   transition: { type: 'spring', stiffness: 300, damping: 20 },
                 }}
                 className="material-symbols-outlined cursor-pointer rounded"

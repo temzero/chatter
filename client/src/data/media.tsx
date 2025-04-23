@@ -14,7 +14,7 @@ export interface MediaProps {
     type: 'photo' | 'video' | 'audio' | 'file';
     url: string;
     messageId: number;  // Now using the message id directly
-    name?: string; // For files
+    fileName?: string; // For files and audio
     size?: number; // For files
     duration?: number; // For audio/video
 }
@@ -51,15 +51,16 @@ export const mediaData: MediaProps[] = [
         type: 'photo',
         url: image4,
     },
-    
+
     // Bob (chatId: 2)
     {
         id: 6,
         messageId: 102,
         type: 'file',
         url: '/files/document.pdf',
+        fileName: 'document.pdf',
     },
-    
+
     // Charlie (chatId: 3)
     {
         id: 7,
@@ -67,7 +68,7 @@ export const mediaData: MediaProps[] = [
         type: 'photo',
         url: image3,
     },
-    
+
     // Diana (chatId: 4)
     {
         id: 8,
@@ -75,7 +76,7 @@ export const mediaData: MediaProps[] = [
         type: 'video',
         url: '/videos/demo.mp4',
     },
-    
+
     // Eve (chatId: 5)
     {
         id: 9,
@@ -83,7 +84,7 @@ export const mediaData: MediaProps[] = [
         type: 'photo',
         url: image4,
     },
-    
+
     // Frank (chatId: 6)
     {
         id: 10,
@@ -91,7 +92,7 @@ export const mediaData: MediaProps[] = [
         type: 'photo',
         url: image5,
     },
-    
+
     // React Enthusiasts group (chatId: 21)
     {
         id: 11,
@@ -104,16 +105,18 @@ export const mediaData: MediaProps[] = [
         messageId: 106,
         type: 'file',
         url: '/files/hook-example.js',
+        fileName: 'hook-example.js',
     },
-    
+
     // Work Team group (chatId: 22)
     {
         id: 13,
         messageId: 107,
         type: 'file',
         url: '/files/report-q3.pdf',
+        fileName: 'report-q3.pdf',
     },
-    
+
     // Weekend Warriors group (chatId: 23)
     {
         id: 14,
@@ -127,15 +130,16 @@ export const mediaData: MediaProps[] = [
         type: 'photo',
         url: image8,
     },
-    
+
     // Study Group CS101 (chatId: 24)
     {
         id: 16,
         messageId: 34,
         type: 'file',
         url: '/files/notes.pdf',
+        fileName: 'notes.pdf',
     },
-    
+
     // Project Alpha group (chatId: 25)
     {
         id: 17,
@@ -143,15 +147,17 @@ export const mediaData: MediaProps[] = [
         type: 'photo',
         url: image9,
     },
-    
+
     // Dev Channel (chatId: 26)
     {
         id: 18,
         messageId: 45,
         type: 'file',
         url: '/files/changelog.md',
+        fileName: 'changelog.md',
     }
 ];
+
 
 // Helper function to get media by messageId
 //  function getAllMediaByMessageId(messageId: number): MediaProps[] {

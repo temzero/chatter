@@ -1,72 +1,90 @@
-import React from 'react';
+// src/components/RenderMedia.tsx
+import React, { useState } from 'react';
+import { MediaProps } from '@/data/media';
+import CustomAudioPlayer from './CustomAudioPlayer'; // Import the custom audio player
 
-export interface MediaItem {
-  type: 'photo' | 'video' | 'audio' | 'file';
-  url: string;
-  filename?: string; // Optional filename for file downloads
-}
-
-interface RenderMedia {
-  media: MediaItem;
+interface RenderMediaProps {
+  media: MediaProps;
   className?: string;
 }
 
-const RenderMedia: React.FC<RenderMedia> = ({ 
-  media, 
-  className = ''
+const getFileIcon = (fileName = '') => {
+  const name = fileName.toLowerCase();
+
+  if (name.endsWith('.pdf')) return 'picture_as_pdf';
+  if (name.endsWith('.doc') || name.endsWith('.docx')) return 'description';
+  if (name.endsWith('.xls') || name.endsWith('.xlsx')) return 'grid_on';
+  if (name.endsWith('.zip') || name.endsWith('.rar')) return 'folder_zip';
+  return 'insert_drive_file';
+};
+
+const RenderMedia: React.FC<RenderMediaProps> = ({
+  media,
+  className = '',
 }) => {
   const baseClasses = 'cursor-pointer overflow-hidden';
+  const [hovered, setHovered] = useState(false);
 
-  const renderMediaContainer = (content: React.ReactNode, additionalClasses = '') => (
-    <div className={`${baseClasses} ${className} ${additionalClasses}`}>
+  const renderContainer = (content: React.ReactNode, extraClass = '') => (
+    <div
+      className={`${baseClasses} ${className} ${extraClass}`}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
       {content}
     </div>
   );
 
+  const handleDownloadClick = (url: string, fileName: string | undefined) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName || true;
+    link.click();
+  };
+
   switch (media.type) {
     case 'photo':
-      return renderMediaContainer(
-        <img 
-          src={media.url} 
-          alt="Media attachment" 
+      return renderContainer(
+        <img
+          src={media.url}
+          alt="Media attachment"
           className="w-[var(--media-width)] max-h-[var(--media-height)] object-cover transition-all duration-300 hover:scale-125"
-        />,
+        />
       );
-    
+
     case 'video':
-      return renderMediaContainer(
-        <video controls className="w-full h-full">
+      return renderContainer(
+        <video className="relative aspect-video w-full h-full rounded overflow-hidden object-cover" controls>
           <source src={media.url} type="video/mp4" />
           Your browser does not support the video tag.
-        </video>,
-        'aspect-video' // Standard video aspect ratio (16:9)
+        </video>
       );
-    
+
     case 'audio':
-      return renderMediaContainer(
-        <audio controls className="w-full">
-          <source src={media.url} type="audio/mpeg" />
-          Your browser does not support the audio element.
-        </audio>,
-        'w-full' // Full width for audio player
+      return renderContainer(
+        <CustomAudioPlayer mediaUrl={media.url} fileName={media.fileName} /> // Use the custom audio player
       );
-    
+
     case 'file':
-      return (
-        <div className={`${baseClasses} ${className} p-3 custom-border-b w-full`}>
-          <a 
-            href={media.url} 
-            download={media.filename || true}
-            className="flex items-center gap-2 text-blue-600 dark:text-blue-400"
+      return renderContainer(
+        <div
+          className="w-full p-2 flex items-center gap-2 bg-purple-600 text-white"
+          onClick={() => handleDownloadClick(media.url, media.fileName)}
+        >
+          <i className="material-symbols-outlined text-3xl">{getFileIcon(media.fileName)}</i>
+          <a
+            href={media.url}
+            download={media.fileName || true}
+            className={`truncate`}
           >
-            <i className="material-symbols-outlined">download</i>
-            <span className="hover:underline truncate">
-              {media.filename || 'Download File'}
-            </span>
+            {media.fileName || 'Download File'}
           </a>
+          {hovered && (
+            <span className="material-symbols-outlined ml-auto">download</span>
+          )}
         </div>
       );
-    
+
     default:
       return null;
   }
