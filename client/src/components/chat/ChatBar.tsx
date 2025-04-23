@@ -31,16 +31,19 @@ const ChatBar: React.FC = () => {
     return () => document.removeEventListener('keydown', handleGlobalKeyDown);
   }, []);
 
-  // Load draft when chat changes
   useEffect(() => {
     if (activeChat) {
       const draft = getDraftMessage(activeChat.id);
       setInput(draft || '');
     }
-
-    setAttachedFiles([]); // Reset attached files
-    setFilePreviewUrls([]); // Reset file previews
-  }, [activeChat, getDraftMessage]);
+  }, [activeChat]);
+  
+  useEffect(() => {
+    // Only reset files when the chat changes
+    setAttachedFiles([]);
+    setFilePreviewUrls([]);
+  }, [activeChat?.id]);
+  
 
   // Adjust input height
   useEffect(() => {
@@ -59,19 +62,20 @@ const ChatBar: React.FC = () => {
     const trimmedInput = input.trim();
     if ((trimmedInput || attachedFiles.length > 0) && activeChat) {
       const newMessage = {
-        id: Date.now(),
+        id: String(Date.now()),
         chatId: activeChat.id,
         senderId: currentUser?.id || 'me',
         text: trimmedInput,
         // media: attachedFiles,
         media: attachedFiles.map((file, index) => ({
-          id: Date.now() + index, // or use a UUID
-          messageId: Date.now(), // or the actual message ID
+          id: String(Date.now() + index),
+          messageId: String(Date.now()),
           type: file.type.startsWith('image') ? 'photo' :
                 file.type.startsWith('video') ? 'video' :
                 file.type.startsWith('audio') ? 'audio' : 'file', // Added audio type
           fileName: file.name,
           url: URL.createObjectURL(file),
+          size: file.size,
         })),
         
         time: new Date().toLocaleTimeString([], {

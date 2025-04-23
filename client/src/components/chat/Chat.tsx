@@ -33,10 +33,13 @@ const Chat: React.FC = () => {
       <AnimatePresence>
         {isChatInfoVisible && (
           <motion.div
-            initial={{ opacity: 0, width: 0 }}
-            animate={{ opacity: 1, width: 'var(--sidebar-width)' }}
-            exit={{ opacity: 0, width: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            initial={{ opacity: 0, x: 300, width: 0 }}
+            animate={{ opacity: 1, x: 0, width: 'var(--sidebar-width)' }}
+            exit={{ opacity: 0, x: 300, width: 0  }}
+            // initial={{ opacity: 0, width: 0 }}
+            // animate={{ opacity: 1, width: 'var(--sidebar-width)' }}
+            // exit={{ opacity: 0, width: 0 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
           >
             <ChatInfo />
           </motion.div>

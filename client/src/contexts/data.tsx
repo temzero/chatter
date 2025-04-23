@@ -1,5 +1,28 @@
 export interface ChatProps {
-    id: number;
+    id: string;
+    avatar: string;
+    name: string;
+    lastMessage: string;
+    lastMessageTime: string;
+    createdAt: Date;
+    createdBy: Date;
+    label?: 'string';
+    type: 'private' | 'group' | 'channel';
+    // If private
+    username?: string; // Made optional since groups don't need these
+    phone?: string; // Made optional since groups don't need these
+    email?: string; // Made optional since groups don't need these
+    bio?: string; // Made optional since groups don't need these
+    birthday?: string; // Made optional since groups don't need these
+
+    // if Group or Channel
+    members?: string[];
+    admins?: string[]; // Required (groups/channels must have admins)
+    description?: string;
+  }
+
+  export interface ChatProps {
+    id: string;
     avatar: string;
     name: string;
     lastMessage: string;
@@ -23,7 +46,7 @@ export interface ChatProps {
 
   export const ChatsData: ChatProps[] = [
     {
-      id: 1,
+      id: '1',
       name: 'Alice',
       avatar: '',
       lastMessage: 'Hey there!',
@@ -37,7 +60,7 @@ export interface ChatProps {
       createdBy: new Date(),
     },
     {
-      id: 2,
+      id: '2',
       name: 'Bob',
       avatar: '',
       lastMessage: 'See you later',
@@ -51,7 +74,7 @@ export interface ChatProps {
       createdBy: new Date(),
     },
     {
-      id: 3,
+      id: '3',
       name: 'Charlie',
       avatar: '',
       lastMessage: 'Let’s meet up tomorrow.',
@@ -65,7 +88,7 @@ export interface ChatProps {
       createdBy: new Date(),
     },
     {
-      id: 4,
+      id: '4',
       name: 'Diana',
       avatar: '',
       lastMessage: 'Got it, thanks!',
@@ -79,7 +102,7 @@ export interface ChatProps {
       createdBy: new Date(),
     },
     {
-      id: 5,
+      id: '5',
       name: 'Eve',
       avatar: '',
       lastMessage: 'Did you finish the project?',
@@ -93,7 +116,7 @@ export interface ChatProps {
       createdBy: new Date(),
     },
     {
-      id: 6,
+      id: '6',
       name: 'Frank',
       avatar: '',
       lastMessage: 'Let’s grab coffee later.',
@@ -107,7 +130,7 @@ export interface ChatProps {
       createdBy: new Date(),
     },
     {
-      id: 7,
+      id: '7',
       name: 'Grace',
       avatar: '',
       lastMessage: 'All tasks are completed.',
@@ -121,7 +144,7 @@ export interface ChatProps {
       createdBy: new Date(),
     },
     {
-      id: 8,
+      id: '8',
       name: 'Henry',
       avatar: '',
       lastMessage: 'Wanna study together?',
@@ -135,7 +158,7 @@ export interface ChatProps {
       createdBy: new Date(),
     },
     {
-      id: 9,
+      id: '9',
       name: 'Isla',
       avatar: '',
       lastMessage: 'Happy birthday!',
@@ -149,7 +172,7 @@ export interface ChatProps {
       createdBy: new Date(),
     },
     {
-      id: 10,
+      id: '10',
       name: 'Jack',
       avatar: '',
       lastMessage: 'I’ll check the docs.',
@@ -163,7 +186,7 @@ export interface ChatProps {
       createdBy: new Date(),
     },
     {
-      id: 11,
+      id: '11',
       name: 'Kara',
       avatar: '',
       lastMessage: 'Notes shared!',
@@ -177,7 +200,7 @@ export interface ChatProps {
       createdBy: new Date(),
     },
     {
-      id: 12,
+      id: '12',
       name: 'Leo',
       avatar: '',
       lastMessage: 'Let’s catch up soon.',
@@ -191,7 +214,7 @@ export interface ChatProps {
       createdBy: new Date(),
     },
     {
-      id: 13,
+      id: '13',
       name: 'Mia',
       avatar: '',
       lastMessage: 'Sent the brief.',
@@ -205,7 +228,7 @@ export interface ChatProps {
       createdBy: new Date(),
     },
     {
-      id: 14,
+      id: '14',
       name: 'Nate',
       avatar: '',
       lastMessage: 'Can we revise that?',
@@ -219,7 +242,7 @@ export interface ChatProps {
       createdBy: new Date(),
     },
     {
-      id: 15,
+      id: '15',
       name: 'Olivia',
       avatar: '',
       lastMessage: 'Working on it.',
@@ -233,7 +256,7 @@ export interface ChatProps {
       createdBy: new Date(),
     },
     {
-      id: 16,
+      id: '16',
       name: 'Paul',
       avatar: '',
       lastMessage: 'I’ll call you back.',
@@ -247,7 +270,7 @@ export interface ChatProps {
       createdBy: new Date(),
     },
     {
-      id: 17,
+      id: '17',
       name: 'Queenie',
       avatar: '',
       lastMessage: 'Meeting is at 4 PM.',
@@ -261,7 +284,7 @@ export interface ChatProps {
       createdBy: new Date(),
     },
     {
-      id: 18,
+      id: '18',
       name: 'Ryan',
       avatar: '',
       lastMessage: 'Need help with the code.',
@@ -275,7 +298,7 @@ export interface ChatProps {
       createdBy: new Date(),
     },
     {
-      id: 19,
+      id: '19',
       name: 'Sophie',
       avatar: '',
       lastMessage: 'Haha that was funny!',
@@ -289,7 +312,7 @@ export interface ChatProps {
       createdBy: new Date(),
     },
     {
-      id: 20,
+      id: '20',
       name: 'Tom',
       avatar: '',
       lastMessage: 'Done with review.',
@@ -303,7 +326,7 @@ export interface ChatProps {
       createdBy: new Date(),
     },
     {
-      id: 21,
+      id: '21',
       name: 'React Enthusiasts',
       avatar: '',
       lastMessage: 'Alice: Check out this new hook!',
@@ -316,7 +339,7 @@ export interface ChatProps {
       createdBy: new Date(),
     },
     {
-      id: 22,
+      id: '22',
       name: 'Work Team',
       avatar: '',
       lastMessage: 'Tom: Meeting at 3pm in Conference Room B',
@@ -329,7 +352,7 @@ export interface ChatProps {
       createdBy: new Date(),
     },
     {
-      id: 23,
+      id: '23',
       name: 'Weekend Warriors',
       avatar: '',
       lastMessage: 'Frank: Whos up for hiking this Saturday?',
@@ -342,7 +365,7 @@ export interface ChatProps {
       createdBy: new Date(),
     },
     {
-      id: 24,
+      id: '24',
       name: 'Study Group CS101',
       avatar: '',
       lastMessage: 'Henry: I shared the notes in the drive',
@@ -355,7 +378,7 @@ export interface ChatProps {
       createdBy: new Date(),
     },
     {
-      id: 25,
+      id: '25',
       name: 'Project Alpha',
       avatar: '',
       lastMessage: 'Grace: Deployment completed successfully',
@@ -368,7 +391,7 @@ export interface ChatProps {
       createdBy: new Date(),
     },
     {
-      id: 26,
+      id: '26',
       name: 'Dev Channel',
       avatar: '',
       lastMessage: 'New deployment is live!',
@@ -381,7 +404,7 @@ export interface ChatProps {
       description: 'Updates and news related to development.',
     },
     {
-      id: 27,
+      id: '27',
       name: 'Marketing Hub',
       avatar: '',
       lastMessage: 'Campaign launch scheduled for next week.',

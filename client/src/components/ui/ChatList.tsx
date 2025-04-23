@@ -14,7 +14,7 @@ const ChatList: React.FC<ChatListProps> = ({
 }) => {
   const { activeChat, setActiveChat, getDraftMessage } = useChat();
 
-  const getUserItemClass = (chatId: number) => {
+  const getUserItemClass = (chatId: string) => {
     const baseClasses = "relative flex items-center w-full h-24 gap-3 p-3 transition-all duration-300 ease-in-out cursor-pointer";
     const activeClasses = activeChat?.id === chatId ? "bg-[var(--active-chat-color)]" : " hover:bg-[var(--hover-color)]";
     return `${baseClasses} ${activeClasses}`;
@@ -29,7 +29,7 @@ const ChatList: React.FC<ChatListProps> = ({
             <i className="material-symbols-outlined flex items-center justify-center text-[16px] h-3">edit</i>
             <p className='text-xs whitespace-nowrap text-ellipsis'>{draft}</p>
           </p> 
-          : <p className='opacity-60 text-xs max-w-[196px] whitespace-nowrap text-ellipsis overflow-hidden'>{chat.lastMessage}</p>
+          : <p className='flex items-center opacity-70 gap-1 text-xs max-w-[196px] whitespace-nowrap text-ellipsis overflow-hidden'>{chat.lastMessage}</p>
 
         return (
           <React.Fragment key={chat.id}>

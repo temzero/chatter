@@ -14,7 +14,7 @@ const Message: React.FC<MessageProps> = ({ time, text, media }) => {
     <div className='relative flex flex-col gap-1 items-center justify-center group custom-border-b'>
       <div className='relative py-8 w-[70%]'>
         {media && 
-          <div className="rounded border mb-2">
+          <div className="rounded overflow-hidden mb-2">
             <RenderMultipleMedia media={media}/>
           </div>
         }

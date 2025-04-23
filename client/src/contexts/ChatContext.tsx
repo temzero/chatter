@@ -13,7 +13,7 @@ import type { MessageProps } from '@/data/message';
 import type { ChatProps } from '@/data/types';
 
 // Modified getMessagesByChatId to accept current messages list
-const getMessagesByChatId = (chatId: number, messages: MessageProps[]) => {
+const getMessagesByChatId = (chatId: string, messages: MessageProps[]) => {
   return messages.filter((msg) => msg.chatId === chatId);
 };
 
@@ -39,10 +39,11 @@ interface ChatContextType {
   searchTerm: string;
   setSearchTerm: Dispatch<SetStateAction<string>>;
   addChat: (newChat: ChatProps) => void;
-  updateChat: (id: number, updatedData: Partial<ChatProps>) => void;
-  deleteChat: (id: number) => void;
+  updateChat: (id: string, updatedData: Partial<ChatProps>) => void;
+  deleteChat: (id: string) => void;
   addMessage: (newMessage: MessageProps) => void;
-  getChatMedia: (chatId: number) => MediaProps[];
+  deleteMessage: (id: string) => void;
+  getChatMedia: (chatId: string) => MediaProps[];
   setDraftMessage: (chatId: string, draft: string) => void;
   getDraftMessage: (chatId: string) => string;
 }
@@ -58,7 +59,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [activeChat, setActiveChat] = useState<ChatProps | null>(null);
   const [messages, setMessages] = useState<MessageProps[]>(MessagesData);
-  const [drafts, setDrafts] = useState<Record<number, string>>({});
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
 
   const activeMessages = useMemo(() => {
     return activeChat ? getMessagesByChatId(activeChat.id, messages) : [];
@@ -81,7 +82,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   }, [chats, searchTerm]);
 
   // New: Helper to get media for any chat
-  const getChatMedia = (chatId: number) => {
+  const getChatMedia = (chatId: string) => {
     const chatMessages = getMessagesByChatId(chatId, messages);
     return getMediaFromMessages(chatMessages);
   };
@@ -90,7 +91,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     setChats([newChat, ...chats]);
   };
 
-  const updateChat = (id: number, updatedData: Partial<ChatProps>) => {
+  const updateChat = (id: string, updatedData: Partial<ChatProps>) => {
     setChats(
       chats.map((chat) =>
         chat.id === id ? { ...chat, ...updatedData } : chat
@@ -98,7 +99,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     );
   };
 
-  const deleteChat = (id: number) => {
+  const deleteChat = (id: string) => {
     setChats(chats.filter((chat) => chat.id !== id));
     setMessages(messages.filter((message) => message.chatId !== id));
     if (activeChat?.id === id) {
@@ -108,20 +109,65 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
   const addMessage = (newMessage: MessageProps) => {
     setMessages([...messages, newMessage]);
-
+  
     if (activeChat && newMessage.chatId === activeChat.id) {
+      const { text = "", media = [] } = newMessage;
+      const types = media.map((m) => m.type);
+  
+      let mediaIcon: React.ReactNode = null;
+      if (types.includes("photo")) {
+        mediaIcon = (
+          <i className="material-symbols-outlined text-md">image</i>
+        );
+      } else if (types.includes("video")) {
+        mediaIcon = (
+          <i className="material-symbols-outlined text-md">videocam</i>
+        );
+      } else if (types.includes("audio")) {
+        mediaIcon = (
+          <i className="material-symbols-outlined text-md">music_note</i>
+        );
+      } else if (types.length) {
+        mediaIcon = (
+          <i className="material-symbols-outlined text-md">folder_zip</i>
+        );
+      }
+  
+      let lastMessageContent: React.ReactNode = null;
+      if (text) {
+        lastMessageContent = (
+          <>
+            {mediaIcon} {text}
+          </>
+        );
+      } else if (media.length > 0 && media[0].fileName) {
+        lastMessageContent = (
+          <p className='text-purple-500 flex items-center gap-1'>
+            {mediaIcon} {media[0].fileName}
+          </p>
+        );
+      } else {
+        lastMessageContent = mediaIcon;
+      }
+  
       updateChat(activeChat.id, {
-        lastMessage: newMessage.text,
+        lastMessage: lastMessageContent,
         lastMessageTime: newMessage.time,
       });
     }
   };
+  
 
-  const setDraftMessage = (chatId: number, text: string) => {
+  // In your ChatProvider component
+  const deleteMessage = (id: string) => {
+    setMessages(messages.filter((message) => message.id !== id));
+  };
+
+  const setDraftMessage = (chatId: string, text: string) => {
     setDrafts((prev) => ({ ...prev, [chatId]: text }));
   };
   
-  const getDraftMessage = (chatId: number) => {
+  const getDraftMessage = (chatId: string) => {
     return drafts[chatId] || '';
   };
 
@@ -139,6 +185,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         updateChat,
         deleteChat,
         addMessage,
+        deleteMessage,
         getChatMedia,
         setDraftMessage,
         getDraftMessage,
@@ -161,7 +208,7 @@ export const useChat = (): ChatContextType => {
 interface MediaProps {
   type: 'photo' | 'video' | 'audio' | 'file';
   url: string;
-  messageId: number;
-  chatId: number;
+  messageId: string;
+  chatId: string;
   timestamp: string;
 }

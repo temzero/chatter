@@ -84,12 +84,7 @@ const Sidebar = () => {
       animate: { 
         opacity: 1, 
         x: 0,
-        transition: { 
-          type: 'spring', 
-          stiffness: 300, 
-          damping: 28,
-          bounce: 0.2
-        }
+        transition: {type: 'spring', stiffness: 300, damping: 28, bounce: 0.2}
       },
 
       exit: { 

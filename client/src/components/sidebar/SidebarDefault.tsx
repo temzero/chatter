@@ -7,7 +7,7 @@ import ChatList from '@/components/ui/ChatList';
 import { motion } from 'framer-motion';
 
 
-const chatTypes = ['all', 'friends', 'work', 'study', 'groups'];
+const chatTypes = ['all', 'private', 'group', 'channel'];
 
 const ChatSidebar: React.FC = () => {
   const { chats } = useChat();
@@ -18,10 +18,8 @@ const ChatSidebar: React.FC = () => {
   const filteredChats = React.useMemo(() => {
     if (selectedType === 'all') {
       return chats;
-    } else if (selectedType === 'groups') {
-      return chats.filter(chat => chat.isGroup === true);
     } else {
-      return chats.filter(chat => chat.type === selectedType && !chat.isGroup);
+      return chats.filter(chat => chat.type === selectedType);
     }
   }, [selectedType, chats]);
   

@@ -5,6 +5,7 @@ import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
 import { ChatProvider, useChat } from '@/contexts/ChatContext';
 import { SidebarProvider } from '@/contexts/SidebarContext';
 import { ChatInfoProvider } from '@/contexts/ChatInfoContext';
+import { MediaProvider } from './contexts/MediaContext';
 
 import Sidebar from '@/components/sidebar/Sidebar';
 import Chat from '@/components/chat/Chat';
@@ -48,7 +49,9 @@ const AppRoutes: React.FC = () => {
       <Route
         path="/"
         element={
+          
           <PrivateRoute>
+            <MediaProvider>
             <div className="flex h-screen overflow-hidden">
               <BackgroundContent />
               <ChatProvider>
@@ -60,6 +63,7 @@ const AppRoutes: React.FC = () => {
                 </ChatInfoProvider>
               </ChatProvider>
             </div>
+            </MediaProvider>
           </PrivateRoute>
         }
       />

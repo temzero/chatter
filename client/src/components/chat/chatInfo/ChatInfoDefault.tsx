@@ -145,6 +145,7 @@ const ChatInfoDefault: React.FC = () => {
                     
                     </div>
                 </div>
+
             </div>
         </aside>
     );

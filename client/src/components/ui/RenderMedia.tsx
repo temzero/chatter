@@ -1,11 +1,21 @@
 // src/components/RenderMedia.tsx
 import React, { useState } from 'react';
 import { MediaProps } from '@/data/media';
-import CustomAudioPlayer from './CustomAudioPlayer'; // Import the custom audio player
+import CustomAudioPlayer from './CustomAudioPlayer';
 
 interface RenderMediaProps {
   media: MediaProps;
   className?: string;
+  type?: string;
+}
+
+export function formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const size = parseFloat((bytes / Math.pow(k, i)).toFixed(2));
+  return `${size} ${sizes[i]}`;
 }
 
 const getFileIcon = (fileName = '') => {
@@ -21,6 +31,7 @@ const getFileIcon = (fileName = '') => {
 const RenderMedia: React.FC<RenderMediaProps> = ({
   media,
   className = '',
+  type
 }) => {
   const baseClasses = 'cursor-pointer overflow-hidden';
   const [hovered, setHovered] = useState(false);
@@ -62,26 +73,31 @@ const RenderMedia: React.FC<RenderMediaProps> = ({
 
     case 'audio':
       return renderContainer(
-        <CustomAudioPlayer mediaUrl={media.url} fileName={media.fileName} /> // Use the custom audio player
+        <CustomAudioPlayer mediaUrl={media.url} fileName={media.fileName} type={type}/> // Use the custom audio player
       );
 
     case 'file':
       return renderContainer(
-        <div
-          className="w-full p-2 flex items-center gap-2 bg-purple-600 text-white"
-          onClick={() => handleDownloadClick(media.url, media.fileName)}
-        >
-          <i className="material-symbols-outlined text-3xl">{getFileIcon(media.fileName)}</i>
-          <a
-            href={media.url}
-            download={media.fileName || true}
-            className={`truncate`}
+          <div
+            className={`w-full p-2 flex items-center gap-2 custom-border-b overflow-hidden ${
+              type === 'info' ? 'text-purple-500' : 'text-white bg-purple-600'
+            }`}
+            onClick={() => handleDownloadClick(media.url, media.fileName)}
           >
-            {media.fileName || 'Download File'}
-          </a>
-          {hovered && (
+
+          <i className="material-symbols-outlined text-3xl">{getFileIcon(media.fileName)}</i>
+            <a
+              href={media.url}
+              download={media.fileName || true}
+              className={`truncate`}
+            >
+              {media.fileName || 'Download File'}
+            </a>
+          {hovered ?
             <span className="material-symbols-outlined ml-auto">download</span>
-          )}
+          : 
+            <p className='opacity-70 ml-auto'>({media.size ? formatFileSize(media.size) : '???'})</p>
+          }
         </div>
       );
 
