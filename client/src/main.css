@@ -244,3 +244,22 @@ select:focus {
   border: 2px solid var(--border-color);
   cursor: pointer;
 }
+
+
+.zoom-image-container {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+.zoom-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.zoom-image.zoomed {
+  cursor: zoom-out;
+}

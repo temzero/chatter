@@ -17,12 +17,38 @@ export interface MediaProps {
   alt?: string;
 }
 
+// Animation variants
+const sliderVariants = {
+  incoming: (direction: number) => ({
+    x: direction > 0 ? '100%' : '-100%',
+    scale: .8,
+    opacity: 0,
+    position: 'absolute',
+  }),
+  active: {
+    x: 0,
+    scale: 1,
+    opacity: 1,
+    position: 'relative',
+  },
+  exit: (direction: number) => ({
+    x: direction > 0 ? '-100%' : '100%',
+    scale: .8,
+    opacity: 0,
+    position: 'absolute',
+  }),
+};
+
+const sliderTransition = {
+  duration: 0.4,
+  ease: [0.56, 0.03, 0.12, 1.04],
+};
+
 const MediaModal = () => {
   const { currentMediaId, closeModal } = useModal();
   const { activeMedia } = useChat();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
-  console.log('direction', direction)
 
   useEffect(() => {
     if (currentMediaId && activeMedia) {
@@ -65,7 +91,6 @@ const MediaModal = () => {
     if (currentMediaId) {
       window.addEventListener('keydown', handleKeyDown);
     }
-
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
@@ -76,85 +101,85 @@ const MediaModal = () => {
   const currentMedia = activeMedia[currentIndex];
 
   return (
-
-      <div
-        className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-[99] flex items-center justify-center"
-
-        onClick={closeModal}
-      >
-        <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-4 z-20 bg-gradient-to-b from-black/60 to-transparent">
-          <div className="text-white font-medium">{currentMedia.sender || 'Username'}</div>
-          <div className="flex items-center gap-4">
-            <button className="text-white/60 hover:text-white">
-              <i className="material-symbols-outlined">replay</i>
-            </button>
-            <button className="text-white/60 hover:text-white">
-              <i className="material-symbols-outlined">send</i>
-            </button>
-            <button className="text-white/60 hover:text-white">
-              <i className="material-symbols-outlined">download</i>
-            </button>
-            <button className="text-white/60 hover:text-white">
-              <i className="material-symbols-outlined">delete</i>
-            </button>
-            <button className="text-white/60 hover:text-white" onClick={closeModal}>
-              <i className="material-symbols-outlined">close</i>
-            </button>
-          </div>
+    <div className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-md z-[99] flex flex-col items-center justify-center text-white">
+      {/* Top Bar */}
+      <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-4 z-20 bg-gradient-to-b from-black/60 to-transparent">
+        <div className="text-white font-medium">{currentMedia.sender || 'Username'}</div>
+        <div className="flex items-center gap-4">
+          <button className="text-white/60 hover:text-white"><i className="material-symbols-outlined">replay</i></button>
+          <button className="text-white/60 hover:text-white"><i className="material-symbols-outlined">send</i></button>
+          <button className="text-white/60 hover:text-white"><i className="material-symbols-outlined">download</i></button>
+          <button className="text-white/60 hover:text-white"><i className="material-symbols-outlined">delete</i></button>
+          <button className="text-white/60 hover:text-white" onClick={closeModal}><i className="material-symbols-outlined">close</i></button>
         </div>
+      </div>
 
-        {currentIndex > 0 && (
-          <button
-            className="h-full w-16 flex items-center justify-center absolute left-0 top-1/2 -translate-y-1/2 z-10 text-white/60 hover:text-white hover:bg-gradient-to-r hover:from-[rgba(255,255,255,0.05)] hover:to-[rgba(0,0,0,0)]"
-            onClick={(e) => {
-              e.stopPropagation();
-              goPrev();
-            }}
-          >
-            <i className="material-symbols-outlined text-5xl">chevron_left</i>
-          </button>
-        )}
+      {/* Navigation Buttons */}
+      {currentIndex > 0 && (
+        <button
+          className="h-full w-16 flex items-center justify-center absolute left-0 top-1/2 -translate-y-1/2 z-10 text-white/60 hover:text-white hover:bg-gradient-to-r hover:from-[rgba(255,255,255,0.05)] hover:to-[rgba(0,0,0,0)]"
+          onClick={(e) => { e.stopPropagation(); goPrev(); }}
+        >
+          <i className="material-symbols-outlined text-5xl">chevron_left</i>
+        </button>
+      )}
+      {activeMedia.length > 1 && currentIndex < activeMedia.length - 1 && (
+        <button
+          className="h-full w-16 flex items-center justify-center absolute right-0 top-1/2 -translate-y-1/2 z-10 text-white/60 hover:text-white hover:bg-gradient-to-l hover:from-[rgba(255,255,255,0.05)] hover:to-[rgba(0,0,0,0)]"
+          onClick={(e) => { e.stopPropagation(); goNext(); }}
+        >
+          <i className="material-symbols-outlined text-5xl">chevron_right</i>
+        </button>
+      )}
 
-        {activeMedia.length > 1 && currentIndex < activeMedia.length - 1 && (
-          <button
-            className="h-full w-16 flex items-center justify-center absolute right-0 top-1/2 -translate-y-1/2 z-10 text-white/60 hover:text-white hover:bg-gradient-to-l hover:from-[rgba(255,255,255,0.05)] hover:to-[rgba(0,0,0,0)]"
-            onClick={(e) => {
-              e.stopPropagation();
-              goNext();
-            }}
-          >
-            <i className="material-symbols-outlined text-5xl">chevron_right</i>
-          </button>
-        )}
-
-        <AnimatePresence custom={direction} mode="wait">
+      {/* Media Viewer with Animation */}
+        <AnimatePresence initial={false} custom={direction}>
           <motion.div
             key={currentMedia.id}
             custom={direction}
-            initial={{ x: direction === 1 ? 1000 : direction === -1 ? -1000 : 0}}
-            animate={{ x: 0 }}
-            exit={{ x: direction === 1 ? -1000 : 1000}}
-            transition={{ duration: 0.2, ease: 'easeInOut' }}
-            className="absolute inset-0 flex items-center justify-center p-6"
-            onClick={(e) => e.stopPropagation()}
+            variants={sliderVariants}
+            initial="incoming"
+            animate="active"
+            exit="exit"
+            transition={sliderTransition}
+            className="w-full h-full"
           >
             <RenderModalMedia media={currentMedia} />
+
           </motion.div>
         </AnimatePresence>
 
-        {activeMedia.length > 1 && (
-          <>
-          <div className="absolute bottom-0 left-0 p-2 px-3 text-xl">
-              {currentIndex + 1} / {activeMedia.length}
-          </div>
-          {currentMedia.size && 
-          <div className="absolute bottom-0 right-0 p-2 px-3">
-              {formatFileSize(currentMedia.size) || '???'}
-          </div>     
-          }
-          </>
-        )}
-      </div>
+      {/* Bottom Info */}
+      {activeMedia.length > 1 && (
+        <>
+          {/* <div className="absolute bottom-0 left-0 p-2 px-3">
+            {currentIndex + 1} / {activeMedia.length}
+          </div> */}
+          {currentMedia.fileName && (
+            <div className="absolute bottom-0 left-0 p-2 px-3">
+              {formatFileSize(currentMedia.fileName)}
+            </div>
+          )}
+
+          {currentMedia.size && (
+            <div className="absolute bottom-0 right-0 p-2 px-3">
+              {formatFileSize(currentMedia.size)}
+            </div>
+          )}
+        {/* Dot Indicator */}
+        <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-2 z-20">
+          {activeMedia.map((_, index) => (
+            <span
+              key={index}
+              className={`w-1 h-1 rounded-full transition-all duration-300 ${
+                index === currentIndex ? 'bg-white scale-125' : 'bg-white/40'
+              }`}
+            />
+          ))}
+        </div>
+        </>
+      )}
+    </div>
   );
 };
 

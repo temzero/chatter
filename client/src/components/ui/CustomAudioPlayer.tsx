@@ -30,13 +30,13 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({ mediaUrl, fileNam
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (audioRef.current) {
-      const newTime = (e.target.value / 100) * audioRef.current.duration;
+      const newTime: number = (e.target.value / 100) * audioRef.current.duration;
       audioRef.current.currentTime = newTime;
     }
   };
 
   return (
-<div className="w-full rounded p-2 flex items-center gap-1 custom-border-b overflow-hidden">
+<div className="w-full p-2 flex items-center gap-1 custom-border-b overflow-hidden">
   <button onClick={togglePlayPause} className="rounded-full hover:opacity-70">
     {isPlaying ? (
       <i className="material-symbols-outlined text-4xl">pause_circle</i>
@@ -45,8 +45,8 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({ mediaUrl, fileNam
     )}
   </button>
 
-  <div className="flex flex-col gap-2 flex-1 min-w-0"> {/* Use flex-1 and min-w-0 to avoid overflow */}
-    <h1 className="truncate">{fileName}</h1>
+  <div className="flex flex-col gap-2 flex-1 min-w-0">
+    {fileName && <h1 className="truncate">{fileName}</h1>}
 
     <audio
       ref={audioRef}

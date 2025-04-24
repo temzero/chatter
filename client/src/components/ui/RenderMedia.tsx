@@ -18,7 +18,7 @@ export function formatFileSize(bytes: number): string {
   return `${size} ${sizes[i]}`;
 }
 
-const getFileIcon = (fileName = '') => {
+export const getFileIcon = (fileName = '') => {
   const name = fileName.toLowerCase();
 
   if (name.endsWith('.pdf')) return 'picture_as_pdf';
