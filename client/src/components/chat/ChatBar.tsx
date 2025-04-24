@@ -70,7 +70,7 @@ const ChatBar: React.FC = () => {
         media: attachedFiles.map((file, index) => ({
           id: String(Date.now() + index),
           messageId: String(Date.now()),
-          type: file.type.startsWith('image') ? 'photo' :
+          type: file.type.startsWith('image') ? 'image' :
                 file.type.startsWith('video') ? 'video' :
                 file.type.startsWith('audio') ? 'audio' : 'file', // Added audio type
           fileName: file.name,

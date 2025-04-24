@@ -10,7 +10,7 @@ import image9 from '@/assets/image/image9.jpg';
 
 export interface MediaProps {
     id: string;  // Change to string
-    type: 'photo' | 'video' | 'audio' | 'file';
+    type: 'image' | 'video' | 'audio' | 'file';
     url: string;
     messageId: string;  // Now using the message id directly as string
     fileName?: string; // For files and audio
@@ -23,31 +23,31 @@ export const mediaData: MediaProps[] = [
     {
         id: '1', // Change to string
         messageId: '100', // Change to string
-        type: 'photo',
+        type: 'image',
         url: image1,
     },
     {
         id: '2',
         messageId: '101',
-        type: 'photo',
+        type: 'image',
         url: image2,
     },
     {
         id: '3',
         messageId: '1001',
-        type: 'photo',
+        type: 'image',
         url: image2,
     },
     {
         id: '4',
         messageId: '1001',
-        type: 'photo',
+        type: 'image',
         url: image3,
     },
     {
         id: '5',
         messageId: '1001',
-        type: 'photo',
+        type: 'image',
         url: image4,
     },
 
@@ -64,7 +64,7 @@ export const mediaData: MediaProps[] = [
     {
         id: '7',
         messageId: '103',
-        type: 'photo',
+        type: 'image',
         url: image3,
     },
 
@@ -80,7 +80,7 @@ export const mediaData: MediaProps[] = [
     {
         id: '9',
         messageId: '16',
-        type: 'photo',
+        type: 'image',
         url: image4,
     },
 
@@ -88,7 +88,7 @@ export const mediaData: MediaProps[] = [
     {
         id: '10',
         messageId: '19',
-        type: 'photo',
+        type: 'image',
         url: image5,
     },
 
@@ -96,7 +96,7 @@ export const mediaData: MediaProps[] = [
     {
         id: '11',
         messageId: '105',
-        type: 'photo',
+        type: 'image',
         url: image6,
     },
     {
@@ -120,13 +120,13 @@ export const mediaData: MediaProps[] = [
     {
         id: '14',
         messageId: '108',
-        type: 'photo',
+        type: 'image',
         url: image7,
     },
     {
         id: '15',
         messageId: '109',
-        type: 'photo',
+        type: 'image',
         url: image8,
     },
 
@@ -143,7 +143,7 @@ export const mediaData: MediaProps[] = [
     {
         id: '17',
         messageId: '39',
-        type: 'photo',
+        type: 'image',
         url: image9,
     },
 

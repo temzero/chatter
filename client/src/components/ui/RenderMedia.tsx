@@ -1,6 +1,6 @@
-// src/components/RenderMedia.tsx
 import React, { useState } from 'react';
 import { MediaProps } from '@/data/media';
+import { useModal } from '@/contexts/ModalContext';
 import CustomAudioPlayer from './CustomAudioPlayer';
 
 interface RenderMediaProps {
@@ -34,6 +34,7 @@ const RenderMedia: React.FC<RenderMediaProps> = ({
   type
 }) => {
   const baseClasses = 'cursor-pointer overflow-hidden';
+  const { openModal } = useModal();
   const [hovered, setHovered] = useState(false);
 
   const renderContainer = (content: React.ReactNode, extraClass = '') => (
@@ -54,18 +55,20 @@ const RenderMedia: React.FC<RenderMediaProps> = ({
   };
 
   switch (media.type) {
-    case 'photo':
+    case 'image':
       return renderContainer(
         <img
           src={media.url}
           alt="Media attachment"
+          onClick={() => openModal(media.id)}
           className="w-[var(--media-width)] max-h-[var(--media-height)] object-cover transition-all duration-300 hover:scale-125"
         />
       );
 
     case 'video':
       return renderContainer(
-        <video className="relative aspect-video w-full h-full rounded overflow-hidden object-cover" controls>
+        <video className="relative aspect-video w-full h-full rounded overflow-hidden object-cover" controls
+        onClick={() => openModal(media.id)}>
           <source src={media.url} type="video/mp4" />
           Your browser does not support the video tag.
         </video>

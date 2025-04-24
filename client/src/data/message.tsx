@@ -208,7 +208,7 @@ export const MessagesData: MessageProps[] = [
         id: '19',
         chatId: '6',
         senderId: 'Frank',
-        text: 'Let\'s grab coffee later this week. Here\'s a photo from last time!',
+        text: 'Let\'s grab coffee later this week. Here\'s a image from last time!',
         time: 'Yesterday, 3:30 PM',
         media: getAllMediaByMessageId('19')
     },

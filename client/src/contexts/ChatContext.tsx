@@ -115,7 +115,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       const types = media.map((m) => m.type);
   
       let mediaIcon: React.ReactNode = null;
-      if (types.includes("photo")) {
+      if (types.includes("image")) {
         mediaIcon = (
           <i className="material-symbols-outlined text-md">image</i>
         );
@@ -206,7 +206,7 @@ export const useChat = (): ChatContextType => {
 
 // MediaProps interface (add this if not already defined elsewhere)
 interface MediaProps {
-  type: 'photo' | 'video' | 'audio' | 'file';
+  type: 'image' | 'video' | 'audio' | 'file';
   url: string;
   messageId: string;
   chatId: string;

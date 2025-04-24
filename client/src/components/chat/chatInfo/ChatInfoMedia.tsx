@@ -4,7 +4,7 @@
     import SlidingContainer from '@/components/ui/SlidingContainer';
     import RenderMedia from '@/components/ui/RenderMedia'
 
-    const mediaTypes = ['photos', 'videos', 'audio', 'files'];
+    const mediaTypes = ['images', 'videos', 'audio', 'files'];
 
     const ChatInfoMedia: React.FC = () => {
         const { setChatInfoMode } = useChatInfo();
@@ -16,8 +16,8 @@
         const filteredMedia = useMemo(() => {
             return activeMedia.filter(media => {
                 switch (selectedType) {
-                    case 'photos':
-                        return media.type === 'photo';
+                    case 'images':
+                        return media.type === 'image';
                     case 'videos':
                         return media.type === 'video';
                     case 'audio':
