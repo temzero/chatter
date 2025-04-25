@@ -57,16 +57,20 @@ const Message: React.FC<RenderMessageProps> = ({
       )}
 
       <div className="flex relative flex-col">
-        {media && media.length > 0 ? (
-          <div className={classNames('message-media-bubble', { 'self-message ml-auto': isMe })}>
-            <RenderMultipleMedia media={media} />
-            {text && <h1 className="p-2">{text}</h1>}
-          </div>
-        ) : (
-          <div className={classNames('message-bubble', { 'self-message ml-auto': isMe })}>
-            {text}
-          </div>
-        )}
+          {media && media.length > 0 ? (
+            <div className={classNames('message-media-bubble', { 'self-message ml-auto': isMe })}
+              style={{
+                width: media.length === 1 ? 'var(--media-width)' : 'var(--media-width-large)',
+              }}
+              >
+                <RenderMultipleMedia media={media} text={text} />
+                {/* {text && <h1 className="p-2 break-words max-w-full">{text}</h1>} */}
+            </div>
+          ) : (
+            <div className={classNames('message-bubble', { 'self-message ml-auto': isMe })}>
+              {text}
+            </div>
+          )}
 
         <div className={classNames('flex items-end h-5', alignmentClass(isMe))}>
           {isGroupChat && !isMe && (

@@ -8,7 +8,7 @@ import { useChat } from '@/contexts/ChatContext';
 const chatTypes = ['all', 'private', 'group', 'channel'];
 
 const SidebarSearch: React.FC = () => {
-  const { chats, searchTerm, setSearchTerm } = useChat(); // use context values
+  const { chats } = useChat(); // use context values
   const { setSidebar } = useSidebar();
   const [selectedType, setSelectedType] = useState<string>(chatTypes[0]);
   const [direction, setDirection] = useState<number>(1);
@@ -43,8 +43,6 @@ const SidebarSearch: React.FC = () => {
     <aside className="w-[var(--sidebar-width)] h-full flex flex-col transition-all duration-300 ease-in-out">
       <header id="logo-container" className="flex w-full items-center h-[var(--header-height)] p-2 pr-0 justify-between">
         <SearchBar 
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search chats..."
         />
         <i className="material-symbols-outlined text-2xl opacity-60 hover:opacity-100 p-1 cursor-pointer" 

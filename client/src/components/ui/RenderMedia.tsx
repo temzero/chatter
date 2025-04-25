@@ -1,7 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MediaProps } from '@/data/media';
 import { useModal } from '@/contexts/ModalContext';
 import CustomAudioPlayer from './CustomAudioPlayer';
+import { formatFileSize } from '@/hooks/formatFileSize';
+import { getFileIcon } from '@/hooks/getFileIcon';
+
+// Helper function to calculate greatest common divisor (GCD)
+const gcd = (a: number, b: number): number => {
+  return b === 0 ? a : gcd(b, a % b);
+};
+
+// Function to calculate aspect ratio
+const calculateAspectRatio = (width: number, height: number): string => {
+  const divisor = gcd(width, height);
+  const ratioWidth = width / divisor;
+  const ratioHeight = height / divisor;
+  return `${ratioWidth}:${ratioHeight}`;
+};
 
 interface RenderMediaProps {
   media: MediaProps;
@@ -9,37 +24,34 @@ interface RenderMediaProps {
   type?: string;
 }
 
-export function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 Bytes';
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  const size = parseFloat((bytes / Math.pow(k, i)).toFixed(2));
-  return `${size} ${sizes[i]}`;
-}
-
-export const getFileIcon = (fileName = '') => {
-  const name = fileName.toLowerCase();
-
-  if (name.endsWith('.pdf')) return 'picture_as_pdf';
-  if (name.endsWith('.doc') || name.endsWith('.docx')) return 'description';
-  if (name.endsWith('.xls') || name.endsWith('.xlsx')) return 'grid_on';
-  if (name.endsWith('.zip') || name.endsWith('.rar')) return 'folder_zip';
-  return 'insert_drive_file';
-};
-
 const RenderMedia: React.FC<RenderMediaProps> = ({
   media,
   className = '',
   type
 }) => {
-  const baseClasses = 'cursor-pointer overflow-hidden';
   const { openModal } = useModal();
   const [hovered, setHovered] = useState(false);
+  const [aspectRatio, setAspectRatio] = useState<string | null>(null);
+  const [dimensions, setDimensions] = useState<{width: number, height: number} | null>(null);
+
+  useEffect(() => {
+    if (media.type === 'image') {
+      const img = new Image();
+      img.onload = () => {
+        setDimensions({ width: img.width, height: img.height });
+        setAspectRatio(calculateAspectRatio(img.width, img.height));
+      };
+      img.src = media.url;
+    }
+    // For videos, we'll handle it differently since we can't preload like images
+  }, [media.url, media.type]);
+
+  // Determine if media is horizontal based on aspect ratio
+  const isHorizontal = dimensions && dimensions.width > dimensions.height;
 
   const renderContainer = (content: React.ReactNode, extraClass = '') => (
     <div
-      className={`${baseClasses} ${className} ${extraClass}`}
+      className={`relative cursor-pointer overflow-hidden ${className} ${extraClass}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -54,50 +66,61 @@ const RenderMedia: React.FC<RenderMediaProps> = ({
     link.click();
   };
 
+  const handleVideoLoadedMetadata = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const video = e.target as HTMLVideoElement;
+    const width = video.videoWidth;
+    const height = video.videoHeight;
+    setDimensions({ width, height });
+    setAspectRatio(calculateAspectRatio(width, height));
+  };
+
   switch (media.type) {
     case 'image':
       return renderContainer(
-        <img
-          src={media.url}
-          alt="Media attachment"
-          onClick={() => openModal(media.id)}
-          className="w-[var(--media-width)] max-h-[var(--media-height)] object-cover transition-all duration-300 hover:scale-125"
-        />
+          <img
+            src={media.url}
+            alt="Media attachment"
+            onClick={() => openModal(media.id)}
+            className="w-full h-full transition-all duration-300 hover:scale-125 object-cover"
+          />
       );
 
     case 'video':
       return renderContainer(
-        <video className="relative aspect-video w-full h-full rounded overflow-hidden object-cover" controls
-        onClick={() => openModal(media.id)}>
-          <source src={media.url} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
+          <video 
+            className="w-full h-full transition-all duration-300 hover:scale-125 object-cover" 
+            controls
+            onClick={() => openModal(media.id)}
+            onLoadedMetadata={handleVideoLoadedMetadata}
+          >
+            <source src={media.url} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
       );
 
     case 'audio':
-      return renderContainer(
-        <CustomAudioPlayer mediaUrl={media.url} fileName={media.fileName} type={type}/> // Use the custom audio player
+      return (
+        <CustomAudioPlayer mediaUrl={media.url} fileName={media.fileName} type={type}/>
       );
 
     case 'file':
       return renderContainer(
-          <div
-            className={`w-full p-2 flex items-center gap-2 custom-border-b overflow-hidden ${
-              type === 'info' ? 'text-purple-500' : 'text-white bg-purple-600'
-            }`}
-            onClick={() => handleDownloadClick(media.url, media.fileName)}
-          >
-
+        <div
+          className={`w-full p-2 flex items-center gap-2 custom-border-b overflow-hidden ${
+            type === 'info' ? 'text-purple-500' : 'text-white bg-purple-600'
+          }`}
+          onClick={() => handleDownloadClick(media.url, media.fileName)}
+        >
           <i className="material-symbols-outlined text-3xl">{getFileIcon(media.fileName)}</i>
-            <a
-              href={media.url}
-              download={media.fileName || true}
-              className={`truncate`}
-            >
-              {media.fileName || 'Download File'}
-            </a>
+          <a
+            href={media.url}
+            download={media.fileName || true}
+            className={`truncate`}
+          >
+            {media.fileName || 'Download File'}
+          </a>
           {hovered ?
-            <span className="material-symbols-outlined ml-auto">download</span>
+            <i className="material-symbols-outlined ml-auto">download</i>
           : 
             <p className='opacity-70 ml-auto'>({media.size ? formatFileSize(media.size) : '???'})</p>
           }

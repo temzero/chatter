@@ -72,6 +72,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     return getMediaFromMessages(activeMessages);
   }, [activeMessages]);
 
+  // In your ChatContext provider:
   const filteredChats = useMemo(() => {
     return chats.filter((chat) =>
       [chat.name, chat.lastMessage, chat.type]
@@ -79,7 +80,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         .toLowerCase()
         .includes(searchTerm.toLowerCase())
     );
-  }, [chats, searchTerm]);
+  }, [chats, searchTerm]);;
 
   // New: Helper to get media for any chat
   const getChatMedia = (chatId: string) => {

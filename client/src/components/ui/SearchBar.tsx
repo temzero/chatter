@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useChat } from '@/contexts/ChatContext';
 
 type SearchBarProps = {
   placeholder?: string;
@@ -7,7 +8,19 @@ type SearchBarProps = {
 };
 
 const SearchBar = ({ value, placeholder = 'Search something...', type }: SearchBarProps) => {
-  const [inputValue, setInputValue] = useState(value );
+  const { searchTerm, setSearchTerm } = useChat();
+  const [inputValue, setInputValue] = useState(value || '');
+
+  // Sync the input value with the context search term
+  useEffect(() => {
+    setInputValue(searchTerm);
+  }, [searchTerm]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setInputValue(value);
+    setSearchTerm(value); // Update the context search term immediately
+  };
 
   return (
     <div className="flex w-full items-center gap-1 p-1 rounded border-2 border-[var(--border-color)] shadow focus-within:border-[var(--primary-color)] focus-within:shadow-md transition-all duration-200">
@@ -23,7 +36,7 @@ const SearchBar = ({ value, placeholder = 'Search something...', type }: SearchB
         placeholder={placeholder}
         autoFocus
         value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
+        onChange={handleChange}
       />
     </div>
   );

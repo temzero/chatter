@@ -1,62 +1,86 @@
 import React, { useState } from 'react';
 import { MediaProps } from './MediaModal';
-import { formatFileSize } from '../ui/RenderMedia';
-import { getFileIcon } from '../ui/RenderMedia';
+import { formatFileSize } from '@/hooks/formatFileSize';
+import { getFileIcon } from '@/hooks/getFileIcon';
 import CustomAudioPlayer from '../ui/CustomAudioPlayer';
+import { handleDownload } from '@/hooks/handleDownload';
 
-export const RenderModalMedia: React.FC<{ media: MediaProps }> = ({ media }) => {
-  const [isZoom, setZoom] = useState(false)
-  const containerRef = React.useRef<HTMLDivElement>(null);
 
-  function scrollToMiddle() {
-    if (containerRef.current) {
-      const container = containerRef.current;
-      const scrollHeight = container.scrollHeight;
-      const clientHeight = container.clientHeight;
-      container.scrollTop = Math.max(0, (scrollHeight - clientHeight) / 2);
-    }
-  }
+
+export const RenderModalMedia = ({ media, rotation = 0 }: { media: MediaProps, rotation?: number }) => {
+  const [isZoom, setZoom] = useState(false);
+  const [isHorizontal, setIsHorizontal] = useState<boolean | null>(null); // null until image loads
 
   function handleZoom() {
     setZoom(prev => !prev);
   }
 
-  const handleDownload = (url: string, fileName?: string) => {
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName || '';
-    link.click();
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { naturalWidth, naturalHeight } = e.currentTarget;
+    setIsHorizontal(naturalWidth > naturalHeight);
   };
 
   switch (media.type) {
     case 'image':
       return (
-        <div ref={containerRef} className="w-full h-full overflow-auto p-6 scrollbar-hide">
+          <div
+            className={`w-full h-full flex items-center justify-center scrollbar-hide overflow-auto ${
+              isHorizontal ? '' : 'py-5'
+            }`}
+          >
           <img
+          //  border-4 border-[var(--border-color)]
             onClick={handleZoom}
+            onLoad={handleImageLoad}
             src={media.url}
             alt={media.alt || media.fileName || 'Image'}
-            className={`mx-auto object-contain rounded-lg border-4 border-[var(--border-color)] transition-all duration-500 ${
-              isZoom ? 'h-[188%] overflow-auto cursor-zoom-out' : 'h-full cursor-zoom-in'
+            className={`mx-auto my-auto object-contain transition-all duration-500 ease-in-out rounded ${
+              isHorizontal === null
+                ? '' // Don't apply width/height until orientation is known
+                : isHorizontal
+                ? `${isZoom ? 'w-[100vw] max-h-[200vh] cursor-zoom-out' : 'w-[80vw] max-h-[80vh] cursor-zoom-in'}`
+                : `${isZoom ? 'h-[160vh] cursor-zoom-out' : 'h-[94vh] cursor-zoom-in'}`
             }`}
             draggable="false"
+            style={{
+              transform: `rotate(${rotation}deg)`,
+              transition: 'all 0.3s ease',
+            }}
           />
         </div>
       );
     case 'video':
       return (
         <video
-          src={media.url}
-          controls
-          autoPlay
-          className="max-w-[90vw] max-h-[93vh] object-contain rounded hover:scale-150 hover:cursor-zoom-in transition-all duration-500 border-4 border-[var(--border-color)]"
-          draggable="false"
-        />
+        src={media.url}
+        controls
+        autoPlay
+        onLoadedMetadata={(e) => {
+          const video = e.currentTarget;
+          setIsHorizontal(video.videoWidth > video.videoHeight);
+        }}
+        className={`object-contain transition-all duration-500 ease-in-out rounded ${
+          isHorizontal === null
+            ? ''
+            : isHorizontal
+            ? 'w-[80vw] max-h-[80vh]'
+            : 'h-[94vh] max-w-[80vw]'
+        }`}
+        draggable="false"
+        style={{
+          transform: `rotate(${rotation}deg)`,
+          transition: 'all 0.3s ease',
+        }}
+      />
       );
       case 'audio':
         return (
           <div
-            className="w-full max-w-md rounded-lg border-4 border-[var(--border-color)]"
+            className="max-w-md rounded-lg border-4 border-[var(--border-color)]"
+            style={{
+              transform: `rotate(${rotation}deg)`,
+              transition: 'all 0.3s ease',
+            }}
           >
             <div className="p-4 custom-border-b flex items-center gap-1"><i className="material-symbols-outlined">music_note</i>{media.fileName || 'Audio file'}</div>
             <CustomAudioPlayer mediaUrl={media.url}/>
@@ -66,7 +90,11 @@ export const RenderModalMedia: React.FC<{ media: MediaProps }> = ({ media }) => 
       case 'file':
         return (
           <div
-            className="w-md pt-0 rounded-lg flex flex-col items-center border-4 border-[var(--border-color)]"
+            className="mx-auto my-auto w-md pt-0 rounded-lg flex flex-col items-center border-4 border-[var(--border-color)]"
+            style={{
+              transform: `rotate(${rotation}deg)`,
+              transition: 'all 0.3s ease',
+            }}
           >
             <i className="material-symbols-outlined text-8xl px-4">{getFileIcon(media.fileName)}</i>
             <div className="text-lg font-medium text-center">{media.fileName || 'File'}</div>
@@ -74,7 +102,7 @@ export const RenderModalMedia: React.FC<{ media: MediaProps }> = ({ media }) => 
               {media.size ? formatFileSize(media.size) : 'Unknown size'}
             </div>
             <button
-              onClick={() => handleDownload(media.url, media.fileName)}
+              onClick={() => handleDownload(media)}
               className="mt-4 w-full py-2 custom-border-t text-blue-500 hover:underline"
             >
               Download

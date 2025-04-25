@@ -59,7 +59,7 @@
             return (
                 <div className={selectedType === 'files' || selectedType === 'audio' 
                     ? 'flex flex-col' 
-                    : 'grid grid-cols-3 gap-1 pb-10'}>
+                    : 'grid grid-cols-3 pb-10'}>
                     
                     {filteredMedia.map((media, index) => (
                       <div
@@ -67,7 +67,7 @@
                         className={
                           selectedType === 'files' || selectedType === 'audio'
                             ? 'w-full px-3'
-                            : 'overflow-hidden aspect-square'
+                            : 'overflow-hidden aspect-square custom-border'
                         }
                       >
                         <RenderMedia
@@ -75,7 +75,7 @@
                           className={
                             selectedType === 'files' || selectedType === 'audio'
                               ? 'w-full'
-                              : 'w-full h-full object-cover cursor-pointer'
+                              : 'w-full h-full'
                           }
                         />
                       </div>

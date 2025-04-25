@@ -60,14 +60,14 @@ export const MessagesData: MessageProps[] = [
         chatId: '1',
         senderId: 'Alice',
         time: '10:50 AM',
-        text: 'Look at these images',
+        text: 'Look at these images Looks great! Here\'s my version, it is very good in deed, i\'ve spend the whole night for that!',
         media: getAllMediaByMessageId('1001')
     },
     {
         id: '101',
         chatId: '1',
         senderId: 'Me',
-        text: 'Looks great! Here\'s my version',
+        text: 'Looks great! Here\'s my version, it is very good in deed, i\'ve spend the whole night for that!',
         time: '10:52 AM',
         media: getAllMediaByMessageId('101')
     },
