@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/contexts/ChatContext';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import EmojiPicker from '../ui/EmojiPicker';
 import AttachFile from '../ui/AttachFile';
 import FileImportPreviews from '../ui/FileImportPreview';
@@ -10,6 +10,7 @@ const ChatBar: React.FC = () => {
   const { currentUser } = useAuth();
   const { activeChat, addMessage, setDraftMessage, getDraftMessage } = useChat();
   const [input, setInput] = useState('');
+  const [triggerSendAnimation, setTriggerSendAnimation] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -72,7 +73,7 @@ const ChatBar: React.FC = () => {
           messageId: String(Date.now()),
           type: file.type.startsWith('image') ? 'image' :
                 file.type.startsWith('video') ? 'video' :
-                file.type.startsWith('audio') ? 'audio' : 'file', // Added audio type
+                file.type.startsWith('audio') ? 'audio' : 'file',
           fileName: file.name,
           url: URL.createObjectURL(file),
           size: file.size,
@@ -94,8 +95,13 @@ const ChatBar: React.FC = () => {
 
       if (inputRef.current) inputRef.current.style.height = 'auto';
       if (containerRef.current) containerRef.current.style.height = 'auto';
-      inputRef.current?.focus();
     }
+
+    // Trigger sending animation
+    setTriggerSendAnimation(prev => !prev)
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 201);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -154,26 +160,38 @@ const ChatBar: React.FC = () => {
         />
       )}
 
-      <div
-        id="input-container"
-        ref={containerRef}
-        className="input gap-1 flex items-end w-full transition-[height] duration-200 ease-in-out"
-      >
-        <textarea
-          ref={inputRef}
-          value={input}
-          onChange={(e) => {
-            setInput(e.target.value);
-            if (activeChat) setDraftMessage(activeChat.id, e.target.value);
-          }}
-          onKeyDown={handleKeyDown}
-          className="w-full outline-none bg-transparent resize-none py-2 border"
-          placeholder={activeChat ? 'Type your message...' : 'Select a chat to start messaging'}
-          aria-label="Type your message"
-          rows={1}
-          disabled={!activeChat}
-        />
+      <div ref={containerRef} id="input-container" className="input gap-1 flex items-end overflow-hidden w-full transition-[height] duration-200 ease-in-out">
+        
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={triggerSendAnimation}
+          className="w-full flex items-center"
+          initial={{ opacity: 0, x: -200 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: 200 }}
+          transition={{ duration: 0.1, ease: "easeInOut" }}
+        >
+          <textarea
+            ref={inputRef}
+            value={input}
+            onChange={(e) => {
+              setInput(e.target.value);
+              if (activeChat) setDraftMessage(activeChat.id, e.target.value);
+            }}
+            onKeyDown={handleKeyDown}
+            className="w-full outline-none bg-transparent resize-none py-2 border overflow-hidden"
+            placeholder={
+              activeChat ? "Type your message..." : "Select a chat to start messaging"
+            }
+            aria-label="Type your message"
+            rows={1}
+            disabled={!activeChat}
+          />
+        </motion.div>
+      </AnimatePresence>
 
+
+        {/* buttons */}
         <div
           id="chat-buttons-container"
           className="flex items-center gap-2 h-[24px]"

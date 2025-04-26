@@ -100,14 +100,19 @@ const RenderMedia: React.FC<RenderMediaProps> = ({
 
     case 'audio':
       return (
+        <div
+        className={`w-full flex items-center gap-2 custom-border-b overflow-hidden ${
+          type === 'info' ? 'opacity-80' : 'text-black bg-purple-400'
+        }`}>
         <CustomAudioPlayer mediaUrl={media.url} fileName={media.fileName} type={type}/>
+        </div>
       );
 
     case 'file':
       return renderContainer(
         <div
           className={`w-full p-2 flex items-center gap-2 custom-border-b overflow-hidden ${
-            type === 'info' ? 'text-purple-500' : 'text-white bg-purple-600'
+            type === 'info' ? 'text-purple-400' : 'text-black bg-purple-400'
           }`}
           onClick={() => handleDownloadClick(media.url, media.fileName)}
         >

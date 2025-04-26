@@ -66,7 +66,7 @@
                         key={`${media.messageId}-${index}`}
                         className={
                           selectedType === 'files' || selectedType === 'audio'
-                            ? 'w-full px-3'
+                            ? 'w-full'
                             : 'overflow-hidden aspect-square custom-border'
                         }
                       >

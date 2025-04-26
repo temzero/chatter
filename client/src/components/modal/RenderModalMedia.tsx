@@ -39,7 +39,7 @@ export const RenderModalMedia = ({ media, rotation = 0 }: { media: MediaProps, r
                 ? '' // Don't apply width/height until orientation is known
                 : isHorizontal
                 ? `${isZoom ? 'w-[100vw] max-h-[200vh] cursor-zoom-out' : 'w-[80vw] max-h-[80vh] cursor-zoom-in'}`
-                : `${isZoom ? 'h-[160vh] cursor-zoom-out' : 'h-[94vh] cursor-zoom-in'}`
+                : `${isZoom ? 'h-[160vh] cursor-zoom-out' : 'h-[93vh] cursor-zoom-in'}`
             }`}
             draggable="false"
             style={{
@@ -64,7 +64,7 @@ export const RenderModalMedia = ({ media, rotation = 0 }: { media: MediaProps, r
             ? ''
             : isHorizontal
             ? 'w-[80vw] max-h-[80vh]'
-            : 'h-[94vh] max-w-[80vw]'
+            : 'h-[93vh] max-w-[80vw]'
         }`}
         draggable="false"
         style={{
