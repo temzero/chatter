@@ -180,6 +180,7 @@ select:focus {
   border-radius: 8px;
   background-color: var(--message-color);
   word-break: break-word;
+  white-space: pre-wrap;
   width: fit-content;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);

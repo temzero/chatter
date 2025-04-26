@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import classNames from 'classnames';
 import { motion } from 'framer-motion';
 import { useChat } from '@/contexts/ChatContext';
@@ -21,6 +21,7 @@ const myMessageAnimation = {
   initial: { opacity: 0, scale: 0.1, x: -1000, y: 160 },
   animate: { opacity: 1, scale: 1, x: 0, y: 0 },
   transition: { type: 'spring', stiffness: 300, damping: 29 }
+  // transition: { duration: .5 }
 };
 
 const otherMessageAnimation = {
@@ -45,10 +46,7 @@ const Message: React.FC<RenderMessageProps> = ({
   shouldAnimate = false 
 }) => {
   const { activeChat, deleteMessage } = useChat();
-  const [copied, setCopied] = useState(false);
-
   const isGroupChat = activeChat?.type === 'group';
-
   const alignmentClass = (isMe: boolean) => ({
     'ml-auto': isMe,
     'mr-auto': !isMe,
@@ -59,22 +57,7 @@ const Message: React.FC<RenderMessageProps> = ({
     'absolute -bottom-1 -right-2': !isMe,
   });
 
-  // Handle copy text
-  const handleCopyText = () => {
-    if (!text) return;
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-  };
-
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (copied) {
-      timer = setTimeout(() => setCopied(false), 200);
-    }
-    return () => clearTimeout(timer);
-  }, [copied]);
-
-  // Determine animation
+  // Determine which animation to use
   const animationProps = shouldAnimate 
     ? (isMe ? myMessageAnimation : otherMessageAnimation)
     : noAnimation;
@@ -98,49 +81,31 @@ const Message: React.FC<RenderMessageProps> = ({
       )}
 
       <div className="flex relative flex-col">
-        {/* Media and Text */}
-        {media && media.length > 0 ? (
-          <div className={classNames('message-media-bubble', { 'self-message ml-auto': isMe })}
-            style={{
-              width: media.length === 1 ? 'var(--media-width)' : 'var(--media-width-large)',
-            }}
-          >
-            <RenderMultipleMedia media={media} />
-            {text && (
-              <h1
-                className={`p-2 break-words max-w-full cursor-pointer transition-all duration-200
-                  ${copied ? "scale-110 opacity-80" : ''}
-                `}
-                onClick={handleCopyText}
+          {media && media.length > 0 ? (
+            <div className={classNames('message-media-bubble', { 'self-message ml-auto': isMe })}
+              style={{
+                width: media.length === 1 ? 'var(--media-width)' : 'var(--media-width-large)',
+              }}
               >
-                {text}
-              </h1>
-            )}
-          </div>
-        ) : (
-          <div className={classNames('message-bubble cursor-pointer transition-all duration-200', { 'self-message ml-auto': isMe }, {'scale-110': copied})}>
-            <h1
-                className={`break-words max-w-full cursor-pointer transition-all duration-200
-                  ${copied ? "scale-110 opacity-80" : ''}
-                `}
-                onClick={handleCopyText}
-              >
-                {text}
-              </h1>
-          </div>
-        )}
+                <RenderMultipleMedia media={media} />
+                {text && <h1 className="p-2 break-words max-w-full">{text}</h1>}
+            </div>
+          ) : (
+            <div className={classNames('message-bubble', { 'self-message ml-auto': isMe })}>
+              {text}
+            </div>
+          )}
 
         {/* Sender Info */}
         <div className={classNames('flex items-end h-5', alignmentClass(isMe))}>
           {isGroupChat && !isMe && (
-            <h1 className="text-sm font-semibold opacity-70 mr-2">
+            <h1 className={classNames('text-sm font-semibold opacity-70 mr-2')}>
               {senderName}
             </h1>
           )}
-          <p className="opacity-0 group-hover:opacity-40 text-xs">{time}</p>
+          <p className={classNames('opacity-0 group-hover:opacity-40 text-xs')}>{time}</p>
         </div>
 
-        {/* Action Buttons */}
         <div
           className={classNames(
             'flex gap-1 opacity-0 group-hover:opacity-80 transition-opacity duration-200 cursor-pointer z-20',

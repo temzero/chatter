@@ -6,13 +6,14 @@ import { useChat } from '@/contexts/ChatContext';
 import { useSoundEffect } from '@/hooks/useSoundEffect';
 import bubbleSound from '@/assets/sound/message-bubble.mp3'
 import popSound from '@/assets/sound/message-pop.mp3'
+import messageSound from '@/assets/sound/message-sent2.mp3'
 
 const ChatBox: React.FC = () => {
   const { currentUser } = useAuth();
   const { activeChat, activeMessages } = useChat();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);
-  const playMessageSound = useSoundEffect(popSound || bubbleSound);
+  const playMessageSound = useSoundEffect(messageSound || popSound || bubbleSound);
 
   const newMessageAdded = useMemo(() => {
     return activeMessages.length > previousMessageCount;
@@ -55,38 +56,71 @@ const ChatBox: React.FC = () => {
 
   const isChannel = activeChat?.type === 'channel';
 
+  // Group messages by date
+  const groupedMessages = useMemo(() => {
+    const groups: {date: string, messages: typeof activeMessages}[] = [];
+    
+    activeMessages.forEach((msg) => {
+      const messageDate = new Date(msg.time).toLocaleDateString();
+      const lastGroup = groups[groups.length - 1];
+      
+      if (!lastGroup || lastGroup.date !== messageDate) {
+        groups.push({
+          date: messageDate,
+          messages: [msg]
+        });
+      } else {
+        lastGroup.messages.push(msg);
+      }
+    });
+    
+    return groups;
+  }, [activeMessages]);
+
   return (
     <div
       ref={containerRef}
-      className="absolute z-0 flex-1 py-32 h-full w-full flex flex-col overflow-x-hidden overflow-y-auto p-6 backdrop-blur-sm"
+      className="p-6 flex-1 h-full w-full flex flex-col overflow-x-hidden overflow-y-auto backdrop-blur-sm"
     >
       {activeMessages.length > 0 ? (
-        activeMessages.map((msg, index) =>
-          isChannel ? (
-            <ChannelMessage
-              key={msg.id}
-              id={msg.id}
-              time={msg.time}
-              text={msg.text}
-              media={msg.media}
-              containerRef={containerRef}
-              shouldAnimate={newMessageAdded && index === activeMessages.length - 1}
-            />
-          ) : (
-            <Message
-              key={msg.id}
-              id={msg.id}
-              isMe={msg.senderId === currentUser?.id}
-              avatar={msg.avatar}
-              senderName={msg.senderId}
-              time={msg.time}
-              text={msg.text}
-              media={msg.media}
-              containerRef={containerRef}
-              shouldAnimate={newMessageAdded && index === activeMessages.length - 1}
-            />
-          )
-        )
+        groupedMessages.map((group) => (
+          <React.Fragment key={group.date}>
+            <div className="sticky -top-4 z-10 flex justify-center mb-4">
+              <div className="bg-black bg-opacity-30 text-white text-xs p-1 rounded">
+                {group.date || 'Today'}
+              </div>
+            </div>
+            {group.messages.map((msg, index) => {
+              const isLastMessageInGroup = index === group.messages.length - 1;
+              const isNewMessage = newMessageAdded && 
+                                 index === group.messages.length - 1 && 
+                                 group === groupedMessages[groupedMessages.length - 1];
+              
+              return isChannel ? (
+                <ChannelMessage
+                  key={msg.id}
+                  id={msg.id}
+                  time={msg.time}
+                  text={msg.text}
+                  media={msg.media}
+                  shouldAnimate={isNewMessage}
+                />
+              ) : (
+                <Message
+                  key={msg.id}
+                  id={msg.id}
+                  isMe={msg.senderId === currentUser?.id}
+                  avatar={msg.avatar}
+                  senderName={msg.senderName || msg.senderId}
+                  time={msg.time}
+                  text={msg.text}
+                  media={msg.media}
+                  shouldAnimate={isNewMessage}
+                />
+              );
+            })}
+          </React.Fragment>
+        ))
       ) : (
         <div className="h-full w-full flex items-center justify-center opacity-50 italic text-xl">
           No messages yet!

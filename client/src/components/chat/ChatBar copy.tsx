@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/contexts/ChatContext';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import EmojiPicker from '../ui/EmojiPicker';
 import AttachFile from '../ui/AttachFile';
 import FileImportPreviews from '../ui/FileImportPreview';
@@ -10,6 +10,7 @@ const ChatBar: React.FC = () => {
   const { currentUser } = useAuth();
   const { activeChat, addMessage, setDraftMessage, getDraftMessage } = useChat();
   const [input, setInput] = useState('');
+  const [triggerSendAnimation, setTriggerSendAnimation] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -61,6 +62,9 @@ const ChatBar: React.FC = () => {
   const handleSend = () => {
     const trimmedInput = input.trim();
     if ((trimmedInput || attachedFiles.length > 0) && activeChat) {
+      if (inputRef.current) {
+        inputRef.current.value = ''; // <-- instantly clear textarea content
+      }
       setInput('');
       const newMessage = {
         id: String(Date.now()),
@@ -89,7 +93,11 @@ const ChatBar: React.FC = () => {
       if (inputRef.current) inputRef.current.style.height = 'auto';
       if (containerRef.current) containerRef.current.style.height = 'auto';
     }
-    inputRef.current?.focus();
+  
+    setTriggerSendAnimation(prev => !prev);
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 300);
   };
   
 
@@ -149,8 +157,17 @@ const ChatBar: React.FC = () => {
         />
       )}
 
-      <div ref={containerRef} id="input-container" className="input gap-1 flex items-end w-full transition-[height] duration-200 ease-in-out">
+      <div ref={containerRef} id="input-container" className="input gap-1 flex items-end overflow-hidden w-full transition-[height] duration-200 ease-in-out">
         
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={triggerSendAnimation}
+          className="w-full flex items-center"
+          initial={{ opacity: 0, x: -300 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: 300 }}
+          transition={{ duration: 0.2, ease: "easeInOut" }}
+        >
           <textarea
             ref={inputRef}
             value={input}
@@ -167,6 +184,8 @@ const ChatBar: React.FC = () => {
             rows={1}
             disabled={!activeChat}
           />
+        </motion.div>
+      </AnimatePresence>
 
         {/* buttons */}
         <div className="flex items-center gap-2 h-[24px]">
