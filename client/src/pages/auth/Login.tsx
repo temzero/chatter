@@ -1,20 +1,24 @@
-// src/pages/Login.tsx
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { currentUserProfileData } from '@/data/currentUser';
+import { AuthenticationLayout } from './AuthenticationLayout';
+import qrCode from '@/assets/icon/qr-code.svg';
+import { QRCode } from '@/components/ui/QrCode';
+import { motion } from 'framer-motion';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showQrCode, setShowQrCode] = useState(false); // State to control QR code visibility
   const { login, setCurrentUser, setIsAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       setError('');
       setLoading(true);
@@ -26,91 +30,110 @@ const Login = () => {
     }
     setLoading(false);
   };
-  
+
   const exampleSubmit = async () => {
     setLoading(true);
     setError('');
-  
+
     try {
       // Simulate setting a predefined example user
       setCurrentUser(currentUserProfileData);
       setIsAuthenticated(true);
-  
+
       // Save to localStorage
       localStorage.setItem('user', JSON.stringify(currentUserProfileData));
       localStorage.setItem('isAuthenticated', 'true');
-  
+
       navigate('/');
     } catch (err) {
       setError('Failed to login with example');
       console.error(err);
     }
-  
+
     setLoading(false);
   };
-  
+
+  const toggleQrCode = () => {
+    setShowQrCode(!showQrCode);
+  };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-5 text-center dark:text-white">Log In</h2>
-      {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>}
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Email
-          </label>
-          <input
+    <AuthenticationLayout
+      showExampleButton
+      onExampleSubmit={exampleSubmit}
+      loading={loading}
+    >
+      <motion.div
+        initial={{ scale: 1.2, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="flex h-[300px] rounded-lg custom-border backdrop-blur-md bg-[var(--card-bg-color)] overflow-hidden"
+      >
+        <form onSubmit={handleSubmit} className='flex flex-col justify-center w-[400px] gap-2 p-8'>
+          <h2 className="text-4xl font-semibold mb-4">Login</h2>
+          {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">{error}</div>}
+          <motion.input
+            whileTap={{ scale: 0.98 }}
             type="email"
             id="email"
+            placeholder='Email or Username'
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+            className="input backdrop-blur-lg"
+            autoFocus
           />
-        </div>
-        <div className="mb-6">
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Password
-          </label>
-          <input
+          <motion.input
+            whileTap={{ scale: 0.98 }}
+
             type="password"
             id="password"
+            placeholder='Password'
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+            className="input backdrop-blur-lg"
           />
-        </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+
+            type="submit"
+            disabled={loading}
+            className="primary w-full py-1 mt-2"
+          >
+            {loading ? 'Logging in...' : 'Log In'}
+          </motion.button>
+
+          <div className="flex items-center justify-between gap-4 mt-2">
+            <Link to="/register" className="opacity-40 hover:opacity-100 hover:text-green-400">
+              Register
+            </Link>
+            <Link to="/forgot-password" className="opacity-40 hover:opacity-100 hover:text-green-400">
+              Forgot Password?
+            </Link>
+          </div>
+        </form>
+
+        <motion.div
+          className="h-full p-6 flex flex-col gap-4 justify-end custom-border-l hover:bg-[var(--sidebar-color)] cursor-pointer select-none"
+          onClick={toggleQrCode}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
-          {loading ? 'Logging in...' : 'Log In'}
-        </button>
-      </form>
-      <div className="mt-4 text-center">
-        <Link to="/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
-          Forgot Password?
-        </Link>
-      </div>
-      <div className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-        Need an account?{' '}
-        <Link to="/register" className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
-          Sign Up
-        </Link>
-      </div>
-
-      <button
-        type="button"
-        disabled={loading}
-        onClick={exampleSubmit}
-        className="mt-4 w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50"
-      >
-        {loading ? 'Logging in...' : 'Example Login'}
-      </button>
-
-    </div>
+          <h1 className='text-xl font-semibold text-center'>Scan to login</h1>
+          {showQrCode ? (
+            <motion.img 
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              className='w-[200px] rounded' 
+              src={qrCode} 
+              alt="Chatter Logo" 
+            />
+          ) : (
+            <QRCode className="w-[200px]" />
+          )}
+        </motion.div>
+      </motion.div>
+    </AuthenticationLayout>
   );
 };
 

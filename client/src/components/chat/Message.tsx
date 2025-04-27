@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useChat } from '@/contexts/ChatContext';
 import RenderMultipleMedia from '../ui/RenderMultipleMedia';
 import type { MediaProps } from '@/data/media';
+import FormatTime from '@/hooks/formatTime';
 
 type RenderMessageProps = {
   id: string;
@@ -109,7 +110,7 @@ const Message: React.FC<RenderMessageProps> = ({
             {text && (
               <h1
                 className={`p-2 break-words max-w-full cursor-pointer transition-all duration-200
-                  ${copied ? "scale-110 opacity-80" : ''}
+                  ${copied ? "scale-110 opacity-60" : ''}
                 `}
                 onClick={handleCopyText}
               >
@@ -121,7 +122,7 @@ const Message: React.FC<RenderMessageProps> = ({
           <div className={classNames('message-bubble cursor-pointer transition-all duration-200', { 'self-message ml-auto': isMe }, {'scale-110': copied})}>
             <h1
                 className={`break-words max-w-full cursor-pointer transition-all duration-200
-                  ${copied ? "scale-110 opacity-80" : ''}
+                  ${copied ? "scale-110 opacity-60" : ''}
                 `}
                 onClick={handleCopyText}
               >
@@ -137,7 +138,8 @@ const Message: React.FC<RenderMessageProps> = ({
               {senderName}
             </h1>
           )}
-          <p className="opacity-0 group-hover:opacity-40 text-xs">{time}</p>
+          <p className="opacity-0 group-hover:opacity-40 text-xs"><FormatTime time={time} /></p>
+
         </div>
 
         {/* Action Buttons */}

@@ -7,10 +7,11 @@ import { SidebarProvider } from '@/contexts/SidebarContext';
 import { ChatInfoProvider } from '@/contexts/ChatInfoContext';
 import { ModalProvider } from './contexts/ModalContext';
 import MediaModal from './components/modal/MediaModal';
+import { motion } from 'framer-motion';
 
 import Sidebar from '@/components/sidebar/Sidebar';
 import Chat from '@/components/chat/Chat';
-import backgroundLight from '@/assets/image/backgroundLight.jpg';
+import backgroundLight from '@/assets/image/backgroundSky.jpg';
 import backgroundDark from '@/assets/image/backgroundDark.jpg';
 
 import PrivateRoute from './routes/PrivateRoute';

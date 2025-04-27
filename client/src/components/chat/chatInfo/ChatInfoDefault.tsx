@@ -109,7 +109,7 @@ const ChatInfoDefault: React.FC = () => {
                                             </span>
                                             <h1>Media & Files</h1>
                                         </div>
-                                        <p className='opacity-60'>23</p>
+                                        <p className='opacity-60'>{activeMedia.length}</p>
                                     </div>
                                 </div>
 

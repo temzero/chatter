@@ -4,6 +4,8 @@ import { useModal } from '@/contexts/ModalContext';
 import CustomAudioPlayer from './CustomAudioPlayer';
 import { formatFileSize } from '@/hooks/formatFileSize';
 import { getFileIcon } from '@/hooks/getFileIcon';
+import { useSoundEffect } from '@/hooks/useSoundEffect';
+import popupSound from '@/assets/sound/flip-switch.mp3'
 
 // Helper function to calculate greatest common divisor (GCD)
 const gcd = (a: number, b: number): number => {
@@ -74,13 +76,19 @@ const RenderMedia: React.FC<RenderMediaProps> = ({
     setAspectRatio(calculateAspectRatio(width, height));
   };
 
+  const playSound = useSoundEffect(popupSound);
+  const handleOpenModal = () => {
+    openModal(media.id);
+    playSound()
+  };
+
   switch (media.type) {
     case 'image':
       return renderContainer(
           <img
             src={media.url}
             alt="Media attachment"
-            onClick={() => openModal(media.id)}
+            onClick={handleOpenModal}
             className="w-full h-full transition-all duration-300 hover:scale-125 object-cover"
           />
       );
@@ -90,7 +98,7 @@ const RenderMedia: React.FC<RenderMediaProps> = ({
           <video 
             className="w-full h-full transition-all duration-300 hover:scale-125 object-cover" 
             controls
-            onClick={() => openModal(media.id)}
+            onClick={handleOpenModal}
             onLoadedMetadata={handleVideoLoadedMetadata}
           >
             <source src={media.url} type="video/mp4" />

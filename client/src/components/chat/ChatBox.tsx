@@ -85,7 +85,7 @@ const ChatBox: React.FC = () => {
       {activeMessages.length > 0 ? (
         groupedMessages.map((group) => (
           <React.Fragment key={group.date}>
-            <div className="sticky -top-4 z-10 flex justify-center mb-4">
+            <div className="sticky -top-5 z-10 flex justify-center mb-4">
               <div className="bg-black bg-opacity-30 text-white text-xs p-1 rounded">
                 {group.date || 'Today'}
               </div>

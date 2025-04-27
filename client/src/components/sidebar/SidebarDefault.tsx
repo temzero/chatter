@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useChat } from '@/contexts/ChatContext';
 import { useSidebar } from '@/contexts/SidebarContext';
-import logo from '@/assets/icon/logo.svg';
+import { Logo } from '../ui/Logo';
 import SlidingContainer from '@/components/ui/SlidingContainer';
 import ChatList from '@/components/ui/ChatList';
 import { motion } from 'framer-motion';
@@ -70,9 +70,9 @@ const ChatSidebar: React.FC = () => {
           whileHover={{ x: 33, }} // This will move the element 5 pixels to the right on hover
           transition={{ type: 'spring', stiffness: 600, damping: 30 }} // Spring animation for a bouncy effect
         >
-          <span className={`material-symbols-outlined text-6xl cursor-pointer ${isCompact ? 'mr-10' : 'mr-3'}`}>trending_flat</span>
+          <span className={`material-symbols-outlined text-6xl cursor-pointer ${isCompact ? 'mr-9' : 'mr-3'}`}>trending_flat</span>
           <div className={`w-8 h-8 flex items-center justify-center`}>
-            <img className="h-full w-full" src={logo} alt="Logo" />
+            <Logo className="h-full w-full" />
           </div>
           {isCompact || <span className="text-2xl font-semibold px-1">Chatter</span>}
         </motion.a>

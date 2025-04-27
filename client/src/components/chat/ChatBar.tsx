@@ -12,6 +12,7 @@ const ChatBar: React.FC = () => {
   const [input, setInput] = useState('');
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isMessageSent, setIsMessageSent] = useState(false);
 
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [filePreviewUrls, setFilePreviewUrls] = useState<string[]>([]);
@@ -37,13 +38,13 @@ const ChatBar: React.FC = () => {
       setInput(draft || '');
     }
   }, [activeChat]);
-  
+
   useEffect(() => {
     // Only reset files when the chat changes
     setAttachedFiles([]);
     setFilePreviewUrls([]);
   }, [activeChat?.id]);
-  
+
 
   // Adjust input height
   useEffect(() => {
@@ -53,7 +54,7 @@ const ChatBar: React.FC = () => {
       inputRef.current.style.height = `${newHeight}px`;
 
       if (containerRef.current) {
-        containerRef.current.style.height = `${newHeight + 13}px`;
+        containerRef.current.style.height = `${newHeight + 14}px`;
       }
     }
   }, [input]);
@@ -71,8 +72,8 @@ const ChatBar: React.FC = () => {
           id: String(Date.now() + index),
           messageId: String(Date.now()),
           type: file.type.startsWith('image') ? 'image' :
-                file.type.startsWith('video') ? 'video' :
-                file.type.startsWith('audio') ? 'audio' : 'file',
+            file.type.startsWith('video') ? 'video' :
+              file.type.startsWith('audio') ? 'audio' : 'file',
           fileName: file.name,
           url: URL.createObjectURL(file),
           size: file.size,
@@ -86,12 +87,14 @@ const ChatBar: React.FC = () => {
       setDraftMessage(activeChat.id, '');
       setAttachedFiles([]);
       setFilePreviewUrls([]);
+      setIsMessageSent(true); // Set state to trigger animation
+      setTimeout(() => setIsMessageSent(false), 200); // Reset after animation duration
       if (inputRef.current) inputRef.current.style.height = 'auto';
       if (containerRef.current) containerRef.current.style.height = 'auto';
     }
     inputRef.current?.focus();
   };
-  
+
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Escape') {
@@ -114,12 +117,12 @@ const ChatBar: React.FC = () => {
 
   function handleFileSelect(fileList: FileList) {
     const newFiles = Array.from(fileList);
-  
+
     if (newFiles.length === 0) return;
-  
+
     const newPreviews: string[] = [];
     let loadedCount = 0;
-  
+
     newFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -133,40 +136,40 @@ const ChatBar: React.FC = () => {
       reader.readAsDataURL(file);
     });
   }
-  
+
 
   return (
     <div className="backdrop-blur-[199px] w-full flex flex-col items-center p-4 justify-between shadow border-[var(--border-color)] z-40 relative">
 
       {filePreviewUrls.length > 0 && (
         <FileImportPreviews
-        files={attachedFiles}
-        urls={filePreviewUrls}
-        onRemove={(index) => {
-          setAttachedFiles((prev) => prev.filter((_, i) => i !== index));
-          setFilePreviewUrls((prev) => prev.filter((_, i) => i !== index));
-        }}
+          files={attachedFiles}
+          urls={filePreviewUrls}
+          onRemove={(index) => {
+            setAttachedFiles((prev) => prev.filter((_, i) => i !== index));
+            setFilePreviewUrls((prev) => prev.filter((_, i) => i !== index));
+          }}
         />
       )}
 
       <div ref={containerRef} id="input-container" className="input gap-1 flex items-end w-full transition-[height] duration-200 ease-in-out">
-        
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={(e) => {
-              setInput(e.target.value);
-              if (activeChat) setDraftMessage(activeChat.id, e.target.value);
-            }}
-            onKeyDown={handleKeyDown}
-            className="w-full outline-none bg-transparent resize-none py-2 border"
-            placeholder={
-              activeChat ? "Message..." : "Select a chat to start messaging"
-            }
-            aria-label="Message"
-            rows={1}
-            disabled={!activeChat}
-          />
+
+        <textarea
+          ref={inputRef}
+          value={input}
+          onChange={(e) => {
+            setInput(e.target.value);
+            if (activeChat) setDraftMessage(activeChat.id, e.target.value);
+          }}
+          onKeyDown={handleKeyDown}
+          className={`w-full outline-none bg-transparent resize-none overflow-hidden border ${isMessageSent ? 'opacity-10 transition-opacity duration-100 ease-in-out' : ''}`}
+          placeholder={
+            activeChat ? "Message..." : "Select a chat to start messaging"
+          }
+          aria-label="Message"
+          rows={1}
+          disabled={!activeChat}
+        />
 
         {/* buttons */}
         <div className="flex items-center gap-2 h-[24px]">
