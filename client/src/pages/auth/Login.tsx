@@ -114,7 +114,7 @@ const Login = () => {
         </form>
 
         <motion.div
-          className="h-full p-6 flex flex-col gap-4 justify-end custom-border-l hover:bg-[var(--sidebar-color)] cursor-pointer select-none"
+          className="h-full p-6 flex flex-col gap-3 justify-end custom-border-l hover:bg-[var(--sidebar-color)] cursor-pointer select-none"
           onClick={toggleQrCode}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
