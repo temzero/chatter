@@ -1,5 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  Index,
+  OneToOne,
+  OneToMany,
+} from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
+import { MessageMedia } from './message-media.entity';
+import { MessageMetadata } from './message-metadata.entity';
 
 @Entity('messages')
 export class Message {
@@ -17,16 +26,13 @@ export class Message {
   @Column({ nullable: true })
   content: string;
 
-  @Column({ type: 'jsonb', nullable: true })
-  media: {
-    type: 'image' | 'video' | 'audio' | 'document' | 'sticker' | 'gif';
-    url: string;
-    thumbnailUrl?: string;
-    size?: number;
-    duration?: number;
-    width?: number;
-    height?: number;
-  };
+  @OneToMany(() => MessageMedia, (media) => media.message, { cascade: true })
+  media: MessageMedia[];
+
+  @OneToOne(() => MessageMetadata, (metadata) => metadata.message, {
+    cascade: true,
+  })
+  metadata: MessageMetadata;
 
   @Column({ nullable: true })
   replyToMessageId: string;
@@ -51,21 +57,21 @@ export class Message {
     [userId: string]: string;
   };
 
-  @Column({ type: 'jsonb', nullable: true })
-  metadata: {
-    linkPreview?: {
-      url: string;
-      title?: string;
-      description?: string;
-      image?: string;
-      siteName?: string;
-    };
-    mentions?: string[];
-    hashtags?: string[];
-    isPinned?: boolean;
-    pinnedBy?: string;
-    pinnedTimestamp?: Date;
-  };
+  // @Column({ type: 'jsonb', nullable: true })
+  // metadata: {
+  //   linkPreview?: {
+  //     url: string;
+  //     title?: string;
+  //     description?: string;
+  //     image?: string;
+  //     siteName?: string;
+  //   };
+  //   mentions?: string[];
+  //   hashtags?: string[];
+  //   isPinned?: boolean;
+  //   pinnedBy?: string;
+  //   pinnedTimestamp?: Date;
+  // };
 
   constructor(partial?: Partial<Message>) {
     if (partial) {
@@ -106,23 +112,6 @@ export class Message {
   removeReaction(userId: string): void {
     if (this.reactions && this.reactions[userId]) {
       delete this.reactions[userId];
-    }
-  }
-
-  pin(byUserId: string): void {
-    if (!this.metadata) {
-      this.metadata = {};
-    }
-    this.metadata.isPinned = true;
-    this.metadata.pinnedBy = byUserId;
-    this.metadata.pinnedTimestamp = new Date();
-  }
-
-  unpin(): void {
-    if (this.metadata) {
-      this.metadata.isPinned = false;
-      this.metadata.pinnedBy = undefined;
-      this.metadata.pinnedTimestamp = undefined;
     }
   }
 }
