@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 export class Message {
   id: string; // Unique message ID
-  conversationId: string; // ID of the chat/conversation
+  chatId: string; // ID of the chat
   senderId: string; // ID of the user who sent the message
   content?: string; // Text content of the message
   media?: {

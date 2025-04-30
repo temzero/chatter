@@ -10,7 +10,7 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { MessageService } from './message.service';
-import { Message } from 'src/models/message.model';
+import { Message } from 'src/entities/message.entity';
 import { ResponseData } from 'src/global/globalClass';
 import { CreateMessageDto } from 'src/dto/create-message.dto';
 import { UpdateMessageDto } from 'src/dto/update-message.dto';
@@ -20,9 +20,9 @@ export class MessageController {
   constructor(private readonly messageService: MessageService) {}
 
   @Get()
-  findAll(): ResponseData<Message[]> {
+  async findAll(): Promise<ResponseData<Message[]>> {
     try {
-      const messages = this.messageService.getMessages();
+      const messages = await this.messageService.getMessages();
       return new ResponseData<Message[]>(
         messages,
         HttpStatus.OK,
@@ -37,7 +37,9 @@ export class MessageController {
   }
 
   @Post()
-  create(@Body() createMessageDto: CreateMessageDto): ResponseData<Message> {
+  async create(
+    @Body() createMessageDto: CreateMessageDto,
+  ): Promise<ResponseData<Message>> {
     if (!createMessageDto.content && !createMessageDto.media) {
       throw new HttpException(
         'Message must have at least "content" or "media"',
@@ -45,7 +47,7 @@ export class MessageController {
       );
     }
     try {
-      const message = this.messageService.createMessage(createMessageDto);
+      const message = await this.messageService.createMessage(createMessageDto);
       return new ResponseData<Message>(
         message,
         HttpStatus.CREATED,
@@ -60,9 +62,9 @@ export class MessageController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): ResponseData<Message> {
+  async findOne(@Param('id') id: string): Promise<ResponseData<Message>> {
     try {
-      const message = this.messageService.getMessageById(id);
+      const message = await this.messageService.getMessageById(id);
       if (!message) {
         throw new HttpException('Message not found', HttpStatus.NOT_FOUND);
       }
@@ -83,12 +85,12 @@ export class MessageController {
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateMessageDto: UpdateMessageDto,
-  ): ResponseData<Message> {
+  ): Promise<ResponseData<Message>> {
     try {
-      const updatedMessage = this.messageService.updateMessage(
+      const updatedMessage = await this.messageService.updateMessage(
         id,
         updateMessageDto,
       );
@@ -112,9 +114,9 @@ export class MessageController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string): ResponseData<string> {
+  async remove(@Param('id') id: string): Promise<ResponseData<string>> {
     try {
-      const deletedMessage = this.messageService.deleteMessage(id);
+      const deletedMessage = await this.messageService.deleteMessage(id);
       if (!deletedMessage) {
         throw new HttpException('Message not found', HttpStatus.NOT_FOUND);
       }

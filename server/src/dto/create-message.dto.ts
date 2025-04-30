@@ -9,8 +9,8 @@ export class CreateMessageDto {
   senderId: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'conversationId should not be empty' })
-  conversationId: string;
+  @IsNotEmpty({ message: 'chatId should not be empty' })
+  chatId: string;
 
   @IsOptional()
   @IsString()
