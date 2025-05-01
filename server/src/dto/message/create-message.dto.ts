@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 import { MediaDto } from './media.dto';

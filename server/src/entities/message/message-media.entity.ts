@@ -6,6 +6,9 @@ export class MessageMedia {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @ManyToOne(() => Message, (message) => message.media_items)
+  message: Message;
+
   @Column({
     type: 'enum',
     enum: ['image', 'video', 'audio', 'document', 'sticker', 'gif'],
@@ -29,7 +32,4 @@ export class MessageMedia {
 
   @Column({ type: 'int', nullable: true })
   height: number;
-
-  @ManyToOne(() => Message, (message) => message.media)
-  message: Message;
 }

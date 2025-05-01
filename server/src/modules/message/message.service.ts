@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
-import { Message } from '../../entities/message.entity';
-import { CreateMessageDto } from 'src/dto/create-message.dto';
-import { UpdateMessageDto } from 'src/dto/update-message.dto';
+import { Message } from 'src/entities/message/message.entity';
+import { CreateMessageDto } from 'src/dto/message/create-message.dto';
+import { UpdateMessageDto } from 'src/dto/message/update-message.dto';
 
 @Injectable()
 export class MessageService {
@@ -13,16 +13,12 @@ export class MessageService {
   ) {}
 
   async getMessages(includeDeleted = false): Promise<Message[]> {
-    const options = includeDeleted ? {} : { where: { isDeleted: false } };
+    const options = includeDeleted ? {} : { where: { is_deleted: false } };
     return this.messageRepository.find(options);
   }
 
   async createMessage(createMessageDto: CreateMessageDto): Promise<Message> {
-    const newMessage = this.messageRepository.create({
-      ...createMessageDto,
-      status: 'sent',
-      timestamp: new Date(),
-    });
+    const newMessage = this.messageRepository.create(createMessageDto);
     return this.messageRepository.save(newMessage);
   }
 
@@ -30,7 +26,7 @@ export class MessageService {
     return this.messageRepository.findOne({
       where: {
         id,
-        isDeleted: false,
+        is_deleted: false,
       },
     });
   }
@@ -44,7 +40,7 @@ export class MessageService {
 
     if (updateMessageDto.content) {
       message.content = updateMessageDto.content;
-      message.editedTimestamp = new Date();
+      message.edited_timestamp = new Date();
     }
 
     return this.messageRepository.save(message);
@@ -54,20 +50,20 @@ export class MessageService {
     const message = await this.getMessageById(id);
     if (!message) return undefined;
 
-    message.isDeleted = true;
-    message.deletedTimestamp = new Date();
+    message.is_deleted = true;
+    message.deleted_timestamp = new Date();
     return this.messageRepository.save(message);
   }
 
   async getMessagesByConversation(
-    chatId: string,
+    chat_id: string,
     limit?: number,
     offset?: number,
   ): Promise<Message[]> {
     const query = this.messageRepository
       .createQueryBuilder('message')
-      .where('message.chatId = :chatId', { chatId })
-      .andWhere('message.isDeleted = :isDeleted', { isDeleted: false })
+      .where('message.chat_id = :chat_id', { chat_id })
+      .andWhere('message.is_deleted = :is_deleted', { is_deleted: false })
       .orderBy('message.timestamp', 'DESC');
 
     if (limit) query.take(limit);
@@ -79,10 +75,11 @@ export class MessageService {
   async searchMessages(chatId: string, searchTerm: string): Promise<Message[]> {
     return this.messageRepository.find({
       where: {
-        chatId,
+        chat: { id: chatId },
         content: Like(`%${searchTerm}%`),
-        isDeleted: false,
+        is_deleted: false,
       },
+      relations: ['chat'], // optional: eager load chat if needed
     });
   }
 }

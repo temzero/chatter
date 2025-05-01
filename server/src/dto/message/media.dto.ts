@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { IsString, IsIn, IsOptional, IsNumber } from 'class-validator';
 
 export class MediaDto {

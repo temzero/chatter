@@ -1,10 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Message } from './message.entity';
 
 @Entity('message_metadata')
 export class MessageMetadata {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @ManyToOne(() => Message, (message) => message.metadata)
+  message: Message;
 
   @Column({ type: 'jsonb', nullable: true })
   linkPreview: {
@@ -29,7 +32,4 @@ export class MessageMetadata {
 
   @Column({ type: 'timestamp', nullable: true })
   pinnedTimestamp: Date;
-
-  @OneToOne(() => Message, (message) => message.metadata)
-  message: Message;
 }
