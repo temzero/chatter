@@ -28,7 +28,8 @@ export class MessageController {
         HttpStatus.OK,
         'Messages retrieved successfully',
       );
-    } catch {
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new HttpException(
         'Failed to retrieve messages',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -53,7 +54,10 @@ export class MessageController {
         HttpStatus.CREATED,
         'Message created successfully',
       );
-    } catch {
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      }
       throw new HttpException(
         'Failed to create message',
         HttpStatus.BAD_REQUEST,
@@ -74,9 +78,7 @@ export class MessageController {
         'Message retrieved successfully',
       );
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
+      if (error instanceof HttpException) throw error;
       throw new HttpException(
         'Failed to retrieve message',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -103,9 +105,7 @@ export class MessageController {
         'Message updated successfully',
       );
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
+      if (error instanceof HttpException) throw error;
       throw new HttpException(
         'Failed to update message',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -126,9 +126,7 @@ export class MessageController {
         'Message deleted successfully',
       );
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
+      if (error instanceof HttpException) throw error;
       throw new HttpException(
         'Failed to delete message',
         HttpStatus.INTERNAL_SERVER_ERROR,

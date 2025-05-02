@@ -5,7 +5,10 @@ import { User } from '../user/user.entity';
 @Entity('chat_group_member')
 export class ChatGroupMember {
   @PrimaryColumn()
-  user_id: number;
+  user_id: string;
+
+  @PrimaryColumn()
+  chat_group_id: string;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'user_id' })
@@ -15,17 +18,14 @@ export class ChatGroupMember {
   @JoinColumn({ name: 'chat_group_id' })
   chatGroup: ChatGroup;
 
-  @Column()
+  @Column({ default: false })
   is_admin: boolean;
 
-  @Column()
+  @Column({ default: false })
   is_banned: boolean;
 
   @Column({ nullable: true })
   muted_until: string;
-
-  @Column()
-  avatar: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   joined_at: Date;

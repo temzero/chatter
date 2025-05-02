@@ -28,7 +28,8 @@ export class UserController {
         HttpStatus.OK,
         'Users retrieved successfully',
       );
-    } catch {
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new HttpException(
         'Failed to retrieve users',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -47,7 +48,8 @@ export class UserController {
         HttpStatus.CREATED,
         'User created successfully',
       );
-    } catch {
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new HttpException('Failed to create user', HttpStatus.BAD_REQUEST);
     }
   }
@@ -65,9 +67,7 @@ export class UserController {
         'User retrieved successfully',
       );
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
+      if (error instanceof HttpException) throw error;
       throw new HttpException(
         'Failed to retrieve user',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -91,9 +91,7 @@ export class UserController {
         'User updated successfully',
       );
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
+      if (error instanceof HttpException) throw error;
       throw new HttpException(
         'Failed to update user',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -114,9 +112,7 @@ export class UserController {
         'User deleted successfully',
       );
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
+      if (error instanceof HttpException) throw error;
       throw new HttpException(
         'Failed to delete user',
         HttpStatus.INTERNAL_SERVER_ERROR,

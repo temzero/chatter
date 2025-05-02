@@ -4,6 +4,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './modules/user/user.module';
 import { ChatModule } from './modules/chat/chat.module';
+import { ChatGroupModule } from './modules/chat-group/chat-group.module';
+import { ChatGroupMemberModule } from './modules/chat-group-member/chat-group-member.module';
 import { MessageModule } from './modules/message/message.module';
 
 @Module({
@@ -21,6 +23,8 @@ import { MessageModule } from './modules/message/message.module';
     UserModule,
     MessageModule,
     ChatModule,
+    ChatGroupModule,
+    ChatGroupMemberModule,
   ],
   controllers: [AppController],
   providers: [AppService],

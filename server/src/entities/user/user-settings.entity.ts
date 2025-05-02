@@ -4,7 +4,7 @@ import { User } from './user.entity';
 @Entity('user_settings')
 export class UserSettings {
   @PrimaryColumn()
-  user_id: number;
+  user_id: string;
 
   @OneToOne(() => User)
   @JoinColumn({ name: 'user_id' })

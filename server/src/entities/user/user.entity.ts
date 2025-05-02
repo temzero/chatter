@@ -1,11 +1,4 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  Index,
-  // OneToOne,
-  // OneToMany,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
 
 @Entity('user')
 export class User {
@@ -26,13 +19,13 @@ export class User {
   @Column({ nullable: true })
   avatar: string;
 
-  @Column()
+  @Column({ nullable: true })
   first_name: string;
 
-  @Column()
+  @Column({ nullable: true })
   last_name: string;
 
-  @Column({ nullable: true })
+  @Column({ unique: true, nullable: true })
   phone_number: string;
 
   @Column({ type: 'date', nullable: true })

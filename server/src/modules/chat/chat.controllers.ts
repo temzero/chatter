@@ -28,7 +28,8 @@ export class ChatController {
         HttpStatus.OK,
         'Chats retrieved successfully',
       );
-    } catch {
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new HttpException(
         'Failed to retrieve chats',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -47,7 +48,8 @@ export class ChatController {
         HttpStatus.CREATED,
         'Chat created successfully',
       );
-    } catch {
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new HttpException('Failed to create chat', HttpStatus.BAD_REQUEST);
     }
   }

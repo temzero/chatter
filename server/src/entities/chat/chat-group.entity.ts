@@ -18,22 +18,22 @@ export class ChatGroup {
   @Column()
   name: string;
 
-  @Column()
-  description: string;
+  @Column({ nullable: true })
+  description?: string;
 
-  @Column()
-  avatar: string;
+  @Column({ nullable: true })
+  avatar?: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
 
-  @ManyToOne(() => Message)
+  @ManyToOne(() => Message, { nullable: true })
   @JoinColumn({ name: 'last_message_id' })
-  lastMessage: Message;
+  lastMessage?: Message;
 
-  @ManyToOne(() => Message)
+  @ManyToOne(() => Message, { nullable: true })
   @JoinColumn({ name: 'pinned_message_id' })
-  pinnedMessage: Message;
+  pinnedMessage?: Message;
 
   @Column()
   is_public: boolean;
