@@ -10,10 +10,10 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { MessageService } from './message.service';
-import { Message } from 'src/entities/message/message.entity';
+import { Message } from 'src/modules/message/entities/message.entity';
 import { ResponseData } from 'src/common/response-data';
-import { CreateMessageDto } from 'src/dto/message/create-message.dto';
-import { UpdateMessageDto } from 'src/dto/message/update-message.dto';
+import { CreateMessageDto } from 'src/modules/message/dto/create-message.dto';
+import { UpdateMessageDto } from 'src/modules/message/dto/update-message.dto';
 
 @Controller('message')
 export class MessageController {

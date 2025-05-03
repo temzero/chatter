@@ -10,8 +10,8 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { ChatGroupService } from './chat-group.service';
-import { ChatGroupDto } from 'src/dto/chat-group/chat-group.dto';
-import { ChatGroup } from 'src/entities/chat/chat-group.entity';
+import { ChatGroupDto } from 'src/modules/chat-group/dto/chat-group.dto';
+import { ChatGroup } from 'src/modules/chat-group/entities/chat-group.entity';
 import { ResponseData } from 'src/common/response-data';
 
 @Controller('chat-group')

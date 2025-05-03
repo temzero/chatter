@@ -7,6 +7,7 @@ import { ChatModule } from './modules/chat/chat.module';
 import { ChatGroupModule } from './modules/chat-group/chat-group.module';
 import { ChatGroupMemberModule } from './modules/chat-group-member/chat-group-member.module';
 import { MessageModule } from './modules/message/message.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { MessageModule } from './modules/message/message.module';
     ChatModule,
     ChatGroupModule,
     ChatGroupMemberModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

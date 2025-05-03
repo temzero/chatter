@@ -5,7 +5,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Message } from '../message/message.entity';
+import { Message } from '../../message/entities/message.entity';
 
 @Entity('chat_group')
 export class ChatGroup {

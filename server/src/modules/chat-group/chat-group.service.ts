@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ChatGroup } from 'src/entities/chat/chat-group.entity';
-import { ChatGroupMember } from 'src/entities/chat/chat-group-member.entity';
-import { ChatGroupDto } from 'src/dto/chat-group/chat-group.dto';
-import { User } from 'src/entities/user/user.entity';
+import { ChatGroup } from 'src/modules/chat-group/entities/chat-group.entity';
+import { ChatGroupMember } from 'src/modules/chat-group-member/entities/chat-group-member.entity';
+import { ChatGroupDto } from 'src/modules/chat-group/dto/chat-group.dto';
+import { User } from 'src/modules/user/entities/user.entity';
 
 @Injectable()
 export class ChatGroupService {

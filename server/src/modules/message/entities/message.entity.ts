@@ -9,8 +9,8 @@ import {
 } from 'typeorm';
 import { MessageMedia } from './message-media.entity';
 import { MessageMetadata } from './message-metadata.entity';
-import { Chat } from '../chat/chat.entity';
-import { User } from '../user/user.entity';
+import { Chat } from '../../chat/entities/chat.entity';
+import { User } from '../../user/entities/user.entity';
 
 @Entity('message')
 export class Message {

@@ -3,9 +3,9 @@ import * as bcrypt from 'bcrypt';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from 'src/entities/user/user.entity';
-import { CreateUserDto } from 'src/dto/user/create-user.dto';
-import { UpdateUserDto } from 'src/dto/user/update-user.dto';
+import { User } from 'src/modules/user/entities/user.entity';
+import { CreateUserDto } from 'src/modules/user/dto/create-user.dto';
+import { UpdateUserDto } from 'src/modules/user/dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -13,6 +13,12 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
+
+  async findByUsernameOrEmail(usernameOrEmail: string): Promise<User | null> {
+    return this.userRepository.findOne({
+      where: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
+    });
+  }
 
   async getAllUsers(): Promise<User[]> {
     return this.userRepository.find();

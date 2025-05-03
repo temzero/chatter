@@ -4,8 +4,6 @@ import {
   IsOptional,
   MinLength,
   IsString,
-  IsDateString,
-  IsBoolean,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -18,10 +16,6 @@ export class CreateUserDto {
   @MinLength(6, { message: 'Password must be at least 6 characters' })
   password: string;
 
-  @IsOptional()
-  @IsString()
-  avatar?: string;
-
   @IsNotEmpty({ message: 'First name is required' })
   first_name: string;
 
@@ -31,12 +25,4 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   phone_number?: string;
-
-  @IsOptional()
-  @IsDateString({}, { message: 'Invalid birthday date format' })
-  birthday?: Date;
-
-  @IsOptional()
-  @IsBoolean()
-  is_verified?: boolean;
 }

@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ChatGroupMember } from 'src/entities/chat/chat-group-member.entity';
-import { ChatGroupMemberDto } from 'src/dto/chat-group/chat-group-members.dto';
+import { ChatGroupMember } from 'src/modules/chat-group-member/entities/chat-group-member.entity';
+import { ChatGroupMemberDto } from 'src/modules/chat-group-member/dto/chat-group-members.dto';
 
 @Injectable()
 export class ChatGroupMemberService {

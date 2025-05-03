@@ -10,9 +10,9 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { ChatService } from './chat.service';
-import { CreateChatDto } from 'src/dto/chat/create-chat.dto';
-import { UpdateChatDto } from 'src/dto/chat/update-chat.dto';
-import { Chat } from 'src/entities/chat/chat.entity';
+import { CreateChatDto } from 'src/modules/chat/dto/create-chat.dto';
+import { UpdateChatDto } from 'src/modules/chat/dto/update-chat.dto';
+import { Chat } from 'src/modules/chat/entities/chat.entity';
 import { ResponseData } from 'src/common/response-data';
 
 @Controller('chat')
