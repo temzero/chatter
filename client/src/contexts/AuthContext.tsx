@@ -25,7 +25,9 @@ interface AuthContextType {
     last_name: string;
     password: string;
   }) => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
+  sendPasswordResetEmail: (email: string) => Promise<void>;
+  resetPasswordWithToken: (token: string, newPassword: string) => Promise<void>;
+  verifyEmailWithToken: (token: string) => Promise<void>;
   message: string | null;
   setMessage: Dispatch<SetStateAction<string | null>>;
 }
@@ -92,20 +94,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     last_name: string;
     password: string;
   }) => {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/user/`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/register/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(userData),
     });
-  
+
     const data = await res.json();
     console.log("Register response:", data);
-  
+
     if (!res.ok) {
       setMessage(data.message);
       throw new Error(data.message || "Registration failed");
     }
-  
+
     // Automatically log in after successful registration
     try {
       await login(userData.username, userData.password);
@@ -121,12 +123,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsAuthenticated(false);
   };
 
-  const resetPassword = async (email: string) => {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/reset-password`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
+  const sendPasswordResetEmail = async (email: string) => {
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/auth/send-password-reset-email`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      }
+    );
 
     const data = await res.json();
     console.log("Reset password response:", data);
@@ -139,6 +144,44 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setMessage("Password reset email sent");
   };
 
+  const resetPasswordWithToken = async (token: string, newPassword: string) => {
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/auth/reset-password`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token, newPassword }),
+      }
+    );
+
+    const data = await res.json();
+    console.log("Reset password response:", data);
+
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to reset password");
+    }
+
+    return data;
+  };
+
+  const verifyEmailWithToken = async (token: string) => {
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/auth/verify-email?token=${encodeURIComponent(token)}`
+    );
+  
+    const data = await res.json();
+    console.log("Verify email response:", data);
+  
+    if (!res.ok) {
+      throw new Error(data.message || "Email verification failed");
+    }
+  
+    return data;
+  };
+  
+
   const value: AuthContextType = {
     currentUser,
     setCurrentUser,
@@ -148,7 +191,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     logout,
     register,
-    resetPassword,
+    sendPasswordResetEmail,
+    resetPasswordWithToken,
+    verifyEmailWithToken,
     message,
     setMessage,
   };
@@ -156,6 +201,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {

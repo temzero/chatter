@@ -28,10 +28,10 @@ export class ChatController {
         HttpStatus.OK,
         'Chats retrieved successfully',
       );
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof HttpException) throw error;
       throw new HttpException(
-        'Failed to retrieve chats',
+        error || 'Failed to retrieve chats',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -48,9 +48,12 @@ export class ChatController {
         HttpStatus.CREATED,
         'Chat created successfully',
       );
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof HttpException) throw error;
-      throw new HttpException('Failed to create chat', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        error || 'Failed to create chat',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -66,10 +69,9 @@ export class ChatController {
         HttpStatus.OK,
         'Chat retrieved successfully',
       );
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
+    } catch (error: unknown) {
       throw new HttpException(
-        'Failed to retrieve chat',
+        error || 'Failed to retrieve chat',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -90,10 +92,9 @@ export class ChatController {
         HttpStatus.OK,
         'Chat updated successfully',
       );
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
+    } catch (error: unknown) {
       throw new HttpException(
-        'Failed to update chat',
+        error || 'Failed to update chat',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -111,10 +112,9 @@ export class ChatController {
         HttpStatus.OK,
         'Chat deleted successfully',
       );
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
+    } catch (error: unknown) {
       throw new HttpException(
-        'Failed to delete chat',
+        error || 'Failed to delete chat',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

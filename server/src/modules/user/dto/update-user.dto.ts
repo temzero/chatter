@@ -50,7 +50,7 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsBoolean()
-  is_verified?: boolean;
+  is_email_verified?: boolean;
 
   @IsOptional()
   @IsBoolean()

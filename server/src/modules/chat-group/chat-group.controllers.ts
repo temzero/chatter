@@ -27,13 +27,11 @@ export class ChatGroupController {
         HttpStatus.OK,
         'Chat groups retrieved successfully',
       );
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      const message =
-        error instanceof Error
-          ? error.message
-          : 'Failed to retrieve chat groups';
-      throw new HttpException(message, HttpStatus.INTERNAL_SERVER_ERROR);
+    } catch (error: unknown) {
+      throw new HttpException(
+        error || 'Failed to retrieve chat groups',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -48,11 +46,11 @@ export class ChatGroupController {
         HttpStatus.CREATED,
         'Chat group created successfully',
       );
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      const message =
-        error instanceof Error ? error.message : 'Failed to create chat group';
-      throw new HttpException(message, HttpStatus.BAD_REQUEST);
+    } catch (error: unknown) {
+      throw new HttpException(
+        error || 'Failed to create chat group',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -68,13 +66,11 @@ export class ChatGroupController {
         HttpStatus.OK,
         'Chat group retrieved successfully',
       );
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      const message =
-        error instanceof Error
-          ? error.message
-          : 'Failed to retrieve chat group';
-      throw new HttpException(message, HttpStatus.INTERNAL_SERVER_ERROR);
+    } catch (error: unknown) {
+      throw new HttpException(
+        error || 'Failed to retrieve chat group',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -96,11 +92,11 @@ export class ChatGroupController {
         HttpStatus.OK,
         'Chat group updated successfully',
       );
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      const message =
-        error instanceof Error ? error.message : 'Failed to update chat group';
-      throw new HttpException(message, HttpStatus.INTERNAL_SERVER_ERROR);
+    } catch (error: unknown) {
+      throw new HttpException(
+        error || 'Failed to update chat group',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -116,11 +112,11 @@ export class ChatGroupController {
         HttpStatus.OK,
         'Chat group deleted successfully',
       );
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      const message =
-        error instanceof Error ? error.message : 'Failed to delete chat group';
-      throw new HttpException(message, HttpStatus.INTERNAL_SERVER_ERROR);
+    } catch (error: unknown) {
+      throw new HttpException(
+        error || 'Failed to delete chat group',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }

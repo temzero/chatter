@@ -10,7 +10,7 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from 'src/modules/user/dto/create-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from 'src/modules/user/dto/update-user.dto';
 import { User } from 'src/modules/user/entities/user.entity';
 import { ResponseData } from 'src/common/response-data';
@@ -28,16 +28,15 @@ export class UserController {
         HttpStatus.OK,
         'Users retrieved successfully',
       );
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
+    } catch (error: unknown) {
       throw new HttpException(
-        'Failed to retrieve users',
+        error || 'Failed to retrieve users',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
-  @Post()
+  @Post('create')
   async create(
     @Body() createUserDto: CreateUserDto,
   ): Promise<ResponseData<User>> {
@@ -48,9 +47,11 @@ export class UserController {
         HttpStatus.CREATED,
         'User created successfully',
       );
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      throw new HttpException('Failed to create user', HttpStatus.BAD_REQUEST);
+    } catch (error: unknown) {
+      throw new HttpException(
+        error || 'Failed to create user',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -66,10 +67,10 @@ export class UserController {
         HttpStatus.OK,
         'User retrieved successfully',
       );
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof HttpException) throw error;
       throw new HttpException(
-        'Failed to retrieve user',
+        error || 'Failed to retrieve user',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -90,10 +91,10 @@ export class UserController {
         HttpStatus.OK,
         'User updated successfully',
       );
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof HttpException) throw error;
       throw new HttpException(
-        'Failed to update user',
+        error || 'Failed to update user',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -111,10 +112,10 @@ export class UserController {
         HttpStatus.OK,
         'User deleted successfully',
       );
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof HttpException) throw error;
       throw new HttpException(
-        'Failed to delete user',
+        error || 'Failed to delete user',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

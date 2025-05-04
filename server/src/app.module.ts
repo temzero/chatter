@@ -8,9 +8,13 @@ import { ChatGroupModule } from './modules/chat-group/chat-group.module';
 import { ChatGroupMemberModule } from './modules/chat-group-member/chat-group-member.module';
 import { MessageModule } from './modules/message/message.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',

@@ -11,7 +11,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showQrCode, setShowQrCode] = useState(false);
-  const { login, message, setMessage } = useAuth(); // Destructure login function directly
+  const { login, message, setMessage } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,13 +78,13 @@ const Login = () => {
 
           <div className="flex items-center justify-between gap-4 mt-2">
             <Link
-              to="/register"
+              to="/auth/register"
               className="opacity-40 hover:opacity-100 hover:text-green-400"
             >
               Register
             </Link>
             <Link
-              to="/forgot-password"
+              to="/auth/forgot-password"
               className="opacity-40 hover:opacity-100 hover:text-green-400"
             >
               Forgot Password?

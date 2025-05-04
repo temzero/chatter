@@ -53,12 +53,6 @@ const Register = () => {
           className="flex flex-col justify-center w-[400px] gap-2 p-8"
         >
           <h2 className="text-4xl font-semibold mb-4">Register</h2>
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-              {error}
-            </div>
-          )}
-
           <input
             type="text"
             id="username"
@@ -122,6 +116,8 @@ const Register = () => {
             className="input backdrop-blur-lg"
           />
 
+          {error && <div className="text-red-400 -mb-1">{error}</div>}
+
           <motion.button
             whileTap={{ scale: 0.98 }}
             type="submit"
@@ -133,7 +129,7 @@ const Register = () => {
 
           <div className="flex items-center gap-4 mt-2">
             <Link
-              to="/login"
+              to="/auth/login"
               className="opacity-40 hover:opacity-100 hover:text-green-400"
             >
               Back to Login

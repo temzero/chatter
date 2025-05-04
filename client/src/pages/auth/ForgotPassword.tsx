@@ -7,21 +7,21 @@ import { motion } from "framer-motion";
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
-  const { resetPassword } = useAuth();
+  const { sendPasswordResetEmail } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
       setError("");
-      setMessage("");
+      setSuccess("");
       setLoading(true);
-      await resetPassword(email);
-      setMessage("Check your inbox for further instructions");
+      await sendPasswordResetEmail(email);
+      setSuccess("Check your inbox for further instructions");
     } catch (err) {
-      setError("Failed to reset password");
+      setError("Failed to send reset password link");
       console.error(err);
     }
     setLoading(false);
@@ -52,7 +52,7 @@ const ForgotPassword = () => {
             autoFocus
           />
           {error && <div className="text-red-400 -mb-1">{error}</div>}
-          {message && <div className="text-red-400 -mb-1">{message}</div>}
+          {success && <div className="text-green-400 -mb-1">{success}</div>}
 
           <motion.button
             whileTap={{ scale: 0.98 }}
@@ -60,11 +60,11 @@ const ForgotPassword = () => {
             disabled={loading}
             className="primary w-full py-1 mt-2"
           >
-            {loading ? "Processing..." : "Reset Password"}
+            {loading ? "Processing..." : "Send Reset Password Link"}
           </motion.button>
           <div className="flex items-center gap-4 mt-2">
             <Link
-              to="/login"
+              to="/auth/login"
               className="opacity-40 hover:opacity-100 hover:text-green-400"
             >
               Back to Login

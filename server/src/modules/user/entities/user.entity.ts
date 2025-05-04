@@ -47,7 +47,7 @@ export class User {
   updated_at: Date;
 
   @Column({ default: false })
-  is_verified: boolean;
+  is_email_verified: boolean;
 
   @Column({ default: false })
   is_deleted: boolean;

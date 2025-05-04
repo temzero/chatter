@@ -29,10 +29,9 @@ export class ChatGroupMemberController {
         HttpStatus.OK,
         'Group members retrieved successfully',
       );
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
+    } catch (error: unknown) {
       throw new HttpException(
-        'Unknown error occurred',
+        error || 'Unknown error occurred',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -49,10 +48,10 @@ export class ChatGroupMemberController {
         HttpStatus.CREATED,
         'Member added successfully',
       );
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof HttpException) throw error;
       throw new HttpException(
-        'Unknown error occurred',
+        error || 'Unknown error occurred',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -70,10 +69,10 @@ export class ChatGroupMemberController {
         HttpStatus.OK,
         'Member removed successfully',
       );
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof HttpException) throw error;
       throw new HttpException(
-        'Unknown error occurred',
+        error || 'Unknown error occurred',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -96,10 +95,10 @@ export class ChatGroupMemberController {
         HttpStatus.OK,
         'Member updated successfully',
       );
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof HttpException) throw error;
       throw new HttpException(
-        'Unknown error occurred',
+        error || 'Unknown error occurred',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
