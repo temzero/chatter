@@ -1,4 +1,5 @@
-import type { ChatProps } from "@/contexts/data";
+
+import { ChatProps } from "@/data/types";
 
 type ChatAvatarProps = {
   chat: ChatProps;
@@ -9,6 +10,10 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
   chat,
   type = "sidebar",
 }) => {
+  if (!chat) {
+    return null;
+  }
+
   // Define size and rounded styles based on type
   const getStyles = () => {
     switch (type) {
@@ -43,7 +48,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
   const styles = getStyles();
   const sharedBase = `flex items-center justify-center overflow-hidden ${styles.dimension} ${styles.rounded}`;
 
-  const renderAvatarContent = (fallbackIcon: string) => (
+  const renderAvatarContent = (fallbackIcon: string) =>
     chat.avatar ? (
       <img
         className="h-full w-full object-cover"
@@ -52,15 +57,18 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
         loading="lazy"
       />
     ) : (
-      <i className={`material-symbols-outlined ${styles.fallbackIconSize} opacity-20 flex items-center justify-center`}>
+      <i
+        className={`material-symbols-outlined ${styles.fallbackIconSize} opacity-20 flex items-center justify-center`}
+      >
         {fallbackIcon}
       </i>
-    )
-  );
+    );
 
   if (chat.type === "channel") {
     return (
-      <div className={`${styles.border} border-[var(--border-color)] ${sharedBase}`}>
+      <div
+        className={`${styles.border} border-[var(--border-color)] ${sharedBase}`}
+      >
         {renderAvatarContent("tv")}
       </div>
     );

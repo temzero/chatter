@@ -29,7 +29,7 @@ import { useAuth } from "@/contexts/AuthContext";
          <div className="flex flex-col gap-1 justify-center p-4 custom-border-b h-20 cursor-pointer hover:bg-[var(--hover-color)]"
              onClick={() => setSidebar('settingsAccount')}>
              <h1>Change Phone Number</h1>
-             <h1 className="opacity-60">{currentUser?.phoneNumber}</h1>
+             <h1 className="opacity-60">{currentUser?.phone_number}</h1>
          </div>
          <div className="flex flex-col gap-1 justify-center p-4 custom-border-b h-20 cursor-pointer hover:bg-[var(--hover-color)]"
              onClick={() => setSidebar('settingsAccount')}>

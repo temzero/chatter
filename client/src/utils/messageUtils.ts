@@ -1,8 +1,8 @@
 // utils/messageUtils.ts
 import type { MessageProps } from '@/data/message';
 
-export function createMessagesIndex(messages: MessageProps[]): Map<number, MessageProps[]> {
-  const index = new Map<number, MessageProps[]>();
+export function createMessagesIndex(messages: MessageProps[]): Map<string, MessageProps[]> {
+  const index = new Map<string, MessageProps[]>();
   
   messages.forEach(message => {
     if (!index.has(message.chatId)) {

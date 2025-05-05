@@ -1,9 +1,8 @@
 import { ReactNode } from "react";
-import { useTheme } from "@/contexts/ThemeContext";
-import backgroundLight from "@/assets/image/backgroundSky.jpg";
-import backgroundDark from "@/assets/image/backgroundDark.jpg";
 import { Logo } from "@/components/ui/Logo";
-import { useNavigate } from "react-router-dom"; // or your routing hook
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "@/constants/routes";
+import BackgroundContent from "@/components/ui/BackgroundContent";
 
 interface AuthenticationLayoutProps {
   children: ReactNode;
@@ -14,23 +13,15 @@ interface AuthenticationLayoutProps {
 export const AuthenticationLayout = ({
   children,
 }: AuthenticationLayoutProps) => {
-  const { resolvedTheme } = useTheme();
-  const navigate = useNavigate(); // Get the navigate function
+  const navigate = useNavigate();
 
   const handleLogoClick = () => {
-    navigate("/login"); // Navigate to login page
+    navigate(ROUTES.PUBLIC.LOGIN);
   };
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
-      {/* Background Image */}
-      <div className="fixed inset-0 -z-10">
-        <img
-          className="w-full h-full object-cover"
-          src={resolvedTheme === "dark" ? backgroundDark : backgroundLight}
-          alt="Background"
-        />
-      </div>
+      <BackgroundContent />
 
       {/* Content */}
       <div className="relative w-full h-full flex items-center justify-center">

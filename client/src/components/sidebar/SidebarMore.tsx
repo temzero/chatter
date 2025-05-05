@@ -87,8 +87,8 @@ const SidebarMore: React.FC = () => {
             </a>
             {isCompact ||
             <div className="flex flex-col font-light min-w-60">
-                <h1 className="font-semibold">{currentUser?.firstName} {currentUser?.lastName}</h1>
-                <a>{currentUser?.phoneNumber}</a>
+                <h1 className="font-semibold">{currentUser?.first_name} {currentUser?.last_name}</h1>
+                <a>{currentUser?.phone_number}</a>
             </div>
             }
         </div>

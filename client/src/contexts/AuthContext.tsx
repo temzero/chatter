@@ -3,19 +3,18 @@ import React, {
   useState,
   useEffect,
   useContext,
-  ReactNode,
-  Dispatch,
-  SetStateAction,
+  useCallback,
 } from "react";
+import axios from "axios";
 import { MyProfileProps } from "@/data/types";
+import { authService, storageService } from "@/services/api/auth";
 
-// Context value type
 interface AuthContextType {
   currentUser: MyProfileProps | null;
-  setCurrentUser: Dispatch<SetStateAction<MyProfileProps | null>>;
   isAuthenticated: boolean;
-  setIsAuthenticated: Dispatch<SetStateAction<boolean>>;
   loading: boolean;
+  message: string | null;
+  setMessage: (message: string | null) => void;
   login: (usernameOrEmail: string, password: string) => Promise<void>;
   logout: () => void;
   register: (userData: {
@@ -28,63 +27,73 @@ interface AuthContextType {
   sendPasswordResetEmail: (email: string) => Promise<void>;
   resetPasswordWithToken: (token: string, newPassword: string) => Promise<void>;
   verifyEmailWithToken: (token: string) => Promise<void>;
-  message: string | null;
-  setMessage: Dispatch<SetStateAction<string | null>>;
 }
 
-// Create context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Provider props
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [currentUser, setCurrentUser] = useState<MyProfileProps | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
 
+  // Initialize auth state from storage
   useEffect(() => {
-    const initializeUser = async () => {
+    const initializeAuth = async () => {
       try {
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-          const userData = JSON.parse(storedUser);
-          setCurrentUser(userData);
+        const user = storageService.getUser();
+        if (user) {
+          setCurrentUser(user);
           setIsAuthenticated(true);
         }
       } catch (error) {
-        console.error("Failed to initialize user", error);
+        console.error("Failed to initialize auth state", error);
+        storageService.clear();
       } finally {
         setLoading(false);
       }
     };
 
-    initializeUser();
+    initializeAuth();
+  }, []);
+
+  const handleAuthError = useCallback((error: unknown): string => {
+    let errorMessage = "An unexpected error occurred";
+
+    if (axios.isAxiosError(error)) {
+      errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Network error occurred";
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+    setMessage(errorMessage);
+    return errorMessage;
   }, []);
 
   const login = async (usernameOrEmail: string, password: string) => {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ usernameOrEmail, password }),
-    });
+    try {
+      setLoading(true);
+      const { access_token, user } = await authService.login(
+        usernameOrEmail,
+        password
+      );
 
-    const data = await res.json();
-    console.log("Login response:", data);
-
-    if (!res.ok) {
-      setMessage(data.message);
-      throw new Error(data.message || "Login failed");
+      storageService.setToken(access_token);
+      storageService.setUser(user);
+      setCurrentUser(user);
+      setIsAuthenticated(true);
+      setMessage(null);
+    } catch (error) {
+      const errorMessage = handleAuthError(error);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
     }
-
-    const { access_token, user } = data;
-    localStorage.setItem("token", access_token);
-    localStorage.setItem("user", JSON.stringify(user));
-    setCurrentUser(user);
-    setIsAuthenticated(true);
   };
 
   const register = async (userData: {
@@ -94,108 +103,78 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     last_name: string;
     password: string;
   }) => {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/register/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(userData),
-    });
-
-    const data = await res.json();
-    console.log("Register response:", data);
-
-    if (!res.ok) {
-      setMessage(data.message);
-      throw new Error(data.message || "Registration failed");
-    }
-
-    // Automatically log in after successful registration
     try {
+      setLoading(true);
+      await authService.register(userData);
       await login(userData.username, userData.password);
-    } catch (err) {
-      console.error("Auto login failed after registration:", err);
+    } catch (error) {
+      const errorMessage = handleAuthError(error);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
   const logout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
+    storageService.clear();
     setCurrentUser(null);
     setIsAuthenticated(false);
+    setMessage(null);
   };
 
   const sendPasswordResetEmail = async (email: string) => {
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/auth/send-password-reset-email`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      }
-    );
-
-    const data = await res.json();
-    console.log("Reset password response:", data);
-
-    if (!res.ok) {
-      setMessage(data.message);
-      throw new Error(data.message || "Reset password failed");
+    try {
+      setLoading(true);
+      await authService.sendPasswordResetEmail(email);
+      setMessage("Password reset email sent. Please check your inbox.");
+    } catch (error) {
+      const errorMessage = handleAuthError(error);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
     }
-
-    setMessage("Password reset email sent");
   };
 
   const resetPasswordWithToken = async (token: string, newPassword: string) => {
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/auth/reset-password`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ token, newPassword }),
-      }
-    );
-
-    const data = await res.json();
-    console.log("Reset password response:", data);
-
-    if (!res.ok) {
-      throw new Error(data.message || "Failed to reset password");
+    try {
+      setLoading(true);
+      await authService.resetPasswordWithToken(token, newPassword);
+      setMessage(
+        "Password reset successfully. You can now login with your new password."
+      );
+    } catch (error) {
+      const errorMessage = handleAuthError(error);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
     }
-
-    return data;
   };
 
   const verifyEmailWithToken = async (token: string) => {
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/auth/verify-email?token=${encodeURIComponent(token)}`
-    );
-  
-    const data = await res.json();
-    console.log("Verify email response:", data);
-  
-    if (!res.ok) {
-      throw new Error(data.message || "Email verification failed");
+    try {
+      setLoading(true);
+      await authService.verifyEmailWithToken(token);
+      setMessage("Email verified successfully!");
+    } catch (error) {
+      const errorMessage = handleAuthError(error);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
     }
-  
-    return data;
   };
-  
 
   const value: AuthContextType = {
     currentUser,
-    setCurrentUser,
     isAuthenticated,
-    setIsAuthenticated,
     loading,
+    message,
+    setMessage,
     login,
     logout,
     register,
     sendPasswordResetEmail,
     resetPasswordWithToken,
     verifyEmailWithToken,
-    message,
-    setMessage,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

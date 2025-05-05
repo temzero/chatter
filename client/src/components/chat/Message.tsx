@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useChat } from '@/contexts/ChatContext';
 import RenderMultipleMedia from '../ui/RenderMultipleMedia';
 import type { MediaProps } from '@/data/media';
-import FormatTime from '@/hooks/formatTime';
+import FormatTime from '@/utils/formatTime';
 
 type RenderMessageProps = {
   id: string;
@@ -32,7 +32,8 @@ const otherMessageAnimation = {
 
 const noAnimation = {
   initial: false,
-  animate: false
+  animate: false,
+  transition: {}
 };
 
 const Message: React.FC<RenderMessageProps> = ({ 

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { AuthenticationLayout } from "./AuthenticationLayout";
+import { AuthenticationLayout } from "../PublicLayout";
 import { motion } from "framer-motion";
 
 const VerifyEmail = () => {
@@ -12,9 +12,9 @@ const VerifyEmail = () => {
   const { first_name, email, token } = useParams();
   const navigate = useNavigate();
 
-  console.log('first name:', first_name)
-  console.log('email:', email)
-  console.log('token:', token)
+  console.log("first name:", first_name);
+  console.log("email:", email);
+  console.log("token:", token);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

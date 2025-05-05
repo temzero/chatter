@@ -1,6 +1,6 @@
 // components/MediaBottomInfo.tsx
-import { MediaProps } from './MediaModal';
-import { formatFileSize } from '@/hooks/formatFileSize';
+import { MediaProps } from "./MediaModal";
+import { formatFileSize } from "@/utils/formatFileSize";
 
 interface MediaBottomInfoProps {
   media: MediaProps;
@@ -8,10 +8,10 @@ interface MediaBottomInfoProps {
   mediaLength: number;
 }
 
-export const MediaBottomInfo = ({ 
-  media, 
-  currentIndex, 
-  mediaLength 
+export const MediaBottomInfo = ({
+  media,
+  currentIndex,
+  mediaLength,
 }: MediaBottomInfoProps) => {
   if (mediaLength <= 1) return null;
 
@@ -24,9 +24,7 @@ export const MediaBottomInfo = ({
           </div>
         )}
         {media.size && (
-          <div className="text-white/60">
-            {formatFileSize(media.size)}
-          </div>
+          <div className="text-white/60">{formatFileSize(media.size)}</div>
         )}
       </div>
       {/* Dot Indicator */}
@@ -35,7 +33,7 @@ export const MediaBottomInfo = ({
           <span
             key={index}
             className={`w-1 h-1 rounded-full transition-all duration-300 ${
-              index === currentIndex ? 'bg-white scale-150' : 'bg-white/40'
+              index === currentIndex ? "bg-white scale-150" : "bg-white/40"
             }`}
           />
         ))}

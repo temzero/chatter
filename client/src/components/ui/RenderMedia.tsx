@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { MediaProps } from '@/data/media';
-import { useModal } from '@/contexts/ModalContext';
-import CustomAudioPlayer from './CustomAudioPlayer';
-import { formatFileSize } from '@/hooks/formatFileSize';
-import { getFileIcon } from '@/hooks/getFileIcon';
-import { useSoundEffect } from '@/hooks/useSoundEffect';
-import popupSound from '@/assets/sound/flip-switch.mp3'
+import React, { useState, useEffect } from "react";
+import { MediaProps } from "@/data/media";
+import { useModal } from "@/contexts/ModalContext";
+import CustomAudioPlayer from "./CustomAudioPlayer";
+import { formatFileSize } from "@/utils/formatFileSize";
+import { getFileIcon } from "@/utils/getFileIcon";
+import { useSoundEffect } from "@/hooks/useSoundEffect";
+import popupSound from "@/assets/sound/flip-switch.mp3";
 
 // Helper function to calculate greatest common divisor (GCD)
 const gcd = (a: number, b: number): number => {
@@ -28,16 +28,19 @@ interface RenderMediaProps {
 
 const RenderMedia: React.FC<RenderMediaProps> = ({
   media,
-  className = '',
-  type
+  className = "",
+  type,
 }) => {
   const { openModal } = useModal();
   const [hovered, setHovered] = useState(false);
   const [aspectRatio, setAspectRatio] = useState<string | null>(null);
-  const [dimensions, setDimensions] = useState<{width: number, height: number} | null>(null);
+  const [dimensions, setDimensions] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
 
   useEffect(() => {
-    if (media.type === 'image') {
+    if (media.type === "image") {
       const img = new Image();
       img.onload = () => {
         setDimensions({ width: img.width, height: img.height });
@@ -51,7 +54,7 @@ const RenderMedia: React.FC<RenderMediaProps> = ({
   // Determine if media is horizontal based on aspect ratio
   const isHorizontal = dimensions && dimensions.width > dimensions.height;
 
-  const renderContainer = (content: React.ReactNode, extraClass = '') => (
+  const renderContainer = (content: React.ReactNode, extraClass = "") => (
     <div
       className={`relative cursor-pointer overflow-hidden ${className} ${extraClass}`}
       onMouseEnter={() => setHovered(true)}
@@ -62,13 +65,15 @@ const RenderMedia: React.FC<RenderMediaProps> = ({
   );
 
   const handleDownloadClick = (url: string, fileName: string | undefined) => {
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
     link.download = fileName || true;
     link.click();
   };
 
-  const handleVideoLoadedMetadata = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+  const handleVideoLoadedMetadata = (
+    e: React.SyntheticEvent<HTMLVideoElement>
+  ) => {
     const video = e.target as HTMLVideoElement;
     const width = video.videoWidth;
     const height = video.videoHeight;
@@ -79,64 +84,73 @@ const RenderMedia: React.FC<RenderMediaProps> = ({
   const playSound = useSoundEffect(popupSound);
   const handleOpenModal = () => {
     openModal(media.id);
-    playSound()
+    playSound();
   };
 
   switch (media.type) {
-    case 'image':
+    case "image":
       return renderContainer(
-          <img
-            src={media.url}
-            alt="Media attachment"
-            onClick={handleOpenModal}
-            className="w-full h-full transition-all duration-300 hover:scale-125 object-cover"
-          />
+        <img
+          src={media.url}
+          alt="Media attachment"
+          onClick={handleOpenModal}
+          className="w-full h-full transition-all duration-300 hover:scale-125 object-cover"
+        />
       );
 
-    case 'video':
+    case "video":
       return renderContainer(
-          <video 
-            className="w-full h-full transition-all duration-300 hover:scale-125 object-cover" 
-            controls
-            onClick={handleOpenModal}
-            onLoadedMetadata={handleVideoLoadedMetadata}
-          >
-            <source src={media.url} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
+        <video
+          className="w-full h-full transition-all duration-300 hover:scale-125 object-cover"
+          controls
+          onClick={handleOpenModal}
+          onLoadedMetadata={handleVideoLoadedMetadata}
+        >
+          <source src={media.url} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
       );
 
-    case 'audio':
+    case "audio":
       return (
         <div
-        className={`w-full flex items-center gap-2 custom-border-b overflow-hidden ${
-          type === 'info' ? 'opacity-80' : 'text-black bg-purple-400'
-        }`}>
-        <CustomAudioPlayer mediaUrl={media.url} fileName={media.fileName} type={type}/>
+          className={`w-full flex items-center gap-2 custom-border-b overflow-hidden ${
+            type === "info" ? "opacity-80" : "text-black bg-purple-400"
+          }`}
+        >
+          <CustomAudioPlayer
+            mediaUrl={media.url}
+            fileName={media.fileName}
+            type={type}
+          />
         </div>
       );
 
-    case 'file':
+    case "file":
       return renderContainer(
         <div
           className={`w-full p-2 flex items-center gap-2 custom-border-b overflow-hidden ${
-            type === 'info' ? 'text-purple-400' : 'text-black bg-purple-400'
+            type === "info" ? "text-purple-400" : "text-black bg-purple-400"
           }`}
           onClick={() => handleDownloadClick(media.url, media.fileName)}
         >
-          <i className="material-symbols-outlined text-3xl">{getFileIcon(media.fileName)}</i>
+          <i className="material-symbols-outlined text-3xl">
+            {getFileIcon(media.fileName)}
+          </i>
           <a
             href={media.url}
             download={media.fileName || true}
             className={`truncate`}
           >
-            {media.fileName || 'Download File'}
+            {media.fileName || "Download File"}
           </a>
-          {hovered ?
+          {hovered ? (
             <i className="material-symbols-outlined ml-auto">download</i>
-          : 
-            <p className='opacity-70 ml-auto'>({media.size ? formatFileSize(media.size) : '???'})</p>
-          }
+          ) : (
+            <p className="opacity-70 ml-auto">
+              ({media.size ? formatFileSize(media.size) : "???"})
+            </p>
+          )}
         </div>
       );
 

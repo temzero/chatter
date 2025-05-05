@@ -1,13 +1,12 @@
 export interface UserProps {
     id: string;
     username: string;
-    firstName: string;
-    lastName: string;
+    first_name: string;
+    last_name: string;
     email?: string;
-    phoneNumber?: string;
+    phone_number?: string;
     avatar?: string;
-    lastSeen?: Date;
-    isOnline: boolean;
+    last_seen?: Date;
     status?: string;
     birthday?: string;
     bio?: string;
@@ -18,12 +17,12 @@ export interface UserProps {
     type: 'image' | 'video' | 'audio' | 'file';
     url: string;
     thumbnail?: string; // for videos
-    fileName?: string;
-    fileSize?: number;
+    file_name?: string;
+    file_size?: number;
     duration?: number; // for audio/video
     width?: number; // for images/videos
     height?: number; // for images/videos
-    mimeType?: string;
+    mime_type?: string;
     uploadedAt: Date;
     uploadedBy: string; // user ID
   }
@@ -74,3 +73,4 @@ export interface UserProps {
     };
     blockedUsers: string[]; // array of user IDs
     contacts: string[]; // array of user IDs
+}

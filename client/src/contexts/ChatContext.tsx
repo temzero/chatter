@@ -6,11 +6,11 @@ import React, {
   Dispatch,
   SetStateAction,
   useMemo,
-} from 'react';
-import { ChatsData } from './data';
-import { MessagesData } from '@/data/message';
-import type { MessageProps } from '@/data/message';
-import type { ChatProps } from '@/data/types';
+} from "react";
+import { ChatsData } from "@/data/chat";
+import { MessagesData } from "@/data/message";
+import type { MessageProps } from "@/data/message";
+import type { ChatProps } from "@/data/types";
 
 // Modified getMessagesByChatId to accept current messages list
 const getMessagesByChatId = (chatId: string, messages: MessageProps[]) => {
@@ -19,13 +19,13 @@ const getMessagesByChatId = (chatId: string, messages: MessageProps[]) => {
 
 const getMediaFromMessages = (messages: MessageProps[]) => {
   return messages
-    .filter((msg) => msg.media && msg.media.length > 0)  // Ensure media is not empty
-    .flatMap((msg) => 
+    .filter((msg) => msg.media && msg.media.length > 0) // Ensure media is not empty
+    .flatMap((msg) =>
       msg.media!.map((mediaItem) => ({
-        ...mediaItem,               // Spread media item properties
-        messageId: msg.id,          // Add messageId
-        chatId: msg.chatId,         // Add chatId
-        timestamp: msg.time,        // Add timestamp
+        ...mediaItem, // Spread media item properties
+        messageId: msg.id, // Add messageId
+        chatId: msg.chatId, // Add chatId
+        timestamp: msg.time, // Add timestamp
       }))
     );
 };
@@ -56,16 +56,15 @@ interface ChatProviderProps {
 
 export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   const [chats, setChats] = useState<ChatProps[]>(ChatsData);
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [activeChat, setActiveChat] = useState<ChatProps | null>(null);
   const [messages, setMessages] = useState<MessageProps[]>(MessagesData);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
 
   const activeMessages = useMemo(() => {
     return activeChat ? getMessagesByChatId(activeChat.id, messages) : [];
-    
   }, [activeChat, messages]);
-  console.log('activeMessages' , activeMessages)
+  console.log("activeMessages", activeMessages);
 
   // New: Active media derived from active messages
   const activeMedia = useMemo(() => {
@@ -76,11 +75,11 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   const filteredChats = useMemo(() => {
     return chats.filter((chat) =>
       [chat.name, chat.lastMessage, chat.type]
-        .join(' ')
+        .join(" ")
         .toLowerCase()
         .includes(searchTerm.toLowerCase())
     );
-  }, [chats, searchTerm]);;
+  }, [chats, searchTerm]);
 
   // New: Helper to get media for any chat
   const getChatMedia = (chatId: string) => {
@@ -94,9 +93,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
   const updateChat = (id: string, updatedData: Partial<ChatProps>) => {
     setChats(
-      chats.map((chat) =>
-        chat.id === id ? { ...chat, ...updatedData } : chat
-      )
+      chats.map((chat) => (chat.id === id ? { ...chat, ...updatedData } : chat))
     );
   };
 
@@ -110,16 +107,14 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
   const addMessage = (newMessage: MessageProps) => {
     setMessages([...messages, newMessage]);
-  
+
     if (activeChat && newMessage.chatId === activeChat.id) {
       const { text = "", media = [] } = newMessage;
       const types = media.map((m) => m.type);
-  
+
       let mediaIcon: React.ReactNode = null;
       if (types.includes("image")) {
-        mediaIcon = (
-          <i className="material-symbols-outlined text-md">image</i>
-        );
+        mediaIcon = <i className="material-symbols-outlined text-md">image</i>;
       } else if (types.includes("video")) {
         mediaIcon = (
           <i className="material-symbols-outlined text-md">videocam</i>
@@ -133,7 +128,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
           <i className="material-symbols-outlined text-md">folder_zip</i>
         );
       }
-  
+
       let lastMessageContent: React.ReactNode = null;
       if (text) {
         lastMessageContent = (
@@ -143,21 +138,20 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         );
       } else if (media.length > 0 && media[0].fileName) {
         lastMessageContent = (
-          <p className='text-purple-500 flex items-center gap-1'>
+          <p className="text-purple-500 flex items-center gap-1">
             {mediaIcon} {media[0].fileName}
           </p>
         );
       } else {
         lastMessageContent = mediaIcon;
       }
-  
+
       updateChat(activeChat.id, {
         lastMessage: lastMessageContent,
         lastMessageTime: newMessage.time,
       });
     }
   };
-  
 
   // In your ChatProvider component
   const deleteMessage = (id: string) => {
@@ -167,9 +161,9 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   const setDraftMessage = (chatId: string, text: string) => {
     setDrafts((prev) => ({ ...prev, [chatId]: text }));
   };
-  
+
   const getDraftMessage = (chatId: string) => {
-    return drafts[chatId] || '';
+    return drafts[chatId] || "";
   };
 
   return (
@@ -200,14 +194,14 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 export const useChat = (): ChatContextType => {
   const context = useContext(ChatContext);
   if (!context) {
-    throw new Error('useChat must be used within a ChatProvider');
+    throw new Error("useChat must be used within a ChatProvider");
   }
   return context;
 };
 
 // MediaProps interface (add this if not already defined elsewhere)
 interface MediaProps {
-  type: 'image' | 'video' | 'audio' | 'file';
+  type: "image" | "video" | "audio" | "file";
   url: string;
   messageId: string;
   chatId: string;

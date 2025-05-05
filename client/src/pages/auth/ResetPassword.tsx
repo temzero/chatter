@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { AuthenticationLayout } from "./AuthenticationLayout";
+import { AuthenticationLayout } from "../PublicLayout";
 import { motion } from "framer-motion";
 
 const ResetPassword = () => {
@@ -62,7 +62,9 @@ const ResetPassword = () => {
           onSubmit={handleSubmit}
           className="flex flex-col justify-center w-[400px] gap-2 p-8"
         >
-          <h2 className="text-4xl font-semibold mb-4 text-center">Reset Password</h2>
+          <h2 className="text-4xl font-semibold mb-4 text-center">
+            Reset Password
+          </h2>
           <input
             type="password"
             id="password"

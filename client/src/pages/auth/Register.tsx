@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { AuthenticationLayout } from "./AuthenticationLayout";
+import { AuthenticationLayout } from "../PublicLayout";
 import { motion } from "framer-motion";
 
 const Register = () => {
@@ -70,7 +70,12 @@ const Register = () => {
               id="first_name"
               placeholder="First Name"
               value={first_name}
-              onChange={(e) => setFirstName(e.target.value)}
+              onChange={(e) =>
+                setFirstName(
+                  e.target.value.charAt(0).toUpperCase() +
+                    e.target.value.slice(1)
+                )
+              }
               required
               className="input backdrop-blur-lg"
             />
@@ -80,7 +85,12 @@ const Register = () => {
               id="last_name"
               placeholder="Last Name"
               value={last_name}
-              onChange={(e) => setLastName(e.target.value)}
+              onChange={(e) =>
+                setLastName(
+                  e.target.value.charAt(0).toUpperCase() +
+                    e.target.value.slice(1)
+                )
+              }
               required
               className="input backdrop-blur-lg"
             />

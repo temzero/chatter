@@ -30,8 +30,24 @@ export class AuthService {
 
   login(user: User) {
     const payload = { sub: user.id, username: user.username };
+    const token = this.jwtService.sign(payload);
+
+    // Return both token and essential user data
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: token,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        avatar: user.avatar,
+        phone_number: user.phone_number,
+        birthday: user.birthday,
+        bio: user.bio,
+        status: user.status,
+        is_email_verified: user.is_email_verified,
+      },
     };
   }
 

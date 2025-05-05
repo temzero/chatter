@@ -6,11 +6,11 @@ const SidebarProfileEdit: React.FC = () => {
     const { currentUser, setCurrentUser } = useAuth();
     const { setSidebar } = useSidebar();
     const [formData, setFormData] = useState({
-        firstName: currentUser?.firstName || '',
-        lastName: currentUser?.lastName || '',
+        first_name: currentUser?.first_name || '',
+        last_name: currentUser?.last_name || '',
         username: currentUser?.username || '',
         email: currentUser?.email || '',
-        phoneNumber: currentUser?.phoneNumber || '',
+        phone_number: currentUser?.phone_number || '',
         birthday: currentUser?.birthday || '',
         bio: currentUser?.bio || '',
         avatar: currentUser?.avatar || ''
@@ -100,8 +100,8 @@ const SidebarProfileEdit: React.FC = () => {
                             <label className="text-sm opacity-70">First Name</label>
                             <input
                                 type="text"
-                                name="firstName"
-                                value={formData.firstName}
+                                name="first_name"
+                                value={formData.first_name}
                                 onChange={handleChange}
                                 className="p-2 custom-border-b"
                                 placeholder="First Name"
@@ -112,8 +112,8 @@ const SidebarProfileEdit: React.FC = () => {
                             <label className="text-sm opacity-70">Last Name</label>
                             <input
                                 type="text"
-                                name="lastName"
-                                value={formData.lastName}
+                                name="last_name"
+                                value={formData.last_name}
                                 onChange={handleChange}
                                 className="p-2 custom-border-b"
                                 placeholder="Last Name"

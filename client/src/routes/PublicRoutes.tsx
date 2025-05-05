@@ -1,26 +1,23 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+// src/routes/PublicRoutes.tsx
+import { Routes, Route, Navigate } from "react-router-dom";
+import { ROUTES } from "@/constants/routes";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
 import ResetPassword from "@/pages/auth/ResetPassword";
 import VerifyEmail from "@/pages/auth/VerifyEmail";
 
-interface PublicRoutesProps {
-  isAuthenticated: boolean;
-}
-
-const PublicRoutes: React.FC<PublicRoutesProps> = ({ isAuthenticated }) => {
-  if (isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
-
+const PublicRoutes: React.FC = () => {
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password/:token" element={<ResetPassword />} />
-      <Route path="/verify-email/:first_name/:email/:token" element={<VerifyEmail />} />
+      {/* Redirect to login as default public route */}
+      <Route path="*" element={<Navigate to={ROUTES.PUBLIC.LOGIN} replace />} />
+
+      <Route path={ROUTES.PUBLIC.LOGIN} element={<Login />} />
+      <Route path={ROUTES.PUBLIC.REGISTER} element={<Register />} />
+      <Route path={ROUTES.PUBLIC.FORGOT_PASSWORD} element={<ForgotPassword />}/>
+      <Route path={ROUTES.PUBLIC.RESET_PASSWORD} element={<ResetPassword />} />
+      <Route path={ROUTES.PUBLIC.VERIFY_EMAIL} element={<VerifyEmail />} />
     </Routes>
   );
 };

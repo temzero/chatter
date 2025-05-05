@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { AuthenticationLayout } from "./AuthenticationLayout";
+import { AuthenticationLayout } from "../PublicLayout";
 import { motion } from "framer-motion";
 
 const ForgotPassword = () => {

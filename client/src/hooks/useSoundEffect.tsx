@@ -5,7 +5,6 @@ type SoundType = 'next' | 'prev';
 
 export const useSoundEffect = (soundPath?: string | SoundType) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
 
   // Preload sound if provided
   useEffect(() => {
