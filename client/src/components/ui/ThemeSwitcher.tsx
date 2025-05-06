@@ -1,9 +1,10 @@
-import { useTheme } from '@/contexts/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useThemeStore } from '@/stores/themeStore';
 
 const ThemeSwitcher = () => {
-  const { resolvedTheme, setTheme } = useTheme();
-
+  const resolvedTheme = useThemeStore((state) => state.theme);
+  const setTheme = useThemeStore((state) => state.setTheme);
+  
   const toggleTheme = () => {
     setTheme(resolvedTheme === 'light' ? 'dark' : 'light');
   };
@@ -16,11 +17,12 @@ const ThemeSwitcher = () => {
   };
 
   return (
-    <div
+    <motion.div
       id="theme-switcher"
       className="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer opacity-80 hover:opacity-100"
       onClick={toggleTheme}
       aria-label={`Toggle ${resolvedTheme === 'light' ? 'dark' : 'light'} mode`}
+      whileTap={{ scale: 0.9 }} // Add tap animation
     >
       <div className="relative w-6 h-6">
         <AnimatePresence mode="wait">
@@ -51,7 +53,7 @@ const ThemeSwitcher = () => {
           )}
         </AnimatePresence>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

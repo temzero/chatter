@@ -1,32 +1,37 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthStore } from "@/stores/authStore";
+import { AlertMessage } from "@/components/ui/AlertMessage";
 import { AuthenticationLayout } from "../PublicLayout";
+import { motion } from "framer-motion";
 import { QRCode } from "@/components/ui/QRCode";
 import qrCode from "@/assets/icon/qr-code.svg";
-import { motion } from "framer-motion";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: ""
+  });
+  
   const [showQrCode, setShowQrCode] = useState(false);
-  const { login, message, setMessage } = useAuth();
+  
+  const login = useAuthStore(state => state.login);
+  const loading = useAuthStore(state => state.loading);
+  
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setMessage("");
+    await login(formData.email, formData.password);
+    navigate("/");
+  };
 
-    try {
-      await login(email, password); // Call login with email and password
-      navigate("/"); // Redirect to homepage after login
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id]: value
+    }));
   };
 
   const toggleQrCode = () => {
@@ -49,23 +54,25 @@ const Login = () => {
           <input
             type="email"
             id="email"
-            placeholder="Username or Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
             required
             className="input backdrop-blur-lg"
             autoFocus
           />
+
           <input
             type="password"
             id="password"
             placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={formData.password}
+            onChange={handleChange}
             required
             className="input backdrop-blur-lg"
           />
-          {message && <div className="text-red-400 -mb-1">{message}</div>}
+          
+          <AlertMessage className="-mb-1" />
 
           <motion.button
             whileTap={{ scale: 0.98 }}

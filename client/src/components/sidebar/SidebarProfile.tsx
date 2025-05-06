@@ -1,10 +1,11 @@
 import { useSidebar } from "@/contexts/SidebarContext";
-import { useAuth } from '@/contexts/AuthContext';
+import { useCurrentUser, useAuthStore } from "@/stores/authStore";
 import ContactInfoItem from '../ui/contactInfoItem';
 
 const SidebarProfile: React.FC = () => {
-    const { currentUser, logout } = useAuth();
+    const currentUser = useCurrentUser();
     const { setSidebar } = useSidebar();
+    const logout = useAuthStore(state => state.logout);
 
     return (
         <aside className="relative w-[var(--sidebar-width)] h-full flex flex-col transition-all duration-300 ease-in-out">

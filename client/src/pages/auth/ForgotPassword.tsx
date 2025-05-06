@@ -1,30 +1,29 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthStore } from "@/stores/authStore";
+import { AlertMessage } from "@/components/ui/AlertMessage";
 import { AuthenticationLayout } from "../PublicLayout";
 import { motion } from "framer-motion";
 
 const ForgotPassword = () => {
-  const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [loading, setLoading] = useState(false);
-  const { sendPasswordResetEmail } = useAuth();
+  const [formData, setFormData] = useState({
+    email: ""
+  });
+
+  const sendPasswordResetEmail = useAuthStore(state => state.sendPasswordResetEmail);
+  const loading = useAuthStore(state => state.loading);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    await sendPasswordResetEmail(formData.email);
+  };
 
-    try {
-      setError("");
-      setSuccess("");
-      setLoading(true);
-      await sendPasswordResetEmail(email);
-      setSuccess("Check your inbox for further instructions");
-    } catch (err) {
-      setError("Failed to send reset password link");
-      console.error(err);
-    }
-    setLoading(false);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id]: value
+    }));
   };
 
   return (
@@ -41,18 +40,19 @@ const ForgotPassword = () => {
           <h2 className="text-4xl font-semibold text-center mb-6">
             Forgot Password
           </h2>
+
           <input
             type="email"
             id="email"
             placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={formData.email}
+            onChange={handleChange}
             required
             className="input backdrop-blur-lg"
             autoFocus
           />
-          {error && <div className="text-red-400 -mb-1">{error}</div>}
-          {success && <div className="text-green-400 -mb-1">{success}</div>}
+
+          <AlertMessage className="-mb-1" />
 
           <motion.button
             whileTap={{ scale: 0.98 }}
@@ -62,6 +62,7 @@ const ForgotPassword = () => {
           >
             {loading ? "Processing..." : "Send Reset Password Link"}
           </motion.button>
+
           <div className="flex items-center gap-4 mt-2">
             <Link
               to="/auth/login"

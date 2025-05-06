@@ -1,44 +1,51 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthStore } from "@/stores/authStore";
+import { AlertMessage } from "@/components/ui/AlertMessage";
 import { AuthenticationLayout } from "../PublicLayout";
 import { motion } from "framer-motion";
 
 const Register = () => {
-  const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
-  const [first_name, setFirstName] = useState("");
-  const [last_name, setLastName] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
+  const [formData, setFormData] = useState({
+    email: "",
+    username: "",
+    first_name: "",
+    last_name: "",
+    password: "",
+    confirmPassword: ""
+  });
+
+  const register = useAuthStore(state => state.register);
+  const setMessage = useAuthStore(state => state.setMessage);
+  const loading = useAuthStore(state => state.loading);
+  
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (password !== confirmPassword) {
-      return setError("Passwords do not match");
+    if (formData.password !== formData.confirmPassword) {
+      return setMessage("error", "Passwords do not match!");
     }
 
-    try {
-      setError("");
-      setLoading(true);
-      await register({
-        email,
-        username,
-        first_name,
-        last_name,
-        password,
-      });
-      navigate("/");
-    } catch (err) {
-      setError("Failed to create an account");
-      console.error(err);
-    }
-    setLoading(false);
+    await register({
+      email: formData.email,
+      username: formData.username,
+      first_name: formData.first_name,
+      last_name: formData.last_name,
+      password: formData.password,
+    });
+    navigate("/");
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id]: id === "first_name" || id === "last_name" 
+        ? value.charAt(0).toUpperCase() + value.slice(1) 
+        : value
+    }));
   };
 
   return (
@@ -57,8 +64,8 @@ const Register = () => {
             type="text"
             id="username"
             placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={formData.username}
+            onChange={handleChange}
             required
             className="input backdrop-blur-lg"
             autoFocus
@@ -69,13 +76,8 @@ const Register = () => {
               type="text"
               id="first_name"
               placeholder="First Name"
-              value={first_name}
-              onChange={(e) =>
-                setFirstName(
-                  e.target.value.charAt(0).toUpperCase() +
-                    e.target.value.slice(1)
-                )
-              }
+              value={formData.first_name}
+              onChange={handleChange}
               required
               className="input backdrop-blur-lg"
             />
@@ -84,13 +86,8 @@ const Register = () => {
               type="text"
               id="last_name"
               placeholder="Last Name"
-              value={last_name}
-              onChange={(e) =>
-                setLastName(
-                  e.target.value.charAt(0).toUpperCase() +
-                    e.target.value.slice(1)
-                )
-              }
+              value={formData.last_name}
+              onChange={handleChange}
               required
               className="input backdrop-blur-lg"
             />
@@ -100,8 +97,8 @@ const Register = () => {
             type="email"
             id="email"
             placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={formData.email}
+            onChange={handleChange}
             required
             className="input backdrop-blur-lg"
           />
@@ -110,8 +107,8 @@ const Register = () => {
             type="password"
             id="password"
             placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={formData.password}
+            onChange={handleChange}
             required
             className="input backdrop-blur-lg"
           />
@@ -120,13 +117,13 @@ const Register = () => {
             type="password"
             id="confirmPassword"
             placeholder="Confirm Password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            value={formData.confirmPassword}
+            onChange={handleChange}
             required
             className="input backdrop-blur-lg"
           />
 
-          {error && <div className="text-red-400 -mb-1">{error}</div>}
+          <AlertMessage className="-mb-1" />
 
           <motion.button
             whileTap={{ scale: 0.98 }}
@@ -146,8 +143,6 @@ const Register = () => {
             </Link>
           </div>
         </form>
-
-        {/* <i className="material-symbols-outlined text-[200px] z-10 backdrop-blur-md">person_add</i> */}
       </motion.div>
     </AuthenticationLayout>
   );

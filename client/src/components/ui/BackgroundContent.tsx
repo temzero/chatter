@@ -1,10 +1,10 @@
 // src/components/common/BackgroundContent.tsx
-import { useTheme } from "@/contexts/ThemeContext";
 import backgroundLight from "@/assets/image/backgroundSky.jpg";
 import backgroundDark from "@/assets/image/backgroundDark.jpg";
+import { useResolvedTheme } from "@/stores/themeStore";
 
 const BackgroundContent = () => {
-  const { resolvedTheme } = useTheme();
+  const resolvedTheme = useResolvedTheme()
 
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden">

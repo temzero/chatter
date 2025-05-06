@@ -10,21 +10,19 @@ import Chat from "@/components/chat/Chat";
 import BackgroundContent from "@/components/ui/BackgroundContent";
 import { Navigate } from "react-router-dom";
 import { useChat } from "@/contexts/ChatContext";
-
-interface PrivateLayoutProps {
-  isAuthenticated: boolean;
-}
+import { useIsAuthenticated } from "@/stores/authStore";
 
 const ChatContent: React.FC = () => {
   const { activeChat } = useChat();
   return activeChat ? <Chat /> : null;
 };
 
-const PrivateLayout: React.FC<PrivateLayoutProps> = ({ isAuthenticated }) => {
+const PrivateLayout: React.FC = () => {
+  const isAuthenticated = useIsAuthenticated();
+
   if (!isAuthenticated) {
     return <Navigate to={ROUTES.PUBLIC.LOGIN} replace />;
   }
-
 
   return (
     <ChatProvider>
@@ -38,7 +36,7 @@ const PrivateLayout: React.FC<PrivateLayoutProps> = ({ isAuthenticated }) => {
           </SidebarProvider>
           
           <ChatInfoProvider>
-            <ChatContent/>
+            <ChatContent />
           </ChatInfoProvider>
         </div>
       </ModalProvider>

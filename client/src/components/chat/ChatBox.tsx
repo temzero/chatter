@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import Message from './Message';
 import ChannelMessage from './MessageChannel';
-import { useAuth } from '@/contexts/AuthContext';
+import { useCurrentUser } from '@/stores/authStore';
 import { useChat } from '@/contexts/ChatContext';
 import { useSoundEffect } from '@/hooks/useSoundEffect';
 import bubbleSound from '@/assets/sound/message-bubble.mp3'
@@ -9,7 +9,7 @@ import popSound from '@/assets/sound/message-pop.mp3'
 import messageSound from '@/assets/sound/message-sent2.mp3'
 
 const ChatBox: React.FC = () => {
-  const { currentUser } = useAuth();
+  const currentUser = useCurrentUser()
   const { activeChat, activeMessages } = useChat();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);

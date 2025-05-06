@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/contexts/ChatContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import EmojiPicker from '../ui/EmojiPicker';
 import AttachFile from '../ui/AttachFile';
 import FileImportPreviews from '../ui/FileImportPreview';
+import { useCurrentUser } from '@/stores/authStore';
 
 const ChatBar: React.FC = () => {
-  const { currentUser } = useAuth();
+  const currentUser = useCurrentUser()
   const { activeChat, addMessage, setDraftMessage, getDraftMessage } = useChat();
   const [input, setInput] = useState('');
   const [triggerSendAnimation, setTriggerSendAnimation] = useState(false);

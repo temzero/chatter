@@ -1,54 +1,43 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthStore } from "@/stores/authStore";
+import { AlertMessage } from "@/components/ui/AlertMessage";
 import { AuthenticationLayout } from "../PublicLayout";
 import { motion } from "framer-motion";
 
 const ResetPassword = () => {
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [loading, setLoading] = useState(false);
-  const { resetPasswordWithToken } = useAuth();
+  const [formData, setFormData] = useState({
+    password: "",
+    confirmPassword: ""
+  });
+
   const { token } = useParams();
+  const loading = useAuthStore(state => state.loading);
+  const resetPasswordWithToken = useAuthStore(state => state.resetPasswordWithToken);
+  const setMessage = useAuthStore(state => state.setMessage);
   const navigate = useNavigate();
 
-  console.log("token: ", token);
-
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (password !== confirmPassword) {
-      return setError("Passwords do not match");
+    if (formData.password !== formData.confirmPassword) {
+      return setMessage("error", "Passwords do not match");
     }
 
     if (!token) {
-      return setError("Invalid reset token");
+      return setMessage("error", "Invalid reset token");
     }
 
-    try {
-      setError(""); // Reset error
-      setSuccess(""); // Reset success
-      setLoading(true);
+    await resetPasswordWithToken(token, formData.password);
+    setTimeout(() => navigate("/auth/login"), 2000);
+  };
 
-      // Call resetPasswordWithToken from the context
-      await resetPasswordWithToken(token, password);
-
-      // Success success
-      setSuccess(
-        "Password successfully reset. You can now login with your new password."
-      );
-
-      // Redirect to login page after 3 seconds
-      setTimeout(() => navigate("/login"), 2000);
-    } catch (err) {
-      setError("Failed to reset password");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id]: value
+    }));
   };
 
   return (
@@ -65,34 +54,39 @@ const ResetPassword = () => {
           <h2 className="text-4xl font-semibold mb-4 text-center">
             Reset Password
           </h2>
+
           <input
             type="password"
             id="password"
             placeholder="New Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={formData.password}
+            onChange={handleChange}
             required
             className="input backdrop-blur-lg"
             autoFocus
           />
+
           <input
             type="password"
             id="confirmPassword"
             placeholder="Confirm New Password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            value={formData.confirmPassword}
+            onChange={handleChange}
             required
             className="input backdrop-blur-lg"
           />
-          {error && <div className="text-red-400 -mb-1">{error}</div>}
-          {success && <div className="text-green-400 -mb-1">{success}</div>}
-          <button
+
+          <AlertMessage className="-mb-1" />
+
+          <motion.button
+            whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={loading}
             className="primary w-full py-1 mt-2"
           >
             {loading ? "Processing..." : "Reset Password"}
-          </button>
+          </motion.button>
+
           <div className="flex items-center gap-4 mt-2">
             <Link
               to="/auth/login"
