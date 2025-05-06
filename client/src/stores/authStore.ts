@@ -35,7 +35,7 @@ type AuthActions = {
   sendPasswordResetEmail: (email: string) => Promise<void>;
   resetPasswordWithToken: (token: string, newPassword: string) => Promise<void>;
   verifyEmailWithToken: (token: string) => Promise<void>;
-  initializeAuth: () => Promise<void>;
+  initialize: () => Promise<void>;
 };
 
 const initialState: AuthState = {
@@ -63,7 +63,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       },
 
       // Auth initialization
-      initializeAuth: async () => {
+      initialize: async () => {
         try {
           get().setLoading(true);
           const user = storageService.getUser();
@@ -197,7 +197,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         isAuthenticated: state.isAuthenticated,
       }),
       onRehydrateStorage: () => (state) => {
-        state?.initializeAuth();
+        state?.initialize();
       },
     }
   )
@@ -212,11 +212,15 @@ function handleAuthError(error: unknown): string {
 }
 
 // Selector hooks
-export const useCurrentUser = () => useAuthStore((state) => state.currentUser);
-export const useIsAuthenticated = () => 
-  useAuthStore((state) => state.isAuthenticated);
-export const useAuthLoading = () => useAuthStore((state) => state.loading);
-export const useAuthMessage = () => useAuthStore((state) => state.message);
+// Single selector for all auth state
+export const useAuthState = () => useAuthStore((state) => ({
+  currentUser: state.currentUser,
+  isAuthenticated: state.isAuthenticated,
+  loading: state.loading,
+  message: state.message,
+}));
+
+// Memoized action selector (won't cause re-renders when actions don't change)
 export const useAuthActions = () => useAuthStore((state) => ({
   setMessage: state.setMessage,
   clearMessage: state.clearMessage,
@@ -228,3 +232,7 @@ export const useAuthActions = () => useAuthStore((state) => ({
   resetPasswordWithToken: state.resetPasswordWithToken,
   verifyEmailWithToken: state.verifyEmailWithToken,
 }));
+
+// Individual selectors (only for frequently used isolated values)
+export const useCurrentUser = () => useAuthStore((state) => state.currentUser);
+export const useIsAuthenticated = () => useAuthStore((state) => state.isAuthenticated);

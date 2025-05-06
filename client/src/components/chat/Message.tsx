@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import classNames from 'classnames';
 import { motion } from 'framer-motion';
-import { useChat } from '@/contexts/ChatContext';
+import { useChatStore } from '@/stores/chatStore';
 import RenderMultipleMedia from '../ui/RenderMultipleMedia';
 import type { MediaProps } from '@/data/media';
 import FormatTime from '@/utils/formatTime';
@@ -46,7 +46,9 @@ const Message: React.FC<RenderMessageProps> = ({
   media = null,
   shouldAnimate = false 
 }) => {
-  const { activeChat, deleteMessage } = useChat();
+  const activeChat = useChatStore((state) => state.activeChat);
+  const deleteMessage = useChatStore((state) => state.deleteMessage);
+
   const [copied, setCopied] = useState(false);
 
   const isGroupChat = activeChat?.type === 'group';

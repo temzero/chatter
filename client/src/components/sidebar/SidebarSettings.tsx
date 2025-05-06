@@ -1,8 +1,9 @@
-import { useSidebar } from "@/contexts/SidebarContext";
+import { useSidebarStore } from '@/stores/sidebarStore';
+
 import ThemeSelector from "@/components/ui/ThemeSelector";
 
 const SidebarSettings: React.FC = () => {
-  const { setSidebar } = useSidebar();
+  const { setSidebar } = useSidebarStore();
 
   return (
     <aside

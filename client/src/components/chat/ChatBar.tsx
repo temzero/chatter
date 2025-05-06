@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useChat } from '@/contexts/ChatContext';
+import { useChatStore } from '@/stores/chatStore';
 import { motion } from 'framer-motion';
 import EmojiPicker from '../ui/EmojiPicker';
 import AttachFile from '../ui/AttachFile';
@@ -8,7 +8,12 @@ import { useCurrentUser } from '@/stores/authStore';
 
 const ChatBar: React.FC = () => {
   const currentUser = useCurrentUser()
-  const { activeChat, addMessage, setDraftMessage, getDraftMessage } = useChat();
+
+  const activeChat = useChatStore((state) => state.activeChat);
+  const addMessage = useChatStore((state) => state.addMessage);
+  const setDraftMessage = useChatStore((state) => state.setDraftMessage);
+  const getDraftMessage = useChatStore((state) => state.getDraftMessage);
+
   const [input, setInput] = useState('');
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);

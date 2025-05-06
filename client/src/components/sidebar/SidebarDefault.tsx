@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useChat } from "@/contexts/ChatContext";
-import { useSidebar } from "@/contexts/SidebarContext";
+import { useChatStore } from '@/stores/chatStore';
+import { useSidebarStore } from "@/stores/sidebarStore";
 import { Logo } from "../ui/Logo";
 import SlidingContainer from "@/components/ui/SlidingContainer";
 import ChatList from "@/components/ui/ChatList";
@@ -9,8 +9,13 @@ import { motion } from "framer-motion";
 const chatTypes = ["all", "private", "group", "channel"];
 
 const ChatSidebar: React.FC = () => {
-  const { chats } = useChat();
-  const { setSidebar, isCompact, toggleCompact } = useSidebar();
+  const chats = useChatStore((state) => state.chats);
+
+  const setSidebar = useSidebarStore((state) => state.setSidebar);
+  const isCompact = useSidebarStore((state) => state.isCompact);
+  const toggleCompact = useSidebarStore((state) => state.toggleCompact);
+
+
   const [selectedType, setSelectedType] = useState<string>(chatTypes[0]);
   const [direction, setDirection] = useState<number>(1);
 

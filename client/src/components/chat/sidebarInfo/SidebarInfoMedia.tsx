@@ -1,14 +1,16 @@
     import React, { useState, useMemo } from 'react';
-    import { useChatInfo } from '@/contexts/ChatInfoContext';
-    import { useChat } from '@/contexts/ChatContext';
+    import { useSidebarInfoStore } from '@/stores/sidebarInfoStore';
+    import { useActiveMedia } from '@/stores/chatStore';
     import SlidingContainer from '@/components/ui/SlidingContainer';
     import RenderMedia from '@/components/ui/RenderMedia'
 
     const mediaTypes = ['images', 'videos', 'audio', 'files'];
 
     const ChatInfoMedia: React.FC = () => {
-        const { setChatInfoMode } = useChatInfo();
-        const { activeMedia } = useChat();
+        const { setSidebarInfoMode } = useSidebarInfoStore();
+
+        const activeMedia = useActiveMedia();
+
         const [selectedType, setSelectedType] = useState<string>(mediaTypes[0]);
         const [direction, setDirection] = useState<number>(1);
 
@@ -90,7 +92,7 @@
                 <header className="flex p-4 w-full items-center min-h-[var(--header-height)] custom-border-b">
                     <h1 className='text-xl font-semibold'>Media & Files</h1>
                     <a className="flex items-center rounded-full cursor-pointer opacity-50 hover:opacity-100 ml-auto"
-                    onClick={() => setChatInfoMode('default')}>
+                    onClick={() => setSidebarInfoMode('default')}>
                         <i className="material-symbols-outlined">edit</i>
                     </a>
                 </header>
@@ -114,7 +116,7 @@
                 </div>
                 
                 <a className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-10 flex items-center justify-center cursor-pointer opacity-50 hover:opacity-90 bg-[var(--sidebar-color)]"
-                    onClick={() => setChatInfoMode('default')}>
+                    onClick={() => setSidebarInfoMode('default')}>
                     <i className="material-symbols-outlined rotate-90">arrow_forward_ios</i>
                 </a>
             </aside>

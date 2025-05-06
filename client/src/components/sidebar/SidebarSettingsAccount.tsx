@@ -1,9 +1,10 @@
 import { useCurrentUser } from "@/stores/authStore";
-import { useSidebar } from "@/contexts/SidebarContext";
+import { useSidebarStore } from '@/stores/sidebarStore';
+
 
 const SidebarSettingsAccount: React.FC = () => {
   const currentUser = useCurrentUser();
-  const { setSidebar } = useSidebar();
+  const { setSidebar } = useSidebarStore();
 
   return (
     <aside

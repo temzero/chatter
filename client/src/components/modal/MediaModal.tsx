@@ -1,23 +1,24 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useModal } from '@/contexts/ModalContext';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { useChat } from '@/contexts/ChatContext';
 import { MediaTopBar } from './MediaTopBar';
 import { MediaNavigationButtons } from './MediaNavigationButtons';
 import { SliderMediaContent } from './SliderMediaContent';
 import { MediaBottomInfo } from './MediaBottomInfo';
 import { useSoundEffect } from '@/hooks/useSoundEffect';
 import slidingSound from '@/assets/sound/click.mp3'
+import { useUIStore } from '@/stores/uiStore';
+import { useActiveMedia } from '@/stores/chatStore';
+
 
 export const MediaModal = () => {
-  const { currentMediaId, closeModal } = useModal();
-  const { activeMedia } = useChat();
+  const { currentMediaId, closeModal } = useUIStore();
+  const activeMedia = useActiveMedia();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const [rotation, setRotation] = useState(0);
   const [slidingAnimation, setSlidingAnimation] = useState(false);
 
-  const playsound = useSoundEffect(slidingSound)
+  const playSound = useSoundEffect(slidingSound)
 
   useEffect(() => {
     if (currentMediaId && activeMedia) {
@@ -33,7 +34,7 @@ export const MediaModal = () => {
       setCurrentIndex(prev => prev + 1);
       setSlidingAnimation(prev => !prev);
       setRotation(0);
-      playsound()
+      playSound()
     }
   }, [activeMedia, currentIndex]);
 
@@ -43,7 +44,7 @@ export const MediaModal = () => {
       setCurrentIndex(prev => prev - 1);
       setSlidingAnimation(prev => !prev);
       setRotation(0);
-      playsound()
+      playSound()
     }
   }, [currentIndex]);
 

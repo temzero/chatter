@@ -1,16 +1,16 @@
-import { useChat } from '@/contexts/ChatContext';
-import { useChatInfo } from '@/contexts/ChatInfoContext';
+import { useChatStore } from '@/stores/chatStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChatAvatar } from '@/components/ui/ChatAvatar';
+import { useSidebarInfoStore } from '@/stores/sidebarInfoStore';
 
 const ChatHeader: React.FC = () => {
-  const { activeChat } = useChat();
-  const { toggleChatInfo } = useChatInfo();
+  const activeChat = useChatStore((state) => state.activeChat);
+  const toggleSidebarInfo = useSidebarInfoStore((state) => state.toggleSidebarInfo)
 
   return (
     <header 
       className="w-full cursor-pointer hover:shadow-2xl flex items-center justify-between min-h-[var(--header-height)] max-h-[var(--header-height)] px-4 shadow border-b border-[var(--border-color)] backdrop-blur-[199px] z-40"
-      onClick={toggleChatInfo}
+      onClick={toggleSidebarInfo}
     >
       <AnimatePresence mode="wait">
         <motion.div 

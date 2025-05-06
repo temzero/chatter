@@ -1,4 +1,3 @@
-import { useSidebar } from '@/contexts/SidebarContext';
 import SidebarDefault from '@/components/sidebar/SidebarDefault';
 import SidebarSearch from '@/components/sidebar/SidebarSearch';
 import SidebarNewChat from '@/components/sidebar/SidebarNewChat';
@@ -8,9 +7,10 @@ import SidebarProfileEdit from '@/components/sidebar/SidebarProfileEdit';
 import SidebarSettings from '@/components/sidebar/SidebarSettings';
 import SidebarSettingsAccount from './SidebarSettingsAccount';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useCurrentSidebar } from '@/stores/sidebarStore';
 
 const Sidebar = () => {
-  const { currentSidebar } = useSidebar();
+  const currentSidebar = useCurrentSidebar();
 
   const sidebars = {
     default: <SidebarDefault />,

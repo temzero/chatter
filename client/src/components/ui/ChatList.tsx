@@ -1,5 +1,5 @@
 import React from "react";
-import { useChat } from "@/contexts/ChatContext";
+import { useChatStore } from '@/stores/chatStore';
 import { ChatProps } from "@/data/data";
 import { ChatAvatar } from "./ChatAvatar";
 
@@ -9,7 +9,10 @@ interface ChatListProps {
 }
 
 const ChatList: React.FC<ChatListProps> = ({ chats, isCompact = false }) => {
-  const { activeChat, setActiveChat, getDraftMessage } = useChat();
+  const activeChat = useChatStore((state) => state.activeChat);
+  const setActiveChat = useChatStore((state) => state.setActiveChat);
+  const getDraftMessage = useChatStore((state) => state.getDraftMessage);
+  
 
   const getUserItemClass = (chatId: string) => {
     const baseClasses =

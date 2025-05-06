@@ -1,14 +1,12 @@
 import { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useSidebar } from "@/contexts/SidebarContext";
+import { useSidebarStore } from "@/stores/sidebarStore";
 import { useCurrentUser } from "@/stores/authStore";
 
 const SidebarProfileEdit: React.FC = () => {
-  const { setCurrentUser } = useAuth();
-
+  const setCurrentUser = useSetCurrentUser();
   const currentUser = useCurrentUser();
 
-  const { setSidebar } = useSidebar();
+  const { setSidebar } = useSidebarStore();
   const [formData, setFormData] = useState({
     first_name: currentUser?.first_name || "",
     last_name: currentUser?.last_name || "",

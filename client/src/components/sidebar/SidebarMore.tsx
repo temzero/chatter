@@ -1,11 +1,11 @@
 import { useEffect } from "react";
-import { useSidebar } from "@/contexts/SidebarContext";
+import { useSidebarStore } from "@/stores/sidebarStore";
 import ThemeSwitcher from "../ui/ThemeSwitcher";
 import { useCurrentUser } from "@/stores/authStore";
 
 const SidebarMore: React.FC = () => {
   const currentUser = useCurrentUser();
-  const { setSidebar, isCompact, toggleCompact } = useSidebar();
+  const { setSidebar, isCompact, toggleCompact } = useSidebarStore();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

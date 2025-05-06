@@ -1,15 +1,15 @@
 import React, { useState, useMemo } from 'react';
 import SearchBar from '@/components/ui/SearchBar';
-import { useSidebar } from '@/contexts/SidebarContext';
+import { useSidebarStore } from '@/stores/sidebarStore';
 import SlidingContainer from '@/components/ui/SlidingContainer';
 import ChatList from '@/components/ui/ChatList';
-import { useChat } from '@/contexts/ChatContext';
+import { useChatStore } from '@/stores/chatStore';
 
 const chatTypes = ['all', 'private', 'group', 'channel'];
 
 const SidebarSearch: React.FC = () => {
-  const { chats } = useChat(); // use context values
-  const { setSidebar } = useSidebar();
+  const { chats } = useChatStore(); // use context values
+  const { setSidebar } = useSidebarStore();
   const [selectedType, setSelectedType] = useState<string>(chatTypes[0]);
   const [direction, setDirection] = useState<number>(1);
 

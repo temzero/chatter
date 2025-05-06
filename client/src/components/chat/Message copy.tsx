@@ -1,7 +1,7 @@
 import React from 'react';
 import classNames from 'classnames';
 import { motion } from 'framer-motion';
-import { useChat } from '@/contexts/ChatContext';
+import { useChatStore } from '@/stores/chatStore';
 import RenderMultipleMedia from '../ui/RenderMultipleMedia';
 import type { MediaProps } from '@/data/media';
 
@@ -45,7 +45,9 @@ const Message: React.FC<RenderMessageProps> = ({
   media = null,
   shouldAnimate = false 
 }) => {
-  const { activeChat, deleteMessage } = useChat();
+  const activeChat = useChatStore((state) => state.activeChat);
+  const deleteMessage = useChatStore((state) => state.deleteMessage);
+
   const isGroupChat = activeChat?.type === 'group';
   const alignmentClass = (isMe: boolean) => ({
     'ml-auto': isMe,

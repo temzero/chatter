@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import SearchBar from '@/components/ui/SearchBar';
-import { useSidebar } from '@/contexts/SidebarContext';
+import { useSidebarStore } from "@/stores/sidebarStore";
 import ChatList from '@/components/ui/ChatList';
-import { useChat } from '@/contexts/ChatContext';
+import { useChatStore } from '@/stores/chatStore';
 
 const chatTypes = ['person', 'group'];
 
 const SidebarNewChat: React.FC = () => {
-  const {chats} = useChat();
-  const { setSidebar } = useSidebar();
+  const chats = useChatStore((state) => state.chats);
+  const setSidebar = useSidebarStore((state) => state.setSidebar);
+
   const [selectedType, setSelectedType] = useState<string>(chatTypes[0]);
 
   const privateChats = chats.filter(chat => chat.type === 'private')

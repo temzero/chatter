@@ -1,12 +1,12 @@
-import { useChatInfo } from '@/contexts/ChatInfoContext';
 import { AnimatePresence, motion } from 'framer-motion';
-import ChatInfoDefault from './ChatInfoDefault';
-import ChatInfoMedia from './ChatInfoMedia';
-import ChatInfoSaved from './ChatInfoSaved';
-import ChatInfoEdit from './ChatInfoEdit';
+import ChatInfoDefault from './SidebarInfoDefault';
+import ChatInfoMedia from './SidebarInfoMedia';
+import ChatInfoSaved from './SidebarInfoSaved';
+import ChatInfoEdit from './SidebarInfoEdit';
+import { useSidebarInfoMode } from '@/stores/sidebarInfoStore';
 
-const ChatInfo: React.FC = () => {
-  const { chatInfoMode } = useChatInfo();
+const SidebarInfo: React.FC = () => {
+  const sidebarInfoMode = useSidebarInfoMode();
 
   // Define your chat info components
   const chatInfoComponents = {
@@ -109,15 +109,15 @@ const ChatInfo: React.FC = () => {
   };
 
   // Get the current component and animation
-  const CurrentComponent = chatInfoComponents[chatInfoMode] || null;
-  const currentAnimation = animations[chatInfoMode] || animations.fallback;
+  const CurrentComponent = chatInfoComponents[sidebarInfoMode] || null;
+  const currentAnimation = animations[sidebarInfoMode] || animations.fallback;
 
   return (
     <div className="h-full w-full relative overflow-hidden bg-[var(--sidebar-color)] border-l-2 border-[var(--border-color)] shadow-lg">
       <AnimatePresence mode="wait">
         {CurrentComponent && (
           <motion.div
-            key={chatInfoMode}
+            key={sidebarInfoMode}
             initial={currentAnimation.initial}
             animate={currentAnimation.animate}
             exit={currentAnimation.exit}
@@ -132,4 +132,4 @@ const ChatInfo: React.FC = () => {
   );
 };
 
-export default ChatInfo;
+export default SidebarInfo;

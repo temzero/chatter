@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useChat } from '@/contexts/ChatContext';
+import { useState, useEffect } from "react";
+import { useChatStore } from "@/stores/chatStore";
 
 type SearchBarProps = {
   placeholder?: string;
@@ -7,9 +7,15 @@ type SearchBarProps = {
   value?: string;
 };
 
-const SearchBar = ({ value, placeholder = 'Search something...', type }: SearchBarProps) => {
-  const { searchTerm, setSearchTerm } = useChat();
-  const [inputValue, setInputValue] = useState(value || '');
+const SearchBar = ({
+  value,
+  placeholder = "Search something...",
+  type,
+}: SearchBarProps) => {
+  const searchTerm = useChatStore((state) => state.searchTerm);
+  const setSearchTerm = useChatStore((state) => state.setSearchTerm);
+
+  const [inputValue, setInputValue] = useState(value || "");
 
   // Sync the input value with the context search term
   useEffect(() => {
@@ -26,10 +32,10 @@ const SearchBar = ({ value, placeholder = 'Search something...', type }: SearchB
     <div className="flex w-full items-center gap-1 p-1 rounded border-2 border-[var(--border-color)] shadow focus-within:border-[var(--primary-color)] focus-within:shadow-md transition-all duration-200">
       <i
         className={`material-symbols-outlined transition-opacity duration-200 ${
-          inputValue ? 'opacity-100' : 'opacity-40'
+          inputValue ? "opacity-100" : "opacity-40"
         }`}
       >
-        {type === 'add' ? 'add' : 'search'}
+        {type === "add" ? "add" : "search"}
       </i>
       <input
         type="text"

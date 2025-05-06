@@ -1,10 +1,10 @@
-import { useSidebar } from "@/contexts/SidebarContext";
+import { useSidebarStore } from "@/stores/sidebarStore";
 import { useCurrentUser, useAuthStore } from "@/stores/authStore";
 import ContactInfoItem from '../ui/contactInfoItem';
 
 const SidebarProfile: React.FC = () => {
     const currentUser = useCurrentUser();
-    const { setSidebar } = useSidebar();
+    const { setSidebar } = useSidebarStore();
     const logout = useAuthStore(state => state.logout);
 
     return (
