@@ -46,24 +46,3 @@ export const authService = {
     return data;
   },
 };
-
-// Local storage helpers (could also be moved to a separate storage service)
-export const storageService = {
-  getUser(): MyProfileProps | null {
-    const user = localStorage.getItem("user");
-    return user ? JSON.parse(user) : null;
-  },
-
-  setUser(user: MyProfileProps) {
-    localStorage.setItem("user", JSON.stringify(user));
-  },
-
-  setToken(token: string) {
-    localStorage.setItem("token", token);
-  },
-
-  clear() {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-  },
-};

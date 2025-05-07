@@ -23,13 +23,4 @@ export class MessageMetadata {
 
   @Column({ type: 'simple-array', nullable: true })
   hashtags: string[];
-
-  @Column({ default: false })
-  isPinned: boolean;
-
-  @Column({ nullable: true })
-  pinnedBy: string;
-
-  @Column({ type: 'timestamp', nullable: true })
-  pinnedTimestamp: Date;
 }

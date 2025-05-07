@@ -18,6 +18,19 @@ export class ChatService {
     });
   }
 
+  async getChatsByUserId(userId: string): Promise<Chat[]> {
+    const chats = await this.chatRepository.find({
+      where: [{ member1: { id: userId } }, { member2: { id: userId } }],
+      relations: ['member1', 'member2', 'lastMessage', 'pinnedMessage'],
+    });
+
+    return chats.sort((a, b) => {
+      const aTime = a.lastMessage?.updatedAt || a.updatedAt;
+      const bTime = b.lastMessage?.updatedAt || b.updatedAt;
+      return bTime.getTime() - aTime.getTime(); // Newest first
+    });
+  }
+
   async getChatById(id: string): Promise<Chat | null> {
     return this.chatRepository.findOne({
       where: { id },

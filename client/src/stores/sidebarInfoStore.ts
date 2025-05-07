@@ -8,7 +8,7 @@ interface SidebarInfoStore {
   isSidebarInfoVisible: boolean;
   sidebarInfoMode: SidebarInfoMode;
   toggleSidebarInfo: () => void;
-  setSidebarInfoMode: (mode: SidebarInfoMode) => void;
+  setSidebarInfo: (mode: SidebarInfoMode) => void;
   initializeKeyListeners: () => () => void;
 }
 
@@ -26,7 +26,7 @@ export const useSidebarInfoStore = create<SidebarInfoStore>()(
         });
       },
 
-      setSidebarInfoMode: (mode) => set({ sidebarInfoMode: mode }),
+      setSidebarInfo: (mode) => set({ sidebarInfoMode: mode }),
 
       initializeKeyListeners: () => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -76,5 +76,5 @@ export const useSidebarInfoMode = () =>
 export const useSidebarInfoActions = () => 
   useSidebarInfoStore((state) => ({
     toggleSidebarInfo: state.toggleSidebarInfo,
-    setSidebarInfoMode: state.setSidebarInfoMode
+    setSidebarInfo: state.setSidebarInfo
   }));

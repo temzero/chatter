@@ -6,6 +6,8 @@ import {
   OneToMany,
   ManyToOne,
   JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { MessageMedia } from './message-media.entity';
 import { MessageMetadata } from './message-metadata.entity';
@@ -39,12 +41,6 @@ export class Message {
     [userId: string]: string;
   };
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  timestamp: Date;
-
-  @Column({ type: 'timestamp', nullable: true })
-  edited_timestamp: Date;
-
   @OneToMany(() => MessageMedia, (media) => media.message, {
     cascade: true,
     nullable: true,
@@ -57,27 +53,11 @@ export class Message {
   })
   metadata: MessageMetadata;
 
-  @Column({ default: false })
-  is_deleted: boolean;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 
-  @Column({ type: 'timestamp', nullable: true })
-  deleted_timestamp: Date;
-
-  constructor(partial?: Partial<Message>) {
-    if (partial) {
-      Object.assign(this, partial);
-    }
-  }
-
-  edit(newContent: string): void {
-    this.content = newContent;
-    this.edited_timestamp = new Date();
-  }
-
-  delete(): void {
-    this.is_deleted = true;
-    this.deleted_timestamp = new Date();
-  }
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 
   addReaction(userId: string, reaction: string): void {
     if (!this.reactions) {

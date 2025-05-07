@@ -9,5 +9,6 @@ import { ChatGroupMember } from 'src/modules/chat-group-member/entities/chat-gro
   imports: [TypeOrmModule.forFeature([ChatGroup, ChatGroupMember])],
   controllers: [ChatGroupController],
   providers: [ChatGroupService],
+  exports: [ChatGroupService],
 })
 export class ChatGroupModule {}

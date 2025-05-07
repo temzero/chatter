@@ -20,6 +20,25 @@ export class ChatGroupService {
     return this.chatGroupRepository.find();
   }
 
+  async getGroupsByUserId(userId: string): Promise<ChatGroup[]> {
+    const members = await this.chatGroupMemberRepository.find({
+      where: { user_id: userId },
+      relations: [
+        'chatGroup',
+        'chatGroup.lastMessage',
+        'chatGroup.pinnedMessage',
+      ],
+    });
+
+    return members
+      .map((member) => member.chatGroup)
+      .sort((a, b) => {
+        const aTime = a.lastMessage?.updatedAt || a.updatedAt;
+        const bTime = b.lastMessage?.updatedAt || b.updatedAt;
+        return bTime.getTime() - aTime.getTime(); // Descending order (newest first)
+      });
+  }
+
   async getGroupById(id: string): Promise<ChatGroup | null> {
     return this.chatGroupRepository.findOne({
       where: { id },

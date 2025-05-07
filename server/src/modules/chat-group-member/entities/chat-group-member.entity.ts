@@ -1,4 +1,12 @@
-import { Entity, Column, ManyToOne, JoinColumn, PrimaryColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  PrimaryColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { ChatGroup } from '../../chat-group/entities/chat-group.entity';
 import { User } from '../../user/entities/user.entity';
 
@@ -14,6 +22,9 @@ export class ChatGroupMember {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
+  @Column({ type: 'varchar', nullable: true })
+  nickname: string;
+
   @ManyToOne(() => ChatGroup)
   @JoinColumn({ name: 'chat_group_id' })
   chatGroup: ChatGroup;
@@ -24,9 +35,13 @@ export class ChatGroupMember {
   @Column({ default: false })
   is_banned: boolean;
 
-  @Column({ nullable: true })
-  muted_until: string;
+  @Column({ type: 'timestamp', nullable: true })
+  muted_until: Date; // Changed from string to Date
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  joined_at: Date;
+  @CreateDateColumn({ name: 'joined_at' })
+  joinedAt: Date; // Using CreateDateColumn for automatic timestamp
+
+  // Optional: If you need to track last update
+  @UpdateDateColumn({ name: 'updated_at', nullable: true })
+  updatedAt?: Date;
 }

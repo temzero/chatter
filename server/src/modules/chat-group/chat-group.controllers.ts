@@ -35,6 +35,25 @@ export class ChatGroupController {
     }
   }
 
+  @Get('user/:userId')
+  async findAllByUserId(
+    @Param('userId') userId: string,
+  ): Promise<ResponseData<ChatGroup[]>> {
+    try {
+      const groups = await this.chatGroupService.getGroupsByUserId(userId);
+      return new ResponseData<ChatGroup[]>(
+        groups,
+        HttpStatus.OK,
+        'User chat groups retrieved successfully',
+      );
+    } catch (error: unknown) {
+      throw new HttpException(
+        error || 'Failed to retrieve user chat groups',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   @Post()
   async create(
     @Body() chatGroupDto: ChatGroupDto,

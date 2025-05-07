@@ -1,206 +1,134 @@
 import { create } from "zustand";
-import { ChatsData } from "@/data/chat";
-import { MessagesData } from "@/data/message";
-import type { MessageProps } from "@/data/message";
-import type { ChatProps } from "@/data/types";
-
-interface MediaProps {
-  type: "image" | "video" | "audio" | "file";
-  url: string;
-  fileName?: string;
-  messageId: string;
-  chatId: string;
-  timestamp: string;
-}
-
-interface LastMessageInfo {
-  content: string;
-  icon?: string;
-  time: string;
-}
+import type { Chat } from "@/types/chat";
+import { chatService } from "@/services/chatService";
+import {
+  useMessageStore,
+  getMessagesByChatId,
+  getMediaFromMessages,
+} from "./messageStore";
 
 interface ChatStore {
-  chats: ChatProps[];
-  messages: MessageProps[];
-  drafts: Record<string, string>;
+  chats: Chat[];
   searchTerm: string;
-  activeChat: ChatProps | null;
-  activeMessages: MessageProps[];
-  activeMedia: MediaProps[];
+  activeChat: Chat | null;
 
-  // Actions
+  getChats: (userId: string) => Promise<void>;
+  getChatById: (chatId: string) => Promise<void>;
   setSearchTerm: (term: string) => void;
-  setActiveChat: (chat: ChatProps | null) => void;
-  addChat: (newChat: ChatProps) => void;
-  updateChat: (id: string, updatedData: Partial<ChatProps>) => void;
-  deleteChat: (id: string) => void;
-  addMessage: (newMessage: MessageProps) => void;
-  deleteMessage: (id: string) => void;
-  getChatMedia: (chatId: string) => MediaProps[];
-  setDraftMessage: (chatId: string, draft: string) => void;
-  getDraftMessage: (chatId: string) => string;
+  setActiveChat: (chat: Chat | null) => void;
+  createChat: (payload: {
+    participants: string[];
+    isGroup?: boolean;
+  }) => Promise<void>;
+  updateChat: (id: string, updates: Partial<Chat>) => Promise<void>;
+  deleteChat: (id: string) => Promise<void>;
 }
 
-// Helpers
-const getMessagesByChatId = (chatId: string, messages: MessageProps[]) => {
-  return messages.filter((msg) => msg.chatId === chatId);
-};
-
-const getMediaFromMessages = (messages: MessageProps[]): MediaProps[] => {
-  return messages
-    .filter((msg) => msg.media && msg.media.length > 0)
-    .flatMap((msg) =>
-      msg.media!.map((mediaItem) => ({
-        ...mediaItem,
-        messageId: msg.id,
-        chatId: msg.chatId,
-        timestamp: msg.time,
-      }))
-    );
-};
-
-const createLastMessageInfo = (message: MessageProps): LastMessageInfo => {
-  const { text = "", media = [], time } = message;
-  const types = media.map((m) => m.type);
-
-  const icon = types.includes("image")
-    ? "image"
-    : types.includes("video")
-    ? "videocam"
-    : types.includes("audio")
-    ? "music_note"
-    : types.length
-    ? "folder_zip"
-    : undefined;
-
-  const content = text || media[0]?.fileName || "";
-
-  return { content, icon, time };
-};
-
-// Zustand store
 export const useChatStore = create<ChatStore>((set, get) => ({
-  chats: ChatsData,
-  messages: MessagesData,
-  drafts: {},
+  chats: [],
   searchTerm: "",
   activeChat: null,
-  activeMessages: [],
-  activeMedia: [],
+
+  getChats: async (userId) => {
+    try {
+      // Choose one of these based on your needs:
+      // const chats = await chatService.getAllChats(); // For all chats (admin)
+      // const chats = await chatService.getChatsByUserId(userId); // For user-specific chats
+      const chats = await chatService.getAllChatsByUserId(userId); // For all conversations (private + groups)
+      set({ chats });
+    } catch (error) {
+      console.error("Failed to fetch chats:", error);
+    }
+  },
+
+  getChatById: async (chatId) => {
+    try {
+      const chat = await chatService.getChatById(chatId);
+      set((state) => ({
+        chats: state.chats.some((c) => c.id === chatId)
+          ? state.chats.map((c) => (c.id === chatId ? chat : c))
+          : [...state.chats, chat],
+        activeChat: state.activeChat?.id === chatId ? chat : state.activeChat,
+      }));
+    } catch (error) {
+      console.error("Failed to fetch chat:", error);
+    }
+  },
 
   setSearchTerm: (term) => set({ searchTerm: term }),
 
   setActiveChat: (chat) => {
-    const messages = get().messages;
-    const activeMessages = chat ? getMessagesByChatId(chat.id, messages) : [];
-    const activeMedia = getMediaFromMessages(activeMessages);
-
-    set({
-      activeChat: chat,
-      activeMessages,
-      activeMedia,
-    });
-  },
-
-  addChat: (newChat) => set((state) => ({ chats: [newChat, ...state.chats] })),
-
-  updateChat: (id, updatedData) =>
-    set((state) => ({
-      chats: state.chats.map((chat) =>
-        chat.id === id ? { ...chat, ...updatedData } : chat
-      ),
-    })),
-
-  deleteChat: (id) =>
-    set((state) => {
-      const newChats = state.chats.filter((chat) => chat.id !== id);
-      const newMessages = state.messages.filter(
-        (message) => message.chatId !== id
-      );
-      const isDeletingActive = state.activeChat?.id === id;
-
-      return {
-        chats: newChats,
-        messages: newMessages,
-        activeChat: isDeletingActive ? null : state.activeChat,
-        activeMessages: isDeletingActive ? [] : state.activeMessages,
-        activeMedia: isDeletingActive ? [] : state.activeMedia,
-      };
-    }),
-
-  addMessage: (newMessage) => {
-    const { activeChat } = get();
-    const updatedMessages = [...get().messages, newMessage];
-
-    const shouldUpdateActive =
-      activeChat && newMessage.chatId === activeChat.id;
-    const activeMessages = shouldUpdateActive
-      ? getMessagesByChatId(activeChat.id, updatedMessages)
-      : get().activeMessages;
-
-    const activeMedia = shouldUpdateActive
-      ? getMediaFromMessages(activeMessages)
-      : get().activeMedia;
-
-    const updatedChats = get().chats.map((chat) =>
-      chat.id === newMessage.chatId
-        ? {
-            ...chat,
-            ...createLastMessageInfo(newMessage),
-          }
-        : chat
-    );
-
-    set({
-      messages: updatedMessages,
-      chats: updatedChats,
-      activeMessages,
-      activeMedia,
-    });
-  },
-
-  deleteMessage: (id) => {
-    const messages = get().messages.filter((msg) => msg.id !== id);
-    const activeChat = get().activeChat;
-    const activeMessages = activeChat
-      ? getMessagesByChatId(activeChat.id, messages)
+    const allMessages = useMessageStore.getState().messages;
+    const activeMessages = chat
+      ? getMessagesByChatId(chat.id, allMessages)
       : [];
     const activeMedia = getMediaFromMessages(activeMessages);
 
-    set({
-      messages,
+    useMessageStore.setState({
       activeMessages,
       activeMedia,
     });
+
+    set({ activeChat: chat });
   },
 
-  getChatMedia: (chatId) => {
-    const chatMessages = getMessagesByChatId(chatId, get().messages);
-    return getMediaFromMessages(chatMessages);
+  createChat: async (payload) => {
+    try {
+      const newChat = await chatService.createChat(payload);
+      set((state) => ({ chats: [newChat, ...state.chats] }));
+      return newChat; // Return the created chat for immediate use if needed
+    } catch (error) {
+      console.error("Failed to create chat:", error);
+      throw error; // Re-throw to handle in UI if needed
+    }
   },
 
-  setDraftMessage: (chatId, draft) =>
-    set((state) => ({
-      drafts: { ...state.drafts, [chatId]: draft },
-    })),
+  updateChat: async (id, updates) => {
+    try {
+      const updatedChat = await chatService.updateChat(id, updates);
+      set((state) => ({
+        chats: state.chats.map((chat) => (chat.id === id ? updatedChat : chat)),
+        activeChat:
+          state.activeChat?.id === id ? updatedChat : state.activeChat,
+      }));
+      return updatedChat; // Return the updated chat for immediate use if needed
+    } catch (error) {
+      console.error("Failed to update chat:", error);
+      throw error; // Re-throw to handle in UI if needed
+    }
+  },
 
-  getDraftMessage: (chatId) => {
-    return get().drafts[chatId] || "";
+  deleteChat: async (id) => {
+    try {
+      await chatService.deleteChat(id);
+
+      useMessageStore.setState((msgState) => {
+        const filteredMessages = msgState.messages.filter(
+          (m) => m.chat.id !== id
+        );
+        const isDeletingActive = get().activeChat?.id === id;
+        return {
+          messages: filteredMessages,
+          activeMessages: isDeletingActive ? [] : msgState.activeMessages,
+          activeMedia: isDeletingActive ? [] : msgState.activeMedia,
+        };
+      });
+
+      set((state) => ({
+        chats: state.chats.filter((chat) => chat.id !== id),
+        activeChat: state.activeChat?.id === id ? null : state.activeChat,
+      }));
+    } catch (error) {
+      console.error("Failed to delete chat:", error);
+      throw error; // Re-throw to handle in UI if needed
+    }
   },
 }));
 
-// Selectors
+// Optional: A hook to get filtered chats by search term
 export const useFilteredChats = () =>
   useChatStore((state) =>
     state.chats.filter((chat) =>
-      [chat.name, chat.lastMessage, chat.type]
-        .join(" ")
-        .toLowerCase()
-        .includes(state.searchTerm.toLowerCase())
+      chat.name?.toLowerCase().includes(state.searchTerm.toLowerCase())
     )
   );
-
-export const useActiveMessages = () =>
-  useChatStore((state) => state.activeMessages);
-
-export const useActiveMedia = () => useChatStore((state) => state.activeMedia);

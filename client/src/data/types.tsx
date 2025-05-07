@@ -44,6 +44,7 @@ export interface UserProps {
   }
   
   export interface ChatProps {
+    bio: string | undefined;
     id: string;
     name?: string; // for groups/channels
     description?: string; // for groups/channels

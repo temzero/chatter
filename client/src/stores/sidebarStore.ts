@@ -2,7 +2,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-type SidebarType = 'login' | 'register' | 'forgotPassword' | 'default' | 'newChat' | 'search' | 'more' | 'profile' | 'profileEdit' | 'settings' | 'settingsAccount';
+type SidebarType = 'default' | 'forgotPassword' | 'newChat' | 'search' | 'more' | 'profile' | 'profileEdit' | 'settings' | 'settingsAccount';
 
 interface SidebarStore {
   currentSidebar: SidebarType;

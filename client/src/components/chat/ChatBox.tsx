@@ -1,21 +1,25 @@
-import React, { useRef, useEffect, useState, useMemo } from 'react';
-import Message from './Message';
-import ChannelMessage from './MessageChannel';
-import { useCurrentUser } from '@/stores/authStore';
-import { useActiveMessages, useChatStore } from '@/stores/chatStore';
-import { useSoundEffect } from '@/hooks/useSoundEffect';
-import bubbleSound from '@/assets/sound/message-bubble.mp3'
-import popSound from '@/assets/sound/message-pop.mp3'
-import messageSound from '@/assets/sound/message-sent2.mp3'
+import React, { useRef, useEffect, useState, useMemo } from "react";
+import Message from "./Message";
+import ChannelMessage from "./MessageChannel";
+import { useCurrentUser } from "@/stores/authStore";
+import { useChatStore } from "@/stores/chatStore";
+import { useMessageStore } from "@/stores/messageStore";
+
+import { useSoundEffect } from "@/hooks/useSoundEffect";
+import bubbleSound from "@/assets/sound/message-bubble.mp3";
+import popSound from "@/assets/sound/message-pop.mp3";
+import messageSound from "@/assets/sound/message-sent2.mp3";
 
 const ChatBox: React.FC = () => {
-  const currentUser = useCurrentUser()
+  const currentUser = useCurrentUser();
   const activeChat = useChatStore((state) => state.activeChat);
-  
-  const activeMessages = useActiveMessages();
+  const activeMessages = useMessageStore((state) => state.activeMessages);
+
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);
-  const playMessageSound = useSoundEffect(messageSound || popSound || bubbleSound);
+  const playMessageSound = useSoundEffect(
+    messageSound || popSound || bubbleSound
+  );
 
   const newMessageAdded = useMemo(() => {
     return activeMessages.length > previousMessageCount;
@@ -27,7 +31,7 @@ const ChatBox: React.FC = () => {
 
   // Helper: Wait for all media elements (img, video, audio) to load
   const waitForMediaToLoad = (container: HTMLElement) => {
-    const mediaElements = container.querySelectorAll('img, video, audio');
+    const mediaElements = container.querySelectorAll("img, video, audio");
     const promises = Array.from(mediaElements).map(
       (media) =>
         new Promise((resolve) => {
@@ -35,7 +39,10 @@ const ChatBox: React.FC = () => {
             // Image element
             if (media.complete) resolve(true);
             else media.onload = media.onerror = () => resolve(true);
-          } else if (media instanceof HTMLVideoElement || media instanceof HTMLAudioElement) {
+          } else if (
+            media instanceof HTMLVideoElement ||
+            media instanceof HTMLAudioElement
+          ) {
             // Video and Audio elements
             if (media.readyState === 4) resolve(true); // Video/Audio is ready
             else media.oncanplaythrough = () => resolve(true);
@@ -51,31 +58,31 @@ const ChatBox: React.FC = () => {
       const container = containerRef.current;
       waitForMediaToLoad(container).then(() => {
         container.scrollTop = container.scrollHeight;
-        playMessageSound()
+        playMessageSound();
       });
     }
   }, [newMessageAdded, activeMessages]);
 
-  const isChannel = activeChat?.type === 'channel';
+  const isChannel = activeChat?.type === "channel";
 
   // Group messages by date
   const groupedMessages = useMemo(() => {
-    const groups: {date: string, messages: typeof activeMessages}[] = [];
-    
+    const groups: { date: string; messages: typeof activeMessages }[] = [];
+
     activeMessages.forEach((msg) => {
       const messageDate = new Date(msg.time).toLocaleDateString();
       const lastGroup = groups[groups.length - 1];
-      
+
       if (!lastGroup || lastGroup.date !== messageDate) {
         groups.push({
           date: messageDate,
-          messages: [msg]
+          messages: [msg],
         });
       } else {
         lastGroup.messages.push(msg);
       }
     });
-    
+
     return groups;
   }, [activeMessages]);
 
@@ -89,15 +96,16 @@ const ChatBox: React.FC = () => {
           <React.Fragment key={group.date}>
             <div className="sticky -top-5 z-10 flex justify-center mb-4">
               <div className="bg-black bg-opacity-30 text-white text-xs p-1 rounded">
-                {group.date || 'Today'}
+                {group.date || "Today"}
               </div>
             </div>
             {group.messages.map((msg, index) => {
               const isLastMessageInGroup = index === group.messages.length - 1;
-              const isNewMessage = newMessageAdded && 
-                                 index === group.messages.length - 1 && 
-                                 group === groupedMessages[groupedMessages.length - 1];
-              
+              const isNewMessage =
+                newMessageAdded &&
+                index === group.messages.length - 1 &&
+                group === groupedMessages[groupedMessages.length - 1];
+
               return isChannel ? (
                 <ChannelMessage
                   key={msg.id}

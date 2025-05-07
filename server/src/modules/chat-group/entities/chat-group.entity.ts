@@ -4,6 +4,8 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Message } from '../../message/entities/message.entity';
 
@@ -24,9 +26,6 @@ export class ChatGroup {
   @Column({ nullable: true })
   avatar?: string;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  created_at: Date;
-
   @ManyToOne(() => Message, { nullable: true })
   @JoinColumn({ name: 'last_message_id' })
   lastMessage?: Message;
@@ -40,4 +39,10 @@ export class ChatGroup {
 
   @Column()
   is_broadcast_only: boolean;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 }

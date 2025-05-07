@@ -88,14 +88,14 @@ const messages = [
 ];
 
 const ChatInfoSaved: React.FC = () => {
-  const { setSidebarInfoMode } = useSidebarInfoStore();
+  const { setSidebarInfo } = useSidebarInfoStore();
 
   return (
     <aside className="w-full h-full overflow-hidden flex flex-col">
       <header className="flex px-4 w-full items-center min-h-[var(--header-height)] custom-border-b">
         {/* <a 
           className="flex items-center rounded-full p-2 cursor-pointer opacity-50 hover:opacity-100"
-          onClick={() => setSidebarInfoMode('default')}
+          onClick={() => setSidebarInfo('default')}
         >
           <i className="material-symbols-outlined">arrow_back</i>
         </a> */}
@@ -103,7 +103,7 @@ const ChatInfoSaved: React.FC = () => {
 
         <a 
           className="flex items-center rounded-full cursor-pointer opacity-50 hover:opacity-100 ml-auto"
-          onClick={() => setSidebarInfoMode('default')}
+          onClick={() => setSidebarInfo('default')}
         >
           <i className="material-symbols-outlined">edit</i>
         </a>
@@ -148,7 +148,7 @@ const ChatInfoSaved: React.FC = () => {
       </div>
 
       <a className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-10 flex items-center justify-center cursor-pointer opacity-50 hover:opacity-90 bg-[var(--sidebar-color)]"
-          onClick={()=> setSidebarInfoMode('default')}>
+          onClick={()=> setSidebarInfo('default')}>
           <i className="material-symbols-outlined rotate-90">arrow_forward_ios</i>
       </a>
     </aside>

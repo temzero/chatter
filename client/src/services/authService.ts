@@ -1,0 +1,51 @@
+import API from "@/services/api/api";
+import { storageService } from "./storage/storageService";
+
+export const authService = {
+  async login(usernameOrEmail: string, password: string) {
+    const { data } = await API.post("/auth/login", {
+      usernameOrEmail,
+      password,
+    });
+    storageService.setToken(data.token);
+    storageService.setUser(data.user);
+    return data;
+  },
+
+  async register(userData: {
+    username: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+    password: string;
+  }) {
+    const { data } = await API.post("/auth/register", userData);
+    return data;
+  },
+
+  async sendPasswordResetEmail(email: string) {
+    const { data } = await API.post("/auth/send-password-reset-email", {
+      email,
+    });
+    return data;
+  },
+
+  async resetPasswordWithToken(token: string, newPassword: string) {
+    const { data } = await API.post("/auth/reset-password", {
+      token,
+      newPassword,
+    });
+    return data;
+  },
+
+  async verifyEmailWithToken(token: string) {
+    const { data } = await API.get(
+      `/auth/verify-email?token=${encodeURIComponent(token)}`
+    );
+    return data;
+  },
+
+  logout() {
+    storageService.clearAuth();
+  },
+};

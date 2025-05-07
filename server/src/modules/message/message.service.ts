@@ -12,9 +12,23 @@ export class MessageService {
     private readonly messageRepository: Repository<Message>,
   ) {}
 
-  async getMessages(includeDeleted = false): Promise<Message[]> {
-    const options = includeDeleted ? {} : { where: { is_deleted: false } };
-    return this.messageRepository.find(options);
+  async getMessages(options?: {
+    relations?: string[];
+    order?: { [key: string]: 'ASC' | 'DESC' };
+    skip?: number;
+    take?: number;
+  }): Promise<Message[]> {
+    return this.messageRepository.find({
+      relations: options?.relations || [
+        'sender',
+        'chat',
+        'metadata',
+        'media_items',
+      ],
+      order: options?.order || { createdAt: 'DESC' }, // Newest first by default
+      skip: options?.skip,
+      take: options?.take,
+    });
   }
 
   async createMessage(createMessageDto: CreateMessageDto): Promise<Message> {
@@ -24,10 +38,7 @@ export class MessageService {
 
   async getMessageById(id: string): Promise<Message | null | undefined> {
     return this.messageRepository.findOne({
-      where: {
-        id,
-        is_deleted: false,
-      },
+      where: { id },
     });
   }
 
@@ -40,19 +51,17 @@ export class MessageService {
 
     if (updateMessageDto.content) {
       message.content = updateMessageDto.content;
-      message.edited_timestamp = new Date();
+      message.updatedAt = new Date();
     }
 
     return this.messageRepository.save(message);
   }
 
-  async deleteMessage(id: string): Promise<Message | undefined> {
-    const message = await this.getMessageById(id);
-    if (!message) return undefined;
-
-    message.is_deleted = true;
-    message.deleted_timestamp = new Date();
-    return this.messageRepository.save(message);
+  async deleteMessage(id: string): Promise<Message | null> {
+    const message = await this.messageRepository.findOneBy({ id });
+    if (!message) return null;
+    await this.messageRepository.delete(id);
+    return message;
   }
 
   async getMessagesByConversation(
@@ -77,7 +86,6 @@ export class MessageService {
       where: {
         chat: { id: chatId },
         content: Like(`%${searchTerm}%`),
-        is_deleted: false,
       },
       relations: ['chat'], // optional: eager load chat if needed
     });

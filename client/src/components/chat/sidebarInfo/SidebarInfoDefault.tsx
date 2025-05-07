@@ -1,5 +1,6 @@
 import React from "react";
-import { useActiveMedia, useChatStore } from "@/stores/chatStore";
+import { useChatStore } from "@/stores/chatStore";
+import { useMessageStore } from "@/stores/messageStore";
 import { AnimatePresence, motion } from "framer-motion";
 import ContactInfoItem from "@/components/ui/contactInfoItem";
 import { ChatAvatar } from "@/components/ui/ChatAvatar";
@@ -8,15 +9,12 @@ import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 
 const ChatInfoDefault: React.FC = () => {
   const activeChat = useChatStore((state) => state.activeChat);
-  const activeMedia = useActiveMedia();
+  const activeMedia = useMessageStore((state) => state.activeMedia);
 
-  
   const isSidebarInfoVisible = useSidebarInfoStore(
     (state) => state.isSidebarInfoVisible
   );
-  const setSidebarInfoMode = useSidebarInfoStore(
-    (state) => state.setSidebarInfoMode
-  );
+  const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
 
   if (!activeChat) return null;
 
@@ -34,7 +32,7 @@ const ChatInfoDefault: React.FC = () => {
         </a>
         <a
           className="flex items-center rounded-full p-2 cursor-pointer opacity-50 hover:opacity-100"
-          onClick={() => setSidebarInfoMode("edit")}
+          onClick={() => setSidebarInfo("edit")}
         >
           <i className="material-symbols-outlined">edit</i>
         </a>
@@ -99,7 +97,7 @@ const ChatInfoDefault: React.FC = () => {
                 <div className="flex flex-col custom-border rounded w-full">
                   <div
                     className="flex p-2 items-center justify-between w-full cursor-pointer hover:bg-[var(--hover-color)]"
-                    onClick={() => setSidebarInfoMode("saved")}
+                    onClick={() => setSidebarInfo("saved")}
                   >
                     <div className="flex gap-2">
                       <span className="flex flex-col justify-center items-center cursor-pointer opacity-60 hover:opacity-100">
@@ -114,7 +112,7 @@ const ChatInfoDefault: React.FC = () => {
 
                   <div
                     className="flex p-2 items-center justify-between w-full cursor-pointer hover:bg-[var(--hover-color)]"
-                    onClick={() => setSidebarInfoMode("media")}
+                    onClick={() => setSidebarInfo("media")}
                   >
                     <div className="flex gap-2">
                       <span className="flex flex-col justify-center items-center cursor-pointer opacity-60 hover:opacity-100">
@@ -148,7 +146,7 @@ const ChatInfoDefault: React.FC = () => {
 
         <div
           className="flex flex-col justify-center items-center cursor-pointer border-2 border-b-0 border-[var(--hover-color)] rounded p-1 shadow-4xl absolute -bottom-[100px] hover:-bottom-[70px] transition-all duration-300 ease-in-out backdrop-blur-[12px]"
-          onClick={() => setSidebarInfoMode("media")}
+          onClick={() => setSidebarInfo("media")}
         >
           <i className="material-symbols-outlined opacity-70">
             keyboard_control_key

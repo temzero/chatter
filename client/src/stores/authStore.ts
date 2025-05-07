@@ -2,13 +2,17 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import axios from "axios";
-import { authService, storageService } from "@/services/api/auth";
+import { authService } from "@/services/authService";
+import { storageService } from "@/services/storage/storageService";
 import { MyProfileProps } from "@/data/types";
+import { useChatStore } from "@/stores/chatStore"; // adjust the path if needed
+import { useSidebarStore } from "./sidebarStore";
+import { useSidebarInfoStore } from "./sidebarInfoStore";
 
 type MessageType = "error" | "success" | "info";
 
 type Message = {
-  type: "error" | "success" | "info";
+  type: MessageType;
   content: string;
 } | null;
 
@@ -53,12 +57,12 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       // Core actions
       setMessage: (type, content) => set({ message: { type, content } }),
       clearMessage: () => set({ message: null }),
-      
+
       // New unified loading control
       setLoading: (loading, clearMessages = true) => {
         set({
           loading,
-          ...(clearMessages ? { message: null } : {})
+          ...(clearMessages ? { message: null } : {}),
         });
       },
 
@@ -79,7 +83,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           }
         } catch (error) {
           console.error("Auth initialization failed", error);
-          storageService.clear();
+          storageService.clearAuth();
           set({ ...initialState, loading: false });
         }
       },
@@ -88,19 +92,18 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       login: async (usernameOrEmail, password) => {
         try {
           get().setLoading(true); // Auto-clears messages
-          const { access_token, user } = await authService.login(
+          const { user } = await authService.login(
             usernameOrEmail,
             password
           );
-
-          storageService.setToken(access_token);
-          storageService.setUser(user);
           set({
             currentUser: user,
             isAuthenticated: true,
             loading: false,
             message: { type: "success", content: "Logged in successfully" },
           });
+
+          useChatStore.getState().getChats(user.id);
         } catch (error) {
           const errorMessage = handleAuthError(error);
           get().setLoading(false, false); // Keep error message
@@ -115,7 +118,10 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           await authService.register(userData);
           await get().login(userData.username, userData.password);
           set({
-            message: { type: "success", content: "Account created successfully" },
+            message: {
+              type: "success",
+              content: "Account created successfully",
+            },
           });
         } catch (error) {
           const errorMessage = handleAuthError(error);
@@ -126,7 +132,10 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       },
 
       logout: () => {
-        storageService.clear();
+        authService.logout();
+        useChatStore.getState().setActiveChat(null);
+        useSidebarStore.getState().setSidebar('default');
+        useSidebarInfoStore.getState().setSidebarInfo('default');
         set({
           ...initialState,
           loading: false,
@@ -140,9 +149,9 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           get().setLoading(true);
           await authService.sendPasswordResetEmail(email);
           set({
-            message: { 
-              type: "success", 
-              content: "Password reset email sent. Please check your inbox." 
+            message: {
+              type: "success",
+              content: "Password reset email sent. Please check your inbox.",
             },
             loading: false,
           });
@@ -159,9 +168,9 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           get().setLoading(true);
           await authService.resetPasswordWithToken(token, newPassword);
           set({
-            message: { 
-              type: "success", 
-              content: "Password reset successfully. You can now login." 
+            message: {
+              type: "success",
+              content: "Password reset successfully. You can now login.",
             },
             loading: false,
           });
@@ -179,7 +188,10 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           get().setLoading(true);
           await authService.verifyEmailWithToken(token);
           set({
-            message: { type: "success", content: "Email verified successfully!" },
+            message: {
+              type: "success",
+              content: "Email verified successfully!",
+            },
             loading: false,
           });
         } catch (error) {
@@ -213,26 +225,29 @@ function handleAuthError(error: unknown): string {
 
 // Selector hooks
 // Single selector for all auth state
-export const useAuthState = () => useAuthStore((state) => ({
-  currentUser: state.currentUser,
-  isAuthenticated: state.isAuthenticated,
-  loading: state.loading,
-  message: state.message,
-}));
+export const useAuthState = () =>
+  useAuthStore((state) => ({
+    currentUser: state.currentUser,
+    isAuthenticated: state.isAuthenticated,
+    loading: state.loading,
+    message: state.message,
+  }));
 
 // Memoized action selector (won't cause re-renders when actions don't change)
-export const useAuthActions = () => useAuthStore((state) => ({
-  setMessage: state.setMessage,
-  clearMessage: state.clearMessage,
-  setLoading: state.setLoading,
-  login: state.login,
-  logout: state.logout,
-  register: state.register,
-  sendPasswordResetEmail: state.sendPasswordResetEmail,
-  resetPasswordWithToken: state.resetPasswordWithToken,
-  verifyEmailWithToken: state.verifyEmailWithToken,
-}));
+export const useAuthActions = () =>
+  useAuthStore((state) => ({
+    setMessage: state.setMessage,
+    clearMessage: state.clearMessage,
+    setLoading: state.setLoading,
+    login: state.login,
+    logout: state.logout,
+    register: state.register,
+    sendPasswordResetEmail: state.sendPasswordResetEmail,
+    resetPasswordWithToken: state.resetPasswordWithToken,
+    verifyEmailWithToken: state.verifyEmailWithToken,
+  }));
 
 // Individual selectors (only for frequently used isolated values)
 export const useCurrentUser = () => useAuthStore((state) => state.currentUser);
-export const useIsAuthenticated = () => useAuthStore((state) => state.isAuthenticated);
+export const useIsAuthenticated = () =>
+  useAuthStore((state) => state.isAuthenticated);

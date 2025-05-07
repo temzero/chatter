@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { authService, storageService } from "@/services/api/auth";
+import { authService } from "@/services/authService";
+import { storageService } from "@/services/storage/storageService";
 import { MyProfileProps } from "@/data/types";
 
 type ProfileState = {
@@ -48,7 +49,7 @@ export const useProfileStore = create<ProfileState & ProfileActions>()(
           storageService.setUser(user);
           set({ currentProfile: user, loading: false });
         } catch (error) {
-          set({ error: "Failed to refresh profile", loading: false });
+          set({ error: error instanceof Error ? error.message : String(error), loading: false });
         }
       },
 
