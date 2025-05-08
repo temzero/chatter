@@ -10,7 +10,6 @@ const chatTypes = ["all", "private", "group", "channel"];
 
 const ChatSidebar: React.FC = () => {
   const chats = useChatStore((state) => state.chats);
-  console.log('all Chats: ', chats)
 
   const setSidebar = useSidebarStore((state) => state.setSidebar);
   const isCompact = useSidebarStore((state) => state.isCompact);

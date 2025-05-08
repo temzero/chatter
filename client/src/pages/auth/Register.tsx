@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 import { AlertMessage } from "@/components/ui/AlertMessage";
@@ -6,15 +6,10 @@ import { AuthenticationLayout } from "../PublicLayout";
 import { motion } from "framer-motion";
 
 const Register = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-    username: "",
-    first_name: "",
-    last_name: "",
-    password: "",
-    confirmPassword: ""
-  });
-
+  const formRef = useRef<HTMLFormElement>(null);
+  const firstNameRef = useRef<HTMLInputElement>(null);
+  const lastNameRef = useRef<HTMLInputElement>(null);
+  
   const register = useAuthStore(state => state.register);
   const setMessage = useAuthStore(state => state.setMessage);
   const loading = useAuthStore(state => state.loading);
@@ -24,28 +19,33 @@ const Register = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (formData.password !== formData.confirmPassword) {
+    if (!formRef.current) return;
+    
+    const formData = new FormData(formRef.current);
+    const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
+
+    if (password !== confirmPassword) {
       return setMessage("error", "Passwords do not match!");
     }
 
     await register({
-      email: formData.email,
-      username: formData.username,
-      first_name: formData.first_name,
-      last_name: formData.last_name,
-      password: formData.password,
+      email: formData.get("email") as string,
+      username: formData.get("username") as string,
+      first_name: formData.get("first_name") as string,
+      last_name: formData.get("last_name") as string,
+      password: password,
     });
     navigate("/");
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [id]: id === "first_name" || id === "last_name" 
-        ? value.charAt(0).toUpperCase() + value.slice(1) 
-        : value
-    }));
+  const capitalizeFirstLetter = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value, selectionStart } = e.target;
+    if (value.length === 1) {
+      e.target.value = value.charAt(0).toUpperCase() + value.slice(1);
+      // Move cursor to end after capitalization
+      e.target.setSelectionRange(selectionStart, selectionStart);
+    }
   };
 
   return (
@@ -56,71 +56,68 @@ const Register = () => {
         className="flex items-center rounded-lg custom-border backdrop-blur-md bg-[var(--card-bg-color)] mt-20"
       >
         <form
+          ref={formRef}
           onSubmit={handleSubmit}
           className="flex flex-col justify-center w-[400px] gap-2 p-8"
         >
           <h2 className="text-4xl font-semibold mb-4">Register</h2>
           <input
             type="text"
-            id="username"
+            name="username"
             placeholder="Username"
-            value={formData.username}
-            onChange={handleChange}
             required
             className="input backdrop-blur-lg"
+            autoComplete="username"
             autoFocus
           />
 
           <div className="flex gap-2">
             <input
               type="text"
-              id="first_name"
+              name="first_name"
               placeholder="First Name"
-              value={formData.first_name}
-              onChange={handleChange}
               required
               className="input backdrop-blur-lg"
+              ref={firstNameRef}
+              onChange={capitalizeFirstLetter}
             />
 
             <input
               type="text"
-              id="last_name"
+              name="last_name"
               placeholder="Last Name"
-              value={formData.last_name}
-              onChange={handleChange}
               required
               className="input backdrop-blur-lg"
+              ref={lastNameRef}
+              onChange={capitalizeFirstLetter}
             />
           </div>
 
           <input
             type="email"
-            id="email"
+            name="email"
             placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
             required
             className="input backdrop-blur-lg"
+            autoComplete="email"
           />
 
           <input
             type="password"
-            id="password"
+            name="password"
             placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
             required
             className="input backdrop-blur-lg"
+            autoComplete="new-password"
           />
 
           <input
             type="password"
-            id="confirmPassword"
+            name="confirmPassword"
             placeholder="Confirm Password"
-            value={formData.confirmPassword}
-            onChange={handleChange}
             required
             className="input backdrop-blur-lg"
+            autoComplete="new-password"
           />
 
           <AlertMessage className="-mb-1" />

@@ -1,8 +1,8 @@
 
-import { ChatProps } from "@/data/types";
+import type { Chat } from "@/types/chat";
 
 type ChatAvatarProps = {
-  chat: ChatProps;
+  chat: Chat;
   type?: "header" | "sidebar" | "info";
 };
 

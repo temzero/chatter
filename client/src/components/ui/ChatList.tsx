@@ -1,18 +1,24 @@
 import React from "react";
-import { useChatStore } from '@/stores/chatStore';
-import { ChatProps } from "@/data/data";
+import { useChatStore } from "@/stores/chatStore";
+import { useMessageStore } from "@/stores/messageStore";
+import type { Chat } from "@/types/chat";
 import { ChatAvatar } from "./ChatAvatar";
+import { formatTime } from "@/utils/formatTime";
 
 interface ChatListProps {
-  chats: ChatProps[];
+  chats: Chat[];
   isCompact?: boolean;
 }
 
 const ChatList: React.FC<ChatListProps> = ({ chats, isCompact = false }) => {
   const activeChat = useChatStore((state) => state.activeChat);
   const setActiveChat = useChatStore((state) => state.setActiveChat);
-  const getDraftMessage = useChatStore((state) => state.getDraftMessage);
-  
+  const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
+
+  function handleChatSelect(chat: Chat) {
+    window.history.pushState({}, '', `/${chat.id}`);
+    setActiveChat(chat);
+  }
 
   const getUserItemClass = (chatId: string) => {
     const baseClasses =
@@ -27,7 +33,7 @@ const ChatList: React.FC<ChatListProps> = ({ chats, isCompact = false }) => {
   return (
     <div className="flex-1 overflow-y-auto overflow-x-hidden relative">
       {chats.map((chat) => {
-        const draft = getDraftMessage(chat.id.toString());
+        const draft = getDraftMessage(chat.id);
         const displayMessage = draft ? (
           <p className="text-[var(--primary-green)] flex items-center gap-1 overflow-hidden max-w-[196px]">
             <i className="material-symbols-outlined flex items-center justify-center text-[16px] h-3">
@@ -37,7 +43,7 @@ const ChatList: React.FC<ChatListProps> = ({ chats, isCompact = false }) => {
           </p>
         ) : (
           <p className="flex items-center opacity-70 gap-1 text-xs max-w-[196px] whitespace-nowrap text-ellipsis overflow-hidden">
-            {chat.lastMessage}
+            {chat.lastMessage?.content}
           </p>
         );
 
@@ -45,7 +51,7 @@ const ChatList: React.FC<ChatListProps> = ({ chats, isCompact = false }) => {
           <React.Fragment key={chat.id}>
             <div
               className={getUserItemClass(chat.id)}
-              onClick={() => setActiveChat(chat)}
+              onClick={() => handleChatSelect(chat)}
             >
               <ChatAvatar chat={chat} type="sidebar" />
 
@@ -59,7 +65,7 @@ const ChatList: React.FC<ChatListProps> = ({ chats, isCompact = false }) => {
                   </div>
 
                   <p className="absolute top-2 right-4 text-xs opacity-40">
-                    {chat.lastMessageTime}
+                    {formatTime(chat.updatedAt)}
                   </p>
                 </>
               )}

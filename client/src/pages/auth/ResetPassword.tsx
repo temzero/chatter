@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 import { AlertMessage } from "@/components/ui/AlertMessage";
@@ -6,11 +6,7 @@ import { AuthenticationLayout } from "../PublicLayout";
 import { motion } from "framer-motion";
 
 const ResetPassword = () => {
-  const [formData, setFormData] = useState({
-    password: "",
-    confirmPassword: ""
-  });
-
+  const formRef = useRef<HTMLFormElement>(null);
   const { token } = useParams();
   const loading = useAuthStore(state => state.loading);
   const resetPasswordWithToken = useAuthStore(state => state.resetPasswordWithToken);
@@ -20,7 +16,13 @@ const ResetPassword = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (formData.password !== formData.confirmPassword) {
+    if (!formRef.current) return;
+    
+    const formData = new FormData(formRef.current);
+    const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
+
+    if (password !== confirmPassword) {
       return setMessage("error", "Passwords do not match");
     }
 
@@ -28,16 +30,8 @@ const ResetPassword = () => {
       return setMessage("error", "Invalid reset token");
     }
 
-    await resetPasswordWithToken(token, formData.password);
+    await resetPasswordWithToken(token, password);
     setTimeout(() => navigate("/auth/login"), 2000);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [id]: value
-    }));
   };
 
   return (
@@ -48,6 +42,7 @@ const ResetPassword = () => {
         className="flex items-center rounded-lg custom-border backdrop-blur-md bg-[var(--card-bg-color)]"
       >
         <form
+          ref={formRef}
           onSubmit={handleSubmit}
           className="flex flex-col justify-center w-[400px] gap-2 p-8"
         >
@@ -57,10 +52,8 @@ const ResetPassword = () => {
 
           <input
             type="password"
-            id="password"
+            name="password"
             placeholder="New Password"
-            value={formData.password}
-            onChange={handleChange}
             required
             className="input backdrop-blur-lg"
             autoFocus
@@ -68,10 +61,8 @@ const ResetPassword = () => {
 
           <input
             type="password"
-            id="confirmPassword"
+            name="confirmPassword"
             placeholder="Confirm New Password"
-            value={formData.confirmPassword}
-            onChange={handleChange}
             required
             className="input backdrop-blur-lg"
           />

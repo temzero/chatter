@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef } from "react";
 import { Link } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 import { AlertMessage } from "@/components/ui/AlertMessage";
@@ -6,24 +6,20 @@ import { AuthenticationLayout } from "../PublicLayout";
 import { motion } from "framer-motion";
 
 const ForgotPassword = () => {
-  const [formData, setFormData] = useState({
-    email: ""
-  });
-
-  const sendPasswordResetEmail = useAuthStore(state => state.sendPasswordResetEmail);
-  const loading = useAuthStore(state => state.loading);
+  const formRef = useRef<HTMLFormElement>(null);
+  const sendPasswordResetEmail = useAuthStore(
+    (state) => state.sendPasswordResetEmail
+  );
+  const loading = useAuthStore((state) => state.loading);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await sendPasswordResetEmail(formData.email);
-  };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [id]: value
-    }));
+    if (!formRef.current) return;
+    const formData = new FormData(formRef.current);
+    const email = formData.get("email") as string;
+
+    await sendPasswordResetEmail(email);
   };
 
   return (
@@ -34,6 +30,7 @@ const ForgotPassword = () => {
         className="flex items-center rounded-lg custom-border backdrop-blur-md bg-[var(--card-bg-color)]"
       >
         <form
+          ref={formRef}
           onSubmit={handleSubmit}
           className="flex flex-col justify-center w-[400px] gap-2 p-8"
         >
@@ -43,10 +40,8 @@ const ForgotPassword = () => {
 
           <input
             type="email"
-            id="email"
+            name="email"
             placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
             required
             className="input backdrop-blur-lg"
             autoFocus

@@ -11,13 +11,15 @@ import {
 } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { ChatGroupService } from '../chat-group/chat-group.service';
-import { CreateChatDto } from 'src/modules/chat/dto/create-chat.dto';
-import { UpdateChatDto } from 'src/modules/chat/dto/update-chat.dto';
+import { CreateChatDto } from 'src/modules/chat/dto/request/create-chat.dto';
+import { UpdateChatDto } from 'src/modules/chat/dto/request/update-chat.dto';
 import { Chat } from 'src/modules/chat/entities/chat.entity';
-import { ChatGroup } from '../chat-group/entities/chat-group.entity';
 import { ResponseData } from 'src/common/response-data';
-
-type Conversation = Chat | ChatGroup;
+import type { ChatDto } from 'src/modules/chat/dto/response/chats.dto';
+import {
+  mapChatToPrivateChatDto,
+  mapGroupToGroupChatDto,
+} from 'src/modules/chat/mappers/combinedChatMappers';
 
 @Controller('chat')
 export class ChatController {
@@ -65,33 +67,28 @@ export class ChatController {
   @Get('all/user/:userId')
   async findAllCombined(
     @Param('userId') userId: string,
-  ): Promise<ResponseData<Conversation[]>> {
+  ): Promise<ResponseData<ChatDto[]>> {
     try {
       const [chats, groups] = await Promise.all([
         this.chatService.getChatsByUserId(userId),
         this.chatGroupService.getGroupsByUserId(userId),
       ]);
 
-      const conversations: Conversation[] = [
-        ...chats, // Assuming these are already of type `Chat`
-        ...groups, // Assuming these are already of type `Group | Channel`
-      ].sort((a, b) => {
-        const getTime = (Conversation: Conversation) =>
-          Conversation.lastMessage?.updatedAt?.getTime() ||
-          Conversation.updatedAt.getTime();
-        return getTime(b) - getTime(a);
-      });
+      const combinedChats: ChatDto[] = [
+        ...chats.map((chat) => mapChatToPrivateChatDto(chat, userId)),
+        ...groups.map(mapGroupToGroupChatDto),
+      ].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
 
       return new ResponseData(
-        conversations,
+        combinedChats,
         HttpStatus.OK,
-        'All conversations retrieved successfully',
+        'All combinedChats retrieved successfully',
       );
-    } catch (error: unknown) {
+    } catch (error) {
       throw new HttpException(
         error instanceof Error
           ? error.message
-          : 'Failed to fetch conversations',
+          : 'Failed to fetch combinedChats',
         HttpStatus.BAD_REQUEST,
       );
     }

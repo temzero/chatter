@@ -1,31 +1,40 @@
 // src/routes/PrivateLayout.tsx
-import { useEffect } from "react";
 import { ROUTES } from "@/constants/routes";
+import { useEffect } from "react";
 import MediaModal from "@/components/modal/MediaModal";
 import Sidebar from "@/components/sidebar/Sidebar";
 import Chat from "@/components/chat/Chat";
 import BackgroundContent from "@/components/ui/BackgroundContent";
-import { Navigate } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { useChatStore } from "@/stores/chatStore";
 import { useIsAuthenticated } from "@/stores/authStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 
-const ChatContent: React.FC = () => {
+export const ChatContent: React.FC = () => {
   const initializeSidebar = useSidebarStore(
     (state) => state.initializeKeyListeners
   );
   const initializeSidebarInfo = useSidebarInfoStore(
     (state) => state.initializeKeyListeners
   );
+  const { id: chatId } = useParams();
+  const { activeChat, setActiveChatById } = useChatStore();
 
-  // Initialize app state
   useEffect(() => {
     initializeSidebar();
     initializeSidebarInfo();
-  }, [initializeSidebar, initializeSidebarInfo]);
 
-  const activeChat = useChatStore((state) => state.activeChat);
+    console.log('chatId: ', chatId)
+
+    // Set active chat based on URL
+    if (chatId) {
+      setActiveChatById(chatId);
+    } else {
+      setActiveChatById(null)
+    }
+  }, [chatId, setActiveChatById, initializeSidebar, initializeSidebarInfo]);
+
   return activeChat ? <Chat /> : null;
 };
 

@@ -6,6 +6,7 @@ import ContactInfoItem from "@/components/ui/contactInfoItem";
 import { ChatAvatar } from "@/components/ui/ChatAvatar";
 import RenderMedia from "@/components/ui/RenderMedia";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
+import { formatTime } from "@/utils/formatTime";
 
 const ChatInfoDefault: React.FC = () => {
   const activeChat = useChatStore((state) => state.activeChat);
@@ -17,6 +18,7 @@ const ChatInfoDefault: React.FC = () => {
   const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
 
   if (!activeChat) return null;
+  const isPrivate = activeChat?.type === "private";
 
   return (
     <aside className="relative w-full h-full overflow-hidden flex flex-col">
@@ -50,11 +52,9 @@ const ChatInfoDefault: React.FC = () => {
 
           <h1 className="text-xl font-semibold">{activeChat.name}</h1>
 
-          {(activeChat.bio || activeChat.description) && (
-            <p className="text-sm text-center font-light opacity-80 w-full min-w-[240px] text-ellipsis">
-              {activeChat.bio || activeChat.description}
-            </p>
-          )}
+          <p className="text-sm text-center font-light opacity-80 w-full min-w-[240px] text-ellipsis">
+            {isPrivate ? activeChat.chatPartner.bio : activeChat.description}
+          </p>
 
           <AnimatePresence>
             {isSidebarInfoVisible && (
@@ -65,30 +65,30 @@ const ChatInfoDefault: React.FC = () => {
                 transition={{ type: "spring", stiffness: 300, damping: 28 }}
                 className="flex flex-col gap-2 w-full mt-4 min-w-[240px]"
               >
-                {activeChat?.type === "private" && (
+                {isPrivate && (
                   <div className="w-full flex flex-col items-center rounded font-light custom-border overflow-hidden">
                     <ContactInfoItem
                       icon="alternate_email"
-                      value={activeChat?.username}
+                      value={activeChat.chatPartner.username}
                       copyType="username"
                       defaultText="No username"
                     />
 
                     <ContactInfoItem
                       icon="call"
-                      value={activeChat?.phone}
-                      copyType="phone"
+                      value={activeChat.chatPartner.phone_number || null}
+                      copyType="phone_number"
                     />
 
-                    <ContactInfoItem
+                    {/* <ContactInfoItem
                       icon="mail"
-                      value={activeChat?.email}
+                      value={activeChat.chatPartner.email}
                       copyType="email"
-                    />
+                    /> */}
 
                     <ContactInfoItem
                       icon="cake"
-                      value={activeChat?.birthday}
+                      value={formatTime(activeChat.chatPartner.birthday)}
                       copyType="birthday"
                     />
                   </div>

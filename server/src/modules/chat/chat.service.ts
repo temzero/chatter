@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Chat } from 'src/modules/chat/entities/chat.entity';
-import { CreateChatDto } from 'src/modules/chat/dto/create-chat.dto';
-import { UpdateChatDto } from 'src/modules/chat/dto/update-chat.dto';
+import { CreateChatDto } from 'src/modules/chat/dto/request/create-chat.dto';
+import { UpdateChatDto } from 'src/modules/chat/dto/request/update-chat.dto';
 
 @Injectable()
 export class ChatService {

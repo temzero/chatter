@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import classNames from 'classnames';
 import { motion } from 'framer-motion';
 import { useChatStore } from '@/stores/chatStore';
+import { useMessageStore } from '@/stores/messageStore';
 import RenderMultipleMedia from '../ui/RenderMultipleMedia';
 import type { MediaProps } from '@/data/media';
-import FormatTime from '@/utils/formatTime';
+import { formatTime } from '@/utils/formatTime';
 
 type RenderMessageProps = {
   id: string;
@@ -47,7 +48,7 @@ const Message: React.FC<RenderMessageProps> = ({
   shouldAnimate = false 
 }) => {
   const activeChat = useChatStore((state) => state.activeChat);
-  const deleteMessage = useChatStore((state) => state.deleteMessage);
+  const deleteMessage = useMessageStore((state) => state.deleteMessage);
 
   const [copied, setCopied] = useState(false);
 
@@ -141,7 +142,7 @@ const Message: React.FC<RenderMessageProps> = ({
               {senderName}
             </h1>
           )}
-          <p className="opacity-0 group-hover:opacity-40 text-xs"><FormatTime time={time} /></p>
+          <p className="opacity-0 group-hover:opacity-40 text-xs">{formatTime(time)}</p>
 
         </div>
 

@@ -1,49 +1,38 @@
-import { User } from '@/types/user';
-import { Message } from '@/types/message';
+import type { Message } from "./message";
 
-export type ChatType = 'private' | 'group' | 'channel';
+export type Chat = PrivateChat | GroupChat;
 
-export interface BaseChat {
+export interface PrivateChat {
   id: string;
-  lastMessage: Message | null;
-  pinnedMessage: Message | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface PrivateChat extends BaseChat {
   type: 'private';
-  member1: User;
-  member1_nickname: string | null;
-  member2: User;
-  member2_nickname: string | null;
+  name: string;
+  chatPartner: ChatPartner;
+  lastMessage?: Message | null;
+  pinnedMessage?: Message | null;
+  updatedAt: Date; // or Date, depending on your serialization
 }
 
 export interface GroupChat {
   id: string;
   type: 'group' | 'channel';
   name: string;
-  description?: string;
   avatar?: string;
-  lastMessage?: Message;
-  pinnedMessage?: Message;
-  is_public: boolean;
-  is_broadcast_only: boolean;
-  createdAt: Date;
+  description?: string | null;
+  lastMessage?: Message | null;
+  pinnedMessage?: Message | null;
   updatedAt: Date;
-  members?: GroupMember[];
 }
 
-export interface GroupMember {
-  user_id: string;
-  chat_group_id: string;
-  user: User;
-  nickname: string | null;
-  is_admin: boolean;
-  is_banned: boolean;
-  muted_until: Date | null;
-  joinedAt: Date;
-  updatedAt?: Date;
+export interface ChatPartner {
+  id: string;
+  username: string;
+  first_name?: string;
+  last_name?: string;
+  avatar?: string | null;
+  bio?: string | null;
+  phone_number?: string | null;
+  birthday?: Date | null;
+  status?: string | null;
+  last_seen?: Date | null;
 }
 
-export type Chat = PrivateChat | GroupChat;

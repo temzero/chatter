@@ -2,13 +2,13 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
 import PublicRoutes from "./PublicRoutes";
-import PrivateLayout from "../pages/PrivateLayout";
+import PrivateLayout, { ChatContent } from "../pages/PrivateLayout";
 import { useIsAuthenticated, useAuthStore } from "@/stores/authStore";
 import { useEffect } from "react";
 
 const RouteMessageCleaner = () => {
   const location = useLocation();
-  const clearMessage = useAuthStore(state => state.clearMessage);
+  const clearMessage = useAuthStore((state) => state.clearMessage);
 
   useEffect(() => {
     clearMessage();
@@ -37,12 +37,10 @@ const AppRoutes: React.FC = () => {
         />
 
         {/* Private Routes */}
-        <Route
-          path={ROUTES.PRIVATE.HOME}
-          element={
-            <PrivateLayout />
-          }
-        />
+        <Route path={ROUTES.PRIVATE.HOME} element={<PrivateLayout />}>
+          <Route path={ROUTES.PRIVATE.CHAT} element={<ChatContent />} />
+          <Route index element={null} />
+        </Route>
 
         {/* Catch-all Route */}
         <Route
