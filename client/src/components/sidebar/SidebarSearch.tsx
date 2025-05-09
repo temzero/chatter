@@ -1,33 +1,33 @@
-import React, { useState, useMemo } from 'react';
-import SearchBar from '@/components/ui/SearchBar';
-import { useSidebarStore } from '@/stores/sidebarStore';
-import SlidingContainer from '@/components/ui/SlidingContainer';
-import ChatList from '@/components/ui/ChatList';
-import { useChatStore } from '@/stores/chatStore';
+import React, { useState } from "react";
+import SearchBar from "@/components/ui/SearchBar";
+import { useSidebarStore } from "@/stores/sidebarStore";
+import SlidingContainer from "@/components/ui/SlidingContainer";
+import ChatList from "@/components/ui/ChatList";
+import { useChatStore } from "@/stores/chatStore";
+import { filterChatsByType } from "@/utils/filterChatsByType";
 
-const chatTypes = ['all', 'private', 'group', 'channel'];
+const chatTypes = ["all", "private", "group", "channel"];
 
 const SidebarSearch: React.FC = () => {
-  const { chats } = useChatStore(); // use context values
+  const filteredChats = useChatStore((state) => state.filteredChats);
   const { setSidebar } = useSidebarStore();
+
   const [selectedType, setSelectedType] = useState<string>(chatTypes[0]);
   const [direction, setDirection] = useState<number>(1);
 
-  const getTypeClass = (type: string) =>
-    `flex items-center justify-center cursor-pointer ${
-      selectedType === type ? 'opacity-100 font-bold' : 'opacity-50 hover:opacity-80'
-    }`;
+  const filteredChatsByType = React.useMemo(() => {
+    return filterChatsByType(filteredChats, selectedType);
+  }, [selectedType, filteredChats]);
 
-  const filteredChats = useMemo(() => {
-    // First filter by type
-    let result = chats;
-    if (selectedType !== 'all') {
-      result = chats.filter(chat => chat.type === selectedType);
-    }
-
-    // Then filter by search term (already handled in context)
-    return result;
-  }, [selectedType, chats]);
+  const getTypeClass = React.useCallback(
+    (type: string) =>
+      `flex items-center justify-center cursor-pointer p-2 ${
+        selectedType === type
+          ? "opacity-100 font-bold"
+          : "opacity-50 hover:opacity-80"
+      }`,
+    [selectedType]
+  );
 
   const handleChatTypeChange = (type: string) => {
     if (type === selectedType) return;
@@ -41,17 +41,26 @@ const SidebarSearch: React.FC = () => {
 
   return (
     <aside className="w-[var(--sidebar-width)] h-full flex flex-col transition-all duration-300 ease-in-out">
-      <header id="logo-container" className="flex w-full items-center h-[var(--header-height)] p-2 pr-0 justify-between">
-        <SearchBar 
-          placeholder="Search chats..."
-        />
-        <i className="material-symbols-outlined text-2xl opacity-60 hover:opacity-100 p-1 cursor-pointer" 
-          onClick={() => setSidebar('default')}>close</i>
+      {/* Header */}
+      <header
+        id="logo-container"
+        className="flex w-full items-center h-[var(--header-height)] justify-between"
+      >
+        <div className="flex items-center w-full px-2">
+          <SearchBar placeholder="Search chats..." />
+          <span
+            className="material-symbols-outlined text-2xl opacity-60 hover:opacity-100 p-1 cursor-pointer ml-2"
+            onClick={() => setSidebar("default")}
+          >
+            close
+          </span>
+        </div>
       </header>
 
-      <div className="flex justify-around items-center custom-border-t custom-border-b w-full h-[40px] backdrop-blur-[120px]">
+      {/* Chat Type Selector */}
+      <div className="flex justify-around items-center custom-border-t custom-border-b w-full shadow">
         {chatTypes.map((type) => (
-          <a 
+          <a
             key={type}
             className={getTypeClass(type)}
             onClick={() => handleChatTypeChange(type)}
@@ -59,11 +68,14 @@ const SidebarSearch: React.FC = () => {
             {type.charAt(0).toUpperCase() + type.slice(1)}
           </a>
         ))}
-        <i className="material-symbols-outlined opacity-40 hover:opacity-100 cursor-pointer text-sm -mr-2">arrow_forward_ios</i>
+        <i className="material-symbols-outlined opacity-40 hover:opacity-100 cursor-pointer text-sm">
+          arrow_forward_ios
+        </i>
       </div>
 
+      {/* Chat List Container */}
       <SlidingContainer selectedType={selectedType} direction={direction}>
-        <ChatList chats={filteredChats}/>
+        <ChatList chats={filteredChatsByType} />
       </SlidingContainer>
     </aside>
   );

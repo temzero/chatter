@@ -8,6 +8,7 @@ import {
   Body,
   HttpStatus,
   HttpException,
+  UseGuards,
 } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { ChatGroupService } from '../chat-group/chat-group.service';
@@ -18,8 +19,11 @@ import { ResponseData } from 'src/common/response-data';
 import type { ChatDto } from 'src/modules/chat/dto/response/chats.dto';
 import {
   mapChatToPrivateChatDto,
-  mapGroupToGroupChatDto,
+  mapChatToGroupChatDto,
 } from 'src/modules/chat/mappers/combinedChatMappers';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import type { JwtPayload } from '../auth/types/jwt-payload.type';
 
 @Controller('chat')
 export class ChatController {
@@ -76,7 +80,7 @@ export class ChatController {
 
       const combinedChats: ChatDto[] = [
         ...chats.map((chat) => mapChatToPrivateChatDto(chat, userId)),
-        ...groups.map(mapGroupToGroupChatDto),
+        ...groups.map(mapChatToGroupChatDto),
       ].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
 
       return new ResponseData(
@@ -90,6 +94,46 @@ export class ChatController {
           ? error.message
           : 'Failed to fetch combinedChats',
         HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Get(':chatId')
+  @UseGuards(JwtAuthGuard)
+  async findOne(
+    @Param('chatId') id: string,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<ResponseData<ChatDto>> {
+    try {
+      console.log('user: ', user);
+      if (!user || !user.sub) {
+        throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+      }
+      // Try to get as group first
+      const groupChat = await this.chatGroupService.getGroupById(id);
+      if (groupChat) {
+        return new ResponseData<ChatDto>(
+          mapChatToGroupChatDto(groupChat),
+          HttpStatus.OK,
+          'Group chat retrieved successfully',
+        );
+      }
+
+      // If not a group, try as private chat
+      const privateChat = await this.chatService.getChatById(id);
+      if (!privateChat) {
+        throw new HttpException('Chat not found', HttpStatus.NOT_FOUND);
+      }
+
+      return new ResponseData<ChatDto>(
+        mapChatToPrivateChatDto(privateChat, user.sub), // Use user.sub (user ID from JWT)
+        HttpStatus.OK,
+        'Private chat retrieved successfully',
+      );
+    } catch (error: unknown) {
+      throw new HttpException(
+        error instanceof Error ? error.message : 'Failed to retrieve chat',
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -109,26 +153,6 @@ export class ChatController {
       throw new HttpException(
         error || 'Failed to create chat',
         HttpStatus.BAD_REQUEST,
-      );
-    }
-  }
-
-  @Get(':id')
-  async findOne(@Param('id') id: string): Promise<ResponseData<Chat>> {
-    try {
-      const chat = await this.chatService.getChatById(id);
-      if (!chat) {
-        throw new HttpException('Chat not found', HttpStatus.NOT_FOUND);
-      }
-      return new ResponseData<Chat>(
-        chat,
-        HttpStatus.OK,
-        'Chat retrieved successfully',
-      );
-    } catch (error: unknown) {
-      throw new HttpException(
-        error || 'Failed to retrieve chat',
-        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }

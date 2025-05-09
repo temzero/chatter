@@ -40,7 +40,7 @@ export function mapChatToPrivateChatDto(
   };
 }
 
-export function mapGroupToGroupChatDto(group: ChatGroup): GroupChatDto {
+export function mapChatToGroupChatDto(group: ChatGroup): GroupChatDto {
   return {
     id: group.id,
     type: group.type as 'group' | 'channel',

@@ -1,9 +1,8 @@
-
 import type { Chat } from "@/types/chat";
 
 type ChatAvatarProps = {
   chat: Chat;
-  type?: "header" | "sidebar" | "info";
+  type?: "header" | "sidebar" | "info" | "contact";
 };
 
 export const ChatAvatar: React.FC<ChatAvatarProps> = ({
@@ -28,6 +27,14 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
       case "info":
         return {
           dimension: "h-32 w-32 min-w-[8rem] min-h-[8rem]", // Added min-h
+          rounded: "rounded-[30px]",
+          iconSize: "text-6xl",
+          fallbackIconSize: "text-8xl",
+          border: "border-[6px]",
+        };
+      case "contact":
+        return {
+          dimension: "h-12 w-12 min-w-[3.6rem] min-h-[3.6rem]", // Added min-h
           rounded: "rounded-[30px]",
           iconSize: "text-6xl",
           fallbackIconSize: "text-8xl",

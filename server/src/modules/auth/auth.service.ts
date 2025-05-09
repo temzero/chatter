@@ -7,6 +7,7 @@ import { UserService } from '../user/user.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { User } from '../user/entities/user.entity';
 import { MailService } from '../mail/mail.service';
+import type { JwtPayload } from './types/jwt-payload.type';
 
 @Injectable()
 export class AuthService {
@@ -29,8 +30,8 @@ export class AuthService {
   }
 
   login(user: User) {
-    const payload = { sub: user.id, username: user.username };
-    const token = this.jwtService.sign(payload);
+    const payload: JwtPayload = { sub: user.id };
+    const token = this.jwtService.sign(user.id);
 
     // Return both token and essential user data
     return {

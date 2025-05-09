@@ -42,7 +42,7 @@ export class ChatGroupService {
   async getGroupById(id: string): Promise<ChatGroup | null> {
     return this.chatGroupRepository.findOne({
       where: { id },
-      relations: ['members', 'members.user', 'lastMessage', 'pinnedMessage'],
+      relations: ['lastMessage', 'pinnedMessage'],
     });
   }
 

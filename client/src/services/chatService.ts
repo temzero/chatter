@@ -7,20 +7,11 @@ type ResponseData<T> = {
   message: string;
 };
 
-type Conversation = Chat & {
-  // Add other possible fields if needed, e.g. for ChatGroup
-};
-
 export const chatService = {
-  // Get all chats (admin use or all available chats)
-  async getAllChats(): Promise<Chat[]> {
-    const response = await API.get<ResponseData<Chat[]>>("/chat");
-    return response.data.data;
-  },
 
   // Get all conversations (private chats + groups) for a user
-  async getAllChatsByUserId(userId: string): Promise<Conversation[]> {
-    const response = await API.get<ResponseData<Conversation[]>>(`/chat/all/user/${userId}`);
+  async getAllChatsByUserId(userId: string): Promise<Chat[]> {
+    const response = await API.get<ResponseData<Chat[]>>(`/chat/all/user/${userId}`);
     return response.data.data;
   },
 

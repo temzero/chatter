@@ -14,6 +14,7 @@ interface ChatStore {
   activeChat: Chat | null;
   isLoading: boolean;
   error: string | null;
+  filteredChats: Chat[];
 
   getChats: (userId: string) => Promise<void>;
   getChatById: (chatId: string) => Promise<void>;
@@ -32,6 +33,7 @@ export const useChatStore = create<ChatStore>()(
   persist(
     (set, get) => ({
       chats: [],
+      filteredChats: [],
       searchTerm: "",
       activeChat: null,
       isLoading: false,
@@ -43,7 +45,6 @@ export const useChatStore = create<ChatStore>()(
           const chats: Chat[] = await chatService.getAllChatsByUserId(userId);
           set({ chats, isLoading: false });
           console.log("fetched Chats:", chats);
-
         } catch (error) {
           console.error("Failed to fetch chats:", error);
           set({
@@ -56,7 +57,7 @@ export const useChatStore = create<ChatStore>()(
       getChatById: async (chatId) => {
         set({ isLoading: true });
         try {
-          const chat = await chatService.getChatById(chatId);
+          const chat: Chat = await chatService.getChatById(chatId);
           set((state) => ({
             chats: state.chats.some((c) => c.id === chatId)
               ? state.chats.map((c) => (c.id === chatId ? chat : c))
@@ -74,7 +75,43 @@ export const useChatStore = create<ChatStore>()(
         }
       },
 
-      setSearchTerm: (term) => set({ searchTerm: term }),
+      setSearchTerm: (term) => {
+        const { chats } = get();
+        console.log('chats', chats)
+        
+        // If search term is empty, show all chats
+        if (!term.trim()) {
+          set({ 
+            searchTerm: term,
+            filteredChats: chats 
+          });
+          return;
+        }
+      
+        const lowerCaseTerm = term.toLowerCase();
+        
+        // Filter chats based on search term
+        const filtered = chats.filter((chat) => {
+          // Search in chat name
+          const nameMatch = chat.name?.toLowerCase().includes(lowerCaseTerm);
+      
+          // For private chats, also search in partner's name
+          if (chat.type === "private") {
+            const partnerNameMatch = chat.chatPartner?.first_name
+              ?.toLowerCase()
+              .includes(lowerCaseTerm);
+      
+            return nameMatch || partnerNameMatch;
+          }
+      
+          return nameMatch;
+        });
+      
+        set({ 
+          searchTerm: term,
+          filteredChats: filtered 
+        });
+      },
 
       setActiveChat: (chat) => {
         const allMessages = useMessageStore.getState().messages;
@@ -87,7 +124,7 @@ export const useChatStore = create<ChatStore>()(
           activeMessages,
           activeMedia,
         });
-
+        console.log(chat)
         set({ activeChat: chat });
       },
 
@@ -99,14 +136,14 @@ export const useChatStore = create<ChatStore>()(
 
         try {
           // Check if we already have the chat in store
-          const existingChat = get().chats.find(c => c.id === chatId);
-          
+          const existingChat = get().chats.find((chat) => chat.id === chatId);
+
           if (existingChat) {
             get().setActiveChat(existingChat);
           } else {
             // Fetch the chat if not in store
             await get().getChatById(chatId);
-            const chat = get().chats.find(c => c.id === chatId);
+            const chat = get().chats.find((c) => c.id === chatId);
             if (chat) {
               get().setActiveChat(chat);
             }
@@ -199,11 +236,3 @@ export const useChatStore = create<ChatStore>()(
     }
   )
 );
-
-// Hook to get filtered chats
-export const useFilteredChats = () =>
-  useChatStore((state) =>
-    state.chats.filter((chat) =>
-      chat.name?.toLowerCase().includes(state.searchTerm.toLowerCase())
-    )
-  );

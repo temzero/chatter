@@ -5,26 +5,22 @@ import { Logo } from "../ui/Logo";
 import SlidingContainer from "@/components/ui/SlidingContainer";
 import ChatList from "@/components/ui/ChatList";
 import { motion } from "framer-motion";
+import { filterChatsByType } from "@/utils/filterChatsByType";
 
 const chatTypes = ["all", "private", "group", "channel"];
 
-const ChatSidebar: React.FC = () => {
+const SidebarDefault: React.FC = () => {
   const chats = useChatStore((state) => state.chats);
 
   const setSidebar = useSidebarStore((state) => state.setSidebar);
   const isCompact = useSidebarStore((state) => state.isCompact);
   const toggleCompact = useSidebarStore((state) => state.toggleCompact);
 
-
   const [selectedType, setSelectedType] = useState<string>(chatTypes[0]);
   const [direction, setDirection] = useState<number>(1);
 
-  const filteredChats = React.useMemo(() => {
-    if (selectedType === "all") {
-      return chats;
-    } else {
-      return chats.filter((chat) => chat.type === selectedType);
-    }
+  const filteredChatsByType = React.useMemo(() => {
+    return filterChatsByType(chats, selectedType);
   }, [selectedType, chats]);
 
   const getTypeClass = React.useCallback(
@@ -138,10 +134,10 @@ const ChatSidebar: React.FC = () => {
 
       {/* Chat List Container */}
       <SlidingContainer selectedType={selectedType} direction={direction}>
-        <ChatList chats={filteredChats} isCompact={isCompact} />
+        <ChatList chats={filteredChatsByType} isCompact={isCompact} />
       </SlidingContainer>
     </aside>
   );
 };
 
-export default ChatSidebar;
+export default SidebarDefault;
