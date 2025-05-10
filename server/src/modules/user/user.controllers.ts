@@ -36,25 +36,6 @@ export class UserController {
     }
   }
 
-  @Post('create')
-  async create(
-    @Body() createUserDto: CreateUserDto,
-  ): Promise<ResponseData<User>> {
-    try {
-      const user = await this.userService.createUser(createUserDto);
-      return new ResponseData<User>(
-        user,
-        HttpStatus.CREATED,
-        'User created successfully',
-      );
-    } catch (error: unknown) {
-      throw new HttpException(
-        error || 'Failed to create user',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-  }
-
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<ResponseData<User>> {
     try {
@@ -72,6 +53,50 @@ export class UserController {
       throw new HttpException(
         error || 'Failed to retrieve user',
         HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get('/find/:identifier')
+  async findOneByIdentifier(
+    @Param('identifier') identifier: string,
+  ): Promise<ResponseData<User>> {
+    try {
+      const user = await this.userService.getUserByIdentifier(
+        identifier.trim(),
+      );
+      if (!user) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+      return new ResponseData<User>(
+        user,
+        HttpStatus.OK,
+        'User retrieved successfully',
+      );
+    } catch (error: unknown) {
+      if (error instanceof HttpException) throw error;
+      throw new HttpException(
+        error instanceof Error ? error.message : 'Failed to retrieve user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Post('create')
+  async create(
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<ResponseData<User>> {
+    try {
+      const user = await this.userService.createUser(createUserDto);
+      return new ResponseData<User>(
+        user,
+        HttpStatus.CREATED,
+        'User created successfully',
+      );
+    } catch (error: unknown) {
+      throw new HttpException(
+        error || 'Failed to create user',
+        HttpStatus.BAD_REQUEST,
       );
     }
   }

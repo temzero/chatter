@@ -54,25 +54,6 @@ export class ChatGroupController {
     }
   }
 
-  @Post()
-  async create(
-    @Body() chatGroupDto: ChatGroupDto,
-  ): Promise<ResponseData<ChatGroup>> {
-    try {
-      const group = await this.chatGroupService.createGroup(chatGroupDto);
-      return new ResponseData<ChatGroup>(
-        group,
-        HttpStatus.CREATED,
-        'Chat group created successfully',
-      );
-    } catch (error: unknown) {
-      throw new HttpException(
-        error || 'Failed to create chat group',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<ResponseData<ChatGroup>> {
     try {
@@ -88,6 +69,25 @@ export class ChatGroupController {
     } catch (error: unknown) {
       throw new HttpException(
         error || 'Failed to retrieve chat group',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Post()
+  async create(
+    @Body() chatGroupDto: ChatGroupDto,
+  ): Promise<ResponseData<ChatGroup>> {
+    try {
+      const group = await this.chatGroupService.createGroup(chatGroupDto);
+      return new ResponseData<ChatGroup>(
+        group,
+        HttpStatus.CREATED,
+        'Chat group created successfully',
+      );
+    } catch (error: unknown) {
+      throw new HttpException(
+        error || 'Failed to create chat group',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

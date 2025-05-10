@@ -27,7 +27,7 @@ export const AuthenticationLayout = ({
       <div className="relative w-full h-full flex items-center justify-center">
         <div
           className="flex gap-1 items-center absolute top-20 z-10 select-none cursor-pointer"
-          onClick={handleLogoClick} // Add click handler
+          onClick={handleLogoClick}
         >
           <Logo className="w-[50px] text-white" />
           <h1 className="text-5xl text-white">Chatter</h1>

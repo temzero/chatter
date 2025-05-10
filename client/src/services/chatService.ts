@@ -22,8 +22,13 @@ export const chatService = {
   },
 
   // Create a new chat
-  async createChat(payload: { participants: string[]; isGroup?: boolean }): Promise<Chat> {
+  async createChat(payload: { memberIds: string[] }): Promise<Chat> {
     const response = await API.post<ResponseData<Chat>>("/chat", payload);
+    return response.data.data;
+  },
+  // Create a new Group/Channel
+  async createGroup(payload: {name: string, memberIds: string[]; type: 'group' | 'channel' }): Promise<Chat> {
+    const response = await API.post<ResponseData<Chat>>("/chat-group", payload);
     return response.data.data;
   },
 

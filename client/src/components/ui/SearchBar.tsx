@@ -55,15 +55,6 @@ const SearchBar = ({
         onChange={handleChange}
         className="w-full bg-transparent outline-none"
       />
-      {/* {localSearchTerm && (
-        <button
-          onClick={handleClear}
-          className="material-symbols-outlined  text-xl opacity-60 hover:opacity-100"
-          aria-label="Clear search"
-        >
-          close
-        </button>
-      )} */}
     </div>
   );
 };

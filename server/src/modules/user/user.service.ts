@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import * as bcrypt from 'bcrypt';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,9 +13,17 @@ export class UserService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async findByUsernameOrEmail(usernameOrEmail: string): Promise<User | null> {
+  async getUserByIdentifier(identifier: string): Promise<User | null> {
+    if (identifier.startsWith('@')) {
+      identifier.slice(1);
+    }
+
     return this.userRepository.findOne({
-      where: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
+      where: [
+        { username: identifier },
+        { email: identifier },
+        { phone_number: identifier },
+      ],
     });
   }
 
@@ -29,14 +36,13 @@ export class UserService {
   }
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
-    const existingUser = await this.findByUsernameOrEmail(createUserDto.email);
+    const existingUser = await this.getUserByIdentifier(createUserDto.email);
     if (existingUser) {
       throw new HttpException(
         'Email or username already taken',
         HttpStatus.CONFLICT,
       );
     }
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     const password_hash: string = await bcrypt.hash(createUserDto.password, 10);
     const user = this.userRepository.create({
       ...createUserDto,
@@ -75,7 +81,6 @@ export class UserService {
       return null;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     const password_hash = await bcrypt.hash(newPassword, 10);
     user.password_hash = password_hash;
 
@@ -92,13 +97,11 @@ export class UserService {
       return null;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     const isMatch = await bcrypt.compare(oldPassword, user.password_hash);
     if (!isMatch) {
       throw new Error('Old password is incorrect');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     user.password_hash = await bcrypt.hash(newPassword, 10);
     return this.userRepository.save(user);
   }

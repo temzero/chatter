@@ -5,7 +5,12 @@ import MediaModal from "@/components/modal/MediaModal";
 import Sidebar from "@/components/sidebar/Sidebar";
 import Chat from "@/components/chat/Chat";
 import BackgroundContent from "@/components/ui/BackgroundContent";
-import { Navigate, useParams } from "react-router-dom";
+import {
+  Navigate,
+  useParams,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 import { useChatStore } from "@/stores/chatStore";
 import { useIsAuthenticated } from "@/stores/authStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
@@ -20,20 +25,27 @@ export const ChatContent: React.FC = () => {
   );
   const { id: chatId } = useParams();
   const { activeChat, setActiveChatById } = useChatStore();
+  const navigate = useNavigate();
 
   useEffect(() => {
     initializeSidebar();
     initializeSidebarInfo();
 
-    console.log('chatId: ', chatId)
-
-    // Set active chat based on URL
     if (chatId) {
       setActiveChatById(chatId);
     } else {
-      setActiveChatById(null)
+      setActiveChatById(null);
     }
   }, [chatId, setActiveChatById, initializeSidebar, initializeSidebarInfo]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      navigate(ROUTES.PRIVATE.HOME, { replace: true });
+      setActiveChatById(null);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+  }, [navigate, setActiveChatById]);
 
   return activeChat ? <Chat /> : null;
 };

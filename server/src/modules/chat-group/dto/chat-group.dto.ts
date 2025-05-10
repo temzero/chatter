@@ -18,19 +18,19 @@ export class ChatGroupDto {
 
   @IsString()
   @IsOptional()
-  description?: string;
+  description: string;
 
   @IsString()
   @IsOptional()
-  avatar?: string;
+  avatar: string;
 
   @IsBoolean()
   @IsOptional()
-  is_public: boolean;
+  is_public: boolean = false; // Default to false
 
   @IsBoolean()
   @IsOptional()
-  is_broadcast_only: boolean;
+  is_broadcast_only: boolean = true; // Default to true
 
   @IsArray()
   @ArrayNotEmpty()

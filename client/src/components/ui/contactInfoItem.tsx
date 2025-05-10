@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 
 type ContactInfoItemProps = {
   icon: string;
-  value: string | null;
+  value: string | null | undefined;
   copyType: string;
   defaultText?: string;
   className?: string;

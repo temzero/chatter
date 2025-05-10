@@ -75,7 +75,14 @@ const SidebarSearch: React.FC = () => {
 
       {/* Chat List Container */}
       <SlidingContainer selectedType={selectedType} direction={direction}>
-        <ChatList chats={filteredChatsByType} />
+        {filteredChatsByType.length > 0 ? (
+          <ChatList chats={filteredChatsByType} />
+        ) : (
+          <div className="flex flex-col items-center justify-center my-auto opacity-40 py-10">
+            <i className="material-symbols-outlined text-6xl">search_off</i>
+            <p>No Result!</p>
+          </div>
+        )}
       </SlidingContainer>
     </aside>
   );

@@ -7,7 +7,7 @@ import { UserService } from '../user/user.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { User } from '../user/entities/user.entity';
 import { MailService } from '../mail/mail.service';
-import type { JwtPayload } from './types/jwt-payload.type';
+// import type { JwtPayload } from './types/jwt-payload.type';
 
 @Injectable()
 export class AuthService {
@@ -22,7 +22,7 @@ export class AuthService {
     usernameOrEmail: string,
     password: string,
   ): Promise<User | null> {
-    const user = await this.userService.findByUsernameOrEmail(usernameOrEmail);
+    const user = await this.userService.getUserByIdentifier(usernameOrEmail);
     if (user && (await bcrypt.compare(password, user.password_hash))) {
       return user;
     }
@@ -30,7 +30,7 @@ export class AuthService {
   }
 
   login(user: User) {
-    const payload: JwtPayload = { sub: user.id };
+    // const payload: JwtPayload = { sub: user.id };
     const token = this.jwtService.sign(user.id);
 
     // Return both token and essential user data
@@ -65,7 +65,7 @@ export class AuthService {
   }
 
   async sendPasswordResetEmail(email: string): Promise<boolean> {
-    const user = await this.userService.findByUsernameOrEmail(email);
+    const user = await this.userService.getUserByIdentifier(email);
     if (!user) return false;
 
     const token = this.jwtService.sign({ id: user.id }, { expiresIn: '1h' });

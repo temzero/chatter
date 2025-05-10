@@ -35,10 +35,10 @@ export class ChatGroup {
   pinnedMessage?: Message;
 
   @Column()
-  is_public: boolean;
+  is_public?: boolean;
 
   @Column()
-  is_broadcast_only: boolean;
+  is_broadcast_only?: boolean;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
