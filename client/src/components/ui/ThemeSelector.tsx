@@ -1,8 +1,8 @@
-import { useUIStore } from '@/stores/uiStore';
+import { useThemeStore } from '@/stores/themeStore';
 
 const ThemeSelector = () => {
-  const theme = useUIStore((state) => state.theme);
-  const setTheme = useUIStore((state) => state.setTheme);
+  const theme = useThemeStore((state) => state.theme);
+  const setTheme = useThemeStore((state) => state.setTheme);
   
   const getButtonClass = (value: string) =>
     `flex items-center gap-2 px-2 py-1 justify-center rounded-full transition-opacity cursor-pointer 

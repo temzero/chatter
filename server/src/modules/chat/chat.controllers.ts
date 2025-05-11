@@ -141,11 +141,13 @@ export class ChatController {
   @Post()
   async create(
     @Body() createChatDto: CreateChatDto,
-  ): Promise<ResponseData<Chat>> {
+    @CurrentUser() user: JwtPayload,
+  ): Promise<ResponseData<ChatDto>> {
     try {
       const chat = await this.chatService.createChat(createChatDto);
-      return new ResponseData<Chat>(
-        chat,
+
+      return new ResponseData<ChatDto>(
+        mapChatToPrivateChatDto(chat, user.sub),
         HttpStatus.CREATED,
         'Chat created successfully',
       );

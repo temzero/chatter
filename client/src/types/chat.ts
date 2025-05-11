@@ -3,6 +3,7 @@ import type { Message } from "./message";
 export type Chat = PrivateChat | GroupChat;
 
 export interface PrivateChat {
+  avatar: string;
   id: string;
   type: 'private';
   name: string;

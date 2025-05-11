@@ -1,25 +1,25 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { RenderModalMedia } from './RenderModalMedia';
+import React, { Children } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { RenderModalMedia } from "./RenderModalMedia";
 
 const sliderVariants = {
   incoming: (direction: number) => ({
-    x: direction > 0 ? '100%' : '-100%',
-    scale: .4,
+    x: direction > 0 ? "100%" : "-100%",
+    scale: 0.4,
     opacity: 0,
-    position: 'absolute',
+    position: "absolute",
   }),
   active: {
     x: 0,
     scale: 1,
     opacity: 1,
-    position: 'relative',
+    position: "relative",
   },
   exit: (direction: number) => ({
-    x: direction > 0 ? '-100%' : '100%',
-    scale: .4,
+    x: direction > 0 ? "-100%" : "100%",
+    scale: 0.4,
     opacity: 0,
-    position: 'absolute',
+    position: "absolute",
   }),
 };
 
@@ -53,7 +53,7 @@ export const SliderMediaContent: React.FC<SliderMediaContentProps> = ({
         transition={sliderTransition}
         className="w-full h-full flex items-center justify-center scrollbar-hide select-none overflow-auto"
       >
-        <RenderModalMedia media={currentMedia} rotation={rotation} />
+        {Children}
       </motion.div>
     </AnimatePresence>
   );

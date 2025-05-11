@@ -2,9 +2,8 @@ import React, { useState } from "react";
 import SearchBar from "@/components/ui/SearchBar";
 import ContactSelectionList from "../ui/ContactSelectionList";
 import { useChatStore } from "@/stores/chatStore";
-import { Avatar } from "./Avatar";
+import { Avatar } from "./avatar/Avatar";
 import type { PrivateChat } from "@/types/chat";
-import { chatService } from "@/services/chatService";
 import { useAuthStore } from "@/stores/authStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 
@@ -12,18 +11,15 @@ interface CreateChatProps {
   type: "group" | "channel";
 }
 
-const CreateNewChat: React.FC<CreateChatProps> = ({ type }) => {
+const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
+  const createGroup = useChatStore((state) => state.createGroup);
+  const isLoading = useChatStore((state) => state.isLoading);
   const currentUser = useAuthStore((state) => state.currentUser);
-  const setActiveChatById = useChatStore((state) => state.setActiveChatById)
-  const setSidebar = useSidebarStore(state => state.setSidebar)
+  const setActiveChat = useChatStore((state) => state.setActiveChat);
+  const setSidebar = useSidebarStore((state) => state.setSidebar);
 
-  const [step, setStep] = useState<"select-contacts" | "set-details">(
-    "select-contacts"
-  );
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [isPublic, setIsPublic] = useState(false);
 
   const filteredChats = useChatStore((state) => state.filteredChats);
   const privateChats = filteredChats.filter((chat) => chat.type === "private");
@@ -48,9 +44,6 @@ const CreateNewChat: React.FC<CreateChatProps> = ({ type }) => {
         console.error("not enough member");
         return;
       }
-
-      console.log("selected chats: ", selectedChats);
-
       const memberIds = Array.from(
         new Set([
           currentUser.id,
@@ -64,13 +57,11 @@ const CreateNewChat: React.FC<CreateChatProps> = ({ type }) => {
         type,
       };
 
-      console.log("payload: ", payload);
-
-      const newChat = await chatService.createGroup(payload);
-
+      const newChat = await createGroup(payload);
       console.log("Successfully created:", newChat);
-      setActiveChatById(newChat.id)
-      setSidebar('default')
+
+      setActiveChat(newChat);
+      setSidebar("default");
       // Handle success (e.g., close modal, redirect)
     } catch (error) {
       console.error("Failed to create group/channel:", error);
@@ -78,89 +69,7 @@ const CreateNewChat: React.FC<CreateChatProps> = ({ type }) => {
     }
   };
 
-  const handleCreateChat = () => {
-    console.log({
-      type,
-      name: name.trim(),
-      description: description.trim(),
-      members: selectedContacts,
-      isPublic,
-    });
-    // TODO: Implement creation logic
-  };
-
-  const renderDetailsStep = () => (
-    <div className="flex flex-col h-full p-4">
-      <h2 className="text-xl font-semibold mb-4">
-        {type === "group" ? "Group" : "Channel"} Details
-      </h2>
-
-      {type === "channel" && (
-        <div className="mb-4">
-          <label className="flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={isPublic}
-              onChange={(e) => setIsPublic(e.target.checked)}
-              className="mr-2"
-            />
-            <span>Public {type}</span>
-          </label>
-        </div>
-      )}
-
-      <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">
-          {type === "group" ? "Group" : "Channel"} Name
-        </label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full p-2 border rounded"
-          placeholder={`Enter ${type} name`}
-          maxLength={50}
-          required
-        />
-      </div>
-
-      <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">
-          Description (Optional)
-        </label>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="w-full p-2 border rounded"
-          placeholder={`Enter ${type} description`}
-          rows={3}
-          maxLength={200}
-        />
-      </div>
-
-      <div className="mt-auto">
-        <button
-          onClick={() => setStep("select-contacts")}
-          className="mb-2 w-full py-2 border rounded"
-        >
-          Back
-        </button>
-        <button
-          onClick={handleCreateChat}
-          disabled={!name.trim()}
-          className={`w-full py-2 rounded ${
-            name.trim()
-              ? "bg-[var(--primary-green)]"
-              : "bg-gray-300 cursor-not-allowed"
-          }`}
-        >
-          Create {type === "group" ? "Group" : "Channel"}
-        </button>
-      </div>
-    </div>
-  );
-
-  const renderSelectContactsStep = () => (
+  return (
     <div className="flex flex-col h-full">
       <div className="p-2">
         <SearchBar placeholder="Search for contacts..." />
@@ -189,9 +98,9 @@ const CreateNewChat: React.FC<CreateChatProps> = ({ type }) => {
         }}
       >
         {getSelectedChats().length > 0 && (
-          <div className="flex flex-wrap gap-2 items-center">
+          <div className="flex flex-wrap gap-1 items-center">
             {getSelectedChats().map((chat) => (
-              <Avatar key={chat.id} avatar={chat.avatar} size="sm" />
+              <Avatar key={chat.id} user={chat.chatPartner} className="w-8 h-8" textSize="text-sm" />
             ))}
           </div>
         )}
@@ -208,23 +117,25 @@ const CreateNewChat: React.FC<CreateChatProps> = ({ type }) => {
 
         <button
           disabled={
-            selectedContacts.length === 0 || (type === "group" && !name.trim())
+            selectedContacts.length === 0 ||
+            (type === "group" && !name.trim()) ||
+            isLoading
           }
-          className={`flex items-center gap-2 py-1 w-full ${
+          className={`flex items-center justify-center gap-2 py-1 w-full ${
             selectedContacts.length > 0 && (type === "channel" || name.trim())
               ? "bg-[var(--primary-green)]"
               : "bg-gray-300 cursor-not-allowed"
           }`}
         >
-          <p>Create {type === "group" ? "Group" : "Channel"}</p>
+          {isLoading ? (
+            <span>Creating...</span>
+          ) : (
+            <span>Create {type === "group" ? "Group" : "Channel"}</span>
+          )}
         </button>
       </form>
     </div>
   );
-
-  return step === "set-details"
-    ? renderDetailsStep()
-    : renderSelectContactsStep();
 };
 
-export default CreateNewChat;
+export default CreateNewGroupChat;

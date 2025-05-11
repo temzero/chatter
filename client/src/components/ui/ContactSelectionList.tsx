@@ -1,6 +1,6 @@
 import React from "react";
 import type { Chat } from "@/types/chat";
-import { ChatAvatar } from "./ChatAvatar";
+import { ChatAvatar } from "./avatar/ChatAvatar";
 
 interface ChatListProps {
   chats: Chat[];
@@ -13,20 +13,13 @@ const ContactSelectionList: React.FC<ChatListProps> = ({
   selectedContacts,
   onContactToggle,
 }) => {
-  function getUserItemClass() {
-    const baseClasses =
-      "relative flex items-center w-full h-22 gap-3 p-3 transition-all duration-300 ease-in-out cursor-pointer";
-    const selectedClasses = "hover:bg-[var(--hover-color)]";
-    return `${baseClasses} ${selectedClasses}`;
-  }
-
   return (
     <div className="flex-1 overflow-y-auto overflow-x-hidden relative">
       {chats.map((chat) => {
         return (
           <React.Fragment key={chat.id}>
             <div
-              className={getUserItemClass()}
+              className="relative flex items-center w-full h-20 gap-3 p-3 transition-all duration-300 ease-in-out cursor-pointer hover:bg-[var(--hover-color)]"
               onClick={() => onContactToggle(chat.id)}
             >
               <ChatAvatar chat={chat} type="sidebar" />

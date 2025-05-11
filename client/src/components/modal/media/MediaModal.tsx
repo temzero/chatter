@@ -2,20 +2,20 @@ import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { MediaTopBar } from "./MediaTopBar";
 import { MediaNavigationButtons } from "./MediaNavigationButtons";
-import { SliderMediaContent } from "./SliderMediaContent";
 import { MediaBottomInfo } from "./MediaBottomInfo";
 import { useSoundEffect } from "@/hooks/useSoundEffect";
 import slidingSound from "@/assets/sound/click.mp3";
-import { useUIStore } from "@/stores/uiStore";
+import { useModalStore } from "@/stores/modalStore";
 import { useMessageStore } from "@/stores/messageStore";
+import { RenderModalMedia } from "./RenderModalMedia";
+import { MediaSlidingContainer } from "./MediaSlidingContainer";
 
 export const MediaModal = () => {
-  const { currentMediaId, closeModal } = useUIStore();
+  const { currentMediaId, closeModal } = useModalStore();
   const activeMedia = useMessageStore((state) => state.activeMedia);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const [rotation, setRotation] = useState(0);
-  const [slidingAnimation, setSlidingAnimation] = useState(false);
 
   const playSound = useSoundEffect(slidingSound);
 
@@ -33,7 +33,6 @@ export const MediaModal = () => {
     if (activeMedia && currentIndex < activeMedia.length - 1) {
       setDirection(1);
       setCurrentIndex((prev) => prev + 1);
-      setSlidingAnimation((prev) => !prev);
       setRotation(0);
       playSound();
     }
@@ -43,7 +42,6 @@ export const MediaModal = () => {
     if (currentIndex > 0) {
       setDirection(-1);
       setCurrentIndex((prev) => prev - 1);
-      setSlidingAnimation((prev) => !prev);
       setRotation(0);
       playSound();
     }
@@ -99,13 +97,7 @@ export const MediaModal = () => {
   const currentMedia = activeMedia[currentIndex];
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.4 }}
-      className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-md z-[99] flex flex-col items-center justify-center text-white"
-    >
+    <>
       <MediaTopBar
         media={currentMedia}
         onRotate={handleRotate}
@@ -126,12 +118,14 @@ export const MediaModal = () => {
         exit={{ opacity: 0, scale: 0.1, y: 2000 }}
         transition={{ type: "spring", stiffness: 300, damping: 29 }}
       >
-        <SliderMediaContent
+        <MediaSlidingContainer
           currentIndex={currentIndex}
           direction={direction}
           currentMedia={currentMedia}
           rotation={rotation}
-        />
+        >
+          <RenderModalMedia media={currentMedia} rotation={rotation} />
+        </MediaSlidingContainer>
       </motion.div>
 
       <MediaBottomInfo
@@ -139,7 +133,7 @@ export const MediaModal = () => {
         currentIndex={currentIndex}
         mediaLength={activeMedia.length}
       />
-    </motion.div>
+    </>
   );
 };
 

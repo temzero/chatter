@@ -1,16 +1,11 @@
 // src/routes/PrivateLayout.tsx
 import { ROUTES } from "@/constants/routes";
 import { useEffect } from "react";
-import MediaModal from "@/components/modal/MediaModal";
+import Modal from "@/components/modal/Modal";
 import Sidebar from "@/components/sidebar/Sidebar";
 import Chat from "@/components/chat/Chat";
 import BackgroundContent from "@/components/ui/BackgroundContent";
-import {
-  Navigate,
-  useParams,
-  useNavigate,
-  useLocation,
-} from "react-router-dom";
+import { Navigate, useParams, useNavigate } from "react-router-dom";
 import { useChatStore } from "@/stores/chatStore";
 import { useIsAuthenticated } from "@/stores/authStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
@@ -32,6 +27,7 @@ export const ChatContent: React.FC = () => {
     initializeSidebarInfo();
 
     if (chatId) {
+      console.log("chatId: ", chatId);
       setActiveChatById(chatId);
     } else {
       setActiveChatById(null);
@@ -59,11 +55,10 @@ const PrivateLayout: React.FC = () => {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <MediaModal />
       <BackgroundContent />
-
       <Sidebar />
       <ChatContent />
+      <Modal />
     </div>
   );
 };

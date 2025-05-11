@@ -2,24 +2,28 @@ import React, { useState } from "react";
 import { userService } from "@/services/userService";
 import { MyProfileProps } from "@/data/types";
 import ContactInfoItem from "./contactInfoItem";
+import { useAuthStore } from "@/stores/authStore";
+import { motion } from "framer-motion";
+import { useModalStore } from "@/stores/modalStore";
+import { useChatStore } from "@/stores/chatStore";
+import { Avatar } from "./avatar/Avatar";
 
 const CreateNewChat: React.FC = () => {
+  const currentUser = useAuthStore((state) => state.currentUser);
+  const setActiveChat = useChatStore((s) => s.setActiveChat);
+  const createChat = useChatStore((s) => s.createChat);
+  const { openModal } = useModalStore();
+
   const [query, setQuery] = useState("");
-  const [requestMessage, setRequestMessage] = useState(
-    "Hello! I'd like to connect and chat with you."
-  );
   const [user, setUser] = useState<MyProfileProps | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [friendRequestSent, setFriendRequestSent] = useState(false);
-  const [friendRequestLoading, setFriendRequestLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setUser(null);
     setLoading(true);
-    setFriendRequestSent(false);
 
     try {
       const foundUser = await userService.getUserByIdentifier(query.trim());
@@ -32,33 +36,39 @@ const CreateNewChat: React.FC = () => {
     }
   }
 
-  const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (e.target.value.length <= 100) {
-      setRequestMessage(e.target.value);
-    }
-  };
+  function handleOpenFriendRequest() {
+    if (!user) return;
 
-  const handleFriendRequest = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user || friendRequestSent) return;
+    openModal("friend-request", {
+      user: {
+        id: user.id,
+        username: user.username,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        avatar: user.avatar,
+      },
+    });
+  }
 
-    setFriendRequestLoading(true);
-    setError(null);
+  async function handleStartChat() {
+    if (!user || !currentUser) return;
 
     try {
-      await userService.sendFriendRequest({
-        recipientId: user.id,
-        message: requestMessage.trim()
+      setLoading(true);
+      const newChat = await createChat({
+        member1Id: currentUser.id,
+        member2Id: user.id,
       });
-      setFriendRequestSent(true);
-    } catch (err: unknown) {
-      console.error("Failed to send friend request:", err);
-      setError("Failed to send friend request");
+      console.log("newChat: ", newChat);
+      // Set the new chat as active
+      setActiveChat(newChat);
+    } catch (err) {
+      console.error("Failed to start chat:", err);
+      setError("Failed to start chat. Please try again.");
     } finally {
-      setFriendRequestLoading(false);
+      setLoading(false);
     }
-  };
-
+  }
   return (
     <div className="flex flex-col gap-3 p-2 h-full relative">
       <form onSubmit={handleSubmit} className="space-y-2">
@@ -87,21 +97,22 @@ const CreateNewChat: React.FC = () => {
       {error && <p className="text-red-400 text-center">{error}</p>}
 
       {user && (
-        <div className="border-2 border-[var(--border-color)] rounded-lg flex flex-col justify-between h-full overflow-hidden">
+        <motion.div
+          key={user.id}
+          initial={{ opacity: 0, scale: 0.3, y: 150 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 19,
+            mass: 0.5,
+          }}
+          className="bg-[var(--card-bg-color)] custom-border rounded-lg flex flex-col justify-between h-full overflow-hidden"
+        >
           {/* Scrollable user info */}
-          <div className="flex-1 flex flex-col items-center justify-start gap-2 p-2 overflow-y-auto">
-            <a className="h-24 w-24 min-w-24 mt-1 flex items-center justify-center rounded-full custom-border">
-              {user.avatar ? (
-                <img
-                  className="w-full h-full rounded-full object-cover"
-                  src={user.avatar}
-                />
-              ) : (
-                <i className="material-symbols-outlined text-8xl opacity-20">
-                  mood
-                </i>
-              )}
-            </a>
+          <div className="flex-1 flex flex-col items-center justify-start gap-2 p-2 pt-4 overflow-y-auto">
+            <Avatar user={user} className="h-28 w-28" />
+
             <h1 className="font-bold text-xl">
               {user.first_name} {user.last_name}
             </h1>
@@ -132,34 +143,26 @@ const CreateNewChat: React.FC = () => {
             </div>
           </div>
 
-          {/* Fixed friend request input at the bottom */}
-          <form 
-            className="w-full border-t-2 border-[var(--border-color)] pt-1 p-2 bg-[var(--sidebar-color)]"
-            onSubmit={handleFriendRequest}
-          >
-            {friendRequestSent ? (
-              <div className="text-center py-2 text-green-500">
-                Friend request sent successfully!
-              </div>
-            ) : (
-              <>
-                <textarea
-                  placeholder="Send request message..."
-                  className="w-full max-h-20 p-1 px-2 border rounded resize-none"
-                  value={requestMessage}
-                  onChange={handleMessageChange}
-                  maxLength={100}
-                />
-                <button 
-                  className="bg-[var(--primary-green)] w-full py-1 flex gap-2 mt-1 rounded text-white justify-center"
-                  disabled={friendRequestLoading}
-                >
-                  {friendRequestLoading ? "Sending..." : "Send Friend Request"}
-                </button>
-              </>
-            )}
-          </form>
-        </div>
+          {user.id === currentUser?.id || (
+            <div className="w-full flex border-t-2 border-[var(--border-color)]">
+              <button
+                className="w-full py-1 flex gap-1 custom-border-r justify-center hover:bg-[var(--primary-green)] rounded-none"
+                onClick={handleOpenFriendRequest}
+              >
+                <span className="material-symbols-outlined">person_add</span>
+              </button>
+              <button
+                className="w-full py-1 flex justify-center hover:bg-[var(--primary-green)] rounded-none"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleStartChat();
+                }}
+              >
+                <span className="material-symbols-outlined">chat_bubble</span>
+              </button>
+            </div>
+          )}
+        </motion.div>
       )}
     </div>
   );

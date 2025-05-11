@@ -2,7 +2,7 @@ import React, { useState, useMemo } from "react";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { useMessageStore } from "@/stores/messageStore";
 
-import SlidingContainer from "@/components/ui/SlidingContainer";
+import { SlidingContainer } from "@/components/ui/SlidingContainer";
 import RenderMedia from "@/components/ui/RenderMedia";
 
 const mediaTypes = ["images", "videos", "audio", "files"];
@@ -26,7 +26,7 @@ const ChatInfoMedia: React.FC = () => {
         case "audio":
           return media.type === "audio";
         case "files":
-          return media.type === "file";
+          return media.type === "document";
         default:
           return false;
       }
@@ -119,7 +119,7 @@ const ChatInfoMedia: React.FC = () => {
       </div>
 
       <div className="overflow-x-hidden overflow-y-auto h-screen">
-        <SlidingContainer selectedType={selectedType} direction={direction}>
+        <SlidingContainer uniqueKey={selectedType} direction={direction}>
           {renderMediaContent()}
         </SlidingContainer>
       </div>

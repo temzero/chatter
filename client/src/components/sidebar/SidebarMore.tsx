@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import ThemeSwitcher from "../ui/ThemeSwitcher";
 import { useCurrentUser } from "@/stores/authStore";
+import { Avatar } from "../ui/avatar/Avatar";
 
 const SidebarMore: React.FC = () => {
   const currentUser = useCurrentUser();
@@ -9,21 +10,21 @@ const SidebarMore: React.FC = () => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === '`') {
+      if (e.key === "`") {
         e.preventDefault();
         toggleCompact();
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [toggleCompact]);  
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [toggleCompact]);
 
   const sidebarButtons = [
     {
-      icon: 'bookmark',
-      text: 'Saved Messages',
-      onClick: null
+      icon: "bookmark",
+      text: "Saved Messages",
+      onClick: null,
     },
     // {
     //   icon: 'add',
@@ -35,101 +36,133 @@ const SidebarMore: React.FC = () => {
     //   text: 'Search',
     //   onClick: () => setSidebar('search')
     // },
-    { type: 'divider' }, // This will render the border divider
+    { type: "divider" }, // This will render the border divider
     {
-      icon: 'call',
-      text: 'Call',
-      onClick: null
+      icon: "call",
+      text: "Call",
+      onClick: null,
     },
     {
-      icon: 'contacts',
-      text: 'Contacts',
-      onClick: null
+      icon: "contacts",
+      text: "Contacts",
+      onClick: null,
     },
-    { type: 'divider' }, // Another divider
+    { type: "divider" }, // Another divider
     {
-      icon: 'folder',
-      text: 'Folder',
-      onClick: null
-    },
-    {
-      icon: 'lock',
-      text: 'Private',
-      onClick: null
+      icon: "folder",
+      text: "Folder",
+      onClick: null,
     },
     {
-      icon: 'block',
-      text: 'Blocked',
-      onClick: null
+      icon: "lock",
+      text: "Private",
+      onClick: null,
+    },
+    {
+      icon: "block",
+      text: "Blocked",
+      onClick: null,
     },
   ];
 
   return (
-    <aside className={`relative h-full flex flex-col justify-between transition-all duration-300 ease-in-out
-        ${isCompact ? 'w-[var(--sidebar-width-small)]' : 'w-[var(--sidebar-width)]'}`}
+    <aside
+      className={`relative h-full flex flex-col justify-between transition-all duration-300 ease-in-out
+        ${
+          isCompact
+            ? "w-[var(--sidebar-width-small)]"
+            : "w-[var(--sidebar-width)]"
+        }`}
     >
-        {/* Header */}
-        <header className="flex w-full justify-between items-center min-h-[var(--header-height)] custom-border-b">
-            <i className="material-symbols-outlined nav-btn"
-                onClick={() => setSidebar('default')}>arrow_back</i>
+      {/* Header */}
+      <header className="flex w-full justify-between items-center min-h-[var(--header-height)] custom-border-b">
+        <i
+          className="material-symbols-outlined nav-btn"
+          onClick={() => setSidebar("default")}
+        >
+          arrow_back
+        </i>
 
-            <i className="material-symbols-outlined nav-btn ml-auto"
-             onClick={() => setSidebar('default')}>close</i>
+        <i
+          className="material-symbols-outlined nav-btn ml-auto"
+          onClick={() => setSidebar("default")}
+        >
+          close
+        </i>
+      </header>
 
-        </header>
-
-        {/* User Info */}
-        <div className="flex items-center p-4 gap-4 w-full custom-border-b cursor-pointer hover:bg-[var(--hover-color)]" onClick={() => setSidebar('profile')}>
-            <a className="h-16 w-16 min-w-16 flex items-center justify-center rounded-full custom-border overflow-hidden">
-            {currentUser?.avatar ? 
-              <img className="w-full h-full" src={currentUser?.avatar}/> : <i className="material-symbols-outlined text-8xl opacity-20">mood</i>
-            }
-            </a>
-            {isCompact ||
-            <div className="flex flex-col font-light min-w-60">
-                <h1 className="font-semibold">{currentUser?.first_name} {currentUser?.last_name}</h1>
-                <a>{currentUser?.phone_number}</a>
-            </div>
-            }
-        </div>
-        
-        <div className="overflow-x-hidden overflow-y-auto">
-          {sidebarButtons.map((button, index) => (
-              button.type === 'divider' ? (
-                  <div key={`divider-${index}`} className="border-b-[6px] custom-border-b"></div>
-              ) : (
-                  <div 
-                  key={button.text} 
-                      className={`sidebar-button ${isCompact ? 'justify-center' : ''}`}
-                  onClick={button.onClick || undefined}
-                  >
-                  <div className="flex items-center justify-center h-10 w-10">
-                      <i className="material-symbols-outlined text-3xl">{button.icon}</i>
-                  </div>
-                  {isCompact || <p className="whitespace-nowrap text-ellipsis">{button.text}</p>}
-                  </div>
-              )
-          ))}
+      {/* User Info */}
+      <div
+        className="flex items-center p-4 gap-4 w-full custom-border-b cursor-pointer hover:bg-[var(--hover-color)]"
+        onClick={() => setSidebar("profile")}
+      >
+        <div className="w-16 h-16">
+          {currentUser && <Avatar user={currentUser} className="h-full w-16" />}
         </div>
 
-
-        <div className={`w-full flex custom-border-t backdrop-blur-[20px] shadow mt-auto ${isCompact ? 'justify-center' : 'justify-between'}`} >
-          <div className={`flex items-center cursor-pointer hover:bg-[var(--hover-color)] w-full p-1 px-4 ${isCompact ? 'justify-center' : 'gap-3'}`} onClick={() => setSidebar('settings')}>
-            <div className="flex items-center justify-center h-10 w-10">
-              <i className="material-symbols-outlined text-3xl">settings</i>
-            </div>
-            {!isCompact && <p className="whitespace-nowrap text-ellipsis">Settings</p>}
+        {isCompact || (
+          <div className="flex flex-col font-light min-w-60">
+            <h1 className="font-semibold">
+              {currentUser?.first_name} {currentUser?.last_name}
+            </h1>
+            <a>{currentUser?.phone_number}</a>
           </div>
+        )}
+      </div>
 
-          {!isCompact && 
+      <div className="overflow-x-hidden overflow-y-auto">
+        {sidebarButtons.map((button, index) =>
+          button.type === "divider" ? (
+            <div
+              key={`divider-${index}`}
+              className="border-b-[6px] custom-border-b"
+            ></div>
+          ) : (
+            <div
+              key={button.text}
+              className={`sidebar-button ${isCompact ? "justify-center" : ""}`}
+              onClick={button.onClick || undefined}
+            >
+              <div className="flex items-center justify-center h-10 w-10">
+                <i className="material-symbols-outlined text-3xl">
+                  {button.icon}
+                </i>
+              </div>
+              {isCompact || (
+                <p className="whitespace-nowrap text-ellipsis">{button.text}</p>
+              )}
+            </div>
+          )
+        )}
+      </div>
+
+      <div
+        className={`w-full flex custom-border-t backdrop-blur-[20px] shadow mt-auto ${
+          isCompact ? "justify-center" : "justify-between"
+        }`}
+      >
+        <div
+          className={`flex items-center cursor-pointer hover:bg-[var(--hover-color)] w-full p-1 px-4 ${
+            isCompact ? "justify-center" : "gap-3"
+          }`}
+          onClick={() => setSidebar("settings")}
+        >
+          <div className="flex items-center justify-center h-10 w-10">
+            <i className="material-symbols-outlined text-3xl">settings</i>
+          </div>
+          {!isCompact && (
+            <p className="whitespace-nowrap text-ellipsis">Settings</p>
+          )}
+        </div>
+
+        {!isCompact && (
           <div className=" flex items-center justify-center px-2">
-            <ThemeSwitcher/>
+            <ThemeSwitcher />
           </div>
-          }
-        </div>
+        )}
+      </div>
     </aside>
-  )
-}
+  );
+};
 
 export default SidebarMore;
-

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useChatStore } from '@/stores/chatStore';
+import { useChatStore } from "@/stores/chatStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { Logo } from "../ui/Logo";
-import SlidingContainer from "@/components/ui/SlidingContainer";
+import { SlidingContainer } from "../ui/SlidingContainer";
 import ChatList from "@/components/ui/ChatList";
 import { motion } from "framer-motion";
 import { filterChatsByType } from "@/utils/filterChatsByType";
@@ -133,7 +133,7 @@ const SidebarDefault: React.FC = () => {
       </div>
 
       {/* Chat List Container */}
-      <SlidingContainer selectedType={selectedType} direction={direction}>
+      <SlidingContainer direction={direction} uniqueKey={selectedType}>
         <ChatList chats={filteredChatsByType} isCompact={isCompact} />
       </SlidingContainer>
     </aside>

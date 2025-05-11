@@ -2,7 +2,7 @@ import React from "react";
 import { useChatStore } from "@/stores/chatStore";
 import { useMessageStore } from "@/stores/messageStore";
 import type { Chat } from "@/types/chat";
-import { ChatAvatar } from "./ChatAvatar";
+import { ChatAvatar } from "./avatar/ChatAvatar";
 import { formatTime } from "@/utils/formatTime";
 
 interface ChatListProps {
@@ -16,7 +16,7 @@ const ChatList: React.FC<ChatListProps> = ({ chats, isCompact = false }) => {
   const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
 
   function handleChatSelect(chat: Chat) {
-    window.history.pushState({}, '', `/${chat.id}`);
+    window.history.pushState({}, "", `/${chat.id}`);
     setActiveChat(chat);
   }
 

@@ -3,7 +3,7 @@ import { useChatStore } from "@/stores/chatStore";
 import { useMessageStore } from "@/stores/messageStore";
 import { AnimatePresence, motion } from "framer-motion";
 import ContactInfoItem from "@/components/ui/contactInfoItem";
-import { ChatAvatar } from "@/components/ui/ChatAvatar";
+import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import RenderMedia from "@/components/ui/RenderMedia";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { formatTime } from "@/utils/formatTime";

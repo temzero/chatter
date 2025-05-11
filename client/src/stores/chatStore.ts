@@ -2,11 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Chat } from "@/types/chat";
 import { chatService } from "@/services/chatService";
-import {
-  useMessageStore,
-  getMessagesByChatId,
-  getMediaFromMessages,
-} from "./messageStore";
+import { useMessageStore } from "./messageStore";
 
 interface ChatStore {
   chats: Chat[];
@@ -22,9 +18,14 @@ interface ChatStore {
   setActiveChat: (chat: Chat | null) => void;
   setActiveChatById: (chatId: string | null) => Promise<void>;
   createChat: (payload: {
-    participants: string[];
-    isGroup?: boolean;
-  }) => Promise<void>;
+    member1Id: string;
+    member2Id: string;
+  }) => Promise<Chat>;
+  createGroup: (payload: {
+    name: string;
+    memberIds: string[];
+    type: "group" | "channel";
+  }) => Promise<Chat>;
   updateChat: (id: string, updates: Partial<Chat>) => Promise<void>;
   deleteChat: (id: string) => Promise<void>;
 }
@@ -77,54 +78,42 @@ export const useChatStore = create<ChatStore>()(
 
       setSearchTerm: (term) => {
         const { chats } = get();
-        console.log('chats', chats)
-        
+
         // If search term is empty, show all chats
         if (!term.trim()) {
-          set({ 
+          set({
             searchTerm: term,
-            filteredChats: chats 
+            filteredChats: chats,
           });
           return;
         }
-      
+
         const lowerCaseTerm = term.toLowerCase();
-        
+
         // Filter chats based on search term
         const filtered = chats.filter((chat) => {
           // Search in chat name
           const nameMatch = chat.name?.toLowerCase().includes(lowerCaseTerm);
-      
+
           // For private chats, also search in partner's name
           if (chat.type === "private") {
             const partnerNameMatch = chat.chatPartner?.first_name
               ?.toLowerCase()
               .includes(lowerCaseTerm);
-      
+
             return nameMatch || partnerNameMatch;
           }
-      
+
           return nameMatch;
         });
-      
-        set({ 
+
+        set({
           searchTerm: term,
-          filteredChats: filtered 
+          filteredChats: filtered,
         });
       },
 
       setActiveChat: (chat) => {
-        const allMessages = useMessageStore.getState().messages;
-        const activeMessages = chat
-          ? getMessagesByChatId(chat.id, allMessages)
-          : [];
-        const activeMedia = getMediaFromMessages(activeMessages);
-
-        useMessageStore.setState({
-          activeMessages,
-          activeMedia,
-        });
-        console.log(chat)
         set({ activeChat: chat });
       },
 
@@ -135,18 +124,11 @@ export const useChatStore = create<ChatStore>()(
         }
 
         try {
-          // Check if we already have the chat in store
           const existingChat = get().chats.find((chat) => chat.id === chatId);
-
           if (existingChat) {
             get().setActiveChat(existingChat);
           } else {
-            // Fetch the chat if not in store
-            await get().getChatById(chatId);
-            const chat = get().chats.find((c) => c.id === chatId);
-            if (chat) {
-              get().setActiveChat(chat);
-            }
+            console.error("Cannot find chat in existing chats");
           }
         } catch (error) {
           console.error("Failed to set active chat:", error);
@@ -158,6 +140,25 @@ export const useChatStore = create<ChatStore>()(
         set({ isLoading: true });
         try {
           const newChat = await chatService.createChat(payload);
+          set((state) => ({
+            chats: [newChat, ...state.chats],
+            isLoading: false,
+          }));
+          return newChat;
+        } catch (error) {
+          console.error("Failed to create chat:", error);
+          set({
+            error: "Failed to create chat",
+            isLoading: false,
+          });
+          throw error;
+        }
+      },
+
+      createGroup: async (payload) => {
+        set({ isLoading: true });
+        try {
+          const newChat = await chatService.createGroup(payload);
           set((state) => ({
             chats: [newChat, ...state.chats],
             isLoading: false,
@@ -185,7 +186,6 @@ export const useChatStore = create<ChatStore>()(
               state.activeChat?.id === id ? updatedChat : state.activeChat,
             isLoading: false,
           }));
-          return updatedChat;
         } catch (error) {
           console.error("Failed to update chat:", error);
           set({
@@ -231,7 +231,8 @@ export const useChatStore = create<ChatStore>()(
     {
       name: "chat-storage",
       partialize: (state) => ({
-        activeChat: state.activeChat, // Only persist the active chat
+        activeChat: state.activeChat,
+        chats: state.chats,
       }),
     }
   )

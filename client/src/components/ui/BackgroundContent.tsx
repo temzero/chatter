@@ -1,8 +1,7 @@
 // src/components/common/BackgroundContent.tsx
 import backgroundLight from "@/assets/image/backgroundSky.jpg";
 import backgroundDark from "@/assets/image/backgroundDark.jpg";
-import { useResolvedTheme } from "@/stores/uiStore";
-
+import { useResolvedTheme } from "@/stores/themeStore";
 
 const BackgroundContent = () => {
   const resolvedTheme = useResolvedTheme()

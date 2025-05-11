@@ -47,7 +47,7 @@ html[data-theme="dark"] {
   --message-color: #303030;
   --scrollbar-color: #5f5f5f;
   --scrollbar-hover-color: #d0d0d0;
-  --card-bg-color: transparent;
+  --card-bg-color: rgb(20, 20, 20);
 }
 
 html {
@@ -85,7 +85,8 @@ button.primary {
   color: white;
 }
 
-input, textarea {
+input,
+textarea {
   outline: none;
   border: none;
   border-radius: 4px !important;
@@ -94,7 +95,8 @@ input, textarea {
   resize: none;
 }
 
-input:focus, textarea:focus {
+input:focus,
+textarea:focus {
   outline: none !important;
   box-shadow: none !important;
 }
@@ -112,7 +114,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
 .input {
   height: 36px;
   width: 100%;
-  padding: 6px; 
+  padding: 6px;
   border: 2px solid var(--input-border-color);
   background-color: var(--input-color);
   border-radius: 4px;
@@ -145,7 +147,7 @@ select:focus {
 
 /* icon */
 .material-symbols-outlined.filled {
-  font-variation-settings: 'FILL' 1;
+  font-variation-settings: "FILL" 1;
 }
 
 .custom-border {
@@ -177,7 +179,8 @@ select:focus {
 }
 
 /* Shared Styles for Both Bubbles */
-.message-bubble, .message-media-bubble {
+.message-bubble,
+.message-media-bubble {
   display: inline-block;
   border-radius: 8px;
   background-color: var(--message-color);
@@ -189,15 +192,19 @@ select:focus {
   transform-origin: bottom left;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
-.message-bubble { padding: 8px; }
+.message-bubble {
+  padding: 8px;
+}
 /* Hover Effect */
-.message-bubble:hover, .message-media-bubble:hover {
+.message-bubble:hover,
+.message-media-bubble:hover {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transform: scale(1.1);
 }
 
 /* Self Message Bubbles (Right-Aligned) */
-.message-bubble.self-message, .message-media-bubble.self-message {
+.message-bubble.self-message,
+.message-media-bubble.self-message {
   background-color: var(--active-chat-color);
   /* background-color: rgb(245, 245, 245); */
   transform-origin: bottom right;
@@ -214,7 +221,6 @@ select:focus {
   object-fit: cover;
   overflow: hidden;
 }
-
 
 .nav-btn {
   display: flex;
@@ -249,7 +255,6 @@ select:focus {
   border: 2px solid var(--border-color);
   cursor: pointer;
 }
-
 
 .zoom-image-container {
   position: relative;

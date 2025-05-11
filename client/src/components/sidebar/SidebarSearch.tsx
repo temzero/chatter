@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import SearchBar from "@/components/ui/SearchBar";
 import { useSidebarStore } from "@/stores/sidebarStore";
-import SlidingContainer from "@/components/ui/SlidingContainer";
+import { SlidingContainer } from "../ui/SlidingContainer";
 import ChatList from "@/components/ui/ChatList";
 import { useChatStore } from "@/stores/chatStore";
 import { filterChatsByType } from "@/utils/filterChatsByType";
@@ -74,7 +74,7 @@ const SidebarSearch: React.FC = () => {
       </div>
 
       {/* Chat List Container */}
-      <SlidingContainer selectedType={selectedType} direction={direction}>
+      <SlidingContainer uniqueKey={selectedType} direction={direction}>
         {filteredChatsByType.length > 0 ? (
           <ChatList chats={filteredChatsByType} />
         ) : (

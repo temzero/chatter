@@ -22,7 +22,7 @@ export const chatService = {
   },
 
   // Create a new chat
-  async createChat(payload: { memberIds: string[] }): Promise<Chat> {
+  async createChat(payload: { member1Id: string, member2Id: string }): Promise<Chat> {
     const response = await API.post<ResponseData<Chat>>("/chat", payload);
     return response.data.data;
   },

@@ -5,7 +5,7 @@ import { formatFileSize } from "@/utils/formatFileSize";
 import { getFileIcon } from "@/utils/getFileIcon";
 import { useSoundEffect } from "@/hooks/useSoundEffect";
 import popupSound from "@/assets/sound/flip-switch.mp3";
-import { useUIStore } from "@/stores/uiStore";
+import { useModalStore } from "@/stores/modalStore";
 
 // Helper function to calculate greatest common divisor (GCD)
 const gcd = (a: number, b: number): number => {
@@ -31,7 +31,7 @@ const RenderMedia: React.FC<RenderMediaProps> = ({
   className = "",
   type,
 }) => {
-  const { openModal } = useUIStore();
+  const { openModal } = useModalStore();
   const [hovered, setHovered] = useState(false);
   const [aspectRatio, setAspectRatio] = useState<string | null>(null);
   const [dimensions, setDimensions] = useState<{

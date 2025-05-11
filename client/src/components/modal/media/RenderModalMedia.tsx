@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { MediaProps } from "./MediaModal";
 import { formatFileSize } from "@/utils/formatFileSize";
 import { getFileIcon } from "@/utils/getFileIcon";
-import CustomAudioPlayer from "../ui/CustomAudioPlayer";
+import CustomAudioPlayer from "../../ui/CustomAudioPlayer";
 import { handleDownload } from "@/utils/handleDownload";
 
 export const RenderModalMedia = ({
