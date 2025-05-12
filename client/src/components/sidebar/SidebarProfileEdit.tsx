@@ -3,7 +3,6 @@ import { useSidebarStore } from "@/stores/sidebarStore";
 import { useCurrentUser } from "@/stores/authStore";
 
 const SidebarProfileEdit: React.FC = () => {
-  const setCurrentUser = useSetCurrentUser();
   const currentUser = useCurrentUser();
 
   const { setSidebar } = useSidebarStore();
@@ -31,7 +30,6 @@ const SidebarProfileEdit: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (currentUser) {
-      setCurrentUser({ ...currentUser, ...formData });
       setSidebar("profile");
     }
   };

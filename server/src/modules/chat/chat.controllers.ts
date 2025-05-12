@@ -21,8 +21,8 @@ import {
   mapChatToPrivateChatDto,
   mapChatToGroupChatDto,
 } from 'src/modules/chat/mappers/combinedChatMappers';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../auth/decorators/user.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import type { JwtPayload } from '../auth/types/jwt-payload.type';
 
 @Controller('chat')

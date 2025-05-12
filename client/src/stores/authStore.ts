@@ -27,7 +27,7 @@ type AuthActions = {
   setMessage: (type: MessageType, content: string) => void;
   clearMessage: () => void;
   setLoading: (loading: boolean, clearMessages?: boolean) => void;
-  login: (usernameOrEmail: string, password: string) => Promise<void>;
+  login: (identifier: string, password: string) => Promise<void>;
   logout: () => void;
   register: (userData: {
     username: string;
@@ -89,11 +89,11 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       },
 
       // Authentication methods
-      login: async (usernameOrEmail, password) => {
+      login: async (identifier, password) => {
         try {
           get().setLoading(true); // Auto-clears messages
           const { user } = await authService.login(
-            usernameOrEmail,
+            identifier,
             password
           );
           set({

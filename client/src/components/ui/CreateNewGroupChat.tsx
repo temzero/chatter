@@ -32,6 +32,10 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
     );
   };
 
+  const handleRemoveContact = (contactId: string) => {
+    setSelectedContacts((prev) => prev.filter((id) => id !== contactId));
+  };
+
   const getSelectedChats = (): PrivateChat[] => {
     return privateChats.filter((chat) => selectedContacts.includes(chat.id));
   };
@@ -100,7 +104,22 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
         {getSelectedChats().length > 0 && (
           <div className="flex flex-wrap gap-1 items-center">
             {getSelectedChats().map((chat) => (
-              <Avatar key={chat.id} user={chat.chatPartner} className="w-8 h-8" textSize="text-sm" />
+              <div
+                key={chat.id}
+                className="relative w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 cursor-pointer group"
+                onClick={() => handleRemoveContact(chat.id)}
+              >
+                <Avatar
+                  user={chat.chatPartner}
+                  className="w-8 h-8"
+                  textSize="text-sm"
+                />
+                <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <i className="material-symbols-outlined text-white">
+                    close
+                  </i>
+                </div>
+              </div>
             ))}
           </div>
         )}

@@ -37,7 +37,7 @@ export class UpdateUserDto {
   phone_number?: string;
 
   @IsOptional()
-  @IsDateString({}, { message: 'Invalid birthday date format' })
+  @IsDateString({}, { message: 'Invalid birthday format' })
   birthday?: Date;
 
   @IsOptional()
@@ -55,4 +55,8 @@ export class UpdateUserDto {
   @IsOptional()
   @IsBoolean()
   is_deleted?: boolean;
+
+  @IsOptional()
+  @IsDateString({}, { message: 'Invalid date format for lastSeen' })
+  last_seen?: Date;
 }

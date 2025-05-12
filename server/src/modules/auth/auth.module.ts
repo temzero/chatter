@@ -6,8 +6,10 @@ import { AuthController } from './auth.controller';
 import { UserModule } from '../user/user.module';
 import { MailModule } from '../mail/mail.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { JwtAuthGuard } from './guards/jwt.guard';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { LocalStrategy } from './strategies/local.strategy';
+import { RefreshTokenModule } from '../refresh-token/refresh-token.module';
 
 @Module({
   imports: [
@@ -19,16 +21,13 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '1d' },
+        signOptions: { expiresIn: '1h' },
       }),
     }),
+    RefreshTokenModule,
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    JwtStrategy,
-    JwtAuthGuard, // Remove if making it global
-  ],
-  exports: [JwtModule, PassportModule], // Export if other modules need it
+  providers: [AuthService, LocalStrategy, JwtStrategy, JwtAuthGuard],
+  exports: [JwtModule, PassportModule],
 })
 export class AuthModule {}

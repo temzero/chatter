@@ -1,18 +1,24 @@
 import {
   Controller,
   Post,
+  Get,
   Body,
-  UnauthorizedException,
   BadRequestException,
   Query,
-  Get,
+  Request,
   HttpException,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ResponseData } from 'src/common/response-data';
 import { User } from '../user/entities/user.entity';
 import { CreateUserDto } from '../user/dto/create-user.dto';
+import { LocalGuard } from './guards/local.guard';
+import { JwtAuthGuard } from './guards/jwt.guard';
+import { RequestUser } from './types/request-user.type';
+import { CurrentUser } from './decorators/user.decorator';
+import { AuthenticatedRequest } from './types/authenticated-request.type';
 
 @Controller('auth')
 export class AuthController {
@@ -23,16 +29,18 @@ export class AuthController {
     return this.authService.verifyEmail(token);
   }
 
+  @Get('jwt-token')
+  @UseGuards(JwtAuthGuard)
+  jwtToken(@CurrentUser() user: RequestUser) {
+    return user;
+  }
+
   @Post('login')
-  async login(@Body() body: { usernameOrEmail: string; password: string }) {
-    const user = await this.authService.validateUser(
-      body.usernameOrEmail,
-      body.password,
-    );
-    if (!user) {
-      throw new UnauthorizedException('Wrong Username or Password!');
-    }
-    return this.authService.login(user);
+  @UseGuards(LocalGuard)
+  login(@Request() req: AuthenticatedRequest) {
+    const deviceId = req.headers['x-device-id'] as string;
+    const deviceName = req.headers['x-device-name'] as string;
+    return this.authService.login(req.user as User, deviceId, deviceName);
   }
 
   @Post('register')
