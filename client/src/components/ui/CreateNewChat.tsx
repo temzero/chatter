@@ -70,7 +70,7 @@ const CreateNewChat: React.FC = () => {
     }
   }
   return (
-    <div className="flex flex-col gap-3 p-2 h-full relative">
+    <div className="flex flex-col gap-3 p-2 h-full relative overflow-hidden">
       <form onSubmit={handleSubmit} className="space-y-2">
         <div className="flex w-full items-center gap-1 p-1 px-2 rounded border-2 border-[var(--border-color)] shadow focus-within:border-[var(--primary-color)] focus-within:shadow-md transition-all duration-200">
           <input
@@ -99,13 +99,13 @@ const CreateNewChat: React.FC = () => {
       {user && (
         <motion.div
           key={user.id}
-          initial={{ opacity: 0, scale: 0.3, y: 150 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
+          initial={{ opacity: 0, scale: 1.1, }}
+          animate={{ opacity: 1, scale: 1, }}
           transition={{
             type: "spring",
             stiffness: 300,
-            damping: 19,
-            mass: 0.5,
+            damping: 12,
+            mass: 0.6,
           }}
           className="bg-[var(--card-bg-color)] custom-border rounded-lg flex flex-col justify-between h-full overflow-hidden"
         >

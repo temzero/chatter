@@ -20,7 +20,7 @@ import { RefreshTokenModule } from '../refresh-token/refresh-token.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
+        secret: configService.get<string>('JWT_ACCESS_SECRET'),
         signOptions: { expiresIn: '1h' },
       }),
     }),
@@ -28,6 +28,6 @@ import { RefreshTokenModule } from '../refresh-token/refresh-token.module';
   ],
   controllers: [AuthController],
   providers: [AuthService, LocalStrategy, JwtStrategy, JwtAuthGuard],
-  exports: [JwtModule, PassportModule],
+  exports: [AuthService, JwtModule, PassportModule],
 })
 export class AuthModule {}

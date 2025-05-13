@@ -8,7 +8,7 @@ import { AuthService } from '../auth.service';
 export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private authService: AuthService) {
     super({
-      usernameField: 'identifier', // matches your LoginDto field
+      usernameField: 'identifier', // matches LoginDto field
     });
   }
 

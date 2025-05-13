@@ -8,7 +8,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    // Add any additional pre-validation logic here if needed
     return super.canActivate(context);
   }
 }

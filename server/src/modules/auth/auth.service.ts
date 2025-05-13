@@ -41,20 +41,19 @@ export class AuthService {
       if (!deviceId) {
         throw new BadRequestException('Device ID is required');
       }
-
       const payload: JwtPayload = {
         sub: user.id,
         username: user.username,
         email: user.email,
       };
 
-      const access_token = this.jwtService.sign(payload); // default expires in 1h
-      const refresh_token = this.jwtService.sign(
-        { sub: user.id },
-        { expiresIn: '7d' },
+      const access_token =
+        this.refreshTokenService.generateAccessToken(payload);
+      const refresh_token = this.refreshTokenService.generateRefreshToken(
+        user.id,
       );
 
-      await this.refreshTokenService.createRefreshToken(
+      await this.refreshTokenService.storeRefreshToken(
         user.id,
         refresh_token,
         deviceId,
@@ -79,10 +78,7 @@ export class AuthService {
   async register(CreateUserDto: CreateUserDto): Promise<User> {
     const user = await this.userService.createUser(CreateUserDto);
 
-    const verifyEmailToken = this.jwtService.sign(
-      { sub: user.id },
-      { expiresIn: '1h' },
-    );
+    const verifyEmailToken = this.jwtService.sign({ sub: user.id });
     const clientUrl = this.configService.get<string>('CLIENT_URL');
     const verificationUrl = `${clientUrl}/auth/verify-email/${user.first_name}/${user.email}/${verifyEmailToken}`;
 
@@ -97,10 +93,7 @@ export class AuthService {
     if (user.is_email_verified === false) {
       throw new UnauthorizedException('Email not verified');
     }
-    const resetPasswordToken = this.jwtService.sign(
-      { sub: user.id },
-      { expiresIn: '1h' },
-    );
+    const resetPasswordToken = this.jwtService.sign({ sub: user.id });
     const clientUrl = this.configService.get<string>('CLIENT_URL');
     const resetUrl = `${clientUrl}/auth/reset-password/${resetPasswordToken}`;
 

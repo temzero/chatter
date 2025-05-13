@@ -9,6 +9,7 @@ import {
   HttpException,
   HttpStatus,
   UseGuards,
+  Headers,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ResponseData } from 'src/common/response-data';
@@ -18,7 +19,6 @@ import { LocalGuard } from './guards/local.guard';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { RequestUser } from './types/request-user.type';
 import { CurrentUser } from './decorators/user.decorator';
-import { AuthenticatedRequest } from './types/authenticated-request.type';
 
 @Controller('auth')
 export class AuthController {
@@ -37,10 +37,12 @@ export class AuthController {
 
   @Post('login')
   @UseGuards(LocalGuard)
-  login(@Request() req: AuthenticatedRequest) {
-    const deviceId = req.headers['x-device-id'] as string;
-    const deviceName = req.headers['x-device-name'] as string;
-    return this.authService.login(req.user as User, deviceId, deviceName);
+  login(
+    @Request() req: { user: User },
+    @Headers('x-device-id') deviceId: string,
+    @Headers('x-device-name') deviceName: string,
+  ) {
+    return this.authService.login(req.user, deviceId, deviceName);
   }
 
   @Post('register')

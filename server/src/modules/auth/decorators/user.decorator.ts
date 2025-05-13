@@ -11,6 +11,6 @@ export const CurrentUser = createParamDecorator(
       throw new Error('User decorator used without auth guard');
     }
 
-    return data ? user[data] : user;
+    return user;
   },
 );

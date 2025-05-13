@@ -4,6 +4,7 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  BeforeInsert,
 } from 'typeorm';
 
 @Entity('refresh_tokens')
@@ -32,9 +33,10 @@ export class RefreshToken {
   @Column({ type: 'timestamp' })
   expiresAt: Date;
 
-  @Column({ default: false })
-  revoked: boolean;
-
-  @Column({ type: 'timestamp', nullable: true })
-  revokedAt: Date;
+  @BeforeInsert()
+  setExpiryDate() {
+    if (!this.expiresAt) {
+      this.expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7); // 7 days
+    }
+  }
 }

@@ -1,79 +1,154 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { RefreshToken } from './entities/refresh-token.entity';
-import * as bcrypt from 'bcrypt';
-
-// refresh-token.service.ts
+import { UserService } from '../user/user.service';
+import { JwtService } from '@nestjs/jwt';
+import { JwtPayload } from '../auth/types/jwt-payload.type';
+import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class RefreshTokenService {
   constructor(
     @InjectRepository(RefreshToken)
     private readonly refreshTokenRepository: Repository<RefreshToken>,
+    private readonly userService: UserService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
-  async createRefreshToken(
+  async validateAndRefreshToken(
+    incomingToken: string,
+    deviceId: string,
+  ): Promise<{
+    accessToken: string;
+    newRefreshToken: string;
+  }> {
+    let decoded: JwtPayload;
+    try {
+      decoded = this.jwtService.verify<JwtPayload>(incomingToken, {
+        secret: this.configService.getOrThrow('JWT_REFRESH_SECRET'),
+      });
+    } catch (err) {
+      console.error('JWT verification error:', err);
+      throw new UnauthorizedException('Refresh token is expired or invalid');
+    }
+
+    const storedToken = await this.findByToken(
+      incomingToken,
+      decoded.sub,
+      deviceId,
+    );
+
+    if (!storedToken) {
+      throw new UnauthorizedException(
+        'Refresh token not found or device mismatch',
+      );
+    }
+
+    if (storedToken.expiresAt < new Date()) {
+      await this.refreshTokenRepository.remove(storedToken);
+      throw new UnauthorizedException('Refresh token expired (DB)');
+    }
+
+    const user = await this.userService.getUserById(storedToken.userId);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const payload: JwtPayload = {
+      sub: user.id,
+      username: user.username,
+      email: user.email,
+    };
+
+    const accessToken = this.generateAccessToken(payload);
+    const newRefreshToken = this.generateRefreshToken(user.id);
+
+    await this.storeRefreshToken(
+      user.id,
+      newRefreshToken,
+      deviceId,
+      storedToken.deviceName,
+    );
+
+    return {
+      accessToken,
+      newRefreshToken,
+    };
+  }
+
+  generateAccessToken(payload: JwtPayload): string {
+    return this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+      expiresIn: this.configService.get<string>('JWT_ACCESS_EXPIRES_IN', '1h'),
+    });
+  }
+
+  generateRefreshToken(userId: string): string {
+    return this.jwtService.sign(
+      { sub: userId },
+      {
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+        expiresIn: this.configService.get<string>(
+          'JWT_REFRESH_EXPIRES_IN',
+          '7d',
+        ),
+      },
+    );
+  }
+
+  async storeRefreshToken(
     userId: string,
     token: string,
     deviceId: string,
     deviceName?: string,
   ): Promise<RefreshToken> {
-    // Remove any existing token for THIS DEVICE only
-    await this.revokeDeviceTokens(userId, deviceId);
+    await this.deleteOldDeviceTokens(userId, deviceId);
 
-    const hashedToken = await bcrypt.hash(token, 10);
+    const expiresIn = this.configService.get<string>(
+      'JWT_REFRESH_EXPIRES_IN',
+      '10m',
+    );
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + parseInt(expiresIn, 10));
 
     const refreshToken = this.refreshTokenRepository.create({
       userId,
-      token: hashedToken,
+      token,
       deviceId,
       deviceName,
-      createdAt: new Date(),
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      expiresAt,
     });
 
     return this.refreshTokenRepository.save(refreshToken);
   }
 
-  async validateRefreshToken(
-    storedToken: RefreshToken,
-    incomingToken: string,
-  ): Promise<boolean> {
-    return bcrypt.compare(incomingToken, storedToken.token);
-  }
-
-  async revokeDeviceTokens(userId: string, deviceId: string): Promise<void> {
+  async deleteOldDeviceTokens(userId: string, deviceId: string): Promise<void> {
     await this.refreshTokenRepository.delete({ userId, deviceId });
   }
 
-  async revokeAllUserTokens(userId: string): Promise<void> {
+  async deleteAllUserTokens(userId: string): Promise<void> {
     await this.refreshTokenRepository.delete({ userId });
   }
 
   async findByToken(
     incomingToken: string,
-    userId?: string, // Optional: Improves performance by reducing candidates
+    userId?: string,
+    deviceId?: string,
   ): Promise<RefreshToken | null> {
-    // 1. Fetch potential tokens (filter by userId if available)
-    const query: FindManyOptions<RefreshToken> = {
-      relations: ['user'],
-    };
+    const storedTokens = await this.refreshTokenRepository.find({
+      where: { deviceId, userId },
+    });
 
-    if (userId) {
-      query.where = { userId }; // Narrow down by user first
-    }
+    return storedTokens.find((t) => t.token === incomingToken) || null;
+  }
 
-    const candidates = await this.refreshTokenRepository.find(query);
-
-    // 2. Compare each candidate hash with the incoming token
-    for (const storedToken of candidates) {
-      const isMatch = await bcrypt.compare(incomingToken, storedToken.token);
-      if (isMatch) {
-        return storedToken; // Found the valid token!
-      }
-    }
-
-    return null; // No match found
+  async cleanupExpiredTokens(): Promise<void> {
+    await this.refreshTokenRepository
+      .createQueryBuilder()
+      .delete()
+      .where('expiresAt < :now', { now: new Date() })
+      .execute();
   }
 
   async getUserActiveSessions(userId: string): Promise<RefreshToken[]> {
