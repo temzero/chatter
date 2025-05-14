@@ -1,11 +1,32 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 
-export class LoginDto {
+class DeviceInfoDto {
   @IsString()
   @IsNotEmpty()
-  identifier: string; // username OR email OR phone
+  deviceId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  deviceName: string;
+}
+
+export class LoginDto {
+  @IsString({ message: 'email or username or phone number' })
+  @IsNotEmpty()
+  identifier: string;
 
   @IsString()
   @IsNotEmpty()
   password: string;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => DeviceInfoDto)
+  device?: DeviceInfoDto;
 }

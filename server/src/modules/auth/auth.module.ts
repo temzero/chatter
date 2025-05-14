@@ -1,18 +1,22 @@
+import { AuthService } from './services/auth.service';
+import { AuthController } from './controllers/auth.controller';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
 import { UserModule } from '../user/user.module';
 import { MailModule } from '../mail/mail.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
-import { RefreshTokenModule } from '../refresh-token/refresh-token.module';
+import { TokenService } from './services/token.service';
+import { TokenStorageService } from './services/token-storage.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { RefreshToken } from './entities/refresh-token.entity';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([RefreshToken]),
     UserModule,
     MailModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
@@ -24,10 +28,16 @@ import { RefreshTokenModule } from '../refresh-token/refresh-token.module';
         signOptions: { expiresIn: '1h' },
       }),
     }),
-    RefreshTokenModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy, JwtAuthGuard],
+  providers: [
+    AuthService,
+    TokenService,
+    TokenStorageService,
+    LocalStrategy,
+    JwtStrategy,
+    JwtAuthGuard,
+  ],
   exports: [AuthService, JwtModule, PassportModule],
 })
 export class AuthModule {}
