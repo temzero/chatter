@@ -13,6 +13,8 @@ import { TokenStorageService } from './services/token-storage.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RefreshToken } from './entities/refresh-token.entity';
+import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
+import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 
 @Module({
   imports: [
@@ -37,6 +39,8 @@ import { RefreshToken } from './entities/refresh-token.entity';
     LocalStrategy,
     JwtStrategy,
     JwtAuthGuard,
+    JwtRefreshStrategy,
+    JwtRefreshGuard,
   ],
   exports: [AuthService, JwtModule, PassportModule],
 })

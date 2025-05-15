@@ -8,22 +8,25 @@ import {
   Get,
   HttpStatus,
   HttpException,
+  UseGuards,
 } from '@nestjs/common';
 import { ChatGroupMemberService } from './chat-group-member.service';
 import { ChatGroupMemberDto } from 'src/modules/chat-group-member/dto/chat-group-members.dto';
 import { ChatGroupMember } from 'src/modules/chat-group-member/entities/chat-group-member.entity';
 import { ResponseData } from 'src/common/response-data';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 
 @Controller('chat-group-members')
+@UseGuards(JwtAuthGuard)
 export class ChatGroupMemberController {
   constructor(private readonly memberService: ChatGroupMemberService) {}
 
-  @Get(':groupId')
+  @Get(':groupChatId')
   async getGroupMembers(
-    @Param('groupId') groupId: string,
+    @Param('groupChatId') groupChatId: string,
   ): Promise<ResponseData<ChatGroupMember[]>> {
     try {
-      const members = await this.memberService.findByGroupId(groupId);
+      const members = await this.memberService.findByGroupId(groupChatId);
       return new ResponseData<ChatGroupMember[]>(
         members,
         HttpStatus.OK,
@@ -57,13 +60,13 @@ export class ChatGroupMemberController {
     }
   }
 
-  @Delete(':groupId/:userId')
+  @Delete(':groupChatId/:userId')
   async removeMember(
-    @Param('groupId') groupId: string,
+    @Param('groupChatId') groupChatId: string,
     @Param('userId') userId: string,
   ): Promise<ResponseData<{ success: boolean }>> {
     try {
-      await this.memberService.removeMember(groupId, userId);
+      await this.memberService.removeMember(groupChatId, userId);
       return new ResponseData<{ success: boolean }>(
         { success: true },
         HttpStatus.OK,
@@ -78,15 +81,15 @@ export class ChatGroupMemberController {
     }
   }
 
-  @Patch(':groupId/:userId')
+  @Patch(':groupChatId/:userId')
   async updateMember(
-    @Param('groupId') groupId: string,
+    @Param('groupChatId') groupChatId: string,
     @Param('userId') userId: string,
     @Body() dto: Partial<ChatGroupMemberDto>,
   ): Promise<ResponseData<ChatGroupMember>> {
     try {
       const updatedMember = await this.memberService.updateMember(
-        groupId,
+        groupChatId,
         userId,
         dto,
       );

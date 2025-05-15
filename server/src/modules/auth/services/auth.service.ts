@@ -38,6 +38,8 @@ export class AuthService {
 
   async login(user: User, deviceId: string, deviceName: string) {
     try {
+      await this.tokenStorageService.deleteDeviceTokens(user.id, deviceId);
+
       const { access_token, refresh_token } =
         await this.tokenService.generateTokenPair({
           userId: user.id,
@@ -54,7 +56,6 @@ export class AuthService {
       );
 
       await this.userService.updateUser(user.id, { last_seen: new Date() });
-
       return {
         access_token,
         refresh_token,
@@ -159,7 +160,6 @@ export class AuthService {
 
   async logout(userId: string, deviceId: string): Promise<void> {
     try {
-      // Delete all refresh tokens for this user on this specific device
       await this.tokenStorageService.deleteDeviceTokens(userId, deviceId);
     } catch (error) {
       console.error('Logout failed:', error);

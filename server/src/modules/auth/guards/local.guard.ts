@@ -32,7 +32,6 @@ export class LocalGuard extends AuthGuard('local') {
         )
       );
     }
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return user;
+    return user as TUser;
   }
 }

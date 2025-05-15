@@ -1,13 +1,14 @@
 import API from "@/services/api/api";
+import rawAPI from "./api/rawApi";
 import { storageService } from "./storage/storageService";
 
 export const authService = {
-  async login(usernameOrEmail: string, password: string) {
+  async login(identifier: string, password: string) {
     const { data } = await API.post("/auth/login", {
-      usernameOrEmail,
+      identifier,
       password,
     });
-    storageService.setToken(data.token);
+    storageService.setToken(data.access_token);
     storageService.setUser(data.user);
     return data;
   },
@@ -45,7 +46,19 @@ export const authService = {
     return data;
   },
 
-  logout() {
+  async refreshToken() {
+    try {
+      const response = await rawAPI.post("/auth/refresh");
+      return response.data.access_token;
+    } catch (error) {
+      console.error("REFRESH TOKEN ERROR:", error);
+      throw error;
+    }
+  },
+
+  logout: async () => {
     storageService.clearAuth();
+    const response = await API.post("/auth/logout");
+    return response.data;
   },
 };

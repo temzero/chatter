@@ -8,34 +8,37 @@ import {
   Body,
   HttpStatus,
   HttpException,
+  UseGuards,
 } from '@nestjs/common';
 import { MessageService } from './message.service';
 import { Message } from 'src/modules/message/entities/message.entity';
 import { ResponseData } from 'src/common/response-data';
 import { CreateMessageDto } from 'src/modules/message/dto/create-message.dto';
 import { UpdateMessageDto } from 'src/modules/message/dto/update-message.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 
 @Controller('message')
+@UseGuards(JwtAuthGuard)
 export class MessageController {
   constructor(private readonly messageService: MessageService) {}
 
-  @Get()
-  async findAll(): Promise<ResponseData<Message[]>> {
-    try {
-      const messages = await this.messageService.getMessages();
-      return new ResponseData<Message[]>(
-        messages,
-        HttpStatus.OK,
-        'Messages retrieved successfully',
-      );
-    } catch (error: unknown) {
-      if (error instanceof HttpException) throw error;
-      throw new HttpException(
-        error || 'Failed to retrieve messages',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
+  // @Get()
+  // async findAll(): Promise<ResponseData<Message[]>> {
+  //   try {
+  //     const messages = await this.messageService.getMessages();
+  //     return new ResponseData<Message[]>(
+  //       messages,
+  //       HttpStatus.OK,
+  //       'Messages retrieved successfully',
+  //     );
+  //   } catch (error: unknown) {
+  //     if (error instanceof HttpException) throw error;
+  //     throw new HttpException(
+  //       error || 'Failed to retrieve messages',
+  //       HttpStatus.INTERNAL_SERVER_ERROR,
+  //     );
+  //   }
+  // }
 
   @Post()
   async create(
@@ -62,10 +65,12 @@ export class MessageController {
     }
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string): Promise<ResponseData<Message>> {
+  @Get(':messageId')
+  async findOne(
+    @Param('messageId') messageId: string,
+  ): Promise<ResponseData<Message>> {
     try {
-      const message = await this.messageService.getMessageById(id);
+      const message = await this.messageService.getMessageById(messageId);
       if (!message) {
         throw new HttpException('Message not found', HttpStatus.NOT_FOUND);
       }
@@ -82,14 +87,14 @@ export class MessageController {
     }
   }
 
-  @Put(':id')
+  @Put(':messageId')
   async update(
-    @Param('id') id: string,
+    @Param('messageId') messageId: string,
     @Body() updateMessageDto: UpdateMessageDto,
   ): Promise<ResponseData<Message>> {
     try {
       const updatedMessage = await this.messageService.updateMessage(
-        id,
+        messageId,
         updateMessageDto,
       );
       if (!updatedMessage) {
@@ -108,10 +113,12 @@ export class MessageController {
     }
   }
 
-  @Delete(':id')
-  async remove(@Param('id') id: string): Promise<ResponseData<string>> {
+  @Delete(':messageId')
+  async remove(
+    @Param('messageId') messageId: string,
+  ): Promise<ResponseData<string>> {
     try {
-      const deletedMessage = await this.messageService.deleteMessage(id);
+      const deletedMessage = await this.messageService.deleteMessage(messageId);
       if (!deletedMessage) {
         throw new HttpException('Message not found', HttpStatus.NOT_FOUND);
       }

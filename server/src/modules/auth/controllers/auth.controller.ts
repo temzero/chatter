@@ -22,8 +22,9 @@ import { LocalGuard } from '../guards/local.guard';
 import { JwtAuthGuard } from '../guards/jwt.guard';
 import { CurrentUser } from '../decorators/user.decorator';
 import { Request, Response } from 'express';
-import { JwtPayload } from '../types/jwt-payload.type';
+import { JwtPayload, JwtRefreshPayload } from '../types/jwt-payload.type';
 import { setRefreshTokenCookie } from 'src/common/helpers/set-cookie.helper';
+import { JwtRefreshGuard } from '../guards/jwt-refresh.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -90,44 +91,40 @@ export class AuthController {
     return decodedToken;
   }
 
-  @Post('refresh')
-  async refresh(
-    @Req() request: Request,
-    @Res({ passthrough: true }) response: Response,
-    @Headers('x-refresh-token') refreshTokenHeader?: string,
-  ) {
-    // Get refresh token (from header or cookie)
-    const cookies = request.cookies as Record<string, string> | undefined;
-    const tokenFromCookie = cookies?.refresh_token;
-    const refreshToken = refreshTokenHeader || tokenFromCookie;
-    if (!refreshToken) {
-      throw new BadRequestException('Refresh token not found');
-    }
+  // @Post('logout')
+  // @UseGuards(JwtRefreshGuard)
+  // async logout(
+  //   @Req() request: Request,
+  //   @Res({ passthrough: true }) response: Response,
+  // ) {
+  //   const user = request.user as {
+  //     refresh_token: string;
+  //   };
+  //   const decodedToken = this.tokenService.decodeToken<JwtRefreshPayload>(
+  //     user.refresh_token,
+  //   );
+  //   if (!decodedToken) {
+  //     throw new BadRequestException('Invalid refresh token');
+  //   }
 
-    const { access_token, refresh_token, email, deviceName } =
-      await this.authService.refreshTokens(refreshToken);
-
-    // Optional: set HTTP-only cookie for web clients
-    setRefreshTokenCookie(response, refresh_token, this.configService);
-
-    return {
-      access_token,
-      email,
-      deviceName,
-    };
-  }
+  //   await this.authService.logout(decodedToken.sub, decodedToken.deviceId);
+  //   response.clearCookie('refresh_token');
+  //   return { message: 'Logged out successfully' };
+  // }
 
   @Post('logout')
-  @UseGuards(JwtAuthGuard)
   async logout(
+    @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
-    @CurrentUser() user: User,
-    @Headers('x-device-id') deviceId: string,
   ) {
-    if (!deviceId) {
-      throw new BadRequestException('Device ID is required');
+    const refreshToken = this.tokenService.getRefreshTokenFromRequest(request);
+    const decodedToken =
+      this.tokenService.decodeToken<JwtRefreshPayload>(refreshToken);
+    if (!decodedToken) {
+      throw new BadRequestException('Invalid refresh token');
     }
-    await this.authService.logout(user.id, deviceId);
+
+    await this.authService.logout(decodedToken.sub, decodedToken.deviceId);
     response.clearCookie('refresh_token');
     return { message: 'Logged out successfully' };
   }
@@ -141,6 +138,30 @@ export class AuthController {
     await this.authService.logoutAll(user.id);
     response.clearCookie('refresh_token');
     return { message: 'Logged out from all devices successfully' };
+  }
+
+  @Post('refresh')
+  @UseGuards(JwtRefreshGuard)
+  async refresh(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    // The guard will validate and add the user info to request.user
+    const user = request.user as {
+      refresh_token: string;
+    };
+
+    const { access_token, refresh_token, email, deviceName } =
+      await this.authService.refreshTokens(user.refresh_token);
+
+    // Optional: set HTTP-only cookie for web clients
+    setRefreshTokenCookie(response, refresh_token, this.configService);
+
+    return {
+      access_token,
+      email,
+      deviceName,
+    };
   }
 
   @Get('verify-email')

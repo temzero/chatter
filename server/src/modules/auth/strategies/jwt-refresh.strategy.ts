@@ -1,27 +1,60 @@
-// src/auth/strategies/jwt.strategy.ts
-import { Injectable } from '@nestjs/common';
+// src/auth/strategies/jwt-refresh.strategy.ts
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
+import { ExtractJwt, Strategy, StrategyOptionsWithRequest } from 'passport-jwt';
+import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
-import { JwtPayload } from '../types/jwt-payload.type';
+import { JwtRefreshPayload } from '../types/jwt-payload.type';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private configService: ConfigService) {
+export class JwtRefreshStrategy extends PassportStrategy(
+  Strategy,
+  'jwt-refresh',
+) {
+  constructor(private readonly configService: ConfigService) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        JwtRefreshStrategy.getRefreshTokenFromRequest,
+      ]),
+      secretOrKey: configService.get('JWT_REFRESH_SECRET'),
+      passReqToCallback: true,
       ignoreExpiration: false,
-      secretOrKey: configService.getOrThrow<string>('JWT_ACCESS_SECRET'),
-    });
+    } as StrategyOptionsWithRequest);
   }
 
-  validate(payload: JwtPayload): {
-    userId: string;
-    email: string;
-  } {
+  validate(request: Request, payload: JwtRefreshPayload) {
+    const refresh_token =
+      JwtRefreshStrategy.getRefreshTokenFromRequest(request);
+
+    if (!refresh_token) {
+      throw new UnauthorizedException('Refresh token malformed');
+    }
+
     return {
       userId: payload.sub,
       email: payload.email,
+      deviceId: payload.deviceId,
+      deviceName: payload.deviceName,
+      refresh_token,
     };
+  }
+
+  // Shared utility method
+  private static getRefreshTokenFromRequest(
+    this: void,
+    request: Request,
+  ): string | null {
+    const cookieToken = (request?.cookies as Record<string, string> | undefined)
+      ?.refresh_token;
+
+    if (cookieToken) return cookieToken;
+
+    const authHeader = request.get('Authorization');
+    if (authHeader) {
+      const [type, value] = authHeader.split(' ');
+      if (type === 'Refresh') return value;
+    }
+
+    return null;
   }
 }

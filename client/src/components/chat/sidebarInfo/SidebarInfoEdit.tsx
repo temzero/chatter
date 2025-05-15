@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
-import { useChatStore } from '@/stores/chatStore';
+import { useChatStore } from "@/stores/chatStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 
 const ChatInfoEdit: React.FC = () => {
   const activeChat = useChatStore((state) => state.activeChat);
-  const setSidebarInfo = useSidebarInfoStore(
-    (state) => state.setSidebarInfo
-  );
+  const deleteChat = useChatStore((state) => state.deleteChat);
+  const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
 
   // Initialize formData with all necessary fields from activeChat
   const [formData, setFormData] = useState({
@@ -150,7 +149,14 @@ const ChatInfoEdit: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex justify-center items-center cursor-pointer p-2 text-red-500 custom-border-t absolute bottom-0 w-full">
+        <div
+          className="flex justify-center items-center cursor-pointer p-2 text-red-500 custom-border-t absolute bottom-0 w-full"
+          onClick={() => {
+            if (activeChat) {
+              deleteChat(activeChat.id, activeChat.type);
+            }
+          }}
+        >
           <i className="material-symbols-outlined">delete</i>
           <span className="font-medium">Delete...</span>
         </div>

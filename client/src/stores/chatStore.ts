@@ -27,7 +27,7 @@ interface ChatStore {
     type: "group" | "channel";
   }) => Promise<Chat>;
   updateChat: (id: string, updates: Partial<Chat>) => Promise<void>;
-  deleteChat: (id: string) => Promise<void>;
+  deleteChat: (id: string, type: string) => Promise<void>;
 }
 
 export const useChatStore = create<ChatStore>()(
@@ -40,10 +40,10 @@ export const useChatStore = create<ChatStore>()(
       isLoading: false,
       error: null,
 
-      getChats: async (userId) => {
+      getChats: async () => {
         set({ isLoading: true, error: null });
         try {
-          const chats: Chat[] = await chatService.getAllChatsByUserId(userId);
+          const chats: Chat[] = await chatService.getAllChats();
           set({ chats, isLoading: false });
           console.log("fetched Chats:", chats);
         } catch (error) {
@@ -196,10 +196,10 @@ export const useChatStore = create<ChatStore>()(
         }
       },
 
-      deleteChat: async (id) => {
+      deleteChat: async (id, type) => {
         set({ isLoading: true });
         try {
-          await chatService.deleteChat(id);
+          await chatService.deleteChat(id, type);
 
           useMessageStore.setState((msgState) => {
             const filteredMessages = msgState.messages.filter(

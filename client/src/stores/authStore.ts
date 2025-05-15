@@ -5,7 +5,7 @@ import axios from "axios";
 import { authService } from "@/services/authService";
 import { storageService } from "@/services/storage/storageService";
 import { MyProfileProps } from "@/data/types";
-import { useChatStore } from "@/stores/chatStore"; // adjust the path if needed
+import { useChatStore } from "@/stores/chatStore";
 import { useSidebarStore } from "./sidebarStore";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
 

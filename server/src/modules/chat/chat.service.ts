@@ -19,6 +19,9 @@ export class ChatService {
   }
 
   async getChatsByUserId(userId: string): Promise<Chat[]> {
+    if (!userId) {
+      throw new Error('User ID is required');
+    }
     const chats = await this.chatRepository.find({
       where: [{ member1: { id: userId } }, { member2: { id: userId } }],
       relations: ['member1', 'member2', 'lastMessage', 'pinnedMessage'],
@@ -32,6 +35,9 @@ export class ChatService {
   }
 
   async getChatById(id: string): Promise<Chat | null> {
+    if (!id) {
+      throw new Error('Chat ID is required');
+    }
     return this.chatRepository.findOne({
       where: { id },
       relations: ['member1', 'member2', 'lastMessage', 'pinnedMessage'],
@@ -39,6 +45,9 @@ export class ChatService {
   }
 
   async createChat(createChatDto: CreateChatDto): Promise<Chat> {
+    if (!createChatDto.member1Id || !createChatDto.member2Id) {
+      throw new Error('Both member IDs are required');
+    }
     const { member1Id, member2Id } = createChatDto;
 
     const chat = this.chatRepository.create({
@@ -53,6 +62,11 @@ export class ChatService {
     id: string,
     updateChatDto: UpdateChatDto,
   ): Promise<Chat | null> {
+    if (!id) {
+      throw new Error('Chat ID is required');
+    } else if (!updateChatDto) {
+      throw new Error('Update data is required');
+    }
     const chat = await this.getChatById(id);
     if (!chat) {
       return null;
@@ -62,6 +76,9 @@ export class ChatService {
   }
 
   async deleteChat(id: string): Promise<Chat | null> {
+    if (!id) {
+      throw new Error('Chat ID is required');
+    }
     const chat = await this.getChatById(id);
     if (!chat) {
       return null;

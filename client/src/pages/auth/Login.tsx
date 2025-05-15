@@ -16,14 +16,14 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formRef.current) return;
-    
+
     const formData = new FormData(formRef.current);
-    const email = formData.get("email") as string;
+    const identifier = formData.get("identifier") as string;
     const password = formData.get("password") as string;
-    
-    await login(email, password);
+
+    await login(identifier, password);
     navigate("/");
   };
 
@@ -46,12 +46,12 @@ const Login = () => {
           <h2 className="text-4xl font-semibold mb-4">Login</h2>
 
           <input
-            type="email"
-            name="email"
-            placeholder="Email"
+            type="text"
+            name="identifier"
+            placeholder="Username, Email, or Phone Number"
             required
             className="input backdrop-blur-lg"
-            autoComplete="email"
+            autoComplete="username"
             autoFocus
           />
 

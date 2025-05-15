@@ -8,18 +8,22 @@ import {
   Body,
   HttpStatus,
   HttpException,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from 'src/modules/user/dto/update-user.dto';
 import { User } from 'src/modules/user/entities/user.entity';
 import { ResponseData } from 'src/common/response-data';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { CurrentUser } from '../auth/decorators/user.decorator';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   async findAll(): Promise<ResponseData<User[]>> {
     try {
       const users = await this.userService.getAllUsers();
@@ -36,10 +40,11 @@ export class UserController {
     }
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string): Promise<ResponseData<User>> {
+  @Get(':userId')
+  @UseGuards(JwtAuthGuard)
+  async findOne(@Param('userId') userId: string): Promise<ResponseData<User>> {
     try {
-      const user = await this.userService.getUserById(id);
+      const user = await this.userService.getUserById(userId);
       if (!user) {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
@@ -58,6 +63,7 @@ export class UserController {
   }
 
   @Get('/find/:identifier')
+  @UseGuards(JwtAuthGuard)
   async findOneByIdentifier(
     @Param('identifier') identifier: string,
   ): Promise<ResponseData<User>> {
@@ -101,13 +107,17 @@ export class UserController {
     }
   }
 
-  @Put(':id')
+  @Put()
+  @UseGuards(JwtAuthGuard)
   async update(
-    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<ResponseData<User>> {
     try {
-      const updatedUser = await this.userService.updateUser(id, updateUserDto);
+      const updatedUser = await this.userService.updateUser(
+        userId,
+        updateUserDto,
+      );
       if (!updatedUser) {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
@@ -125,10 +135,13 @@ export class UserController {
     }
   }
 
-  @Delete(':id')
-  async remove(@Param('id') id: string): Promise<ResponseData<string>> {
+  @Delete()
+  @UseGuards(JwtAuthGuard)
+  async remove(
+    @CurrentUser('id') userId: string,
+  ): Promise<ResponseData<string>> {
     try {
-      const deletedUser = await this.userService.deleteUser(id);
+      const deletedUser = await this.userService.deleteUser(userId);
       if (!deletedUser) {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }

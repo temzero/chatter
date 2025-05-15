@@ -23,9 +23,9 @@ import {
 } from 'src/modules/chat/mappers/combinedChatMappers';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
-import type { JwtPayload } from '../auth/types/jwt-payload.type';
 
 @Controller('chat')
+@UseGuards(JwtAuthGuard)
 export class ChatController {
   constructor(
     private readonly chatService: ChatService,
@@ -33,25 +33,8 @@ export class ChatController {
   ) {}
 
   @Get()
-  async findAll(): Promise<ResponseData<Chat[]>> {
-    try {
-      const chats = await this.chatService.getAllChats();
-      return new ResponseData<Chat[]>(
-        chats,
-        HttpStatus.OK,
-        'Chats retrieved successfully',
-      );
-    } catch (error: unknown) {
-      throw new HttpException(
-        error || 'Failed to retrieve chats',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  @Get('user/:userId')
-  async findAllByUserId(
-    @Param('userId') userId: string,
+  async findAllPrivateChats(
+    @CurrentUser('id') userId: string,
   ): Promise<ResponseData<Chat[]>> {
     try {
       const chats = await this.chatService.getChatsByUserId(userId);
@@ -68,9 +51,9 @@ export class ChatController {
     }
   }
 
-  @Get('all/user/:userId')
+  @Get('all')
   async findAllCombined(
-    @Param('userId') userId: string,
+    @CurrentUser('id') userId: string,
   ): Promise<ResponseData<ChatDto[]>> {
     try {
       const [chats, groups] = await Promise.all([
@@ -99,14 +82,12 @@ export class ChatController {
   }
 
   @Get(':chatId')
-  @UseGuards(JwtAuthGuard)
   async findOne(
     @Param('chatId') id: string,
-    @CurrentUser() user: JwtPayload,
+    @CurrentUser('id') userId: string,
   ): Promise<ResponseData<ChatDto>> {
     try {
-      console.log('user: ', user);
-      if (!user || !user.sub) {
+      if (!userId) {
         throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
       }
       // Try to get as group first
@@ -126,7 +107,7 @@ export class ChatController {
       }
 
       return new ResponseData<ChatDto>(
-        mapChatToPrivateChatDto(privateChat, user.sub), // Use user.sub (user ID from JWT)
+        mapChatToPrivateChatDto(privateChat, userId), // Use userId (user ID from JWT)
         HttpStatus.OK,
         'Private chat retrieved successfully',
       );
@@ -141,13 +122,13 @@ export class ChatController {
   @Post()
   async create(
     @Body() createChatDto: CreateChatDto,
-    @CurrentUser() user: JwtPayload,
+    @CurrentUser('id') userId: string,
   ): Promise<ResponseData<ChatDto>> {
     try {
       const chat = await this.chatService.createChat(createChatDto);
 
       return new ResponseData<ChatDto>(
-        mapChatToPrivateChatDto(chat, user.sub),
+        mapChatToPrivateChatDto(chat, userId),
         HttpStatus.CREATED,
         'Chat created successfully',
       );
@@ -159,13 +140,16 @@ export class ChatController {
     }
   }
 
-  @Put(':id')
+  @Put(':chatId')
   async update(
-    @Param('id') id: string,
+    @Param(':chatId') chatId: string,
     @Body() updateChatDto: UpdateChatDto,
   ): Promise<ResponseData<Chat>> {
     try {
-      const updatedChat = await this.chatService.updateChat(id, updateChatDto);
+      const updatedChat = await this.chatService.updateChat(
+        chatId,
+        updateChatDto,
+      );
       if (!updatedChat) {
         throw new HttpException('Chat not found', HttpStatus.NOT_FOUND);
       }
@@ -182,10 +166,10 @@ export class ChatController {
     }
   }
 
-  @Delete(':id')
-  async remove(@Param('id') id: string): Promise<ResponseData<string>> {
+  @Delete(':chatId')
+  async remove(@Param('chatId') chatId: string): Promise<ResponseData<string>> {
     try {
-      const deletedChat = await this.chatService.deleteChat(id);
+      const deletedChat = await this.chatService.deleteChat(chatId);
       if (!deletedChat) {
         throw new HttpException('Chat not found', HttpStatus.NOT_FOUND);
       }

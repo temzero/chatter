@@ -8,36 +8,23 @@ import {
   Body,
   HttpStatus,
   HttpException,
+  UseGuards,
 } from '@nestjs/common';
 import { ChatGroupService } from './chat-group.service';
 import { ChatGroupDto } from 'src/modules/chat-group/dto/chat-group.dto';
 import { ChatGroup } from 'src/modules/chat-group/entities/chat-group.entity';
 import { ResponseData } from 'src/common/response-data';
+import { CurrentUser } from '../auth/decorators/user.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 
 @Controller('chat-group')
+@UseGuards(JwtAuthGuard)
 export class ChatGroupController {
   constructor(private readonly chatGroupService: ChatGroupService) {}
 
-  @Get()
-  async findAll(): Promise<ResponseData<ChatGroup[]>> {
-    try {
-      const groups = await this.chatGroupService.getAllGroups();
-      return new ResponseData<ChatGroup[]>(
-        groups,
-        HttpStatus.OK,
-        'Chat groups retrieved successfully',
-      );
-    } catch (error: unknown) {
-      throw new HttpException(
-        error || 'Failed to retrieve chat groups',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  @Get('user/:userId')
-  async findAllByUserId(
-    @Param('userId') userId: string,
+  @Get('')
+  async findAllGroupChats(
+    @CurrentUser('groupChatId') userId: string,
   ): Promise<ResponseData<ChatGroup[]>> {
     try {
       const groups = await this.chatGroupService.getGroupsByUserId(userId);
@@ -54,10 +41,12 @@ export class ChatGroupController {
     }
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string): Promise<ResponseData<ChatGroup>> {
+  @Get(':groupChatId')
+  async findOne(
+    @Param('groupChatId') groupChatId: string,
+  ): Promise<ResponseData<ChatGroup>> {
     try {
-      const group = await this.chatGroupService.getGroupById(id);
+      const group = await this.chatGroupService.getGroupById(groupChatId);
       if (!group) {
         throw new HttpException('Chat group not found', HttpStatus.NOT_FOUND);
       }
@@ -93,14 +82,14 @@ export class ChatGroupController {
     }
   }
 
-  @Put(':id')
+  @Put(':groupChatId')
   async update(
-    @Param('id') id: string,
+    @Param('groupChatId') groupChatId: string,
     @Body() chatGroupDto: ChatGroupDto,
   ): Promise<ResponseData<ChatGroup>> {
     try {
       const updatedGroup = await this.chatGroupService.updateGroup(
-        id,
+        groupChatId,
         chatGroupDto,
       );
       if (!updatedGroup) {
@@ -119,10 +108,12 @@ export class ChatGroupController {
     }
   }
 
-  @Delete(':id')
-  async remove(@Param('id') id: string): Promise<ResponseData<string>> {
+  @Delete(':groupChatId')
+  async remove(
+    @Param('groupChatId') groupChatId: string,
+  ): Promise<ResponseData<string>> {
     try {
-      const deletedGroup = await this.chatGroupService.deleteGroup(id);
+      const deletedGroup = await this.chatGroupService.deleteGroup(groupChatId);
       if (!deletedGroup) {
         throw new HttpException('Chat group not found', HttpStatus.NOT_FOUND);
       }

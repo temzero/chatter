@@ -1,16 +1,27 @@
 // src/decorators/user.decorator.ts
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { RequestUser } from '../types/request-user.type';
+import { JwtPayload } from '../types/jwt-payload.type';
+import { Request } from 'express';
 
 export const CurrentUser = createParamDecorator(
-  (data: keyof RequestUser | undefined, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest<{ user: RequestUser }>();
-    const user = request.user;
+  (data: string | undefined, ctx: ExecutionContext) => {
+    const request = ctx.switchToHttp().getRequest<Request>();
+    const payload = request.user as JwtPayload;
 
-    if (!user) {
+    if (!payload) {
       throw new Error('User decorator used without auth guard');
     }
 
-    return user;
+    if (data === 'id') {
+      return payload.sub;
+    } else if (data === 'email') {
+      return payload.email;
+    }
+
+    if (data) {
+      return payload[data] as string;
+    } else {
+      return payload;
+    }
   },
 );

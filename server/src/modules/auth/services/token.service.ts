@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { TokenType } from '../types/token-type.enum';
 import { JwtPayload, JwtRefreshPayload } from '../types/jwt-payload.type';
+import { Request } from 'express';
 import * as jwt from 'jsonwebtoken';
 
 @Injectable()
@@ -122,5 +123,31 @@ export class TokenService {
       console.error('Token generation failed', error);
       throw new Error('Failed to generate tokens');
     }
+  }
+
+  /**
+   * Extracts refresh token from request (header or cookie)
+   */
+  getRefreshTokenFromRequest(request: Request): string {
+    const cookies = request.cookies as Record<string, string> | undefined;
+    const tokenFromCookie = cookies?.refresh_token;
+
+    const authHeader = request.get('Authorization');
+    let tokenFromHeader: string | undefined;
+
+    if (authHeader) {
+      const [type, value] = authHeader.split(' ');
+      if (type === 'Refresh') {
+        tokenFromHeader = value;
+      }
+    }
+
+    const refreshToken = tokenFromHeader || tokenFromCookie;
+
+    if (!refreshToken) {
+      throw new UnauthorizedException('Refresh token is missing');
+    }
+
+    return refreshToken;
   }
 }
