@@ -11,10 +11,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ChatGroupMemberService } from './chat-group-member.service';
-import { ChatGroupMemberDto } from 'src/modules/chat-group-member/dto/chat-group-members.dto';
+import { ChatGroupMemberDto } from 'src/modules/chat-group-member/dto/request/chat-group-member.dto';
 import { ChatGroupMember } from 'src/modules/chat-group-member/entities/chat-group-member.entity';
 import { ResponseData } from 'src/common/response-data';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { ChatGroupMemberResponseDto } from './dto/response/chat-group-member-response.dto';
 
 @Controller('chat-group-members')
 @UseGuards(JwtAuthGuard)
@@ -24,10 +25,10 @@ export class ChatGroupMemberController {
   @Get(':groupChatId')
   async getGroupMembers(
     @Param('groupChatId') groupChatId: string,
-  ): Promise<ResponseData<ChatGroupMember[]>> {
+  ): Promise<ResponseData<ChatGroupMemberResponseDto[]>> {
     try {
       const members = await this.memberService.findByGroupId(groupChatId);
-      return new ResponseData<ChatGroupMember[]>(
+      return new ResponseData<ChatGroupMemberResponseDto[]>(
         members,
         HttpStatus.OK,
         'Group members retrieved successfully',
@@ -45,9 +46,9 @@ export class ChatGroupMemberController {
     @Body() dto: ChatGroupMemberDto,
   ): Promise<ResponseData<ChatGroupMember>> {
     try {
-      const member = await this.memberService.addMember(dto);
+      const newMember = await this.memberService.addMember(dto);
       return new ResponseData<ChatGroupMember>(
-        member,
+        newMember,
         HttpStatus.CREATED,
         'Member added successfully',
       );

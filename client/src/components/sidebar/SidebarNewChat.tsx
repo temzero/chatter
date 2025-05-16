@@ -12,7 +12,7 @@ const SidebarNewChat: React.FC = () => {
   const [direction, setDirection] = useState<number>(1);
 
   const getTypeClass = (type: string) =>
-    `flex items-center justify-center gap-1 cursor-pointer rounded ${
+    `flex items-center justify-center gap-1 cursor-pointer rounded w-full ${
       selectedType === type
         ? "opacity-100 font-bold text-green-400"
         : "opacity-40 hover:opacity-80"
@@ -50,7 +50,7 @@ const SidebarNewChat: React.FC = () => {
     }
   };
 
-  const NewChatWrapper = ({ type }: { type: string }) => {
+  const NewChatWrapper = (type: string) => {
     switch (type) {
       case "person":
         return <CreateNewChat />;
@@ -80,9 +80,9 @@ const SidebarNewChat: React.FC = () => {
         </i>
       </header>
 
-      <div className="flex justify-around items-center custom-border-t w-full h-[40px] backdrop-blur-[120px] p-2">
+      <div className="flex custom-border-t">
         {chatTypes.map((type) => (
-          <div
+          <button
             key={type}
             className={getTypeClass(type)}
             onClick={() => handleChatTypeChange(type)}
@@ -94,13 +94,13 @@ const SidebarNewChat: React.FC = () => {
             >
               {getTypeIcon(type)}
             </i>
-          </div>
+          </button>
         ))}
       </div>
 
       <SlidingContainer uniqueKey={selectedType} direction={direction}>
-        <NewChatWrapper type={selectedType} />
         {/* <h1 className="p-6 text-center">Content</h1> */}
+        {NewChatWrapper(selectedType)}
       </SlidingContainer>
     </aside>
   );

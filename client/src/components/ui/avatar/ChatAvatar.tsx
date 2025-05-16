@@ -19,7 +19,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
     switch (type) {
       case "header":
         return {
-          dimension: "h-11 w-11 min-w-[2.75rem] min-h-[2.75rem]", // Added min-h
+          size: "h-11 w-11", // Added min-h
           rounded: "rounded-[10px]",
           iconSize: "text-lg",
           fallbackIconSize: "text-4xl",
@@ -27,7 +27,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
         };
       case "info":
         return {
-          dimension: "h-32 w-32 min-w-[8rem] min-h-[8rem]", // Added min-h
+          size: "h-32 w-32", // Added min-h
           rounded: "rounded-[30px]",
           iconSize: "text-6xl",
           fallbackIconSize: "text-8xl",
@@ -35,7 +35,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
         };
       case "contact":
         return {
-          dimension: "h-12 w-12 min-w-[3.6rem] min-h-[3.6rem]", // Added min-h
+          size: "h-12 w-12", // Added min-h
           rounded: "rounded-[30px]",
           iconSize: "text-6xl",
           fallbackIconSize: "text-8xl",
@@ -44,7 +44,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
       case "sidebar":
       default:
         return {
-          dimension: "h-16 w-16 min-w-[4rem] min-h-[4rem]", // Added min-h
+          size: "h-16 w-16", // Added min-h
           rounded: "rounded-2xl",
           iconSize: "text-2xl",
           fallbackIconSize: "text-6xl",
@@ -54,7 +54,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
   };
 
   const styles = getStyles();
-  const sharedBase = `flex items-center justify-center overflow-hidden ${styles.dimension} ${styles.rounded}`;
+  const sharedBase = `flex items-center justify-center overflow-hidden ${styles.size} ${styles.rounded}`;
 
   switch (chat.type) {
     case "channel":
@@ -100,7 +100,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
 
     default: // private
       return (
-        <Avatar user={chat.chatPartner} className={`${styles.dimension}`} />
+        <Avatar user={chat.chatPartner} className={`${styles.size}`} />
       );
   }
 };

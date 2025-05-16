@@ -2,7 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ChatGroupMember } from 'src/modules/chat-group-member/entities/chat-group-member.entity';
-import { ChatGroupMemberDto } from 'src/modules/chat-group-member/dto/chat-group-members.dto';
+import { ChatGroupMemberDto } from 'src/modules/chat-group-member/dto/request/chat-group-member.dto';
+import { ChatGroupMemberResponseDto } from './dto/response/chat-group-member-response.dto';
 
 @Injectable()
 export class ChatGroupMemberService {
@@ -11,11 +12,26 @@ export class ChatGroupMemberService {
     private readonly memberRepository: Repository<ChatGroupMember>,
   ) {}
 
-  async findByGroupId(groupId: string): Promise<ChatGroupMember[]> {
-    return this.memberRepository.find({
+  async findByGroupId(groupId: string): Promise<ChatGroupMemberResponseDto[]> {
+    const members = await this.memberRepository.find({
       where: { chat_group_id: groupId },
       relations: ['user'],
     });
+
+    return members.map((member) => ({
+      id: member.user.id,
+      username: member.user.username,
+      nickname: member.nickname,
+      avatar: member.user.avatar,
+      first_name: member.user.first_name,
+      last_name: member.user.last_name,
+      last_seen: member.user.last_seen,
+      chat_group_id: member.chat_group_id,
+      is_admin: member.is_admin,
+      is_banned: member.is_banned,
+      muted_until: member.muted_until,
+      joinedAt: member.joinedAt,
+    }));
   }
 
   async addMember(dto: ChatGroupMemberDto): Promise<ChatGroupMember> {

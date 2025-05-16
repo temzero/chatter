@@ -3,9 +3,11 @@ import {
   IsOptional,
   MinLength,
   IsString,
-  IsDateString,
   IsBoolean,
+  IsDate,
+  Matches,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class UpdateUserDto {
   @IsOptional()
@@ -34,10 +36,12 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
+  @Matches(/^[0-9+\-\s]+$/, { message: 'Invalid phone number' })
   phone_number?: string;
 
   @IsOptional()
-  @IsDateString({}, { message: 'Invalid birthday format' })
+  @IsDate()
+  @Type(() => Date)
   birthday?: Date;
 
   @IsOptional()
@@ -50,13 +54,14 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsBoolean()
-  is_email_verified?: boolean;
+  is_email_verified?: boolean = false;
 
   @IsOptional()
   @IsBoolean()
-  is_deleted?: boolean;
+  is_deleted?: boolean = false;
 
   @IsOptional()
-  @IsDateString({}, { message: 'Invalid date format for lastSeen' })
+  @IsDate()
+  @Type(() => Date)
   last_seen?: Date;
 }

@@ -97,7 +97,7 @@ const SidebarMore: React.FC = () => {
         onClick={() => setSidebar("profile")}
       >
         <div className="w-16 h-16">
-          {currentUser && <Avatar user={currentUser} className="h-full w-16" />}
+          {currentUser && <Avatar user={currentUser} size="16" />}
         </div>
 
         {isCompact || (

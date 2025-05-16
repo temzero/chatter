@@ -32,7 +32,7 @@ const SidebarProfile: React.FC = () => {
       {/* User Info */}
       <div className="overflow-y-auto h-screen">
         <div className="flex flex-col items-center p-4 gap-2 w-full">
-          {currentUser && <Avatar user={currentUser} className="h-36 w-36" />}
+          {currentUser && <Avatar user={currentUser} size="36" />}
 
           <h1 className="text-xl font-semibold">
             {currentUser?.first_name} {currentUser?.last_name}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useChatStore } from "@/stores/chatStore";
 import { useMessageStore } from "@/stores/messageStore";
 import { AnimatePresence, motion } from "framer-motion";
@@ -7,10 +7,28 @@ import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import RenderMedia from "@/components/ui/RenderMedia";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { formatTime } from "@/utils/formatTime";
+import { Avatar } from "@/components/ui/avatar/Avatar";
 
 const ChatInfoDefault: React.FC = () => {
   const activeChat = useChatStore((state) => state.activeChat);
   const activeMedia = useMessageStore((state) => state.activeMedia);
+  const { groupMembers, getGroupMembers } = useChatStore();
+
+  useEffect(() => {
+    // Only fetch if it's a group chat and members aren't already loaded
+    if (
+      activeChat?.type !== "private" &&
+      activeChat?.id &&
+      !groupMembers[activeChat.id]
+    ) {
+      getGroupMembers(activeChat.id);
+    }
+  }, [activeChat?.id, activeChat?.type, getGroupMembers, groupMembers]);
+
+  const currentMembers =
+    activeChat?.type !== "private" && activeChat?.id
+      ? groupMembers[activeChat.id] || []
+      : [];
 
   const isSidebarInfoVisible = useSidebarInfoStore(
     (state) => state.isSidebarInfoVisible
@@ -42,13 +60,7 @@ const ChatInfoDefault: React.FC = () => {
 
       <div className="overflow-x-hidden overflow-y-auto h-screen">
         <div className="flex flex-col justify-center items-center p-4 gap-2 w-full pb-[70px]">
-          <div className="relative">
-            <ChatAvatar chat={activeChat} type="info" />
-
-            <a className="absolute bottom-0 right-0 flex items-center rounded-full cursor-pointer opacity-40 hover:opacity-80">
-              <i className="material-symbols-outlined">favorite</i>
-            </a>
-          </div>
+          <ChatAvatar chat={activeChat} type="info" />
 
           <h1 className="text-xl font-semibold">{activeChat.name}</h1>
 
@@ -124,17 +136,34 @@ const ChatInfoDefault: React.FC = () => {
                   </div>
                 </div>
 
-                {activeChat.members && (
+                {!isPrivate && currentMembers && (
                   <div className="flex flex-col rounded overflow-hidden custom-border">
-                    {activeChat.members.map((member, index) => (
+                    {currentMembers.map((member) => (
                       <div
-                        key={`${member}-${index}`}
-                        className="flex items-center gap-2 hover:bg-[var(--hover-color)] p-2 cursor-pointer"
+                        key={member.id}
+                        className="flex items-center justify-between hover:bg-[var(--hover-color)] p-2 cursor-pointer"
                       >
-                        <i className="material-symbols-outlined flex items-center justify-center w-8 h-8 text-3xl opacity-40 rounded-full custom-border">
-                          mood
-                        </i>
-                        <h1>{member}</h1>
+                        <div className="flex gap-2 items-center">
+                          <Avatar user={member} size="8" textSize="sm" />
+                          {member.nickname ? (
+                            <h1 className="text-sm">{member.nickname}</h1>
+                          ) : (
+                            <h1 className="text-sm">
+                              {member.first_name} {member.last_name}
+                            </h1>
+                          )}
+                        </div>
+                        {member.is_banned ? (
+                          <span className="material-symbols-outlined">
+                            dangerous
+                          </span>
+                        ) : (
+                          member.is_admin && (
+                            <span className="material-symbols-outlined opacity-50">
+                              manage_accounts
+                            </span>
+                          )
+                        )}
                       </div>
                     ))}
                   </div>

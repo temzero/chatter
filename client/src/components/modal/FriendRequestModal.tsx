@@ -41,7 +41,7 @@ const FriendRequestModal: React.FC<FriendRequestModalProps> = ({ user }) => {
   return (
     <div className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded p-4 max-w-xl w-[400px] custom-border">
       <div className="flex items-center gap-4 mb-4">
-        <Avatar user={user} className="h-12 w-12" />
+        <Avatar user={user} size="12" />
 
         <div>
           <h1 className="text-xl font-semibold">

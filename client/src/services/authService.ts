@@ -8,7 +8,7 @@ export const authService = {
       identifier,
       password,
     });
-    storageService.setToken(data.access_token);
+    storageService.setAccessToken(data.access_token);
     storageService.setUser(data.user);
     return data;
   },

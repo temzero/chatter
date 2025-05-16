@@ -2,12 +2,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-type SidebarType = 'default' | 'forgotPassword' | 'newChat' | 'search' | 'more' | 'profile' | 'profileEdit' | 'settings' | 'settingsAccount';
+type SidebarModes = 'default' | 'newChat' | 'search' | 'more' | 'profile' | 'profileEdit' | 'settings' | 'settingsAccount';
 
 interface SidebarStore {
-  currentSidebar: SidebarType;
+  currentSidebar: SidebarModes;
   isCompact: boolean;
-  setSidebar: (sidebar: SidebarType) => void;
+  setSidebar: (sidebar: SidebarModes) => void;
   toggleCompact: () => void;
   initializeKeyListeners: () => void;
   cleanupKeyListener: () => void;
@@ -19,7 +19,7 @@ export const useSidebarStore = create<SidebarStore>()(
       currentSidebar: 'default',
       isCompact: false,
 
-      setSidebar: (sidebar) => set({ currentSidebar: sidebar }),
+      setSidebar: (sidebar) => { console.log('set sidebar to: ', sidebar); set({ currentSidebar: sidebar })},
 
       toggleCompact: () => {
         const newCompactState = !get().isCompact;

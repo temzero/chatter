@@ -111,7 +111,7 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
               >
                 <Avatar
                   user={chat.chatPartner}
-                  className="w-8 h-8"
+                  size="8"
                   textSize="text-sm"
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">

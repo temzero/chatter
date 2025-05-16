@@ -11,7 +11,7 @@ import { Avatar } from "./avatar/Avatar";
 const CreateNewChat: React.FC = () => {
   const currentUser = useAuthStore((state) => state.currentUser);
   const setActiveChat = useChatStore((s) => s.setActiveChat);
-  const createChat = useChatStore((s) => s.createChat);
+  const createPrivateChat = useChatStore((s) => s.createPrivateChat);
   const { openModal } = useModalStore();
 
   const [query, setQuery] = useState("");
@@ -51,14 +51,11 @@ const CreateNewChat: React.FC = () => {
   }
 
   async function handleStartChat() {
-    if (!user || !currentUser) return;
+    if (!user) return;
 
     try {
       setLoading(true);
-      const newChat = await createChat({
-        member1Id: currentUser.id,
-        member2Id: user.id,
-      });
+      const newChat = await createPrivateChat(user.id);
       console.log("newChat: ", newChat);
       // Set the new chat as active
       setActiveChat(newChat);
@@ -69,6 +66,7 @@ const CreateNewChat: React.FC = () => {
       setLoading(false);
     }
   }
+
   return (
     <div className="flex flex-col gap-3 p-2 h-full relative overflow-hidden">
       <form onSubmit={handleSubmit} className="space-y-2">
@@ -99,8 +97,8 @@ const CreateNewChat: React.FC = () => {
       {user && (
         <motion.div
           key={user.id}
-          initial={{ opacity: 0, scale: 1.1, }}
-          animate={{ opacity: 1, scale: 1, }}
+          initial={{ opacity: 0, scale: 1.1 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={{
             type: "spring",
             stiffness: 300,
@@ -111,7 +109,7 @@ const CreateNewChat: React.FC = () => {
         >
           {/* Scrollable user info */}
           <div className="flex-1 flex flex-col items-center justify-start gap-2 p-2 pt-4 overflow-y-auto">
-            <Avatar user={user} className="h-28 w-28" />
+            <Avatar user={user} size="28" />
 
             <h1 className="font-bold text-xl">
               {user.first_name} {user.last_name}

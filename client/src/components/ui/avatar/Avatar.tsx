@@ -1,13 +1,16 @@
-import { MyProfileProps } from "@/data/types";
+import type { ChatPartner, ChatGroupMember } from "@/types/chat";
+import type { User } from "@/types/user";
 
 type AvatarProps = {
-  user: MyProfileProps | unknown;
+  user: User | ChatPartner | ChatGroupMember | unknown;
+  size?: string;
   textSize?: string;
   className?: string;
 };
 
 export const Avatar: React.FC<AvatarProps> = ({
   user,
+  size = "10",
   textSize = "text-xl",
   className = "",
 }) => {
@@ -15,7 +18,7 @@ export const Avatar: React.FC<AvatarProps> = ({
 
   return (
     <div
-      className={`flex items-center justify-center overflow-hidden rounded-full border-2 border-[var(--border-color)] ${className}`}
+      className={`w-${size} h-${size} flex items-center justify-center overflow-hidden rounded-full border-2 border-[var(--border-color)] ${className}`}
     >
       {user.avatar ? (
         <img

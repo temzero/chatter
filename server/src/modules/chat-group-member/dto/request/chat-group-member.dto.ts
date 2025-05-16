@@ -17,11 +17,11 @@ export class ChatGroupMemberDto {
 
   @IsOptional()
   @IsBoolean()
-  is_admin: boolean;
+  is_admin: boolean = false; // default value
 
   @IsOptional()
   @IsBoolean()
-  is_banned: boolean;
+  is_banned: boolean = false; // default value
 
   @IsOptional()
   @IsDateString()

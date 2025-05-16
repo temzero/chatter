@@ -1,21 +1,42 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useCurrentUser } from "@/stores/authStore";
+import { useProfileStore } from "@/stores/profileStore";
+import AvatarEdit from "../ui/avatar/AvatarEdit";
+import { useMemo } from "react";
 
 const SidebarProfileEdit: React.FC = () => {
   const currentUser = useCurrentUser();
+  const { updateProfile } = useProfileStore();
 
   const { setSidebar } = useSidebarStore();
-  const [formData, setFormData] = useState({
-    first_name: currentUser?.first_name || "",
-    last_name: currentUser?.last_name || "",
-    username: currentUser?.username || "",
-    email: currentUser?.email || "",
-    phone_number: currentUser?.phone_number || "",
-    birthday: currentUser?.birthday || "",
-    bio: currentUser?.bio || "",
-    avatar: currentUser?.avatar || "",
-  });
+
+  const initialFormData = useMemo(
+    () => ({
+      first_name: currentUser?.first_name || "",
+      last_name: currentUser?.last_name || "",
+      username: currentUser?.username || "",
+      email: currentUser?.email || "",
+      phone_number: currentUser?.phone_number || null,
+      birthday: currentUser?.birthday || null,
+      bio: currentUser?.bio || "",
+      avatar: currentUser?.avatar || "",
+    }),
+    [currentUser]
+  );
+
+  const [formData, setFormData] = useState(initialFormData);
+  const [hasChanges, setHasChanges] = useState(false);
+
+  useEffect(() => {
+    // Compare current form data with initial data
+    const changesDetected = Object.keys(initialFormData).some(
+      (key) =>
+        formData[key as keyof typeof formData] !==
+        initialFormData[key as keyof typeof initialFormData]
+    );
+    setHasChanges(changesDetected);
+  }, [formData, initialFormData]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -27,10 +48,18 @@ const SidebarProfileEdit: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (currentUser) {
       setSidebar("profile");
+    }
+    console.log("Form submitted:", formData);
+    updateProfile(formData);
+    try {
+      await updateProfile(formData); // still needed
+      setSidebar("profile"); // only runs after update finishes
+    } catch (error) {
+      console.error("Failed to update profile", error);
     }
   };
 
@@ -38,7 +67,7 @@ const SidebarProfileEdit: React.FC = () => {
     <aside className="relative w-[var(--sidebar-width)] h-full flex flex-col transition-all duration-300 ease-in-out">
       {/* Header */}
       <header className="flex w-full justify-between items-center min-h-[var(--header-height)] custom-border-b">
-        <div className="flex items-center">
+        <button className="flex items-center">
           <i
             className="material-symbols-outlined nav-btn"
             onClick={() => setSidebar("profile")}
@@ -46,20 +75,22 @@ const SidebarProfileEdit: React.FC = () => {
             arrow_back
           </i>
           <h1 className="text-xl font-semibold">Edit Profile</h1>
-        </div>
+        </button>
         <div className="flex gap-1">
-          <a
-            className="flex items-center justify-center rounded-full cursor-pointer hover:opacity-100 text-green-400 h-10 w-10 hover:bg-green-500 hover:text-white"
-            onClick={handleSubmit}
-          >
-            <i className="material-symbols-outlined text-3xl">check</i>
-          </a>
-          <a
+          {hasChanges && (
+            <button
+              className="flex items-center justify-center rounded-full cursor-pointer hover:opacity-100 text-green-400 h-10 w-10 hover:bg-green-500 hover:text-white"
+              onClick={handleSubmit}
+            >
+              <i className="material-symbols-outlined text-3xl">check</i>
+            </button>
+          )}
+          <button
             className="flex items-center rounded-full p-2 cursor-pointer opacity-70 hover:opacity-80 h-10 w-10 hover:bg-[var(--hover-color)] mr-1"
             onClick={() => setSidebar("default")}
           >
             <i className="material-symbols-outlined">close</i>
-          </a>
+          </button>
         </div>
       </header>
 
@@ -67,41 +98,12 @@ const SidebarProfileEdit: React.FC = () => {
       <form className="overflow-y-auto h-screen p-4" onSubmit={handleSubmit}>
         <div className="flex flex-col items-center gap-4 w-full">
           {/* Avatar Upload */}
-          <div className="h-36 w-36 flex items-center justify-center rounded-full custom-border relative">
-            {formData.avatar ? (
-              <img
-                src={formData.avatar}
-                alt="Profile"
-                className="h-full w-full rounded-full object-cover"
-              />
-            ) : (
-              <i className="material-symbols-outlined text-8xl opacity-20">
-                mood
-              </i>
-            )}
-            <label className="w-10 h-10 absolute bottom-0 right-0 bg-gray-600 text-white rounded-full p-2 cursor-pointer hover:bg-gray-700 flex items-center justify-center">
-              <i className="material-symbols-outlined">edit</i>
-              <input
-                type="file"
-                className="hidden"
-                accept="image/*"
-                onChange={(e) => {
-                  if (e.target.files?.[0]) {
-                    const file = e.target.files[0];
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                      setFormData((prev) => ({
-                        ...prev,
-                        avatar: event.target?.result as string,
-                      }));
-                    };
-                    reader.readAsDataURL(file);
-                  }
-                }}
-              />
-            </label>
-          </div>
-
+          <AvatarEdit
+            avatar={formData.avatar}
+            onAvatarChange={(newAvatar) =>
+              setFormData((prev) => ({ ...prev, avatar: newAvatar }))
+            }
+          />
           {/* Form Fields */}
           <div className="w-full space-y-4">
             <div className="flex flex-col gap-1">
@@ -131,7 +133,7 @@ const SidebarProfileEdit: React.FC = () => {
             <div className="flex flex-col gap-1">
               <label className="text-sm opacity-70">Birthday</label>
               <input
-                type="text"
+                type="date"
                 name="birthday"
                 value={formData.birthday}
                 onChange={handleChange}

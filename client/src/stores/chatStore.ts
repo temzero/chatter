@@ -1,8 +1,10 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Chat } from "@/types/chat";
-import { chatService } from "@/services/chatService";
+import { chatService } from "@/services/chat/chatService";
 import { useMessageStore } from "./messageStore";
+import { useSidebarInfoStore } from "./sidebarInfoStore";
+import type { Chat, ChatGroupMember, PrivateChat } from "@/types/chat";
+import { groupChatService } from "@/services/chat/groupChatService";
 
 interface ChatStore {
   chats: Chat[];
@@ -11,17 +13,16 @@ interface ChatStore {
   isLoading: boolean;
   error: string | null;
   filteredChats: Chat[];
+  groupMembers: Record<string, ChatGroupMember[]>;
 
   getChats: (userId: string) => Promise<void>;
   getChatById: (chatId: string) => Promise<void>;
+  getGroupMembers: (groupId: string) => Promise<void>;
   setSearchTerm: (term: string) => void;
   setActiveChat: (chat: Chat | null) => void;
   setActiveChatById: (chatId: string | null) => Promise<void>;
-  createChat: (payload: {
-    member1Id: string;
-    member2Id: string;
-  }) => Promise<Chat>;
-  createGroup: (payload: {
+  createPrivateChat: (chatPartnerId: string) => Promise<PrivateChat>;
+  createGroupChat: (payload: {
     name: string;
     memberIds: string[];
     type: "group" | "channel";
@@ -34,6 +35,7 @@ export const useChatStore = create<ChatStore>()(
   persist(
     (set, get) => ({
       chats: [],
+      groupMembers: {},
       filteredChats: [],
       searchTerm: "",
       activeChat: null,
@@ -76,6 +78,13 @@ export const useChatStore = create<ChatStore>()(
         }
       },
 
+      getGroupMembers: async (groupId) => {
+        const members = await groupChatService.getGroupChatMembers(groupId);
+        set((state) => ({
+          groupMembers: { ...state.groupMembers, [groupId]: members },
+        }));
+      },
+
       setSearchTerm: (term) => {
         const { chats } = get();
 
@@ -114,6 +123,7 @@ export const useChatStore = create<ChatStore>()(
       },
 
       setActiveChat: (chat) => {
+        useSidebarInfoStore.getState().setSidebarInfo("default");
         set({ activeChat: chat });
       },
 
@@ -136,10 +146,10 @@ export const useChatStore = create<ChatStore>()(
         }
       },
 
-      createChat: async (payload) => {
+      createPrivateChat: async (chatPartnerId) => {
         set({ isLoading: true });
         try {
-          const newChat = await chatService.createChat(payload);
+          const newChat = await chatService.createPrivateChat(chatPartnerId);
           set((state) => ({
             chats: [newChat, ...state.chats],
             isLoading: false,
@@ -155,10 +165,10 @@ export const useChatStore = create<ChatStore>()(
         }
       },
 
-      createGroup: async (payload) => {
+      createGroupChat: async (payload) => {
         set({ isLoading: true });
         try {
-          const newChat = await chatService.createGroup(payload);
+          const newChat = await chatService.createGroupChat(payload);
           set((state) => ({
             chats: [newChat, ...state.chats],
             isLoading: false,

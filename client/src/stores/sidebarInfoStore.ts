@@ -2,13 +2,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-type SidebarInfoMode = 'default' | 'media' | 'saved' | 'edit';
+type SidebarInfoModes = 'default' | 'media' | 'saved' | 'edit';
 
 interface SidebarInfoStore {
   isSidebarInfoVisible: boolean;
-  sidebarInfoMode: SidebarInfoMode;
+  currentSidebarInfo: SidebarInfoModes;
   toggleSidebarInfo: () => void;
-  setSidebarInfo: (mode: SidebarInfoMode) => void;
+  setSidebarInfo: (mode: SidebarInfoModes) => void;
   initializeKeyListeners: () => () => void;
 }
 
@@ -16,17 +16,17 @@ export const useSidebarInfoStore = create<SidebarInfoStore>()(
   persist(
     (set, get) => ({
       isSidebarInfoVisible: false,
-      sidebarInfoMode: 'default',
+      currentSidebarInfo: 'default',
 
       toggleSidebarInfo: () => {
         const currentVisibility = get().isSidebarInfoVisible;
         set({ 
           isSidebarInfoVisible: !currentVisibility,
-          sidebarInfoMode: 'default' // Reset mode when toggling
+          currentSidebarInfo: 'default' // Reset mode when toggling
         });
       },
 
-      setSidebarInfo: (mode) => set({ sidebarInfoMode: mode }),
+      setSidebarInfo: (mode) => set({ currentSidebarInfo: mode }),
 
       initializeKeyListeners: () => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -37,7 +37,7 @@ export const useSidebarInfoStore = create<SidebarInfoStore>()(
 
           if (e.key === 'Escape') {
             e.preventDefault();
-            set({ sidebarInfoMode: 'default' });
+            set({ currentSidebarInfo: 'default' });
             e.stopPropagation();
           }
         };
@@ -70,8 +70,8 @@ export const useSidebarInfoStore = create<SidebarInfoStore>()(
 export const useSidebarInfoVisibility = () => 
   useSidebarInfoStore((state) => state.isSidebarInfoVisible);
 
-export const useSidebarInfoMode = () => 
-  useSidebarInfoStore((state) => state.sidebarInfoMode);
+export const useCurrentSidebarInfo = () => 
+  useSidebarInfoStore((state) => state.currentSidebarInfo);
 
 export const useSidebarInfoActions = () => 
   useSidebarInfoStore((state) => ({

@@ -1,12 +1,12 @@
-import { AnimatePresence, motion } from 'framer-motion';
-import ChatInfoDefault from './SidebarInfoDefault';
-import ChatInfoMedia from './SidebarInfoMedia';
-import ChatInfoSaved from './SidebarInfoSaved';
-import ChatInfoEdit from './SidebarInfoEdit';
-import { useSidebarInfoMode } from '@/stores/sidebarInfoStore';
+import { AnimatePresence, motion } from "framer-motion";
+import { useCurrentSidebarInfo } from "@/stores/sidebarInfoStore";
+import ChatInfoDefault from "./SidebarInfoDefault";
+import ChatInfoMedia from "./SidebarInfoMedia";
+import ChatInfoSaved from "./SidebarInfoSaved";
+import ChatInfoEdit from "./SidebarInfoEdit";
 
 const SidebarInfo: React.FC = () => {
-  const sidebarInfoMode = useSidebarInfoMode();
+  const currentSidebarInfo = useCurrentSidebarInfo();
 
   // Define your chat info components
   const chatInfoComponents = {
@@ -20,108 +20,108 @@ const SidebarInfo: React.FC = () => {
   const animations = {
     default: {
       initial: { opacity: 0 },
-      animate: { 
+      animate: {
         opacity: 1,
-        transition: { 
-          type: 'spring', 
-          stiffness: 300, 
+        transition: {
+          type: "spring",
+          stiffness: 300,
           damping: 20,
-          bounce: 0.2
-        }
+          bounce: 0.2,
+        },
       },
-      exit: { 
+      exit: {
         opacity: 0,
-        transition: { 
+        transition: {
           duration: 0,
-        } 
-      }
+        },
+      },
     },
     media: {
       initial: { opacity: 0, y: 700 },
-      animate: { 
-        opacity: 1, 
+      animate: {
+        opacity: 1,
         y: 0,
-        transition: { 
-          type: 'spring', 
-          stiffness: 300, 
+        transition: {
+          type: "spring",
+          stiffness: 300,
           damping: 26,
-          bounce: 0.2
-        }
+          bounce: 0.2,
+        },
       },
-      exit: { 
-        opacity: 0, 
-        y: 900,  // Different direction and distance for exit
-        transition: { 
+      exit: {
+        opacity: 0,
+        y: 900, // Different direction and distance for exit
+        transition: {
           duration: 0.3,
-          ease: [0.4, 0, 0.2, 1]  // Smoother ease-out
-        } 
-      }
+          ease: [0.4, 0, 0.2, 1], // Smoother ease-out
+        },
+      },
     },
 
     saved: {
       initial: { opacity: 0, y: 700 },
-      animate: { 
-        opacity: 1, 
+      animate: {
+        opacity: 1,
         y: 0,
-        transition: { 
-          type: 'spring', 
-          stiffness: 300, 
+        transition: {
+          type: "spring",
+          stiffness: 300,
           damping: 26,
-          bounce: 0.2
-        }
+          bounce: 0.2,
+        },
       },
-      exit: { 
-        opacity: 0, 
-        y: 900,  // Different direction and distance for exit
-        transition: { 
+      exit: {
+        opacity: 0,
+        y: 900, // Different direction and distance for exit
+        transition: {
           duration: 0.3,
-          ease: [0.4, 0, 0.2, 1]  // Smoother ease-out
-        } 
-      }
+          ease: [0.4, 0, 0.2, 1], // Smoother ease-out
+        },
+      },
     },
 
     edit: {
-      initial: { opacity: 0, x: 'var(--sidebar-width)' },
-      animate: { 
-        opacity: 1, 
+      initial: { opacity: 0, x: "var(--sidebar-width)" },
+      animate: {
+        opacity: 1,
         x: 0,
-        transition: { 
-          type: 'spring', 
-          stiffness: 300, 
+        transition: {
+          type: "spring",
+          stiffness: 300,
           damping: 28,
-          bounce: 0.2
-        }
+          bounce: 0.2,
+        },
       },
-      exit: { 
-        opacity: 0, 
-        x: 'var(--sidebar-width)',  
-        transition: { duration: 0.2 } 
-      }
+      exit: {
+        opacity: 0,
+        x: "var(--sidebar-width)",
+        transition: { duration: 0.2 },
+      },
     },
 
     fallback: {
       initial: { opacity: 0 },
       animate: { opacity: 1 },
       exit: { opacity: 0 },
-      transition: { duration: 0.2, ease: "easeOut" }
-    }
-
+      transition: { duration: 0.2, ease: "easeOut" },
+    },
   };
 
   // Get the current component and animation
-  const CurrentComponent = chatInfoComponents[sidebarInfoMode] || null;
-  const currentAnimation = animations[sidebarInfoMode] || animations.fallback;
+  const CurrentComponent = chatInfoComponents[currentSidebarInfo] || null;
+  const currentAnimation =
+    animations[currentSidebarInfo as keyof typeof animations] ||
+    animations.fallback;
 
   return (
     <div className="h-full w-full relative overflow-hidden bg-[var(--sidebar-color)] border-l-2 border-[var(--border-color)] shadow-lg">
       <AnimatePresence mode="wait">
         {CurrentComponent && (
           <motion.div
-            key={sidebarInfoMode}
+            key={currentSidebarInfo}
             initial={currentAnimation.initial}
             animate={currentAnimation.animate}
             exit={currentAnimation.exit}
-            transition={currentAnimation.transition}
             className="absolute inset-0 overflow-y-auto"
           >
             {CurrentComponent}

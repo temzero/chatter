@@ -1,13 +1,13 @@
-import SidebarDefault from '@/components/sidebar/SidebarDefault';
-import SidebarSearch from '@/components/sidebar/SidebarSearch';
-import SidebarNewChat from '@/components/sidebar/SidebarNewChat';
-import SidebarMore from '@/components/sidebar/SidebarMore';
-import SidebarProfile from '@/components/sidebar/SidebarProfile';
-import SidebarProfileEdit from '@/components/sidebar/SidebarProfileEdit';
-import SidebarSettings from '@/components/sidebar/SidebarSettings';
-import SidebarSettingsAccount from './SidebarSettingsAccount';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useCurrentSidebar } from '@/stores/sidebarStore';
+import SidebarDefault from "@/components/sidebar/SidebarDefault";
+import SidebarSearch from "@/components/sidebar/SidebarSearch";
+import SidebarNewChat from "@/components/sidebar/SidebarNewChat";
+import SidebarMore from "@/components/sidebar/SidebarMore";
+import SidebarProfile from "@/components/sidebar/SidebarProfile";
+import SidebarProfileEdit from "@/components/sidebar/SidebarProfileEdit";
+import SidebarSettings from "@/components/sidebar/SidebarSettings";
+import SidebarSettingsAccount from "./SidebarSettingsAccount";
+import { motion, AnimatePresence } from "framer-motion";
+import { useCurrentSidebar } from "@/stores/sidebarStore";
 
 const Sidebar = () => {
   const currentSidebar = useCurrentSidebar();
@@ -20,100 +20,106 @@ const Sidebar = () => {
     profile: <SidebarProfile />,
     profileEdit: <SidebarProfileEdit />,
     settings: <SidebarSettings />,
-    settingsAccount: <SidebarSettingsAccount />
+    settingsAccount: <SidebarSettingsAccount />,
   };
 
   // Define different animations for each sidebar
-  const sidebarAnimations = {
+  const animations = {
     default: {
-      initial: { opacity: 0, scale: .9 },
-      animate: { 
+      initial: { opacity: 0, scale: 0.9 },
+      animate: {
         opacity: 1,
         scale: 1,
-        transition: { duration: 0.2, ease: "easeOut" }
+        transition: { duration: 0.2, ease: "easeOut" },
       },
-      exit: { 
+      exit: {
         opacity: 0,
-        transition: { 
+        transition: {
           duration: 0,
-        } 
-      }
+        },
+      },
     },
     search: {
       initial: { opacity: 0, y: 400 },
-      animate: { 
+      animate: {
         opacity: 1,
         y: 0,
-        transition: { 
-          type: 'spring', 
-          stiffness: 300, 
+        transition: {
+          type: "spring",
+          stiffness: 300,
           damping: 28,
-          bounce: 0.2
-        }
+          bounce: 0.2,
+        },
       },
-      exit: { 
+      exit: {
         opacity: 0,
         y: 400,
-        transition: { 
+        transition: {
           duration: 0.2,
-        } 
-      }
+        },
+      },
     },
     newChat: {
       initial: { opacity: 0, y: 400 },
-      animate: { 
+      animate: {
         opacity: 1,
         y: 0,
-        transition: { 
-          type: 'spring', 
-          stiffness: 300, 
+        transition: {
+          type: "spring",
+          stiffness: 300,
           damping: 28,
-          bounce: 0.2
-        }
+          bounce: 0.2,
+        },
       },
-      exit: { 
+      exit: {
         opacity: 0,
         y: 400,
-        transition: { 
+        transition: {
           duration: 0.2,
-        } 
-      }
+        },
+      },
     },
     fallback: {
       initial: { opacity: 0, x: -300 },
-      animate: { 
-        opacity: 1, 
+      animate: {
+        opacity: 1,
         x: 0,
-        transition: {type: 'spring', stiffness: 300, damping: 28, bounce: 0.2}
+        transition: {
+          type: "spring",
+          stiffness: 300,
+          damping: 28,
+          bounce: 0.2,
+        },
       },
 
-      exit: { 
+      exit: {
         opacity: 0,
         x: -300,
-        transition: { 
+        transition: {
           duration: 0.2,
-        } 
-      }
-    }
+        },
+      },
+    },
   };
 
-  // Get the animation for the current sidebar or use fallback
-  const currentAnimation = sidebarAnimations[currentSidebar] || sidebarAnimations.fallback;
+  // Get the animations for the current sidebar or use fallback
+  const CurrentComponent = sidebars[currentSidebar] || null;
+  const currentAnimation =
+    animations[currentSidebar as keyof typeof animations] || animations.fallback;
 
   return (
     <div className="bg-[var(--sidebar-color)] h-full flex flex-col shadow border-[var(--border-color)] border-r-2 transition-all duration-300 ease-in-out z-50">
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={currentSidebar}
-        initial={currentAnimation.initial}
-        animate={currentAnimation.animate}
-        exit={currentAnimation.exit}
-        transition={currentAnimation.transition}
-        className="h-full"
-      >
-        {sidebars[currentSidebar]}
-      </motion.div>
-    </AnimatePresence>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentSidebar}
+          initial={currentAnimation.initial}
+          animate={currentAnimation.animate}
+          exit={currentAnimation.exit}
+          className="h-full"
+        >
+          {CurrentComponent}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 };

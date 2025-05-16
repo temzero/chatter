@@ -1,13 +1,13 @@
 // src/stores/authStore.ts
+import axios from "axios";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import axios from "axios";
 import { authService } from "@/services/authService";
 import { storageService } from "@/services/storage/storageService";
-import { MyProfileProps } from "@/data/types";
 import { useChatStore } from "@/stores/chatStore";
 import { useSidebarStore } from "./sidebarStore";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
+import type { User } from "@/types/user";
 
 type MessageType = "error" | "success" | "info";
 
@@ -17,13 +17,14 @@ type Message = {
 } | null;
 
 type AuthState = {
-  currentUser: MyProfileProps | null;
+  currentUser: User | null;
   isAuthenticated: boolean;
   loading: boolean;
   message: Message;
 };
 
 type AuthActions = {
+  setCurrentUser: (user: User | null) => void;
   setMessage: (type: MessageType, content: string) => void;
   clearMessage: () => void;
   setLoading: (loading: boolean, clearMessages?: boolean) => void;
@@ -53,6 +54,13 @@ export const useAuthStore = create<AuthState & AuthActions>()(
   persist(
     (set, get) => ({
       ...initialState,
+
+      setCurrentUser: (user) => {
+        set({
+          currentUser: user,
+          isAuthenticated: !!user,
+        });
+      },
 
       // Core actions
       setMessage: (type, content) => set({ message: { type, content } }),
@@ -92,10 +100,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       login: async (identifier, password) => {
         try {
           get().setLoading(true); // Auto-clears messages
-          const { user } = await authService.login(
-            identifier,
-            password
-          );
+          const { user } = await authService.login(identifier, password);
           set({
             currentUser: user,
             isAuthenticated: true,
@@ -134,8 +139,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       logout: () => {
         authService.logout();
         useChatStore.getState().setActiveChat(null);
-        useSidebarStore.getState().setSidebar('default');
-        useSidebarInfoStore.getState().setSidebarInfo('default');
+        useSidebarStore.getState().setSidebar("default");
+        useSidebarInfoStore.getState().setSidebarInfo("default");
         set({
           ...initialState,
           loading: false,

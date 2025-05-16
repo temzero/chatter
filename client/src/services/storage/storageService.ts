@@ -3,12 +3,12 @@ import { v4 as uuidv4 } from "uuid";
 
 export const storageService = {
   // Token management
-  getToken(): string | null {
-    return localStorage.getItem("token");
+  getAccessToken(): string | null {
+    return localStorage.getItem("access_token");
   },
 
-  setToken(token: string): void {
-    localStorage.setItem("token", token);
+  setAccessToken(token: string): void {
+    localStorage.setItem("access_token", token);
   },
 
   // User data management
