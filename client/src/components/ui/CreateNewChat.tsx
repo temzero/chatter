@@ -75,11 +75,11 @@ const CreateNewChat: React.FC = () => {
             type="text"
             name="userInput"
             placeholder="@username/email/phone_number"
-            autoFocus
             required
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="w-full bg-transparent outline-none"
+            autoFocus
           />
         </div>
         <button

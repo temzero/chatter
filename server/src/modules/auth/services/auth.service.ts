@@ -9,10 +9,10 @@ import { UserService } from '../../user/user.service';
 import { ConfigService } from '@nestjs/config';
 import { TokenService } from './token.service';
 import { TokenStorageService } from './token-storage.service';
-import { CreateUserDto } from '../../user/dto/create-user.dto';
+import { CreateUserDto } from '../../user/dto/requests/create-user.dto';
 import { User } from '../../user/entities/user.entity';
-import { MailService } from '../../mail/mail.service';
-import { LoginDto } from '../dto/login.dto';
+import { MailService } from '../mail/mail.service';
+import { LoginDto } from '../dto/requests/login.dto';
 import { TokenType } from '../types/token-type.enum';
 import type { JwtRefreshPayload } from '../types/jwt-payload.type';
 

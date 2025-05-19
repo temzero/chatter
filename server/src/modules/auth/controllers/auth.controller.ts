@@ -17,7 +17,7 @@ import { AuthService } from '../services/auth.service';
 import { TokenService } from '../services/token.service';
 import { ResponseData } from 'src/common/response-data';
 import { User } from '../../user/entities/user.entity';
-import { CreateUserDto } from '../../user/dto/create-user.dto';
+import { CreateUserDto } from '../../user/dto/requests/create-user.dto';
 import { LocalGuard } from '../guards/local.guard';
 import { JwtAuthGuard } from '../guards/jwt.guard';
 import { CurrentUser } from '../decorators/user.decorator';

@@ -66,7 +66,7 @@ const Register = () => {
             name="username"
             placeholder="Username"
             required
-            className="input backdrop-blur-lg"
+            className="input"
             autoComplete="username"
             autoFocus
           />
@@ -77,7 +77,7 @@ const Register = () => {
               name="first_name"
               placeholder="First Name"
               required
-              className="input backdrop-blur-lg"
+              className="input"
               ref={firstNameRef}
               onChange={capitalizeFirstLetter}
             />
@@ -87,7 +87,7 @@ const Register = () => {
               name="last_name"
               placeholder="Last Name"
               required
-              className="input backdrop-blur-lg"
+              className="input"
               ref={lastNameRef}
               onChange={capitalizeFirstLetter}
             />
@@ -98,7 +98,7 @@ const Register = () => {
             name="email"
             placeholder="Email"
             required
-            className="input backdrop-blur-lg"
+            className="input"
             autoComplete="email"
           />
 
@@ -107,7 +107,7 @@ const Register = () => {
             name="password"
             placeholder="Password"
             required
-            className="input backdrop-blur-lg"
+            className="input"
             autoComplete="new-password"
           />
 
@@ -116,7 +116,7 @@ const Register = () => {
             name="confirmPassword"
             placeholder="Confirm Password"
             required
-            className="input backdrop-blur-lg"
+            className="input"
             autoComplete="new-password"
           />
 

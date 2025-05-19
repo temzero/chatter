@@ -10,13 +10,15 @@ import {
   HttpException,
   UseGuards,
 } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from 'src/modules/user/dto/update-user.dto';
-import { User } from 'src/modules/user/entities/user.entity';
+import { CreateUserDto } from './dto/requests/create-user.dto';
+import { UpdateUserDto } from './dto/requests/update-user.dto';
 import { ResponseData } from 'src/common/response-data';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { CurrentUser } from '../auth/decorators/user.decorator';
+import { UserResponseDto } from './dto/responses/user-response.dto';
+import { AppError } from 'src/common/errors';
 
 @Controller('user')
 export class UserController {
@@ -24,41 +26,33 @@ export class UserController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  async findAll(): Promise<ResponseData<User[]>> {
+  async findAll(): Promise<ResponseData<UserResponseDto[]>> {
     try {
       const users = await this.userService.getAllUsers();
-      return new ResponseData<User[]>(
-        users,
+      return new ResponseData(
+        plainToInstance(UserResponseDto, users),
         HttpStatus.OK,
         'Users retrieved successfully',
       );
-    } catch (error: unknown) {
-      throw new HttpException(
-        error || 'Failed to retrieve users',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    } catch (error) {
+      AppError.throw(error, 'Failed to retrieve users');
     }
   }
 
   @Get(':userId')
   @UseGuards(JwtAuthGuard)
-  async findOne(@Param('userId') userId: string): Promise<ResponseData<User>> {
+  async findOne(
+    @Param('userId') userId: string,
+  ): Promise<ResponseData<UserResponseDto>> {
     try {
       const user = await this.userService.getUserById(userId);
-      if (!user) {
-        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-      }
-      return new ResponseData<User>(
-        user,
+      return new ResponseData(
+        plainToInstance(UserResponseDto, user),
         HttpStatus.OK,
         'User retrieved successfully',
       );
-    } catch (error: unknown) {
-      if (error instanceof HttpException) throw error;
-      throw new HttpException(
-        error || 'Failed to retrieve user',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    } catch (error) {
+      AppError.throw(error, 'Failed to retrieve user');
     }
   }
 
@@ -66,7 +60,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   async findOneByIdentifier(
     @Param('identifier') identifier: string,
-  ): Promise<ResponseData<User>> {
+  ): Promise<ResponseData<UserResponseDto>> {
     try {
       const user = await this.userService.getUserByIdentifier(
         identifier.trim(),
@@ -74,36 +68,29 @@ export class UserController {
       if (!user) {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
-      return new ResponseData<User>(
-        user,
+      return new ResponseData(
+        plainToInstance(UserResponseDto, user),
         HttpStatus.OK,
         'User retrieved successfully',
       );
-    } catch (error: unknown) {
-      if (error instanceof HttpException) throw error;
-      throw new HttpException(
-        error instanceof Error ? error.message : 'Failed to retrieve user',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    } catch (error) {
+      AppError.throw(error, 'Failed to retrieve user');
     }
   }
 
   @Post('create')
   async create(
     @Body() createUserDto: CreateUserDto,
-  ): Promise<ResponseData<User>> {
+  ): Promise<ResponseData<UserResponseDto>> {
     try {
       const user = await this.userService.createUser(createUserDto);
-      return new ResponseData<User>(
-        user,
+      return new ResponseData(
+        plainToInstance(UserResponseDto, user),
         HttpStatus.CREATED,
         'User created successfully',
       );
-    } catch (error: unknown) {
-      throw new HttpException(
-        error || 'Failed to create user',
-        HttpStatus.BAD_REQUEST,
-      );
+    } catch (error) {
+      AppError.throw(error, 'Failed to create user', HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -112,26 +99,19 @@ export class UserController {
   async update(
     @CurrentUser('id') userId: string,
     @Body() updateUserDto: UpdateUserDto,
-  ): Promise<ResponseData<User>> {
+  ): Promise<ResponseData<UserResponseDto>> {
     try {
       const updatedUser = await this.userService.updateUser(
         userId,
         updateUserDto,
       );
-      if (!updatedUser) {
-        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-      }
-      return new ResponseData<User>(
-        updatedUser,
+      return new ResponseData(
+        plainToInstance(UserResponseDto, updatedUser),
         HttpStatus.OK,
         'User updated successfully',
       );
-    } catch (error: unknown) {
-      if (error instanceof HttpException) throw error;
-      throw new HttpException(
-        error || 'Failed to update user',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    } catch (error) {
+      AppError.throw(error, 'Failed to update user');
     }
   }
 
@@ -139,23 +119,12 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   async remove(
     @CurrentUser('id') userId: string,
-  ): Promise<ResponseData<string>> {
+  ): Promise<ResponseData<boolean>> {
     try {
-      const deletedUser = await this.userService.deleteUser(userId);
-      if (!deletedUser) {
-        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-      }
-      return new ResponseData<string>(
-        deletedUser.id,
-        HttpStatus.OK,
-        'User deleted successfully',
-      );
-    } catch (error: unknown) {
-      if (error instanceof HttpException) throw error;
-      throw new HttpException(
-        error || 'Failed to delete user',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      await this.userService.deleteUser(userId);
+      return new ResponseData(true, HttpStatus.OK, 'User deleted successfully');
+    } catch (error) {
+      AppError.throw(error, 'Failed to delete user');
     }
   }
 }

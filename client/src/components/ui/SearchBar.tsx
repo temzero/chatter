@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useChatStore } from "@/stores/chatStore";
 import { useDebounce } from "@/hooks/useDebounce";
 
@@ -13,8 +13,8 @@ const SearchBar = ({
 }: SearchBarProps) => {
   const [localSearchTerm, setLocalSearchTerm] = useState("");
   const setSearchTerm = useChatStore((state) => state.setSearchTerm);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Debounce the search input (200ms delay)
   const debouncedSearchTerm = useDebounce(localSearchTerm);
 
   useEffect(() => {
@@ -22,21 +22,24 @@ const SearchBar = ({
   }, [debouncedSearchTerm, setSearchTerm]);
 
   useEffect(() => {
-    // Reset search when component unmounts
     return () => {
       setSearchTerm("");
       setLocalSearchTerm("");
     };
   }, [setSearchTerm]);
 
+  // ⏳ Set focus time to prevent animation flicker
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      inputRef.current?.focus();
+    }, 202);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalSearchTerm(e.target.value);
   };
-
-  // const handleClear = () => {
-  //   setLocalSearchTerm("");
-  //   setSearchTerm("");
-  // };
 
   return (
     <div className="flex w-full items-center gap-1 p-1 rounded border-2 border-[var(--border-color)] shadow focus-within:border-[var(--primary-color)] focus-within:shadow-md transition-all duration-200">
@@ -48,9 +51,9 @@ const SearchBar = ({
         {type === "add" ? "add" : "search"}
       </i>
       <input
+        ref={inputRef}
         type="text"
         placeholder={placeholder}
-        autoFocus
         value={localSearchTerm}
         onChange={handleChange}
         className="w-full bg-transparent outline-none"

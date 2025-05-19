@@ -19,7 +19,7 @@ export const useSidebarStore = create<SidebarStore>()(
       currentSidebar: 'default',
       isCompact: false,
 
-      setSidebar: (sidebar) => { console.log('set sidebar to: ', sidebar); set({ currentSidebar: sidebar })},
+      setSidebar: (sidebar) => set({ currentSidebar: sidebar }),
 
       toggleCompact: () => {
         const newCompactState = !get().isCompact;

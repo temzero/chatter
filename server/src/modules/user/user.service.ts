@@ -1,11 +1,12 @@
 import * as bcrypt from 'bcrypt';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from 'src/modules/user/entities/user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from 'src/modules/user/dto/update-user.dto';
+import { CreateUserDto } from './dto/requests/create-user.dto';
+import { UpdateUserDto } from 'src/modules/user/dto/requests/update-user.dto';
 import { ConfigService } from '@nestjs/config';
+import { User } from 'src/modules/user/entities/user.entity';
+import { AppError } from 'src/common/errors';
 
 @Injectable()
 export class UserService {
@@ -20,96 +21,115 @@ export class UserService {
   }
 
   async getUserByIdentifier(identifier: string): Promise<User | null> {
-    const normalizedIdentifier = this.normalizeIdentifier(identifier);
-    return this.userRepository.findOne({
-      where: [
-        { username: normalizedIdentifier },
-        { email: normalizedIdentifier },
-        { phone_number: normalizedIdentifier },
-      ],
-    });
+    try {
+      const normalizedIdentifier = this.normalizeIdentifier(identifier);
+      return await this.userRepository.findOne({
+        where: [
+          { username: normalizedIdentifier },
+          { email: normalizedIdentifier },
+          { phoneNumber: normalizedIdentifier },
+        ],
+      });
+    } catch (error) {
+      AppError.throw(error, 'Failed to retrieve user by identifier');
+    }
   }
 
   async getAllUsers(): Promise<User[]> {
-    return this.userRepository.find();
+    try {
+      return await this.userRepository.find();
+    } catch (error) {
+      AppError.throw(error, 'Failed to retrieve users');
+    }
   }
 
-  async getUserById(id: string): Promise<User | null> {
-    return this.userRepository.findOneBy({ id });
+  async getUserById(id: string): Promise<User> {
+    try {
+      const user = await this.userRepository.findOneBy({ id });
+      if (!user) {
+        AppError.notFound('User not found');
+      }
+      return user;
+    } catch (error) {
+      AppError.throw(error, 'Failed to retrieve user');
+    }
   }
 
   async hashPassword(password: string): Promise<string> {
-    const saltRounds = parseInt(
-      this.configService.get('BCRYPT_SALT_ROUNDS', '10'),
-      10,
-    );
-    return bcrypt.hash(password, saltRounds);
+    try {
+      const saltRounds = parseInt(
+        this.configService.get('BCRYPT_SALT_ROUNDS', '10'),
+        10,
+      );
+      return await bcrypt.hash(password, saltRounds);
+    } catch (error) {
+      AppError.throw(error, 'Failed to hash password');
+    }
   }
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
-    const existingUser = await this.getUserByIdentifier(createUserDto.email);
-    if (existingUser) {
-      throw new HttpException(
-        'Email or username already taken',
-        HttpStatus.CONFLICT,
-      );
+    try {
+      const existingUser = await this.getUserByIdentifier(createUserDto.email);
+      if (existingUser) {
+        AppError.conflict('Email or username already taken');
+      }
+      const user = this.userRepository.create({
+        ...createUserDto,
+        passwordHash: await this.hashPassword(createUserDto.password),
+      });
+      return await this.userRepository.save(user);
+    } catch (error) {
+      AppError.throw(error, 'Failed to create user');
     }
-
-    const user = this.userRepository.create({
-      ...createUserDto,
-      password_hash: await this.hashPassword(createUserDto.password),
-    });
-
-    return this.userRepository.save(user);
   }
 
-  async updateUser(
-    id: string,
-    updateUserDto: UpdateUserDto,
-  ): Promise<User | null> {
-    const user = await this.getUserById(id);
-    if (!user) return null;
-
-    Object.assign(user, updateUserDto);
-    return this.userRepository.save(user);
+  async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    try {
+      const user = await this.getUserById(id);
+      Object.assign(user, updateUserDto);
+      return await this.userRepository.save(user);
+    } catch (error) {
+      AppError.throw(error, 'Failed to update user');
+    }
   }
 
-  async deleteUser(id: string): Promise<User | null> {
-    const user = await this.getUserById(id);
-    if (!user) return null;
-
-    await this.userRepository.remove(user);
-    return user;
+  async deleteUser(id: string): Promise<User> {
+    try {
+      const user = await this.getUserById(id);
+      await this.userRepository.remove(user);
+      return user;
+    } catch (error) {
+      AppError.throw(error, 'Failed to delete user');
+    }
   }
 
-  async updatePassword(
-    userId: string,
-    newPassword: string,
-  ): Promise<User | null> {
-    const user = await this.getUserById(userId);
-    if (!user) return null;
-
-    user.password_hash = await this.hashPassword(newPassword);
-    return this.userRepository.save(user);
+  async updatePassword(userId: string, newPassword: string): Promise<User> {
+    try {
+      const user = await this.getUserById(userId);
+      user.passwordHash = await this.hashPassword(newPassword);
+      return await this.userRepository.save(user);
+    } catch (error) {
+      AppError.throw(error, 'Failed to update password');
+    }
   }
 
   async updatePasswordWithCheck(
     userId: string,
     oldPassword: string,
     newPassword: string,
-  ): Promise<User | null> {
-    const user = await this.getUserById(userId);
-    if (!user) return null;
+  ): Promise<User> {
+    try {
+      const user = await this.getUserById(userId);
 
-    const isMatch = await bcrypt.compare(oldPassword, user.password_hash);
-    if (!isMatch) {
-      throw new HttpException(
-        'Old password is incorrect',
-        HttpStatus.UNAUTHORIZED,
-      );
+      const isMatch = await bcrypt.compare(oldPassword, user.passwordHash);
+      if (!isMatch) {
+        AppError.unauthorized('Old password is incorrect');
+      }
+
+      user.passwordHash = await this.hashPassword(newPassword);
+      return await this.userRepository.save(user);
+    } catch (error) {
+      AppError.throw(error, 'Failed to update password');
     }
-
-    user.password_hash = await this.hashPassword(newPassword);
-    return this.userRepository.save(user);
   }
 }

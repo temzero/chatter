@@ -1,0 +1,38 @@
+import { ChatType } from '../../constants/chat-types.constants';
+import { Expose, Type } from 'class-transformer';
+import { MessageResponseDto } from './message-response.dto';
+import { ChatMemberResponseDto } from 'src/modules/chat-member/dto/responses/chat-member-response.dto';
+
+export class ChatResponseDto {
+  @Expose()
+  id: string;
+
+  @Expose()
+  type: ChatType;
+
+  @Expose()
+  name?: string;
+
+  @Expose()
+  description?: string;
+
+  @Expose()
+  avatar?: string;
+
+  @Expose()
+  isPublic: boolean;
+
+  @Expose()
+  @Type(() => MessageResponseDto)
+  lastMessage?: MessageResponseDto;
+
+  @Expose()
+  @Type(() => ChatMemberResponseDto)
+  members: ChatMemberResponseDto[];
+
+  @Expose()
+  createdAt: Date;
+
+  @Expose()
+  updatedAt: Date;
+}

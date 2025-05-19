@@ -1,51 +1,73 @@
-import { useState, useRef, useEffect } from 'react';
-import { emojiCategories } from '@/data/emoji';
+import { emojiCategories } from "@/data/emoji";
+import { useState, useRef, useEffect, useMemo } from "react";
 
-const CustomEmojiPicker = ({ onSelect }) => {
+interface EmojiCategory {
+  name: string;
+  emojis: string[];
+  id?: string;
+  googleIcon?: string;
+}
+
+interface CustomEmojiPickerProps {
+  onSelect: (emoji: string) => void;
+}
+
+const CustomEmojiPicker = ({ onSelect }: CustomEmojiPickerProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [recentEmojis, setRecentEmojis] = useState(() => {
-    const saved = localStorage.getItem('recentEmojis');
+  const [recentEmojis, setRecentEmojis] = useState<string[]>(() => {
+    const saved = localStorage.getItem("recentEmojis");
     return saved ? JSON.parse(saved) : [];
   });
 
-  const pickerRef = useRef(null);
+  const pickerRef = useRef<HTMLDivElement>(null);
   const [currentCategory, setCurrentCategory] = useState(
-    recentEmojis.length > 0 ? 'Recently' : emojiCategories[0]?.name || ''
+    recentEmojis.length > 0 ? "Recently" : emojiCategories[0]?.name || ""
   );
 
-  const combinedCategories = [
-    ...(recentEmojis.length > 0 ? [{ name: 'Recently', emojis: recentEmojis }] : []),
-    ...emojiCategories
-  ];
+  const combinedCategories: EmojiCategory[] = useMemo(
+    () => [
+      ...(recentEmojis.length > 0
+        ? [{ name: "Recently", emojis: recentEmojis }]
+        : []),
+      ...emojiCategories.map((cat) => ({
+        ...cat,
+        id: cat.id?.toString(), // Ensure id is string
+      })),
+    ],
+    [recentEmojis]
+  );
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (pickerRef.current && !pickerRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        pickerRef.current &&
+        !pickerRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
-  const handleEmojiClick = (emoji) => {
+  const handleEmojiClick = (emoji: string) => {
     onSelect(emoji);
 
-    setRecentEmojis(prev => {
-      const updated = [emoji, ...prev.filter(e => e !== emoji)].slice(0, 16); // Max 16
-      localStorage.setItem('recentEmojis', JSON.stringify(updated));
+    setRecentEmojis((prev) => {
+      const updated = [emoji, ...prev.filter((e) => e !== emoji)].slice(0, 16); // Max 16
+      localStorage.setItem("recentEmojis", JSON.stringify(updated));
       return updated;
     });
   };
 
   function scrollToCategory(categoryName: string) {
-    const categoryId = categoryName.toLowerCase().replace(/ /g, '-');
+    const categoryId = categoryName.toLowerCase().replace(/ /g, "-");
     const element = document.getElementById(`category-${categoryId}`);
     if (element) {
-      element.scrollIntoView({ block: 'start' });
+      element.scrollIntoView({ block: "start" });
     }
   }
 
@@ -53,22 +75,23 @@ const CustomEmojiPicker = ({ onSelect }) => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting && entry.target.id.startsWith('category-')) {
-            const categoryName = entry.target.id.replace('category-', '').replace(/-/g, ' ');
+          if (entry.isIntersecting && entry.target.id.startsWith("category-")) {
+            const categoryName = entry.target.id
+              .replace("category-", "")
+              .replace(/-/g, " ");
             setCurrentCategory(categoryName);
-            console.log('current category:', categoryName)
           }
         });
       },
       {
-        root: pickerRef.current?.querySelector('.h-80'), // Observe within the scrollable div
+        root: pickerRef.current?.querySelector(".h-80"), // Observe within the scrollable div
         threshold: 0.5, // Consider visible if at least 50% is showing
       }
     );
 
     // Observe each category header
     combinedCategories.forEach((category) => {
-      const categoryId = category.name.toLowerCase().replace(/ /g, '-');
+      const categoryId = category.name.toLowerCase().replace(/ /g, "-");
       const target = document.getElementById(`category-${categoryId}`);
       if (target) {
         observer.observe(target);
@@ -78,20 +101,19 @@ const CustomEmojiPicker = ({ onSelect }) => {
     return () => {
       observer.disconnect(); // Clean up the observer
     };
-  }, [combinedCategories]); // Re-run when categories change
+  }, [combinedCategories]);
 
-    useEffect(() => {
-      const handleGlobalKeyDown = (e: KeyboardEvent) => {
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === "e") {
+        e.preventDefault();
+        setIsOpen((pre) => !pre);
+      }
+    };
 
-        if (e.ctrlKey && e.key === 'e') {
-          e.preventDefault();
-          setIsOpen(pre => !pre);
-        }
-      };
-  
-      document.addEventListener('keydown', handleGlobalKeyDown);
-      return () => document.removeEventListener('keydown', handleGlobalKeyDown);
-    }, []);
+    document.addEventListener("keydown", handleGlobalKeyDown);
+    return () => document.removeEventListener("keydown", handleGlobalKeyDown);
+  }, []);
 
   return (
     <div className="" ref={pickerRef}>
@@ -109,7 +131,9 @@ const CustomEmojiPicker = ({ onSelect }) => {
             {combinedCategories.map((category) => (
               <div key={category.name}>
                 <h3
-                  id={`category-${category.name.toLowerCase().replace(/ /g, '-')}`}
+                  id={`category-${category.name
+                    .toLowerCase()
+                    .replace(/ /g, "-")}`}
                   className={`font-semibold bg-[var(--sidebar-color)] custom-border-b p-1 px-3`}
                 >
                   {category.name}
@@ -119,7 +143,7 @@ const CustomEmojiPicker = ({ onSelect }) => {
                     <button
                       key={emoji}
                       onClick={() => handleEmojiClick(emoji)}
-                      className="text-2xl hover:scale-150 transition-all duration-200"
+                      className="text-2xl hover:scale-[2] transition-all duration-200"
                       aria-label={`Select ${emoji} emoji`}
                     >
                       {emoji}
@@ -133,20 +157,30 @@ const CustomEmojiPicker = ({ onSelect }) => {
             {emojiCategories.map((category) => (
               <button
                 className={`${
-                  currentCategory.toLowerCase() === category.name.toLowerCase() ? 'opacity-100' : 'opacity-50'
+                  currentCategory.toLowerCase() === category.name.toLowerCase()
+                    ? "opacity-100"
+                    : "opacity-50"
                 }`}
                 key={category.id}
                 onClick={() => scrollToCategory(category.name)}
               >
-                <i className="material-symbols-outlined">{category.googleIcon}</i>
+                <i className="material-symbols-outlined">
+                  {category.googleIcon}
+                </i>
               </button>
             ))}
 
             <div className="custom-border-l"></div>
 
             <button
-              className={`opacity-50 hover:opacity-100 ${currentCategory.toLowerCase() === 'recently' ? 'opacity-100' : ''}`}
-              onClick={() => recentEmojis.length > 0 && scrollToCategory('Recently')}
+              className={`opacity-50 hover:opacity-100 ${
+                currentCategory.toLowerCase() === "recently"
+                  ? "opacity-100"
+                  : ""
+              }`}
+              onClick={() =>
+                recentEmojis.length > 0 && scrollToCategory("Recently")
+              }
             >
               <i className="material-symbols-outlined">note_stack</i>
             </button>

@@ -55,7 +55,7 @@ const ResetPassword = () => {
             name="password"
             placeholder="New Password"
             required
-            className="input backdrop-blur-lg"
+            className="input"
             autoFocus
           />
 
@@ -64,7 +64,7 @@ const ResetPassword = () => {
             name="confirmPassword"
             placeholder="Confirm New Password"
             required
-            className="input backdrop-blur-lg"
+            className="input"
           />
 
           <AlertMessage className="-mb-1" />

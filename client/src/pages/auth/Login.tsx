@@ -50,7 +50,7 @@ const Login = () => {
             name="identifier"
             placeholder="Username, Email, or Phone Number"
             required
-            className="input backdrop-blur-lg"
+            className="input"
             autoComplete="username"
             autoFocus
           />
@@ -60,7 +60,7 @@ const Login = () => {
             name="password"
             placeholder="Password"
             required
-            className="input backdrop-blur-lg"
+            className="input"
             autoComplete="current-password"
           />
 

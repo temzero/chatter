@@ -1,74 +1,141 @@
-import { Entity, Column, OneToOne, JoinColumn, PrimaryColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToOne,
+  JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { User } from './user.entity';
+import { ThemePreference } from '../constants/theme.constants';
+import { NotificationPreference } from '../constants/notification.constants';
 
 @Entity('user_settings')
 export class UserSettings {
-  @PrimaryColumn()
-  user_id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @OneToOne(() => User)
+  @OneToOne(() => User, (user) => user.settings, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  // Notifications
-  @Column({ default: true })
-  notifications_enabled: boolean;
+  @Column({ name: 'user_id' })
+  userId: string;
 
-  @Column({ default: true })
-  email_notifications: boolean;
+  // Display Preferences
+  @Column({
+    type: 'enum',
+    enum: ThemePreference,
+    default: ThemePreference.SYSTEM,
+  })
+  theme: ThemePreference;
 
-  @Column({ default: true })
-  push_notifications: boolean;
+  @Column({ name: 'font_size', default: 16 })
+  fontSize: number; // in pixels
 
-  @Column({ default: true })
-  message_notifications: boolean; // Enable/disable notifications for new messages
+  @Column({ name: 'compact_mode', default: false })
+  compactMode: boolean;
 
-  @Column({ default: true })
-  mention_notifications: boolean; // Enable/disable notifications for mentions
+  // Notification Preferences
+  @Column({
+    type: 'enum',
+    enum: NotificationPreference,
+    default: NotificationPreference.ALL,
+    name: 'message_notifications',
+  })
+  messageNotifications: NotificationPreference;
 
-  // Theme settings
-  @Column({ default: 'light' })
-  theme: string; // 'light' | 'dark' | 'system'
+  @Column({
+    type: 'enum',
+    enum: NotificationPreference,
+    default: NotificationPreference.ALL,
+    name: 'reaction_notifications',
+  })
+  reactionNotifications: NotificationPreference;
 
-  // Language settings
-  @Column({ default: 'en' })
+  @Column({ name: 'notification_sound', default: true })
+  notificationSound: boolean;
+
+  @Column({ name: 'notification_vibrate', default: true })
+  notificationVibrate: boolean;
+
+  @Column({ name: 'notification_badge', default: true })
+  notificationBadge: boolean;
+
+  // Privacy Settings
+  @Column({ name: 'online_status_visible', default: true })
+  onlineStatusVisible: boolean;
+
+  @Column({ name: 'read_receipts_enabled', default: true })
+  readReceiptsEnabled: boolean;
+
+  @Column({ name: 'typing_indicators_enabled', default: true })
+  typingIndicatorsEnabled: boolean;
+
+  @Column({ name: 'last_seen_visible', default: true })
+  lastSeenVisible: boolean;
+
+  // Message Preferences
+  @Column({ name: 'message_preview', default: true })
+  messagePreview: boolean;
+
+  @Column({ name: 'auto_download_media', default: true })
+  autoDownloadMedia: boolean;
+
+  @Column({ name: 'save_to_camera_roll', default: false })
+  saveToCameraRoll: boolean;
+
+  // Language & Region
+  @Column({ length: 10, default: 'en' })
   language: string;
 
-  // Privacy & Security settings
-  @Column({ default: 'everyone' })
-  last_seen: string; // 'everyone' | 'contacts' | 'nobody'
+  @Column({ length: 10, nullable: true })
+  timezone: string | null;
 
-  @Column({ default: true })
-  profile_picture_visible: boolean; // Profile picture visibility
+  // Advanced Settings
+  @Column({ name: 'auto_lock_enabled', default: false })
+  autoLockEnabled: boolean;
 
-  @Column({ default: true })
-  read_receipts_enabled: boolean; // Show "read" receipts
+  @Column({ name: 'auto_lock_timeout', nullable: true })
+  autoLockTimeout: number | null; // in minutes
 
-  @Column({ default: false })
-  two_factor_enabled: boolean; // Enable two-factor authentication
+  @Column({ name: 'biometric_auth', default: false })
+  biometricAuth: boolean;
 
-  @Column({ default: false })
-  encrypted_chats: boolean; // Enable end-to-end encryption for chats
+  @Column({ type: 'jsonb', nullable: true })
+  customPreferences: Record<string, any> | null;
 
-  // Message history settings
-  @Column({ default: true })
-  save_chat_history: boolean; // Save message history
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 
-  @Column({ default: '30 days' })
-  message_history_duration: string; // Duration to retain message history (e.g., '30 days', '1 year')
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 
-  // Font size setting
-  @Column({ default: 'medium' })
-  font_size: string; // 'small' | 'medium' | 'large'
-
-  // Privacy settings
-  @Column({ type: 'json', nullable: true })
-  privacy_settings: Record<string, any>;
-
-  // Timestamps
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  created_at: Date;
-
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  updated_at: Date;
+  // Helper method to get all settings as a plain object
+  toJSON() {
+    return {
+      theme: this.theme,
+      fontSize: this.fontSize,
+      compactMode: this.compactMode,
+      messageNotifications: this.messageNotifications,
+      reactionNotifications: this.reactionNotifications,
+      notificationSound: this.notificationSound,
+      notificationVibrate: this.notificationVibrate,
+      notificationBadge: this.notificationBadge,
+      onlineStatusVisible: this.onlineStatusVisible,
+      readReceiptsEnabled: this.readReceiptsEnabled,
+      typingIndicatorsEnabled: this.typingIndicatorsEnabled,
+      lastSeenVisible: this.lastSeenVisible,
+      messagePreview: this.messagePreview,
+      autoDownloadMedia: this.autoDownloadMedia,
+      saveToCameraRoll: this.saveToCameraRoll,
+      language: this.language,
+      timezone: this.timezone,
+      autoLockEnabled: this.autoLockEnabled,
+      autoLockTimeout: this.autoLockTimeout,
+      biometricAuth: this.biometricAuth,
+      customPreferences: this.customPreferences,
+    };
+  }
 }

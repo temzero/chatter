@@ -1,18 +1,18 @@
 import React, { useState } from "react";
+import { Avatar } from "./avatar/Avatar";
 import SearchBar from "@/components/ui/SearchBar";
 import ContactSelectionList from "../ui/ContactSelectionList";
 import { useChatStore } from "@/stores/chatStore";
-import { Avatar } from "./avatar/Avatar";
-import type { PrivateChat } from "@/types/chat";
 import { useAuthStore } from "@/stores/authStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
+import type { PrivateChat } from "@/types/chat";
 
 interface CreateChatProps {
   type: "group" | "channel";
 }
 
 const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
-  const createGroup = useChatStore((state) => state.createGroup);
+  const createGroupChat = useChatStore((state) => state.createGroupChat);
   const isLoading = useChatStore((state) => state.isLoading);
   const currentUser = useAuthStore((state) => state.currentUser);
   const setActiveChat = useChatStore((state) => state.setActiveChat);
@@ -61,7 +61,7 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
         type,
       };
 
-      const newChat = await createGroup(payload);
+      const newChat = await createGroupChat(payload);
       console.log("Successfully created:", newChat);
 
       setActiveChat(newChat);

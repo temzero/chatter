@@ -21,9 +21,9 @@ export const groupChatService = {
     return response.data.data;
   },
 
-  async getGroupChatById(chatId: string): Promise<GroupChat> {
+  async getGroupChatById(groupChatId: string): Promise<GroupChat> {
     const response = await API.get<ResponseData<GroupChat>>(
-      `/chat-group/${chatId}`
+      `/chat-group/${groupChatId}`
     );
     return response.data.data;
   },
@@ -35,10 +35,18 @@ export const groupChatService = {
     return response.data.data;
   },
 
+  async updateGroupChat(groupChatId: string, payload: Partial<GroupChat>): Promise<GroupChat> {
+    const response = await API.put<ResponseData<GroupChat>>(
+      `/chat-group/${groupChatId}`,
+      payload
+    );
+    return response.data.data;
+  },
+
   // Delete a group chat
-  async deleteGroupChat(chatId: string): Promise<string> {
+  async deleteGroupChat(groupChatId: string): Promise<string> {
     const response = await API.delete<ResponseData<string>>(
-      `/chat-group/${chatId}`
+      `/chat-group/${groupChatId}`
     );
     return response.data.data;
   },

@@ -42,7 +42,7 @@ const SidebarProfile: React.FC = () => {
             {currentUser?.bio || ""}
           </p>
 
-          <div className="w-full flex flex-col font-light py-2 my-2 custom-border-t custom-border-b">
+          <div className="w-full flex flex-col font-light my-2 custom-border-t custom-border rounded">
             <div>
               <ContactInfoItem
                 icon="alternate_email"

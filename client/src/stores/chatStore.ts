@@ -3,7 +3,14 @@ import { persist } from "zustand/middleware";
 import { chatService } from "@/services/chat/chatService";
 import { useMessageStore } from "./messageStore";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
-import type { Chat, ChatGroupMember, PrivateChat } from "@/types/chat";
+import type {
+  Chat,
+  ChatTypes,
+  ChatGroupTypes,
+  ChatGroupMember,
+  GroupChat,
+  PrivateChat,
+} from "@/types/chat";
 import { groupChatService } from "@/services/chat/groupChatService";
 
 interface ChatStore {
@@ -18,17 +25,21 @@ interface ChatStore {
   getChats: (userId: string) => Promise<void>;
   getChatById: (chatId: string) => Promise<void>;
   getGroupMembers: (groupId: string) => Promise<void>;
-  setSearchTerm: (term: string) => void;
   setActiveChat: (chat: Chat | null) => void;
   setActiveChatById: (chatId: string | null) => Promise<void>;
   createPrivateChat: (chatPartnerId: string) => Promise<PrivateChat>;
   createGroupChat: (payload: {
     name: string;
     memberIds: string[];
-    type: "group" | "channel";
+    type: ChatGroupTypes;
   }) => Promise<Chat>;
-  updateChat: (id: string, updates: Partial<Chat>) => Promise<void>;
-  deleteChat: (id: string, type: string) => Promise<void>;
+  updatePrivateChat: (
+    id: string,
+    payload: Partial<PrivateChat>
+  ) => Promise<void>;
+  updateGroupChat: (id: string, payload: Partial<GroupChat>) => Promise<void>;
+  deleteChat: (id: string, type: ChatTypes) => Promise<void>;
+  setSearchTerm: (term: string) => void;
 }
 
 export const useChatStore = create<ChatStore>()(
@@ -88,7 +99,6 @@ export const useChatStore = create<ChatStore>()(
       setSearchTerm: (term) => {
         const { chats } = get();
 
-        // If search term is empty, show all chats
         if (!term.trim()) {
           set({
             searchTerm: term,
@@ -98,18 +108,13 @@ export const useChatStore = create<ChatStore>()(
         }
 
         const lowerCaseTerm = term.toLowerCase();
-
-        // Filter chats based on search term
         const filtered = chats.filter((chat) => {
-          // Search in chat name
           const nameMatch = chat.name?.toLowerCase().includes(lowerCaseTerm);
 
-          // For private chats, also search in partner's name
           if (chat.type === "private") {
             const partnerNameMatch = chat.chatPartner?.first_name
               ?.toLowerCase()
               .includes(lowerCaseTerm);
-
             return nameMatch || partnerNameMatch;
           }
 
@@ -184,10 +189,10 @@ export const useChatStore = create<ChatStore>()(
         }
       },
 
-      updateChat: async (id, updates) => {
+      updatePrivateChat: async (id, payload) => {
         set({ isLoading: true });
         try {
-          const updatedChat = await chatService.updateChat(id, updates);
+          const updatedChat = await chatService.updatePrivateChat(id, payload);
           set((state) => ({
             chats: state.chats.map((chat) =>
               chat.id === id ? updatedChat : chat
@@ -197,9 +202,31 @@ export const useChatStore = create<ChatStore>()(
             isLoading: false,
           }));
         } catch (error) {
-          console.error("Failed to update chat:", error);
+          console.error("Failed to update private chat:", error);
           set({
-            error: "Failed to update chat",
+            error: "Failed to update private chat",
+            isLoading: false,
+          });
+          throw error;
+        }
+      },
+
+      updateGroupChat: async (id, payload) => {
+        set({ isLoading: true });
+        try {
+          const updatedChat = await chatService.updateGroupChat(id, payload);
+          set((state) => ({
+            chats: state.chats.map((chat) =>
+              chat.id === id ? updatedChat : chat
+            ),
+            activeChat:
+              state.activeChat?.id === id ? updatedChat : state.activeChat,
+            isLoading: false,
+          }));
+        } catch (error) {
+          console.error("Failed to update group chat:", error);
+          set({
+            error: "Failed to update group chat",
             isLoading: false,
           });
           throw error;

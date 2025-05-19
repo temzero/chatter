@@ -2,10 +2,14 @@ import type { Message } from "./message";
 
 export type Chat = PrivateChat | GroupChat;
 
+export type ChatTypes = PrivateChatType | ChatGroupTypes;
+export type PrivateChatType = "private";
+export type ChatGroupTypes = "group" | "channel";
+
 export interface PrivateChat {
   avatar: string;
   id: string;
-  type: 'private';
+  type: PrivateChatType;
   name: string;
   chatPartner: ChatPartner;
   lastMessage?: Message | null;
@@ -15,7 +19,7 @@ export interface PrivateChat {
 
 export interface GroupChat {
   id: string;
-  type: 'group' | 'channel';
+  type: ChatGroupTypes;
   name: string;
   avatar?: string;
   description?: string | null;
@@ -25,8 +29,10 @@ export interface GroupChat {
 }
 
 export interface ChatPartner {
+  email: string | null | undefined;
   id: string;
   username: string;
+  nickname: string | null;
   first_name?: string;
   last_name?: string;
   avatar?: string | null;

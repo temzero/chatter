@@ -3,7 +3,8 @@ import { useCurrentSidebarInfo } from "@/stores/sidebarInfoStore";
 import ChatInfoDefault from "./SidebarInfoDefault";
 import ChatInfoMedia from "./SidebarInfoMedia";
 import ChatInfoSaved from "./SidebarInfoSaved";
-import ChatInfoEdit from "./SidebarInfoEdit";
+import PrivateChatEdit from "./SidebarInfoEdit/PrivateChatEdit";
+import GroupChatEdit from "./SidebarInfoEdit/GroupChatEdit";
 
 const SidebarInfo: React.FC = () => {
   const currentSidebarInfo = useCurrentSidebarInfo();
@@ -13,7 +14,8 @@ const SidebarInfo: React.FC = () => {
     default: <ChatInfoDefault />,
     media: <ChatInfoMedia />,
     saved: <ChatInfoSaved />,
-    edit: <ChatInfoEdit />,
+    privateEdit: <PrivateChatEdit />,
+    groupEdit: <GroupChatEdit />,
   };
 
   // Animation configurations
@@ -80,7 +82,7 @@ const SidebarInfo: React.FC = () => {
       },
     },
 
-    edit: {
+    fallback: {
       initial: { opacity: 0, x: "var(--sidebar-width)" },
       animate: {
         opacity: 1,
@@ -97,13 +99,6 @@ const SidebarInfo: React.FC = () => {
         x: "var(--sidebar-width)",
         transition: { duration: 0.2 },
       },
-    },
-
-    fallback: {
-      initial: { opacity: 0 },
-      animate: { opacity: 1 },
-      exit: { opacity: 0 },
-      transition: { duration: 0.2, ease: "easeOut" },
     },
   };
 

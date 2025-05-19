@@ -27,7 +27,6 @@ export const ChatContent: React.FC = () => {
     initializeSidebarInfo();
 
     if (chatId) {
-      console.log("chatId: ", chatId);
       setActiveChatById(chatId);
     } else {
       setActiveChatById(null);

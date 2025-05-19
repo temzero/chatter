@@ -1,5 +1,4 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 type ContactInfoItemProps = {
   icon: string;
@@ -14,7 +13,7 @@ const ContactInfoItem: React.FC<ContactInfoItemProps> = ({
   value,
   copyType,
   defaultText = "Not specified",
-  className = ""
+  className = "",
 }) => {
   const [copied, setCopied] = useState<string | null>(null);
 
@@ -26,26 +25,36 @@ const ContactInfoItem: React.FC<ContactInfoItemProps> = ({
     return () => clearTimeout(timer);
   }, [copied]);
 
+  if (!value) return null;
+
+  // Format birthday if copyType === "birthday"
+  const formattedValue =
+    copyType === "birthday" && !isNaN(Date.parse(value))
+      ? new Date(value).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })
+      : value;
+
   const handleCopy = () => {
-    if (!value) return;
-    navigator.clipboard.writeText(value);
+    if (!formattedValue) return;
+    navigator.clipboard.writeText(formattedValue);
     setCopied(copyType);
   };
 
-  if (!value) return null;
-
   return (
-    <div 
-      className={`flex cursor-pointer p-1 px-2 hover:bg-[var(--hover-color)] w-full justify-between ${className}`}
+    <div
+      className={`flex cursor-pointer p-2 opacity-80 hover:bg-[var(--hover-color)] w-full justify-between ${className}`}
       onClick={handleCopy}
     >
-      <i className="material-symbols-outlined opacity-70">{icon}</i>
+      <i className="material-symbols-outlined">{icon}</i>
       {copied === copyType ? (
         <span className="text-green-400">
           {copyType.charAt(0).toUpperCase() + copyType.slice(1)} copied!
         </span>
       ) : (
-        value || defaultText
+        formattedValue || defaultText
       )}
     </div>
   );

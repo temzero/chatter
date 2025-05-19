@@ -1,14 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useCurrentUser } from "@/stores/authStore";
 import { useProfileStore } from "@/stores/profileStore";
 import AvatarEdit from "../ui/avatar/AvatarEdit";
-import { useMemo } from "react";
 
 const SidebarProfileEdit: React.FC = () => {
   const currentUser = useCurrentUser();
   const { updateProfile } = useProfileStore();
-
   const { setSidebar } = useSidebarStore();
 
   const initialFormData = useMemo(
@@ -18,7 +16,9 @@ const SidebarProfileEdit: React.FC = () => {
       username: currentUser?.username || "",
       email: currentUser?.email || "",
       phone_number: currentUser?.phone_number || null,
-      birthday: currentUser?.birthday || null,
+      birthday: currentUser?.birthday
+        ? new Date(currentUser.birthday).toISOString().split("T")[0]
+        : "",
       bio: currentUser?.bio || "",
       avatar: currentUser?.avatar || "",
     }),
@@ -29,7 +29,6 @@ const SidebarProfileEdit: React.FC = () => {
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
-    // Compare current form data with initial data
     const changesDetected = Object.keys(initialFormData).some(
       (key) =>
         formData[key as keyof typeof formData] !==
@@ -50,14 +49,10 @@ const SidebarProfileEdit: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (currentUser) {
-      setSidebar("profile");
-    }
     console.log("Form submitted:", formData);
-    updateProfile(formData);
     try {
-      await updateProfile(formData); // still needed
-      setSidebar("profile"); // only runs after update finishes
+      await updateProfile(formData);
+      setSidebar("profile");
     } catch (error) {
       console.error("Failed to update profile", error);
     }
@@ -113,7 +108,7 @@ const SidebarProfileEdit: React.FC = () => {
                 name="first_name"
                 value={formData.first_name}
                 onChange={handleChange}
-                className="p-2 custom-border-b"
+                className="input text-lg"
                 placeholder="First Name"
               />
             </div>
@@ -125,20 +120,19 @@ const SidebarProfileEdit: React.FC = () => {
                 name="last_name"
                 value={formData.last_name}
                 onChange={handleChange}
-                className="p-2 custom-border-b"
+                className="input text-lg"
                 placeholder="Last Name"
               />
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-sm opacity-70">Birthday</label>
+              <label className="text-sm opacity-70">Birthday (Month/Date/Year)</label>
               <input
                 type="date"
                 name="birthday"
-                value={formData.birthday}
+                value={formData.birthday || ""}
                 onChange={handleChange}
-                className="p-2 custom-border-b"
-                placeholder="DD/MM/YYYY"
+                className="input text-lg"
               />
             </div>
 
@@ -148,7 +142,7 @@ const SidebarProfileEdit: React.FC = () => {
                 name="bio"
                 value={formData.bio}
                 onChange={handleChange}
-                className="p-2 custom-border min-h-[120px]"
+                className="input min-h-[120px]"
                 placeholder="Tell us about yourself"
                 maxLength={150}
               />
@@ -156,6 +150,7 @@ const SidebarProfileEdit: React.FC = () => {
           </div>
         </div>
       </form>
+
       <div
         className="flex gap-2 justify-center items-center cursor-pointer p-2 text-blue-500 custom-border-t absolute bottom-0 w-full"
         onClick={() => setSidebar("settingsAccount")}

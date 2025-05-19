@@ -11,8 +11,12 @@ import { Avatar } from "@/components/ui/avatar/Avatar";
 
 const ChatInfoDefault: React.FC = () => {
   const activeChat = useChatStore((state) => state.activeChat);
-  const activeMedia = useMessageStore((state) => state.activeMedia);
   const { groupMembers, getGroupMembers } = useChatStore();
+  const activeMedia = useMessageStore((state) => state.activeMedia);
+  const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
+  const isSidebarInfoVisible = useSidebarInfoStore(
+    (state) => state.isSidebarInfoVisible
+  );
 
   useEffect(() => {
     // Only fetch if it's a group chat and members aren't already loaded
@@ -30,13 +34,16 @@ const ChatInfoDefault: React.FC = () => {
       ? groupMembers[activeChat.id] || []
       : [];
 
-  const isSidebarInfoVisible = useSidebarInfoStore(
-    (state) => state.isSidebarInfoVisible
-  );
-  const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
-
   if (!activeChat) return null;
   const isPrivate = activeChat?.type === "private";
+
+  const openEditSidebar = () => {
+    if (isPrivate) {
+      setSidebarInfo("privateEdit");
+    } else {
+      setSidebarInfo("groupEdit");
+    }
+  };
 
   return (
     <aside className="relative w-full h-full overflow-hidden flex flex-col">
@@ -52,7 +59,7 @@ const ChatInfoDefault: React.FC = () => {
         </a>
         <a
           className="flex items-center rounded-full p-2 cursor-pointer opacity-50 hover:opacity-100"
-          onClick={() => setSidebarInfo("edit")}
+          onClick={openEditSidebar}
         >
           <i className="material-symbols-outlined">edit</i>
         </a>
@@ -75,7 +82,7 @@ const ChatInfoDefault: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 100 }}
                 transition={{ type: "spring", stiffness: 300, damping: 28 }}
-                className="flex flex-col gap-2 w-full mt-4 min-w-[240px]"
+                className="flex flex-col gap-4 w-full mt-4 min-w-[240px]"
               >
                 {isPrivate && (
                   <div className="w-full flex flex-col items-center rounded font-light custom-border overflow-hidden">
@@ -92,15 +99,17 @@ const ChatInfoDefault: React.FC = () => {
                       copyType="phone_number"
                     />
 
-                    {/* <ContactInfoItem
+                    <ContactInfoItem
                       icon="mail"
                       value={activeChat.chatPartner.email}
                       copyType="email"
-                    /> */}
+                    />
 
                     <ContactInfoItem
                       icon="cake"
-                      value={formatTime(activeChat.chatPartner.birthday)}
+                      value={formatTime(
+                        activeChat.chatPartner.birthday || null
+                      )}
                       copyType="birthday"
                     />
                   </div>
