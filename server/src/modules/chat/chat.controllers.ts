@@ -19,6 +19,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { ChatResponseDto } from './dto/responses/chat-response.dto';
 import { ChatMemberRole } from '../chat-member/constants/chat-member-roles.constants';
 import { AppError } from 'src/common/errors';
+import { ChatListResponseDto } from './dto/responses/chat-list-response.dto';
 
 @Controller('chat')
 @UseGuards(JwtAuthGuard)
@@ -28,12 +29,12 @@ export class ChatController {
   @Get()
   async findAll(
     @CurrentUser('id') userId: string,
-  ): Promise<ResponseData<ChatResponseDto[]>> {
+  ): Promise<ResponseData<ChatListResponseDto[]>> {
     try {
       const chats = await this.chatService.getChatsByUserId(userId);
 
-      return new ResponseData<ChatResponseDto[]>(
-        plainToInstance(ChatResponseDto, chats),
+      return new ResponseData<ChatListResponseDto[]>(
+        plainToInstance(ChatListResponseDto, chats),
         HttpStatus.OK,
         'User chats retrieved successfully',
       );

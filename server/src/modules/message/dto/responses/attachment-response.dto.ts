@@ -1,37 +1,18 @@
-import { Expose } from 'class-transformer';
 import { AttachmentType } from '../../constants/attachment-type.constants';
 
 export class AttachmentResponseDto {
-  @Expose()
   id: string;
-
-  @Expose()
+  messageId: string;
   type: AttachmentType;
-
-  @Expose()
   url: string;
-
-  @Expose()
-  thumbnailUrl?: string;
-
-  @Expose()
-  filename?: string;
-
-  @Expose()
-  size?: number;
-
-  @Expose()
-  mimeType?: string;
-
-  @Expose()
-  width?: number;
-
-  @Expose()
-  height?: number;
-
-  @Expose()
-  duration?: number;
-
-  @Expose()
+  thumbnailUrl: string | null;
+  filename: string | null;
+  size: number | null;
+  mimeType: string | null;
+  width: number | null;
+  height: number | null;
+  duration: number | null;
+  metadata: Record<string, any> | null;
   createdAt: Date;
+  updatedAt: Date;
 }

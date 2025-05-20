@@ -41,13 +41,13 @@ export class Chat {
   pinnedMessage: Message | null;
 
   /* Group-Specific Fields (nullable) */
-  @Column({ nullable: true, length: 128 })
+  @Column({ type: 'varchar', nullable: true, length: 64 })
   name: string | null;
 
-  @Column({ nullable: true, length: 512 })
+  @Column({ type: 'varchar', nullable: true, length: 512 })
   description: string | null;
 
-  @Column({ nullable: true, length: 2048 })
+  @Column({ type: 'varchar', nullable: true, length: 512 })
   avatar: string | null;
 
   @Column({ default: false, nullable: true })

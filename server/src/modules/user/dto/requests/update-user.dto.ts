@@ -1,67 +1,90 @@
 import {
-  IsEmail,
   IsOptional,
-  MinLength,
   IsString,
-  IsBoolean,
+  IsEmail,
+  Length,
+  IsPhoneNumber,
+  IsEnum,
   IsDate,
-  Matches,
+  IsUrl,
+  IsBoolean,
+  IsObject,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
+import { UserRole } from '../../constants/user-role.constants';
+import { UserStatus } from '../../constants/user-status.constants';
+import { PartialType } from '@nestjs/mapped-types';
+import { EmptyStringToNull } from 'src/common/utils/dto.utils';
 
 export class UpdateUserDto {
   @IsOptional()
   @IsString()
+  @Length(1, 100)
+  @EmptyStringToNull()
+  firstName?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 100)
+  @EmptyStringToNull()
+  lastName?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(3, 100)
+  @EmptyStringToNull()
   username?: string;
 
   @IsOptional()
-  @IsEmail({}, { message: 'Invalid email address' })
+  @IsEmail()
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.toLowerCase().trim() : value,
+  )
   email?: string;
 
   @IsOptional()
-  @MinLength(6, { message: 'Password must be at least 6 characters' })
-  password?: string;
+  @IsPhoneNumber()
+  @EmptyStringToNull()
+  phoneNumber?: string | null;
 
   @IsOptional()
   @IsString()
-  avatar?: string;
+  @Length(0, 512)
+  @EmptyStringToNull()
+  bio?: string | null;
 
   @IsOptional()
-  @IsString()
-  first_name?: string;
-
-  @IsOptional()
-  @IsString()
-  last_name?: string;
-
-  @IsOptional()
-  @IsString()
-  @Matches(/^[0-9+\-\s]+$/, { message: 'Invalid phone number' })
-  phone_number?: string;
-
-  @IsOptional()
-  @IsDate()
   @Type(() => Date)
-  birthday?: Date;
+  @IsDate()
+  @EmptyStringToNull()
+  birthday?: Date | null;
 
   @IsOptional()
-  @IsString()
-  bio?: string;
+  @IsUrl()
+  @Length(0, 512)
+  @EmptyStringToNull()
+  avatarUrl?: string | null;
 
   @IsOptional()
-  @IsString()
-  status?: string;
+  @IsEnum(UserRole)
+  role?: UserRole;
+
+  @IsOptional()
+  @IsEnum(UserStatus)
+  status?: UserStatus;
 
   @IsOptional()
   @IsBoolean()
-  is_email_verified?: boolean = false;
+  emailVerified?: boolean;
 
   @IsOptional()
   @IsBoolean()
-  is_deleted?: boolean = false;
+  phoneVerified?: boolean;
 
   @IsOptional()
-  @IsDate()
-  @Type(() => Date)
-  last_seen?: Date;
+  @IsObject()
+  metadata?: Record<string, any> | null;
 }
+
+// For partial updates (PATCH requests)
+export class PartialUpdateUserDto extends PartialType(UpdateUserDto) {}

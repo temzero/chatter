@@ -20,6 +20,6 @@ export class CreateChatMemberDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(128)
+  @MaxLength(32)
   nickname?: string;
 }

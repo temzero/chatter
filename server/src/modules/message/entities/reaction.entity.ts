@@ -34,7 +34,7 @@ export class Reaction {
   @Column({ name: 'user_id' })
   userId: string;
 
-  @Column({ length: 32 })
+  @Column({ type: 'varchar', length: 32 })
   emoji: string;
 
   @CreateDateColumn({ name: 'created_at' })

@@ -6,6 +6,7 @@ import { ChatMember } from './entities/chat-member.entity';
 import { ChatMemberRole } from './constants/chat-member-roles.constants';
 import { ChatMemberStatus } from './constants/chat-member-status.constants';
 import { AppError } from '../../common/errors';
+import { UpdateChatMemberDto } from './dto/requests/update-chat-member.dto';
 
 @Injectable()
 export class ChatMemberService {
@@ -63,36 +64,21 @@ export class ChatMemberService {
   async updateMember(
     chatId: string,
     userId: string,
-    updates: {
-      role?: ChatMemberRole;
-      status?: ChatMemberStatus;
-      nickname?: string | null;
-      customTitle?: string | null;
-      mutedUntil?: Date | null;
-      lastReadMessageId?: string | null;
-    },
+    updateDto: UpdateChatMemberDto,
   ): Promise<ChatMember> {
     try {
-      const member = await this.memberRepo.findOneBy({
-        chatId,
-        userId,
+      await this.memberRepo.update({ chatId, userId }, updateDto);
+      // Then return the updated entity
+      const member = await this.memberRepo.findOne({
+        where: { chatId, userId },
+        relations: ['user', 'lastReadMessage'],
       });
 
       if (!member) {
         AppError.notFound('Chat member not found');
       }
 
-      if (updates.role !== undefined) member.role = updates.role;
-      if (updates.status !== undefined) member.status = updates.status;
-      if (updates.nickname !== undefined) member.nickname = updates.nickname;
-      if (updates.customTitle !== undefined)
-        member.customTitle = updates.customTitle;
-      if (updates.mutedUntil !== undefined)
-        member.mutedUntil = updates.mutedUntil;
-      if (updates.lastReadMessageId !== undefined)
-        member.lastReadMessageId = updates.lastReadMessageId;
-
-      return await this.memberRepo.save(member);
+      return member;
     } catch (error) {
       AppError.throw(error, 'Failed to update chat member');
     }

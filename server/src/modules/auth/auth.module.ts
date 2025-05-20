@@ -1,3 +1,4 @@
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthService } from './services/auth.service';
 import { AuthController } from './controllers/auth.controller';
 import { Module } from '@nestjs/common';
@@ -11,7 +12,6 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { TokenService } from './services/token.service';
 import { TokenStorageService } from './services/token-storage.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';

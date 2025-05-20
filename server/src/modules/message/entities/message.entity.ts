@@ -21,6 +21,7 @@ import { MessageStatus } from '../constants/message-status.constants';
 @Entity('message')
 @Index(['chatId']) // Index for faster chat message queries
 @Index(['senderId']) // Index for faster sender queries
+@Index(['createdAt']) // Index for faster unread count queries
 @Index(['deletedAt']) // Index for soft delete queries
 export class Message {
   @PrimaryGeneratedColumn('uuid')
@@ -47,7 +48,11 @@ export class Message {
   })
   type: MessageType;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    length: 3000,
+  })
   content: string | null;
 
   @Column({
@@ -60,7 +65,7 @@ export class Message {
   @Column({ name: 'is_pinned', default: false })
   isPinned: boolean;
 
-  @Column({ name: 'pinned_at', nullable: true })
+  @Column({ name: 'pinned_at', nullable: true, type: 'timestamp' })
   pinnedAt: Date | null;
 
   @Column({ name: 'reply_to_message_id', nullable: true })
@@ -73,7 +78,7 @@ export class Message {
   @Column({ name: 'reply_count', default: 0 })
   replyCount: number;
 
-  @Column({ name: 'edited_at', nullable: true })
+  @Column({ name: 'edited_at', nullable: true, type: 'timestamp' })
   editedAt: Date | null;
 
   @OneToMany(() => Reaction, (reaction) => reaction.message)
@@ -81,6 +86,9 @@ export class Message {
 
   @OneToMany(() => Attachment, (attachment) => attachment.message)
   attachments: Attachment[];
+
+  @Column({ name: 'is_deleted', default: false })
+  isDeleted: boolean;
 
   @Column({ name: 'deleted_at', nullable: true, type: 'timestamp' })
   deletedAt: Date | null;

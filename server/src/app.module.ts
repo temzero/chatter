@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './modules/user/user.module';
@@ -7,7 +8,7 @@ import { ChatModule } from './modules/chat/chat.module';
 import { FriendshipModule } from './modules/friendship/friendship.module';
 import { MessageModule } from './modules/message/message.module';
 import { AuthModule } from './modules/auth/auth.module';
-import { ConfigModule } from '@nestjs/config';
+import { ChatMemberModule } from './modules/chat-member/chat-member.module';
 
 @Module({
   imports: [
@@ -21,15 +22,16 @@ import { ConfigModule } from '@nestjs/config';
       port: 5432,
       username: 'postgres',
       password: 'password',
-      database: 'chatter-unified',
+      database: 'chatter',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
     }),
-    UserModule,
+    AuthModule,
+    ChatModule,
+    ChatMemberModule,
     FriendshipModule,
     MessageModule,
-    ChatModule,
-    AuthModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

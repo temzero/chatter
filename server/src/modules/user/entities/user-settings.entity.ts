@@ -87,19 +87,13 @@ export class UserSettings {
   saveToCameraRoll: boolean;
 
   // Language & Region
-  @Column({ length: 10, default: 'en' })
+  @Column({ default: 'en' })
   language: string;
 
-  @Column({ length: 10, nullable: true })
+  @Column({ nullable: true, type: 'timestamp' })
   timezone: string | null;
 
   // Advanced Settings
-  @Column({ name: 'auto_lock_enabled', default: false })
-  autoLockEnabled: boolean;
-
-  @Column({ name: 'auto_lock_timeout', nullable: true })
-  autoLockTimeout: number | null; // in minutes
-
   @Column({ name: 'biometric_auth', default: false })
   biometricAuth: boolean;
 
@@ -132,8 +126,6 @@ export class UserSettings {
       saveToCameraRoll: this.saveToCameraRoll,
       language: this.language,
       timezone: this.timezone,
-      autoLockEnabled: this.autoLockEnabled,
-      autoLockTimeout: this.autoLockTimeout,
       biometricAuth: this.biometricAuth,
       customPreferences: this.customPreferences,
     };

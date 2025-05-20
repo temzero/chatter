@@ -1,5 +1,5 @@
 import { Expose, Type } from 'class-transformer';
-import { UserResponseDto } from '../../user/dto/responses/user-response.dto';
+import { UserResponseDto } from 'src/modules/user/dto/responses/user-response.dto';
 
 export class ReactionResponseDto {
   @Expose()
@@ -13,5 +13,5 @@ export class ReactionResponseDto {
   user: UserResponseDto;
 
   @Expose()
-  createdAt: Date;
+  updatedAt: Date;
 }

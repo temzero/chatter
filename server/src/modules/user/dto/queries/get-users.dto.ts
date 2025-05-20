@@ -1,24 +1,46 @@
-import { IsOptional, IsEnum, IsNumber, Min, Max } from 'class-validator';
-import { UserRole } from '../../constants/user-role.constants';
-import { UserStatus } from '../../constants/user-status.constants';
+import { Transform, Type } from 'class-transformer';
+import {
+  IsOptional,
+  IsInt,
+  Min,
+  Max,
+  IsBoolean,
+  IsDate,
+} from 'class-validator';
 
 export class GetUsersDto {
   @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number = 1;
 
   @IsOptional()
-  @IsEnum(UserStatus)
-  status?: UserStatus;
-
-  @IsOptional()
-  @IsNumber()
+  @Type(() => Number)
+  @IsInt()
   @Min(1)
   @Max(100)
-  limit = 20;
+  limit?: number = 10;
 
   @IsOptional()
-  @IsNumber()
-  @Min(0)
-  offset = 0;
+  @Transform(({ value }) => value === 'true')
+  @IsBoolean()
+  isActive?: boolean;
+
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  createdAfter?: Date;
+
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  updatedBefore?: Date;
+
+  @IsOptional()
+  sortBy?: 'createdAt' | 'updatedAt' | 'lastActiveAt' = 'createdAt';
+
+  @IsOptional()
+  @Transform(({ value }) => (value === 'asc' ? 'asc' : 'desc'))
+  sortOrder?: 'asc' | 'desc' = 'desc';
 }

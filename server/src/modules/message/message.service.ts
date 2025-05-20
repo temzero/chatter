@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
-
 import { Message } from './entities/message.entity';
 import { CreateMessageDto } from './dto/requests/create-message.dto';
 import { UpdateMessageDto } from './dto/requests/update-message.dto';
 import { AppError } from '../../common/errors';
+import { GetMessagesDto } from './dto/queries/get-messages.dto';
 
 @Injectable()
 export class MessageService {
@@ -13,29 +13,6 @@ export class MessageService {
     @InjectRepository(Message)
     private readonly messageRepo: Repository<Message>,
   ) {}
-
-  async getMessages(options?: {
-    relations?: string[];
-    order?: { [key: string]: 'ASC' | 'DESC' };
-    skip?: number;
-    take?: number;
-  }): Promise<Message[]> {
-    try {
-      return await this.messageRepo.find({
-        relations: options?.relations || [
-          'sender',
-          'chat',
-          'metadata',
-          'media_items',
-        ],
-        order: options?.order || { createdAt: 'DESC' },
-        skip: options?.skip,
-        take: options?.take,
-      });
-    } catch (error) {
-      AppError.throw(error, 'Failed to retrieve messages');
-    }
-  }
 
   async createMessage(createMessageDto: CreateMessageDto): Promise<Message> {
     try {
@@ -91,10 +68,9 @@ export class MessageService {
     }
   }
 
-  async getMessagesByChat(
+  async getMessagesByChatId(
     chatId: string,
-    limit?: number,
-    offset?: number,
+    queryParams: GetMessagesDto,
   ): Promise<Message[]> {
     try {
       const query = this.messageRepo
@@ -103,8 +79,8 @@ export class MessageService {
         .andWhere('message.is_deleted = :isDeleted', { isDeleted: false })
         .orderBy('message.timestamp', 'DESC');
 
-      if (limit) query.take(limit);
-      if (offset) query.skip(offset);
+      if (queryParams.limit) query.take(queryParams.limit);
+      if (queryParams.offset) query.skip(queryParams.offset);
 
       return await query.getMany();
     } catch (error) {

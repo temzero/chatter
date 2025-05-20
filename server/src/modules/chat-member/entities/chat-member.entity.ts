@@ -6,18 +6,15 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Column,
-  BeforeInsert,
-  BeforeUpdate,
   Index,
 } from 'typeorm';
 import { Chat } from 'src/modules/chat/entities/chat.entity';
 import { User } from '../../user/entities/user.entity';
-import { Message } from 'src/modules/message/entities/message.entity';
 import { ChatMemberRole } from '../constants/chat-member-roles.constants';
 import { ChatMemberStatus } from '../constants/chat-member-status.constants';
 
 @Entity('chat_member')
-@Index(['chatId', 'userId'], { unique: true }) // Ensure a user can only be in a chat once
+@Index(['chatId', 'userId'], { unique: true })
 export class ChatMember {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -50,46 +47,24 @@ export class ChatMember {
   })
   status: ChatMemberStatus;
 
-  @Column({ nullable: true, length: 128 })
+  @Column({ type: 'varchar', nullable: true, length: 32 })
   nickname: string | null;
 
-  @Column({ name: 'custom_title', nullable: true, length: 64 })
+  @Column({ name: 'custom_title', type: 'varchar', nullable: true, length: 64 })
   customTitle: string | null;
 
   @Column({ name: 'muted_until', nullable: true, type: 'timestamp' })
   mutedUntil: Date | null;
 
-  @Column({
-    name: 'joined_at',
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-  })
-  joinedAt: Date;
+  @Column({ name: 'last_read_at', type: 'timestamp', nullable: true })
+  lastReadAt: Date | null;
 
-  @Column({ name: 'last_read_message_id', nullable: true })
+  @Column({ name: 'last_read_message_id', type: 'varchar', nullable: true })
   lastReadMessageId: string | null;
-
-  @ManyToOne(() => Message, { nullable: true })
-  @JoinColumn({ name: 'last_read_message_id' })
-  lastReadMessage: Message | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
-
-  @BeforeInsert()
-  @BeforeUpdate()
-  trimStrings() {
-    if (this.nickname) {
-      this.nickname = this.nickname.trim();
-      if (this.nickname === '') this.nickname = null;
-    }
-
-    if (this.customTitle) {
-      this.customTitle = this.customTitle.trim();
-      if (this.customTitle === '') this.customTitle = null;
-    }
-  }
 }

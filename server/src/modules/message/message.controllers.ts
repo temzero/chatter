@@ -8,6 +8,7 @@ import {
   Body,
   HttpStatus,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { MessageService } from './message.service';
@@ -18,6 +19,7 @@ import { CurrentUser } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { MessageResponseDto } from './dto/responses/message-response.dto';
 import { AppError } from '../../common/errors';
+import { GetMessagesDto } from './dto/queries/get-messages.dto';
 
 @Controller('message')
 @UseGuards(JwtAuthGuard)
@@ -121,11 +123,15 @@ export class MessageController {
   @Get('chat/:chatId')
   async getChatMessages(
     @Param('chatId') chatId: string,
+    @Query() queryParams: GetMessagesDto,
     // @CurrentUser('id') userId: string,
   ): Promise<ResponseData<MessageResponseDto[]>> {
     try {
       // Optional: Verify user is a member of the chat
-      const messages = await this.messageService.getMessagesByChat(chatId);
+      const messages = await this.messageService.getMessagesByChatId(
+        chatId,
+        queryParams,
+      );
 
       return new ResponseData<MessageResponseDto[]>(
         plainToInstance(MessageResponseDto, messages),

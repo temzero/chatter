@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-
 import { Chat } from 'src/modules/chat/entities/chat.entity';
 import { CreateChatDto } from 'src/modules/chat/dto/requests/create-chat.dto';
 import { UpdateChatDto } from 'src/modules/chat/dto/requests/update-chat.dto';
@@ -18,9 +17,6 @@ export class ChatService {
 
     @InjectRepository(ChatMember)
     private readonly memberRepo: Repository<ChatMember>,
-
-    @InjectRepository(User)
-    private readonly userRepo: Repository<User>,
   ) {}
 
   async createChat(createDto: CreateChatDto): Promise<Chat> {

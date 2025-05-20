@@ -1,25 +1,16 @@
-import { IsOptional, IsUUID, IsNumber, Min, Max } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsOptional, IsInt, Min } from 'class-validator';
 
 export class GetMessagesDto {
-  @IsUUID()
-  chatId: string;
-
   @IsOptional()
-  @IsUUID()
-  beforeMessageId?: string;
-
-  @IsOptional()
-  @IsUUID()
-  afterMessageId?: string;
-
-  @IsOptional()
-  @IsNumber()
-  @Min(1)
-  @Max(100)
-  limit = 20;
-
-  @IsOptional()
-  @IsNumber()
+  @Type(() => Number)
+  @IsInt()
   @Min(0)
-  offset = 0;
+  offset?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  limit?: number;
 }

@@ -14,9 +14,9 @@ import { ResponseData } from 'src/common/response-data';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { ChatMemberService } from './chat-member.service';
 import { ChatMemberRole } from './constants/chat-member-roles.constants';
-import { ChatMemberStatus } from './constants/chat-member-status.constants';
 import { ChatMemberResponseDto } from './dto/responses/chat-member-response.dto';
 import { AppError } from 'src/common/errors';
+import { UpdateChatMemberDto } from './dto/requests/update-chat-member.dto';
 
 @Controller('chat-members')
 @UseGuards(JwtAuthGuard)
@@ -99,20 +99,13 @@ export class ChatMemberController {
     @Param('chatId') chatId: string,
     @Param('userId') userId: string,
     @Body()
-    updates: {
-      role?: ChatMemberRole;
-      status?: ChatMemberStatus;
-      nickname?: string | null;
-      customTitle?: string | null;
-      mutedUntil?: Date | null;
-      lastReadMessageId?: string | null;
-    },
+    updateDto: UpdateChatMemberDto,
   ): Promise<ResponseData<ChatMemberResponseDto>> {
     try {
       const updatedMember = await this.memberService.updateMember(
         chatId,
         userId,
-        updates,
+        updateDto,
       );
       return new ResponseData(
         plainToInstance(ChatMemberResponseDto, updatedMember),

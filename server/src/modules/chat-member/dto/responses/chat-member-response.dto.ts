@@ -1,35 +1,22 @@
-import { Expose, Type } from 'class-transformer';
-import { ChatMemberRole, ChatMemberStatus } from '../constants';
-import { UserResponseDto } from '../../user/dto/responses/user-response.dto';
-import { MessageReferenceDto } from '../../message/dto/responses/message-reference.dto';
+import { ChatMemberRole } from '../../constants/chat-member-roles.constants';
+import { ChatMemberStatus } from '../../constants/chat-member-status.constants';
 
 export class ChatMemberResponseDto {
-  @Expose()
   id: string;
-
-  @Expose()
-  @Type(() => UserResponseDto)
-  user: UserResponseDto;
-
-  @Expose()
+  chatId: string;
+  userId: string;
   role: ChatMemberRole;
-
-  @Expose()
   status: ChatMemberStatus;
-
-  @Expose()
-  nickname?: string;
-
-  @Expose()
-  customTitle?: string;
-
-  @Expose()
-  mutedUntil?: Date;
-
-  @Expose()
-  @Type(() => MessageReferenceDto)
-  lastReadMessage?: MessageReferenceDto;
-
-  @Expose()
-  joinedAt: Date;
+  nickname: string | null;
+  customTitle: string | null;
+  mutedUntil: Date | null;
+  lastReadAt: Date | null;
+  lastReadMessageId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  user?: {
+    id: string;
+    username: string;
+    avatar?: string;
+  };
 }

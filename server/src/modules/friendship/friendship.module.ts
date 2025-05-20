@@ -3,9 +3,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { FriendshipController } from './friendship.controller';
 import { FriendshipService } from './friendship.service';
 import { Friendship } from './entities/friendship.entity';
+import { UserModule } from '../user/user.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Friendship])],
+  imports: [TypeOrmModule.forFeature([Friendship]), UserModule],
   controllers: [FriendshipController],
   providers: [FriendshipService],
   exports: [FriendshipService],

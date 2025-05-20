@@ -32,7 +32,7 @@ export class AuthService {
     const user = await this.userService.getUserByIdentifier(identifier);
     if (!user) return null;
 
-    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
     return isPasswordValid ? user : null;
   }
 
@@ -55,7 +55,7 @@ export class AuthService {
         deviceName,
       );
 
-      await this.userService.updateUser(user.id, { last_seen: new Date() });
+      await this.userService.setUserOnlineStatus(user.id, true);
       return {
         access_token,
         refresh_token,
@@ -72,7 +72,7 @@ export class AuthService {
 
     const verifyEmailToken = this.jwtService.sign({ sub: user.id });
     const clientUrl = this.configService.get<string>('CLIENT_URL');
-    const verificationUrl = `${clientUrl}/auth/verify-email/${user.first_name}/${user.email}/${verifyEmailToken}`;
+    const verificationUrl = `${clientUrl}/auth/verify-email/${user.firstName}/${user.email}/${verifyEmailToken}`;
 
     await this.mailService.sendVerificationEmail(user.email, verificationUrl);
 
@@ -125,7 +125,7 @@ export class AuthService {
   async sendPasswordResetEmail(email: string): Promise<boolean> {
     const user = await this.userService.getUserByIdentifier(email);
     if (!user) return false;
-    if (user.is_email_verified === false) {
+    if (user.emailVerified === false) {
       throw new UnauthorizedException('Email not verified');
     }
     const resetPasswordToken = this.jwtService.sign({ sub: user.id });
@@ -140,7 +140,7 @@ export class AuthService {
     try {
       const payload = this.jwtService.verify<{ sub: string }>(token);
       void this.userService.updateUser(payload.sub, {
-        is_email_verified: true,
+        emailVerified: true,
       });
       return { message: 'Email verified successfully.' };
     } catch {
@@ -161,6 +161,8 @@ export class AuthService {
   async logout(userId: string, deviceId: string): Promise<void> {
     try {
       await this.tokenStorageService.deleteDeviceTokens(userId, deviceId);
+      // Update user status
+      await this.userService.setUserOnlineStatus(userId, false);
     } catch (error) {
       console.error('Logout failed:', error);
       throw new InternalServerErrorException('Failed to logout');
@@ -169,8 +171,9 @@ export class AuthService {
 
   async logoutAll(userId: string): Promise<void> {
     try {
-      // Delete all refresh tokens for this user
       await this.tokenStorageService.deleteAllUserTokens(userId);
+      // Update user status
+      await this.userService.setUserOnlineStatus(userId, false);
     } catch (error) {
       console.error('Logout from all devices failed:', error);
       throw new InternalServerErrorException(
@@ -184,14 +187,14 @@ export class AuthService {
       id: user.id,
       username: user.username,
       email: user.email,
-      first_name: user.first_name,
-      last_name: user.last_name,
-      avatar: user.avatar,
-      phone_number: user.phone_number,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      avatarUrl: user.avatarUrl,
+      phoneNumber: user.phoneNumber,
       birthday: user.birthday,
       bio: user.bio,
       status: user.status,
-      is_email_verified: user.is_email_verified,
+      emailVerified: user.emailVerified,
     };
   }
 }

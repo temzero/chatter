@@ -1,8 +1,9 @@
 import { Expose, Type } from 'class-transformer';
-import { MessageType, MessageStatus } from '../../message/constants';
-import { UserResponseDto } from '../../user/dto/responses/user-response.dto';
-import { AttachmentResponseDto } from './attachment-response.dto';
-import { ReactionResponseDto } from './reaction-response.dto';
+import { MessageType } from 'src/modules/message/constants/message-type.constants';
+import { MessageStatus } from 'src/modules/message/constants/message-status.constants';
+import { UserResponseDto } from 'src/modules/user/dto/responses/user-response.dto';
+import { AttachmentResponseDto } from 'src/modules/message/dto/responses/attachment-response.dto';
+import { ReactionResponseDto } from 'src/modules/message/dto/responses/reaction-response.dto';
 
 export class MessageResponseDto {
   @Expose()

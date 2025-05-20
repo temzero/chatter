@@ -30,19 +30,19 @@ export class Attachment {
   })
   type: AttachmentType;
 
-  @Column({ length: 2048 })
+  @Column({ length: 512 })
   url: string;
 
-  @Column({ length: 2048, nullable: true })
+  @Column({ type: 'varchar', length: 512, nullable: true })
   thumbnailUrl: string | null;
 
-  @Column({ length: 256, nullable: true })
+  @Column({ type: 'varchar', length: 256, nullable: true })
   filename: string | null;
 
   @Column({ type: 'int', nullable: true })
   size: number | null; // in bytes
 
-  @Column({ length: 128, nullable: true })
+  @Column({ type: 'varchar', length: 128, nullable: true })
   mimeType: string | null;
 
   @Column({ type: 'int', nullable: true })
