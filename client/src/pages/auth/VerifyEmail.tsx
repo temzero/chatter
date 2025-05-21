@@ -5,11 +5,13 @@ import { AuthenticationLayout } from "../PublicLayout";
 import { motion } from "framer-motion";
 
 const VerifyEmail = () => {
-  const { first_name, email, token } = useParams();
+  const { firstName, email, token } = useParams();
 
-  const verifyEmailWithToken = useAuthStore(state => state.verifyEmailWithToken);
-  const setMessage = useAuthStore(state => state.setMessage);
-  const loading = useAuthStore(state => state.loading);
+  const verifyEmailWithToken = useAuthStore(
+    (state) => state.verifyEmailWithToken
+  );
+  const setMessage = useAuthStore((state) => state.setMessage);
+  const loading = useAuthStore((state) => state.loading);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,10 +39,10 @@ const VerifyEmail = () => {
           <h2 className="text-4xl font-semibold mb-4 text-center">
             Verify Email
           </h2>
-          
+
           <div className="opacity-80 py-2 flex flex-col items-center justify-center">
             <p>
-              Hi <strong>{first_name}!</strong>
+              Hi <strong>{firstName}!</strong>
             </p>
             <p>Please confirm that this is your email address</p>
             <div className="text-green-400 flex items-center gap-1 font-semibold mt-2">

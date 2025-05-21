@@ -2,11 +2,12 @@ import * as bcrypt from 'bcrypt';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from './dto/requests/create-user.dto';
+import { RegisterDto } from '../auth/dto/requests/register.dto';
 import { UpdateUserDto } from 'src/modules/user/dto/requests/update-user.dto';
 import { ConfigService } from '@nestjs/config';
 import { User } from 'src/modules/user/entities/user.entity';
 import { AppError } from 'src/common/errors';
+import { TokenStorageService } from '../auth/services/token-storage.service';
 
 @Injectable()
 export class UserService {
@@ -14,6 +15,7 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly configService: ConfigService,
+    private readonly tokenStorageService: TokenStorageService,
   ) {}
 
   private normalizeIdentifier(identifier: string): string {
@@ -23,23 +25,16 @@ export class UserService {
   async getUserByIdentifier(identifier: string): Promise<User | null> {
     try {
       const normalizedIdentifier = this.normalizeIdentifier(identifier);
-      return await this.userRepository.findOne({
+      const user = await this.userRepository.findOne({
         where: [
           { username: normalizedIdentifier },
           { email: normalizedIdentifier },
           { phoneNumber: normalizedIdentifier },
         ],
       });
+      return user;
     } catch (error) {
       AppError.throw(error, 'Failed to retrieve user by identifier');
-    }
-  }
-
-  async getAllUsers(): Promise<User[]> {
-    try {
-      return await this.userRepository.find();
-    } catch (error) {
-      AppError.throw(error, 'Failed to retrieve users');
     }
   }
 
@@ -55,6 +50,14 @@ export class UserService {
     }
   }
 
+  async getAllUsers(): Promise<User[]> {
+    try {
+      return await this.userRepository.find();
+    } catch (error) {
+      AppError.throw(error, 'Failed to retrieve users');
+    }
+  }
+
   async hashPassword(password: string): Promise<string> {
     try {
       const saltRounds = parseInt(
@@ -67,25 +70,29 @@ export class UserService {
     }
   }
 
-  async createUser(createUserDto: CreateUserDto): Promise<User> {
+  async createUser(registerDto: RegisterDto): Promise<User> {
     try {
-      const existingUser = await this.getUserByIdentifier(createUserDto.email);
+      const existingUser = await this.getUserByIdentifier(registerDto.email);
       if (existingUser) {
         AppError.conflict('Email or username already taken');
       }
       const user = this.userRepository.create({
-        ...createUserDto,
-        passwordHash: await this.hashPassword(createUserDto.password),
+        ...registerDto,
+        passwordHash: await this.hashPassword(registerDto.password),
       });
-      return await this.userRepository.save(user);
+      await this.userRepository.save(user);
+      return user;
     } catch (error) {
       AppError.throw(error, 'Failed to create user');
     }
   }
 
-  async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+  async updateUser(
+    userId: string,
+    updateUserDto: UpdateUserDto,
+  ): Promise<User> {
     try {
-      const user = await this.getUserById(id);
+      const user = await this.getUserById(userId);
       Object.assign(user, updateUserDto);
       return await this.userRepository.save(user);
     } catch (error) {
@@ -103,16 +110,6 @@ export class UserService {
     user.lastActiveAt = new Date(); // Always set to current server time
 
     return this.userRepository.save(user);
-  }
-
-  async deleteUser(id: string): Promise<User> {
-    try {
-      const user = await this.getUserById(id);
-      await this.userRepository.remove(user);
-      return user;
-    } catch (error) {
-      AppError.throw(error, 'Failed to delete user');
-    }
   }
 
   async updatePassword(userId: string, newPassword: string): Promise<User> {
@@ -142,6 +139,19 @@ export class UserService {
       return await this.userRepository.save(user);
     } catch (error) {
       AppError.throw(error, 'Failed to update password');
+    }
+  }
+
+  async deleteUser(userId: string, deviceId: string): Promise<User> {
+    try {
+      const user = await this.getUserById(userId);
+      await this.userRepository.remove(user);
+      if (userId && deviceId) {
+        await this.tokenStorageService.deleteDeviceTokens(userId, deviceId);
+      }
+      return user;
+    } catch (error) {
+      AppError.throw(error, 'Failed to delete user');
     }
   }
 }

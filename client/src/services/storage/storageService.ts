@@ -4,11 +4,11 @@ import { v4 as uuidv4 } from "uuid";
 export const storageService = {
   // Token management
   getAccessToken(): string | null {
-    return localStorage.getItem("access_token");
+    return localStorage.getItem("accessToken");
   },
 
   setAccessToken(token: string): void {
-    localStorage.setItem("access_token", token);
+    localStorage.setItem("accessToken", token);
   },
 
   // User data management
@@ -90,7 +90,7 @@ export const storageService = {
   },
   // Clear all auth-related data
   clearAuth(): void {
-    localStorage.removeItem("access_token");
+    localStorage.removeItem("accessToken");
     localStorage.removeItem("user");
   },
 

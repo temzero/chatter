@@ -20,12 +20,12 @@ const API: AxiosInstance = axios.create({
 // Add Authorization & device info headers
 API.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const access_token = storageService.getAccessToken();
+    const accessToken = storageService.getAccessToken();
     const deviceId = storageService.getDeviceId();
     const deviceName = storageService.getDeviceName();
 
-    if (access_token && config.headers) {
-      config.headers.Authorization = `Bearer ${access_token}`;
+    if (accessToken && config.headers) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
     }
 
     config.headers["x-device-id"] = deviceId;

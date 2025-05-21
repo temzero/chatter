@@ -35,7 +35,7 @@ const SidebarProfile: React.FC = () => {
           {currentUser && <Avatar user={currentUser} size="36" />}
 
           <h1 className="text-xl font-semibold">
-            {currentUser?.first_name} {currentUser?.last_name}
+            {currentUser?.firstName} {currentUser?.lastName}
           </h1>
 
           <p className="text-sm text-center font-light opacity-80 w-full min-w-[240px] text-ellipsis">
@@ -53,7 +53,7 @@ const SidebarProfile: React.FC = () => {
 
               <ContactInfoItem
                 icon="call"
-                value={currentUser?.phone_number}
+                value={currentUser?.phoneNumber}
                 copyType="phone"
               />
 

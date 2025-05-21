@@ -95,8 +95,8 @@ const ChatInfoDefault: React.FC = () => {
 
                     <ContactInfoItem
                       icon="call"
-                      value={activeChat.chatPartner.phone_number || null}
-                      copyType="phone_number"
+                      value={activeChat.chatPartner.phoneNumber || null}
+                      copyType="phoneNumber"
                     />
 
                     <ContactInfoItem
@@ -158,7 +158,7 @@ const ChatInfoDefault: React.FC = () => {
                             <h1 className="text-sm">{member.nickname}</h1>
                           ) : (
                             <h1 className="text-sm">
-                              {member.first_name} {member.last_name}
+                              {member.firstName} {member.lastName}
                             </h1>
                           )}
                         </div>

@@ -54,11 +54,13 @@ const PrivateChatEdit = () => {
           <Avatar user={activeChat.chatPartner} size="12" />
           <div>
             <h1 className="text-xl font-semibold">
-              {activeChat.chatPartner.first_name}{" "}
-              {activeChat.chatPartner.last_name}
+              {activeChat.chatPartner.firstName}{" "}
+              {activeChat.chatPartner.lastName}
             </h1>
             {activeChat.chatPartner.nickname && (
-              <p className="text-sm opacity-70">${activeChat.chatPartner.nickname}</p>
+              <p className="text-sm opacity-70">
+                ${activeChat.chatPartner.nickname}
+              </p>
             )}
           </div>
         </div>

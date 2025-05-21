@@ -43,8 +43,8 @@ const CreateNewChat: React.FC = () => {
       user: {
         id: user.id,
         username: user.username,
-        first_name: user.first_name,
-        last_name: user.last_name,
+        firstName: user.firstName,
+        lastName: user.lastName,
         avatar: user.avatar,
       },
     });
@@ -74,7 +74,7 @@ const CreateNewChat: React.FC = () => {
           <input
             type="text"
             name="userInput"
-            placeholder="@username/email/phone_number"
+            placeholder="@username/email/phoneNumber"
             required
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -112,7 +112,7 @@ const CreateNewChat: React.FC = () => {
             <Avatar user={user} size="28" />
 
             <h1 className="font-bold text-xl">
-              {user.first_name} {user.last_name}
+              {user.firstName} {user.lastName}
             </h1>
             <h1>{user.bio}</h1>
 
@@ -125,7 +125,7 @@ const CreateNewChat: React.FC = () => {
               />
               <ContactInfoItem
                 icon="call"
-                value={user.phone_number}
+                value={user.phoneNumber}
                 copyType="phone"
               />
               <ContactInfoItem

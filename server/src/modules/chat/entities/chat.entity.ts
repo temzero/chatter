@@ -22,7 +22,7 @@ export class Chat {
   @Column({
     type: 'enum',
     enum: ChatType,
-    default: ChatType.PRIVATE,
+    default: ChatType.DIRECT,
   })
   type: ChatType;
 

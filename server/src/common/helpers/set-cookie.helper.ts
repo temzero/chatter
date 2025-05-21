@@ -7,7 +7,7 @@ export const setRefreshTokenCookie = (
   configService: ConfigService,
   options?: Partial<ReturnType<typeof defaultOptions>>,
 ) => {
-  response.cookie('refresh_token', refreshToken, {
+  response.cookie('refreshToken', refreshToken, {
     ...defaultOptions(configService),
     ...options, // allows overriding options if needed
   });
@@ -18,6 +18,6 @@ const defaultOptions = (configService: ConfigService) => ({
   secure: true,
   sameSite: 'strict' as const,
   maxAge:
-    configService.get<number>('REFRESH_TOKEN_EXPIRATION_MS') ??
+    configService.get<number>('refreshToken_EXPIRATION_MS') ??
     7 * 24 * 60 * 60 * 1000,
 });

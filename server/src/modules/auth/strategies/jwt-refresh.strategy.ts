@@ -23,10 +23,9 @@ export class JwtRefreshStrategy extends PassportStrategy(
   }
 
   validate(request: Request, payload: JwtRefreshPayload) {
-    const refresh_token =
-      JwtRefreshStrategy.getRefreshTokenFromRequest(request);
+    const refreshToken = JwtRefreshStrategy.getRefreshTokenFromRequest(request);
 
-    if (!refresh_token) {
+    if (!refreshToken) {
       throw new UnauthorizedException('Refresh token malformed');
     }
 
@@ -35,7 +34,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
       email: payload.email,
       deviceId: payload.deviceId,
       deviceName: payload.deviceName,
-      refresh_token,
+      refreshToken,
     };
   }
 
@@ -45,7 +44,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
     request: Request,
   ): string | null {
     const cookieToken = (request?.cookies as Record<string, string> | undefined)
-      ?.refresh_token;
+      ?.refreshToken;
 
     if (cookieToken) return cookieToken;
 

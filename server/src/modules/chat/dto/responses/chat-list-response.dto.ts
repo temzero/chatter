@@ -1,7 +1,8 @@
 import { ChatType } from '../../constants/chat-types.constants';
-import { Expose, Type } from 'class-transformer';
+import { Exclude, Expose, Type } from 'class-transformer';
 import { MessageResponseDto } from './message-response.dto';
 
+@Exclude()
 export class ChatListResponseDto {
   @Expose()
   id: string;
@@ -10,7 +11,7 @@ export class ChatListResponseDto {
   type: ChatType;
 
   @Expose()
-  name?: string;
+  name: string;
 
   @Expose()
   avatar?: string;
@@ -19,7 +20,14 @@ export class ChatListResponseDto {
   @Type(() => MessageResponseDto)
   lastMessage?: MessageResponseDto;
 
-  // Other list-specific fields
+  @Expose()
+  get lastMessageTimestamp(): string | null {
+    return this.lastMessage?.createdAt?.toISOString() || null;
+  }
+
   @Expose()
   unreadCount?: number;
+
+  @Expose()
+  updatedAt?: Date;
 }

@@ -86,8 +86,8 @@ export class TokenService {
     deviceId: string;
     deviceName: string;
   }): Promise<{
-    access_token: string;
-    refresh_token: string;
+    newAccessToken: string;
+    newRefreshToken: string;
   }> {
     // Validate required fields
     if (
@@ -113,8 +113,11 @@ export class TokenService {
 
     try {
       return {
-        access_token: await this.generateToken(TokenType.ACCESS, accessPayload),
-        refresh_token: await this.generateToken(
+        newAccessToken: await this.generateToken(
+          TokenType.ACCESS,
+          accessPayload,
+        ),
+        newRefreshToken: await this.generateToken(
           TokenType.REFRESH,
           refreshPayload,
         ),
@@ -130,7 +133,7 @@ export class TokenService {
    */
   getRefreshTokenFromRequest(request: Request): string {
     const cookies = request.cookies as Record<string, string> | undefined;
-    const tokenFromCookie = cookies?.refresh_token;
+    const tokenFromCookie = cookies?.refreshToken;
 
     const authHeader = request.get('Authorization');
     let tokenFromHeader: string | undefined;

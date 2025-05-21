@@ -33,11 +33,11 @@ export interface ChatPartner {
   id: string;
   username: string;
   nickname: string | null;
-  first_name?: string;
-  last_name?: string;
+  firstName?: string;
+  lastName?: string;
   avatar?: string | null;
   bio?: string | null;
-  phone_number?: string | null;
+  phoneNumber?: string | null;
   birthday?: Date | null;
   status?: string | null;
   last_seen?: Date | null;
@@ -48,8 +48,8 @@ export interface ChatGroupMember {
   username: string;
   nickname: string | null;
   avatar: string | null;
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   last_seen: Date | null;
   chat_group_id: string;
   is_admin: boolean;
@@ -57,4 +57,3 @@ export interface ChatGroupMember {
   muted_until: Date | null;
   joinedAt: Date;
 }
-

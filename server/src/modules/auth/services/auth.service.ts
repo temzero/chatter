@@ -1,19 +1,18 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../../user/user.service';
 import { ConfigService } from '@nestjs/config';
 import { TokenService } from './token.service';
 import { TokenStorageService } from './token-storage.service';
-import { CreateUserDto } from '../../user/dto/requests/create-user.dto';
 import { User } from '../../user/entities/user.entity';
 import { MailService } from '../mail/mail.service';
 import { LoginDto } from '../dto/requests/login.dto';
 import { TokenType } from '../types/token-type.enum';
+import { plainToInstance } from 'class-transformer';
+import { UserResponseDto } from 'src/modules/user/dto/responses/user-response.dto';
+import { RegisterDto } from '../dto/requests/register.dto';
+import { AppError } from 'src/common/errors';
 import type { JwtRefreshPayload } from '../types/jwt-payload.type';
 
 @Injectable()
@@ -28,19 +27,20 @@ export class AuthService {
   ) {}
 
   async validateUser(loginDto: LoginDto): Promise<User | null> {
-    const { identifier, password } = loginDto;
-    const user = await this.userService.getUserByIdentifier(identifier);
-    if (!user) return null;
-
-    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-    return isPasswordValid ? user : null;
+    try {
+      const { identifier, password } = loginDto;
+      const user = await this.userService.getUserByIdentifier(identifier);
+      if (!user) AppError.unauthorized('Invalid credentials');
+      const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+      return isPasswordValid ? user : null;
+    } catch (error) {
+      AppError.throw(error, 'User validation failed');
+    }
   }
 
   async login(user: User, deviceId: string, deviceName: string) {
     try {
-      await this.tokenStorageService.deleteDeviceTokens(user.id, deviceId);
-
-      const { access_token, refresh_token } =
+      const { newAccessToken, newRefreshToken } =
         await this.tokenService.generateTokenPair({
           userId: user.id,
           email: user.email,
@@ -49,102 +49,122 @@ export class AuthService {
         });
 
       await this.tokenStorageService.createRefreshToken(
-        refresh_token,
+        newRefreshToken,
         user.id,
         deviceId,
         deviceName,
       );
 
-      await this.userService.setUserOnlineStatus(user.id, true);
+      const loginUser = await this.userService.setUserOnlineStatus(
+        user.id,
+        true,
+      );
       return {
-        access_token,
-        refresh_token,
-        user: this.filterUserData(user),
+        user: plainToInstance(UserResponseDto, loginUser),
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
       };
     } catch (error) {
-      console.error(`Login failed for ${user.username}`, error);
-      throw new InternalServerErrorException('Login failed');
+      AppError.throw(error, 'Login failed');
     }
   }
 
-  async register(createUserDto: CreateUserDto): Promise<User> {
-    const user = await this.userService.createUser(createUserDto);
+  async register(
+    registerDto: RegisterDto,
+    deviceId: string,
+    deviceName: string,
+  ) {
+    try {
+      const user = await this.userService.createUser(registerDto);
 
-    const verifyEmailToken = this.jwtService.sign({ sub: user.id });
-    const clientUrl = this.configService.get<string>('CLIENT_URL');
-    const verificationUrl = `${clientUrl}/auth/verify-email/${user.firstName}/${user.email}/${verifyEmailToken}`;
+      const verifyEmailToken = this.jwtService.sign({ sub: user.id });
+      const clientUrl = this.configService.get<string>('CLIENT_URL');
+      const verificationUrl = `${clientUrl}/auth/verify-email/${user.firstName}/${user.email}/${verifyEmailToken}`;
+      await this.mailService.sendVerificationEmail(user.email, verificationUrl);
 
-    await this.mailService.sendVerificationEmail(user.email, verificationUrl);
-
-    return user;
+      // Automatically login the user
+      return this.login(user, deviceId, deviceName);
+    } catch (error) {
+      AppError.throw(error, 'Registration failed');
+    }
   }
 
   async refreshTokens(refreshToken: string) {
-    // 1. Verify JWT signature and decode
-    const payload = await this.tokenService.verifyToken<JwtRefreshPayload>(
-      TokenType.REFRESH,
-      refreshToken,
-    );
-    // 2. Check if token exists in database (prevent reuse)
-    const storedToken = await this.tokenStorageService.findToken(refreshToken);
-    if (!storedToken) {
-      throw new UnauthorizedException('Refresh token not found');
-    } else if (storedToken.expiresAt < new Date()) {
-      await this.tokenStorageService.deleteToken(refreshToken);
-      throw new UnauthorizedException('Refresh token expired');
-    }
-    // 3. Delete old refresh token (security best practice)
-    await this.tokenStorageService.deleteDeviceTokens(
-      payload.sub,
-      payload.deviceId,
-    );
-    // 4. Generate new tokens
-    const { access_token, refresh_token } =
-      await this.tokenService.generateTokenPair({
-        userId: payload.sub,
+    try {
+      // 1. Verify JWT signature and decode
+      const payload = await this.tokenService.verifyToken<JwtRefreshPayload>(
+        TokenType.REFRESH,
+        refreshToken,
+      );
+      // 2. Check if token exists in database (prevent reuse)
+      const storedToken =
+        await this.tokenStorageService.findToken(refreshToken);
+      if (!storedToken) {
+        AppError.unauthorized('Refresh token not found');
+      } else if (storedToken.expiresAt < new Date()) {
+        await this.tokenStorageService.deleteToken(refreshToken);
+        AppError.unauthorized('Refresh token expired');
+      }
+      // 3. Delete old refresh token (security best practice)
+      await this.tokenStorageService.deleteDeviceTokens(
+        payload.sub,
+        payload.deviceId,
+      );
+      // 4. Generate new tokens
+      const { newAccessToken, newRefreshToken } =
+        await this.tokenService.generateTokenPair({
+          userId: payload.sub,
+          email: payload.email,
+          deviceId: payload.deviceId,
+          deviceName: payload.deviceName,
+        });
+      // 5. Save new refresh token
+      await this.tokenStorageService.createRefreshToken(
+        newRefreshToken,
+        payload.sub,
+        payload.deviceId,
+        payload.deviceName,
+      );
+
+      return {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
         email: payload.email,
-        deviceId: payload.deviceId,
         deviceName: payload.deviceName,
-      });
-    // 5. Save new refresh token
-    await this.tokenStorageService.createRefreshToken(
-      refresh_token,
-      payload.sub,
-      payload.deviceId,
-      payload.deviceName,
-    );
-
-    return {
-      access_token: access_token,
-      refresh_token: refresh_token,
-      email: payload.email,
-      deviceName: payload.deviceName,
-    };
-  }
-
-  async sendPasswordResetEmail(email: string): Promise<boolean> {
-    const user = await this.userService.getUserByIdentifier(email);
-    if (!user) return false;
-    if (user.emailVerified === false) {
-      throw new UnauthorizedException('Email not verified');
+      };
+    } catch (error) {
+      AppError.throw(error, 'Failed to refresh tokens');
     }
-    const resetPasswordToken = this.jwtService.sign({ sub: user.id });
-    const clientUrl = this.configService.get<string>('CLIENT_URL');
-    const resetUrl = `${clientUrl}/auth/reset-password/${resetPasswordToken}`;
-
-    await this.mailService.sendPasswordResetEmail(email, resetUrl);
-    return true;
   }
 
-  verifyEmail(token: string) {
+  async sendPasswordResetEmail(email: string) {
+    try {
+      const user = await this.userService.getUserByIdentifier(email);
+      if (!user) return { message: 'user Not found' };
+      if (user.emailVerified === false) {
+        AppError.unauthorized('Email not verified');
+      }
+      const resetPasswordToken = this.jwtService.sign({ sub: user.id });
+      const clientUrl = this.configService.get<string>('CLIENT_URL');
+      const resetUrl = `${clientUrl}/auth/reset-password/${resetPasswordToken}`;
+
+      await this.mailService.sendPasswordResetEmail(email, resetUrl);
+      return { message: 'Verification email sent successfully.' };
+    } catch (error) {
+      AppError.throw(error, 'Failed to send password reset email');
+    }
+  }
+
+  async verifyEmail(token: string) {
     try {
       const payload = this.jwtService.verify<{ sub: string }>(token);
-      void this.userService.updateUser(payload.sub, {
+      await this.userService.updateUser(payload.sub, {
         emailVerified: true,
       });
       return { message: 'Email verified successfully.' };
-    } catch {
-      throw new UnauthorizedException('Invalid or expired token');
+    } catch (error) {
+      console.error('verifyEmail', error);
+      AppError.unauthorized('Invalid or expired token');
     }
   }
 
@@ -153,8 +173,9 @@ export class AuthService {
       const payload = this.jwtService.verify<{ sub: string }>(token);
       await this.userService.updatePassword(payload.sub, newPassword);
       return { message: 'Password reset successfully.' };
-    } catch {
-      throw new UnauthorizedException('Invalid or expired token');
+    } catch (error) {
+      console.error('setNewPasswordWithToken', error);
+      AppError.unauthorized('Invalid or expired token');
     }
   }
 
@@ -164,8 +185,7 @@ export class AuthService {
       // Update user status
       await this.userService.setUserOnlineStatus(userId, false);
     } catch (error) {
-      console.error('Logout failed:', error);
-      throw new InternalServerErrorException('Failed to logout');
+      AppError.throw(error, 'Failed to logout');
     }
   }
 
@@ -175,26 +195,7 @@ export class AuthService {
       // Update user status
       await this.userService.setUserOnlineStatus(userId, false);
     } catch (error) {
-      console.error('Logout from all devices failed:', error);
-      throw new InternalServerErrorException(
-        'Failed to logout from all devices',
-      );
+      AppError.throw(error, 'Failed to logout from all devices');
     }
-  }
-
-  private filterUserData(user: User): Partial<User> {
-    return {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      avatarUrl: user.avatarUrl,
-      phoneNumber: user.phoneNumber,
-      birthday: user.birthday,
-      bio: user.bio,
-      status: user.status,
-      emailVerified: user.emailVerified,
-    };
   }
 }

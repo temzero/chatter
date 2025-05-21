@@ -8,9 +8,9 @@ export interface User {
   email: string;
   password_hash: string;
   avatar?: string;
-  first_name?: string;
-  last_name?: string;
-  phone_number?: string;
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
   birthday?: string; // ISO string format for consistency
   bio?: string;
   status?: string;

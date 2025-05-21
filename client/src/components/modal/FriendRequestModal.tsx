@@ -8,8 +8,8 @@ interface FriendRequestModalProps {
   user: {
     id: string;
     username: string;
-    first_name: string;
-    last_name: string;
+    firstName: string;
+    lastName: string;
     avatar: string;
   };
 }
@@ -45,7 +45,7 @@ const FriendRequestModal: React.FC<FriendRequestModalProps> = ({ user }) => {
 
         <div>
           <h1 className="text-xl font-semibold">
-            {user.first_name} {user.last_name}
+            {user.firstName} {user.lastName}
           </h1>
           <p className="text-sm opacity-80">@{user.username}</p>
         </div>

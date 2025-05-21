@@ -1,4 +1,6 @@
 import {
+  ArrayMaxSize,
+  ArrayMinSize,
   IsArray,
   IsEnum,
   IsOptional,
@@ -8,11 +10,20 @@ import {
 } from 'class-validator';
 import { ChatType } from '../../constants/chat-types.constants';
 
-export class CreateChatDto {
+export class CreateDirectChatDto {
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(1) // Will be combined with current user to make 2
+  @IsUUID(4, { each: true })
+  memberIds: string[];
+}
+
+export class CreateGroupChatDto {
   @IsEnum(ChatType)
   type: ChatType;
 
   @IsArray()
+  @ArrayMinSize(1) // Will be combined with current user
   @IsUUID(4, { each: true })
   @IsString({ each: true })
   memberIds: string[]; // Required for all chat types

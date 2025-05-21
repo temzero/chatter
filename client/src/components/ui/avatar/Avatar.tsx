@@ -30,8 +30,8 @@ export const Avatar: React.FC<AvatarProps> = ({
         <h1
           className={`h-full w-full font-light flex items-center justify-center bg-[var(--border-color)] select-none ${textSize}`}
         >
-          {user.first_name.charAt(0).toUpperCase()}
-          {user.last_name.charAt(0).toUpperCase()}
+          {user.firstName.charAt(0).toUpperCase()}
+          {user.lastName.charAt(0).toUpperCase()}
         </h1>
       )}
     </div>

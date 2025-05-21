@@ -27,7 +27,7 @@ export class UpdateChatDto {
   avatarUrl?: string;
 
   @IsOptional()
-  @IsUUID(4)
+  @IsUUID()
   pinnedMessageId?: string;
 
   @IsOptional()

@@ -11,11 +11,11 @@ const SidebarProfileEdit: React.FC = () => {
 
   const initialFormData = useMemo(
     () => ({
-      first_name: currentUser?.first_name || "",
-      last_name: currentUser?.last_name || "",
+      firstName: currentUser?.firstName || "",
+      lastName: currentUser?.lastName || "",
       username: currentUser?.username || "",
       email: currentUser?.email || "",
-      phone_number: currentUser?.phone_number || null,
+      phoneNumber: currentUser?.phoneNumber || null,
       birthday: currentUser?.birthday
         ? new Date(currentUser.birthday).toISOString().split("T")[0]
         : "",
@@ -105,8 +105,8 @@ const SidebarProfileEdit: React.FC = () => {
               <label className="text-sm opacity-70">First Name</label>
               <input
                 type="text"
-                name="first_name"
-                value={formData.first_name}
+                name="firstName"
+                value={formData.firstName}
                 onChange={handleChange}
                 className="input text-lg"
                 placeholder="First Name"
@@ -117,8 +117,8 @@ const SidebarProfileEdit: React.FC = () => {
               <label className="text-sm opacity-70">Last Name</label>
               <input
                 type="text"
-                name="last_name"
-                value={formData.last_name}
+                name="lastName"
+                value={formData.lastName}
                 onChange={handleChange}
                 className="input text-lg"
                 placeholder="Last Name"
@@ -126,7 +126,9 @@ const SidebarProfileEdit: React.FC = () => {
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-sm opacity-70">Birthday (Month/Date/Year)</label>
+              <label className="text-sm opacity-70">
+                Birthday (Month/Date/Year)
+              </label>
               <input
                 type="date"
                 name="birthday"

@@ -8,7 +8,7 @@ export const authService = {
       identifier,
       password,
     });
-    storageService.setAccessToken(data.access_token);
+    storageService.setAccessToken(data.accessToken);
     storageService.setUser(data.user);
     return data;
   },
@@ -16,8 +16,8 @@ export const authService = {
   async register(userData: {
     username: string;
     email: string;
-    first_name: string;
-    last_name: string;
+    firstName: string;
+    lastName: string;
     password: string;
   }) {
     const { data } = await API.post("/auth/register", userData);
@@ -49,7 +49,7 @@ export const authService = {
   async refreshToken() {
     try {
       const response = await rawAPI.post("/auth/refresh");
-      return response.data.access_token;
+      return response.data.accessToken;
     } catch (error) {
       console.error("REFRESH TOKEN ERROR:", error);
       throw error;

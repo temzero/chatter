@@ -33,8 +33,8 @@ type AuthActions = {
   register: (userData: {
     username: string;
     email: string;
-    first_name: string;
-    last_name: string;
+    firstName: string;
+    lastName: string;
     password: string;
   }) => Promise<void>;
   sendPasswordResetEmail: (email: string) => Promise<void>;
@@ -120,9 +120,11 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       register: async (userData) => {
         try {
           get().setLoading(true);
-          await authService.register(userData);
-          await get().login(userData.username, userData.password);
+          const { user } = await authService.register(userData);
           set({
+            currentUser: user,
+            isAuthenticated: true,
+            loading: false,
             message: {
               type: "success",
               content: "Account created successfully",

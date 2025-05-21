@@ -60,7 +60,6 @@ export class User {
     name: 'password_hash',
     type: 'varchar',
     length: 255,
-    select: false,
   })
   passwordHash: string;
 

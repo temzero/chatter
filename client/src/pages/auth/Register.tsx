@@ -9,18 +9,18 @@ const Register = () => {
   const formRef = useRef<HTMLFormElement>(null);
   const firstNameRef = useRef<HTMLInputElement>(null);
   const lastNameRef = useRef<HTMLInputElement>(null);
-  
-  const register = useAuthStore(state => state.register);
-  const setMessage = useAuthStore(state => state.setMessage);
-  const loading = useAuthStore(state => state.loading);
-  
+
+  const register = useAuthStore((state) => state.register);
+  const setMessage = useAuthStore((state) => state.setMessage);
+  const loading = useAuthStore((state) => state.loading);
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formRef.current) return;
-    
+
     const formData = new FormData(formRef.current);
     const password = formData.get("password") as string;
     const confirmPassword = formData.get("confirmPassword") as string;
@@ -32,8 +32,8 @@ const Register = () => {
     await register({
       email: formData.get("email") as string,
       username: formData.get("username") as string,
-      first_name: formData.get("first_name") as string,
-      last_name: formData.get("last_name") as string,
+      firstName: formData.get("firstName") as string,
+      lastName: formData.get("lastName") as string,
       password: password,
     });
     navigate("/");
@@ -74,7 +74,7 @@ const Register = () => {
           <div className="flex gap-2">
             <input
               type="text"
-              name="first_name"
+              name="firstName"
               placeholder="First Name"
               required
               className="input"
@@ -84,7 +84,7 @@ const Register = () => {
 
             <input
               type="text"
-              name="last_name"
+              name="lastName"
               placeholder="Last Name"
               required
               className="input"

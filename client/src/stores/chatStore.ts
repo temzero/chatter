@@ -112,7 +112,7 @@ export const useChatStore = create<ChatStore>()(
           const nameMatch = chat.name?.toLowerCase().includes(lowerCaseTerm);
 
           if (chat.type === "private") {
-            const partnerNameMatch = chat.chatPartner?.first_name
+            const partnerNameMatch = chat.chatPartner?.firstName
               ?.toLowerCase()
               .includes(lowerCaseTerm);
             return nameMatch || partnerNameMatch;

@@ -1,5 +1,5 @@
 export enum ChatType {
-  PRIVATE = 'private',
+  DIRECT = 'direct',
   GROUP = 'group',
   CHANNEL = 'channel',
 }

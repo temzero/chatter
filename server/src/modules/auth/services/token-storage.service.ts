@@ -19,7 +19,7 @@ export class TokenStorageService {
   ) {
     const expiresAt = new Date(
       Date.now() +
-        parseInt(process.env.REFRESH_TOKEN_EXPIRATION_MS || '604800000', 10), // 7 days in milliseconds
+        parseInt(process.env.refreshToken_EXPIRATION_MS || '604800000', 10), // 7 days in milliseconds
     );
     const tokenData = this.refreshTokenRepository.create({
       token,
