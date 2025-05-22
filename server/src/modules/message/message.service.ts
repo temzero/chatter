@@ -6,7 +6,7 @@ import { Chat } from '../chat/entities/chat.entity';
 import { ChatMember } from '../chat-member/entities/chat-member.entity';
 import { CreateMessageDto } from './dto/requests/create-message.dto';
 import { UpdateMessageDto } from './dto/requests/update-message.dto';
-import { AppError } from '../../common/errors';
+import { ErrorResponse } from '../../common/api-response/errors';
 import { GetMessagesDto } from './dto/queries/get-messages.dto';
 
 @Injectable()
@@ -30,7 +30,7 @@ export class MessageService {
   //     const newMessage = this.messageRepo.create(createMessageDto);
   //     return await this.messageRepo.save(newMessage);
   //   } catch (error) {
-  //     AppError.throw(error, 'Failed to create message');
+  //     ErrorResponse.throw(error, 'Failed to create message');
   //   }
   // }
 
@@ -43,7 +43,7 @@ export class MessageService {
       where: { id: createMessageDto.chatId },
     });
     if (!chat) {
-      AppError.notFound('Chat not found');
+      ErrorResponse.notFound('Chat not found');
     }
 
     // Check if user is a member of the chat
@@ -54,7 +54,7 @@ export class MessageService {
       },
     });
     if (!isMember) {
-      AppError.notFound('You are not a member of this chat');
+      ErrorResponse.notFound('You are not a member of this chat');
     }
 
     // Check if reply message exists when replyToMessageId is provided
@@ -63,10 +63,10 @@ export class MessageService {
         where: { id: createMessageDto.replyToMessageId },
       });
       if (!repliedMessage) {
-        AppError.notFound('Replied message not found');
+        ErrorResponse.notFound('Replied message not found');
       }
       if (repliedMessage.chatId !== createMessageDto.chatId) {
-        AppError.badRequest('Replied message is not from the same chat');
+        ErrorResponse.badRequest('Replied message is not from the same chat');
       }
     }
 
@@ -86,7 +86,7 @@ export class MessageService {
       const savedMessage = await this.messageRepo.save(newMessage);
       return savedMessage;
     } catch (error) {
-      AppError.throw(error, 'Failed to create message');
+      ErrorResponse.throw(error, 'Failed to create message');
     }
   }
 
@@ -98,12 +98,12 @@ export class MessageService {
       });
 
       if (!message) {
-        AppError.notFound('Message not found');
+        ErrorResponse.notFound('Message not found');
       }
 
       return message;
     } catch (error) {
-      AppError.throw(error, 'Failed to retrieve message');
+      ErrorResponse.throw(error, 'Failed to retrieve message');
     }
   }
 
@@ -121,7 +121,7 @@ export class MessageService {
 
       return await this.messageRepo.save(message);
     } catch (error) {
-      AppError.throw(error, 'Failed to update message');
+      ErrorResponse.throw(error, 'Failed to update message');
     }
   }
 
@@ -141,7 +141,7 @@ export class MessageService {
 
       return await query.getMany();
     } catch (error) {
-      AppError.throw(error, 'Failed to retrieve conversation messages');
+      ErrorResponse.throw(error, 'Failed to retrieve conversation messages');
     }
   }
 
@@ -155,7 +155,7 @@ export class MessageService {
         relations: ['sender', 'chat'],
       });
     } catch (error) {
-      AppError.throw(error, 'Failed to search messages');
+      ErrorResponse.throw(error, 'Failed to search messages');
     }
   }
 
@@ -166,7 +166,7 @@ export class MessageService {
         order: { createdAt: 'DESC' },
       });
     } catch (error) {
-      AppError.throw(error, 'Failed to retrieve last message');
+      ErrorResponse.throw(error, 'Failed to retrieve last message');
     }
   }
 
@@ -178,7 +178,7 @@ export class MessageService {
       await this.messageRepo.save(message);
       return message;
     } catch (error) {
-      AppError.throw(error, 'Failed to soft delete message');
+      ErrorResponse.throw(error, 'Failed to soft delete message');
     }
   }
 
@@ -188,7 +188,7 @@ export class MessageService {
       await this.messageRepo.delete(id);
       return message;
     } catch (error) {
-      AppError.throw(error, 'Failed to delete message');
+      ErrorResponse.throw(error, 'Failed to delete message');
     }
   }
 }

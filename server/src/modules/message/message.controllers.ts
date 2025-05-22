@@ -6,7 +6,6 @@ import {
   Delete,
   Param,
   Body,
-  HttpStatus,
   UseGuards,
   Query,
 } from '@nestjs/common';
@@ -14,11 +13,11 @@ import { plainToInstance } from 'class-transformer';
 import { MessageService } from './message.service';
 import { CreateMessageDto } from './dto/requests/create-message.dto';
 import { UpdateMessageDto } from './dto/requests/update-message.dto';
-import { ResponseData } from '../../common/response-data';
+import { SuccessResponse } from '../../common/api-response/success';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { MessageResponseDto } from './dto/responses/message-response.dto';
-import { AppError } from '../../common/errors';
+import { ErrorResponse } from '../../common/api-response/errors';
 import { GetMessagesDto } from './dto/queries/get-messages.dto';
 
 @Controller('message')
@@ -30,9 +29,9 @@ export class MessageController {
   async create(
     @CurrentUser('id') userId: string,
     @Body() createMessageDto: CreateMessageDto,
-  ): Promise<ResponseData<MessageResponseDto>> {
+  ): Promise<SuccessResponse<MessageResponseDto>> {
     if (!createMessageDto.content && !createMessageDto.attachmentIds) {
-      AppError.badRequest('Message must have at least Text or Attachment');
+      ErrorResponse.badRequest('Message must have at least Text or Attachment');
     }
 
     const message = await this.messageService.createMessage(
@@ -40,9 +39,8 @@ export class MessageController {
       createMessageDto,
     );
 
-    return new ResponseData<MessageResponseDto>(
+    return new SuccessResponse(
       plainToInstance(MessageResponseDto, message),
-      HttpStatus.CREATED,
       'Message created successfully',
     );
   }
@@ -50,12 +48,11 @@ export class MessageController {
   @Get(':messageId')
   async findOne(
     @Param('messageId') messageId: string,
-  ): Promise<ResponseData<MessageResponseDto>> {
+  ): Promise<SuccessResponse<MessageResponseDto>> {
     const message = await this.messageService.getMessageById(messageId);
 
-    return new ResponseData<MessageResponseDto>(
+    return new SuccessResponse(
       plainToInstance(MessageResponseDto, message),
-      HttpStatus.OK,
       'Message retrieved successfully',
     );
   }
@@ -65,11 +62,10 @@ export class MessageController {
     @Param('messageId') messageId: string,
     @Body() updateMessageDto: UpdateMessageDto,
     @CurrentUser('id') userId: string,
-  ): Promise<ResponseData<MessageResponseDto>> {
-    // Verify the user is the message sender before allowing update
+  ): Promise<SuccessResponse<MessageResponseDto>> {
     const message = await this.messageService.getMessageById(messageId);
     if (message.senderId !== userId) {
-      AppError.unauthorized('Unauthorized to update this message');
+      ErrorResponse.unauthorized('Unauthorized to update this message');
     }
 
     const updatedMessage = await this.messageService.updateMessage(
@@ -77,9 +73,8 @@ export class MessageController {
       updateMessageDto,
     );
 
-    return new ResponseData<MessageResponseDto>(
+    return new SuccessResponse(
       plainToInstance(MessageResponseDto, updatedMessage),
-      HttpStatus.OK,
       'Message updated successfully',
     );
   }
@@ -88,17 +83,14 @@ export class MessageController {
   async getChatMessages(
     @Param('chatId') chatId: string,
     @Query() queryParams: GetMessagesDto,
-    // @CurrentUser('id') userId: string,
-  ): Promise<ResponseData<MessageResponseDto[]>> {
-    // Optional: Verify user is a member of the chat
+  ): Promise<SuccessResponse<MessageResponseDto[]>> {
     const messages = await this.messageService.getMessagesByChatId(
       chatId,
       queryParams,
     );
 
-    return new ResponseData<MessageResponseDto[]>(
+    return new SuccessResponse(
       plainToInstance(MessageResponseDto, messages),
-      HttpStatus.OK,
       'Chat messages retrieved successfully',
     );
   }
@@ -107,19 +99,17 @@ export class MessageController {
   async remove(
     @Param('messageId') messageId: string,
     @CurrentUser('id') userId: string,
-  ): Promise<ResponseData<MessageResponseDto>> {
-    // Verify the user is the message sender before allowing deletion
+  ): Promise<SuccessResponse<MessageResponseDto>> {
     const message = await this.messageService.getMessageById(messageId);
     if (message.senderId !== userId) {
-      AppError.unauthorized('Unauthorized to delete this message');
+      ErrorResponse.unauthorized('Unauthorized to delete this message');
     }
 
     const deletedMessage =
       await this.messageService.softDeleteMessage(messageId);
 
-    return new ResponseData<MessageResponseDto>(
+    return new SuccessResponse(
       plainToInstance(MessageResponseDto, deletedMessage),
-      HttpStatus.OK,
       'Message deleted successfully',
     );
   }

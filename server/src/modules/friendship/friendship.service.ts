@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { Friendship } from './entities/friendship.entity';
 import { UserService } from '../user/user.service';
 import { FriendshipStatus } from './constants/friendship-status.constants';
-import { AppError } from '../../common/errors';
+import { ErrorResponse } from '../../common/api-response/errors';
 
 @Injectable()
 export class FriendshipService {
@@ -32,7 +32,7 @@ export class FriendshipService {
       });
 
       if (exists) {
-        AppError.conflict('Friendship relationship already exists');
+        ErrorResponse.conflict('Friendship relationship already exists');
       }
 
       return await this.friendshipRepo.save({
@@ -41,7 +41,7 @@ export class FriendshipService {
         status: FriendshipStatus.PENDING,
       });
     } catch (error) {
-      AppError.throw(error, 'Failed to send friend request');
+      ErrorResponse.throw(error, 'Failed to send friend request');
     }
   }
 
@@ -60,14 +60,14 @@ export class FriendshipService {
       });
 
       if (!request) {
-        AppError.notFound('Friend request not found');
+        ErrorResponse.notFound('Friend request not found');
       }
 
       request.status = status;
       request.updatedAt = new Date();
       return await this.friendshipRepo.save(request);
     } catch (error) {
-      AppError.throw(error, 'Failed to respond to friend request');
+      ErrorResponse.throw(error, 'Failed to respond to friend request');
     }
   }
 
@@ -81,7 +81,7 @@ export class FriendshipService {
         relations: ['requester', 'addressee'],
       });
     } catch (error) {
-      AppError.throw(error, 'Failed to retrieve friends');
+      ErrorResponse.throw(error, 'Failed to retrieve friends');
     }
   }
 
@@ -95,7 +95,7 @@ export class FriendshipService {
         relations: ['requester'],
       });
     } catch (error) {
-      AppError.throw(error, 'Failed to retrieve pending friend requests');
+      ErrorResponse.throw(error, 'Failed to retrieve pending friend requests');
     }
   }
 
@@ -113,7 +113,7 @@ export class FriendshipService {
 
       return friendship?.status || null;
     } catch (error) {
-      AppError.throw(error, 'Failed to retrieve friendship status');
+      ErrorResponse.throw(error, 'Failed to retrieve friendship status');
     }
   }
 }

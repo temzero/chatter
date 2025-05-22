@@ -8,6 +8,7 @@ export const authService = {
       identifier,
       password,
     });
+    console.log('data response: ', data)
     storageService.setAccessToken(data.accessToken);
     storageService.setUser(data.user);
     return data;

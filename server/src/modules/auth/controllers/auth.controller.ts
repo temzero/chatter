@@ -5,7 +5,6 @@ import {
   Body,
   BadRequestException,
   Query,
-  HttpStatus,
   UseGuards,
   Headers,
   Req,
@@ -14,7 +13,12 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from '../services/auth.service';
 import { TokenService } from '../services/token.service';
-import { ResponseData } from 'src/common/response-data';
+import {
+  RefreshResponse,
+  SuccessResponse,
+} from 'src/common/api-response/success';
+import { ErrorResponse } from 'src/common/api-response/errors';
+import { AuthResponse } from 'src/common/api-response/success';
 import { User } from '../../user/entities/user.entity';
 import { LocalGuard } from '../guards/local.guard';
 import { JwtAuthGuard } from '../guards/jwt.guard';
@@ -24,7 +28,6 @@ import { JwtPayload, JwtRefreshPayload } from '../types/jwt-payload.type';
 import { setRefreshTokenCookie } from 'src/common/helpers/set-cookie.helper';
 import { JwtRefreshGuard } from '../guards/jwt-refresh.guard';
 import { RegisterDto } from '../dto/requests/register.dto';
-import { LoginResponseDto } from '../dto/responses/login-response.dto';
 import { TokenStorageService } from '../services/token-storage.service';
 
 @Controller('auth')
@@ -43,7 +46,7 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
     @Headers('x-device-id') deviceId: string,
     @Headers('x-device-name') deviceName: string,
-  ): Promise<ResponseData<LoginResponseDto>> {
+  ): Promise<AuthResponse> {
     await this.tokenStorageService.deleteDeviceTokens(req.user.id, deviceId);
 
     const { user, accessToken, refreshToken } = await this.authService.login(
@@ -53,14 +56,7 @@ export class AuthController {
     );
     // Optional: Set HTTP-only cookie for web clients
     setRefreshTokenCookie(response, refreshToken, this.configService);
-    return new ResponseData<LoginResponseDto>(
-      {
-        user,
-        accessToken,
-      },
-      HttpStatus.OK,
-      'Login successful',
-    );
+    return new AuthResponse(user, accessToken, 'Login successful');
   }
 
   @Post('register')
@@ -69,7 +65,7 @@ export class AuthController {
     @Headers('x-device-name') deviceName: string,
     @Res({ passthrough: true }) response: Response,
     @Body() registerDto: RegisterDto,
-  ): Promise<ResponseData<LoginResponseDto>> {
+  ): Promise<AuthResponse> {
     const { user, accessToken, refreshToken } = await this.authService.register(
       registerDto,
       deviceId,
@@ -77,12 +73,9 @@ export class AuthController {
     );
     // Optional: Set HTTP-only cookie for web clients
     setRefreshTokenCookie(response, refreshToken, this.configService);
-    return new ResponseData<LoginResponseDto>(
-      {
-        user,
-        accessToken,
-      },
-      HttpStatus.CREATED,
+    return new AuthResponse(
+      user,
+      accessToken,
       'User registered and logged in successfully. Please verify your email.',
     );
   }
@@ -95,7 +88,7 @@ export class AuthController {
       throw new BadRequestException('Access token not found');
     }
     const decodedToken = this.tokenService.decodeToken<JwtPayload>(accessToken);
-    return decodedToken;
+    return new SuccessResponse(decodedToken, 'Token decoded successfully');
   }
 
   @Post('logout')
@@ -112,7 +105,7 @@ export class AuthController {
 
     await this.authService.logout(decodedToken.sub, decodedToken.deviceId);
     response.clearCookie('refreshToken');
-    return { message: 'Logged out successfully' };
+    return new SuccessResponse(null, 'Logged out successfully');
   }
 
   @Post('logout-all')
@@ -123,7 +116,10 @@ export class AuthController {
   ) {
     await this.authService.logoutAll(user.id);
     response.clearCookie('refreshToken');
-    return { message: 'Logged out from all devices successfully' };
+    return new SuccessResponse(
+      null,
+      'Logged out from all devices successfully',
+    );
   }
 
   @Post('refresh')
@@ -143,16 +139,24 @@ export class AuthController {
     // Optional: set HTTP-only cookie for web clients
     setRefreshTokenCookie(response, refreshToken, this.configService);
 
-    return {
+    return new RefreshResponse(
       accessToken,
       email,
       deviceName,
-    };
+      'Tokens refreshed successfully',
+    );
   }
 
   @Get('verify-email')
   verifyEmail(@Query('token') token: string) {
-    return this.authService.verifyEmail(token);
+    return this.authService
+      .verifyEmail(token)
+      .then(
+        (result) => new SuccessResponse(result, 'Email verified successfully'),
+      )
+      .catch((error) => {
+        ErrorResponse.throw(error, 'Email verification fail');
+      });
   }
 
   @Post('send-password-reset-email')

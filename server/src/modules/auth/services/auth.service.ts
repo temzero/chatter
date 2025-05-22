@@ -12,7 +12,7 @@ import { TokenType } from '../types/token-type.enum';
 import { plainToInstance } from 'class-transformer';
 import { UserResponseDto } from 'src/modules/user/dto/responses/user-response.dto';
 import { RegisterDto } from '../dto/requests/register.dto';
-import { AppError } from 'src/common/errors';
+import { ErrorResponse } from 'src/common/api-response/errors';
 import type { JwtRefreshPayload } from '../types/jwt-payload.type';
 
 @Injectable()
@@ -30,11 +30,11 @@ export class AuthService {
     try {
       const { identifier, password } = loginDto;
       const user = await this.userService.getUserByIdentifier(identifier);
-      if (!user) AppError.unauthorized('Invalid credentials');
+      if (!user) ErrorResponse.unauthorized('Invalid credentials');
       const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
       return isPasswordValid ? user : null;
     } catch (error) {
-      AppError.throw(error, 'User validation failed');
+      ErrorResponse.throw(error, 'User validation failed');
     }
   }
 
@@ -65,7 +65,7 @@ export class AuthService {
         refreshToken: newRefreshToken,
       };
     } catch (error) {
-      AppError.throw(error, 'Login failed');
+      ErrorResponse.throw(error, 'Login failed');
     }
   }
 
@@ -85,7 +85,7 @@ export class AuthService {
       // Automatically login the user
       return this.login(user, deviceId, deviceName);
     } catch (error) {
-      AppError.throw(error, 'Registration failed');
+      ErrorResponse.throw(error, 'Registration failed');
     }
   }
 
@@ -100,10 +100,10 @@ export class AuthService {
       const storedToken =
         await this.tokenStorageService.findToken(refreshToken);
       if (!storedToken) {
-        AppError.unauthorized('Refresh token not found');
+        ErrorResponse.unauthorized('Refresh token not found');
       } else if (storedToken.expiresAt < new Date()) {
         await this.tokenStorageService.deleteToken(refreshToken);
-        AppError.unauthorized('Refresh token expired');
+        ErrorResponse.unauthorized('Refresh token expired');
       }
       // 3. Delete old refresh token (security best practice)
       await this.tokenStorageService.deleteDeviceTokens(
@@ -133,7 +133,7 @@ export class AuthService {
         deviceName: payload.deviceName,
       };
     } catch (error) {
-      AppError.throw(error, 'Failed to refresh tokens');
+      ErrorResponse.throw(error, 'Failed to refresh tokens');
     }
   }
 
@@ -142,7 +142,7 @@ export class AuthService {
       const user = await this.userService.getUserByIdentifier(email);
       if (!user) return { message: 'user Not found' };
       if (user.emailVerified === false) {
-        AppError.unauthorized('Email not verified');
+        ErrorResponse.unauthorized('Email not verified');
       }
       const resetPasswordToken = this.jwtService.sign({ sub: user.id });
       const clientUrl = this.configService.get<string>('CLIENT_URL');
@@ -151,7 +151,7 @@ export class AuthService {
       await this.mailService.sendPasswordResetEmail(email, resetUrl);
       return { message: 'Verification email sent successfully.' };
     } catch (error) {
-      AppError.throw(error, 'Failed to send password reset email');
+      ErrorResponse.throw(error, 'Failed to send password reset email');
     }
   }
 
@@ -164,7 +164,7 @@ export class AuthService {
       return { message: 'Email verified successfully.' };
     } catch (error) {
       console.error('verifyEmail', error);
-      AppError.unauthorized('Invalid or expired token');
+      ErrorResponse.unauthorized('Invalid or expired token');
     }
   }
 
@@ -175,7 +175,7 @@ export class AuthService {
       return { message: 'Password reset successfully.' };
     } catch (error) {
       console.error('setNewPasswordWithToken', error);
-      AppError.unauthorized('Invalid or expired token');
+      ErrorResponse.unauthorized('Invalid or expired token');
     }
   }
 
@@ -185,7 +185,7 @@ export class AuthService {
       // Update user status
       await this.userService.setUserOnlineStatus(userId, false);
     } catch (error) {
-      AppError.throw(error, 'Failed to logout');
+      ErrorResponse.throw(error, 'Failed to logout');
     }
   }
 
@@ -195,7 +195,7 @@ export class AuthService {
       // Update user status
       await this.userService.setUserOnlineStatus(userId, false);
     } catch (error) {
-      AppError.throw(error, 'Failed to logout from all devices');
+      ErrorResponse.throw(error, 'Failed to logout from all devices');
     }
   }
 }

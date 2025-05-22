@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 
-export class AppError {
+export class ErrorResponse {
   static throw(
     error: unknown,
     defaultMessage: string,

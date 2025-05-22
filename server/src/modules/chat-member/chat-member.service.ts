@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 
 import { ChatMember } from './entities/chat-member.entity';
 import { ChatMemberRole } from './constants/chat-member-roles.constants';
-import { AppError } from '../../common/errors';
+import { ErrorResponse } from '../../common/api-response/errors';
 import { UpdateChatMemberDto } from './dto/requests/update-chat-member.dto';
 import { User } from '../user/entities/user.entity';
 import { Chat } from '../chat/entities/chat.entity';
@@ -27,7 +27,7 @@ export class ChatMemberService {
         relations: ['user'],
       });
     } catch (error) {
-      AppError.throw(error, 'Failed to retrieve chat members');
+      ErrorResponse.throw(error, 'Failed to retrieve chat members');
     }
   }
 
@@ -39,12 +39,12 @@ export class ChatMemberService {
       });
 
       if (!member) {
-        AppError.notFound('Chat member not found or Chat not exist!');
+        ErrorResponse.notFound('Chat member not found or Chat not exist!');
       }
 
       return member;
     } catch (error) {
-      AppError.throw(error, 'Failed to retrieve chat member');
+      ErrorResponse.throw(error, 'Failed to retrieve chat member');
     }
   }
 
@@ -56,13 +56,13 @@ export class ChatMemberService {
     // Check if user exists
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) {
-      AppError.notFound('User does not exist');
+      ErrorResponse.notFound('User does not exist');
     }
 
     // Check if chat exists
     const chat = await this.chatRepo.findOne({ where: { id: chatId } });
     if (!chat) {
-      AppError.notFound('Chat does not exist');
+      ErrorResponse.notFound('Chat does not exist');
     }
 
     // Check if user is already a member
@@ -70,7 +70,7 @@ export class ChatMemberService {
       where: { chatId, userId },
     });
     if (existingMember) {
-      AppError.badRequest('User is already a member of this chat');
+      ErrorResponse.badRequest('User is already a member of this chat');
     }
 
     // Create new member
@@ -83,7 +83,7 @@ export class ChatMemberService {
     try {
       return await this.memberRepo.save(newMember);
     } catch (error) {
-      AppError.throw(error, 'Failed to add chat member');
+      ErrorResponse.throw(error, 'Failed to add chat member');
     }
   }
 
@@ -99,7 +99,7 @@ export class ChatMemberService {
       );
 
       if (result.affected === 0) {
-        AppError.notFound('Chat member not found');
+        ErrorResponse.notFound('Chat member not found');
       }
       // Then return the updated entity
       const member = await this.memberRepo.findOne({
@@ -108,12 +108,12 @@ export class ChatMemberService {
       });
 
       if (!member) {
-        AppError.notFound('Chat member not found');
+        ErrorResponse.notFound('Chat member not found');
       }
 
       return member;
     } catch (error) {
-      AppError.throw(error, 'Failed to update chat member');
+      ErrorResponse.throw(error, 'Failed to update chat member');
     }
   }
 
@@ -127,7 +127,7 @@ export class ChatMemberService {
         lastReadMessageId: messageId,
       });
     } catch (error) {
-      AppError.throw(error, 'Failed to update last read message');
+      ErrorResponse.throw(error, 'Failed to update last read message');
     }
   }
 
@@ -139,13 +139,13 @@ export class ChatMemberService {
       });
 
       if (!member) {
-        AppError.notFound('Member not found');
+        ErrorResponse.notFound('Member not found');
       }
 
       await this.memberRepo.remove(member);
       return member;
     } catch (error) {
-      AppError.throw(error, 'Failed to remove chat member');
+      ErrorResponse.throw(error, 'Failed to remove chat member');
     }
   }
 }

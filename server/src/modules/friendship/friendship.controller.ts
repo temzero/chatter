@@ -5,12 +5,11 @@ import {
   Patch,
   Param,
   Body,
-  HttpStatus,
   UseGuards,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { FriendshipService } from './friendship.service';
-import { ResponseData } from '../../common/response-data';
+import { SuccessResponse } from '../../common/api-response/success';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { FriendshipResponseDto } from './dto/responses/friendship-response.dto';
@@ -26,15 +25,14 @@ export class FriendshipController {
   async sendRequest(
     @CurrentUser('id') userId: string,
     @Param('addresseeId') addresseeId: string,
-  ): Promise<ResponseData<FriendshipResponseDto>> {
+  ): Promise<SuccessResponse<FriendshipResponseDto>> {
     const friendship = await this.friendshipService.sendRequest(
       userId,
       addresseeId,
     );
 
-    return new ResponseData<FriendshipResponseDto>(
+    return new SuccessResponse(
       plainToInstance(FriendshipResponseDto, friendship),
-      HttpStatus.CREATED,
       'Friend request sent successfully',
     );
   }
@@ -44,16 +42,15 @@ export class FriendshipController {
     @CurrentUser('id') userId: string,
     @Param('friendshipId') friendshipId: string,
     @Body() body: RespondToRequestDto,
-  ): Promise<ResponseData<FriendshipResponseDto>> {
+  ): Promise<SuccessResponse<FriendshipResponseDto>> {
     const friendship = await this.friendshipService.respondToRequest(
       userId,
       friendshipId,
       body.status,
     );
 
-    return new ResponseData<FriendshipResponseDto>(
+    return new SuccessResponse(
       plainToInstance(FriendshipResponseDto, friendship),
-      HttpStatus.OK,
       'Friend request responded successfully',
     );
   }
@@ -61,12 +58,11 @@ export class FriendshipController {
   @Get()
   async getFriends(
     @CurrentUser('id') userId: string,
-  ): Promise<ResponseData<FriendshipResponseDto[]>> {
+  ): Promise<SuccessResponse<FriendshipResponseDto[]>> {
     const friendships = await this.friendshipService.getFriends(userId);
 
-    return new ResponseData<FriendshipResponseDto[]>(
+    return new SuccessResponse(
       plainToInstance(FriendshipResponseDto, friendships),
-      HttpStatus.OK,
       'Friends retrieved successfully',
     );
   }
@@ -74,12 +70,11 @@ export class FriendshipController {
   @Get('requests/pending')
   async getPendingRequests(
     @CurrentUser('id') userId: string,
-  ): Promise<ResponseData<FriendshipResponseDto[]>> {
+  ): Promise<SuccessResponse<FriendshipResponseDto[]>> {
     const requests = await this.friendshipService.getPendingRequests(userId);
 
-    return new ResponseData<FriendshipResponseDto[]>(
+    return new SuccessResponse(
       plainToInstance(FriendshipResponseDto, requests),
-      HttpStatus.OK,
       'Pending friend requests retrieved successfully',
     );
   }
@@ -88,15 +83,14 @@ export class FriendshipController {
   async getFriendshipStatus(
     @CurrentUser('id') currentUserId: string,
     @Param('otherUserId') otherUserId: string,
-  ): Promise<ResponseData<{ status: FriendshipStatus | null }>> {
+  ): Promise<SuccessResponse<{ status: FriendshipStatus | null }>> {
     const status = await this.friendshipService.getFriendshipStatus(
       currentUserId,
       otherUserId,
     );
 
-    return new ResponseData(
+    return new SuccessResponse(
       { status },
-      HttpStatus.OK,
       'Friendship status retrieved successfully',
     );
   }

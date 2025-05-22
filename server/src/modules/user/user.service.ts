@@ -6,7 +6,7 @@ import { RegisterDto } from '../auth/dto/requests/register.dto';
 import { UpdateUserDto } from 'src/modules/user/dto/requests/update-user.dto';
 import { ConfigService } from '@nestjs/config';
 import { User } from 'src/modules/user/entities/user.entity';
-import { AppError } from 'src/common/errors';
+import { ErrorResponse } from 'src/common/api-response/errors';
 import { TokenStorageService } from '../auth/services/token-storage.service';
 
 @Injectable()
@@ -34,7 +34,7 @@ export class UserService {
       });
       return user;
     } catch (error) {
-      AppError.throw(error, 'Failed to retrieve user by identifier');
+      ErrorResponse.throw(error, 'Failed to retrieve user by identifier');
     }
   }
 
@@ -42,11 +42,11 @@ export class UserService {
     try {
       const user = await this.userRepository.findOneBy({ id });
       if (!user) {
-        AppError.notFound('User not found');
+        ErrorResponse.notFound('User not found');
       }
       return user;
     } catch (error) {
-      AppError.throw(error, 'Failed to retrieve user');
+      ErrorResponse.throw(error, 'Failed to retrieve user');
     }
   }
 
@@ -54,7 +54,7 @@ export class UserService {
     try {
       return await this.userRepository.find();
     } catch (error) {
-      AppError.throw(error, 'Failed to retrieve users');
+      ErrorResponse.throw(error, 'Failed to retrieve users');
     }
   }
 
@@ -66,7 +66,7 @@ export class UserService {
       );
       return await bcrypt.hash(password, saltRounds);
     } catch (error) {
-      AppError.throw(error, 'Failed to hash password');
+      ErrorResponse.throw(error, 'Failed to hash password');
     }
   }
 
@@ -74,7 +74,7 @@ export class UserService {
     try {
       const existingUser = await this.getUserByIdentifier(registerDto.email);
       if (existingUser) {
-        AppError.conflict('Email or username already taken');
+        ErrorResponse.conflict('Email or username already taken');
       }
       const user = this.userRepository.create({
         ...registerDto,
@@ -83,7 +83,7 @@ export class UserService {
       await this.userRepository.save(user);
       return user;
     } catch (error) {
-      AppError.throw(error, 'Failed to create user');
+      ErrorResponse.throw(error, 'Failed to create user');
     }
   }
 
@@ -96,7 +96,7 @@ export class UserService {
       Object.assign(user, updateUserDto);
       return await this.userRepository.save(user);
     } catch (error) {
-      AppError.throw(error, 'Failed to update user');
+      ErrorResponse.throw(error, 'Failed to update user');
     }
   }
 
@@ -118,7 +118,7 @@ export class UserService {
       user.passwordHash = await this.hashPassword(newPassword);
       return await this.userRepository.save(user);
     } catch (error) {
-      AppError.throw(error, 'Failed to update password');
+      ErrorResponse.throw(error, 'Failed to update password');
     }
   }
 
@@ -132,13 +132,13 @@ export class UserService {
 
       const isMatch = await bcrypt.compare(oldPassword, user.passwordHash);
       if (!isMatch) {
-        AppError.unauthorized('Old password is incorrect');
+        ErrorResponse.unauthorized('Old password is incorrect');
       }
 
       user.passwordHash = await this.hashPassword(newPassword);
       return await this.userRepository.save(user);
     } catch (error) {
-      AppError.throw(error, 'Failed to update password');
+      ErrorResponse.throw(error, 'Failed to update password');
     }
   }
 
@@ -151,7 +151,7 @@ export class UserService {
       }
       return user;
     } catch (error) {
-      AppError.throw(error, 'Failed to delete user');
+      ErrorResponse.throw(error, 'Failed to delete user');
     }
   }
 }

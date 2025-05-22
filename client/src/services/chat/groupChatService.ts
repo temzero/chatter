@@ -1,7 +1,7 @@
 import API from "../api/api";
 import type { GroupChat, ChatGroupMember } from "@/types/chat";
 
-type ResponseData<T> = {
+type SuccessResponse<T> = {
   data: T;
   statusCode: number;
   message: string;
@@ -14,7 +14,7 @@ export const groupChatService = {
     memberIds: string[];
     type: "group" | "channel";
   }): Promise<GroupChat> {
-    const response = await API.post<ResponseData<GroupChat>>(
+    const response = await API.post<SuccessResponse<GroupChat>>(
       "/chat-group/create",
       payload
     );
@@ -22,21 +22,24 @@ export const groupChatService = {
   },
 
   async getGroupChatById(groupChatId: string): Promise<GroupChat> {
-    const response = await API.get<ResponseData<GroupChat>>(
+    const response = await API.get<SuccessResponse<GroupChat>>(
       `/chat-group/${groupChatId}`
     );
     return response.data.data;
   },
 
   async getGroupChatMembers(groupChatId: string): Promise<ChatGroupMember[]> {
-    const response = await API.get<ResponseData<ChatGroupMember[]>>(
+    const response = await API.get<SuccessResponse<ChatGroupMember[]>>(
       `/chat-group-members/${groupChatId}`
     );
     return response.data.data;
   },
 
-  async updateGroupChat(groupChatId: string, payload: Partial<GroupChat>): Promise<GroupChat> {
-    const response = await API.put<ResponseData<GroupChat>>(
+  async updateGroupChat(
+    groupChatId: string,
+    payload: Partial<GroupChat>
+  ): Promise<GroupChat> {
+    const response = await API.put<SuccessResponse<GroupChat>>(
       `/chat-group/${groupChatId}`,
       payload
     );
@@ -45,7 +48,7 @@ export const groupChatService = {
 
   // Delete a group chat
   async deleteGroupChat(groupChatId: string): Promise<string> {
-    const response = await API.delete<ResponseData<string>>(
+    const response = await API.delete<SuccessResponse<string>>(
       `/chat-group/${groupChatId}`
     );
     return response.data.data;

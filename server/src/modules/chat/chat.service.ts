@@ -6,7 +6,7 @@ import { UpdateChatDto } from 'src/modules/chat/dto/requests/update-chat.dto';
 import { User } from 'src/modules/user/entities/user.entity';
 import { ChatMember } from 'src/modules/chat-member/entities/chat-member.entity';
 import { ChatMemberRole } from 'src/modules/chat-member/constants/chat-member-roles.constants';
-import { AppError } from 'src/common/errors';
+import { ErrorResponse } from 'src/common/api-response/errors';
 import { In } from 'typeorm';
 import { ChatType } from './constants/chat-types.constants';
 import {
@@ -30,7 +30,7 @@ export class ChatService {
   async createDirectChat(createDto: CreateDirectChatDto): Promise<Chat> {
     // Validate exactly 2 users (current user + one other)
     if (createDto.memberIds.length !== 2) {
-      AppError.badRequest('Direct chats must have exactly 2 members');
+      ErrorResponse.badRequest('Direct chats must have exactly 2 members');
     }
 
     // Validate users if exist
@@ -39,7 +39,7 @@ export class ChatService {
     });
 
     if (userCount !== createDto.memberIds.length) {
-      AppError.badRequest('One or more Users do not exist!');
+      ErrorResponse.badRequest('One or more Users do not exist!');
     }
 
     const [user1, user2] = createDto.memberIds;
@@ -57,7 +57,9 @@ export class ChatService {
       .getOne();
 
     if (existingChat) {
-      AppError.badRequest('A direct chat already exists between these users');
+      ErrorResponse.badRequest(
+        'A direct chat already exists between these users',
+      );
     }
 
     // Create new chat
@@ -75,15 +77,15 @@ export class ChatService {
     const memberCount = createDto.memberIds.length;
 
     if (createDto.type === ChatType.GROUP && memberCount < 2) {
-      AppError.badRequest('Group must have at least 2 members');
+      ErrorResponse.badRequest('Group must have at least 2 members');
     }
 
     if (createDto.type === ChatType.CHANNEL && memberCount < 1) {
-      AppError.badRequest('Channel must have at least 1 member');
+      ErrorResponse.badRequest('Channel must have at least 1 member');
     }
 
     if (!createDto.name) {
-      AppError.badRequest('Group or Channel must have a name');
+      ErrorResponse.badRequest('Group or Channel must have a name');
     }
 
     // Validate users if exist
@@ -92,7 +94,7 @@ export class ChatService {
     });
 
     if (userCount !== createDto.memberIds.length) {
-      AppError.badRequest('One or more Users do not exist!');
+      ErrorResponse.badRequest('One or more Users do not exist!');
     }
 
     // Create new chat
@@ -108,7 +110,7 @@ export class ChatService {
       Object.assign(chat, updateDto);
       return await this.chatRepo.save(chat);
     } catch (error) {
-      AppError.throw(error, 'Failed to update chat');
+      ErrorResponse.throw(error, 'Failed to update chat');
     }
   }
 
@@ -116,11 +118,11 @@ export class ChatService {
     try {
       const chat = await this.chatRepo.findOne({ where: { id: chatId } });
       if (!chat) {
-        AppError.notFound('Chat not found');
+        ErrorResponse.notFound('Chat not found');
       }
       return chat;
     } catch (error) {
-      AppError.throw(error, 'Failed to retrieve chat');
+      ErrorResponse.throw(error, 'Failed to retrieve chat');
     }
   }
 
@@ -139,7 +141,7 @@ export class ChatService {
             (a.lastMessage?.createdAt || a.createdAt).getTime(),
         );
     } catch (error) {
-      AppError.throw(error, 'Failed to retrieve user chats');
+      ErrorResponse.throw(error, 'Failed to retrieve user chats');
     }
   }
 
@@ -151,7 +153,7 @@ export class ChatService {
       });
       return members.map((m) => m.user);
     } catch (error) {
-      AppError.throw(error, 'Failed to retrieve chat members');
+      ErrorResponse.throw(error, 'Failed to retrieve chat members');
     }
   }
 
@@ -166,7 +168,7 @@ export class ChatService {
         ),
       );
     } catch (error) {
-      AppError.throw(error, 'Failed to add chat members');
+      ErrorResponse.throw(error, 'Failed to add chat members');
     }
   }
 
@@ -178,19 +180,19 @@ export class ChatService {
       });
 
       if (!chat) {
-        AppError.notFound('Chat not found');
+        ErrorResponse.notFound('Chat not found');
       }
 
       // Check if user is a member of the chat
       const member = chat.members.find((m) => m.userId === userId);
       if (!member) {
-        AppError.unauthorized('You are not a member of this chat');
+        ErrorResponse.unauthorized('You are not a member of this chat');
       }
 
       // Additional checks for group chats
       if (chat.type !== ChatType.DIRECT) {
         if (member.role !== ChatMemberRole.OWNER) {
-          AppError.unauthorized('Only owners can delete group chats');
+          ErrorResponse.unauthorized('Only owners can delete group chats');
         }
       }
 
@@ -201,7 +203,7 @@ export class ChatService {
       await this.chatRepo.delete(chatId);
       return chat;
     } catch (error) {
-      AppError.throw(error, 'Failed to delete chat');
+      ErrorResponse.throw(error, 'Failed to delete chat');
     }
   }
 }
