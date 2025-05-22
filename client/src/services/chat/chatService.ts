@@ -14,7 +14,7 @@ export const chatService = {
   ...groupChatService,
   // Get all private and group chats
   async getAllChats(): Promise<Chat[]> {
-    const response = await API.get<ResponseData<Chat[]>>(`/chat/all`);
+    const response = await API.get<ResponseData<Chat[]>>(`/chat`);
     return response.data.data;
   },
 

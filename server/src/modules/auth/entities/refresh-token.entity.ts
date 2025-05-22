@@ -7,7 +7,7 @@ import {
   BeforeInsert,
 } from 'typeorm';
 
-@Entity('refreshTokens')
+@Entity('refresh_tokens')
 export class RefreshToken {
   @PrimaryGeneratedColumn('uuid')
   id: string;

@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
 import { Message } from './entities/message.entity';
+import { Chat } from '../chat/entities/chat.entity';
+import { ChatMember } from '../chat-member/entities/chat-member.entity';
 import { CreateMessageDto } from './dto/requests/create-message.dto';
 import { UpdateMessageDto } from './dto/requests/update-message.dto';
 import { AppError } from '../../common/errors';
@@ -10,14 +12,79 @@ import { GetMessagesDto } from './dto/queries/get-messages.dto';
 @Injectable()
 export class MessageService {
   constructor(
+    @InjectRepository(Chat)
+    private readonly chatRepo: Repository<Chat>,
+    @InjectRepository(ChatMember)
+    private readonly chatMemberRepo: Repository<ChatMember>,
     @InjectRepository(Message)
     private readonly messageRepo: Repository<Message>,
   ) {}
 
-  async createMessage(createMessageDto: CreateMessageDto): Promise<Message> {
+  // async createMessage(
+  //   userId: string,
+  //   createMessageDto: CreateMessageDto,
+  // ): Promise<Message> {
+  //   // check if chat exist
+  //   // check if user is member of that chat
+  //   try {
+  //     const newMessage = this.messageRepo.create(createMessageDto);
+  //     return await this.messageRepo.save(newMessage);
+  //   } catch (error) {
+  //     AppError.throw(error, 'Failed to create message');
+  //   }
+  // }
+
+  async createMessage(
+    userId: string,
+    createMessageDto: CreateMessageDto,
+  ): Promise<Message> {
+    // Check if chat exists
+    const chat = await this.chatRepo.findOne({
+      where: { id: createMessageDto.chatId },
+    });
+    if (!chat) {
+      AppError.notFound('Chat not found');
+    }
+
+    // Check if user is a member of the chat
+    const isMember = await this.chatMemberRepo.exists({
+      where: {
+        chatId: createMessageDto.chatId,
+        userId: userId,
+      },
+    });
+    if (!isMember) {
+      AppError.notFound('You are not a member of this chat');
+    }
+
+    // Check if reply message exists when replyToMessageId is provided
+    if (createMessageDto.replyToMessageId) {
+      const repliedMessage = await this.messageRepo.findOne({
+        where: { id: createMessageDto.replyToMessageId },
+      });
+      if (!repliedMessage) {
+        AppError.notFound('Replied message not found');
+      }
+      if (repliedMessage.chatId !== createMessageDto.chatId) {
+        AppError.badRequest('Replied message is not from the same chat');
+      }
+    }
+
     try {
-      const newMessage = this.messageRepo.create(createMessageDto);
-      return await this.messageRepo.save(newMessage);
+      const newMessage = this.messageRepo.create({
+        senderId: userId,
+        ...createMessageDto,
+      });
+
+      // If there are attachments, you might want to associate them here
+      // This would depend on your attachment entity structure
+      // if (createMessageDto.attachmentIds?.length) {
+      // Example implementation:
+      // newMessage.attachments = createMessageDto.attachmentIds.map(id => ({ id }));
+      // }
+
+      const savedMessage = await this.messageRepo.save(newMessage);
+      return savedMessage;
     } catch (error) {
       AppError.throw(error, 'Failed to create message');
     }
@@ -27,7 +94,7 @@ export class MessageService {
     try {
       const message = await this.messageRepo.findOne({
         where: { id },
-        relations: ['sender', 'chat', 'metadata', 'media_items'],
+        relations: ['sender', 'chat'],
       });
 
       if (!message) {
@@ -58,16 +125,6 @@ export class MessageService {
     }
   }
 
-  async deleteMessage(id: string): Promise<Message> {
-    try {
-      const message = await this.getMessageById(id);
-      await this.messageRepo.delete(id);
-      return message;
-    } catch (error) {
-      AppError.throw(error, 'Failed to delete message');
-    }
-  }
-
   async getMessagesByChatId(
     chatId: string,
     queryParams: GetMessagesDto,
@@ -77,7 +134,7 @@ export class MessageService {
         .createQueryBuilder('message')
         .where('message.chat_id = :chatId', { chatId })
         .andWhere('message.is_deleted = :isDeleted', { isDeleted: false })
-        .orderBy('message.timestamp', 'DESC');
+        .orderBy('message.createdAt', 'DESC');
 
       if (queryParams.limit) query.take(queryParams.limit);
       if (queryParams.offset) query.skip(queryParams.offset);
@@ -110,6 +167,28 @@ export class MessageService {
       });
     } catch (error) {
       AppError.throw(error, 'Failed to retrieve last message');
+    }
+  }
+
+  async softDeleteMessage(id: string): Promise<Message> {
+    try {
+      const message = await this.getMessageById(id);
+      message.isDeleted = true;
+      message.deletedAt = new Date();
+      await this.messageRepo.save(message);
+      return message;
+    } catch (error) {
+      AppError.throw(error, 'Failed to soft delete message');
+    }
+  }
+
+  async deleteMessage(id: string): Promise<Message> {
+    try {
+      const message = await this.getMessageById(id);
+      await this.messageRepo.delete(id);
+      return message;
+    } catch (error) {
+      AppError.throw(error, 'Failed to delete message');
     }
   }
 }

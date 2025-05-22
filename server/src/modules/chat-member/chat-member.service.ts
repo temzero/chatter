@@ -4,13 +4,18 @@ import { Repository } from 'typeorm';
 
 import { ChatMember } from './entities/chat-member.entity';
 import { ChatMemberRole } from './constants/chat-member-roles.constants';
-import { ChatMemberStatus } from './constants/chat-member-status.constants';
 import { AppError } from '../../common/errors';
 import { UpdateChatMemberDto } from './dto/requests/update-chat-member.dto';
+import { User } from '../user/entities/user.entity';
+import { Chat } from '../chat/entities/chat.entity';
 
 @Injectable()
 export class ChatMemberService {
   constructor(
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
+    @InjectRepository(Chat)
+    private readonly chatRepo: Repository<Chat>,
     @InjectRepository(ChatMember)
     private readonly memberRepo: Repository<ChatMember>,
   ) {}
@@ -19,10 +24,27 @@ export class ChatMemberService {
     try {
       return await this.memberRepo.find({
         where: { chatId },
-        relations: ['user', 'lastReadMessage'],
+        relations: ['user'],
       });
     } catch (error) {
       AppError.throw(error, 'Failed to retrieve chat members');
+    }
+  }
+
+  async getMember(chatId: string, userId: string): Promise<ChatMember> {
+    try {
+      const member = await this.memberRepo.findOne({
+        where: { chatId, userId },
+        relations: ['user'],
+      });
+
+      if (!member) {
+        AppError.notFound('Chat member not found or Chat not exist!');
+      }
+
+      return member;
+    } catch (error) {
+      AppError.throw(error, 'Failed to retrieve chat member');
     }
   }
 
@@ -31,33 +53,37 @@ export class ChatMemberService {
     userId: string,
     role: ChatMemberRole = ChatMemberRole.MEMBER,
   ): Promise<ChatMember> {
+    // Check if user exists
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) {
+      AppError.notFound('User does not exist');
+    }
+
+    // Check if chat exists
+    const chat = await this.chatRepo.findOne({ where: { id: chatId } });
+    if (!chat) {
+      AppError.notFound('Chat does not exist');
+    }
+
+    // Check if user is already a member
+    const existingMember = await this.memberRepo.findOne({
+      where: { chatId, userId },
+    });
+    if (existingMember) {
+      AppError.badRequest('User is already a member of this chat');
+    }
+
+    // Create new member
+    const newMember = this.memberRepo.create({
+      chatId,
+      userId,
+      role,
+    });
+
     try {
-      const newMember = this.memberRepo.create({
-        chatId,
-        userId,
-        role,
-        status: ChatMemberStatus.ACTIVE,
-      });
       return await this.memberRepo.save(newMember);
     } catch (error) {
       AppError.throw(error, 'Failed to add chat member');
-    }
-  }
-
-  async removeMember(chatId: string, userId: string): Promise<void> {
-    try {
-      const member = await this.memberRepo.findOneBy({
-        chatId,
-        userId,
-      });
-
-      if (!member) {
-        AppError.notFound('Chat member not found');
-      }
-
-      await this.memberRepo.remove(member);
-    } catch (error) {
-      AppError.throw(error, 'Failed to remove chat member');
     }
   }
 
@@ -67,11 +93,18 @@ export class ChatMemberService {
     updateDto: UpdateChatMemberDto,
   ): Promise<ChatMember> {
     try {
-      await this.memberRepo.update({ chatId, userId }, updateDto);
+      const result = await this.memberRepo.update(
+        { chatId, userId },
+        updateDto,
+      );
+
+      if (result.affected === 0) {
+        AppError.notFound('Chat member not found');
+      }
       // Then return the updated entity
       const member = await this.memberRepo.findOne({
         where: { chatId, userId },
-        relations: ['user', 'lastReadMessage'],
+        relations: ['user'],
       });
 
       if (!member) {
@@ -81,23 +114,6 @@ export class ChatMemberService {
       return member;
     } catch (error) {
       AppError.throw(error, 'Failed to update chat member');
-    }
-  }
-
-  async getMember(chatId: string, userId: string): Promise<ChatMember> {
-    try {
-      const member = await this.memberRepo.findOne({
-        where: { chatId, userId },
-        relations: ['user', 'lastReadMessage'],
-      });
-
-      if (!member) {
-        AppError.notFound('Chat member not found');
-      }
-
-      return member;
-    } catch (error) {
-      AppError.throw(error, 'Failed to retrieve chat member');
     }
   }
 
@@ -112,6 +128,24 @@ export class ChatMemberService {
       });
     } catch (error) {
       AppError.throw(error, 'Failed to update last read message');
+    }
+  }
+
+  async removeMember(chatId: string, userId: string): Promise<ChatMember> {
+    try {
+      const member = await this.memberRepo.findOneBy({
+        chatId,
+        userId,
+      });
+
+      if (!member) {
+        AppError.notFound('Member not found');
+      }
+
+      await this.memberRepo.remove(member);
+      return member;
+    } catch (error) {
+      AppError.throw(error, 'Failed to remove chat member');
     }
   }
 }

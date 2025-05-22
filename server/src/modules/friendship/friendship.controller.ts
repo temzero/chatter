@@ -10,112 +10,94 @@ import {
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { FriendshipService } from './friendship.service';
-import { SendFriendRequestDto } from './dto/requests/send-friend-request.dto';
-import { RespondFriendRequestDto } from './dto/requests/respond-friend-request.dto';
 import { ResponseData } from '../../common/response-data';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { FriendshipResponseDto } from './dto/responses/friendship-response.dto';
-import { AppError } from '../../common/errors';
 import { FriendshipStatus } from './constants/friendship-status.constants';
+import { RespondToRequestDto } from './dto/requests/response-to-request.dto';
 
 @Controller('friendships')
 @UseGuards(JwtAuthGuard)
 export class FriendshipController {
   constructor(private readonly friendshipService: FriendshipService) {}
 
-  @Post('requests')
+  @Post('requests/:addresseeId')
   async sendRequest(
     @CurrentUser('id') userId: string,
-    @Body() dto: SendFriendRequestDto,
+    @Param('addresseeId') addresseeId: string,
   ): Promise<ResponseData<FriendshipResponseDto>> {
-    try {
-      const friendship = await this.friendshipService.sendRequest(userId, dto);
+    const friendship = await this.friendshipService.sendRequest(
+      userId,
+      addresseeId,
+    );
 
-      return new ResponseData<FriendshipResponseDto>(
-        plainToInstance(FriendshipResponseDto, friendship),
-        HttpStatus.CREATED,
-        'Friend request sent successfully',
-      );
-    } catch (error: unknown) {
-      AppError.throw(error, 'Failed to send friend request');
-    }
+    return new ResponseData<FriendshipResponseDto>(
+      plainToInstance(FriendshipResponseDto, friendship),
+      HttpStatus.CREATED,
+      'Friend request sent successfully',
+    );
   }
 
-  @Patch('requests/:id')
+  @Patch('requests/:friendshipId')
   async respondToRequest(
     @CurrentUser('id') userId: string,
-    @Param('id') id: string,
-    @Body() dto: RespondFriendRequestDto,
+    @Param('friendshipId') friendshipId: string,
+    @Body() body: RespondToRequestDto,
   ): Promise<ResponseData<FriendshipResponseDto>> {
-    try {
-      const friendship = await this.friendshipService.respondToRequest(userId, {
-        ...dto,
-        friendshipId: id,
-      });
+    const friendship = await this.friendshipService.respondToRequest(
+      userId,
+      friendshipId,
+      body.status,
+    );
 
-      return new ResponseData<FriendshipResponseDto>(
-        plainToInstance(FriendshipResponseDto, friendship),
-        HttpStatus.OK,
-        'Friend request responded successfully',
-      );
-    } catch (error: unknown) {
-      AppError.throw(error, 'Failed to respond to friend request');
-    }
+    return new ResponseData<FriendshipResponseDto>(
+      plainToInstance(FriendshipResponseDto, friendship),
+      HttpStatus.OK,
+      'Friend request responded successfully',
+    );
   }
 
   @Get()
   async getFriends(
     @CurrentUser('id') userId: string,
   ): Promise<ResponseData<FriendshipResponseDto[]>> {
-    try {
-      const friendships = await this.friendshipService.getFriends(userId);
+    const friendships = await this.friendshipService.getFriends(userId);
 
-      return new ResponseData<FriendshipResponseDto[]>(
-        plainToInstance(FriendshipResponseDto, friendships),
-        HttpStatus.OK,
-        'Friends retrieved successfully',
-      );
-    } catch (error: unknown) {
-      AppError.throw(error, 'Failed to retrieve friends');
-    }
+    return new ResponseData<FriendshipResponseDto[]>(
+      plainToInstance(FriendshipResponseDto, friendships),
+      HttpStatus.OK,
+      'Friends retrieved successfully',
+    );
   }
 
   @Get('requests/pending')
   async getPendingRequests(
     @CurrentUser('id') userId: string,
   ): Promise<ResponseData<FriendshipResponseDto[]>> {
-    try {
-      const requests = await this.friendshipService.getPendingRequests(userId);
+    const requests = await this.friendshipService.getPendingRequests(userId);
 
-      return new ResponseData<FriendshipResponseDto[]>(
-        plainToInstance(FriendshipResponseDto, requests),
-        HttpStatus.OK,
-        'Pending friend requests retrieved successfully',
-      );
-    } catch (error: unknown) {
-      AppError.throw(error, 'Failed to retrieve pending friend requests');
-    }
+    return new ResponseData<FriendshipResponseDto[]>(
+      plainToInstance(FriendshipResponseDto, requests),
+      HttpStatus.OK,
+      'Pending friend requests retrieved successfully',
+    );
   }
 
-  @Get('status/:userId')
+  @Get('status/:otherUserId')
   async getFriendshipStatus(
     @CurrentUser('id') currentUserId: string,
-    @Param('userId') otherUserId: string,
+    @Param('otherUserId') otherUserId: string,
   ): Promise<ResponseData<{ status: FriendshipStatus | null }>> {
-    try {
-      const status = await this.friendshipService.getFriendshipStatus(
-        currentUserId,
-        otherUserId,
-      );
+    const status = await this.friendshipService.getFriendshipStatus(
+      currentUserId,
+      otherUserId,
+    );
 
-      return new ResponseData(
-        { status },
-        HttpStatus.OK,
-        'Friendship status retrieved successfully',
-      );
-    } catch (error: unknown) {
-      AppError.throw(error, 'Failed to retrieve friendship status');
-    }
+    return new ResponseData(
+      { status },
+      HttpStatus.OK,
+      'Friendship status retrieved successfully',
+    );
   }
 }

@@ -14,25 +14,36 @@ export const Avatar: React.FC<AvatarProps> = ({
   textSize = "text-xl",
   className = "",
 }) => {
-  if (!user) return null;
+  if (!user || typeof user !== "object") return null;
+
+  const typedUser = user as User | ChatPartner | ChatGroupMember;
+
+  const avatar = typedUser.avatar;
+  const firstNameInitial = typedUser.firstName?.charAt(0)?.toUpperCase();
+  const lastNameInitial = typedUser.lastName?.charAt(0)?.toUpperCase();
+
+  const showInitials = firstNameInitial || lastNameInitial;
 
   return (
     <div
       className={`w-${size} h-${size} flex items-center justify-center overflow-hidden rounded-full border-2 border-[var(--border-color)] ${className}`}
     >
-      {user.avatar ? (
+      {avatar ? (
         <img
           className="h-full w-full object-cover"
-          src={user.avatar}
+          src={avatar}
           loading="lazy"
+          alt="User avatar"
         />
-      ) : (
+      ) : showInitials ? (
         <h1
           className={`h-full w-full font-light flex items-center justify-center bg-[var(--border-color)] select-none ${textSize}`}
         >
-          {user.firstName.charAt(0).toUpperCase()}
-          {user.lastName.charAt(0).toUpperCase()}
+          {firstNameInitial}
+          {lastNameInitial}
         </h1>
+      ) : (
+        <div className="h-full w-full bg-[var(--border-color)]"></div>
       )}
     </div>
   );

@@ -4,9 +4,7 @@ import { Repository } from 'typeorm';
 
 import { Friendship } from './entities/friendship.entity';
 import { UserService } from '../user/user.service';
-import { SendFriendRequestDto } from './dto/requests/send-friend-request.dto';
 import { FriendshipStatus } from './constants/friendship-status.constants';
-import { RespondFriendRequestDto } from './dto/requests/respond-friend-request.dto';
 import { AppError } from '../../common/errors';
 
 @Injectable()
@@ -19,17 +17,17 @@ export class FriendshipService {
 
   async sendRequest(
     requesterId: string,
-    dto: SendFriendRequestDto,
+    addresseeId: string,
   ): Promise<Friendship> {
     try {
       // Check if user exists
-      await this.userService.getUserById(dto.addresseeId);
+      await this.userService.getUserById(addresseeId);
 
       // Check if relationship already exists
       const exists = await this.friendshipRepo.findOne({
         where: [
-          { requesterId, addresseeId: dto.addresseeId },
-          { requesterId: dto.addresseeId, addresseeId: requesterId },
+          { requesterId, addresseeId },
+          { requesterId: addresseeId, addresseeId: requesterId },
         ],
       });
 
@@ -39,7 +37,7 @@ export class FriendshipService {
 
       return await this.friendshipRepo.save({
         requesterId,
-        addresseeId: dto.addresseeId,
+        addresseeId: addresseeId,
         status: FriendshipStatus.PENDING,
       });
     } catch (error) {
@@ -49,12 +47,13 @@ export class FriendshipService {
 
   async respondToRequest(
     userId: string,
-    dto: RespondFriendRequestDto,
+    friendshipId: string,
+    status: FriendshipStatus.ACCEPTED | FriendshipStatus.DECLINED,
   ): Promise<Friendship> {
     try {
       const request = await this.friendshipRepo.findOne({
         where: {
-          id: dto.friendshipId,
+          id: friendshipId,
           addresseeId: userId,
           status: FriendshipStatus.PENDING,
         },
@@ -64,7 +63,7 @@ export class FriendshipService {
         AppError.notFound('Friend request not found');
       }
 
-      request.status = dto.status;
+      request.status = status;
       request.updatedAt = new Date();
       return await this.friendshipRepo.save(request);
     } catch (error) {

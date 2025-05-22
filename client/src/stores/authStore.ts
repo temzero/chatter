@@ -107,7 +107,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             loading: false,
             message: { type: "success", content: "Logged in successfully" },
           });
-
+          useChatStore.getState().clearChats();
           useChatStore.getState().getChats(user.id);
         } catch (error) {
           const errorMessage = handleAuthError(error);
@@ -140,7 +140,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       logout: () => {
         authService.logout();
-        useChatStore.getState().setActiveChat(null);
+        useChatStore.getState().clearChats();
         useSidebarStore.getState().setSidebar("default");
         useSidebarInfoStore.getState().setSidebarInfo("default");
         set({

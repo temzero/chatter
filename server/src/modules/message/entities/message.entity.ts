@@ -15,7 +15,6 @@ import { Chat } from 'src/modules/chat/entities/chat.entity';
 import { User } from '../../user/entities/user.entity';
 import { Reaction } from './reaction.entity';
 import { Attachment } from './attachment.entity';
-import { MessageType } from '../constants/message-type.constants';
 import { MessageStatus } from '../constants/message-status.constants';
 
 @Entity('message')
@@ -40,13 +39,6 @@ export class Message {
 
   @Column({ name: 'sender_id' })
   senderId: string;
-
-  @Column({
-    type: 'enum',
-    enum: MessageType,
-    default: MessageType.TEXT,
-  })
-  type: MessageType;
 
   @Column({
     type: 'varchar',
@@ -102,20 +94,22 @@ export class Message {
   @BeforeInsert()
   @BeforeUpdate()
   validateContent() {
-    if (this.type === MessageType.TEXT && !this.content?.trim()) {
-      throw new Error('Text messages must have content');
-    }
-
+    // Trim content if it exists
     if (this.content) {
       this.content = this.content.trim();
-      if (this.content === '') this.content = null;
+      if (this.content === '') {
+        this.content = null;
+      }
     }
-  }
 
-  @BeforeUpdate()
-  setEditedAt() {
-    if (this.status === MessageStatus.EDITED && !this.editedAt) {
-      this.editedAt = new Date();
+    const hasText = !!this.content;
+    const hasAttachments =
+      Array.isArray(this.attachments) && this.attachments.length > 0;
+
+    if (!hasText && !hasAttachments) {
+      throw new Error(
+        'Message must contain either text content or at least one attachment',
+      );
     }
   }
 }

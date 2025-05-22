@@ -15,8 +15,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { ChatMemberService } from './chat-member.service';
 import { ChatMemberRole } from './constants/chat-member-roles.constants';
 import { ChatMemberResponseDto } from './dto/responses/chat-member-response.dto';
-import { AppError } from 'src/common/errors';
 import { UpdateChatMemberDto } from './dto/requests/update-chat-member.dto';
+import { mapChatMemberToResponseDto } from './mappers/chat-member.mapper.dto';
 
 @Controller('chat-members')
 @UseGuards(JwtAuthGuard)
@@ -27,16 +27,13 @@ export class ChatMemberController {
   async getChatMembers(
     @Param('chatId') chatId: string,
   ): Promise<ResponseData<ChatMemberResponseDto[]>> {
-    try {
-      const members = await this.memberService.findByChatId(chatId);
-      return new ResponseData(
-        plainToInstance(ChatMemberResponseDto, members),
-        HttpStatus.OK,
-        'Chat members retrieved successfully',
-      );
-    } catch (error) {
-      AppError.throw(error, 'Failed to retrieve chat members');
-    }
+    const members = await this.memberService.findByChatId(chatId);
+    const membersResponse = members.map(mapChatMemberToResponseDto);
+    return new ResponseData(
+      membersResponse,
+      HttpStatus.OK,
+      'Chat members retrieved successfully',
+    );
   }
 
   @Get(':chatId/:userId')
@@ -44,54 +41,27 @@ export class ChatMemberController {
     @Param('chatId') chatId: string,
     @Param('userId') userId: string,
   ): Promise<ResponseData<ChatMemberResponseDto>> {
-    try {
-      const member = await this.memberService.getMember(chatId, userId);
-      return new ResponseData(
-        plainToInstance(ChatMemberResponseDto, member),
-        HttpStatus.OK,
-        'Chat member retrieved successfully',
-      );
-    } catch (error) {
-      AppError.throw(error, 'Failed to retrieve chat member');
-    }
+    const member = await this.memberService.getMember(chatId, userId);
+    const memberResponse = mapChatMemberToResponseDto(member);
+    return new ResponseData(
+      memberResponse,
+      HttpStatus.OK,
+      'Chat member retrieved successfully',
+    );
   }
 
   @Post()
   async addMember(
     @Body() body: { chatId: string; userId: string; role?: ChatMemberRole },
-  ): Promise<ResponseData<ChatMemberResponseDto>> {
-    try {
-      const { chatId, userId, role } = body;
-      const newMember = await this.memberService.addMember(
-        chatId,
-        userId,
-        role,
-      );
-      return new ResponseData(
-        plainToInstance(ChatMemberResponseDto, newMember),
-        HttpStatus.CREATED,
-        'Member added successfully',
-      );
-    } catch (error) {
-      AppError.throw(error, 'Failed to add member', HttpStatus.BAD_REQUEST);
-    }
-  }
+  ) {
+    const { chatId, userId, role } = body;
+    const newMember = await this.memberService.addMember(chatId, userId, role);
 
-  @Delete(':chatId/:userId')
-  async removeMember(
-    @Param('chatId') chatId: string,
-    @Param('userId') userId: string,
-  ): Promise<ResponseData<{ success: boolean }>> {
-    try {
-      await this.memberService.removeMember(chatId, userId);
-      return new ResponseData(
-        { success: true },
-        HttpStatus.OK,
-        'Member removed successfully',
-      );
-    } catch (error) {
-      AppError.throw(error, 'Failed to remove member');
-    }
+    return new ResponseData(
+      newMember,
+      HttpStatus.CREATED,
+      'Member added successfully',
+    );
   }
 
   @Patch(':chatId/:userId')
@@ -101,42 +71,49 @@ export class ChatMemberController {
     @Body()
     updateDto: UpdateChatMemberDto,
   ): Promise<ResponseData<ChatMemberResponseDto>> {
-    try {
-      const updatedMember = await this.memberService.updateMember(
-        chatId,
-        userId,
-        updateDto,
-      );
-      return new ResponseData(
-        plainToInstance(ChatMemberResponseDto, updatedMember),
-        HttpStatus.OK,
-        'Member updated successfully',
-      );
-    } catch (error) {
-      AppError.throw(error, 'Failed to update member');
-    }
+    const updatedMember = await this.memberService.updateMember(
+      chatId,
+      userId,
+      updateDto,
+    );
+    const memberResponse = mapChatMemberToResponseDto(updatedMember);
+    return new ResponseData(
+      plainToInstance(ChatMemberResponseDto, memberResponse),
+      HttpStatus.OK,
+      'Member updated successfully',
+    );
   }
 
-  @Patch(':chatId/:userId/last-read')
+  @Patch('last-read/:chatId/:userId')
   async updateLastReadMessage(
     @Param('chatId') chatId: string,
     @Param('userId') userId: string,
     @Body() body: { messageId: string },
   ): Promise<ResponseData<ChatMemberResponseDto>> {
-    try {
-      const { messageId } = body;
-      const updatedMember = await this.memberService.updateLastReadMessage(
-        chatId,
-        userId,
-        messageId,
-      );
-      return new ResponseData(
-        plainToInstance(ChatMemberResponseDto, updatedMember),
-        HttpStatus.OK,
-        'Last read message updated successfully',
-      );
-    } catch (error) {
-      AppError.throw(error, 'Failed to update last read message');
-    }
+    const { messageId } = body;
+    const updatedMember = await this.memberService.updateLastReadMessage(
+      chatId,
+      userId,
+      messageId,
+    );
+    return new ResponseData(
+      plainToInstance(ChatMemberResponseDto, updatedMember),
+      HttpStatus.OK,
+      'Last read message updated successfully',
+    );
+  }
+
+  @Delete(':chatId/:userId')
+  async removeMember(
+    @Param('chatId') chatId: string,
+    @Param('userId') userId: string,
+  ) {
+    const removedMember = await this.memberService.removeMember(chatId, userId);
+
+    return new ResponseData(
+      removedMember,
+      HttpStatus.OK,
+      'Member removed successfully',
+    );
   }
 }

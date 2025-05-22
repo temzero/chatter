@@ -40,6 +40,7 @@ interface ChatStore {
   updateGroupChat: (id: string, payload: Partial<GroupChat>) => Promise<void>;
   deleteChat: (id: string, type: ChatTypes) => Promise<void>;
   setSearchTerm: (term: string) => void;
+  clearChats: () => void;
 }
 
 export const useChatStore = create<ChatStore>()(
@@ -264,7 +265,12 @@ export const useChatStore = create<ChatStore>()(
           throw error;
         }
       },
+
+      clearChats: () => {
+        set({ chats: [], activeChat: null, groupMembers: {} });
+      },
     }),
+
     {
       name: "chat-storage",
       partialize: (state) => ({

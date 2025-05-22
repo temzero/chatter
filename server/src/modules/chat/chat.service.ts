@@ -27,30 +27,6 @@ export class ChatService {
     private readonly memberRepo: Repository<ChatMember>,
   ) {}
 
-  // async createChat(createDto: CreateChatDto): Promise<Chat> {
-  //   try {
-  //     // Validate users first
-  //     const userCount = await this.userRepo.count({
-  //       where: { id: In(createDto.memberIds) },
-  //     });
-
-  //     if (userCount !== createDto.memberIds.length) {
-  //       AppError.badRequest('One or more Users do not exist!');
-  //     }
-
-  //     // Proceed with creation
-  //     const chat = await this.chatRepo.save({
-  //       type: createDto.type,
-  //       name: createDto.name,
-  //     });
-
-  //     await this.addMembers(chat.id, createDto.memberIds);
-  //     return chat;
-  //   } catch (error) {
-  //     AppError.throw(error, 'Failed to create chat');
-  //   }
-  // }
-
   async createDirectChat(createDto: CreateDirectChatDto): Promise<Chat> {
     // Validate exactly 2 users (current user + one other)
     if (createDto.memberIds.length !== 2) {
@@ -136,33 +112,6 @@ export class ChatService {
     }
   }
 
-  async deleteChat(chatId: string, userId: string): Promise<Chat> {
-    try {
-      const chat = await this.chatRepo.findOne({
-        where: { id: chatId },
-        relations: ['members'],
-      });
-
-      if (!chat) {
-        AppError.notFound('Chat not found');
-      }
-
-      const member = chat.members.find((m) => m.userId === userId);
-      if (
-        !member ||
-        (member.role !== ChatMemberRole.ADMIN &&
-          member.role !== ChatMemberRole.OWNER)
-      ) {
-        AppError.unauthorized('Unauthorized to delete chat');
-      }
-
-      await this.chatRepo.delete(chatId);
-      return chat;
-    } catch (error) {
-      AppError.throw(error, 'Failed to delete chat');
-    }
-  }
-
   async getChatById(chatId: string): Promise<Chat> {
     try {
       const chat = await this.chatRepo.findOne({ where: { id: chatId } });
@@ -218,6 +167,41 @@ export class ChatService {
       );
     } catch (error) {
       AppError.throw(error, 'Failed to add chat members');
+    }
+  }
+
+  async deleteChat(chatId: string, userId: string): Promise<Chat> {
+    try {
+      const chat = await this.chatRepo.findOne({
+        where: { id: chatId },
+        relations: ['members'],
+      });
+
+      if (!chat) {
+        AppError.notFound('Chat not found');
+      }
+
+      // Check if user is a member of the chat
+      const member = chat.members.find((m) => m.userId === userId);
+      if (!member) {
+        AppError.unauthorized('You are not a member of this chat');
+      }
+
+      // Additional checks for group chats
+      if (chat.type !== ChatType.DIRECT) {
+        if (member.role !== ChatMemberRole.OWNER) {
+          AppError.unauthorized('Only owners can delete group chats');
+        }
+      }
+
+      // For direct chats, you might want additional checks
+      // For example, maybe both users should confirm deletion?
+      // This depends on your business logic
+
+      await this.chatRepo.delete(chatId);
+      return chat;
+    } catch (error) {
+      AppError.throw(error, 'Failed to delete chat');
     }
   }
 }

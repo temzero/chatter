@@ -60,7 +60,6 @@ export class ChatController {
       if (!Object.values(ChatType).includes(chat.type)) {
         throw new Error('Invalid chat type');
       }
-      console.log(chat.type);
 
       if (chat.type === ChatType.DIRECT) {
         return new ResponseData<directChatResponseDto>(
@@ -88,7 +87,7 @@ export class ChatController {
     try {
       const chat = await this.chatService.createDirectChat({
         ...createDirectChatDto,
-        memberIds: [...createDirectChatDto.memberIds, userId], // Include current user
+        memberIds: [userId, ...createDirectChatDto.memberIds],
       });
 
       return new ResponseData<directChatResponseDto>(
@@ -107,15 +106,14 @@ export class ChatController {
 
   @Post('group')
   async createGroupChat(
-    @Body() createGroupChatDto: CreateGroupChatDto,
     @CurrentUser('id') userId: string,
+    @Body() createGroupChatDto: CreateGroupChatDto,
   ): Promise<ResponseData<groupChatResponseDto>> {
     try {
-      if (!createGroupChatDto.memberIds.includes(userId)) {
-        createGroupChatDto.memberIds.push(userId);
-      }
-
-      const chat = await this.chatService.createGroupChat(createGroupChatDto);
+      const chat = await this.chatService.createDirectChat({
+        ...createGroupChatDto,
+        memberIds: [userId, ...createGroupChatDto.memberIds],
+      });
 
       return new ResponseData<groupChatResponseDto>(
         plainToInstance(groupChatResponseDto, chat),
@@ -164,28 +162,21 @@ export class ChatController {
   }
 
   @Delete(':chatId')
-  async remove(
+  async delete(
     @Param('chatId') chatId: string,
     @CurrentUser('id') userId: string,
   ): Promise<ResponseData<directChatResponseDto | groupChatResponseDto>> {
-    try {
-      const deletedChat = await this.chatService.deleteChat(chatId, userId);
+    const deletedChat = await this.chatService.deleteChat(chatId, userId);
 
-      if (deletedChat.type === ChatType.DIRECT) {
-        return new ResponseData<directChatResponseDto>(
-          plainToInstance(directChatResponseDto, deletedChat),
-          HttpStatus.OK,
-          'Direct chat deleted successfully',
-        );
-      } else {
-        return new ResponseData<groupChatResponseDto>(
-          plainToInstance(groupChatResponseDto, deletedChat),
-          HttpStatus.OK,
-          'Group chat deleted successfully',
-        );
-      }
-    } catch (error: unknown) {
-      AppError.throw(error, 'Failed to delete chat');
-    }
+    const responseDto =
+      deletedChat.type === ChatType.DIRECT
+        ? plainToInstance(directChatResponseDto, deletedChat)
+        : plainToInstance(groupChatResponseDto, deletedChat);
+
+    return new ResponseData(
+      responseDto,
+      HttpStatus.OK,
+      `${deletedChat.type} chat DELETED successfully`,
+    );
   }
 }
