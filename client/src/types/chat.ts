@@ -1,59 +1,63 @@
-import type { Message } from "./message";
+import { AttachmentType } from "./attachment";
 
-export type Chat = PrivateChat | GroupChat;
+export type Chat = DirectChat | GroupChannelChat;
 
-export type ChatTypes = PrivateChatType | ChatGroupTypes;
-export type PrivateChatType = "private";
-export type ChatGroupTypes = "group" | "channel";
+export type ChatType = "direct" | "group" | "channel";
 
-export interface PrivateChat {
-  avatar: string;
+export interface BaseChatResponse {
   id: string;
-  type: PrivateChatType;
+  type: ChatType;
   name: string;
-  chatPartner: ChatPartner;
-  lastMessage?: Message | null;
-  pinnedMessage?: Message | null;
-  updatedAt: Date; // or Date, depending on your serialization
-}
-
-export interface GroupChat {
-  id: string;
-  type: ChatGroupTypes;
-  name: string;
-  avatar?: string;
+  avatarUrl?: string | null;
   description?: string | null;
-  lastMessage?: Message | null;
-  pinnedMessage?: Message | null;
   updatedAt: Date;
+  unreadCount?: number;
+  lastMessage?: DisplayMessage;
 }
 
+export interface DirectChat extends BaseChatResponse {
+  type: "direct";
+  userId: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  birthday: string;
+}
+
+export interface GroupChannelChat extends BaseChatResponse {
+  type: "group" | "channel";
+  memberCount?: number;
+}
+
+// Deprecated interfaces (keep for backward compatibility if needed)
 export interface ChatPartner {
-  email: string | null | undefined;
   id: string;
   username: string;
-  nickname: string | null;
-  firstName?: string;
-  lastName?: string;
-  avatar?: string | null;
-  bio?: string | null;
-  phoneNumber?: string | null;
-  birthday?: Date | null;
-  status?: string | null;
-  last_seen?: Date | null;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  birthday: string;
+  avatarUrl?: string | null;
 }
 
 export interface ChatGroupMember {
   id: string;
-  username: string;
-  nickname: string | null;
-  avatar: string | null;
+  nickname: string;
   firstName: string;
   lastName: string;
-  last_seen: Date | null;
-  chat_group_id: string;
-  is_admin: boolean;
-  is_banned: boolean;
-  muted_until: Date | null;
-  joinedAt: Date;
+  avatarUrl: string | null;
+  isBanned: boolean;
+  isAdmin: boolean;
+}
+
+export interface DisplayMessage {
+  id: string;
+  senderName: string;
+  content?: string;
+  attachmentTypes?: AttachmentType;
+  createdAt: string;
+  // Add other message properties as needed
 }

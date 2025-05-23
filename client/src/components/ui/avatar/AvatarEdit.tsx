@@ -2,13 +2,13 @@
 import React from "react";
 
 interface AvatarEditProps {
-  avatar: string;
+  avatarUrl: string;
   type?: string;
   onAvatarChange: (newAvatar: string) => void;
 }
 
 const AvatarEdit: React.FC<AvatarEditProps> = ({
-  avatar,
+  avatarUrl,
   onAvatarChange,
   type,
 }) => {
@@ -36,11 +36,11 @@ const AvatarEdit: React.FC<AvatarEditProps> = ({
 
   return (
     <div
-      id="change-avatar"
+      id="change-avatarUrl"
       className={`${typeClass} flex items-center justify-center border-[var(--border-color)] overflow-hidden relative`}
     >
-      {avatar ? (
-        <img src={avatar} alt="Avatar" className="h-full w-full object-cover" />
+      {avatarUrl ? (
+        <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
       ) : (
         <i className="material-symbols-outlined text-8xl opacity-20">
           {type === "group" ? "groups" : type === "channel" ? "tv" : "person"}

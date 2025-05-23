@@ -1,33 +1,37 @@
 import { ChatType } from '../../constants/chat-types.constants';
 import { Exclude, Expose, Type } from 'class-transformer';
-import { MessageResponseDto } from './message-response.dto';
+import { LastMessageResponseDto } from './last-message-response.dto';
 
 @Exclude()
 export class ChatListResponseDto {
-  @Expose()
-  id: string;
+  // Common fields for ALL chats
+  @Expose() id: string;
+  @Expose() type: ChatType; // "direct" | "group" | "channel"
+  @Expose() name: string;
+  @Expose() avatarUrl?: string | null;
+  @Expose() description?: string | null;
 
+  @Expose() updatedAt: Date;
+  @Expose() unreadCount?: number;
   @Expose()
-  type: ChatType;
+  @Type(() => LastMessageResponseDto)
+  lastMessage?: LastMessageResponseDto;
 
-  @Expose()
-  name: string;
+  @Expose({ groups: ['direct'] })
+  userId: string;
+  @Expose({ groups: ['direct'] })
+  username: string;
+  @Expose({ groups: ['direct'] })
+  firstName: string;
+  @Expose({ groups: ['direct'] })
+  lastName: string;
+  @Expose({ groups: ['direct'] })
+  email: string;
+  @Expose({ groups: ['direct'] })
+  phoneNumber: string;
+  @Expose({ groups: ['direct'] })
+  birthday: string;
 
-  @Expose()
-  avatar?: string;
-
-  @Expose()
-  @Type(() => MessageResponseDto)
-  lastMessage?: MessageResponseDto;
-
-  @Expose()
-  get lastMessageTimestamp(): string | null {
-    return this.lastMessage?.createdAt?.toISOString() || null;
-  }
-
-  @Expose()
-  unreadCount?: number;
-
-  @Expose()
-  updatedAt?: Date;
+  @Expose({ groups: ['group-channel'] })
+  memberCount?: number; // Only for groups and channel
 }

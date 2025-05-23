@@ -20,7 +20,7 @@ const SidebarProfileEdit: React.FC = () => {
         ? new Date(currentUser.birthday).toISOString().split("T")[0]
         : "",
       bio: currentUser?.bio || "",
-      avatar: currentUser?.avatar || "",
+      avatarUrl: currentUser?.avatarUrl || "",
     }),
     [currentUser]
   );
@@ -94,9 +94,9 @@ const SidebarProfileEdit: React.FC = () => {
         <div className="flex flex-col items-center gap-4 w-full">
           {/* Avatar Upload */}
           <AvatarEdit
-            avatar={formData.avatar}
+            avatarUrl={formData.avatarUrl}
             onAvatarChange={(newAvatar) =>
-              setFormData((prev) => ({ ...prev, avatar: newAvatar }))
+              setFormData((prev) => ({ ...prev, avatarUrl: newAvatar }))
             }
           />
           {/* Form Fields */}

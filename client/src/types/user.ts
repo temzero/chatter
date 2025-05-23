@@ -7,7 +7,7 @@ export interface User {
   username: string;
   email: string;
   password_hash: string;
-  avatar?: string;
+  avatarUrl?: string;
   firstName?: string;
   lastName?: string;
   phoneNumber?: string;
@@ -24,7 +24,7 @@ export interface User {
 
 export interface UserSettings {
   user_id: string;
-  user: Pick<User, "id" | "username" | "email" | "avatar">;
+  user: Pick<User, "id" | "username" | "email" | "avatarUrl">;
 
   // Notifications
   notifications_enabled: boolean;

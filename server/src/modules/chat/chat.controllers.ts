@@ -40,9 +40,21 @@ export class ChatController {
     @CurrentUser('id') userId: string,
   ): Promise<SuccessResponse<ChatListResponseDto[]>> {
     try {
-      const chats = await this.chatService.getChatsByUserId(userId);
+      const chats = await this.chatService.getChatListByUserId(userId);
+      console.log('chats: ', chats);
+      function getTransformGroup(chatType: ChatType): string[] {
+        if (chatType === ChatType.DIRECT) return ['direct'];
+        if (chatType === ChatType.GROUP || chatType === ChatType.CHANNEL)
+          return ['group-channel'];
+        return [];
+      }
+      const transformedChats = chats.map((chat) =>
+        plainToInstance(ChatListResponseDto, chat, {
+          groups: getTransformGroup(chat.type),
+        }),
+      );
       return new SuccessResponse(
-        plainToInstance(ChatListResponseDto, chats),
+        transformedChats,
         'User chats retrieved successfully',
       );
     } catch (error: unknown) {

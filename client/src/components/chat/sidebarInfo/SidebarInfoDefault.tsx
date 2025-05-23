@@ -1,68 +1,57 @@
-import React, { useEffect } from "react";
+import React, { useMemo } from "react";
 import { useChatStore } from "@/stores/chatStore";
 import { useMessageStore } from "@/stores/messageStore";
+import {
+  SidebarInfoModes,
+  useSidebarInfoStore,
+} from "@/stores/sidebarInfoStore";
 import { AnimatePresence, motion } from "framer-motion";
+import { formatTime } from "@/utils/formatTime";
 import ContactInfoItem from "@/components/ui/contactInfoItem";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import RenderMedia from "@/components/ui/RenderMedia";
-import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
-import { formatTime } from "@/utils/formatTime";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 
 const ChatInfoDefault: React.FC = () => {
-  const activeChat = useChatStore((state) => state.activeChat);
-  const { groupMembers, getGroupMembers } = useChatStore();
-  const activeMedia = useMessageStore((state) => state.activeMedia);
-  const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
-  const isSidebarInfoVisible = useSidebarInfoStore(
-    (state) => state.isSidebarInfoVisible
-  );
+  const { activeChat, groupMembers } = useChatStore();
+  const { activeMedia } = useMessageStore();
+  const { setSidebarInfo, isSidebarInfoVisible } = useSidebarInfoStore();
 
-  useEffect(() => {
-    // Only fetch if it's a group chat and members aren't already loaded
-    if (
-      activeChat?.type !== "private" &&
-      activeChat?.id &&
-      !groupMembers[activeChat.id]
-    ) {
-      getGroupMembers(activeChat.id);
+  const isDirect = activeChat?.type === 'direct';
+
+  const currentMembers = useMemo(() => {
+    if (!isDirect && activeChat?.id) {
+      return groupMembers[activeChat.id] || [];
     }
-  }, [activeChat?.id, activeChat?.type, getGroupMembers, groupMembers]);
+    return [];
+  }, [activeChat?.id, activeChat?.type, groupMembers]);
 
-  const currentMembers =
-    activeChat?.type !== "private" && activeChat?.id
-      ? groupMembers[activeChat.id] || []
-      : [];
-
-  if (!activeChat) return null;
-  const isPrivate = activeChat?.type === "private";
 
   const openEditSidebar = () => {
-    if (isPrivate) {
-      setSidebarInfo("privateEdit");
-    } else {
-      setSidebarInfo("groupEdit");
-    }
+    setSidebarInfo(isDirect ? "directEdit" : "groupEdit");
   };
+
+  const headerIcons = [
+    { icon: "notifications", action: () => {} },
+    { icon: "search", action: () => {} },
+    { icon: "block", action: () => {}, className: "rotate-90" },
+    { icon: "edit", action: openEditSidebar },
+  ];
+
+  if (!activeChat) return null;
 
   return (
     <aside className="relative w-full h-full overflow-hidden flex flex-col">
       <header className="flex w-full justify-around items-center min-h-[var(--header-height)] custom-border-b">
-        <a className="flex items-center rounded-full p-2 cursor-pointer opacity-50 hover:opacity-100">
-          <i className="material-symbols-outlined">notifications</i>
-        </a>
-        <a className="flex items-center rounded-full p-2 cursor-pointer opacity-50 hover:opacity-100">
-          <i className="material-symbols-outlined">search</i>
-        </a>
-        <a className="flex items-center rounded-full p-2 cursor-pointer opacity-50 hover:opacity-100">
-          <i className="material-symbols-outlined rotate-90">block</i>
-        </a>
-        <a
-          className="flex items-center rounded-full p-2 cursor-pointer opacity-50 hover:opacity-100"
-          onClick={openEditSidebar}
-        >
-          <i className="material-symbols-outlined">edit</i>
-        </a>
+        {headerIcons.map(({ icon, action, className = "" }) => (
+          <a
+            key={icon}
+            className={`flex items-center rounded-full p-2 cursor-pointer opacity-50 hover:opacity-100 ${className}`}
+            onClick={action}
+          >
+            <i className="material-symbols-outlined">{icon}</i>
+          </a>
+        ))}
       </header>
 
       <div className="overflow-x-hidden overflow-y-auto h-screen">
@@ -70,9 +59,15 @@ const ChatInfoDefault: React.FC = () => {
           <ChatAvatar chat={activeChat} type="info" />
 
           <h1 className="text-xl font-semibold">{activeChat.name}</h1>
+          {isDirect && activeChat.firstName && activeChat.lastName && 
+           `${activeChat.firstName} ${activeChat.lastName}` !== activeChat.name && (
+            <h2 className="text-sm opacity-80 -mt-1">
+              {activeChat.firstName} {activeChat.lastName}
+            </h2>
+          )}
 
           <p className="text-sm text-center font-light opacity-80 w-full min-w-[240px] text-ellipsis">
-            {isPrivate ? activeChat.chatPartner.bio : activeChat.description}
+            {activeChat.description}
           </p>
 
           <AnimatePresence>
@@ -84,68 +79,73 @@ const ChatInfoDefault: React.FC = () => {
                 transition={{ type: "spring", stiffness: 300, damping: 28 }}
                 className="flex flex-col gap-4 w-full mt-4 min-w-[240px]"
               >
-                {isPrivate && (
+                {isDirect && (
                   <div className="w-full flex flex-col items-center rounded font-light custom-border overflow-hidden">
                     <ContactInfoItem
                       icon="alternate_email"
-                      value={activeChat.chatPartner.username}
+                      value={activeChat.username}
                       copyType="username"
                       defaultText="No username"
                     />
-
                     <ContactInfoItem
                       icon="call"
-                      value={activeChat.chatPartner.phoneNumber || null}
+                      value={activeChat.phoneNumber || null}
                       copyType="phoneNumber"
                     />
-
                     <ContactInfoItem
                       icon="mail"
-                      value={activeChat.chatPartner.email}
+                      value={activeChat.email}
                       copyType="email"
                     />
-
                     <ContactInfoItem
                       icon="cake"
-                      value={formatTime(
-                        activeChat.chatPartner.birthday || null
-                      )}
+                      value={formatTime(activeChat.birthday)}
                       copyType="birthday"
                     />
                   </div>
                 )}
 
                 <div className="flex flex-col custom-border rounded w-full">
-                  <div
-                    className="flex p-2 items-center justify-between w-full cursor-pointer hover:bg-[var(--hover-color)]"
-                    onClick={() => setSidebarInfo("saved")}
-                  >
-                    <div className="flex gap-2">
-                      <span className="flex flex-col justify-center items-center cursor-pointer opacity-60 hover:opacity-100">
-                        <i className="material-symbols-outlined">bookmark</i>
-                      </span>
-                      <h1>Saved Messages</h1>
-                    </div>
-                    <p className="opacity-60">12</p>
-                  </div>
-
-                  <div className="custom-border-b"></div>
-
-                  <div
-                    className="flex p-2 items-center justify-between w-full cursor-pointer hover:bg-[var(--hover-color)]"
-                    onClick={() => setSidebarInfo("media")}
-                  >
-                    <div className="flex gap-2">
-                      <span className="flex flex-col justify-center items-center cursor-pointer opacity-60 hover:opacity-100">
-                        <i className="material-symbols-outlined">attach_file</i>
-                      </span>
-                      <h1>Media & Files</h1>
-                    </div>
-                    <p className="opacity-60">{activeMedia.length}</p>
-                  </div>
+                  {(
+                    [
+                      {
+                        icon: "bookmark",
+                        text: "Saved Messages",
+                        count: 12,
+                        action: "saved" as SidebarInfoModes,
+                      },
+                      {
+                        icon: "attach_file",
+                        text: "Media & Files",
+                        count: activeMedia.length,
+                        action: "media" as SidebarInfoModes,
+                      },
+                    ] as {
+                      icon: string;
+                      text: string;
+                      count: number;
+                      action: SidebarInfoModes;
+                    }[]
+                  ).map(({ icon, text, count, action }) => (
+                    <React.Fragment key={text}>
+                      <div
+                        className="flex p-2 items-center justify-between w-full cursor-pointer hover:bg-[var(--hover-color)]"
+                        onClick={() => setSidebarInfo(action)}
+                      >
+                        <div className="flex gap-2">
+                          <span className="flex flex-col justify-center items-center cursor-pointer opacity-60 hover:opacity-100">
+                            <i className="material-symbols-outlined">{icon}</i>
+                          </span>
+                          <h1>{text}</h1>
+                        </div>
+                        <p className="opacity-60">{count}</p>
+                      </div>
+                      <div className="custom-border-b"></div>
+                    </React.Fragment>
+                  ))}
                 </div>
 
-                {!isPrivate && currentMembers && (
+                {!isDirect && currentMembers.length > 0 && (
                   <div className="flex flex-col rounded overflow-hidden custom-border">
                     {currentMembers.map((member) => (
                       <div
@@ -153,21 +153,24 @@ const ChatInfoDefault: React.FC = () => {
                         className="flex items-center justify-between hover:bg-[var(--hover-color)] p-2 cursor-pointer"
                       >
                         <div className="flex gap-2 items-center">
-                          <Avatar user={member} size="8" textSize="sm" />
-                          {member.nickname ? (
-                            <h1 className="text-sm">{member.nickname}</h1>
-                          ) : (
-                            <h1 className="text-sm">
-                              {member.firstName} {member.lastName}
-                            </h1>
-                          )}
+                          <Avatar
+                            avatarUrl={member.avatarUrl}
+                            firstName={member.firstName}
+                            lastName={member.lastName}
+                            size="8"
+                            textSize="sm"
+                          />
+                          <h1 className="text-sm">
+                            {member.nickname ||
+                              `${member.firstName} ${member.lastName}`}
+                          </h1>
                         </div>
-                        {member.is_banned ? (
+                        {member.isBanned ? (
                           <span className="material-symbols-outlined">
                             dangerous
                           </span>
                         ) : (
-                          member.is_admin && (
+                          member.isAdmin && (
                             <span className="material-symbols-outlined opacity-50">
                               manage_accounts
                             </span>

@@ -6,7 +6,7 @@ import ChatList from "@/components/ui/ChatList";
 import { useChatStore } from "@/stores/chatStore";
 import { filterChatsByType } from "@/utils/filterChatsByType";
 
-const chatTypes = ["all", "private", "group", "channel"];
+const chatTypes = ["all", "direct", "group", "channel"];
 
 const SidebarSearch: React.FC = () => {
   const filteredChats = useChatStore((state) => state.filteredChats);

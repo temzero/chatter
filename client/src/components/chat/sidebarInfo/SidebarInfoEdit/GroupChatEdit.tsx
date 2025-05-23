@@ -2,7 +2,6 @@ import { useState, useMemo } from "react";
 import { useChatStore } from "@/stores/chatStore";
 import AvatarEdit from "@/components/ui/avatar/AvatarEdit";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
-import { groupChatService } from "@/services/chat/groupChatService";
 
 const GroupChatEdit = () => {
   const activeChat = useChatStore((state) => state.activeChat);
@@ -12,8 +11,8 @@ const GroupChatEdit = () => {
   const initialFormData = useMemo(
     () => ({
       name: activeChat?.name || "",
-      avatar: activeChat?.avatar || "",
-      email: "",
+      avatarUrl: activeChat?.avatarUrl || "",
+      description: activeChat?.description || "",
     }),
     [activeChat]
   );
@@ -32,7 +31,7 @@ const GroupChatEdit = () => {
     // Handle group chat update logic here
   };
 
-  if (!activeChat || activeChat.type === "private") return null;
+  if (!activeChat || activeChat.type === "direct") return null;
 
   return (
     <aside className="relative w-full h-full overflow-hidden flex flex-col">
@@ -52,10 +51,10 @@ const GroupChatEdit = () => {
           className="flex flex-col items-center p-4 gap-4 w-full"
         >
           <AvatarEdit
-            avatar={formData.avatar}
+            avatarUrl={formData.avatarUrl}
             type={activeChat.type}
             onAvatarChange={(newAvatar) =>
-              setFormData((prev) => ({ ...prev, avatar: newAvatar }))
+              setFormData((prev) => ({ ...prev, avatarUrl: newAvatar }))
             }
           />
 
@@ -74,7 +73,7 @@ const GroupChatEdit = () => {
               <label className="text-sm opacity-70">Description</label>
               <textarea
                 name="email"
-                value={formData.email}
+                value={formData.description}
                 onChange={handleChange}
                 className="input min-h-[120px]"
               />

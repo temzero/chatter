@@ -38,7 +38,7 @@ const Modal = () => {
               username: "",
               firstName: "",
               lastName: "",
-              avatar: "",
+              avatarUrl: "",
             }}
             {...modalContent.props}
           />

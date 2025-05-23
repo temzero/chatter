@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useChatStore } from "@/stores/chatStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
-import PrivateChatEdit from "./PrivateChatEdit";
+import PrivateChatEdit from "./DirectChatEdit";
 import GroupChatEdit from "./GroupChatEdit";
 
 const SidebarInfoEdit: React.FC = () => {
@@ -12,7 +12,7 @@ const SidebarInfoEdit: React.FC = () => {
   const initialFormData = useMemo(
     () => ({
       name: activeChat?.name || "",
-      avatar: activeChat?.avatar || "",
+      avatarUrl: activeChat?.avatarUrl || "",
       email: "",
     }),
     [activeChat]
@@ -25,7 +25,7 @@ const SidebarInfoEdit: React.FC = () => {
     if (activeChat) {
       setFormData({
         name: activeChat.name || "",
-        avatar: activeChat.avatar || "",
+        avatarUrl: activeChat.avatarUrl || "",
         email: "",
       });
       setHasChanges(false);
@@ -53,7 +53,7 @@ const SidebarInfoEdit: React.FC = () => {
     setSidebarInfo("default");
   };
 
-  const isPrivate = activeChat?.type === "private";
+  const isPrivate = activeChat?.type === "direct";
 
   return (
     <aside className="relative w-full h-full overflow-hidden flex flex-col">

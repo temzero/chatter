@@ -57,3 +57,10 @@ export interface Message {
   createdAt: string; // ISO date string
   updatedAt: string;
 }
+
+export interface DisplayMessage {
+  senderName: string;
+  content?: string;
+  attachment?: MessageMetadata;
+  createdAt: string;
+}

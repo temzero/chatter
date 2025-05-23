@@ -37,7 +37,7 @@ export class groupChatResponseDto {
   description?: string;
 
   @Expose()
-  avatar?: string;
+  avatarUrl?: string;
 
   @Expose()
   isPublic: boolean;

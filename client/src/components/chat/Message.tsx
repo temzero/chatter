@@ -10,7 +10,7 @@ import { formatTime } from '@/utils/formatTime';
 type RenderMessageProps = {
   id: string;
   isMe?: boolean;
-  avatar?: string;
+  avatarUrl?: string;
   senderName: string;
   time: string;
   text?: string;
@@ -40,7 +40,7 @@ const noAnimation = {
 const Message: React.FC<RenderMessageProps> = ({ 
   id, 
   isMe = false, 
-  avatar, 
+  avatarUrl, 
   senderName, 
   time, 
   text, 
@@ -94,8 +94,8 @@ const Message: React.FC<RenderMessageProps> = ({
       {/* Sender Avatar */}
       {isGroupChat && !isMe && (
         <div className="mt-auto mr-1 h-10 w-10 min-w-10 min-h-10 flex items-center justify-center rounded-full object-cover custom-border overflow-hidden">
-          {avatar ? (
-            <img src={avatar} className="h-full w-full object-cover" />
+          {avatarUrl ? (
+            <img src={avatarUrl} className="h-full w-full object-cover" />
           ) : (
             <i className="material-symbols-outlined text-4xl">mood</i>
           )}

@@ -3,7 +3,7 @@ import { useCurrentSidebarInfo } from "@/stores/sidebarInfoStore";
 import ChatInfoDefault from "./SidebarInfoDefault";
 import ChatInfoMedia from "./SidebarInfoMedia";
 import ChatInfoSaved from "./SidebarInfoSaved";
-import PrivateChatEdit from "./SidebarInfoEdit/PrivateChatEdit";
+import PrivateChatEdit from "./SidebarInfoEdit/DirectChatEdit";
 import GroupChatEdit from "./SidebarInfoEdit/GroupChatEdit";
 
 const SidebarInfo: React.FC = () => {
@@ -14,7 +14,7 @@ const SidebarInfo: React.FC = () => {
     default: <ChatInfoDefault />,
     media: <ChatInfoMedia />,
     saved: <ChatInfoSaved />,
-    privateEdit: <PrivateChatEdit />,
+    directEdit: <PrivateChatEdit />,
     groupEdit: <GroupChatEdit />,
   };
 

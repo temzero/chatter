@@ -8,15 +8,15 @@ type SuccessResponse<T> = {
 };
 
 export const privateChatService = {
-  // Create a new private chat
+  // Create a new direct chat
   async createPrivateChat(chatPartnerId: string): Promise<PrivateChat> {
     const response = await API.post<SuccessResponse<PrivateChat>>(
       `/chat/create/${chatPartnerId}`
     );
-    return response.data.data;
+    return response.data.payload;
   },
 
-  // Update an existing private chat
+  // Update an existing direct chat
   async updatePrivateChat(
     chatId: string,
     updates: Partial<PrivateChat>
@@ -25,14 +25,14 @@ export const privateChatService = {
       `/chat/${chatId}`,
       updates
     );
-    return response.data.data;
+    return response.data.payload;
   },
 
-  // Delete a private chat
+  // Delete a direct chat
   async deletePrivateChat(chatId: string): Promise<string> {
     const response = await API.delete<SuccessResponse<string>>(
       `/chat/${chatId}`
     );
-    return response.data.data;
+    return response.data.payload;
   },
 };

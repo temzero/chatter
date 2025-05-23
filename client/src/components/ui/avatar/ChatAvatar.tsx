@@ -62,10 +62,10 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
         <div
           className={`${styles.border} border-[var(--border-color)] ${sharedBase}`}
         >
-          {chat.avatar ? (
+          {chat.avatarUrl ? (
             <img
               className="h-full w-full object-cover"
-              src={chat.avatar}
+              src={chat.avatarUrl}
               alt={`${chat.name}'s avatar`}
               loading="lazy"
             />
@@ -98,9 +98,14 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
         </div>
       );
 
-    default: // private
+    default: // direct
       return (
-        <Avatar user={chat.chatPartner} className={`${styles.size}`} />
+        <Avatar
+          avatarUrl={chat.avatarUrl ?? undefined}
+          firstName={chat.firstName}
+          lastName={chat.lastName}
+          className={`${styles.size}`}
+        />
       );
   }
 };

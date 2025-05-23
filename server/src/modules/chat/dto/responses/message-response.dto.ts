@@ -1,5 +1,4 @@
 import { Expose, Type } from 'class-transformer';
-import { MessageType } from 'src/modules/message/constants/message-type.constants';
 import { MessageStatus } from 'src/modules/message/constants/message-status.constants';
 import { UserResponseDto } from 'src/modules/user/dto/responses/user-response.dto';
 import { AttachmentResponseDto } from 'src/modules/message/dto/responses/attachment-response.dto';
@@ -15,9 +14,6 @@ export class MessageResponseDto {
   @Expose()
   @Type(() => UserResponseDto)
   sender: UserResponseDto;
-
-  @Expose()
-  type: MessageType;
 
   @Expose()
   content?: string;

@@ -1,37 +1,33 @@
-import type { ChatPartner, ChatGroupMember } from "@/types/chat";
-import type { User } from "@/types/user";
-
 type AvatarProps = {
-  user: User | ChatPartner | ChatGroupMember | unknown;
+  avatarUrl?: string | undefined | null;
+  firstName?: string;
+  lastName?: string;
   size?: string;
   textSize?: string;
   className?: string;
 };
 
 export const Avatar: React.FC<AvatarProps> = ({
-  user,
+  avatarUrl,
+  firstName,
+  lastName,
   size = "10",
   textSize = "text-xl",
   className = "",
 }) => {
-  if (!user || typeof user !== "object") return null;
-
-  const typedUser = user as User | ChatPartner | ChatGroupMember;
-
-  const avatar = typedUser.avatar;
-  const firstNameInitial = typedUser.firstName?.charAt(0)?.toUpperCase();
-  const lastNameInitial = typedUser.lastName?.charAt(0)?.toUpperCase();
-
-  const showInitials = firstNameInitial || lastNameInitial;
+  console.log("chat fullName", firstName, lastName);
+  const firstNameInitial = firstName?.charAt(0)?.toUpperCase();
+  const lastNameInitial = lastName?.charAt(0)?.toUpperCase();
+  const showInitials = firstNameInitial && lastNameInitial;
 
   return (
     <div
       className={`w-${size} h-${size} flex items-center justify-center overflow-hidden rounded-full border-2 border-[var(--border-color)] ${className}`}
     >
-      {avatar ? (
+      {avatarUrl ? (
         <img
           className="h-full w-full object-cover"
-          src={avatar}
+          src={avatarUrl}
           loading="lazy"
           alt="User avatar"
         />
@@ -43,7 +39,9 @@ export const Avatar: React.FC<AvatarProps> = ({
           {lastNameInitial}
         </h1>
       ) : (
-        <div className="h-full w-full bg-[var(--border-color)]"></div>
+        <div className="h-full w-full bg-[var(--border-color)]">
+          <span className="material-symbols-outlined">sentiment_satisfied</span>
+        </div>
       )}
     </div>
   );

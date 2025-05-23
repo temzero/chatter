@@ -10,7 +10,7 @@ interface FriendRequestModalProps {
     username: string;
     firstName: string;
     lastName: string;
-    avatar: string;
+    avatarUrl: string;
   };
 }
 

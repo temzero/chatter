@@ -38,7 +38,7 @@ const ChatHeader: React.FC = () => {
       {activeChat && (
         <div className="flex gap-2">
           <a className="flex items-center cursor-pointer rounded-full opacity-60 hover:opacity-100 p-1">
-            {activeChat.type === "private" && (
+            {activeChat.type === "direct" && (
               <i className="material-symbols-outlined text-3xl">
                 phone_enabled
               </i>

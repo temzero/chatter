@@ -22,7 +22,7 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
   const [name, setName] = useState("");
 
   const filteredChats = useChatStore((state) => state.filteredChats);
-  const privateChats = filteredChats.filter((chat) => chat.type === "private");
+  const privateChats = filteredChats.filter((chat) => chat.type === "direct");
 
   const handleContactToggle = (contactId: string) => {
     setSelectedContacts((prev) =>

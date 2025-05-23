@@ -2,7 +2,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-type SidebarInfoModes = 'default' | 'media' | 'saved' | 'privateEdit' | 'groupEdit';
+export type SidebarInfoModes = 'default' | 'media' | 'saved' | 'directEdit' | 'groupEdit';
 
 interface SidebarInfoStore {
   isSidebarInfoVisible: boolean;

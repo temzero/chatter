@@ -120,7 +120,7 @@ const ChatBox: React.FC = () => {
                   key={msg.id}
                   id={msg.id}
                   isMe={msg.senderId === currentUser?.id}
-                  avatar={msg.avatar}
+                  avatarUrl={msg.avatarUrl}
                   senderName={msg.senderName || msg.senderId}
                   time={msg.time}
                   text={msg.text}

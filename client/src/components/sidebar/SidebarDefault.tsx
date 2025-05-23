@@ -7,7 +7,7 @@ import ChatList from "@/components/ui/ChatList";
 import { motion } from "framer-motion";
 import { filterChatsByType } from "@/utils/filterChatsByType";
 
-const chatTypes = ["all", "private", "group", "channel"];
+const chatTypes = ["all", "direct", "group", "channel"];
 
 const SidebarDefault: React.FC = () => {
   const chats = useChatStore((state) => state.chats);

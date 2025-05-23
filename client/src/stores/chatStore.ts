@@ -5,11 +5,11 @@ import { useMessageStore } from "./messageStore";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
 import type {
   Chat,
-  ChatTypes,
+  ChatType,
   ChatGroupTypes,
   ChatGroupMember,
   GroupChat,
-  PrivateChat,
+  DirectChat,
 } from "@/types/chat";
 import { groupChatService } from "@/services/chat/groupChatService";
 
@@ -27,7 +27,7 @@ interface ChatStore {
   getGroupMembers: (groupId: string) => Promise<void>;
   setActiveChat: (chat: Chat | null) => void;
   setActiveChatById: (chatId: string | null) => Promise<void>;
-  createPrivateChat: (chatPartnerId: string) => Promise<PrivateChat>;
+  createPrivateChat: (chatPartnerId: string) => Promise<DirectChat>;
   createGroupChat: (payload: {
     name: string;
     memberIds: string[];
@@ -35,7 +35,7 @@ interface ChatStore {
   }) => Promise<Chat>;
   updatePrivateChat: (
     id: string,
-    payload: Partial<PrivateChat>
+    payload: Partial<DirectChat>
   ) => Promise<void>;
   updateGroupChat: (id: string, payload: Partial<GroupChat>) => Promise<void>;
   deleteChat: (id: string, type: ChatTypes) => Promise<void>;
@@ -112,7 +112,7 @@ export const useChatStore = create<ChatStore>()(
         const filtered = chats.filter((chat) => {
           const nameMatch = chat.name?.toLowerCase().includes(lowerCaseTerm);
 
-          if (chat.type === "private") {
+          if (chat.type === "direct") {
             const partnerNameMatch = chat.chatPartner?.firstName
               ?.toLowerCase()
               .includes(lowerCaseTerm);
@@ -203,9 +203,9 @@ export const useChatStore = create<ChatStore>()(
             isLoading: false,
           }));
         } catch (error) {
-          console.error("Failed to update private chat:", error);
+          console.error("Failed to update direct chat:", error);
           set({
-            error: "Failed to update private chat",
+            error: "Failed to update direct chat",
             isLoading: false,
           });
           throw error;

@@ -15,7 +15,7 @@ export class GroupChatResponseDto {
   description: string | null;
 
   @Expose()
-  avatar: string | null;
+  avatarUrl: string | null;
 
   @Expose()
   isPublic: boolean;

@@ -39,13 +39,16 @@ const ChatList: React.FC<ChatListProps> = ({ chats, isCompact = false }) => {
             <i className="material-symbols-outlined flex items-center justify-center text-[16px] h-3">
               edit
             </i>
-            <p className="text-xs whitespace-nowrap text-ellipsis">{draft}</p>
+            <span className="text-xs whitespace-nowrap text-ellipsis">
+              {draft}
+            </span>
           </p>
-        ) : (
+        ) : chat.lastMessage ? (
           <p className="flex items-center opacity-70 gap-1 text-xs max-w-[196px] whitespace-nowrap text-ellipsis overflow-hidden">
-            {chat.lastMessage?.content}
+            <strong>{chat.lastMessage.senderName}:</strong>{" "}
+            {chat.lastMessage.content}
           </p>
-        );
+        ) : null;
 
         return (
           <React.Fragment key={chat.id}>
@@ -65,7 +68,7 @@ const ChatList: React.FC<ChatListProps> = ({ chats, isCompact = false }) => {
                   </div>
 
                   <p className="absolute top-2 right-4 text-xs opacity-40">
-                    {formatTime(chat.updatedAt)}
+                    {formatTime(chat.lastMessage?.createdAt ?? chat.updatedAt)}
                   </p>
                 </>
               )}

@@ -13,6 +13,7 @@ import {
   CreateDirectChatDto,
   CreateGroupChatDto,
 } from './dto/requests/create-chat.dto';
+import { Message } from '../message/entities/message.entity';
 
 @Injectable()
 export class ChatService {
@@ -130,7 +131,7 @@ export class ChatService {
     try {
       const memberships = await this.memberRepo.find({
         where: { user: { id: userId } },
-        relations: ['chat', 'chat.lastMessage'],
+        relations: ['chat', 'chat.lastMessage', 'chat.lastMessage.sender'],
       });
 
       return memberships
@@ -143,6 +144,83 @@ export class ChatService {
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to retrieve user chats');
     }
+  }
+
+  async getChatListByUserId(userId: string) {
+    const chats = await this.chatRepo
+      .createQueryBuilder('chat')
+      .leftJoinAndSelect('chat.members', 'member')
+      .leftJoinAndSelect('member.user', 'memberUser')
+      .leftJoinAndSelect('chat.lastMessage', 'lastMessage')
+      .leftJoinAndSelect('lastMessage.sender', 'sender')
+      .leftJoinAndSelect('lastMessage.attachments', 'attachments')
+      .where(
+        'chat.id IN (SELECT "chat_id" FROM chat_member WHERE "user_id" = :userId)',
+        { userId },
+      )
+      .orderBy('COALESCE(lastMessage.createdAt, chat.createdAt)', 'DESC')
+      .getMany();
+
+    return chats.map((chat) => {
+      // Enhanced direct chat handling
+      if (chat.type === ChatType.DIRECT && chat.members?.length === 2) {
+        const chatPartner = chat.members.find((m) => m.userId !== userId);
+        if (chatPartner?.user) {
+          return {
+            ...chat,
+            name:
+              chatPartner.nickname ||
+              `${chatPartner.user.firstName} ${chatPartner.user.lastName}`.trim(),
+            avatarUrl: chatPartner.user.avatarUrl,
+            // Flattened user data
+            userId: chatPartner.user.id,
+            username: chatPartner.user.username,
+            firstName: chatPartner.user.firstName,
+            lastName: chatPartner.user.lastName,
+            email: chatPartner.user.email,
+            phoneNumber: chatPartner.user.phoneNumber,
+            birthday: chatPartner.user.birthday,
+            description: chatPartner.user.bio,
+            isOnline: chatPartner.user.isOnline,
+            lastMessage: chat.lastMessage
+              ? this.transformLastMessage(
+                  chat.lastMessage,
+                  userId,
+                  chat.members,
+                )
+              : null,
+          };
+        }
+      }
+
+      return {
+        ...chat,
+        lastMessage: chat.lastMessage
+          ? this.transformLastMessage(chat.lastMessage, userId, chat.members)
+          : null,
+      };
+    });
+  }
+
+  private transformLastMessage(
+    message: Message,
+    userId: string,
+    members: ChatMember[],
+  ) {
+    const senderMember = members.find((m) => m.userId === message.senderId);
+
+    return {
+      id: message.id,
+      content: message.content,
+      attachmentType: message.attachments?.[0]?.type,
+      createdAt: message.createdAt,
+      senderName:
+        message.senderId === userId
+          ? 'Me'
+          : senderMember?.nickname || message.sender.firstName,
+      senderId: message.senderId,
+      // Include any other relevant message fields
+    };
   }
 
   async getChatMembers(chatId: string): Promise<User[]> {

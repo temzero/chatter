@@ -1,6 +1,6 @@
 export class SuccessResponse<D> {
   constructor(
-    public readonly data: D,
+    public readonly payload: D,
     public readonly message?: string,
   ) {}
 }

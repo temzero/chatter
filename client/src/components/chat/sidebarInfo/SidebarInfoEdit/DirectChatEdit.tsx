@@ -2,7 +2,6 @@ import { useState, useMemo } from "react";
 import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
-import { privateChatService } from "@/services/chat/privateChatService";
 
 const PrivateChatEdit = () => {
   const activeChat = useChatStore((state) => state.activeChat);
@@ -29,18 +28,18 @@ const PrivateChatEdit = () => {
       console.error("No active chat ID found");
       return;
     }
-    const updatedChat = privateChatService.updatePrivateChat(activeChat.id, {
-      ...formData,
-    });
-    // Handle private chat update logic here
+    // const updatedChat = privateChatService.updatePrivateChat(activeChat.id, {
+    //   ...formData,
+    // });
+    // Handle direct chat update logic here
   };
 
-  if (!activeChat || activeChat.type !== "private") return null;
+  if (!activeChat || activeChat.type !== "direct") return null;
 
   return (
     <aside className="relative w-full h-full overflow-hidden flex flex-col">
       <header className="flex w-full justify-between px-2 items-center min-h-[var(--header-height)] custom-border-b">
-        <h1 className="text-xl font-semibold ml-2">Edit Private Chat</h1>
+        <h1 className="text-xl font-semibold ml-2">Edit Chat</h1>
         <button
           className="flex items-center rounded-full p-2 cursor-pointer opacity-70 hover:opacity-80 h-10 w-10 hover:bg-[var(--hover-color)]"
           onClick={() => setSidebarInfo("default")}
@@ -51,16 +50,18 @@ const PrivateChatEdit = () => {
 
       <div className="overflow-y-auto h-screen">
         <div className="flex gap-4 p-4 items-center">
-          <Avatar user={activeChat.chatPartner} size="12" />
+          <Avatar
+            avatarUrl={activeChat.avatarUrl}
+            firstName={activeChat.firstName}
+            lastName={activeChat.lastName}
+            size="12"
+          />
           <div>
             <h1 className="text-xl font-semibold">
-              {activeChat.chatPartner.firstName}{" "}
-              {activeChat.chatPartner.lastName}
+              {activeChat.firstName} {activeChat.lastName}
             </h1>
-            {activeChat.chatPartner.nickname && (
-              <p className="text-sm opacity-70">
-                ${activeChat.chatPartner.nickname}
-              </p>
+            {activeChat.name && (
+              <p className="text-sm opacity-70">{activeChat.name}</p>
             )}
           </div>
         </div>

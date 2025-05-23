@@ -48,7 +48,7 @@ export class Chat {
   description: string | null;
 
   @Column({ type: 'varchar', nullable: true, length: 512 })
-  avatar: string | null;
+  avatarUrl: string | null;
 
   @Column({ default: false, nullable: true })
   is_public?: boolean;
@@ -77,9 +77,9 @@ export class Chat {
       if (this.description === '') this.description = null;
     }
 
-    if (this.avatar) {
-      this.avatar = this.avatar.trim();
-      if (this.avatar === '') this.avatar = null;
+    if (this.avatarUrl) {
+      this.avatarUrl = this.avatarUrl.trim();
+      if (this.avatarUrl === '') this.avatarUrl = null;
     }
   }
 }

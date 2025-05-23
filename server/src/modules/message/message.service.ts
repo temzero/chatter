@@ -41,6 +41,7 @@ export class MessageService {
     // Check if chat exists
     const chat = await this.chatRepo.findOne({
       where: { id: createMessageDto.chatId },
+      relations: ['lastMessage'], // optional if needed later
     });
     if (!chat) {
       ErrorResponse.notFound('Chat not found');
@@ -76,14 +77,12 @@ export class MessageService {
         ...createMessageDto,
       });
 
-      // If there are attachments, you might want to associate them here
-      // This would depend on your attachment entity structure
-      // if (createMessageDto.attachmentIds?.length) {
-      // Example implementation:
-      // newMessage.attachments = createMessageDto.attachmentIds.map(id => ({ id }));
-      // }
-
       const savedMessage = await this.messageRepo.save(newMessage);
+
+      // Update chat.lastMessage to savedMessage
+      chat.lastMessage = savedMessage;
+      await this.chatRepo.save(chat);
+
       return savedMessage;
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to create message');

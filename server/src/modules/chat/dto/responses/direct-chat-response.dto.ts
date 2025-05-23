@@ -12,7 +12,7 @@ export class PrivateChatResponseDto {
   opponent: {
     id: string;
     name: string;
-    avatar: string | null;
+    avatarUrl: string | null;
   };
 
   @Expose()
