@@ -1,12 +1,8 @@
 import API from "../api/api";
 import type { Chat } from "@/types/chat";
-import { privateChatService } from "./privateChatService";
+import { privateChatService } from "./directChatService";
 import { groupChatService } from "./groupChatService";
-
-type SuccessResponse<T> = {
-  payload: T;
-  message: string;
-};
+import type { ApiSuccessResponse } from "@/types/apiSuccessResponse";
 
 export const chatService = {
   ...privateChatService,
@@ -19,19 +15,19 @@ export const chatService = {
 
   // Get a specific chat by ID
   async getChatById(chatId: string): Promise<Chat> {
-    const response = await API.get<SuccessResponse<Chat>>(`/chat/${chatId}`);
+    const response = await API.get<ApiSuccessResponse<Chat>>(`/chat/${chatId}`);
     return response.data.payload;
   },
 
   // Delete a chat by ID
   async deleteChat(chatId: string, type?: string): Promise<string> {
     if (type && type === "group") {
-      const response = await API.delete<SuccessResponse<string>>(
+      const response = await API.delete<ApiSuccessResponse<string>>(
         `/chat-group/${chatId}`
       );
       return response.data.payload; // This returns the deleted chat's ID
     } else {
-      const response = await API.delete<SuccessResponse<string>>(
+      const response = await API.delete<ApiSuccessResponse<string>>(
         `/chat/${chatId}`
       );
       return response.data.payload; // This returns the deleted chat's ID

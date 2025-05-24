@@ -18,7 +18,28 @@ export class UserResponseDto {
   lastName: string;
 
   @Expose()
+  email: string;
+
+  @Expose()
+  emailVerified: boolean;
+
+  @Expose()
+  phoneNumber: string;
+
+  @Expose()
+  phoneVerified: boolean;
+
+  @Expose()
+  birthday: Date;
+
+  @Expose()
   bio: string;
+
+  @Expose()
+  role: string;
+
+  @Expose()
+  status: string;
 
   @Expose()
   isOnline: boolean;

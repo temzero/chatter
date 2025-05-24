@@ -3,68 +3,52 @@ import { persist } from "zustand/middleware";
 import { userService } from "@/services/userService";
 import { storageService } from "@/services/storage/storageService";
 import { useAuthStore } from "./authStore";
-import { MyProfileProps } from "@/data/types";
+import type { User } from "@/types/user";
 
 type ProfileState = {
-  currentProfile: MyProfileProps | null;
   loading: boolean;
   error: string | null;
 };
 
 type ProfileActions = {
-  updateProfile: (updatedData: Partial<MyProfileProps>) => Promise<void>;
-  refreshProfile: () => Promise<void>;
+  updateProfile: (updatedData: Partial<User>) => Promise<void>;
   reset: () => void;
   deleteProfile: () => Promise<void>;
 };
 
 const initialState: ProfileState = {
-  currentProfile: null,
   loading: false,
   error: null,
 };
 
 export const useProfileStore = create<ProfileState & ProfileActions>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       ...initialState,
 
       updateProfile: async (updatedData) => {
         set({ loading: true, error: null });
         try {
           const updatedUser = await userService.updateUser(updatedData);
-          storageService.setUser(updatedUser);
-          useAuthStore.getState().setCurrentUser(updatedUser);
 
-          set({
-            currentProfile: updatedUser,
-            loading: false,
-          });
+          // Optimized: Avoid unnecessary `console.log` in production
+          if (process.env.NODE_ENV === "development") {
+            console.log("updated User: ", updatedUser);
+          }
+
+          // Optimized: Get and update auth store in one operation
+          const { currentUser, setCurrentUser } = useAuthStore.getState();
+          const mergedUser = currentUser
+            ? { ...currentUser, ...updatedUser }
+            : updatedUser;
+          setCurrentUser(mergedUser);
+
+          set({ loading: false });
         } catch (error) {
           const errorMessage =
             error instanceof Error ? error.message : "Failed to update profile";
           set({ error: errorMessage, loading: false });
-          throw error;
-        }
-      },
-
-      refreshProfile: async () => {
-        set({ loading: true });
-        try {
-          // Assuming we can get current user by their ID from storage
-          const currentUserId = get().currentProfile?.id;
-          if (!currentUserId) {
-            throw new Error("No user logged in");
-          }
-          const user = await userService.getUserById(currentUserId);
-          storageService.setUser(user);
-          set({ currentProfile: user, loading: false });
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error
-              ? error.message
-              : "Failed to refresh profile";
-          set({ error: errorMessage, loading: false });
+          throw error; // Re-throw for error boundaries or further handling
         }
       },
 
@@ -72,7 +56,7 @@ export const useProfileStore = create<ProfileState & ProfileActions>()(
         set({ loading: true, error: null });
         try {
           await userService.deleteUser();
-          storageService.clearUser();
+          storageService.clearAuth();
           set(initialState);
         } catch (error) {
           const errorMessage =
@@ -83,13 +67,18 @@ export const useProfileStore = create<ProfileState & ProfileActions>()(
       },
 
       reset: () => {
-        storageService.clearUser();
+        storageService.clearAuth();
         set(initialState);
       },
     }),
     {
       name: "profile-storage",
-      partialize: (state) => ({ currentProfile: state.currentProfile }),
+      // Optional: Skip persisting certain fields if needed
+      partialize: (state) => ({
+        ...state,
+        loading: false, // Don't persist loading state
+        error: null, // Don't persist errors
+      }),
     }
   )
 );

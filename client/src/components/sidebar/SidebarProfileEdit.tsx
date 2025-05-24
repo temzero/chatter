@@ -11,16 +11,11 @@ const SidebarProfileEdit: React.FC = () => {
 
   const initialFormData = useMemo(
     () => ({
+      avatarUrl: currentUser?.avatarUrl || "",
       firstName: currentUser?.firstName || "",
       lastName: currentUser?.lastName || "",
-      username: currentUser?.username || "",
-      email: currentUser?.email || "",
-      phoneNumber: currentUser?.phoneNumber || null,
-      birthday: currentUser?.birthday
-        ? new Date(currentUser.birthday).toISOString().split("T")[0]
-        : "",
+      birthday: currentUser?.birthday ?? undefined,
       bio: currentUser?.bio || "",
-      avatarUrl: currentUser?.avatarUrl || "",
     }),
     [currentUser]
   );
@@ -132,8 +127,21 @@ const SidebarProfileEdit: React.FC = () => {
               <input
                 type="date"
                 name="birthday"
-                value={formData.birthday || ""}
-                onChange={handleChange}
+                value={
+                  formData.birthday
+                    ? typeof formData.birthday === "string"
+                      ? formData.birthday.slice(0, 10)
+                      : formData.birthday.toISOString().slice(0, 10)
+                    : ""
+                }
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    birthday: e.target.value
+                      ? new Date(e.target.value)
+                      : undefined,
+                  }))
+                }
                 className="input text-lg"
               />
             </div>
@@ -145,7 +153,7 @@ const SidebarProfileEdit: React.FC = () => {
                 value={formData.bio}
                 onChange={handleChange}
                 className="input min-h-[120px]"
-                placeholder="Tell us about yourself"
+                placeholder="Describe something about yourself"
                 maxLength={150}
               />
             </div>

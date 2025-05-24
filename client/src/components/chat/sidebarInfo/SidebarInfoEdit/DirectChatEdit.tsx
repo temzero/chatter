@@ -3,7 +3,7 @@ import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 
-const PrivateChatEdit = () => {
+const DirectChatEdit = () => {
   const activeChat = useChatStore((state) => state.activeChat);
   const deleteChat = useChatStore((state) => state.deleteChat);
   const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
@@ -103,4 +103,4 @@ const PrivateChatEdit = () => {
   );
 };
 
-export default PrivateChatEdit;
+export default DirectChatEdit;

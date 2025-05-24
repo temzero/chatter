@@ -1,52 +1,58 @@
 import API from "@/services/api/api";
-import { MyProfileProps } from "@/data/types";
 import { User } from "@/types/user";
 
 export const userService = {
   /**
    * Get all users
    */
-  async getAllUsers(): Promise<MyProfileProps[]> {
+  async getAllUsers(): Promise<User[]> {
     const { data } = await API.get("/user");
-    return data.data;
+    return data.payload;
   },
 
   /**
    * Get user by ID
    * @param userId - User ID
    */
-  async getUserById(userId: string): Promise<MyProfileProps> {
+  async getUserById(userId: string): Promise<User> {
     const { data } = await API.get(`/user/${userId}`);
-    return data.data;
+    return data.payload;
   },
 
   /**
    * Get user by identifier (username, email, or phone)
    * @param identifier - Username, email, or phone
    */
-  async getUserByIdentifier(identifier: string): Promise<MyProfileProps> {
+  async getUserByIdentifier(identifier: string): Promise<User> {
     const { data } = await API.get(`/user/find/${identifier}`);
-    return data.data;
+    return data.payload;
   },
 
   /**
    * Create a new user
    * @param userData - User creation data
    */
-  async createUser(userData: Partial<MyProfileProps>): Promise<MyProfileProps> {
+  async createUser(userData: Partial<User>): Promise<User> {
     const { data } = await API.post("/user/create", userData);
-    return data.data;
+    return data.payload;
+  },
+
+  /**
+   * Update the currently authenticated user
+   * @param updatedProfile - Data to update
+   */
+  async updateProfile(updatedProfile: Partial<User>): Promise<User> {
+    const { data } = await API.put("/user/profile", updatedProfile);
+    return data.payload;
   },
 
   /**
    * Update the currently authenticated user
    * @param updatedData - Data to update
    */
-  async updateUser(
-    updatedData: Partial<MyProfileProps | User>
-  ): Promise<MyProfileProps> {
-    const { data } = await API.put("/user", updatedData); // ✅ no userId in URL
-    return data.data;
+  async updateUser(updatedData: Partial<User>): Promise<User> {
+    const { data } = await API.put("/user", updatedData);
+    return data.payload;
   },
 
   /**
@@ -54,7 +60,7 @@ export const userService = {
    */
   async deleteUser(): Promise<string> {
     const { data } = await API.delete("/user"); // ✅ no userId in URL
-    return data.data;
+    return data.payload;
   },
 
   async sendFriendRequest(requestData: {
@@ -84,7 +90,7 @@ export const userService = {
    */
   async getFriendRequests(): Promise<unknown[]> {
     const { data } = await API.get("/friend-request");
-    return data.data;
+    return data.payload;
   },
 
   /**
@@ -97,6 +103,6 @@ export const userService = {
     accept: boolean
   ): Promise<unknown> {
     const { data } = await API.put(`/friend-request/${requestId}`, { accept });
-    return data.data;
+    return data.payload;
   },
 };

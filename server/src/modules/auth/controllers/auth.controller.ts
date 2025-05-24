@@ -56,7 +56,10 @@ export class AuthController {
     );
     // Optional: Set HTTP-only cookie for web clients
     setRefreshTokenCookie(response, refreshToken, this.configService);
-    return new AuthResponse(user, accessToken, 'Login successful');
+    return new AuthResponse(
+      accessToken,
+      `Login successful, welcome back ${user.firstName}`,
+    );
   }
 
   @Post('register')
@@ -74,9 +77,8 @@ export class AuthController {
     // Optional: Set HTTP-only cookie for web clients
     setRefreshTokenCookie(response, refreshToken, this.configService);
     return new AuthResponse(
-      user,
       accessToken,
-      'User registered and logged in successfully. Please verify your email.',
+      `User ${user.firstName} registered and logged in successfully. Please verify your email.`,
     );
   }
 

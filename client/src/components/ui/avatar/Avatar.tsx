@@ -39,9 +39,7 @@ export const Avatar: React.FC<AvatarProps> = ({
           {lastNameInitial}
         </h1>
       ) : (
-        <div className="h-full w-full bg-[var(--border-color)]">
-          <span className="material-symbols-outlined">sentiment_satisfied</span>
-        </div>
+          <span className="material-symbols-outlined text-4xl">sentiment_satisfied</span>
       )}
     </div>
   );

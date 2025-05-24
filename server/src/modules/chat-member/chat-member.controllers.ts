@@ -76,6 +76,20 @@ export class ChatMemberController {
     );
   }
 
+  @Patch('nickname/:chatId/:userId')
+  async updateNickname(
+    @Param('chatId') chatId: string,
+    @Param('userId') userId: string,
+    @Body() body: { nickname: string },
+  ): Promise<SuccessResponse<string>> {
+    const nickname = await this.memberService.updateNickname(
+      chatId,
+      userId,
+      body.nickname,
+    );
+    return new SuccessResponse(nickname ?? '', 'Nickname updated successfully');
+  }
+
   @Patch('last-read/:chatId/:userId')
   async updateLastReadMessage(
     @Param('chatId') chatId: string,

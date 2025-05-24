@@ -3,14 +3,19 @@ import rawAPI from "./api/rawApi";
 import { storageService } from "./storage/storageService";
 
 export const authService = {
+  async getCurrentUser() {
+    const { data } = await API.get("/user/me");
+    console.log("Response from /user/me:", data);
+    return data.payload;
+  },
+
   async login(identifier: string, password: string) {
     const { data } = await API.post("/auth/login", {
       identifier,
       password,
     });
-    console.log('data response: ', data)
+    console.log("data response: ", data);
     storageService.setAccessToken(data.accessToken);
-    storageService.setUser(data.user);
     return data;
   },
 

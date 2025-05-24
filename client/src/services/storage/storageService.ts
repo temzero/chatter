@@ -1,4 +1,3 @@
-import { MyProfileProps } from "@/data/types";
 import { v4 as uuidv4 } from "uuid";
 
 export const storageService = {
@@ -12,14 +11,13 @@ export const storageService = {
   },
 
   // User data management
-  getUser(): MyProfileProps | null {
-    const user = localStorage.getItem("user");
-    return user ? JSON.parse(user) : null;
-  },
-
-  setUser(user: MyProfileProps): void {
-    localStorage.setItem("user", JSON.stringify(user));
-  },
+  // getUser(): User | null {
+  //   const user = localStorage.getItem("user");
+  //   return user ? JSON.parse(user) : null;
+  // },
+  // setUser(user: User): void {
+  //   localStorage.setItem("user", JSON.stringify(user));
+  // },
 
   getDeviceId(): string {
     let deviceId = localStorage.getItem("deviceId");

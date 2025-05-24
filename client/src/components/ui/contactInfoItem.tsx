@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 type ContactInfoItemProps = {
   icon: string;
-  value: string | null | undefined;
+  value: string | Date | null | undefined;
   copyType: string;
   defaultText?: string;
   className?: string;
@@ -29,8 +29,10 @@ const ContactInfoItem: React.FC<ContactInfoItemProps> = ({
 
   // Format birthday if copyType === "birthday"
   const formattedValue =
-    copyType === "birthday" && !isNaN(Date.parse(value))
-      ? new Date(value).toLocaleDateString("en-US", {
+    copyType === "birthday" &&
+    ((typeof value === "string" && !isNaN(Date.parse(value))) ||
+      (value instanceof Date && !isNaN(value.getTime())))
+      ? new Date(value as string | Date).toLocaleDateString("en-US", {
           year: "numeric",
           month: "long",
           day: "numeric",
@@ -39,7 +41,7 @@ const ContactInfoItem: React.FC<ContactInfoItemProps> = ({
 
   const handleCopy = () => {
     if (!formattedValue) return;
-    navigator.clipboard.writeText(formattedValue);
+    navigator.clipboard.writeText(String(formattedValue));
     setCopied(copyType);
   };
 
@@ -54,7 +56,11 @@ const ContactInfoItem: React.FC<ContactInfoItemProps> = ({
           {copyType.charAt(0).toUpperCase() + copyType.slice(1)} copied!
         </span>
       ) : (
-        formattedValue || defaultText
+        typeof formattedValue === "string" || typeof formattedValue === "number"
+          ? formattedValue
+          : formattedValue
+          ? String(formattedValue)
+          : defaultText
       )}
     </div>
   );

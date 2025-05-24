@@ -3,15 +3,9 @@ import { persist } from "zustand/middleware";
 import { chatService } from "@/services/chat/chatService";
 import { useMessageStore } from "./messageStore";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
-import type {
-  Chat,
-  ChatType,
-  ChatGroupTypes,
-  ChatGroupMember,
-  GroupChat,
-  DirectChat,
-} from "@/types/chat";
+import type { Chat, ChatType, ChatGroupMember, DirectChat } from "@/types/chat";
 import { groupChatService } from "@/services/chat/groupChatService";
+import { GroupChannelChat } from "@/types/chat";
 
 interface ChatStore {
   chats: Chat[];
@@ -22,7 +16,8 @@ interface ChatStore {
   filteredChats: Chat[];
   groupMembers: Record<string, ChatGroupMember[]>;
 
-  getChats: (userId: string) => Promise<void>;
+  initialize: () => Promise<void>;
+  getChats: () => Promise<void>;
   getChatById: (chatId: string) => Promise<void>;
   getGroupMembers: (groupId: string) => Promise<void>;
   setActiveChat: (chat: Chat | null) => void;
@@ -31,14 +26,17 @@ interface ChatStore {
   createGroupChat: (payload: {
     name: string;
     memberIds: string[];
-    type: ChatGroupTypes;
+    type: "group" | "channel";
   }) => Promise<Chat>;
   updatePrivateChat: (
     id: string,
     payload: Partial<DirectChat>
   ) => Promise<void>;
-  updateGroupChat: (id: string, payload: Partial<GroupChat>) => Promise<void>;
-  deleteChat: (id: string, type: ChatTypes) => Promise<void>;
+  updateGroupChat: (
+    id: string,
+    payload: Partial<GroupChannelChat>
+  ) => Promise<void>;
+  deleteChat: (id: string, type: ChatType) => Promise<void>;
   setSearchTerm: (term: string) => void;
   clearChats: () => void;
 }
@@ -53,6 +51,10 @@ export const useChatStore = create<ChatStore>()(
       activeChat: null,
       isLoading: false,
       error: null,
+
+      initialize: async () => {
+        await get().getChats();
+      },
 
       getChats: async () => {
         set({ isLoading: true, error: null });
@@ -113,7 +115,7 @@ export const useChatStore = create<ChatStore>()(
           const nameMatch = chat.name?.toLowerCase().includes(lowerCaseTerm);
 
           if (chat.type === "direct") {
-            const partnerNameMatch = chat.chatPartner?.firstName
+            const partnerNameMatch = chat.firstName
               ?.toLowerCase()
               .includes(lowerCaseTerm);
             return nameMatch || partnerNameMatch;

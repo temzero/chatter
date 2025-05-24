@@ -117,6 +117,32 @@ export class ChatMemberService {
     }
   }
 
+  async updateNickname(
+    chatId: string,
+    userId: string,
+    nickname: string | null,
+  ): Promise<string | null> {
+    try {
+      // Validate nickname length if provided
+      if (nickname && nickname.length > 32) {
+        ErrorResponse.badRequest('Nickname must be 32 characters or less');
+      }
+
+      const result = await this.memberRepo.update(
+        { chatId, userId },
+        { nickname },
+      );
+
+      if (result.affected === 0) {
+        ErrorResponse.notFound('Chat member not found');
+      }
+
+      return nickname;
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to update nickname');
+    }
+  }
+
   async updateLastReadMessage(
     chatId: string,
     userId: string,

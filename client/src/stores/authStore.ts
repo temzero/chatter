@@ -3,7 +3,6 @@ import axios from "axios";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { authService } from "@/services/authService";
-import { storageService } from "@/services/storage/storageService";
 import { useChatStore } from "@/stores/chatStore";
 import { useSidebarStore } from "./sidebarStore";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
@@ -74,11 +73,11 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         });
       },
 
-      // Auth initialization
       initialize: async () => {
         try {
           get().setLoading(true);
-          const user = storageService.getUser();
+          const user = await authService.getCurrentUser();
+
           if (user) {
             set({
               currentUser: user,
@@ -86,13 +85,16 @@ export const useAuthStore = create<AuthState & AuthActions>()(
               loading: false,
               message: null,
             });
+            console.log('currentUser from server: ', user)
+            return user;
           } else {
             set({ ...initialState, loading: false });
+            return null;
           }
         } catch (error) {
-          console.error("Auth initialization failed", error);
-          storageService.clearAuth();
+          console.error(error);
           set({ ...initialState, loading: false });
+          return null;
         }
       },
 
@@ -100,15 +102,13 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       login: async (identifier, password) => {
         try {
           get().setLoading(true); // Auto-clears messages
-          const { user } = await authService.login(identifier, password);
+          await authService.login(identifier, password);
           set({
-            currentUser: user,
             isAuthenticated: true,
             loading: false,
             message: { type: "success", content: "Logged in successfully" },
           });
           useChatStore.getState().clearChats();
-          useChatStore.getState().getChats(user.id);
         } catch (error) {
           const errorMessage = handleAuthError(error);
           get().setLoading(false, false); // Keep error message
@@ -215,9 +215,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         currentUser: state.currentUser,
         isAuthenticated: state.isAuthenticated,
       }),
-      onRehydrateStorage: () => (state) => {
-        state?.initialize();
-      },
     }
   )
 );

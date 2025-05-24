@@ -5,7 +5,7 @@ import ContactSelectionList from "../ui/ContactSelectionList";
 import { useChatStore } from "@/stores/chatStore";
 import { useAuthStore } from "@/stores/authStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
-import type { PrivateChat } from "@/types/chat";
+import type { DirectChat } from "@/types/chat";
 
 interface CreateChatProps {
   type: "group" | "channel";
@@ -36,14 +36,14 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
     setSelectedContacts((prev) => prev.filter((id) => id !== contactId));
   };
 
-  const getSelectedChats = (): PrivateChat[] => {
+  const getSelectedChats = (): DirectChat[] => {
     return privateChats.filter((chat) => selectedContacts.includes(chat.id));
   };
 
   const CreateNewGroup = async () => {
     try {
       // Get the selected chats and extract just the member IDs
-      const selectedChats = getSelectedChats(); // This returns PrivateChat[]
+      const selectedChats = getSelectedChats(); // This returns DirectChat[]
       if (!selectedChats.length || !currentUser) {
         console.error("not enough member");
         return;
@@ -51,7 +51,7 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
       const memberIds = Array.from(
         new Set([
           currentUser.id,
-          ...selectedChats.map((chat) => chat.chatPartner.id),
+          ...selectedChats.map((chat) => chat.userId),
         ])
       );
 
@@ -110,14 +110,14 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
                 onClick={() => handleRemoveContact(chat.id)}
               >
                 <Avatar
-                  user={chat.chatPartner}
+                  avatarUrl={chat.avatarUrl}
+                  firstName={chat.firstName}
+                  lastName={chat.lastName}
                   size="8"
                   textSize="text-sm"
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <i className="material-symbols-outlined text-white">
-                    close
-                  </i>
+                  <i className="material-symbols-outlined text-white">close</i>
                 </div>
               </div>
             ))}

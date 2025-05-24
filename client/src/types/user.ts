@@ -11,7 +11,7 @@ export interface User {
   firstName?: string;
   lastName?: string;
   phoneNumber?: string;
-  birthday?: string; // ISO string format for consistency
+  birthday?: Date | string; // ISO string format for consistency
   bio?: string;
   status?: string;
   last_seen?: string;

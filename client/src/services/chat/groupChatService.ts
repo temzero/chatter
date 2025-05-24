@@ -1,11 +1,6 @@
 import API from "../api/api";
-import type { GroupChat, ChatGroupMember } from "@/types/chat";
-
-type SuccessResponse<T> = {
-  data: T;
-  statusCode: number;
-  message: string;
-};
+import type { GroupChannelChat } from "@/types/chat";
+import type { ApiSuccessResponse } from "@/types/apiSuccessResponse";
 
 export const groupChatService = {
   // Create a new Group/Channel
@@ -13,33 +8,26 @@ export const groupChatService = {
     name: string;
     memberIds: string[];
     type: "group" | "channel";
-  }): Promise<GroupChat> {
-    const response = await API.post<SuccessResponse<GroupChat>>(
+  }): Promise<GroupChannelChat> {
+    const response = await API.post<ApiSuccessResponse<GroupChannelChat>>(
       "/chat-group/create",
       payload
     );
     return response.data.payload;
   },
 
-  async getGroupChatById(groupChatId: string): Promise<GroupChat> {
-    const response = await API.get<SuccessResponse<GroupChat>>(
+  async getGroupChatById(groupChatId: string): Promise<GroupChannelChat> {
+    const response = await API.get<ApiSuccessResponse<GroupChannelChat>>(
       `/chat-group/${groupChatId}`
-    );
-    return response.data.payload;
-  },
-
-  async getGroupChatMembers(groupChatId: string): Promise<ChatGroupMember[]> {
-    const response = await API.get<SuccessResponse<ChatGroupMember[]>>(
-      `/chat-group-members/${groupChatId}`
     );
     return response.data.payload;
   },
 
   async updateGroupChat(
     groupChatId: string,
-    payload: Partial<GroupChat>
-  ): Promise<GroupChat> {
-    const response = await API.put<SuccessResponse<GroupChat>>(
+    payload: Partial<GroupChannelChat>
+  ): Promise<GroupChannelChat> {
+    const response = await API.put<ApiSuccessResponse<GroupChannelChat>>(
       `/chat-group/${groupChatId}`,
       payload
     );
@@ -48,7 +36,7 @@ export const groupChatService = {
 
   // Delete a group chat
   async deleteGroupChat(groupChatId: string): Promise<string> {
-    const response = await API.delete<SuccessResponse<string>>(
+    const response = await API.delete<ApiSuccessResponse<string>>(
       `/chat-group/${groupChatId}`
     );
     return response.data.payload;

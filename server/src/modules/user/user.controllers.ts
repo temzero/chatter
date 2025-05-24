@@ -15,13 +15,26 @@ import { SuccessResponse } from 'src/common/api-response/success';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { UserResponseDto } from './dto/responses/user-response.dto';
+import { JwtPayload } from '../auth/types/jwt-payload.type';
+import { UpdateProfileDto } from './dto/requests/update-profile.dto';
 
 @Controller('user')
+@UseGuards(JwtAuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Get('me')
+  async getCurrentUser(
+    @CurrentUser() user: JwtPayload,
+  ): Promise<SuccessResponse<UserResponseDto>> {
+    const fullUser = await this.userService.getUserById(user.sub);
+    return new SuccessResponse(
+      plainToInstance(UserResponseDto, fullUser),
+      'Current user retrieved successfully',
+    );
+  }
+
   @Get()
-  @UseGuards(JwtAuthGuard)
   async findAll(): Promise<SuccessResponse<UserResponseDto[]>> {
     const users = await this.userService.getAllUsers();
     return new SuccessResponse(
@@ -31,7 +44,6 @@ export class UserController {
   }
 
   @Get(':userId')
-  @UseGuards(JwtAuthGuard)
   async findOne(
     @Param('userId') userId: string,
   ): Promise<SuccessResponse<UserResponseDto>> {
@@ -43,7 +55,6 @@ export class UserController {
   }
 
   @Get('/find/:identifier')
-  @UseGuards(JwtAuthGuard)
   async findOneByIdentifier(
     @Param('identifier') identifier: string,
   ): Promise<SuccessResponse<UserResponseDto>> {
@@ -54,8 +65,22 @@ export class UserController {
     );
   }
 
+  @Put('profile')
+  async updateProfile(
+    @CurrentUser('id') userId: string,
+    @Body() updateProfileDto: UpdateProfileDto,
+  ): Promise<SuccessResponse<UserResponseDto>> {
+    const updatedUser = await this.userService.updateUser(
+      userId,
+      updateProfileDto,
+    );
+    return new SuccessResponse(
+      plainToInstance(UserResponseDto, updatedUser),
+      'User updated successfully',
+    );
+  }
+
   @Put()
-  @UseGuards(JwtAuthGuard)
   async update(
     @CurrentUser('id') userId: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -71,7 +96,6 @@ export class UserController {
   }
 
   @Delete()
-  @UseGuards(JwtAuthGuard)
   async remove(
     @Headers('x-device-id') deviceId: string,
     @CurrentUser('id') userId: string,

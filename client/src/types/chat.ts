@@ -43,7 +43,7 @@ export interface ChatPartner {
   avatarUrl?: string | null;
 }
 
-export interface ChatGroupMember {
+export interface ChatMember {
   id: string;
   nickname: string;
   firstName: string;

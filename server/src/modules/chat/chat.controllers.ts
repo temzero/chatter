@@ -41,7 +41,6 @@ export class ChatController {
   ): Promise<SuccessResponse<ChatListResponseDto[]>> {
     try {
       const chats = await this.chatService.getChatListByUserId(userId);
-      console.log('chats: ', chats);
       function getTransformGroup(chatType: ChatType): string[] {
         if (chatType === ChatType.DIRECT) return ['direct'];
         if (chatType === ChatType.GROUP || chatType === ChatType.CHANNEL)

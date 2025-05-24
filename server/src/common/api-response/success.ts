@@ -8,7 +8,6 @@ export class SuccessResponse<D> {
 // Specialized version for auth responses
 export class AuthResponse {
   constructor(
-    public readonly user: any, // Replace 'any' with your User type
     public readonly accessToken: string,
     public readonly message?: string,
   ) {}
