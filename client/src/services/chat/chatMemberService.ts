@@ -12,10 +12,7 @@ export const chatMemberService = {
   },
 
   // Get a specific member of a chat
-  async getMember(
-    chatId: string,
-    userId: string
-  ): Promise<ChatMember> {
+  async getMember(chatId: string, userId: string): Promise<ChatMember> {
     const response = await API.get<ApiSuccessResponse<ChatMember>>(
       `/chat-members/${chatId}/${userId}`
     );
@@ -48,6 +45,19 @@ export const chatMemberService = {
     return response.data.payload;
   },
 
+  async updateMemberNickname(
+    chatId: string,
+    userId: string,
+    nickname: string
+  ): Promise<string> {
+    const response = await API.patch<ApiSuccessResponse<string>>(
+      `/chat-members/nickname/${chatId}/${userId}`,
+      { nickname }
+    );
+    // return nickname: string
+    return response.data.payload;
+  },
+
   // Update a member's last read message
   async updateLastReadMessage(
     chatId: string,
@@ -62,10 +72,7 @@ export const chatMemberService = {
   },
 
   // Remove a member from a chat
-  async removeMember(
-    chatId: string,
-    userId: string
-  ): Promise<ChatMember> {
+  async removeMember(chatId: string, userId: string): Promise<ChatMember> {
     const response = await API.delete<ApiSuccessResponse<ChatMember>>(
       `/chat-members/${chatId}/${userId}`
     );

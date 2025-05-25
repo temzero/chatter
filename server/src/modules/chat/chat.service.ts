@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOneOptions, Repository } from 'typeorm';
 import { Chat } from 'src/modules/chat/entities/chat.entity';
 import { UpdateChatDto } from 'src/modules/chat/dto/requests/update-chat.dto';
 import { User } from 'src/modules/user/entities/user.entity';
@@ -115,15 +115,17 @@ export class ChatService {
     }
   }
 
-  async getChatById(chatId: string): Promise<Chat> {
+  async getChatById(chatId: string, loadRelations = true): Promise<Chat> {
     try {
-      const chat = await this.chatRepo.findOne({ where: { id: chatId } });
+      const options: FindOneOptions<Chat> = { where: { id: chatId } };
+      if (loadRelations) options.relations = ['members'];
+      const chat = await this.chatRepo.findOne(options);
       if (!chat) {
         ErrorResponse.notFound('Chat not found');
       }
       return chat;
     } catch (error) {
-      ErrorResponse.throw(error, 'Failed to retrieve chat');
+      ErrorResponse.throw(error, 'Failed to get chat');
     }
   }
 
@@ -144,6 +146,25 @@ export class ChatService {
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to retrieve user chats');
     }
+  }
+
+  async isChatParticipant(chatId: string, userId: string): Promise<boolean> {
+    return this.memberRepo.exist({
+      where: {
+        chat: { id: chatId },
+        user: { id: userId },
+      },
+    });
+  }
+
+  async isAdminOrOwner(chatId: string, userId: string): Promise<boolean> {
+    return this.memberRepo.exist({
+      where: {
+        chat: { id: chatId },
+        user: { id: userId },
+        role: In([ChatMemberRole.ADMIN, ChatMemberRole.OWNER]),
+      },
+    });
   }
 
   async getChatListByUserId(userId: string) {
@@ -195,6 +216,7 @@ export class ChatService {
 
       return {
         ...chat,
+        myRole: chat.members?.find((m) => m.userId === userId)?.role,
         lastMessage: chat.lastMessage
           ? this.transformLastMessage(chat.lastMessage, userId, chat.members)
           : null,

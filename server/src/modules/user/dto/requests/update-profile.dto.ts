@@ -6,7 +6,7 @@ import { EmptyStringToNull } from 'src/common/utils/dto.utils';
 export class UpdateProfileDto {
   @IsOptional()
   @IsUrl()
-  @Length(0, 512)
+  // @Length(0, 512)
   @EmptyStringToNull()
   avatarUrl?: string | null;
 

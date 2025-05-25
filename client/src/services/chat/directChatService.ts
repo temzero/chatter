@@ -2,9 +2,9 @@ import API from "../api/api";
 import type { DirectChat } from "@/types/chat";
 import type { ApiSuccessResponse } from "@/types/apiSuccessResponse";
 
-export const privateChatService = {
+export const directChatService = {
   // Create a new direct chat
-  async createPrivateChat(chatPartnerId: string): Promise<DirectChat> {
+  async createDirectChat(chatPartnerId: string): Promise<DirectChat> {
     const response = await API.post<ApiSuccessResponse<DirectChat>>(
       `/chat/create/${chatPartnerId}`
     );
@@ -12,7 +12,7 @@ export const privateChatService = {
   },
 
   // Update an existing direct chat
-  async updatePrivateChat(
+  async updateDirectChat(
     chatId: string,
     updates: Partial<DirectChat>
   ): Promise<DirectChat> {
@@ -24,7 +24,7 @@ export const privateChatService = {
   },
 
   // Delete a direct chat
-  async deletePrivateChat(chatId: string): Promise<string> {
+  async deleteDirectChat(chatId: string): Promise<string> {
     const response = await API.delete<ApiSuccessResponse<string>>(
       `/chat/${chatId}`
     );

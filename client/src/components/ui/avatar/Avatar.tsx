@@ -15,7 +15,6 @@ export const Avatar: React.FC<AvatarProps> = ({
   textSize = "text-xl",
   className = "",
 }) => {
-  console.log("chat fullName", firstName, lastName);
   const firstNameInitial = firstName?.charAt(0)?.toUpperCase();
   const lastNameInitial = lastName?.charAt(0)?.toUpperCase();
   const showInitials = firstNameInitial && lastNameInitial;

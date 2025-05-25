@@ -1,21 +1,21 @@
 import React, { useState } from "react";
 import { userService } from "@/services/userService";
-import { MyProfileProps } from "@/data/types";
 import ContactInfoItem from "./contactInfoItem";
 import { useAuthStore } from "@/stores/authStore";
 import { motion } from "framer-motion";
 import { useModalStore } from "@/stores/modalStore";
 import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "./avatar/Avatar";
+import type { User } from "@/types/user";
 
 const CreateNewChat: React.FC = () => {
   const currentUser = useAuthStore((state) => state.currentUser);
   const setActiveChat = useChatStore((s) => s.setActiveChat);
-  const createPrivateChat = useChatStore((s) => s.createPrivateChat);
+  const createDirectChat = useChatStore((s) => s.createDirectChat);
   const { openModal } = useModalStore();
 
   const [query, setQuery] = useState("");
-  const [user, setUser] = useState<MyProfileProps | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -55,7 +55,7 @@ const CreateNewChat: React.FC = () => {
 
     try {
       setLoading(true);
-      const newChat = await createPrivateChat(user.id);
+      const newChat = await createDirectChat(user.id);
       console.log("newChat: ", newChat);
       // Set the new chat as active
       setActiveChat(newChat);
@@ -109,7 +109,12 @@ const CreateNewChat: React.FC = () => {
         >
           {/* Scrollable user info */}
           <div className="flex-1 flex flex-col items-center justify-start gap-2 p-2 pt-4 overflow-y-auto">
-            <Avatar user={user} size="28" />
+            <Avatar
+              avatarUrl={user.avatarUrl}
+              firstName={user.firstName}
+              lastName={user.lastName}
+              className="w-[120px] h-[120px]"
+            />
 
             <h1 className="font-bold text-xl">
               {user.firstName} {user.lastName}

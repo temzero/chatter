@@ -85,7 +85,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
               loading: false,
               message: null,
             });
-            console.log('currentUser from server: ', user)
             return user;
           } else {
             set({ ...initialState, loading: false });

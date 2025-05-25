@@ -52,6 +52,10 @@ export const useProfileStore = create<ProfileState & ProfileActions>()(
         }
       },
 
+      updateUserNickname: async() => {
+        
+      },
+
       deleteProfile: async () => {
         set({ loading: true, error: null });
         try {

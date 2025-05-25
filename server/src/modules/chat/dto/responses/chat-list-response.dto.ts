@@ -1,6 +1,7 @@
 import { ChatType } from '../../constants/chat-types.constants';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { LastMessageResponseDto } from './last-message-response.dto';
+import { ChatMemberRole } from 'src/modules/chat-member/constants/chat-member-roles.constants';
 
 @Exclude()
 export class ChatListResponseDto {
@@ -32,6 +33,8 @@ export class ChatListResponseDto {
   @Expose({ groups: ['direct'] })
   birthday: string;
 
+  @Expose({ groups: ['group-channel'] })
+  myRole?: ChatMemberRole; // Only for groups and channel
   @Expose({ groups: ['group-channel'] })
   memberCount?: number; // Only for groups and channel
 }

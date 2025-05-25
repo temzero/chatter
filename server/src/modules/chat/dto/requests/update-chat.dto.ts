@@ -4,6 +4,14 @@ import { EmptyStringToNull } from 'src/common/utils/dto.utils';
 export class UpdateChatDto {
   @IsOptional()
   @IsString()
+  @MaxLength(512, {
+    message: 'Avatar URL cannot be longer than 2048 characters',
+  })
+  @EmptyStringToNull()
+  avatarUrl?: string;
+
+  @IsOptional()
+  @IsString()
   @MaxLength(64, {
     message: 'Chat name cannot be longer than 64 characters',
   })
@@ -17,14 +25,6 @@ export class UpdateChatDto {
   })
   @EmptyStringToNull()
   description?: string;
-
-  @IsOptional()
-  @IsString()
-  @MaxLength(512, {
-    message: 'Avatar URL cannot be longer than 2048 characters',
-  })
-  @EmptyStringToNull()
-  avatarUrl?: string;
 
   @IsOptional()
   @IsUUID()

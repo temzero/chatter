@@ -24,7 +24,6 @@ import {
   directChatResponseDto,
   groupChatResponseDto,
 } from './dto/responses/chat-response.dto';
-import { ChatMemberRole } from '../chat-member/constants/chat-member-roles.constants';
 import { ErrorResponse } from 'src/common/api-response/errors';
 import { ChatListResponseDto } from './dto/responses/chat-list-response.dto';
 import { ChatType } from './constants/chat-types.constants';
@@ -136,19 +135,37 @@ export class ChatController {
 
   @Put(':chatId')
   async update(
+    @CurrentUser('id') userId: string,
     @Param('chatId') chatId: string,
     @Body() updateChatDto: UpdateChatDto,
-    @CurrentUser('id') userId: string,
   ): Promise<SuccessResponse<groupChatResponseDto>> {
     try {
-      const chat = await this.chatService.getChatById(chatId);
-      const member = chat.members.find((m) => m.userId === userId);
+      // First check if chat exists without loading members
+      const chat = await this.chatService.getChatById(chatId, false);
 
-      if (
-        !member ||
-        ![ChatMemberRole.ADMIN, ChatMemberRole.OWNER].includes(member.role)
-      ) {
-        ErrorResponse.unauthorized('Unauthorized to update chat');
+      // For direct chats
+      if (chat.type === ChatType.DIRECT) {
+        // Verify participation using a dedicated query
+        const isParticipant = await this.chatService.isChatParticipant(
+          chatId,
+          userId,
+        );
+        if (!isParticipant) {
+          ErrorResponse.unauthorized('Unauthorized to update chat');
+        }
+      }
+      // For group chats
+      else {
+        // Check admin/owner status with a dedicated query
+        const isAdminOrOwner = await this.chatService.isAdminOrOwner(
+          chatId,
+          userId,
+        );
+        if (!isAdminOrOwner) {
+          ErrorResponse.unauthorized(
+            'User must be Admin or Owner to update chat',
+          );
+        }
       }
 
       const updatedChat = await this.chatService.updateChat(

@@ -5,7 +5,6 @@ import { storageService } from "./storage/storageService";
 export const authService = {
   async getCurrentUser() {
     const { data } = await API.get("/user/me");
-    console.log("Response from /user/me:", data);
     return data.payload;
   },
 

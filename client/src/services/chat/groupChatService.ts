@@ -10,7 +10,7 @@ export const groupChatService = {
     type: "group" | "channel";
   }): Promise<GroupChannelChat> {
     const response = await API.post<ApiSuccessResponse<GroupChannelChat>>(
-      "/chat-group/create",
+      "/chat/create",
       payload
     );
     return response.data.payload;
@@ -18,7 +18,7 @@ export const groupChatService = {
 
   async getGroupChatById(groupChatId: string): Promise<GroupChannelChat> {
     const response = await API.get<ApiSuccessResponse<GroupChannelChat>>(
-      `/chat-group/${groupChatId}`
+      `/chat/${groupChatId}`
     );
     return response.data.payload;
   },
@@ -28,7 +28,7 @@ export const groupChatService = {
     payload: Partial<GroupChannelChat>
   ): Promise<GroupChannelChat> {
     const response = await API.put<ApiSuccessResponse<GroupChannelChat>>(
-      `/chat-group/${groupChatId}`,
+      `/chat/${groupChatId}`,
       payload
     );
     return response.data.payload;
@@ -37,7 +37,7 @@ export const groupChatService = {
   // Delete a group chat
   async deleteGroupChat(groupChatId: string): Promise<string> {
     const response = await API.delete<ApiSuccessResponse<string>>(
-      `/chat-group/${groupChatId}`
+      `/chat/${groupChatId}`
     );
     return response.data.payload;
   },

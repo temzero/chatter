@@ -1,4 +1,5 @@
 import { AttachmentType } from "./attachment";
+import { ChatMemberRole } from "./ChatMemberRole";
 
 export type Chat = DirectChat | GroupChannelChat;
 
@@ -28,6 +29,7 @@ export interface DirectChat extends BaseChatResponse {
 
 export interface GroupChannelChat extends BaseChatResponse {
   type: "group" | "channel";
+  myRole: ChatMemberRole;
   memberCount?: number;
 }
 
@@ -45,6 +47,7 @@ export interface ChatPartner {
 
 export interface ChatMember {
   id: string;
+  userId: string;
   nickname: string;
   firstName: string;
   lastName: string;

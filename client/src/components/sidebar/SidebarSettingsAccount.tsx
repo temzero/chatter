@@ -3,6 +3,7 @@ import { useSidebarStore } from "@/stores/sidebarStore";
 
 const SidebarSettingsAccount: React.FC = () => {
   const currentUser = useCurrentUser();
+  console.log('currentUser: ', currentUser)
   const { setSidebar } = useSidebarStore();
 
   return (

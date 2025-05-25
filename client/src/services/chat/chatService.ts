@@ -1,11 +1,11 @@
 import API from "../api/api";
 import type { Chat } from "@/types/chat";
-import { privateChatService } from "./directChatService";
+import { directChatService } from "./directChatService";
 import { groupChatService } from "./groupChatService";
 import type { ApiSuccessResponse } from "@/types/apiSuccessResponse";
 
 export const chatService = {
-  ...privateChatService,
+  ...directChatService,
   ...groupChatService,
   // Get all direct and group chats
   async getAllChats(): Promise<Chat[]> {

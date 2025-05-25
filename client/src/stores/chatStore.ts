@@ -3,9 +3,9 @@ import { persist } from "zustand/middleware";
 import { chatService } from "@/services/chat/chatService";
 import { useMessageStore } from "./messageStore";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
-import type { Chat, ChatType, ChatGroupMember, DirectChat } from "@/types/chat";
-import { groupChatService } from "@/services/chat/groupChatService";
 import { GroupChannelChat } from "@/types/chat";
+import { chatMemberService } from "@/services/chat/chatMemberService";
+import type { Chat, ChatType, ChatMember, DirectChat } from "@/types/chat";
 
 interface ChatStore {
   chats: Chat[];
@@ -14,30 +14,37 @@ interface ChatStore {
   isLoading: boolean;
   error: string | null;
   filteredChats: Chat[];
-  groupMembers: Record<string, ChatGroupMember[]>;
+  groupMembers: Record<string, ChatMember[]>;
 
   initialize: () => Promise<void>;
   getChats: () => Promise<void>;
   getChatById: (chatId: string) => Promise<void>;
-  getGroupMembers: (groupId: string) => Promise<void>;
   setActiveChat: (chat: Chat | null) => void;
+  getGroupMembers: (groupId: string) => Promise<void>;
   setActiveChatById: (chatId: string | null) => Promise<void>;
-  createPrivateChat: (chatPartnerId: string) => Promise<DirectChat>;
+  createDirectChat: (chatPartnerId: string) => Promise<DirectChat>;
   createGroupChat: (payload: {
     name: string;
     memberIds: string[];
     type: "group" | "channel";
   }) => Promise<Chat>;
-  updatePrivateChat: (
-    id: string,
-    payload: Partial<DirectChat>
-  ) => Promise<void>;
+  updateDirectChat: (id: string, payload: Partial<DirectChat>) => Promise<void>;
   updateGroupChat: (
     id: string,
     payload: Partial<GroupChannelChat>
   ) => Promise<void>;
   deleteChat: (id: string, type: ChatType) => Promise<void>;
   setSearchTerm: (term: string) => void;
+  updateMember: (
+    chatId: string,
+    userId: string,
+    updates: { role?: string; mutedUntil?: Date }
+  ) => Promise<void>;
+  updateMemberNickname: (
+    chatId: string,
+    userId: string,
+    nickname: string
+  ) => Promise<string>;
   clearChats: () => void;
 }
 
@@ -93,7 +100,7 @@ export const useChatStore = create<ChatStore>()(
       },
 
       getGroupMembers: async (groupId) => {
-        const members = await groupChatService.getGroupChatMembers(groupId);
+        const members = await chatMemberService.getChatMembers(groupId);
         set((state) => ({
           groupMembers: { ...state.groupMembers, [groupId]: members },
         }));
@@ -131,12 +138,21 @@ export const useChatStore = create<ChatStore>()(
       },
 
       setActiveChat: (chat) => {
+        if (!chat) {
+          console.log("chat not exist!");
+          set({ activeChat: null });
+          return;
+        }
         useSidebarInfoStore.getState().setSidebarInfo("default");
         set({ activeChat: chat });
+        if (chat.type !== "direct") {
+          get().getGroupMembers(chat.id);
+        }
       },
 
       setActiveChatById: async (chatId: string | null) => {
         if (!chatId) {
+          console.log("no chatId");
           get().setActiveChat(null);
           return;
         }
@@ -154,10 +170,10 @@ export const useChatStore = create<ChatStore>()(
         }
       },
 
-      createPrivateChat: async (chatPartnerId) => {
+      createDirectChat: async (chatPartnerId) => {
         set({ isLoading: true });
         try {
-          const newChat = await chatService.createPrivateChat(chatPartnerId);
+          const newChat = await chatService.createDirectChat(chatPartnerId);
           set((state) => ({
             chats: [newChat, ...state.chats],
             isLoading: false,
@@ -192,10 +208,10 @@ export const useChatStore = create<ChatStore>()(
         }
       },
 
-      updatePrivateChat: async (id, payload) => {
+      updateDirectChat: async (id, payload) => {
         set({ isLoading: true });
         try {
-          const updatedChat = await chatService.updatePrivateChat(id, payload);
+          const updatedChat = await chatService.updateDirectChat(id, payload);
           set((state) => ({
             chats: state.chats.map((chat) =>
               chat.id === id ? updatedChat : chat
@@ -232,6 +248,76 @@ export const useChatStore = create<ChatStore>()(
             error: "Failed to update group chat",
             isLoading: false,
           });
+          throw error;
+        }
+      },
+
+      updateMember: async (chatId, userId, updates) => {
+        set({ isLoading: true });
+        try {
+          const updatedMember = await chatMemberService.updateMember(
+            chatId,
+            userId,
+            updates
+          );
+
+          // Update the member inside groupMembers state
+          set((state) => {
+            const currentMembers = state.groupMembers[chatId] || [];
+            const updatedMembers = currentMembers.map((member) =>
+              member.userId === userId ? updatedMember : member
+            );
+            return {
+              groupMembers: {
+                ...state.groupMembers,
+                [chatId]: updatedMembers,
+              },
+              isLoading: false,
+            };
+          });
+        } catch (error) {
+          console.error("Failed to update chat member:", error);
+          set({ error: "Failed to update member", isLoading: false });
+          throw error;
+        }
+      },
+
+      updateMemberNickname: async (chatId, userId, nickname) => {
+        set({ isLoading: true });
+        try {
+          const updatedNickname = await chatMemberService.updateMemberNickname(
+            chatId,
+            userId,
+            nickname
+          );
+
+          // Update the active chat name if it's a direct chat
+          set((state) => {
+            if (
+              state.activeChat?.id === chatId &&
+              state.activeChat.type === "direct"
+            ) {
+              const updatedActiveChat = {
+                ...state.activeChat,
+                name: updatedNickname as string,
+                firstName: updatedNickname as string,
+              } as Chat;
+              return {
+                activeChat: updatedActiveChat,
+                chats: state.chats.map((chat) =>
+                  chat.id === chatId && chat.type === "direct"
+                    ? updatedActiveChat
+                    : chat
+                ),
+                isLoading: false,
+              };
+            }
+            return { isLoading: false };
+          });
+          return updatedNickname;
+        } catch (error) {
+          console.error("Failed to update member nickname:", error);
+          set({ error: "Failed to update nickname", isLoading: false });
           throw error;
         }
       },

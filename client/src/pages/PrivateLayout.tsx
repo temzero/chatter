@@ -4,7 +4,7 @@ import Modal from "@/components/modal/Modal";
 import Sidebar from "@/components/sidebar/Sidebar";
 import Chat from "@/components/chat/Chat";
 import BackgroundContent from "@/components/ui/BackgroundContent";
-import { Navigate, useParams, useNavigate } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 import { useChatStore } from "@/stores/chatStore";
 import { useIsAuthenticated } from "@/stores/authStore";
@@ -12,6 +12,7 @@ import { useSidebarStore } from "@/stores/sidebarStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 
 export const ChatContent: React.FC = () => {
+  const { id: chatId } = useParams();
   const { initializeKeyListeners: initializeSidebar } = useSidebarStore();
   const { initializeKeyListeners: initializeSidebarInfo } =
     useSidebarInfoStore();
@@ -21,8 +22,6 @@ export const ChatContent: React.FC = () => {
     activeChat,
     setActiveChatById,
   } = useChatStore();
-  const { id: chatId } = useParams();
-  const navigate = useNavigate();
 
   // Initialization effect
   useEffect(() => {
@@ -41,17 +40,6 @@ export const ChatContent: React.FC = () => {
   useEffect(() => {
     setActiveChatById(chatId || null);
   }, [chatId, setActiveChatById]);
-
-  // Navigation effect
-  useEffect(() => {
-    const handlePopState = () => {
-      navigate(ROUTES.PRIVATE.HOME, { replace: true });
-      setActiveChatById(null);
-    };
-
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [navigate, setActiveChatById]);
 
   return activeChat ? <Chat /> : null;
 };

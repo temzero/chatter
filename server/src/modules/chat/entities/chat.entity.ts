@@ -47,7 +47,8 @@ export class Chat {
   @Column({ type: 'varchar', nullable: true, length: 512 })
   description: string | null;
 
-  @Column({ type: 'varchar', nullable: true, length: 512 })
+  // @Column({ name: 'avatar_url', type: 'varchar', length: 512, nullable: true })
+  @Column({ name: 'avatar_url', type: 'text', nullable: true })
   avatarUrl: string | null;
 
   @Column({ default: false, nullable: true })

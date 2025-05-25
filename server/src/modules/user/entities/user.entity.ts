@@ -26,7 +26,8 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ name: 'avatar_url', type: 'varchar', length: 512, nullable: true })
+  // @Column({ name: 'avatar_url', type: 'varchar', length: 512, nullable: true })
+  @Column({ name: 'avatar_url', type: 'text', nullable: true })
   avatarUrl: string | null;
 
   @Column({ name: 'first_name', type: 'varchar', length: 24 })

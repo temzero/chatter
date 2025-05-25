@@ -11,31 +11,45 @@ import ContactInfoItem from "@/components/ui/contactInfoItem";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import RenderMedia from "@/components/ui/RenderMedia";
 import { Avatar } from "@/components/ui/avatar/Avatar";
+import { ChatMemberRole } from "@/types/ChatMemberRole";
 
-const ChatInfoDefault: React.FC = () => {
+const SidebarInfoDefault: React.FC = () => {
   const { activeChat, groupMembers } = useChatStore();
   const { activeMedia } = useMessageStore();
   const { setSidebarInfo, isSidebarInfoVisible } = useSidebarInfoStore();
 
-  const isDirect = activeChat?.type === 'direct';
+  const isDirect = activeChat?.type === "direct";
 
   const currentMembers = useMemo(() => {
     if (!isDirect && activeChat?.id) {
       return groupMembers[activeChat.id] || [];
     }
     return [];
-  }, [activeChat?.id, activeChat?.type, groupMembers]);
-
+  }, [activeChat?.id, groupMembers, isDirect]);
 
   const openEditSidebar = () => {
     setSidebarInfo(isDirect ? "directEdit" : "groupEdit");
   };
 
-  const headerIcons = [
+  // Base header icons that are always visible
+  const baseHeaderIcons = [
     { icon: "notifications", action: () => {} },
     { icon: "search", action: () => {} },
     { icon: "block", action: () => {}, className: "rotate-90" },
-    { icon: "edit", action: openEditSidebar },
+  ];
+
+  // Determine if edit button should be shown
+  const showEditButton =
+    isDirect ||
+    (!isDirect &&
+      activeChat &&
+      (activeChat.myRole === ChatMemberRole.ADMIN ||
+        activeChat.myRole === ChatMemberRole.OWNER));
+
+  // Final header icons array
+  const headerIcons = [
+    ...baseHeaderIcons,
+    ...(showEditButton ? [{ icon: "edit", action: openEditSidebar }] : []),
   ];
 
   if (!activeChat) return null;
@@ -59,12 +73,15 @@ const ChatInfoDefault: React.FC = () => {
           <ChatAvatar chat={activeChat} type="info" />
 
           <h1 className="text-xl font-semibold">{activeChat.name}</h1>
-          {isDirect && activeChat.firstName && activeChat.lastName && 
-           `${activeChat.firstName} ${activeChat.lastName}` !== activeChat.name && (
-            <h2 className="text-sm opacity-80 -mt-1">
-              {activeChat.firstName} {activeChat.lastName}
-            </h2>
-          )}
+          {isDirect &&
+            activeChat.firstName &&
+            activeChat.lastName &&
+            `${activeChat.firstName} ${activeChat.lastName}` !==
+              activeChat.name && (
+              <h2 className="text-sm opacity-80 -mt-1">
+                {activeChat.firstName} {activeChat.lastName}
+              </h2>
+            )}
 
           <p className="text-sm text-center font-light opacity-80 w-full min-w-[240px] text-ellipsis">
             {activeChat.description}
@@ -149,7 +166,7 @@ const ChatInfoDefault: React.FC = () => {
                   <div className="flex flex-col rounded overflow-hidden custom-border">
                     {currentMembers.map((member) => (
                       <div
-                        key={member.id}
+                        key={member.userId}
                         className="flex items-center justify-between hover:bg-[var(--hover-color)] p-2 cursor-pointer"
                       >
                         <div className="flex gap-2 items-center">
@@ -183,28 +200,28 @@ const ChatInfoDefault: React.FC = () => {
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
 
-        <div
-          className="flex flex-col justify-center items-center cursor-pointer border-2 border-b-0 border-[var(--hover-color)] rounded p-1 shadow-4xl absolute -bottom-[100px] hover:-bottom-[70px] transition-all duration-300 ease-in-out backdrop-blur-[12px]"
-          onClick={() => setSidebarInfo("media")}
-        >
-          <i className="material-symbols-outlined opacity-70">
-            keyboard_control_key
-          </i>
-          <h1 className="-mt-1 mb-2">Media & Files</h1>
-          <div className="grid grid-cols-3">
-            {activeMedia.slice(0, 3).map((media, index) => (
-              <div
-                key={`${media.messageId}-${index}`}
-                className="overflow-hidden aspect-square"
-              >
-                <RenderMedia
-                  media={media}
-                  className="hover:none custom-border"
-                />
-              </div>
-            ))}
+          <div
+            className="flex flex-col justify-center items-center cursor-pointer border-2 border-b-0 border-[var(--hover-color)] rounded p-1 shadow-4xl absolute -bottom-[100px] hover:-bottom-[70px] transition-all duration-300 ease-in-out backdrop-blur-[12px]"
+            onClick={() => setSidebarInfo("media")}
+          >
+            <i className="material-symbols-outlined opacity-70">
+              keyboard_control_key
+            </i>
+            <h1 className="-mt-1 mb-2">Media & Files</h1>
+            <div className="grid grid-cols-3">
+              {activeMedia.slice(0, 3).map((media, index) => (
+                <div
+                  key={`${media.messageId}-${index}`}
+                  className="overflow-hidden aspect-square"
+                >
+                  <RenderMedia
+                    media={media}
+                    className="hover:none custom-border"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -212,4 +229,4 @@ const ChatInfoDefault: React.FC = () => {
   );
 };
 
-export default ChatInfoDefault;
+export default SidebarInfoDefault;
