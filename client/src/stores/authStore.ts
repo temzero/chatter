@@ -227,14 +227,6 @@ function handleAuthError(error: unknown): string {
 }
 
 // Selector hooks
-// Single selector for all auth state
-export const useAuthState = () =>
-  useAuthStore((state) => ({
-    currentUser: state.currentUser,
-    isAuthenticated: state.isAuthenticated,
-    loading: state.loading,
-    message: state.message,
-  }));
 
 // Memoized action selector (won't cause re-renders when actions don't change)
 export const useAuthActions = () =>

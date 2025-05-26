@@ -5,6 +5,16 @@ export class SuccessResponse<D> {
   ) {}
 }
 
+export class GetOrCreateResponse<D> {
+  constructor(
+    public readonly payload: D,
+    public readonly wasExisting: boolean,
+    public readonly message?: string,
+  ) {}
+}
+
+
+
 // Specialized version for auth responses
 export class AuthResponse {
   constructor(

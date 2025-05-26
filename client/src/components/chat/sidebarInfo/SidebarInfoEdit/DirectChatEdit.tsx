@@ -2,27 +2,37 @@ import { useState, useMemo, useEffect } from "react";
 import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
-import { DirectChat } from "@/types/chat";
+import { DirectChatResponse } from "@/types/chat.type";
+import { useAuthStore } from "@/stores/authStore";
 
 const DirectChatEdit = () => {
-  const activeChat = useChatStore((state) => state.activeChat) as DirectChat;
+  const currentUser = useAuthStore((s) => s.currentUser);
+  const activeChat = useChatStore(
+    (state) => state.activeChat
+  ) as DirectChatResponse;
+  const chatPartner = activeChat.chatPartner;
   const deleteChat = useChatStore((state) => state.deleteChat);
   const updateMemberNickname = useChatStore(
     (state) => state.updateMemberNickname
   );
   const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
+
   const initialFormData = useMemo(
     () => ({
-      nickname: activeChat?.name || "",
+      partnerNickname: chatPartner?.nickname || "",
+      myNickname: activeChat.myNickname || "",
     }),
-    [activeChat]
+    [chatPartner, activeChat.myNickname]
   );
+
   const [formData, setFormData] = useState(initialFormData);
   const [hasChanges, setHasChanges] = useState(false);
 
   // Compare current form data with initial data to determine if there are changes
   useEffect(() => {
-    const isChanged = formData.nickname !== initialFormData.nickname;
+    const isChanged =
+      formData.partnerNickname !== initialFormData.partnerNickname ||
+      formData.myNickname !== initialFormData.myNickname;
     setHasChanges(isChanged);
   }, [formData, initialFormData]);
 
@@ -39,11 +49,30 @@ const DirectChatEdit = () => {
     }
 
     try {
-      await updateMemberNickname(
-        activeChat.id,
-        activeChat.userId,
-        formData.nickname
-      );
+      // Update partner's nickname
+      if (formData.partnerNickname !== initialFormData.partnerNickname) {
+        await updateMemberNickname(
+          activeChat.id,
+          chatPartner.userId,
+          formData.partnerNickname
+        );
+      }
+
+      // Update my nickname (you might need a separate action for this)
+      if (formData.myNickname !== initialFormData.myNickname) {
+        // Assuming you have a way to get current user's ID
+        if (!currentUser?.id) {
+          console.error("cannot find currentUserID");
+          return;
+        } // Replace with actual current user ID
+
+        await updateMemberNickname(
+          activeChat.id,
+          currentUser.id,
+          formData.myNickname
+        );
+      }
+
       setSidebarInfo("default"); // Go back to sidebar after successful update
     } catch (error) {
       console.error("Failed to update nickname:", error);
@@ -77,17 +106,17 @@ const DirectChatEdit = () => {
       <div className="overflow-y-auto h-screen">
         <div className="flex gap-4 p-4 items-center">
           <Avatar
-            avatarUrl={activeChat.avatarUrl}
-            firstName={activeChat.firstName}
-            lastName={activeChat.lastName}
+            avatarUrl={chatPartner.avatarUrl}
+            firstName={chatPartner.firstName}
+            lastName={chatPartner.lastName}
             size="12"
           />
           <div>
             <h1 className="text-xl font-semibold">
-              {activeChat.firstName} {activeChat.lastName}
+              {chatPartner.firstName} {chatPartner.lastName}
             </h1>
-            {activeChat.name && (
-              <p className="text-sm opacity-70">{activeChat.name}</p>
+            {chatPartner.nickname && (
+              <p className="text-sm opacity-70">{chatPartner.nickname}</p>
             )}
           </div>
         </div>
@@ -98,11 +127,24 @@ const DirectChatEdit = () => {
         >
           <div className="w-full space-y-4">
             <div className="flex flex-col gap-1">
-              <label className="text-sm opacity-70">Set Nickname</label>
+              <label className="text-sm opacity-70">
+                Set {chatPartner.firstName}'s Nickname
+              </label>
               <input
                 type="text"
-                name="nickname"
-                value={formData.nickname}
+                name="partnerNickname"
+                value={formData.partnerNickname}
+                onChange={handleChange}
+                className="input"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-sm opacity-70">Set My Nickname</label>
+              <input
+                type="text"
+                name="myNickname"
+                value={formData.myNickname}
                 onChange={handleChange}
                 className="input"
               />

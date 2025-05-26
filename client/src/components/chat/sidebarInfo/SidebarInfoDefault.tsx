@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { useChatStore } from "@/stores/chatStore";
 import { useMessageStore } from "@/stores/messageStore";
 import {
@@ -12,20 +12,20 @@ import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import RenderMedia from "@/components/ui/RenderMedia";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { ChatMemberRole } from "@/types/ChatMemberRole";
+import getChatName from "@/utils/getChatName";
+import type {
+  ChatResponse,
+  DirectChatResponse,
+  GroupChatResponse,
+} from "@/types/chat.type";
+import { ChatType } from "@/types/enums/ChatType";
 
 const SidebarInfoDefault: React.FC = () => {
-  const { activeChat, groupMembers } = useChatStore();
+  const { activeChat, activeMembers } = useChatStore();
   const { activeMedia } = useMessageStore();
   const { setSidebarInfo, isSidebarInfoVisible } = useSidebarInfoStore();
 
-  const isDirect = activeChat?.type === "direct";
-
-  const currentMembers = useMemo(() => {
-    if (!isDirect && activeChat?.id) {
-      return groupMembers[activeChat.id] || [];
-    }
-    return [];
-  }, [activeChat?.id, groupMembers, isDirect]);
+  const isDirect = activeChat?.type === ChatType.DIRECT;
 
   const openEditSidebar = () => {
     setSidebarInfo(isDirect ? "directEdit" : "groupEdit");
@@ -54,6 +54,16 @@ const SidebarInfoDefault: React.FC = () => {
 
   if (!activeChat) return null;
 
+  const getChatDescription = (chat: ChatResponse): string | null => {
+    if (chat.type === ChatType.DIRECT) {
+      const directChat = chat as DirectChatResponse;
+      return directChat.chatPartner.bio;
+    } else {
+      const groupChat = chat as GroupChatResponse;
+      return groupChat.description ?? null;
+    }
+  };
+
   return (
     <aside className="relative w-full h-full overflow-hidden flex flex-col">
       <header className="flex w-full justify-around items-center min-h-[var(--header-height)] custom-border-b">
@@ -72,20 +82,20 @@ const SidebarInfoDefault: React.FC = () => {
         <div className="flex flex-col justify-center items-center p-4 gap-2 w-full pb-[70px]">
           <ChatAvatar chat={activeChat} type="info" />
 
-          <h1 className="text-xl font-semibold">{activeChat.name}</h1>
+          <h1 className="text-xl font-semibold">{getChatName(activeChat)}</h1>
           {isDirect &&
-            activeChat.firstName &&
-            activeChat.lastName &&
-            `${activeChat.firstName} ${activeChat.lastName}` !==
-              activeChat.name && (
+            (activeChat as DirectChatResponse).chatPartner.nickname && (
               <h2 className="text-sm opacity-80 -mt-1">
-                {activeChat.firstName} {activeChat.lastName}
+                {(activeChat as DirectChatResponse).chatPartner.firstName}{" "}
+                {(activeChat as DirectChatResponse).chatPartner.lastName}
               </h2>
             )}
 
-          <p className="text-sm text-center font-light opacity-80 w-full min-w-[240px] text-ellipsis">
-            {activeChat.description}
-          </p>
+          {getChatDescription(activeChat) && (
+            <p className="text-sm text-center font-light opacity-80 w-full min-w-[240px] text-ellipsis">
+              {getChatDescription(activeChat)}
+            </p>
+          )}
 
           <AnimatePresence>
             {isSidebarInfoVisible && (
@@ -100,23 +110,32 @@ const SidebarInfoDefault: React.FC = () => {
                   <div className="w-full flex flex-col items-center rounded font-light custom-border overflow-hidden">
                     <ContactInfoItem
                       icon="alternate_email"
-                      value={activeChat.username}
+                      value={
+                        (activeChat as DirectChatResponse).chatPartner.username
+                      }
                       copyType="username"
                       defaultText="No username"
                     />
                     <ContactInfoItem
                       icon="call"
-                      value={activeChat.phoneNumber || null}
+                      value={
+                        (activeChat as DirectChatResponse).chatPartner
+                          .phoneNumber || null
+                      }
                       copyType="phoneNumber"
                     />
                     <ContactInfoItem
                       icon="mail"
-                      value={activeChat.email}
+                      value={
+                        (activeChat as DirectChatResponse).chatPartner.email
+                      }
                       copyType="email"
                     />
                     <ContactInfoItem
                       icon="cake"
-                      value={formatTime(activeChat.birthday)}
+                      value={formatTime(
+                        (activeChat as DirectChatResponse).chatPartner.birthday
+                      )}
                       copyType="birthday"
                     />
                   </div>
@@ -162,9 +181,9 @@ const SidebarInfoDefault: React.FC = () => {
                   ))}
                 </div>
 
-                {!isDirect && currentMembers.length > 0 && (
+                {!isDirect && activeMembers.length > 0 && (
                   <div className="flex flex-col rounded overflow-hidden custom-border">
-                    {currentMembers.map((member) => (
+                    {activeMembers.map((member) => (
                       <div
                         key={member.userId}
                         className="flex items-center justify-between hover:bg-[var(--hover-color)] p-2 cursor-pointer"

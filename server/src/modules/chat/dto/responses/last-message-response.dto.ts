@@ -4,13 +4,16 @@ import { AttachmentType } from 'src/modules/message/constants/attachment-type.co
 @Exclude()
 export class LastMessageResponseDto {
   @Expose()
+  senderId: string;
+
+  @Expose()
   senderName: string;
 
   @Expose()
   content?: string;
 
   @Expose()
-  attachmentTypes?: AttachmentType;
+  attachmentType?: AttachmentType;
 
   @Expose()
   createdAt: Date;

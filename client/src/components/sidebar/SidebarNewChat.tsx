@@ -3,6 +3,7 @@ import { useSidebarStore } from "@/stores/sidebarStore";
 import CreateNewChat from "../ui/CreateNewChat";
 import CreateNewGroupChat from "../ui/CreateNewGroupChat";
 import { SlidingContainer } from "../ui/SlidingContainer";
+import { ChatType } from "@/types/enums/ChatType";
 
 const chatTypes = ["person", "group", "channel"];
 
@@ -55,9 +56,9 @@ const SidebarNewChat: React.FC = () => {
       case "person":
         return <CreateNewChat />;
       case "group":
-        return <CreateNewGroupChat type="group" />;
+        return <CreateNewGroupChat type={ChatType.GROUP} />;
       case "channel":
-        return <CreateNewGroupChat type="channel" />;
+        return <CreateNewGroupChat type={ChatType.CHANNEL} />;
       default:
         return null;
     }
@@ -99,7 +100,6 @@ const SidebarNewChat: React.FC = () => {
       </div>
 
       <SlidingContainer uniqueKey={selectedType} direction={direction}>
-        {/* <h1 className="p-6 text-center">Content</h1> */}
         {NewChatWrapper(selectedType)}
       </SlidingContainer>
     </aside>

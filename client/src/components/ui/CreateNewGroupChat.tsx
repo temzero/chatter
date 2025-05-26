@@ -5,10 +5,11 @@ import ContactSelectionList from "../ui/ContactSelectionList";
 import { useChatStore } from "@/stores/chatStore";
 import { useAuthStore } from "@/stores/authStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
-import type { DirectChat } from "@/types/chat";
+import type { DirectChatResponse } from "@/types/chat.type";
+import type { ChatType } from "@/types/enums/ChatType";
 
 interface CreateChatProps {
-  type: "group" | "channel";
+  type: ChatType.GROUP | ChatType.CHANNEL;
 }
 
 const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
@@ -36,24 +37,25 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
     setSelectedContacts((prev) => prev.filter((id) => id !== contactId));
   };
 
-  const getSelectedChats = (): DirectChat[] => {
+  const getSelectedChats = (): DirectChatResponse[] => {
     return privateChats.filter((chat) => selectedContacts.includes(chat.id));
   };
 
   const CreateNewGroup = async () => {
     try {
-      // Get the selected chats and extract just the member IDs
-      const selectedChats = getSelectedChats(); // This returns DirectChat[]
-      if (!selectedChats.length || !currentUser) {
-        console.error("not enough member");
+      if (!currentUser) {
+        console.error("User not authenticated");
         return;
       }
-      const memberIds = Array.from(
-        new Set([
-          currentUser.id,
-          ...selectedChats.map((chat) => chat.userId),
-        ])
-      );
+
+      // Get the selected chats and extract just the member IDs (excluding current user)
+      const selectedChats = getSelectedChats();
+      const memberIds =
+        selectedChats.length > 0
+          ? Array.from(
+              new Set(selectedChats.map((chat) => chat.chatPartner.userId))
+            )
+          : []; // Empty array if no contacts selected (current user will be added by backend via token)
 
       const payload = {
         name,
@@ -66,10 +68,8 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
 
       setActiveChat(newChat);
       setSidebar("default");
-      // Handle success (e.g., close modal, redirect)
     } catch (error) {
       console.error("Failed to create group/channel:", error);
-      // Handle error (e.g., show error message)
     }
   };
 
@@ -110,9 +110,9 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
                 onClick={() => handleRemoveContact(chat.id)}
               >
                 <Avatar
-                  avatarUrl={chat.avatarUrl}
-                  firstName={chat.firstName}
-                  lastName={chat.lastName}
+                  avatarUrl={chat.chatPartner.avatarUrl}
+                  firstName={chat.chatPartner.firstName}
+                  lastName={chat.chatPartner.lastName}
                   size="8"
                   textSize="text-sm"
                 />
@@ -136,12 +136,14 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
 
         <button
           disabled={
-            selectedContacts.length === 0 ||
-            (type === "group" && !name.trim()) ||
+            (type === "group" &&
+              (selectedContacts.length === 0 || !name.trim())) ||
+            (type === "channel" && !name.trim()) ||
             isLoading
           }
           className={`flex items-center justify-center gap-2 py-1 w-full ${
-            selectedContacts.length > 0 && (type === "channel" || name.trim())
+            (type === "channel" && name.trim()) ||
+            (type === "group" && selectedContacts.length > 0 && name.trim())
               ? "bg-[var(--primary-green)]"
               : "bg-gray-300 cursor-not-allowed"
           }`}

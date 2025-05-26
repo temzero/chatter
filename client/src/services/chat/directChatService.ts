@@ -1,22 +1,32 @@
 import API from "../api/api";
-import type { DirectChat } from "@/types/chat";
-import type { ApiSuccessResponse } from "@/types/apiSuccessResponse";
+import type { DirectChatResponse } from "@/types/chat.type";
+import type {
+  ApiSuccessResponse,
+  DirectChatApiResponse,
+} from "@/types/apiSuccessResponse";
+
+interface DirectChatDataResponse {
+  payload: DirectChatResponse;
+  wasExisting: boolean;
+  message: string;
+}
 
 export const directChatService = {
-  // Create a new direct chat
-  async createDirectChat(chatPartnerId: string): Promise<DirectChat> {
-    const response = await API.post<ApiSuccessResponse<DirectChat>>(
-      `/chat/create/${chatPartnerId}`
-    );
-    return response.data.payload;
+  // Create or get an existing direct chat
+  async createOrGetDirectChat(partnerId: string): Promise<DirectChatDataResponse> {
+    const response = await API.post<DirectChatApiResponse>("/chat/direct", {
+      partnerId,
+    });
+    console.log("return direct chat data: ", response.data);
+    return response.data;
   },
 
   // Update an existing direct chat
   async updateDirectChat(
     chatId: string,
-    updates: Partial<DirectChat>
-  ): Promise<DirectChat> {
-    const response = await API.put<ApiSuccessResponse<DirectChat>>(
+    updates: Partial<DirectChatResponse>
+  ): Promise<DirectChatResponse> {
+    const response = await API.put<ApiSuccessResponse<DirectChatResponse>>(
       `/chat/${chatId}`,
       updates
     );
@@ -24,10 +34,9 @@ export const directChatService = {
   },
 
   // Delete a direct chat
-  async deleteDirectChat(chatId: string): Promise<string> {
-    const response = await API.delete<ApiSuccessResponse<string>>(
-      `/chat/${chatId}`
-    );
-    return response.data.payload;
+  async deleteDirectChat(chatId: string): Promise<void> {
+    await API.delete<ApiSuccessResponse<void>>(`/chat/${chatId}`);
+    // Typically delete operations don't return the deleted item
+    // If you need confirmation, you might return response.data.message instead
   },
 };

@@ -2,12 +2,15 @@ import { useChatStore } from "@/stores/chatStore";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
+import getChatName from "@/utils/getChatName";
 
 const ChatHeader: React.FC = () => {
   const activeChat = useChatStore((state) => state.activeChat);
   const toggleSidebarInfo = useSidebarInfoStore(
     (state) => state.toggleSidebarInfo
   );
+
+  if (!activeChat) return null
 
   return (
     <header
@@ -30,7 +33,7 @@ const ChatHeader: React.FC = () => {
           <ChatAvatar chat={activeChat} type="header" />
 
           <h1 className="text-xl font-medium">
-            {activeChat?.name || "Select a chat"}
+            {getChatName(activeChat)}
           </h1>
         </motion.div>
       </AnimatePresence>

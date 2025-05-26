@@ -11,7 +11,7 @@ import type { User } from "@/types/user";
 const CreateNewChat: React.FC = () => {
   const currentUser = useAuthStore((state) => state.currentUser);
   const setActiveChat = useChatStore((s) => s.setActiveChat);
-  const createDirectChat = useChatStore((s) => s.createDirectChat);
+  const createOrGetDirectChat = useChatStore((s) => s.createOrGetDirectChat);
   const { openModal } = useModalStore();
 
   const [query, setQuery] = useState("");
@@ -55,7 +55,7 @@ const CreateNewChat: React.FC = () => {
 
     try {
       setLoading(true);
-      const newChat = await createDirectChat(user.id);
+      const newChat = await createOrGetDirectChat(user.id);
       console.log("newChat: ", newChat);
       // Set the new chat as active
       setActiveChat(newChat);

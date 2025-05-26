@@ -17,15 +17,17 @@ import {
   CreateGroupChatDto,
 } from 'src/modules/chat/dto/requests/create-chat.dto';
 import { UpdateChatDto } from 'src/modules/chat/dto/requests/update-chat.dto';
-import { SuccessResponse } from 'src/common/api-response/success';
+import {
+  GetOrCreateResponse,
+  SuccessResponse,
+} from 'src/common/api-response/success';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
-import {
-  directChatResponseDto,
-  groupChatResponseDto,
-} from './dto/responses/chat-response.dto';
 import { ErrorResponse } from 'src/common/api-response/errors';
-import { ChatListResponseDto } from './dto/responses/chat-list-response.dto';
+import {
+  DirectChatResponseDto,
+  GroupChatResponseDto,
+} from './dto/responses/chat-response.dto';
 import { ChatType } from './constants/chat-types.constants';
 
 @Controller('chat')
@@ -37,20 +39,18 @@ export class ChatController {
   @HttpCode(HttpStatus.OK)
   async findAll(
     @CurrentUser('id') userId: string,
-  ): Promise<SuccessResponse<ChatListResponseDto[]>> {
+  ): Promise<
+    SuccessResponse<Array<DirectChatResponseDto | GroupChatResponseDto>>
+  > {
     try {
-      const chats = await this.chatService.getChatListByUserId(userId);
-      function getTransformGroup(chatType: ChatType): string[] {
-        if (chatType === ChatType.DIRECT) return ['direct'];
-        if (chatType === ChatType.GROUP || chatType === ChatType.CHANNEL)
-          return ['group-channel'];
-        return [];
-      }
-      const transformedChats = chats.map((chat) =>
-        plainToInstance(ChatListResponseDto, chat, {
-          groups: getTransformGroup(chat.type),
-        }),
-      );
+      const chats = await this.chatService.getChatsByUserId(userId);
+
+      const transformedChats = chats.map((chat) => {
+        return chat.type === ChatType.DIRECT
+          ? plainToInstance(DirectChatResponseDto, chat)
+          : plainToInstance(GroupChatResponseDto, chat);
+      });
+
       return new SuccessResponse(
         transformedChats,
         'User chats retrieved successfully',
@@ -63,7 +63,7 @@ export class ChatController {
   @Get(':chatId')
   async findOne(
     @Param('chatId') id: string,
-  ): Promise<SuccessResponse<directChatResponseDto | groupChatResponseDto>> {
+  ): Promise<SuccessResponse<DirectChatResponseDto | GroupChatResponseDto>> {
     try {
       const chat = await this.chatService.getChatById(id);
 
@@ -73,8 +73,8 @@ export class ChatController {
 
       const responseData =
         chat.type === ChatType.DIRECT
-          ? plainToInstance(directChatResponseDto, chat)
-          : plainToInstance(groupChatResponseDto, chat);
+          ? plainToInstance(DirectChatResponseDto, chat)
+          : plainToInstance(GroupChatResponseDto, chat);
 
       return new SuccessResponse(
         responseData,
@@ -86,24 +86,27 @@ export class ChatController {
   }
 
   @Post('direct')
-  async createDirectChat(
+  async createOrGetDirectChat(
     @Body() createDirectChatDto: CreateDirectChatDto,
     @CurrentUser('id') userId: string,
-  ): Promise<SuccessResponse<directChatResponseDto>> {
+  ): Promise<GetOrCreateResponse<DirectChatResponseDto>> {
     try {
-      const chat = await this.chatService.createDirectChat({
-        ...createDirectChatDto,
-        memberIds: [userId, ...createDirectChatDto.memberIds],
-      });
+      const result = await this.chatService.getOrCreateDirectChat(
+        userId,
+        createDirectChatDto.partnerId,
+      );
 
-      return new SuccessResponse(
-        plainToInstance(directChatResponseDto, chat),
-        'Direct chat created successfully',
+      return new GetOrCreateResponse(
+        plainToInstance(DirectChatResponseDto, result.chat),
+        result.wasExisting,
+        result.wasExisting
+          ? 'Direct chat already created — retrieved successfully'
+          : 'Direct chat created successfully',
       );
     } catch (error: unknown) {
       ErrorResponse.throw(
         error,
-        'Failed to create direct chat',
+        'Failed to process direct chat request',
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -113,15 +116,15 @@ export class ChatController {
   async createGroupChat(
     @CurrentUser('id') userId: string,
     @Body() createGroupChatDto: CreateGroupChatDto,
-  ): Promise<SuccessResponse<groupChatResponseDto>> {
+  ): Promise<SuccessResponse<GroupChatResponseDto>> {
     try {
-      const chat = await this.chatService.createGroupChat({
-        ...createGroupChatDto,
-        memberIds: [userId, ...createGroupChatDto.memberIds],
-      });
+      const chat = await this.chatService.createGroupChat(
+        userId,
+        createGroupChatDto,
+      );
 
       return new SuccessResponse(
-        plainToInstance(groupChatResponseDto, chat),
+        plainToInstance(GroupChatResponseDto, chat),
         'Group chat created successfully',
       );
     } catch (error: unknown) {
@@ -138,14 +141,11 @@ export class ChatController {
     @CurrentUser('id') userId: string,
     @Param('chatId') chatId: string,
     @Body() updateChatDto: UpdateChatDto,
-  ): Promise<SuccessResponse<groupChatResponseDto>> {
+  ): Promise<SuccessResponse<DirectChatResponseDto | GroupChatResponseDto>> {
     try {
-      // First check if chat exists without loading members
       const chat = await this.chatService.getChatById(chatId, false);
 
-      // For direct chats
       if (chat.type === ChatType.DIRECT) {
-        // Verify participation using a dedicated query
         const isParticipant = await this.chatService.isChatParticipant(
           chatId,
           userId,
@@ -153,10 +153,7 @@ export class ChatController {
         if (!isParticipant) {
           ErrorResponse.unauthorized('Unauthorized to update chat');
         }
-      }
-      // For group chats
-      else {
-        // Check admin/owner status with a dedicated query
+      } else {
         const isAdminOrOwner = await this.chatService.isAdminOrOwner(
           chatId,
           userId,
@@ -173,10 +170,12 @@ export class ChatController {
         updateChatDto,
       );
 
-      return new SuccessResponse(
-        plainToInstance(groupChatResponseDto, updatedChat),
-        'Chat updated successfully',
-      );
+      const responseData =
+        updatedChat.type === ChatType.DIRECT
+          ? plainToInstance(DirectChatResponseDto, updatedChat)
+          : plainToInstance(GroupChatResponseDto, updatedChat);
+
+      return new SuccessResponse(responseData, 'Chat updated successfully');
     } catch (error: unknown) {
       ErrorResponse.throw(error, 'Failed to update chat');
     }
@@ -186,16 +185,17 @@ export class ChatController {
   async delete(
     @Param('chatId') chatId: string,
     @CurrentUser('id') userId: string,
-  ): Promise<SuccessResponse<directChatResponseDto | groupChatResponseDto>> {
+  ): Promise<SuccessResponse<DirectChatResponseDto | GroupChatResponseDto>> {
     try {
       const deletedChat = await this.chatService.deleteChat(chatId, userId);
-      const responseDto =
+
+      const responseData =
         deletedChat.type === ChatType.DIRECT
-          ? plainToInstance(directChatResponseDto, deletedChat)
-          : plainToInstance(groupChatResponseDto, deletedChat);
+          ? plainToInstance(DirectChatResponseDto, deletedChat)
+          : plainToInstance(GroupChatResponseDto, deletedChat);
 
       return new SuccessResponse(
-        responseDto,
+        responseData,
         `${deletedChat.type} chat deleted successfully`,
       );
     } catch (error: unknown) {

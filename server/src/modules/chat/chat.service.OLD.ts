@@ -11,13 +11,6 @@ import { In } from 'typeorm';
 import { ChatType } from './constants/chat-types.constants';
 import { CreateGroupChatDto } from './dto/requests/create-chat.dto';
 import { Message } from '../message/entities/message.entity';
-import {
-  ChatResponseDto,
-  DirectChatResponseDto,
-  GroupChatResponseDto,
-} from './dto/responses/chat-response.dto';
-import { ChatPartnerDto } from './dto/responses/chat-partner-response.dto';
-import { LastMessageResponseDto } from './dto/responses/last-message-response.dto';
 
 @Injectable()
 export class ChatService {
@@ -32,18 +25,15 @@ export class ChatService {
     private readonly memberRepo: Repository<ChatMember>,
   ) {}
 
-  async getOrCreateDirectChat(
-    myUserId: string,
-    partnerId: string,
-  ): Promise<{
-    chat: ChatResponseDto;
-    wasExisting: boolean;
-  }> {
+  async getOrCreateDirectChat(myUserId: string, partnerId: string) {
     if (!myUserId || !partnerId) {
       ErrorResponse.badRequest('Missing userId');
     }
 
+    // Create memberIds array from the two user IDs
     const memberIds = [myUserId, partnerId];
+
+    // Validate users if exist
     const userCount = await this.userRepo.count({
       where: { id: In(memberIds) },
     });
@@ -52,6 +42,7 @@ export class ChatService {
       ErrorResponse.badRequest('One or more Users do not exist!');
     }
 
+    // Check for existing chat
     const existingChat = await this.chatRepo
       .createQueryBuilder('chat')
       .innerJoin('chat.members', 'member1', 'member1.user_id = :user1', {
@@ -64,55 +55,103 @@ export class ChatService {
       .getOne();
 
     if (existingChat) {
-      const fullChat = await this.getFullChat(existingChat.id);
+      // Fetch the existing chat with all relations
+      const fullChat = await this.chatRepo.findOne({
+        where: { id: existingChat.id },
+        relations: [
+          'members',
+          'members.user',
+          'lastMessage',
+          'lastMessage.sender',
+          'lastMessage.attachments',
+        ],
+      });
+
+      if (!fullChat) {
+        ErrorResponse.notFound('Chat not found');
+      }
+
       return {
-        chat: this.transformToDirectChatDto(fullChat, myUserId),
+        chat: this.transformChatForUser(fullChat, myUserId),
         wasExisting: true,
       };
     }
 
+    // Create new chat
     const chat = await this.chatRepo.save({
       type: ChatType.DIRECT,
       name: null,
     });
 
     await this.addMembers(chat.id, memberIds);
-    const fullChat = await this.getFullChat(chat.id);
+
+    // Fetch the newly created chat with all relations
+    const fullChat = await this.chatRepo.findOne({
+      where: { id: chat.id },
+      relations: [
+        'members',
+        'members.user',
+        'lastMessage',
+        'lastMessage.sender',
+        'lastMessage.attachments',
+      ],
+    });
+
+    if (!fullChat) {
+      ErrorResponse.notFound('Chat not found');
+    }
 
     return {
-      chat: this.transformToDirectChatDto(fullChat, myUserId),
+      chat: this.transformChatForUser(fullChat, myUserId),
       wasExisting: false,
     };
   }
 
-  async createGroupChat(
-    userId: string,
-    createDto: CreateGroupChatDto,
-  ): Promise<ChatResponseDto> {
-    const allMemberIds = [userId, ...createDto.memberIds];
-    const memberCount = allMemberIds.length;
+  async createGroupChat(userId: string, createDto: CreateGroupChatDto) {
+    // Validate based on chat type
+    const memberCount = createDto.memberIds.length;
 
     if (createDto.type === ChatType.GROUP && memberCount < 2) {
       ErrorResponse.badRequest('Group must have at least 2 members');
+    }
+
+    if (createDto.type === ChatType.CHANNEL && memberCount < 1) {
+      ErrorResponse.badRequest('Channel must have at least 1 member');
     }
 
     if (!createDto.name) {
       ErrorResponse.badRequest('Group or Channel must have a name');
     }
 
+    // Validate users if exist
     const userCount = await this.userRepo.count({
-      where: { id: In(allMemberIds) },
+      where: { id: In(createDto.memberIds) },
     });
 
-    if (userCount !== memberCount) {
+    if (userCount !== createDto.memberIds.length) {
       ErrorResponse.badRequest('One or more Users do not exist!');
     }
 
+    // Create new chat
     const chat = await this.chatRepo.save(createDto);
-    await this.addMembers(chat.id, allMemberIds, userId);
-    const fullChat = await this.getFullChat(chat.id);
 
-    return this.transformToGroupChatDto(fullChat, userId);
+    await this.addMembers(chat.id, createDto.memberIds);
+
+    // Fetch the newly created chat with all relations
+    const fullChat = await this.chatRepo.findOne({
+      where: { id: chat.id },
+      relations: [
+        'members',
+        'members.user',
+        'lastMessage',
+        'lastMessage.sender',
+        'lastMessage.attachments',
+      ],
+    });
+    if (!fullChat) {
+      ErrorResponse.notFound('Chat not found');
+    }
+    return this.transformChatForUser(fullChat, userId);
   }
 
   async updateChat(chatId: string, updateDto: UpdateChatDto): Promise<Chat> {
@@ -139,121 +178,89 @@ export class ChatService {
     }
   }
 
-  async getChatsByUserId(userId: string): Promise<ChatResponseDto[]> {
+  async getChatsByUserId(userId: string): Promise<Chat[]> {
     try {
-      const chats = await this.chatRepo
-        .createQueryBuilder('chat')
-        .leftJoinAndSelect('chat.members', 'member')
-        .leftJoinAndSelect('member.user', 'memberUser')
-        .leftJoinAndSelect('chat.lastMessage', 'lastMessage')
-        .leftJoinAndSelect('lastMessage.sender', 'sender')
-        .leftJoinAndSelect('lastMessage.attachments', 'attachments')
-        .where(
-          'chat.id IN (SELECT "chat_id" FROM chat_member WHERE "user_id" = :userId)',
-          { userId },
-        )
-        .orderBy('COALESCE(lastMessage.createdAt, chat.createdAt)', 'DESC')
-        .getMany();
+      const memberships = await this.memberRepo.find({
+        where: { user: { id: userId } },
+        relations: ['chat', 'chat.lastMessage', 'chat.lastMessage.sender'],
+      });
 
-      return chats.map((chat) =>
-        chat.type === ChatType.DIRECT
-          ? this.transformToDirectChatDto(chat, userId)
-          : this.transformToGroupChatDto(chat, userId),
-      );
+      return memberships
+        .map((m) => m.chat)
+        .sort(
+          (a, b) =>
+            (b.lastMessage?.createdAt || b.createdAt).getTime() -
+            (a.lastMessage?.createdAt || a.createdAt).getTime(),
+        );
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to retrieve user chats');
     }
   }
 
-  private async getFullChat(chatId: string): Promise<Chat> {
-    const fullChat = await this.chatRepo.findOne({
-      where: { id: chatId },
-      relations: [
-        'members',
-        'members.user',
-        'lastMessage',
-        'lastMessage.sender',
-        'lastMessage.attachments',
-      ],
-    });
+  async getChatListByUserId(userId: string) {
+    const chats = await this.chatRepo
+      .createQueryBuilder('chat')
+      .leftJoinAndSelect('chat.members', 'member')
+      .leftJoinAndSelect('member.user', 'memberUser')
+      .leftJoinAndSelect('chat.lastMessage', 'lastMessage')
+      .leftJoinAndSelect('lastMessage.sender', 'sender')
+      .leftJoinAndSelect('lastMessage.attachments', 'attachments')
+      .where(
+        'chat.id IN (SELECT "chat_id" FROM chat_member WHERE "user_id" = :userId)',
+        { userId },
+      )
+      .orderBy('COALESCE(lastMessage.createdAt, chat.createdAt)', 'DESC')
+      .getMany();
 
-    if (!fullChat) {
-      ErrorResponse.notFound('Chat not found');
+    return chats.map((chat) => this.transformChatForUser(chat, userId));
+  }
+
+  private transformChatForUser(chat: Chat, userId: string) {
+    // Enhanced direct chat handling
+    if (chat.type === ChatType.DIRECT && chat.members?.length === 2) {
+      const chatPartner = chat.members.find((m) => m.userId !== userId);
+      if (chatPartner?.user) {
+        return {
+          ...chat,
+          name:
+            chatPartner.nickname ||
+            `${chatPartner.user.firstName} ${chatPartner.user.lastName}`.trim(),
+          avatarUrl: chatPartner.user.avatarUrl,
+          // Flattened user data
+          userId: chatPartner.user.id,
+          username: chatPartner.user.username,
+          nickname: chatPartner.nickname,
+          firstName: chatPartner.user.firstName,
+          lastName: chatPartner.user.lastName,
+          email: chatPartner.user.email,
+          phoneNumber: chatPartner.user.phoneNumber,
+          birthday: chatPartner.user.birthday,
+          description: chatPartner.user.bio,
+          lastMessage: chat.lastMessage
+            ? this.transformLastMessage(chat.lastMessage, userId, chat.members)
+            : null,
+        };
+      }
     }
 
-    return fullChat;
-  }
-
-  private transformToDirectChatDto(
-    chat: Chat,
-    userId: string,
-  ): DirectChatResponseDto {
-    const chatPartner = chat.members.find((m) => m.userId !== userId);
-    const chatPartnerUser = chatPartner?.user;
-    const myMember = chat.members.find((m) => m.userId === userId); // Add this line to find the current user's member record
-
-    if (!chatPartner || !chatPartnerUser) {
-      throw new Error('Direct chat must have a partner');
-    }
-
-    const chatPartnerDto: ChatPartnerDto = {
-      userId: chatPartnerUser.id,
-      avatarUrl: chatPartnerUser.avatarUrl,
-      username: chatPartnerUser.username,
-      nickname: chatPartner.nickname,
-      firstName: chatPartnerUser.firstName,
-      lastName: chatPartnerUser.lastName,
-      bio: chatPartnerUser.bio,
-      email: chatPartnerUser.email,
-      phoneNumber: chatPartnerUser.phoneNumber,
-      birthday: chatPartnerUser.birthday,
-    };
-
-    const dto: DirectChatResponseDto = {
-      id: chat.id,
-      myNickname: myMember?.nickname, // Add myNickname from the member record
-      type: ChatType.DIRECT,
-      updatedAt: chat.updatedAt,
-      chatPartner: chatPartnerDto,
+    return {
+      ...chat,
+      myRole: chat.members?.find((m) => m.userId === userId)?.role,
       lastMessage: chat.lastMessage
-        ? this.transformLastMessageDto(chat.lastMessage, userId, chat.members)
+        ? this.transformLastMessage(chat.lastMessage, userId, chat.members)
         : null,
     };
-
-    return dto;
   }
 
-  private transformToGroupChatDto(
-    chat: Chat,
-    userId: string,
-  ): GroupChatResponseDto {
-    const myMember = chat.members.find((m) => m.userId === userId); // Find the current user's member record
-
-    const dto: GroupChatResponseDto = {
-      id: chat.id,
-      myNickname: myMember?.nickname,
-      type: chat.type as ChatType.GROUP | ChatType.CHANNEL,
-      name: chat.name,
-      avatarUrl: chat.avatarUrl,
-      description: chat.description,
-      updatedAt: chat.updatedAt,
-      myRole: myMember?.role, // This can also be simplified
-      lastMessage: chat.lastMessage
-        ? this.transformLastMessageDto(chat.lastMessage, userId, chat.members)
-        : null,
-    };
-
-    return dto;
-  }
-
-  private transformLastMessageDto(
+  private transformLastMessage(
     message: Message,
     userId: string,
     members: ChatMember[],
-  ): LastMessageResponseDto {
+  ) {
     const senderMember = members.find((m) => m.userId === message.senderId);
 
     return {
+      id: message.id,
       content: message.content ?? undefined,
       attachmentType: message.attachments?.[0]?.type,
       createdAt: message.createdAt,
@@ -296,23 +303,16 @@ export class ChatService {
     }
   }
 
-  private async addMembers(
-    chatId: string,
-    memberIds: string[],
-    creatorId?: string,
-  ): Promise<void> {
+  private async addMembers(chatId: string, userIds: string[]): Promise<void> {
     try {
-      const membersToAdd = memberIds.map((userId) => ({
-        chat: { id: chatId },
-        user: { id: userId },
-        role:
-          userId === creatorId ? ChatMemberRole.OWNER : ChatMemberRole.MEMBER,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }));
-
-      // Using insert() instead of save() for better performance with multiple records
-      await this.memberRepo.insert(membersToAdd);
+      await Promise.all(
+        userIds.map((userId) =>
+          this.memberRepo.save({
+            chat: { id: chatId },
+            user: { id: userId },
+          }),
+        ),
+      );
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to add chat members');
     }
@@ -329,11 +329,13 @@ export class ChatService {
         ErrorResponse.notFound('Chat not found');
       }
 
+      // Check if user is a member of the chat
       const member = chat.members.find((m) => m.userId === userId);
       if (!member) {
         ErrorResponse.unauthorized('You are not a member of this chat');
       }
 
+      // Additional checks for group chats
       if (chat.type !== ChatType.DIRECT) {
         if (member.role !== ChatMemberRole.OWNER) {
           ErrorResponse.unauthorized('Only owners can delete group chats');

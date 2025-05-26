@@ -1,12 +1,13 @@
 import React from "react";
 import { useChatStore } from "@/stores/chatStore";
 import { useMessageStore } from "@/stores/messageStore";
-import type { Chat } from "@/types/chat";
+import type { ChatResponse } from "@/types/chat.type";
 import { ChatAvatar } from "./avatar/ChatAvatar";
 import { formatTime } from "@/utils/formatTime";
+import getChatName from "../../utils/getChatName";
 
 interface ChatListProps {
-  chats: Chat[];
+  chats: ChatResponse[];
   isCompact?: boolean;
 }
 
@@ -15,8 +16,7 @@ const ChatList: React.FC<ChatListProps> = ({ chats, isCompact = false }) => {
   const setActiveChat = useChatStore((state) => state.setActiveChat);
   const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
 
-  function handleChatSelect(chat: Chat) {
-    window.history.pushState({}, "", `/${chat.id}`);
+  function handleChatSelect(chat: ChatResponse) {
     setActiveChat(chat);
   }
 
@@ -62,7 +62,7 @@ const ChatList: React.FC<ChatListProps> = ({ chats, isCompact = false }) => {
                 <>
                   <div className="flex flex-col justify-center gap-1">
                     <h1 className="text-lg font-semibold whitespace-nowrap text-ellipsis">
-                      {chat.name}
+                      {getChatName(chat)}
                     </h1>
                     {displayMessage}
                   </div>

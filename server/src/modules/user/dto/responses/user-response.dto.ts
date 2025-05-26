@@ -24,13 +24,13 @@ export class UserResponseDto {
   emailVerified: boolean;
 
   @Expose()
-  phoneNumber: string;
+  phoneNumber: string | null;
 
   @Expose()
   phoneVerified: boolean;
 
   @Expose()
-  birthday: Date;
+  birthday: Date | null;
 
   @Expose()
   bio: string;

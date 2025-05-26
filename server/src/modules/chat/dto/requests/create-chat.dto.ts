@@ -1,5 +1,4 @@
 import {
-  ArrayMaxSize,
   ArrayMinSize,
   IsArray,
   IsEnum,
@@ -7,28 +6,29 @@ import {
   IsString,
   IsUUID,
   MaxLength,
+  ValidateIf,
 } from 'class-validator';
 import { ChatType } from '../../constants/chat-types.constants';
 
 export class CreateDirectChatDto {
-  @IsArray()
-  @ArrayMinSize(1)
-  @ArrayMaxSize(1) // Will be combined with current user to make 2
-  @IsUUID(4, { each: true })
-  memberIds: string[];
+  @IsString()
+  @IsUUID()
+  partnerId: string;
 }
 
 export class CreateGroupChatDto {
   @IsEnum(ChatType)
-  type: ChatType;
+  type: ChatType.GROUP | ChatType.CHANNEL;
 
   @IsArray()
-  @ArrayMinSize(1) // Will be combined with current user
+  @ValidateIf((o: CreateGroupChatDto) => o.type === ChatType.GROUP)
+  @ArrayMinSize(1, {
+    message: 'At least one member is required for group chats',
+  })
   @IsUUID(4, { each: true })
   @IsString({ each: true })
-  memberIds: string[]; // Required for all chat types
+  memberIds: string[];
 
-  // Optional fields (primarily for groups/channels)
   @IsOptional()
   @IsString()
   @MaxLength(128, {
@@ -50,7 +50,6 @@ export class CreateGroupChatDto {
   })
   avatarUrl?: string;
 
-  // Settings (defaults applied at service level)
   @IsOptional()
   isPublic?: boolean;
 

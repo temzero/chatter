@@ -2,13 +2,15 @@ import { useState, useMemo, useEffect } from "react";
 import { useChatStore } from "@/stores/chatStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import AvatarEdit from "@/components/ui/avatar/AvatarEdit";
-import { GroupChannelChat } from "@/types/chat";
+import { GroupChatResponse } from "@/types/chat.type";
 
 const GroupChatEdit = () => {
   const activeChat = useChatStore(
     (state) => state.activeChat
-  ) as GroupChannelChat;
+  ) as GroupChatResponse;
+  const activeMembers = useChatStore((state) => state.activeMembers);
   const deleteChat = useChatStore((state) => state.deleteChat);
+  const leaveGroupChat = useChatStore((state) => state.leaveGroupChat);
   const updateGroupChat = useChatStore((state) => state.updateGroupChat);
   const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
 
@@ -123,17 +125,22 @@ const GroupChatEdit = () => {
         </form>
 
         <div className="custom-border-t absolute bottom-0 w-full">
-          <button className="flex gap-2 justify-center items-center p-2 text-yellow-500 w-full font-medium">
-            <span className="material-symbols-outlined">logout</span>
-            Leave Group
-          </button>
+          {activeMembers.length > 1 && (
+            <button
+              className="flex gap-2 justify-center items-center p-2 text-yellow-500 w-full font-medium"
+              onClick={() => leaveGroupChat(activeChat.id)}
+            >
+              <span className="material-symbols-outlined">logout</span>
+              Leave {activeChat.type}
+            </button>
+          )}
 
           <button
             className="flex justify-center items-center p-2 text-red-500 w-full font-medium custom-border-t"
             onClick={() => deleteChat(activeChat.id, activeChat.type)}
           >
             <i className="material-symbols-outlined">delete</i>
-            Delete Group
+            Delete {activeChat.type}
           </button>
         </div>
       </div>

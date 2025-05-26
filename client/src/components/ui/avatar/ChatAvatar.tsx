@@ -1,8 +1,13 @@
 import { Avatar } from "./Avatar";
-import type { Chat } from "@/types/chat";
+import type {
+  ChatResponse,
+  DirectChatResponse,
+  GroupChatResponse,
+} from "@/types/chat.type";
+import { ChatType } from "@/types/enums/ChatType";
 
 type ChatAvatarProps = {
-  chat: Chat;
+  chat: ChatResponse;
   type?: "header" | "sidebar" | "info" | "contact";
 };
 
@@ -19,7 +24,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
     switch (type) {
       case "header":
         return {
-          size: "h-11 w-11", // Added min-h
+          size: "h-11 w-11",
           rounded: "rounded-[10px]",
           iconSize: "text-lg",
           fallbackIconSize: "text-4xl",
@@ -27,7 +32,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
         };
       case "info":
         return {
-          size: "h-32 w-32", // Added min-h
+          size: "h-32 w-32",
           rounded: "rounded-[30px]",
           iconSize: "text-6xl",
           fallbackIconSize: "text-8xl",
@@ -35,7 +40,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
         };
       case "contact":
         return {
-          size: "h-12 w-12", // Added min-h
+          size: "h-12 w-12",
           rounded: "rounded-[30px]",
           iconSize: "text-6xl",
           fallbackIconSize: "text-8xl",
@@ -44,7 +49,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
       case "sidebar":
       default:
         return {
-          size: "h-16 w-16", // Added min-h
+          size: "h-16 w-16",
           rounded: "rounded-2xl",
           iconSize: "text-2xl",
           fallbackIconSize: "text-6xl",
@@ -57,16 +62,17 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
   const sharedBase = `flex items-center justify-center overflow-hidden ${styles.size} ${styles.rounded}`;
 
   switch (chat.type) {
-    case "channel":
+    case ChatType.CHANNEL: {
+      const channelChat = chat as GroupChatResponse;
       return (
         <div
           className={`${styles.border} border-[var(--border-color)] ${sharedBase}`}
         >
-          {chat.avatarUrl ? (
+          {channelChat.avatarUrl ? (
             <img
               className="h-full w-full object-cover"
-              src={chat.avatarUrl}
-              alt={`${chat.name}'s avatar`}
+              src={channelChat.avatarUrl}
+              alt={`${channelChat.name || "Channel"}'s avatar`}
               loading="lazy"
             />
           ) : (
@@ -78,8 +84,9 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
           )}
         </div>
       );
+    }
 
-    case "group":
+    case ChatType.GROUP:
       return (
         <div
           className={`bg-[var(--border-color)] cursor-pointer ${sharedBase}`}
@@ -98,14 +105,28 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
         </div>
       );
 
-    default: // direct
+    case ChatType.DIRECT: {
+      const directChat = chat as DirectChatResponse;
       return (
         <Avatar
-          avatarUrl={chat.avatarUrl ?? undefined}
-          firstName={chat.firstName}
-          lastName={chat.lastName}
+          avatarUrl={directChat.chatPartner.avatarUrl ?? undefined}
+          firstName={directChat.chatPartner.firstName}
+          lastName={directChat.chatPartner.lastName}
           className={`${styles.size}`}
         />
       );
+    }
+
+    default:
+      return (
+        <div className={`bg-[var(--border-color)] ${sharedBase}`}>
+          <i
+            className={`material-symbols-outlined ${styles.fallbackIconSize} opacity-20 flex items-center justify-center`}
+          >
+            chat
+          </i>
+        </div>
+      );
   }
 };
+

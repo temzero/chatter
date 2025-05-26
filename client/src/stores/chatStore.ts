@@ -3,37 +3,46 @@ import { persist } from "zustand/middleware";
 import { chatService } from "@/services/chat/chatService";
 import { useMessageStore } from "./messageStore";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
-import { GroupChannelChat } from "@/types/chat";
 import { chatMemberService } from "@/services/chat/chatMemberService";
-import type { Chat, ChatType, ChatMember, DirectChat } from "@/types/chat";
+import type {
+  ChatResponse,
+  DirectChatResponse,
+  GroupChatResponse,
+  ChatMember,
+} from "@/types/chat.type";
+import { ChatType } from "@/types/enums/ChatType";
+import { useAuthStore } from "./authStore";
 
 interface ChatStore {
-  chats: Chat[];
+  chats: ChatResponse[];
   searchTerm: string;
-  activeChat: Chat | null;
+  activeChat: ChatResponse | null;
   isLoading: boolean;
   error: string | null;
-  filteredChats: Chat[];
-  groupMembers: Record<string, ChatMember[]>;
+  filteredChats: ChatResponse[];
+  allGroupMembers: Record<string, ChatMember[]>;
+  activeMembers: ChatMember[];
 
   initialize: () => Promise<void>;
   getChats: () => Promise<void>;
   getChatById: (chatId: string) => Promise<void>;
-  setActiveChat: (chat: Chat | null) => void;
-  getGroupMembers: (groupId: string) => Promise<void>;
+  setActiveChat: (chat: ChatResponse | null) => void;
+  getGroupMembers: (groupId: string) => Promise<ChatMember[]>;
   setActiveChatById: (chatId: string | null) => Promise<void>;
-  createDirectChat: (chatPartnerId: string) => Promise<DirectChat>;
+  createOrGetDirectChat: (partnerId: string) => Promise<DirectChatResponse>;
   createGroupChat: (payload: {
     name: string;
     memberIds: string[];
-    type: "group" | "channel";
-  }) => Promise<Chat>;
-  updateDirectChat: (id: string, payload: Partial<DirectChat>) => Promise<void>;
+    type: ChatType.GROUP | ChatType.CHANNEL;
+  }) => Promise<GroupChatResponse>;
+  updateDirectChat: (
+    id: string,
+    payload: Partial<DirectChatResponse>
+  ) => Promise<void>;
   updateGroupChat: (
     id: string,
-    payload: Partial<GroupChannelChat>
+    payload: Partial<GroupChatResponse>
   ) => Promise<void>;
-  deleteChat: (id: string, type: ChatType) => Promise<void>;
   setSearchTerm: (term: string) => void;
   updateMember: (
     chatId: string,
@@ -45,320 +54,450 @@ interface ChatStore {
     userId: string,
     nickname: string
   ) => Promise<string>;
+  leaveGroupChat: (chatId: string) => Promise<void>;
+  deleteChat: (id: string, type: ChatType) => Promise<void>;
   clearChats: () => void;
 }
 
 export const useChatStore = create<ChatStore>()(
   persist(
-    (set, get) => ({
-      chats: [],
-      groupMembers: {},
-      filteredChats: [],
-      searchTerm: "",
-      activeChat: null,
-      isLoading: false,
-      error: null,
+    (set, get) => {
+      // Shared cleanup function
+      const cleanupChat = (chatId: string) => {
+        // Cleanup messages
+        useMessageStore.setState((msgState) => {
+          const filteredMessages = msgState.messages.filter(
+            (m) => m.chat.id !== chatId
+          );
+          const isActive = get().activeChat?.id === chatId;
+          return {
+            messages: filteredMessages,
+            activeMessages: isActive ? [] : msgState.activeMessages,
+            activeMedia: isActive ? [] : msgState.activeMedia,
+          };
+        });
 
-      initialize: async () => {
-        await get().getChats();
-      },
-
-      getChats: async () => {
-        set({ isLoading: true, error: null });
-        try {
-          const chats: Chat[] = await chatService.getAllChats();
-          set({ chats, isLoading: false });
-          console.log("fetched Chats:", chats);
-        } catch (error) {
-          console.error("Failed to fetch chats:", error);
-          set({
-            error: "Failed to load chats",
-            isLoading: false,
-          });
-        }
-      },
-
-      getChatById: async (chatId) => {
-        set({ isLoading: true });
-        try {
-          const chat: Chat = await chatService.getChatById(chatId);
-          set((state) => ({
-            chats: state.chats.some((c) => c.id === chatId)
-              ? state.chats.map((c) => (c.id === chatId ? chat : c))
-              : [...state.chats, chat],
-            activeChat:
-              state.activeChat?.id === chatId ? chat : state.activeChat,
-            isLoading: false,
-          }));
-        } catch (error) {
-          console.error("Failed to fetch chat:", error);
-          set({
-            error: "Failed to load chat",
-            isLoading: false,
-          });
-        }
-      },
-
-      getGroupMembers: async (groupId) => {
-        const members = await chatMemberService.getChatMembers(groupId);
+        // Cleanup chat store
         set((state) => ({
-          groupMembers: { ...state.groupMembers, [groupId]: members },
+          chats: state.chats.filter((chat) => chat.id !== chatId),
+          filteredChats: state.filteredChats.filter(
+            (chat) => chat.id !== chatId
+          ),
+          activeChat: state.activeChat?.id === chatId ? null : state.activeChat,
+          allGroupMembers: Object.fromEntries(
+            Object.entries(state.allGroupMembers).filter(
+              ([id]) => id !== chatId
+            )
+          ),
+          activeMembers: state.activeMembers.filter(
+            (member) => member.chatId !== chatId
+          ),
         }));
-      },
+      };
 
-      setSearchTerm: (term) => {
-        const { chats } = get();
+      return {
+        chats: [],
+        allGroupMembers: {},
+        filteredChats: [],
+        searchTerm: "",
+        activeChat: null,
+        activeMembers: [],
+        isLoading: false,
+        error: null,
 
-        if (!term.trim()) {
+        initialize: async () => {
+          await get().getChats();
+        },
+
+        getChats: async () => {
+          set({ isLoading: true, error: null });
+          try {
+            const chats: ChatResponse[] = await chatService.getAllChats();
+            set({ chats, filteredChats: chats, isLoading: false });
+          } catch (error) {
+            console.error("Failed to fetch chats:", error);
+            set({
+              error: "Failed to load chats",
+              isLoading: false,
+            });
+          }
+        },
+
+        getChatById: async (chatId) => {
+          set({ isLoading: true });
+          try {
+            const chat: ChatResponse = await chatService.getChatById(chatId);
+            set((state) => ({
+              chats: state.chats.some((c) => c.id === chatId)
+                ? state.chats.map((c) => (c.id === chatId ? chat : c))
+                : [...state.chats, chat],
+              activeChat:
+                state.activeChat?.id === chatId ? chat : state.activeChat,
+              isLoading: false,
+            }));
+          } catch (error) {
+            console.error("Failed to fetch chat:", error);
+            set({
+              error: "Failed to load chat",
+              isLoading: false,
+            });
+          }
+        },
+
+        getGroupMembers: async (groupId) => {
+          try {
+            const members = await chatMemberService.getChatMembers(groupId);
+            console.log("Fetched members for group:", groupId, members);
+            set((state) => ({
+              allGroupMembers: { ...state.allGroupMembers, [groupId]: members },
+            }));
+            return members;
+          } catch (error) {
+            console.error("Failed to fetch group members:", error);
+            return [];
+          }
+        },
+
+        setSearchTerm: (term) => {
+          const { chats } = get();
+
+          if (!term.trim()) {
+            set({
+              searchTerm: term,
+              filteredChats: chats,
+            });
+            return;
+          }
+
+          const lowerCaseTerm = term.toLowerCase();
+          const filtered = chats.filter((chat) => {
+            if (chat.type === ChatType.DIRECT) {
+              return (
+                chat.chatPartner.firstName
+                  .toLowerCase()
+                  .includes(lowerCaseTerm) ||
+                chat.chatPartner.lastName
+                  .toLowerCase()
+                  .includes(lowerCaseTerm) ||
+                chat.chatPartner.username.toLowerCase().includes(lowerCaseTerm)
+              );
+            } else {
+              return chat.name?.toLowerCase().includes(lowerCaseTerm) ?? false;
+            }
+          });
+
           set({
             searchTerm: term,
-            filteredChats: chats,
+            filteredChats: filtered,
           });
-          return;
-        }
+        },
 
-        const lowerCaseTerm = term.toLowerCase();
-        const filtered = chats.filter((chat) => {
-          const nameMatch = chat.name?.toLowerCase().includes(lowerCaseTerm);
-
-          if (chat.type === "direct") {
-            const partnerNameMatch = chat.firstName
-              ?.toLowerCase()
-              .includes(lowerCaseTerm);
-            return nameMatch || partnerNameMatch;
+        setActiveChat: async (chat) => {
+          if (!chat) {
+            set({ activeChat: null });
+            return;
           }
 
-          return nameMatch;
-        });
+          useSidebarInfoStore.getState().setSidebarInfo("default");
+          set({ activeChat: chat });
+          window.history.pushState({}, "", `/${chat.id}`);
 
-        set({
-          searchTerm: term,
-          filteredChats: filtered,
-        });
-      },
-
-      setActiveChat: (chat) => {
-        if (!chat) {
-          console.log("chat not exist!");
-          set({ activeChat: null });
-          return;
-        }
-        useSidebarInfoStore.getState().setSidebarInfo("default");
-        set({ activeChat: chat });
-        if (chat.type !== "direct") {
-          get().getGroupMembers(chat.id);
-        }
-      },
-
-      setActiveChatById: async (chatId: string | null) => {
-        if (!chatId) {
-          console.log("no chatId");
-          get().setActiveChat(null);
-          return;
-        }
-
-        try {
-          const existingChat = get().chats.find((chat) => chat.id === chatId);
-          if (existingChat) {
-            get().setActiveChat(existingChat);
-          } else {
-            console.error("Cannot find chat in existing chats");
+          if (chat.type !== ChatType.DIRECT) {
+            await get().getGroupMembers(chat.id);
+            set((state) => ({
+              activeMembers: state.allGroupMembers[chat.id] || [],
+            }));
           }
-        } catch (error) {
-          console.error("Failed to set active chat:", error);
-          set({ error: "Failed to load chat" });
-        }
-      },
 
-      createDirectChat: async (chatPartnerId) => {
-        set({ isLoading: true });
-        try {
-          const newChat = await chatService.createDirectChat(chatPartnerId);
-          set((state) => ({
-            chats: [newChat, ...state.chats],
-            isLoading: false,
-          }));
-          return newChat;
-        } catch (error) {
-          console.error("Failed to create chat:", error);
-          set({
-            error: "Failed to create chat",
-            isLoading: false,
-          });
-          throw error;
-        }
-      },
+          if (chat.unreadCount && chat.unreadCount > 0) {
+            set((state) => ({
+              chats: state.chats.map((c) =>
+                c.id === chat.id ? { ...c, unreadCount: 0 } : c
+              ),
+            }));
+          }
+        },
 
-      createGroupChat: async (payload) => {
-        set({ isLoading: true });
-        try {
-          const newChat = await chatService.createGroupChat(payload);
-          set((state) => ({
-            chats: [newChat, ...state.chats],
-            isLoading: false,
-          }));
-          return newChat;
-        } catch (error) {
-          console.error("Failed to create chat:", error);
-          set({
-            error: "Failed to create chat",
-            isLoading: false,
-          });
-          throw error;
-        }
-      },
+        setActiveChatById: async (chatId) => {
+          if (!chatId) {
+            get().setActiveChat(null);
+            return;
+          }
 
-      updateDirectChat: async (id, payload) => {
-        set({ isLoading: true });
-        try {
-          const updatedChat = await chatService.updateDirectChat(id, payload);
-          set((state) => ({
-            chats: state.chats.map((chat) =>
-              chat.id === id ? updatedChat : chat
-            ),
-            activeChat:
-              state.activeChat?.id === id ? updatedChat : state.activeChat,
-            isLoading: false,
-          }));
-        } catch (error) {
-          console.error("Failed to update direct chat:", error);
-          set({
-            error: "Failed to update direct chat",
-            isLoading: false,
-          });
-          throw error;
-        }
-      },
+          try {
+            const existingChat = get().chats.find((chat) => chat.id === chatId);
+            if (existingChat) {
+              get().setActiveChat(existingChat);
+            } else {
+              await get().getChatById(chatId);
+              const fetchedChat = get().chats.find(
+                (chat) => chat.id === chatId
+              );
+              if (fetchedChat) get().setActiveChat(fetchedChat);
+            }
+          } catch (error) {
+            console.error("Failed to set active chat:", error);
+            set({ error: "Failed to load chat" });
+          }
+        },
 
-      updateGroupChat: async (id, payload) => {
-        set({ isLoading: true });
-        try {
-          const updatedChat = await chatService.updateGroupChat(id, payload);
-          set((state) => ({
-            chats: state.chats.map((chat) =>
-              chat.id === id ? updatedChat : chat
-            ),
-            activeChat:
-              state.activeChat?.id === id ? updatedChat : state.activeChat,
-            isLoading: false,
-          }));
-        } catch (error) {
-          console.error("Failed to update group chat:", error);
-          set({
-            error: "Failed to update group chat",
-            isLoading: false,
-          });
-          throw error;
-        }
-      },
+        createOrGetDirectChat: async (partnerId) => {
+          set({ isLoading: true });
+          try {
+            const { payload, wasExisting } =
+              await chatService.createOrGetDirectChat(partnerId);
 
-      updateMember: async (chatId, userId, updates) => {
-        set({ isLoading: true });
-        try {
-          const updatedMember = await chatMemberService.updateMember(
-            chatId,
-            userId,
-            updates
-          );
+            if (wasExisting) {
+              const existingChat = get().chats.find(
+                (chat) => chat.id === payload.id
+              );
+              if (existingChat) {
+                get().setActiveChat(existingChat);
+              } else {
+                await get().getChatById(payload.id);
+                const fetchedChat = get().chats.find(
+                  (chat) => chat.id === payload.id
+                );
+                if (fetchedChat) get().setActiveChat(fetchedChat);
+              }
+            } else {
+              set((state) => ({
+                chats: [payload, ...state.chats],
+                filteredChats: [payload, ...state.filteredChats],
+              }));
+              get().setActiveChat(payload);
+            }
 
-          // Update the member inside groupMembers state
-          set((state) => {
-            const currentMembers = state.groupMembers[chatId] || [];
-            const updatedMembers = currentMembers.map((member) =>
-              member.userId === userId ? updatedMember : member
-            );
-            return {
-              groupMembers: {
-                ...state.groupMembers,
-                [chatId]: updatedMembers,
-              },
+            set({ isLoading: false });
+            return payload;
+          } catch (error) {
+            console.error("Failed to create chat:", error);
+            set({
+              error: "Failed to create chat",
               isLoading: false,
-            };
-          });
-        } catch (error) {
-          console.error("Failed to update chat member:", error);
-          set({ error: "Failed to update member", isLoading: false });
-          throw error;
-        }
-      },
+            });
+            throw error;
+          }
+        },
 
-      updateMemberNickname: async (chatId, userId, nickname) => {
-        set({ isLoading: true });
-        try {
-          const updatedNickname = await chatMemberService.updateMemberNickname(
-            chatId,
-            userId,
-            nickname
-          );
+        createGroupChat: async (payload) => {
+          set({ isLoading: true });
+          try {
+            const newChat = await chatService.createGroupChat(payload);
+            set((state) => ({
+              chats: [newChat, ...state.chats],
+              filteredChats: [newChat, ...state.filteredChats],
+              isLoading: false,
+            }));
+            return newChat;
+          } catch (error) {
+            console.error("Failed to create chat:", error);
+            set({
+              error: "Failed to create chat",
+              isLoading: false,
+            });
+            throw error;
+          }
+        },
 
-          // Update the active chat name if it's a direct chat
-          set((state) => {
-            if (
-              state.activeChat?.id === chatId &&
-              state.activeChat.type === "direct"
-            ) {
-              const updatedActiveChat = {
-                ...state.activeChat,
-                name: updatedNickname as string,
-                firstName: updatedNickname as string,
-              } as Chat;
+        updateDirectChat: async (id, payload) => {
+          set({ isLoading: true });
+          try {
+            const updatedChat = await chatService.updateDirectChat(id, payload);
+            set((state) => ({
+              chats: state.chats.map((chat) =>
+                chat.id === id ? { ...chat, ...updatedChat } : chat
+              ),
+              filteredChats: state.filteredChats.map((chat) =>
+                chat.id === id ? { ...chat, ...updatedChat } : chat
+              ),
+              activeChat:
+                state.activeChat?.id === id
+                  ? { ...state.activeChat, ...updatedChat }
+                  : state.activeChat,
+              isLoading: false,
+            }));
+          } catch (error) {
+            console.error("Failed to update direct chat:", error);
+            set({
+              error: "Failed to update direct chat",
+              isLoading: false,
+            });
+            throw error;
+          }
+        },
+
+        updateGroupChat: async (id, payload) => {
+          set({ isLoading: true });
+          try {
+            const updatedChat = await chatService.updateGroupChat(id, payload);
+            set((state) => ({
+              chats: state.chats.map((chat) =>
+                chat.id === id ? { ...chat, ...updatedChat } : chat
+              ),
+              filteredChats: state.filteredChats.map((chat) =>
+                chat.id === id ? { ...chat, ...updatedChat } : chat
+              ),
+              activeChat:
+                state.activeChat?.id === id
+                  ? { ...state.activeChat, ...updatedChat }
+                  : state.activeChat,
+              isLoading: false,
+            }));
+          } catch (error) {
+            console.error("Failed to update group chat:", error);
+            set({
+              error: "Failed to update group chat",
+              isLoading: false,
+            });
+            throw error;
+          }
+        },
+
+        updateMember: async (chatId, userId, updates) => {
+          set({ isLoading: true });
+          try {
+            const updatedMember = await chatMemberService.updateMember(
+              chatId,
+              userId,
+              updates
+            );
+
+            set((state) => {
+              const activeMembers = state.allGroupMembers[chatId] || [];
+              const updatedMembers = activeMembers.map((member) =>
+                member.userId === userId ? updatedMember : member
+              );
               return {
-                activeChat: updatedActiveChat,
-                chats: state.chats.map((chat) =>
-                  chat.id === chatId && chat.type === "direct"
-                    ? updatedActiveChat
-                    : chat
-                ),
+                allGroupMembers: {
+                  ...state.allGroupMembers,
+                  [chatId]: updatedMembers,
+                },
                 isLoading: false,
               };
+            });
+          } catch (error) {
+            console.error("Failed to update chat member:", error);
+            set({ error: "Failed to update member", isLoading: false });
+            throw error;
+          }
+        },
+
+        updateMemberNickname: async (chatId, userId, nickname) => {
+          set({ isLoading: true });
+          try {
+            const currentUserId = useAuthStore.getState().currentUser?.id;
+            const updatedNickname =
+              await chatMemberService.updateMemberNickname(
+                chatId,
+                userId,
+                nickname
+              );
+
+            set((state) => {
+              if (
+                state.activeChat?.id === chatId &&
+                state.activeChat.type === ChatType.DIRECT
+              ) {
+                const isCurrentUser = userId === currentUserId;
+                const isPartner =
+                  userId === state.activeChat.chatPartner.userId;
+
+                let updatedActiveChat = { ...state.activeChat };
+
+                if (isPartner) {
+                  updatedActiveChat = {
+                    ...updatedActiveChat,
+                    chatPartner: {
+                      ...updatedActiveChat.chatPartner,
+                      nickname: updatedNickname,
+                    },
+                  };
+                } else if (isCurrentUser) {
+                  updatedActiveChat = {
+                    ...updatedActiveChat,
+                    myNickname: updatedNickname,
+                  };
+                }
+
+                return {
+                  activeChat: updatedActiveChat,
+                  chats: state.chats.map((chat) =>
+                    chat.id === chatId && chat.type === ChatType.DIRECT
+                      ? updatedActiveChat
+                      : chat
+                  ),
+                  filteredChats: state.filteredChats.map((chat) =>
+                    chat.id === chatId && chat.type === ChatType.DIRECT
+                      ? updatedActiveChat
+                      : chat
+                  ),
+                  isLoading: false,
+                };
+              }
+              return { isLoading: false };
+            });
+            return updatedNickname;
+          } catch (error) {
+            console.error("Failed to update member nickname:", error);
+            set({ error: "Failed to update nickname", isLoading: false });
+            throw error;
+          }
+        },
+
+        leaveGroupChat: async (chatId) => {
+          set({ isLoading: true });
+          try {
+            const currentUserId = useAuthStore.getState().currentUser?.id;
+            if (!currentUserId) {
+              throw new Error("User not authenticated");
             }
-            return { isLoading: false };
-          });
-          return updatedNickname;
-        } catch (error) {
-          console.error("Failed to update member nickname:", error);
-          set({ error: "Failed to update nickname", isLoading: false });
-          throw error;
-        }
-      },
-
-      deleteChat: async (id, type) => {
-        set({ isLoading: true });
-        try {
-          await chatService.deleteChat(id, type);
-
-          useMessageStore.setState((msgState) => {
-            const filteredMessages = msgState.messages.filter(
-              (m) => m.chat.id !== id
+            console.log(
+              "Leaving group chat:",
+              chatId,
+              "for user:",
+              currentUserId
             );
-            const isDeletingActive = get().activeChat?.id === id;
-            return {
-              messages: filteredMessages,
-              activeMessages: isDeletingActive ? [] : msgState.activeMessages,
-              activeMedia: isDeletingActive ? [] : msgState.activeMedia,
-            };
-          });
+            await chatMemberService.removeMember(chatId, currentUserId);
+            cleanupChat(chatId);
+            set({ isLoading: false });
+          } catch (error) {
+            console.error("Failed to delete chat:", error);
+            set({
+              error: "Failed to delete chat",
+              isLoading: false,
+            });
+            throw error;
+          }
+        },
 
-          set((state) => ({
-            chats: state.chats.filter((chat) => chat.id !== id),
-            activeChat: state.activeChat?.id === id ? null : state.activeChat,
-            isLoading: false,
-          }));
-        } catch (error) {
-          console.error("Failed to delete chat:", error);
+        deleteChat: async (id, type) => {
+          set({ isLoading: true });
+          try {
+            await chatService.deleteChat(id, type);
+            cleanupChat(id);
+            set({ isLoading: false });
+          } catch (error) {
+            console.error("Failed to delete chat:", error);
+            set({
+              error: "Failed to delete chat",
+              isLoading: false,
+            });
+            throw error;
+          }
+        },
+
+        clearChats: () => {
           set({
-            error: "Failed to delete chat",
-            isLoading: false,
+            chats: [],
+            filteredChats: [],
+            activeChat: null,
+            allGroupMembers: {},
+            activeMembers: [],
           });
-          throw error;
-        }
-      },
-
-      clearChats: () => {
-        set({ chats: [], activeChat: null, groupMembers: {} });
-      },
-    }),
-
+        },
+      };
+    },
     {
       name: "chat-storage",
       partialize: (state) => ({

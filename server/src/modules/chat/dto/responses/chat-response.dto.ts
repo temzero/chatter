@@ -1,58 +1,39 @@
 import { ChatType } from '../../constants/chat-types.constants';
 import { Exclude, Expose, Type } from 'class-transformer';
-import { MessageResponseDto } from './message-response.dto';
-import { ChatMemberResponseDto } from 'src/modules/chat-member/dto/responses/chat-member-response.dto';
+import { LastMessageResponseDto } from './last-message-response.dto';
+import { ChatMemberRole } from 'src/modules/chat-member/constants/chat-member-roles.constants';
+import { ChatPartnerDto } from './chat-partner-response.dto';
 
+export type ChatResponseDto = DirectChatResponseDto | GroupChatResponseDto;
+
+// Base DTO for shared fields (extended by others)
 @Exclude()
-export class directChatResponseDto {
+export abstract class BaseChatResponseDto {
+  @Expose() id: string;
+  @Expose() myNickname?: string | null;
+  @Expose() updatedAt: Date;
+  @Expose() unreadCount?: number;
   @Expose()
-  id: string;
-
-  @Expose()
-  type: ChatType;
-
-  @Expose()
-  @Type(() => MessageResponseDto)
-  lastMessage?: MessageResponseDto;
-
-  @Expose()
-  createdAt: Date;
-
-  @Expose()
-  updatedAt: Date;
+  @Type(() => LastMessageResponseDto)
+  lastMessage?: LastMessageResponseDto | null;
 }
 
+// Direct Chat (only user-specific fields)
 @Exclude()
-export class groupChatResponseDto {
+export class DirectChatResponseDto extends BaseChatResponseDto {
+  @Expose() type: ChatType.DIRECT;
   @Expose()
-  id: string;
+  @Type(() => ChatPartnerDto)
+  chatPartner: ChatPartnerDto; // Only critical fields (id, username, avatar)
+}
 
-  @Expose()
-  type: ChatType;
-
-  @Expose()
-  name?: string;
-
-  @Expose()
-  description?: string;
-
-  @Expose()
-  avatarUrl?: string;
-
-  @Expose()
-  isPublic: boolean;
-
-  @Expose()
-  @Type(() => MessageResponseDto)
-  lastMessage?: MessageResponseDto;
-
-  @Expose()
-  @Type(() => ChatMemberResponseDto)
-  members: ChatMemberResponseDto[];
-
-  @Expose()
-  createdAt: Date;
-
-  @Expose()
-  updatedAt: Date;
+// Group/Channel Chat (only group-specific fields)
+@Exclude()
+export class GroupChatResponseDto extends BaseChatResponseDto {
+  @Expose() type: ChatType.GROUP | ChatType.CHANNEL;
+  @Expose() name: string | null;
+  @Expose() avatarUrl?: string | null;
+  @Expose() description?: string | null;
+  @Expose() myRole?: ChatMemberRole;
+  @Expose() memberCount?: number;
 }

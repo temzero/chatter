@@ -1,5 +1,5 @@
 import API from "../api/api";
-import type { ChatMember } from "@/types/chat";
+import type { ChatMember } from "@/types/chat.type";
 import type { ApiSuccessResponse } from "@/types/apiSuccessResponse";
 
 export const chatMemberService = {
