@@ -9,6 +9,7 @@ import { FriendshipModule } from './modules/friendship/friendship.module';
 import { MessageModule } from './modules/message/message.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ChatMemberModule } from './modules/chat-member/chat-member.module';
+import { SupabaseModule } from './modules/superbase/supabase.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ChatMemberModule } from './modules/chat-member/chat-member.module';
     FriendshipModule,
     MessageModule,
     UserModule,
+    SupabaseModule,
   ],
   controllers: [AppController],
   providers: [AppService],

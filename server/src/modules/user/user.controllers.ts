@@ -7,6 +7,7 @@ import {
   Body,
   UseGuards,
   Headers,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { UserService } from './user.service';
@@ -17,11 +18,15 @@ import { CurrentUser } from '../auth/decorators/user.decorator';
 import { UserResponseDto } from './dto/responses/user-response.dto';
 import { JwtPayload } from '../auth/types/jwt-payload.type';
 import { UpdateProfileDto } from './dto/requests/update-profile.dto';
+import { SupabaseService } from '../superbase/supabase.service';
 
 @Controller('user')
 @UseGuards(JwtAuthGuard)
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly supabaseService: SupabaseService,
+  ) {}
 
   @Get('me')
   async getCurrentUser(
@@ -70,14 +75,20 @@ export class UserController {
     @CurrentUser('id') userId: string,
     @Body() updateProfileDto: UpdateProfileDto,
   ): Promise<SuccessResponse<UserResponseDto>> {
-    const updatedUser = await this.userService.updateUser(
-      userId,
-      updateProfileDto,
-    );
-    return new SuccessResponse(
-      plainToInstance(UserResponseDto, updatedUser),
-      'User updated successfully',
-    );
+    try {
+      const updatedUser = await this.userService.updateUser(
+        userId,
+        updateProfileDto,
+      );
+
+      return new SuccessResponse(
+        plainToInstance(UserResponseDto, updatedUser),
+        'User updated successfully',
+      );
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw new InternalServerErrorException('Failed to update user profile');
+    }
   }
 
   @Put()

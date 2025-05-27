@@ -1,14 +1,13 @@
-import { IsOptional, IsString, Length, IsDate, IsUrl } from 'class-validator';
+import { IsOptional, IsString, Length, IsDate } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PartialType } from '@nestjs/mapped-types';
 import { EmptyStringToNull } from 'src/common/utils/dto.utils';
 
 export class UpdateProfileDto {
   @IsOptional()
-  @IsUrl()
-  // @Length(0, 512)
+  @IsString()
   @EmptyStringToNull()
-  avatarUrl?: string | null;
+  avatarUrl?: string;
 
   @IsOptional()
   @IsString()
@@ -36,4 +35,4 @@ export class UpdateProfileDto {
 }
 
 // For partial updates (PATCH requests)
-export class PartialUpdateUserDto extends PartialType(UpdateProfileDto) {}
+export class PartialUpdateProfileDto extends PartialType(UpdateProfileDto) {}

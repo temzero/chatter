@@ -1,5 +1,7 @@
 import API from "@/services/api/api";
 import { User } from "@/types/user";
+import { ProfileFormData } from "@/components/sidebar/SidebarProfileEdit";
+import logFormData from "@/utils/logFormdata";
 
 export const userService = {
   /**
@@ -41,18 +43,49 @@ export const userService = {
    * Update the currently authenticated user
    * @param updatedProfile - Data to update
    */
-  async updateProfile(updatedProfile: Partial<User>): Promise<User> {
-    const { data } = await API.put("/user/profile", updatedProfile);
-    return data.payload;
+  async updateProfile(updatedProfile: ProfileFormData) {
+    try {
+      const { data } = await API.put("/user/profile", updatedProfile);
+      console.log("Profile updated successfully:", data.payload);
+      return data.payload;
+    } catch (error: unknown) {
+      console.error("updateProfile failed:", error);
+      throw new Error("Profile update failed");
+    }
   },
-
   /**
    * Update the currently authenticated user
    * @param updatedData - Data to update
    */
-  async updateUser(updatedData: Partial<User>): Promise<User> {
+  async updateUser(updatedData: FormData): Promise<User> {
     const { data } = await API.put("/user", updatedData);
     return data.payload;
+  },
+
+  /**
+   * Upload avatar image file only
+   * @param avatarFile - File object of the avatar image
+   */
+  async uploadAvatar(avatarFile: File): Promise<{ url: string }> {
+    const formData = new FormData();
+    formData.append("file", avatarFile);
+    logFormData(formData);
+
+    try {
+      const { data } = await API.post("/uploads", formData, {
+        headers: {"Content-Type": "multipart/form-data"},
+        timeout: 30000, // Allow more time for upload
+      });
+
+      // Assuming your NestJS controller returns { url: publicUrl }
+      if (!data?.url) {
+        throw new Error("Upload failed: No URL returned");
+      }
+      return data.url;
+    } catch (error: unknown) {
+      console.error("uploadImage failed:", error);
+      throw new Error("Image upload failed");
+    }
   },
 
   /**

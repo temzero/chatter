@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 import { userService } from "@/services/userService";
 import { storageService } from "@/services/storage/storageService";
 import { useAuthStore } from "./authStore";
-import type { User } from "@/types/user";
+import { ProfileFormData } from "@/components/sidebar/SidebarProfileEdit";
 
 type ProfileState = {
   loading: boolean;
@@ -11,7 +11,7 @@ type ProfileState = {
 };
 
 type ProfileActions = {
-  updateProfile: (updatedData: Partial<User>) => Promise<void>;
+  updateProfile: (updatedData: ProfileFormData) => Promise<void>;
   reset: () => void;
   deleteProfile: () => Promise<void>;
 };
@@ -29,7 +29,7 @@ export const useProfileStore = create<ProfileState & ProfileActions>()(
       updateProfile: async (updatedData) => {
         set({ loading: true, error: null });
         try {
-          const updatedUser = await userService.updateUser(updatedData);
+          const updatedUser = await userService.updateProfile(updatedData);
 
           // Optimized: Avoid unnecessary `console.log` in production
           if (process.env.NODE_ENV === "development") {
@@ -52,9 +52,7 @@ export const useProfileStore = create<ProfileState & ProfileActions>()(
         }
       },
 
-      updateUserNickname: async() => {
-        
-      },
+      updateUserNickname: async () => {},
 
       deleteProfile: async () => {
         set({ loading: true, error: null });

@@ -94,7 +94,8 @@ export class UserService {
     try {
       const user = await this.getUserById(userId);
       Object.assign(user, updateUserDto);
-      return await this.userRepository.save(user);
+      const savedUser = await this.userRepository.save(user);
+      return savedUser;
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to update user');
     }

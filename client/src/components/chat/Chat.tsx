@@ -18,7 +18,7 @@ const Chat: React.FC = () => {
         <ChatHeader />
         <ChatBox />
         <AnimatePresence>
-          {activeChat?.type !== "channel" && (
+          {!(activeChat?.type === "channel" && activeChat.myRole !== 'owner') && (
             <motion.div
               initial={{ height: 0 }}
               animate={{ height: "auto" }}
@@ -38,9 +38,6 @@ const Chat: React.FC = () => {
             initial={{ opacity: 0, x: 300, width: 0 }}
             animate={{ opacity: 1, x: 0, width: "var(--sidebar-width)" }}
             exit={{ opacity: 0, x: 300, width: 0 }}
-            // initial={{ opacity: 0, width: 0 }}
-            // animate={{ opacity: 1, width: 'var(--sidebar-width)' }}
-            // exit={{ opacity: 0, width: 0 }}
             transition={{ duration: 0.2, ease: "easeInOut" }}
           >
             <ChatInfo />

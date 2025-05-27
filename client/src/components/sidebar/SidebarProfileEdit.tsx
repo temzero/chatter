@@ -3,13 +3,24 @@ import { useSidebarStore } from "@/stores/sidebarStore";
 import { useCurrentUser } from "@/stores/authStore";
 import { useProfileStore } from "@/stores/profileStore";
 import AvatarEdit from "../ui/avatar/AvatarEdit";
+import { userService } from "@/services/userService";
+import { uploadService } from "@/services/uploadService";
+
+export interface ProfileFormData {
+  avatarUrl: string;
+  firstName: string;
+  lastName: string;
+  birthday: string | Date | undefined;
+  bio: string;
+}
 
 const SidebarProfileEdit: React.FC = () => {
   const currentUser = useCurrentUser();
+  console.log("Current User in Profile Edit:", currentUser);
   const { updateProfile } = useProfileStore();
   const { setSidebar } = useSidebarStore();
 
-  const initialFormData = useMemo(
+  const initialFormData = useMemo<ProfileFormData>(
     () => ({
       avatarUrl: currentUser?.avatarUrl || "",
       firstName: currentUser?.firstName || "",
@@ -20,17 +31,22 @@ const SidebarProfileEdit: React.FC = () => {
     [currentUser]
   );
 
-  const [formData, setFormData] = useState(initialFormData);
+  const [formData, setFormData] = useState<ProfileFormData>(initialFormData);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [error, setError] = useState("");
 
+  // Check for changes including the avatar file
   useEffect(() => {
-    const changesDetected = Object.keys(initialFormData).some(
-      (key) =>
-        formData[key as keyof typeof formData] !==
-        initialFormData[key as keyof typeof initialFormData]
-    );
+    const changesDetected =
+      Object.keys(initialFormData).some(
+        (key) =>
+          formData[key as keyof ProfileFormData] !==
+          initialFormData[key as keyof ProfileFormData]
+      ) || avatarFile !== null;
     setHasChanges(changesDetected);
-  }, [formData, initialFormData]);
+  }, [formData, initialFormData, avatarFile]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -42,14 +58,54 @@ const SidebarProfileEdit: React.FC = () => {
     }));
   };
 
+  const handleAvatarChange = (newAvatar: string, file?: File) => {
+    setFormData((prev) => ({ ...prev, avatarUrl: newAvatar }));
+    setAvatarFile(file || null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
+    if (!hasChanges) return;
+    setIsSubmitting(true);
+    setError("");
+
     try {
-      await updateProfile(formData);
+      let newAvatarUrl = formData.avatarUrl;
+
+      // If avatar file changed, upload it first
+      if (avatarFile) {
+        // Keep old avatar URL for deletion later
+        const oldAvatarUrl = currentUser?.avatarUrl || "";
+
+        // Upload new avatar
+        const uploadResult = await userService.uploadAvatar(avatarFile);
+        newAvatarUrl =
+          typeof uploadResult === "string" ? uploadResult : uploadResult.url;
+
+        // Delete old avatar if it exists and is different from the new one
+        if (oldAvatarUrl && oldAvatarUrl !== newAvatarUrl) {
+          try {
+            console.log("Deleting old avatar:", oldAvatarUrl);
+            await uploadService.deleteImage(oldAvatarUrl); // You need to implement this method in userService
+          } catch (deleteError) {
+            console.warn("Failed to delete old avatar:", deleteError);
+            // You may decide whether to continue or fail here — typically continue is fine
+          }
+        }
+
+        // Update form data avatarUrl before profile update
+        setFormData((prev) => ({ ...prev, avatarUrl: newAvatarUrl }));
+      }
+
+      // Update profile with possibly new avatarUrl and other data
+      await updateProfile({ ...formData, avatarUrl: newAvatarUrl });
+
       setSidebar("profile");
     } catch (error) {
+      setError("Failed to update profile!");
       console.error("Failed to update profile", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -69,10 +125,19 @@ const SidebarProfileEdit: React.FC = () => {
         <div className="flex gap-1">
           {hasChanges && (
             <button
-              className="flex items-center justify-center rounded-full cursor-pointer hover:opacity-100 text-green-400 h-10 w-10 hover:bg-green-500 hover:text-white"
+              className={`flex items-center justify-center rounded-full cursor-pointer hover:opacity-100 text-green-400 h-10 w-10 hover:bg-green-500 hover:text-white ${
+                isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+              }`}
               onClick={handleSubmit}
+              disabled={isSubmitting}
             >
-              <i className="material-symbols-outlined text-3xl">check</i>
+              {isSubmitting ? (
+                <i className="material-symbols-outlined text-3xl animate-spin">
+                  progress_activity
+                </i>
+              ) : (
+                <i className="material-symbols-outlined text-3xl">check</i>
+              )}
             </button>
           )}
           <button
@@ -84,16 +149,25 @@ const SidebarProfileEdit: React.FC = () => {
         </div>
       </header>
 
+      {error && (
+        <div className="text-red-500 text-center mt-2">
+          <p>{error}</p>
+        </div>
+      )}
+
       {/* Edit Form */}
-      <form className="overflow-y-auto h-screen p-4" onSubmit={handleSubmit}>
+      <form
+        className="overflow-y-auto h-screen p-4"
+        onSubmit={handleSubmit}
+        encType="multipart/form-data"
+      >
         <div className="flex flex-col items-center gap-4 w-full">
           {/* Avatar Upload */}
           <AvatarEdit
             avatarUrl={formData.avatarUrl}
-            onAvatarChange={(newAvatar) =>
-              setFormData((prev) => ({ ...prev, avatarUrl: newAvatar }))
-            }
+            onAvatarChange={handleAvatarChange}
           />
+
           {/* Form Fields */}
           <div className="w-full space-y-4">
             <div className="flex flex-col gap-1">
@@ -129,9 +203,9 @@ const SidebarProfileEdit: React.FC = () => {
                 name="birthday"
                 value={
                   formData.birthday
-                    ? typeof formData.birthday === "string"
-                      ? formData.birthday.slice(0, 10)
-                      : formData.birthday.toISOString().slice(0, 10)
+                    ? formData.birthday instanceof Date
+                      ? formData.birthday.toISOString().slice(0, 10)
+                      : new Date(formData.birthday).toISOString().slice(0, 10)
                     : ""
                 }
                 onChange={(e) =>
@@ -156,6 +230,9 @@ const SidebarProfileEdit: React.FC = () => {
                 placeholder="Describe something about yourself"
                 maxLength={150}
               />
+              <span className="text-xs opacity-50 text-right">
+                {formData.bio.length}/150
+              </span>
             </div>
           </div>
         </div>

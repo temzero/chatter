@@ -2,9 +2,9 @@
 import React from "react";
 
 interface AvatarEditProps {
-  avatarUrl: string;
+  avatarUrl: string | null | undefined;
   type?: string;
-  onAvatarChange: (newAvatar: string) => void;
+  onAvatarChange: (newAvatar: string, file?: File) => void;
 }
 
 const AvatarEdit: React.FC<AvatarEditProps> = ({
@@ -27,7 +27,7 @@ const AvatarEdit: React.FC<AvatarEditProps> = ({
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {
-          onAvatarChange(event.target.result as string);
+          onAvatarChange(event.target.result as string, file); // Pass both URL and file
         }
       };
       reader.readAsDataURL(file);
@@ -40,7 +40,11 @@ const AvatarEdit: React.FC<AvatarEditProps> = ({
       className={`${typeClass} flex items-center justify-center border-[var(--border-color)] overflow-hidden relative`}
     >
       {avatarUrl ? (
-        <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+        <img
+          src={avatarUrl}
+          alt="Avatar"
+          className="h-full w-full object-cover"
+        />
       ) : (
         <i className="material-symbols-outlined text-8xl opacity-20">
           {type === "group" ? "groups" : type === "channel" ? "tv" : "person"}

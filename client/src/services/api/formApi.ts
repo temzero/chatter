@@ -8,17 +8,17 @@ import axios, {
 import { storageService } from "../storage/storageService";
 import { authService } from "../authService";
 
-const API: AxiosInstance = axios.create({
+const formAPI: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   headers: {
-    "Content-Type": "application/json",
+    "Content-Type": "multipart/form-data",
   },
   withCredentials: true, // Include cookies in requests
 });
 
 // REQUEST interceptor
 // Add Authorization & device info headers
-API.interceptors.request.use(
+formAPI.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const accessToken = storageService.getAccessToken();
     const deviceId = storageService.getDeviceId();
@@ -55,7 +55,7 @@ const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue = [];
 };
 
-API.interceptors.response.use(
+formAPI.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError) => {
     console.error("API Error:", error.response?.data);
@@ -76,7 +76,7 @@ API.interceptors.response.use(
               originalRequest.headers.Authorization = `Bearer ${
                 token as string
               }`;
-              resolve(API(originalRequest));
+              resolve(formAPI(originalRequest));
             },
             reject: (err) => {
               console.error("Error in failedQueue:", err);
@@ -99,7 +99,7 @@ API.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
         processQueue(null, newAccessToken);
-        return API(originalRequest);
+        return formAPI(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
         authService.logout();
@@ -114,5 +114,5 @@ API.interceptors.response.use(
   }
 );
 
-export default API;
+export default formAPI;
 
