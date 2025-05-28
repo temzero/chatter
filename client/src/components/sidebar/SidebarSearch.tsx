@@ -68,9 +68,6 @@ const SidebarSearch: React.FC = () => {
             {type.charAt(0).toUpperCase() + type.slice(1)}
           </a>
         ))}
-        <i className="material-symbols-outlined opacity-40 hover:opacity-100 cursor-pointer text-sm">
-          arrow_forward_ios
-        </i>
       </div>
 
       {/* Chat List Container */}

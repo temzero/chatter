@@ -1,4 +1,4 @@
-import { DirectChat } from "./chat.type";
+import { DirectChat } from "./chat";
 
 export type ApiSuccessResponse<T> = {
   payload: T;

@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useChatStore } from "@/stores/chatStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import AvatarEdit from "@/components/ui/avatar/AvatarEdit";
-import { GroupChatResponse } from "@/types/chat.type";
+import { GroupChatResponse } from "@/types/chat";
 
 const GroupChatEdit = () => {
   const activeChat = useChatStore(

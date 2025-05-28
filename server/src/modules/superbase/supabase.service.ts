@@ -36,7 +36,6 @@ export class SupabaseService {
   }
 
   async deleteFile(filePath: string): Promise<boolean> {
-    console.log('Deleting file:', filePath);
     if (!filePath) {
       throw new Error('File path is required for deletion');
     }

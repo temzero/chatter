@@ -3,7 +3,7 @@ import type {
   ChatResponse,
   DirectChatResponse,
   GroupChatResponse,
-} from "@/types/chat.type";
+} from "@/types/chat";
 import { ChatType } from "@/types/enums/ChatType";
 
 type ChatAvatarProps = {
@@ -129,4 +129,3 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
       );
   }
 };
-

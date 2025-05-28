@@ -5,59 +5,57 @@ import CreateNewGroupChat from "../ui/CreateNewGroupChat";
 import { SlidingContainer } from "../ui/SlidingContainer";
 import { ChatType } from "@/types/enums/ChatType";
 
-const chatTypes = ["person", "group", "channel"];
-
 const SidebarNewChat: React.FC = () => {
   const setSidebar = useSidebarStore((state) => state.setSidebar);
-  const [selectedType, setSelectedType] = useState<string>(chatTypes[0]);
+  const [selectedType, setSelectedType] = useState<ChatType>(ChatType.DIRECT);
   const [direction, setDirection] = useState<number>(1);
 
-  const getTypeClass = (type: string) =>
+  const getTypeClass = (type: ChatType) =>
     `flex items-center justify-center gap-1 cursor-pointer rounded w-full ${
       selectedType === type
         ? "opacity-100 font-bold text-green-400"
         : "opacity-40 hover:opacity-80"
     }`;
 
-  const handleChatTypeChange = (type: string) => {
+  const handleChatTypeChange = (type: ChatType) => {
     if (type === selectedType) return;
-    const currentIndex = chatTypes.indexOf(selectedType);
-    const newIndex = chatTypes.indexOf(type);
+    const currentIndex = Object.values(ChatType).indexOf(selectedType);
+    const newIndex = Object.values(ChatType).indexOf(type);
     setDirection(newIndex > currentIndex ? 1 : -1);
     setSelectedType(type);
   };
 
-  const getTypeLabel = (type: string) => {
+  const getTypeLabel = (type: ChatType) => {
     switch (type) {
-      case "group":
+      case ChatType.GROUP:
         return "Group Chat";
-      case "channel":
+      case ChatType.CHANNEL:
         return "Channel";
-      case "person":
+      case ChatType.DIRECT:
       default:
         return "Chat";
     }
   };
 
-  const getTypeIcon = (type: string) => {
+  const getTypeIcon = (type: ChatType) => {
     switch (type) {
-      case "group":
+      case ChatType.GROUP:
         return "groups";
-      case "channel":
+      case ChatType.CHANNEL:
         return "tv";
-      case "person":
+      case ChatType.DIRECT:
       default:
         return "person";
     }
   };
 
-  const NewChatWrapper = (type: string) => {
+  const NewChatWrapper = (type: ChatType) => {
     switch (type) {
-      case "person":
+      case ChatType.DIRECT:
         return <CreateNewChat />;
-      case "group":
+      case ChatType.GROUP:
         return <CreateNewGroupChat type={ChatType.GROUP} />;
-      case "channel":
+      case ChatType.CHANNEL:
         return <CreateNewGroupChat type={ChatType.CHANNEL} />;
       default:
         return null;
@@ -66,10 +64,7 @@ const SidebarNewChat: React.FC = () => {
 
   return (
     <aside className="w-[var(--sidebar-width)] h-full flex flex-col transition-all duration-300 ease-in-out">
-      <header
-        id="logo-container"
-        className="flex w-full items-center h-[var(--header-height)] p-2 pr-0 justify-between"
-      >
+      <header className="flex w-full items-center h-[var(--header-height)] p-2 pr-0 justify-between">
         <h1 className="font-semibold text-xl pl-1">
           New {getTypeLabel(selectedType)}
         </h1>
@@ -82,7 +77,7 @@ const SidebarNewChat: React.FC = () => {
       </header>
 
       <div className="flex custom-border-t">
-        {chatTypes.map((type) => (
+        {Object.values(ChatType).map((type) => (
           <button
             key={type}
             className={getTypeClass(type)}
@@ -90,7 +85,7 @@ const SidebarNewChat: React.FC = () => {
           >
             <i
               className={`material-symbols-outlined ${
-                type === "group" ? "text-[2.1rem]" : ""
+                type === ChatType.GROUP ? "text-[2.1rem]" : ""
               }`}
             >
               {getTypeIcon(type)}

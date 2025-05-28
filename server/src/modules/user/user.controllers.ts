@@ -15,7 +15,10 @@ import { UpdateUserDto } from './dto/requests/update-user.dto';
 import { SuccessResponse } from 'src/common/api-response/success';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { CurrentUser } from '../auth/decorators/user.decorator';
-import { UserResponseDto } from './dto/responses/user-response.dto';
+import {
+  OtherUserResponseDto,
+  UserResponseDto,
+} from './dto/responses/user-response.dto';
 import { JwtPayload } from '../auth/types/jwt-payload.type';
 import { UpdateProfileDto } from './dto/requests/update-profile.dto';
 import { SupabaseService } from '../superbase/supabase.service';
@@ -61,11 +64,16 @@ export class UserController {
 
   @Get('/find/:identifier')
   async findOneByIdentifier(
+    @CurrentUser('id') userId: string,
     @Param('identifier') identifier: string,
-  ): Promise<SuccessResponse<UserResponseDto>> {
-    const user = await this.userService.getUserByIdentifier(identifier.trim());
+  ): Promise<SuccessResponse<OtherUserResponseDto>> {
+    const user = await this.userService.getOtherUserByIdentifier(
+      identifier.trim(),
+      userId,
+    );
+    // const friendshipStatus = await this.FriendshipService.getFriendshipStatus()
     return new SuccessResponse(
-      plainToInstance(UserResponseDto, user),
+      plainToInstance(OtherUserResponseDto, user),
       'User retrieved successfully',
     );
   }

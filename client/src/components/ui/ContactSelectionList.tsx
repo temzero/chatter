@@ -1,5 +1,5 @@
 import React from "react";
-import type { ChatResponse } from "@/types/chat.type";
+import type { ChatResponse } from "@/types/chat";
 import { ChatAvatar } from "./avatar/ChatAvatar";
 import getChatName from "@/utils/getChatName";
 

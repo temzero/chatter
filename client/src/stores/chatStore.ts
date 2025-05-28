@@ -9,7 +9,7 @@ import type {
   DirectChatResponse,
   GroupChatResponse,
   ChatMember,
-} from "@/types/chat.type";
+} from "@/types/chat";
 import { ChatType } from "@/types/enums/ChatType";
 import { useAuthStore } from "./authStore";
 

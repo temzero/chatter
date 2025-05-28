@@ -5,7 +5,7 @@ import ContactSelectionList from "../ui/ContactSelectionList";
 import { useChatStore } from "@/stores/chatStore";
 import { useAuthStore } from "@/stores/authStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
-import type { DirectChatResponse } from "@/types/chat.type";
+import type { DirectChatResponse } from "@/types/chat";
 import type { ChatType } from "@/types/enums/ChatType";
 
 interface CreateChatProps {

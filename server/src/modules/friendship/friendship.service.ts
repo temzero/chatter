@@ -1,7 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-
 import { Friendship } from './entities/friendship.entity';
 import { UserService } from '../user/user.service';
 import { FriendshipStatus } from './constants/friendship-status.constants';
@@ -12,22 +11,20 @@ export class FriendshipService {
   constructor(
     @InjectRepository(Friendship)
     private readonly friendshipRepo: Repository<Friendship>,
+    @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
   ) {}
 
-  async sendRequest(
-    requesterId: string,
-    addresseeId: string,
-  ): Promise<Friendship> {
+  async sendRequest(senderId: string, receiverId: string): Promise<Friendship> {
     try {
       // Check if user exists
-      await this.userService.getUserById(addresseeId);
+      await this.userService.getUserById(receiverId);
 
       // Check if relationship already exists
       const exists = await this.friendshipRepo.findOne({
         where: [
-          { requesterId, addresseeId },
-          { requesterId: addresseeId, addresseeId: requesterId },
+          { senderId, receiverId },
+          { senderId: receiverId, receiverId: senderId },
         ],
       });
 
@@ -36,8 +33,8 @@ export class FriendshipService {
       }
 
       return await this.friendshipRepo.save({
-        requesterId,
-        addresseeId: addresseeId,
+        senderId,
+        receiverId,
         status: FriendshipStatus.PENDING,
       });
     } catch (error) {
@@ -54,7 +51,7 @@ export class FriendshipService {
       const request = await this.friendshipRepo.findOne({
         where: {
           id: friendshipId,
-          addresseeId: userId,
+          receiverId: userId,
           status: FriendshipStatus.PENDING,
         },
       });
@@ -75,10 +72,10 @@ export class FriendshipService {
     try {
       return await this.friendshipRepo.find({
         where: [
-          { requesterId: userId, status: FriendshipStatus.ACCEPTED },
-          { addresseeId: userId, status: FriendshipStatus.ACCEPTED },
+          { senderId: userId, status: FriendshipStatus.ACCEPTED },
+          { receiverId: userId, status: FriendshipStatus.ACCEPTED },
         ],
-        relations: ['requester', 'addressee'],
+        relations: ['sender', 'receiver'],
       });
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to retrieve friends');
@@ -89,10 +86,10 @@ export class FriendshipService {
     try {
       return await this.friendshipRepo.find({
         where: {
-          addresseeId: userId,
+          receiverId: userId,
           status: FriendshipStatus.PENDING,
         },
-        relations: ['requester'],
+        relations: ['sender'],
       });
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to retrieve pending friend requests');
@@ -106,8 +103,8 @@ export class FriendshipService {
     try {
       const friendship = await this.friendshipRepo.findOne({
         where: [
-          { requesterId: userId, addresseeId: otherUserId },
-          { requesterId: otherUserId, addresseeId: userId },
+          { senderId: userId, receiverId: otherUserId },
+          { senderId: otherUserId, receiverId: userId },
         ],
       });
 

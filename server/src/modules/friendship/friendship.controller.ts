@@ -21,14 +21,14 @@ import { RespondToRequestDto } from './dto/requests/response-to-request.dto';
 export class FriendshipController {
   constructor(private readonly friendshipService: FriendshipService) {}
 
-  @Post('requests/:addresseeId')
+  @Post('requests/:receiverId')
   async sendRequest(
-    @CurrentUser('id') userId: string,
-    @Param('addresseeId') addresseeId: string,
+    @CurrentUser('id') senderId: string,
+    @Param('receiverId') receiverId: string,
   ): Promise<SuccessResponse<FriendshipResponseDto>> {
     const friendship = await this.friendshipService.sendRequest(
-      userId,
-      addresseeId,
+      senderId,
+      receiverId,
     );
 
     return new SuccessResponse(

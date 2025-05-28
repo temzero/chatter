@@ -1,4 +1,8 @@
-import { ChatResponse, DirectChatResponse, GroupChatResponse } from "@/types/chat.type";
+import {
+  ChatResponse,
+  DirectChatResponse,
+  GroupChatResponse,
+} from "@/types/chat";
 import { ChatType } from "@/types/enums/ChatType";
 
 const getChatName = (chat: ChatResponse): string => {

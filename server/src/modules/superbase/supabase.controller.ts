@@ -10,23 +10,39 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { SupabaseService } from './supabase.service';
 import { v4 as uuidv4 } from 'uuid';
+import sharp from 'sharp';
 
 @Controller('uploads')
 export class SupabaseController {
   constructor(private readonly supabaseService: SupabaseService) {}
 
-  @Post()
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadFile(@UploadedFile() file: Express.Multer.File) {
-    if (!file) throw new BadRequestException('File is required');
+  @Post('avatar')
+  @UseInterceptors(FileInterceptor('avatar'))
+  async uploadAvatar(@UploadedFile() avatar: Express.Multer.File) {
+    if (!avatar) throw new BadRequestException('File is required');
 
-    const fileExtension = file.originalname.split('.').pop();
+    // ✅ Check image dimensions
+    const metadata = await sharp(avatar.buffer).metadata();
+    if (!metadata.width || !metadata.height) {
+      throw new BadRequestException('Invalid image file');
+    }
+
+    if (metadata.width > 512 || metadata.height > 512) {
+      throw new BadRequestException(
+        'Image dimensions must be 512x512 pixels or less',
+      );
+    }
+
+    const fileExtension = avatar.originalname.split('.').pop();
     const filePath = `image/${uuidv4()}.${fileExtension}`;
 
-    // Upload file buffer to Supabase Storage
-    await this.supabaseService.uploadFile(file.buffer, filePath, file.mimetype);
+    // Upload avatar buffer to Supabase Storage
+    await this.supabaseService.uploadFile(
+      avatar.buffer,
+      filePath,
+      avatar.mimetype,
+    );
 
-    // Get public URL to access later
     const publicUrl = this.supabaseService.getPublicUrl(filePath);
 
     return { url: publicUrl };

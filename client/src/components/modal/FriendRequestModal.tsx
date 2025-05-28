@@ -1,20 +1,23 @@
-// FriendRequestModal.tsx
-import { userService } from "@/services/userService";
 import React, { useRef, useState } from "react";
 import { useModalStore } from "@/stores/modalStore";
 import { Avatar } from "../ui/avatar/Avatar";
+import { friendshipService } from "@/services/friendshipService";
 
 interface FriendRequestModalProps {
-  user: {
+  receiver: {
     id: string;
     username: string;
     firstName: string;
     lastName: string;
     avatarUrl: string;
   };
+  onSuccess?: (status: string) => void;
 }
 
-const FriendRequestModal: React.FC<FriendRequestModalProps> = ({ user }) => {
+const FriendRequestModal: React.FC<FriendRequestModalProps> = ({
+  receiver,
+  onSuccess,
+}) => {
   const closeModal = useModalStore((s) => s.closeModal);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [charCount, setCharCount] = useState(0);
@@ -23,10 +26,12 @@ const FriendRequestModal: React.FC<FriendRequestModalProps> = ({ user }) => {
   const handleFriendRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await userService.sendFriendRequest({
-        recipientId: user.id,
-        message: textareaRef.current?.value.trim() || "", // Always a string
-      });
+      const status = await friendshipService.sendRequest(receiver.id);
+      console.log("FriendshipResponseDto", status);
+
+      if (onSuccess) {
+        onSuccess(status);
+      }
 
       closeModal();
     } catch (err: unknown) {
@@ -41,13 +46,18 @@ const FriendRequestModal: React.FC<FriendRequestModalProps> = ({ user }) => {
   return (
     <div className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded p-4 max-w-xl w-[400px] custom-border">
       <div className="flex items-center gap-4 mb-4">
-        <Avatar user={user} size="12" />
+        <Avatar
+          avatarUrl={receiver.avatarUrl}
+          firstName={receiver.firstName}
+          lastName={receiver.lastName}
+          size="12"
+        />
 
         <div>
           <h1 className="text-xl font-semibold">
-            {user.firstName} {user.lastName}
+            {receiver.firstName} {receiver.lastName}
           </h1>
-          <p className="text-sm opacity-80">@{user.username}</p>
+          <p className="text-sm opacity-80">@{receiver.username}</p>
         </div>
       </div>
 

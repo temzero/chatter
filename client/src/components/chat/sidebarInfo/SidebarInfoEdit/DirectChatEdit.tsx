@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
-import { DirectChatResponse } from "@/types/chat.type";
+import { DirectChatResponse } from "@/types/chat";
 import { useAuthStore } from "@/stores/authStore";
 
 const DirectChatEdit = () => {

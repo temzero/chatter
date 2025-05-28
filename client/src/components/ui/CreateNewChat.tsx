@@ -2,11 +2,12 @@ import React, { useState } from "react";
 import { userService } from "@/services/userService";
 import ContactInfoItem from "./contactInfoItem";
 import { useAuthStore } from "@/stores/authStore";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useModalStore } from "@/stores/modalStore";
 import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "./avatar/Avatar";
-import type { User } from "@/types/user";
+import type { otherUser } from "@/types/user";
+import { FriendshipStatus } from "@/types/enums/friendshipType";
 
 const CreateNewChat: React.FC = () => {
   const currentUser = useAuthStore((state) => state.currentUser);
@@ -15,7 +16,7 @@ const CreateNewChat: React.FC = () => {
   const { openModal } = useModalStore();
 
   const [query, setQuery] = useState("");
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<otherUser | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -36,17 +37,27 @@ const CreateNewChat: React.FC = () => {
     }
   }
 
+  const updateFriendshipStatus = (newStatus: FriendshipStatus) => {
+    if (user) {
+      setUser({
+        ...user,
+        friendshipStatus: newStatus,
+      });
+    }
+  };
+
   function handleOpenFriendRequest() {
     if (!user) return;
 
     openModal("friend-request", {
-      user: {
+      receiver: {
         id: user.id,
         username: user.username,
         firstName: user.firstName,
         lastName: user.lastName,
         avatarUrl: user.avatarUrl,
       },
+      onSuccess: updateFriendshipStatus,
     });
   }
 
@@ -56,8 +67,6 @@ const CreateNewChat: React.FC = () => {
     try {
       setLoading(true);
       const newChat = await createOrGetDirectChat(user.id);
-      console.log("newChat: ", newChat);
-      // Set the new chat as active
       setActiveChat(newChat);
     } catch (err) {
       console.error("Failed to start chat:", err);
@@ -93,80 +102,92 @@ const CreateNewChat: React.FC = () => {
       </form>
 
       {error && <p className="text-red-400 text-center">{error}</p>}
+      <AnimatePresence mode="wait">
+        {user && (
+          <motion.div
+            key={user.id}
+            initial={{ opacity: 0, scale: 1.1 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 12,
+              mass: 0.6,
+            }}
+            className="bg-[var(--card-bg-color)] custom-border rounded-lg flex flex-col justify-between h-full overflow-hidden"
+          >
+            <div className="flex-1 flex flex-col items-center justify-start gap-2 p-2 pt-4 overflow-y-auto">
+              <Avatar
+                avatarUrl={user.avatarUrl}
+                firstName={user.firstName}
+                lastName={user.lastName}
+                className="w-[120px] h-[120px]"
+              />
 
-      {user && (
-        <motion.div
-          key={user.id}
-          initial={{ opacity: 0, scale: 1.1 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{
-            type: "spring",
-            stiffness: 300,
-            damping: 12,
-            mass: 0.6,
-          }}
-          className="bg-[var(--card-bg-color)] custom-border rounded-lg flex flex-col justify-between h-full overflow-hidden"
-        >
-          {/* Scrollable user info */}
-          <div className="flex-1 flex flex-col items-center justify-start gap-2 p-2 pt-4 overflow-y-auto">
-            <Avatar
-              avatarUrl={user.avatarUrl}
-              firstName={user.firstName}
-              lastName={user.lastName}
-              className="w-[120px] h-[120px]"
-            />
+              <h1 className="font-bold text-xl">
+                {user.firstName} {user.lastName}
+              </h1>
+              <h1>{user.bio}</h1>
 
-            <h1 className="font-bold text-xl">
-              {user.firstName} {user.lastName}
-            </h1>
-            <h1>{user.bio}</h1>
-
-            <div className="w-full flex flex-col font-light my-2 custom-border-t custom-border-b">
-              <ContactInfoItem
-                icon="alternate_email"
-                value={user.username}
-                copyType="username"
-                defaultText="No username"
-              />
-              <ContactInfoItem
-                icon="call"
-                value={user.phoneNumber}
-                copyType="phone"
-              />
-              <ContactInfoItem
-                icon="mail"
-                value={user.email}
-                copyType="email"
-              />
-              <ContactInfoItem
-                icon="cake"
-                value={user.birthday}
-                copyType="birthday"
-              />
+              <div className="w-full flex flex-col font-light my-2 custom-border-t custom-border-b">
+                <ContactInfoItem
+                  icon="alternate_email"
+                  value={user.username}
+                  copyType="username"
+                  defaultText="No username"
+                />
+                <ContactInfoItem
+                  icon="call"
+                  value={user.phoneNumber}
+                  copyType="phone"
+                />
+                <ContactInfoItem
+                  icon="mail"
+                  value={user.email}
+                  copyType="email"
+                />
+                <ContactInfoItem
+                  icon="cake"
+                  value={user.birthday}
+                  copyType="birthday"
+                />
+              </div>
             </div>
-          </div>
 
-          {user.id === currentUser?.id || (
-            <div className="w-full flex border-t-2 border-[var(--border-color)]">
-              <button
-                className="w-full py-1 flex gap-1 custom-border-r justify-center hover:bg-[var(--primary-green)] rounded-none"
-                onClick={handleOpenFriendRequest}
-              >
-                <span className="material-symbols-outlined">person_add</span>
-              </button>
-              <button
-                className="w-full py-1 flex justify-center hover:bg-[var(--primary-green)] rounded-none"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleStartChat();
-                }}
-              >
-                <span className="material-symbols-outlined">chat_bubble</span>
-              </button>
-            </div>
-          )}
-        </motion.div>
-      )}
+            {user.id === currentUser?.id || (
+              <div className="w-full flex border-t-2 border-[var(--border-color)]">
+                {!user.friendshipStatus ? (
+                  <button
+                    className="w-full py-1 flex gap-1 custom-border-r justify-center hover:bg-[var(--primary-green)] rounded-none"
+                    onClick={handleOpenFriendRequest}
+                  >
+                    <span className="material-symbols-outlined">
+                      person_add
+                    </span>
+                  </button>
+                ) : (
+                  <div className="w-full py-1 flex gap-1 custom-border-r justify-center items-center">
+                    <span className="text-sm opacity-60">
+                      {user.friendshipStatus === FriendshipStatus.PENDING
+                        ? "Request Sent"
+                        : "Friends"}
+                    </span>
+                  </div>
+                )}
+                <button
+                  className="w-full py-1 flex justify-center hover:bg-[var(--primary-green)] rounded-none"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleStartChat();
+                  }}
+                >
+                  <span className="material-symbols-outlined">chat_bubble</span>
+                </button>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

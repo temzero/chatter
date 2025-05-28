@@ -1,3 +1,5 @@
+import { FriendshipStatus } from "./enums/friendshipType";
+
 export type Theme = "light" | "dark" | "system";
 export type LastSeenSetting = "everyone" | "contacts" | "nobody";
 export type FontSize = "small" | "medium" | "large";
@@ -20,6 +22,10 @@ export interface User {
   is_email_verified: boolean;
   is_deleted: boolean;
   deleted_at?: string;
+}
+
+export interface otherUser extends User {
+  friendshipStatus?: FriendshipStatus | null;
 }
 
 export interface UserSettings {

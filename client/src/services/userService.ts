@@ -1,5 +1,5 @@
 import API from "@/services/api/api";
-import { User } from "@/types/user";
+import { otherUser, User } from "@/types/user";
 import { ProfileFormData } from "@/components/sidebar/SidebarProfileEdit";
 import logFormData from "@/utils/logFormdata";
 
@@ -25,7 +25,7 @@ export const userService = {
    * Get user by identifier (username, email, or phone)
    * @param identifier - Username, email, or phone
    */
-  async getUserByIdentifier(identifier: string): Promise<User> {
+  async getUserByIdentifier(identifier: string): Promise<otherUser> {
     const { data } = await API.get(`/user/find/${identifier}`);
     return data.payload;
   },
@@ -68,22 +68,24 @@ export const userService = {
    */
   async uploadAvatar(avatarFile: File): Promise<{ url: string }> {
     const formData = new FormData();
-    formData.append("file", avatarFile);
+    formData.append("avatar", avatarFile);
     logFormData(formData);
 
     try {
-      const { data } = await API.post("/uploads", formData, {
-        headers: {"Content-Type": "multipart/form-data"},
-        timeout: 30000, // Allow more time for upload
+      const { data } = await API.post("/uploads/avatar", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        timeout: 30000,
       });
 
-      // Assuming your NestJS controller returns { url: publicUrl }
       if (!data?.url) {
         throw new Error("Upload failed: No URL returned");
       }
-      return data.url;
+
+      return data; // 👈 Return full object if it's { url: string }
     } catch (error: unknown) {
-      console.error("uploadImage failed:", error);
+      console.error("uploadAvatar failed:", error);
       throw new Error("Image upload failed");
     }
   },
@@ -93,49 +95,6 @@ export const userService = {
    */
   async deleteUser(): Promise<string> {
     const { data } = await API.delete("/user"); // ✅ no userId in URL
-    return data.payload;
-  },
-
-  async sendFriendRequest(requestData: {
-    recipientId: string;
-    message: string;
-  }): Promise<{ success: boolean; message?: string }> {
-    try {
-      const { data } = await API.post("/friend-request", requestData);
-      return { success: true, message: data.message };
-    } catch (error) {
-      console.error("Failed to send friend request:", error);
-      let errorMessage = "Failed to send friend request";
-
-      if (error && typeof error === "object" && "response" in error) {
-        const err = error as { response?: { data?: { message?: string } } };
-        errorMessage = err.response?.data?.message || errorMessage;
-      }
-      return {
-        success: false,
-        message: errorMessage,
-      };
-    }
-  },
-
-  /**
-   * Get pending friend requests
-   */
-  async getFriendRequests(): Promise<unknown[]> {
-    const { data } = await API.get("/friend-request");
-    return data.payload;
-  },
-
-  /**
-   * Respond to a friend request
-   * @param requestId - Friend request ID
-   * @param accept - Whether to accept or reject
-   */
-  async respondToFriendRequest(
-    requestId: string,
-    accept: boolean
-  ): Promise<unknown> {
-    const { data } = await API.put(`/friend-request/${requestId}`, { accept });
     return data.payload;
   },
 };

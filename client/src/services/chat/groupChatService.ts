@@ -1,5 +1,5 @@
 import API from "../api/api";
-import type { GroupChatResponse } from "@/types/chat.type";
+import type { GroupChatResponse } from "@/types/chat";
 import type { ApiSuccessResponse } from "@/types/apiSuccessResponse";
 import { ChatType } from "@/types/enums/ChatType";
 

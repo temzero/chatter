@@ -8,6 +8,9 @@ import { ConfigService } from '@nestjs/config';
 import { User } from 'src/modules/user/entities/user.entity';
 import { ErrorResponse } from 'src/common/api-response/errors';
 import { TokenStorageService } from '../auth/services/token-storage.service';
+import { OtherUserResponseDto } from './dto/responses/user-response.dto';
+import { FriendshipStatus } from '../friendship/constants/friendship-status.constants';
+import { FriendshipService } from '../friendship/friendship.service';
 
 @Injectable()
 export class UserService {
@@ -16,6 +19,7 @@ export class UserService {
     private readonly userRepository: Repository<User>,
     private readonly configService: ConfigService,
     private readonly tokenStorageService: TokenStorageService,
+    private readonly friendshipService: FriendshipService,
   ) {}
 
   private normalizeIdentifier(identifier: string): string {
@@ -36,6 +40,38 @@ export class UserService {
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to retrieve user by identifier');
     }
+  }
+  async getOtherUserByIdentifier(
+    identifier: string,
+    currentUserId: string,
+  ): Promise<OtherUserResponseDto> {
+    // Find the user
+    const user = await this.userRepository.findOne({
+      where: [
+        { username: identifier },
+        { email: identifier },
+        { phoneNumber: identifier },
+      ],
+    });
+
+    if (!user) {
+      ErrorResponse.notFound('User not found');
+    }
+
+    let friendshipStatus: FriendshipStatus | null = null;
+
+    // Only check friendship if currentUserId is provided
+    if (currentUserId && currentUserId !== user.id) {
+      friendshipStatus = await this.friendshipService.getFriendshipStatus(
+        currentUserId,
+        user.id,
+      );
+    }
+
+    return {
+      ...user,
+      friendshipStatus,
+    };
   }
 
   async getUserById(id: string): Promise<User> {

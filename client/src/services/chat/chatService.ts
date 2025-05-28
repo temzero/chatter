@@ -1,5 +1,5 @@
 import API from "../api/api";
-import type { ChatResponse } from "@/types/chat.type";
+import type { ChatResponse } from "@/types/chat";
 import { directChatService } from "./directChatService";
 import { groupChatService } from "./groupChatService";
 import type { ApiSuccessResponse } from "@/types/apiSuccessResponse";

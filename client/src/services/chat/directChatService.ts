@@ -1,5 +1,5 @@
 import API from "../api/api";
-import type { DirectChatResponse } from "@/types/chat.type";
+import type { DirectChatResponse } from "@/types/chat";
 import type {
   ApiSuccessResponse,
   DirectChatApiResponse,
@@ -13,7 +13,9 @@ interface DirectChatDataResponse {
 
 export const directChatService = {
   // Create or get an existing direct chat
-  async createOrGetDirectChat(partnerId: string): Promise<DirectChatDataResponse> {
+  async createOrGetDirectChat(
+    partnerId: string
+  ): Promise<DirectChatDataResponse> {
     const response = await API.post<DirectChatApiResponse>("/chat/direct", {
       partnerId,
     });

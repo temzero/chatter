@@ -71,7 +71,6 @@ const SidebarProfileEdit: React.FC = () => {
 
     try {
       let newAvatarUrl = formData.avatarUrl;
-
       // If avatar file changed, upload it first
       if (avatarFile) {
         // Keep old avatar URL for deletion later
@@ -92,14 +91,11 @@ const SidebarProfileEdit: React.FC = () => {
             // You may decide whether to continue or fail here — typically continue is fine
           }
         }
-
         // Update form data avatarUrl before profile update
         setFormData((prev) => ({ ...prev, avatarUrl: newAvatarUrl }));
       }
-
       // Update profile with possibly new avatarUrl and other data
       await updateProfile({ ...formData, avatarUrl: newAvatarUrl });
-
       setSidebar("profile");
     } catch (error) {
       setError("Failed to update profile!");

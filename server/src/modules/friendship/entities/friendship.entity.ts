@@ -12,24 +12,24 @@ import { User } from '../../user/entities/user.entity';
 import { FriendshipStatus } from '../constants/friendship-status.constants';
 
 @Entity('friendship')
-@Index(['requesterId', 'addresseeId'], { unique: true })
+@Index(['senderId', 'receiverId'], { unique: true })
 export class Friendship {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'requester_id' })
-  requester: User;
+  @JoinColumn({ name: 'sender_id' })
+  sender: User;
 
-  @Column({ name: 'requester_id' })
-  requesterId: string;
+  @Column({ name: 'sender_id' })
+  senderId: string;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'addressee_id' })
-  addressee: User;
+  @JoinColumn({ name: 'receiver_id' })
+  receiver: User;
 
-  @Column({ name: 'addressee_id' })
-  addresseeId: string;
+  @Column({ name: 'receiver_id' })
+  receiverId: string;
 
   @Column({
     type: 'enum',
