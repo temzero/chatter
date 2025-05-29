@@ -6,8 +6,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useModalStore } from "@/stores/modalStore";
 import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "./avatar/Avatar";
-import type { otherUser } from "@/types/user";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
+import type { otherUser } from "@/types/user";
 
 const CreateNewChat: React.FC = () => {
   const currentUser = useAuthStore((state) => state.currentUser);
@@ -127,6 +127,9 @@ const CreateNewChat: React.FC = () => {
               <h1 className="font-bold text-xl">
                 {user.firstName} {user.lastName}
               </h1>
+              {user.friendshipStatus === FriendshipStatus.ACCEPTED && (
+                <h1 className="text-[var(--primary-green)] -mt-1">Friend</h1>
+              )}
               <h1>{user.bio}</h1>
 
               <div className="w-full flex flex-col font-light my-2 custom-border-t custom-border-b">
@@ -156,23 +159,21 @@ const CreateNewChat: React.FC = () => {
 
             {user.id === currentUser?.id || (
               <div className="w-full flex border-t-2 border-[var(--border-color)]">
-                {!user.friendshipStatus ? (
+                {user.friendshipStatus !== FriendshipStatus.ACCEPTED && (
                   <button
-                    className="w-full py-1 flex gap-1 custom-border-r justify-center hover:bg-[var(--primary-green)] rounded-none"
+                    className={`w-full py-1 flex gap-1 custom-border-r justify-center hover:bg-[var(--primary-green)] rounded-none`}
                     onClick={handleOpenFriendRequest}
                   >
-                    <span className="material-symbols-outlined">
-                      person_add
-                    </span>
+                    {user.friendshipStatus === FriendshipStatus.PENDING ? (
+                      <span className="text-sm opacity-60">Request Sent</span>
+                    ) : (
+                      <>
+                        <span className="material-symbols-outlined">
+                          person_add
+                        </span>
+                      </>
+                    )}
                   </button>
-                ) : (
-                  <div className="w-full py-1 flex gap-1 custom-border-r justify-center items-center">
-                    <span className="text-sm opacity-60">
-                      {user.friendshipStatus === FriendshipStatus.PENDING
-                        ? "Request Sent"
-                        : "Friends"}
-                    </span>
-                  </div>
                 )}
                 <button
                   className="w-full py-1 flex justify-center hover:bg-[var(--primary-green)] rounded-none"

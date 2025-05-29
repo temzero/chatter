@@ -10,6 +10,7 @@ import { useChatStore } from "@/stores/chatStore";
 import { useIsAuthenticated } from "@/stores/authStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
+import { useFriendRequestStore } from "@/stores/friendRequestStore";
 
 export const ChatContent: React.FC = () => {
   const { id: chatId } = useParams();
@@ -22,6 +23,7 @@ export const ChatContent: React.FC = () => {
     activeChat,
     setActiveChatById,
   } = useChatStore();
+  const { fetchPendingRequests } = useFriendRequestStore();
 
   // Initialization effect
   useEffect(() => {
@@ -29,11 +31,13 @@ export const ChatContent: React.FC = () => {
     initializeSidebarInfo();
     initializeAuth();
     initializeChats();
+    fetchPendingRequests();
   }, [
     initializeSidebar,
     initializeSidebarInfo,
     initializeAuth,
     initializeChats,
+    fetchPendingRequests,
   ]);
 
   // Chat ID effect

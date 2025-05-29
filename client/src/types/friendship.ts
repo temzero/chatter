@@ -1,6 +1,6 @@
 import { FriendshipStatus } from "./enums/friendshipType";
 
-export interface FriendshipResponseDto {
+export interface FriendshipResDto {
   id: string;
   senderId: string;
   receiverId: string;
@@ -11,3 +11,31 @@ export interface FriendshipResponseDto {
   senderUsername?: string;
   receiverUsername?: string;
 }
+
+export interface FriendRequestResDto {
+  sent: SentRequestResDto[];
+  received: ReceivedRequestsResDto[];
+}
+
+export interface ReceivedRequestsResDto {
+  id: string;
+  senderId: string;
+  senderName: string;
+  senderAvatarUrl?: string | null;
+  mutualFriends: number;
+  requestMessage?: string | null;
+  updatedAt: string;
+}
+
+export interface SentRequestResDto {
+  id: string;
+  receiverId: string;
+  receiverName: string;
+  receiverAvatarUrl?: string | null;
+  mutualFriends: number;
+  requestMessage?: string | null;
+  updatedAt: string;
+}
+
+export { FriendshipStatus };
+

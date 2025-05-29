@@ -15,6 +15,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { FriendshipResponseDto } from './dto/responses/friendship-response.dto';
 import { FriendshipStatus } from './constants/friendship-status.constants';
 import { RespondToRequestDto } from './dto/requests/response-to-request.dto';
+import { FriendRequestResDto } from './dto/responses/friend-request-response.dto';
 
 @Controller('friendships')
 @UseGuards(JwtAuthGuard)
@@ -25,10 +26,12 @@ export class FriendshipController {
   async sendRequest(
     @CurrentUser('id') senderId: string,
     @Param('receiverId') receiverId: string,
+    @Body() body: { requestMessage?: string },
   ): Promise<SuccessResponse<FriendshipResponseDto>> {
     const friendship = await this.friendshipService.sendRequest(
       senderId,
       receiverId,
+      body.requestMessage,
     );
 
     return new SuccessResponse(
@@ -70,11 +73,11 @@ export class FriendshipController {
   @Get('requests/pending')
   async getPendingRequests(
     @CurrentUser('id') userId: string,
-  ): Promise<SuccessResponse<FriendshipResponseDto[]>> {
+  ): Promise<SuccessResponse<FriendRequestResDto>> {
     const requests = await this.friendshipService.getPendingRequests(userId);
 
     return new SuccessResponse(
-      plainToInstance(FriendshipResponseDto, requests),
+      requests,
       'Pending friend requests retrieved successfully',
     );
   }

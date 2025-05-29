@@ -7,6 +7,7 @@ import {
   Column,
   CreateDateColumn,
   Index,
+  UpdateDateColumn,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { FriendshipStatus } from '../constants/friendship-status.constants';
@@ -38,9 +39,17 @@ export class Friendship {
   })
   status: FriendshipStatus;
 
+  @Column({
+    name: 'request_message',
+    type: 'varchar',
+    nullable: true,
+    length: 200,
+  })
+  requestMessage: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @Column({ name: 'updated_at', type: 'timestamp', nullable: true })
-  updatedAt: Date | null;
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 }

@@ -1,5 +1,5 @@
 import API from "@/services/api/api";
-import { FriendshipResponseDto } from "@/types/friendship";
+import { FriendRequestResDto, FriendshipResDto } from "@/types/friendship";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
 
 export const friendshipService = {
@@ -7,8 +7,10 @@ export const friendshipService = {
    * Send a friend request to a receiver by ID
    * @param receiverId - User ID to send request to
    */
-  async sendRequest(receiverId: string): Promise<string> {
-    const { data } = await API.post(`/friendships/requests/${receiverId}`);
+  async sendRequest(receiverId: string, requestMessage: string): Promise<string> {
+    const { data } = await API.post(`/friendships/requests/${receiverId}`, {
+      requestMessage
+    });
     return data.payload.status;
   },
 
@@ -20,7 +22,7 @@ export const friendshipService = {
   async respondToRequest(
     friendshipId: string,
     status: FriendshipStatus
-  ): Promise<FriendshipResponseDto> {
+  ): Promise<FriendshipResDto> {
     const { data } = await API.patch(`/friendships/requests/${friendshipId}`, {
       status,
     });
@@ -30,7 +32,7 @@ export const friendshipService = {
   /**
    * Get all friends of the current user
    */
-  async getFriends(): Promise<FriendshipResponseDto[]> {
+  async getFriends(): Promise<FriendshipResDto[]> {
     const { data } = await API.get("/friendships");
     return data.payload;
   },
@@ -38,8 +40,9 @@ export const friendshipService = {
   /**
    * Get all pending friend requests for the current user
    */
-  async getPendingRequests(): Promise<FriendshipResponseDto[]> {
+  async getPendingRequests(): Promise<FriendRequestResDto> {
     const { data } = await API.get("/friendships/requests/pending");
+    console.log('request: ', data.payload)
     return data.payload;
   },
 

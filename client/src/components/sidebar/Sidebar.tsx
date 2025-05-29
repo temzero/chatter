@@ -8,6 +8,7 @@ import SidebarSettings from "@/components/sidebar/SidebarSettings";
 import SidebarSettingsAccount from "./SidebarSettingsAccount";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCurrentSidebar } from "@/stores/sidebarStore";
+import SidebarFriendRequests from "./SidebarFriendRequests";
 
 const Sidebar = () => {
   const currentSidebar = useCurrentSidebar();
@@ -19,6 +20,7 @@ const Sidebar = () => {
     more: <SidebarMore />,
     profile: <SidebarProfile />,
     profileEdit: <SidebarProfileEdit />,
+    friendRequests: <SidebarFriendRequests/>,
     settings: <SidebarSettings />,
     settingsAccount: <SidebarSettingsAccount />,
   };

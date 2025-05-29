@@ -21,12 +21,16 @@ const FriendRequestModal: React.FC<FriendRequestModalProps> = ({
   const closeModal = useModalStore((s) => s.closeModal);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [charCount, setCharCount] = useState(0);
+  const [requestMessage, setRequestMessage] = useState("");
   const maxChar = 200;
 
   const handleFriendRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const status = await friendshipService.sendRequest(receiver.id);
+      const status = await friendshipService.sendRequest(
+        receiver.id,
+        requestMessage
+      );
       console.log("FriendshipResponseDto", status);
 
       if (onSuccess) {
@@ -40,6 +44,7 @@ const FriendRequestModal: React.FC<FriendRequestModalProps> = ({
   };
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setRequestMessage(e.target.value);
     setCharCount(e.target.value.length);
   };
 
@@ -72,6 +77,7 @@ const FriendRequestModal: React.FC<FriendRequestModalProps> = ({
           className="w-full min-h-28 px-2"
           maxLength={maxChar}
           onChange={handleTextChange}
+          value={requestMessage}
           autoFocus
         />
         <div className="flex justify-between items-center mb-2">

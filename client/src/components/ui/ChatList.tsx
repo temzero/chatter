@@ -3,8 +3,9 @@ import { useChatStore } from "@/stores/chatStore";
 import { useMessageStore } from "@/stores/messageStore";
 import type { ChatResponse } from "@/types/chat";
 import { ChatAvatar } from "./avatar/ChatAvatar";
-import { formatTime } from "@/utils/formatTime";
+// import { formatTime } from "@/utils/formatTime";
 import getChatName from "../../utils/getChatName";
+import { getTimeAgo } from "@/utils/getTimeAgo";
 
 interface ChatListProps {
   chats: ChatResponse[];
@@ -68,7 +69,8 @@ const ChatList: React.FC<ChatListProps> = ({ chats, isCompact = false }) => {
                   </div>
 
                   <p className="absolute top-2 right-4 text-xs opacity-40">
-                    {formatTime(chat.lastMessage?.createdAt ?? chat.updatedAt)}
+                    {/* {formatTime(chat.lastMessage?.createdAt ?? chat.updatedAt)} */}
+                    {getTimeAgo(chat.lastMessage?.createdAt ?? chat.updatedAt)}
                   </p>
                 </>
               )}

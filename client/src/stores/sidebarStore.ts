@@ -2,7 +2,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-type SidebarModes = 'default' | 'newChat' | 'search' | 'more' | 'profile' | 'profileEdit' | 'settings' | 'settingsAccount';
+type SidebarModes = 'default' | 'newChat' | 'search' | 'more' | 'profile' | 'profileEdit' | 'friendRequests' | 'settings' | 'settingsAccount';
 
 interface SidebarStore {
   currentSidebar: SidebarModes;
