@@ -18,6 +18,8 @@ import {
 } from './dto/responses/chat-response.dto';
 import { ChatPartnerDto } from './dto/responses/chat-partner-response.dto';
 import { LastMessageResponseDto } from './dto/responses/last-message-response.dto';
+import { FriendshipService } from '../friendship/friendship.service';
+import { FriendshipStatus } from '../friendship/constants/friendship-status.constants';
 
 @Injectable()
 export class ChatService {
@@ -30,6 +32,8 @@ export class ChatService {
 
     @InjectRepository(ChatMember)
     private readonly memberRepo: Repository<ChatMember>,
+
+    private readonly friendshipService: FriendshipService,
   ) {}
 
   async getOrCreateDirectChat(
@@ -52,6 +56,11 @@ export class ChatService {
       ErrorResponse.badRequest('One or more Users do not exist!');
     }
 
+    const friendshipStatus = await this.friendshipService.getFriendshipStatus(
+      myUserId,
+      partnerId,
+    );
+
     const existingChat = await this.chatRepo
       .createQueryBuilder('chat')
       .innerJoin('chat.members', 'member1', 'member1.user_id = :user1', {
@@ -66,7 +75,11 @@ export class ChatService {
     if (existingChat) {
       const fullChat = await this.getFullChat(existingChat.id);
       return {
-        chat: this.transformToDirectChatDto(fullChat, myUserId),
+        chat: this.transformToDirectChatDto(
+          fullChat,
+          myUserId,
+          friendshipStatus ?? undefined,
+        ),
         wasExisting: true,
       };
     }
@@ -80,7 +93,11 @@ export class ChatService {
     const fullChat = await this.getFullChat(chat.id);
 
     return {
-      chat: this.transformToDirectChatDto(fullChat, myUserId),
+      chat: this.transformToDirectChatDto(
+        fullChat,
+        myUserId,
+        friendshipStatus ?? undefined,
+      ),
       wasExisting: false,
     };
   }
@@ -155,11 +172,35 @@ export class ChatService {
         .orderBy('COALESCE(lastMessage.createdAt, chat.createdAt)', 'DESC')
         .getMany();
 
-      return chats.map((chat) =>
-        chat.type === ChatType.DIRECT
-          ? this.transformToDirectChatDto(chat, userId)
-          : this.transformToGroupChatDto(chat, userId),
+      // Process chats in parallel
+      const chatDtos = await Promise.all(
+        chats.map(async (chat) => {
+          if (chat.type === ChatType.DIRECT) {
+            // Find the partner user for direct chats
+            const partner = chat.members.find((m) => m.userId !== userId);
+            if (!partner) {
+              throw new Error('Direct chat must have a partner');
+            }
+
+            // Get friendship status with the partner
+            const friendshipStatus =
+              await this.friendshipService.getFriendshipStatus(
+                userId,
+                partner.userId,
+              );
+
+            return this.transformToDirectChatDto(
+              chat,
+              userId,
+              friendshipStatus ?? undefined,
+            );
+          } else {
+            return this.transformToGroupChatDto(chat, userId);
+          }
+        }),
       );
+
+      return chatDtos;
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to retrieve user chats');
     }
@@ -180,38 +221,46 @@ export class ChatService {
     if (!fullChat) {
       ErrorResponse.notFound('Chat not found');
     }
-
     return fullChat;
   }
 
   private transformToDirectChatDto(
     chat: Chat,
     userId: string,
+    friendshipStatus?: FriendshipStatus,
   ): DirectChatResponseDto {
     const chatPartner = chat.members.find((m) => m.userId !== userId);
     const chatPartnerUser = chatPartner?.user;
-    const myMember = chat.members.find((m) => m.userId === userId); // Add this line to find the current user's member record
+    const myMember = chat.members.find((m) => m.userId === userId);
 
     if (!chatPartner || !chatPartnerUser) {
-      throw new Error('Direct chat must have a partner');
+      ErrorResponse.badRequest('Direct chat must have a partner');
     }
 
-    const chatPartnerDto: ChatPartnerDto = {
+    // Base fields that are always included
+    const chatPartnerDto: Partial<ChatPartnerDto> = {
       userId: chatPartnerUser.id,
       avatarUrl: chatPartnerUser.avatarUrl,
-      username: chatPartnerUser.username,
       nickname: chatPartner.nickname,
       firstName: chatPartnerUser.firstName,
       lastName: chatPartnerUser.lastName,
       bio: chatPartnerUser.bio,
-      email: chatPartnerUser.email,
-      phoneNumber: chatPartnerUser.phoneNumber,
-      birthday: chatPartnerUser.birthday,
+      friendshipStatus: friendshipStatus ?? undefined,
     };
+
+    // Only include sensitive fields if friendship is accepted
+    if (friendshipStatus === FriendshipStatus.ACCEPTED) {
+      Object.assign(chatPartnerDto, {
+        username: chatPartnerUser.username,
+        email: chatPartnerUser.email,
+        phoneNumber: chatPartnerUser.phoneNumber,
+        birthday: chatPartnerUser.birthday,
+      });
+    }
 
     const dto: DirectChatResponseDto = {
       id: chat.id,
-      myNickname: myMember?.nickname, // Add myNickname from the member record
+      myNickname: myMember?.nickname,
       type: ChatType.DIRECT,
       updatedAt: chat.updatedAt,
       chatPartner: chatPartnerDto,

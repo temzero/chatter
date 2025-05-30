@@ -2,13 +2,14 @@ import { useEffect } from "react";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useCurrentUser } from "@/stores/authStore";
 import { Avatar } from "../ui/avatar/Avatar";
-import { useFriendRequestStore } from "@/stores/friendRequestStore";
+import { useFriendshipStore } from "@/stores/friendshipStore";
 import ThemeSwitcher from "../ui/ThemeSwitcher";
 
 const SidebarMore: React.FC = () => {
   const currentUser = useCurrentUser();
   const { setSidebar, isCompact, toggleCompact } = useSidebarStore();
-  const {receivedRequests} = useFriendRequestStore();
+  const { receivedRequests, sentRequests } = useFriendshipStore();
+  const requestsCount = receivedRequests.length + sentRequests.length;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -51,8 +52,8 @@ const SidebarMore: React.FC = () => {
     },
     {
       icon: "person_add",
-      text: `Friend requests (${receivedRequests.length})`,
-      onClick: () => setSidebar('friendRequests'),
+      text: `Friend requests ${requestsCount > 0 ? requestsCount : ""}`,
+      onClick: () => setSidebar("friendRequests"),
     },
     { type: "divider" }, // Another divider
     {

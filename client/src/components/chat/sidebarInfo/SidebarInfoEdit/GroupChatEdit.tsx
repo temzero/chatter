@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect } from "react";
 import { useChatStore } from "@/stores/chatStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
-import AvatarEdit from "@/components/ui/avatar/AvatarEdit";
 import { GroupChatResponse } from "@/types/chat";
+import AvatarEdit from "@/components/ui/avatar/AvatarEdit";
 
 const GroupChatEdit = () => {
   const activeChat = useChatStore(
@@ -12,6 +12,7 @@ const GroupChatEdit = () => {
   const deleteChat = useChatStore((state) => state.deleteChat);
   const leaveGroupChat = useChatStore((state) => state.leaveGroupChat);
   const updateGroupChat = useChatStore((state) => state.updateGroupChat);
+
   const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
 
   const initialFormData = useMemo(

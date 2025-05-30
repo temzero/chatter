@@ -4,6 +4,8 @@ import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { DirectChatResponse } from "@/types/chat";
 import { useAuthStore } from "@/stores/authStore";
+import { useFriendshipStore } from "@/stores/friendshipStore";
+import { FriendshipStatus } from "@/types/friendship";
 
 const DirectChatEdit = () => {
   const currentUser = useAuthStore((s) => s.currentUser);
@@ -16,6 +18,11 @@ const DirectChatEdit = () => {
     (state) => state.updateMemberNickname
   );
   const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
+  const deleteFriendshipByUserId = useFriendshipStore(
+    (state) => state.deleteFriendshipByUserId
+  );
+
+  console.log("activeChat: ", activeChat);
 
   const initialFormData = useMemo(
     () => ({
@@ -73,7 +80,7 @@ const DirectChatEdit = () => {
         );
       }
 
-      setSidebarInfo("default"); // Go back to sidebar after successful update
+      setSidebarInfo("default");
     } catch (error) {
       console.error("Failed to update nickname:", error);
     }
@@ -152,14 +159,22 @@ const DirectChatEdit = () => {
           </div>
         </form>
 
-        <div className="custom-border-t absolute bottom-0 w-full">
-          <button className="flex gap-2 justify-center items-center p-2 text-yellow-500 w-full font-medium">
-            <span className="material-symbols-outlined">person_cancel</span>
-            Unfriend
-          </button>
+        <div className="custom-border-t absolute bottom-0 w-full flex">
+          {activeChat.chatPartner.friendshipStatus ===
+            FriendshipStatus.ACCEPTED && (
+            <button
+              className="flex gap-2 justify-center items-center p-2 text-yellow-500 w-full font-medium rounded-none custom-border-r"
+              onClick={() =>
+                deleteFriendshipByUserId(activeChat.chatPartner.userId)
+              }
+            >
+              <span className="material-symbols-outlined">person_cancel</span>
+              Unfriend
+            </button>
+          )}
 
           <button
-            className="flex justify-center items-center p-2 text-red-500 w-full font-medium custom-border-t"
+            className="flex justify-center items-center p-2 text-red-500 w-full font-medium"
             onClick={() => deleteChat(activeChat.id, activeChat.type)}
           >
             <i className="material-symbols-outlined">delete</i>

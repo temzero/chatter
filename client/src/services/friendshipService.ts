@@ -1,5 +1,5 @@
 import API from "@/services/api/api";
-import { FriendRequestResDto, FriendshipResDto } from "@/types/friendship";
+import { FriendRequestResDto, FriendshipResDto, SentRequestResDto } from "@/types/friendship";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
 
 export const friendshipService = {
@@ -7,11 +7,11 @@ export const friendshipService = {
    * Send a friend request to a receiver by ID
    * @param receiverId - User ID to send request to
    */
-  async sendRequest(receiverId: string, requestMessage: string): Promise<string> {
+  async sendRequest(receiverId: string, requestMessage: string | undefined): Promise<SentRequestResDto> {
     const { data } = await API.post(`/friendships/requests/${receiverId}`, {
       requestMessage
     });
-    return data.payload.status;
+    return data.payload;
   },
 
   /**
@@ -42,7 +42,6 @@ export const friendshipService = {
    */
   async getPendingRequests(): Promise<FriendRequestResDto> {
     const { data } = await API.get("/friendships/requests/pending");
-    console.log('request: ', data.payload)
     return data.payload;
   },
 
@@ -54,6 +53,26 @@ export const friendshipService = {
     otherUserId: string
   ): Promise<{ status: FriendshipStatus | null }> {
     const { data } = await API.get(`/friendships/status/${otherUserId}`);
+    return data.payload;
+  },
+
+  /**
+   * delete to a friend request by friendship ID
+   * @param friendshipId - Friend request ID
+   */
+  async deleteRequest(
+    friendshipId: string
+  ): Promise<FriendshipResDto> {
+    const { data } = await API.delete(`/friendships/${friendshipId}`);
+    console.log('deleted: ', data)
+    return data.payload;
+  },
+
+  async deleteByUserId(
+    userId: string
+  ): Promise<FriendshipResDto> {
+    const { data } = await API.delete(`/friendships/by-userid/${userId}`);
+    console.log('deleted: ', data)
     return data.payload;
   },
 };

@@ -24,7 +24,7 @@ export class DirectChatResponseDto extends BaseChatResponseDto {
   @Expose() type: ChatType.DIRECT;
   @Expose()
   @Type(() => ChatPartnerDto)
-  chatPartner: ChatPartnerDto; // Only critical fields (id, username, avatar)
+  chatPartner: Partial<ChatPartnerDto>; // Only critical fields (id, username, avatar)
 }
 
 // Group/Channel Chat (only group-specific fields)

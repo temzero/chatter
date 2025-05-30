@@ -45,16 +45,7 @@ export class ChatController {
     try {
       const chats = await this.chatService.getChatsByUserId(userId);
 
-      const transformedChats = chats.map((chat) => {
-        return chat.type === ChatType.DIRECT
-          ? plainToInstance(DirectChatResponseDto, chat)
-          : plainToInstance(GroupChatResponseDto, chat);
-      });
-
-      return new SuccessResponse(
-        transformedChats,
-        'User chats retrieved successfully',
-      );
+      return new SuccessResponse(chats, 'User chats retrieved successfully');
     } catch (error: unknown) {
       ErrorResponse.throw(error, 'Failed to retrieve user chats');
     }
@@ -86,7 +77,7 @@ export class ChatController {
   }
 
   @Post('direct')
-  async createOrGetDirectChat(
+  async getOrCreateDirectChat(
     @Body() createDirectChatDto: CreateDirectChatDto,
     @CurrentUser('id') userId: string,
   ): Promise<GetOrCreateResponse<DirectChatResponseDto>> {

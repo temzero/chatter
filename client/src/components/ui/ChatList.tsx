@@ -3,7 +3,6 @@ import { useChatStore } from "@/stores/chatStore";
 import { useMessageStore } from "@/stores/messageStore";
 import type { ChatResponse } from "@/types/chat";
 import { ChatAvatar } from "./avatar/ChatAvatar";
-// import { formatTime } from "@/utils/formatTime";
 import getChatName from "../../utils/getChatName";
 import { getTimeAgo } from "@/utils/getTimeAgo";
 

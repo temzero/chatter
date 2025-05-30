@@ -2,22 +2,20 @@ import React, { useState } from "react";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { Avatar } from "../ui/avatar/Avatar";
 import { getTimeAgo } from "../../utils/getTimeAgo";
-import { useFriendRequestStore } from "@/stores/friendRequestStore";
+import { useFriendshipStore } from "@/stores/friendshipStore";
 import { FriendshipStatus } from "@/types/friendship";
 import { SlidingContainer } from "../ui/SlidingContainer";
+import { useChatStore } from "@/stores/chatStore";
 
 type RequestTab = "received" | "sent";
 
 const SidebarFriendRequests: React.FC = () => {
   const { setSidebar } = useSidebarStore();
-  const {
-    receivedRequests,
-    sentRequests,
-    respondToRequest,
-    removeReceivedRequest,
-    // removeSentRequest,
-    cancelRequest,
-  } = useFriendRequestStore();
+  const createOrGetDirectChat = useChatStore(
+    (state) => state.createOrGetDirectChat
+  );
+  const { receivedRequests, sentRequests, respondToRequest, cancelRequest } =
+    useFriendshipStore();
   const [activeTab, setActiveTab] = useState<RequestTab>("received");
   const [direction, setDirection] = useState<number>(1);
 
@@ -25,28 +23,6 @@ const SidebarFriendRequests: React.FC = () => {
     if (tab === activeTab) return;
     setDirection(tab === "received" ? -1 : 1);
     setActiveTab(tab);
-  };
-
-  const handleRespondToRequest = async (
-    friendshipId: string,
-    status: FriendshipStatus
-  ) => {
-    try {
-      await respondToRequest(friendshipId, status);
-      removeReceivedRequest(friendshipId);
-    } catch (error) {
-      console.error("Failed to respond to friend request:", error);
-    }
-  };
-
-  const handleCancelRequest = async (friendshipId: string) => {
-    try {
-      await cancelRequest(friendshipId);
-      // Remove the request from the local state if successful
-      // (assuming your store handles this)
-    } catch (error) {
-      console.error("Failed to cancel friend request:", error);
-    }
   };
 
   return (
@@ -76,23 +52,19 @@ const SidebarFriendRequests: React.FC = () => {
       <div className="flex custom-border-b">
         <button
           className={`flex-1 py-3 font-medium ${
-            activeTab === "received"
-              ? "text-green-400"
-              : "opacity-60"
+            activeTab === "received" ? "text-green-400" : "opacity-60"
           }`}
           onClick={() => handleTabChange("received")}
         >
-          Requests ({receivedRequests.length})
+          Requests {receivedRequests.length > 0 && receivedRequests.length}
         </button>
         <button
           className={`flex-1 py-3 font-medium ${
-            activeTab === "sent"
-              ? "text-green-400"
-              : "opacity-60"
+            activeTab === "sent" ? "text-green-400" : "opacity-60"
           }`}
           onClick={() => handleTabChange("sent")}
         >
-          Sent ({sentRequests.length})
+          Sent {sentRequests.length > 0 && sentRequests.length}
         </button>
       </div>
 
@@ -108,6 +80,7 @@ const SidebarFriendRequests: React.FC = () => {
                   <div
                     key={request.id}
                     className="flex p-3 gap-4 w-full custom-border-b cursor-pointer"
+                    onClick={() => createOrGetDirectChat(request.senderId)}
                   >
                     <Avatar
                       avatarUrl={request.senderAvatarUrl}
@@ -137,24 +110,28 @@ const SidebarFriendRequests: React.FC = () => {
 
                       <div className="flex gap-2 mt-2">
                         <button
-                          className="bg-[var(--primary-green)] text-white px-3 py-1 rounded text-sm"
-                          onClick={() =>
-                            handleRespondToRequest(
+                          className="bg-[var(--primary-green)] px-3 py-1 rounded text-sm"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            respondToRequest(
                               request.id,
                               FriendshipStatus.ACCEPTED
-                            )
-                          }
+                            );
+                          }}
                         >
                           Accept
                         </button>
                         <button
-                          className="custom-border hover:bg-red-500 text-white px-3 py-1 rounded text-sm"
-                          onClick={() =>
-                            handleRespondToRequest(
+                          className="custom-border hover:bg-red-500 px-3 py-1 rounded text-sm"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            respondToRequest(
                               request.id,
                               FriendshipStatus.DECLINED
-                            )
-                          }
+                            );
+                          }}
                         >
                           Decline
                         </button>
@@ -188,7 +165,10 @@ const SidebarFriendRequests: React.FC = () => {
                     className="mt-1"
                   />
 
-                  <div className="flex flex-col flex-1 gap-1">
+                  <div
+                    className="flex flex-col flex-1 gap-1"
+                    onClick={() => createOrGetDirectChat(request.receiverId)}
+                  >
                     <div className="flex justify-between items-center">
                       <h1 className="font-semibold">{request.receiverName}</h1>
                       <p className="text-xs opacity-60">
@@ -202,8 +182,12 @@ const SidebarFriendRequests: React.FC = () => {
 
                     <div className="flex gap-2 mt-2">
                       <button
-                        className="custom-border hover:bg-red-500 text-white px-3 py-1 rounded text-sm"
-                        onClick={() => handleCancelRequest(request.id)}
+                        className="custom-border hover:bg-red-500 px-3 py-1 rounded text-sm"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          cancelRequest(request.id);
+                        }}
                       >
                         Cancel Request
                       </button>

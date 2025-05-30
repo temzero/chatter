@@ -24,10 +24,10 @@ export class FriendshipService {
     senderId: string,
     receiverId: string,
     requestMessage?: string,
-  ): Promise<Friendship> {
+  ): Promise<SentRequestResDto> {
     try {
-      // Check if user exists
-      await this.userService.getUserById(receiverId);
+      // Check if user exists and get receiver details
+      const receiver = await this.userService.getUserById(receiverId);
 
       // Check if relationship already exists
       const exists = await this.friendshipRepo.findOne({
@@ -41,12 +41,29 @@ export class FriendshipService {
         ErrorResponse.conflict('Friendship relationship already exists');
       }
 
-      return await this.friendshipRepo.save({
+      // Create the friendship request
+      const friendship = await this.friendshipRepo.save({
         senderId,
         receiverId,
         status: FriendshipStatus.PENDING,
         requestMessage: requestMessage || null,
       });
+
+      // Get mutual friends count
+      const mutualFriends = await this.getMutualFriendsCount(
+        senderId,
+        receiverId,
+      );
+      // Return the response in the specified format
+      return {
+        id: friendship.id,
+        receiverId: receiver.id,
+        receiverName: receiver.firstName + ' ' + receiver.lastName,
+        receiverAvatarUrl: receiver.avatarUrl,
+        mutualFriends,
+        requestMessage: friendship.requestMessage,
+        updatedAt: friendship.updatedAt,
+      };
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to send friend request');
     }
@@ -221,6 +238,67 @@ export class FriendshipService {
       return friendship?.status || null;
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to retrieve friendship status');
+    }
+  }
+
+  async deleteFriendship(
+    id: string,
+    currentUserId: string,
+  ): Promise<Friendship> {
+    try {
+      // First, find the friendship by ID only
+      const friendship = await this.friendshipRepo.findOneBy({ id });
+
+      if (!friendship) {
+        ErrorResponse.notFound('Friendship not found');
+      }
+
+      // Then verify the current user is either sender or receiver
+      if (
+        friendship.senderId !== currentUserId &&
+        friendship.receiverId !== currentUserId
+      ) {
+        ErrorResponse.unauthorized(
+          'You are not authorized to delete this friendship',
+        );
+      }
+
+      await this.friendshipRepo.remove(friendship);
+      return friendship;
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to delete friendship');
+    }
+  }
+
+  async deleteFriendshipByUserId(
+    userId: string,
+    currentUserId: string,
+  ): Promise<Friendship> {
+    try {
+      // Verify the user exists
+      await this.userService.getUserById(userId);
+
+      // Find all friendship records between these two users
+      const friendships = await this.friendshipRepo.find({
+        where: [
+          { senderId: currentUserId, receiverId: userId },
+          { senderId: userId, receiverId: currentUserId },
+        ],
+      });
+
+      if (!friendships || friendships.length === 0) {
+        ErrorResponse.notFound('Friendship not found');
+      }
+
+      // We'll return the first deleted friendship (for consistency with deleteFriendship)
+      const friendshipToReturn = friendships[0];
+
+      // Delete all found friendships
+      await this.friendshipRepo.remove(friendships);
+
+      return friendshipToReturn;
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to delete friendship');
     }
   }
 }

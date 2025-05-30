@@ -1,5 +1,74 @@
+// import { ROUTES } from "@/constants/routes";
+// import { useEffect } from "react";
+// import Modal from "@/components/modal/Modal";
+// import Sidebar from "@/components/sidebar/Sidebar";
+// import Chat from "@/components/chat/Chat";
+// import BackgroundContent from "@/components/ui/BackgroundContent";
+// import { Navigate, useParams } from "react-router-dom";
+// import { useAuthStore } from "@/stores/authStore";
+// import { useChatStore } from "@/stores/chatStore";
+// import { useIsAuthenticated } from "@/stores/authStore";
+// import { useSidebarStore } from "@/stores/sidebarStore";
+// import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
+// import { useFriendshipStore } from "@/stores/friendshipStore";
+
+// export const ChatContent: React.FC = () => {
+//   const { id: chatId } = useParams();
+//   const { initializeKeyListeners: initializeSidebar } = useSidebarStore();
+//   const { initializeKeyListeners: initializeSidebarInfo } =
+//     useSidebarInfoStore();
+//   const { initialize: initializeAuth } = useAuthStore();
+//   const {
+//     initialize: initializeChats,
+//     activeChat,
+//     setActiveChatById,
+//   } = useChatStore();
+//   const { fetchPendingRequests } = useFriendshipStore();
+
+//   // Initialization effect
+//   useEffect(() => {
+//     initializeSidebar();
+//     initializeSidebarInfo();
+//     initializeAuth();
+//     initializeChats();
+//     fetchPendingRequests();
+//   }, [
+//     initializeSidebar,
+//     initializeSidebarInfo,
+//     initializeAuth,
+//     initializeChats,
+//     fetchPendingRequests,
+//   ]);
+
+//   // Chat ID effect
+//   useEffect(() => {
+//     setActiveChatById(chatId || null);
+//   }, [chatId, setActiveChatById]);
+
+//   return activeChat ? <Chat /> : null;
+// };
+
+// const PrivateLayout: React.FC = () => {
+//   const isAuthenticated = useIsAuthenticated();
+
+//   if (!isAuthenticated) {
+//     return <Navigate to={ROUTES.PUBLIC.LOGIN} replace />;
+//   }
+
+//   return (
+//     <div className="flex h-screen overflow-hidden">
+//       <BackgroundContent />
+//       <Sidebar />
+//       <ChatContent />
+//       <Modal />
+//     </div>
+//   );
+// };
+
+// export default PrivateLayout;
+
 import { ROUTES } from "@/constants/routes";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Modal from "@/components/modal/Modal";
 import Sidebar from "@/components/sidebar/Sidebar";
 import Chat from "@/components/chat/Chat";
@@ -10,7 +79,7 @@ import { useChatStore } from "@/stores/chatStore";
 import { useIsAuthenticated } from "@/stores/authStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
-import { useFriendRequestStore } from "@/stores/friendRequestStore";
+import { useFriendshipStore } from "@/stores/friendshipStore";
 
 export const ChatContent: React.FC = () => {
   const { id: chatId } = useParams();
@@ -23,29 +92,63 @@ export const ChatContent: React.FC = () => {
     activeChat,
     setActiveChatById,
   } = useChatStore();
-  const { fetchPendingRequests } = useFriendRequestStore();
+  const { fetchPendingRequests } = useFriendshipStore();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Initialization effect
+  // Initialization effect with proper sequencing
   useEffect(() => {
-    initializeSidebar();
-    initializeSidebarInfo();
-    initializeAuth();
-    initializeChats();
-    fetchPendingRequests();
-  }, [
-    initializeSidebar,
-    initializeSidebarInfo,
-    initializeAuth,
-    initializeChats,
-    fetchPendingRequests,
-  ]);
+    const initialize = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
 
-  // Chat ID effect
-  useEffect(() => {
-    setActiveChatById(chatId || null);
-  }, [chatId, setActiveChatById]);
+        // 1. Initialize auth first (everything depends on this)
+        await initializeAuth();
 
-  return activeChat ? <Chat /> : null;
+        // 2. Initialize chats in parallel with friendships (they both need auth but don't depend on each other)
+        await Promise.all([initializeChats(), fetchPendingRequests()]);
+
+        // 3. Set active chat after chats are loaded
+        setActiveChatById(chatId || null);
+
+        // 4. Initialize sidebar UI components (can happen last)
+        initializeSidebar();
+        initializeSidebarInfo();
+      } catch (err) {
+        console.error("Initialization error:", err);
+        setError("Failed to initialize application data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initialize();
+  }, [chatId, fetchPendingRequests, initializeAuth, initializeChats, initializeSidebar, initializeSidebarInfo, setActiveChatById]); // Only chatId as dependency since store methods are stable
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full w-full">
+        <h1>Loading...</h1>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full text-red-500">
+        {error}
+      </div>
+    );
+  }
+
+  return activeChat ? (
+    <Chat />
+  ) : (
+    <div className="flex items-center justify-center h-full text-gray-500">
+      Select a chat to start messaging
+    </div>
+  );
 };
 
 const PrivateLayout: React.FC = () => {

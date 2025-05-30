@@ -147,7 +147,6 @@ export const useChatStore = create<ChatStore>()(
         getGroupMembers: async (groupId) => {
           try {
             const members = await chatMemberService.getChatMembers(groupId);
-            console.log("Fetched members for group:", groupId, members);
             set((state) => ({
               allGroupMembers: { ...state.allGroupMembers, [groupId]: members },
             }));

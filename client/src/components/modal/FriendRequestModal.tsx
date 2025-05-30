@@ -1,7 +1,9 @@
+// FriendRequestModal.tsx
 import React, { useRef, useState } from "react";
 import { useModalStore } from "@/stores/modalStore";
 import { Avatar } from "../ui/avatar/Avatar";
-import { friendshipService } from "@/services/friendshipService";
+import { useFriendshipStore } from "@/stores/friendshipStore";
+import { FriendshipStatus } from "@/types/friendship";
 
 interface FriendRequestModalProps {
   receiver: {
@@ -18,6 +20,7 @@ const FriendRequestModal: React.FC<FriendRequestModalProps> = ({
   receiver,
   onSuccess,
 }) => {
+  const { sendFriendRequest } = useFriendshipStore();
   const closeModal = useModalStore((s) => s.closeModal);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [charCount, setCharCount] = useState(0);
@@ -27,16 +30,10 @@ const FriendRequestModal: React.FC<FriendRequestModalProps> = ({
   const handleFriendRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const status = await friendshipService.sendRequest(
-        receiver.id,
-        requestMessage
-      );
-      console.log("FriendshipResponseDto", status);
-
+      await sendFriendRequest(receiver.id, requestMessage);
       if (onSuccess) {
-        onSuccess(status);
+        onSuccess(FriendshipStatus.PENDING);
       }
-
       closeModal();
     } catch (err: unknown) {
       console.error("Failed to send friend request:", err);
@@ -50,7 +47,8 @@ const FriendRequestModal: React.FC<FriendRequestModalProps> = ({
 
   return (
     <div className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded p-4 max-w-xl w-[400px] custom-border">
-      <div className="flex items-center gap-4 mb-4">
+      <h1 className="font-bold text-center text-xl">Send Friend Request to</h1>
+      <div className="flex items-center gap-4 custom-border p-2 my-4 rounded-lg">
         <Avatar
           avatarUrl={receiver.avatarUrl}
           firstName={receiver.firstName}
@@ -67,7 +65,7 @@ const FriendRequestModal: React.FC<FriendRequestModalProps> = ({
       </div>
 
       <form
-        className="w-full custom-border-t pt-4"
+        className="w-full"
         onSubmit={handleFriendRequest}
       >
         <textarea

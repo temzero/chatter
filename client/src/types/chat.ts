@@ -1,6 +1,7 @@
 import { AttachmentType } from "./enums/attachmentType";
 import { ChatMemberRole } from "./ChatMemberRole";
 import { ChatType } from "./enums/ChatType";
+import { FriendshipStatus } from "./friendship";
 
 export type ChatResponse = DirectChatResponse | GroupChatResponse;
 
@@ -41,6 +42,7 @@ export interface ChatPartnerResponse {
   phoneNumber: string | null;
   birthday: string | null;
   avatarUrl?: string | null;
+  friendshipStatus?: FriendshipStatus | null;
 }
 
 // Last Message Response (similar to LastMessageResponseDto)

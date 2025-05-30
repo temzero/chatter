@@ -3,17 +3,15 @@ import { userService } from "@/services/userService";
 import ContactInfoItem from "./contactInfoItem";
 import { useAuthStore } from "@/stores/authStore";
 import { AnimatePresence, motion } from "framer-motion";
-import { useModalStore } from "@/stores/modalStore";
 import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "./avatar/Avatar";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
 import type { otherUser } from "@/types/user";
+import FriendshipBtn from "./FriendshipBtn";
 
 const CreateNewChat: React.FC = () => {
   const currentUser = useAuthStore((state) => state.currentUser);
-  const setActiveChat = useChatStore((s) => s.setActiveChat);
   const createOrGetDirectChat = useChatStore((s) => s.createOrGetDirectChat);
-  const { openModal } = useModalStore();
 
   const [query, setQuery] = useState("");
   const [user, setUser] = useState<otherUser | null>(null);
@@ -37,44 +35,13 @@ const CreateNewChat: React.FC = () => {
     }
   }
 
-  const updateFriendshipStatus = (newStatus: FriendshipStatus) => {
-    if (user) {
-      setUser({
-        ...user,
-        friendshipStatus: newStatus,
-      });
-    }
-  };
-
-  function handleOpenFriendRequest() {
+  const updateFriendshipStatus = (newStatus: FriendshipStatus | null) => {
     if (!user) return;
-
-    openModal("friend-request", {
-      receiver: {
-        id: user.id,
-        username: user.username,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        avatarUrl: user.avatarUrl,
-      },
-      onSuccess: updateFriendshipStatus,
+    setUser({
+      ...user,
+      friendshipStatus: newStatus,
     });
-  }
-
-  async function handleStartChat() {
-    if (!user) return;
-
-    try {
-      setLoading(true);
-      const newChat = await createOrGetDirectChat(user.id);
-      setActiveChat(newChat);
-    } catch (err) {
-      console.error("Failed to start chat:", err);
-      setError("Failed to start chat. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }
+  };
 
   return (
     <div className="flex flex-col gap-3 p-2 h-full relative overflow-hidden">
@@ -159,28 +126,19 @@ const CreateNewChat: React.FC = () => {
 
             {user.id === currentUser?.id || (
               <div className="w-full flex border-t-2 border-[var(--border-color)]">
-                {user.friendshipStatus !== FriendshipStatus.ACCEPTED && (
-                  <button
-                    className={`w-full py-1 flex gap-1 custom-border-r justify-center hover:bg-[var(--primary-green)] rounded-none`}
-                    onClick={handleOpenFriendRequest}
-                  >
-                    {user.friendshipStatus === FriendshipStatus.PENDING ? (
-                      <span className="text-sm opacity-60">Request Sent</span>
-                    ) : (
-                      <>
-                        <span className="material-symbols-outlined">
-                          person_add
-                        </span>
-                      </>
-                    )}
-                  </button>
-                )}
+                <FriendshipBtn
+                  userId={user.id}
+                  username={user.username}
+                  firstName={user.firstName}
+                  lastName={user.lastName}
+                  avatarUrl={user.avatarUrl}
+                  friendshipStatus={user.friendshipStatus}
+                  onStatusChange={updateFriendshipStatus}
+                />
+
                 <button
                   className="w-full py-1 flex justify-center hover:bg-[var(--primary-green)] rounded-none"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleStartChat();
-                  }}
+                  onClick={() => createOrGetDirectChat(user.id)}
                 >
                   <span className="material-symbols-outlined">chat_bubble</span>
                 </button>

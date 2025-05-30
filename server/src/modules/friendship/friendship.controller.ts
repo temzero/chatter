@@ -6,6 +6,7 @@ import {
   Param,
   Body,
   UseGuards,
+  Delete,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { FriendshipService } from './friendship.service';
@@ -15,7 +16,11 @@ import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { FriendshipResponseDto } from './dto/responses/friendship-response.dto';
 import { FriendshipStatus } from './constants/friendship-status.constants';
 import { RespondToRequestDto } from './dto/requests/response-to-request.dto';
-import { FriendRequestResDto } from './dto/responses/friend-request-response.dto';
+import {
+  FriendRequestResDto,
+  SentRequestResDto,
+} from './dto/responses/friend-request-response.dto';
+import { Friendship } from './entities/friendship.entity';
 
 @Controller('friendships')
 @UseGuards(JwtAuthGuard)
@@ -27,17 +32,14 @@ export class FriendshipController {
     @CurrentUser('id') senderId: string,
     @Param('receiverId') receiverId: string,
     @Body() body: { requestMessage?: string },
-  ): Promise<SuccessResponse<FriendshipResponseDto>> {
-    const friendship = await this.friendshipService.sendRequest(
+  ): Promise<SuccessResponse<SentRequestResDto>> {
+    const sentRequest = await this.friendshipService.sendRequest(
       senderId,
       receiverId,
       body.requestMessage,
     );
 
-    return new SuccessResponse(
-      plainToInstance(FriendshipResponseDto, friendship),
-      'Friend request sent successfully',
-    );
+    return new SuccessResponse(sentRequest, 'Friend request sent successfully');
   }
 
   @Patch('requests/:friendshipId')
@@ -95,6 +97,39 @@ export class FriendshipController {
     return new SuccessResponse(
       { status },
       'Friendship status retrieved successfully',
+    );
+  }
+
+  @Delete(':id')
+  async deleteFriendRequest(
+    @CurrentUser('id') currentUserId: string,
+    @Param('id') id: string,
+  ): Promise<SuccessResponse<Friendship>> {
+    const deletedFriendship = await this.friendshipService.deleteFriendship(
+      id,
+      currentUserId,
+    );
+
+    return new SuccessResponse(
+      deletedFriendship,
+      'Friendship deleted successfully',
+    );
+  }
+
+  @Delete('by-userid/:userId')
+  async deleteByUserId(
+    @CurrentUser('id') currentUserId: string,
+    @Param('userId') userId: string,
+  ): Promise<SuccessResponse<Friendship>> {
+    const deletedFriendship =
+      await this.friendshipService.deleteFriendshipByUserId(
+        userId,
+        currentUserId,
+      );
+
+    return new SuccessResponse(
+      deletedFriendship,
+      'Friendship deleted successfully',
     );
   }
 }
