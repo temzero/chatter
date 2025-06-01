@@ -29,24 +29,56 @@ export class FriendshipService {
       // Check if user exists and get receiver details
       const receiver = await this.userService.getUserById(receiverId);
 
-      // Check if relationship already exists
-      const exists = await this.friendshipRepo.findOne({
+      // Check all existing friendships between these users
+      const existingFriendships = await this.friendshipRepo.find({
         where: [
           { senderId, receiverId },
           { senderId: receiverId, receiverId: senderId },
         ],
       });
 
-      if (exists) {
-        ErrorResponse.conflict('Friendship relationship already exists');
+      // Check if we're blocked by the other user
+      const isBlockedByOtherUser = existingFriendships.some((friendship) => {
+        // If I'm the sender and receiver has declined/blocked
+        if (
+          friendship.senderId === senderId &&
+          [FriendshipStatus.DECLINED, FriendshipStatus.BLOCKED].includes(
+            friendship.receiverStatus,
+          )
+        ) {
+          return true;
+        }
+        // If I'm the receiver and sender has declined/blocked
+        if (
+          friendship.receiverId === senderId &&
+          [FriendshipStatus.DECLINED, FriendshipStatus.BLOCKED].includes(
+            friendship.senderStatus,
+          )
+        ) {
+          return true;
+        }
+        return false;
+      });
+
+      if (isBlockedByOtherUser) {
+        ErrorResponse.conflict(
+          'Cannot send request - user has blocked or declined your previous request',
+        );
       }
 
-      // Create the friendship request
+      // Delete ALL existing friendship records between these users
+      // (We'll create a fresh one below)
+      if (existingFriendships.length > 0) {
+        await this.friendshipRepo.remove(existingFriendships);
+      }
+
+      // Create new friendship request
       const friendship = await this.friendshipRepo.save({
         senderId,
         receiverId,
-        status: FriendshipStatus.PENDING,
         requestMessage: requestMessage || null,
+        senderStatus: FriendshipStatus.ACCEPTED, // Sender always accepts their own request
+        receiverStatus: FriendshipStatus.PENDING, // Receiver needs to respond
       });
 
       // Get mutual friends count
@@ -54,7 +86,8 @@ export class FriendshipService {
         senderId,
         receiverId,
       );
-      // Return the response in the specified format
+
+      // Return the response
       return {
         id: friendship.id,
         receiverId: receiver.id,
@@ -79,7 +112,7 @@ export class FriendshipService {
         where: {
           id: friendshipId,
           receiverId: userId,
-          status: FriendshipStatus.PENDING,
+          receiverStatus: FriendshipStatus.PENDING,
         },
       });
 
@@ -87,7 +120,7 @@ export class FriendshipService {
         ErrorResponse.notFound('Friend request not found');
       }
 
-      request.status = status;
+      request.receiverStatus = status;
       request.updatedAt = new Date();
 
       // Clear the request message if the request is accepted
@@ -105,8 +138,16 @@ export class FriendshipService {
     try {
       return await this.friendshipRepo.find({
         where: [
-          { senderId: userId, status: FriendshipStatus.ACCEPTED },
-          { receiverId: userId, status: FriendshipStatus.ACCEPTED },
+          {
+            senderId: userId,
+            senderStatus: FriendshipStatus.ACCEPTED,
+            receiverStatus: FriendshipStatus.ACCEPTED,
+          },
+          {
+            receiverId: userId,
+            senderStatus: FriendshipStatus.ACCEPTED,
+            receiverStatus: FriendshipStatus.ACCEPTED,
+          },
         ],
         relations: ['sender', 'receiver'],
       });
@@ -117,20 +158,21 @@ export class FriendshipService {
 
   async getPendingRequests(userId: string): Promise<FriendRequestResDto> {
     try {
-      // Get received requests (where user is the receiver)
+      // Get received requests (where user is the receiver and status is pending)
       const receivedRequests = await this.friendshipRepo.find({
         where: {
           receiverId: userId,
-          status: FriendshipStatus.PENDING,
+          receiverStatus: FriendshipStatus.PENDING,
         },
         relations: ['sender'],
       });
 
-      // Get sent requests (where user is the sender)
+      // Get sent requests (where user is the sender and receiver hasn't responded yet)
       const sentRequests = await this.friendshipRepo.find({
         where: {
           senderId: userId,
-          status: FriendshipStatus.PENDING,
+          receiverStatus: FriendshipStatus.PENDING,
+          senderStatus: FriendshipStatus.ACCEPTED,
         },
         relations: ['receiver'],
       });
@@ -190,13 +232,19 @@ export class FriendshipService {
     userAId: string,
     userBId: string,
   ): Promise<number> {
-    const acceptedStatus = FriendshipStatus.ACCEPTED;
-
-    // Get userA's friends
+    // Get userA's accepted friends
     const userAFriendships = await this.friendshipRepo.find({
       where: [
-        { senderId: userAId, status: acceptedStatus },
-        { receiverId: userAId, status: acceptedStatus },
+        {
+          senderId: userAId,
+          senderStatus: FriendshipStatus.ACCEPTED,
+          receiverStatus: FriendshipStatus.ACCEPTED,
+        },
+        {
+          receiverId: userAId,
+          senderStatus: FriendshipStatus.ACCEPTED,
+          receiverStatus: FriendshipStatus.ACCEPTED,
+        },
       ],
     });
 
@@ -204,11 +252,19 @@ export class FriendshipService {
       f.senderId === userAId ? f.receiverId : f.senderId,
     );
 
-    // Get userB's friends
+    // Get userB's accepted friends
     const userBFriendships = await this.friendshipRepo.find({
       where: [
-        { senderId: userBId, status: acceptedStatus },
-        { receiverId: userBId, status: acceptedStatus },
+        {
+          senderId: userBId,
+          senderStatus: FriendshipStatus.ACCEPTED,
+          receiverStatus: FriendshipStatus.ACCEPTED,
+        },
+        {
+          receiverId: userBId,
+          senderStatus: FriendshipStatus.ACCEPTED,
+          receiverStatus: FriendshipStatus.ACCEPTED,
+        },
       ],
     });
 
@@ -235,7 +291,23 @@ export class FriendshipService {
         ],
       });
 
-      return friendship?.status || null;
+      if (!friendship) {
+        return null;
+      }
+
+      // Determine overall status based on both statuses
+      if (
+        friendship.senderStatus === FriendshipStatus.ACCEPTED &&
+        friendship.receiverStatus === FriendshipStatus.ACCEPTED
+      ) {
+        return FriendshipStatus.ACCEPTED;
+      } else if (friendship.receiverStatus === FriendshipStatus.PENDING) {
+        return FriendshipStatus.PENDING;
+      } else if (friendship.receiverStatus === FriendshipStatus.DECLINED) {
+        return FriendshipStatus.DECLINED;
+      }
+
+      return null;
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to retrieve friendship status');
     }

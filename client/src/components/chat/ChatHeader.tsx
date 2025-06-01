@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import getChatName from "@/utils/getChatName";
+import { FriendshipStatus } from "@/types/friendship";
 
 const ChatHeader: React.FC = () => {
   const activeChat = useChatStore((state) => state.activeChat);
@@ -10,7 +11,7 @@ const ChatHeader: React.FC = () => {
     (state) => state.toggleSidebarInfo
   );
 
-  if (!activeChat) return null
+  if (!activeChat) return null;
 
   return (
     <header
@@ -32,27 +33,29 @@ const ChatHeader: React.FC = () => {
         >
           <ChatAvatar chat={activeChat} type="header" />
 
-          <h1 className="text-xl font-medium">
-            {getChatName(activeChat)}
-          </h1>
+          <h1 className="text-xl font-medium">{getChatName(activeChat)}</h1>
         </motion.div>
       </AnimatePresence>
 
       {activeChat && (
         <div className="flex gap-2">
-          <a className="flex items-center cursor-pointer rounded-full opacity-60 hover:opacity-100 p-1">
-            {activeChat.type === "direct" && (
-              <i className="material-symbols-outlined text-3xl">
-                phone_enabled
-              </i>
-            )}
+          <div className="flex items-center cursor-pointer rounded-full opacity-60 hover:opacity-100 p-1">
+            {activeChat.type === "direct" &&
+              activeChat.chatPartner?.friendshipStatus ===
+                FriendshipStatus.ACCEPTED && (
+                <i className="material-symbols-outlined text-3xl">
+                  phone_enabled
+                </i>
+              )}
+
             {activeChat.type === "group" && (
               <i className="material-symbols-outlined text-3xl">videocam</i>
             )}
+
             {activeChat.type === "channel" && (
               <i className="material-symbols-outlined text-3xl">connected_tv</i>
             )}
-          </a>
+          </div>
         </div>
       )}
     </header>

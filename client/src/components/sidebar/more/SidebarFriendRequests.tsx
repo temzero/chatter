@@ -1,16 +1,15 @@
 import React, { useState } from "react";
-import { useSidebarStore } from "@/stores/sidebarStore";
-import { Avatar } from "../ui/avatar/Avatar";
-import { getTimeAgo } from "../../utils/getTimeAgo";
+import { Avatar } from "../../ui/avatar/Avatar";
+import { getTimeAgo } from "../../../utils/getTimeAgo";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import { FriendshipStatus } from "@/types/friendship";
-import { SlidingContainer } from "../ui/SlidingContainer";
+import { SlidingContainer } from "../../ui/SlidingContainer";
 import { useChatStore } from "@/stores/chatStore";
+import SidebarLayout from "@/pages/SidebarLayout";
 
 type RequestTab = "received" | "sent";
 
 const SidebarFriendRequests: React.FC = () => {
-  const { setSidebar } = useSidebarStore();
   const createOrGetDirectChat = useChatStore(
     (state) => state.createOrGetDirectChat
   );
@@ -26,28 +25,7 @@ const SidebarFriendRequests: React.FC = () => {
   };
 
   return (
-    <aside
-      className={`w-[var(--sidebar-width)] h-full flex flex-col transition-all duration-300 ease-in-out`}
-    >
-      {/* Header */}
-      <header className="flex w-full justify-between items-center min-h-[var(--header-height)] custom-border-b">
-        <i
-          className="material-symbols-outlined nav-btn"
-          onClick={() => setSidebar("more")}
-        >
-          arrow_back
-        </i>
-
-        <h1 className="font-semibold text-lg">Friend Requests</h1>
-
-        <i
-          className="material-symbols-outlined nav-btn ml-auto"
-          onClick={() => setSidebar("default")}
-        >
-          close
-        </i>
-      </header>
-
+    <SidebarLayout title="Friend Requests">
       {/* Tabs */}
       <div className="flex custom-border-b">
         <button
@@ -204,7 +182,7 @@ const SidebarFriendRequests: React.FC = () => {
           )}
         </div>
       </SlidingContainer>
-    </aside>
+    </SidebarLayout>
   );
 };
 

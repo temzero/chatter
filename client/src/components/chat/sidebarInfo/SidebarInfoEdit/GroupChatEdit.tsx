@@ -3,6 +3,7 @@ import { useChatStore } from "@/stores/chatStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { GroupChatResponse } from "@/types/chat";
 import AvatarEdit from "@/components/ui/avatar/AvatarEdit";
+import { storageService } from "@/services/storageService";
 
 const GroupChatEdit = () => {
   const activeChat = useChatStore(
@@ -25,16 +26,20 @@ const GroupChatEdit = () => {
   );
 
   const [formData, setFormData] = useState(initialFormData);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   // Track changes between current formData and initialFormData
   useEffect(() => {
     const changed =
       formData.name !== initialFormData.name ||
       formData.avatarUrl !== initialFormData.avatarUrl ||
-      formData.description !== initialFormData.description;
+      formData.description !== initialFormData.description ||
+      avatarFile !== null;
     setHasChanges(changed);
-  }, [formData, initialFormData]);
+  }, [formData, initialFormData, avatarFile]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -45,21 +50,38 @@ const GroupChatEdit = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!activeChat?.id) {
-      console.error("No active chat ID found");
-      return;
-    }
+    if (!hasChanges || !activeChat?.id) return;
+
+    setIsSubmitting(true);
+    setError("");
 
     try {
-      // Call your update action — adjust args as per your store implementation
+      let newAvatarUrl = formData.avatarUrl;
+
+      // If avatar file changed, upload it first
+      if (avatarFile) {
+        const oldAvatarUrl = activeChat?.avatarUrl || "";
+
+        // Upload new avatar
+        newAvatarUrl = await storageService.uploadAvatar(avatarFile, oldAvatarUrl, 'group');
+
+        // Update form data with new avatar URL
+        setFormData((prev) => ({ ...prev, avatarUrl: newAvatarUrl }));
+      }
+
+      // Call your update action
       await updateGroupChat(activeChat.id, {
         name: formData.name,
-        avatarUrl: formData.avatarUrl,
+        avatarUrl: newAvatarUrl,
         description: formData.description,
       });
+
       setSidebarInfo("default"); // Close sidebar on success
     } catch (error) {
+      setError("Failed to update group chat");
       console.error("Failed to update group chat:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -72,11 +94,20 @@ const GroupChatEdit = () => {
         <div className="flex gap-1">
           {hasChanges && (
             <button
-              className="flex items-center justify-center rounded-full cursor-pointer hover:opacity-100 text-green-400 h-10 w-10 hover:bg-green-500 hover:text-white"
+              className={`flex items-center justify-center rounded-full cursor-pointer hover:opacity-100 text-green-400 h-10 w-10 hover:bg-green-500 hover:text-white ${
+                isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+              }`}
               onClick={handleSubmit}
+              disabled={isSubmitting}
               aria-label="Save changes"
             >
-              <i className="material-symbols-outlined text-3xl">check</i>
+              {isSubmitting ? (
+                <i className="material-symbols-outlined text-3xl animate-spin">
+                  progress_activity
+                </i>
+              ) : (
+                <i className="material-symbols-outlined text-3xl">check</i>
+              )}
             </button>
           )}
           <button
@@ -89,17 +120,25 @@ const GroupChatEdit = () => {
         </div>
       </header>
 
+      {error && (
+        <div className="text-red-500 text-center mt-2">
+          <p>{error}</p>
+        </div>
+      )}
+
       <div className="overflow-y-auto h-screen">
         <form
           onSubmit={handleSubmit}
           className="flex flex-col items-center p-4 gap-4 w-full"
+          encType="multipart/form-data"
         >
           <AvatarEdit
             avatarUrl={formData.avatarUrl}
             type={activeChat.type}
-            onAvatarChange={(newAvatar) =>
-              setFormData((prev) => ({ ...prev, avatarUrl: newAvatar }))
-            }
+            onAvatarChange={(newAvatar, file) => {
+              setFormData((prev) => ({ ...prev, avatarUrl: newAvatar }));
+              setAvatarFile(file || null);
+            }}
           />
 
           <div className="w-full space-y-4">

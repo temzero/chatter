@@ -6,8 +6,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "./avatar/Avatar";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
-import type { otherUser } from "@/types/user";
 import FriendshipBtn from "./FriendshipBtn";
+import type { otherUser } from "@/types/user";
 
 const CreateNewChat: React.FC = () => {
   const currentUser = useAuthStore((state) => state.currentUser);
@@ -88,7 +88,8 @@ const CreateNewChat: React.FC = () => {
                 avatarUrl={user.avatarUrl}
                 firstName={user.firstName}
                 lastName={user.lastName}
-                className="w-[120px] h-[120px]"
+                className="w-[120px] h-[120px] cursor-pointer hover:border-4 hover:border-[var(--primary-green)]"
+                onClick={() => createOrGetDirectChat(user.id)}
               />
 
               <h1 className="font-bold text-xl">
@@ -98,6 +99,18 @@ const CreateNewChat: React.FC = () => {
                 <h1 className="text-[var(--primary-green)] -mt-1">Friend</h1>
               )}
               <h1>{user.bio}</h1>
+
+              {/* {user.id !== currentUser?.id && (
+                <FriendshipBtn
+                  userId={user.id}
+                  username={user.username}
+                  firstName={user.firstName}
+                  lastName={user.lastName}
+                  avatarUrl={user.avatarUrl}
+                  friendshipStatus={user.friendshipStatus}
+                  onStatusChange={updateFriendshipStatus}
+                />
+              )} */}
 
               <div className="w-full flex flex-col font-light my-2 custom-border-t custom-border-b">
                 <ContactInfoItem
@@ -125,23 +138,28 @@ const CreateNewChat: React.FC = () => {
             </div>
 
             {user.id === currentUser?.id || (
-              <div className="w-full flex border-t-2 border-[var(--border-color)]">
-                <FriendshipBtn
-                  userId={user.id}
-                  username={user.username}
-                  firstName={user.firstName}
-                  lastName={user.lastName}
-                  avatarUrl={user.avatarUrl}
-                  friendshipStatus={user.friendshipStatus}
-                  onStatusChange={updateFriendshipStatus}
-                />
-
-                <button
-                  className="w-full py-1 flex justify-center hover:bg-[var(--primary-green)] rounded-none"
-                  onClick={() => createOrGetDirectChat(user.id)}
-                >
-                  <span className="material-symbols-outlined">chat_bubble</span>
-                </button>
+              <div className="w-full border-t-2 border-[var(--border-color)]">
+                {user.friendshipStatus !== FriendshipStatus.ACCEPTED ? (
+                  <FriendshipBtn
+                    userId={user.id}
+                    username={user.username}
+                    firstName={user.firstName}
+                    lastName={user.lastName}
+                    avatarUrl={user.avatarUrl}
+                    friendshipStatus={user.friendshipStatus}
+                    onStatusChange={updateFriendshipStatus}
+                  />
+                ) : (
+                  <button
+                    className="w-full py-1 flex gap-1 items-center justify-center hover:bg-[var(--primary-green)]"
+                    onClick={() => createOrGetDirectChat(user.id)}
+                  >
+                    Start Chat
+                    <span className="material-symbols-outlined">
+                      arrow_right_alt
+                    </span>
+                  </button>
+                )}
               </div>
             )}
           </motion.div>

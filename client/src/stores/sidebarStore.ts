@@ -1,13 +1,12 @@
 // sidebarStore.ts
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-
-type SidebarModes = 'default' | 'newChat' | 'search' | 'more' | 'profile' | 'profileEdit' | 'friendRequests' | 'settings' | 'settingsAccount';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { SidebarMode } from "@/types/enums/sidebarMode";
 
 interface SidebarStore {
-  currentSidebar: SidebarModes;
+  currentSidebar: SidebarMode;
   isCompact: boolean;
-  setSidebar: (sidebar: SidebarModes) => void;
+  setSidebar: (sidebar: SidebarMode) => void;
   toggleCompact: () => void;
   initializeKeyListeners: () => void;
   cleanupKeyListener: () => void;
@@ -16,7 +15,7 @@ interface SidebarStore {
 export const useSidebarStore = create<SidebarStore>()(
   persist(
     (set, get) => ({
-      currentSidebar: 'default',
+      currentSidebar: SidebarMode.DEFAULT,
       isCompact: false,
 
       setSidebar: (sidebar) => set({ currentSidebar: sidebar }),
@@ -28,44 +27,47 @@ export const useSidebarStore = create<SidebarStore>()(
 
       initializeKeyListeners: () => {
         const handleKeyDown = (e: KeyboardEvent) => {
-          if (e.key === 'Escape' && get().currentSidebar !== 'default') {
+          if (e.key === "Escape" && get().currentSidebar !== SidebarMode.DEFAULT) {
             e.preventDefault();
-            set({ currentSidebar: 'default' });
+            set({ currentSidebar: SidebarMode.DEFAULT });
             e.stopPropagation();
           }
         };
 
-        window.addEventListener('keydown', handleKeyDown);
-        
+        window.addEventListener("keydown", handleKeyDown);
+
         // Return cleanup function that will be called when the store is destroyed
         return () => {
-          window.removeEventListener('keydown', handleKeyDown);
+          window.removeEventListener("keydown", handleKeyDown);
         };
       },
 
       cleanupKeyListener: () => {
         // This would be called manually if needed before component unmount
         // The actual listener cleanup is handled by the initializeKeyListeners return function
-      }
+      },
     }),
     {
-      name: 'sidebar-storage',
+      name: "sidebar-storage",
       partialize: (state) => ({
-        isCompact: state.isCompact
+        isCompact: state.isCompact,
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {
           state.initializeKeyListeners();
         }
-      }
+      },
     }
   )
 );
 
 // Selector hooks
-export const useCurrentSidebar = () => useSidebarStore((state) => state.currentSidebar);
-export const useIsCompactSidebar = () => useSidebarStore((state) => state.isCompact);
-export const useSidebarActions = () => useSidebarStore((state) => ({
-  setSidebar: state.setSidebar,
-  toggleCompact: state.toggleCompact
-}));
+export const useCurrentSidebar = () =>
+  useSidebarStore((state) => state.currentSidebar);
+export const useIsCompactSidebar = () =>
+  useSidebarStore((state) => state.isCompact);
+export const useSidebarActions = () =>
+  useSidebarStore((state) => ({
+    setSidebar: state.setSidebar,
+    toggleCompact: state.toggleCompact,
+  }));

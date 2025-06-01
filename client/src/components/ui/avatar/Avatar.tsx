@@ -5,6 +5,7 @@ type AvatarProps = {
   size?: string;
   textSize?: string;
   className?: string;
+  onClick?: () => void;
 };
 
 export const Avatar: React.FC<AvatarProps> = ({
@@ -14,6 +15,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   size = "10",
   textSize = "text-xl",
   className = "",
+  onClick,
 }) => {
   const firstNameInitial = firstName?.charAt(0)?.toUpperCase();
   const lastNameInitial = lastName?.charAt(0)?.toUpperCase();
@@ -22,6 +24,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   return (
     <div
       className={`w-${size} h-${size} flex items-center justify-center overflow-hidden rounded-full border-2 border-[var(--border-color)] ${className}`}
+      onClick={onClick}
     >
       {avatarUrl ? (
         <img
@@ -38,7 +41,9 @@ export const Avatar: React.FC<AvatarProps> = ({
           {lastNameInitial}
         </h1>
       ) : (
-          <span className="material-symbols-outlined text-4xl">sentiment_satisfied</span>
+        <span className="material-symbols-outlined text-4xl">
+          sentiment_satisfied
+        </span>
       )}
     </div>
   );

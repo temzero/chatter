@@ -22,8 +22,6 @@ const DirectChatEdit = () => {
     (state) => state.deleteFriendshipByUserId
   );
 
-  console.log("activeChat: ", activeChat);
-
   const initialFormData = useMemo(
     () => ({
       partnerNickname: chatPartner?.nickname || "",

@@ -4,6 +4,7 @@ import CreateNewChat from "../ui/CreateNewChat";
 import CreateNewGroupChat from "../ui/CreateNewGroupChat";
 import { SlidingContainer } from "../ui/SlidingContainer";
 import { ChatType } from "@/types/enums/ChatType";
+import { SidebarMode } from "@/types/enums/sidebarMode";
 
 const SidebarNewChat: React.FC = () => {
   const setSidebar = useSidebarStore((state) => state.setSidebar);
@@ -70,7 +71,7 @@ const SidebarNewChat: React.FC = () => {
         </h1>
         <i
           className="material-symbols-outlined text-2xl opacity-60 hover:opacity-100 p-1 cursor-pointer"
-          onClick={() => setSidebar("default")}
+          onClick={() => setSidebar(SidebarMode.DEFAULT)}
         >
           close
         </i>

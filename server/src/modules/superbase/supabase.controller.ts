@@ -1,3 +1,4 @@
+// Server-side controller
 import {
   Controller,
   Post,
@@ -12,16 +13,21 @@ import { SupabaseService } from './supabase.service';
 import { v4 as uuidv4 } from 'uuid';
 import sharp from 'sharp';
 
-@Controller('uploads')
+@Controller('storage')
 export class SupabaseController {
   constructor(private readonly supabaseService: SupabaseService) {}
 
   @Post('avatar')
   @UseInterceptors(FileInterceptor('avatar'))
-  async uploadAvatar(@UploadedFile() avatar: Express.Multer.File) {
+  async uploadAvatar(
+    @UploadedFile() avatar: Express.Multer.File,
+    @Body() body: { type?: 'user' | 'group'; oldUrl?: string },
+  ) {
     if (!avatar) throw new BadRequestException('File is required');
 
-    // ✅ Check image dimensions
+    const type = body.type || 'user'; // Default to 'user' if not specified
+
+    // Check image dimensions
     const metadata = await sharp(avatar.buffer).metadata();
     if (!metadata.width || !metadata.height) {
       throw new BadRequestException('Invalid image file');
@@ -34,16 +40,28 @@ export class SupabaseController {
     }
 
     const fileExtension = avatar.originalname.split('.').pop();
-    const filePath = `image/${uuidv4()}.${fileExtension}`;
+    const fileName = `${uuidv4()}.${fileExtension}`;
+    const filePath = `${type}/${fileName}`; // Save to user/ or group/ folder based on type
 
     // Upload avatar buffer to Supabase Storage
     await this.supabaseService.uploadFile(
+      'avatars',
       avatar.buffer,
       filePath,
       avatar.mimetype,
     );
 
-    const publicUrl = this.supabaseService.getPublicUrl(filePath);
+    // if (body.oldUrl) {
+    //   this.supabaseService.deleteFileByUrl(body.oldUrl);
+    // }
+    // Fire-and-forget deletion of old avatar
+    if (body.oldUrl) {
+      this.handleOldAvatarDeletion(body.oldUrl).catch((error) => {
+        console.error('Background avatar deletion failed:', error);
+      });
+    }
+
+    const publicUrl = this.supabaseService.getPublicUrl('avatars', filePath);
 
     return { url: publicUrl };
   }
@@ -54,7 +72,6 @@ export class SupabaseController {
     if (!url) {
       throw new BadRequestException('URL is required');
     }
-    console.log('Deleting file with URL:', url);
     try {
       // Extract the file path from the public URL
       const pathStartIndex = url.indexOf('/storage/v1/object/public/');
@@ -67,11 +84,22 @@ export class SupabaseController {
       );
 
       // Call service to delete file
-      const deleted = await this.supabaseService.deleteFile(filePath);
-      return deleted;
+      const deleted = await this.supabaseService.deleteFile(
+        'avatars',
+        filePath,
+      );
+      return { success: deleted };
     } catch (err) {
       console.error('Error deleting file:', err);
       throw new BadRequestException('Could not delete file');
+    }
+  }
+
+  private async handleOldAvatarDeletion(oldUrl: string): Promise<void> {
+    try {
+      await this.supabaseService.deleteFileByUrl(oldUrl);
+    } catch (error) {
+      console.warn('Silent failure - could not delete old avatar:', error);
     }
   }
 }

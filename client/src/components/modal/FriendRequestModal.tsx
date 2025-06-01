@@ -60,7 +60,7 @@ const FriendRequestModal: React.FC<FriendRequestModalProps> = ({
           <h1 className="text-xl font-semibold">
             {receiver.firstName} {receiver.lastName}
           </h1>
-          <p className="text-sm opacity-80">@{receiver.username}</p>
+          {receiver.username && <p className="text-sm opacity-80">@{receiver.username}</p>}
         </div>
       </div>
 

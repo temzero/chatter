@@ -1,7 +1,6 @@
 import API from "@/services/api/api";
 import { otherUser, User } from "@/types/user";
 import { ProfileFormData } from "@/components/sidebar/SidebarProfileEdit";
-import logFormData from "@/utils/logFormdata";
 
 export const userService = {
   /**
@@ -60,34 +59,6 @@ export const userService = {
   async updateUser(updatedData: FormData): Promise<User> {
     const { data } = await API.put("/user", updatedData);
     return data.payload;
-  },
-
-  /**
-   * Upload avatar image file only
-   * @param avatarFile - File object of the avatar image
-   */
-  async uploadAvatar(avatarFile: File): Promise<{ url: string }> {
-    const formData = new FormData();
-    formData.append("avatar", avatarFile);
-    logFormData(formData);
-
-    try {
-      const { data } = await API.post("/uploads/avatar", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        timeout: 30000,
-      });
-
-      if (!data?.url) {
-        throw new Error("Upload failed: No URL returned");
-      }
-
-      return data; // 👈 Return full object if it's { url: string }
-    } catch (error: unknown) {
-      console.error("uploadAvatar failed:", error);
-      throw new Error("Image upload failed");
-    }
   },
 
   /**

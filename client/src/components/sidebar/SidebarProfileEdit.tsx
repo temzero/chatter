@@ -3,8 +3,9 @@ import { useSidebarStore } from "@/stores/sidebarStore";
 import { useCurrentUser } from "@/stores/authStore";
 import { useProfileStore } from "@/stores/profileStore";
 import AvatarEdit from "../ui/avatar/AvatarEdit";
-import { userService } from "@/services/userService";
-import { uploadService } from "@/services/uploadService";
+import { storageService } from "@/services/storageService";
+import { SidebarMode } from "@/types/enums/sidebarMode";
+import SidebarLayout from "@/pages/SidebarLayout";
 
 export interface ProfileFormData {
   avatarUrl: string;
@@ -16,7 +17,6 @@ export interface ProfileFormData {
 
 const SidebarProfileEdit: React.FC = () => {
   const currentUser = useCurrentUser();
-  console.log("Current User in Profile Edit:", currentUser);
   const { updateProfile } = useProfileStore();
   const { setSidebar } = useSidebarStore();
 
@@ -37,7 +37,6 @@ const SidebarProfileEdit: React.FC = () => {
   const [hasChanges, setHasChanges] = useState(false);
   const [error, setError] = useState("");
 
-  // Check for changes including the avatar file
   useEffect(() => {
     const changesDetected =
       Object.keys(initialFormData).some(
@@ -71,32 +70,16 @@ const SidebarProfileEdit: React.FC = () => {
 
     try {
       let newAvatarUrl = formData.avatarUrl;
-      // If avatar file changed, upload it first
       if (avatarFile) {
-        // Keep old avatar URL for deletion later
         const oldAvatarUrl = currentUser?.avatarUrl || "";
-
-        // Upload new avatar
-        const uploadResult = await userService.uploadAvatar(avatarFile);
-        newAvatarUrl =
-          typeof uploadResult === "string" ? uploadResult : uploadResult.url;
-
-        // Delete old avatar if it exists and is different from the new one
-        if (oldAvatarUrl && oldAvatarUrl !== newAvatarUrl) {
-          try {
-            console.log("Deleting old avatar:", oldAvatarUrl);
-            await uploadService.deleteImage(oldAvatarUrl); // You need to implement this method in userService
-          } catch (deleteError) {
-            console.warn("Failed to delete old avatar:", deleteError);
-            // You may decide whether to continue or fail here — typically continue is fine
-          }
-        }
-        // Update form data avatarUrl before profile update
+        newAvatarUrl = await storageService.uploadAvatar(
+          avatarFile,
+          oldAvatarUrl
+        );
         setFormData((prev) => ({ ...prev, avatarUrl: newAvatarUrl }));
       }
-      // Update profile with possibly new avatarUrl and other data
       await updateProfile({ ...formData, avatarUrl: newAvatarUrl });
-      setSidebar("profile");
+      setSidebar(SidebarMode.PROFILE);
     } catch (error) {
       setError("Failed to update profile!");
       console.error("Failed to update profile", error);
@@ -105,66 +88,57 @@ const SidebarProfileEdit: React.FC = () => {
     }
   };
 
-  return (
-    <aside className="relative w-[var(--sidebar-width)] h-full flex flex-col transition-all duration-300 ease-in-out">
-      {/* Header */}
-      <header className="flex w-full justify-between items-center min-h-[var(--header-height)] custom-border-b">
-        <button className="flex items-center">
-          <i
-            className="material-symbols-outlined nav-btn"
-            onClick={() => setSidebar("profile")}
-          >
-            arrow_back
-          </i>
-          <h1 className="text-xl font-semibold">Edit Profile</h1>
-        </button>
-        <div className="flex gap-1">
-          {hasChanges && (
-            <button
-              className={`flex items-center justify-center rounded-full cursor-pointer hover:opacity-100 text-green-400 h-10 w-10 hover:bg-green-500 hover:text-white ${
-                isSubmitting ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <i className="material-symbols-outlined text-3xl animate-spin">
-                  progress_activity
-                </i>
-              ) : (
-                <i className="material-symbols-outlined text-3xl">check</i>
-              )}
-            </button>
+  const rightButton = (
+    <div className="flex gap-1">
+      {hasChanges && (
+        <button
+          className={`flex items-center justify-center rounded-full cursor-pointer hover:opacity-100 text-green-400 h-10 w-10 hover:bg-green-500 hover:text-white ${
+            isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <i className="material-symbols-outlined text-3xl animate-spin">
+              progress_activity
+            </i>
+          ) : (
+            <i className="material-symbols-outlined text-3xl">check</i>
           )}
-          <button
-            className="flex items-center rounded-full p-2 cursor-pointer opacity-70 hover:opacity-80 h-10 w-10 hover:bg-[var(--hover-color)] mr-1"
-            onClick={() => setSidebar("default")}
-          >
-            <i className="material-symbols-outlined">close</i>
-          </button>
-        </div>
-      </header>
+        </button>
+      )}
+      <button
+        className="flex items-center rounded-full p-2 cursor-pointer opacity-70 hover:opacity-80 h-10 w-10 hover:bg-[var(--hover-color)] mr-1"
+        onClick={() => setSidebar(SidebarMode.DEFAULT)}
+      >
+        <i className="material-symbols-outlined">close</i>
+      </button>
+    </div>
+  );
 
+  return (
+    <SidebarLayout
+      title="Edit Profile"
+      backLocation={SidebarMode.PROFILE}
+      rightButton={rightButton}
+    >
       {error && (
         <div className="text-red-500 text-center mt-2">
           <p>{error}</p>
         </div>
       )}
 
-      {/* Edit Form */}
       <form
-        className="overflow-y-auto h-screen p-4"
+        className="p-4 flex-1 flex flex-col"
         onSubmit={handleSubmit}
         encType="multipart/form-data"
       >
         <div className="flex flex-col items-center gap-4 w-full">
-          {/* Avatar Upload */}
           <AvatarEdit
             avatarUrl={formData.avatarUrl}
             onAvatarChange={handleAvatarChange}
           />
 
-          {/* Form Fields */}
           <div className="w-full space-y-4">
             <div className="flex flex-col gap-1">
               <label className="text-sm opacity-70">First Name</label>
@@ -232,16 +206,16 @@ const SidebarProfileEdit: React.FC = () => {
             </div>
           </div>
         </div>
-      </form>
 
-      <div
-        className="flex gap-2 justify-center items-center cursor-pointer p-2 text-blue-500 custom-border-t absolute bottom-0 w-full"
-        onClick={() => setSidebar("settingsAccount")}
-      >
-        <i className="material-symbols-outlined">person</i>
-        <span>Account Settings</span>
-      </div>
-    </aside>
+        <div
+          className="absolute bottom-0 left-0 w-full flex gap-2 justify-center items-center cursor-pointer p-2 text-blue-500 custom-border-t mt-auto"
+          onClick={() => setSidebar(SidebarMode.SETTINGS_ACCOUNT)}
+        >
+          <i className="material-symbols-outlined">person</i>
+          <span>Account Settings</span>
+        </div>
+      </form>
+    </SidebarLayout>
   );
 };
 

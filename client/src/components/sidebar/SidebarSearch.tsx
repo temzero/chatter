@@ -5,6 +5,7 @@ import { SlidingContainer } from "../ui/SlidingContainer";
 import ChatList from "@/components/ui/ChatList";
 import { useChatStore } from "@/stores/chatStore";
 import { filterChatsByType } from "@/utils/filterChatsByType";
+import { SidebarMode } from "@/types/enums/sidebarMode";
 
 const chatTypes = ["all", "direct", "group", "channel"];
 
@@ -50,7 +51,7 @@ const SidebarSearch: React.FC = () => {
           <SearchBar placeholder="Search chats..." />
           <span
             className="material-symbols-outlined text-2xl opacity-60 hover:opacity-100 p-1 cursor-pointer ml-2"
-            onClick={() => setSidebar("default")}
+            onClick={() => setSidebar(SidebarMode.DEFAULT)}
           >
             close
           </span>

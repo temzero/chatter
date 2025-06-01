@@ -34,7 +34,7 @@ const AvatarEdit: React.FC<AvatarEditProps> = ({
   }, [croppedUrl, avatarUrl]);
 
   // Handle image crop and resize
-  const cropAndResizeImage = (img: HTMLImageElement): Promise<Blob> => {
+  const cropAndResizeImage = useCallback((img: HTMLImageElement): Promise<Blob> => {
     return new Promise((resolve) => {
       const canvas = document.createElement("canvas");
       canvas.width = targetSize;
@@ -67,7 +67,7 @@ const AvatarEdit: React.FC<AvatarEditProps> = ({
         0.9 // Quality
       );
     });
-  };
+  }, [targetSize]);
 
   // Handle file selection
   const handleFileChange = useCallback(

@@ -7,6 +7,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import type { DirectChatResponse } from "@/types/chat";
 import type { ChatType } from "@/types/enums/ChatType";
+import { SidebarMode } from "@/types/enums/sidebarMode";
 
 interface CreateChatProps {
   type: ChatType.GROUP | ChatType.CHANNEL;
@@ -67,7 +68,7 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
       console.log("Successfully created:", newChat);
 
       setActiveChat(newChat);
-      setSidebar("default");
+      setSidebar(SidebarMode.DEFAULT);
     } catch (error) {
       console.error("Failed to create group/channel:", error);
     }

@@ -2,6 +2,8 @@ import { useSidebarStore } from "@/stores/sidebarStore";
 import { useCurrentUser, useAuthStore } from "@/stores/authStore";
 import ContactInfoItem from "../ui/contactInfoItem";
 import { Avatar } from "../ui/avatar/Avatar";
+import { SidebarMode } from "@/types/enums/sidebarMode";
+import SidebarLayout from "@/pages/SidebarLayout";
 
 const SidebarProfile: React.FC = () => {
   const currentUser = useCurrentUser();
@@ -9,28 +11,19 @@ const SidebarProfile: React.FC = () => {
   const logout = useAuthStore((state) => state.logout);
 
   return (
-    <aside className="relative w-[var(--sidebar-width)] h-full flex flex-col transition-all duration-300 ease-in-out">
-      {/* Header */}
-      <header className="flex w-full justify-between items-center min-h-[var(--header-height)] custom-border-b">
-        <div className="flex items-center">
-          <i
-            className="material-symbols-outlined nav-btn"
-            onClick={() => setSidebar("more")}
-          >
-            arrow_back
-          </i>
-          <h1 className="text-xl font-semibold">My Profile</h1>
-        </div>
+    <SidebarLayout
+      title="My Profile"
+      rightButton={
         <i
           className="material-symbols-outlined nav-btn"
-          onClick={() => setSidebar("profileEdit")}
+          onClick={() => setSidebar(SidebarMode.PROFILE_EDIT)}
         >
           edit
         </i>
-      </header>
-
+      }
+    >
       {/* User Info */}
-      <div className="overflow-y-auto h-screen">
+      <div className="overflow-y-auto flex-1 h-full">
         <div className="flex flex-col items-center p-4 gap-2 w-full">
           {currentUser && (
             <Avatar
@@ -84,10 +77,10 @@ const SidebarProfile: React.FC = () => {
           onClick={logout}
         >
           <h1 className="text-xl">Logout</h1>
-          <a className="material-symbols-outlined cursor-pointer">logout</a>
+          <i className="material-symbols-outlined cursor-pointer">logout</i>
         </div>
       </div>
-    </aside>
+    </SidebarLayout>
   );
 };
 

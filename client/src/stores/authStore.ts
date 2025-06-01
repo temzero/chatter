@@ -7,6 +7,7 @@ import { useChatStore } from "@/stores/chatStore";
 import { useSidebarStore } from "./sidebarStore";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
 import type { User } from "@/types/user";
+import { SidebarMode } from "@/types/enums/sidebarMode";
 
 type MessageType = "error" | "success" | "info";
 
@@ -140,8 +141,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       logout: () => {
         authService.logout();
         useChatStore.getState().clearChats();
-        useSidebarStore.getState().setSidebar("default");
-        useSidebarInfoStore.getState().setSidebarInfo("default");
+        useSidebarStore.getState().setSidebar(SidebarMode.DEFAULT);
+        useSidebarInfoStore.getState().setSidebarInfo(SidebarMode.DEFAULT);
         set({
           ...initialState,
           loading: false,

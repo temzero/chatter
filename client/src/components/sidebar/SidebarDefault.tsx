@@ -6,6 +6,7 @@ import { SlidingContainer } from "../ui/SlidingContainer";
 import ChatList from "@/components/ui/ChatList";
 import { motion } from "framer-motion";
 import { filterChatsByType } from "@/utils/filterChatsByType";
+import { SidebarMode } from "@/types/enums/sidebarMode";
 
 const chatTypes = ["all", "direct", "group", "channel"];
 
@@ -71,7 +72,7 @@ const SidebarDefault: React.FC = () => {
         <motion.a
           id="branding"
           className="flex items-center cursor-pointer -ml-[64px]"
-          onClick={() => setSidebar("more")}
+          onClick={() => setSidebar(SidebarMode.MORE)}
           whileHover={{ x: 33 }} // This will move the element 5 pixels to the right on hover
           transition={{ type: "spring", stiffness: 600, damping: 30 }} // Spring animation for a bouncy effect
         >
@@ -94,13 +95,13 @@ const SidebarDefault: React.FC = () => {
           <div className="flex">
             <a
               className="cursor-pointer select-none nav-btn"
-              onClick={() => setSidebar("newChat")}
+              onClick={() => setSidebar(SidebarMode.NEW_CHAT)}
             >
               <i className="material-symbols-outlined text-2xl">add</i>
             </a>
             <a
               className="cursor-pointer select-none nav-btn -ml-2"
-              onClick={() => setSidebar("search")}
+              onClick={() => setSidebar(SidebarMode.SEARCH)}
             >
               <i className="material-symbols-outlined text-2xl">search</i>
             </a>

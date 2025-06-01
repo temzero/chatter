@@ -124,7 +124,15 @@ export const ChatContent: React.FC = () => {
     };
 
     initialize();
-  }, [chatId, fetchPendingRequests, initializeAuth, initializeChats, initializeSidebar, initializeSidebarInfo, setActiveChatById]); // Only chatId as dependency since store methods are stable
+  }, [
+    chatId,
+    fetchPendingRequests,
+    initializeAuth,
+    initializeChats,
+    initializeSidebar,
+    initializeSidebarInfo,
+    setActiveChatById,
+  ]); // Only chatId as dependency since store methods are stable
 
   if (isLoading) {
     return (
@@ -142,13 +150,7 @@ export const ChatContent: React.FC = () => {
     );
   }
 
-  return activeChat ? (
-    <Chat />
-  ) : (
-    <div className="flex items-center justify-center h-full text-gray-500">
-      Select a chat to start messaging
-    </div>
-  );
+  return activeChat ? <Chat /> : "";
 };
 
 const PrivateLayout: React.FC = () => {

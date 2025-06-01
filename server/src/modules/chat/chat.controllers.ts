@@ -76,6 +76,32 @@ export class ChatController {
     }
   }
 
+  // @Post('direct')
+  // async getOrCreateDirectChat(
+  //   @Body() createDirectChatDto: CreateDirectChatDto,
+  //   @CurrentUser('id') userId: string,
+  // ): Promise<GetOrCreateResponse<DirectChatResponseDto>> {
+  //   try {
+  //     const result = await this.chatService.getOrCreateDirectChat(
+  //       userId,
+  //       createDirectChatDto.partnerId,
+  //     );
+
+  //     return new GetOrCreateResponse(
+  //       plainToInstance(DirectChatResponseDto, result.chat),
+  //       result.wasExisting,
+  //       result.wasExisting
+  //         ? 'Direct chat already created — retrieved successfully'
+  //         : 'Direct chat created successfully',
+  //     );
+  //   } catch (error: unknown) {
+  //     ErrorResponse.throw(
+  //       error,
+  //       'Failed to process direct chat request',
+  //       HttpStatus.BAD_REQUEST,
+  //     );
+  //   }
+  // }
   @Post('direct')
   async getOrCreateDirectChat(
     @Body() createDirectChatDto: CreateDirectChatDto,

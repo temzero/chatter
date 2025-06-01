@@ -88,14 +88,14 @@ export class FriendshipController {
   async getFriendshipStatus(
     @CurrentUser('id') currentUserId: string,
     @Param('otherUserId') otherUserId: string,
-  ): Promise<SuccessResponse<{ status: FriendshipStatus | null }>> {
+  ): Promise<SuccessResponse<FriendshipStatus | null>> {
     const status = await this.friendshipService.getFriendshipStatus(
       currentUserId,
       otherUserId,
     );
 
     return new SuccessResponse(
-      { status },
+      status,
       'Friendship status retrieved successfully',
     );
   }

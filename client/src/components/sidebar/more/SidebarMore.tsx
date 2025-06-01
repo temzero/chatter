@@ -1,9 +1,10 @@
 import { useEffect } from "react";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useCurrentUser } from "@/stores/authStore";
-import { Avatar } from "../ui/avatar/Avatar";
+import { Avatar } from "../../ui/avatar/Avatar";
 import { useFriendshipStore } from "@/stores/friendshipStore";
-import ThemeSwitcher from "../ui/ThemeSwitcher";
+import ThemeSwitcher from "../../ui/ThemeSwitcher";
+import { SidebarMode } from "@/types/enums/sidebarMode";
 
 const SidebarMore: React.FC = () => {
   const currentUser = useCurrentUser();
@@ -27,49 +28,39 @@ const SidebarMore: React.FC = () => {
     {
       icon: "bookmark",
       text: "Saved Messages",
-      onClick: null,
+      onClick: () => setSidebar(SidebarMode.SAVED_MESSAGES),
     },
-    // {
-    //   icon: 'add',
-    //   text: 'New Chat',
-    //   onClick: () => setSidebar('newChat')
-    // },
-    // {
-    //   icon: 'search',
-    //   text: 'Search',
-    //   onClick: () => setSidebar('search')
-    // },
     { type: "divider" }, // This will render the border divider
     {
       icon: "call",
-      text: "Call",
-      onClick: null,
+      text: "Calls",
+      onClick: () => setSidebar(SidebarMode.CALLS),
     },
     {
       icon: "contacts",
       text: "Contacts",
-      onClick: null,
+      onClick: () => setSidebar(SidebarMode.CONTACTS),
     },
     {
       icon: "person_add",
       text: `Friend requests ${requestsCount > 0 ? requestsCount : ""}`,
-      onClick: () => setSidebar("friendRequests"),
+      onClick: () => setSidebar(SidebarMode.FRIEND_REQUESTS),
     },
     { type: "divider" }, // Another divider
     {
       icon: "folder",
-      text: "Folder",
-      onClick: null,
+      text: "Folders",
+      onClick: () => setSidebar(SidebarMode.FOLDERS),
     },
     {
       icon: "lock",
       text: "Private",
-      onClick: null,
+      onClick: () => setSidebar(SidebarMode.PRIVATE),
     },
     {
       icon: "block",
       text: "Blocked",
-      onClick: null,
+      onClick: () => setSidebar(SidebarMode.BLOCKED),
     },
   ];
 
@@ -86,14 +77,14 @@ const SidebarMore: React.FC = () => {
       <header className="flex w-full justify-between items-center min-h-[var(--header-height)] custom-border-b">
         <i
           className="material-symbols-outlined nav-btn"
-          onClick={() => setSidebar("default")}
+          onClick={() => setSidebar(SidebarMode.DEFAULT)}
         >
           arrow_back
         </i>
 
         <i
           className="material-symbols-outlined nav-btn ml-auto"
-          onClick={() => setSidebar("default")}
+          onClick={() => setSidebar(SidebarMode.DEFAULT)}
         >
           close
         </i>
@@ -102,7 +93,7 @@ const SidebarMore: React.FC = () => {
       {/* User Info */}
       <div
         className="flex items-center p-4 gap-4 w-full custom-border-b cursor-pointer hover:bg-[var(--hover-color)]"
-        onClick={() => setSidebar("profile")}
+        onClick={() => setSidebar(SidebarMode.PROFILE)}
       >
         <div className="w-16 h-16">
           <Avatar
@@ -158,7 +149,7 @@ const SidebarMore: React.FC = () => {
           className={`flex items-center cursor-pointer hover:bg-[var(--hover-color)] w-full p-1 px-4 ${
             isCompact ? "justify-center" : "gap-3"
           }`}
-          onClick={() => setSidebar("settings")}
+          onClick={() => setSidebar(SidebarMode.SETTINGS)}
         >
           <div className="flex items-center justify-center h-10 w-10">
             <i className="material-symbols-outlined text-3xl">settings</i>

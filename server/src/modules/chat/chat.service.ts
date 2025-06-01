@@ -61,6 +61,10 @@ export class ChatService {
       partnerId,
     );
 
+    if (friendshipStatus === FriendshipStatus.BLOCKED) {
+      ErrorResponse.badRequest('Friendship Blocked');
+    }
+
     const existingChat = await this.chatRepo
       .createQueryBuilder('chat')
       .innerJoin('chat.members', 'member1', 'member1.user_id = :user1', {

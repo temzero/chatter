@@ -13,7 +13,7 @@ import { User } from '../../user/entities/user.entity';
 import { FriendshipStatus } from '../constants/friendship-status.constants';
 
 @Entity('friendship')
-@Index(['senderId', 'receiverId'], { unique: true })
+@Index(['senderId', 'receiverId'])
 export class Friendship {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -35,9 +35,18 @@ export class Friendship {
   @Column({
     type: 'enum',
     enum: FriendshipStatus,
-    default: FriendshipStatus.PENDING,
+    default: FriendshipStatus.ACCEPTED,
+    name: 'sender_status',
   })
-  status: FriendshipStatus;
+  senderStatus: FriendshipStatus;
+
+  @Column({
+    type: 'enum',
+    enum: FriendshipStatus,
+    default: FriendshipStatus.PENDING,
+    name: 'receiver_status',
+  })
+  receiverStatus: FriendshipStatus;
 
   @Column({
     name: 'request_message',

@@ -28,7 +28,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
           rounded: "rounded-[10px]",
           iconSize: "text-lg",
           fallbackIconSize: "text-4xl",
-          border: "border-[4px]",
+          borderWidth: "4px",
         };
       case "info":
         return {
@@ -36,7 +36,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
           rounded: "rounded-[30px]",
           iconSize: "text-6xl",
           fallbackIconSize: "text-8xl",
-          border: "border-[6px]",
+          borderWidth: "6px",
         };
       case "contact":
         return {
@@ -44,7 +44,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
           rounded: "rounded-[30px]",
           iconSize: "text-6xl",
           fallbackIconSize: "text-8xl",
-          border: "border-[6px]",
+          borderWidth: "6px",
         };
       case "sidebar":
       default:
@@ -53,28 +53,48 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
           rounded: "rounded-2xl",
           iconSize: "text-2xl",
           fallbackIconSize: "text-6xl",
-          border: "border-[4px]",
+          borderWidth: "4px",
         };
     }
   };
 
   const styles = getStyles();
-  const sharedBase = `flex items-center justify-center overflow-hidden ${styles.size} ${styles.rounded}`;
+  const sharedBase = `flex items-center justify-center overflow-hidden custom-border ${styles.size} ${styles.rounded}`;
 
   switch (chat.type) {
     case ChatType.CHANNEL: {
       const channelChat = chat as GroupChatResponse;
       return (
-        <div
-          className={`${styles.border} border-[var(--border-color)] ${sharedBase}`}
-        >
+        <div className={`${sharedBase} relative`}>
           {channelChat.avatarUrl ? (
-            <img
-              className="h-full w-full object-cover"
-              src={channelChat.avatarUrl}
-              alt={`${channelChat.name || "Channel"}'s avatar`}
-              loading="lazy"
-            />
+            <>
+              {/* Main image */}
+              <img
+                className="h-full w-full object-cover"
+                src={channelChat.avatarUrl}
+                alt={`${channelChat.name || "Channel"}'s avatar`}
+                loading="lazy"
+              />
+              {/* Blurred border effect */}
+              <div
+                className={`absolute inset-0 ${styles.rounded} border-[var(--border-color)] pointer-events-none`}
+                style={{
+                  borderWidth: styles.borderWidth,
+                  borderStyle: "solid",
+                  boxShadow: "inset 0 0 12px rgba(0, 0, 0, .8)",
+                  filter: "blur(4px)",
+                }}
+              />
+              {/* Sharp inner border */}
+              <div
+                className={`absolute inset-0 ${styles.rounded} pointer-events-none`}
+                style={{
+                  borderWidth: styles.borderWidth,
+                  borderStyle: "solid",
+                  borderColor: "var(--border-color)",
+                }}
+              />
+            </>
           ) : (
             <i
               className={`material-symbols-outlined ${styles.fallbackIconSize} opacity-20 flex items-center justify-center`}
@@ -86,24 +106,37 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
       );
     }
 
-    case ChatType.GROUP:
+    case ChatType.GROUP: {
+      const groupChat = chat as GroupChatResponse;
       return (
-        <div
-          className={`bg-[var(--border-color)] cursor-pointer ${sharedBase}`}
-        >
-          <div className="grid grid-cols-2 grid-rows-2 h-full w-full">
-            {Array.from({ length: 4 }).map((_, idx) => (
-              <div key={idx} className="flex items-center justify-center">
-                <i
-                  className={`material-symbols-outlined border ${styles.iconSize} opacity-20 flex items-center justify-center rounded-full h-full w-full`}
-                >
-                  mood
-                </i>
+        <div className={`${sharedBase}`}>
+          {groupChat.avatarUrl ? (
+            <img
+              className="h-full w-full object-cover"
+              src={groupChat.avatarUrl}
+              alt={`${groupChat.name || "Group"}'s avatar`}
+              loading="lazy"
+            />
+          ) : (
+            <div
+              className={`bg-[var(--border-color)] cursor-pointer h-full w-full`}
+            >
+              <div className="grid grid-cols-2 grid-rows-2 h-full w-full">
+                {Array.from({ length: 4 }).map((_, idx) => (
+                  <div key={idx} className="flex items-center justify-center">
+                    <i
+                      className={`material-symbols-outlined border ${styles.iconSize} opacity-20 flex items-center justify-center rounded-full h-full w-full`}
+                    >
+                      mood
+                    </i>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
       );
+    }
 
     case ChatType.DIRECT: {
       const directChat = chat as DirectChatResponse;

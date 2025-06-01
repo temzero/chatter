@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { ErrorResponse } from 'src/common/api-response/errors';
+import { parseSupabaseStorageUrl } from './utils/supabase-storage.util';
+
+type bucketType = 'avatars' | 'attachments';
 
 @Injectable()
 export class SupabaseService {
@@ -12,57 +16,82 @@ export class SupabaseService {
     );
   }
 
-  async uploadFile(buffer: Buffer, path: string, contentType: string) {
-    const { data, error } = await this.supabase.storage
-      .from(process.env.SUPABASE_BUCKET_NAME || 'attachments')
-      .upload(path, buffer, { contentType, upsert: true });
+  async uploadFile(
+    bucket: bucketType,
+    buffer: Buffer,
+    path: string,
+    contentType: string,
+  ) {
+    try {
+      const { data, error } = await this.supabase.storage
+        .from(bucket)
+        .upload(path, buffer, { contentType, upsert: true });
 
-    if (error) throw error;
-    return data;
+      if (error)
+        ErrorResponse.throw(error, `Failed to upload file to ${bucket}`);
+      return data;
+    } catch (error) {
+      ErrorResponse.throw(error, `Failed to upload file to ${bucket}`);
+    }
   }
 
-  getPublicUrl(path: string): string {
-    return this.supabase.storage
-      .from(process.env.SUPABASE_BUCKET_NAME || 'attachments')
-      .getPublicUrl(path).data.publicUrl;
+  getPublicUrl(bucket: bucketType, path: string): string {
+    try {
+      return this.supabase.storage.from(bucket).getPublicUrl(path).data
+        .publicUrl;
+    } catch (error) {
+      ErrorResponse.throw(error, `Failed to get public URL from ${bucket}`);
+    }
   }
 
-  async fileExists(filePath: string): Promise<boolean> {
-    const { data, error } = await this.supabase.storage
-      .from(process.env.SUPABASE_BUCKET_NAME || 'attachments')
-      .download(filePath);
+  async fileExists(bucket: bucketType, filePath: string): Promise<boolean> {
+    try {
+      const { data, error } = await this.supabase.storage
+        .from(bucket)
+        .download(filePath);
 
-    return !error && !!data;
+      return !error && !!data;
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to check if file exists');
+    }
   }
 
-  async deleteFile(filePath: string): Promise<boolean> {
+  async deleteFileByUrl(url: string): Promise<boolean> {
+    if (!url) {
+      ErrorResponse.throw(null, 'URL is required for deletion');
+    }
+
+    try {
+      const { bucket, filePath } = parseSupabaseStorageUrl(url);
+      return this.deleteFile(bucket as bucketType, filePath);
+    } catch (error) {
+      ErrorResponse.throw(error, `Failed to delete file by URL`);
+    }
+  }
+
+  async deleteFile(bucket: bucketType, filePath: string): Promise<boolean> {
     if (!filePath) {
-      throw new Error('File path is required for deletion');
+      ErrorResponse.throw(null, 'File path is required for deletion');
     }
 
-    const cleanedPath = filePath.replace(/^attachments\//, '');
-    const { error } = await this.supabase.storage
-      .from(process.env.SUPABASE_BUCKET_NAME || 'attachments')
-      .remove([cleanedPath]);
+    try {
+      const cleanedPath = filePath.startsWith(`${bucket}/`)
+        ? filePath.substring(bucket.length + 1)
+        : filePath;
 
-    if (error) {
-      throw new Error(`Failed to delete file: ${error.message}`);
+      const { error } = await this.supabase.storage
+        .from(bucket)
+        .remove([cleanedPath]);
+
+      if (error) {
+        console.error('Supabase deletion error:', error);
+        ErrorResponse.throw(error, `Failed to delete file from ${bucket}`);
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      ErrorResponse.throw(error, `Failed to delete file from ${bucket}`);
     }
-    return true;
   }
-
-  // async deleteFileByUrl(publicUrl: string): Promise<boolean> {
-  //   const match = publicUrl.match(/\/object\/public\/([^/]+)\/(.+)/);
-  //   if (!match) {
-  //     throw new Error('Invalid Supabase public URL');
-  //   }
-
-  //   const [, bucket, path] = match;
-
-  //   const { error } = await this.supabase.storage.from(bucket).remove([path]);
-
-  //   if (error) throw new Error(`Failed to delete file: ${error.message}`);
-
-  //   return true;
-  // }
 }
