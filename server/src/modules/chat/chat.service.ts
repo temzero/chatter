@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOneOptions, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Chat } from 'src/modules/chat/entities/chat.entity';
 import { UpdateChatDto } from 'src/modules/chat/dto/requests/update-chat.dto';
 import { User } from 'src/modules/user/entities/user.entity';
@@ -136,9 +136,11 @@ export class ChatService {
     return this.transformToGroupChatDto(fullChat, userId);
   }
 
-  async updateChat(chatId: string, updateDto: UpdateChatDto): Promise<Chat> {
+  async updateChat(
+    chat: ChatResponseDto,
+    updateDto: UpdateChatDto,
+  ): Promise<Chat> {
     try {
-      const chat = await this.getChatById(chatId);
       Object.assign(chat, updateDto);
       return await this.chatRepo.save(chat);
     } catch (error) {
@@ -146,15 +148,32 @@ export class ChatService {
     }
   }
 
-  async getChatById(chatId: string, loadRelations = true): Promise<Chat> {
+  async getChatById(chatId: string, userId: string): Promise<ChatResponseDto> {
     try {
-      const options: FindOneOptions<Chat> = { where: { id: chatId } };
-      if (loadRelations) options.relations = ['members'];
-      const chat = await this.chatRepo.findOne(options);
-      if (!chat) {
-        ErrorResponse.notFound('Chat not found');
+      const chat = await this.getFullChat(chatId);
+
+      if (chat.type === ChatType.DIRECT) {
+        // Find the partner user for direct chats
+        const partner = chat.members.find((m) => m.userId !== userId);
+        if (!partner) {
+          throw new Error('Direct chat must have a partner');
+        }
+
+        // Get friendship status with the partner
+        const friendshipStatus =
+          await this.friendshipService.getFriendshipStatus(
+            userId,
+            partner.userId,
+          );
+
+        return this.transformToDirectChatDto(
+          chat,
+          userId,
+          friendshipStatus ?? undefined,
+        );
+      } else {
+        return this.transformToGroupChatDto(chat, userId);
       }
-      return chat;
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to get chat');
     }

@@ -55,12 +55,12 @@ const SidebarMore: React.FC = () => {
     {
       icon: "lock",
       text: "Private",
-      onClick: () => setSidebar(SidebarMode.PRIVATE),
+      onClick: () => setSidebar(SidebarMode.PRIVATE_CHATS),
     },
     {
       icon: "block",
       text: "Blocked",
-      onClick: () => setSidebar(SidebarMode.BLOCKED),
+      onClick: () => setSidebar(SidebarMode.BLOCKED_USERS),
     },
   ];
 

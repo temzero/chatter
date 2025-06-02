@@ -26,6 +26,7 @@ const CreateNewChat: React.FC = () => {
 
     try {
       const foundUser = await userService.getUserByIdentifier(query.trim());
+      console.log('foundedUser: ', foundUser)
       setUser(foundUser);
     } catch (err: unknown) {
       console.log("Search for user: ", String(err));
@@ -99,18 +100,6 @@ const CreateNewChat: React.FC = () => {
                 <h1 className="text-[var(--primary-green)] -mt-1">Friend</h1>
               )}
               <h1>{user.bio}</h1>
-
-              {/* {user.id !== currentUser?.id && (
-                <FriendshipBtn
-                  userId={user.id}
-                  username={user.username}
-                  firstName={user.firstName}
-                  lastName={user.lastName}
-                  avatarUrl={user.avatarUrl}
-                  friendshipStatus={user.friendshipStatus}
-                  onStatusChange={updateFriendshipStatus}
-                />
-              )} */}
 
               <div className="w-full flex flex-col font-light my-2 custom-border-t custom-border-b">
                 <ContactInfoItem

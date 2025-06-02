@@ -8,9 +8,10 @@ import { ConfigService } from '@nestjs/config';
 import { User } from 'src/modules/user/entities/user.entity';
 import { ErrorResponse } from 'src/common/api-response/errors';
 import { TokenStorageService } from '../auth/services/token-storage.service';
-import { OtherUserResponseDto } from './dto/responses/user-response.dto';
+import { ChatPartnerResDto } from './dto/responses/user-response.dto';
 import { FriendshipStatus } from '../friendship/constants/friendship-status.constants';
 import { FriendshipService } from '../friendship/friendship.service';
+import { MailService } from '../auth/mail/mail.service';
 
 @Injectable()
 export class UserService {
@@ -20,6 +21,7 @@ export class UserService {
     private readonly configService: ConfigService,
     private readonly tokenStorageService: TokenStorageService,
     private readonly friendshipService: FriendshipService,
+    private readonly mailService: MailService,
   ) {}
 
   private normalizeIdentifier(identifier: string): string {
@@ -44,7 +46,7 @@ export class UserService {
   async getOtherUserByIdentifier(
     identifier: string,
     currentUserId: string,
-  ): Promise<OtherUserResponseDto> {
+  ): Promise<ChatPartnerResDto> {
     // Find the user
     const user = await this.userRepository.findOne({
       where: [
@@ -159,23 +161,35 @@ export class UserService {
     }
   }
 
-  async updatePasswordWithCheck(
+  async changePassword(
     userId: string,
     oldPassword: string,
     newPassword: string,
-  ): Promise<User> {
+  ): Promise<{ isSuccess: boolean; message: string }> {
     try {
       const user = await this.getUserById(userId);
 
       const isMatch = await bcrypt.compare(oldPassword, user.passwordHash);
       if (!isMatch) {
-        ErrorResponse.unauthorized('Old password is incorrect');
+        return {
+          isSuccess: false,
+          message: 'Current password is incorrect',
+        };
       }
 
       user.passwordHash = await this.hashPassword(newPassword);
-      return await this.userRepository.save(user);
+      await this.userRepository.save(user);
+
+      return {
+        isSuccess: true,
+        message: 'Password updated successfully',
+      };
     } catch (error) {
-      ErrorResponse.throw(error, 'Failed to update password');
+      console.error('Failed to update password:', error);
+      return {
+        isSuccess: false,
+        message: 'An error occurred while updating the password',
+      };
     }
   }
 
@@ -189,6 +203,85 @@ export class UserService {
       return user;
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to delete user');
+    }
+  }
+
+  async updateUsername(userId: string, username: string): Promise<User> {
+    try {
+      // Check if username is available
+      const available = await this.isUsernameAvailable(username);
+      if (!available) {
+        ErrorResponse.conflict('Username is already taken');
+      }
+      // Update the username
+      const user = await this.getUserById(userId);
+      user.username = username;
+      return await this.userRepository.save(user);
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to update username');
+    }
+  }
+
+  async sendPhoneVerification(
+    userId: string,
+    phoneNumber: string,
+  ): Promise<void> {
+    try {
+      // In a real implementation, you would:
+      // 1. Validate the phone number format
+      // 2. Generate a verification code
+      // 3. Store the code with an expiration time
+      // 4. Send the code via SMS (using a service like Twilio)
+
+      // For now, we'll just update the user's phone number
+      const user = await this.getUserById(userId);
+      user.phoneNumber = phoneNumber;
+      user.phoneVerified = false; // Mark as unverified until verified
+      await this.userRepository.save(user);
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to send phone verification');
+    }
+  }
+
+  async isUsernameAvailable(username: string): Promise<boolean> {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { username },
+      });
+      return !user; // Available if no user found
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to check username availability');
+    }
+  }
+
+  async sendEmailVerification(userId: string, email: string): Promise<void> {
+    try {
+      // Check if email is already in use by another user
+      const existingUser = await this.userRepository.findOne({
+        where: { email },
+      });
+
+      if (existingUser && existingUser.id !== userId) {
+        ErrorResponse.conflict('Email is already in use by another account');
+      }
+
+      // Update the user's email and mark as unverified
+      const user = await this.getUserById(userId);
+      user.email = email;
+      user.emailVerified = false;
+      await this.userRepository.save(user);
+
+      // Generate verification token (you might want to use JWT or a random string)
+      const verificationToken = 'generated-verification-token'; // Replace with actual token generation
+
+      // Create verification URL
+      const baseUrl = this.configService.get<string>('APP_BASE_URL');
+      const verificationUrl = `${baseUrl}/verify-email?token=${verificationToken}`;
+
+      // Send verification email
+      await this.mailService.sendVerificationEmail(email, verificationUrl);
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to send email verification');
     }
   }
 }

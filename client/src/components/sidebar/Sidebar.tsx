@@ -5,8 +5,8 @@ import SidebarMore from "@/components/sidebar/more/SidebarMore";
 import SidebarProfile from "@/components/sidebar/SidebarProfile";
 import SidebarProfileEdit from "@/components/sidebar/SidebarProfileEdit";
 import SidebarSettings from "@/components/sidebar/settings/SidebarSettings";
-import SidebarSettingsAccount from "./settings/SidebarSettingsAccount";
-import SidebarSettingsPassword from "./settings/sidebarSettingsPassword";
+import SidebarSettingsAccount from "./settings/account/SidebarSettingsAccount";
+import SidebarSettingsPassword from "./settings/account/sidebarSettingsPassword";
 import SidebarSettingsPrivacy from "./settings/sidebarSettingsPrivacy";
 import SidebarSettingsTheme from "./settings/sidebarSettingsTheme";
 import SidebarSettingsDisplay from "./settings/sidebarSettingsDisplay";
@@ -27,6 +27,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCurrentSidebar } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/types/enums/sidebarMode";
 import { JSX } from "react";
+import SidebarSettingsEmail from "./settings/account/sidebarSettingsEmail";
+import SidebarSettingsUsername from "./settings/account/sidebarSettingsUsername";
+import SidebarSettingsPhoneNumber from "./settings/account/sidebarSettingsPhoneNumber";
 
 const Sidebar = () => {
   const currentSidebar = useCurrentSidebar();
@@ -53,6 +56,11 @@ const Sidebar = () => {
     [SidebarMode.SETTINGS_ACCOUNT]: <SidebarSettingsAccount />,
     [SidebarMode.SETTINGS_PASSWORD]: <SidebarSettingsPassword />,
     [SidebarMode.SETTINGS_PRIVACY]: <SidebarSettingsPrivacy />,
+    [SidebarMode.SETTINGS_EMAIL]: <SidebarSettingsEmail />,
+    [SidebarMode.SETTINGS_USERNAME]: <SidebarSettingsUsername />,
+    [SidebarMode.SETTINGS_PHONE]: <SidebarSettingsPhoneNumber />,
+
+    // settings
     [SidebarMode.SETTINGS_THEME]: <SidebarSettingsTheme />,
     [SidebarMode.SETTINGS_DISPLAY]: <SidebarSettingsDisplay />,
     [SidebarMode.SETTINGS_KEYBOARD]: <SidebarSettingsKeyboard />,

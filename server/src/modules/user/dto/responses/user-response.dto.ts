@@ -58,7 +58,7 @@ export class UserResponseDto {
 }
 
 @Exclude()
-export class OtherUserResponseDto {
+export class ChatPartnerResDto {
   @Expose()
   id: string;
 

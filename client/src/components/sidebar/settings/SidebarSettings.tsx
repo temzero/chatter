@@ -8,47 +8,52 @@ const SidebarSettings: React.FC = () => {
   const settingsItems = [
     {
       icon: "person",
-      text: "Account",
+      title: "Account",
       onClick: () => setSidebar(SidebarMode.SETTINGS_ACCOUNT),
     },
     {
+      icon: "lock",
+      title: "Privacy & Security",
+      onClick: () => setSidebar(SidebarMode.SETTINGS_PRIVACY), // Assuming this exists in your enum
+    },
+    {
       icon: "contrast",
-      text: "Theme",
+      title: "Theme",
       onClick: () => setSidebar(SidebarMode.SETTINGS_THEME),
     },
     {
       icon: "visibility",
-      text: "Display",
+      title: "Display",
       onClick: () => setSidebar(SidebarMode.SETTINGS_DISPLAY),
     },
     {
       icon: "keyboard",
-      text: "Keyboard",
+      title: "Keyboard",
       onClick: () => setSidebar(SidebarMode.SETTINGS_KEYBOARD),
     },
     {
       icon: "message",
-      text: "Messages",
+      title: "Messages",
       onClick: () => setSidebar(SidebarMode.SETTINGS_MESSAGES),
     },
     {
       icon: "folder",
-      text: "Chat Folders",
+      title: "Chat Folders",
       onClick: () => setSidebar(SidebarMode.SETTINGS_FOLDERS),
     },
     {
       icon: "notifications",
-      text: "Notifications",
+      title: "Notifications",
       onClick: () => setSidebar(SidebarMode.SETTINGS_NOTIFICATIONS),
     },
     {
       icon: "database",
-      text: "Data & Storage",
+      title: "Data & Storage",
       onClick: () => setSidebar(SidebarMode.SETTINGS_DATA_STORAGE),
     },
     {
       icon: "translate",
-      text: "Language",
+      title: "Language",
       onClick: () => setSidebar(SidebarMode.SETTINGS_LANGUAGE),
       extra: <span className="opacity-60 ml-auto">English</span>,
     },
@@ -63,7 +68,7 @@ const SidebarSettings: React.FC = () => {
           onClick={item.onClick}
         >
           <i className="material-symbols-outlined">{item.icon}</i>
-          <h1>{item.text}</h1>
+          <h1>{item.title}</h1>
           {item.extra && item.extra}
         </div>
       ))}

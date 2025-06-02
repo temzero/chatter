@@ -1,4 +1,5 @@
 // FriendshipBtn.tsx
+import { useChatStore } from "@/stores/chatStore";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import { useModalStore } from "@/stores/modalStore";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
@@ -33,6 +34,9 @@ const FriendshipBtn: React.FC<FriendshipBtnProps> = ({
     // deleteFriendshipByUserId,
   } = useFriendshipStore();
 
+  const getDirectChatByUserId = useChatStore(
+    (state) => state.getDirectChatByUserId
+  );
   // Check if this is an incoming request
   const incomingRequest = receivedRequests.find(
     (req) => req.senderId === userId
@@ -57,8 +61,12 @@ const FriendshipBtn: React.FC<FriendshipBtnProps> = ({
   async function handleAcceptRequest() {
     if (!incomingRequest) return;
     try {
-      await respondToRequest(incomingRequest.id, FriendshipStatus.ACCEPTED);
+      await respondToRequest(
+        incomingRequest.id,
+        FriendshipStatus.ACCEPTED
+      );
       onStatusChange?.(FriendshipStatus.ACCEPTED);
+      getDirectChatByUserId(incomingRequest.senderId);
     } catch (error) {
       console.error("Failed to accept friend request:", error);
     }
@@ -69,6 +77,7 @@ const FriendshipBtn: React.FC<FriendshipBtnProps> = ({
     try {
       await respondToRequest(incomingRequest.id, FriendshipStatus.DECLINED);
       onStatusChange?.(null);
+      getDirectChatByUserId(incomingRequest.senderId);
     } catch (error) {
       console.error("Failed to decline friend request:", error);
     }
@@ -79,19 +88,11 @@ const FriendshipBtn: React.FC<FriendshipBtnProps> = ({
     try {
       await cancelRequest(outgoingRequest.id);
       onStatusChange?.(null);
+      getDirectChatByUserId(outgoingRequest.receiverId);
     } catch (error) {
       console.error("Failed to cancel friend request:", error);
     }
   }
-
-  // async function handleRemoveFriend() {
-  //   try {
-  //     await deleteFriendshipByUserId(userId);
-  //     onStatusChange?.(null);
-  //   } catch (error) {
-  //     console.error("Failed to remove friend:", error);
-  //   }
-  // }
 
   switch (friendshipStatus) {
     case null:

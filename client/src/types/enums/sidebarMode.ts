@@ -21,6 +21,11 @@ export enum SidebarMode {
   SETTINGS_ACCOUNT = "settingsAccount",
   SETTINGS_PASSWORD = "settingsPassword",
   SETTINGS_PRIVACY = "settingsPrivacy",
+  SETTINGS_EMAIL = "settingsEmail",
+  SETTINGS_USERNAME = "settingsUsername",
+  SETTINGS_PHONE = "settingsPhone",
+
+  // settings
   SETTINGS_THEME = "settingsTheme",
   SETTINGS_DISPLAY = "settingsDisplay",
   SETTINGS_KEYBOARD = "settingsKeyboard",

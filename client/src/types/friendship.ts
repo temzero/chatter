@@ -1,9 +1,12 @@
 import { FriendshipStatus } from "./enums/friendshipType";
+import { User } from "./user";
 
 export interface FriendshipResDto {
   id: string;
   senderId: string;
+  sender: User;
   receiverId: string;
+  receiver: User;
   status: FriendshipStatus;
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string

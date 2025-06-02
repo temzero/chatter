@@ -66,13 +66,13 @@ button {
   text-align: center;
   cursor: pointer;
   font-size: 1rem;
+  background-color: var(--border-color);
 }
 button:hover {
   opacity: 0.9;
 }
 button:disabled {
   color: var(--text-color);
-  background-color: var(--border-color);
   opacity: 0.8;
   pointer-events: none;
 }
@@ -109,6 +109,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 /* Optional: Hide the dropdown arrow in Firefox */
 input[type="date"]::-moz-calendar-picker-indicator {
   display: none;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
 }
 
 .input {

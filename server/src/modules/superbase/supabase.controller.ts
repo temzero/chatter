@@ -51,9 +51,6 @@ export class SupabaseController {
       avatar.mimetype,
     );
 
-    // if (body.oldUrl) {
-    //   this.supabaseService.deleteFileByUrl(body.oldUrl);
-    // }
     // Fire-and-forget deletion of old avatar
     if (body.oldUrl) {
       this.handleOldAvatarDeletion(body.oldUrl).catch((error) => {

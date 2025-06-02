@@ -7,11 +7,13 @@ import { TokenStorageService } from '../auth/services/token-storage.service';
 import { RefreshToken } from '../auth/entities/refresh-token.entity';
 import { SupabaseModule } from '../superbase/supabase.module';
 import { FriendshipModule } from '../friendship/friendship.module';
+import { MailModule } from '../auth/mail/mail.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, RefreshToken]),
     forwardRef(() => FriendshipModule),
+    MailModule,
     SupabaseModule,
   ],
   controllers: [UserController],

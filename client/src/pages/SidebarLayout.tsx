@@ -27,7 +27,7 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({
           >
             arrow_back
           </i>
-          <h1 className="font-semibold text-xl">{title}</h1>
+          <h1 className="font-semibold text-lg">{title}</h1>
         </div>
         {rightButton ? (
           rightButton

@@ -10,6 +10,7 @@ import {
   ReceivedRequestsResDto,
   SentRequestResDto,
 } from './dto/responses/friend-request-response.dto';
+import { FriendshipResponseDto } from './dto/responses/friendship-response.dto';
 
 @Injectable()
 export class FriendshipService {
@@ -103,17 +104,18 @@ export class FriendshipService {
   }
 
   async respondToRequest(
-    userId: string,
+    receiverId: string,
     friendshipId: string,
     status: FriendshipStatus.ACCEPTED | FriendshipStatus.DECLINED,
-  ): Promise<Friendship> {
+  ) {
     try {
       const request = await this.friendshipRepo.findOne({
         where: {
           id: friendshipId,
-          receiverId: userId,
+          receiverId,
           receiverStatus: FriendshipStatus.PENDING,
         },
+        relations: ['receiver'], // Include receiver relation
       });
 
       if (!request) {
@@ -128,7 +130,16 @@ export class FriendshipService {
         request.requestMessage = null;
       }
 
-      return await this.friendshipRepo.save(request);
+      const updatedFriendship = await this.friendshipRepo.save(request);
+
+      if (status === FriendshipStatus.ACCEPTED) {
+        return updatedFriendship; // Returns with receiver
+      } else {
+        // For DECLINED, remove receiver before returning
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { receiver, ...friendshipWithoutReceiver } = updatedFriendship;
+        return friendshipWithoutReceiver;
+      }
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to respond to friend request');
     }

@@ -7,7 +7,7 @@ import type {
 import { ChatType } from "@/types/enums/ChatType";
 
 type ChatAvatarProps = {
-  chat: ChatResponse;
+  chat?: ChatResponse | null; // Make chat optional
   type?: "header" | "sidebar" | "info" | "contact";
 };
 
@@ -15,8 +15,23 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
   chat,
   type = "sidebar",
 }) => {
+  // Early return if no chat
   if (!chat) {
-    return null;
+    return (
+      <div
+        className={`bg-[var(--border-color)] flex items-center justify-center overflow-hidden ${
+          type === "header"
+            ? "h-11 w-11 rounded-[10px]"
+            : type === "info"
+            ? "h-32 w-32 rounded-[30px]"
+            : type === "contact"
+            ? "h-12 w-12 rounded-[30px]"
+            : "h-16 w-16 rounded-2xl"
+        }`}
+      >
+        <i className="material-symbols-outlined text-2xl opacity-20">error</i>
+      </div>
+    );
   }
 
   // Define size and rounded styles based on type
@@ -68,14 +83,12 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
         <div className={`${sharedBase} relative`}>
           {channelChat.avatarUrl ? (
             <>
-              {/* Main image */}
               <img
                 className="h-full w-full object-cover"
                 src={channelChat.avatarUrl}
                 alt={`${channelChat.name || "Channel"}'s avatar`}
                 loading="lazy"
               />
-              {/* Blurred border effect */}
               <div
                 className={`absolute inset-0 ${styles.rounded} border-[var(--border-color)] pointer-events-none`}
                 style={{
@@ -85,7 +98,6 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
                   filter: "blur(4px)",
                 }}
               />
-              {/* Sharp inner border */}
               <div
                 className={`absolute inset-0 ${styles.rounded} pointer-events-none`}
                 style={{
@@ -118,9 +130,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
               loading="lazy"
             />
           ) : (
-            <div
-              className={`bg-[var(--border-color)] cursor-pointer h-full w-full`}
-            >
+            <div className="bg-[var(--border-color)] cursor-pointer h-full w-full">
               <div className="grid grid-cols-2 grid-rows-2 h-full w-full">
                 {Array.from({ length: 4 }).map((_, idx) => (
                   <div key={idx} className="flex items-center justify-center">
@@ -140,11 +150,14 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
 
     case ChatType.DIRECT: {
       const directChat = chat as DirectChatResponse;
+      // Safe access to chatPartner properties
+      const chatPartner = directChat.chatPartner || {};
+
       return (
         <Avatar
-          avatarUrl={directChat.chatPartner.avatarUrl ?? undefined}
-          firstName={directChat.chatPartner.firstName}
-          lastName={directChat.chatPartner.lastName}
+          avatarUrl={chatPartner.avatarUrl ?? undefined}
+          firstName={chatPartner.firstName}
+          lastName={chatPartner.lastName}
           className={`${styles.size}`}
         />
       );

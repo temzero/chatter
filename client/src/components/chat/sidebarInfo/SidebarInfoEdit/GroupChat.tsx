@@ -28,23 +28,19 @@ const GroupChat: React.FC = () => {
             {
               icon: "bookmark",
               text: "Saved Messages",
-              count: 12,
               action: "saved" as SidebarInfoModes,
             },
             {
               icon: "attach_file",
               text: "Media & Files",
-              // count: activeMedia.length,
-              count: 8,
               action: "media" as SidebarInfoModes,
             },
           ] as {
             icon: string;
             text: string;
-            count: number;
             action: SidebarInfoModes;
           }[]
-        ).map(({ icon, text, count, action }) => (
+        ).map(({ icon, text, action }) => (
           <React.Fragment key={text}>
             <div
               className="flex p-2 items-center justify-between w-full cursor-pointer hover:bg-[var(--hover-color)]"
@@ -56,7 +52,6 @@ const GroupChat: React.FC = () => {
                 </span>
                 <h1>{text}</h1>
               </div>
-              <p className="opacity-60">{count}</p>
             </div>
           </React.Fragment>
         ))}

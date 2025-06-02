@@ -1,19 +1,19 @@
 // src/modules/friendship/dto/friendship-response.dto.ts
 import { Expose, Type } from 'class-transformer';
 import { FriendshipStatus } from '../../constants/friendship-status.constants';
-import { UserResponseDto } from 'src/modules/user/dto/responses/user-response.dto';
+import { ChatPartnerResDto } from 'src/modules/user/dto/responses/user-response.dto';
 
 export class FriendshipResponseDto {
   @Expose()
   id: string;
 
   @Expose()
-  @Type(() => UserResponseDto)
-  sender: UserResponseDto;
+  @Type(() => ChatPartnerResDto)
+  sender: ChatPartnerResDto;
 
   @Expose()
-  @Type(() => UserResponseDto)
-  receiver: UserResponseDto;
+  @Type(() => ChatPartnerResDto)
+  receiver: ChatPartnerResDto;
 
   @Expose()
   senderStatus: FriendshipStatus;
@@ -29,24 +29,6 @@ export class FriendshipResponseDto {
 
   @Expose()
   updatedAt: Date;
-
-  // @Expose()
-  // get status(): FriendshipStatus {
-  //   // You can add logic to compute an overall status if needed
-  //   if (
-  //     this.senderStatus === FriendshipStatus.ACCEPTED &&
-  //     this.receiverStatus === FriendshipStatus.ACCEPTED
-  //   ) {
-  //     return FriendshipStatus.ACCEPTED;
-  //   }
-  //   if (
-  //     this.senderStatus === FriendshipStatus.DECLINED ||
-  //     this.receiverStatus === FriendshipStatus.DECLINED
-  //   ) {
-  //     return FriendshipStatus.DECLINED;
-  //   }
-  //   return FriendshipStatus.PENDING;
-  // }
 }
 
 // For friendship status with a specific user

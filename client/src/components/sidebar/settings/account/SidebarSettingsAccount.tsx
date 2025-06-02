@@ -11,21 +11,17 @@ const SidebarSettingsAccount: React.FC = () => {
     {
       title: "Change Username",
       subtitle: `@${currentUser?.username || "username"}`,
-      onClick: () => setSidebar(SidebarMode.SETTINGS_ACCOUNT), // Replace with a dedicated mode if needed (e.g., SETTINGS_ACCOUNT_USERNAME)
+      onClick: () => setSidebar(SidebarMode.SETTINGS_USERNAME), // Replace with a dedicated mode if needed (e.g., SETTINGS_ACCOUNT_USERNAME)
     },
     {
       title: "Change Email",
       subtitle: currentUser?.email || "email@example.com",
-      onClick: () => setSidebar(SidebarMode.SETTINGS_ACCOUNT), // Replace with SETTINGS_ACCOUNT_EMAIL if needed
+      onClick: () => setSidebar(SidebarMode.SETTINGS_EMAIL), // Replace with SETTINGS_ACCOUNT_EMAIL if needed
     },
     {
       title: "Change Phone Number",
       subtitle: currentUser?.phoneNumber || "+1234567890",
-      onClick: () => setSidebar(SidebarMode.SETTINGS_ACCOUNT), // Replace with SETTINGS_ACCOUNT_PHONE if needed
-    },
-    {
-      title: "Privacy & Security",
-      onClick: () => setSidebar(SidebarMode.SETTINGS_PRIVACY), // Assuming this exists in your enum
+      onClick: () => setSidebar(SidebarMode.SETTINGS_PHONE), // Replace with SETTINGS_ACCOUNT_PHONE if needed
     },
     {
       title: "Change Password",

@@ -1,5 +1,4 @@
 import React from "react";
-import { formatTime } from "@/utils/formatTime";
 import ContactInfoItem from "@/components/ui/contactInfoItem";
 import { DirectChatResponse } from "@/types/chat";
 import {
@@ -14,26 +13,15 @@ import { useChatStore } from "@/stores/chatStore";
 
 const DirectChat: React.FC = () => {
   const activeChat = useChatStore((s) => s.activeChat) as DirectChatResponse;
-  const setActiveChat = useChatStore((s) => s.setActiveChat);
+  // const setActiveChat = useChatStore((s) => s.setActiveChat);
   const { setSidebarInfo } = useSidebarInfoStore();
   if (!activeChat) return;
   const chatPartner = activeChat.chatPartner;
-  console.log(chatPartner);
 
   if (!chatPartner) {
     console.error("No chatPartner found!");
     return;
   }
-
-  const updateFriendshipStatus = (newStatus: FriendshipStatus | null) => {
-    setActiveChat({
-      ...activeChat,
-      chatPartner: {
-        ...activeChat.chatPartner,
-        friendshipStatus: newStatus,
-      },
-    });
-  };
 
   return (
     <div className="flex flex-col justify-center items-center gap-4 px-4 w-full h-full">
@@ -54,7 +42,6 @@ const DirectChat: React.FC = () => {
         lastName={chatPartner.lastName}
         avatarUrl={chatPartner.avatarUrl ?? undefined}
         friendshipStatus={chatPartner.friendshipStatus}
-        onStatusChange={updateFriendshipStatus}
         className="bg-[var(--primary-green)]"
       />
       {chatPartner.friendshipStatus === FriendshipStatus.ACCEPTED && (
@@ -77,7 +64,7 @@ const DirectChat: React.FC = () => {
           />
           <ContactInfoItem
             icon="cake"
-            value={formatTime(chatPartner.birthday)}
+            value={chatPartner.birthday}
             copyType="birthday"
           />
         </div>
@@ -89,22 +76,19 @@ const DirectChat: React.FC = () => {
             {
               icon: "bookmark",
               text: "Saved Messages",
-              count: 12,
               action: "saved" as SidebarInfoModes,
             },
             {
               icon: "attach_file",
               text: "Media & Files",
-              count: 6,
               action: "media" as SidebarInfoModes,
             },
           ] as {
             icon: string;
             text: string;
-            count: number;
             action: SidebarInfoModes;
           }[]
-        ).map(({ icon, text, count, action }) => (
+        ).map(({ icon, text, action }) => (
           <React.Fragment key={text}>
             <div
               className="flex p-2 items-center justify-between w-full cursor-pointer hover:bg-[var(--hover-color)]"
@@ -116,7 +100,6 @@ const DirectChat: React.FC = () => {
                 </span>
                 <h1>{text}</h1>
               </div>
-              <p className="opacity-60">{count}</p>
             </div>
           </React.Fragment>
         ))}

@@ -44,18 +44,25 @@ export class FriendshipController {
 
   @Patch('requests/:friendshipId')
   async respondToRequest(
-    @CurrentUser('id') userId: string,
+    @CurrentUser('id') receiverId: string,
     @Param('friendshipId') friendshipId: string,
     @Body() body: RespondToRequestDto,
   ): Promise<SuccessResponse<FriendshipResponseDto>> {
     const friendship = await this.friendshipService.respondToRequest(
-      userId,
+      receiverId,
       friendshipId,
       body.status,
     );
 
+    const response = plainToInstance(FriendshipResponseDto, friendship, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
+
+    console.log('friendship accepted: ', response);
+
     return new SuccessResponse(
-      plainToInstance(FriendshipResponseDto, friendship),
+      response,
       'Friend request responded successfully',
     );
   }

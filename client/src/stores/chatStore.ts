@@ -25,7 +25,10 @@ interface ChatStore {
 
   initialize: () => Promise<void>;
   getChats: () => Promise<void>;
-  getChatById: (chatId: string) => Promise<void>;
+  getChatById: (chatId?: string) => Promise<void>;
+  getDirectChatByUserId: (
+    userId: string
+  ) => Promise<ChatResponse | null | undefined>;
   setActiveChat: (chat: ChatResponse | null) => void;
   getGroupMembers: (groupId: string) => Promise<ChatMember[]>;
   setActiveChatById: (chatId: string | null) => Promise<void>;
@@ -124,15 +127,24 @@ export const useChatStore = create<ChatStore>()(
         },
 
         getChatById: async (chatId) => {
+          // If no chatId provided, use active chat's ID if available
+          const targetChatId = chatId || get().activeChat?.id;
+          if (!targetChatId) {
+            console.warn("No chatId provided and no active chat available");
+            return;
+          }
+
           set({ isLoading: true });
           try {
-            const chat: ChatResponse = await chatService.getChatById(chatId);
+            const chat: ChatResponse = await chatService.getChatById(
+              targetChatId
+            );
             set((state) => ({
-              chats: state.chats.some((c) => c.id === chatId)
-                ? state.chats.map((c) => (c.id === chatId ? chat : c))
+              chats: state.chats.some((c) => c.id === targetChatId)
+                ? state.chats.map((c) => (c.id === targetChatId ? chat : c))
                 : [...state.chats, chat],
               activeChat:
-                state.activeChat?.id === chatId ? chat : state.activeChat,
+                state.activeChat?.id === targetChatId ? chat : state.activeChat,
               isLoading: false,
             }));
           } catch (error) {
@@ -142,6 +154,27 @@ export const useChatStore = create<ChatStore>()(
               isLoading: false,
             });
           }
+        },
+
+        getDirectChatByUserId: async (userId) => {
+          if (!userId) {
+            console.warn("No userId provided");
+            return;
+          }
+
+          // Find existing direct chat with this user in the store
+          const existingChat = get().chats.find(
+            (chat) =>
+              chat.type === ChatType.DIRECT &&
+              chat.chatPartner.userId === userId // handle both cases if needed
+          );
+
+          if (existingChat) {
+            // If found, refresh the chat data by calling getChatById
+            await get().getChatById(existingChat.id);
+            return existingChat;
+          }
+          return null;
         },
 
         getGroupMembers: async (groupId) => {

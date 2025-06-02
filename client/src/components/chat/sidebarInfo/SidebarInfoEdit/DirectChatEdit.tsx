@@ -12,6 +12,7 @@ const DirectChatEdit = () => {
   const activeChat = useChatStore(
     (state) => state.activeChat
   ) as DirectChatResponse;
+  const getChatById = useChatStore((state) => state.getChatById);
   const chatPartner = activeChat.chatPartner;
   const deleteChat = useChatStore((state) => state.deleteChat);
   const updateMemberNickname = useChatStore(
@@ -81,6 +82,16 @@ const DirectChatEdit = () => {
       setSidebarInfo("default");
     } catch (error) {
       console.error("Failed to update nickname:", error);
+    }
+  };
+
+  const handleUnfriend = async () => {
+    try {
+      await deleteFriendshipByUserId(activeChat.chatPartner.userId);
+      setSidebarInfo("default");
+      getChatById();
+    } catch (error) {
+      console.error("Failed to unfriend:", error);
     }
   };
 
@@ -162,9 +173,7 @@ const DirectChatEdit = () => {
             FriendshipStatus.ACCEPTED && (
             <button
               className="flex gap-2 justify-center items-center p-2 text-yellow-500 w-full font-medium rounded-none custom-border-r"
-              onClick={() =>
-                deleteFriendshipByUserId(activeChat.chatPartner.userId)
-              }
+              onClick={handleUnfriend}
             >
               <span className="material-symbols-outlined">person_cancel</span>
               Unfriend

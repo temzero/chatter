@@ -8,20 +8,25 @@ import {
   UseGuards,
   Headers,
   InternalServerErrorException,
+  Post,
+  BadRequestException,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { UserService } from './user.service';
-import { UpdateUserDto } from './dto/requests/update-user.dto';
 import { SuccessResponse } from 'src/common/api-response/success';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import {
-  OtherUserResponseDto,
+  ChatPartnerResDto,
   UserResponseDto,
 } from './dto/responses/user-response.dto';
 import { JwtPayload } from '../auth/types/jwt-payload.type';
 import { UpdateProfileDto } from './dto/requests/update-profile.dto';
 import { SupabaseService } from '../superbase/supabase.service';
+import { ChangePasswordDto } from './dto/requests/change-password.dto';
+import { VerifyUsernameDto } from './dto/requests/verify-username.dto';
+import { VerifyPhoneDto } from './dto/requests/verify-phone.dto';
+import { VerifyEmailDto } from './dto/requests/verify-email.dto';
 
 @Controller('user')
 @UseGuards(JwtAuthGuard)
@@ -62,18 +67,17 @@ export class UserController {
     );
   }
 
-  @Get('/find/:identifier')
+  @Get('find/:identifier')
   async findOneByIdentifier(
     @CurrentUser('id') userId: string,
     @Param('identifier') identifier: string,
-  ): Promise<SuccessResponse<OtherUserResponseDto>> {
+  ): Promise<SuccessResponse<ChatPartnerResDto>> {
     const user = await this.userService.getOtherUserByIdentifier(
       identifier.trim(),
       userId,
     );
-    // const friendshipStatus = await this.FriendshipService.getFriendshipStatus()
     return new SuccessResponse(
-      plainToInstance(OtherUserResponseDto, user),
+      plainToInstance(ChatPartnerResDto, user),
       'User retrieved successfully',
     );
   }
@@ -88,7 +92,6 @@ export class UserController {
         userId,
         updateProfileDto,
       );
-
       return new SuccessResponse(
         plainToInstance(UserResponseDto, updatedUser),
         'User updated successfully',
@@ -99,18 +102,99 @@ export class UserController {
     }
   }
 
-  @Put()
-  async update(
+  // @Put()
+  // @UseInterceptors(FileInterceptor('avatar'))
+  // async update(
+  //   @CurrentUser('id') userId: string,
+  //   @Body() updateUserDto: UpdateUserDto,
+  //   @UploadedFile() file?: Express.Multer.File,
+  // ): Promise<SuccessResponse<UserResponseDto>> {
+  //   if (file) {
+  //     const avatarUrl = await this.supabaseService.uploadFile(
+  //       `users/${userId}/avatar`,
+  //       file,
+  //     );
+  //     updateUserDto.avatar = avatarUrl;
+  //   }
+
+  //   const updatedUser = await this.userService.updateUser(
+  //     userId,
+  //     updateUserDto,
+  //   );
+  //   return new SuccessResponse(
+  //     plainToInstance(UserResponseDto, updatedUser),
+  //     'User updated successfully',
+  //   );
+  // }
+
+  @Put('username')
+  async updateUsername(
     @CurrentUser('id') userId: string,
-    @Body() updateUserDto: UpdateUserDto,
+    @Body() updateUsernameDto: VerifyUsernameDto,
   ): Promise<SuccessResponse<UserResponseDto>> {
-    const updatedUser = await this.userService.updateUser(
+    const updatedUser = await this.userService.updateUsername(
       userId,
-      updateUserDto,
+      updateUsernameDto.username,
     );
     return new SuccessResponse(
       plainToInstance(UserResponseDto, updatedUser),
-      'User updated successfully',
+      'Username updated successfully',
+    );
+  }
+
+  @Post('verify/username')
+  async verifyUsername(
+    @Body() verifyUsernameDto: VerifyUsernameDto,
+  ): Promise<SuccessResponse<boolean>> {
+    const isAvailable = await this.userService.isUsernameAvailable(
+      verifyUsernameDto.username,
+    );
+
+    const message = isAvailable
+      ? 'Username available'
+      : 'Username is already taken';
+
+    return new SuccessResponse(isAvailable, message);
+  }
+
+  @Put('password')
+  async changePassword(
+    @CurrentUser('id') userId: string,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ): Promise<SuccessResponse<boolean>> {
+    const { isSuccess, message } = await this.userService.changePassword(
+      userId,
+      changePasswordDto.currentPassword,
+      changePasswordDto.newPassword,
+    );
+
+    return new SuccessResponse(isSuccess, message);
+  }
+
+  @Post('verify/phone/send')
+  async sendPhoneVerification(
+    @CurrentUser('id') userId: string,
+    @Body() verifyPhoneDto: VerifyPhoneDto,
+  ): Promise<SuccessResponse<{ message: string }>> {
+    await this.userService.sendPhoneVerification(
+      userId,
+      verifyPhoneDto.phoneNumber,
+    );
+    return new SuccessResponse(
+      { message: 'Verification code sent successfully' },
+      'Phone verification initiated',
+    );
+  }
+
+  @Post('verify/email/send')
+  async sendEmailVerification(
+    @CurrentUser('id') userId: string,
+    @Body() verifyEmailDto: VerifyEmailDto,
+  ): Promise<SuccessResponse<{ message: string }>> {
+    await this.userService.sendEmailVerification(userId, verifyEmailDto.email);
+    return new SuccessResponse(
+      { message: 'Verification email sent successfully' },
+      'Email verification initiated',
     );
   }
 
@@ -119,6 +203,9 @@ export class UserController {
     @Headers('x-device-id') deviceId: string,
     @CurrentUser('id') userId: string,
   ): Promise<SuccessResponse<UserResponseDto>> {
+    if (!deviceId) {
+      throw new BadRequestException('Device ID is required');
+    }
     const user = await this.userService.deleteUser(userId, deviceId);
     return new SuccessResponse(
       plainToInstance(UserResponseDto, user),

@@ -4,6 +4,7 @@ import { useModalStore } from "@/stores/modalStore";
 import { Avatar } from "../ui/avatar/Avatar";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import { FriendshipStatus } from "@/types/friendship";
+import { useChatStore } from "@/stores/chatStore";
 
 interface FriendRequestModalProps {
   receiver: {
@@ -20,6 +21,7 @@ const FriendRequestModal: React.FC<FriendRequestModalProps> = ({
   receiver,
   onSuccess,
 }) => {
+  const getChatById = useChatStore((state) => state.getChatById);
   const { sendFriendRequest } = useFriendshipStore();
   const closeModal = useModalStore((s) => s.closeModal);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -35,6 +37,7 @@ const FriendRequestModal: React.FC<FriendRequestModalProps> = ({
         onSuccess(FriendshipStatus.PENDING);
       }
       closeModal();
+      getChatById();
     } catch (err: unknown) {
       console.error("Failed to send friend request:", err);
     }
@@ -60,14 +63,13 @@ const FriendRequestModal: React.FC<FriendRequestModalProps> = ({
           <h1 className="text-xl font-semibold">
             {receiver.firstName} {receiver.lastName}
           </h1>
-          {receiver.username && <p className="text-sm opacity-80">@{receiver.username}</p>}
+          {receiver.username && (
+            <p className="text-sm opacity-80">@{receiver.username}</p>
+          )}
         </div>
       </div>
 
-      <form
-        className="w-full"
-        onSubmit={handleFriendRequest}
-      >
+      <form className="w-full" onSubmit={handleFriendRequest}>
         <textarea
           id="friend-request-message"
           ref={textareaRef}

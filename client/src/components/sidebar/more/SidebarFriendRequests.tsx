@@ -13,6 +13,9 @@ const SidebarFriendRequests: React.FC = () => {
   const createOrGetDirectChat = useChatStore(
     (state) => state.createOrGetDirectChat
   );
+  const getDirectChatByUserId = useChatStore(
+    (state) => state.getDirectChatByUserId
+  );
   const { receivedRequests, sentRequests, respondToRequest, cancelRequest } =
     useFriendshipStore();
   const [activeTab, setActiveTab] = useState<RequestTab>("received");
@@ -22,6 +25,33 @@ const SidebarFriendRequests: React.FC = () => {
     if (tab === activeTab) return;
     setDirection(tab === "received" ? -1 : 1);
     setActiveTab(tab);
+  };
+
+  const handleAcceptRequest = async (requestId: string, senderId: string) => {
+    try {
+      await respondToRequest(requestId, FriendshipStatus.ACCEPTED);
+      getDirectChatByUserId(senderId);
+    } catch (error) {
+      console.error("Failed to accept friend request:", error);
+    }
+  };
+
+  const handleDeclineRequest = async (requestId: string, senderId: string) => {
+    try {
+      await respondToRequest(requestId, FriendshipStatus.DECLINED);
+      getDirectChatByUserId(senderId);
+    } catch (error) {
+      console.error("Failed to decline friend request:", error);
+    }
+  };
+
+  const handleCancelRequest = async (requestId: string, receiverId: string) => {
+    try {
+      await cancelRequest(requestId);
+      getDirectChatByUserId(receiverId);
+    } catch (error) {
+      console.error("Failed to cancel friend request:", error);
+    }
   };
 
   return (
@@ -92,10 +122,7 @@ const SidebarFriendRequests: React.FC = () => {
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            respondToRequest(
-                              request.id,
-                              FriendshipStatus.ACCEPTED
-                            );
+                            handleAcceptRequest(request.id, request.senderId);
                           }}
                         >
                           Accept
@@ -105,10 +132,7 @@ const SidebarFriendRequests: React.FC = () => {
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            respondToRequest(
-                              request.id,
-                              FriendshipStatus.DECLINED
-                            );
+                            handleDeclineRequest(request.id, request.senderId);
                           }}
                         >
                           Decline
@@ -164,7 +188,7 @@ const SidebarFriendRequests: React.FC = () => {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          cancelRequest(request.id);
+                          handleCancelRequest(request.id, request.receiverId);
                         }}
                       >
                         Cancel Request
