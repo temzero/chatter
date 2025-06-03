@@ -13,8 +13,6 @@ export class GetOrCreateResponse<D> {
   ) {}
 }
 
-
-
 // Specialized version for auth responses
 export class AuthResponse {
   constructor(

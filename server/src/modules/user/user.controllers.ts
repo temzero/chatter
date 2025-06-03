@@ -9,7 +9,6 @@ import {
   Headers,
   InternalServerErrorException,
   Post,
-  BadRequestException,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { UserService } from './user.service';
@@ -22,18 +21,22 @@ import {
 } from './dto/responses/user-response.dto';
 import { JwtPayload } from '../auth/types/jwt-payload.type';
 import { UpdateProfileDto } from './dto/requests/update-profile.dto';
-import { SupabaseService } from '../superbase/supabase.service';
 import { ChangePasswordDto } from './dto/requests/change-password.dto';
 import { VerifyUsernameDto } from './dto/requests/verify-username.dto';
-import { VerifyPhoneDto } from './dto/requests/verify-phone.dto';
+// import { VerifyPhoneDto } from './dto/requests/verify-phone.dto';
 import { VerifyEmailDto } from './dto/requests/verify-email.dto';
+import { VerifyEmailCodeDto } from './dto/requests/verify-email.dto';
+import { MailService } from '../auth/mail/mail.service';
+import { VerificationCodeService } from '../auth/services/verification-code.service';
+import { ErrorResponse } from 'src/common/api-response/errors';
 
 @Controller('user')
 @UseGuards(JwtAuthGuard)
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    private readonly supabaseService: SupabaseService,
+    private readonly mailService: MailService,
+    private readonly verificationCodeService: VerificationCodeService,
   ) {}
 
   @Get('me')
@@ -102,31 +105,6 @@ export class UserController {
     }
   }
 
-  // @Put()
-  // @UseInterceptors(FileInterceptor('avatar'))
-  // async update(
-  //   @CurrentUser('id') userId: string,
-  //   @Body() updateUserDto: UpdateUserDto,
-  //   @UploadedFile() file?: Express.Multer.File,
-  // ): Promise<SuccessResponse<UserResponseDto>> {
-  //   if (file) {
-  //     const avatarUrl = await this.supabaseService.uploadFile(
-  //       `users/${userId}/avatar`,
-  //       file,
-  //     );
-  //     updateUserDto.avatar = avatarUrl;
-  //   }
-
-  //   const updatedUser = await this.userService.updateUser(
-  //     userId,
-  //     updateUserDto,
-  //   );
-  //   return new SuccessResponse(
-  //     plainToInstance(UserResponseDto, updatedUser),
-  //     'User updated successfully',
-  //   );
-  // }
-
   @Put('username')
   async updateUsername(
     @CurrentUser('id') userId: string,
@@ -171,30 +149,52 @@ export class UserController {
     return new SuccessResponse(isSuccess, message);
   }
 
-  @Post('verify/phone/send')
-  async sendPhoneVerification(
-    @CurrentUser('id') userId: string,
-    @Body() verifyPhoneDto: VerifyPhoneDto,
-  ): Promise<SuccessResponse<{ message: string }>> {
-    await this.userService.sendPhoneVerification(
-      userId,
-      verifyPhoneDto.phoneNumber,
-    );
-    return new SuccessResponse(
-      { message: 'Verification code sent successfully' },
-      'Phone verification initiated',
-    );
-  }
-
-  @Post('verify/email/send')
-  async sendEmailVerification(
+  @Post('verify/email/send-code')
+  async sendEmailVerificationCode(
     @CurrentUser('id') userId: string,
     @Body() verifyEmailDto: VerifyEmailDto,
-  ): Promise<SuccessResponse<{ message: string }>> {
-    await this.userService.sendEmailVerification(userId, verifyEmailDto.email);
+  ): Promise<SuccessResponse<boolean>> {
+    const isSuccess = await this.mailService.sendEmailVerificationCode(
+      userId,
+      verifyEmailDto.email,
+    );
+
+    const message = isSuccess
+      ? 'Verification email sent successfully'
+      : 'Verification email sent failed';
+
+    return new SuccessResponse(isSuccess, message);
+  }
+
+  @Post('verify/email/confirm-code')
+  async updateEmailWithCode(
+    @CurrentUser('id') userId: string,
+    @Body() verifyEmailCodeDto: VerifyEmailCodeDto,
+  ): Promise<SuccessResponse<UserResponseDto>> {
+    if (!/^\d{6}$/.test(verifyEmailCodeDto.verificationCode)) {
+      ErrorResponse.badRequest('Verification code must be 6 digits');
+    }
+
+    // Verify the code first
+    const isValid = await this.verificationCodeService.verifyCode(
+      userId,
+      verifyEmailCodeDto.email,
+      verifyEmailCodeDto.verificationCode,
+    );
+
+    if (!isValid) {
+      ErrorResponse.badRequest('Email verification failed - invalid code');
+    }
+
+    // Update user's email and get the updated user
+    const updatedUser = await this.userService.updateEmail(
+      userId,
+      verifyEmailCodeDto.email,
+    );
+
     return new SuccessResponse(
-      { message: 'Verification email sent successfully' },
-      'Email verification initiated',
+      plainToInstance(UserResponseDto, updatedUser),
+      'Email verified and updated successfully',
     );
   }
 
@@ -204,7 +204,7 @@ export class UserController {
     @CurrentUser('id') userId: string,
   ): Promise<SuccessResponse<UserResponseDto>> {
     if (!deviceId) {
-      throw new BadRequestException('Device ID is required');
+      ErrorResponse.badRequest('Device ID is required');
     }
     const user = await this.userService.deleteUser(userId, deviceId);
     return new SuccessResponse(

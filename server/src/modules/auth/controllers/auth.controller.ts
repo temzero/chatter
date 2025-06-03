@@ -150,15 +150,13 @@ export class AuthController {
   }
 
   @Get('verify-email')
-  verifyEmail(@Query('token') token: string) {
-    return this.authService
-      .verifyEmail(token)
-      .then(
-        (result) => new SuccessResponse(result, 'Email verified successfully'),
-      )
-      .catch((error) => {
-        ErrorResponse.throw(error, 'Email verification fail');
-      });
+  async verifyEmail(@Query('token') token: string) {
+    try {
+      const result = await this.authService.verifyEmail(token);
+      return new SuccessResponse(result, 'Email verified successfully');
+    } catch (error) {
+      ErrorResponse.throw(error, 'Email verification fail');
+    }
   }
 
   @Post('send-password-reset-email')

@@ -1,16 +1,20 @@
 // src/auth/services/token.service.ts
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { TokenType } from '../types/token-type.enum';
 import { JwtPayload, JwtRefreshPayload } from '../types/jwt-payload.type';
 import { Request } from 'express';
 import * as jwt from 'jsonwebtoken';
+import { ErrorResponse } from 'src/common/api-response/errors';
+import { VerificationPurpose } from '../mail/constants/verificationPurpose';
+import { VerificationCodeService } from './verification-code.service';
 
 @Injectable()
 export class TokenService {
   constructor(
     private readonly jwtService: JwtService,
+    private readonly verificationCodeService: VerificationCodeService,
     private readonly configService: ConfigService,
   ) {}
 
@@ -54,12 +58,12 @@ export class TokenService {
     } catch (err) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (err.name === 'TokenExpiredError') {
-        throw new UnauthorizedException('Token expired');
+        ErrorResponse.unauthorized('Token expired');
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       } else if (err.name === 'JsonWebTokenError') {
-        throw new UnauthorizedException('Invalid token');
+        ErrorResponse.unauthorized('Invalid token');
       } else {
-        throw new UnauthorizedException('Token verification failed');
+        ErrorResponse.unauthorized('Token verification failed');
       }
     }
   }
@@ -96,7 +100,7 @@ export class TokenService {
       !payload.deviceId ||
       !payload.deviceName
     ) {
-      throw new Error('Missing required fields for token generation');
+      ErrorResponse.badRequest('Missing required fields for token generation');
     }
 
     const accessPayload: JwtPayload = {
@@ -123,8 +127,7 @@ export class TokenService {
         ),
       };
     } catch (error) {
-      console.error('Token generation failed', error);
-      throw new Error('Failed to generate tokens');
+      ErrorResponse.throw(error, 'Failed to generate tokens');
     }
   }
 
@@ -148,9 +151,57 @@ export class TokenService {
     const refreshToken = tokenFromHeader || tokenFromCookie;
 
     if (!refreshToken) {
-      throw new UnauthorizedException('Refresh token is missing');
+      ErrorResponse.badRequest('Refresh token is missing');
     }
 
     return refreshToken;
+  }
+
+  async generateEmailToken(
+    userId: string,
+    email: string,
+    purpose: VerificationPurpose,
+  ): Promise<string> {
+    return this.jwtService.signAsync(
+      {
+        sub: userId,
+        email,
+        purpose,
+      },
+      {
+        secret: this.configService.get<string>('JWT_VERIFICATION_SECRET'),
+        expiresIn: this.configService.get<string>(
+          'JWT_VERIFICATION_EXPIRATION',
+          '15m',
+        ),
+      },
+    );
+  }
+
+  /**
+   * Verifies an email verification token
+   */
+  async verifyEmailToken(token: string): Promise<{
+    userId: string;
+    email: string;
+    purpose: VerificationPurpose;
+  }> {
+    try {
+      const payload = await this.jwtService.verifyAsync<{
+        sub: string;
+        email: string;
+        purpose: VerificationPurpose;
+      }>(token, {
+        secret: this.configService.get<string>('JWT_VERIFICATION_SECRET'),
+      });
+
+      return {
+        userId: payload.sub,
+        email: payload.email,
+        purpose: payload.purpose,
+      };
+    } catch (error) {
+      ErrorResponse.throw(error, 'Invalid or expired verification token');
+    }
   }
 }

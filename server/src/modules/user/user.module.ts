@@ -3,21 +3,21 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserController } from './user.controllers';
 import { UserService } from './user.service';
 import { User } from 'src/modules/user/entities/user.entity';
-import { TokenStorageService } from '../auth/services/token-storage.service';
 import { RefreshToken } from '../auth/entities/refresh-token.entity';
 import { SupabaseModule } from '../superbase/supabase.module';
 import { FriendshipModule } from '../friendship/friendship.module';
-import { MailModule } from '../auth/mail/mail.module';
+import { AuthModule } from '../auth/modules/auth.module';
+import { VerificationCode } from '../auth/entities/verification_code.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, RefreshToken]),
+    TypeOrmModule.forFeature([User, RefreshToken, VerificationCode]),
     forwardRef(() => FriendshipModule),
-    MailModule,
     SupabaseModule,
+    forwardRef(() => AuthModule), // Use forwardRef here
   ],
   controllers: [UserController],
-  providers: [UserService, TokenStorageService],
+  providers: [UserService], // Removed MailService and TokenStorageService as they come from AuthModule
   exports: [UserService, TypeOrmModule],
 })
 export class UserModule {}

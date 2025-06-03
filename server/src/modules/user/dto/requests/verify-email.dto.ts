@@ -5,3 +5,11 @@ export class VerifyEmailDto {
   @IsEmail({}, { message: 'Invalid email format' })
   email: string;
 }
+
+export class VerifyEmailCodeDto {
+  @IsEmail({}, { message: 'Invalid email format' })
+  email: string;
+
+  @IsString()
+  verificationCode: string;
+}

@@ -77,10 +77,9 @@ export class AuthService {
     try {
       const user = await this.userService.createUser(registerDto);
 
-      const verifyEmailToken = this.jwtService.sign({ sub: user.id });
-      const clientUrl = this.configService.get<string>('CLIENT_URL');
-      const verificationUrl = `${clientUrl}/auth/verify-email/${user.firstName}/${user.email}/${verifyEmailToken}`;
-      await this.mailService.sendVerificationEmail(user.email, verificationUrl);
+      // const verifyEmailToken = this.jwtService.sign({ sub: user.id });
+      // const clientUrl = this.configService.get<string>('CLIENT_URL');
+      await this.mailService.sendEmailVerificationLink(user.id, user.email);
 
       // Automatically login the user
       return this.login(user, deviceId, deviceName);
@@ -137,45 +136,105 @@ export class AuthService {
     }
   }
 
-  async sendPasswordResetEmail(email: string) {
+  async sendPasswordResetEmail(email: string): Promise<{ message: string }> {
     try {
       const user = await this.userService.getUserByIdentifier(email);
-      if (!user) return { message: 'user Not found' };
-      if (user.emailVerified === false) {
-        ErrorResponse.unauthorized('Email not verified');
+      if (!user) {
+        ErrorResponse.badRequest(
+          'If an account exists, a password reset link has been sent',
+        );
       }
-      const resetPasswordToken = this.jwtService.sign({ sub: user.id });
-      const clientUrl = this.configService.get<string>('CLIENT_URL');
-      const resetUrl = `${clientUrl}/auth/reset-password/${resetPasswordToken}`;
+      // Generate time-limited token with specific purpose
+      const resetPasswordToken = this.jwtService.sign(
+        {
+          sub: user.id,
+          purpose: 'password_reset',
+          email: user.email, // Include email to prevent token reuse if email changes
+        },
+        { expiresIn: '15m' }, // Short-lived token for security
+      );
 
-      await this.mailService.sendPasswordResetEmail(email, resetUrl);
-      return { message: 'Verification email sent successfully.' };
+      const clientUrl = this.configService.get<string>('CLIENT_URL');
+      const resetUrl = `${clientUrl}/auth/reset-password?token=${encodeURIComponent(resetPasswordToken)}`;
+
+      await this.mailService.sendPasswordResetEmail(user.email, resetUrl);
+
+      return { message: 'Password reset link sent if account exists' };
     } catch (error) {
-      ErrorResponse.throw(error, 'Failed to send password reset email');
+      ErrorResponse.throw(error, 'Failed to process password reset request');
     }
   }
 
-  async verifyEmail(token: string) {
+  async setNewPasswordWithToken(
+    token: string,
+    newPassword: string,
+  ): Promise<{ message: string }> {
     try {
-      const payload = this.jwtService.verify<{ sub: string }>(token);
-      await this.userService.updateUser(payload.sub, {
+      // Verify and decode the token with additional security checks
+      const payload = this.jwtService.verify<{
+        sub: string;
+        purpose: string;
+        email: string;
+        timestamp: number;
+      }>(token);
+      // Validate token purpose
+      if (payload.purpose !== 'password_reset') {
+        ErrorResponse.unauthorized('Invalid token type');
+      }
+      // Get user and validate email match
+      const user = await this.userService.getUserById(payload.sub);
+      if (!user) {
+        ErrorResponse.notFound('User not found');
+      }
+      // Verify the email in token matches user's current email
+      if (user.email !== payload.email) {
+        ErrorResponse.unauthorized('Email mismatch - token invalid');
+      }
+      // Update password and record change time
+      await this.userService.updatePassword(payload.sub, newPassword);
+
+      return { message: 'Password reset successfully' };
+    } catch (error) {
+      ErrorResponse.throw(
+        error,
+        'Password reset failed - please request a new link',
+      );
+    }
+  }
+
+  async verifyEmail(token: string): Promise<{ message: string }> {
+    let userId: string;
+    try {
+      const payload = this.jwtService.verify<{
+        sub: string;
+        purpose?: string;
+        email?: string;
+      }>(token);
+
+      if (payload.purpose !== 'email_verification') {
+        ErrorResponse.unauthorized('Invalid token purpose');
+      }
+
+      userId = payload.sub;
+      const user = await this.userService.getUserById(userId);
+
+      // Additional validation
+      if (user.emailVerified) {
+        return { message: 'Email already verified' };
+      }
+
+      if (payload.email && user.email !== payload.email) {
+        ErrorResponse.unauthorized('Email mismatch');
+      }
+
+      // Update with transaction
+      await this.userService.updateUser(userId, {
         emailVerified: true,
       });
-      return { message: 'Email verified successfully.' };
-    } catch (error) {
-      console.error('verifyEmail', error);
-      ErrorResponse.unauthorized('Invalid or expired token');
-    }
-  }
 
-  async setNewPasswordWithToken(token: string, newPassword: string) {
-    try {
-      const payload = this.jwtService.verify<{ sub: string }>(token);
-      await this.userService.updatePassword(payload.sub, newPassword);
-      return { message: 'Password reset successfully.' };
+      return { message: 'Email verified successfully' };
     } catch (error) {
-      console.error('setNewPasswordWithToken', error);
-      ErrorResponse.unauthorized('Invalid or expired token');
+      ErrorResponse.throw(error, 'Email verification failed');
     }
   }
 

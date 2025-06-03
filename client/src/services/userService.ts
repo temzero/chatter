@@ -75,15 +75,12 @@ export const userService = {
    * Update the currently authenticated user
    * @param updatedData - Data to update
    */
-  async changePassword(
-    currentPassword: string,
-    newPassword: string
-  ) {
+  async changePassword(currentPassword: string, newPassword: string) {
     const { data } = await API.put("/user/password", {
       currentPassword,
       newPassword,
     });
-    console.log('change password Data: ', data)
+    console.log("change password Data: ", data);
     return data;
   },
 
@@ -97,12 +94,40 @@ export const userService = {
   },
 
   /**
-   * Send email verification link
+   * Send 6-digit verification code to email
    * @param email - Email address to verify
+   * @throws {Error} If email is invalid or sending fails
    */
-  async sendEmailVerification(email: string): Promise<User> {
-    const { data } = await API.post("/user/verify/email/send", { email });
-    return data.payload;
+  async sendEmailVerificationCode(email: string): Promise<boolean> {
+      const { data } = await API.post("/user/verify/email/send-code", {
+        email,
+      });
+      return data.payload;
+  },
+
+  /**
+   * Verify 6-digit code sent to email
+   * @param email - Email address to verify
+   * @param verificationCode - 6-digit verification code
+   * @throws {Error} If verification fails
+   */
+  async updateEmailWithCode(
+    email: string,
+    verificationCode: string
+  ): Promise<User> {
+      // Validate code format before sending to server
+      if (!/^\d{6}$/.test(verificationCode)) {
+        throw new Error("Verification code must be 6 digits");
+      }
+
+      const { data } = await API.post("/user/verify/email/confirm-code", {
+        email,
+        verificationCode,
+      });
+
+      console.log('data', data)
+
+      return data.payload;
   },
 
   /**

@@ -3,21 +3,33 @@ import SidebarLayout from "@/pages/SidebarLayout";
 import { SidebarMode } from "@/types/enums/sidebarMode";
 import { useAuthStore } from "@/stores/authStore";
 import { userService } from "@/services/userService";
+import { useSidebarStore } from "@/stores/sidebarStore";
+import axios from "axios";
+
+type MessageType = "error" | "success" | "info";
+
+interface Message {
+  type: MessageType;
+  content: string;
+}
 
 const SidebarSettingsEmail: React.FC = () => {
+  const { setSidebar } = useSidebarStore();
   const currentUser = useAuthStore((state) => state.currentUser);
   const setCurrentUser = useAuthStore((state) => state.setCurrentUser);
-  const setMessage = useAuthStore((state) => state.setMessage);
-  const setLoading = useAuthStore((state) => state.setLoading);
-  const clearMessage = useAuthStore((state) => state.clearMessage);
-  const loading = useAuthStore((state) => state.loading);
-  const message = useAuthStore((state) => state.message);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<Message | null>(null);
 
   const [email, setEmail] = useState(currentUser?.email || "");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [showCodeInput, setShowCodeInput] = useState(false);
   const [isValid, setIsValid] = useState(false);
   const [validationError, setValidationError] = useState("");
+  const [codeCountdown, setCodeCountdown] = useState(0);
   const isUnchanged = email === currentUser?.email;
   const isDisabled = loading || !isValid || isUnchanged;
+
+  const clearMessage = () => setMessage(null);
 
   // Validate email whenever it changes
   useEffect(() => {
@@ -27,7 +39,6 @@ const SidebarSettingsEmail: React.FC = () => {
       return;
     }
 
-    // Basic email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setIsValid(false);
@@ -35,28 +46,40 @@ const SidebarSettingsEmail: React.FC = () => {
       return;
     }
 
-    // Check length
     if (email.length > 254) {
       setIsValid(false);
       setValidationError("Email must be no more than 254 characters");
       return;
     }
 
-    // If all checks pass
     setIsValid(true);
     setValidationError("");
   }, [email]);
+
+  // Handle countdown timer
+  useEffect(() => {
+    if (codeCountdown <= 0) return;
+
+    const timer = setTimeout(() => {
+      setCodeCountdown((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [codeCountdown]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!email.trim()) {
-      setMessage("error", "Email cannot be empty");
+      setMessage({ type: "error", content: "Email cannot be empty" });
       return;
     }
 
     if (!isValid) {
-      setMessage("error", validationError || "Invalid email format");
+      setMessage({
+        type: "error",
+        content: validationError || "Invalid email format",
+      });
       return;
     }
 
@@ -64,24 +87,101 @@ const SidebarSettingsEmail: React.FC = () => {
       setLoading(true);
       clearMessage();
 
-      // Check if email is the same as current
       if (email === currentUser?.email) {
-        setMessage("info", "This is already your current email");
+        setMessage({
+          type: "info",
+          content: "This is already your current email",
+        });
         return;
       }
 
-      const updatedUser = await userService.sendEmailVerification(email);
-      setCurrentUser(updatedUser);
-      setMessage("success", "Email updated successfully");
+      await userService.sendEmailVerificationCode(email);
+      setShowCodeInput(true);
+      setCodeCountdown(120); // 2 minutes countdown
+      setMessage({
+        type: "info",
+        content: "Verification code sent to your email",
+      });
     } catch (error) {
       console.error(error);
-      setMessage(
-        "error",
-        error instanceof Error ? error.message : "Failed to update email"
-      );
+      setMessage({
+        type: "error",
+        content:
+          error instanceof Error
+            ? error.message
+            : "Failed to send verification code",
+      });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleVerifyCode = async () => {
+    if (verificationCode.length !== 6) {
+      setMessage({ type: "error", content: "Please enter a 6-digit code" });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      clearMessage();
+
+      const updatedUser = await userService.updateEmailWithCode(
+        email,
+        verificationCode
+      );
+      setCurrentUser(updatedUser);
+      setMessage({
+        type: "success",
+        content: "Email verified and updated successfully",
+      });
+      setShowCodeInput(false);
+      setVerificationCode("");
+      setSidebar(SidebarMode.PROFILE);
+    } catch (error) {
+      console.error("error from client: ", error);
+      let errorMessage = "Email verification failed";
+
+      if (axios.isAxiosError(error)) {
+        if (error.response?.data?.message) {
+          errorMessage = error.response.data.message;
+        }
+      }
+      setMessage({ type: "error", content: errorMessage });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    if (codeCountdown > 0) return;
+
+    try {
+      setLoading(true);
+      clearMessage();
+
+      await userService.sendEmailVerificationCode(email);
+      setCodeCountdown(120); // Reset to 2 minutes
+      setMessage({
+        type: "info",
+        content: "Verification code resent to your email",
+      });
+    } catch (error) {
+      console.error(error);
+      setMessage({
+        type: "error",
+        content:
+          error instanceof Error ? error.message : "Failed to resend code",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatCountdown = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   return (
@@ -104,7 +204,7 @@ const SidebarSettingsEmail: React.FC = () => {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value.trim())}
-          disabled={loading}
+          disabled={loading || showCodeInput}
           name="email"
           placeholder="Set New Email"
           className="input"
@@ -116,13 +216,59 @@ const SidebarSettingsEmail: React.FC = () => {
           <div className="text-sm text-red-600">{validationError}</div>
         )}
 
-        <button
-          type="submit"
-          className={`${isDisabled ? "" : "primary"} p-1 w-full`}
-          disabled={isDisabled}
-        >
-          {loading ? "Sending..." : "Send Email Verification"}
-        </button>
+        {!showCodeInput ? (
+          <button
+            type="submit"
+            className={`${isDisabled ? "" : "primary"} p-1 w-full`}
+            disabled={isDisabled}
+          >
+            {loading ? "Sending..." : "Send Email Verification"}
+          </button>
+        ) : (
+          <div className="flex flex-col gap-2">
+            <div className="relative flex items-center gap-2 border-2 border-[var(--input-border-color)] p-2 rounded">
+              <input
+                type="text"
+                value={verificationCode}
+                onChange={(e) =>
+                  setVerificationCode(
+                    e.target.value.replace(/\D/g, "").slice(0, 6)
+                  )
+                }
+                placeholder="Enter code"
+                className="border-4 border-bottom text-3xl"
+                inputMode="numeric"
+                pattern="\d{6}"
+                disabled={loading}
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                className="primary p-1 flex-1"
+                onClick={handleVerifyCode}
+                disabled={loading || verificationCode.length !== 6}
+              >
+                {loading ? "Verifying..." : "Verify Code"}
+              </button>
+              {codeCountdown > 0 ? (
+                <button type="button" className="secondary p-1 flex-1" disabled>
+                  Resend in {formatCountdown(codeCountdown)}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="secondary p-1 flex-1"
+                  onClick={handleResendCode}
+                  disabled={loading}
+                >
+                  Resend Code
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {message && (
           <div
