@@ -1,9 +1,11 @@
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/types/enums/sidebarMode";
 import SidebarLayout from "@/pages/SidebarLayout";
+import { useThemeStore } from "@/stores/themeStore";
 
 const SidebarSettings: React.FC = () => {
   const { setSidebar } = useSidebarStore();
+  const theme = useThemeStore((state) => state.theme);
 
   const settingsItems = [
     {
@@ -14,12 +16,13 @@ const SidebarSettings: React.FC = () => {
     {
       icon: "lock",
       title: "Privacy & Security",
-      onClick: () => setSidebar(SidebarMode.SETTINGS_PRIVACY), // Assuming this exists in your enum
+      onClick: () => setSidebar(SidebarMode.SETTINGS_PRIVACY),
     },
     {
       icon: "contrast",
-      title: "Theme",
+      title: `Theme`,
       onClick: () => setSidebar(SidebarMode.SETTINGS_THEME),
+      value: theme,
     },
     {
       icon: "visibility",
@@ -55,7 +58,7 @@ const SidebarSettings: React.FC = () => {
       icon: "translate",
       title: "Language",
       onClick: () => setSidebar(SidebarMode.SETTINGS_LANGUAGE),
-      extra: <span className="opacity-60 ml-auto">English</span>,
+      value: "English",
     },
   ];
 
@@ -69,7 +72,12 @@ const SidebarSettings: React.FC = () => {
         >
           <i className="material-symbols-outlined">{item.icon}</i>
           <h1>{item.title}</h1>
-          {item.extra && item.extra}
+          {item.value && (
+            <span className="opacity-60 ml-auto">
+              {item.value.charAt(0).toUpperCase() +
+                item.value.slice(1).toLowerCase()}
+            </span>
+          )}
         </div>
       ))}
     </SidebarLayout>

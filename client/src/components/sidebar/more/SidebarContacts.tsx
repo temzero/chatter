@@ -18,8 +18,7 @@ const SidebarContacts: React.FC<SidebarContactsProps> = ({
 }) => {
   const chats = useChatStore((s) => s.chats);
   const directChats = chats.filter(
-    (chat): chat is DirectChatResponse =>
-      chat.type === ChatType.DIRECT && !!chat.chatPartner?.phoneNumber
+    (chat): chat is DirectChatResponse => chat.type === ChatType.DIRECT
   );
 
   const handleVideoCall =

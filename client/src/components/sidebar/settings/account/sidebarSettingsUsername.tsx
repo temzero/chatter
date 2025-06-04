@@ -1,26 +1,22 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import SidebarLayout from "@/pages/SidebarLayout";
 import { SidebarMode } from "@/types/enums/sidebarMode";
 import { useAuthStore } from "@/stores/authStore";
 import { userService } from "@/services/userService";
 import { useSidebarStore } from "@/stores/sidebarStore";
-
-interface Message {
-  type: "error" | "success" | "info";
-  content: string;
-}
+import { handleError } from "@/utils/handleError";
 
 const SidebarSettingsUsername: React.FC = () => {
   const currentUser = useAuthStore((state) => state.currentUser);
   const setCurrentUser = useAuthStore((state) => state.setCurrentUser);
   const [loading, setLoading] = useState(false);
-  const [localMessage, setLocalMessage] = useState<Message | null>(null);
-
   const [username, setUsername] = useState(currentUser?.username || "");
   const [isValid, setIsValid] = useState(false);
-  const [validationError, setValidationError] = useState("");
+  const [ErrorMessage, setErrorMessage] = useState("");
   const [isVerified, setIsVerified] = useState(false);
-  const [isAvailable, setIsAvailable] = useState(false); // New state for tracking availability
+  const [isAvailable, setIsAvailable] = useState(false);
   const { setSidebar } = useSidebarStore();
 
   const isUnchanged = username === currentUser?.username;
@@ -30,115 +26,83 @@ const SidebarSettingsUsername: React.FC = () => {
   useEffect(() => {
     if (!username) {
       setIsValid(false);
-      setValidationError("");
-      return;
-    }
-
-    // Check length
-    if (username.length < 3) {
-      setIsValid(false);
-      setValidationError("Username must be at least 3 characters");
+      setErrorMessage("");
       return;
     }
 
     if (username.length > 30) {
       setIsValid(false);
-      setValidationError("Username must be no more than 30 characters");
+      setErrorMessage("Username must be no more than 30 characters");
       return;
     }
 
-    // Check allowed characters
     const validChars = /^[a-zA-Z0-9._]+$/;
     if (!validChars.test(username)) {
       setIsValid(false);
-      setValidationError(
+      setErrorMessage(
         "Only letters, numbers, periods (.) and underscores (_) are allowed"
       );
       return;
     }
 
-    // Check for spaces
     if (/\s/.test(username)) {
       setIsValid(false);
-      setValidationError("Spaces are not allowed");
+      setErrorMessage("Spaces are not allowed");
       return;
     }
 
-    // Check if ends with period
     if (username.endsWith(".")) {
       setIsValid(false);
-      setValidationError("Username cannot end with a period");
+      setErrorMessage("Username cannot end with a period");
       return;
     }
 
-    // Check for consecutive periods
     if (/\.{2,}/.test(username)) {
       setIsValid(false);
-      setValidationError("Username cannot contain consecutive periods");
+      setErrorMessage("Username cannot contain consecutive periods");
       return;
     }
 
-    // If all checks pass
     setIsValid(true);
-    setValidationError("");
+    setErrorMessage("");
   }, [username]);
-
-  const clearMessage = () => {
-    setLocalMessage(null);
-  };
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!username.trim()) {
-      setLocalMessage({ type: "error", content: "Username cannot be empty" });
+      toast.error("Please enter a username");
       return;
     }
 
     if (!isValid) {
-      setLocalMessage({
-        type: "error",
-        content: validationError || "Invalid username format",
-      });
+      toast.error("Please fix validation errors first");
       return;
     }
 
     try {
       setLoading(true);
-      clearMessage();
-      setIsAvailable(false); // Reset availability state
+      setIsAvailable(false);
 
-      // Check if username is the same as current
       if (username === currentUser?.username) {
-        setLocalMessage({
-          type: "info",
-          content: "This is already your current username",
-        });
         setIsVerified(false);
+        toast.info("This is already your current username");
         return;
       }
 
-      // Verify username availability
       const data = await userService.verifyUsername(username);
-      console.log("data: ", data);
 
-      let type: Message["type"] = "error"; // default type
       if (data.payload) {
-        type = "success";
-        setIsAvailable(true); // Only set to true if payload is true
+        setIsAvailable(true);
+        toast.success("Username is available!");
+      } else {
+        toast.error("Username is already taken");
       }
-
-      setLocalMessage({ type, content: data.message });
       setIsVerified(true);
     } catch (error) {
-      console.error(error);
-      setLocalMessage({
-        type: "error",
-        content:
-          error instanceof Error ? error.message : "Username is not available",
-      });
       setIsVerified(false);
       setIsAvailable(false);
+      handleError(error, "Failed to update username");
     } finally {
       setLoading(false);
     }
@@ -148,34 +112,21 @@ const SidebarSettingsUsername: React.FC = () => {
     e.preventDefault();
 
     if (!isVerified || !isAvailable) {
-      setLocalMessage({
-        type: "error",
-        content: "Please verify your username first and ensure it's available",
-      });
+      toast.error("Please verify username availability first");
       return;
     }
 
     try {
       setLoading(true);
-      clearMessage();
 
-      // Update username
       const updatedUser = await userService.updateUsername(username);
       setCurrentUser(updatedUser);
-      setLocalMessage({
-        type: "success",
-        content: "Username updated successfully!",
-      });
-      setIsVerified(false); // Reset verification state after update
-      setIsAvailable(false); // Reset availability state after update
-      setSidebar(SidebarMode.SETTINGS_ACCOUNT)
+      setIsVerified(false);
+      setIsAvailable(false);
+      toast.success("Username updated successfully!");
+      setSidebar(SidebarMode.SETTINGS_ACCOUNT);
     } catch (error) {
-      console.error(error);
-      setLocalMessage({
-        type: "error",
-        content:
-          error instanceof Error ? error.message : "Failed to update username",
-      });
+      handleError(error, "Failed to update username");
     } finally {
       setLoading(false);
     }
@@ -190,7 +141,7 @@ const SidebarSettingsUsername: React.FC = () => {
         <div className="w-full p-4 rounded-lg bg-[var(--hover-color)]">
           <h3 className="font-semibold mb-2">Username Requirements:</h3>
           <ul className="space-y-1 dark:text-gray-300">
-            <li>• 3–30 characters</li>
+            <li>• Maximum 24 characters</li>
             <li>
               • Letters (A-Z), numbers (0-9), periods (.) or underscores (_)
             </li>
@@ -201,44 +152,45 @@ const SidebarSettingsUsername: React.FC = () => {
           </ul>
         </div>
 
-        <input
-          type="text"
-          value={username}
-          onChange={(e) => {
-            const value = e.target.value;
-            setUsername(value.toLowerCase());
-            setIsVerified(false); // Reset verification when username changes
-            setIsAvailable(false); // Reset availability when username changes
-          }}
-          disabled={loading}
-          name="identifier"
-          placeholder="Set New Username"
-          className="input"
-          autoComplete="username"
-          autoFocus
-        />
+        <div className="input flex items-center justify-between">
+          <input
+            type="text"
+            value={username}
+            maxLength={24}
+            onChange={(e) => {
+              const value = e.target.value;
+              setUsername(value.toLowerCase());
+              setIsVerified(false);
+              setIsAvailable(false);
+            }}
+            disabled={loading}
+            name="identifier"
+            placeholder="Set New Username"
+            className="flex-1"
+            autoComplete="username"
+            autoFocus
+          />
+          {isVerified &&
+            (isAvailable ? (
+              <span className="material-symbols-outlined text-green-500 -mr-1">
+                check_circle
+              </span>
+            ) : (
+              <span className="material-symbols-outlined text-red-500 -mr-1">
+                cancel
+              </span>
+            ))}
+        </div>
 
-        {validationError && (
-          <div className="text-sm text-red-600">{validationError}</div>
-        )}
-
-        {localMessage && (
-          <div
-            className={`text-sm ${
-              localMessage.type === "error"
-                ? "text-red-600"
-                : localMessage.type === "success"
-                ? "text-green-600"
-                : "text-blue-600"
-            }`}
-          >
-            {localMessage.content}
-          </div>
+        {ErrorMessage && (
+          <div className="text-sm text-red-600">{ErrorMessage}</div>
         )}
 
         <button
           type="submit"
-          className={`${isDisabled ? "" : "text-green-400"} p-1 w-full`}
+          className={`${
+            isDisabled ? "" : "text-green-400 bg-[var(--border-color)]"
+          } p-1 w-full`}
           disabled={isDisabled}
         >
           {loading && !isVerified ? "Verifying..." : "Verify"}

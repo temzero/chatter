@@ -4,21 +4,14 @@ import { SidebarMode } from "@/types/enums/sidebarMode";
 import { useAuthStore } from "@/stores/authStore";
 import { userService } from "@/services/userService";
 import { useSidebarStore } from "@/stores/sidebarStore";
-import axios from "axios";
-
-type MessageType = "error" | "success" | "info";
-
-interface Message {
-  type: MessageType;
-  content: string;
-}
+import { handleError } from "@/utils/handleError";
+import { toast } from "react-toastify";
 
 const SidebarSettingsEmail: React.FC = () => {
   const { setSidebar } = useSidebarStore();
   const currentUser = useAuthStore((state) => state.currentUser);
   const setCurrentUser = useAuthStore((state) => state.setCurrentUser);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<Message | null>(null);
 
   const [email, setEmail] = useState(currentUser?.email || "");
   const [verificationCode, setVerificationCode] = useState("");
@@ -28,8 +21,6 @@ const SidebarSettingsEmail: React.FC = () => {
   const [codeCountdown, setCodeCountdown] = useState(0);
   const isUnchanged = email === currentUser?.email;
   const isDisabled = loading || !isValid || isUnchanged;
-
-  const clearMessage = () => setMessage(null);
 
   // Validate email whenever it changes
   useEffect(() => {
@@ -71,46 +62,35 @@ const SidebarSettingsEmail: React.FC = () => {
     e.preventDefault();
 
     if (!email.trim()) {
-      setMessage({ type: "error", content: "Email cannot be empty" });
+      toast.error("Email cannot be empty");
       return;
     }
 
     if (!isValid) {
-      setMessage({
-        type: "error",
-        content: validationError || "Invalid email format",
-      });
+      toast.error(validationError || "Invalid email format");
       return;
     }
 
     try {
       setLoading(true);
-      clearMessage();
 
       if (email === currentUser?.email) {
-        setMessage({
-          type: "info",
-          content: "This is already your current email",
-        });
+        toast.info("This is already your current email");
         return;
       }
 
       await userService.sendEmailVerificationCode(email);
       setShowCodeInput(true);
       setCodeCountdown(120); // 2 minutes countdown
-      setMessage({
-        type: "info",
-        content: "Verification code sent to your email",
-      });
+      toast.info(`Verification code sent to your email: ${email}`);
     } catch (error) {
       console.error(error);
-      setMessage({
-        type: "error",
-        content:
-          error instanceof Error
-            ? error.message
-            : "Failed to send verification code",
-      });
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to send verification code";
+      toast.error(errorMessage);
+      handleError(error, "Failed to send verification code");
     } finally {
       setLoading(false);
     }
@@ -118,36 +98,24 @@ const SidebarSettingsEmail: React.FC = () => {
 
   const handleVerifyCode = async () => {
     if (verificationCode.length !== 6) {
-      setMessage({ type: "error", content: "Please enter a 6-digit code" });
+      toast.error("Please enter a 6-digit code");
       return;
     }
 
     try {
       setLoading(true);
-      clearMessage();
 
       const updatedUser = await userService.updateEmailWithCode(
         email,
         verificationCode
       );
       setCurrentUser(updatedUser);
-      setMessage({
-        type: "success",
-        content: "Email verified and updated successfully",
-      });
+      toast.success("Email verified and updated successfully");
       setShowCodeInput(false);
       setVerificationCode("");
       setSidebar(SidebarMode.PROFILE);
     } catch (error) {
-      console.error("error from client: ", error);
-      let errorMessage = "Email verification failed";
-
-      if (axios.isAxiosError(error)) {
-        if (error.response?.data?.message) {
-          errorMessage = error.response.data.message;
-        }
-      }
-      setMessage({ type: "error", content: errorMessage });
+      handleError(error, "Email verification failed");
     } finally {
       setLoading(false);
     }
@@ -158,21 +126,15 @@ const SidebarSettingsEmail: React.FC = () => {
 
     try {
       setLoading(true);
-      clearMessage();
 
       await userService.sendEmailVerificationCode(email);
       setCodeCountdown(120); // Reset to 2 minutes
-      setMessage({
-        type: "info",
-        content: "Verification code resent to your email",
-      });
+      toast.info("Verification code resent to your email");
     } catch (error) {
-      console.error(error);
-      setMessage({
-        type: "error",
-        content:
-          error instanceof Error ? error.message : "Failed to resend code",
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to resend code";
+      toast.error(errorMessage);
+      handleError(error, "Failed to resend code");
     } finally {
       setLoading(false);
     }
@@ -219,7 +181,9 @@ const SidebarSettingsEmail: React.FC = () => {
         {!showCodeInput ? (
           <button
             type="submit"
-            className={`${isDisabled ? "" : "primary"} p-1 w-full`}
+            className={`${
+              isDisabled ? "" : "primary bg-[var(--border-color)]"
+            } p-1 w-full`}
             disabled={isDisabled}
           >
             {loading ? "Sending..." : "Send Email Verification"}
@@ -246,7 +210,7 @@ const SidebarSettingsEmail: React.FC = () => {
             <div className="flex gap-2">
               <button
                 type="button"
-                className="primary p-1 flex-1"
+                className="primary p-1 flex-1 bg-[var(--border-color)]"
                 onClick={handleVerifyCode}
                 disabled={loading || verificationCode.length !== 6}
               >
@@ -259,7 +223,7 @@ const SidebarSettingsEmail: React.FC = () => {
               ) : (
                 <button
                   type="button"
-                  className="secondary p-1 flex-1"
+                  className="secondary p-1 flex-1 bg-[var(--border-color)]"
                   onClick={handleResendCode}
                   disabled={loading}
                 >
@@ -267,20 +231,6 @@ const SidebarSettingsEmail: React.FC = () => {
                 </button>
               )}
             </div>
-          </div>
-        )}
-
-        {message && (
-          <div
-            className={`text-sm ${
-              message.type === "error"
-                ? "text-red-600"
-                : message.type === "success"
-                ? "text-green-600"
-                : "text-blue-600"
-            }`}
-          >
-            {message.content}
           </div>
         )}
       </form>

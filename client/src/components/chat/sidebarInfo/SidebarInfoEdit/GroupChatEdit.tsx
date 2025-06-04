@@ -4,6 +4,8 @@ import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { GroupChatResponse } from "@/types/chat";
 import AvatarEdit from "@/components/ui/avatar/AvatarEdit";
 import { storageService } from "@/services/storageService";
+import { handleError } from "@/utils/handleError";
+import { toast } from "react-toastify";
 
 const GroupChatEdit = () => {
   const activeChat = useChatStore(
@@ -29,7 +31,6 @@ const GroupChatEdit = () => {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState("");
 
   // Track changes between current formData and initialFormData
   useEffect(() => {
@@ -53,7 +54,6 @@ const GroupChatEdit = () => {
     if (!hasChanges || !activeChat?.id) return;
 
     setIsSubmitting(true);
-    setError("");
 
     try {
       let newAvatarUrl = formData.avatarUrl;
@@ -77,9 +77,9 @@ const GroupChatEdit = () => {
       });
 
       setSidebarInfo("default"); // Close sidebar on success
+      toast.success('Update successfully')
     } catch (error) {
-      setError("Failed to update group chat");
-      console.error("Failed to update group chat:", error);
+      handleError(error, 'Update failed!')
     } finally {
       setIsSubmitting(false);
     }
@@ -119,12 +119,6 @@ const GroupChatEdit = () => {
           </button>
         </div>
       </header>
-
-      {error && (
-        <div className="text-red-500 text-center mt-2">
-          <p>{error}</p>
-        </div>
-      )}
 
       <div className="overflow-y-auto h-screen">
         <form

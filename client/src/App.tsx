@@ -3,12 +3,13 @@ import { BrowserRouter as Router } from "react-router-dom";
 import { useEffect } from "react";
 import { useThemeStore } from "./stores/themeStore";
 import AppRoutes from "@/routes/AppRoutes";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const App: React.FC = () => {
-  // const initializeAuth = useAuthStore((state) => state.initialize);
   const initializeTheme = useThemeStore((state) => state.initialize);
+  const resolvedTheme = useThemeStore((state) => state.resolvedTheme);
 
-  // Initialize app state
   useEffect(() => {
     initializeTheme();
   }, [initializeTheme]);
@@ -16,6 +17,24 @@ const App: React.FC = () => {
   return (
     <Router>
       <AppRoutes />
+      <ToastContainer
+        position="bottom-right"
+        autoClose={52000}
+        hideProgressBar={true}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme={resolvedTheme}
+        toastStyle={{
+          padding: "12px",
+          ...(resolvedTheme === "dark"
+            ? { backgroundColor: "#222", color: "#fff", border: '2px solid #444' }
+            : { backgroundColor: "#fff", color: "#1a202c", border: '2px solid #ddd' }),
+        }}
+      />
     </Router>
   );
 };

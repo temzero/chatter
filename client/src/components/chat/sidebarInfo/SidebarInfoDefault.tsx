@@ -59,10 +59,9 @@ const SidebarInfoDefault: React.FC = () => {
         <AnimatePresence>
           {isSidebarInfoVisible && (
             <motion.div
-              initial={{ opacity: 0, y: 100 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 100 }}
-              transition={{ type: "spring", stiffness: 300, damping: 28 }}
+              key={activeChat.id}
+              initial={{ opacity: 0, scale: 0.9}}
+              animate={{ opacity: 1, scale: 1}}
               className="flex flex-col gap-4 w-full mt-4 min-w-[240px]"
             >
               {isDirect ? <DirectChat /> : <GroupChat />}

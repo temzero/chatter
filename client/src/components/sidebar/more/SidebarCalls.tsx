@@ -83,7 +83,9 @@ const SidebarCalls: React.FC<SidebarCallsProps> = ({
         })
       ) : (
         <div className="flex flex-col items-center justify-center mt-8 opacity-60">
-          <i className="material-symbols-outlined text-6xl mb-4">phone_enabled</i>
+          <i className="material-symbols-outlined text-6xl mb-4 scale-x-[-1]">
+            phone_enabled
+          </i>
           <p>No contacts with phone numbers</p>
         </div>
       )}

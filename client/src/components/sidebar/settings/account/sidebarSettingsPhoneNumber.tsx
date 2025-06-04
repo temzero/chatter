@@ -3,15 +3,15 @@ import SidebarLayout from "@/pages/SidebarLayout";
 import { SidebarMode } from "@/types/enums/sidebarMode";
 import { useAuthStore } from "@/stores/authStore";
 import { userService } from "@/services/userService";
+import { handleError } from "@/utils/handleError";
+import { toast } from "react-toastify";
+
 
 const SidebarSettingsPhoneNumber: React.FC = () => {
   const currentUser = useAuthStore((state) => state.currentUser);
   const setCurrentUser = useAuthStore((state) => state.setCurrentUser);
-  const setMessage = useAuthStore((state) => state.setMessage);
   const setLoading = useAuthStore((state) => state.setLoading);
-  const clearMessage = useAuthStore((state) => state.clearMessage);
   const loading = useAuthStore((state) => state.loading);
-  const message = useAuthStore((state) => state.message);
 
   const [phoneNumber, setPhoneNumber] = useState(
     currentUser?.phoneNumber || ""
@@ -50,44 +50,25 @@ const SidebarSettingsPhoneNumber: React.FC = () => {
     setValidationError("");
   }, [phoneNumber]);
 
-  // const formatPhoneNumber = (value: string) => {
-  //   // Remove all non-digit characters
-  //   const cleaned = value.replace(/\D/g, "");
-
-  //   // Format based on length (adjust formatting as needed)
-  //   let formatted = cleaned;
-  //   if (cleaned.length > 3 && cleaned.length <= 6) {
-  //     formatted = `(${cleaned.slice(0, 3)}) ${cleaned.slice(3)}`;
-  //   } else if (cleaned.length > 6) {
-  //     formatted = `(${cleaned.slice(0, 3)}) ${cleaned.slice(
-  //       3,
-  //       6
-  //     )}-${cleaned.slice(6, 10)}`;
-  //   }
-
-  //   return formatted;
-  // };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!phoneNumber.trim()) {
-      setMessage("error", "Phone number cannot be empty");
+      toast.error("Phone number cannot be empty");
       return;
     }
 
     if (!isValid) {
-      setMessage("error", validationError || "Invalid phone number format");
+      toast.error(validationError || "Invalid phone number format");
       return;
     }
 
     try {
       setLoading(true);
-      clearMessage();
 
       // Check if phone number is the same as current
       if (phoneNumber === currentUser?.phoneNumber) {
-        setMessage("info", "This is already your current phone number");
+        toast("This is already your current phone number");
         return;
       }
 
@@ -97,13 +78,9 @@ const SidebarSettingsPhoneNumber: React.FC = () => {
         cleanedPhoneNumber
       );
       setCurrentUser(updatedUser);
-      setMessage("success", "Phone number updated successfully");
+      toast.success("Phone number updated successfully");
     } catch (error) {
-      console.error(error);
-      setMessage(
-        "error",
-        error instanceof Error ? error.message : "Failed to update phone number"
-      );
+      handleError(error, "Failed to update phone number");
     } finally {
       setLoading(false);
     }
@@ -152,20 +129,6 @@ const SidebarSettingsPhoneNumber: React.FC = () => {
 
         {validationError && (
           <div className="text-sm text-red-600">{validationError}</div>
-        )}
-
-        {message && (
-          <div
-            className={`text-sm ${
-              message.type === "error"
-                ? "text-red-600"
-                : message.type === "success"
-                ? "text-green-600"
-                : "text-blue-600"
-            }`}
-          >
-            {message.content}
-          </div>
         )}
       </form>
     </SidebarLayout>

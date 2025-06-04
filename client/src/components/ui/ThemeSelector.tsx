@@ -1,41 +1,72 @@
-import { useThemeStore } from '@/stores/themeStore';
+import { useThemeStore } from "@/stores/themeStore";
 
 const ThemeSelector = () => {
   const theme = useThemeStore((state) => state.theme);
   const setTheme = useThemeStore((state) => state.setTheme);
-  
-  const getButtonClass = (value: string) =>
-    `flex items-center gap-1 px-2 py-1 w-full justify-center transition-opacity cursor-pointer 
-     ${theme === value ? 'opacity-100 bg-[var(--primary-green)]' : 'opacity-30'} hover:opacity-80`;
+
+  const getOptionClass = (value: string) =>
+    `flex items-center gap-4 px-4 py-2 w-full cursor-pointer transition-colors custom-border-b
+     ${
+       theme === value
+         ? "bg-[var(--primary-green)]/20"
+         : "hover:bg-[var(--primary-green)]/10"
+     }`;
 
   return (
-    <div id="theme-switcher" className="flex overflow-hidden">
-      <button 
-        className={getButtonClass('light')} 
-        onClick={() => setTheme('light')}
-        aria-label="Light theme"
+    <div id="theme-switcher" className="flex flex-col gap-1">
+      <div
+        className={getOptionClass("light")}
+        onClick={() => setTheme("light")}
       >
-        Light
-        <i className="material-symbols-outlined">light_mode</i>
-      </button>
+        <div
+          className={`w-4 h-4 rounded-full border-2 flex items-center justify-center 
+          ${
+            theme === "light"
+              ? "border-[var(--primary-green)]"
+              : "border-gray-400"
+          }`}
+        >
+          {theme === "light" && (
+            <div className="w-2 h-2 rounded-full bg-[var(--primary-green)]"></div>
+          )}
+        </div>
+        <span>Light</span>
+        {/* <i className="material-symbols-outlined ml-auto">light_mode</i> */}
+      </div>
 
-      <button 
-        className={getButtonClass('dark')} 
-        onClick={() => setTheme('dark')}
-        aria-label="Dark theme"
-      >
-        Dark
-        <i className="material-symbols-outlined">dark_mode</i>
-      </button>
+      <div className={getOptionClass("dark")} onClick={() => setTheme("dark")}>
+        <div
+          className={`w-4 h-4 rounded-full border-2 flex items-center justify-center 
+          ${
+            theme === "dark"
+              ? "border-[var(--primary-green)]"
+              : "border-gray-400"
+          }`}
+        >
+          {theme === "dark" && (
+            <div className="w-2 h-2 rounded-full bg-[var(--primary-green)]"></div>
+          )}
+        </div>
+        <span>Dark</span>
+        {/* <i className="material-symbols-outlined ml-auto">dark_mode</i> */}
+      </div>
 
-      <button 
-        className={getButtonClass('auto')} 
-        onClick={() => setTheme('auto')}
-        aria-label="System preference"
-      >
-        System
-        <i className="material-symbols-outlined">routine</i>
-      </button>
+      <div className={getOptionClass("auto")} onClick={() => setTheme("auto")}>
+        <div
+          className={`w-4 h-4 rounded-full border-2 flex items-center justify-center 
+          ${
+            theme === "auto"
+              ? "border-[var(--primary-green)]"
+              : "border-gray-400"
+          }`}
+        >
+          {theme === "auto" && (
+            <div className="w-2 h-2 rounded-full bg-[var(--primary-green)]"></div>
+          )}
+        </div>
+        <span>Auto</span>
+        {/* <i className="material-symbols-outlined ml-auto">routine</i> */}
+      </div>
     </div>
   );
 };

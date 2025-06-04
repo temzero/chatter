@@ -6,6 +6,8 @@ import AvatarEdit from "../ui/avatar/AvatarEdit";
 import { storageService } from "@/services/storageService";
 import { SidebarMode } from "@/types/enums/sidebarMode";
 import SidebarLayout from "@/pages/SidebarLayout";
+import { handleError } from "@/utils/handleError";
+import { toast } from "react-toastify";
 
 export interface ProfileFormData {
   avatarUrl: string;
@@ -35,7 +37,6 @@ const SidebarProfileEdit: React.FC = () => {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     const changesDetected =
@@ -66,7 +67,6 @@ const SidebarProfileEdit: React.FC = () => {
     e.preventDefault();
     if (!hasChanges) return;
     setIsSubmitting(true);
-    setError("");
 
     try {
       let newAvatarUrl = formData.avatarUrl;
@@ -79,10 +79,10 @@ const SidebarProfileEdit: React.FC = () => {
         setFormData((prev) => ({ ...prev, avatarUrl: newAvatarUrl }));
       }
       await updateProfile({ ...formData, avatarUrl: newAvatarUrl });
+      toast.success('Profile update successfully')
       setSidebar(SidebarMode.PROFILE);
     } catch (error) {
-      setError("Failed to update profile!");
-      console.error("Failed to update profile", error);
+      handleError(error, 'Failed to update profile!')
     } finally {
       setIsSubmitting(false);
     }
@@ -122,11 +122,6 @@ const SidebarProfileEdit: React.FC = () => {
       backLocation={SidebarMode.PROFILE}
       rightButton={rightButton}
     >
-      {error && (
-        <div className="text-red-500 text-center mt-2">
-          <p>{error}</p>
-        </div>
-      )}
 
       <form
         className="p-4 flex-1 flex flex-col"

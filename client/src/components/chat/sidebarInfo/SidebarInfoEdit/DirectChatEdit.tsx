@@ -6,6 +6,8 @@ import { DirectChatResponse } from "@/types/chat";
 import { useAuthStore } from "@/stores/authStore";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import { FriendshipStatus } from "@/types/friendship";
+import { handleError } from "@/utils/handleError";
+import { toast } from "react-toastify";
 
 const DirectChatEdit = () => {
   const currentUser = useAuthStore((s) => s.currentUser);
@@ -80,8 +82,9 @@ const DirectChatEdit = () => {
       }
 
       setSidebarInfo("default");
+      toast.success('Update successfully')
     } catch (error) {
-      console.error("Failed to update nickname:", error);
+      handleError(error, 'Failed to update nickname')
     }
   };
 
