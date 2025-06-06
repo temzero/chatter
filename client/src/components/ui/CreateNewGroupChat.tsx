@@ -3,7 +3,7 @@ import { Avatar } from "./avatar/Avatar";
 import SearchBar from "@/components/ui/SearchBar";
 import ContactSelectionList from "../ui/ContactSelectionList";
 import { useChatStore } from "@/stores/chatStore";
-import { useAuthStore } from "@/stores/authStore";
+import { useCurrentUser } from "@/stores/authStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import type { DirectChatResponse } from "@/types/chat";
 import type { ChatType } from "@/types/enums/ChatType";
@@ -16,7 +16,8 @@ interface CreateChatProps {
 const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
   const createGroupChat = useChatStore((state) => state.createGroupChat);
   const isLoading = useChatStore((state) => state.isLoading);
-  const currentUser = useAuthStore((state) => state.currentUser);
+  const currentUser = useCurrentUser();
+
   const setActiveChat = useChatStore((state) => state.setActiveChat);
   const setSidebar = useSidebarStore((state) => state.setSidebar);
 

@@ -10,7 +10,7 @@ export class CreateMessageDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(2000)
+  @MaxLength(3000)
   content?: string;
 
   @IsOptional()

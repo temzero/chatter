@@ -12,7 +12,7 @@ export const useMessages = (chatId: string) => {
   const messagesQuery = useInfiniteQuery({
     queryKey: ["messages", chatId],
     queryFn: ({ pageParam = 1 }) =>
-      messageService.getMessages(chatId, pageParam),
+      messageService.getChatMessages(chatId, pageParam),
     getNextPageParam: (lastPage, allPages) => {
       if (lastPage.length < 50) return undefined;
       return allPages.length + 1;

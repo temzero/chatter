@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import SidebarLayout from "@/pages/SidebarLayout";
 import { SidebarMode } from "@/types/enums/sidebarMode";
-import { useAuthStore } from "@/stores/authStore";
+import { useAuthStore, useCurrentUser } from "@/stores/authStore";
 import { userService } from "@/services/userService";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { handleError } from "@/utils/handleError";
@@ -9,7 +9,8 @@ import { toast } from "react-toastify";
 
 const SidebarSettingsEmail: React.FC = () => {
   const { setSidebar } = useSidebarStore();
-  const currentUser = useAuthStore((state) => state.currentUser);
+  const currentUser = useCurrentUser();
+
   const setCurrentUser = useAuthStore((state) => state.setCurrentUser);
   const [loading, setLoading] = useState(false);
 

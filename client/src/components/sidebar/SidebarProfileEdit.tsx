@@ -3,7 +3,7 @@ import { useSidebarStore } from "@/stores/sidebarStore";
 import { useCurrentUser } from "@/stores/authStore";
 import { useProfileStore } from "@/stores/profileStore";
 import AvatarEdit from "../ui/avatar/AvatarEdit";
-import { storageService } from "@/services/storageService";
+import { fileStorageService } from "@/services/storage/fileStorageService";
 import { SidebarMode } from "@/types/enums/sidebarMode";
 import SidebarLayout from "@/pages/SidebarLayout";
 import { handleError } from "@/utils/handleError";
@@ -72,17 +72,17 @@ const SidebarProfileEdit: React.FC = () => {
       let newAvatarUrl = formData.avatarUrl;
       if (avatarFile) {
         const oldAvatarUrl = currentUser?.avatarUrl || "";
-        newAvatarUrl = await storageService.uploadAvatar(
+        newAvatarUrl = await fileStorageService.uploadAvatar(
           avatarFile,
           oldAvatarUrl
         );
         setFormData((prev) => ({ ...prev, avatarUrl: newAvatarUrl }));
       }
       await updateProfile({ ...formData, avatarUrl: newAvatarUrl });
-      toast.success('Profile update successfully')
+      toast.success("Profile update successfully");
       setSidebar(SidebarMode.PROFILE);
     } catch (error) {
-      handleError(error, 'Failed to update profile!')
+      handleError(error, "Failed to update profile!");
     } finally {
       setIsSubmitting(false);
     }
@@ -122,7 +122,6 @@ const SidebarProfileEdit: React.FC = () => {
       backLocation={SidebarMode.PROFILE}
       rightButton={rightButton}
     >
-
       <form
         className="p-4 flex-1 flex flex-col"
         onSubmit={handleSubmit}

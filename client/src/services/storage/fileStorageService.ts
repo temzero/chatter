@@ -1,4 +1,4 @@
-// src/services/storageService.ts
+// src/services/fileStorageService.ts
 import API from "@/services/api/api";
 import logFormData from "@/utils/logFormdata";
 
@@ -10,7 +10,7 @@ type DeleteResponse = {
   success: boolean;
 };
 
-export const storageService = {
+export const fileStorageService = {
   /**
    * Upload file via backend (processed by NestJS)
    * @param file - File object to upload

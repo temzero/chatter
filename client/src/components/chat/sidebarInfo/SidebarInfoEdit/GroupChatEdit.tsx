@@ -3,7 +3,7 @@ import { useChatStore } from "@/stores/chatStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { GroupChatResponse } from "@/types/chat";
 import AvatarEdit from "@/components/ui/avatar/AvatarEdit";
-import { storageService } from "@/services/storageService";
+import { fileStorageService } from "@/services/storage/fileStorageService";
 import { handleError } from "@/utils/handleError";
 import { toast } from "react-toastify";
 
@@ -63,7 +63,11 @@ const GroupChatEdit = () => {
         const oldAvatarUrl = activeChat?.avatarUrl || "";
 
         // Upload new avatar
-        newAvatarUrl = await storageService.uploadAvatar(avatarFile, oldAvatarUrl, 'group');
+        newAvatarUrl = await fileStorageService.uploadAvatar(
+          avatarFile,
+          oldAvatarUrl,
+          "group"
+        );
 
         // Update form data with new avatar URL
         setFormData((prev) => ({ ...prev, avatarUrl: newAvatarUrl }));
@@ -77,9 +81,9 @@ const GroupChatEdit = () => {
       });
 
       setSidebarInfo("default"); // Close sidebar on success
-      toast.success('Update successfully')
+      toast.success("Update successfully");
     } catch (error) {
-      handleError(error, 'Update failed!')
+      handleError(error, "Update failed!");
     } finally {
       setIsSubmitting(false);
     }

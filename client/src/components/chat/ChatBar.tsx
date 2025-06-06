@@ -1,21 +1,19 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useChatStore } from '@/stores/chatStore';
-import { useMessageStore } from '@/stores/messageStore';
-import { motion } from 'framer-motion';
-import EmojiPicker from '../ui/EmojiPicker';
-import AttachFile from '../ui/AttachFile';
-import FileImportPreviews from '../ui/FileImportPreview';
-import { useCurrentUser } from '@/stores/authStore';
+import React, { useState, useRef, useEffect } from "react";
+import { useChatStore } from "@/stores/chatStore";
+import { useMessageStore } from "@/stores/messageStore";
+import { motion } from "framer-motion";
+import EmojiPicker from "../ui/EmojiPicker";
+import AttachFile from "../ui/AttachFile";
+import FileImportPreviews from "../ui/FileImportPreview";
+import { SendMessagePayload } from "@/types/sendMessagePayload";
+import { messageService } from "@/services/messageService";
 
 const ChatBar: React.FC = () => {
-  const currentUser = useCurrentUser()
-
   const activeChat = useChatStore((state) => state.activeChat);
-  const addMessage = useMessageStore((state) => state.addMessage);
   const setDraftMessage = useMessageStore((state) => state.setDraftMessage);
   const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
 
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isMessageSent, setIsMessageSent] = useState(false);
@@ -28,22 +26,22 @@ const ChatBar: React.FC = () => {
     inputRef.current?.focus();
 
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      if (e.key === '/' && document.activeElement !== inputRef.current) {
+      if (e.key === "/" && document.activeElement !== inputRef.current) {
         e.preventDefault();
         inputRef.current?.focus();
       }
     };
 
-    document.addEventListener('keydown', handleGlobalKeyDown);
-    return () => document.removeEventListener('keydown', handleGlobalKeyDown);
+    document.addEventListener("keydown", handleGlobalKeyDown);
+    return () => document.removeEventListener("keydown", handleGlobalKeyDown);
   }, []);
 
   useEffect(() => {
     if (activeChat) {
       const draft = getDraftMessage(activeChat.id);
-      setInput(draft || '');
+      setInput(draft || "");
     }
-  }, [activeChat]);
+  }, [activeChat, getDraftMessage]);
 
   useEffect(() => {
     // Only reset files when the chat changes
@@ -51,11 +49,10 @@ const ChatBar: React.FC = () => {
     setFilePreviewUrls([]);
   }, [activeChat?.id]);
 
-
   // Adjust input height
   useEffect(() => {
     if (inputRef.current) {
-      inputRef.current.style.height = 'auto';
+      inputRef.current.style.height = "auto";
       const newHeight = Math.min(inputRef.current.scrollHeight, 100);
       inputRef.current.style.height = `${newHeight}px`;
 
@@ -65,48 +62,41 @@ const ChatBar: React.FC = () => {
     }
   }, [input]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     const trimmedInput = input.trim();
     if ((trimmedInput || attachedFiles.length > 0) && activeChat) {
-      setInput('');
-      const newMessage = {
-        id: String(Date.now()),
+      setInput("");
+
+      // Create the payload according to SendMessagePayload interface
+      const payload: SendMessagePayload = {
         chatId: activeChat.id,
-        senderId: currentUser?.id || 'me',
-        text: trimmedInput,
-        media: attachedFiles.map((file, index) => ({
-          id: String(Date.now() + index),
-          messageId: String(Date.now()),
-          type: file.type.startsWith('image') ? 'image' :
-            file.type.startsWith('video') ? 'video' :
-              file.type.startsWith('audio') ? 'audio' : 'file',
-          fileName: file.name,
-          url: URL.createObjectURL(file),
-          size: file.size,
-        })),
-        time: new Date().toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
+        content: trimmedInput || undefined,
+        attachmentIds:
+          attachedFiles.length > 0
+            ? attachedFiles.map((_, index) => String(Date.now() + index))
+            : undefined,
       };
-      addMessage(newMessage);
-      setDraftMessage(activeChat.id, '');
+
+      await messageService.sendMessage(payload);
+
+      // Clear local state
+      setDraftMessage(activeChat.id, "");
       setAttachedFiles([]);
       setFilePreviewUrls([]);
-      setIsMessageSent(true); // Set state to trigger animation
-      setTimeout(() => setIsMessageSent(false), 200); // Reset after animation duration
-      if (inputRef.current) inputRef.current.style.height = 'auto';
-      if (containerRef.current) containerRef.current.style.height = 'auto';
+      setIsMessageSent(true);
+      setTimeout(() => setIsMessageSent(false), 200);
+
+      if (inputRef.current) inputRef.current.style.height = "auto";
+      if (containerRef.current) containerRef.current.style.height = "auto";
     }
     inputRef.current?.focus();
   };
 
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Escape') {
-      setInput('');
-      if (activeChat) setDraftMessage(activeChat.id, '');
-    } else if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Escape") {
+      setInput("");
+      if (activeChat) setDraftMessage(activeChat.id, "");
+    } else if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -143,10 +133,8 @@ const ChatBar: React.FC = () => {
     });
   }
 
-
   return (
     <div className="backdrop-blur-[199px] w-full flex flex-col items-center p-4 justify-between shadow border-[var(--border-color)] z-40 relative">
-
       {filePreviewUrls.length > 0 && (
         <FileImportPreviews
           files={attachedFiles}
@@ -158,8 +146,11 @@ const ChatBar: React.FC = () => {
         />
       )}
 
-      <div ref={containerRef} id="input-container" className="input gap-1 flex items-end w-full transition-[height] duration-200 ease-in-out">
-
+      <div
+        ref={containerRef}
+        id="input-container"
+        className="input gap-1 flex items-end w-full transition-[height] duration-200 ease-in-out"
+      >
         <textarea
           ref={inputRef}
           value={input}
@@ -168,7 +159,11 @@ const ChatBar: React.FC = () => {
             if (activeChat) setDraftMessage(activeChat.id, e.target.value);
           }}
           onKeyDown={handleKeyDown}
-          className={`w-full outline-none bg-transparent resize-none overflow-hidden border ${isMessageSent ? 'opacity-10 transition-opacity duration-100 ease-in-out' : ''}`}
+          className={`w-full outline-none bg-transparent resize-none overflow-hidden border ${
+            isMessageSent
+              ? "opacity-10 transition-opacity duration-100 ease-in-out"
+              : ""
+          }`}
           placeholder={
             activeChat ? "Message..." : "Select a chat to start messaging"
           }
@@ -185,7 +180,7 @@ const ChatBar: React.FC = () => {
                 className="flex gap-2 items-center"
                 animate={{
                   transition: {
-                    type: 'spring',
+                    type: "spring",
                     stiffness: 300,
                     damping: 20,
                   },
@@ -205,7 +200,7 @@ const ChatBar: React.FC = () => {
                   width: input || attachedFiles.length ? 24 : 0,
                   opacity: input || attachedFiles.length ? 1 : 0,
                   marginLeft: input || attachedFiles.length ? 0 : -8,
-                  transition: { type: 'spring', stiffness: 300, damping: 20 },
+                  transition: { type: "spring", stiffness: 300, damping: 20 },
                 }}
                 className="material-symbols-outlined cursor-pointer rounded"
                 onClick={handleSend}

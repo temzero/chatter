@@ -133,7 +133,7 @@ export class MessageService {
         .createQueryBuilder('message')
         .where('message.chat_id = :chatId', { chatId })
         .andWhere('message.is_deleted = :isDeleted', { isDeleted: false })
-        .orderBy('message.createdAt', 'DESC');
+        .orderBy('message.createdAt', 'ASC');
 
       if (queryParams.limit) query.take(queryParams.limit);
       if (queryParams.offset) query.skip(queryParams.offset);

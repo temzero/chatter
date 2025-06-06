@@ -20,7 +20,7 @@ import { MessageResponseDto } from './dto/responses/message-response.dto';
 import { ErrorResponse } from '../../common/api-response/errors';
 import { GetMessagesDto } from './dto/queries/get-messages.dto';
 
-@Controller('message')
+@Controller('messages')
 @UseGuards(JwtAuthGuard)
 export class MessageController {
   constructor(private readonly messageService: MessageService) {}
@@ -50,6 +50,7 @@ export class MessageController {
     @Param('messageId') messageId: string,
   ): Promise<SuccessResponse<MessageResponseDto>> {
     const message = await this.messageService.getMessageById(messageId);
+    console.log('message: ', message);
 
     return new SuccessResponse(
       plainToInstance(MessageResponseDto, message),

@@ -5,7 +5,7 @@ import axios, {
   AxiosResponse,
   InternalAxiosRequestConfig,
 } from "axios";
-import { storageService } from "../storage/storageService";
+import { localStorageService } from "../storage/localStorageService";
 import { authService } from "../authService";
 
 const API: AxiosInstance = axios.create({
@@ -20,9 +20,9 @@ const API: AxiosInstance = axios.create({
 // Add Authorization & device info headers
 API.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const accessToken = storageService.getAccessToken();
-    const deviceId = storageService.getDeviceId();
-    const deviceName = storageService.getDeviceName();
+    const accessToken = localStorageService.getAccessToken();
+    const deviceId = localStorageService.getDeviceId();
+    const deviceName = localStorageService.getDeviceName();
 
     if (accessToken && config.headers) {
       config.headers.Authorization = `Bearer ${accessToken}`;
@@ -92,7 +92,7 @@ API.interceptors.response.use(
         // toast.error("Session expired. Please log in again.");
         const newAccessToken = await authService.refreshToken();
 
-        storageService.setAccessToken(newAccessToken);
+        localStorageService.setAccessToken(newAccessToken);
 
         if (!originalRequest.headers)
           originalRequest.headers = new axios.AxiosHeaders();
@@ -115,4 +115,3 @@ API.interceptors.response.use(
 );
 
 export default API;
-

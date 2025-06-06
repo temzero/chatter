@@ -3,13 +3,14 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SidebarLayout from "@/pages/SidebarLayout";
 import { SidebarMode } from "@/types/enums/sidebarMode";
-import { useAuthStore } from "@/stores/authStore";
+import { useAuthStore, useCurrentUser } from "@/stores/authStore";
 import { userService } from "@/services/userService";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { handleError } from "@/utils/handleError";
 
 const SidebarSettingsUsername: React.FC = () => {
-  const currentUser = useAuthStore((state) => state.currentUser);
+  const currentUser = useCurrentUser();
+
   const setCurrentUser = useAuthStore((state) => state.setCurrentUser);
   const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState(currentUser?.username || "");

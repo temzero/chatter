@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import SidebarLayout from "@/pages/SidebarLayout";
 import { SidebarMode } from "@/types/enums/sidebarMode";
 import { useAuthStore } from "@/stores/authStore";
+import { useCurrentUser } from "@/stores/authStore";
 import { userService } from "@/services/userService";
 import Toggle from "@/components/ui/Toggle";
 
 const SidebarSettingsPrivacy: React.FC = () => {
-  const currentUser = useAuthStore((state) => state.currentUser);
+  const currentUser = useCurrentUser();
   const setCurrentUser = useAuthStore((state) => state.setCurrentUser);
   const setMessage = useAuthStore((state) => state.setMessage);
   const setLoading = useAuthStore((state) => state.setLoading);

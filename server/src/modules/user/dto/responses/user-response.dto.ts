@@ -1,5 +1,4 @@
 import { Exclude, Expose } from 'class-transformer';
-import { IsOptional } from 'class-validator';
 import { FriendshipStatus } from 'src/modules/friendship/constants/friendship-status.constants';
 
 @Exclude()
@@ -10,9 +9,8 @@ export class UserResponseDto {
   @Expose()
   username: string;
 
-  @IsOptional()
   @Expose()
-  avatarUrl: string | null;
+  avatarUrl?: string | null;
 
   @Expose()
   firstName: string;
@@ -26,16 +24,14 @@ export class UserResponseDto {
   @Expose()
   emailVerified: boolean;
 
-  @IsOptional()
   @Expose()
-  phoneNumber: string | null;
+  phoneNumber?: string | null;
 
   @Expose()
   phoneVerified: boolean;
 
-  @IsOptional()
   @Expose()
-  birthday: Date | null;
+  birthday?: Date | null;
 
   @Expose()
   bio: string;
@@ -65,9 +61,8 @@ export class ChatPartnerResDto {
   @Expose()
   username: string;
 
-  @IsOptional()
   @Expose()
-  avatarUrl: string | null;
+  avatarUrl?: string | null;
 
   @Expose()
   firstName: string;
@@ -81,24 +76,20 @@ export class ChatPartnerResDto {
   @Expose()
   emailVerified: boolean;
 
-  @IsOptional()
   @Expose()
-  phoneNumber: string | null;
+  phoneNumber?: string | null;
 
   @Expose()
   phoneVerified: boolean;
 
-  @IsOptional()
   @Expose()
-  birthday: Date | null;
+  birthday?: Date | null;
 
-  @IsOptional()
   @Expose()
-  bio: string | null;
+  bio?: string | null;
 
-  @IsOptional()
   @Expose()
-  friendshipStatus: FriendshipStatus | null;
+  friendshipStatus?: FriendshipStatus | null;
 
   constructor(partial: Partial<UserResponseDto>) {
     Object.assign(this, partial);

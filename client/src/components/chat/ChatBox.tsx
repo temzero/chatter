@@ -1,33 +1,36 @@
 import React, { useRef, useEffect, useState, useMemo } from "react";
 import Message from "./Message";
 import ChannelMessage from "./MessageChannel";
-import { useCurrentUser } from "@/stores/authStore";
-import { useChatStore } from "@/stores/chatStore";
-import { useMessageStore } from "@/stores/messageStore";
-
 import { useSoundEffect } from "@/hooks/useSoundEffect";
 import bubbleSound from "@/assets/sound/message-bubble.mp3";
 import popSound from "@/assets/sound/message-pop.mp3";
 import messageSound from "@/assets/sound/message-sent2.mp3";
+import { useActiveChatMessages } from "@/stores/messageStore";
 
-const ChatBox: React.FC = () => {
-  const currentUser = useCurrentUser();
-  const activeChat = useChatStore((state) => state.activeChat);
-  const activeMessages = useMessageStore((state) => state.activeMessages);
+interface ChatBoxProps {
+  isChannel?: boolean;
+}
+
+const ChatBox: React.FC<ChatBoxProps> = ({ isChannel = false }) => {
+  const messages = useActiveChatMessages();
+
+  console.log("chat messages: ", messages);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);
-  const playMessageSound = useSoundEffect(
-    messageSound || popSound || bubbleSound
-  );
+
+  // Create sound effects with different volumes
+  const playBubbleSound = useSoundEffect(bubbleSound, 0.4);
+  const playPopSound = useSoundEffect(popSound, 0.3);
+  const playMessageSound = useSoundEffect(messageSound, 0.5);
 
   const newMessageAdded = useMemo(() => {
-    return activeMessages.length > previousMessageCount;
-  }, [activeMessages.length, previousMessageCount]);
+    return messages.length > previousMessageCount;
+  }, [messages.length, previousMessageCount]);
 
   useEffect(() => {
-    setPreviousMessageCount(activeMessages.length);
-  }, [activeMessages.length]);
+    setPreviousMessageCount(messages.length);
+  }, [messages.length]);
 
   // Helper: Wait for all media elements (img, video, audio) to load
   const waitForMediaToLoad = (container: HTMLElement) => {
@@ -36,15 +39,13 @@ const ChatBox: React.FC = () => {
       (media) =>
         new Promise((resolve) => {
           if (media instanceof HTMLImageElement) {
-            // Image element
             if (media.complete) resolve(true);
             else media.onload = media.onerror = () => resolve(true);
           } else if (
             media instanceof HTMLVideoElement ||
             media instanceof HTMLAudioElement
           ) {
-            // Video and Audio elements
-            if (media.readyState === 4) resolve(true); // Video/Audio is ready
+            if (media.readyState === 4) resolve(true);
             else media.oncanplaythrough = () => resolve(true);
           }
         })
@@ -58,19 +59,28 @@ const ChatBox: React.FC = () => {
       const container = containerRef.current;
       waitForMediaToLoad(container).then(() => {
         container.scrollTop = container.scrollHeight;
-        playMessageSound();
+
+        // Play a random sound when new message arrives
+        const soundOptions = [playMessageSound, playPopSound, playBubbleSound];
+        const randomSound =
+          soundOptions[Math.floor(Math.random() * soundOptions.length)];
+        randomSound();
       });
     }
-  }, [newMessageAdded, activeMessages]);
-
-  const isChannel = activeChat?.type === "channel";
+  }, [
+    newMessageAdded,
+    messages,
+    playMessageSound,
+    playPopSound,
+    playBubbleSound,
+  ]);
 
   // Group messages by date
   const groupedMessages = useMemo(() => {
-    const groups: { date: string; messages: typeof activeMessages }[] = [];
+    const groups: { date: string; messages: typeof messages }[] = [];
 
-    activeMessages.forEach((msg) => {
-      const messageDate = new Date(msg.time).toLocaleDateString();
+    messages.forEach((msg) => {
+      const messageDate = new Date(msg.createdAt).toLocaleDateString();
       const lastGroup = groups[groups.length - 1];
 
       if (!lastGroup || lastGroup.date !== messageDate) {
@@ -84,14 +94,14 @@ const ChatBox: React.FC = () => {
     });
 
     return groups;
-  }, [activeMessages]);
+  }, [messages]);
 
   return (
     <div
       ref={containerRef}
       className="p-6 flex-1 h-full w-full flex flex-col overflow-x-hidden overflow-y-auto backdrop-blur-sm"
     >
-      {activeMessages.length > 0 ? (
+      {messages.length > 0 ? (
         groupedMessages.map((group) => (
           <React.Fragment key={group.date}>
             <div className="sticky -top-5 z-10 flex justify-center mb-4">
@@ -100,31 +110,17 @@ const ChatBox: React.FC = () => {
               </div>
             </div>
             {group.messages.map((msg, index) => {
-              const isLastMessageInGroup = index === group.messages.length - 1;
               const isNewMessage =
                 newMessageAdded &&
                 index === group.messages.length - 1 &&
                 group === groupedMessages[groupedMessages.length - 1];
 
               return isChannel ? (
-                <ChannelMessage
-                  key={msg.id}
-                  id={msg.id}
-                  time={msg.time}
-                  text={msg.text}
-                  media={msg.media}
-                  shouldAnimate={isNewMessage}
-                />
+                <ChannelMessage key={msg.id} message={msg} />
               ) : (
                 <Message
                   key={msg.id}
-                  id={msg.id}
-                  isMe={msg.senderId === currentUser?.id}
-                  avatarUrl={msg.avatarUrl}
-                  senderName={msg.senderName || msg.senderId}
-                  time={msg.time}
-                  text={msg.text}
-                  media={msg.media}
+                  message={msg}
                   shouldAnimate={isNewMessage}
                 />
               );

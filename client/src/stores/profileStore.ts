@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { userService } from "@/services/userService";
-import { storageService } from "@/services/storage/storageService";
+import { localStorageService } from "@/services/storage/localStorageService";
 import { useAuthStore } from "./authStore";
 import { ProfileFormData } from "@/components/sidebar/SidebarProfileEdit";
 
@@ -58,7 +58,7 @@ export const useProfileStore = create<ProfileState & ProfileActions>()(
         set({ loading: true, error: null });
         try {
           await userService.deleteUser();
-          storageService.clearAuth();
+          localStorageService.clearAuth();
           set(initialState);
         } catch (error) {
           const errorMessage =
@@ -69,7 +69,7 @@ export const useProfileStore = create<ProfileState & ProfileActions>()(
       },
 
       reset: () => {
-        storageService.clearAuth();
+        localStorageService.clearAuth();
         set(initialState);
       },
     }),

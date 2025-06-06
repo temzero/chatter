@@ -3,14 +3,14 @@ import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { DirectChatResponse } from "@/types/chat";
-import { useAuthStore } from "@/stores/authStore";
+import { useCurrentUser } from "@/stores/authStore";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import { FriendshipStatus } from "@/types/friendship";
 import { handleError } from "@/utils/handleError";
 import { toast } from "react-toastify";
 
 const DirectChatEdit = () => {
-  const currentUser = useAuthStore((s) => s.currentUser);
+  const currentUser = useCurrentUser();
   const activeChat = useChatStore(
     (state) => state.activeChat
   ) as DirectChatResponse;

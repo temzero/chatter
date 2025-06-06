@@ -1,6 +1,6 @@
 import API from "@/services/api/api";
 import rawAPI from "./api/rawApi";
-import { storageService } from "./storage/storageService";
+import { localStorageService } from "./storage/localStorageService";
 
 export const authService = {
   async getCurrentUser() {
@@ -14,7 +14,7 @@ export const authService = {
       password,
     });
     console.log("data response: ", data);
-    storageService.setAccessToken(data.accessToken);
+    localStorageService.setAccessToken(data.accessToken);
     return data;
   },
 
@@ -62,7 +62,7 @@ export const authService = {
   },
 
   logout: async () => {
-    storageService.clearAuth();
+    localStorageService.clearAuth();
     const response = await API.post("/auth/logout");
     return response.data;
   },

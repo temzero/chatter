@@ -1,17 +1,18 @@
 import React from "react";
 import { useChatStore } from "@/stores/chatStore";
-import { useMessageStore } from "@/stores/messageStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { ChatType } from "@/types/enums/ChatType";
 import { ChatMemberRole } from "@/types/ChatMemberRole";
-import RenderMedia from "@/components/ui/RenderMedia";
+// import { useActiveChatAttachments } from "@/stores/messageStore";
+// import RenderMedia from "@/components/ui/RenderMedia";
 import DirectChat from "./SidebarInfoEdit/DirectChat";
 import GroupChat from "./SidebarInfoEdit/GroupChat";
 
 const SidebarInfoDefault: React.FC = () => {
   const { activeChat } = useChatStore();
-  const { activeMedia } = useMessageStore();
+  // const activeAttachments = useActiveChatAttachments()
+  // const activeAttachments: any[] = [];
   const { setSidebarInfo, isSidebarInfoVisible } = useSidebarInfoStore();
 
   const isDirect = activeChat?.type === ChatType.DIRECT;
@@ -56,18 +57,16 @@ const SidebarInfoDefault: React.FC = () => {
 
       <div className="overflow-x-hidden overflow-y-auto h-screen">
         {/* <div className="flex flex-col justify-center items-center p-4 gap-2 w-full pb-[70px]"> */}
-        <AnimatePresence>
-          {isSidebarInfoVisible && (
-            <motion.div
-              key={activeChat.id}
-              initial={{ opacity: 0, scale: 0.9}}
-              animate={{ opacity: 1, scale: 1}}
-              className="flex flex-col gap-4 w-full mt-4 min-w-[240px]"
-            >
-              {isDirect ? <DirectChat /> : <GroupChat />}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {isSidebarInfoVisible && (
+          <motion.div
+            key={activeChat.id}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col gap-4 w-full mt-4 min-w-[240px]"
+          >
+            {isDirect ? <DirectChat /> : <GroupChat />}
+          </motion.div>
+        )}
 
         <div
           className="flex flex-col justify-center items-center cursor-pointer border-2 border-b-0 border-[var(--hover-color)] rounded p-1 shadow-4xl absolute -bottom-[100px] hover:-bottom-[70px] transition-all duration-300 ease-in-out backdrop-blur-[12px]"
@@ -77,8 +76,8 @@ const SidebarInfoDefault: React.FC = () => {
             keyboard_control_key
           </i>
           <h1 className="-mt-1 mb-2">Media & Files</h1>
-          <div className="grid grid-cols-3">
-            {activeMedia.slice(0, 3).map((media, index) => (
+          {/* <div className="grid grid-cols-3">
+            {activeAttachments.slice(0, 3).map((media, index) => (
               <div
                 key={`${media.messageId}-${index}`}
                 className="overflow-hidden aspect-square"
@@ -89,7 +88,7 @@ const SidebarInfoDefault: React.FC = () => {
                 />
               </div>
             ))}
-          </div>
+          </div> */}
         </div>
         {/* </div> */}
       </div>

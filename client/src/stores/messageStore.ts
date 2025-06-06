@@ -1,73 +1,98 @@
 import { create } from "zustand";
-import type { Message, MessageMedia } from "@/types/message";
+import type {
+  AttachmentResponse,
+  MessageResponse,
+} from "@/types/messageResponse";
 import { useChatStore } from "./chatStore";
+import { AttachmentType } from "@/types/enums/attachmentType";
+import { messageService } from "@/services/messageService";
+import { useMemo } from "react";
+import { handleError } from "@/utils/handleError";
 
-export interface MessageStore {
-  messages: Message[];
-  drafts: Record<string, string>;
-  activeMessages: Message[];
-  activeMedia: MessageMedia[];
-
-  addMessage: (newMessage: Message) => void;
-  deleteMessage: (id: string) => void;
-  getChatMedia: (chatId: string) => MessageMedia[];
-  setDraftMessage: (chatId: string, draft: string) => void;
-  getDraftMessage: (chatId: string) => string;
+interface ChatMessages {
+  [chatId: string]: MessageResponse[];
 }
 
-export const getMessagesByChatId = (chatId: string, messages: Message[]) =>
-  messages.filter((msg) => msg.chat.id === chatId);
+export interface MessageStore {
+  messages: ChatMessages;
+  drafts: Record<string, string>;
+  isLoading: boolean;
 
-export const getMediaFromMessages = (messages: Message[]): MessageMedia[] =>
+  fetchMessages: (chatId: string) => void;
+  addMessage: (chatId: string, newMessage: MessageResponse) => void;
+  deleteMessage: (chatId: string, messageId: string) => void;
+  getChatMessages: (chatId: string) => MessageResponse[];
+  getChatAttachments: (chatId: string) => AttachmentResponse[];
+  setDraftMessage: (chatId: string, draft: string) => void;
+  getDraftMessage: (chatId: string) => string;
+  setChatMessages: (chatId: string, messages: MessageResponse[]) => void;
+  clearChatMessages: (chatId: string) => void;
+}
+
+export const getAttachmentsFromMessages = (
+  messages: MessageResponse[]
+): AttachmentResponse[] =>
   messages
-    .filter((msg) => msg.media_items && msg.media_items.length > 0)
+    .filter((msg) => msg.attachments && msg.attachments.length > 0)
     .flatMap((msg) =>
-      msg.media_items!.map((mediaItem) => ({
-        ...mediaItem,
+      msg.attachments!.map((attachment) => ({
+        ...attachment,
         messageId: msg.id,
       }))
     );
 
-const createLastMessageInfo = (message: Message) => {
-  const { content = "", media_items = [], createdAt } = message;
-  const types = media_items.map((m) => m.type);
-  const icon = types.includes("image")
+const createLastMessageInfo = (message: MessageResponse) => {
+  const { content = "", attachments = [], createdAt } = message;
+  const types = attachments.map((a) => a.type);
+  const icon = types.includes(AttachmentType.IMAGE)
     ? "image"
-    : types.includes("video")
+    : types.includes(AttachmentType.VIDEO)
     ? "videocam"
-    : types.includes("audio")
+    : types.includes(AttachmentType.AUDIO)
     ? "music_note"
     : types.length
     ? "folder_zip"
     : undefined;
 
-  const contentText = content || "Media";
+  const contentText = content || "Attachment";
   return { content: contentText, icon, time: createdAt };
 };
 
 export const useMessageStore = create<MessageStore>((set, get) => ({
-  messages: [],
+  messages: {},
   drafts: {},
-  activeMessages: [],
-  activeMedia: [],
+  isLoading: false,
 
-  addMessage: (newMessage) => {
+  fetchMessages: async (chatId: string) => {
+    set({ isLoading: true });
+    try {
+      const messages = await messageService.getChatMessages(chatId);
+      set((state) => ({
+        messages: {
+          ...state.messages,
+          [chatId]: messages,
+        },
+        isLoading: false,
+      }));
+      console.log("all fetched messages: ", get().messages);
+      return messages;
+    } catch (error) {
+      handleError(error, "Fail fetching messages");
+      set({ isLoading: false });
+    }
+  },
+
+  addMessage: (chatId, newMessage) => {
     const { messages } = get();
-    const updatedMessages = [...messages, newMessage];
 
-    const activeChat = useChatStore.getState().activeChat;
-    const shouldUpdateActive = activeChat?.id === newMessage.chat.id;
+    const updatedMessages = {
+      ...messages,
+      [chatId]: [...(messages[chatId] || []), newMessage],
+    };
 
-    const activeMessages = shouldUpdateActive
-      ? getMessagesByChatId(activeChat.id, updatedMessages)
-      : get().activeMessages;
-
-    const activeMedia = shouldUpdateActive
-      ? getMediaFromMessages(activeMessages)
-      : get().activeMedia;
-
+    // Update last message info in chat store
     const chats = useChatStore.getState().chats.map((chat) =>
-      chat.id === newMessage.chat.id
+      chat.id === chatId
         ? {
             ...chat,
             ...createLastMessageInfo(newMessage),
@@ -79,31 +104,28 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
 
     set({
       messages: updatedMessages,
-      activeMessages,
-      activeMedia,
     });
   },
 
-  deleteMessage: (id) => {
-    const messages = get().messages.filter((msg) => msg.id !== id);
-    const activeChat = useChatStore.getState().activeChat;
-
-    const activeMessages = activeChat
-      ? getMessagesByChatId(activeChat.id, messages)
-      : [];
-
-    const activeMedia = getMediaFromMessages(activeMessages);
+  deleteMessage: (chatId, messageId) => {
+    const { messages } = get();
+    const chatMessages = messages[chatId] || [];
 
     set({
-      messages,
-      activeMessages,
-      activeMedia,
+      messages: {
+        ...messages,
+        [chatId]: chatMessages.filter((msg) => msg.id !== messageId),
+      },
     });
   },
 
-  getChatMedia: (chatId) => {
-    const chatMessages = getMessagesByChatId(chatId, get().messages);
-    return getMediaFromMessages(chatMessages);
+  getChatMessages: (chatId) => {
+    return get().messages[chatId] || [];
+  },
+
+  getChatAttachments: (chatId) => {
+    const chatMessages = get().messages[chatId] || [];
+    return getAttachmentsFromMessages(chatMessages);
   },
 
   setDraftMessage: (chatId, draft) =>
@@ -114,4 +136,55 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
   getDraftMessage: (chatId) => {
     return get().drafts[chatId] || "";
   },
+
+  setChatMessages: (chatId, messages) => {
+    set((state) => ({
+      messages: {
+        ...state.messages,
+        [chatId]: messages,
+      },
+    }));
+  },
+
+  clearChatMessages: (chatId) => {
+    const { messages } = get();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { [chatId]: _, ...remainingMessages } = messages;
+
+    set({
+      messages: remainingMessages,
+    });
+  },
 }));
+
+// // Custom hooks for easier consumption in components
+export const useActiveChatMessages = () => {
+  const activeChat = useChatStore((state) => state.activeChat);
+  const isLoading = useMessageStore((state) => state.isLoading);
+  const getChatMessages = useMessageStore((state) => state.getChatMessages);
+
+  return useMemo(
+    () => (activeChat && !isLoading ? getChatMessages(activeChat.id) : []),
+    [activeChat, isLoading, getChatMessages]
+  );
+};
+
+export const useActiveChatAttachments = () => {
+  const activeChat = useChatStore((state) => state.activeChat);
+  const isLoading = useMessageStore((state) => state.isLoading);
+  const getChatAttachments = useMessageStore(
+    (state) => state.getChatAttachments
+  );
+
+  return useMemo(
+    () => (activeChat && !isLoading ? getChatAttachments(activeChat.id) : []),
+    [activeChat, isLoading, getChatAttachments]
+  );
+};
+
+export const useActiveChatDraft = () => {
+  const activeChatId = useChatStore((state) => state.activeChat?.id);
+  return useMessageStore((state) =>
+    activeChatId ? state.getDraftMessage(activeChatId) : ""
+  );
+};

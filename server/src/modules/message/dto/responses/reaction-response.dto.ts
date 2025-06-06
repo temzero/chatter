@@ -1,6 +1,7 @@
-import { Expose, Type } from 'class-transformer';
-import { UserResponseDto } from 'src/modules/user/dto/responses/user-response.dto';
+import { Exclude, Expose, Type } from 'class-transformer';
+import { SenderResponseDto } from './sender-response.dto';
 
+@Exclude()
 export class ReactionResponseDto {
   @Expose()
   id: string;
@@ -9,8 +10,11 @@ export class ReactionResponseDto {
   emoji: string;
 
   @Expose()
-  @Type(() => UserResponseDto)
-  user: UserResponseDto;
+  userId: string;
+
+  @Expose()
+  @Type(() => SenderResponseDto)
+  user?: SenderResponseDto;
 
   @Expose()
   updatedAt: Date;

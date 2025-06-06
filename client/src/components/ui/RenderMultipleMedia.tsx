@@ -1,9 +1,9 @@
-import React from 'react';
-import RenderMedia from './RenderMedia';
+import React from "react";
+import RenderMedia from "./RenderMedia";
 
 export interface MediaProps {
   id: string;
-  type: 'image' | 'video' | 'audio' | 'file';
+  type: "image" | "video" | "audio" | "file";
   url: string;
   messageId: string;
   fileName?: string;
@@ -13,115 +13,81 @@ export interface MediaProps {
 
 interface RenderMultipleMediaProps {
   media: MediaProps[];
-  text?: string
+  text?: string;
   className?: string;
 }
 
-const RenderMultipleMedia: React.FC<RenderMultipleMediaProps> = ({ media, text, className = '' }) => {
+const RenderMultipleMedia: React.FC<RenderMultipleMediaProps> = ({
+  media,
+  text,
+  className = "",
+}) => {
   if (media.length === 0) {
-    return <span>No media available</span>;
+    return text ? (
+      <div className="p-2">{text}</div>
+    ) : (
+      <span>No media available</span>
+    );
   }
 
-  // Separate visual media (images and videos) from non-visual (files and audio)
-  const visualMedia = media.filter(m => m.type === 'image' || m.type === 'video');
+  // Categorize media by type
+  const visualMedia = media.filter(
+    (m) => m.type === "image" || m.type === "video"
+  );
+  const audioMedia = media.filter((m) => m.type === "audio");
+  const fileMedia = media.filter((m) => m.type === "file");
 
-  const audioItems = media.filter(m => m.type === 'audio');
-  const fileItems = media.filter(m => m.type === 'file');
-  const nonVisualMedia = [...audioItems, ...fileItems];
-
-  function renderVisualMedia (visualMediaLength: number) {
-
-    if (visualMediaLength === 1) {
-      return <RenderMedia media={visualMedia[0]} />
-    }
-
-    // Special layout for 3 visual media items (one large, two small)
-    else if (visualMediaLength === 3) {
-      return (
-        <div className="grid grid-cols-6 grid-rows-2 gap-[1px]  w-[var(--media-width-large)]">
-          <div className="col-span-4 row-span-2">
-            <RenderMedia media={visualMedia[0]} className="w-full h-full" />
-          </div>
-          <div className="col-span-2">
-            <RenderMedia media={visualMedia[1]} className="w-full h-full" />
-          </div>
-          <div className="col-span-2">
-            <RenderMedia media={visualMedia[2]} className="w-full h-full" />
-          </div>
+  const renderMediaGrid = (items: MediaProps[], cols: number) => (
+    <div
+      className={`grid gap-[1px] w-full`}
+      style={{
+        gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
+      }}
+    >
+      {items.map((mediaItem) => (
+        <div key={mediaItem.id} className="aspect-square">
+          <RenderMedia media={mediaItem} className="w-full h-full" />
         </div>
-      );
-    }
+      ))}
+    </div>
+  );
 
-    else if (visualMediaLength === 4) {
-      return (
-        <div className="grid grid-cols-4 grid-rows-1 gap-[1px]  w-[var(--media-width-large)]">
-          {/* Large image on the left - takes full height and 3/4 width */}
-          <div className="col-span-3 row-span-1">
-            <RenderMedia 
-              media={visualMedia[0]} 
-              className="w-full h-full rounded-l-lg" 
-            />
-          </div>
-          
-          {/* Three images stacked vertically on the right - each takes 1/3 height */}
-          <div className="col-span-1 grid grid-rows-3 h-full">
-            <div className="row-span-1">
-              <RenderMedia 
-                media={visualMedia[1]} 
-                className="w-full h-full" 
-              />
-            </div>
-            <div className="row-span-1">
-              <RenderMedia 
-                media={visualMedia[2]} 
-                className="w-full h-full" 
-              />
-            </div>
-            <div className="row-span-1">
-              <RenderMedia 
-                media={visualMedia[3]} 
-                className="w-full h-full" 
-              />
-            </div>
-          </div>
-        </div>
-      );
-    }
+  const renderVisualMedia = () => {
+    const count = visualMedia.length;
 
-    else if (visualMediaLength % 3 === 0) {
+    switch (count) {
+      case 0:
+        return null;
+      case 1:
+        return <RenderMedia media={visualMedia[0]} />;
+      case 3:
         return (
-          <div className="grid grid-cols-3 gap-[1px] w-[var(--media-width-large)]">
-            {visualMedia.map((media) => (
-              <div key={media.id} className="aspect-square">
-                <RenderMedia
-                  media={media}
-                  className="w-full h-full"
-                />
-              </div>
-            ))}
+          <div className="grid grid-cols-6 grid-rows-2 gap-[1px] w-[var(--media-width-large)]">
+            <div className="col-span-4 row-span-2">
+              <RenderMedia media={visualMedia[0]} className="w-full h-full" />
+            </div>
+            <div className="col-span-2">
+              <RenderMedia media={visualMedia[1]} className="w-full h-full" />
+            </div>
+            <div className="col-span-2">
+              <RenderMedia media={visualMedia[2]} className="w-full h-full" />
+            </div>
           </div>
         );
-      } else if (visualMediaLength % 2 === 0) {
-        const firstFour = visualMedia.slice(0, 4);
-        const remaining = visualMedia.slice(4);
-    
+      case 4:
         return (
-          <div className="w-[var(--media-width-large)]">
-            <div className="grid grid-cols-2 gap-[1px]">
-              {firstFour.map((media) => (
-                <div key={media.id} className="aspect-square">
-                  <RenderMedia
-                    media={media}
-                    className="w-full h-full"
-                  />
-                </div>
-              ))}
+          <div className="grid grid-cols-4 grid-rows-1 gap-[1px] w-[var(--media-width-large)]">
+            <div className="col-span-3 row-span-1">
+              <RenderMedia
+                media={visualMedia[0]}
+                className="w-full h-full rounded-l-lg"
+              />
             </div>
-            <div className="grid grid-cols-3 gap-[1px]">
-              {remaining.map((media) => (
-                <div key={media.id} className="aspect-square">
+            <div className="col-span-1 grid grid-rows-3 h-full">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="row-span-1">
                   <RenderMedia
-                    media={media}
+                    media={visualMedia[i]}
                     className="w-full h-full"
                   />
                 </div>
@@ -129,49 +95,37 @@ const RenderMultipleMedia: React.FC<RenderMultipleMediaProps> = ({ media, text, 
             </div>
           </div>
         );
-      } else {
+      default:
+        { if (count % 3 === 0) {
+          return renderMediaGrid(visualMedia, 3);
+        }
+
+        // For other counts, show first 2 in 2 columns, then 3 columns for rest
         const firstTwo = visualMedia.slice(0, 2);
         const remaining = visualMedia.slice(2);
-    
+
         return (
           <div className="w-[var(--media-width-large)]">
-            <div className="grid grid-cols-2 gap-[1px]">
-              {firstTwo.map((media) => (
-                <div key={media.id} className="aspect-square">
-                  <RenderMedia
-                    media={media}
-                    className="w-full h-full"
-                  />
-                </div>
-              ))}
-            </div>
-            <div className="grid grid-cols-3 gap-[1px]">
-              {remaining.map((media) => (
-                <div key={media.id} className="aspect-square">
-                  <RenderMedia
-                    media={media}
-                    className="w-full h-full"
-                  />
-                </div>
-              ))}
-            </div>
+            {firstTwo.length > 0 && renderMediaGrid(firstTwo, 2)}
+            {remaining.length > 0 && renderMediaGrid(remaining, 3)}
           </div>
-        );
+        ); }
     }
-  }
+  };
 
-  // For multiple visual media items (with optional non-visual items at bottom)
   return (
     <div className={`flex flex-col ${className}`}>
-      {renderVisualMedia(visualMedia.length)}
-      {nonVisualMedia.length > 0 && (
-        <div className="">
-          {nonVisualMedia.map((m, index) => (
-            <RenderMedia key={index} media={m}/>
-          ))}
+      {renderVisualMedia()}
+
+      {/* Non-visual media */}
+      {[...audioMedia, ...fileMedia].map((mediaItem) => (
+        <div key={mediaItem.id} className="mt-2">
+          <RenderMedia media={mediaItem} />
         </div>
-      )}
-      {text && <h1 className="p-2 break-words max-w-full">{text}</h1>}
+      ))}
+
+      {/* Optional text content */}
+      {text && <div className="p-2 break-words max-w-full">{text}</div>}
     </div>
   );
 };

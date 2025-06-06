@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { userService } from "@/services/userService";
 import ContactInfoItem from "./contactInfoItem";
-import { useAuthStore } from "@/stores/authStore";
+import { useCurrentUser } from "@/stores/authStore";
 import { AnimatePresence, motion } from "framer-motion";
 import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "./avatar/Avatar";
@@ -10,7 +10,8 @@ import FriendshipBtn from "./FriendshipBtn";
 import type { otherUser } from "@/types/user";
 
 const CreateNewChat: React.FC = () => {
-  const currentUser = useAuthStore((state) => state.currentUser);
+    const currentUser = useCurrentUser();
+  
   const createOrGetDirectChat = useChatStore((s) => s.createOrGetDirectChat);
 
   const [query, setQuery] = useState("");

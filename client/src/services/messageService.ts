@@ -1,34 +1,43 @@
 import API from "./api/api";
-import { Message, SendMessagePayload } from "@/data/types"; // Adjust your types import
+import { SendMessagePayload } from "@/types/sendMessagePayload";
+import { MessageResponse } from "@/types/messageResponse";
+import { UpdateMessageDto } from "@/types/updateMessageDto";
+
 
 export const messageService = {
-  // Get messages for a chat
-  async getMessages(chatId: string, page: number = 1, limit: number = 50): Promise<Message[]> {
-    const { data } = await API.get(`/messages/${chatId}`, {
-      params: { page, limit }
+  async getChatMessages(
+    chatId: string,
+    offset: number = 0,
+    limit: number = 50
+  ): Promise<MessageResponse[]> {
+    const { data } = await API.get(`/messages/chat/${chatId}`, {
+      params: { offset, limit },
     });
-    return data;
+    return data.payload;
   },
 
-  // Send a message
-  async sendMessage(payload: SendMessagePayload): Promise<Message> {
+  async sendMessage(payload: SendMessagePayload): Promise<MessageResponse> {
+    if (!payload.content && !payload.attachmentIds) {
+      throw new Error("Message must have content or attachments");
+    }
     const { data } = await API.post("/messages", payload);
     return data;
   },
 
-  // Edit a message
-  async editMessage(messageId: string, newContent: string): Promise<Message> {
-    const { data } = await API.patch(`/messages/${messageId}`, { content: newContent });
+  async editMessage(
+    messageId: string,
+    updateData: UpdateMessageDto
+  ): Promise<MessageResponse> {
+    const { data } = await API.put(`/messages/${messageId}`, updateData);
     return data;
   },
 
-  // Delete a message
   async deleteMessage(messageId: string): Promise<void> {
     await API.delete(`/messages/${messageId}`);
   },
 
-  // Mark messages as read
+  // Either implement in controller or remove:
   async markAsRead(messageIds: string[]): Promise<void> {
     await API.patch("/messages/mark-read", { messageIds });
-  }
+  },
 };

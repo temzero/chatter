@@ -68,17 +68,7 @@ export const useChatStore = create<ChatStore>()(
       // Shared cleanup function
       const cleanupChat = (chatId: string) => {
         // Cleanup messages
-        useMessageStore.setState((msgState) => {
-          const filteredMessages = msgState.messages.filter(
-            (m) => m.chat.id !== chatId
-          );
-          const isActive = get().activeChat?.id === chatId;
-          return {
-            messages: filteredMessages,
-            activeMessages: isActive ? [] : msgState.activeMessages,
-            activeMedia: isActive ? [] : msgState.activeMedia,
-          };
-        });
+        useMessageStore.getState().clearChatMessages(chatId);
 
         // Cleanup chat store
         set((state) => ({
@@ -127,7 +117,6 @@ export const useChatStore = create<ChatStore>()(
         },
 
         getChatById: async (chatId) => {
-          // If no chatId provided, use active chat's ID if available
           const targetChatId = chatId || get().activeChat?.id;
           if (!targetChatId) {
             console.warn("No chatId provided and no active chat available");
@@ -162,15 +151,13 @@ export const useChatStore = create<ChatStore>()(
             return;
           }
 
-          // Find existing direct chat with this user in the store
           const existingChat = get().chats.find(
             (chat) =>
               chat.type === ChatType.DIRECT &&
-              chat.chatPartner.userId === userId // handle both cases if needed
+              chat.chatPartner.userId === userId
           );
 
           if (existingChat) {
-            // If found, refresh the chat data by calling getChatById
             await get().getChatById(existingChat.id);
             return existingChat;
           }
@@ -234,6 +221,8 @@ export const useChatStore = create<ChatStore>()(
           set({ activeChat: chat });
           window.history.pushState({}, "", `/${chat.id}`);
 
+          // Fetch messages for the active chat
+          useMessageStore.getState().fetchMessages(chat.id);
           if (chat.type !== ChatType.DIRECT) {
             await get().getGroupMembers(chat.id);
             set((state) => ({
@@ -484,12 +473,6 @@ export const useChatStore = create<ChatStore>()(
             if (!currentUserId) {
               throw new Error("User not authenticated");
             }
-            console.log(
-              "Leaving group chat:",
-              chatId,
-              "for user:",
-              currentUserId
-            );
             await chatMemberService.removeMember(chatId, currentUserId);
             cleanupChat(chatId);
             set({ isLoading: false });
@@ -539,3 +522,5 @@ export const useChatStore = create<ChatStore>()(
     }
   )
 );
+
+export const useActiveChat = () => useChatStore((state) => state.activeChat);

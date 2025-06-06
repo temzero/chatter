@@ -9,11 +9,10 @@ import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import getChatName from "@/utils/getChatName";
 import FriendshipBtn from "@/components/ui/FriendshipBtn";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
-import { useChatStore } from "@/stores/chatStore";
+import { useActiveChat } from "@/stores/chatStore";
 
 const DirectChat: React.FC = () => {
-  const activeChat = useChatStore((s) => s.activeChat) as DirectChatResponse;
-  // const setActiveChat = useChatStore((s) => s.setActiveChat);
+  const activeChat = useActiveChat() as DirectChatResponse;
   const { setSidebarInfo } = useSidebarInfoStore();
   if (!activeChat) return;
   const chatPartner = activeChat.chatPartner;

@@ -2,7 +2,6 @@ import { Exclude, Expose, Transform } from 'class-transformer';
 import { UserRole } from '../../constants/user-role.constants';
 import { UserStatus } from '../../constants/user-status.constants';
 import { UserSettingsResponseDto } from './user-settings-response.dto';
-import { DateStringOrNull, StringOrNull } from 'src/common/utils/dto.utils';
 
 @Exclude()
 export class UserDetailResponseDto {
@@ -10,8 +9,7 @@ export class UserDetailResponseDto {
   id: string;
 
   @Expose()
-  @StringOrNull()
-  avatarUrl: string | null;
+  avatarUrl?: string | null;
 
   @Expose()
   firstName: string;
@@ -26,16 +24,13 @@ export class UserDetailResponseDto {
   email: string;
 
   @Expose()
-  @StringOrNull()
-  phoneNumber: string | null;
+  phoneNumber?: string | null;
 
   @Expose()
-  @StringOrNull()
-  bio: string | null;
+  bio?: string | null;
 
   @Expose()
-  @DateStringOrNull()
-  birthday: string | null;
+  birthday?: string | null;
 
   @Expose()
   role: UserRole;
@@ -53,24 +48,20 @@ export class UserDetailResponseDto {
   isOnline: boolean;
 
   @Expose()
-  @DateStringOrNull()
-  lastActiveAt: string | null;
+  lastActiveAt?: string | null;
 
   @Expose()
   @Transform(({ value }): Record<string, unknown> => value ?? {})
   metadata: Record<string, unknown>;
 
   @Expose()
-  @DateStringOrNull()
-  createdAt: string;
+  createdAt?: string | null;
 
   @Expose()
-  @DateStringOrNull()
-  updatedAt: string;
+  updatedAt?: string | null;
 
   @Expose()
-  @DateStringOrNull()
-  deletedAt: string | null;
+  deletedAt?: string | null;
 
   @Expose()
   @Transform(({ obj }: { obj: Partial<UserDetailResponseDto> }) => {
