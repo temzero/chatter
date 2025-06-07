@@ -55,10 +55,7 @@ export class AuthService {
         deviceName,
       );
 
-      const loginUser = await this.userService.setUserOnlineStatus(
-        user.id,
-        true,
-      );
+      const loginUser = await this.userService.getUserById(user.id);
       return {
         user: plainToInstance(UserResponseDto, loginUser),
         accessToken: newAccessToken,
@@ -241,8 +238,6 @@ export class AuthService {
   async logout(userId: string, deviceId: string): Promise<void> {
     try {
       await this.tokenStorageService.deleteDeviceTokens(userId, deviceId);
-      // Update user status
-      await this.userService.setUserOnlineStatus(userId, false);
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to logout');
     }
@@ -251,8 +246,6 @@ export class AuthService {
   async logoutAll(userId: string): Promise<void> {
     try {
       await this.tokenStorageService.deleteAllUserTokens(userId);
-      // Update user status
-      await this.userService.setUserOnlineStatus(userId, false);
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to logout from all devices');
     }

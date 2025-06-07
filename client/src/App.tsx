@@ -19,7 +19,7 @@ const App: React.FC = () => {
       <AppRoutes />
       <ToastContainer
         position="bottom-right"
-        autoClose={52000}
+        autoClose={2500}
         hideProgressBar={true}
         newestOnTop={false}
         closeOnClick

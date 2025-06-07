@@ -1,26 +1,33 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
-import bodyParser from 'body-parser';
+import { json, urlencoded } from 'express';
+import { IoAdapter } from '@nestjs/platform-socket.io';
+
+const logger = new Logger('Bootstrap');
+const DEFAULT_PORT = 3000;
+const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
+const BODY_PARSER_LIMIT = '100mb';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  // Increase JSON body size limit (e.g., to 10mb)
-  app.use(bodyParser.json({ limit: '100mb' }));
-  app.use(bodyParser.urlencoded({ limit: '100mb', extended: true }));
-
-  app.use(cookieParser());
-
-  // Enable CORS to allow frontend (Vite React) to communicate
-  app.enableCors({
-    origin: 'http://localhost:5173',
-    credentials: true,
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bufferLogs: true,
   });
 
-  // Apply global validation pipe
+  // Middleware
+  app.use(json({ limit: BODY_PARSER_LIMIT }));
+  app.use(urlencoded({ limit: BODY_PARSER_LIMIT, extended: true }));
+  app.use(cookieParser());
+
+  // Global configurations
+  app.enableCors({
+    origin: CLIENT_URL,
+    credentials: true,
+  });
+  app.useWebSocketAdapter(new IoAdapter(app));
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -29,11 +36,27 @@ async function bootstrap() {
       validateCustomDecorators: true,
     }),
   );
-
-  // Serve static files from the 'public' directory
   app.useStaticAssets(join(__dirname, '..', 'public'));
 
-  await app.listen(process.env.PORT ?? 3000);
+  // Start application
+  const port = process.env.PORT ?? DEFAULT_PORT;
+  await app.listen(port);
+
+  // Log startup information
+  const server = app.getHttpServer();
+  const address = server.address();
+  const actualPort = typeof address === 'string' ? address : address?.port;
+
+  logger.log(`Server running on port ${actualPort}`);
+  logger.log(`CORS configured for ${CLIENT_URL}`);
+  logger.log('Static assets served from /public');
+
+  console.log(`Server running on port ${actualPort}`);
+  console.log(`CORS configured for ${CLIENT_URL}`);
+  console.log(`Static assets served from /public`);
 }
 
-void bootstrap();
+bootstrap().catch((err) => {
+  logger.error('Failed to start application', err);
+  process.exit(1);
+});

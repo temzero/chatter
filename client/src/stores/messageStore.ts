@@ -20,7 +20,7 @@ export interface MessageStore {
 
   fetchMessages: (chatId: string) => void;
   addMessage: (chatId: string, newMessage: MessageResponse) => void;
-  deleteMessage: (chatId: string, messageId: string) => void;
+  deleteMessage: (messageId: string) => void;
   getChatMessages: (chatId: string) => MessageResponse[];
   getChatAttachments: (chatId: string) => AttachmentResponse[];
   setDraftMessage: (chatId: string, draft: string) => void;
@@ -107,14 +107,20 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
     });
   },
 
-  deleteMessage: (chatId, messageId) => {
+  deleteMessage: (messageId: string) => {
     const { messages } = get();
-    const chatMessages = messages[chatId] || [];
+
+    // Find which chat contains this message
+    const chatId = Object.keys(messages).find((chatId) =>
+      messages[chatId].some((msg) => msg.id === messageId)
+    );
+
+    if (!chatId) return;
 
     set({
       messages: {
         ...messages,
-        [chatId]: chatMessages.filter((msg) => msg.id !== messageId),
+        [chatId]: messages[chatId].filter((msg) => msg.id !== messageId),
       },
     });
   },

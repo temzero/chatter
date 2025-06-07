@@ -7,6 +7,7 @@ import axios, {
 } from "axios";
 import { localStorageService } from "../storage/localStorageService";
 import { authService } from "../authService";
+import { handleError } from "@/utils/handleError";
 
 const API: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -89,7 +90,6 @@ API.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // toast.error("Session expired. Please log in again.");
         const newAccessToken = await authService.refreshToken();
 
         localStorageService.setAccessToken(newAccessToken);
@@ -104,6 +104,7 @@ API.interceptors.response.use(
         processQueue(refreshError, null);
         authService.logout();
         window.location.href = "/login";
+        handleError(refreshError, 'Api refresh error')
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

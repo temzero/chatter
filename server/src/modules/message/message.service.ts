@@ -20,20 +20,6 @@ export class MessageService {
     private readonly messageRepo: Repository<Message>,
   ) {}
 
-  // async createMessage(
-  //   userId: string,
-  //   createMessageDto: CreateMessageDto,
-  // ): Promise<Message> {
-  //   // check if chat exist
-  //   // check if user is member of that chat
-  //   try {
-  //     const newMessage = this.messageRepo.create(createMessageDto);
-  //     return await this.messageRepo.save(newMessage);
-  //   } catch (error) {
-  //     ErrorResponse.throw(error, 'Failed to create message');
-  //   }
-  // }
-
   async createMessage(
     userId: string,
     createMessageDto: CreateMessageDto,

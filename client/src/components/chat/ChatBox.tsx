@@ -2,8 +2,8 @@ import React, { useRef, useEffect, useState, useMemo } from "react";
 import Message from "./Message";
 import ChannelMessage from "./MessageChannel";
 import { useSoundEffect } from "@/hooks/useSoundEffect";
-import bubbleSound from "@/assets/sound/message-bubble.mp3";
-import popSound from "@/assets/sound/message-pop.mp3";
+// import bubbleSound from "@/assets/sound/message-bubble.mp3";
+// import popSound from "@/assets/sound/message-pop.mp3";
 import messageSound from "@/assets/sound/message-sent2.mp3";
 import { useActiveChatMessages } from "@/stores/messageStore";
 
@@ -20,8 +20,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ isChannel = false }) => {
   const [previousMessageCount, setPreviousMessageCount] = useState(0);
 
   // Create sound effects with different volumes
-  const playBubbleSound = useSoundEffect(bubbleSound, 0.4);
-  const playPopSound = useSoundEffect(popSound, 0.3);
+  // const playBubbleSound = useSoundEffect(bubbleSound, 0.4);
+  // const playPopSound = useSoundEffect(popSound, 0.3);
   const playMessageSound = useSoundEffect(messageSound, 0.5);
 
   const newMessageAdded = useMemo(() => {
@@ -59,21 +59,10 @@ const ChatBox: React.FC<ChatBoxProps> = ({ isChannel = false }) => {
       const container = containerRef.current;
       waitForMediaToLoad(container).then(() => {
         container.scrollTop = container.scrollHeight;
-
-        // Play a random sound when new message arrives
-        const soundOptions = [playMessageSound, playPopSound, playBubbleSound];
-        const randomSound =
-          soundOptions[Math.floor(Math.random() * soundOptions.length)];
-        randomSound();
+        playMessageSound();
       });
     }
-  }, [
-    newMessageAdded,
-    messages,
-    playMessageSound,
-    playPopSound,
-    playBubbleSound,
-  ]);
+  }, [newMessageAdded, messages, playMessageSound]);
 
   // Group messages by date
   const groupedMessages = useMemo(() => {

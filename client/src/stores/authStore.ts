@@ -8,6 +8,7 @@ import { useSidebarStore } from "./sidebarStore";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
 import type { User } from "@/types/user";
 import { SidebarMode } from "@/types/enums/sidebarMode";
+import { webSocketService } from "@/lib/websocket/websocketService";
 
 type MessageType = "error" | "success" | "info";
 
@@ -55,6 +56,36 @@ export const useAuthStore = create<AuthState & AuthActions>()(
     (set, get) => ({
       ...initialState,
 
+      initialize: async () => {
+        try {
+          get().setLoading(true);
+          const user = await authService.getCurrentUser();
+
+          if (!user) {
+            return set({ ...initialState, loading: false });
+          }
+
+          set({
+            currentUser: user,
+            isAuthenticated: true,
+            loading: false,
+            message: null,
+          });
+
+          try {
+            await webSocketService.connect();
+          } catch (wsError) {
+            console.error(
+              wsError,
+              "WebSocket failed, but keeping user logged in"
+            );
+          }
+        } catch (error) {
+          console.error(error);
+          set({ ...initialState, loading: false });
+        }
+      },
+
       setCurrentUser: (user) => {
         set({
           currentUser: user,
@@ -74,30 +105,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         });
       },
 
-      initialize: async () => {
-        try {
-          get().setLoading(true);
-          const user = await authService.getCurrentUser();
-
-          if (user) {
-            set({
-              currentUser: user,
-              isAuthenticated: true,
-              loading: false,
-              message: null,
-            });
-            return user;
-          } else {
-            set({ ...initialState, loading: false });
-            return null;
-          }
-        } catch (error) {
-          console.error(error);
-          set({ ...initialState, loading: false });
-          return null;
-        }
-      },
-
       // Authentication methods
       login: async (identifier, password) => {
         try {
@@ -109,6 +116,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             message: { type: "success", content: "Logged in successfully" },
           });
           useChatStore.getState().clearChats();
+          // await webSocketService.connect();
         } catch (error) {
           const errorMessage = handleAuthError(error);
           get().setLoading(false, false); // Keep error message
@@ -130,6 +138,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
               content: "Account created successfully",
             },
           });
+          // await webSocketService.connect();
         } catch (error) {
           const errorMessage = handleAuthError(error);
           get().setLoading(false, false);
@@ -140,6 +149,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       logout: () => {
         authService.logout();
+        webSocketService.disconnect();
         useChatStore.getState().clearChats();
         useSidebarStore.getState().setSidebar(SidebarMode.DEFAULT);
         useSidebarInfoStore.getState().setSidebarInfo(SidebarMode.DEFAULT);

@@ -2,19 +2,28 @@
 import { io, Socket } from "socket.io-client";
 import { localStorageService } from "../../services/storage/localStorageService";
 import { MessageResponse } from "@/types/messageResponse";
-import { handleError } from "@/utils/handleError";
+import { toast } from "react-toastify";
 
-const SOCKET_URL = process.env.REACT_APP_WS_URL || "ws://localhost:3001";
+// const SOCKET_URL = import.meta.env.REACT_APP_WS_URL || "ws://localhost:3001";
+const SOCKET_URL = "http://localhost:3000";
 
 class WebSocketService {
   private socket: Socket | null = null;
+  private connectionPromise: Promise<Socket> | null = null;
 
   connect(): Promise<Socket> {
-    return new Promise((resolve, reject) => {
+    if (this.connectionPromise) return this.connectionPromise;
+
+    this.connectionPromise = new Promise((resolve, reject) => {
       this.socket = io(SOCKET_URL, {
         auth: {
           token: localStorageService.getAccessToken(),
         },
+        withCredentials: true, // Add this
+        transports: ["websocket"], // Force WebSocket transport
+        reconnection: false,
+        reconnectionAttempts: 2,
+        reconnectionDelay: 1000,
       });
 
       this.socket.on("connect", () => {
@@ -24,16 +33,25 @@ class WebSocketService {
 
       this.socket.on("connect_error", (error: unknown) => {
         console.error("Connection error:", error);
-        handleError(error, "Websocket connection failed!");
+        // handleError(error, "Websocket connection failed!");
+        toast.error("Websocket connection failed!");
+        this.connectionPromise = null;
         reject(error);
       });
+
+      this.socket.on("disconnect", () => {
+        console.log("Disconnected from WebSocket server");
+      });
     });
+
+    return this.connectionPromise;
   }
 
   disconnect() {
     if (this.socket) {
       this.socket.disconnect();
       this.socket = null;
+      this.connectionPromise = null;
     }
   }
 
@@ -80,6 +98,23 @@ class WebSocketService {
   ) {
     if (this.socket) {
       this.socket.off("newMessage", callback);
+    }
+  }
+
+  // Add online status methods
+  onUserOnlineStatus(
+    callback: (data: { userId: string; online: boolean }) => void
+  ) {
+    if (this.socket) {
+      this.socket.on("userOnline", callback);
+    }
+  }
+
+  offUserOnlineStatus(
+    callback: (data: { userId: string; online: boolean }) => void
+  ) {
+    if (this.socket) {
+      this.socket.off("userOnline", callback);
     }
   }
 }

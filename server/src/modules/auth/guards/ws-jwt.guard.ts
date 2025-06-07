@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { WsException } from '@nestjs/websockets';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from 'src/modules/user/user.service';
+import { User } from 'src/modules/user/entities/user.entity';
 import type { JwtPayload } from '../types/jwt-payload.type';
 
 interface WsClient {
@@ -36,7 +37,7 @@ export class WsJwtGuard implements CanActivate {
         secret: this.configService.getOrThrow<string>('JWT_ACCESS_SECRET'),
       });
 
-      const user = await this.userService.getUserById(payload.sub);
+      const user: User = await this.userService.getUserById(payload.sub);
       if (!user) {
         throw new WsException('User not found');
       }

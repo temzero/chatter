@@ -70,9 +70,6 @@ export class User {
   @Column({ name: 'phone_verified', default: false })
   phoneVerified: boolean;
 
-  @Column({ name: 'is_online', default: false })
-  isOnline: boolean;
-
   @Column({ name: 'last_active_at', type: 'timestamp', nullable: true })
   lastActiveAt: Date | null;
 

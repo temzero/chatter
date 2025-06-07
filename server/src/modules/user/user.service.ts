@@ -137,18 +137,6 @@ export class UserService {
     }
   }
 
-  async setUserOnlineStatus(
-    id: string,
-    isOnline: boolean, // Simple DTO with just isOnline
-  ): Promise<User> {
-    const user = await this.getUserById(id);
-
-    user.isOnline = isOnline;
-    user.lastActiveAt = new Date(); // Always set to current server time
-
-    return this.userRepository.save(user);
-  }
-
   async updatePassword(userId: string, newPassword: string): Promise<User> {
     try {
       const user = await this.getUserById(userId);

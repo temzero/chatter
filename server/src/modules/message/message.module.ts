@@ -11,5 +11,6 @@ import { User } from '../user/entities/user.entity';
   imports: [TypeOrmModule.forFeature([Message, Chat, ChatMember, User])],
   controllers: [MessageController],
   providers: [MessageService],
+  exports: [MessageService],
 })
 export class MessageModule {}

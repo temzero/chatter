@@ -11,6 +11,8 @@ export const useWebSocket = (activeChatId: string | null) => {
   useEffect(() => {
     // Connect to WebSocket server
     webSocketService.connect();
+    console.log("Initial connection status:", 
+      webSocketService.getSocket()?.connected);
 
     // Message handler
     const handleNewMessage = (data: {

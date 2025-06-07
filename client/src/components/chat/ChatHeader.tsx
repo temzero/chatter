@@ -4,6 +4,8 @@ import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import getChatName from "@/utils/getChatName";
 import { FriendshipStatus } from "@/types/friendship";
+import { usePresence } from "@/hooks/usePresence";
+import { ChatType } from "@/types/enums/ChatType";
 
 const ChatHeader: React.FC = () => {
   const activeChat = useChatStore((state) => state.activeChat);
@@ -11,7 +13,11 @@ const ChatHeader: React.FC = () => {
     (state) => state.toggleSidebarInfo
   );
 
+  const isOnline = usePresence();
+  console.log("isOnline: ", isOnline);
+
   if (!activeChat) return null;
+  const isChannel = activeChat.type === ChatType.CHANNEL;
 
   return (
     <header
@@ -31,8 +37,13 @@ const ChatHeader: React.FC = () => {
             ease: "easeInOut",
           }}
         >
-          <ChatAvatar chat={activeChat} type="header" />
-
+          <div className="relative">
+            <ChatAvatar chat={activeChat} type="header" />
+            {isOnline &&
+              !isChannel && (
+                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-[var(--background-color)]"></div>
+              )}
+          </div>
           <h1 className="text-xl font-medium">{getChatName(activeChat)}</h1>
         </motion.div>
       </AnimatePresence>

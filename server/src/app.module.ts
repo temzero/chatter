@@ -10,6 +10,7 @@ import { MessageModule } from './modules/message/message.module';
 import { AuthModule } from './modules/auth/modules/auth.module';
 import { ChatMemberModule } from './modules/chat-member/chat-member.module';
 import { SupabaseModule } from './modules/superbase/supabase.module';
+import { WebSocketModule } from './modules/websocket/websocket.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { SupabaseModule } from './modules/superbase/supabase.module';
     MessageModule,
     UserModule,
     SupabaseModule,
+    WebSocketModule,
   ],
   controllers: [AppController],
   providers: [AppService],

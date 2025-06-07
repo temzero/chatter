@@ -5,12 +5,14 @@ import { Avatar } from "../../ui/avatar/Avatar";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import ThemeSwitcher from "../../ui/ThemeSwitcher";
 import { SidebarMode } from "@/types/enums/sidebarMode";
+import { usePresence } from "@/hooks/usePresence";
 
 const SidebarMore: React.FC = () => {
   const currentUser = useCurrentUser();
   const { setSidebar, isCompact, toggleCompact } = useSidebarStore();
   const { receivedRequests, sentRequests } = useFriendshipStore();
   const requestsCount = receivedRequests.length + sentRequests.length;
+  const isOnline = usePresence();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -95,13 +97,16 @@ const SidebarMore: React.FC = () => {
         className="flex items-center p-4 gap-4 w-full custom-border-b cursor-pointer hover:bg-[var(--hover-color)]"
         onClick={() => setSidebar(SidebarMode.PROFILE)}
       >
-        <div className="w-16 h-16">
+        <div className="relative w-16 h-16">
           <Avatar
             avatarUrl={currentUser?.avatarUrl}
             firstName={currentUser?.firstName}
             lastName={currentUser?.lastName}
             size="16"
           />
+          {isOnline && (
+            <div className="absolute bottom-1 right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-[var(--background-color)]"></div>
+          )}
         </div>
 
         {isCompact || (
