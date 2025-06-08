@@ -5,7 +5,7 @@ import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
 import { json, urlencoded } from 'express';
-import { IoAdapter } from '@nestjs/platform-socket.io';
+import { JwtIoAdapter } from './jwt.adapter';
 
 const logger = new Logger('Bootstrap');
 const DEFAULT_PORT = 3000;
@@ -27,7 +27,7 @@ async function bootstrap() {
     origin: CLIENT_URL,
     credentials: true,
   });
-  app.useWebSocketAdapter(new IoAdapter(app));
+  app.useWebSocketAdapter(new JwtIoAdapter(app));
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

@@ -57,6 +57,20 @@ export class WebsocketService {
     return { userId, wasLastConnection: false };
   }
 
+  // Get all online users
+  getOnlineUsers(): string[] {
+    return Array.from(this.userSocketMap.keys());
+  }
+
+  // Get status for multiple users
+  getUsersStatus(userIds: string[]): Record<string, boolean> {
+    const result: Record<string, boolean> = {};
+    userIds.forEach((userId) => {
+      result[userId] = this.userSocketMap.has(userId);
+    });
+    return result;
+  }
+
   getUserSocketIds(userId: string): string[] {
     const sockets = this.userSocketMap.get(userId);
     return sockets ? Array.from(sockets) : [];

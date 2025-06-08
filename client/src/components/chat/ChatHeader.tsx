@@ -4,7 +4,8 @@ import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import getChatName from "@/utils/getChatName";
 import { FriendshipStatus } from "@/types/friendship";
-import { usePresence } from "@/hooks/usePresence";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { useGroupOnlineStatus } from "@/hooks/useGroupOnlineStatus";
 import { ChatType } from "@/types/enums/ChatType";
 
 const ChatHeader: React.FC = () => {
@@ -13,11 +14,22 @@ const ChatHeader: React.FC = () => {
     (state) => state.toggleSidebarInfo
   );
 
-  const isOnline = usePresence();
-  console.log("isOnline: ", isOnline);
+  const directUserId =
+    activeChat?.type === ChatType.DIRECT
+      ? activeChat.chatPartner?.userId
+      : undefined;
+  const isOnline = useOnlineStatus(directUserId);
+  const isGroupOnline = useGroupOnlineStatus(activeChat?.id);
 
   if (!activeChat) return null;
+
   const isChannel = activeChat.type === ChatType.CHANNEL;
+  const isDirect = activeChat.type === ChatType.DIRECT;
+  const isGroup = activeChat.type === ChatType.GROUP;
+
+  console.log("isGroupOnline", isGroupOnline);
+
+  const showOnlineStatus = (isDirect && isOnline) || (isGroup && isGroupOnline);
 
   return (
     <header
@@ -39,36 +51,31 @@ const ChatHeader: React.FC = () => {
         >
           <div className="relative">
             <ChatAvatar chat={activeChat} type="header" />
-            {isOnline &&
-              !isChannel && (
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-[var(--background-color)]"></div>
-              )}
+            {!isChannel && showOnlineStatus && (
+              <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-[var(--background-color)]"></div>
+            )}
           </div>
           <h1 className="text-xl font-medium">{getChatName(activeChat)}</h1>
         </motion.div>
       </AnimatePresence>
 
-      {activeChat && (
-        <div className="flex gap-2">
-          <div className="flex items-center cursor-pointer rounded-full opacity-60 hover:opacity-100 p-1">
-            {activeChat.type === "direct" &&
-              activeChat.chatPartner?.friendshipStatus ===
-                FriendshipStatus.ACCEPTED && (
-                <i className="material-symbols-outlined text-3xl">
-                  phone_enabled
-                </i>
-              )}
-
-            {activeChat.type === "group" && (
-              <i className="material-symbols-outlined text-3xl">videocam</i>
+      <div className="flex gap-2">
+        <div className="flex items-center cursor-pointer rounded-full opacity-60 hover:opacity-100 p-1">
+          {isDirect &&
+            activeChat.chatPartner?.friendshipStatus ===
+              FriendshipStatus.ACCEPTED && (
+              <i className="material-symbols-outlined text-3xl">
+                phone_enabled
+              </i>
             )}
-
-            {activeChat.type === "channel" && (
-              <i className="material-symbols-outlined text-3xl">connected_tv</i>
-            )}
-          </div>
+          {isGroup && (
+            <i className="material-symbols-outlined text-3xl">videocam</i>
+          )}
+          {isChannel && (
+            <i className="material-symbols-outlined text-3xl">connected_tv</i>
+          )}
         </div>
-      )}
+      </div>
     </header>
   );
 };

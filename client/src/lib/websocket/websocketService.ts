@@ -13,15 +13,14 @@ class WebSocketService {
 
   connect(): Promise<Socket> {
     if (this.connectionPromise) return this.connectionPromise;
-
+    console.log('connect with accessToken', localStorageService.getAccessToken())
     this.connectionPromise = new Promise((resolve, reject) => {
       this.socket = io(SOCKET_URL, {
         auth: {
           token: localStorageService.getAccessToken(),
         },
-        withCredentials: true, // Add this
-        transports: ["websocket"], // Force WebSocket transport
-        reconnection: false,
+        withCredentials: true,
+        transports: ["websocket"],
         reconnectionAttempts: 2,
         reconnectionDelay: 1000,
       });

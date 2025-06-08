@@ -43,9 +43,6 @@ export class UserResponseDto {
   status: string;
 
   @Expose()
-  isOnline: boolean;
-
-  @Expose()
   lastActiveAt: string;
 
   constructor(partial: Partial<UserResponseDto>) {

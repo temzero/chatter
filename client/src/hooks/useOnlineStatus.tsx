@@ -1,9 +1,23 @@
-// hooks/usePresence.ts
+// hooks/useOnlineStatus.ts
 import { useEffect, useState } from "react";
 import { webSocketService } from "@/lib/websocket/websocketService";
 
-export const usePresence = (userId?: string) => {
+export const useOnlineStatus = (userId?: string) => {
   const [isOnline, setIsOnline] = useState(false);
+
+  // Ping/Pong mechanism
+  useEffect(() => {
+    const socket = webSocketService.getSocket();
+
+    // Ping every 25 seconds
+    const pingInterval = setInterval(() => {
+      if (socket?.connected) {
+        socket.emit("ping");
+      }
+    }, 25000);
+
+    return () => clearInterval(pingInterval);
+  }, []);
 
   useEffect(() => {
     if (!userId) {

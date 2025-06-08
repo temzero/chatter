@@ -8,6 +8,7 @@ import type { JwtPayload } from '../types/jwt-payload.type';
 
 interface WsClient {
   handshake: {
+    query?: Record<string, any>;
     auth?: {
       token?: string;
     };
@@ -19,9 +20,9 @@ interface WsClient {
 @Injectable()
 export class WsJwtGuard implements CanActivate {
   constructor(
-    private jwtService: JwtService,
-    private userService: UserService,
-    private configService: ConfigService,
+    private readonly jwtService: JwtService,
+    private readonly userService: UserService,
+    private readonly configService: ConfigService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -37,15 +38,16 @@ export class WsJwtGuard implements CanActivate {
         secret: this.configService.getOrThrow<string>('JWT_ACCESS_SECRET'),
       });
 
+      console.log('payload from accessToken: ', payload);
+
       const user: User = await this.userService.getUserById(payload.sub);
       if (!user) {
         throw new WsException('User not found');
       }
 
-      if (!client.data) {
-        client.data = {};
-      }
-      client.data.user = user;
+      console.log('UserData from accessToken: ', user);
+
+      client.data = { ...(client.data || {}), user };
       return true;
     } catch {
       throw new WsException('Unauthorized');
@@ -53,6 +55,17 @@ export class WsJwtGuard implements CanActivate {
   }
 
   private extractTokenFromAuthPayload(client: WsClient): string | undefined {
-    return client.handshake.auth?.token;
+    // Try different ways to get the token
+    const token =
+      typeof client.handshake?.auth?.token === 'string'
+        ? client.handshake.auth.token
+        : typeof client.handshake?.query?.token === 'string'
+          ? client.handshake.query.token
+          : typeof client.handshake?.headers?.authorization === 'string'
+            ? client.handshake.headers.authorization.split(' ')[1]
+            : undefined;
+
+    console.log('Extracted token:', token);
+    return token;
   }
 }

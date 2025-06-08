@@ -48,6 +48,45 @@ export class ChatMemberService {
     }
   }
 
+  async getAllMembers(chatId: string): Promise<ChatMember[]> {
+    try {
+      const members = await this.memberRepo.find({
+        where: { chatId },
+        relations: ['user'],
+      });
+
+      if (!members || members.length === 0) {
+        ErrorResponse.notFound(
+          'No members found for this chat or chat does not exist!',
+        );
+      }
+
+      return members;
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to retrieve chat members');
+    }
+  }
+
+  async getAllMemberIds(chatId: string): Promise<string[]> {
+    try {
+      const members = await this.memberRepo.find({
+        where: { chatId },
+        select: ['id'], // Only select the id field
+      });
+
+      if (!members || members.length === 0) {
+        ErrorResponse.notFound(
+          'No members found for this chat or chat does not exist!',
+        );
+      }
+
+      // Extract just the IDs from the member objects
+      return members.map((member) => member.id);
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to retrieve chat member IDs');
+    }
+  }
+
   async addMember(
     chatId: string,
     userId: string,

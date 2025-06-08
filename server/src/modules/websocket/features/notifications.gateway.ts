@@ -21,7 +21,7 @@ export class NotificationGateway {
     @MessageBody() userId: string,
   ) {
     // Validate the requesting user matches the subscription
-    if (client.data.user.id !== userId) {
+    if (client.data.userId !== userId) {
       throw new Error('Unauthorized subscription attempt');
     }
 

@@ -45,9 +45,6 @@ export class UserDetailResponseDto {
   phoneVerified: boolean;
 
   @Expose()
-  isOnline: boolean;
-
-  @Expose()
   lastActiveAt?: string | null;
 
   @Expose()

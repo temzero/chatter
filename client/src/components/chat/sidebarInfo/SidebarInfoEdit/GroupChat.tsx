@@ -5,14 +5,12 @@ import {
   SidebarInfoModes,
   useSidebarInfoStore,
 } from "@/stores/sidebarInfoStore";
-import { Avatar } from "@/components/ui/avatar/Avatar";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
+import MemberItem from "./GroupChatMember";
 
 const GroupChat: React.FC = () => {
   const activeChat = useChatStore((s) => s.activeChat) as GroupChatResponse;
   const { activeMembers } = useChatStore();
-
-  const { createOrGetDirectChat } = useChatStore();
   const { setSidebarInfo } = useSidebarInfoStore();
 
   return (
@@ -60,33 +58,7 @@ const GroupChat: React.FC = () => {
       {activeMembers.length > 0 && (
         <div className="flex flex-col rounded overflow-hidden custom-border w-full">
           {activeMembers.map((member) => (
-            <div
-              key={member.userId}
-              className="flex items-center justify-between hover:bg-[var(--hover-color)] p-2 cursor-pointer"
-              onClick={() => createOrGetDirectChat(member.userId)}
-            >
-              <div className="flex gap-2 items-center">
-                <Avatar
-                  avatarUrl={member.avatarUrl}
-                  firstName={member.firstName}
-                  lastName={member.lastName}
-                  size="8"
-                  textSize="sm"
-                />
-                <h1 className="text-sm">
-                  {member.nickname || `${member.firstName} ${member.lastName}`}
-                </h1>
-              </div>
-              {member.isBanned ? (
-                <span className="material-symbols-outlined">dangerous</span>
-              ) : (
-                member.isAdmin && (
-                  <span className="material-symbols-outlined opacity-50">
-                    manage_accounts
-                  </span>
-                )
-              )}
-            </div>
+            <MemberItem key={member.userId} member={member} />
           ))}
         </div>
       )}
