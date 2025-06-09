@@ -63,7 +63,7 @@ export class WebsocketService {
     const userId = this.socketUserMap.get(socketId);
     if (!userId) return null;
 
-    // 1. Immediately remove the socket from mappings
+    // 1. Clean up socket mappings
     this.socketUserMap.delete(socketId);
     const userSockets = this.userSocketMap.get(userId);
     if (!userSockets) return null;
@@ -71,44 +71,43 @@ export class WebsocketService {
     userSockets.delete(socketId);
     const wasLastConnection = userSockets.size === 0;
 
+    // 2. Only notify if it was the LAST connection (mirroring userConnected's "first connection" logic)
     if (wasLastConnection) {
       this.userSocketMap.delete(userId);
 
-      // 2. Get all chats the user is in
+      // 3. Get all chats the user is in
       const chatIds = await this.chatMemberService.getChatIdsByUserId(userId);
 
-      // 3. Process each chat in parallel
-      await Promise.all(
-        chatIds.map(async (chatId) => {
-          // 4. Get all members in this chat
-          const allMembers =
+      // 4. For each chat, notify other ONLINE members
+      for (const chatId of chatIds) {
+        const anyoneElseOnline = await this.hasAnyOtherMemberOnline(
+          chatId,
+          userId,
+        );
+
+        if (!anyoneElseOnline) {
+          // No other members are online in this chat, notify others that chat is now offline
+          const memberIds =
             await this.chatMemberService.getAllMemberIds(chatId);
 
-          // 5. Calculate new online status for this chat (excluding the disconnecting user)
-          const remainingOnlineMembers = allMembers.filter(
-            (memberId) => memberId !== userId && this.isUserOnline(memberId),
-          );
-          const chatIsNowOnline = remainingOnlineMembers.length > 0;
-
-          // 6. Get sockets of all online members who should be notified
-          const socketsToNotify = remainingOnlineMembers.flatMap((memberId) =>
-            this.getUserSocketIds(memberId),
-          );
-
-          // 7. Emit to all relevant sockets
-          if (socketsToNotify.length > 0) {
-            this.server.to(socketsToNotify).emit('chat:statusChanged', {
-              chatId,
-              isOnline: chatIsNowOnline,
+          // Notify all other members (could be offline, but we skip filtering for now)
+          memberIds
+            .filter((memberId) => memberId !== userId)
+            .forEach((memberId) => {
+              if (this.isUserOnline(memberId)) {
+                this.server
+                  .to(this.getUserSocketIds(memberId))
+                  .emit('chat:statusChanged', {
+                    chatId,
+                    isOnline: false,
+                  });
+              }
             });
-          }
-        }),
-      );
-
-      return { userId, wasLastConnection: true };
+        }
+      }
     }
 
-    return { userId, wasLastConnection: false };
+    return { userId, wasLastConnection };
   }
 
   getOnlineUsers(): string[] {
