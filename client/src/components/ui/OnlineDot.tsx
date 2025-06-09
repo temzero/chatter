@@ -6,7 +6,7 @@ interface OnlineDotProps {
 
 export const OnlineDot = ({
   isOnline,
-  size = "md",
+  size = "sm",
   className = "",
 }: OnlineDotProps) => {
   if (!isOnline) return null;
@@ -19,7 +19,7 @@ export const OnlineDot = ({
 
   return (
     <div
-      className={`rounded-full custom-border shadow-sm bg-green-500 ${sizeClasses[size]} ${className}`}
+      className={`rounded-full bg-green-500 ${sizeClasses[size]} ${className}`}
     />
   );
 };

@@ -10,7 +10,9 @@ import { AuthenticatedSocket } from '../constants/authenticatedSocket.type';
 import { CreateMessageDto } from 'src/modules/message/dto/requests/create-message.dto';
 import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
 
-@WebSocketGateway({ namespace: 'chat' })
+const chatGateway = 'chat';
+
+@WebSocketGateway()
 export class ChatGateway {
   constructor(
     private readonly messageService: MessageService,
@@ -18,27 +20,19 @@ export class ChatGateway {
     private readonly chatMemberService: ChatMemberService,
   ) {}
 
-  @SubscribeMessage('check-online')
-  async handleChatroomHasOnline(
+  @SubscribeMessage(`${chatGateway}:getStatus`)
+  async handleGetStatus(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() chatId: string,
-  ): Promise<boolean> {
-    try {
-      const memberIds = await this.chatMemberService.getAllMemberIds(chatId);
-      const otherMemberIds = memberIds.filter(
-        (id) => id !== client.data.userId,
-      );
-      const hasOnline = otherMemberIds.some((id) =>
-        this.websocketService.isUserOnline(id),
-      );
-      return hasOnline;
-    } catch (error) {
-      console.error('Error checking chatroom online status:', error);
-      return false;
-    }
+  ) {
+    const userId = client.data.userId;
+    if (!userId) return false;
+
+    const isOnline = await this.hasAnyOtherMemberOnline(chatId, userId);
+    return { chatId, isOnline };
   }
 
-  @SubscribeMessage('sendMessage')
+  @SubscribeMessage(`${chatGateway}:sendMessage`)
   async handleMessage(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: CreateMessageDto,
@@ -68,5 +62,16 @@ export class ChatGateway {
       console.error('Error handling sendMessage:', error);
       client.emit('error', { message: 'Failed to send message' });
     }
+  }
+
+  // Utility to check if any other chat member is online (excluding one user)
+  async hasAnyOtherMemberOnline(
+    chatId: string,
+    excludeUserId: string,
+  ): Promise<boolean> {
+    const memberIds = await this.chatMemberService.getAllMemberIds(chatId);
+    return memberIds
+      .filter((id) => id !== excludeUserId)
+      .some((id) => this.websocketService.isUserOnline(id));
   }
 }

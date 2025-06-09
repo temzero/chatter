@@ -4,8 +4,7 @@ import { localStorageService } from "../../services/storage/localStorageService"
 import { MessageResponse } from "@/types/messageResponse";
 import { toast } from "react-toastify";
 
-// const SOCKET_URL = import.meta.env.REACT_APP_WS_URL || "ws://localhost:3001";
-const SOCKET_URL = "http://localhost:3000";
+const SOCKET_URL = import.meta.env.VITE_API_URL || "ws://localhost:3000";
 
 class WebSocketService {
   private socket: Socket | null = null;
@@ -13,7 +12,6 @@ class WebSocketService {
 
   connect(): Promise<Socket> {
     if (this.connectionPromise) return this.connectionPromise;
-    console.log('connect with accessToken', localStorageService.getAccessToken())
     this.connectionPromise = new Promise((resolve, reject) => {
       this.socket = io(SOCKET_URL, {
         auth: {

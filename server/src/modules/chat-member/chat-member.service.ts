@@ -71,7 +71,7 @@ export class ChatMemberService {
     try {
       const members = await this.memberRepo.find({
         where: { chatId },
-        select: ['id'], // Only select the id field
+        select: ['userId'],
       });
 
       if (!members || members.length === 0) {
@@ -81,9 +81,26 @@ export class ChatMemberService {
       }
 
       // Extract just the IDs from the member objects
-      return members.map((member) => member.id);
+      return members.map((member) => member.userId);
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to retrieve chat member IDs');
+    }
+  }
+
+  async getChatIdsByUserId(userId: string): Promise<string[]> {
+    try {
+      const chatMemberships = await this.memberRepo.find({
+        where: { userId },
+        select: ['chatId'],
+      });
+
+      if (!chatMemberships || chatMemberships.length === 0) {
+        ErrorResponse.notFound('User is not a member of any chats');
+      }
+
+      return chatMemberships.map((member) => member.chatId);
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to retrieve chat IDs by user ID');
     }
   }
 

@@ -14,7 +14,7 @@ interface ChatBoxProps {
 const ChatBox: React.FC<ChatBoxProps> = ({ isChannel = false }) => {
   const messages = useActiveChatMessages();
 
-  console.log("chat messages: ", messages);
+  // console.log("chat messages: ", messages);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);

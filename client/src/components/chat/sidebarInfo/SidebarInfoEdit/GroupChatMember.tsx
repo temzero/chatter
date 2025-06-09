@@ -1,6 +1,6 @@
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { OnlineDot } from "@/components/ui/OnlineDot";
-import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { useUserOnlineStatus } from "@/hooks/useUserOnlineStatus";
 import { useChatStore } from "@/stores/chatStore";
 
 interface MemberItemProps {
@@ -16,7 +16,7 @@ interface MemberItemProps {
 }
 
 const MemberItem: React.FC<MemberItemProps> = ({ member }) => {
-  const isMemberOnline = useOnlineStatus(member.userId);
+  const isMemberOnline = useUserOnlineStatus(member.userId);
   const { createOrGetDirectChat } = useChatStore();
 
   return (

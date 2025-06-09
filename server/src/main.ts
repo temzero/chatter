@@ -42,18 +42,18 @@ async function bootstrap() {
   const port = process.env.PORT ?? DEFAULT_PORT;
   await app.listen(port);
 
-  // Log startup information
-  const server = app.getHttpServer();
-  const address = server.address();
-  const actualPort = typeof address === 'string' ? address : address?.port;
+  // // Log startup information
+  // const server = app.getHttpServer();
+  // const address = server.address();
+  // const actualPort = typeof address === 'string' ? address : address?.port;
 
-  logger.log(`Server running on port ${actualPort}`);
-  logger.log(`CORS configured for ${CLIENT_URL}`);
-  logger.log('Static assets served from /public');
+  // logger.log(`Server running on port ${actualPort}`);
+  // logger.log(`CORS configured for ${CLIENT_URL}`);
+  // logger.log('Static assets served from /public');
 
-  console.log(`Server running on port ${actualPort}`);
-  console.log(`CORS configured for ${CLIENT_URL}`);
-  console.log(`Static assets served from /public`);
+  // console.log(`Server running on port ${actualPort}`);
+  // console.log(`CORS configured for ${CLIENT_URL}`);
+  // console.log(`Static assets served from /public`);
 }
 
 bootstrap().catch((err) => {

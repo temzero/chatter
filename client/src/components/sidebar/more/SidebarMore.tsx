@@ -5,7 +5,7 @@ import { Avatar } from "../../ui/avatar/Avatar";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import ThemeSwitcher from "../../ui/ThemeSwitcher";
 import { SidebarMode } from "@/types/enums/sidebarMode";
-import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { useUserOnlineStatus } from "@/hooks/useUserOnlineStatus";
 import { OnlineDot } from "@/components/ui/OnlineDot";
 
 const SidebarMore: React.FC = () => {
@@ -13,7 +13,7 @@ const SidebarMore: React.FC = () => {
   const { setSidebar, isCompact, toggleCompact } = useSidebarStore();
   const { receivedRequests, sentRequests } = useFriendshipStore();
   const requestsCount = receivedRequests.length + sentRequests.length;
-  const isOnline = useOnlineStatus();
+  const isOnline = useUserOnlineStatus(currentUser?.id);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

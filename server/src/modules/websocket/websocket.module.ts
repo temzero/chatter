@@ -7,11 +7,15 @@ import { MessageModule } from '../message/message.module';
 import { UserModule } from '../user/user.module'; // Add this import
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { WsJwtGuard } from '../auth/guards/ws-jwt.guard'; // Import the guard
+import { ChatMemberModule } from '../chat-member/chat-member.module';
+import { ChatGateway } from './features/chat.gateway';
+import { NotificationGateway } from './features/notifications.gateway';
 
 @Module({
   imports: [
     forwardRef(() => MessageModule),
     forwardRef(() => UserModule), // Add UserModule import
+    forwardRef(() => ChatMemberModule), // Add UserModule import
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -24,7 +28,9 @@ import { WsJwtGuard } from '../auth/guards/ws-jwt.guard'; // Import the guard
   providers: [
     WebsocketService,
     GlobalGateway,
-    WsJwtGuard, // Add the guard as a provider
+    ChatGateway,
+    NotificationGateway,
+    WsJwtGuard,
   ],
   exports: [GlobalGateway, WebsocketService],
 })
