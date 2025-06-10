@@ -6,18 +6,18 @@ import type {
   GroupChatResponse,
 } from "@/types/chat";
 import { ChatType } from "@/types/enums/ChatType";
-import { useChatOnlineStatus } from "@/hooks/useChatOnlineStatus";
+// import { useChatOnlineStatus } from "@/hooks/useChatOnlineStatus";
+// import { useChatOnlineStatus } from "@/stores/chatStore";
 
 type ChatAvatarProps = {
-  chat?: ChatResponse | null; // Make chat optional
+  chat?: ChatResponse | null;
   type?: "header" | "sidebar" | "info" | "contact";
 };
 
-export const ChatAvatar: React.FC<ChatAvatarProps> = ({
-  chat,
-  type = "sidebar",
-}) => {
-  const isOnline = useChatOnlineStatus(chat?.id);
+export const ChatAvatar: React.FC<ChatAvatarProps> = ({ chat, type }) => {
+  // const isOnline = useChatOnlineStatus(chat?.id);
+  const isOnline = false;
+  // console.log('isOnline', isOnline)
   // Early return if no chat
   if (!chat) {
     return (
@@ -112,7 +112,9 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
               />
             </>
           ) : (
-            <i className={`material-symbols-outlined ${styles.fallbackIconSize} opacity-20 flex items-center justify-center`}>
+            <i
+              className={`material-symbols-outlined ${styles.fallbackIconSize} opacity-20 flex items-center justify-center`}
+            >
               tv
             </i>
           )}

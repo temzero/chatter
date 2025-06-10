@@ -17,7 +17,6 @@ export function mapChatMemberToResponseDto(
     customTitle: member.customTitle,
     mutedUntil: member.mutedUntil,
     lastReadAt: member.lastReadAt,
-    lastReadMessageId: member.lastReadMessageId,
     createdAt: member.createdAt,
     updatedAt: member.updatedAt,
   };

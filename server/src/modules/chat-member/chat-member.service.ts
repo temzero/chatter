@@ -173,6 +173,17 @@ export class ChatMemberService {
     }
   }
 
+  async updateLastRead(chatId: string, userId: string): Promise<ChatMember> {
+    try {
+      return await this.updateMember(chatId, userId, {
+        // automatically update to now
+        lastReadAt: new Date(),
+      });
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to update last read info');
+    }
+  }
+
   async updateNickname(
     chatId: string,
     userId: string,
@@ -196,20 +207,6 @@ export class ChatMemberService {
       return nickname;
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to update nickname');
-    }
-  }
-
-  async updateLastReadMessage(
-    chatId: string,
-    userId: string,
-    messageId: string,
-  ): Promise<ChatMember> {
-    try {
-      return await this.updateMember(chatId, userId, {
-        lastReadMessageId: messageId,
-      });
-    } catch (error) {
-      ErrorResponse.throw(error, 'Failed to update last read message');
     }
   }
 

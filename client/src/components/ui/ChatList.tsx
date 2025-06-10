@@ -1,88 +1,64 @@
-import React from "react";
-import { useChatStore } from "@/stores/chatStore";
-import { useMessageStore } from "@/stores/messageStore";
+import React, { useEffect, useState } from "react";
+import ChatListItem from "./ChatListItem";
+import { webSocketService } from "@/lib/websocket/services/websocket.service";
+import { chatGateway } from "@/hooks/useChatOnlineStatus";
 import type { ChatResponse } from "@/types/chat";
-import { ChatAvatar } from "./avatar/ChatAvatar";
-import getChatName from "../../utils/getChatName";
-import { getTimeAgo } from "@/utils/getTimeAgo";
 
 interface ChatListProps {
   chats: ChatResponse[];
   isCompact?: boolean;
 }
 
+// In ChatList.tsx
 const ChatList: React.FC<ChatListProps> = ({ chats, isCompact = false }) => {
-  const activeChat = useChatStore((state) => state.activeChat);
-  const setActiveChat = useChatStore((state) => state.setActiveChat);
-  const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
+  const [onlineStatus, setOnlineStatus] = useState<Record<string, boolean>>({});
+  const socket = webSocketService.getSocket();
 
-  function handleChatSelect(chat: ChatResponse) {
-    setActiveChat(chat);
-  }
+  useEffect(() => {
+    if (!socket) return;
 
-  const getUserItemClass = (chatId: string) => {
-    const baseClasses =
-      "relative flex items-center w-full h-24 gap-3 p-3 transition-all duration-300 ease-in-out cursor-pointer";
-    const activeClasses =
-      activeChat?.id === chatId
-        ? "bg-[var(--active-chat-color)]"
-        : " hover:bg-[var(--hover-color)]";
-    return `${baseClasses} ${activeClasses}`;
-  };
+    const statusHandler = (payload: { chatId: string; isOnline: boolean }) => {
+      setOnlineStatus((prev) => ({
+        ...prev,
+        [payload.chatId]: payload.isOnline,
+      }));
+    };
+
+    socket.on(`${chatGateway}:statusChanged`, statusHandler);
+
+    // Fetch initial statuses for all chats
+    chats.forEach((chat) => {
+      socket.emit(
+        `${chatGateway}:getStatus`,
+        chat.id,
+        (response: { chatId: string; isOnline: boolean }) => {
+          setOnlineStatus((prev) => ({
+            ...prev,
+            [response.chatId]: response.isOnline,
+          }));
+        }
+      );
+    });
+
+    return () => {
+      socket.off(`${chatGateway}:statusChanged`, statusHandler);
+    };
+  }, [socket, chats]);
 
   return (
     <div className="flex-1 overflow-y-auto overflow-x-hidden relative">
-      {chats.map((chat) => {
-        const draft = getDraftMessage(chat.id);
-        const displayMessage = draft ? (
-          <p className="text-[var(--primary-green)] flex items-center gap-1 overflow-hidden max-w-[196px]">
-            <i className="material-symbols-outlined flex items-center justify-center text-[16px] h-3">
-              edit
-            </i>
-            <span className="text-xs whitespace-nowrap text-ellipsis">
-              {draft}
-            </span>
-          </p>
-        ) : chat.lastMessage ? (
-          <p className="flex items-center opacity-70 gap-1 text-xs max-w-[196px] whitespace-nowrap text-ellipsis overflow-hidden">
-            <strong>{chat.lastMessage.senderName}:</strong>{" "}
-            {chat.lastMessage.content}
-          </p>
-        ) : null;
-
-        return (
-          <React.Fragment key={chat.id}>
-            <div
-              className={getUserItemClass(chat.id)}
-              onClick={() => handleChatSelect(chat)}
-            >
-              <ChatAvatar chat={chat} type="sidebar" />
-
-              {!isCompact && (
-                <>
-                  <div className="flex flex-col justify-center gap-1">
-                    <h1 className="text-lg font-semibold whitespace-nowrap text-ellipsis">
-                      {getChatName(chat)}
-                    </h1>
-                    {displayMessage}
-                  </div>
-
-                  <p className="absolute top-2 right-4 text-xs opacity-40">
-                    {/* {formatTime(chat.lastMessage?.createdAt ?? chat.updatedAt)} */}
-                    {getTimeAgo(chat.lastMessage?.createdAt ?? chat.updatedAt)}
-                  </p>
-                </>
-              )}
-            </div>
-
-            {!isCompact && (
-              <div className="w-[90%] mx-auto custom-border-b"></div>
-            )}
-          </React.Fragment>
-        );
-      })}
+      {chats.map((chat) => (
+        <ChatListItem
+          key={chat.id}
+          chat={chat}
+          isCompact={isCompact}
+          isOnline={onlineStatus[chat.id] || false}
+        />
+      ))}
     </div>
   );
 };
+
+// ChatListItem no longer needs useChatOnlineStatus
 
 export default ChatList;

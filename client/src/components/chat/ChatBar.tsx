@@ -6,7 +6,7 @@ import EmojiPicker from "../ui/EmojiPicker";
 import AttachFile from "../ui/AttachFile";
 import FileImportPreviews from "../ui/FileImportPreview";
 import { SendMessagePayload } from "@/types/sendMessagePayload";
-import { messageService } from "@/services/messageService";
+import { chatWebSocketService } from "@/lib/websocket/services/chat.socket.service";
 
 const ChatBar: React.FC = () => {
   const activeChat = useChatStore((state) => state.activeChat);
@@ -17,9 +17,44 @@ const ChatBar: React.FC = () => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isMessageSent, setIsMessageSent] = useState(false);
-
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [filePreviewUrls, setFilePreviewUrls] = useState<string[]>([]);
+
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Handle typing indicator
+  useEffect(() => {
+    if (!activeChat?.id) return;
+
+    const handleInputChange = () => {
+      // Send typing start event
+      chatWebSocketService.typing(activeChat.id, true);
+
+      // Clear any existing timeout
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+
+      // Set timeout to send typing stop event after 2 seconds of inactivity
+      typingTimeoutRef.current = setTimeout(() => {
+        chatWebSocketService.typing(activeChat.id, false);
+      }, 2000);
+    };
+
+    const inputElem = inputRef.current;
+    if (inputElem) {
+      inputElem.addEventListener("input", handleInputChange);
+    }
+
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      if (inputElem) {
+        inputElem.removeEventListener("input", handleInputChange);
+      }
+    };
+  }, [activeChat?.id]);
 
   // Focus input on load and when '/' is pressed
   useEffect(() => {
@@ -62,12 +97,42 @@ const ChatBar: React.FC = () => {
     }
   }, [input]);
 
+  // const handleSend = async () => {
+  //   const trimmedInput = input.trim();
+  //   if ((trimmedInput || attachedFiles.length > 0) && activeChat) {
+  //     setInput("");
+
+  //     // Create the payload according to SendMessagePayload interface
+  //     const payload: SendMessagePayload = {
+  //       chatId: activeChat.id,
+  //       content: trimmedInput || undefined,
+  //       attachmentIds:
+  //         attachedFiles.length > 0
+  //           ? attachedFiles.map((_, index) => String(Date.now() + index))
+  //           : undefined,
+  //     };
+
+  //     await messageService.sendMessage(payload);
+
+  //     // Clear local state
+  //     setDraftMessage(activeChat.id, "");
+  //     setAttachedFiles([]);
+  //     setFilePreviewUrls([]);
+  //     setIsMessageSent(true);
+  //     setTimeout(() => setIsMessageSent(false), 200);
+
+  //     if (inputRef.current) inputRef.current.style.height = "auto";
+  //     if (containerRef.current) containerRef.current.style.height = "auto";
+  //   }
+  //   inputRef.current?.focus();
+  // };
+
   const handleSend = async () => {
     const trimmedInput = input.trim();
     if ((trimmedInput || attachedFiles.length > 0) && activeChat) {
       setInput("");
 
-      // Create the payload according to SendMessagePayload interface
+      // Create the payload
       const payload: SendMessagePayload = {
         chatId: activeChat.id,
         content: trimmedInput || undefined,
@@ -77,7 +142,18 @@ const ChatBar: React.FC = () => {
             : undefined,
       };
 
-      await messageService.sendMessage(payload);
+      try {
+        // Then send via WebSocket for real-time delivery
+        chatWebSocketService.sendMessage(payload);
+
+        // Mark as read
+        chatWebSocketService.markAsRead(activeChat.id);
+
+        // Clear typing indicator
+        chatWebSocketService.typing(activeChat.id, false);
+      } catch (error) {
+        console.error("Failed to send message:", error);
+      }
 
       // Clear local state
       setDraftMessage(activeChat.id, "");

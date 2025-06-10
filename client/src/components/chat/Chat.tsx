@@ -18,9 +18,11 @@ const Chat: React.FC = () => {
     <section className="flex-1 flex h-full">
       <section className="relative flex-1 flex flex-col justify-between h-full overflow-hidden">
         <ChatHeader />
-        <ChatBox isChannel={isChannel} />
+        <ChatBox chatId={activeChat?.id} isChannel={isChannel} />
         <AnimatePresence>
-          {!(activeChat?.type === "channel" && activeChat.myRole !== 'owner') && (
+          {!(
+            activeChat?.type === "channel" && activeChat.myRole !== "owner"
+          ) && (
             <motion.div
               initial={{ height: 0 }}
               animate={{ height: "auto" }}

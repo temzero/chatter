@@ -1,6 +1,7 @@
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { OnlineDot } from "@/components/ui/OnlineDot";
 import { useUserOnlineStatus } from "@/hooks/useUserOnlineStatus";
+import { useCurrentUser } from "@/stores/authStore";
 import { useChatStore } from "@/stores/chatStore";
 
 interface MemberItemProps {
@@ -16,8 +17,11 @@ interface MemberItemProps {
 }
 
 const MemberItem: React.FC<MemberItemProps> = ({ member }) => {
+  const currentUser = useCurrentUser();
   const isMemberOnline = useUserOnlineStatus(member.userId);
   const { createOrGetDirectChat } = useChatStore();
+
+  const isCurrentUser = currentUser?.id === member.userId;
 
   return (
     <div
@@ -39,7 +43,7 @@ const MemberItem: React.FC<MemberItemProps> = ({ member }) => {
             className="absolute bottom-0 right-0"
           />
         </div>
-        <h1 className="text-sm">
+        <h1 className={`text-sm ${isCurrentUser ? "text-green-500" : ""}`}>
           {member.nickname || `${member.firstName} ${member.lastName}`}
         </h1>
       </div>

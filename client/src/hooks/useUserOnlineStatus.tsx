@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { webSocketService } from "@/lib/websocket/websocketService";
+import { webSocketService } from "@/lib/websocket/services/websocket.service";
 
 export const useUserOnlineStatus = (userId?: string) => {
   const [isOnline, setIsOnline] = useState(false);

@@ -5,12 +5,17 @@ import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import getChatName from "@/utils/getChatName";
 import { FriendshipStatus } from "@/types/friendship";
 import { ChatType } from "@/types/enums/ChatType";
+import { OnlineDot } from "../ui/OnlineDot";
+import { useChatOnlineStatus } from "@/hooks/useChatOnlineStatus";
 
 const ChatHeader: React.FC = () => {
   const activeChat = useChatStore((state) => state.activeChat);
   const toggleSidebarInfo = useSidebarInfoStore(
     (state) => state.toggleSidebarInfo
   );
+
+  const isOnline = useChatOnlineStatus(activeChat?.id);
+  console.log("chat header isOnline: ", isOnline, activeChat?.id);
 
   if (!activeChat) return null;
 
@@ -26,7 +31,7 @@ const ChatHeader: React.FC = () => {
       <AnimatePresence mode="wait">
         <motion.div
           key={activeChat?.id || "no-chat"}
-          className="flex gap-3 items-center cursor-pointer"
+          className="relative flex gap-3 items-center cursor-pointer"
           initial={{ opacity: 0.2, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0.2, scale: 0.9 }}
@@ -36,12 +41,13 @@ const ChatHeader: React.FC = () => {
             ease: "easeInOut",
           }}
         >
+          <OnlineDot isOnline={isOnline} size="xs" className="absolute top-1/2 -left-[10px] -translate-y-1/2"/>
           <ChatAvatar chat={activeChat} type="header" />
           <h1 className="text-xl font-medium">{getChatName(activeChat)}</h1>
         </motion.div>
       </AnimatePresence>
 
-      <div className="flex gap-2">
+      <div className="flex items-center gap-2">
         <div className="flex items-center cursor-pointer rounded-full opacity-60 hover:opacity-100 p-1">
           {isDirect &&
             activeChat.chatPartner?.friendshipStatus ===

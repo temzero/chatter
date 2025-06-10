@@ -1,40 +1,56 @@
 // hooks/useChatOnlineStatus.ts
 import { useEffect, useState } from "react";
-import { webSocketService } from "@/lib/websocket/websocketService";
+import { webSocketService } from "@/lib/websocket/services/websocket.service";
 
-const chatGateway = "chat";
+export const chatGateway = "chat";
 
 export const useChatOnlineStatus = (chatId?: string) => {
   const [isOnline, setIsOnline] = useState(false);
-
+  console.log('chatId: ', chatId)
   useEffect(() => {
     if (!chatId) return;
 
     const socket = webSocketService.getSocket();
+    console.log('socket: ', socket)
 
-    // Initial status check
-    socket?.emit(
-      `${chatGateway}:getStatus`,
-      chatId,
-      (response: { chatId: string; isOnline: boolean }) => {
-        if (response.chatId === chatId) {
-          setIsOnline(response.isOnline);
+    // Wait for socket to be connected
+    const checkStatus = () => {
+      console.log("Socket connected:", socket?.connected);
+      socket?.emit(
+        `${chatGateway}:getStatus`,
+        chatId,
+        (response: { chatId: string; isOnline: boolean }) => {
+          console.log("Status response:", response);
+          if (response.chatId === chatId) {
+            setIsOnline(response.isOnline);
+          }
         }
-      }
-    );
+      );
+    };
 
-    // Listen for status changes
+    if (socket?.connected) {
+      checkStatus();
+    } else {
+      const onConnect = () => {
+        checkStatus();
+        socket?.off("connect", onConnect);
+      };
+      socket?.on("connect", onConnect);
+    }
+
     const statusHandler = (payload: { chatId: string; isOnline: boolean }) => {
       if (payload.chatId === chatId) {
         setIsOnline(payload.isOnline);
-        console.log('Status updated:', payload); 
+        console.log("isOnline?: ", payload.isOnline);
+      } else {
+        console.log("wrong chatId?: ", payload.chatId);
       }
     };
 
-    socket?.on("chat:statusChanged", statusHandler);
+    socket?.on(`${chatGateway}:statusChanged`, statusHandler);
 
     return () => {
-      socket?.off("chat:statusChanged", statusHandler);
+      socket?.off(`${chatGateway}:statusChanged`, statusHandler);
     };
   }, [chatId]);
 

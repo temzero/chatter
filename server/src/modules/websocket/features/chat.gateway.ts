@@ -32,6 +32,22 @@ export class ChatGateway {
     return { chatId, isOnline };
   }
 
+  @SubscribeMessage(`${chatGateway}:typing`)
+  handleTyping(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() data: { chatId: string; isTyping: boolean },
+  ) {
+    const userId = client.data.userId;
+    if (!userId) return;
+
+    // Broadcast to all other members in the chat
+    client.to(data.chatId).emit('userTyping', {
+      userId,
+      chatId: data.chatId,
+      isTyping: data.isTyping,
+    });
+  }
+
   @SubscribeMessage(`${chatGateway}:sendMessage`)
   async handleMessage(
     @ConnectedSocket() client: AuthenticatedSocket,
@@ -40,6 +56,8 @@ export class ChatGateway {
     try {
       // Add senderId from socket if not in payload
       const senderId = client.data.userId;
+      console.log('senderId: ', senderId);
+      console.log('payload: ', payload);
       if (!senderId) {
         client.emit('error', { message: 'Unauthorized' });
         return;
@@ -62,6 +80,24 @@ export class ChatGateway {
       console.error('Error handling sendMessage:', error);
       client.emit('error', { message: 'Failed to send message' });
     }
+  }
+
+  @SubscribeMessage(`${chatGateway}:markAsRead`)
+  async handleMarkAsRead(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() data: { chatId: string },
+  ) {
+    const userId = client.data.userId;
+    if (!userId) return;
+
+    await this.chatMemberService.updateLastRead(data.chatId, userId);
+
+    // Notify other participants that messages were read
+    client.to(data.chatId).emit('messagesRead', {
+      userId,
+      chatId: data.chatId,
+      timestamp: Date.now(),
+    });
   }
 
   // Utility to check if any other chat member is online (excluding one user)

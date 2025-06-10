@@ -59,9 +59,6 @@ export class ChatMember {
   @Column({ name: 'last_read_at', type: 'timestamp', nullable: true })
   lastReadAt: Date | null;
 
-  @Column({ name: 'last_read_message_id', type: 'varchar', nullable: true })
-  lastReadMessageId: string | null;
-
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

@@ -8,7 +8,7 @@ import { useSidebarStore } from "./sidebarStore";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
 import type { User } from "@/types/user";
 import { SidebarMode } from "@/types/enums/sidebarMode";
-import { webSocketService } from "@/lib/websocket/websocketService";
+import { webSocketService } from "@/lib/websocket/services/websocket.service";
 
 type MessageType = "error" | "success" | "info";
 

@@ -2,26 +2,27 @@ import React, { useRef, useEffect, useState, useMemo } from "react";
 import Message from "./Message";
 import ChannelMessage from "./MessageChannel";
 import { useSoundEffect } from "@/hooks/useSoundEffect";
-// import bubbleSound from "@/assets/sound/message-bubble.mp3";
-// import popSound from "@/assets/sound/message-pop.mp3";
 import messageSound from "@/assets/sound/message-sent2.mp3";
 import { useActiveChatMessages } from "@/stores/messageStore";
+import { chatWebSocketService } from "@/lib/websocket/services/chat.socket.service";
+import { MessageResponse } from "@/types/messageResponse";
 
 interface ChatBoxProps {
+  chatId?: string;
   isChannel?: boolean;
 }
 
-const ChatBox: React.FC<ChatBoxProps> = ({ isChannel = false }) => {
+const ChatBox: React.FC<ChatBoxProps> = ({ chatId, isChannel = false }) => {
   const messages = useActiveChatMessages();
-
   // console.log("chat messages: ", messages);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);
 
+  const [isTyping, setIsTyping] = useState(false);
+  const [typingUserId, setTypingUserId] = useState<string | null>(null);
+
   // Create sound effects with different volumes
-  // const playBubbleSound = useSoundEffect(bubbleSound, 0.4);
-  // const playPopSound = useSoundEffect(popSound, 0.3);
   const playMessageSound = useSoundEffect(messageSound, 0.5);
 
   const newMessageAdded = useMemo(() => {
@@ -31,6 +32,51 @@ const ChatBox: React.FC<ChatBoxProps> = ({ isChannel = false }) => {
   useEffect(() => {
     setPreviousMessageCount(messages.length);
   }, [messages.length]);
+
+  // WebSocket event listeners
+  useEffect(() => {
+    if (!chatId) return;
+
+    const handleNewMessage = (message: MessageResponse) => {
+      // Only process if message belongs to current chat
+      if (message.chatId === chatId) {
+        // Your existing message handling logic
+      }
+    };
+
+    const handleTyping = (data: {
+      userId: string;
+      chatId: string;
+      isTyping: boolean;
+    }) => {
+      if (data.chatId === chatId) {
+        setIsTyping(data.isTyping);
+        setTypingUserId(data.userId);
+      }
+    };
+
+    const handleMessagesRead = (data: {
+      userId: string;
+      chatId: string;
+      timestamp: number;
+    }) => {
+      if (data.chatId === chatId) {
+        // Handle read receipts
+      }
+    };
+
+    // Subscribe to events
+    chatWebSocketService.onNewMessage(handleNewMessage);
+    chatWebSocketService.onTyping(handleTyping);
+    chatWebSocketService.onMessagesRead(handleMessagesRead);
+
+    // Cleanup on unmount
+    return () => {
+      chatWebSocketService.offNewMessage(handleNewMessage);
+      chatWebSocketService.offTyping(handleTyping);
+      chatWebSocketService.offMessagesRead(handleMessagesRead);
+    };
+  }, [chatId]);
 
   // Helper: Wait for all media elements (img, video, audio) to load
   const waitForMediaToLoad = (container: HTMLElement) => {
@@ -119,7 +165,14 @@ const ChatBox: React.FC<ChatBoxProps> = ({ isChannel = false }) => {
       ) : (
         <div className="h-full w-full flex items-center justify-center opacity-50 italic text-xl">
           No messages yet!
+          {/* {isTyping && (
+            <div className="typing-indicator">{typingUserId} is typing...</div>
+          )} */}
         </div>
+      )}
+
+      {isTyping && (
+        <div className="typing-indicator">{typingUserId} is typing...</div>
       )}
     </div>
   );

@@ -4,6 +4,7 @@ import { chatService } from "@/services/chat/chatService";
 import { useMessageStore } from "./messageStore";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
 import { chatMemberService } from "@/services/chat/chatMemberService";
+import { webSocketService } from "@/lib/websocket/services/websocket.service";
 import type {
   ChatResponse,
   DirectChatResponse,
@@ -22,6 +23,7 @@ interface ChatStore {
   filteredChats: ChatResponse[];
   allGroupMembers: Record<string, ChatMember[]>;
   activeMembers: ChatMember[];
+  onlineStatuses: Record<string, boolean>;
 
   initialize: () => Promise<void>;
   getChats: () => Promise<void>;
@@ -60,31 +62,69 @@ interface ChatStore {
   leaveGroupChat: (chatId: string) => Promise<void>;
   deleteChat: (id: string, type: ChatType) => Promise<void>;
   clearChats: () => void;
+  checkOnlineStatus: (chatId: string) => void;
+  setupWebSocket: () => void;
 }
+
+const chatGateway = "chat";
 
 export const useChatStore = create<ChatStore>()(
   persist(
     (set, get) => {
       // Shared cleanup function
       const cleanupChat = (chatId: string) => {
-        // Cleanup messages
         useMessageStore.getState().clearChatMessages(chatId);
-        // Cleanup chat store
-        set((state) => ({
-          chats: state.chats.filter((chat) => chat.id !== chatId),
-          filteredChats: state.filteredChats.filter(
-            (chat) => chat.id !== chatId
-          ),
-          activeChat: state.activeChat?.id === chatId ? null : state.activeChat,
-          allGroupMembers: Object.fromEntries(
-            Object.entries(state.allGroupMembers).filter(
-              ([id]) => id !== chatId
-            )
-          ),
-          activeMembers: state.activeMembers.filter(
-            (member) => member.chatId !== chatId
-          ),
-        }));
+        set((state) => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { [chatId]: _, ...remainingStatuses } = state.onlineStatuses;
+          return {
+            chats: state.chats.filter((chat) => chat.id !== chatId),
+            filteredChats: state.filteredChats.filter(
+              (chat) => chat.id !== chatId
+            ),
+            activeChat:
+              state.activeChat?.id === chatId ? null : state.activeChat,
+            allGroupMembers: Object.fromEntries(
+              Object.entries(state.allGroupMembers).filter(
+                ([id]) => id !== chatId
+              )
+            ),
+            activeMembers: state.activeMembers.filter(
+              (member) => member.chatId !== chatId
+            ),
+            onlineStatuses: remainingStatuses,
+          };
+        });
+      };
+
+      // WebSocket status handler
+      const statusHandler = (payload: {
+        chatId: string;
+        isOnline: boolean;
+      }) => {
+        console.log(
+          `statusChanged received - chatId: ${payload.chatId}, isOnline: ${payload.isOnline}`
+        );
+        set((state) => {
+          // Update status only for direct chats that exist
+          const chatExists = state.chats.some(
+            (chat) =>
+              chat.id === payload.chatId && chat.type === ChatType.DIRECT
+          );
+          if (chatExists) {
+            return {
+              onlineStatuses: {
+                ...state.onlineStatuses,
+                [payload.chatId]: payload.isOnline,
+              },
+            };
+          } else {
+            console.warn(
+              `Ignoring status update for unknown chatId: ${payload.chatId}`
+            );
+          }
+          return state;
+        });
       };
 
       return {
@@ -96,9 +136,64 @@ export const useChatStore = create<ChatStore>()(
         activeMembers: [],
         isLoading: false,
         error: null,
+        onlineStatuses: {},
 
         initialize: async () => {
+          get().setupWebSocket();
           await get().getChats();
+        },
+
+        setupWebSocket: () => {
+          const socket = webSocketService.getSocket();
+          if (!socket) {
+            console.warn("WebSocket service not available");
+            return;
+          }
+
+          // Remove existing listeners to prevent duplicates
+          socket.off(`${chatGateway}:statusChanged`, statusHandler);
+          socket.on(`${chatGateway}:statusChanged`, statusHandler);
+
+          // Handle reconnect
+          socket.off("connect");
+          socket.on("connect", () => {
+            console.log("WebSocket reconnected, re-checking statuses");
+            const { chats } = get();
+            chats
+              .filter((chat) => chat.type === ChatType.DIRECT)
+              .forEach((chat) => get().checkOnlineStatus(chat.id));
+          });
+        },
+
+        checkOnlineStatus: (chatId: string) => {
+          const socket = webSocketService.getSocket();
+          if (!socket) {
+            console.warn("WebSocket not available for status check");
+            return;
+          }
+
+          console.log(`Checking online status for chatId: ${chatId}`);
+          socket.emit(
+            `${chatGateway}:getStatus`,
+            chatId,
+            (response: { chatId: string; isOnline: boolean }) => {
+              if (response.chatId === chatId) {
+                console.log(
+                  `Received status for chatId: ${chatId}, isOnline: ${response.isOnline}`
+                );
+                set((state) => ({
+                  onlineStatuses: {
+                    ...state.onlineStatuses,
+                    [chatId]: response.isOnline,
+                  },
+                }));
+              } else {
+                console.warn(
+                  `Received status for unexpected chatId: ${response.chatId}`
+                );
+              }
+            }
+          );
         },
 
         getChats: async () => {
@@ -106,6 +201,12 @@ export const useChatStore = create<ChatStore>()(
           try {
             const chats: ChatResponse[] = await chatService.getAllChats();
             set({ chats, filteredChats: chats, isLoading: false });
+            const socket = webSocketService.getSocket();
+            if (socket?.connected) {
+              chats
+                .filter((chat) => chat.type === ChatType.DIRECT)
+                .forEach((chat) => get().checkOnlineStatus(chat.id));
+            }
           } catch (error) {
             console.error("Failed to fetch chats:", error);
             set({
@@ -135,6 +236,12 @@ export const useChatStore = create<ChatStore>()(
                 state.activeChat?.id === targetChatId ? chat : state.activeChat,
               isLoading: false,
             }));
+            if (chat.type === ChatType.DIRECT) {
+              const socket = webSocketService.getSocket();
+              if (socket?.connected) {
+                get().checkOnlineStatus(targetChatId);
+              }
+            }
           } catch (error) {
             console.error("Failed to fetch chat:", error);
             set({
@@ -210,7 +317,7 @@ export const useChatStore = create<ChatStore>()(
           });
         },
 
-        setActiveChat: async (chat) => {
+        setActiveChat: (chat) => {
           if (!chat) {
             set({ activeChat: null });
             return;
@@ -220,13 +327,18 @@ export const useChatStore = create<ChatStore>()(
           set({ activeChat: chat });
           window.history.pushState({}, "", `/${chat.id}`);
 
-          // Fetch messages for the active chat
           useMessageStore.getState().fetchMessages(chat.id);
           if (chat.type !== ChatType.DIRECT) {
-            await get().getGroupMembers(chat.id);
-            set((state) => ({
-              activeMembers: state.allGroupMembers[chat.id] || [],
-            }));
+            get()
+              .getGroupMembers(chat.id)
+              .then((members) => {
+                set({ activeMembers: members });
+              });
+          } else {
+            const socket = webSocketService.getSocket();
+            if (socket?.connected) {
+              get().checkOnlineStatus(chat.id);
+            }
           }
 
           if (chat.unreadCount && chat.unreadCount > 0) {
@@ -288,6 +400,10 @@ export const useChatStore = create<ChatStore>()(
               get().setActiveChat(payload);
             }
 
+            const socket = webSocketService.getSocket();
+            if (socket?.connected) {
+              get().checkOnlineStatus(payload.id);
+            }
             set({ isLoading: false });
             return payload;
           } catch (error) {
@@ -337,6 +453,10 @@ export const useChatStore = create<ChatStore>()(
                   : state.activeChat,
               isLoading: false,
             }));
+            const socket = webSocketService.getSocket();
+            if (socket?.connected) {
+              get().checkOnlineStatus(id);
+            }
           } catch (error) {
             console.error("Failed to update direct chat:", error);
             set({
@@ -476,9 +596,9 @@ export const useChatStore = create<ChatStore>()(
             cleanupChat(chatId);
             set({ isLoading: false });
           } catch (error) {
-            console.error("Failed to delete chat:", error);
+            console.error("Failed to leave chat:", error);
             set({
-              error: "Failed to delete chat",
+              error: "Failed to leave chat",
               isLoading: false,
             });
             throw error;
@@ -502,12 +622,18 @@ export const useChatStore = create<ChatStore>()(
         },
 
         clearChats: () => {
+          const socket = webSocketService.getSocket();
+          if (socket) {
+            socket.off(`${chatGateway}:statusChanged`, statusHandler);
+            socket.off("connect");
+          }
           set({
             chats: [],
             filteredChats: [],
             activeChat: null,
             allGroupMembers: {},
             activeMembers: [],
+            onlineStatuses: {},
           });
         },
       };
@@ -517,9 +643,14 @@ export const useChatStore = create<ChatStore>()(
       partialize: (state) => ({
         activeChat: state.activeChat,
         chats: state.chats,
+        onlineStatuses: state.onlineStatuses,
       }),
     }
   )
 );
 
 export const useActiveChat = () => useChatStore((state) => state.activeChat);
+export const useChatOnlineStatus = (chatId?: string) =>
+  useChatStore((state) =>
+    chatId ? state.onlineStatuses[chatId] ?? false : false
+  );

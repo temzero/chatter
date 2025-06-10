@@ -1,6 +1,6 @@
 interface OnlineDotProps {
   isOnline: boolean;
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
   className?: string;
 }
 
@@ -12,6 +12,7 @@ export const OnlineDot = ({
   if (!isOnline) return null;
 
   const sizeClasses = {
+    xs: "w-1 h-1",
     sm: "w-2 h-2",
     md: "w-3 h-3",
     lg: "w-4 h-4",

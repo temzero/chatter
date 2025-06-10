@@ -15,7 +15,7 @@ import { ChatMemberService } from './chat-member.service';
 import { ChatMemberRole } from './constants/chat-member-roles.constants';
 import { ChatMemberResponseDto } from './dto/responses/chat-member-response.dto';
 import { UpdateChatMemberDto } from './dto/requests/update-chat-member.dto';
-import { mapChatMemberToResponseDto } from './mappers/chat-member.mapper.dto';
+import { mapChatMemberToResponseDto } from './mappers/chat-member.mapper';
 
 @Controller('chat-members')
 @UseGuards(JwtAuthGuard)
@@ -28,7 +28,7 @@ export class ChatMemberController {
   ): Promise<SuccessResponse<ChatMemberResponseDto[]>> {
     const members = await this.memberService.findByChatId(chatId);
     const membersResponse = members.map(mapChatMemberToResponseDto);
-    return new SuccessResponse(
+    return new SuccessResponse<ChatMemberResponseDto[]>(
       membersResponse,
       'Chat members retrieved successfully',
     );
@@ -94,13 +94,10 @@ export class ChatMemberController {
   async updateLastReadMessage(
     @Param('chatId') chatId: string,
     @Param('userId') userId: string,
-    @Body() body: { messageId: string },
   ): Promise<SuccessResponse<ChatMemberResponseDto>> {
-    const { messageId } = body;
-    const updatedMember = await this.memberService.updateLastReadMessage(
+    const updatedMember = await this.memberService.updateLastRead(
       chatId,
       userId,
-      messageId,
     );
     return new SuccessResponse(
       plainToInstance(ChatMemberResponseDto, updatedMember),

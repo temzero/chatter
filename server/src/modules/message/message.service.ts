@@ -110,6 +110,8 @@ export class MessageService {
     }
   }
 
+  async markMessagesAsRead() {}
+
   async getMessagesByChatId(
     chatId: string,
     queryParams: GetMessagesDto,

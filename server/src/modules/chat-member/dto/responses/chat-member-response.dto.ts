@@ -38,9 +38,6 @@ export class ChatMemberResponseDto {
   lastReadAt: Date | null;
 
   @Expose()
-  lastReadMessageId: string | null;
-
-  @Expose()
   createdAt: Date;
 
   @Expose()

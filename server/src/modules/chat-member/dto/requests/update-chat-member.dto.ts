@@ -1,7 +1,14 @@
 import { EmptyStringToNull } from 'src/common/utils/dto.utils';
 import { ChatMemberRole } from '../../constants/chat-member-roles.constants';
 import { ChatMemberStatus } from '../../constants/chat-member-status.constants';
-import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsDate,
+  IsEnum,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class UpdateChatMemberDto {
   @IsOptional()
@@ -26,12 +33,12 @@ export class UpdateChatMemberDto {
   customTitle?: string;
 
   @IsOptional()
-  @IsString()
-  @EmptyStringToNull()
+  @Type(() => Date)
+  @IsDate()
   mutedUntil?: Date | null;
 
   @IsOptional()
-  @IsString()
-  @EmptyStringToNull()
-  lastReadMessageId?: string | null;
+  @Type(() => Date)
+  @IsDate()
+  lastReadAt?: Date | null;
 }

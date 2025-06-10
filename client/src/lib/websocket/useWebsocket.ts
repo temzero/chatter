@@ -1,6 +1,6 @@
 // src/hooks/useWebSocket.ts
 import { useEffect } from "react";
-import { webSocketService } from "@/lib/websocket/websocketService";
+import { webSocketService } from "@/lib/websocket/services/websocket.service";
 import { useMessageStore } from "@/stores/messageStore";
 import { MessageResponse } from "@/types/messageResponse";
 
@@ -11,8 +11,10 @@ export const useWebSocket = (activeChatId: string | null) => {
   useEffect(() => {
     // Connect to WebSocket server
     webSocketService.connect();
-    console.log("Initial connection status:", 
-      webSocketService.getSocket()?.connected);
+    console.log(
+      "Initial connection status:",
+      webSocketService.getSocket()?.connected
+    );
 
     // Message handler
     const handleNewMessage = (data: {
