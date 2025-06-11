@@ -19,7 +19,7 @@ export interface MessageStore {
   isLoading: boolean;
 
   fetchMessages: (chatId: string) => void;
-  addMessage: (chatId: string, newMessage: MessageResponse) => void;
+  addMessage: (newMessage: MessageResponse) => void;
   deleteMessage: (messageId: string) => void;
   getChatMessages: (chatId: string) => MessageResponse[];
   getChatAttachments: (chatId: string) => AttachmentResponse[];
@@ -82,8 +82,10 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
     }
   },
 
-  addMessage: (chatId, newMessage) => {
+  addMessage: (newMessage) => {
+    console.log("[STORE] 🧠 Adding message to store:", newMessage);
     const { messages } = get();
+    const chatId = newMessage.chatId
 
     const updatedMessages = {
       ...messages,

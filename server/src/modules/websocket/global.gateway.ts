@@ -10,17 +10,13 @@ import {
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { WebsocketService } from './websocket.service';
-import { ChatMemberService } from '../chat-member/chat-member.service';
 import type { AuthenticatedSocket } from './constants/authenticatedSocket.type';
 
 @WebSocketGateway()
 export class GlobalGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  constructor(
-    private readonly websocketService: WebsocketService,
-    private readonly chatMemberService: ChatMemberService,
-  ) {}
+  constructor(private readonly websocketService: WebsocketService) {}
 
   @WebSocketServer()
   server: Server;

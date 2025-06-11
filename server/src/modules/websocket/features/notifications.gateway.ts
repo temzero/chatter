@@ -10,12 +10,14 @@ import { WsJwtGuard } from 'src/modules/auth/guards/ws-jwt.guard';
 import { WebsocketService } from '../websocket.service';
 import { AuthenticatedSocket } from '../constants/authenticatedSocket.type';
 
-@WebSocketGateway({ namespace: 'notifications' })
+const notificationsLink = 'notifications:';
+
+@WebSocketGateway()
 @UseGuards(WsJwtGuard)
 export class NotificationGateway {
   constructor(private readonly websocketService: WebsocketService) {}
 
-  @SubscribeMessage('subscribeToNotifications')
+  @SubscribeMessage(`${notificationsLink}subscribeToNotifications`)
   handleSubscribe(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() userId: string,
@@ -30,7 +32,7 @@ export class NotificationGateway {
     return { success: true };
   }
 
-  @SubscribeMessage('markAsRead')
+  @SubscribeMessage(`${notificationsLink}markAsRead`)
   handleMarkAsRead(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() notificationId: string,

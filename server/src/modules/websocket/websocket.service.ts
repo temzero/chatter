@@ -33,23 +33,23 @@ export class WebsocketService {
       this.userSocketMap.get(userId)!.add(socketId);
     }
 
-    if (isFirstConnection) {
-      // Get all chats this user is in
-      const chatIds = await this.chatMemberService.getChatIdsByUserId(userId);
+    console.log('isFirstConnection', isFirstConnection);
 
-      // For each chat, notify members that status might have changed
+    if (isFirstConnection) {
+      const chatIds = await this.chatMemberService.getChatIdsByUserId(userId);
+      console.log('User connected :', userId);
+
       for (const chatId of chatIds) {
         const otherMembers =
           await this.chatMemberService.getAllMemberIds(chatId);
 
-        // Notify each member individually (no need for chat room joins)
         otherMembers.forEach((memberId) => {
           if (memberId !== userId && this.isUserOnline(memberId)) {
             this.server
               .to(this.getUserSocketIds(memberId))
               .emit('chat:statusChanged', {
                 chatId,
-                isOnline: true, // because this user just came online
+                isOnline: true,
               });
           }
         });
@@ -63,7 +63,6 @@ export class WebsocketService {
     const userId = this.socketUserMap.get(socketId);
     if (!userId) return null;
 
-    // 1. Clean up socket mappings
     this.socketUserMap.delete(socketId);
     const userSockets = this.userSocketMap.get(userId);
     if (!userSockets) return null;
@@ -71,33 +70,25 @@ export class WebsocketService {
     userSockets.delete(socketId);
     const wasLastConnection = userSockets.size === 0;
 
-    // 2. If this was the user's last connection, proceed with notifications
     if (wasLastConnection) {
       this.userSocketMap.delete(userId);
-
-      // 3. Get all chats the user is in
       const chatIds = await this.chatMemberService.getChatIdsByUserId(userId);
 
-      // 4. For each chat, check online members and notify as needed
       for (const chatId of chatIds) {
         const memberIds = await this.chatMemberService.getAllMemberIds(chatId);
-
-        // Find other online members (excluding the disconnecting user)
         const otherOnlineMembers = memberIds.filter(
           (memberId) => memberId !== userId && this.isUserOnline(memberId),
         );
 
-        // If exactly one other user is online, notify them
         if (otherOnlineMembers.length === 1) {
           const remainingUserId = otherOnlineMembers[0];
           const remainingUserSockets = this.userSocketMap.get(remainingUserId);
 
           if (remainingUserSockets) {
-            // Notify all sockets of the remaining user
             for (const socketId of remainingUserSockets) {
               this.server.to(socketId).emit('chat:statusChanged', {
                 chatId,
-                userId, // The user who went offline
+                userId,
                 isOnline: false,
               });
             }
@@ -130,7 +121,18 @@ export class WebsocketService {
     return this.userSocketMap.has(userId);
   }
 
-  // Utility to check if any other chat member is online (excluding one user)
+  async emitToChatMembers(chatId: string, event: string, payload: any) {
+    const memberIds = await this.chatMemberService.getAllMemberIds(chatId);
+
+    for (const userId of memberIds) {
+      const socketIds = this.getUserSocketIds(userId);
+      console.log('socketIds', socketIds);
+      for (const socketId of socketIds) {
+        this.server.to(socketId).emit(event, payload);
+      }
+    }
+  }
+
   async hasMoreThanTwoUsersOnline(
     chatId: string,
     excludeUserId: string,

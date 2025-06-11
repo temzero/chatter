@@ -15,7 +15,7 @@ const ChatHeader: React.FC = () => {
   );
 
   const isOnline = useChatOnlineStatus(activeChat?.id);
-  console.log("chat header isOnline: ", isOnline, activeChat?.id);
+  // console.log("chat header isOnline: ", isOnline, activeChat?.id);
 
   if (!activeChat) return null;
 
@@ -25,13 +25,13 @@ const ChatHeader: React.FC = () => {
 
   return (
     <header
-      className="w-full cursor-pointer hover:shadow-2xl flex items-center justify-between min-h-[var(--header-height)] max-h-[var(--header-height)] px-4 shadow border-b border-[var(--border-color)] backdrop-blur-[199px] z-40"
+      className="w-full cursor-pointer hover:shadow-2xl flex items-center justify-between min-h-[var(--header-height)] max-h-[var(--header-height)] px-3 shadow border-b border-[var(--border-color)] backdrop-blur-[199px] z-40"
       onClick={toggleSidebarInfo}
     >
       <AnimatePresence mode="wait">
         <motion.div
           key={activeChat?.id || "no-chat"}
-          className="relative flex gap-3 items-center cursor-pointer"
+          className="flex gap-3 items-center cursor-pointer"
           initial={{ opacity: 0.2, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0.2, scale: 0.9 }}
@@ -41,7 +41,6 @@ const ChatHeader: React.FC = () => {
             ease: "easeInOut",
           }}
         >
-          <OnlineDot isOnline={isOnline} size="xs" className="absolute top-1/2 -left-[10px] -translate-y-1/2"/>
           <ChatAvatar chat={activeChat} type="header" />
           <h1 className="text-xl font-medium">{getChatName(activeChat)}</h1>
         </motion.div>
@@ -63,6 +62,8 @@ const ChatHeader: React.FC = () => {
             <i className="material-symbols-outlined text-3xl">connected_tv</i>
           )}
         </div>
+
+        <OnlineDot isOnline={isOnline} size="xs" />
       </div>
     </header>
   );

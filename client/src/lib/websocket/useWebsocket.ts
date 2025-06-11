@@ -1,50 +1,18 @@
 // src/hooks/useWebSocket.ts
 import { useEffect } from "react";
 import { webSocketService } from "@/lib/websocket/services/websocket.service";
-import { useMessageStore } from "@/stores/messageStore";
-import { MessageResponse } from "@/types/messageResponse";
 
-export const useWebSocket = (activeChatId: string | null) => {
-  const { addMessage } = useMessageStore();
-
-  // Initialize WebSocket connection and listeners
+export const useWebSocket = () => {
   useEffect(() => {
-    // Connect to WebSocket server
-    webSocketService.connect();
-    console.log(
-      "Initial connection status:",
-      webSocketService.getSocket()?.connected
-    );
+    // Connect on mount
+    webSocketService.connect().then((socket) => {
+      console.log("[WS] 🔌 Connected? ", socket.connected);
+    });
 
-    // Message handler
-    const handleNewMessage = (data: {
-      chatId: string;
-      message: MessageResponse;
-      senderId: string;
-    }) => {
-      if (data.chatId === activeChatId) {
-        addMessage(data.chatId, data.message);
-      }
-    };
-
-    // Register listener
-    webSocketService.onNewMessage(handleNewMessage);
-
-    // Cleanup on unmount
+    // Disconnect on unmount
     return () => {
-      webSocketService.offNewMessage(handleNewMessage);
       webSocketService.disconnect();
+      console.log("[WS] 🔌 Disconnected");
     };
-  }, [activeChatId, addMessage]);
-
-  // Handle chat room joining/leaving
-  useEffect(() => {
-    if (!activeChatId) return;
-
-    webSocketService.joinChat(activeChatId);
-
-    return () => {
-      webSocketService.leaveChat(activeChatId);
-    };
-  }, [activeChatId]);
+  }, []);
 };

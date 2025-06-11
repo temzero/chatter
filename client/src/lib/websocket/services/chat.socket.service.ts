@@ -1,44 +1,53 @@
 // src/services/websocket/chat.service.ts
 import { SendMessagePayload } from "@/types/sendMessagePayload";
-import { WebSocketService } from "./websocket.service";
+import { webSocketService } from "./websocket.service";
 import { MessageResponse } from "@/types/messageResponse";
 
-const CHAT_NAMESPACE = "chat";
+export class ChatWebSocketService {
+  constructor() {
+    // Initialize connection when the service is created
+    this.initializeConnection();
+  }
 
-export class ChatWebSocketService extends WebSocketService {
+  private async initializeConnection() {
+    try {
+      await webSocketService.connect();
+    } catch (error) {
+      console.error("Failed to initialize WebSocket connection:", error);
+    }
+  }
+
   async getChatStatus(
     chatId: string
   ): Promise<{ chatId: string; isOnline: boolean } | null> {
     return new Promise((resolve) => {
-      this.socket?.emit(
-        `${CHAT_NAMESPACE}:getStatus`,
-        chatId,
-        (response: { chatId: string; isOnline: boolean }) => {
-          resolve(response);
-        }
-      );
+      webSocketService.emit("chat:getStatus", chatId, (response: unknown) => {
+        resolve(response as { chatId: string; isOnline: boolean });
+      });
     });
   }
 
   typing(chatId: string, isTyping: boolean) {
-    this.socket?.emit(`${CHAT_NAMESPACE}:typing`, { chatId, isTyping });
+    webSocketService.emit("chat:typing", { chatId, isTyping });
   }
 
-  sendMessage(messagePayload: SendMessagePayload) {
-    console.log('sendPayload: ', messagePayload)
-    this.socket?.emit(`${CHAT_NAMESPACE}:sendMessage`, messagePayload);
+  async sendMessage(messagePayload: SendMessagePayload) {
+    console.log("sendPayload: ", messagePayload);
+    console.log("isArray:", Array.isArray(messagePayload));
+    webSocketService.emit("chat:sendMessage", messagePayload);
   }
 
   markAsRead(chatId: string) {
-    this.socket?.emit(`${CHAT_NAMESPACE}:markAsRead`, { chatId });
+    webSocketService.emit("chat:markAsRead", { chatId });
   }
 
+  // Event listeners
   onNewMessage(callback: (message: MessageResponse) => void) {
-    this.socket?.on("newMessage", callback);
+    webSocketService.on("chat:newMessage", callback);
   }
 
   offNewMessage(callback: (message: MessageResponse) => void) {
-    this.socket?.off("newMessage", callback);
+    webSocketService.off("chat:newMessage", callback);
   }
 
   onTyping(
@@ -48,7 +57,7 @@ export class ChatWebSocketService extends WebSocketService {
       isTyping: boolean;
     }) => void
   ) {
-    this.socket?.on("userTyping", callback);
+    webSocketService.on("chat:userTyping", callback);
   }
 
   offTyping(
@@ -58,7 +67,7 @@ export class ChatWebSocketService extends WebSocketService {
       isTyping: boolean;
     }) => void
   ) {
-    this.socket?.off("userTyping", callback);
+    webSocketService.off("chat:userTyping", callback);
   }
 
   onMessagesRead(
@@ -68,7 +77,7 @@ export class ChatWebSocketService extends WebSocketService {
       timestamp: number;
     }) => void
   ) {
-    this.socket?.on("messagesRead", callback);
+    webSocketService.on("chat:messagesRead", callback);
   }
 
   offMessagesRead(
@@ -78,7 +87,16 @@ export class ChatWebSocketService extends WebSocketService {
       timestamp: number;
     }) => void
   ) {
-    this.socket?.off("messagesRead", callback);
+    webSocketService.off("chat:messagesRead", callback);
+  }
+
+  // Room management
+  joinChatRoom(chatId: string) {
+    webSocketService.joinRoom(`chat:${chatId}`);
+  }
+
+  leaveChatRoom(chatId: string) {
+    webSocketService.leaveRoom(`chat:${chatId}`);
   }
 }
 

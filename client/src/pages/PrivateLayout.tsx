@@ -11,6 +11,8 @@ import { useIsAuthenticated } from "@/stores/authStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { useFriendshipStore } from "@/stores/friendshipStore";
+import { useChatSocketListeners } from "@/lib/websocket/useChatSocketListener";
+import { useWebSocket } from "@/lib/websocket/useWebsocket";
 
 export const ChatContent: React.FC = () => {
   const { id: chatId } = useParams();
@@ -26,6 +28,9 @@ export const ChatContent: React.FC = () => {
   const { fetchPendingRequests } = useFriendshipStore();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useWebSocket()
+  useChatSocketListeners();
 
   // Initialization effect with proper sequencing
   useEffect(() => {

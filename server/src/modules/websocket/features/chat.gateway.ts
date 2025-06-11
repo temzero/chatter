@@ -10,7 +10,7 @@ import { AuthenticatedSocket } from '../constants/authenticatedSocket.type';
 import { CreateMessageDto } from 'src/modules/message/dto/requests/create-message.dto';
 import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
 
-const chatGateway = 'chat';
+const chatLink = 'chat:';
 
 @WebSocketGateway()
 export class ChatGateway {
@@ -20,19 +20,41 @@ export class ChatGateway {
     private readonly chatMemberService: ChatMemberService,
   ) {}
 
-  @SubscribeMessage(`${chatGateway}:getStatus`)
+  handleConnection(client: AuthenticatedSocket) {
+    try {
+      const userId = client.data?.userId;
+      if (!userId) {
+        console.log(`Unauthenticated connection attempt from ${client.id}`);
+        client.disconnect();
+        return;
+      }
+    } catch (error) {
+      console.error('Connection error:', error);
+      client.disconnect();
+    }
+  }
+
+  handleDisconnect(client: AuthenticatedSocket) {
+    const userId = client.data?.userId;
+    console.log(
+      `Client disconnected: ${client.id}, User: ${userId || 'unknown'}`,
+    );
+  }
+
+  @SubscribeMessage(`${chatLink}getStatus`)
   async handleGetStatus(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() chatId: string,
   ) {
     const userId = client.data.userId;
+    console.log('Get chat Status for :', userId);
     if (!userId) return false;
 
     const isOnline = await this.hasAnyOtherMemberOnline(chatId, userId);
     return { chatId, isOnline };
   }
 
-  @SubscribeMessage(`${chatGateway}:typing`)
+  @SubscribeMessage(`${chatLink}typing`)
   handleTyping(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() data: { chatId: string; isTyping: boolean },
@@ -48,11 +70,12 @@ export class ChatGateway {
     });
   }
 
-  @SubscribeMessage(`${chatGateway}:sendMessage`)
+  @SubscribeMessage(`${chatLink}sendMessage`)
   async handleMessage(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: CreateMessageDto,
   ) {
+    console.log('message sent');
     try {
       // Add senderId from socket if not in payload
       const senderId = client.data.userId;
@@ -68,21 +91,18 @@ export class ChatGateway {
         payload,
       );
 
-      // Ensure sender has joined the room
-      await client.join(payload.chatId);
-
-      // Emit to all clients in the chat room (including sender)
-      this.websocketService
-        .getServer()
-        .to(payload.chatId)
-        .emit('newMessage', message);
+      await this.websocketService.emitToChatMembers(
+        payload.chatId,
+        'newMessage',
+        message,
+      );
     } catch (error) {
       console.error('Error handling sendMessage:', error);
       client.emit('error', { message: 'Failed to send message' });
     }
   }
 
-  @SubscribeMessage(`${chatGateway}:markAsRead`)
+  @SubscribeMessage(`${chatLink}markAsRead`)
   async handleMarkAsRead(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() data: { chatId: string },

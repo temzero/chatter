@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 const SOCKET_URL = import.meta.env.VITE_API_URL || "ws://localhost:3000";
 
 export class WebSocketService {
-  protected socket: Socket | null = null;
+  private socket: Socket | null = null;
   private connectionPromise: Promise<Socket> | null = null;
 
   connect(): Promise<Socket> {
@@ -24,7 +24,7 @@ export class WebSocketService {
       });
 
       this.socket.on("connect", () => {
-        console.log("Connected to WebSocket server");
+        console.log("Connected to WebSocket, socketId: ", this.socket?.id);
         resolve(this.socket as Socket);
       });
 
@@ -36,7 +36,7 @@ export class WebSocketService {
       });
 
       this.socket.on("disconnect", () => {
-        console.log("Disconnected from WebSocket server");
+        console.log("Disconnected from WebSocket");
       });
     });
 
@@ -54,6 +54,62 @@ export class WebSocketService {
   getSocket(): Socket | null {
     return this.socket;
   }
+
+  // Helper method to emit events with proper typing
+  emit<T>(event: string, data: T, callback?: (response: unknown) => void) {
+    if (!this.socket) {
+      console.warn("Socket not connected. Cannot emit event:", event);
+      return;
+    }
+    this.socket.emit(event, data, callback);
+  }
+
+  // Helper method to listen to events
+  on<T>(event: string, callback: (data: T) => void) {
+    if (!this.socket) {
+      console.warn("Socket not connected. Cannot listen to event:", event);
+      return;
+    }
+    this.socket.on(event, callback);
+  }
+
+  // Helper method to remove event listeners
+  off<T = unknown>(event: string, callback?: (data: T) => void): void {
+    if (!this.socket) {
+      console.warn(
+        "Socket not connected. Cannot remove listener for event:",
+        event
+      );
+      return;
+    }
+
+    if (callback) {
+      // Remove specific callback for the event
+      this.socket.off(event, callback);
+    } else {
+      // Remove all listeners for the event
+      this.socket.off(event);
+    }
+  }
+
+  // Join a room (channel)
+  joinRoom(room: string) {
+    if (!this.socket) {
+      console.warn("Socket not connected. Cannot join room:", room);
+      return;
+    }
+    this.socket.emit("join", room);
+  }
+
+  // Leave a room (channel)
+  leaveRoom(room: string) {
+    if (!this.socket) {
+      console.warn("Socket not connected. Cannot leave room:", room);
+      return;
+    }
+    this.socket.emit("leave", room);
+  }
 }
 
+// Single instance for the entire application
 export const webSocketService = new WebSocketService();

@@ -71,15 +71,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             loading: false,
             message: null,
           });
-
-          try {
-            await webSocketService.connect();
-          } catch (wsError) {
-            console.error(
-              wsError,
-              "WebSocket failed, but keeping user logged in"
-            );
-          }
         } catch (error) {
           console.error(error);
           set({ ...initialState, loading: false });
