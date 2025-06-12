@@ -19,11 +19,15 @@ import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { MessageResponseDto } from './dto/responses/message-response.dto';
 import { ErrorResponse } from '../../common/api-response/errors';
 import { GetMessagesDto } from './dto/queries/get-messages.dto';
+import { MessageMapper } from './mappers/message.mapper';
 
 @Controller('messages')
 @UseGuards(JwtAuthGuard)
 export class MessageController {
-  constructor(private readonly messageService: MessageService) {}
+  constructor(
+    private readonly messageService: MessageService,
+    private readonly messageMapper: MessageMapper,
+  ) {}
 
   @Post()
   async create(
@@ -39,10 +43,10 @@ export class MessageController {
       createMessageDto,
     );
 
-    return new SuccessResponse(
-      plainToInstance(MessageResponseDto, message),
-      'Message created successfully',
-    );
+    const messageResponse = this.messageMapper.toResponseDto(message);
+    console.log('messageResponse: ', messageResponse);
+
+    return new SuccessResponse(messageResponse, 'Message created successfully');
   }
 
   @Get(':messageId')
@@ -90,8 +94,13 @@ export class MessageController {
       queryParams,
     );
 
+    // const messagesResponse = plainToInstance(MessageResponseDto, messages);
+    const messagesResponse = messages.map((message) =>
+      this.messageMapper.toResponseDto(message),
+    );
+
     return new SuccessResponse(
-      plainToInstance(MessageResponseDto, messages),
+      messagesResponse,
       'Chat messages retrieved successfully',
     );
   }

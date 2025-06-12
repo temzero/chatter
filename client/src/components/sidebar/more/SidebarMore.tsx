@@ -107,6 +107,7 @@ const SidebarMore: React.FC = () => {
           />
           <OnlineDot
             isOnline={isOnline}
+            size="sm"
             className="absolute bottom-1 right-1"
           />
         </div>
@@ -119,6 +120,10 @@ const SidebarMore: React.FC = () => {
             <a>{currentUser?.phoneNumber}</a>
           </div>
         )}
+
+        <OnlineDot
+          isOnline={isOnline}
+        />
       </div>
 
       <div className="overflow-x-hidden overflow-y-auto">

@@ -6,8 +6,6 @@ import type {
   GroupChatResponse,
 } from "@/types/chat";
 import { ChatType } from "@/types/enums/ChatType";
-// import { useChatOnlineStatus } from "@/hooks/useChatOnlineStatus";
-// import { useChatOnlineStatus } from "@/stores/chatStore";
 
 type ChatAvatarProps = {
   chat?: ChatResponse | null;
@@ -15,10 +13,13 @@ type ChatAvatarProps = {
 };
 
 export const ChatAvatar: React.FC<ChatAvatarProps> = ({ chat, type }) => {
-  // const isOnline = useChatOnlineStatus(chat?.id);
   const isOnline = false;
-  // console.log('isOnline', isOnline)
-  // Early return if no chat
+
+  const parentScaleClass =
+    "transform transition-transform duration-300 hover:scale-110";
+  const childrenScaleClass =
+    "transition-transform duration-300 group-hover:scale-125";
+
   if (!chat) {
     return (
       <div
@@ -37,7 +38,6 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({ chat, type }) => {
     );
   }
 
-  // Define size and rounded styles based on type
   const getStyles = (): {
     size: string;
     rounded: string;
@@ -88,29 +88,25 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({ chat, type }) => {
   };
 
   const styles = getStyles();
-  const sharedBase = `flex items-center justify-center ${styles.size}`;
+  const sharedBase = `flex items-center justify-center ${parentScaleClass} ${styles.size}`;
   const showOnlineDot = type !== "info";
+  const squircleShape = `[mask-image:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCB0cmFuc2Zvcm09InJvdGF0ZSg0NSA1MCA1MCkiIGQ9Ik01MCwwQzMwLDAsMCwzMCwwLDUwczMwLDUwLDUwLDUwczUwLTMwLDUwLTUwUzcwLDAsNTAsMHoiLz48L3N2Zz4=)] 
+    [mask-size:100%_100%] [mask-repeat:no-repeat]`;
 
   switch (chat.type) {
     case ChatType.CHANNEL: {
       const channelChat = chat as GroupChatResponse;
       return (
         <div
-          className={`${sharedBase} overflow-hidden ${styles.rounded}`}
-          style={{
-            borderWidth: styles.borderWidth,
-            borderStyle: "solid",
-            borderColor: "grey",
-          }}
+          className={`group overflow-hidden ${sharedBase} ${styles.rounded} ${squircleShape}`}
         >
           {channelChat.avatarUrl ? (
-            <>
-              <img
-                src={channelChat.avatarUrl}
-                alt={`${channelChat.name || "Channel"}'s avatar`}
-                loading="lazy"
-              />
-            </>
+            <img
+              src={channelChat.avatarUrl}
+              alt={`${channelChat.name || "Channel"}'s avatar`}
+              loading="lazy"
+              className={`h-full w-full object-cover ${childrenScaleClass}`}
+            />
           ) : (
             <i
               className={`material-symbols-outlined ${styles.fallbackIconSize} opacity-20 flex items-center justify-center`}
@@ -125,17 +121,19 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({ chat, type }) => {
     case ChatType.GROUP: {
       const groupChat = chat as GroupChatResponse;
       return (
-        <div className={`relative ${sharedBase}`}>
+        <div
+          className={`relative group overflow-hidden ${sharedBase} ${styles.rounded} ${parentScaleClass}`}
+        >
           {groupChat.avatarUrl ? (
             <img
-              className={`h-full w-full object-cover custom-border ${styles.rounded}`}
+              className={`h-full w-full object-cover ${childrenScaleClass} ${styles.rounded}`}
               src={groupChat.avatarUrl}
               alt={`${groupChat.name || "Group"}'s avatar`}
               loading="lazy"
             />
           ) : (
             <div
-              className={`bg-[var(--border-color)] cursor-pointer h-full w-full custom-border ${styles.rounded}`}
+              className={`bg-[var(--border-color)] cursor-pointer h-full w-full ${styles.rounded}`}
             >
               <div className="grid grid-cols-2 grid-rows-2 h-full w-full">
                 {Array.from({ length: 4 }).map((_, idx) => (
@@ -153,7 +151,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({ chat, type }) => {
           {showOnlineDot && (
             <OnlineDot
               isOnline={isOnline}
-              className={`absolute bottom-0 right-0`}
+              className={`absolute ${styles.onlineDotClass}`}
             />
           )}
         </div>
@@ -162,16 +160,15 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({ chat, type }) => {
 
     case ChatType.DIRECT: {
       const directChat = chat as DirectChatResponse;
-      // Safe access to chatPartner properties
       const chatPartner = directChat.chatPartner || {};
 
       return (
-        <div className="relative">
+        <div className={`relative group overflow-hidden ${parentScaleClass}`}>
           <Avatar
             avatarUrl={chatPartner.avatarUrl ?? undefined}
             firstName={chatPartner.firstName}
             lastName={chatPartner.lastName}
-            className={`${styles.size}`}
+            className={`${styles.size} ${styles.rounded} object-cover`}
           />
           {showOnlineDot && (
             <OnlineDot

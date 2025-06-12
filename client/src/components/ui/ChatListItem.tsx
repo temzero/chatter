@@ -11,12 +11,14 @@ interface ChatListItemProps {
   chat: ChatResponse;
   isCompact?: boolean;
   isOnline: boolean;
+  currentUserId: string;
 }
 
 const ChatListItem: React.FC<ChatListItemProps> = ({
   chat,
   isCompact = false,
   isOnline,
+  currentUserId = "",
 }) => {
   const activeChat = useChatStore((state) => state.activeChat);
   const setActiveChat = useChatStore((state) => state.setActiveChat);
@@ -46,14 +48,28 @@ const ChatListItem: React.FC<ChatListItemProps> = ({
     </p>
   ) : chat.lastMessage ? (
     <p className="flex items-center opacity-70 gap-1 text-xs max-w-[196px] whitespace-nowrap text-ellipsis overflow-hidden">
-      <strong>{chat.lastMessage.senderName}:</strong> {chat.lastMessage.content}
+      <strong>
+        {chat.lastMessage.senderId === currentUserId
+          ? "Me"
+          : chat.lastMessage.senderName}
+        :
+      </strong>
+      {chat.lastMessage.icon && (
+        <i className="material-symbols-outlined text-sm">
+          {chat.lastMessage.icon}
+        </i>
+      )}
+      {chat.lastMessage.content}
     </p>
   ) : null;
 
   return (
     <>
       <div className={getUserItemClass()} onClick={handleChatSelect}>
-        <OnlineDot isOnline={isOnline} size="xs" className="absolute top-1/2 left-[3px] -translate-y-1/2"/>
+        <OnlineDot
+          isOnline={isOnline}
+          className="absolute top-1/2 left-[3px] -translate-y-1/2"
+        />
         <ChatAvatar chat={chat} type="sidebar" />
 
         {!isCompact && (

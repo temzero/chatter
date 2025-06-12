@@ -15,7 +15,6 @@ const ChatHeader: React.FC = () => {
   );
 
   const isOnline = useChatOnlineStatus(activeChat?.id);
-  // console.log("chat header isOnline: ", isOnline, activeChat?.id);
 
   if (!activeChat) return null;
 
@@ -25,7 +24,7 @@ const ChatHeader: React.FC = () => {
 
   return (
     <header
-      className="w-full cursor-pointer hover:shadow-2xl flex items-center justify-between min-h-[var(--header-height)] max-h-[var(--header-height)] px-3 shadow border-b border-[var(--border-color)] backdrop-blur-[199px] z-40"
+      className="absolute top-0 left-0 w-full cursor-pointer hover:shadow-2xl flex items-center justify-between min-h-[var(--header-height)] max-h-[var(--header-height)] px-3 backdrop-blur-xl shadow z-40"
       onClick={toggleSidebarInfo}
     >
       <AnimatePresence mode="wait">
@@ -63,7 +62,7 @@ const ChatHeader: React.FC = () => {
           )}
         </div>
 
-        <OnlineDot isOnline={isOnline} size="xs" />
+        <OnlineDot isOnline={isOnline} />
       </div>
     </header>
   );

@@ -36,11 +36,11 @@ const MemberItem: React.FC<MemberItemProps> = ({ member }) => {
             lastName={member.lastName}
             size="8"
             textSize="sm"
+            className="transform transition-transform duration-300 hover:scale-125"
           />
           <OnlineDot
             isOnline={isMemberOnline}
-            size="sm"
-            className="absolute bottom-0 right-0"
+            className="absolute bottom-[2px] right-[2px]"
           />
         </div>
         <h1 className={`text-sm ${isCurrentUser ? "text-green-500" : ""}`}>

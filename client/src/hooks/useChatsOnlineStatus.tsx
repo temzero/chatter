@@ -12,15 +12,22 @@ export function useChatsOnlineStatus(chats: ChatResponse[]): OnlineStatus {
     const socket = webSocketService.getSocket();
     if (!socket) return;
 
-    const statusHandler = (payload: { chatId: string; isOnline: boolean }) => {
+    // Handle live status update
+    const statusHandler = (payload: {
+      userId: string;
+      chatId: string;
+      isOnline: boolean;
+    }) => {
       setOnlineStatus((prev) => ({
         ...prev,
         [payload.chatId]: payload.isOnline,
       }));
     };
 
-    socket.on("statusChanged", statusHandler);
+    // Listen for status changes globally
+    chatWebSocketService.onStatusChanged(statusHandler);
 
+    // Initial status fetch
     const fetchStatuses = async () => {
       for (const chat of chats) {
         try {
@@ -40,7 +47,7 @@ export function useChatsOnlineStatus(chats: ChatResponse[]): OnlineStatus {
     fetchStatuses();
 
     return () => {
-      socket.off("statusChanged", statusHandler);
+      chatWebSocketService.offStatusChanged(statusHandler);
     };
   }, [chats]);
 

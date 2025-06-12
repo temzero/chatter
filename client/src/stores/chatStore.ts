@@ -9,6 +9,7 @@ import type {
   DirectChatResponse,
   GroupChatResponse,
   ChatMember,
+  LastMessageResponse,
 } from "@/types/chat";
 import { ChatType } from "@/types/enums/ChatType";
 import { useAuthStore } from "./authStore";
@@ -46,6 +47,7 @@ interface ChatStore {
     id: string,
     payload: Partial<GroupChatResponse>
   ) => Promise<void>;
+  setLastMessage: (chatId: string, message: LastMessageResponse | null) => void;
   setSearchTerm: (term: string) => void;
   updateMember: (
     chatId: string,
@@ -190,14 +192,11 @@ export const useChatStore = create<ChatStore>()(
           const lowerCaseTerm = term.toLowerCase();
           const filtered = chats.filter((chat) => {
             if (chat.type === ChatType.DIRECT) {
+              const partner = chat.chatPartner;
               return (
-                chat.chatPartner.firstName
-                  .toLowerCase()
-                  .includes(lowerCaseTerm) ||
-                chat.chatPartner.lastName
-                  .toLowerCase()
-                  .includes(lowerCaseTerm) ||
-                chat.chatPartner.username.toLowerCase().includes(lowerCaseTerm)
+                partner?.firstName?.toLowerCase().includes(lowerCaseTerm) ||
+                partner?.lastName?.toLowerCase().includes(lowerCaseTerm) ||
+                partner?.username?.toLowerCase().includes(lowerCaseTerm)
               );
             } else {
               return chat.name?.toLowerCase().includes(lowerCaseTerm) ?? false;
@@ -463,6 +462,26 @@ export const useChatStore = create<ChatStore>()(
             set({ error: "Failed to update nickname", isLoading: false });
             throw error;
           }
+        },
+
+        setLastMessage: (chatId, message) => {
+          if (!chatId || !message) {
+            console.warn("Chat ID or message is missing");
+            return;
+          }
+          set((state) => {
+            const updateChat = (chat: ChatResponse) =>
+              chat.id === chatId ? { ...chat, lastMessage: message } : chat;
+
+            return {
+              chats: state.chats.map(updateChat),
+              filteredChats: state.filteredChats.map(updateChat),
+              activeChat:
+                state.activeChat?.id === chatId
+                  ? { ...state.activeChat, lastMessage: message }
+                  : state.activeChat,
+            };
+          });
         },
 
         leaveGroupChat: async (chatId) => {

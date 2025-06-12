@@ -27,14 +27,32 @@ export class ChatWebSocketService {
     });
   }
 
+  onStatusChanged(
+    callback: (data: {
+      userId: string;
+      chatId: string;
+      isOnline: boolean;
+    }) => void
+  ) {
+    webSocketService.on("chat:statusChanged", callback);
+  }
+
+  offStatusChanged(
+    callback: (data: {
+      userId: string;
+      chatId: string;
+      isOnline: boolean;
+    }) => void
+  ) {
+    webSocketService.off("chat:statusChanged", callback);
+  }
+
   typing(chatId: string, isTyping: boolean) {
     webSocketService.emit("chat:typing", { chatId, isTyping });
   }
 
-  async sendMessage(messagePayload: SendMessagePayload) {
-    console.log("sendPayload: ", messagePayload);
-    console.log("isArray:", Array.isArray(messagePayload));
-    webSocketService.emit("chat:sendMessage", messagePayload);
+  async sendMessage(message: SendMessagePayload) {
+    webSocketService.emit("chat:sendMessage", message);
   }
 
   markAsRead(chatId: string) {
@@ -88,15 +106,6 @@ export class ChatWebSocketService {
     }) => void
   ) {
     webSocketService.off("chat:messagesRead", callback);
-  }
-
-  // Room management
-  joinChatRoom(chatId: string) {
-    webSocketService.joinRoom(`chat:${chatId}`);
-  }
-
-  leaveChatRoom(chatId: string) {
-    webSocketService.leaveRoom(`chat:${chatId}`);
   }
 }
 

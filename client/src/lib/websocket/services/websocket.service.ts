@@ -61,7 +61,11 @@ export class WebSocketService {
       console.warn("Socket not connected. Cannot emit event:", event);
       return;
     }
-    this.socket.emit(event, data, callback);
+    if (callback) {
+      this.socket.emit(event, data, callback); // Send with callback
+    } else {
+      this.socket.emit(event, data); // Send without callback
+    }
   }
 
   // Helper method to listen to events

@@ -11,12 +11,16 @@ import {
 import { Server } from 'socket.io';
 import { WebsocketService } from './websocket.service';
 import type { AuthenticatedSocket } from './constants/authenticatedSocket.type';
+import { ChatMemberService } from '../chat-member/chat-member.service';
 
 @WebSocketGateway()
 export class GlobalGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  constructor(private readonly websocketService: WebsocketService) {}
+  constructor(
+    private readonly websocketService: WebsocketService,
+    private readonly chatMemberService: ChatMemberService,
+  ) {}
 
   @WebSocketServer()
   server: Server;
@@ -50,6 +54,8 @@ export class GlobalGateway
         this.server
           .to(`presence:${userId}`)
           .emit('presence:update', userId, true);
+
+        await this.notifyUserStatusChange(userId, true);
       }
 
       client.emit('connectionSuccess', {
@@ -77,6 +83,8 @@ export class GlobalGateway
       this.server
         .to(`presence:${userId}`)
         .emit('presence:update', userId, false);
+
+      await this.notifyUserStatusChange(userId, true);
     }
   }
 
@@ -97,5 +105,20 @@ export class GlobalGateway
     await client.join(`presence:${userId}`);
     const isOnline = this.websocketService.isUserOnline(userId);
     client.emit('presence:update', userId, isOnline);
+  }
+
+  async notifyUserStatusChange(userId: string, isOnline: boolean) {
+    const chatIds = await this.chatMemberService.getChatIdsByUserId(userId);
+
+    for (const chatId of chatIds) {
+      await this.websocketService.emitToChatMembers(
+        chatId,
+        'chat:statusChanged',
+        {
+          userId,
+          isOnline,
+        },
+      );
+    }
   }
 }

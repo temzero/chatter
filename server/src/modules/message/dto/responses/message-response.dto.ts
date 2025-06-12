@@ -10,6 +10,10 @@ export class MessageResponseDto {
   @Expose() id: string;
   @Expose() chatId: string;
   @Expose() senderId: string;
+  @Expose() senderNickname: string;
+  @Expose() senderFirstName: string;
+  @Expose() senderLastName: string;
+  @Expose() senderAvatarUrl: string;
 
   @Expose() type: MessageType;
   @Expose() content?: string | null;

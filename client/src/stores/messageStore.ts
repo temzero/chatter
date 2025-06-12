@@ -8,6 +8,7 @@ import { AttachmentType } from "@/types/enums/attachmentType";
 import { messageService } from "@/services/messageService";
 import { useMemo } from "react";
 import { handleError } from "@/utils/handleError";
+import { LastMessageResponse } from "@/types/chat";
 
 interface ChatMessages {
   [chatId: string]: MessageResponse[];
@@ -41,21 +42,40 @@ export const getAttachmentsFromMessages = (
       }))
     );
 
-const createLastMessageInfo = (message: MessageResponse) => {
-  const { content = "", attachments = [], createdAt } = message;
-  const types = attachments.map((a) => a.type);
-  const icon = types.includes(AttachmentType.IMAGE)
+const createLastMessage = (message: MessageResponse): LastMessageResponse => {
+  const {
+    id,
+    senderId,
+    senderFirstName,
+    senderNickname,
+    content = "",
+    attachments = [],
+    createdAt,
+  } = message;
+
+  const senderName = senderNickname || senderFirstName;
+
+  const attachmentTypes = attachments.length ? attachments[0].type : undefined;
+
+  const icon = attachments.some((a) => a.type === AttachmentType.IMAGE)
     ? "image"
-    : types.includes(AttachmentType.VIDEO)
+    : attachments.some((a) => a.type === AttachmentType.VIDEO)
     ? "videocam"
-    : types.includes(AttachmentType.AUDIO)
+    : attachments.some((a) => a.type === AttachmentType.AUDIO)
     ? "music_note"
-    : types.length
+    : attachments.length
     ? "folder_zip"
     : undefined;
 
-  const contentText = content || "Attachment";
-  return { content: contentText, icon, time: createdAt };
+  return {
+    id,
+    senderId,
+    senderName,
+    content: content || "Attachment",
+    attachmentTypes,
+    createdAt,
+    icon,
+  };
 };
 
 export const useMessageStore = create<MessageStore>((set, get) => ({
@@ -83,26 +103,19 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
   },
 
   addMessage: (newMessage) => {
-    console.log("[STORE] 🧠 Adding message to store:", newMessage);
+    console.log("Adding new message:", newMessage);
     const { messages } = get();
-    const chatId = newMessage.chatId
+    const chatId = newMessage.chatId;
 
     const updatedMessages = {
       ...messages,
       [chatId]: [...(messages[chatId] || []), newMessage],
     };
 
-    // Update last message info in chat store
-    const chats = useChatStore.getState().chats.map((chat) =>
-      chat.id === chatId
-        ? {
-            ...chat,
-            ...createLastMessageInfo(newMessage),
-          }
-        : chat
-    );
+    const lastMessage = createLastMessage(newMessage);
 
-    useChatStore.setState({ chats });
+    // Update last message in chat store
+    useChatStore.getState().setLastMessage(chatId, lastMessage);
 
     set({
       messages: updatedMessages,
@@ -168,13 +181,12 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
 // // Custom hooks for easier consumption in components
 export const useActiveChatMessages = () => {
   const activeChat = useChatStore((state) => state.activeChat);
+  const messages = useMessageStore((state) => state.messages);
   const isLoading = useMessageStore((state) => state.isLoading);
-  const getChatMessages = useMessageStore((state) => state.getChatMessages);
 
-  return useMemo(
-    () => (activeChat && !isLoading ? getChatMessages(activeChat.id) : []),
-    [activeChat, isLoading, getChatMessages]
-  );
+  return useMemo(() => {
+    return activeChat && !isLoading ? messages[activeChat.id] || [] : [];
+  }, [activeChat, isLoading, messages]);
 };
 
 export const useActiveChatAttachments = () => {

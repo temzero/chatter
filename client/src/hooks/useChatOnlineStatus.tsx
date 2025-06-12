@@ -10,15 +10,12 @@ export const useChatOnlineStatus = (chatId?: string) => {
     if (!chatId) return;
 
     const socket = webSocketService.getSocket();
-    // console.log("chatId:", chatId, "socket:", socket);
 
-    // Check status and set up listeners
     const checkStatus = async () => {
       try {
         const response = await chatWebSocketService.getChatStatus(chatId);
         if (response?.chatId === chatId) {
           setIsOnline(response.isOnline);
-          // console.log("Status response:", response);
         }
       } catch (error) {
         console.error("Error getting chat status:", error);
@@ -28,27 +25,25 @@ export const useChatOnlineStatus = (chatId?: string) => {
     const statusHandler = (payload: { chatId: string; isOnline: boolean }) => {
       if (payload.chatId === chatId) {
         setIsOnline(payload.isOnline);
-        // console.log("Status update - isOnline:", payload.isOnline);
+        console.log("Status update - isOnline:", payload.isOnline);
       }
     };
 
-    // Set up initial connection and listeners
     if (socket?.connected) {
       checkStatus();
     } else {
       const onConnect = () => {
         checkStatus();
-        socket?.off("connect", onConnect);
+        socket?.off("connect", onConnect); // remove listener after one-time use
       };
       socket?.on("connect", onConnect);
     }
 
-    // Listen for status changes
-    socket?.on("statusChanged", statusHandler);
+    // ✅ Use the service layer abstraction (correct way)
+    chatWebSocketService.onStatusChanged(statusHandler);
 
     return () => {
-      // Clean up listeners
-      socket?.off("statusChanged", statusHandler);
+      chatWebSocketService.offStatusChanged(statusHandler);
       socket?.off("connect", checkStatus);
     };
   }, [chatId]);

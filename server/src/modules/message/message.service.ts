@@ -20,20 +20,44 @@ export class MessageService {
     private readonly messageRepo: Repository<Message>,
   ) {}
 
+  private async getFullMessageById(id: string): Promise<Message> {
+    try {
+      return await this.messageRepo
+        .createQueryBuilder('message')
+        .leftJoinAndSelect('message.sender', 'sender')
+        .leftJoinAndSelect('message.chat', 'chat')
+        .leftJoinAndSelect(
+          'chat.members',
+          'member',
+          'member.user_id = sender.id',
+        )
+        .select([
+          'message',
+          'sender.id',
+          'sender.firstName',
+          'sender.lastName',
+          'sender.avatarUrl',
+          'member.nickname',
+        ])
+        .where('message.id = :id', { id })
+        .getOneOrFail();
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to get full message');
+    }
+  }
+
   async createMessage(
     userId: string,
     createMessageDto: CreateMessageDto,
   ): Promise<Message> {
-    // Check if chat exists
     const chat = await this.chatRepo.findOne({
       where: { id: createMessageDto.chatId },
-      relations: ['lastMessage'], // optional if needed later
+      relations: ['lastMessage'],
     });
     if (!chat) {
       ErrorResponse.notFound('Chat not found');
     }
 
-    // Check if user is a member of the chat
     const isMember = await this.chatMemberRepo.exists({
       where: {
         chatId: createMessageDto.chatId,
@@ -44,7 +68,6 @@ export class MessageService {
       ErrorResponse.notFound('You are not a member of this chat');
     }
 
-    // Check if reply message exists when replyToMessageId is provided
     if (createMessageDto.replyToMessageId) {
       const repliedMessage = await this.messageRepo.findOne({
         where: { id: createMessageDto.replyToMessageId },
@@ -65,11 +88,12 @@ export class MessageService {
 
       const savedMessage = await this.messageRepo.save(newMessage);
 
-      // Update chat.lastMessage to savedMessage
       chat.lastMessage = savedMessage;
       await this.chatRepo.save(chat);
+      const fullMessage = await this.getFullMessageById(savedMessage.id);
+      // console.log('Message created:', fullMessage);
 
-      return savedMessage;
+      return fullMessage;
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to create message');
     }
@@ -119,6 +143,21 @@ export class MessageService {
     try {
       const query = this.messageRepo
         .createQueryBuilder('message')
+        .leftJoinAndSelect('message.sender', 'sender')
+        .leftJoinAndSelect('message.chat', 'chat')
+        .leftJoinAndSelect(
+          'chat.members',
+          'member',
+          'member.user_id = sender.id',
+        )
+        .select([
+          'message',
+          'sender.id',
+          'sender.firstName',
+          'sender.lastName',
+          'sender.avatarUrl',
+          'member.nickname',
+        ])
         .where('message.chat_id = :chatId', { chatId })
         .andWhere('message.is_deleted = :isDeleted', { isDeleted: false })
         .orderBy('message.createdAt', 'ASC');

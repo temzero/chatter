@@ -48,10 +48,12 @@ export interface ChatPartnerResponse {
 // Last Message Response (similar to LastMessageResponseDto)
 export interface LastMessageResponse {
   id: string;
+  senderId: string;
   senderName: string;
   content?: string;
   attachmentTypes?: AttachmentType;
   createdAt: string;
+  icon?: string;
 }
 
 // Deprecated interfaces (keep if needed for backward compatibility)

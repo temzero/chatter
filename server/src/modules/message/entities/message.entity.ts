@@ -16,6 +16,7 @@ import { User } from '../../user/entities/user.entity';
 import { Reaction } from './reaction.entity';
 import { Attachment } from './attachment.entity';
 import { MessageStatus } from '../constants/message-status.constants';
+import { MessageType } from '../constants/message-type.constants';
 
 @Entity('message')
 @Index(['chatId']) // Index for faster chat message queries
@@ -90,6 +91,7 @@ export class Message {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+  type: MessageType;
 
   @BeforeInsert()
   @BeforeUpdate()

@@ -41,6 +41,10 @@ export interface MessageResponse {
   id: string;
   chatId: string;
   senderId: string;
+  senderNickname: string;
+  senderFirstName: string;
+  senderLastName: string;
+  senderAvatarUrl?: string | null;
   sender?: SenderResponse;
   type: MessageType;
   content?: string | null;

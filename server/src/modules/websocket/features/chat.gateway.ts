@@ -9,6 +9,7 @@ import { WebsocketService } from '../websocket.service';
 import { AuthenticatedSocket } from '../constants/authenticatedSocket.type';
 import { CreateMessageDto } from 'src/modules/message/dto/requests/create-message.dto';
 import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
+import { MessageMapper } from 'src/modules/message/mappers/message.mapper';
 
 const chatLink = 'chat:';
 
@@ -18,6 +19,7 @@ export class ChatGateway {
     private readonly messageService: MessageService,
     private readonly websocketService: WebsocketService,
     private readonly chatMemberService: ChatMemberService,
+    private readonly messageMapper: MessageMapper,
   ) {}
 
   handleConnection(client: AuthenticatedSocket) {
@@ -47,7 +49,7 @@ export class ChatGateway {
     @MessageBody() chatId: string,
   ) {
     const userId = client.data.userId;
-    console.log('Get chat Status for :', userId);
+    // console.log('Get chat Status for :', userId);
     if (!userId) return false;
 
     const isOnline = await this.hasAnyOtherMemberOnline(chatId, userId);
@@ -62,8 +64,12 @@ export class ChatGateway {
     const userId = client.data.userId;
     if (!userId) return;
 
+    console.log(
+      `User ${userId} is typing in chat ${data.chatId}: ${data.isTyping}`,
+    );
+
     // Broadcast to all other members in the chat
-    client.to(data.chatId).emit('userTyping', {
+    client.emit(`${chatLink}userTyping`, {
       userId,
       chatId: data.chatId,
       isTyping: data.isTyping,
@@ -79,10 +85,10 @@ export class ChatGateway {
     try {
       // Add senderId from socket if not in payload
       const senderId = client.data.userId;
-      console.log('senderId: ', senderId);
-      console.log('payload: ', payload);
+      // console.log('senderId: ', senderId);
+      // console.log('payload: ', payload);
       if (!senderId) {
-        client.emit('error', { message: 'Unauthorized' });
+        client.emit(`${chatLink}error`, { message: 'Unauthorized' });
         return;
       }
 
@@ -90,15 +96,18 @@ export class ChatGateway {
         senderId,
         payload,
       );
+      const messageResponse = this.messageMapper.toResponseDto(message);
+
+      // console.log('Message created:', messageResponse);
 
       await this.websocketService.emitToChatMembers(
         payload.chatId,
-        'newMessage',
-        message,
+        `${chatLink}newMessage`,
+        messageResponse,
       );
     } catch (error) {
       console.error('Error handling sendMessage:', error);
-      client.emit('error', { message: 'Failed to send message' });
+      client.emit(`${chatLink}error`, { message: 'Failed to send message' });
     }
   }
 
@@ -113,7 +122,7 @@ export class ChatGateway {
     await this.chatMemberService.updateLastRead(data.chatId, userId);
 
     // Notify other participants that messages were read
-    client.to(data.chatId).emit('messagesRead', {
+    client.to(data.chatId).emit(`${chatLink}messagesRead`, {
       userId,
       chatId: data.chatId,
       timestamp: Date.now(),

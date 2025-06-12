@@ -10,6 +10,7 @@ import { WsJwtGuard } from '../auth/guards/ws-jwt.guard'; // Import the guard
 import { ChatMemberModule } from '../chat-member/chat-member.module';
 import { ChatGateway } from './features/chat.gateway';
 import { NotificationGateway } from './features/notifications.gateway';
+import { MessageMapper } from '../message/mappers/message.mapper';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { NotificationGateway } from './features/notifications.gateway';
     ChatGateway,
     NotificationGateway,
     WsJwtGuard,
+    MessageMapper,
   ],
   exports: [GlobalGateway, WebsocketService],
 })

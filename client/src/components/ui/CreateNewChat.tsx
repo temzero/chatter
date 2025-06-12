@@ -90,7 +90,7 @@ const CreateNewChat: React.FC = () => {
                 avatarUrl={user.avatarUrl}
                 firstName={user.firstName}
                 lastName={user.lastName}
-                className="w-[120px] h-[120px] cursor-pointer hover:border-4 hover:border-[var(--primary-green)]"
+                className="w-[120px] h-[120px] cursor-pointer hover:border-4 transform transition-transform duration-300 hover:scale-110"
                 onClick={() => createOrGetDirectChat(user.id)}
               />
 
