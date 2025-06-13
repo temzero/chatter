@@ -12,8 +12,6 @@ const Chat: React.FC = () => {
     (state) => state.isSidebarInfoVisible
   );
 
-  console.log("[Chat] Rendering active chat:", activeChat);
-
   return (
     <section className="flex-1 flex h-full">
       <section className="relative flex-1 flex flex-col justify-between h-full overflow-hidden">

@@ -1,7 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { create, createStore, useStore } from "zustand";
+import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { shallow } from "zustand/shallow";
 import { chatService } from "@/services/chat/chatService";
 import { useMessageStore } from "./messageStore";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
@@ -575,6 +573,3 @@ export const useActiveMembers = () => {
   const chatMembers = useChatStore((state) => state.chatMembers);
   return activeChat ? chatMembers[activeChat.id] || [] : [];
 };
-
-export const useChatMembers = (chatId: string) =>
-  useChatStore((state) => state.chatMembers[chatId] ?? [], shallow);

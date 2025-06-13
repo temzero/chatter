@@ -1,6 +1,8 @@
+import { useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useChatStore } from "@/stores/chatStore";
+import { Avatar } from "../avatar/Avatar";
 import "./TypingIndicator.css";
-import { useChatMembers } from "@/stores/chatStore";
 
 interface TypingIndicatorProps {
   chatId: string;
@@ -8,26 +10,47 @@ interface TypingIndicatorProps {
 }
 
 const TypingIndicator = ({ chatId, userIds }: TypingIndicatorProps) => {
-  const members = useChatMembers(chatId);
-  console.log("TypingIndicator members", members);
+  console.log("TypingIndicator - chatId:", chatId);
+  console.log("TypingIndicator - userIds:", userIds);
+  // Get members with proper memoization
+  const allMembers = useMemo(() => {
+    return useChatStore.getState().chatMembers[chatId] || [];
+  }, [chatId]);
+  console.log("TypingIndicator - allMembers:", allMembers);
 
-  const typingNames = userIds;
-  // console.log("TypingIndicator chatId", chatId);
-  // console.log("TypingIndicator userIds", userIds);
-  // console.log("TypingIndicator typingNames", typingNames);
-  console.log("showing typing indicator for:", typingNames);
+  // Filter and memoize only the typing members
+  const typingMembers = useMemo(() => {
+    return allMembers.filter((member) => userIds.includes(member.userId));
+  }, [allMembers, userIds]);
+
+  // Memoize the avatar display
+  const displayAvatars = useMemo(() => {
+    return typingMembers.map((member) => (
+      <Avatar
+        key={member.userId}
+        avatarUrl={member.avatarUrl}
+        firstName={member.firstName}
+        lastName={member.lastName}
+        size="10"
+      />
+    ));
+  }, [typingMembers]);
 
   return (
     <AnimatePresence>
-      {typingNames.length > 0 && (
+      {userIds.length > 0 && (
         <motion.div
-          key={`${chatId}-${typingNames.join("-")}`}
-          initial={{ opacity: 0, scale: 0, x: -10 }}
-          animate={{ opacity: 1, scale: 1, x: 0 }}
-          exit={{ opacity: 0, scale: 0, x: -100 }}
-          transition={{ duration: 0.1 }}
-          className="message-bubble my-4"
+          key={`${chatId}-${userIds.join("-")}`}
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: .9 }}
+          // transition={{ duration: 0.1 }}
+          style={{
+            transformOrigin: "top left", // Ensures the scaling originates from bottom left
+          }}
+          className="my-4 flex items-center gap-4"
         >
+          <div className="flex -space-x-2">{displayAvatars}</div>
           <div className="typing">
             <div className="dot"></div>
             <div className="dot"></div>
