@@ -1,6 +1,6 @@
 import React from "react";
 import { GroupChatResponse } from "@/types/chat";
-import { useChatStore } from "@/stores/chatStore";
+import { useActiveChat, useActiveMembers } from "@/stores/chatStore";
 import {
   SidebarInfoModes,
   useSidebarInfoStore,
@@ -9,8 +9,8 @@ import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import MemberItem from "./GroupChatMember";
 
 const GroupChat: React.FC = () => {
-  const activeChat = useChatStore((s) => s.activeChat) as GroupChatResponse;
-  const { activeMembers } = useChatStore();
+  const activeChat = useActiveChat() as GroupChatResponse;
+  const activeMembers = useActiveMembers();
   const { setSidebarInfo } = useSidebarInfoStore();
 
   return (

@@ -57,7 +57,7 @@ export class ChatGateway {
   }
 
   @SubscribeMessage(`${chatLink}typing`)
-  handleTyping(
+  async handleTyping(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() data: { chatId: string; isTyping: boolean },
   ) {
@@ -68,12 +68,24 @@ export class ChatGateway {
       `User ${userId} is typing in chat ${data.chatId}: ${data.isTyping}`,
     );
 
-    // Broadcast to all other members in the chat
-    client.emit(`${chatLink}userTyping`, {
-      userId,
+    const payload = {
       chatId: data.chatId,
+      userId,
       isTyping: data.isTyping,
-    });
+    };
+
+    // Broadcast to all other members in the chat
+    await this.websocketService.emitToChatMembers(
+      data.chatId,
+      `${chatLink}userTyping`,
+      payload,
+    );
+
+    // client.emit(`${chatLink}userTyping`, {
+    //   userId,
+    //   chatId: data.chatId,
+    //   isTyping: data.isTyping,
+    // });
   }
 
   @SubscribeMessage(`${chatLink}sendMessage`)

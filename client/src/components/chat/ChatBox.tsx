@@ -1,3 +1,4 @@
+// src/components/ChatBox.tsx
 import React, { useRef, useEffect, useState, useMemo } from "react";
 import Message from "./Message";
 import ChannelMessage from "./MessageChannel";
@@ -5,24 +6,29 @@ import { useSoundEffect } from "@/hooks/useSoundEffect";
 import messageSound from "@/assets/sound/message-sent2.mp3";
 import { useActiveChatMessages } from "@/stores/messageStore";
 import { ChatType } from "@/types/enums/ChatType";
-import { useCurrentUser } from "@/stores/authStore";
+import TypingIndicator from "../ui/typingIndicator/TypingIndicator";
+import { useActiveChat } from "@/stores/chatStore";
+import { useTypingStore } from "@/stores/typingStore";
 
-interface ChatBoxProps {
-  chatId?: string;
-  chatType?: ChatType;
-}
-
-const ChatBox: React.FC<ChatBoxProps> = ({ chatType }) => {
-  const currentUser = useCurrentUser();
+const ChatBox: React.FC = () => {
+  const activeChat = useActiveChat();
+  const chatType = activeChat?.type || ChatType.DIRECT;
   const messages = useActiveChatMessages();
+  const chatId = activeChat?.id || "";
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);
 
-  // const [isTyping, setIsTyping] = useState(false);
-  // const [typingUserId, setTypingUserId] = useState<string | null>(null);
+  // ✅ FIXED Zustand selector: access full typingMap first
+  const typingMap = useTypingStore((state) => state.typingMap);
+  const typingUsers = useMemo(() => {
+    const chatTypingMap = typingMap[chatId] || {};
+    return Object.entries(chatTypingMap)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      .filter(([_, isTyping]) => isTyping)
+      .map(([userId]) => userId);
+  }, [typingMap, chatId]);
 
-  // Create sound effects with different volumes
   const playMessageSound = useSoundEffect(messageSound, 0.5);
 
   const newMessageAdded = useMemo(() => {
@@ -33,7 +39,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ chatType }) => {
     setPreviousMessageCount(messages.length);
   }, [messages.length]);
 
-  // Helper: Wait for all media elements (img, video, audio) to load
   const waitForMediaToLoad = (container: HTMLElement) => {
     const mediaElements = container.querySelectorAll("img, video, audio");
     const promises = Array.from(mediaElements).map(
@@ -54,7 +59,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ chatType }) => {
     return Promise.all(promises);
   };
 
-  // Scroll to bottom when new message (with media) is added
   useEffect(() => {
     if (newMessageAdded && containerRef.current) {
       const container = containerRef.current;
@@ -65,7 +69,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ chatType }) => {
     }
   }, [newMessageAdded, messages, playMessageSound]);
 
-  // Group messages by date
   const groupedMessages = useMemo(() => {
     const groups: { date: string; messages: typeof messages }[] = [];
 
@@ -121,15 +124,10 @@ const ChatBox: React.FC<ChatBoxProps> = ({ chatType }) => {
       ) : (
         <div className="h-full w-full flex items-center justify-center opacity-50 italic text-xl">
           No messages yet!
-          {/* {isTyping && (
-            <div className="typing-indicator">{typingUserId} is typing...</div>
-          )} */}
         </div>
       )}
 
-      {/* {isTyping && (
-        <div className="typing-indicator">{typingUserId} is typing...</div>
-      )} */}
+      <TypingIndicator chatId={chatId} userIds={typingUsers} />
     </div>
   );
 };

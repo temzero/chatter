@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useChatStore } from "@/stores/chatStore";
-import { useDebounce } from "@/hooks/useDebounce";
+import { debounce } from "lodash";
 
 type SearchBarProps = {
   placeholder?: string;
@@ -15,11 +15,20 @@ const SearchBar = ({
   const setSearchTerm = useChatStore((state) => state.setSearchTerm);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const debouncedSearchTerm = useDebounce(localSearchTerm);
+  // Create debounced setSearchTerm
+  const debouncedSetSearchTerm = useRef(
+    debounce((term: string) => {
+      setSearchTerm(term);
+    }, 200)
+  ).current;
 
   useEffect(() => {
-    setSearchTerm(debouncedSearchTerm);
-  }, [debouncedSearchTerm, setSearchTerm]);
+    debouncedSetSearchTerm(localSearchTerm);
+    // Cleanup on unmount
+    return () => {
+      debouncedSetSearchTerm.cancel();
+    };
+  }, [localSearchTerm, debouncedSetSearchTerm]);
 
   useEffect(() => {
     return () => {
@@ -28,12 +37,10 @@ const SearchBar = ({
     };
   }, [setSearchTerm]);
 
-  // ⏳ Set focus time to prevent animation flicker
   useEffect(() => {
     const timer = setTimeout(() => {
       inputRef.current?.focus();
     }, 202);
-
     return () => clearTimeout(timer);
   }, []);
 

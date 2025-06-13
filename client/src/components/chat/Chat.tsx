@@ -18,7 +18,7 @@ const Chat: React.FC = () => {
     <section className="flex-1 flex h-full">
       <section className="relative flex-1 flex flex-col justify-between h-full overflow-hidden">
         <ChatHeader />
-        <ChatBox chatId={activeChat?.id} chatType={activeChat?.type} />
+        <ChatBox />
         <AnimatePresence>
           {!(
             activeChat?.type === "channel" && activeChat.myRole !== "owner"

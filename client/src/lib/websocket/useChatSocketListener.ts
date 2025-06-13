@@ -22,13 +22,6 @@ export function useChatSocketListeners() {
       useTypingStore
         .getState()
         .setTyping(data.chatId, data.userId, data.isTyping);
-
-      // Auto-clear after 3 seconds (debounce alternative)
-      if (data.isTyping) {
-        setTimeout(() => {
-          useTypingStore.getState().setTyping(data.chatId, data.userId, false);
-        }, 3000);
-      }
     };
 
     // Subscribe to events

@@ -1,9 +1,13 @@
-import { create } from "zustand";
+import { useEffect, useRef, useState } from "react";
+import { create, createStore, useStore } from "zustand";
 import { persist } from "zustand/middleware";
+import { shallow } from "zustand/shallow";
 import { chatService } from "@/services/chat/chatService";
 import { useMessageStore } from "./messageStore";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
 import { chatMemberService } from "@/services/chat/chatMemberService";
+import { ChatType } from "@/types/enums/ChatType";
+import { useAuthStore } from "./authStore";
 import type {
   ChatResponse,
   DirectChatResponse,
@@ -11,18 +15,15 @@ import type {
   ChatMember,
   LastMessageResponse,
 } from "@/types/chat";
-import { ChatType } from "@/types/enums/ChatType";
-import { useAuthStore } from "./authStore";
 
 interface ChatStore {
   chats: ChatResponse[];
+  chatMembers: Record<string, ChatMember[]>; // chatId -> members
   searchTerm: string;
   activeChat: ChatResponse | null;
   isLoading: boolean;
   error: string | null;
   filteredChats: ChatResponse[];
-  allGroupMembers: Record<string, ChatMember[]>;
-  activeMembers: ChatMember[];
 
   initialize: () => Promise<void>;
   getChats: () => Promise<void>;
@@ -59,6 +60,12 @@ interface ChatStore {
     userId: string,
     nickname: string
   ) => Promise<string>;
+  getGroupMemberById: (
+    groupId: string,
+    userId: string
+  ) => ChatMember | undefined;
+  addGroupMember: (groupId: string, member: ChatMember) => void;
+  removeGroupMember: (groupId: string, userId: string) => void;
   leaveGroupChat: (chatId: string) => Promise<void>;
   deleteChat: (id: string, type: ChatType) => Promise<void>;
   clearChats: () => void;
@@ -78,24 +85,18 @@ export const useChatStore = create<ChatStore>()(
             (chat) => chat.id !== chatId
           ),
           activeChat: state.activeChat?.id === chatId ? null : state.activeChat,
-          allGroupMembers: Object.fromEntries(
-            Object.entries(state.allGroupMembers).filter(
-              ([id]) => id !== chatId
-            )
-          ),
-          activeMembers: state.activeMembers.filter(
-            (member) => member.chatId !== chatId
+          chatMembers: Object.fromEntries(
+            Object.entries(state.chatMembers).filter(([id]) => id !== chatId)
           ),
         }));
       };
 
       return {
         chats: [],
-        allGroupMembers: {},
+        chatMembers: {},
         filteredChats: [],
         searchTerm: "",
         activeChat: null,
-        activeMembers: [],
         isLoading: false,
         error: null,
 
@@ -169,7 +170,7 @@ export const useChatStore = create<ChatStore>()(
           try {
             const members = await chatMemberService.getChatMembers(groupId);
             set((state) => ({
-              allGroupMembers: { ...state.allGroupMembers, [groupId]: members },
+              chatMembers: { ...state.chatMembers, [groupId]: members },
             }));
             return members;
           } catch (error) {
@@ -223,9 +224,6 @@ export const useChatStore = create<ChatStore>()(
           useMessageStore.getState().fetchMessages(chat.id);
           if (chat.type !== ChatType.DIRECT) {
             await get().getGroupMembers(chat.id);
-            set((state) => ({
-              activeMembers: state.allGroupMembers[chat.id] || [],
-            }));
           }
 
           if (chat.unreadCount && chat.unreadCount > 0) {
@@ -383,13 +381,13 @@ export const useChatStore = create<ChatStore>()(
             );
 
             set((state) => {
-              const activeMembers = state.allGroupMembers[chatId] || [];
-              const updatedMembers = activeMembers.map((member) =>
+              const currentMembers = state.chatMembers[chatId] || [];
+              const updatedMembers = currentMembers.map((member) =>
                 member.userId === userId ? updatedMember : member
               );
               return {
-                allGroupMembers: {
-                  ...state.allGroupMembers,
+                chatMembers: {
+                  ...state.chatMembers,
                   [chatId]: updatedMembers,
                 },
                 isLoading: false,
@@ -464,6 +462,35 @@ export const useChatStore = create<ChatStore>()(
           }
         },
 
+        getGroupMemberById: (groupId, userId) => {
+          const members = get().chatMembers[groupId];
+          return members?.find((member) => member.userId === userId);
+        },
+
+        addGroupMember: (groupId, member) => {
+          set((state) => {
+            const currentMembers = state.chatMembers[groupId] || [];
+            return {
+              chatMembers: {
+                ...state.chatMembers,
+                [groupId]: [...currentMembers, member],
+              },
+            };
+          });
+        },
+
+        removeGroupMember: (groupId, userId) => {
+          set((state) => {
+            const currentMembers = state.chatMembers[groupId] || [];
+            return {
+              chatMembers: {
+                ...state.chatMembers,
+                [groupId]: currentMembers.filter((m) => m.userId !== userId),
+              },
+            };
+          });
+        },
+
         setLastMessage: (chatId, message) => {
           if (!chatId || !message) {
             console.warn("Chat ID or message is missing");
@@ -525,8 +552,7 @@ export const useChatStore = create<ChatStore>()(
             chats: [],
             filteredChats: [],
             activeChat: null,
-            allGroupMembers: {},
-            activeMembers: [],
+            chatMembers: {},
           });
         },
       };
@@ -542,3 +568,13 @@ export const useChatStore = create<ChatStore>()(
 );
 
 export const useActiveChat = () => useChatStore((state) => state.activeChat);
+
+// New selector to get active members
+export const useActiveMembers = () => {
+  const activeChat = useChatStore((state) => state.activeChat);
+  const chatMembers = useChatStore((state) => state.chatMembers);
+  return activeChat ? chatMembers[activeChat.id] || [] : [];
+};
+
+export const useChatMembers = (chatId: string) =>
+  useChatStore((state) => state.chatMembers[chatId] ?? [], shallow);
