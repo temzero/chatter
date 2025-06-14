@@ -98,18 +98,18 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({ chat, type }) => {
       const channelChat = chat as GroupChatResponse;
       return (
         <div
-          className={`group overflow-hidden ${sharedBase} ${styles.rounded} ${squircleShape}`}
+          className={`group overflow-hidden ${sharedBase} ${styles.rounded} bg-[var(--border-color)] ${parentScaleClass}`}
         >
           {channelChat.avatarUrl ? (
             <img
               src={channelChat.avatarUrl}
               alt={`${channelChat.name || "Channel"}'s avatar`}
               loading="lazy"
-              className={`h-full w-full object-cover ${childrenScaleClass}`}
+              className={`h-full w-full object-cover ${childrenScaleClass} ${squircleShape}`}
             />
           ) : (
             <i
-              className={`material-symbols-outlined ${styles.fallbackIconSize} opacity-20 flex items-center justify-center`}
+              className={`material-symbols-outlined ${styles.fallbackIconSize} ${squircleShape} opacity-20 flex items-center justify-center`}
             >
               tv
             </i>

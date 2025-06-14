@@ -9,6 +9,7 @@ import { OnlineDot } from "../ui/OnlineDot";
 import { useChatOnlineStatus } from "@/hooks/useChatOnlineStatus";
 
 const ChatHeader: React.FC = () => {
+  // console.log('ChatHeader mounted');
   const activeChat = useChatStore((state) => state.activeChat);
   const toggleSidebarInfo = useSidebarInfoStore(
     (state) => state.toggleSidebarInfo
@@ -45,7 +46,7 @@ const ChatHeader: React.FC = () => {
         </motion.div>
       </AnimatePresence>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         <div className="flex items-center cursor-pointer rounded-full opacity-60 hover:opacity-100 p-1">
           {isDirect &&
             activeChat.chatPartner?.friendshipStatus ===

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useChatStore } from "@/stores/chatStore";
 import { useMessageStore } from "@/stores/messageStore";
 import { motion } from "framer-motion";
@@ -10,70 +10,85 @@ import { chatWebSocketService } from "@/lib/websocket/services/chat.socket.servi
 import useTypingIndicator from "@/hooks/useTypingIndicator";
 
 const ChatBar: React.FC = () => {
-  const activeChat = useChatStore((state) => state.activeChat);
+  // console.log("ChatBar mounted");
+  const activeChatId = useChatStore((state) => state.activeChat?.id);
   const setDraftMessage = useMessageStore((state) => state.setDraftMessage);
   const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
-
-  const [input, setInput] = useState("");
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null!);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isMessageSent, setIsMessageSent] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [filePreviewUrls, setFilePreviewUrls] = useState<string[]>([]);
+  const [hasTextContent, setHasTextContent] = useState(false);
 
-  // Use the typing indicator hook
-  useTypingIndicator({ input, activeChat });
+  // Get current input value without state
+  // const getInputValue = useCallback(() => inputRef.current?.value || "", []);
+  useTypingIndicator(inputRef, activeChatId ?? null);
 
-  // Focus input on load and when '/' is pressed
+  // Compute visibility based on content
+  const shouldShowSendButton = hasTextContent || attachedFiles.length > 0;
+
+  // Load draft message when chat changes
+  useEffect(() => {
+    if (activeChatId && inputRef.current) {
+      const draft = getDraftMessage(activeChatId);
+      inputRef.current.value = draft || "";
+      setHasTextContent(!!draft?.trim());
+      updateInputHeight();
+    }
+  }, [activeChatId, getDraftMessage]);
+
+  // Save draft when unmounting
+  useEffect(() => {
+    return () => {
+      if (activeChatId && inputRef.current?.value) {
+        setDraftMessage(activeChatId, inputRef.current.value);
+      }
+    };
+  }, [activeChatId, setDraftMessage]);
+
+  // Focus management
   useEffect(() => {
     inputRef.current?.focus();
-
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       if (e.key === "/" && document.activeElement !== inputRef.current) {
         e.preventDefault();
         inputRef.current?.focus();
       }
     };
-
     document.addEventListener("keydown", handleGlobalKeyDown);
     return () => document.removeEventListener("keydown", handleGlobalKeyDown);
   }, []);
-
-  // Load draft message when chat changes
-  useEffect(() => {
-    if (activeChat) {
-      const draft = getDraftMessage(activeChat.id);
-      setInput(draft || "");
-    }
-  }, [activeChat, getDraftMessage]);
 
   // Reset files when chat changes
   useEffect(() => {
     setAttachedFiles([]);
     setFilePreviewUrls([]);
-  }, [activeChat?.id]);
+  }, [activeChatId]);
 
-  // Adjust input height
-  useEffect(() => {
-    if (inputRef.current) {
+  const updateInputHeight = () => {
+    if (inputRef.current && containerRef.current) {
       inputRef.current.style.height = "auto";
       const newHeight = Math.min(inputRef.current.scrollHeight, 100);
       inputRef.current.style.height = `${newHeight}px`;
-
-      if (containerRef.current) {
-        containerRef.current.style.height = `${newHeight + 14}px`;
-      }
+      containerRef.current.style.height = `${newHeight + 14}px`;
     }
-  }, [input]);
+  };
 
-  const handleSend = async () => {
-    const trimmedInput = input.trim();
-    if ((trimmedInput || attachedFiles.length > 0) && activeChat) {
-      setInput("");
+  const handleInput = () => {
+    setHasTextContent(!!inputRef.current?.value.trim());
+    updateInputHeight();
+  };
 
-      // Create the payload
+  const handleSend = useCallback(async () => {
+    const inputValue = inputRef.current?.value || "";
+    const trimmedInput = inputValue.trim();
+
+    if ((trimmedInput || attachedFiles.length > 0) && activeChatId) {
+      if (inputRef.current) inputRef.current.value = "";
+
       const payload: SendMessagePayload = {
-        chatId: activeChat.id,
+        chatId: activeChatId,
         content: trimmedInput || undefined,
         attachmentIds:
           attachedFiles.length > 0
@@ -82,50 +97,53 @@ const ChatBar: React.FC = () => {
       };
 
       try {
-        // Send via WebSocket
         chatWebSocketService.sendMessage(payload);
-
-        // Mark as read
-        chatWebSocketService.markAsRead(activeChat.id);
+        chatWebSocketService.markAsRead(activeChatId);
       } catch (error) {
         console.error("Failed to send message:", error);
       }
 
-      // Clear local state
-      setDraftMessage(activeChat.id, "");
+      setDraftMessage(activeChatId, "");
       setAttachedFiles([]);
       setFilePreviewUrls([]);
+      setHasTextContent(false);
       setIsMessageSent(true);
       setTimeout(() => setIsMessageSent(false), 200);
 
-      if (inputRef.current) inputRef.current.style.height = "auto";
-      if (containerRef.current) containerRef.current.style.height = "auto";
+      updateInputHeight();
     }
     inputRef.current?.focus();
-  };
+  }, [activeChatId, attachedFiles, setDraftMessage]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Escape") {
-      setInput("");
-      if (activeChat) setDraftMessage(activeChat.id, "");
-    } else if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === "Escape") {
+        if (inputRef.current) inputRef.current.value = "";
+        if (activeChatId) setDraftMessage(activeChatId, "");
+        setHasTextContent(false);
+        updateInputHeight();
+      } else if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+      }
+    },
+    [activeChatId, handleSend, setDraftMessage]
+  );
+
+  const handleEmojiSelect = useCallback((emoji: string) => {
+    if (inputRef.current) {
+      inputRef.current.value += emoji;
+      setHasTextContent(true);
+      updateInputHeight();
     }
-  };
-
-  function handleEmojiSelect(emoji: string) {
-    setInput((prev) => {
-      const updated = prev + emoji;
-      if (activeChat) setDraftMessage(activeChat.id, updated);
-      return updated;
-    });
     inputRef.current?.focus();
-  }
+  }, []);
 
-  function handleFileSelect(fileList: FileList) {
+  const handleFileSelect = useCallback((fileList: FileList) => {
     const newFiles = Array.from(fileList);
     if (newFiles.length === 0) return;
+
+    setAttachedFiles((prev) => [...prev, ...newFiles]);
 
     const newPreviews: string[] = [];
     let loadedCount = 0;
@@ -136,13 +154,12 @@ const ChatBar: React.FC = () => {
         newPreviews.push(reader.result as string);
         loadedCount++;
         if (loadedCount === newFiles.length) {
-          setAttachedFiles((prev) => [...prev, ...newFiles]);
           setFilePreviewUrls((prev) => [...prev, ...newPreviews]);
         }
       };
       reader.readAsDataURL(file);
     });
-  }
+  }, []);
 
   return (
     <div className="backdrop-blur-[199px] w-full flex flex-col items-center p-4 justify-between shadow border-[var(--border-color)] z-40 relative">
@@ -164,11 +181,8 @@ const ChatBar: React.FC = () => {
       >
         <textarea
           ref={inputRef}
-          value={input}
-          onChange={(e) => {
-            setInput(e.target.value);
-            if (activeChat) setDraftMessage(activeChat.id, e.target.value);
-          }}
+          defaultValue=""
+          onInput={handleInput}
           onKeyDown={handleKeyDown}
           className={`w-full outline-none bg-transparent resize-none overflow-hidden ${
             isMessageSent
@@ -176,16 +190,15 @@ const ChatBar: React.FC = () => {
               : ""
           }`}
           placeholder={
-            activeChat ? "Message..." : "Select a chat to start messaging"
+            activeChatId ? "Message..." : "Select a chat to start messaging"
           }
           aria-label="Message"
           rows={1}
-          disabled={!activeChat}
+          disabled={!activeChatId}
         />
 
-        {/* buttons */}
         <div className="flex items-center justify-between gap-2 h-[24px]">
-          {activeChat && (
+          {activeChatId && (
             <>
               <motion.div
                 className="flex gap-2 items-center"
@@ -198,27 +211,20 @@ const ChatBar: React.FC = () => {
                 }}
               >
                 <EmojiPicker onSelect={handleEmojiSelect} />
-                <AttachFile
-                  onFileSelect={(files) => {
-                    if (files) handleFileSelect(files);
-                  }}
-                />
+                <AttachFile onFileSelect={handleFileSelect} />
               </motion.div>
 
-              <motion.button
-                initial={false}
-                animate={{
-                  width: input || attachedFiles.length ? 30 : 0,
-                  opacity: input || attachedFiles.length ? 1 : 0,
-                  marginLeft: input || attachedFiles.length ? 0 : -8,
-                  transition: { type: "spring", stiffness: 300, damping: 20 },
-                }}
-                className="rounded bg-[var(--primary-green)] border-2 border-green-400 flex items-center justify-center text-white hover:border-3"
+              <button
+                className={`rounded bg-[var(--primary-green)] border-2 border-green-400 flex items-center justify-center text-white transition-all duration-300 ${
+                  shouldShowSendButton
+                    ? "w-[30px] opacity-100 ml-0 pointer-events-auto"
+                    : "w-0 opacity-0 -ml-2 pointer-events-none"
+                }`}
                 onClick={handleSend}
                 aria-label="Send message"
               >
-                <span className="material-symbols-outlined ">send</span>
-              </motion.button>
+                <span className="material-symbols-outlined">send</span>
+              </button>
             </>
           )}
         </div>
@@ -227,4 +233,5 @@ const ChatBar: React.FC = () => {
   );
 };
 
+// export default React.memo(ChatBar);
 export default ChatBar;

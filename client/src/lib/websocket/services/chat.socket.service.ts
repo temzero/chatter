@@ -4,18 +4,18 @@ import { webSocketService } from "./websocket.service";
 import { MessageResponse } from "@/types/messageResponse";
 
 export class ChatWebSocketService {
-  constructor() {
-    // Initialize connection when the service is created
-    this.initializeConnection();
-  }
+  // constructor() {
+  //   // Initialize connection when the service is created
+  //   this.initializeConnection();
+  // }
 
-  private async initializeConnection() {
-    try {
-      await webSocketService.connect();
-    } catch (error) {
-      console.error("Failed to initialize WebSocket connection:", error);
-    }
-  }
+  // private async initializeConnection() {
+  //   try {
+  //     await webSocketService.connect();
+  //   } catch (error) {
+  //     console.error("Failed to initialize WebSocket connection:", error);
+  //   }
+  // }
 
   async getChatStatus(
     chatId: string

@@ -3,6 +3,7 @@ import { webSocketService } from "@/lib/websocket/services/websocket.service";
 
 export const useUserOnlineStatus = (userId?: string) => {
   const [isOnline, setIsOnline] = useState(false);
+  console.log("useUserOnlineStatus mounted", userId);
 
   // Ping/Pong mechanism to keep connection alive
   useEffect(() => {

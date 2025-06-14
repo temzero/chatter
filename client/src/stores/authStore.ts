@@ -107,7 +107,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             message: { type: "success", content: "Logged in successfully" },
           });
           useChatStore.getState().clearChats();
-          // await webSocketService.connect();
         } catch (error) {
           const errorMessage = handleAuthError(error);
           get().setLoading(false, false); // Keep error message
@@ -129,7 +128,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
               content: "Account created successfully",
             },
           });
-          // await webSocketService.connect();
         } catch (error) {
           const errorMessage = handleAuthError(error);
           get().setLoading(false, false);

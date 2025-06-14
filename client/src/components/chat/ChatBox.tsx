@@ -6,28 +6,32 @@ import { useSoundEffect } from "@/hooks/useSoundEffect";
 import messageSound from "@/assets/sound/message-sent2.mp3";
 import { useActiveChatMessages } from "@/stores/messageStore";
 import { ChatType } from "@/types/enums/ChatType";
-import TypingIndicator from "../ui/typingIndicator/TypingIndicator";
-import { useActiveChat } from "@/stores/chatStore";
+import { useActiveChat, useActiveMembersByChatId, useChatStore } from "@/stores/chatStore";
 import { useTypingStore } from "@/stores/typingStore";
+import TypingIndicator from "../ui/typingIndicator/TypingIndicator";
 
 const ChatBox: React.FC = () => {
+  // console.log("ChatBox mounted");
   const activeChat = useActiveChat();
   const chatType = activeChat?.type || ChatType.DIRECT;
+  const activeChatId = activeChat?.id || "";
   const messages = useActiveChatMessages();
-  const chatId = activeChat?.id || "";
+  const chatMembers = useActiveMembersByChatId(activeChatId) || [];
+  // const chatMembers = useChatStore.getState().chatMembers[activeChatId] || [];
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);
 
-  // ✅ FIXED Zustand selector: access full typingMap first
   const typingMap = useTypingStore((state) => state.typingMap);
   const typingUsers = useMemo(() => {
-    const chatTypingMap = typingMap[chatId] || {};
-    return Object.entries(chatTypingMap)
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      .filter(([_, isTyping]) => isTyping)
-      .map(([userId]) => userId);
-  }, [typingMap, chatId]);
+    const chatTypingMap = typingMap[activeChatId] || {};
+    return (
+      Object.entries(chatTypingMap)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .filter(([_, isTyping]) => isTyping)
+        .map(([userId]) => userId)
+    );
+  }, [typingMap, activeChatId]);
 
   const playMessageSound = useSoundEffect(messageSound, 0.5);
 
@@ -127,7 +131,11 @@ const ChatBox: React.FC = () => {
         </div>
       )}
 
-      <TypingIndicator chatId={chatId} userIds={typingUsers} />
+      <TypingIndicator
+        chatId={activeChatId}
+        userIds={typingUsers}
+        members={chatMembers || []}
+      />
     </div>
   );
 };

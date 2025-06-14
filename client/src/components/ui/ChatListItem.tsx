@@ -6,12 +6,15 @@ import { ChatAvatar } from "./avatar/ChatAvatar";
 import getChatName from "../../utils/getChatName";
 import { getTimeAgo } from "@/utils/getTimeAgo";
 import { OnlineDot } from "./OnlineDot";
+import SimpleTypingIndicator from "./typingIndicator/SimpleTypingIndicator";
+// import SimpleTypingIndicator from "./typingIndicator/SimpleTypingIndicator";
 
 interface ChatListItemProps {
   chat: ChatResponse;
   isCompact?: boolean;
   isOnline: boolean;
   currentUserId: string;
+  typingUsers?: string[];
 }
 
 const ChatListItem: React.FC<ChatListItemProps> = ({
@@ -19,8 +22,9 @@ const ChatListItem: React.FC<ChatListItemProps> = ({
   isCompact = false,
   isOnline,
   currentUserId = "",
+  typingUsers = [],
 }) => {
-  const activeChat = useChatStore((state) => state.activeChat);
+  const activeChatId = useChatStore((state) => state.activeChat?.id);
   const setActiveChat = useChatStore((state) => state.setActiveChat);
   const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
 
@@ -32,7 +36,7 @@ const ChatListItem: React.FC<ChatListItemProps> = ({
     const baseClasses =
       "relative flex items-center w-full h-24 gap-3 p-3 transition-all duration-300 ease-in-out cursor-pointer";
     const activeClasses =
-      activeChat?.id === chat.id
+      activeChatId === chat.id
         ? "bg-[var(--active-chat-color)]"
         : " hover:bg-[var(--hover-color)]";
     return `${baseClasses} ${activeClasses}`;
@@ -78,7 +82,12 @@ const ChatListItem: React.FC<ChatListItemProps> = ({
               <h1 className="text-lg font-semibold whitespace-nowrap text-ellipsis">
                 {getChatName(chat)}
               </h1>
-              {displayMessage}
+              {/* {displayMessage} */}
+              {typingUsers.length > 0 ? (
+                <SimpleTypingIndicator chatId={chat.id} userIds={typingUsers} />
+              ) : (
+                displayMessage
+              )}
             </div>
 
             <p className="absolute top-2 right-4 text-xs opacity-40">

@@ -6,6 +6,7 @@ import { useSidebarInfoStore } from "./sidebarInfoStore";
 import { chatMemberService } from "@/services/chat/chatMemberService";
 import { ChatType } from "@/types/enums/ChatType";
 import { useAuthStore } from "./authStore";
+import { shallow } from "zustand/shallow";
 import type {
   ChatResponse,
   DirectChatResponse,
@@ -567,9 +568,21 @@ export const useChatStore = create<ChatStore>()(
 
 export const useActiveChat = () => useChatStore((state) => state.activeChat);
 
+export const useAllChats = () => useChatStore((state) => state.chats, shallow);
+
 // New selector to get active members
 export const useActiveMembers = () => {
   const activeChat = useChatStore((state) => state.activeChat);
   const chatMembers = useChatStore((state) => state.chatMembers);
   return activeChat ? chatMembers[activeChat.id] || [] : [];
 };
+
+export const useActiveMembersByChatId = (chatId: string) => {
+  const chatMembers = useChatStore((state) => state.chatMembers);
+  return chatMembers[chatId] || [];
+};
+
+// export const useActiveMembersByChatId = (chatId: string) =>
+//   useChatStore(
+//     useCallback((state) => state.chatMembers[chatId] || [], [chatId])
+//   );
