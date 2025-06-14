@@ -95,24 +95,6 @@ export class WebSocketService {
       this.socket.off(event);
     }
   }
-
-  // Join a room (channel)
-  joinRoom(room: string) {
-    if (!this.socket) {
-      console.warn("Socket not connected. Cannot join room:", room);
-      return;
-    }
-    this.socket.emit("join", room);
-  }
-
-  // Leave a room (channel)
-  leaveRoom(room: string) {
-    if (!this.socket) {
-      console.warn("Socket not connected. Cannot leave room:", room);
-      return;
-    }
-    this.socket.emit("leave", room);
-  }
 }
 
 // Single instance for the entire application

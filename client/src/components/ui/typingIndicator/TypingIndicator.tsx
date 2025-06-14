@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-// import { useActiveMembersByChatId } from "@/stores/chatStore";
 import { Avatar } from "../avatar/Avatar";
 import "./TypingIndicator.css";
 import { ChatMember } from "@/types/chat";
@@ -24,17 +23,11 @@ const TypingIndicator = ({
   useEffect(() => {
     if (previousChatIdRef.current !== chatId) {
       setHasSettled(false);
-      const timeout = setTimeout(() => setHasSettled(true), 0); // optionally delay 1 frame
+      const timeout = setTimeout(() => setHasSettled(true), 0);
       previousChatIdRef.current = chatId;
       return () => clearTimeout(timeout);
     }
   }, [chatId]);
-
-  // const allMembers = useMemo(() => {
-  //   return useChatStore.getState().chatMembers[chatId] || [];
-  // }, [chatId]);
-
-  // console.log("Typing Members:", members);
 
   const typingMembers = useMemo(() => {
     return (members ?? []).filter((member) => userIds.includes(member.userId));
@@ -42,13 +35,23 @@ const TypingIndicator = ({
 
   const displayAvatars = useMemo(() => {
     return typingMembers.map((member) => (
-      <Avatar
-        key={member.userId}
-        avatarUrl={member.avatarUrl}
-        firstName={member.firstName}
-        lastName={member.lastName}
-        size="8"
-      />
+      // <AnimatePresence>
+        <motion.div
+          key={member.userId}
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.5 }}
+          // transition={{ type: "spring", damping: 10, stiffness: 100 }}
+        >
+          <Avatar
+            key={member.userId}
+            avatarUrl={member.avatarUrl}
+            firstName={member.firstName}
+            lastName={member.lastName}
+            size="8"
+          />
+        </motion.div>
+      // </AnimatePresence>
     ));
   }, [typingMembers]);
 
@@ -65,7 +68,7 @@ const TypingIndicator = ({
           style={{ transformOrigin: "top left" }}
           className="my-4 flex items-center gap-4"
         >
-          <div className="flex -space-x-2">{displayAvatars}</div>
+          <div className="flex -space-x-2 items-start border transition-all duration-500">{displayAvatars}</div>
           <div className="typing">
             <div className="dot"></div>
             <div className="dot"></div>

@@ -1,11 +1,8 @@
-import React, { useMemo } from "react";
+import React from "react";
 import ChatListItem from "./ChatListItem";
 import type { ChatResponse } from "@/types/chat";
-// import { useChatsOnlineStatus } from "@/hooks/useChatsOnlineStatus";
-import { useAuthStore, useCurrentUser } from "@/stores/authStore";
-import { useWhyDidYouUpdate } from "@/hooks/useWhyDidYouUpdate";
+import { useAuthStore } from "@/stores/authStore";
 import { useTypingStore } from "@/stores/typingStore";
-import { useChatStore } from "@/stores/chatStore";
 interface ChatListProps {
   chats: ChatResponse[];
   isCompact?: boolean;
@@ -55,21 +52,12 @@ interface ChatListProps {
 // };
 
 const ChatList: React.FC<ChatListProps> = ({ chats, isCompact = false }) => {
-  const typingMap = useTypingStore((state) => state.typingMap);
-  console.log('typingMap:', typingMap);
-
+  const activeTyping = useTypingStore((state) => state.activeTyping);
   return (
     <div className="flex-1 overflow-y-auto overflow-x-hidden relative">
       {chats.map((chat) => {
-        // Filter typing users for THIS specific chat only
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        const typingUsers = useMemo(() => {
-          const chatTypingMap = typingMap[chat.id] || {}; // Use chat.id instead of activeChatId
-          return Object.entries(chatTypingMap)
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            .filter(([_, isTyping]) => isTyping)
-            .map(([userId]) => userId);
-        }, [chat.id]); // Re-run when this chat's typing data changes
+        // Get typing users for this specific chat
+        const typingUsers = Array.from(activeTyping[chat.id] || []);
 
         return (
           <ChatListItem
@@ -78,7 +66,7 @@ const ChatList: React.FC<ChatListProps> = ({ chats, isCompact = false }) => {
             isCompact={isCompact}
             isOnline={false}
             currentUserId={useAuthStore.getState().currentUser?.id || ""}
-            typingUsers={typingUsers} // Now chat-specific
+            typingUsers={typingUsers}
           />
         );
       })}
@@ -87,3 +75,4 @@ const ChatList: React.FC<ChatListProps> = ({ chats, isCompact = false }) => {
 };
 
 export default React.memo(ChatList);
+

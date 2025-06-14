@@ -1,40 +1,53 @@
 import { create } from "zustand";
 
 interface TypingState {
-  // chatId -> userId -> isTyping
-  typingMap: Record<string, Record<string, boolean>>;
-  setTyping: (chatId: string, userId: string, isTyping: boolean) => void;
-  clearTyping: (chatId: string, userId: string) => void;
+  // Only stores active typers - if user exists in the set, they're typing
+  activeTyping: Record<string, Set<string>>; // chatId -> Set of userIds
+
+  startTyping: (chatId: string, userId: string) => void;
+  stopTyping: (chatId: string, userId: string) => void;
+  isTyping: (chatId: string, userId: string) => boolean;
 }
 
-export const useTypingStore = create<TypingState>((set) => ({
-  typingMap: {},
+export const useTypingStore = create<TypingState>((set, get) => ({
+  activeTyping: {},
 
-  // Immediate state update for typing status
-  setTyping: (chatId, userId, isTyping) => {
-    set((state) => ({
-      typingMap: {
-        ...state.typingMap,
-        [chatId]: {
-          ...(state.typingMap[chatId] || {}),
-          [userId]: isTyping,
-        },
-      },
-    }));
-  },
-
-  // Optional: Explicit clear function
-  clearTyping: (chatId, userId) => {
+  startTyping: (chatId, userId) => {
     set((state) => {
-      const chatTyping = { ...(state.typingMap[chatId] || {}) };
-      delete chatTyping[userId];
-
+      const chatTyping = state.activeTyping[chatId] || new Set();
       return {
-        typingMap: {
-          ...state.typingMap,
-          [chatId]: chatTyping,
+        activeTyping: {
+          ...state.activeTyping,
+          [chatId]: new Set(chatTyping).add(userId),
         },
       };
     });
+  },
+
+  stopTyping: (chatId, userId) => {
+    set((state) => {
+      const chatTyping = state.activeTyping[chatId];
+      if (!chatTyping) return state;
+
+      const newTypingUsers = new Set(chatTyping);
+      newTypingUsers.delete(userId);
+
+      // Create a shallow copy of activeTyping
+      const updatedActiveTyping = { ...state.activeTyping };
+
+      if (newTypingUsers.size > 0) {
+        updatedActiveTyping[chatId] = newTypingUsers;
+      } else {
+        delete updatedActiveTyping[chatId];
+      }
+
+      return {
+        activeTyping: updatedActiveTyping,
+      };
+    });
+  },
+
+  isTyping: (chatId, userId) => {
+    return Boolean(get().activeTyping[chatId]?.has(userId));
   },
 }));

@@ -1,3 +1,4 @@
+// src/components/ChatBox.tsx
 import React, { useRef, useEffect, useState, useMemo } from "react";
 import Message from "./Message";
 import ChannelMessage from "./MessageChannel";
@@ -5,30 +6,32 @@ import { useSoundEffect } from "@/hooks/useSoundEffect";
 import messageSound from "@/assets/sound/message-sent2.mp3";
 import { useActiveChatMessages } from "@/stores/messageStore";
 import { ChatType } from "@/types/enums/ChatType";
-import { useActiveChat, useActiveMembersByChatId } from "@/stores/chatStore";
+import { useActiveChat, useActiveMembersByChatId, useChatStore } from "@/stores/chatStore";
 import { useTypingStore } from "@/stores/typingStore";
 import TypingIndicator from "../ui/typingIndicator/TypingIndicator";
 
 const ChatBox: React.FC = () => {
+  // console.log("ChatBox mounted");
   const activeChat = useActiveChat();
   const chatType = activeChat?.type || ChatType.DIRECT;
   const activeChatId = activeChat?.id || "";
   const messages = useActiveChatMessages();
   const chatMembers = useActiveMembersByChatId(activeChatId) || [];
+  // const chatMembers = useChatStore.getState().chatMembers[activeChatId] || [];
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);
 
-  // const typingUsers = useTypingStore((state) =>
-  //   activeChatId ? Array.from(state.activeTyping[activeChatId] || []) : []
-  // );
-  const activeTyping = useTypingStore((state) => state.activeTyping);
+  const typingMap = useTypingStore((state) => state.typingMap);
   const typingUsers = useMemo(() => {
-    const chatTypingSet = activeTyping[activeChatId] || new Set();
-    return Array.from(chatTypingSet);
-  }, [activeTyping, activeChatId]);
-  console.log("activeTyping:", activeTyping);
-  // const typingUsers = []
+    const chatTypingMap = typingMap[activeChatId] || {};
+    return (
+      Object.entries(chatTypingMap)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .filter(([_, isTyping]) => isTyping)
+        .map(([userId]) => userId)
+    );
+  }, [typingMap, activeChatId]);
 
   const playMessageSound = useSoundEffect(messageSound, 0.5);
 
@@ -137,4 +140,4 @@ const ChatBox: React.FC = () => {
   );
 };
 
-export default React.memo(ChatBox);
+export default ChatBox;

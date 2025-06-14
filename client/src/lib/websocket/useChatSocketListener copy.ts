@@ -12,23 +12,16 @@ export function useChatSocketListeners() {
       useMessageStore.getState().addMessage(message);
     };
 
+    // Typing handler
     const handleTyping = (data: {
       chatId: string;
       userId: string;
       isTyping: boolean;
     }) => {
-      console.log(
-        `[WS] 🖊️ User ${data.userId} ${
-          data.isTyping ? "started" : "stopped"
-        } typing in chat ${data.chatId}`
-      );
-
-      const typingStore = useTypingStore.getState();
-      if (data.isTyping) {
-        typingStore.startTyping(data.chatId, data.userId);
-      } else {
-        typingStore.stopTyping(data.chatId, data.userId);
-      }
+      console.log(`[WS] 🖊️ User ${data.userId} is typing in chat ${data.chatId}: ${data.isTyping} `)
+      useTypingStore
+        .getState()
+        .setTyping(data.chatId, data.userId, data.isTyping);
     };
 
     // Subscribe to events

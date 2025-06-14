@@ -9,7 +9,6 @@ const useTypingIndicator = (
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastActivityRef = useRef<number>(0);
 
-  // Send typing state (true/false) over WebSocket
   const sendTypingState = useCallback(
     (isTyping: boolean) => {
       if (!chatId) return;
@@ -22,16 +21,6 @@ const useTypingIndicator = (
     [chatId]
   );
 
-  // Manually clear typing state (call this when needed)
-  const clearTypingState = useCallback(() => {
-    if (lastTypingStateRef.current) {
-      sendTypingState(false);
-    }
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
-    }
-  }, [sendTypingState]);
-
   useEffect(() => {
     if (!chatId || !inputRef.current) return;
 
@@ -39,10 +28,12 @@ const useTypingIndicator = (
       const hasValue = inputRef.current?.value.trim().length > 0;
       lastActivityRef.current = Date.now();
 
+      // Only send typing=true if we're not already in typing state
       if (!lastTypingStateRef.current && hasValue) {
         sendTypingState(true);
       }
 
+      // Reset the timeout
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
@@ -53,18 +44,25 @@ const useTypingIndicator = (
     };
 
     const element = inputRef.current;
+
+    // Track both input and keydown events for better accuracy
     element.addEventListener("input", handleActivity);
     element.addEventListener("keydown", handleActivity);
 
+    // Cleanup function
     return () => {
       element.removeEventListener("input", handleActivity);
       element.removeEventListener("keydown", handleActivity);
-      clearTypingState(); // Clear on unmount
-    };
-  }, [chatId, inputRef, sendTypingState, clearTypingState]);
 
-  // Return clear function if parent component needs to manually reset typing state
-  return { clearTypingState };
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+
+      if (lastTypingStateRef.current) {
+        sendTypingState(false);
+      }
+    };
+  }, [chatId, inputRef, sendTypingState]);
 };
 
 export default useTypingIndicator;
