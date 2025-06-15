@@ -3,7 +3,6 @@ import { useEffect, useRef } from "react";
 export const useSoundEffect = (soundPath?: string, volume = 0.3) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Preload sound if provided
   useEffect(() => {
     if (soundPath) {
       audioRef.current = new Audio(soundPath);
@@ -14,24 +13,21 @@ export const useSoundEffect = (soundPath?: string, volume = 0.3) => {
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
-        audioRef.current.src = ""; // Release memory
+        audioRef.current.src = ""; // release resource
         audioRef.current = null;
       }
     };
   }, [soundPath, volume]);
 
   const playSound = () => {
-    // Respect user's reduced motion preference
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
     }
 
-    // Try to play imported sound first
     if (audioRef.current) {
       try {
         audioRef.current.currentTime = 0;
         audioRef.current.play().catch(() => {
-          // Fallback to generated sound if playback fails
           playGeneratedSound();
         });
         return;
@@ -40,27 +36,24 @@ export const useSoundEffect = (soundPath?: string, volume = 0.3) => {
       }
     }
 
-    // Fallback to generated sound
     playGeneratedSound();
+  };
+
+  const stopSound = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
   };
 
   const playGeneratedSound = () => {
     try {
       const audioCtx = new (window.AudioContext ||
-        (window as unknown as { webkitAudioContext?: typeof AudioContext })
-          .webkitAudioContext!)();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (window as any).webkitAudioContext)();
 
-      // AudioContext starts in suspended state
       if (audioCtx.state === "suspended") {
-        audioCtx
-          .resume()
-          .then(() => {
-            // Now we can create and play the sound
-            createAndPlaySound(audioCtx);
-          })
-          .catch((e) => {
-            console.log("AudioContext resume failed:", e);
-          });
+        audioCtx.resume().then(() => createAndPlaySound(audioCtx));
       } else {
         createAndPlaySound(audioCtx);
       }
@@ -69,7 +62,6 @@ export const useSoundEffect = (soundPath?: string, volume = 0.3) => {
     }
   };
 
-  // Helper function to create and play the sound
   const createAndPlaySound = (audioCtx: AudioContext) => {
     const oscillator = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
@@ -89,5 +81,5 @@ export const useSoundEffect = (soundPath?: string, volume = 0.3) => {
     oscillator.stop(audioCtx.currentTime + 0.2);
   };
 
-  return playSound;
+  return [playSound, stopSound] as const;
 };

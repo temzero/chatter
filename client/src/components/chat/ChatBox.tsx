@@ -3,34 +3,34 @@ import Message from "./Message";
 import ChannelMessage from "./MessageChannel";
 import { useSoundEffect } from "@/hooks/useSoundEffect";
 import messageSound from "@/assets/sound/message-sent2.mp3";
-import { useActiveChatMessages } from "@/stores/messageStore";
 import { ChatType } from "@/types/enums/ChatType";
-import { useActiveChat, useActiveMembersByChatId } from "@/stores/chatStore";
 import { useTypingStore } from "@/stores/typingStore";
 import TypingIndicator from "../ui/typingIndicator/TypingIndicator";
+import { useChatBoxData } from "@/hooks/useChatBoxData";
+import { useActiveChat } from "@/stores/chatStore";
 
 const ChatBox: React.FC = () => {
-  const activeChat = useActiveChat();
+  // console.log("chatBox Rendered");
+  const { activeChat, messages, chatMembers, isLoading } = useChatBoxData();
+
+  // const activeChat = useActiveChat();
+  // const messages = [];
+  // const chatMembers = [];
+  // const isLoading = false;
+
   const chatType = activeChat?.type || ChatType.DIRECT;
   const activeChatId = activeChat?.id || "";
-  const messages = useActiveChatMessages();
-  const chatMembers = useActiveMembersByChatId(activeChatId) || [];
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);
 
-  // const typingUsers = useTypingStore((state) =>
-  //   activeChatId ? Array.from(state.activeTyping[activeChatId] || []) : []
-  // );
   const activeTyping = useTypingStore((state) => state.activeTyping);
   const typingUsers = useMemo(() => {
     const chatTypingSet = activeTyping[activeChatId] || new Set();
     return Array.from(chatTypingSet);
   }, [activeTyping, activeChatId]);
-  console.log("activeTyping:", activeTyping);
-  // const typingUsers = []
 
-  const playMessageSound = useSoundEffect(messageSound, 0.5);
+  const [playMessageSound] = useSoundEffect(messageSound, 0.5);
 
   const newMessageAdded = useMemo(() => {
     return messages.length > previousMessageCount;
@@ -89,6 +89,14 @@ const ChatBox: React.FC = () => {
 
     return groups;
   }, [messages]);
+
+  if (isLoading) {
+    return (
+      <div className="p-6 py-16 flex-1 h-full w-full flex items-center justify-center">
+        <div className="animate-pulse text-gray-400">Loading messages...</div>
+      </div>
+    );
+  }
 
   return (
     <div

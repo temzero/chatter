@@ -1,8 +1,8 @@
 import { create } from "zustand";
 
 interface TypingState {
-  // Only stores active typers - if user exists in the set, they're typing
-  activeTyping: Record<string, Set<string>>; // chatId -> Set of userIds
+  // Now using an array: chatId -> array of userIds (in order they started typing)
+  activeTyping: Record<string, string[]>;
 
   startTyping: (chatId: string, userId: string) => void;
   stopTyping: (chatId: string, userId: string) => void;
@@ -14,11 +14,16 @@ export const useTypingStore = create<TypingState>((set, get) => ({
 
   startTyping: (chatId, userId) => {
     set((state) => {
-      const chatTyping = state.activeTyping[chatId] || new Set();
+      const chatTyping = state.activeTyping[chatId] || [];
+
+      // Remove if already exists, then add to end
+      const withoutUser = chatTyping.filter((id) => id !== userId);
+      const updatedList = [...withoutUser, userId];
+
       return {
         activeTyping: {
           ...state.activeTyping,
-          [chatId]: new Set(chatTyping).add(userId),
+          [chatId]: updatedList,
         },
       };
     });
@@ -29,14 +34,11 @@ export const useTypingStore = create<TypingState>((set, get) => ({
       const chatTyping = state.activeTyping[chatId];
       if (!chatTyping) return state;
 
-      const newTypingUsers = new Set(chatTyping);
-      newTypingUsers.delete(userId);
-
-      // Create a shallow copy of activeTyping
+      const updatedList = chatTyping.filter((id) => id !== userId);
       const updatedActiveTyping = { ...state.activeTyping };
 
-      if (newTypingUsers.size > 0) {
-        updatedActiveTyping[chatId] = newTypingUsers;
+      if (updatedList.length > 0) {
+        updatedActiveTyping[chatId] = updatedList;
       } else {
         delete updatedActiveTyping[chatId];
       }
@@ -48,6 +50,6 @@ export const useTypingStore = create<TypingState>((set, get) => ({
   },
 
   isTyping: (chatId, userId) => {
-    return Boolean(get().activeTyping[chatId]?.has(userId));
+    return get().activeTyping[chatId]?.includes(userId) ?? false;
   },
 }));

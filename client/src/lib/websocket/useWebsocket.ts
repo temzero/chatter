@@ -6,13 +6,13 @@ export const useWebSocket = () => {
   useEffect(() => {
     // Connect on mount
     webSocketService.connect().then((socket) => {
-      console.log("[WS] 🔌 Connected? ", socket.connected);
+      // console.log("[WS] 🔌 Connected? ", socket.connected);
     });
 
     // Disconnect on unmount
     return () => {
       webSocketService.disconnect();
-      console.log("[WS] 🔌 Disconnected");
+      // console.log("[WS] 🔌 Disconnected");
     };
   }, []);
 };

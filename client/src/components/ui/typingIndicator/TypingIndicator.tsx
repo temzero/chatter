@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Avatar } from "../avatar/Avatar";
-import "./TypingIndicator.css";
 import { ChatMember } from "@/types/chat";
+import { useSoundEffect } from "@/hooks/useSoundEffect"; // <-- your custom hook
+import typingSound from "@/assets/sound/typing.mp3";
+import "./TypingIndicator.css";
 
 interface TypingIndicatorProps {
   chatId: string;
@@ -15,9 +17,26 @@ const TypingIndicator = ({
   userIds,
   members,
 }: TypingIndicatorProps) => {
-  console.log("TypingIndicator Mounted");
+  // console.log("TypingIndicator Mounted");
   const [hasSettled, setHasSettled] = useState(true);
   const previousChatIdRef = useRef<string | null>(null);
+  const previousUserIdsLength = useRef(0);
+  // const playTypingSound = useSoundEffect(typingSound, 0.5);
+  const [playTypingSound, stopTypingSound] = useSoundEffect(typingSound, 1);
+
+  // Play sound when someone starts typing
+  useEffect(() => {
+    if (previousUserIdsLength.current === 0 && userIds.length > 0) {
+      playTypingSound();
+    }
+    previousUserIdsLength.current = userIds.length;
+  }, [userIds, playTypingSound]);
+  // stop sound when TypingIndicator unmounts
+  useEffect(() => {
+    return () => {
+      stopTypingSound();
+    };
+  }, [stopTypingSound]);
 
   // Detect change in chatId
   useEffect(() => {
@@ -29,29 +48,31 @@ const TypingIndicator = ({
     }
   }, [chatId]);
 
+  // Filter and sort members based on userIds
   const typingMembers = useMemo(() => {
-    return (members ?? []).filter((member) => userIds.includes(member.userId));
+    const userIdIndexMap = new Map(userIds.map((id, index) => [id, index]));
+
+    return (members ?? [])
+      .filter((member) => userIdIndexMap.has(member.userId))
+      .sort((a, b) => {
+        return (
+          (userIdIndexMap.get(a.userId) ?? 0) -
+          (userIdIndexMap.get(b.userId) ?? 0)
+        );
+      });
   }, [members, userIds]);
 
   const displayAvatars = useMemo(() => {
     return typingMembers.map((member) => (
-      // <AnimatePresence>
-        <motion.div
+      <div key={member.userId}>
+        <Avatar
           key={member.userId}
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.5 }}
-          // transition={{ type: "spring", damping: 10, stiffness: 100 }}
-        >
-          <Avatar
-            key={member.userId}
-            avatarUrl={member.avatarUrl}
-            firstName={member.firstName}
-            lastName={member.lastName}
-            size="8"
-          />
-        </motion.div>
-      // </AnimatePresence>
+          avatarUrl={member.avatarUrl}
+          firstName={member.firstName}
+          lastName={member.lastName}
+          size="8"
+        />
+      </div>
     ));
   }, [typingMembers]);
 
@@ -64,16 +85,30 @@ const TypingIndicator = ({
           key={`${chatId}`}
           initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
-          style={{ transformOrigin: "top left" }}
+          exit={{ opacity: 0, scale: 0.5 }}
+          style={{ transformOrigin: "left" }}
           className="my-4 flex items-center gap-4"
         >
-          <div className="flex -space-x-2 items-start border transition-all duration-500">{displayAvatars}</div>
-          <div className="typing">
-            <div className="dot"></div>
-            <div className="dot"></div>
-            <div className="dot"></div>
-          </div>
+          <motion.div
+            layout
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            transition={{
+              duration: 0.2,
+              layout: {
+                duration: 0.2,
+              },
+            }}
+            className="flex items-center gap-4"
+          >
+            <div className="flex -space-x-2">{displayAvatars}</div>
+            <div className="typing">
+              <div className="dot"></div>
+              <div className="dot"></div>
+              <div className="dot"></div>
+            </div>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>

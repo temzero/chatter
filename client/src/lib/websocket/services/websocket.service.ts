@@ -24,19 +24,19 @@ export class WebSocketService {
       });
 
       this.socket.on("connect", () => {
-        console.log("Connected to WebSocket, socketId: ", this.socket?.id);
+        // console.log("Connected to WebSocket, socketId: ", this.socket?.id);
         resolve(this.socket as Socket);
       });
 
       this.socket.on("connect_error", (error: unknown) => {
-        console.error("Connection error:", error);
+        // console.error("Connection error:", error);
         toast.error("WebSocket connection failed!");
         this.connectionPromise = null;
         reject(error);
       });
 
       this.socket.on("disconnect", () => {
-        console.log("Disconnected from WebSocket");
+        // console.log("Disconnected from WebSocket");
       });
     });
 

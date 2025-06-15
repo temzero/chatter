@@ -18,7 +18,7 @@ const SimpleTypingIndicator = ({ chatId, userIds }: TypingIndicatorProps) => {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.8 }}
           style={{ transformOrigin: "left" }}
-          className="flex items-center gap-4 ml-1"
+          className="flex items-center gap-4 ml-1 min-h-6"
         >
           <div className="typing">
             <div className="dot"></div>

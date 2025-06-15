@@ -1,4 +1,4 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import { useChatStore } from "@/stores/chatStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { Logo } from "../ui/Logo";
@@ -7,27 +7,21 @@ import ChatList from "@/components/ui/ChatList";
 import { motion } from "framer-motion";
 import { filterChatsByType } from "@/utils/filterChatsByType";
 import { SidebarMode } from "@/types/enums/sidebarMode";
-import { shallow } from "zustand/shallow";
 
 const chatTypes = ["all", "direct", "group", "channel"];
 
 const SidebarDefault: React.FC = () => {
-  console.log("SidebarDefault mounted");
   // const chats = useChatStore((state) => state.chats, shallow);
   const chats = useChatStore.getState().chats;
   // const chats = []
   
-  console.log("Chats in SidebarDefault:", chats);
-
   const setSidebar = useSidebarStore((state) => state.setSidebar);
   // const isCompact = useSidebarStore((state) => state.isCompact);
   const isCompact = useSidebarStore((state) => state.isCompact);
   const toggleCompact = useSidebarStore((state) => state.toggleCompact);
 
   const [selectedType, setSelectedType] = useState<string>(chatTypes[0]);
-  console.log("Selected chat type:", selectedType);
   const [direction, setDirection] = useState<number>(1);
-  console.log("Direction:", direction);
 
   const filteredChatsByType = React.useMemo(() => {
     return filterChatsByType(chats, selectedType);

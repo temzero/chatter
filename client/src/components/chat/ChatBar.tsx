@@ -23,7 +23,11 @@ const ChatBar: React.FC = () => {
 
   // Get current input value without state
   // const getInputValue = useCallback(() => inputRef.current?.value || "", []);
-  useTypingIndicator(inputRef, activeChatId ?? null);
+  // useTypingIndicator(inputRef, activeChatId ?? null);
+  const { clearTypingState } = useTypingIndicator(
+    inputRef,
+    activeChatId ?? null
+  );
 
   // Compute visibility based on content
   const shouldShowSendButton = hasTextContent || attachedFiles.length > 0;
@@ -102,7 +106,7 @@ const ChatBar: React.FC = () => {
       } catch (error) {
         console.error("Failed to send message:", error);
       }
-
+      clearTypingState();
       setDraftMessage(activeChatId, "");
       setAttachedFiles([]);
       setFilePreviewUrls([]);

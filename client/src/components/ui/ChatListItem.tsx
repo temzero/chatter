@@ -7,6 +7,7 @@ import getChatName from "../../utils/getChatName";
 import { getTimeAgo } from "@/utils/getTimeAgo";
 import { OnlineDot } from "./OnlineDot";
 import SimpleTypingIndicator from "./typingIndicator/SimpleTypingIndicator";
+import { AnimatePresence, motion } from "framer-motion";
 // import SimpleTypingIndicator from "./typingIndicator/SimpleTypingIndicator";
 
 interface ChatListItemProps {
@@ -51,7 +52,7 @@ const ChatListItem: React.FC<ChatListItemProps> = ({
       <span className="text-xs whitespace-nowrap text-ellipsis">{draft}</span>
     </p>
   ) : chat.lastMessage ? (
-    <p className="flex items-center opacity-70 gap-1 text-xs max-w-[196px] whitespace-nowrap text-ellipsis overflow-hidden">
+    <p className="flex items-center opacity-70 gap-1 text-xs max-w-[196px] whitespace-nowrap text-ellipsis overflow-hidden min-h-6">
       <strong>
         {chat.lastMessage.senderId === currentUserId
           ? "Me"
@@ -82,12 +83,32 @@ const ChatListItem: React.FC<ChatListItemProps> = ({
               <h1 className="text-lg font-semibold whitespace-nowrap text-ellipsis">
                 {getChatName(chat)}
               </h1>
-              {/* {displayMessage} */}
-              {typingUsers.length > 0 ? (
-                <SimpleTypingIndicator chatId={chat.id} userIds={typingUsers} />
-              ) : (
-                displayMessage
-              )}
+              <AnimatePresence mode="wait" initial={false}>
+                {typingUsers.length > 0 ? (
+                  <motion.div
+                    key="typing"
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <SimpleTypingIndicator
+                      chatId={chat.id}
+                      userIds={typingUsers}
+                    />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="message"
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {displayMessage}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             <p className="absolute top-2 right-4 text-xs opacity-40">
