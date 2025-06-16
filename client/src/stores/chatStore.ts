@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { chatService } from "@/services/chat/chatService";
 import { useMessageStore } from "./messageStore";
-import { useSidebarInfoStore } from "./sidebarInfoStore";
 import { chatMemberService } from "@/services/chat/chatMemberService";
 import { ChatType } from "@/types/enums/ChatType";
 import { useAuthStore } from "./authStore";
@@ -25,13 +24,13 @@ interface ChatStore {
 
   initialize: () => Promise<void>;
   getChats: () => Promise<void>;
-  getChatById: (chatId?: string) => Promise<void>;
+  fetchChatById: (chatId?: string) => Promise<void>;
   getDirectChatByUserId: (
     userId: string
   ) => Promise<ChatResponse | null | undefined>;
-  setActiveChat: (chat: ChatResponse | null) => void;
-  getChatMembers: (chatId: string) => Promise<ChatMember[]>;
+  setActiveChat: (chat: ChatResponse | null) => Promise<void>;
   setActiveChatById: (chatId: string | null) => Promise<void>;
+  getChatMembers: (chatId: string) => Promise<ChatMember[]>;
   createOrGetDirectChat: (partnerId: string) => Promise<DirectChatResponse>;
   createGroupChat: (payload: {
     name: string;
@@ -116,7 +115,7 @@ export const useChatStore = create<ChatStore>()(
           }
         },
 
-        getChatById: async (chatId) => {
+        fetchChatById: async (chatId) => {
           const targetChatId = chatId || get().activeChat?.id;
           if (!targetChatId) {
             console.warn("No chatId provided and no active chat available");
@@ -125,7 +124,7 @@ export const useChatStore = create<ChatStore>()(
 
           set({ isLoading: true });
           try {
-            const chat: ChatResponse = await chatService.getChatById(
+            const chat: ChatResponse = await chatService.fetchChatById(
               targetChatId
             );
             set((state) => ({
@@ -158,7 +157,7 @@ export const useChatStore = create<ChatStore>()(
           );
 
           if (existingChat) {
-            await get().getChatById(existingChat.id);
+            await get().fetchChatById(existingChat.id);
             return existingChat;
           }
           return null;
@@ -210,51 +209,71 @@ export const useChatStore = create<ChatStore>()(
         },
 
         setActiveChat: async (chat) => {
+          // console.log("setActiveChat", chat);
+
+          // Return a resolved promise immediately for null case
           if (!chat) {
-            set({ activeChat: null });
-            return;
+            set({ activeChat: null, isLoading: false });
+            return Promise.resolve(); // <-- This is crucial
           }
 
-          useSidebarInfoStore.getState().setSidebarInfo("default");
+          // const alreadyFetchedMessages =
+          //   useMessageStore.getState().messages[chat.id];
+          // const alreadyFetchedMembers = get().chatMembers[chat?.id];
+          // console.log("alreadyFetchedMessages", alreadyFetchedMessages);
+          // console.log("alreadyFetchedMembers", alreadyFetchedMembers);
+
+          set({ isLoading: true });
           set({ activeChat: chat });
           window.history.pushState({}, "", `/${chat.id}`);
 
-          // Fetch messages for the active chat
-          // useMessageStore.getState().fetchMessages(chat.id);
-          // if (chat.type !== ChatType.DIRECT) {
-          //   await get().getChatMembers(chat.id);
-          //   console.log(
-          //     "Active chat members:",
-          //     get().chatMembers[chat.id] || []
-          //   );
-          // }
-
-          if (chat.unreadCount && chat.unreadCount > 0) {
+          try {
+            const fetchMessages = useMessageStore
+              .getState()
+              .fetchMessages(chat.id);
+            const fetchMembers =
+              chat.type !== ChatType.DIRECT
+                ? get().getChatMembers(chat.id)
+                : [];
+            await Promise.all([fetchMessages, fetchMembers]);
+            console.log("Fetched Data: ", fetchMessages, fetchMembers);
             set((state) => ({
               chats: state.chats.map((c) =>
                 c.id === chat.id ? { ...c, unreadCount: 0 } : c
               ),
+              isLoading: false,
             }));
+
+            console.log("setActiveChat Finished");
+          } catch (error) {
+            console.error("Error in setActiveChat:", error);
+            set({ isLoading: false });
+            throw error; // <-- Important to propagate the error
           }
         },
 
         setActiveChatById: async (chatId) => {
+          console.log("setActiveChat By ID");
           if (!chatId) {
-            get().setActiveChat(null);
+            await get().setActiveChat(null);
             return;
           }
 
           try {
             const existingChat = get().chats.find((chat) => chat.id === chatId);
             if (existingChat) {
-              get().setActiveChat(existingChat);
+              console.log("Existing chat");
+              await get().setActiveChat(existingChat);
             } else {
-              await get().getChatById(chatId);
+              console.log("No Existing chat");
+
+              await get().fetchChatById(chatId);
               const fetchedChat = get().chats.find(
                 (chat) => chat.id === chatId
               );
-              if (fetchedChat) get().setActiveChat(fetchedChat);
+              if (fetchedChat) await get().setActiveChat(fetchedChat);
             }
+            console.log("setActiveChat ByID Finished");
           } catch (error) {
             console.error("Failed to set active chat:", error);
             set({ error: "Failed to load chat" });
@@ -274,7 +293,7 @@ export const useChatStore = create<ChatStore>()(
               if (existingChat) {
                 get().setActiveChat(existingChat);
               } else {
-                await get().getChatById(payload.id);
+                await get().fetchChatById(payload.id);
                 const fetchedChat = get().chats.find(
                   (chat) => chat.id === payload.id
                 );
@@ -585,3 +604,5 @@ export const useActiveMembersByChatId = (chatId: string) => {
   const chatMembers = useChatStore((state) => state.chatMembers);
   return chatMembers[chatId] || [];
 };
+
+export const useIsChatLoading = () => useChatStore((state) => state.isLoading);

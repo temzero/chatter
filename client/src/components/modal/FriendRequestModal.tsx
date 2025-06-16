@@ -21,7 +21,7 @@ const FriendRequestModal: React.FC<FriendRequestModalProps> = ({
   receiver,
   onSuccess,
 }) => {
-  const getChatById = useChatStore((state) => state.getChatById);
+  const fetchChatById = useChatStore((state) => state.fetchChatById);
   const { sendFriendRequest } = useFriendshipStore();
   const closeModal = useModalStore((s) => s.closeModal);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -37,7 +37,7 @@ const FriendRequestModal: React.FC<FriendRequestModalProps> = ({
         onSuccess(FriendshipStatus.PENDING);
       }
       closeModal();
-      getChatById();
+      fetchChatById();
     } catch (err: unknown) {
       console.error("Failed to send friend request:", err);
     }

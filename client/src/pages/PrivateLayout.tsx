@@ -46,7 +46,7 @@ export const ChatContent: React.FC = () => {
         await Promise.all([initializeChats(), fetchPendingRequests()]);
 
         // 3. Set active chat after chats are loaded
-        setActiveChatById(chatId || null);
+        await setActiveChatById(chatId || null);
 
         // 4. Initialize sidebar UI components (can happen last)
         initializeSidebar();

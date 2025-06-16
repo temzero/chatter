@@ -14,7 +14,7 @@ const DirectChatEdit = () => {
   const activeChat = useChatStore(
     (state) => state.activeChat
   ) as DirectChatResponse;
-  const getChatById = useChatStore((state) => state.getChatById);
+  const fetchChatById = useChatStore((state) => state.fetchChatById);
   const chatPartner = activeChat.chatPartner;
   const deleteChat = useChatStore((state) => state.deleteChat);
   const updateMemberNickname = useChatStore(
@@ -92,7 +92,7 @@ const DirectChatEdit = () => {
     try {
       await deleteFriendshipByUserId(activeChat.chatPartner.userId);
       setSidebarInfo("default");
-      getChatById();
+      fetchChatById();
     } catch (error) {
       console.error("Failed to unfriend:", error);
     }

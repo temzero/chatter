@@ -1,9 +1,20 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export const useSoundEffect = (soundPath?: string, volume = 0.3) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isInteracted, setIsInteracted] = useState(false);
 
   useEffect(() => {
+    // Set up initial interaction listener
+    const handleFirstInteraction = () => {
+      setIsInteracted(true);
+      document.removeEventListener("click", handleFirstInteraction);
+      document.removeEventListener("keydown", handleFirstInteraction);
+    };
+
+    document.addEventListener("click", handleFirstInteraction);
+    document.addEventListener("keydown", handleFirstInteraction);
+
     if (soundPath) {
       audioRef.current = new Audio(soundPath);
       audioRef.current.volume = volume;
@@ -11,15 +22,25 @@ export const useSoundEffect = (soundPath?: string, volume = 0.3) => {
     }
 
     return () => {
+      document.removeEventListener("click", handleFirstInteraction);
+      document.removeEventListener("keydown", handleFirstInteraction);
+
       if (audioRef.current) {
         audioRef.current.pause();
-        audioRef.current.src = ""; // release resource
+        audioRef.current.src = "";
         audioRef.current = null;
       }
     };
   }, [soundPath, volume]);
 
   const playSound = () => {
+    if (!isInteracted) {
+      // console.warn(
+      //   "Audio not played - document hasn't received user interaction yet"
+      // );
+      return;
+    }
+
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
     }
@@ -27,16 +48,13 @@ export const useSoundEffect = (soundPath?: string, volume = 0.3) => {
     if (audioRef.current) {
       try {
         audioRef.current.currentTime = 0;
-        audioRef.current.play().catch(() => {
-          playGeneratedSound();
+        audioRef.current.play().catch((e) => {
+          console.error("Audio playback error:", e);
         });
-        return;
       } catch (e) {
         console.error("Audio playback error:", e);
       }
     }
-
-    playGeneratedSound();
   };
 
   const stopSound = () => {
@@ -44,41 +62,6 @@ export const useSoundEffect = (soundPath?: string, volume = 0.3) => {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
-  };
-
-  const playGeneratedSound = () => {
-    try {
-      const audioCtx = new (window.AudioContext ||
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (window as any).webkitAudioContext)();
-
-      if (audioCtx.state === "suspended") {
-        audioCtx.resume().then(() => createAndPlaySound(audioCtx));
-      } else {
-        createAndPlaySound(audioCtx);
-      }
-    } catch (e) {
-      console.log("Generated audio error:", e);
-    }
-  };
-
-  const createAndPlaySound = (audioCtx: AudioContext) => {
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-
-    oscillator.type = "sine";
-    oscillator.frequency.value = 440;
-    gainNode.gain.value = 0.2;
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-
-    oscillator.start();
-    gainNode.gain.exponentialRampToValueAtTime(
-      0.001,
-      audioCtx.currentTime + 0.2
-    );
-    oscillator.stop(audioCtx.currentTime + 0.2);
   };
 
   return [playSound, stopSound] as const;

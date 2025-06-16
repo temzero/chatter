@@ -94,7 +94,6 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         },
         isLoading: false,
       }));
-      // console.log("all fetched messages: ", get().messages);
       return messages;
     } catch (error) {
       handleError(error, "Fail fetching messages");
@@ -208,3 +207,7 @@ export const useActiveChatDraft = () => {
     activeChatId ? state.getDraftMessage(activeChatId) : ""
   );
 };
+
+export const useMessageLoading = () => {
+  return useMessageStore((state) => state.isLoading);
+}

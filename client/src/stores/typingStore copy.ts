@@ -1,8 +1,10 @@
 import { create } from "zustand";
+import { shallow } from "zustand/shallow";
 import { useShallow } from "zustand/react/shallow";
+// import { useStoreWithEqualityFn } from "zustand/traditional";
 
 interface TypingState {
-  activeTyping: Record<string, string[]>; // chatId - UserId[]
+  activeTyping: Record<string, string[]>;
   startTyping: (chatId: string, userId: string) => void;
   stopTyping: (chatId: string, userId: string) => void;
   isTyping: (chatId: string, userId: string) => boolean;
@@ -14,6 +16,7 @@ export const useTypingStore = create<TypingState>((set, get) => ({
   startTyping: (chatId, userId) => {
     set((state) => {
       const currentTyping = state.activeTyping[chatId] || [];
+      // Only update if needed
       if (currentTyping.includes(userId)) return state;
 
       return {
@@ -48,21 +51,14 @@ export const useTypingStore = create<TypingState>((set, get) => ({
   },
 }));
 
-// Using useShallow to select multiple values
-export const useTypingInfo = (chatId: string) => {
-  return useTypingStore(
-    useShallow((state) => ({
-      typingUsers: state.activeTyping[chatId] || [],
-      isTyping: (userId: string) => state.isTyping(chatId, userId),
-      startTyping: state.startTyping,
-      stopTyping: state.stopTyping,
-    }))
-  );
+export const useTypingUsers = (chatId: string) => {
+  return useTypingStore((state) => state.activeTyping[chatId] || [], shallow);
 };
 
-// Keep your existing shallow selector for single value
-export const useTypingUsers = (chatId: string) => {
-  return useTypingStore(
-    useShallow((state) => state.activeTyping[chatId] || [])
-  );
-};
+// export const useTypingUsers = (chatId: string) => {
+//   return useStoreWithEqualityFn(
+//     useTypingStore,
+//     (state) => state.activeTyping[chatId] || [],
+//     shallow
+//   );
+// };

@@ -18,9 +18,9 @@ export const useChatBoxData = () => {
   // const isLoading = isMessageLoading || isChatLoading;
 
   console.log("useChatBoxData updated", {
-    activeChatId: activeChat?.id,
-    messagesCount: messages.length,
-    chatMembersCount: chatMembers.length,
+    activeChat,
+    messages: messages.length,
+    chatMembers: chatMembers.length,
     isLoading,
   });
 

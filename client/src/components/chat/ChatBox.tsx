@@ -5,18 +5,26 @@ import { useSoundEffect } from "@/hooks/useSoundEffect";
 import messageSound from "@/assets/sound/message-sent2.mp3";
 import { ChatType } from "@/types/enums/ChatType";
 import { useTypingStore } from "@/stores/typingStore";
-import TypingIndicator from "../ui/typingIndicator/TypingIndicator";
 import { useChatBoxData } from "@/hooks/useChatBoxData";
-import { useActiveChat } from "@/stores/chatStore";
+import TypingIndicator from "../ui/typingIndicator/TypingIndicator";
+import { useActiveChat, useChatStore } from "@/stores/chatStore";
+// import { useActiveChat } from "@/stores/chatStore";
 
 const ChatBox: React.FC = () => {
-  // console.log("chatBox Rendered");
-  const { activeChat, messages, chatMembers, isLoading } = useChatBoxData();
+  console.log("chatBox Rendered");
+  // const { activeChat, messages, chatMembers, isLoading } = useChatBoxData();
 
-  // const activeChat = useActiveChat();
-  // const messages = [];
-  // const chatMembers = [];
-  // const isLoading = false;
+  const activeChat = useChatStore.getState().activeChat;
+  const messages = [];
+  const chatMembers = [];
+  const isLoading = false;
+
+  console.log("ChatBox Data:", {
+    chatId: activeChat?.id,
+    messageCount: messages.length,
+    memberCount: chatMembers.length,
+    isLoading,
+  });
 
   const chatType = activeChat?.type || ChatType.DIRECT;
   const activeChatId = activeChat?.id || "";
@@ -136,11 +144,13 @@ const ChatBox: React.FC = () => {
         </div>
       )}
 
-      <TypingIndicator
-        chatId={activeChatId}
-        userIds={typingUsers}
-        members={chatMembers || []}
-      />
+      {!isLoading && (
+        <TypingIndicator
+          chatId={activeChatId}
+          userIds={typingUsers}
+          members={chatMembers || []}
+        />
+      )}
     </div>
   );
 };

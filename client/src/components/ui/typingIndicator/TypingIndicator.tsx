@@ -17,8 +17,12 @@ const TypingIndicator = ({
   userIds,
   members,
 }: TypingIndicatorProps) => {
-  // console.log("TypingIndicator Mounted");
+  console.log("TypingIndicator Mounted");
+  // console.log('Typing Indicator chatId', chatId)
+  // console.log('Typing Indicator userIds', userIds)
+  // console.log('Typing Indicator members', members)
   const [hasSettled, setHasSettled] = useState(true);
+  console.log('hasSettled', hasSettled)
   const previousChatIdRef = useRef<string | null>(null);
   const previousUserIdsLength = useRef(0);
   // const playTypingSound = useSoundEffect(typingSound, 0.5);

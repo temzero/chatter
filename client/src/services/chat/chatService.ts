@@ -14,7 +14,7 @@ export const chatService = {
   },
 
   // Get a specific chat by ID
-  async getChatById(chatId: string): Promise<ChatResponse> {
+  async fetchChatById(chatId: string): Promise<ChatResponse> {
     const response = await API.get<ApiSuccessResponse<ChatResponse>>(
       `/chat/${chatId}`
     );
