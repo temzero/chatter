@@ -1,4 +1,4 @@
-import React from "react";
+import { useActiveChat } from "@/stores/chatStore";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
@@ -7,35 +7,22 @@ import { FriendshipStatus } from "@/types/friendship";
 import { ChatType } from "@/types/enums/ChatType";
 import { OnlineDot } from "../ui/OnlineDot";
 import { useChatOnlineStatus } from "@/hooks/useChatOnlineStatus";
-import type { ChatResponse } from "@/types/chat";
+import React from "react";
 
-interface ChatHeaderProps {
-  chat: ChatResponse;
-}
+const ChatHeader: React.FC = () => {
+  console.log('ChatHeader mounted');
+  const activeChat = useActiveChat();
 
-const ChatHeader: React.FC<ChatHeaderProps> = ({ chat }) => {
-  console.log("CHAT HEADER rendered");
   const toggleSidebarInfo = useSidebarInfoStore(
     (state) => state.toggleSidebarInfo
   );
+  const isOnline = useChatOnlineStatus(activeChat?.id);
 
-  const isOnline = useChatOnlineStatus(chat?.id);
+  if (!activeChat) return null;
 
-  // Memoize derived values
-  const isChannel = React.useMemo(
-    () => chat.type === ChatType.CHANNEL,
-    [chat.type]
-  );
-  const isDirect = React.useMemo(
-    () => chat.type === ChatType.DIRECT,
-    [chat.type]
-  );
-  const isGroup = React.useMemo(
-    () => chat.type === ChatType.GROUP,
-    [chat.type]
-  );
-
-  if (!chat) return null;
+  const isChannel = activeChat.type === ChatType.CHANNEL;
+  const isDirect = activeChat.type === ChatType.DIRECT;
+  const isGroup = activeChat.type === ChatType.GROUP;
 
   return (
     <header
@@ -44,7 +31,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ chat }) => {
     >
       <AnimatePresence mode="wait">
         <motion.div
-          key={chat.id}
+          key={activeChat?.id || "no-chat"}
           className="flex gap-3 items-center cursor-pointer"
           initial={{ opacity: 0.2, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -55,16 +42,15 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ chat }) => {
             ease: "easeInOut",
           }}
         >
-          <ChatAvatar chat={chat} type="header" />
-          <h1 className="text-xl font-medium">{getChatName(chat)}</h1>
+          <ChatAvatar chat={activeChat} type="header" />
+          <h1 className="text-xl font-medium">{getChatName(activeChat)}</h1>
         </motion.div>
       </AnimatePresence>
 
       <div className="flex items-center gap-1">
         <div className="flex items-center cursor-pointer rounded-full opacity-60 hover:opacity-100 p-1">
           {isDirect &&
-            "chatPartner" in chat &&
-            chat.chatPartner?.friendshipStatus ===
+            activeChat.chatPartner?.friendshipStatus ===
               FriendshipStatus.ACCEPTED && (
               <i className="material-symbols-outlined text-3xl">
                 phone_enabled
@@ -84,9 +70,4 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ chat }) => {
   );
 };
 
-// Custom comparison function for React.memo
-const areEqual = (prevProps: ChatHeaderProps, nextProps: ChatHeaderProps) => {
-  return prevProps.chat?.id === nextProps.chat?.id;
-};
-
-export default React.memo(ChatHeader, areEqual);
+export default React.memo(ChatHeader);

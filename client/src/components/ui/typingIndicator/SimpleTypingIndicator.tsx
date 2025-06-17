@@ -7,7 +7,7 @@ interface TypingIndicatorProps {
 }
 
 const SimpleTypingIndicator = ({ chatId, userIds }: TypingIndicatorProps) => {
-  console.log("SimpleTypingIndicator Mounted");
+  // console.log("SimpleTypingIndicator Mounted");
 
   return (
     <AnimatePresence>

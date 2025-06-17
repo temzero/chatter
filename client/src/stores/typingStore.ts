@@ -61,7 +61,7 @@ export const useTypingInfo = (chatId: string) => {
 };
 
 // Keep your existing shallow selector for single value
-export const useTypingUsers = (chatId: string) => {
+export const useTypingUsersByChatId = (chatId: string) => {
   return useTypingStore(
     useShallow((state) => state.activeTyping[chatId] || [])
   );

@@ -1,16 +1,10 @@
 import { useActiveChatMessages } from "@/stores/messageStore";
-import {
-  useActiveChat,
-  useActiveMembersByChatId,
-  useIsChatLoading,
-} from "@/stores/chatStore";
+import { useActiveChat, useIsChatLoading } from "@/stores/chatStore";
 
 export const useChatBoxData = () => {
-  // console.log("useChatBoxData Rendered");
+  console.log("useChatBoxData Rendered");
   const activeChat = useActiveChat();
-  const activeChatId = activeChat?.id || "";
   const messages = useActiveChatMessages();
-  const chatMembers = useActiveMembersByChatId(activeChatId) || [];
   const isLoading = useIsChatLoading();
 
   // const isMessageLoading = useMessageLoading()
@@ -20,14 +14,12 @@ export const useChatBoxData = () => {
   console.log("useChatBoxData updated", {
     activeChatId: activeChat?.id,
     messagesCount: messages.length,
-    chatMembersCount: chatMembers.length,
     isLoading,
   });
 
   return {
     activeChat,
     messages,
-    chatMembers,
     isLoading,
   };
 };

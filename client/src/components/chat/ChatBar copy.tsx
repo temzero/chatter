@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
+import { useActiveChat } from "@/stores/chatStore";
 import { useMessageStore } from "@/stores/messageStore";
 import { motion } from "framer-motion";
 import EmojiPicker from "../ui/EmojiPicker";
@@ -8,15 +9,13 @@ import { SendMessagePayload } from "@/types/sendMessagePayload";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.socket.service";
 import useTypingIndicator from "@/hooks/useTypingIndicator";
 
-interface ChatBarProps {
-  chatId?: string;
-}
-
-const ChatBar: React.FC<ChatBarProps> = ({ chatId }) => {
+const ChatBar: React.FC = () => {
   console.log("CHAT BAR mounted");
+  const activeChat = useActiveChat();
+  const activeChatId = activeChat?.id
+
   const setDraftMessage = useMessageStore((state) => state.setDraftMessage);
   const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
-
   const inputRef = useRef<HTMLTextAreaElement>(null!);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isMessageSent, setIsMessageSent] = useState(false);
@@ -24,29 +23,35 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId }) => {
   const [filePreviewUrls, setFilePreviewUrls] = useState<string[]>([]);
   const [hasTextContent, setHasTextContent] = useState(false);
 
-  const { clearTypingState } = useTypingIndicator(inputRef, chatId ?? null);
+  // Get current input value without state
+  // const getInputValue = useCallback(() => inputRef.current?.value || "", []);
+  // useTypingIndicator(inputRef, activeChatId ?? null);
+  const { clearTypingState } = useTypingIndicator(
+    inputRef,
+    activeChatId ?? null
+  );
 
+  // Compute visibility based on content
   const shouldShowSendButton = hasTextContent || attachedFiles.length > 0;
 
   // Load draft message when chat changes
   useEffect(() => {
-    if (chatId && inputRef.current) {
-      const draft = getDraftMessage(chatId);
+    if (activeChatId && inputRef.current) {
+      const draft = getDraftMessage(activeChatId);
       inputRef.current.value = draft || "";
       setHasTextContent(!!draft?.trim());
       updateInputHeight();
     }
-  }, [chatId, getDraftMessage]);
+  }, [activeChatId, getDraftMessage]);
 
   // Save draft when unmounting
   useEffect(() => {
-    const inputValueAtMount = inputRef.current?.value;
     return () => {
-      if (chatId && inputValueAtMount) {
-        setDraftMessage(chatId, inputValueAtMount);
+      if (activeChatId && inputRef.current?.value) {
+        setDraftMessage(activeChatId, inputRef.current.value);
       }
     };
-  }, [chatId, setDraftMessage]);
+  }, [activeChatId, setDraftMessage]);
 
   // Focus management
   useEffect(() => {
@@ -65,7 +70,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId }) => {
   useEffect(() => {
     setAttachedFiles([]);
     setFilePreviewUrls([]);
-  }, [chatId]);
+  }, [activeChatId]);
 
   const updateInputHeight = () => {
     if (inputRef.current && containerRef.current) {
@@ -85,11 +90,11 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId }) => {
     const inputValue = inputRef.current?.value || "";
     const trimmedInput = inputValue.trim();
 
-    if ((trimmedInput || attachedFiles.length > 0) && chatId) {
+    if ((trimmedInput || attachedFiles.length > 0) && activeChatId) {
       if (inputRef.current) inputRef.current.value = "";
 
       const payload: SendMessagePayload = {
-        chatId: chatId,
+        chatId: activeChatId,
         content: trimmedInput || undefined,
         attachmentIds:
           attachedFiles.length > 0
@@ -99,12 +104,12 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId }) => {
 
       try {
         chatWebSocketService.sendMessage(payload);
-        chatWebSocketService.markAsRead(chatId);
+        chatWebSocketService.markAsRead(activeChatId);
       } catch (error) {
         console.error("Failed to send message:", error);
       }
       clearTypingState();
-      setDraftMessage(chatId, "");
+      setDraftMessage(activeChatId, "");
       setAttachedFiles([]);
       setFilePreviewUrls([]);
       setHasTextContent(false);
@@ -114,13 +119,13 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId }) => {
       updateInputHeight();
     }
     inputRef.current?.focus();
-  }, [chatId, attachedFiles, setDraftMessage, clearTypingState]);
+  }, [activeChatId, attachedFiles, setDraftMessage]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === "Escape") {
         if (inputRef.current) inputRef.current.value = "";
-        if (chatId) setDraftMessage(chatId, "");
+        if (activeChatId) setDraftMessage(activeChatId, "");
         setHasTextContent(false);
         updateInputHeight();
       } else if (e.key === "Enter" && !e.shiftKey) {
@@ -128,7 +133,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId }) => {
         handleSend();
       }
     },
-    [chatId, handleSend, setDraftMessage]
+    [activeChatId, handleSend, setDraftMessage]
   );
 
   const handleEmojiSelect = useCallback((emoji: string) => {
@@ -191,15 +196,15 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId }) => {
               : ""
           }`}
           placeholder={
-            chatId ? "Message..." : "Select a chat to start messaging"
+            activeChatId ? "Message..." : "Select a chat to start messaging"
           }
           aria-label="Message"
           rows={1}
-          disabled={!chatId}
+          disabled={!activeChatId}
         />
 
         <div className="flex items-center justify-between gap-2 h-[24px]">
-          {chatId && (
+          {activeChatId && (
             <>
               <motion.div
                 className="flex gap-2 items-center"

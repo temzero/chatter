@@ -1,76 +1,41 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Avatar } from "../avatar/Avatar";
-import { ChatMember } from "@/types/chat";
-import { useSoundEffect } from "@/hooks/useSoundEffect"; // <-- your custom hook
-import typingSound from "@/assets/sound/typing.mp3";
+import { useSoundEffect } from "@/hooks/useSoundEffect";
+import { useTypingMembers } from "@/hooks/useTypingMembers";
+import typingSound from "@/assets/sound/message-sent.mp3";
 import "./TypingIndicator.css";
+import React from "react";
 
 interface TypingIndicatorProps {
   chatId: string;
-  userIds: string[];
-  members?: ChatMember[] | []; // Optional prop for members, if needed
 }
 
-const TypingIndicator = ({
-  chatId,
-  userIds,
-  members,
-}: TypingIndicatorProps) => {
-  console.log("TypingIndicator Mounted");
-  // console.log('Typing Indicator chatId', chatId)
-  // console.log('Typing Indicator userIds', userIds)
-  // console.log('Typing Indicator members', members)
-  const [hasSettled, setHasSettled] = useState(true);
-  console.log('hasSettled', hasSettled)
-  const previousChatIdRef = useRef<string | null>(null);
-  const previousUserIdsLength = useRef(0);
-  // const playTypingSound = useSoundEffect(typingSound, 0.5);
+const TypingIndicator = ({ chatId }: TypingIndicatorProps) => {
+  console.log("TypingIndicator Mounted", chatId);
+
+  // const typingMembers = [];
+  const { typingMembers, isTyping } = useTypingMembers(chatId);
+  // console.log("typingMembers", typingMembers);
+
   const [playTypingSound, stopTypingSound] = useSoundEffect(typingSound, 1);
+  const previousTypingCount = useRef(0);
 
   // Play sound when someone starts typing
   useEffect(() => {
-    if (previousUserIdsLength.current === 0 && userIds.length > 0) {
+    if (previousTypingCount.current === 0 && isTyping) {
       playTypingSound();
     }
-    previousUserIdsLength.current = userIds.length;
-  }, [userIds, playTypingSound]);
-  // stop sound when TypingIndicator unmounts
-  useEffect(() => {
-    return () => {
-      stopTypingSound();
-    };
-  }, [stopTypingSound]);
+    previousTypingCount.current = typingMembers.length;
+  }, [isTyping, playTypingSound, typingMembers.length]);
 
-  // Detect change in chatId
-  useEffect(() => {
-    if (previousChatIdRef.current !== chatId) {
-      setHasSettled(false);
-      const timeout = setTimeout(() => setHasSettled(true), 0);
-      previousChatIdRef.current = chatId;
-      return () => clearTimeout(timeout);
-    }
-  }, [chatId]);
-
-  // Filter and sort members based on userIds
-  const typingMembers = useMemo(() => {
-    const userIdIndexMap = new Map(userIds.map((id, index) => [id, index]));
-
-    return (members ?? [])
-      .filter((member) => userIdIndexMap.has(member.userId))
-      .sort((a, b) => {
-        return (
-          (userIdIndexMap.get(a.userId) ?? 0) -
-          (userIdIndexMap.get(b.userId) ?? 0)
-        );
-      });
-  }, [members, userIds]);
+  // Stop sound on unmount
+  useEffect(() => stopTypingSound, [stopTypingSound]);
 
   const displayAvatars = useMemo(() => {
     return typingMembers.map((member) => (
       <div key={member.userId}>
         <Avatar
-          key={member.userId}
           avatarUrl={member.avatarUrl}
           firstName={member.firstName}
           lastName={member.lastName}
@@ -80,13 +45,10 @@ const TypingIndicator = ({
     ));
   }, [typingMembers]);
 
-  if (!hasSettled) return null;
-
   return (
     <AnimatePresence>
-      {userIds.length > 0 && (
+      {isTyping && (
         <motion.div
-          key={`${chatId}`}
           initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.5 }}
@@ -100,9 +62,7 @@ const TypingIndicator = ({
             exit={{ opacity: 0, scale: 0.5 }}
             transition={{
               duration: 0.2,
-              layout: {
-                duration: 0.2,
-              },
+              layout: { duration: 0.2 },
             }}
             className="flex items-center gap-4"
           >
@@ -119,4 +79,4 @@ const TypingIndicator = ({
   );
 };
 
-export default TypingIndicator;
+export default React.memo(TypingIndicator);

@@ -9,6 +9,7 @@ import { messageService } from "@/services/messageService";
 import { useMemo } from "react";
 import { handleError } from "@/utils/handleError";
 import { LastMessageResponse } from "@/types/chat";
+import { useShallow } from "zustand/shallow";
 
 interface ChatMessages {
   [chatId: string]: MessageResponse[];
@@ -188,6 +189,10 @@ export const useActiveChatMessages = () => {
   }, [activeChat, isLoading, messages]);
 };
 
+export const useMessagesByChatId = (chatId: string) => {
+  return useMessageStore(useShallow((state) => state.messages[chatId] || []));
+};
+
 export const useActiveChatAttachments = () => {
   const activeChat = useChatStore((state) => state.activeChat);
   const isLoading = useMessageStore((state) => state.isLoading);
@@ -210,4 +215,4 @@ export const useActiveChatDraft = () => {
 
 export const useMessageLoading = () => {
   return useMessageStore((state) => state.isLoading);
-}
+};

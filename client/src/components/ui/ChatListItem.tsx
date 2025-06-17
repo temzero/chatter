@@ -1,7 +1,6 @@
 import React from "react";
-import { useChatStore } from "@/stores/chatStore";
 import { useMessageStore } from "@/stores/messageStore";
-import { useTypingStore, useTypingUsers } from "@/stores/typingStore";
+import { useTypingUsersByChatId } from "@/stores/typingStore";
 import type { ChatResponse } from "@/types/chat";
 import { ChatAvatar } from "./avatar/ChatAvatar";
 import getChatName from "../../utils/getChatName";
@@ -9,43 +8,36 @@ import { getTimeAgo } from "@/utils/getTimeAgo";
 import { OnlineDot } from "./OnlineDot";
 import SimpleTypingIndicator from "./typingIndicator/SimpleTypingIndicator";
 import { AnimatePresence, motion } from "framer-motion";
+import { useChatOnlineStatus } from "@/hooks/useChatOnlineStatus";
+import { useChatStore, useIsActiveChat } from "@/stores/chatStore";
 
 interface ChatListItemProps {
   chat: ChatResponse;
   isCompact?: boolean;
-  isOnline: boolean;
   currentUserId: string;
 }
 
 const ChatListItem: React.FC<ChatListItemProps> = React.memo(
-  ({ chat, isCompact = false, isOnline, currentUserId = "" }) => {
-    // Use proper hooks instead of store.getState()
-    const activeChatId = useChatStore((state) => state.activeChat?.id);
-    const setActiveChatById = useChatStore((state) => state.setActiveChatById);
+  ({ chat, isCompact = false, currentUserId = "" }) => {
+    console.log("CHAT LIST ITEM");
+
     const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
+    const typingUsers = useTypingUsersByChatId(chat.id);
+    const isOnline = useChatOnlineStatus(chat?.id);
 
-    // console.log("ChatListItem rendered for chat:", chat.id);
-    const typingUsers = useTypingUsers(chat.id);
-    // const typingUsers = useTypingStore.getState().activeTyping[chat.id] || [];
-    console.log("typingUsers", typingUsers);
-    // const typingUsers = []
+    const setActiveChatById = useChatStore.getState().setActiveChatById;
+    const isActive = useIsActiveChat(chat.id);
 
-    const handleChatSelect = async () => {
-      try {
-        await setActiveChatById(chat.id);
-        console.log("SetActiveChat completed in ChatListItem:", chat.id);
-      } catch (error) {
-        console.error("Failed to set active chat:", error);
-      }
+    const handleClick = () => {
+      setActiveChatById(chat.id);
     };
 
     const getUserItemClass = () => {
       const baseClasses =
         "relative flex items-center w-full h-24 gap-3 p-3 transition-all duration-300 ease-in-out cursor-pointer";
-      const activeClasses =
-        activeChatId === chat.id
-          ? "bg-[var(--active-chat-color)]"
-          : "hover:bg-[var(--hover-color)]";
+      const activeClasses = isActive
+        ? "bg-[var(--active-chat-color)]"
+        : "hover:bg-[var(--hover-color)]";
       return `${baseClasses} ${activeClasses}`;
     };
 
@@ -76,7 +68,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
 
     return (
       <>
-        <div className={getUserItemClass()} onClick={handleChatSelect}>
+        <div className={getUserItemClass()} onClick={handleClick}>
           <OnlineDot
             isOnline={isOnline}
             className="absolute top-1/2 left-[3px] -translate-y-1/2"

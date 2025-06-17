@@ -4,6 +4,7 @@ import { chatWebSocketService } from "@/lib/websocket/services/chat.socket.servi
 import { webSocketService } from "@/lib/websocket/services/websocket.service";
 
 export const useChatOnlineStatus = (chatId?: string) => {
+  // console.log('useChatOnlineStatus', chatId)
   const [isOnline, setIsOnline] = useState(false);
 
   useEffect(() => {

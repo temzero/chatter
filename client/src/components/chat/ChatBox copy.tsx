@@ -3,43 +3,40 @@ import Message from "./Message";
 import ChannelMessage from "./MessageChannel";
 import { useSoundEffect } from "@/hooks/useSoundEffect";
 import messageSound from "@/assets/sound/message-sent2.mp3";
-import { useActiveChatMessages } from "@/stores/messageStore";
 import { ChatType } from "@/types/enums/ChatType";
-import { useActiveChat, useActiveMembersByChatId } from "@/stores/chatStore";
-import { useTypingStore } from "@/stores/typingStore";
 import TypingIndicator from "../ui/typingIndicator/TypingIndicator";
+import type { ChatResponse } from "@/types/chat";
+import { useMessagesByChatId } from "@/stores/messageStore";
 
-const ChatBox: React.FC = () => {
-  console.log('chatBox Rendered');
-  const activeChat = useActiveChat();
-  const chatType = activeChat?.type || ChatType.DIRECT;
-  const activeChatId = activeChat?.id || "";
-  const messages = useActiveChatMessages();
-  const chatMembers = useActiveMembersByChatId(activeChatId) || [];
-  // const messages = [];
-  // const chatMembers = [];
-  console.log('chatMembers', chatMembers);
-  console.log('messages', messages);
+interface ChatBoxProps {
+  chat?: ChatResponse;
+}
+
+const ChatBox: React.FC<ChatBoxProps> = ({ chat }) => {
+  console.log("CHAT BOX RENDERED");
+
+  const chatType = chat?.type || ChatType.DIRECT;
+  const chatId = chat?.id || "";
+  const messages = useMessagesByChatId(chatId);
+  console.log("messages: ", messages.length);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [previousMessageCount, setPreviousMessageCount] = useState(0);
-
-
-  const activeTyping = useTypingStore((state) => state.activeTyping);
-  const typingUsers = useMemo(() => {
-    const chatTypingSet = activeTyping[activeChatId] || new Set();
-    return Array.from(chatTypingSet);
-  }, [activeTyping, activeChatId]);
+  const [lastMessageId, setLastMessageId] = useState<string | null>(null);
+  const [isNewChat, setIsNewChat] = useState(true);
 
   const [playMessageSound] = useSoundEffect(messageSound, 0.5);
 
+  // Track the last message ID to properly detect new messages
   const newMessageAdded = useMemo(() => {
-    return messages.length > previousMessageCount;
-  }, [messages.length, previousMessageCount]);
+    if (!messages.length || isNewChat) return false;
+    return messages[messages.length - 1].id !== lastMessageId;
+  }, [messages, lastMessageId, isNewChat]);
 
   useEffect(() => {
-    setPreviousMessageCount(messages.length);
-  }, [messages.length]);
+    // Reset tracking when chat changes
+    setIsNewChat(true);
+    setLastMessageId(null);
+  }, [chatId]);
 
   const waitForMediaToLoad = (container: HTMLElement) => {
     const mediaElements = container.querySelectorAll("img, video, audio");
@@ -62,14 +59,26 @@ const ChatBox: React.FC = () => {
   };
 
   useEffect(() => {
-    if (newMessageAdded && containerRef.current) {
+    if (containerRef.current) {
       const container = containerRef.current;
-      waitForMediaToLoad(container).then(() => {
-        container.scrollTop = container.scrollHeight;
-        playMessageSound();
-      });
+
+      if (isNewChat) {
+        waitForMediaToLoad(container).then(() => {
+          container.scrollTop = container.scrollHeight;
+          if (messages.length) {
+            setLastMessageId(messages[messages.length - 1].id);
+          }
+          setIsNewChat(false);
+        });
+      } else if (newMessageAdded) {
+        waitForMediaToLoad(container).then(() => {
+          container.scrollTop = container.scrollHeight;
+          playMessageSound();
+          setLastMessageId(messages[messages.length - 1].id);
+        });
+      }
     }
-  }, [newMessageAdded, messages, playMessageSound]);
+  }, [messages, newMessageAdded, playMessageSound, isNewChat]);
 
   const groupedMessages = useMemo(() => {
     const groups: { date: string; messages: typeof messages }[] = [];
@@ -129,11 +138,7 @@ const ChatBox: React.FC = () => {
         </div>
       )}
 
-      <TypingIndicator
-        chatId={activeChatId}
-        userIds={typingUsers}
-        members={chatMembers || []}
-      />
+      <TypingIndicator chatId={chatId} />
     </div>
   );
 };

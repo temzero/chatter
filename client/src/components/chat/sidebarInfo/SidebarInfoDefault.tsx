@@ -10,6 +10,7 @@ import DirectChat from "./SidebarInfoEdit/DirectChat";
 import GroupChat from "./SidebarInfoEdit/GroupChat";
 
 const SidebarInfoDefault: React.FC = () => {
+  console.log('SIDEBAR-InfoDefault Rendered')
   const { activeChat } = useChatStore();
   // const activeAttachments = useActiveChatAttachments()
   // const activeAttachments: any[] = [];

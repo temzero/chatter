@@ -5,6 +5,7 @@ import { useMessageStore } from "./messageStore";
 import { chatMemberService } from "@/services/chat/chatMemberService";
 import { ChatType } from "@/types/enums/ChatType";
 import { useAuthStore } from "./authStore";
+import { useShallow } from "zustand/shallow";
 import type {
   ChatResponse,
   DirectChatResponse,
@@ -12,6 +13,7 @@ import type {
   ChatMember,
   LastMessageResponse,
 } from "@/types/chat";
+import React from "react";
 
 interface ChatStore {
   chats: ChatResponse[];
@@ -236,7 +238,7 @@ export const useChatStore = create<ChatStore>()(
                 ? get().getChatMembers(chat.id)
                 : [];
             await Promise.all([fetchMessages, fetchMembers]);
-            console.log("Fetched Data: ", fetchMessages, fetchMembers);
+            // console.log("Fetched Data: ", fetchMessages, fetchMembers);
             set((state) => ({
               chats: state.chats.map((c) =>
                 c.id === chat.id ? { ...c, unreadCount: 0 } : c
@@ -244,7 +246,7 @@ export const useChatStore = create<ChatStore>()(
               isLoading: false,
             }));
 
-            console.log("setActiveChat Finished");
+            // console.log("setActiveChat Finished");
           } catch (error) {
             console.error("Error in setActiveChat:", error);
             set({ isLoading: false });
@@ -253,7 +255,7 @@ export const useChatStore = create<ChatStore>()(
         },
 
         setActiveChatById: async (chatId) => {
-          console.log("setActiveChat By ID");
+          // console.log("setActiveChat By ID");
           if (!chatId) {
             await get().setActiveChat(null);
             return;
@@ -262,10 +264,10 @@ export const useChatStore = create<ChatStore>()(
           try {
             const existingChat = get().chats.find((chat) => chat.id === chatId);
             if (existingChat) {
-              console.log("Existing chat");
+              // console.log("Existing chat");
               await get().setActiveChat(existingChat);
             } else {
-              console.log("No Existing chat");
+              // console.log("No Existing chat");
 
               await get().fetchChatById(chatId);
               const fetchedChat = get().chats.find(
@@ -273,7 +275,7 @@ export const useChatStore = create<ChatStore>()(
               );
               if (fetchedChat) await get().setActiveChat(fetchedChat);
             }
-            console.log("setActiveChat ByID Finished");
+            // console.log("setActiveChat ByID Finished");
           } catch (error) {
             console.error("Failed to set active chat:", error);
             set({ error: "Failed to load chat" });
@@ -589,7 +591,13 @@ export const useChatStore = create<ChatStore>()(
   )
 );
 
-export const useActiveChat = () => useChatStore((state) => state.activeChat);
+export const useActiveChat = () =>
+  useChatStore(useShallow((state) => state.activeChat));
+
+export const useIsActiveChat = (chatId: string): boolean =>
+  useChatStore(
+    React.useCallback((state) => state.activeChat?.id === chatId, [chatId])
+  );
 
 export const useAllChats = () => useChatStore((state) => state.chats);
 
