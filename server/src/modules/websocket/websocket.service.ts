@@ -1,17 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { Server } from 'socket.io';
-import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
-
-type UserConnectionStatus = {
-  userId: string;
-  wasLastConnection: boolean;
-} | null;
+import { ChatMemberService } from '../chat-member/chat-member.service';
 
 @Injectable()
 export class WebsocketService {
+  private server: Server;
+
+  // Tracks all active connections
   private readonly userSocketMap = new Map<string, Set<string>>(); // userId → socketIds
   private readonly socketUserMap = new Map<string, string>(); // socketId → userId
-  private server: Server;
+
+  // Presence subscription system
+  private readonly presenceSubscriptions = new Map<string, Set<string>>(); // targetUserId → subscriberSocketIds
+  private readonly socketSubscriptions = new Map<string, Set<string>>(); // socketId → targetUserIds
 
   constructor(private readonly chatMemberService: ChatMemberService) {}
 
@@ -19,47 +20,22 @@ export class WebsocketService {
     this.server = server;
   }
 
-  getServer(): Server {
-    return this.server;
-  }
-
-  async userConnected(userId: string, socketId: string): Promise<boolean> {
+  // Connection Management
+  userConnected(userId: string, socketId: string): boolean {
     this.socketUserMap.set(socketId, userId);
 
     const isFirstConnection = !this.userSocketMap.has(userId);
-    if (!this.userSocketMap.has(userId)) {
-      this.userSocketMap.set(userId, new Set([socketId]));
-    } else {
-      this.userSocketMap.get(userId)!.add(socketId);
-    }
-
-    console.log('isFirstConnection', isFirstConnection);
-
     if (isFirstConnection) {
-      const chatIds = await this.chatMemberService.getChatIdsByUserId(userId);
-      console.log('User connected :', userId);
-
-      for (const chatId of chatIds) {
-        const otherMembers =
-          await this.chatMemberService.getAllMemberIds(chatId);
-
-        otherMembers.forEach((memberId) => {
-          if (memberId !== userId && this.isUserOnline(memberId)) {
-            this.server
-              .to(this.getUserSocketIds(memberId))
-              .emit('chat:statusChanged', {
-                chatId,
-                isOnline: true,
-              });
-          }
-        });
-      }
+      this.userSocketMap.set(userId, new Set());
     }
+    this.userSocketMap.get(userId)!.add(socketId);
 
     return isFirstConnection;
   }
 
-  async userDisconnected(socketId: string): Promise<UserConnectionStatus> {
+  userDisconnected(
+    socketId: string,
+  ): { userId: string; wasLastConnection: boolean } | null {
     const userId = this.socketUserMap.get(socketId);
     if (!userId) return null;
 
@@ -72,53 +48,67 @@ export class WebsocketService {
 
     if (wasLastConnection) {
       this.userSocketMap.delete(userId);
-      const chatIds = await this.chatMemberService.getChatIdsByUserId(userId);
-
-      for (const chatId of chatIds) {
-        const memberIds = await this.chatMemberService.getAllMemberIds(chatId);
-        const otherOnlineMembers = memberIds.filter(
-          (memberId) => memberId !== userId && this.isUserOnline(memberId),
-        );
-
-        if (otherOnlineMembers.length === 1) {
-          const remainingUserId = otherOnlineMembers[0];
-          const remainingUserSockets = this.userSocketMap.get(remainingUserId);
-
-          if (remainingUserSockets) {
-            for (const socketId of remainingUserSockets) {
-              this.server.to(socketId).emit('chat:statusChanged', {
-                chatId,
-                userId,
-                isOnline: false,
-              });
-            }
-          }
-        }
-      }
     }
+
+    // Clean up presence subscriptions
+    this.removeAllSubscriptionsForSocket(socketId);
 
     return { userId, wasLastConnection };
   }
 
-  getOnlineUsers(): string[] {
-    return Array.from(this.userSocketMap.keys());
+  // Presence Subscription System
+  addPresenceSubscriber(socketId: string, targetUserId: string): void {
+    // Add to target's subscriber list
+    if (!this.presenceSubscriptions.has(targetUserId)) {
+      this.presenceSubscriptions.set(targetUserId, new Set());
+    }
+    this.presenceSubscriptions.get(targetUserId)!.add(socketId);
+
+    // Add to socket's subscription list
+    if (!this.socketSubscriptions.has(socketId)) {
+      this.socketSubscriptions.set(socketId, new Set());
+    }
+    this.socketSubscriptions.get(socketId)!.add(targetUserId);
+  }
+
+  removeAllSubscriptionsForSocket(socketId: string): void {
+    // Remove from all target users' subscription lists
+    const targetUserIds = this.socketSubscriptions.get(socketId);
+    if (targetUserIds) {
+      for (const targetUserId of targetUserIds) {
+        const subscribers = this.presenceSubscriptions.get(targetUserId);
+        if (subscribers) {
+          subscribers.delete(socketId);
+          if (subscribers.size === 0) {
+            this.presenceSubscriptions.delete(targetUserId);
+          }
+        }
+      }
+      this.socketSubscriptions.delete(socketId);
+    }
+  }
+
+  getSubscribersForUser(userId: string): string[] {
+    return Array.from(this.presenceSubscriptions.get(userId) || []);
+  }
+
+  // Status Utilities
+  isUserOnline(userId: string): boolean {
+    return this.userSocketMap.has(userId);
   }
 
   getUsersStatus(userIds: string[]): Record<string, boolean> {
     const result: Record<string, boolean> = {};
     userIds.forEach((userId) => {
-      result[userId] = this.userSocketMap.has(userId);
+      result[userId] = this.isUserOnline(userId);
     });
     return result;
   }
 
+  // Helper Methods
   getUserSocketIds(userId: string): string[] {
     const sockets = this.userSocketMap.get(userId);
     return sockets ? Array.from(sockets) : [];
-  }
-
-  isUserOnline(userId: string): boolean {
-    return this.userSocketMap.has(userId);
   }
 
   async emitToChatMembers(chatId: string, event: string, payload: any) {
@@ -131,16 +121,5 @@ export class WebsocketService {
         this.server.to(socketId).emit(event, payload);
       }
     }
-  }
-
-  async hasMoreThanTwoUsersOnline(
-    chatId: string,
-    excludeUserId: string,
-  ): Promise<boolean> {
-    const memberIds = await this.chatMemberService.getAllMemberIds(chatId);
-    const onlineCount = memberIds
-      .filter((id) => id !== excludeUserId)
-      .filter((id) => this.isUserOnline(id)).length;
-    return onlineCount > 2;
   }
 }

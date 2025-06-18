@@ -6,8 +6,9 @@ import getChatName from "@/utils/getChatName";
 import { FriendshipStatus } from "@/types/friendship";
 import { ChatType } from "@/types/enums/ChatType";
 import { OnlineDot } from "../ui/OnlineDot";
-import { useChatOnlineStatus } from "@/hooks/useChatOnlineStatus";
+// import { useChatOnlineStatus } from "@/hooks/useChatOnlineStatus";
 import type { ChatResponse } from "@/types/chat";
+import { useChatStatus } from "@/stores/presenceStore";
 
 interface ChatHeaderProps {
   chat: ChatResponse;
@@ -19,7 +20,9 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ chat }) => {
     (state) => state.toggleSidebarInfo
   );
 
-  const isOnline = useChatOnlineStatus(chat?.id);
+  // const isOnline = useChatOnlineStatus(chat?.id);
+  const isOnline = useChatStatus(chat?.id);
+  console.log('isOnline', isOnline)
 
   // Memoize derived values
   const isChannel = React.useMemo(
@@ -84,9 +87,4 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ chat }) => {
   );
 };
 
-// Custom comparison function for React.memo
-const areEqual = (prevProps: ChatHeaderProps, nextProps: ChatHeaderProps) => {
-  return prevProps.chat?.id === nextProps.chat?.id;
-};
-
-export default React.memo(ChatHeader, areEqual);
+export default React.memo(ChatHeader);

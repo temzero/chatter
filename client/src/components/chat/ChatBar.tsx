@@ -163,7 +163,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId }) => {
   }, []);
 
   return (
-    <div className="backdrop-blur-[199px] w-full flex flex-col items-center p-4 justify-between shadow border-[var(--border-color)] z-40 relative">
+    <div className="absolute bottom-0 left-0 backdrop-blur-xl w-full flex flex-col items-center p-4 justify-between shadow border-[var(--border-color)] z-40">
       {filePreviewUrls.length > 0 && (
         <FileImportPreviews
           files={attachedFiles}

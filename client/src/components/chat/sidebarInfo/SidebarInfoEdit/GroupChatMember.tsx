@@ -3,6 +3,7 @@ import { OnlineDot } from "@/components/ui/OnlineDot";
 import { useUserOnlineStatus } from "@/hooks/useUserOnlineStatus";
 import { useCurrentUser } from "@/stores/authStore";
 import { useChatStore } from "@/stores/chatStore";
+import { useUserStatus } from "@/stores/presenceUsersStore";
 
 interface MemberItemProps {
   member: {
@@ -18,7 +19,8 @@ interface MemberItemProps {
 
 const MemberItem: React.FC<MemberItemProps> = ({ member }) => {
   const currentUser = useCurrentUser();
-  const isMemberOnline = useUserOnlineStatus(member.userId);
+  // const isMemberOnline = useUserOnlineStatus(member.userId);
+  const isMemberOnline = useUserStatus(member.userId);
   const { createOrGetDirectChat } = useChatStore();
 
   const isCurrentUser = currentUser?.id === member.userId;

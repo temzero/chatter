@@ -1,4 +1,3 @@
-// components/PrivateLayout.tsx
 import { ROUTES } from "@/constants/routes";
 import { useEffect, useState } from "react";
 import Modal from "@/components/modal/Modal";
@@ -12,10 +11,9 @@ import { useIsAuthenticated } from "@/stores/authStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { useFriendshipStore } from "@/stores/friendshipStore";
-import { usePresenceUserStore } from "@/stores/presenceUsersStore"; // Add this import
 import { useChatSocketListeners } from "@/lib/websocket/hooks/useChatSocketListener";
 import { useWebSocket } from "@/lib/websocket/hooks/useWebsocket";
-// Remove usePresenceSocketListeners import
+import { usePresenceSocketListeners } from "@/lib/websocket/hooks/usePresenceSocketListeners";
 
 export const ChatContent: React.FC = () => {
   const { id: chatId } = useParams();
@@ -29,39 +27,32 @@ export const ChatContent: React.FC = () => {
     setActiveChatById,
   } = useChatStore();
   const { fetchPendingRequests } = useFriendshipStore();
-  const { initialize: initializePresence } = usePresenceUserStore(); // Add this
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useWebSocket();
+  usePresenceSocketListeners();
   useChatSocketListeners();
 
+  // Initialization effect with proper sequencing
   useEffect(() => {
     const initialize = async () => {
       try {
         setIsLoading(true);
         setError(null);
 
-        // 1. Initialize auth first
+        // 1. Initialize auth first (everything depends on this)
         await initializeAuth();
 
-        // 2. Initialize chats and friendships
+        // 2. Initialize chats in parallel with friendships (they both need auth but don't depend on each other)
         await Promise.all([initializeChats(), fetchPendingRequests()]);
 
-        // 3. Set active chat
+        // 3. Set active chat after chats are loaded
         await setActiveChatById(chatId || null);
 
-        // 4. Initialize presence (after chats are loaded)
-        const cleanupPresence = initializePresence();
-
-        // 5. Initialize sidebar UI components
+        // 4. Initialize sidebar UI components (can happen last)
         initializeSidebar();
         initializeSidebarInfo();
-
-        // Cleanup on unmount
-        return () => {
-          cleanupPresence();
-        };
       } catch (err) {
         console.error("Initialization error:", err);
         setError("Failed to initialize application data");
@@ -76,11 +67,10 @@ export const ChatContent: React.FC = () => {
     fetchPendingRequests,
     initializeAuth,
     initializeChats,
-    initializePresence, // Add to dependencies
     initializeSidebar,
     initializeSidebarInfo,
     setActiveChatById,
-  ]);
+  ]); // Only chatId as dependency since store methods are stable
 
   if (isLoading) {
     return (

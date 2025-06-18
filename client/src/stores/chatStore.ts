@@ -33,6 +33,8 @@ interface ChatStore {
   setActiveChat: (chat: ChatResponse | null) => Promise<void>;
   setActiveChatById: (chatId: string | null) => Promise<void>;
   getChatMembers: (chatId: string) => Promise<ChatMember[]>;
+  getAllChatMemberIds: () => string[];
+  getAllUserIdsInChats: () => string[];
   createOrGetDirectChat: (partnerId: string) => Promise<DirectChatResponse>;
   createGroupChat: (payload: {
     name: string;
@@ -179,6 +181,20 @@ export const useChatStore = create<ChatStore>()(
           }
         },
 
+        getAllChatMemberIds: () => {
+          const { chatMembers } = get();
+          const allMemberIds = new Set<string>();
+
+          // Iterate through all chat members in all chats
+          Object.values(chatMembers).forEach((members) => {
+            members.forEach((member) => {
+              allMemberIds.add(member.userId);
+            });
+          });
+
+          return Array.from(allMemberIds);
+        },
+
         setSearchTerm: (term) => {
           const { chats } = get();
 
@@ -208,6 +224,27 @@ export const useChatStore = create<ChatStore>()(
             searchTerm: term,
             filteredChats: filtered,
           });
+        },
+
+        getAllUserIdsInChats: (): string[] => {
+          const { chats, chatMembers } = get();
+          const allUserIds = new Set<string>();
+
+          // Process all chats
+          chats.forEach((chat) => {
+            if (chat.type === ChatType.DIRECT) {
+              // Add direct chat partner
+              allUserIds.add(chat.chatPartner.userId);
+            } else {
+              // Add all group chat members
+              const members = chatMembers[chat.id] || [];
+              members.forEach((member) => {
+                allUserIds.add(member.userId);
+              });
+            }
+          });
+
+          return Array.from(allUserIds);
         },
 
         setActiveChat: async (chat) => {

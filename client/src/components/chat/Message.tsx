@@ -11,7 +11,8 @@ import { ChatType } from "@/types/enums/ChatType";
 
 // Animation configurations
 const myMessageAnimation = {
-  initial: { opacity: 0, scale: 0.1, x: -1000, y: 160 },
+  // initial: { opacity: 0, scale: 0.1, x: -1000, y: 160 },
+  initial: { opacity: 0, scale: 0.1, x: 100, y: 0 },
   animate: { opacity: 1, scale: 1, x: 0, y: 0 },
   transition: { type: "spring", stiffness: 300, damping: 29 },
 };
@@ -32,12 +33,16 @@ interface MessageProps {
   message: MessageResponse;
   chatType?: ChatType;
   shouldAnimate?: boolean;
+  showInfo?: boolean;
+  isRecent?: boolean;
 }
 
 const Message: React.FC<MessageProps> = ({
   message,
   chatType = ChatType.DIRECT, // Default to direct chat
   shouldAnimate = false,
+  showInfo = true,
+  isRecent = false,
 }) => {
   const currentUser = useCurrentUser();
   const deleteMessage = useMessageStore((state) => state.deleteMessage);
@@ -50,6 +55,8 @@ const Message: React.FC<MessageProps> = ({
   const alignmentClass = {
     "ml-auto": isMe,
     "mr-auto": !isMe,
+    "pb-1": isRecent, // messages in middle of sequence
+    "pb-8": !isRecent, // standalone messages or end of sequence
   };
 
   const iconAlignmentClass = {
@@ -57,9 +64,9 @@ const Message: React.FC<MessageProps> = ({
     "absolute -bottom-1 -right-2": !isMe,
   };
 
-  const displayName =
-    message.senderNickname ||
-    `${message.senderFirstName} ${message.senderLastName}`;
+  const displayName = message.senderNickname || message.senderFirstName;
+
+  // `${message.senderFirstName} ${message.senderLastName}`;
 
   // Handle copy text
   const handleCopyText = () => {
@@ -98,21 +105,23 @@ const Message: React.FC<MessageProps> = ({
 
   return (
     <motion.div
-      className={classNames("flex max-w-[60%] mb-1 group", alignmentClass)}
+      className={classNames("flex max-w-[60%] group", alignmentClass)}
       initial={animationProps.initial}
       animate={animationProps.animate}
       transition={animationProps.transition}
     >
-      {/* Sender Avatar */}
-      {isGroupChat && !isMe && (
-        <div className="mt-auto mr-1 h-10 w-10 min-w-10 min-h-10 flex items-center justify-center rounded-full object-cover custom-border overflow-hidden">
-          <Avatar
-            avatarUrl={message.senderAvatarUrl}
-            firstName={message.senderFirstName}
-            lastName={message.senderLastName}
-          />
-        </div>
-      )}
+      {isGroupChat &&
+        (showInfo && !isMe ? (
+          <div className="mt-auto mr-1 h-10 w-10 min-w-10 min-h-10 flex items-center justify-center rounded-full object-cover custom-border overflow-hidden">
+            <Avatar
+              avatarUrl={message.senderAvatarUrl}
+              firstName={message.senderFirstName}
+              lastName={message.senderLastName}
+            />
+          </div>
+        ) : (
+          <div className="w-10 mr-1"></div>
+        ))}
 
       <div className="flex relative flex-col">
         {/* Media and Text */}
@@ -160,16 +169,17 @@ const Message: React.FC<MessageProps> = ({
         )}
 
         {/* Sender Info */}
-        <div className={classNames("flex items-end h-5", alignmentClass)}>
-          {isGroupChat && !isMe && (
-            <h1 className="text-sm font-semibold opacity-70 mr-2">
-              {displayName}
-            </h1>
-          )}
+        {showInfo && isGroupChat && !isMe && (
+          <h1 className="text-sm font-semibold opacity-70 mr-2">
+            {displayName}
+          </h1>
+        )}
+
+        {!isRecent && (
           <p className="opacity-0 group-hover:opacity-40 text-xs">
             {formatTime(message.createdAt)}
           </p>
-        </div>
+        )}
 
         {/* Action Buttons */}
         <div

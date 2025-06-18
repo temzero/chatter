@@ -8,8 +8,9 @@ import { getTimeAgo } from "@/utils/getTimeAgo";
 import { OnlineDot } from "./OnlineDot";
 import SimpleTypingIndicator from "./typingIndicator/SimpleTypingIndicator";
 import { AnimatePresence, motion } from "framer-motion";
-import { useChatOnlineStatus } from "@/hooks/useChatOnlineStatus";
+// import { useChatOnlineStatus } from "@/hooks/useChatOnlineStatus";
 import { useChatStore, useIsActiveChat } from "@/stores/chatStore";
+import { useChatStatus } from "@/stores/presenceStore";
 
 interface ChatListItemProps {
   chat: ChatResponse;
@@ -23,7 +24,10 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
 
     const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
     const typingUsers = useTypingUsersByChatId(chat.id);
-    const isOnline = useChatOnlineStatus(chat?.id);
+    // const isOnline = useChatOnlineStatus(chat?.id);
+    const isOnline = useChatStatus(chat?.id);
+
+    console.log("ChatListItem isOnline", isOnline);
 
     const setActiveChatById = useChatStore.getState().setActiveChatById;
     const isActive = useIsActiveChat(chat.id);
@@ -122,4 +126,4 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
   }
 );
 
-export default ChatListItem;
+export default React.memo(ChatListItem);
