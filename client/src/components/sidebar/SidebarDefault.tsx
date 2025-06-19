@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useChatStore } from "@/stores/chatStore";
+import { useAllChats } from "@/stores/chatStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { Logo } from "../ui/Logo";
 import { SlidingContainer } from "../ui/SlidingContainer";
@@ -11,12 +11,10 @@ import { SidebarMode } from "@/types/enums/sidebarMode";
 const chatTypes = ["all", "direct", "group", "channel"];
 
 const SidebarDefault: React.FC = () => {
-  // const chats = useChatStore((state) => state.chats, shallow);
-  const chats = useChatStore.getState().chats;
-  // const chats = []
+  const chats = useAllChats()
+  console.log('chats', chats)
   
   const setSidebar = useSidebarStore((state) => state.setSidebar);
-  // const isCompact = useSidebarStore((state) => state.isCompact);
   const isCompact = useSidebarStore((state) => state.isCompact);
   const toggleCompact = useSidebarStore((state) => state.toggleCompact);
 

@@ -44,7 +44,6 @@ export class ChatController {
   > {
     try {
       const chats = await this.chatService.getChatsByUserId(userId);
-
       return new SuccessResponse(chats, 'User chats retrieved successfully');
     } catch (error: unknown) {
       ErrorResponse.throw(error, 'Failed to retrieve user chats');

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { webSocketService } from "../services/websocket.service";
-import { usePresenceStore } from "@/stores/presenceStore";
+import { usePresenceStore } from "@/stores/chatPresenceStore";
 
 export function usePresenceListener() {
   const setOnlineStatus = usePresenceStore((s) => s.setOnlineStatus);
@@ -13,7 +13,7 @@ export function usePresenceListener() {
       userId: string;
       isOnline: boolean;
     }) => {
-      console.log('detect Friend isOnline', data.isOnline, data.userId)
+      console.log("detect Friend isOnline", data.isOnline, data.userId);
       setOnlineStatus(data.userId, data.isOnline);
     };
 

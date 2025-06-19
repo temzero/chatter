@@ -7,7 +7,7 @@ import { FriendshipResDto, ReceivedRequestsResDto, SentRequestResDto } from "@/t
 type FriendshipState = {
   receivedRequests: ReceivedRequestsResDto[];
   sentRequests: SentRequestResDto[];
-  loading: boolean;
+  isLoading: boolean;
   error: string | null;
 };
 
@@ -31,11 +31,11 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
   (set) => ({
     receivedRequests: [],
     sentRequests: [],
-    loading: false,
+    isLoading: false,
     error: null,
 
     sendFriendRequest: async (receiverId, message) => {
-      set({ loading: true, error: null });
+      set({ isLoading: true, error: null });
       try {
         const newSentRequest = await friendshipService.sendRequest(
           receiverId,
@@ -44,7 +44,7 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
         console.log("newSentRequest", newSentRequest);
         set((state) => ({
           sentRequests: [...state.sentRequests, newSentRequest],
-          loading: false,
+          isLoading: false,
         }));
         return newSentRequest;
       } catch (error) {
@@ -54,20 +54,20 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
             error instanceof Error
               ? error.message
               : "Failed to send friend request",
-          loading: false,
+          isLoading: false,
         });
         throw error;
       }
     },
 
     fetchPendingRequests: async () => {
-      set({ loading: true, error: null });
+      set({ isLoading: true, error: null });
       try {
         const { sent, received } = await friendshipService.getPendingRequests();
         set({
           receivedRequests: received,
           sentRequests: sent,
-          loading: false,
+          isLoading: false,
         });
       } catch (error) {
         console.error("Failed to fetch friend requests:", error);
@@ -76,20 +76,20 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
             error instanceof Error
               ? error.message
               : "Failed to fetch friend requests",
-          loading: false,
+          isLoading: false,
         });
       }
     },
 
     respondToRequest: async (friendshipId, status) => {
-      set({ loading: true, error: null });
+      set({ isLoading: true, error: null });
       try {
         const friendShip = await friendshipService.respondToRequest(friendshipId, status);
         set((state) => ({
           receivedRequests: state.receivedRequests.filter(
             (req) => req.id !== friendshipId
           ),
-          loading: false,
+          isLoading: false,
         }));
         return friendShip;
       } catch (error) {
@@ -99,21 +99,21 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
             error instanceof Error
               ? error.message
               : "Failed to respond to friend request",
-          loading: false,
+          isLoading: false,
         });
         throw error;
       }
     },
 
     cancelRequest: async (friendshipId) => {
-      set({ loading: true, error: null });
+      set({ isLoading: true, error: null });
       try {
         await friendshipService.deleteRequest(friendshipId);
         set((state) => ({
           sentRequests: state.sentRequests.filter(
             (req) => req.id !== friendshipId
           ),
-          loading: false,
+          isLoading: false,
         }));
       } catch (error) {
         console.error("Failed to cancel friend request:", error);
@@ -122,14 +122,14 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
             error instanceof Error
               ? error.message
               : "Failed to cancel friend request",
-          loading: false,
+          isLoading: false,
         });
         throw error;
       }
     },
 
     deleteFriendshipByUserId: async (userId) => {
-      set({ loading: true, error: null });
+      set({ isLoading: true, error: null });
       try {
         await friendshipService.deleteByUserId(userId);
         set((state) => ({
@@ -137,7 +137,7 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
           sentRequests: state.sentRequests.filter(
             (req) => req.receiverId !== userId
           ),
-          loading: false,
+          isLoading: false,
         }));
       } catch (error) {
         console.error("Failed to delete friendship:", error);
@@ -146,7 +146,7 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
             error instanceof Error
               ? error.message
               : "Failed to delete friendship",
-          loading: false,
+          isLoading: false,
         });
         throw error;
       }

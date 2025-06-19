@@ -6,12 +6,13 @@ import AvatarEdit from "@/components/ui/avatar/AvatarEdit";
 import { fileStorageService } from "@/services/storage/fileStorageService";
 import { handleError } from "@/utils/handleError";
 import { toast } from "react-toastify";
+import { useActiveMembers } from "@/stores/chatMemberStore";
 
 const GroupChatEdit = () => {
   const activeChat = useChatStore(
     (state) => state.activeChat
   ) as GroupChatResponse;
-  const activeMembers = useChatStore((state) => state.activeMembers);
+  const activeMembers = useActiveMembers();
   const deleteChat = useChatStore((state) => state.deleteChat);
   const leaveGroupChat = useChatStore((state) => state.leaveGroupChat);
   const updateGroupChat = useChatStore((state) => state.updateGroupChat);

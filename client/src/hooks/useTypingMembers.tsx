@@ -1,8 +1,8 @@
 // hooks/useTypingMembers.ts
 import { useMemo } from "react";
 import { useTypingUsersByChatId } from "@/stores/typingStore";
-import { useActiveMembersByChatId } from "@/stores/chatStore";
 import { ChatMember } from "@/types/chat";
+import { useActiveMembersByChatId } from "@/stores/chatMemberStore";
 
 type UseTypingMembersResult = {
   typingMembers: ChatMember[];

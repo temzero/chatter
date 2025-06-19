@@ -4,7 +4,7 @@ import type { ApiSuccessResponse } from "@/types/apiSuccessResponse";
 
 export const chatMemberService = {
   // Get all members of a chat
-  async getChatMembers(chatId: string): Promise<ChatMember[]> {
+  async fetchChatMembers(chatId: string): Promise<ChatMember[]> {
     const response = await API.get<ApiSuccessResponse<ChatMember[]>>(
       `/chat-members/${chatId}`
     );

@@ -1,9 +1,8 @@
 import { useActiveChatMessages } from "@/stores/messageStore";
 import {
   useActiveChat,
-  useActiveMembersByChatId,
-  useIsChatLoading,
 } from "@/stores/chatStore";
+import { useActiveMembersByChatId } from "@/stores/chatMemberStore";
 
 export const useChatBoxData = () => {
   // console.log("useChatBoxData Rendered");

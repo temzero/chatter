@@ -9,6 +9,8 @@ import { OnlineDot } from "../ui/OnlineDot";
 // import { useChatOnlineStatus } from "@/hooks/useChatOnlineStatus";
 import type { ChatResponse } from "@/types/chat";
 import { useChatStatus } from "@/stores/presenceStore";
+import { useChatMemberStore } from "@/stores/chatMemberStore";
+// import { useChatStatus } from "@/stores/presenceStore";
 
 interface ChatHeaderProps {
   chat: ChatResponse;
@@ -20,9 +22,12 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ chat }) => {
     (state) => state.toggleSidebarInfo
   );
 
+  const chatListMembers = useChatMemberStore.getState().chatMembers[chat.id];
+  console.log("chat Header Members", chat.type, chatListMembers);
+
   // const isOnline = useChatOnlineStatus(chat?.id);
-  const isOnline = useChatStatus(chat?.id);
-  console.log('isOnline', isOnline)
+  const isOnline = useChatStatus(chat?.id, chat.type);
+  console.log("ChatHeader isOnline", isOnline);
 
   // Memoize derived values
   const isChannel = React.useMemo(

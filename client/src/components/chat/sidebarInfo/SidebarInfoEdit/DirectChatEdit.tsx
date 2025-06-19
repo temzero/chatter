@@ -8,6 +8,7 @@ import { useFriendshipStore } from "@/stores/friendshipStore";
 import { FriendshipStatus } from "@/types/friendship";
 import { handleError } from "@/utils/handleError";
 import { toast } from "react-toastify";
+import { useChatMemberStore } from "@/stores/chatMemberStore";
 
 const DirectChatEdit = () => {
   const currentUser = useCurrentUser();
@@ -17,7 +18,7 @@ const DirectChatEdit = () => {
   const fetchChatById = useChatStore((state) => state.fetchChatById);
   const chatPartner = activeChat.chatPartner;
   const deleteChat = useChatStore((state) => state.deleteChat);
-  const updateMemberNickname = useChatStore(
+  const updateMemberNickname = useChatMemberStore(
     (state) => state.updateMemberNickname
   );
   const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);

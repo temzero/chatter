@@ -28,6 +28,7 @@ export interface GroupChatResponse extends BaseChatResponse {
   description?: string | null;
   myRole?: ChatMemberRole;
   memberCount?: number;
+  memberIds?: string[]
 }
 
 // Simplified Chat Partner (similar to ChatPartnerDto)

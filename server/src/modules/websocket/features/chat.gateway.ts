@@ -22,27 +22,6 @@ export class ChatGateway {
     private readonly messageMapper: MessageMapper,
   ) {}
 
-  handleConnection(client: AuthenticatedSocket) {
-    try {
-      const userId = client.data?.userId;
-      if (!userId) {
-        console.log(`Unauthenticated connection attempt from ${client.id}`);
-        client.disconnect();
-        return;
-      }
-    } catch (error) {
-      console.error('Connection error:', error);
-      client.disconnect();
-    }
-  }
-
-  handleDisconnect(client: AuthenticatedSocket) {
-    const userId = client.data?.userId;
-    console.log(
-      `Client disconnected: ${client.id}, User: ${userId || 'unknown'}`,
-    );
-  }
-
   @SubscribeMessage(`${chatLink}getStatus`)
   async handleGetStatus(
     @ConnectedSocket() client: AuthenticatedSocket,
@@ -63,10 +42,6 @@ export class ChatGateway {
   ) {
     const userId = client.data.userId;
     if (!userId) return;
-
-    console.log(
-      `User ${userId} is typing in chat ${data.chatId}: ${data.isTyping}`,
-    );
 
     const payload = {
       chatId: data.chatId,

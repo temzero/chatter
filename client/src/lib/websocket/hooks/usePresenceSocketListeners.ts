@@ -1,19 +1,19 @@
 // hooks/usePresenceSocketListeners.ts
 import { useEffect } from "react";
 import { webSocketService } from "../services/websocket.service";
-import { usePresenceUserStore } from "@/stores/presenceUsersStore";
+import { usePresenceUserStore } from "@/stores/presenceStore";
 import { useChatStore } from "@/stores/chatStore";
 
 export function usePresenceSocketListeners() {
   useEffect(() => {
     const socket = webSocketService.getSocket();
-    console.log('usePresenceSocketListeners socket', socket)
+    console.log("usePresenceSocketListeners socket", socket);
 
     if (!socket) return;
 
     // Get all user IDs from chats (direct partners + group members)
     const userIds = useChatStore.getState().getAllUserIdsInChats();
-    console.log('usePresenceSocketListeners userIds', userIds)
+    console.log("usePresenceSocketListeners userIds", userIds);
 
     // Subscribe to presence updates for these users
     socket.emit("presence:subscribe", userIds);

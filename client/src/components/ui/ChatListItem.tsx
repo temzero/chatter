@@ -11,6 +11,7 @@ import { AnimatePresence, motion } from "framer-motion";
 // import { useChatOnlineStatus } from "@/hooks/useChatOnlineStatus";
 import { useChatStore, useIsActiveChat } from "@/stores/chatStore";
 import { useChatStatus } from "@/stores/presenceStore";
+import { useChatMemberStore } from "@/stores/chatMemberStore";
 
 interface ChatListItemProps {
   chat: ChatResponse;
@@ -24,16 +25,21 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
 
     const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
     const typingUsers = useTypingUsersByChatId(chat.id);
-    // const isOnline = useChatOnlineStatus(chat?.id);
-    const isOnline = useChatStatus(chat?.id);
 
+    // const chatListMembers = useChatStore(state => state.chatMembers[chat.id]);
+    const chatListMembers = useChatMemberStore.getState().chatMembers[chat.id];
+    console.log('chat List Members', chat.type, chatListMembers)
+
+    const isOnline = useChatStatus(chat?.id, chat.type);
     console.log("ChatListItem isOnline", isOnline);
 
     const setActiveChatById = useChatStore.getState().setActiveChatById;
     const isActive = useIsActiveChat(chat.id);
 
     const handleClick = () => {
-      setActiveChatById(chat.id);
+      if (!isActive) {
+        setActiveChatById(chat.id);
+      }
     };
 
     const getUserItemClass = () => {

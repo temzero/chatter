@@ -36,4 +36,5 @@ export class GroupChatResponseDto extends BaseChatResponseDto {
   @Expose() description?: string | null;
   @Expose() myRole?: ChatMemberRole;
   @Expose() memberCount?: number;
+  @Expose() memberIds?: string[];
 }

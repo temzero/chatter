@@ -1,6 +1,6 @@
 // components/PrivateLayout.tsx
 import { ROUTES } from "@/constants/routes";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Modal from "@/components/modal/Modal";
 import Sidebar from "@/components/sidebar/Sidebar";
 import Chat from "@/components/chat/Chat";
@@ -15,8 +15,7 @@ import { useFriendshipStore } from "@/stores/friendshipStore";
 import { usePresenceUserStore } from "@/stores/presenceStore";
 import { useChatSocketListeners } from "@/lib/websocket/hooks/useChatSocketListener";
 import { useWebSocket } from "@/lib/websocket/hooks/useWebsocket";
-import { PuffLoader } from "react-spinners";
-import ErrorView from "@/components/ui/ErrorView";
+// Remove usePresenceSocketListeners import
 
 export const ChatContent: React.FC = () => {
   const { id: chatId } = useParams();
@@ -28,15 +27,11 @@ export const ChatContent: React.FC = () => {
     initialize: initializeChats,
     activeChat,
     setActiveChatById,
-    isLoading: chatsLoading,
-    error: chatError,
   } = useChatStore();
-  const {
-    fetchPendingRequests,
-    isLoading: friendshipsLoading,
-    error: friendshipsError,
-  } = useFriendshipStore();
+  const { fetchPendingRequests } = useFriendshipStore();
   const { initialize: initializePresence } = usePresenceUserStore();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useWebSocket();
   useChatSocketListeners();
@@ -44,28 +39,34 @@ export const ChatContent: React.FC = () => {
   useEffect(() => {
     const initialize = async () => {
       try {
-        // setInitializationStatus("loading");
+        setIsLoading(true);
+        setError(null);
 
         // 1. Initialize auth first
         await initializeAuth();
 
-        // 2. Initialize chats and friendships in parallel
+        // 2. Initialize chats and friendships
         await Promise.all([initializeChats(), fetchPendingRequests()]);
 
-        // 3. Set active chat after data is loaded
+        // 3. Set active chat
         await setActiveChatById(chatId || null);
 
-        // 4. Initialize presence
-        initializePresence();
+        // 4. Initialize presence (after chats are loaded)
+        const cleanupPresence = initializePresence();
 
         // 5. Initialize sidebar UI components
         initializeSidebar();
         initializeSidebarInfo();
 
-        // setInitializationStatus("success");
-      } catch (error) {
-        console.error("Initialization error:", error);
-        // setInitializationStatus("error");
+        // Cleanup on unmount
+        return () => {
+          cleanupPresence();
+        };
+      } catch (err) {
+        console.error("Initialization error:", err);
+        setError("Failed to initialize application data");
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -75,45 +76,29 @@ export const ChatContent: React.FC = () => {
     fetchPendingRequests,
     initializeAuth,
     initializeChats,
-    initializePresence,
+    initializePresence, // Add to dependencies
     initializeSidebar,
     initializeSidebarInfo,
     setActiveChatById,
   ]);
 
-  // Show loading if initialization is in progress or stores are loading
-  if (
-    chatsLoading ||
-    friendshipsLoading
-  ) {
+  if (isLoading) {
     return (
-    <div className="w-full h-full flex items-center justify-center">
-      <PuffLoader color="#6a6a6a" />;
-    </div>
-    )
-  }
-
-  // Show error if initialization failed or stores have errors
-  if (chatError || friendshipsError) {
-    return (
-      <ErrorView
-        message={
-          chatError || friendshipsError || "Failed to initialize application"
-        }
-        onRetry={() => window.location.reload()}
-      />
+      <div className="flex items-center justify-center h-full w-full">
+        <h1>Loading...</h1>
+      </div>
     );
   }
 
-  return activeChat ? (
-    <Chat />
-  ) : (
-    <div className="flex items-center justify-center h-full w-full bg-[var(--chat-bg-color)]">
-      <div className="text-center text-[var(--text-secondary)]">
-        <p className="text-xl">Select a chat to start messaging</p>
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full text-red-500">
+        {error}
       </div>
-    </div>
-  );
+    );
+  }
+
+  return activeChat ? <Chat /> : "";
 };
 
 const PrivateLayout: React.FC = () => {

@@ -218,7 +218,11 @@ export class ChatService {
               friendshipStatus ?? undefined,
             );
           } else {
-            return this.transformToGroupChatDto(chat, userId);
+            // For group/channel chats, transform and include memberIds
+            const dto = this.transformToGroupChatDto(chat, userId);
+            // Add memberIds only for non-direct chats
+            dto.memberIds = chat.members.map((member) => member.userId);
+            return dto;
           }
         }),
       );

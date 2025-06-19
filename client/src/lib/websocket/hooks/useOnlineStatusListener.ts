@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.socket.service";
 import { webSocketService } from "@/lib/websocket/services/websocket.service";
 import type { ChatResponse } from "@/types/chat";
-import { usePresenceStore } from "@/stores/presenceStore";
+import { usePresenceStore } from "@/stores/chatPresenceStore";
 
 export function useOnlineStatusListener(chats: ChatResponse[]) {
   console.log("LISTEN FOR ONLINE STATUS");
@@ -18,7 +18,7 @@ export function useOnlineStatusListener(chats: ChatResponse[]) {
       chatId: string;
       isOnline: boolean;
     }) => {
-        console.log('statusHandler', payload.chatId, payload.isOnline)
+      console.log("statusHandler", payload.chatId, payload.isOnline);
       setChatStatus(payload.chatId, payload.isOnline);
     };
 
@@ -27,7 +27,7 @@ export function useOnlineStatusListener(chats: ChatResponse[]) {
 
     // Initial status fetch
     const fetchStatuses = async () => {
-        console.log('fetchStatuses fetchStatuses fetchStatuses')
+      console.log("fetchStatuses fetchStatuses fetchStatuses");
       for (const chat of chats) {
         try {
           const status = await chatWebSocketService.getChatStatus(chat.id);
