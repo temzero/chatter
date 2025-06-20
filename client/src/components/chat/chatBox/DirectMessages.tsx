@@ -1,20 +1,48 @@
 import React, { useMemo } from "react";
-import Message from "./Message";
-import ChannelMessage from "./MessageChannel";
-import { ChatType } from "@/types/enums/ChatType";
-import type { MessageResponse } from "@/types/messageResponse";
+import Message from "../Message";
+import { MessageResponse } from "@/types/messageResponse";
+import { DirectChatResponse } from "@/types/chat";
+import { chatMemberService } from "@/services/chat/chatMemberService";
+import { useCurrentUser } from "@/stores/authStore";
 
-interface GroupMessagesProps {
+interface DirectMessagesProps {
+  chat: DirectChatResponse;
   messages: MessageResponse[];
-  chatType: ChatType;
-  chatId: string;
 }
 
-const ChatBoxMessages: React.FC<GroupMessagesProps> = ({
-  messages,
-  chatType,
-  chatId,
-}) => {
+const DirectMessages: React.FC<DirectMessagesProps> = ({ chat, messages }) => {
+  const chatId = chat?.id;
+  const currentUser = useCurrentUser();
+
+  // Update my last read at
+  if (chat?.myMemberId) {
+    chatMemberService.updateLastRead(chat.myMemberId);
+  }
+
+  const myLastReadAt = chat.myLastReadAt;
+  const partnerLastReadAt = chat.chatPartner.lastReadAt;
+
+  // Compute my last read message ID
+  const myLastReadMessageId = useMemo(() => {
+    if (!myLastReadAt) return null;
+    const flatMessages = messages.slice().reverse();
+    const lastReadMsg = flatMessages.find(
+      (msg) => new Date(msg.createdAt) <= new Date(myLastReadAt)
+    );
+    return lastReadMsg?.id || null;
+  }, [messages, myLastReadAt]);
+
+  // Compute partner's last read message ID
+  const partnerLastReadMessageId = useMemo(() => {
+    if (!partnerLastReadAt) return null;
+    const flatMessages = messages.slice().reverse();
+    const lastReadMsg = flatMessages.find(
+      (msg) => new Date(msg.createdAt) <= new Date(partnerLastReadAt)
+    );
+    return lastReadMsg?.id || null;
+  }, [messages, partnerLastReadAt]);
+
+  // Group messages by date
   const messagesByDate = useMemo(() => {
     const groups: { date: string; messages: MessageResponse[] }[] = [];
 
@@ -35,23 +63,20 @@ const ChatBoxMessages: React.FC<GroupMessagesProps> = ({
     return groups;
   }, [messages]);
 
-  // Helper function to determine if showInfo should be true
   const shouldShowInfo = (
     currentMsg: MessageResponse,
     _prevMsg: MessageResponse | undefined,
     nextMsg: MessageResponse | undefined
   ) => {
-    // Show info only if the next message is from a different sender or does not exist
     return !nextMsg || nextMsg.senderId !== currentMsg.senderId;
   };
 
-  // Helper function to determine if message is recent (within 5 minutes)
   const isRecentMessage = (
     currentMsg: MessageResponse,
     prevMsg: MessageResponse | undefined,
     nextMsg: MessageResponse | undefined
   ) => {
-    const RECENT_MESSAGE_PERIOD = 10 * 60 * 1000; // 10m
+    const RECENT_MESSAGE_PERIOD = 10 * 60 * 1000; // 10 minutes
 
     const prevIsRecent =
       prevMsg &&
@@ -67,7 +92,6 @@ const ChatBoxMessages: React.FC<GroupMessagesProps> = ({
         new Date(currentMsg.createdAt).getTime() <=
         RECENT_MESSAGE_PERIOD;
 
-    // If it has a prev recent msg, but no recent next msg => it's the last in the block => not recent
     if (prevIsRecent && !nextIsRecent) {
       return false;
     }
@@ -98,16 +122,28 @@ const ChatBoxMessages: React.FC<GroupMessagesProps> = ({
             const showInfo = shouldShowInfo(msg, prevMsg, nextMsg);
             const isRecent = isRecentMessage(msg, prevMsg, nextMsg);
 
-            return chatType === ChatType.CHANNEL ? (
-              <ChannelMessage key={msg.id} message={msg} />
-            ) : (
+            // Avatars shown only on the user's exact last read message
+            const readMarkers: string[] = [];
+
+            if (msg.id === myLastReadMessageId && currentUser?.avatarUrl) {
+              readMarkers.push(currentUser.avatarUrl);
+            }
+
+            if (
+              msg.id === partnerLastReadMessageId &&
+              chat.chatPartner.avatarUrl
+            ) {
+              readMarkers.push(chat.chatPartner.avatarUrl);
+            }
+
+            return (
               <Message
                 key={msg.id}
                 message={msg}
-                chatType={chatType}
                 shouldAnimate={true}
                 showInfo={showInfo}
                 isRecent={isRecent}
+                readUserAvatars={readMarkers}
               />
             );
           })}
@@ -117,4 +153,4 @@ const ChatBoxMessages: React.FC<GroupMessagesProps> = ({
   );
 };
 
-export default React.memo(ChatBoxMessages);
+export default React.memo(DirectMessages);

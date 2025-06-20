@@ -35,11 +35,26 @@ export class ChatMemberController {
   }
 
   @Get(':chatId/:userId')
-  async getMember(
+  async getMemberByChatIdAndUserId(
     @Param('chatId') chatId: string,
     @Param('userId') userId: string,
   ): Promise<SuccessResponse<ChatMemberResponseDto>> {
-    const member = await this.memberService.getMember(chatId, userId);
+    const member = await this.memberService.getMemberByChatIdAndUserId(
+      chatId,
+      userId,
+    );
+    const memberResponse = mapChatMemberToResponseDto(member);
+    return new SuccessResponse(
+      memberResponse,
+      'Chat member retrieved successfully',
+    );
+  }
+
+  @Get(':memberId')
+  async getMember(
+    @Param('memberId') memberId: string,
+  ): Promise<SuccessResponse<ChatMemberResponseDto>> {
+    const member = await this.memberService.getMember(memberId);
     const memberResponse = mapChatMemberToResponseDto(member);
     return new SuccessResponse(
       memberResponse,

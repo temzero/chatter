@@ -10,7 +10,6 @@ import { useMemo } from "react";
 import { handleError } from "@/utils/handleError";
 import { LastMessageResponse } from "@/types/chat";
 import { useShallow } from "zustand/shallow";
-import { useChatMemberStore } from "./chatMemberStore";
 
 interface ChatMessages {
   [chatId: string]: MessageResponse[];
@@ -21,7 +20,7 @@ export interface MessageStore {
   drafts: Record<string, string>;
   isLoading: boolean;
 
-  fetchMessages: (chatId: string) => Promise<void>;
+  fetchMessages: (chatId: string) => void;
   addMessage: (newMessage: MessageResponse) => void;
   deleteMessage: (messageId: string) => void;
   getChatMessages: (chatId: string) => MessageResponse[];
@@ -30,11 +29,6 @@ export interface MessageStore {
   getDraftMessage: (chatId: string) => string;
   setChatMessages: (chatId: string, messages: MessageResponse[]) => void;
   clearChatMessages: (chatId: string) => void;
-  getUnreadMessagesCount: (chatId: string, memberId: string) => number;
-  isMessageReadByMember: (
-    message: MessageResponse,
-    memberId: string
-  ) => boolean;
 }
 
 export const getAttachmentsFromMessages = (
@@ -101,6 +95,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         },
         isLoading: false,
       }));
+      return messages;
     } catch (error) {
       handleError(error, "Fail fetching messages");
       set({ isLoading: false });
@@ -181,34 +176,9 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
       messages: remainingMessages,
     });
   },
-
-  getUnreadMessagesCount: (chatId, memberId) => {
-    const messages = get().messages[chatId] || [];
-    const member = useChatMemberStore
-      .getState()
-      .getChatMember(chatId, memberId);
-
-    if (!member || !member.lastReadAt) return messages.length;
-
-    return messages.filter(
-      (message) =>
-        member.lastReadAt !== null &&
-        new Date(message.createdAt) > new Date(member.lastReadAt as string)
-    ).length;
-  },
-
-  isMessageReadByMember: (message, memberId) => {
-    const member = useChatMemberStore
-      .getState()
-      .getChatMember(message.chatId, memberId);
-    return (
-      !!member?.lastReadAt &&
-      new Date(member.lastReadAt) >= new Date(message.createdAt)
-    );
-  },
 }));
 
-// Custom hooks for easier consumption in components
+// // Custom hooks for easier consumption in components
 export const useActiveChatMessages = () => {
   const activeChat = useChatStore((state) => state.activeChat);
   const messages = useMessageStore((state) => state.messages);
@@ -245,19 +215,4 @@ export const useActiveChatDraft = () => {
 
 export const useMessageLoading = () => {
   return useMessageStore((state) => state.isLoading);
-};
-
-export const useUnreadMessagesCount = (chatId: string, memberId: string) => {
-  return useMessageStore((state) =>
-    state.getUnreadMessagesCount(chatId, memberId)
-  );
-};
-
-export const useIsMessageReadByMember = (
-  message: MessageResponse,
-  memberId: string
-) => {
-  return useMessageStore((state) =>
-    state.isMessageReadByMember(message, memberId)
-  );
 };

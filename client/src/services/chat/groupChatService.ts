@@ -8,7 +8,7 @@ export const groupChatService = {
   // Create a new Group/Channel
   async createGroupChat(payload: {
     name: string;
-    memberIds: string[];
+    userIds: string[];
     type: ChatType.GROUP | ChatType.CHANNEL;
   }): Promise<GroupChatResponse> {
     const response = await API.post<ApiSuccessResponse<GroupChatResponse>>(

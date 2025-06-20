@@ -34,13 +34,13 @@ interface ChatStore {
   setActiveChat: (chat: ChatResponse | null) => Promise<void>;
   setActiveChatById: (chatId: string | null) => Promise<void>;
   fetchChatMembers: (chatId: string) => Promise<ChatMember[]>;
-  getChatMemberIds: (chatId: string, type: ChatType) => string[];
+  getChatMemberUserIds: (chatId: string, type: ChatType) => string[];
   getAllChatMemberIds: () => string[];
   getAllUserIdsInChats: () => string[];
   createOrGetDirectChat: (partnerId: string) => Promise<DirectChatResponse>;
   createGroupChat: (payload: {
     name: string;
-    memberIds: string[];
+    userIds: string[];
     type: ChatType.GROUP | ChatType.CHANNEL;
   }) => Promise<GroupChatResponse>;
   updateDirectChat: (
@@ -219,7 +219,7 @@ export const useChatStore = create<ChatStore>()(
           }
         },
 
-        getChatMemberIds: (chatId: string, type: ChatType): string[] => {
+        getChatMemberUserIds: (chatId: string, type: ChatType): string[] => {
           if (type === ChatType.DIRECT) {
             const chat = get().chats.find(
               (c) => c.id === chatId
@@ -708,7 +708,7 @@ export const useActiveMembers = () => {
   return activeChat ? chatMembers[activeChat.id] || [] : [];
 };
 
-export const useActiveMembersByChatId = (chatId: string) => {
+export const useMembersByChatId = (chatId: string) => {
   const chatMembers = useChatStore((state) => state.chatMembers);
   return chatMembers[chatId] || [];
 };

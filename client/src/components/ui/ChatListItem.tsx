@@ -11,7 +11,6 @@ import { AnimatePresence, motion } from "framer-motion";
 // import { useChatOnlineStatus } from "@/hooks/useChatOnlineStatus";
 import { useChatStore, useIsActiveChat } from "@/stores/chatStore";
 import { useChatStatus } from "@/stores/presenceStore";
-import { useChatMemberStore } from "@/stores/chatMemberStore";
 
 interface ChatListItemProps {
   chat: ChatResponse;
@@ -25,10 +24,6 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
 
     const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
     const typingUsers = useTypingUsersByChatId(chat.id);
-
-    // const chatListMembers = useChatStore(state => state.chatMembers[chat.id]);
-    const chatListMembers = useChatMemberStore.getState().chatMembers[chat.id];
-    console.log('chat List Members', chat.type, chatListMembers)
 
     const isOnline = useChatStatus(chat?.id, chat.type);
     console.log("ChatListItem isOnline", isOnline);
@@ -81,7 +76,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
         <div className={getUserItemClass()} onClick={handleClick}>
           <OnlineDot
             isOnline={isOnline}
-            className="absolute top-1/2 left-[3px] -translate-y-1/2"
+            className={`absolute top-1/2 left-[3px] -translate-y-1/2 ${isActive && 'bg-white border'}`}
           />
           <ChatAvatar chat={chat} type="sidebar" />
 

@@ -1,6 +1,8 @@
 import React, { useRef, useEffect } from "react";
-import ChatBoxMessages from "./ChatBoxMessages";
-import TypingIndicator from "../ui/typingIndicator/TypingIndicator";
+import DirectMessages from "./DirectMessages";
+import GroupMessages from "./GroupMessages";
+import ChannelMessages from "./ChannelMessages";
+import TypingIndicator from "../../ui/typingIndicator/TypingIndicator";
 import type { ChatResponse } from "@/types/chat";
 import { useMessagesByChatId } from "@/stores/messageStore";
 import { ChatType } from "@/types/enums/ChatType";
@@ -11,10 +13,9 @@ interface ChatBoxProps {
 
 const ChatBox: React.FC<ChatBoxProps> = ({ chat }) => {
   console.log("CHAT BOX RENDERED");
-  const chatType = chat?.type || ChatType.DIRECT;
   const chatId = chat?.id || "";
   const messages = useMessagesByChatId(chatId);
-  console.log("messages: ", messages.length);
+  console.log("activeChat", chat);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -25,25 +26,30 @@ const ChatBox: React.FC<ChatBoxProps> = ({ chat }) => {
   };
 
   useEffect(() => {
-    scrollToBottom()
+    scrollToBottom();
   }, [chatId, messages.length]);
 
-  // useEffect(() => {
-  //   // Delay to ensure messages are rendered before scrolling
-  //   const timeout = setTimeout(scrollToBottom, 0);
-  //   return () => clearTimeout(timeout);
-  // }, [chatId, messages.length]);
+  const renderMessages = () => {
+    if (!chat) return null;
+
+    switch (chat.type) {
+      case ChatType.DIRECT:
+        return <DirectMessages chat={chat} messages={messages} />;
+      case ChatType.GROUP:
+        return <GroupMessages chat={chat} messages={messages} />;
+      case ChatType.CHANNEL:
+        return <ChannelMessages chat={chat} messages={messages} />;
+      default:
+        return <DirectMessages chat={chat} messages={messages} />;
+    }
+  };
 
   return (
     <div
       ref={containerRef}
       className="px-6 py-16 pb-[160px] flex-1 h-full w-full flex flex-col overflow-x-hidden overflow-y-auto backdrop-blur-sm"
     >
-      <ChatBoxMessages
-        messages={messages}
-        chatType={chatType}
-        chatId={chatId}
-      />
+      {chat && renderMessages()}
       <TypingIndicator chatId={chatId} />
     </div>
   );

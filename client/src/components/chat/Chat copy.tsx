@@ -3,7 +3,7 @@ import { useActiveChat } from "@/stores/chatStore";
 import SidebarInfo from "./sidebarInfo/SidebarInfo";
 import ChatHeader from "./ChatHeader";
 import ChatBar from "./ChatBar";
-import ChatBox from "./ChatBox";
+import ChatBox from "./chatBox/ChatBox";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import React from "react";
 import { ChatResponse } from "@/types/chat";

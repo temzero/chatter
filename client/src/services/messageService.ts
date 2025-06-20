@@ -3,7 +3,6 @@ import { SendMessagePayload } from "@/types/sendMessagePayload";
 import { MessageResponse } from "@/types/messageResponse";
 import { UpdateMessageDto } from "@/types/updateMessageDto";
 
-
 export const messageService = {
   async getChatMessages(
     chatId: string,
@@ -34,10 +33,5 @@ export const messageService = {
 
   async deleteMessage(messageId: string): Promise<void> {
     await API.delete(`/messages/${messageId}`);
-  },
-
-  // Either implement in controller or remove:
-  async markAsRead(messageIds: string[]): Promise<void> {
-    await API.patch("/messages/mark-read", { messageIds });
   },
 };

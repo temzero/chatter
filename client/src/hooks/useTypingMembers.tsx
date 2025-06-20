@@ -2,7 +2,7 @@
 import { useMemo } from "react";
 import { useTypingUsersByChatId } from "@/stores/typingStore";
 import { ChatMember } from "@/types/chat";
-import { useActiveMembersByChatId } from "@/stores/chatMemberStore";
+import { useMembersByChatId } from "@/stores/chatMemberStore";
 
 type UseTypingMembersResult = {
   typingMembers: ChatMember[];
@@ -10,7 +10,7 @@ type UseTypingMembersResult = {
 };
 
 export const useTypingMembers = (chatId: string): UseTypingMembersResult => {
-  const members = useActiveMembersByChatId(chatId) as ChatMember[];
+  const members = useMembersByChatId(chatId) as ChatMember[];
   const typingUserIds = useTypingUsersByChatId(chatId);
 
   const typingMembers = useMemo(() => {

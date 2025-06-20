@@ -8,6 +8,9 @@ export class ChatPartnerDto {
   userId: string;
 
   @Expose()
+  memberId: string;
+
+  @Expose()
   avatarUrl: string | null;
 
   @IsOptional()
@@ -40,4 +43,7 @@ export class ChatPartnerDto {
 
   @Expose()
   friendshipStatus?: FriendshipStatus;
+
+  @Expose()
+  lastReadAt?: Date | null;
 }

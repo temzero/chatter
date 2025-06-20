@@ -82,15 +82,12 @@ export const ChatContent: React.FC = () => {
   ]);
 
   // Show loading if initialization is in progress or stores are loading
-  if (
-    chatsLoading ||
-    friendshipsLoading
-  ) {
+  if (chatsLoading || friendshipsLoading) {
     return (
-    <div className="w-full h-full flex items-center justify-center">
-      <PuffLoader color="#6a6a6a" />;
-    </div>
-    )
+      <div className="w-full h-full flex items-center justify-center">
+        <PuffLoader color="#6a6a6a" />;
+      </div>
+    );
   }
 
   // Show error if initialization failed or stores have errors
@@ -105,15 +102,7 @@ export const ChatContent: React.FC = () => {
     );
   }
 
-  return activeChat ? (
-    <Chat />
-  ) : (
-    <div className="flex items-center justify-center h-full w-full bg-[var(--chat-bg-color)]">
-      <div className="text-center text-[var(--text-secondary)]">
-        <p className="text-xl">Select a chat to start messaging</p>
-      </div>
-    </div>
-  );
+  return activeChat ? <Chat /> : null;
 };
 
 const PrivateLayout: React.FC = () => {

@@ -47,12 +47,12 @@ export class ChatService {
       ErrorResponse.badRequest('Missing userId');
     }
 
-    const memberIds = [myUserId, partnerId];
+    const memberUserIds = [myUserId, partnerId];
     const userCount = await this.userRepo.count({
-      where: { id: In(memberIds) },
+      where: { id: In(memberUserIds) },
     });
 
-    if (userCount !== memberIds.length) {
+    if (userCount !== memberUserIds.length) {
       ErrorResponse.badRequest('One or more Users do not exist!');
     }
 
@@ -93,7 +93,7 @@ export class ChatService {
       name: null,
     });
 
-    await this.addMembers(chat.id, memberIds);
+    await this.addMembers(chat.id, memberUserIds);
     const fullChat = await this.getFullChat(chat.id);
 
     return {
@@ -110,8 +110,8 @@ export class ChatService {
     userId: string,
     createDto: CreateGroupChatDto,
   ): Promise<ChatResponseDto> {
-    const allMemberIds = [userId, ...createDto.memberIds];
-    const memberCount = allMemberIds.length;
+    const allUserIds = [userId, ...createDto.userIds];
+    const memberCount = allUserIds.length;
 
     if (createDto.type === ChatType.GROUP && memberCount < 2) {
       ErrorResponse.badRequest('Group must have at least 2 members');
@@ -122,7 +122,7 @@ export class ChatService {
     }
 
     const userCount = await this.userRepo.count({
-      where: { id: In(allMemberIds) },
+      where: { id: In(allUserIds) },
     });
 
     if (userCount !== memberCount) {
@@ -130,7 +130,7 @@ export class ChatService {
     }
 
     const chat = await this.chatRepo.save(createDto);
-    await this.addMembers(chat.id, allMemberIds, userId);
+    await this.addMembers(chat.id, allUserIds, userId);
     const fullChat = await this.getFullChat(chat.id);
 
     return this.transformToGroupChatDto(fullChat, userId);
@@ -221,7 +221,7 @@ export class ChatService {
             // For group/channel chats, transform and include memberIds
             const dto = this.transformToGroupChatDto(chat, userId);
             // Add memberIds only for non-direct chats
-            dto.memberIds = chat.members.map((member) => member.userId);
+            dto.memberUserIds = chat.members.map((member) => member.userId);
             return dto;
           }
         }),
@@ -267,12 +267,14 @@ export class ChatService {
     // Base fields that are always included
     const chatPartnerDto: Partial<ChatPartnerDto> = {
       userId: chatPartnerUser.id,
+      memberId: chatPartner.id,
       avatarUrl: chatPartnerUser.avatarUrl,
       nickname: chatPartner.nickname,
       firstName: chatPartnerUser.firstName,
       lastName: chatPartnerUser.lastName,
       bio: chatPartnerUser.bio,
       friendshipStatus: friendshipStatus ?? undefined,
+      lastReadAt: chatPartner.lastReadAt,
     };
 
     // Only include sensitive fields if friendship is accepted
@@ -288,6 +290,8 @@ export class ChatService {
     const dto: DirectChatResponseDto = {
       id: chat.id,
       myNickname: myMember?.nickname,
+      myMemberId: myMember?.id ?? '',
+      myLastReadAt: myMember?.lastReadAt ?? null,
       type: ChatType.DIRECT,
       updatedAt: chat.updatedAt,
       chatPartner: chatPartnerDto,
@@ -308,6 +312,8 @@ export class ChatService {
     const dto: GroupChatResponseDto = {
       id: chat.id,
       myNickname: myMember?.nickname,
+      myMemberId: myMember?.id || '',
+      myLastReadAt: myMember?.lastReadAt ?? null,
       type: chat.type as ChatType.GROUP | ChatType.CHANNEL,
       name: chat.name,
       avatarUrl: chat.avatarUrl,

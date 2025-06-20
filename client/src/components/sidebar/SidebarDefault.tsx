@@ -11,8 +11,8 @@ import { SidebarMode } from "@/types/enums/sidebarMode";
 const chatTypes = ["all", "direct", "group", "channel"];
 
 const SidebarDefault: React.FC = () => {
-  const chats = useAllChats()
-  console.log('chats', chats)
+  const allChats = useAllChats()
+  console.log('allChats', allChats)
   
   const setSidebar = useSidebarStore((state) => state.setSidebar);
   const isCompact = useSidebarStore((state) => state.isCompact);
@@ -22,8 +22,8 @@ const SidebarDefault: React.FC = () => {
   const [direction, setDirection] = useState<number>(1);
 
   const filteredChatsByType = React.useMemo(() => {
-    return filterChatsByType(chats, selectedType);
-  }, [selectedType, chats]);
+    return filterChatsByType(allChats, selectedType);
+  }, [selectedType, allChats]);
 
   const getTypeClass = React.useCallback(
     (type: string) =>

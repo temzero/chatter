@@ -34,7 +34,7 @@ interface ChatStore {
   createOrGetDirectChat: (partnerId: string) => Promise<DirectChatResponse>;
   createGroupChat: (payload: {
     name: string;
-    memberIds: string[];
+    userIds: string[];
     type: ChatType.GROUP | ChatType.CHANNEL;
   }) => Promise<GroupChatResponse>;
   updateDirectChat: (
@@ -178,8 +178,10 @@ export const useChatStore = create<ChatStore>()(
 
           const { messages } = useMessageStore.getState();
           const alreadyFetchedMessages = !!messages[chat.id];
+          console.log("alreadyFetchedMessages", alreadyFetchedMessages);
           const { chatMembers } = useChatMemberStore.getState();
           const alreadyFetchedMembers = !!chatMembers[chat.id];
+          console.log('alreadyFetchedMembers', alreadyFetchedMembers)
 
           set({ isLoading: true });
           set({ activeChat: chat });

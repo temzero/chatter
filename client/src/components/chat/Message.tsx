@@ -35,6 +35,8 @@ interface MessageProps {
   shouldAnimate?: boolean;
   showInfo?: boolean;
   isRecent?: boolean;
+  isRead?: boolean;
+  readUserAvatars?: string[];
 }
 
 const Message: React.FC<MessageProps> = ({
@@ -43,13 +45,14 @@ const Message: React.FC<MessageProps> = ({
   shouldAnimate = false,
   showInfo = true,
   isRecent = false,
+  readUserAvatars,
 }) => {
   const currentUser = useCurrentUser();
+  const isMe = message.senderId === currentUser?.id;
   const deleteMessage = useMessageStore((state) => state.deleteMessage);
 
   const [copied, setCopied] = useState(false);
 
-  const isMe = message.senderId === currentUser?.id;
   const isGroupChat = chatType === "group";
 
   const alignmentClass = {
@@ -179,6 +182,25 @@ const Message: React.FC<MessageProps> = ({
           <p className="opacity-0 group-hover:opacity-40 text-xs">
             {formatTime(message.createdAt)}
           </p>
+        )}
+        {readUserAvatars && (
+          <div
+            className={`flex ${
+              isMe ? "justify-end" : "justify-start"
+            } items-center gap-1`}
+          >
+            {readUserAvatars.map((avatarUrl, index) => (
+              <div key={index}>
+                <Avatar
+                  avatarUrl={avatarUrl}
+                  firstName="F"
+                  lastName="L"
+                  size="5"
+                  id={index}
+                />
+              </div>
+            ))}
+          </div>
         )}
 
         {/* Action Buttons */}

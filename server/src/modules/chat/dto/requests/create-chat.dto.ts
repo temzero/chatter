@@ -27,7 +27,7 @@ export class CreateGroupChatDto {
   })
   @IsUUID(4, { each: true })
   @IsString({ each: true })
-  memberIds: string[];
+  userIds: string[];
 
   @IsOptional()
   @IsString()

@@ -29,7 +29,7 @@ export const usePresenceUserStore = create<PresenceStore>((set) => ({
     }),
   setMultipleStatuses: (statuses) =>
     set((state) => {
-      console.log("⬅️ Previous onlineUsers:", state.onlineUsers);
+      // console.log("⬅️ Previous onlineUsers:", state.onlineUsers);
 
       const prevOnlineSet = new Set(state.onlineUsers);
       const newOnlineSet = new Set<string>();
@@ -53,7 +53,7 @@ export const usePresenceUserStore = create<PresenceStore>((set) => ({
       }
 
       const updatedOnlineUsers = Array.from(newOnlineSet);
-      console.log("✅ Updated onlineUsers:", updatedOnlineUsers);
+      // console.log("✅ Updated onlineUsers:", updatedOnlineUsers);
 
       return { onlineUsers: updatedOnlineUsers };
     }),
@@ -64,7 +64,7 @@ export const usePresenceUserStore = create<PresenceStore>((set) => ({
 
     // Get user IDs from chat store
     const userIds = useChatMemberStore.getState().getAllUserIdsInChats();
-    console.log("userIds: ", userIds);
+    // console.log("userIds: ", userIds);
     socket.emit("presence:subscribe", userIds);
 
     // Handlers
@@ -97,16 +97,16 @@ export const useUserStatus = (userId: string) => {
 export const useChatStatus = (chatId: string, type: ChatType) => {
   console.log("useChatStatus", type);
   const currentUserId = useCurrentUserId();
-  const getChatMemberIds = useChatMemberStore(
-    (state) => state.getChatMemberIds
+  const getChatMemberUserIds = useChatMemberStore(
+    (state) => state.getChatMemberUserIds
   );
 
   const memberIds = useMemo(() => {
-    const raw = getChatMemberIds(chatId, type);
+    const raw = getChatMemberUserIds(chatId, type);
     return raw.filter((id) => id !== currentUserId);
-  }, [chatId, type, getChatMemberIds, currentUserId]);
+  }, [chatId, type, getChatMemberUserIds, currentUserId]);
 
-  console.log("useChatStatus memberIds", memberIds);
+  // console.log("useChatStatus memberIds", memberIds);
 
   return usePresenceUserStore(
     useShallow((state) =>

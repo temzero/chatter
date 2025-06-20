@@ -1,8 +1,14 @@
 // stores/sidebarInfoStore.ts
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { useShallow } from "zustand/shallow";
 
-export type SidebarInfoModes = 'default' | 'media' | 'saved' | 'directEdit' | 'groupEdit';
+export type SidebarInfoModes =
+  | "default"
+  | "media"
+  | "saved"
+  | "directEdit"
+  | "groupEdit";
 
 interface SidebarInfoStore {
   isSidebarInfoVisible: boolean;
@@ -16,13 +22,13 @@ export const useSidebarInfoStore = create<SidebarInfoStore>()(
   persist(
     (set, get) => ({
       isSidebarInfoVisible: false,
-      currentSidebarInfo: 'default',
+      currentSidebarInfo: "default",
 
       toggleSidebarInfo: () => {
         const currentVisibility = get().isSidebarInfoVisible;
-        set({ 
+        set({
           isSidebarInfoVisible: !currentVisibility,
-          currentSidebarInfo: 'default' // Reset mode when toggling
+          currentSidebarInfo: "default", // Reset mode when toggling
         });
       },
 
@@ -30,30 +36,30 @@ export const useSidebarInfoStore = create<SidebarInfoStore>()(
 
       initializeKeyListeners: () => {
         const handleKeyDown = (e: KeyboardEvent) => {
-          if (e.key === 'F1') {
+          if (e.key === "F1") {
             e.preventDefault();
             get().toggleSidebarInfo();
           }
 
-          if (e.key === 'Escape') {
+          if (e.key === "Escape") {
             e.preventDefault();
-            set({ currentSidebarInfo: 'default' });
+            set({ currentSidebarInfo: "default" });
             e.stopPropagation();
           }
         };
 
-        window.addEventListener('keydown', handleKeyDown);
-        
+        window.addEventListener("keydown", handleKeyDown);
+
         // Return cleanup function
         return () => {
-          window.removeEventListener('keydown', handleKeyDown);
+          window.removeEventListener("keydown", handleKeyDown);
         };
-      }
+      },
     }),
     {
-      name: 'sidebar-info-storage',
+      name: "sidebar-info-storage",
       partialize: (state) => ({
-        isSidebarInfoVisible: state.isSidebarInfoVisible
+        isSidebarInfoVisible: state.isSidebarInfoVisible,
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {
@@ -61,20 +67,20 @@ export const useSidebarInfoStore = create<SidebarInfoStore>()(
           // Store the cleanup function if needed for later
           return cleanup;
         }
-      }
+      },
     }
   )
 );
 
 // Selector hooks
-export const useSidebarInfoVisibility = () => 
-  useSidebarInfoStore((state) => state.isSidebarInfoVisible);
+export const useSidebarInfoVisibility = () =>
+  useSidebarInfoStore(useShallow((state) => state.isSidebarInfoVisible));
 
-export const useCurrentSidebarInfo = () => 
-  useSidebarInfoStore((state) => state.currentSidebarInfo);
+export const useCurrentSidebarInfo = () =>
+  useSidebarInfoStore(useShallow((state) => state.currentSidebarInfo));
 
-export const useSidebarInfoActions = () => 
+export const useSidebarInfoActions = () =>
   useSidebarInfoStore((state) => ({
     toggleSidebarInfo: state.toggleSidebarInfo,
-    setSidebarInfo: state.setSidebarInfo
+    setSidebarInfo: state.setSidebarInfo,
   }));

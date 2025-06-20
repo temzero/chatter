@@ -31,7 +31,10 @@ export class ChatMemberService {
     }
   }
 
-  async getMember(chatId: string, userId: string): Promise<ChatMember> {
+  async getMemberByChatIdAndUserId(
+    chatId: string,
+    userId: string,
+  ): Promise<ChatMember> {
     try {
       const member = await this.memberRepo.findOne({
         where: { chatId, userId },
@@ -40,6 +43,23 @@ export class ChatMemberService {
 
       if (!member) {
         ErrorResponse.notFound('Chat member not found or Chat not exist!');
+      }
+
+      return member;
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to retrieve chat member');
+    }
+  }
+
+  async getMember(memberId: string): Promise<ChatMember> {
+    try {
+      const member = await this.memberRepo.findOne({
+        where: { id: memberId },
+        relations: ['user'],
+      });
+
+      if (!member) {
+        ErrorResponse.notFound('Chat member not found');
       }
 
       return member;

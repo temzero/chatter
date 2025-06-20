@@ -15,6 +15,7 @@ import { useFriendshipStore } from "@/stores/friendshipStore";
 import { usePresenceUserStore } from "@/stores/presenceStore";
 import { useChatSocketListeners } from "@/lib/websocket/hooks/useChatSocketListener";
 import { useWebSocket } from "@/lib/websocket/hooks/useWebsocket";
+import { ChatSidebar } from "@/components/chat/ChatSidebar";
 // Remove usePresenceSocketListeners import
 
 export const ChatContent: React.FC = () => {
@@ -98,7 +99,16 @@ export const ChatContent: React.FC = () => {
     );
   }
 
-  return activeChat ? <Chat /> : "";
+  return activeChat ? (
+    <section className="w-full h-full border-4">
+      <Chat />
+      <div className="border-4">
+        <ChatSidebar />
+      </div>
+    </section>
+  ) : (
+    ""
+  );
 };
 
 const PrivateLayout: React.FC = () => {

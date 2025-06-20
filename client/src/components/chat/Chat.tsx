@@ -3,8 +3,8 @@ import { useActiveChat } from "@/stores/chatStore";
 import SidebarInfo from "./sidebarInfo/SidebarInfo";
 import ChatHeader from "./ChatHeader";
 import ChatBar from "./ChatBar";
-import ChatBox from "./ChatBox";
-import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
+import ChatBox from "./chatBox/ChatBox";
+import { useSidebarInfoVisibility } from "@/stores/sidebarInfoStore";
 import React from "react";
 
 // Memoized ChatContent component to prevent re-renders when props don't change
@@ -36,9 +36,7 @@ const ChatContent = React.memo(() => {
 // Independent Sidebar component that doesn't depend on activeChat
 const ChatSidebar = React.memo(() => {
   console.log("ChatSidebar rendered");
-  const isChatInfoVisible = useSidebarInfoStore(
-    (state) => state.isSidebarInfoVisible
-  );
+  const isChatInfoVisible = useSidebarInfoVisibility();
 
   return (
     // <AnimatePresence>

@@ -11,6 +11,8 @@ export type ChatResponseDto = DirectChatResponseDto | GroupChatResponseDto;
 export abstract class BaseChatResponseDto {
   @Expose() id: string;
   @Expose() myNickname?: string | null;
+  @Expose() myMemberId: string;
+  @Expose() myLastReadAt: Date | null;
   @Expose() updatedAt: Date;
   @Expose() unreadCount?: number;
   @Expose()
@@ -36,5 +38,5 @@ export class GroupChatResponseDto extends BaseChatResponseDto {
   @Expose() description?: string | null;
   @Expose() myRole?: ChatMemberRole;
   @Expose() memberCount?: number;
-  @Expose() memberIds?: string[];
+  @Expose() memberUserIds?: string[];
 }

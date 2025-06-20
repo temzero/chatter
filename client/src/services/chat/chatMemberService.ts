@@ -12,9 +12,16 @@ export const chatMemberService = {
   },
 
   // Get a specific member of a chat
-  async getMember(chatId: string, userId: string): Promise<ChatMember> {
+  async getMemberByChatIdAndUserId(chatId: string, userId: string): Promise<ChatMember> {
     const response = await API.get<ApiSuccessResponse<ChatMember>>(
       `/chat-members/${chatId}/${userId}`
+    );
+    return response.data.payload;
+  },
+
+  async getMember(memberId: string): Promise<ChatMember> {
+    const response = await API.get<ApiSuccessResponse<ChatMember>>(
+      `/chat-members/${memberId}`
     );
     return response.data.payload;
   },
@@ -58,17 +65,9 @@ export const chatMemberService = {
     return response.data.payload;
   },
 
-  // Update a member's last read message
-  async updateLastReadMessage(
-    chatId: string,
-    userId: string,
-    messageId: string
-  ): Promise<ChatMember> {
-    const response = await API.patch<ApiSuccessResponse<ChatMember>>(
-      `/chat-members/last-read/${chatId}/${userId}`,
-      { messageId }
-    );
-    return response.data.payload;
+  // Either implement in controller or remove:
+  async updateLastRead(chatMemberId: string): Promise<void> {
+    await API.patch("/messages/last-read", { chatMemberId });
   },
 
   // Remove a member from a chat

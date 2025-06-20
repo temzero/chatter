@@ -11,7 +11,8 @@ interface ChatMemberStore {
   error: string | null;
 
   fetchChatMembers: (chatId: string) => Promise<ChatMember[]>;
-  getChatMemberIds: (chatId: string, type: ChatType) => string[];
+  getChatMember: (chatId: string, memberId: string) => ChatMember | undefined;
+  getChatMemberUserIds: (chatId: string, type: ChatType) => string[];
   getAllChatMemberIds: () => string[];
   getAllUserIdsInChats: () => string[];
   updateMember: (
@@ -24,6 +25,7 @@ interface ChatMemberStore {
     userId: string,
     nickname: string
   ) => Promise<string>;
+  updateMemberLastRead: (memberId: string) => Promise<void>;
   getGroupMemberById: (
     chatId: string,
     userId: string
@@ -53,7 +55,13 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
     }
   },
 
-  getChatMemberIds: (chatId: string, type: ChatType): string[] => {
+  getChatMember: (chatId, memberId) => {
+    const { chatMembers } = get();
+    const members = chatMembers[chatId] || [];
+    return members.find((member) => member.userId === memberId);
+  },
+
+  getChatMemberUserIds: (chatId: string, type: ChatType): string[] => {
     const chat = useChatStore.getState().chats.find((c) => c.id === chatId);
     if (!chat) return [];
 
@@ -63,7 +71,7 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
     }
 
     if (chat.type === ChatType.GROUP || chat.type === ChatType.CHANNEL) {
-      return chat.memberIds || [];
+      return chat.memberUserIds || [];
     }
 
     return [];
@@ -191,6 +199,10 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
     }
   },
 
+  updateMemberLastRead: async (chatMemberId: string) => {
+    chatMemberService.updateLastRead(chatMemberId);
+  },
+
   getGroupMemberById: (chatId, userId) => {
     const members = get().chatMembers[chatId];
     return members?.find((member) => member.userId === userId);
@@ -228,7 +240,11 @@ export const useActiveMembers = () => {
   return activeChat ? chatMembers[activeChat.id] || [] : [];
 };
 
-export const useActiveMembersByChatId = (chatId: string) => {
+export const useMembersByChatId = (chatId: string) => {
   const chatMembers = useChatMemberStore((state) => state.chatMembers);
   return chatMembers[chatId] || [];
+};
+
+export const useUpdateMyLastRead = (memberId: string) => {
+  return useChatMemberStore((state) => state.updateMemberLastRead(memberId));
 };

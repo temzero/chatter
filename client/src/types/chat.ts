@@ -9,6 +9,8 @@ export type ChatResponse = DirectChatResponse | GroupChatResponse;
 export interface BaseChatResponse {
   id: string;
   myNickname: string | null;
+  myMemberId: string;
+  myLastReadAt: string | null;
   updatedAt: string;
   unreadCount?: number;
   lastMessage?: LastMessageResponse | null;
@@ -28,13 +30,14 @@ export interface GroupChatResponse extends BaseChatResponse {
   description?: string | null;
   myRole?: ChatMemberRole;
   memberCount?: number;
-  memberIds?: string[]
+  memberUserIds?: string[]
 }
 
 // Simplified Chat Partner (similar to ChatPartnerDto)
 export interface ChatPartnerResponse {
   nickname: string;
   userId: string;
+  memberId: string;
   username: string;
   firstName: string;
   lastName: string;
@@ -44,6 +47,7 @@ export interface ChatPartnerResponse {
   birthday: string | null;
   avatarUrl?: string | null;
   friendshipStatus?: FriendshipStatus | null;
+  lastReadAt?: string | null;
 }
 
 // Last Message Response (similar to LastMessageResponseDto)
@@ -59,7 +63,8 @@ export interface LastMessageResponse {
 
 // Deprecated interfaces (keep if needed for backward compatibility)
 export interface ChatPartner {
-  id: string;
+  userId: string;
+  memberId: string;
   username: string;
   firstName: string;
   lastName: string;
@@ -68,6 +73,7 @@ export interface ChatPartner {
   phoneNumber: string | null;
   birthday: string | null | undefined;
   avatarUrl?: string | null;
+  lastReadAt?: string | null;
 }
 
 export interface ChatMember {
@@ -80,6 +86,7 @@ export interface ChatMember {
   avatarUrl: string | null;
   isBanned: boolean;
   isAdmin: boolean;
+  lastReadAt: string | null;
 }
 
 export interface DisplayMessage {

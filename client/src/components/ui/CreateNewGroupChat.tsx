@@ -52,7 +52,7 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
 
       // Get the selected chats and extract just the member IDs (excluding current user)
       const selectedChats = getSelectedChats();
-      const memberIds =
+      const userIds =
         selectedChats.length > 0
           ? Array.from(
               new Set(selectedChats.map((chat) => chat.chatPartner.userId))
@@ -61,7 +61,7 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
 
       const payload = {
         name,
-        memberIds,
+        userIds,
         type,
       };
 

@@ -6,7 +6,7 @@ export const useChatBoxData = () => {
   const activeChat = useActiveChat();
   const activeChatId = activeChat?.id || "";
   // const messages = useActiveChatMessages();
-  // const chatMembers = useActiveMembersByChatId(activeChatId) || [];
+  // const chatMembers = useMembersByChatId(activeChatId) || [];
 
   // 2. Get members data (initially empty if not loaded)
   // const { chatMembers, isLoadingMembers } = useChatStore(
