@@ -38,7 +38,6 @@ export class UpdateChatMemberDto {
   mutedUntil?: Date | null;
 
   @IsOptional()
-  @Type(() => Date)
-  @IsDate()
-  lastReadAt?: Date | null;
+  @IsString()
+  lastReadMessageId?: string | null;
 }

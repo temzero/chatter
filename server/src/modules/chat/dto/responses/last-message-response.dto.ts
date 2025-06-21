@@ -4,6 +4,9 @@ import { AttachmentType } from 'src/modules/message/constants/attachment-type.co
 @Exclude()
 export class LastMessageResponseDto {
   @Expose()
+  id: string;
+
+  @Expose()
   senderId: string;
 
   @Expose()

@@ -13,36 +13,60 @@ import { SuccessResponse } from 'src/common/api-response/success';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { ChatMemberService } from './chat-member.service';
 import { ChatMemberRole } from './constants/chat-member-roles.constants';
-import { ChatMemberResponseDto } from './dto/responses/chat-member-response.dto';
+import {
+  GroupChatMemberResponseDto,
+  DirectChatMemberResponseDto,
+} from './dto/responses/chat-member-response.dto';
 import { UpdateChatMemberDto } from './dto/requests/update-chat-member.dto';
 import { mapChatMemberToResponseDto } from './mappers/chat-member.mapper';
+import { ChatService } from '../chat/chat.service';
+import { ChatType } from '../chat/constants/chat-types.constants';
 
 @Controller('chat-members')
 @UseGuards(JwtAuthGuard)
 export class ChatMemberController {
-  constructor(private readonly memberService: ChatMemberService) {}
+  constructor(
+    private readonly memberService: ChatMemberService,
+    private readonly chatService: ChatService,
+  ) {}
 
-  @Get(':chatId')
-  async getChatMembers(
+  @Get('direct/:chatId')
+  async getDirectChatMembers(
     @Param('chatId') chatId: string,
-  ): Promise<SuccessResponse<ChatMemberResponseDto[]>> {
+  ): Promise<SuccessResponse<DirectChatMemberResponseDto[]>> {
     const members = await this.memberService.findByChatId(chatId);
-    const membersResponse = members.map(mapChatMemberToResponseDto);
-    return new SuccessResponse<ChatMemberResponseDto[]>(
+    const membersResponse = members.map(
+      (member) =>
+        mapChatMemberToResponseDto(
+          member,
+          ChatType.DIRECT,
+        ) as DirectChatMemberResponseDto,
+    );
+    return new SuccessResponse(
       membersResponse,
-      'Chat members retrieved successfully',
+      'Direct chat members retrieved successfully',
     );
   }
 
-  @Get(':chatId/:userId')
-  async getMemberByChatIdAndUserId(
+  @Get('group/:chatId')
+  async getGroupChatMembers(
     @Param('chatId') chatId: string,
-    @Param('userId') userId: string,
-  ): Promise<SuccessResponse<ChatMemberResponseDto>> {
-    const member = await this.memberService.getMemberByChatIdAndUserId(
-      chatId,
-      userId,
+  ): Promise<SuccessResponse<GroupChatMemberResponseDto[]>> {
+    const members = await this.memberService.findByChatId(chatId);
+    const membersResponse = members.map((member) =>
+      mapChatMemberToResponseDto(member, ChatType.GROUP),
     );
+    return new SuccessResponse(
+      membersResponse,
+      'Group chat members retrieved successfully',
+    );
+  }
+
+  @Get(':memberId')
+  async getMember(
+    @Param('memberId') memberId: string,
+  ): Promise<SuccessResponse<GroupChatMemberResponseDto>> {
+    const member = await this.memberService.getMember(memberId);
     const memberResponse = mapChatMemberToResponseDto(member);
     return new SuccessResponse(
       memberResponse,
@@ -50,12 +74,19 @@ export class ChatMemberController {
     );
   }
 
-  @Get(':memberId')
-  async getMember(
-    @Param('memberId') memberId: string,
-  ): Promise<SuccessResponse<ChatMemberResponseDto>> {
-    const member = await this.memberService.getMember(memberId);
-    const memberResponse = mapChatMemberToResponseDto(member);
+  @Get(':chatId/:userId')
+  async getMemberByChatIdAndUserId(
+    @Param('chatId') chatId: string,
+    @Param('userId') userId: string,
+  ): Promise<
+    SuccessResponse<GroupChatMemberResponseDto | DirectChatMemberResponseDto>
+  > {
+    const member = await this.memberService.getMemberByChatIdAndUserId(
+      chatId,
+      userId,
+    );
+    const chatType = await this.chatService.getChatType(chatId);
+    const memberResponse = mapChatMemberToResponseDto(member, chatType);
     return new SuccessResponse(
       memberResponse,
       'Chat member retrieved successfully',
@@ -65,57 +96,56 @@ export class ChatMemberController {
   @Post()
   async addMember(
     @Body() body: { chatId: string; userId: string; role?: ChatMemberRole },
-  ): Promise<SuccessResponse<ChatMemberResponseDto>> {
+  ): Promise<SuccessResponse<GroupChatMemberResponseDto>> {
     const { chatId, userId, role } = body;
     const newMember = await this.memberService.addMember(chatId, userId, role);
-    const memberResponse = mapChatMemberToResponseDto(newMember);
+    const memberResponse = plainToInstance(
+      GroupChatMemberResponseDto,
+      mapChatMemberToResponseDto(newMember),
+    );
     return new SuccessResponse(memberResponse, 'Member added successfully');
   }
 
-  @Patch(':chatId/:userId')
+  @Patch(':memberId')
   async updateMember(
-    @Param('chatId') chatId: string,
-    @Param('userId') userId: string,
+    @Param('memberId') memberId: string,
     @Body()
     updateDto: UpdateChatMemberDto,
-  ): Promise<SuccessResponse<ChatMemberResponseDto>> {
+  ): Promise<SuccessResponse<GroupChatMemberResponseDto>> {
     const updatedMember = await this.memberService.updateMember(
-      chatId,
-      userId,
+      memberId,
       updateDto,
     );
     const memberResponse = mapChatMemberToResponseDto(updatedMember);
     return new SuccessResponse(
-      plainToInstance(ChatMemberResponseDto, memberResponse),
+      plainToInstance(GroupChatMemberResponseDto, memberResponse),
       'Member updated successfully',
     );
   }
 
-  @Patch('nickname/:chatId/:userId')
+  @Patch('nickname/:memberId')
   async updateNickname(
-    @Param('chatId') chatId: string,
-    @Param('userId') userId: string,
+    @Param('memberId') memberId: string,
     @Body() body: { nickname: string },
   ): Promise<SuccessResponse<string>> {
     const nickname = await this.memberService.updateNickname(
-      chatId,
-      userId,
+      memberId,
       body.nickname,
     );
     return new SuccessResponse(nickname ?? '', 'Nickname updated successfully');
   }
 
-  @Patch('last-read/:chatId/:userId')
+  @Patch('last-read/:memberId/:messageId')
   async updateLastReadMessage(
-    @Param('chatId') chatId: string,
-    @Param('userId') userId: string,
-  ): Promise<SuccessResponse<ChatMemberResponseDto>> {
+    @Param('memberId') memberId: string,
+    @Param('messageId') messageId: string,
+  ): Promise<SuccessResponse<GroupChatMemberResponseDto>> {
     const updatedMember = await this.memberService.updateLastRead(
-      chatId,
-      userId,
+      memberId,
+      messageId,
     );
     return new SuccessResponse(
-      plainToInstance(ChatMemberResponseDto, updatedMember),
+      plainToInstance(GroupChatMemberResponseDto, updatedMember),
       'Last read message updated successfully',
     );
   }
@@ -124,7 +154,7 @@ export class ChatMemberController {
   async removeMember(
     @Param('chatId') chatId: string,
     @Param('userId') userId: string,
-  ): Promise<SuccessResponse<ChatMemberResponseDto>> {
+  ): Promise<SuccessResponse<GroupChatMemberResponseDto>> {
     const removedMember = await this.memberService.removeMember(chatId, userId);
     const memberResponse = mapChatMemberToResponseDto(removedMember);
     return new SuccessResponse(memberResponse, 'Member removed successfully');

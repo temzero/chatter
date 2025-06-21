@@ -54,8 +54,7 @@ const FriendRequestModal: React.FC<FriendRequestModalProps> = ({
       <div className="flex items-center gap-4 custom-border p-2 my-4 rounded-lg">
         <Avatar
           avatarUrl={receiver.avatarUrl}
-          firstName={receiver.firstName}
-          lastName={receiver.lastName}
+          name={receiver.firstName}
           size="12"
         />
 

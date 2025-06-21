@@ -31,6 +31,23 @@ export class ChatMemberService {
     }
   }
 
+  async getMember(memberId: string): Promise<ChatMember> {
+    try {
+      const member = await this.memberRepo.findOne({
+        where: { id: memberId },
+        relations: ['user'],
+      });
+
+      if (!member) {
+        ErrorResponse.notFound('Chat member not found');
+      }
+
+      return member;
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to retrieve chat member');
+    }
+  }
+
   async getMemberByChatIdAndUserId(
     chatId: string,
     userId: string,
@@ -43,23 +60,6 @@ export class ChatMemberService {
 
       if (!member) {
         ErrorResponse.notFound('Chat member not found or Chat not exist!');
-      }
-
-      return member;
-    } catch (error) {
-      ErrorResponse.throw(error, 'Failed to retrieve chat member');
-    }
-  }
-
-  async getMember(memberId: string): Promise<ChatMember> {
-    try {
-      const member = await this.memberRepo.findOne({
-        where: { id: memberId },
-        relations: ['user'],
-      });
-
-      if (!member) {
-        ErrorResponse.notFound('Chat member not found');
       }
 
       return member;
@@ -164,22 +164,18 @@ export class ChatMemberService {
   }
 
   async updateMember(
-    chatId: string,
-    userId: string,
+    memberId: string,
     updateDto: UpdateChatMemberDto,
   ): Promise<ChatMember> {
     try {
-      const result = await this.memberRepo.update(
-        { chatId, userId },
-        updateDto,
-      );
+      const result = await this.memberRepo.update({ id: memberId }, updateDto);
 
       if (result.affected === 0) {
         ErrorResponse.notFound('Chat member not found');
       }
       // Then return the updated entity
       const member = await this.memberRepo.findOne({
-        where: { chatId, userId },
+        where: { id: memberId },
         relations: ['user'],
       });
 
@@ -193,11 +189,14 @@ export class ChatMemberService {
     }
   }
 
-  async updateLastRead(chatId: string, userId: string): Promise<ChatMember> {
+  async updateLastRead(
+    memberId: string,
+    messageId: string,
+  ): Promise<ChatMember> {
     try {
-      return await this.updateMember(chatId, userId, {
+      return await this.updateMember(memberId, {
         // automatically update to now
-        lastReadAt: new Date(),
+        lastReadMessageId: messageId,
       });
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to update last read info');
@@ -205,8 +204,7 @@ export class ChatMemberService {
   }
 
   async updateNickname(
-    chatId: string,
-    userId: string,
+    memberId: string,
     nickname: string | null,
   ): Promise<string | null> {
     try {
@@ -216,7 +214,7 @@ export class ChatMemberService {
       }
 
       const result = await this.memberRepo.update(
-        { chatId, userId },
+        { id: memberId },
         { nickname },
       );
 

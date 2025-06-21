@@ -208,18 +208,6 @@ export class MessageService {
     }
   }
 
-  // In MessageService:
-  async updateLastRead(chatMemberId: string): Promise<void> {
-    try {
-      await this.chatMemberRepo.update(
-        { id: chatMemberId },
-        { lastReadAt: new Date() },
-      );
-    } catch (error) {
-      ErrorResponse.throw(error, 'Failed to update last read timestamp');
-    }
-  }
-
   async deleteMessage(id: string): Promise<Message> {
     try {
       const message = await this.getMessageById(id);

@@ -3,8 +3,7 @@ import React from "react";
 import SidebarLayout from "@/pages/SidebarLayout";
 import { useChatStore } from "@/stores/chatStore";
 import { ChatType } from "@/types/enums/ChatType";
-import { DirectChatResponse } from "@/types/chat";
-import getChatName from "@/utils/getChatName";
+import { ChatResponse } from "@/types/chat";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 
 interface SidebarCallsProps {
@@ -18,12 +17,12 @@ const SidebarCalls: React.FC<SidebarCallsProps> = ({
 }) => {
   const chats = useChatStore((s) => s.chats);
   const directChats = chats.filter(
-    (chat): chat is DirectChatResponse =>
+    (chat): chat is ChatResponse =>
       chat.type === ChatType.DIRECT && !!chat.chatPartner?.phoneNumber
   );
 
   const handleVideoCall =
-    (chat: DirectChatResponse) => (e: React.MouseEvent) => {
+    (chat: ChatResponse) => (e: React.MouseEvent) => {
       e.stopPropagation();
       if (onVideoCall && chat.chatPartner?.phoneNumber) {
         onVideoCall(chat.chatPartner.phoneNumber);
@@ -31,7 +30,7 @@ const SidebarCalls: React.FC<SidebarCallsProps> = ({
     };
 
   const handleAudioCall =
-    (chat: DirectChatResponse) => (e: React.MouseEvent) => {
+    (chat: ChatResponse) => (e: React.MouseEvent) => {
       e.stopPropagation();
       if (onAudioCall && chat.chatPartner?.phoneNumber) {
         onAudioCall(chat.chatPartner.phoneNumber);
@@ -52,11 +51,10 @@ const SidebarCalls: React.FC<SidebarCallsProps> = ({
               <div className="flex items-center gap-3">
                 <Avatar
                   avatarUrl={chatPartner?.avatarUrl}
-                  firstName={chatPartner.firstName}
-                  lastName={chatPartner.lastName}
+                  name={chatPartner.firstName}
                   size="10"
                 />
-                <h1 className="font-medium">{getChatName(chat)}</h1>
+                <h1 className="font-medium">{chat.name}</h1>
               </div>
               <div className="flex gap-2 items-center">
                 {chatPartner?.phoneNumber && (

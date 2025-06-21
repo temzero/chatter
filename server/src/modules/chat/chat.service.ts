@@ -11,15 +11,11 @@ import { In } from 'typeorm';
 import { ChatType } from './constants/chat-types.constants';
 import { CreateGroupChatDto } from './dto/requests/create-chat.dto';
 import { Message } from '../message/entities/message.entity';
-import {
-  ChatResponseDto,
-  DirectChatResponseDto,
-  GroupChatResponseDto,
-} from './dto/responses/chat-response.dto';
-import { ChatPartnerDto } from './dto/responses/chat-partner-response.dto';
+import { ChatResponseDto } from './dto/responses/chat-response.dto';
 import { LastMessageResponseDto } from './dto/responses/last-message-response.dto';
 import { FriendshipService } from '../friendship/friendship.service';
 import { FriendshipStatus } from '../friendship/constants/friendship-status.constants';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class ChatService {
@@ -79,11 +75,7 @@ export class ChatService {
     if (existingChat) {
       const fullChat = await this.getFullChat(existingChat.id);
       return {
-        chat: this.transformToDirectChatDto(
-          fullChat,
-          myUserId,
-          friendshipStatus ?? undefined,
-        ),
+        chat: this.transformToDirectChatDto(fullChat, myUserId),
         wasExisting: true,
       };
     }
@@ -97,13 +89,27 @@ export class ChatService {
     const fullChat = await this.getFullChat(chat.id);
 
     return {
-      chat: this.transformToDirectChatDto(
-        fullChat,
-        myUserId,
-        friendshipStatus ?? undefined,
-      ),
+      chat: this.transformToDirectChatDto(fullChat, myUserId),
       wasExisting: false,
     };
+  }
+
+  // In ChatService
+  async getChatType(chatId: string): Promise<ChatType> {
+    try {
+      const chat = await this.chatRepo.findOne({
+        where: { id: chatId },
+        select: ['type'],
+      });
+
+      if (!chat) {
+        ErrorResponse.notFound('Chat not found');
+      }
+
+      return chat.type;
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to get chat type');
+    }
   }
 
   async createGroupChat(
@@ -139,10 +145,24 @@ export class ChatService {
   async updateChat(
     chat: ChatResponseDto,
     updateDto: UpdateChatDto,
-  ): Promise<Chat> {
+  ): Promise<ChatResponseDto> {
     try {
-      Object.assign(chat, updateDto);
-      return await this.chatRepo.save(chat);
+      const existingChat = await this.chatRepo.findOne({
+        where: { id: chat.id },
+      });
+
+      if (!existingChat) {
+        ErrorResponse.notFound('Chat not found');
+      }
+
+      Object.assign(existingChat, updateDto);
+      const updatedChat = await this.chatRepo.save(existingChat);
+
+      if (updatedChat.type === ChatType.DIRECT) {
+        return plainToInstance(ChatResponseDto, updatedChat);
+      } else {
+        return plainToInstance(ChatResponseDto, updatedChat);
+      }
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to update chat');
     }
@@ -153,24 +173,7 @@ export class ChatService {
       const chat = await this.getFullChat(chatId);
 
       if (chat.type === ChatType.DIRECT) {
-        // Find the partner user for direct chats
-        const partner = chat.members.find((m) => m.userId !== userId);
-        if (!partner) {
-          throw new Error('Direct chat must have a partner');
-        }
-
-        // Get friendship status with the partner
-        const friendshipStatus =
-          await this.friendshipService.getFriendshipStatus(
-            userId,
-            partner.userId,
-          );
-
-        return this.transformToDirectChatDto(
-          chat,
-          userId,
-          friendshipStatus ?? undefined,
-        );
+        return this.transformToDirectChatDto(chat, userId);
       } else {
         return this.transformToGroupChatDto(chat, userId);
       }
@@ -179,7 +182,7 @@ export class ChatService {
     }
   }
 
-  async getChatsByUserId(userId: string): Promise<ChatResponseDto[]> {
+  async getChatsByUserId(userId: string): Promise<Array<ChatResponseDto>> {
     try {
       const chats = await this.chatRepo
         .createQueryBuilder('chat')
@@ -195,39 +198,15 @@ export class ChatService {
         .orderBy('COALESCE(lastMessage.createdAt, chat.createdAt)', 'DESC')
         .getMany();
 
-      // Process chats in parallel
-      const chatDtos = await Promise.all(
-        chats.map(async (chat) => {
+      return Promise.all(
+        chats.map((chat) => {
           if (chat.type === ChatType.DIRECT) {
-            // Find the partner user for direct chats
-            const partner = chat.members.find((m) => m.userId !== userId);
-            if (!partner) {
-              throw new Error('Direct chat must have a partner');
-            }
-
-            // Get friendship status with the partner
-            const friendshipStatus =
-              await this.friendshipService.getFriendshipStatus(
-                userId,
-                partner.userId,
-              );
-
-            return this.transformToDirectChatDto(
-              chat,
-              userId,
-              friendshipStatus ?? undefined,
-            );
+            return this.transformToDirectChatDto(chat, userId);
           } else {
-            // For group/channel chats, transform and include memberIds
-            const dto = this.transformToGroupChatDto(chat, userId);
-            // Add memberIds only for non-direct chats
-            dto.memberUserIds = chat.members.map((member) => member.userId);
-            return dto;
+            return this.transformToGroupChatDto(chat, userId);
           }
         }),
       );
-
-      return chatDtos;
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to retrieve user chats');
     }
@@ -253,97 +232,86 @@ export class ChatService {
 
   private transformToDirectChatDto(
     chat: Chat,
-    userId: string,
-    friendshipStatus?: FriendshipStatus,
-  ): DirectChatResponseDto {
-    const chatPartner = chat.members.find((m) => m.userId !== userId);
-    const chatPartnerUser = chatPartner?.user;
-    const myMember = chat.members.find((m) => m.userId === userId);
+    currentUserId: string,
+  ): ChatResponseDto {
+    const myMember = chat.members.find((m) => m.userId === currentUserId);
+    const otherMembers = chat.members.filter((m) => m.userId !== currentUserId);
 
-    if (!chatPartner || !chatPartnerUser) {
-      ErrorResponse.badRequest('Direct chat must have a partner');
+    const otherMember = otherMembers[0]; // Only one in direct chat
+
+    if (!otherMember) {
+      ErrorResponse.badRequest('Chat partner not found in direct chat');
     }
 
-    // Base fields that are always included
-    const chatPartnerDto: Partial<ChatPartnerDto> = {
-      userId: chatPartnerUser.id,
-      memberId: chatPartner.id,
-      avatarUrl: chatPartnerUser.avatarUrl,
-      nickname: chatPartner.nickname,
-      firstName: chatPartnerUser.firstName,
-      lastName: chatPartnerUser.lastName,
-      bio: chatPartnerUser.bio,
-      friendshipStatus: friendshipStatus ?? undefined,
-      lastReadAt: chatPartner.lastReadAt,
-    };
+    const fullName = [otherMember.user.firstName, otherMember.user.lastName]
+      .filter(Boolean)
+      .join(' ');
+    const displayName = otherMember.nickname || fullName || 'Unknown User';
 
-    // Only include sensitive fields if friendship is accepted
-    if (friendshipStatus === FriendshipStatus.ACCEPTED) {
-      Object.assign(chatPartnerDto, {
-        username: chatPartnerUser.username,
-        email: chatPartnerUser.email,
-        phoneNumber: chatPartnerUser.phoneNumber,
-        birthday: chatPartnerUser.birthday,
-      });
-    }
-
-    const dto: DirectChatResponseDto = {
+    return {
       id: chat.id,
-      myNickname: myMember?.nickname,
-      myMemberId: myMember?.id ?? '',
-      myLastReadAt: myMember?.lastReadAt ?? null,
       type: ChatType.DIRECT,
+      myMemberId: myMember?.id ?? '',
+      name: displayName,
+      avatarUrl: otherMember.user.avatarUrl ?? null,
       updatedAt: chat.updatedAt,
-      chatPartner: chatPartnerDto,
       lastMessage: chat.lastMessage
-        ? this.transformLastMessageDto(chat.lastMessage, userId, chat.members)
+        ? this.transformLastMessageDto(
+            chat.lastMessage,
+            chat.members,
+            currentUserId,
+          )
         : null,
+      otherMemberUserIds: otherMembers.map((m) => m.userId),
     };
-
-    return dto;
   }
 
   private transformToGroupChatDto(
     chat: Chat,
-    userId: string,
-  ): GroupChatResponseDto {
-    const myMember = chat.members.find((m) => m.userId === userId); // Find the current user's member record
+    currentUserId: string,
+  ): ChatResponseDto {
+    const myMember = chat.members.find((m) => m.userId === currentUserId);
+    const otherMembers = chat.members.filter((m) => m.userId !== currentUserId);
 
-    const dto: GroupChatResponseDto = {
+    return {
       id: chat.id,
-      myNickname: myMember?.nickname,
-      myMemberId: myMember?.id || '',
-      myLastReadAt: myMember?.lastReadAt ?? null,
       type: chat.type as ChatType.GROUP | ChatType.CHANNEL,
-      name: chat.name,
-      avatarUrl: chat.avatarUrl,
-      description: chat.description,
+      myMemberId: myMember?.id ?? '',
+      name: chat.name ?? 'Unnamed Group',
+      avatarUrl: chat.avatarUrl ?? null,
+      description: chat.description ?? null,
       updatedAt: chat.updatedAt,
-      myRole: myMember?.role, // This can also be simplified
       lastMessage: chat.lastMessage
-        ? this.transformLastMessageDto(chat.lastMessage, userId, chat.members)
+        ? this.transformLastMessageDto(
+            chat.lastMessage,
+            chat.members,
+            currentUserId,
+          )
         : null,
+      otherMemberUserIds: otherMembers.map((m) => m.userId),
     };
-
-    return dto;
   }
 
   private transformLastMessageDto(
     message: Message,
-    userId: string,
     members: ChatMember[],
+    currentUserId?: string,
   ): LastMessageResponseDto {
-    const senderMember = members.find((m) => m.userId === message.senderId);
+    const isMe = message.senderId === currentUserId;
+
+    const member = members.find((m) => m.userId === message.senderId);
+
+    const senderName = isMe
+      ? 'Me'
+      : member?.nickname || member?.user?.firstName || 'Unknown';
 
     return {
-      content: message.content ?? undefined,
-      attachmentType: message.attachments?.[0]?.type,
-      createdAt: message.createdAt,
-      senderName:
-        message.senderId === userId
-          ? 'Me'
-          : senderMember?.nickname || message.sender.firstName,
+      id: message.id,
       senderId: message.senderId,
+      senderName,
+      content: message.content ?? undefined,
+      attachmentType: message.attachments?.[0]?.type ?? undefined,
+      createdAt: message.createdAt,
     };
   }
 
@@ -366,18 +334,6 @@ export class ChatService {
     });
   }
 
-  async getChatMembers(chatId: string): Promise<User[]> {
-    try {
-      const members = await this.memberRepo.find({
-        where: { chat: { id: chatId } },
-        relations: ['user'],
-      });
-      return members.map((m) => m.user);
-    } catch (error) {
-      ErrorResponse.throw(error, 'Failed to retrieve chat members');
-    }
-  }
-
   private async addMembers(
     chatId: string,
     memberIds: string[],
@@ -393,14 +349,13 @@ export class ChatService {
         updatedAt: new Date(),
       }));
 
-      // Using insert() instead of save() for better performance with multiple records
       await this.memberRepo.insert(membersToAdd);
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to add chat members');
     }
   }
 
-  async deleteChat(chatId: string, userId: string): Promise<Chat> {
+  async deleteChat(chatId: string, userId: string): Promise<ChatResponseDto> {
     try {
       const chat = await this.chatRepo.findOne({
         where: { id: chatId },
@@ -423,7 +378,12 @@ export class ChatService {
       }
 
       await this.chatRepo.delete(chatId);
-      return chat;
+
+      if (chat.type === ChatType.DIRECT) {
+        return plainToInstance(ChatResponseDto, chat);
+      } else {
+        return plainToInstance(ChatResponseDto, chat);
+      }
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to delete chat');
     }

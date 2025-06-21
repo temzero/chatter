@@ -1,5 +1,5 @@
 import API from "../api/api";
-import type { GroupChatResponse } from "@/types/chat";
+import type { ChatResponse } from "@/types/chat";
 import type { ApiSuccessResponse } from "@/types/apiSuccessResponse";
 import { ChatType } from "@/types/enums/ChatType";
 import logFormData from "@/utils/logFormdata";
@@ -10,16 +10,16 @@ export const groupChatService = {
     name: string;
     userIds: string[];
     type: ChatType.GROUP | ChatType.CHANNEL;
-  }): Promise<GroupChatResponse> {
-    const response = await API.post<ApiSuccessResponse<GroupChatResponse>>(
+  }): Promise<ChatResponse> {
+    const response = await API.post<ApiSuccessResponse<ChatResponse>>(
       "/chat/group",
       payload
     );
     return response.data.payload;
   },
 
-  async getGroupChatById(groupChatId: string): Promise<GroupChatResponse> {
-    const response = await API.get<ApiSuccessResponse<GroupChatResponse>>(
+  async getGroupChatById(groupChatId: string): Promise<ChatResponse> {
+    const response = await API.get<ApiSuccessResponse<ChatResponse>>(
       `/chat/${groupChatId}`
     );
     return response.data.payload;
@@ -54,11 +54,11 @@ export const groupChatService = {
   },
 
   async updateGroupChat(
-    groupChatId: string,
-    payload: Partial<GroupChatResponse>
-  ): Promise<GroupChatResponse> {
-    const response = await API.put<ApiSuccessResponse<GroupChatResponse>>(
-      `/chat/${groupChatId}`,
+    chatId: string,
+    payload: Partial<ChatResponse>
+  ): Promise<ChatResponse> {
+    const response = await API.put<ApiSuccessResponse<ChatResponse>>(
+      `/chat/${chatId}`,
       payload
     );
     return response.data.payload;

@@ -1,45 +1,52 @@
 import { Exclude, Expose } from 'class-transformer';
 import { ChatMemberRole } from '../../constants/chat-member-roles.constants';
 import { ChatMemberStatus } from '../../constants/chat-member-status.constants';
+import { FriendshipStatus } from 'src/modules/friendship/constants/friendship-status.constants';
+
+export type ChatMemberResponseDto =
+  | DirectChatMemberResponseDto
+  | GroupChatMemberResponseDto;
 
 @Exclude()
-export class ChatMemberResponseDto {
-  @Expose()
-  userId: string;
+export class GroupChatMemberResponseDto {
+  @Expose() id: string;
 
-  @Expose()
-  username: string;
+  @Expose() chatId: string;
 
-  @Expose()
-  avatarUrl: string | null;
+  @Expose() userId: string;
 
-  @Expose()
-  firstName: string;
+  @Expose() avatarUrl: string | null;
 
-  @Expose()
-  lastName: string;
+  @Expose() firstName: string;
 
-  @Expose()
-  nickname: string | null;
+  @Expose() lastName: string;
 
-  @Expose()
-  role: ChatMemberRole;
+  @Expose() nickname: string | null;
 
-  @Expose()
-  status: ChatMemberStatus;
+  @Expose() role: ChatMemberRole;
 
-  @Expose()
-  customTitle: string | null;
+  @Expose() status: ChatMemberStatus;
 
-  @Expose()
-  mutedUntil: Date | null;
+  @Expose() customTitle: string | null;
 
-  @Expose()
-  lastReadAt: Date | null;
+  @Expose() mutedUntil: Date | null;
 
-  @Expose()
-  createdAt: Date;
+  @Expose() lastReadMessageId: string | null;
 
-  @Expose()
-  updatedAt: Date;
+  @Expose() createdAt: Date;
+}
+
+@Exclude()
+export class DirectChatMemberResponseDto extends GroupChatMemberResponseDto {
+  @Expose() username: string;
+
+  @Expose() email: string;
+
+  @Expose() phoneNumber: string | null;
+
+  @Expose() birthday: Date | null;
+
+  @Expose() bio: string | null;
+
+  @Expose() friendshipStatus?: FriendshipStatus;
 }

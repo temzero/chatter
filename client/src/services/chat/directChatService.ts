@@ -1,12 +1,12 @@
 import API from "../api/api";
-import type { DirectChatResponse } from "@/types/chat";
+import type { ChatResponse } from "@/types/chat";
 import type {
   ApiSuccessResponse,
   DirectChatApiResponse,
 } from "@/types/apiSuccessResponse";
 
 interface DirectChatDataResponse {
-  payload: DirectChatResponse;
+  payload: ChatResponse;
   wasExisting: boolean;
   message: string;
 }
@@ -26,9 +26,9 @@ export const directChatService = {
   // Update an existing direct chat
   async updateDirectChat(
     chatId: string,
-    updates: Partial<DirectChatResponse>
-  ): Promise<DirectChatResponse> {
-    const response = await API.put<ApiSuccessResponse<DirectChatResponse>>(
+    updates: Partial<ChatResponse>
+  ): Promise<ChatResponse> {
+    const response = await API.put<ApiSuccessResponse<ChatResponse>>(
       `/chat/${chatId}`,
       updates
     );

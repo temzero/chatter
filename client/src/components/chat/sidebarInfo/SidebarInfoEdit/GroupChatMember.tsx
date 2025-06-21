@@ -3,17 +3,12 @@ import { OnlineDot } from "@/components/ui/OnlineDot";
 import { useCurrentUser } from "@/stores/authStore";
 import { useChatStore } from "@/stores/chatStore";
 import { useUserStatus } from "@/stores/presenceStore";
+import { GroupChatMember } from "@/types/chatMember";
+import { ChatMemberRole } from "@/types/ChatMemberRole";
+import { ChatMemberStatus } from "@/types/enums/chatMemberStatus";
 
 interface MemberItemProps {
-  member: {
-    userId: string;
-    avatarUrl?: string | null;
-    firstName: string;
-    lastName: string;
-    nickname?: string | null;
-    isBanned: boolean;
-    isAdmin: boolean;
-  };
+  member: GroupChatMember;
 }
 
 const MemberItem: React.FC<MemberItemProps> = ({ member }) => {
@@ -32,8 +27,7 @@ const MemberItem: React.FC<MemberItemProps> = ({ member }) => {
         <div className="relative">
           <Avatar
             avatarUrl={member.avatarUrl}
-            firstName={member.firstName}
-            lastName={member.lastName}
+            name={member.firstName}
             size="8"
             textSize="sm"
             className="transform transition-transform duration-300 hover:scale-125"
@@ -47,10 +41,10 @@ const MemberItem: React.FC<MemberItemProps> = ({ member }) => {
           {member.nickname || `${member.firstName} ${member.lastName}`}
         </h1>
       </div>
-      {member.isBanned ? (
+      {member.status === ChatMemberStatus.BANNED ? (
         <span className="material-symbols-outlined">dangerous</span>
       ) : (
-        member.isAdmin && (
+        member.role === ChatMemberRole.ADMIN && (
           <span className="material-symbols-outlined opacity-50">
             manage_accounts
           </span>

@@ -3,7 +3,6 @@ import { useChatStore } from "@/stores/chatStore";
 import { useMessageStore } from "@/stores/messageStore";
 import type { ChatResponse } from "@/types/chat";
 import { ChatAvatar } from "./avatar/ChatAvatar";
-import getChatName from "../../utils/getChatName";
 import { getTimeAgo } from "@/utils/getTimeAgo";
 import { OnlineDot } from "./OnlineDot";
 import SimpleTypingIndicator from "./typingIndicator/SimpleTypingIndicator";
@@ -92,7 +91,7 @@ const ChatListItem: React.FC<ChatListItemProps> = ({
           <>
             <div className="flex flex-col justify-center gap-1">
               <h1 className="text-lg font-semibold whitespace-nowrap text-ellipsis">
-                {getChatName(chat)}
+                {chat.name}
               </h1>
               <AnimatePresence mode="wait" initial={false}>
                 {typingUsers.length > 0 ? (

@@ -39,7 +39,7 @@ import { debounce } from "lodash";
 import { useMemo, useState, useEffect } from "react";
 import type { ChatResponse } from "@/types/chat";
 import type { MessageResponse } from "@/types/messageResponse";
-import type { ChatMember } from "@/types/chat";
+import type { ChatMember } from "@/types/chatMember";
 
 // Debounce delay in milliseconds
 const DEBOUNCE_DELAY = 1200;

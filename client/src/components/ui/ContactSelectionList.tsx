@@ -1,7 +1,6 @@
 import React from "react";
 import type { ChatResponse } from "@/types/chat";
 import { ChatAvatar } from "./avatar/ChatAvatar";
-import getChatName from "@/utils/getChatName";
 
 interface ChatListProps {
   chats: ChatResponse[];
@@ -27,7 +26,7 @@ const ContactSelectionList: React.FC<ChatListProps> = ({
 
               <div className="flex flex-col justify-center gap-1 flex-1 relative">
                 <h1 className="text-lg font-semibold whitespace-nowrap text-ellipsis">
-                  {getChatName(chat)}
+                  {chat.name}
                 </h1>
                 <input
                   type="checkbox"

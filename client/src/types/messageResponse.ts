@@ -61,3 +61,20 @@ export interface MessageResponse {
   reactions?: ReactionResponse[];
   attachments?: AttachmentResponse[];
 }
+
+export interface DisplayMessage {
+  id: string;
+  senderName: string;
+  content?: string;
+  attachmentTypes?: AttachmentType;
+  createdAt: string;
+}
+
+export interface LastMessageResponse {
+  id: string;
+  senderId: string;
+  senderName: string;
+  content?: string;
+  attachmentTypes?: AttachmentType;
+  createdAt: string;
+}

@@ -5,7 +5,7 @@ import ContactSelectionList from "../ui/ContactSelectionList";
 import { useChatStore } from "@/stores/chatStore";
 import { useCurrentUser } from "@/stores/authStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
-import type { DirectChatResponse } from "@/types/chat";
+import type { ChatResponse } from "@/types/chat";
 import type { ChatType } from "@/types/enums/ChatType";
 import { SidebarMode } from "@/types/enums/sidebarMode";
 
@@ -39,7 +39,7 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
     setSelectedContacts((prev) => prev.filter((id) => id !== contactId));
   };
 
-  const getSelectedChats = (): DirectChatResponse[] => {
+  const getSelectedChats = (): ChatResponse[] => {
     return privateChats.filter((chat) => selectedContacts.includes(chat.id));
   };
 
@@ -55,9 +55,13 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
       const userIds =
         selectedChats.length > 0
           ? Array.from(
-              new Set(selectedChats.map((chat) => chat.chatPartner.userId))
+              new Set(
+                selectedChats
+                  .map((chat) => chat.otherMemberUserIds?.[0])
+                  .filter((id): id is string => typeof id === "string")
+              )
             )
-          : []; // Empty array if no contacts selected (current user will be added by backend via token)
+          : [];
 
       const payload = {
         name,
@@ -112,9 +116,8 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
                 onClick={() => handleRemoveContact(chat.id)}
               >
                 <Avatar
-                  avatarUrl={chat.chatPartner.avatarUrl}
-                  firstName={chat.chatPartner.firstName}
-                  lastName={chat.chatPartner.lastName}
+                  avatarUrl={chat.avatarUrl}
+                  name={chat.name || ""}
                   size="8"
                   textSize="text-sm"
                 />

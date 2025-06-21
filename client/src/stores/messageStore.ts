@@ -8,7 +8,7 @@ import { AttachmentType } from "@/types/enums/attachmentType";
 import { messageService } from "@/services/messageService";
 import { useMemo } from "react";
 import { handleError } from "@/utils/handleError";
-import { LastMessageResponse } from "@/types/chat";
+import { LastMessageResponse } from "@/types/messageResponse";
 import { useShallow } from "zustand/shallow";
 import { useChatMemberStore } from "./chatMemberStore";
 
@@ -207,6 +207,8 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
     );
   },
 }));
+
+
 
 // Custom hooks for easier consumption in components
 export const useActiveChatMessages = () => {

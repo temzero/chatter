@@ -1,7 +1,6 @@
 type AvatarProps = {
   avatarUrl?: string | undefined | null;
-  firstName?: string;
-  lastName?: string;
+  name?: string;
   size?: string;
   textSize?: string;
   className?: string;
@@ -11,17 +10,14 @@ type AvatarProps = {
 
 export const Avatar: React.FC<AvatarProps> = ({
   avatarUrl,
-  firstName,
-  lastName,
+  name,
   size = "10",
-  textSize = "text-xl",
+  textSize = "text-4xl",
   className = "",
   id, // renamed from key
   onClick,
 }) => {
-  const firstNameInitial = firstName?.charAt(0)?.toUpperCase();
-  const lastNameInitial = lastName?.charAt(0)?.toUpperCase();
-  const showInitials = firstNameInitial && lastNameInitial;
+  const nameInitial = name?.charAt(0)?.toUpperCase();
 
   return (
     <div
@@ -36,12 +32,11 @@ export const Avatar: React.FC<AvatarProps> = ({
           loading="lazy"
           alt="User avatar"
         />
-      ) : showInitials ? (
+      ) : nameInitial ? (
         <h1
           className={`h-full w-full font-light flex items-center justify-center bg-[var(--border-color)] select-none ${textSize}`}
         >
-          {firstNameInitial}
-          {lastNameInitial}
+          {nameInitial}
         </h1>
       ) : (
         <span className="material-symbols-outlined text-4xl">

@@ -8,7 +8,6 @@ import {
   Body,
   UseGuards,
   Query,
-  Patch,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { MessageService } from './message.service';
@@ -104,14 +103,6 @@ export class MessageController {
       messagesResponse,
       'Chat messages retrieved successfully',
     );
-  }
-
-  @Patch('last-read')
-  async updateLastRead(
-    @Body() body: { chatMemberId: string },
-  ): Promise<SuccessResponse<void>> {
-    await this.messageService.updateLastRead(body.chatMemberId);
-    return new SuccessResponse(undefined, 'Last read updated successfully');
   }
 
   @Delete(':messageId')

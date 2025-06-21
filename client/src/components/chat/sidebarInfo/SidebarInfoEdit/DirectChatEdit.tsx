@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
-import { DirectChatResponse } from "@/types/chat";
+import { ChatResponse } from "@/types/chat";
 import { useCurrentUser } from "@/stores/authStore";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import { FriendshipStatus } from "@/types/friendship";
@@ -14,7 +14,7 @@ const DirectChatEdit = () => {
   const currentUser = useCurrentUser();
   const activeChat = useChatStore(
     (state) => state.activeChat
-  ) as DirectChatResponse;
+  ) as ChatResponse;
   const fetchChatById = useChatStore((state) => state.fetchChatById);
   const chatPartner = activeChat.chatPartner;
   const deleteChat = useChatStore((state) => state.deleteChat);
@@ -127,8 +127,7 @@ const DirectChatEdit = () => {
         <div className="flex gap-4 p-4 items-center">
           <Avatar
             avatarUrl={chatPartner.avatarUrl}
-            firstName={chatPartner.firstName}
-            lastName={chatPartner.lastName}
+            name={chatPartner.firstName}
             size="12"
           />
           <div>

@@ -8,6 +8,7 @@ const useTypingIndicator = (
   const lastTypingStateRef = useRef<boolean>(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastActivityRef = useRef<number>(0);
+  const previousLengthRef = useRef<number>(0);
 
   // Send typing state (true/false) over WebSocket
   const sendTypingState = useCallback(
@@ -22,7 +23,7 @@ const useTypingIndicator = (
     [chatId]
   );
 
-  // Manually clear typing state (call this when needed)
+  // Manually clear typing state
   const clearTypingState = useCallback(() => {
     if (lastTypingStateRef.current) {
       sendTypingState(false);
@@ -35,35 +36,42 @@ const useTypingIndicator = (
   useEffect(() => {
     if (!chatId || !inputRef.current) return;
 
-    const handleActivity = () => {
-      const hasValue = inputRef.current?.value.trim().length > 0;
-      lastActivityRef.current = Date.now();
+    const handleInput = () => {
+      const currentValue = inputRef.current?.value || "";
+      const currentLength = currentValue.length;
+      const isAddingText = currentLength > previousLengthRef.current;
+      previousLengthRef.current = currentLength;
 
-      if (!lastTypingStateRef.current && hasValue) {
-        sendTypingState(true);
+      // Only trigger typing if text was added and there's content
+      if (isAddingText && currentValue.trim().length > 0) {
+        lastActivityRef.current = Date.now();
+
+        if (!lastTypingStateRef.current) {
+          sendTypingState(true);
+        }
+
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
+
+        typingTimeoutRef.current = setTimeout(() => {
+          sendTypingState(false);
+        }, 5000);
       }
-
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-      }
-
-      typingTimeoutRef.current = setTimeout(() => {
-        sendTypingState(false);
-      }, 5000);
     };
 
     const element = inputRef.current;
-    element.addEventListener("input", handleActivity);
-    element.addEventListener("keydown", handleActivity);
+    element.addEventListener("input", handleInput);
+
+    // Initialize previous length
+    previousLengthRef.current = element.value.length;
 
     return () => {
-      element.removeEventListener("input", handleActivity);
-      element.removeEventListener("keydown", handleActivity);
+      element.removeEventListener("input", handleInput);
       clearTypingState(); // Clear on unmount
     };
   }, [chatId, inputRef, sendTypingState, clearTypingState]);
 
-  // Return clear function if parent component needs to manually reset typing state
   return { clearTypingState };
 };
 

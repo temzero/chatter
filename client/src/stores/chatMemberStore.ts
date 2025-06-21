@@ -1,16 +1,16 @@
 import { create } from "zustand";
 import { chatMemberService } from "@/services/chat/chatMemberService";
-import { useAuthStore } from "./authStore";
-import type { ChatMember } from "@/types/chat";
+import { useActiveChatId, useChatStore } from "./chatStore";
+import type { ChatMember } from "@/types/chatMember";
 import { ChatType } from "@/types/enums/ChatType";
-import { useChatStore } from "./chatStore";
+import { useShallow } from "zustand/shallow";
 
 interface ChatMemberStore {
   chatMembers: Record<string, ChatMember[]>; // chatId -> members
   isLoading: boolean;
   error: string | null;
 
-  fetchChatMembers: (chatId: string) => Promise<ChatMember[]>;
+  fetchChatMembers: (chatId: string, type: ChatType) => Promise<ChatMember[]>;
   getChatMember: (chatId: string, memberId: string) => ChatMember | undefined;
   getChatMemberUserIds: (chatId: string, type: ChatType) => string[];
   getAllChatMemberIds: () => string[];
@@ -25,7 +25,11 @@ interface ChatMemberStore {
     userId: string,
     nickname: string
   ) => Promise<string>;
-  updateMemberLastRead: (memberId: string) => Promise<void>;
+  updateMemberLastRead: (
+    chatId: string,
+    memberId: string,
+    messageId: string
+  ) => Promise<void>;
   getGroupMemberById: (
     chatId: string,
     userId: string
@@ -39,10 +43,18 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
   isLoading: false,
   error: null,
 
-  fetchChatMembers: async (chatId) => {
+  fetchChatMembers: async (chatId, type) => {
     try {
       set({ isLoading: true });
-      const members = await chatMemberService.fetchChatMembers(chatId);
+
+      let members: ChatMember[] = [];
+
+      if (type === ChatType.DIRECT) {
+        members = await chatMemberService.fetchDirectChatMembers(chatId);
+      } else {
+        members = await chatMemberService.fetchGroupChatMembers(chatId);
+      }
+
       set((state) => ({
         chatMembers: { ...state.chatMembers, [chatId]: members },
         isLoading: false,
@@ -61,20 +73,10 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
     return members.find((member) => member.userId === memberId);
   },
 
-  getChatMemberUserIds: (chatId: string, type: ChatType): string[] => {
+  getChatMemberUserIds: (chatId: string): string[] => {
     const chat = useChatStore.getState().chats.find((c) => c.id === chatId);
     if (!chat) return [];
-
-    if (type === ChatType.DIRECT) {
-      if (!chat || chat.type !== ChatType.DIRECT) return [];
-      return [chat.chatPartner.userId];
-    }
-
-    if (chat.type === ChatType.GROUP || chat.type === ChatType.CHANNEL) {
-      return chat.memberUserIds || [];
-    }
-
-    return [];
+    return chat.otherMemberUserIds || [];
   },
 
   getAllChatMemberIds: () => {
@@ -90,38 +92,33 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
     return Array.from(allMemberIds);
   },
 
-  getAllUserIdsInChats: (): string[] => {
+  getAllUserIdsInChats: () => {
     const chats = useChatStore.getState().chats;
     const { chatMembers } = get();
     const allUserIds = new Set<string>();
 
     chats.forEach((chat) => {
-      if (chat.type === ChatType.DIRECT) {
-        allUserIds.add(chat.chatPartner.userId);
-      } else {
-        const members = chatMembers[chat.id] || [];
-        members.forEach((member) => {
-          allUserIds.add(member.userId);
-        });
-      }
+      const members = chatMembers[chat.id] || [];
+      members.forEach((member) => {
+        allUserIds.add(member.userId);
+      });
     });
 
     return Array.from(allUserIds);
   },
 
-  updateMember: async (chatId, userId, updates) => {
+  updateMember: async (chatId, memberId, updates) => {
     set({ isLoading: true });
     try {
       const updatedMember = await chatMemberService.updateMember(
-        chatId,
-        userId,
+        memberId,
         updates
       );
 
       set((state) => {
         const currentMembers = state.chatMembers[chatId] || [];
         const updatedMembers = currentMembers.map((member) =>
-          member.userId === userId ? updatedMember : member
+          member.id === memberId ? updatedMember : member
         );
         return {
           chatMembers: {
@@ -138,59 +135,14 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
     }
   },
 
-  updateMemberNickname: async (chatId, userId, nickname) => {
+  updateMemberNickname: async (memberId, nickname) => {
     set({ isLoading: true });
     try {
-      const currentUserId = useAuthStore.getState().currentUser?.id;
       const updatedNickname = await chatMemberService.updateMemberNickname(
-        chatId,
-        userId,
+        memberId,
         nickname
       );
 
-      set(() => {
-        const activeChat = useChatStore.getState().activeChat;
-        if (activeChat?.id === chatId && activeChat.type === ChatType.DIRECT) {
-          const isCurrentUser = userId === currentUserId;
-          const isPartner = userId === activeChat.chatPartner.userId;
-
-          let updatedActiveChat = { ...activeChat };
-
-          if (isPartner) {
-            updatedActiveChat = {
-              ...updatedActiveChat,
-              chatPartner: {
-                ...updatedActiveChat.chatPartner,
-                nickname: updatedNickname,
-              },
-            };
-          } else if (isCurrentUser) {
-            updatedActiveChat = {
-              ...updatedActiveChat,
-              myNickname: updatedNickname,
-            };
-          }
-
-          useChatStore.setState({
-            activeChat: updatedActiveChat,
-            chats: useChatStore
-              .getState()
-              .chats.map((chat) =>
-                chat.id === chatId && chat.type === ChatType.DIRECT
-                  ? updatedActiveChat
-                  : chat
-              ),
-            filteredChats: useChatStore
-              .getState()
-              .filteredChats.map((chat) =>
-                chat.id === chatId && chat.type === ChatType.DIRECT
-                  ? updatedActiveChat
-                  : chat
-              ),
-          });
-        }
-        return { isLoading: false };
-      });
       return updatedNickname;
     } catch (error) {
       console.error("Failed to update member nickname:", error);
@@ -199,8 +151,43 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
     }
   },
 
-  updateMemberLastRead: async (chatMemberId: string) => {
-    chatMemberService.updateLastRead(chatMemberId);
+  updateMemberLastRead: async (
+    chatId: string,
+    memberId: string,
+    messageId: string
+  ) => {
+    set({ isLoading: true });
+    try {
+      // Optionally call an API to update last read on the server here
+      // await chatMemberService.updateMemberLastRead(memberId, messageId);
+
+      set((state) => {
+        const members = state.chatMembers[chatId];
+        if (!members) return state;
+
+        const memberIndex = members.findIndex((m) => m.id === memberId);
+        if (memberIndex === -1) return state;
+
+        const updatedMembers = [...members];
+        updatedMembers[memberIndex] = {
+          ...updatedMembers[memberIndex],
+          lastReadMessageId: messageId,
+        };
+
+        return {
+          ...state,
+          chatMembers: {
+            ...state.chatMembers,
+            [chatId]: updatedMembers,
+          },
+          isLoading: false,
+        };
+      });
+    } catch (error) {
+      console.error("Failed to update member last read:", error);
+      set({ error: "Failed to update last read", isLoading: false });
+      throw error;
+    }
   },
 
   getGroupMemberById: (chatId, userId) => {
@@ -233,18 +220,44 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
   },
 }));
 
-// Selectors remain the same
-export const useActiveMembers = () => {
-  const activeChat = useChatStore((state) => state.activeChat);
-  const chatMembers = useChatMemberStore((state) => state.chatMembers);
-  return activeChat ? chatMembers[activeChat.id] || [] : [];
+export const useActiveMembers = (): ChatMember[] | undefined => {
+  const activeChatId = useActiveChatId();
+  return useChatMemberStore(
+    useShallow((state) => (activeChatId ? state.chatMembers[activeChatId] : []))
+  );
 };
 
-export const useMembersByChatId = (chatId: string) => {
-  const chatMembers = useChatMemberStore((state) => state.chatMembers);
-  return chatMembers[chatId] || [];
+export const useMembersByChatId = (
+  chatId: string
+): ChatMember[] | undefined => {
+  return useChatMemberStore(
+    useShallow((state) => state.chatMembers[chatId] || [])
+  );
 };
 
-export const useUpdateMyLastRead = (memberId: string) => {
-  return useChatMemberStore((state) => state.updateMemberLastRead(memberId));
+export const useDirectChatPartner = (
+  chatId: string,
+  myMemberId: string
+): ChatMember | undefined => {
+  return useChatMemberStore(
+    useShallow((state) => {
+      const members = state.chatMembers[chatId];
+      if (!members || members.length !== 2) return undefined;
+
+      return members.find((member) => member.id !== myMemberId);
+    })
+  );
+};
+
+export const useGroupOtherMembers = (
+  chatId: string,
+  myMemberId: string
+): ChatMember[] => {
+  return useChatMemberStore(
+    useShallow((state) => {
+      const members = state.chatMembers[chatId];
+      if (!members) return [];
+      return members.filter((member) => member.id !== myMemberId);
+    })
+  );
 };

@@ -3,12 +3,13 @@ import Message from "../Message";
 import { MessageResponse } from "@/types/messageResponse";
 import { DirectChatResponse } from "@/types/chat";
 import { useCurrentUser } from "@/stores/authStore";
+// import { formatTime } from "@/utils/formatTime";
 import {
   groupMessagesByDate,
   isRecentMessage,
   shouldShowInfo,
 } from "@/utils/messageHelpers";
-import { useActiveMembers, useChatMemberStore } from "@/stores/chatMemberStore";
+import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.socket.service";
 
 interface DirectMessagesProps {
@@ -19,38 +20,26 @@ interface DirectMessagesProps {
 const DirectMessages: React.FC<DirectMessagesProps> = ({ chat, messages }) => {
   const chatId = chat?.id;
   const currentUser = useCurrentUser();
-  const { updateMemberLastRead } = useChatMemberStore();
-
-  const rawMembers = useActiveMembers();
-  const members = useMemo(() => rawMembers || [], [rawMembers]);
-
-  const myMember = useMemo(
-    () => members.find((m) => m.id === chat.myMemberId),
-    [members, chat.myMemberId]
+  const updateMemberLastRead = useChatMemberStore(
+    (state) => state.updateMemberLastRead
   );
 
-  const partnerMember = useMemo(
-    () => members.find((m) => m.id !== chat.myMemberId),
-    [members, chat.myMemberId]
-  );
-
-  const myLastReadMessageId = myMember?.lastReadMessageId ?? null;
-  const partnerLastReadMessageId = partnerMember?.lastReadMessageId ?? null;
-
-  // Update last read when new messages arrive
+  // Update last read when new messages arrive (debounced)
   useEffect(() => {
-    if (!chatId || !chat.myMemberId || messages.length === 0) return;
+    if (!chatId || !chat?.myMemberId || messages.length === 0) return;
 
     const lastMessageId = messages[messages.length - 1].id;
     updateMemberLastRead(chatId, chat.myMemberId, lastMessageId);
 
-    const isUnread =
-      myLastReadMessageId === null ||
-      messages[messages.length - 1].id !== myLastReadMessageId;
+    // Debounced server update (only if messages are unread)
+    const hasUnread =
+      !chat.myLastReadAt ||
+      new Date(messages[messages.length - 1].createdAt) >
+        new Date(chat.myLastReadAt);
 
-    if (isUnread) {
+    if (hasUnread) {
       const timer = setTimeout(() => {
-        chatWebSocketService.markAsRead(chat.myMemberId, lastMessageId);
+        chatWebSocketService.markAsRead(chat?.myMemberId, lastMessageId);
       }, 1000);
 
       return () => clearTimeout(timer);
@@ -59,10 +48,35 @@ const DirectMessages: React.FC<DirectMessagesProps> = ({ chat, messages }) => {
     chatId,
     chat.myMemberId,
     messages,
-    myLastReadMessageId,
+    chat.myLastReadAt,
     updateMemberLastRead,
   ]);
 
+  // Get last read times from store
+  const myLastReadAt = chat.myLastReadAt;
+
+  const partnerLastReadAt = chat.chatPartner.lastReadAt;
+
+  // Find last read message IDs (optimized)
+  const { myLastReadMessageId, partnerLastReadMessageId } = useMemo(() => {
+    if (messages.length === 0)
+      return { myLastReadMessageId: null, partnerLastReadMessageId: null };
+
+    const flatMessages = [...messages].reverse();
+    const findId = (timestamp?: string) =>
+      timestamp
+        ? flatMessages.find(
+            (msg) => new Date(msg.createdAt) <= new Date(timestamp)
+          )?.id || null
+        : null;
+
+    return {
+      myLastReadMessageId: findId(myLastReadAt ?? undefined),
+      partnerLastReadMessageId: findId(partnerLastReadAt ?? undefined),
+    };
+  }, [messages, myLastReadAt, partnerLastReadAt]);
+
+  // Group messages by date
   const messagesByDate = useMemo(() => {
     return groupMessagesByDate(messages);
   }, [messages]);
@@ -90,15 +104,16 @@ const DirectMessages: React.FC<DirectMessagesProps> = ({ chat, messages }) => {
             const showInfo = shouldShowInfo(msg, prevMsg, nextMsg);
             const isRecent = isRecentMessage(msg, prevMsg, nextMsg);
 
+            // Determine read markers
             const readMarkers: string[] = [];
             if (msg.id === myLastReadMessageId && currentUser?.avatarUrl) {
               readMarkers.push(currentUser.avatarUrl);
             }
             if (
               msg.id === partnerLastReadMessageId &&
-              partnerMember?.avatarUrl
+              chat.chatPartner.avatarUrl
             ) {
-              readMarkers.push(partnerMember.avatarUrl);
+              readMarkers.push(chat.chatPartner.avatarUrl);
             }
 
             return (

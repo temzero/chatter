@@ -24,10 +24,7 @@ import {
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { ErrorResponse } from 'src/common/api-response/errors';
-import {
-  DirectChatResponseDto,
-  GroupChatResponseDto,
-} from './dto/responses/chat-response.dto';
+import { ChatResponseDto } from './dto/responses/chat-response.dto';
 import { ChatType } from './constants/chat-types.constants';
 
 @Controller('chat')
@@ -39,9 +36,7 @@ export class ChatController {
   @HttpCode(HttpStatus.OK)
   async findAll(
     @CurrentUser('id') userId: string,
-  ): Promise<
-    SuccessResponse<Array<DirectChatResponseDto | GroupChatResponseDto>>
-  > {
+  ): Promise<SuccessResponse<Array<ChatResponseDto>>> {
     try {
       const chats = await this.chatService.getChatsByUserId(userId);
       return new SuccessResponse(chats, 'User chats retrieved successfully');
@@ -54,7 +49,7 @@ export class ChatController {
   async findOne(
     @Param('chatId') id: string,
     @CurrentUser('id') userId: string,
-  ): Promise<SuccessResponse<DirectChatResponseDto | GroupChatResponseDto>> {
+  ): Promise<SuccessResponse<ChatResponseDto>> {
     try {
       const chat = await this.chatService.getChatById(id, userId);
 
@@ -71,7 +66,7 @@ export class ChatController {
   async getOrCreateDirectChat(
     @Body() createDirectChatDto: CreateDirectChatDto,
     @CurrentUser('id') userId: string,
-  ): Promise<GetOrCreateResponse<DirectChatResponseDto>> {
+  ): Promise<GetOrCreateResponse<ChatResponseDto>> {
     try {
       const result = await this.chatService.getOrCreateDirectChat(
         userId,
@@ -79,7 +74,7 @@ export class ChatController {
       );
 
       return new GetOrCreateResponse(
-        plainToInstance(DirectChatResponseDto, result.chat),
+        plainToInstance(ChatResponseDto, result.chat),
         result.wasExisting,
         result.wasExisting
           ? 'Direct chat already created — retrieved successfully'
@@ -98,7 +93,7 @@ export class ChatController {
   async createGroupChat(
     @CurrentUser('id') userId: string,
     @Body() createGroupChatDto: CreateGroupChatDto,
-  ): Promise<SuccessResponse<GroupChatResponseDto>> {
+  ): Promise<SuccessResponse<ChatResponseDto>> {
     try {
       const chat = await this.chatService.createGroupChat(
         userId,
@@ -106,7 +101,7 @@ export class ChatController {
       );
 
       return new SuccessResponse(
-        plainToInstance(GroupChatResponseDto, chat),
+        plainToInstance(ChatResponseDto, chat),
         'Group chat created successfully',
       );
     } catch (error: unknown) {
@@ -123,7 +118,7 @@ export class ChatController {
     @CurrentUser('id') userId: string,
     @Param('chatId') chatId: string,
     @Body() updateChatDto: UpdateChatDto,
-  ): Promise<SuccessResponse<DirectChatResponseDto | GroupChatResponseDto>> {
+  ): Promise<SuccessResponse<ChatResponseDto>> {
     try {
       const chat = await this.chatService.getChatById(chatId, userId);
 
@@ -154,8 +149,8 @@ export class ChatController {
 
       const responseData =
         updatedChat.type === ChatType.DIRECT
-          ? plainToInstance(DirectChatResponseDto, updatedChat)
-          : plainToInstance(GroupChatResponseDto, updatedChat);
+          ? plainToInstance(ChatResponseDto, updatedChat)
+          : plainToInstance(ChatResponseDto, updatedChat);
 
       return new SuccessResponse(responseData, 'Chat updated successfully');
     } catch (error: unknown) {
@@ -167,14 +162,14 @@ export class ChatController {
   async delete(
     @Param('chatId') chatId: string,
     @CurrentUser('id') userId: string,
-  ): Promise<SuccessResponse<DirectChatResponseDto | GroupChatResponseDto>> {
+  ): Promise<SuccessResponse<ChatResponseDto>> {
     try {
       const deletedChat = await this.chatService.deleteChat(chatId, userId);
 
       const responseData =
         deletedChat.type === ChatType.DIRECT
-          ? plainToInstance(DirectChatResponseDto, deletedChat)
-          : plainToInstance(GroupChatResponseDto, deletedChat);
+          ? plainToInstance(ChatResponseDto, deletedChat)
+          : plainToInstance(ChatResponseDto, deletedChat);
 
       return new SuccessResponse(
         responseData,

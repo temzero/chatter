@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useChatStore } from "@/stores/chatStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
-import { GroupChatResponse } from "@/types/chat";
+import { ChatResponse } from "@/types/chat";
 import AvatarEdit from "@/components/ui/avatar/AvatarEdit";
 import { fileStorageService } from "@/services/storage/fileStorageService";
 import { handleError } from "@/utils/handleError";
@@ -11,7 +11,7 @@ import { useActiveMembers } from "@/stores/chatMemberStore";
 const GroupChatEdit = () => {
   const activeChat = useChatStore(
     (state) => state.activeChat
-  ) as GroupChatResponse;
+  ) as ChatResponse;
   const activeMembers = useActiveMembers();
   const deleteChat = useChatStore((state) => state.deleteChat);
   const leaveGroupChat = useChatStore((state) => state.leaveGroupChat);

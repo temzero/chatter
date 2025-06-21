@@ -28,8 +28,7 @@ const SidebarProfile: React.FC = () => {
           {currentUser && (
             <Avatar
               avatarUrl={currentUser.avatarUrl}
-              firstName={currentUser.firstName}
-              lastName={currentUser.lastName}
+              name={currentUser.firstName}
               size="36"
             />
           )}

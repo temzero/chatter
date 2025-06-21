@@ -106,13 +106,17 @@ export class ChatGateway {
     const userId = client.data.userId;
     if (!userId) return;
 
-    await this.chatMemberService.updateLastRead(data.chatId, userId);
-
-    // Notify other participants that messages were read
-    client.to(data.chatId).emit(`${chatLink}messagesRead`, {
+    // Update read time in DB and get the memberId
+    const member = await this.chatMemberService.updateLastRead(
+      data.chatId,
       userId,
-      chatId: data.chatId,
-      timestamp: Date.now(),
+    );
+
+    if (!member) return;
+
+    // Notify other participants with only memberId
+    client.to(data.chatId).emit(`${chatLink}messagesRead`, {
+      memberId: member.id,
     });
   }
 

@@ -4,18 +4,6 @@ import { webSocketService } from "./websocket.service";
 import { MessageResponse } from "@/types/messageResponse";
 
 export class ChatWebSocketService {
-  // constructor() {
-  //   // Initialize connection when the service is created
-  //   this.initializeConnection();
-  // }
-
-  // private async initializeConnection() {
-  //   try {
-  //     await webSocketService.connect();
-  //   } catch (error) {
-  //     console.error("Failed to initialize WebSocket connection:", error);
-  //   }
-  // }
 
   async getChatStatus(
     chatId: string
@@ -55,8 +43,8 @@ export class ChatWebSocketService {
     webSocketService.emit("chat:sendMessage", message);
   }
 
-  markAsRead(chatId: string) {
-    webSocketService.emit("chat:markAsRead", { chatId });
+  markAsRead(memberId: string, messageId: string) {
+    webSocketService.emit("chat:markAsRead", { memberId, messageId });
   }
 
   // Event listeners
@@ -88,24 +76,12 @@ export class ChatWebSocketService {
     webSocketService.off("chat:userTyping", callback);
   }
 
-  onMessagesRead(
-    callback: (data: {
-      userId: string;
-      chatId: string;
-      timestamp: number;
-    }) => void
-  ) {
-    webSocketService.on("chat:messagesRead", callback);
+  onMessagesRead(callback: (data: { memberId: string }) => void) {
+    webSocketService.on("chat:markAsRead", callback);
   }
 
-  offMessagesRead(
-    callback: (data: {
-      userId: string;
-      chatId: string;
-      timestamp: number;
-    }) => void
-  ) {
-    webSocketService.off("chat:messagesRead", callback);
+  offMessagesRead(callback: (data: { memberId: string }) => void) {
+    webSocketService.off("chat:markAsRead", callback);
   }
 }
 

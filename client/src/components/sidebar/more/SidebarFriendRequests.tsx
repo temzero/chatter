@@ -82,7 +82,7 @@ const SidebarFriendRequests: React.FC = () => {
           {activeTab === "received" ? (
             receivedRequests.length > 0 ? (
               receivedRequests.map((request) => {
-                const [firstName, lastName] = request.senderName.split(" ");
+                const [firstName] = request.senderName.split(" ");
 
                 return (
                   <div
@@ -92,8 +92,7 @@ const SidebarFriendRequests: React.FC = () => {
                   >
                     <Avatar
                       avatarUrl={request.senderAvatarUrl}
-                      firstName={firstName}
-                      lastName={lastName || ""}
+                      name={firstName}
                       size="12"
                       className="mt-1"
                     />
@@ -152,7 +151,7 @@ const SidebarFriendRequests: React.FC = () => {
             )
           ) : sentRequests.length > 0 ? (
             sentRequests.map((request) => {
-              const [firstName, lastName] = request.receiverName.split(" ");
+              const [firstName] = request.receiverName.split(" ");
 
               return (
                 <div
@@ -161,8 +160,7 @@ const SidebarFriendRequests: React.FC = () => {
                 >
                   <Avatar
                     avatarUrl={request.receiverAvatarUrl}
-                    firstName={firstName}
-                    lastName={lastName || ""}
+                    name={firstName}
                     size="12"
                     className="mt-1"
                   />

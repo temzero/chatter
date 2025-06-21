@@ -2,7 +2,6 @@ import { useActiveChat } from "@/stores/chatStore";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
-import getChatName from "@/utils/getChatName";
 import { FriendshipStatus } from "@/types/friendship";
 import { ChatType } from "@/types/enums/ChatType";
 import { OnlineDot } from "../ui/OnlineDot";
@@ -43,7 +42,7 @@ const ChatHeader: React.FC = () => {
           }}
         >
           <ChatAvatar chat={activeChat} type="header" />
-          <h1 className="text-xl font-medium">{getChatName(activeChat)}</h1>
+          <h1 className="text-xl font-medium">{activeChat.name}</h1>
         </motion.div>
       </AnimatePresence>
 

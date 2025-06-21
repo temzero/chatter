@@ -118,8 +118,7 @@ const Message: React.FC<MessageProps> = ({
           <div className="mt-auto mr-1 h-10 w-10 min-w-10 min-h-10 flex items-center justify-center rounded-full object-cover custom-border overflow-hidden">
             <Avatar
               avatarUrl={message.senderAvatarUrl}
-              firstName={message.senderFirstName}
-              lastName={message.senderLastName}
+              name={message.senderFirstName}
             />
           </div>
         ) : (
@@ -179,7 +178,7 @@ const Message: React.FC<MessageProps> = ({
         )}
 
         {!isRecent && (
-          <p className="opacity-0 group-hover:opacity-40 text-xs">
+          <p className={`opacity-0 group-hover:opacity-40 text-xs ${isMe ? 'ml-auto' : 'mr-auto'}`}>
             {formatTime(message.createdAt)}
           </p>
         )}
@@ -193,8 +192,7 @@ const Message: React.FC<MessageProps> = ({
               <div key={index}>
                 <Avatar
                   avatarUrl={avatarUrl}
-                  firstName="F"
-                  lastName="L"
+                  name={displayName}
                   size="5"
                   id={index}
                 />
@@ -204,7 +202,7 @@ const Message: React.FC<MessageProps> = ({
         )}
 
         {/* Action Buttons */}
-        <div
+        {/* <div
           className={classNames(
             "flex gap-1 opacity-0 group-hover:opacity-80 transition-opacity duration-200 cursor-pointer z-20",
             iconAlignmentClass
@@ -228,7 +226,7 @@ const Message: React.FC<MessageProps> = ({
           <i className="material-symbols-outlined hover:scale-125 opacity-80 hover:opacity-100 duration-200 rounded-full">
             favorite
           </i>
-        </div>
+        </div> */}
       </div>
     </motion.div>
   );

@@ -1,15 +1,16 @@
-import React, { useMemo, useEffect } from "react";
+import React, { useMemo } from "react";
 import Message from "../Message";
 import { MessageResponse } from "@/types/messageResponse";
 import { ChatResponse } from "@/types/chat";
+import { chatMemberService } from "@/services/chat/chatMemberService";
+import { useActiveMembers } from "@/stores/chatMemberStore";
+// import { useCurrentUser } from "@/stores/authStore";
 import { ChatType } from "@/types/enums/ChatType";
 import {
   groupMessagesByDate,
   isRecentMessage,
   shouldShowInfo,
 } from "@/utils/messageHelpers";
-import { useActiveMembers, useChatMemberStore } from "@/stores/chatMemberStore";
-import { chatWebSocketService } from "@/lib/websocket/services/chat.socket.service";
 
 interface GroupMessagesProps {
   chat: ChatResponse;
@@ -18,46 +19,46 @@ interface GroupMessagesProps {
 
 const GroupMessages: React.FC<GroupMessagesProps> = ({ chat, messages }) => {
   const chatId = chat?.id;
-  const { updateMemberLastRead } = useChatMemberStore();
-  const rawMembers = useActiveMembers();
-  const members = useMemo(() => rawMembers || [], [rawMembers]);
+  // const currentUser = useCurrentUser();
+  // const myLastReadAt = chat.myLastReadAt;
+  const myMemberId = chat.myMemberId;
+  const chatMembers = useActiveMembers();
 
-  const myMember = useMemo(
-    () => members.find((m) => m.id === chat.myMemberId),
-    [members, chat.myMemberId]
+  // Update my last read timestamp
+  if (myMemberId) {
+    chatMemberService.updateLastRead(myMemberId);
+  }
+
+  const messagesByDate = useMemo(
+    () => groupMessagesByDate(messages),
+    [messages]
   );
 
-  const myLastReadMessageId = myMember?.lastReadMessageId ?? null;
+  // Precompute last read message ID for each user
+  const lastReadMessageIdMap = useMemo(() => {
+    const map: Record<string, string> = {}; // userId => messageId
 
-  // Update last read message ID for my member
-  useEffect(() => {
-    if (!chatId || !chat.myMemberId || messages.length === 0) return;
+    const sortedMessages = [...messages];
 
-    const lastMessageId = messages[messages.length - 1].id;
-    updateMemberLastRead(chatId, chat.myMemberId, lastMessageId);
+    chatMembers.forEach((member) => {
+      if (!member.lastReadAt) return;
 
-    const isUnread =
-      myLastReadMessageId === null ||
-      messages[messages.length - 1].id !== myLastReadMessageId;
+      const lastReadMsg = sortedMessages
+        .slice()
+        .reverse()
+        .find(
+          (msg) =>
+            new Date(msg.createdAt).getTime() <=
+            new Date(member.lastReadAt!).getTime()
+        );
 
-    if (isUnread) {
-      const timer = setTimeout(() => {
-        chatWebSocketService.markAsRead(chat.myMemberId, lastMessageId);
-      }, 1000);
+      if (lastReadMsg) {
+        map[member.userId] = lastReadMsg.id;
+      }
+    });
 
-      return () => clearTimeout(timer);
-    }
-  }, [
-    chatId,
-    chat.myMemberId,
-    messages,
-    myLastReadMessageId,
-    updateMemberLastRead,
-  ]);
-
-  const messagesByDate = useMemo(() => {
-    return groupMessagesByDate(messages);
-  }, [messages]);
+    return map;
+  }, [messages, chatMembers]);
 
   if (messages.length === 0) {
     return (
@@ -85,8 +86,11 @@ const GroupMessages: React.FC<GroupMessagesProps> = ({ chat, messages }) => {
 
             const readUserAvatars: string[] = [];
 
-            for (const member of members) {
-              if (member.avatarUrl && member.lastReadMessageId === msg.id) {
+            for (const member of chatMembers) {
+              if (!member.avatarUrl) continue;
+
+              const lastReadMessageId = lastReadMessageIdMap[member.userId];
+              if (lastReadMessageId === msg.id) {
                 readUserAvatars.push(member.avatarUrl);
               }
             }
@@ -96,7 +100,7 @@ const GroupMessages: React.FC<GroupMessagesProps> = ({ chat, messages }) => {
                 key={msg.id}
                 message={msg}
                 chatType={ChatType.GROUP}
-                shouldAnimate={isRecent}
+                shouldAnimate={true}
                 showInfo={showInfo}
                 isRecent={isRecent}
                 readUserAvatars={readUserAvatars}

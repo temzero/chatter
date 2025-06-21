@@ -37,8 +37,7 @@ const TypingIndicator = ({ chatId }: TypingIndicatorProps) => {
       <div key={member.userId}>
         <Avatar
           avatarUrl={member.avatarUrl}
-          firstName={member.firstName}
-          lastName={member.lastName}
+          name={member.firstName}
           size="8"
         />
       </div>

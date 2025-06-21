@@ -1,31 +1,36 @@
 import React from "react";
 import ContactInfoItem from "@/components/ui/contactInfoItem";
-import { DirectChatResponse } from "@/types/chat";
+import { ChatResponse } from "@/types/chat";
 import {
   SidebarInfoModes,
   useSidebarInfoStore,
 } from "@/stores/sidebarInfoStore";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
-import getChatName from "@/utils/getChatName";
 import FriendshipBtn from "@/components/ui/FriendshipBtn";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
 import { useActiveChat } from "@/stores/chatStore";
+import { useActiveMembers } from "@/stores/chatMemberStore";
+import { DirectChatMember } from "@/types/chatMember";
 
 const DirectChat: React.FC = () => {
-  const activeChat = useActiveChat() as DirectChatResponse;
+  const activeChat = useActiveChat() as ChatResponse;
   const { setSidebarInfo } = useSidebarInfoStore();
-  if (!activeChat) return;
-  const chatPartner = activeChat.chatPartner;
+  const chatMembers = useActiveMembers();
 
-  if (!chatPartner) {
-    console.error("No chatPartner found!");
+  const chatPartner = chatMembers?.find(
+    (member) => member.id !== activeChat.myMemberId
+  ) as DirectChatMember;
+
+  console.log('chatPartner', chatPartner)
+
+  if (!chatPartner || !activeChat) {
     return;
   }
 
   return (
     <div className="flex flex-col justify-center items-center gap-4 px-4 w-full h-full">
       <ChatAvatar chat={activeChat} type="info" />
-      <h1 className="text-xl font-semibold">{getChatName(activeChat)}</h1>
+      <h1 className="text-xl font-semibold">{activeChat.name}</h1>
       {chatPartner.nickname && (
         <h2 className="text-sm opacity-80 -mt-1">
           {chatPartner.firstName} {chatPartner.lastName}

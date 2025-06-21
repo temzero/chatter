@@ -160,14 +160,12 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({ chat, type }) => {
 
     case ChatType.DIRECT: {
       const directChat = chat as DirectChatResponse;
-      const chatPartner = directChat.chatPartner || {};
 
       return (
         <div className={`relative group overflow-hidden ${parentScaleClass}`}>
           <Avatar
-            avatarUrl={chatPartner.avatarUrl ?? undefined}
-            firstName={chatPartner.firstName}
-            lastName={chatPartner.lastName}
+            avatarUrl={directChat.avatarUrl ?? undefined}
+            name={directChat.name}
             className={`${styles.size} ${styles.rounded} object-cover`}
           />
           {showOnlineDot && (

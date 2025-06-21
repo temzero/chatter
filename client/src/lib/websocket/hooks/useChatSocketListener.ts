@@ -3,12 +3,13 @@ import { chatWebSocketService } from "../services/chat.socket.service";
 import { useMessageStore } from "@/stores/messageStore";
 import { MessageResponse } from "@/types/messageResponse";
 import { useTypingStore } from "@/stores/typingStore";
+import { useChatMemberStore } from "@/stores/chatMemberStore";
+import { useChatStore } from "@/stores/chatStore";
 
 export function useChatSocketListeners() {
   useEffect(() => {
     // Message handler
     const handleNewMessage = (message: MessageResponse) => {
-      // console.log("[WS] 📩 New message received:", message);
       useMessageStore.getState().addMessage(message);
     };
 
@@ -17,12 +18,6 @@ export function useChatSocketListeners() {
       userId: string;
       isTyping: boolean;
     }) => {
-      // console.log(
-      //   `[WS] 🖊️ User ${data.userId} ${
-      //     data.isTyping ? "started" : "stopped"
-      //   } typing in chat ${data.chatId}`
-      // );
-
       const typingStore = useTypingStore.getState();
       if (data.isTyping) {
         typingStore.startTyping(data.chatId, data.userId);
@@ -31,16 +26,28 @@ export function useChatSocketListeners() {
       }
     };
 
+    // New handler for mark as read
+    const handleMessagesRead = (data: { memberId: string }) => {
+      // Update your store to mark messages as read for this member
+      // You may need to get the current chatId from somewhere else, e.g., from a store or context
+      const chatId = useChatStore.getState().activeChat?.id;
+      if (chatId) {
+        useChatMemberStore
+          .getState()
+          .updateMemberLastRead(chatId, data.memberId);
+      }
+    };
+
     // Subscribe to events
     chatWebSocketService.onNewMessage(handleNewMessage);
     chatWebSocketService.onTyping(handleTyping);
-    // console.log("[WS] ✅ Subscribed to new message & typing listeners");
+    chatWebSocketService.onMessagesRead(handleMessagesRead);
 
     return () => {
       // Clean up listeners
       chatWebSocketService.offNewMessage(handleNewMessage);
       chatWebSocketService.offTyping(handleTyping);
-      // console.log("[WS] ❌ Unsubscribed from listeners");
+      chatWebSocketService.offMessagesRead(handleMessagesRead);
     };
   }, []);
 }
