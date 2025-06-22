@@ -4,6 +4,9 @@ export class CreateMessageDto {
   @IsUUID()
   chatId: string;
 
+  @IsUUID()
+  memberId: string;
+
   @IsOptional()
   @IsUUID()
   replyToMessageId?: string;

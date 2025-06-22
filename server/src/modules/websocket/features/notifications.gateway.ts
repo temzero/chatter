@@ -32,7 +32,7 @@ export class NotificationGateway {
     return { success: true };
   }
 
-  @SubscribeMessage(`${notificationsLink}markAsRead`)
+  @SubscribeMessage(`${notificationsLink}messageRead`)
   handleMarkAsRead(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() notificationId: string,

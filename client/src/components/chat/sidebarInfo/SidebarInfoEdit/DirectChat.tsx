@@ -16,6 +16,7 @@ const DirectChat: React.FC = () => {
   const activeChat = useActiveChat() as ChatResponse;
   const { setSidebarInfo } = useSidebarInfoStore();
   const chatMembers = useActiveMembers();
+  console.log('DirectChat chatMembers', chatMembers)
 
   const chatPartner = chatMembers?.find(
     (member) => member.id !== activeChat.myMemberId

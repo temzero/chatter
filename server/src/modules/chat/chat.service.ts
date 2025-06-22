@@ -277,6 +277,7 @@ export class ChatService {
       id: chat.id,
       type: chat.type as ChatType.GROUP | ChatType.CHANNEL,
       myMemberId: myMember?.id ?? '',
+      myRole: myMember?.role,
       name: chat.name ?? 'Unnamed Group',
       avatarUrl: chat.avatarUrl ?? null,
       description: chat.description ?? null,

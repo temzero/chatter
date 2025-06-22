@@ -9,10 +9,11 @@ import { chatWebSocketService } from "@/lib/websocket/services/chat.socket.servi
 import useTypingIndicator from "@/hooks/useTypingIndicator";
 
 interface ChatBarProps {
-  chatId?: string;
+  chatId: string;
+  memberId: string;
 }
 
-const ChatBar: React.FC<ChatBarProps> = ({ chatId }) => {
+const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
   console.log("CHAT BAR mounted");
   const setDraftMessage = useMessageStore((state) => state.setDraftMessage);
   const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
@@ -90,6 +91,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId }) => {
 
       const payload: SendMessagePayload = {
         chatId: chatId,
+        memberId: memberId,
         content: trimmedInput || undefined,
         attachmentIds:
           attachedFiles.length > 0
@@ -99,7 +101,6 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId }) => {
 
       try {
         chatWebSocketService.sendMessage(payload);
-        chatWebSocketService.markAsRead(chatId);
       } catch (error) {
         console.error("Failed to send message:", error);
       }
@@ -114,7 +115,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId }) => {
       updateInputHeight();
     }
     inputRef.current?.focus();
-  }, [chatId, attachedFiles, setDraftMessage, clearTypingState]);
+  }, [attachedFiles, chatId, memberId, clearTypingState, setDraftMessage]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

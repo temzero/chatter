@@ -12,6 +12,7 @@ import { useActiveMembers } from "@/stores/chatMemberStore";
 const GroupChat: React.FC = () => {
   const activeChat = useActiveChat() as ChatResponse;
   const activeMembers = useActiveMembers() || [];
+  console.log('activeMembers', activeMembers)
   const { setSidebarInfo } = useSidebarInfoStore();
 
   return (

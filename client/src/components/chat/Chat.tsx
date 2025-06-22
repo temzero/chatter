@@ -6,6 +6,7 @@ import ChatBar from "./ChatBar";
 import ChatBox from "./chatBox/ChatBox";
 import { useSidebarInfoVisibility } from "@/stores/sidebarInfoStore";
 import React from "react";
+import { ChatMemberRole } from "@/types/ChatMemberRole";
 
 // Memoized ChatContent component to prevent re-renders when props don't change
 const ChatContent = React.memo(() => {
@@ -18,14 +19,17 @@ const ChatContent = React.memo(() => {
       <ChatHeader chat={activeChat} />
       <ChatBox chat={activeChat} />
       <AnimatePresence>
-        {!(activeChat.type === "channel" && activeChat.myRole !== "owner") && (
+        {!(
+          activeChat.type === "channel" &&
+          activeChat.myRole !== ChatMemberRole.OWNER
+        ) && (
           <motion.div
             initial={{ height: 0 }}
             animate={{ height: "auto" }}
             exit={{ height: 0 }}
             transition={{ duration: 0.2 }}
           >
-            <ChatBar chatId={activeChat.id} />
+            <ChatBar chatId={activeChat.id} memberId={activeChat.myMemberId} />
           </motion.div>
         )}
       </AnimatePresence>

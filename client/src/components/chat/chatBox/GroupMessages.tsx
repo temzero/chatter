@@ -18,12 +18,11 @@ interface GroupMessagesProps {
 
 const GroupMessages: React.FC<GroupMessagesProps> = ({ chat, messages }) => {
   const chatId = chat?.id;
+  const members = useActiveMembers();
   const { updateMemberLastRead } = useChatMemberStore();
-  const rawMembers = useActiveMembers();
-  const members = useMemo(() => rawMembers || [], [rawMembers]);
 
   const myMember = useMemo(
-    () => members.find((m) => m.id === chat.myMemberId),
+    () => members?.find((m) => m.id === chat.myMemberId),
     [members, chat.myMemberId]
   );
 
@@ -31,18 +30,24 @@ const GroupMessages: React.FC<GroupMessagesProps> = ({ chat, messages }) => {
 
   // Update last read message ID for my member
   useEffect(() => {
+    console.log("useEffect update last read");
     if (!chatId || !chat.myMemberId || messages.length === 0) return;
 
     const lastMessageId = messages[messages.length - 1].id;
-    updateMemberLastRead(chatId, chat.myMemberId, lastMessageId);
 
     const isUnread =
       myLastReadMessageId === null ||
       messages[messages.length - 1].id !== myLastReadMessageId;
 
+    console.log("isUnread", isUnread);
+
     if (isUnread) {
       const timer = setTimeout(() => {
-        chatWebSocketService.markAsRead(chat.myMemberId, lastMessageId);
+        chatWebSocketService.messageRead(
+          chatId,
+          chat.myMemberId,
+          lastMessageId
+        );
       }, 1000);
 
       return () => clearTimeout(timer);
@@ -54,6 +59,18 @@ const GroupMessages: React.FC<GroupMessagesProps> = ({ chat, messages }) => {
     myLastReadMessageId,
     updateMemberLastRead,
   ]);
+
+  useEffect(() => {
+    if (members) {
+      console.log("All members' last read message IDs:");
+      members.forEach((member) => {
+        console.log(
+          `Member ${member.id} (${member.firstName} ${member.lastName}):`,
+          member.lastReadMessageId
+        );
+      });
+    }
+  }, [members]);
 
   const messagesByDate = useMemo(() => {
     return groupMessagesByDate(messages);
@@ -85,7 +102,7 @@ const GroupMessages: React.FC<GroupMessagesProps> = ({ chat, messages }) => {
 
             const readUserAvatars: string[] = [];
 
-            for (const member of members) {
+            for (const member of members ?? []) {
               if (member.avatarUrl && member.lastReadMessageId === msg.id) {
                 readUserAvatars.push(member.avatarUrl);
               }

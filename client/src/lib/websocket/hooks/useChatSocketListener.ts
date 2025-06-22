@@ -4,7 +4,7 @@ import { useMessageStore } from "@/stores/messageStore";
 import { MessageResponse } from "@/types/messageResponse";
 import { useTypingStore } from "@/stores/typingStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
-import { useChatStore } from "@/stores/chatStore";
+import { toast } from "react-toastify";
 
 export function useChatSocketListeners() {
   useEffect(() => {
@@ -27,15 +27,16 @@ export function useChatSocketListeners() {
     };
 
     // New handler for mark as read
-    const handleMessagesRead = (data: { memberId: string }) => {
-      // Update your store to mark messages as read for this member
-      // You may need to get the current chatId from somewhere else, e.g., from a store or context
-      const chatId = useChatStore.getState().activeChat?.id;
-      if (chatId) {
-        useChatMemberStore
-          .getState()
-          .updateMemberLastRead(chatId, data.memberId);
-      }
+    const handleMessagesRead = (data: {
+      chatId: string; // Add this to match server payload
+      memberId: string;
+      messageId: string;
+    }) => {
+      toast.success("Message Read Triggered");
+      // No need to get chatId from store, it's in the payload
+      useChatMemberStore
+        .getState()
+        .updateMemberLastRead(data.chatId, data.memberId, data.messageId);
     };
 
     // Subscribe to events

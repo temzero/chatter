@@ -55,12 +55,6 @@ export class ChatGateway {
       `${chatLink}userTyping`,
       payload,
     );
-
-    // client.emit(`${chatLink}userTyping`, {
-    //   userId,
-    //   chatId: data.chatId,
-    //   isTyping: data.isTyping,
-    // });
   }
 
   @SubscribeMessage(`${chatLink}sendMessage`)
@@ -70,54 +64,79 @@ export class ChatGateway {
   ) {
     console.log('message sent');
     try {
-      // Add senderId from socket if not in payload
       const senderId = client.data.userId;
-      // console.log('senderId: ', senderId);
-      // console.log('payload: ', payload);
       if (!senderId) {
         client.emit(`${chatLink}error`, { message: 'Unauthorized' });
         return;
       }
 
+      // Create the message
       const message = await this.messageService.createMessage(
         senderId,
         payload,
       );
       const messageResponse = this.messageMapper.toResponseDto(message);
 
-      // console.log('Message created:', messageResponse);
+      // Update the sender's last read message to this new message
+      const updatedMember = await this.chatMemberService.updateLastRead(
+        payload.memberId,
+        message.id, // using the newly created message's ID
+      );
 
+      // Emit the new message to all chat members
       await this.websocketService.emitToChatMembers(
         payload.chatId,
         `${chatLink}newMessage`,
         messageResponse,
       );
+
+      // Emit the read update to all chat members
+      if (updatedMember) {
+        await this.websocketService.emitToChatMembers(
+          payload.chatId,
+          `${chatLink}messageRead`,
+          {
+            chatId: payload.chatId,
+            memberId: updatedMember.id,
+            messageId: message.id,
+          },
+        );
+      }
     } catch (error) {
       console.error('Error handling sendMessage:', error);
       client.emit(`${chatLink}error`, { message: 'Failed to send message' });
     }
   }
 
-  @SubscribeMessage(`${chatLink}markAsRead`)
+  @SubscribeMessage(`${chatLink}messageRead`)
   async handleMarkAsRead(
     @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() data: { chatId: string },
+    @MessageBody()
+    data: { chatId: string; memberId: string; messageId: string },
   ) {
+    console.log('[WS] messageRead received', data); // <-- Add this
     const userId = client.data.userId;
     if (!userId) return;
+    console.log('messageRead', data.messageId);
 
-    // Update read time in DB and get the memberId
+    // Update read time in DB and get the member
     const member = await this.chatMemberService.updateLastRead(
-      data.chatId,
-      userId,
+      data.memberId,
+      data.messageId,
     );
 
     if (!member) return;
 
-    // Notify other participants with only memberId
-    client.to(data.chatId).emit(`${chatLink}messagesRead`, {
-      memberId: member.id,
-    });
+    // Notify other participants with memberId and messageId
+    await this.websocketService.emitToChatMembers(
+      data.chatId,
+      `${chatLink}messageRead`,
+      {
+        chatId: data.chatId,
+        memberId: member.id, // This matches what client expects
+        messageId: data.messageId,
+      },
+    );
   }
 
   // Utility to check if any other chat member is online (excluding one user)

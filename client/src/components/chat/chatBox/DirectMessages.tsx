@@ -1,25 +1,24 @@
 import React, { useMemo, useEffect } from "react";
 import Message from "../Message";
 import { MessageResponse } from "@/types/messageResponse";
-import { DirectChatResponse } from "@/types/chat";
+import { ChatResponse } from "@/types/chat";
 import { useCurrentUser } from "@/stores/authStore";
 import {
   groupMessagesByDate,
   isRecentMessage,
   shouldShowInfo,
 } from "@/utils/messageHelpers";
-import { useActiveMembers, useChatMemberStore } from "@/stores/chatMemberStore";
+import { useActiveMembers } from "@/stores/chatMemberStore";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.socket.service";
 
 interface DirectMessagesProps {
-  chat: DirectChatResponse;
+  chat: ChatResponse;
   messages: MessageResponse[];
 }
 
 const DirectMessages: React.FC<DirectMessagesProps> = ({ chat, messages }) => {
   const chatId = chat?.id;
   const currentUser = useCurrentUser();
-  const { updateMemberLastRead } = useChatMemberStore();
 
   const rawMembers = useActiveMembers();
   const members = useMemo(() => rawMembers || [], [rawMembers]);
@@ -34,38 +33,54 @@ const DirectMessages: React.FC<DirectMessagesProps> = ({ chat, messages }) => {
     [members, chat.myMemberId]
   );
 
+  console.log("partnerMember", partnerMember);
+
   const myLastReadMessageId = myMember?.lastReadMessageId ?? null;
+  console.log("myLastReadMessageId", myLastReadMessageId);
   const partnerLastReadMessageId = partnerMember?.lastReadMessageId ?? null;
+  console.log("partnerLastReadMessageId", partnerLastReadMessageId);
 
   // Update last read when new messages arrive
   useEffect(() => {
+    console.log("useEffect update last read");
+
     if (!chatId || !chat.myMemberId || messages.length === 0) return;
 
-    const lastMessageId = messages[messages.length - 1].id;
-    updateMemberLastRead(chatId, chat.myMemberId, lastMessageId);
+    const lastMessage = messages[messages.length - 1];
+    const lastMessageId = lastMessage.id;
+    console.log("lastMessageId", lastMessage.id);
 
+    // Only mark as read if:
+    // 1. The message is not from current user (you don't need to mark your own messages as read)
+    // 2. It's actually unread
     const isUnread =
-      myLastReadMessageId === null ||
-      messages[messages.length - 1].id !== myLastReadMessageId;
+      lastMessage.senderId !== currentUser?.id &&
+      (myLastReadMessageId === null || lastMessage.id !== myLastReadMessageId);
+
+    console.log("isUnread", isUnread);
 
     if (isUnread) {
       const timer = setTimeout(() => {
-        chatWebSocketService.markAsRead(chat.myMemberId, lastMessageId);
+        chatWebSocketService.messageRead(
+          chatId,
+          chat.myMemberId,
+          lastMessageId
+        );
       }, 1000);
 
       return () => clearTimeout(timer);
     }
-  }, [
-    chatId,
-    chat.myMemberId,
-    messages,
-    myLastReadMessageId,
-    updateMemberLastRead,
-  ]);
+  }, [chatId, chat.myMemberId, messages, myLastReadMessageId, currentUser?.id]);
 
   const messagesByDate = useMemo(() => {
     return groupMessagesByDate(messages);
   }, [messages]);
+
+  useEffect(() => {
+    if (!partnerMember) return;
+
+    // This will force a re-render when partner's lastRead updates
+  }, [partnerMember, partnerMember?.lastReadMessageId]);
 
   if (messages.length === 0) {
     return (

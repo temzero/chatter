@@ -151,43 +151,43 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
     }
   },
 
+  // In chatMemberStore.ts
   updateMemberLastRead: async (
     chatId: string,
     memberId: string,
     messageId: string
   ) => {
-    set({ isLoading: true });
-    try {
-      // Optionally call an API to update last read on the server here
-      // await chatMemberService.updateMemberLastRead(memberId, messageId);
+    set((state) => {
+      const members = state.chatMembers[chatId];
+      if (!members) return state;
 
-      set((state) => {
-        const members = state.chatMembers[chatId];
-        if (!members) return state;
+      const memberIndex = members.findIndex((m) => m.id === memberId);
+      if (memberIndex === -1) return state;
 
-        const memberIndex = members.findIndex((m) => m.id === memberId);
-        if (memberIndex === -1) return state;
+      const member = members[memberIndex];
 
-        const updatedMembers = [...members];
-        updatedMembers[memberIndex] = {
-          ...updatedMembers[memberIndex],
-          lastReadMessageId: messageId,
-        };
+      // Only update if the new messageId is more recent
+      if (
+        member.lastReadMessageId &&
+        compareMessageIds(member.lastReadMessageId, messageId) >= 0
+      ) {
+        return state;
+      }
 
-        return {
-          ...state,
-          chatMembers: {
-            ...state.chatMembers,
-            [chatId]: updatedMembers,
-          },
-          isLoading: false,
-        };
-      });
-    } catch (error) {
-      console.error("Failed to update member last read:", error);
-      set({ error: "Failed to update last read", isLoading: false });
-      throw error;
-    }
+      const updatedMembers = [...members];
+      updatedMembers[memberIndex] = {
+        ...member,
+        lastReadMessageId: messageId,
+      };
+
+      return {
+        ...state,
+        chatMembers: {
+          ...state.chatMembers,
+          [chatId]: updatedMembers,
+        },
+      };
+    });
   },
 
   getGroupMemberById: (chatId, userId) => {
@@ -261,3 +261,12 @@ export const useGroupOtherMembers = (
     })
   );
 };
+
+function compareMessageIds(a: string, b: string): number {
+  // Implement your message ID comparison logic
+  // This depends on how your message IDs are generated
+  // For timestamp-based IDs:
+  return new Date(a).getTime() - new Date(b).getTime();
+  // For sequential IDs:
+  // return parseInt(a) - parseInt(b);
+}

@@ -24,14 +24,21 @@ interface ChatStore {
   getDirectChatByUserId: (userId: string) => Promise<ChatResponse | null>;
   setActiveChat: (chat: ChatResponse | null) => Promise<void>;
   setActiveChatById: (chatId: string | null) => Promise<void>;
+  getAllUserIdsInChats: () => string[];
   createOrGetDirectChat: (partnerId: string) => Promise<ChatResponse>;
   createGroupChat: (payload: {
     name: string;
     userIds: string[];
     type: ChatType.GROUP | ChatType.CHANNEL;
   }) => Promise<ChatResponse>;
-  updateDirectChat: (id: string, payload: Partial<ChatResponse>) => Promise<void>;
-  updateGroupChat: (id: string, payload: Partial<ChatResponse>) => Promise<void>;
+  updateDirectChat: (
+    id: string,
+    payload: Partial<ChatResponse>
+  ) => Promise<void>;
+  updateGroupChat: (
+    id: string,
+    payload: Partial<ChatResponse>
+  ) => Promise<void>;
   setLastMessage: (chatId: string, message: LastMessageResponse | null) => void;
   setSearchTerm: (term: string) => void;
   leaveGroupChat: (chatId: string) => Promise<void>;
@@ -144,6 +151,7 @@ export const useChatStore = create<ChatStore>()(
           const { chatMembers } = useChatMemberStore.getState();
           const alreadyFetchedMessages = !!messages[chat.id];
           const alreadyFetchedMembers = !!chatMembers[chat.id];
+          console.log("alreadyFetchedMembers", alreadyFetchedMembers);
 
           set({ activeChat: chat, isLoading: true });
           window.history.pushState({}, "", `/${chat.id}`);
@@ -153,12 +161,11 @@ export const useChatStore = create<ChatStore>()(
               ? null
               : useMessageStore.getState().fetchMessages(chat.id);
 
-            const fetchMembersPromise =
-              alreadyFetchedMembers || chat.type === ChatType.DIRECT
-                ? null
-                : useChatMemberStore
-                    .getState()
-                    .fetchChatMembers(chat.id, chat.type);
+            const fetchMembersPromise = alreadyFetchedMembers
+              ? null
+              : useChatMemberStore
+                  .getState()
+                  .fetchChatMembers(chat.id, chat.type);
 
             await Promise.all(
               [fetchMessagesPromise, fetchMembersPromise].filter(Boolean)
@@ -193,6 +200,19 @@ export const useChatStore = create<ChatStore>()(
             const fetchedChat = get().chats.find((chat) => chat.id === chatId);
             if (fetchedChat) await get().setActiveChat(fetchedChat);
           }
+        },
+
+        getAllUserIdsInChats: () => {
+          const chats = get().chats;
+          const allUserIds = new Set<string>();
+
+          chats.forEach((chat) => {
+            chat.otherMemberUserIds?.forEach((userId) =>
+              allUserIds.add(userId)
+            );
+          });
+
+          return Array.from(allUserIds);
         },
 
         createOrGetDirectChat: async (partnerId) => {

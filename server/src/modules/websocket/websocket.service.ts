@@ -116,7 +116,7 @@ export class WebsocketService {
 
     for (const userId of memberIds) {
       const socketIds = this.getUserSocketIds(userId);
-      console.log('socketIds', socketIds);
+      // console.log('socketIds', socketIds);
       for (const socketId of socketIds) {
         this.server.to(socketId).emit(event, payload);
       }

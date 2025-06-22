@@ -12,7 +12,7 @@ import useTypingIndicator from "@/hooks/useTypingIndicator";
 const ChatBar: React.FC = () => {
   console.log("CHAT BAR mounted");
   const activeChat = useActiveChat();
-  const activeChatId = activeChat?.id
+  const activeChatId = activeChat?.id;
 
   const setDraftMessage = useMessageStore((state) => state.setDraftMessage);
   const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
@@ -104,7 +104,7 @@ const ChatBar: React.FC = () => {
 
       try {
         chatWebSocketService.sendMessage(payload);
-        chatWebSocketService.markAsRead(activeChatId);
+        chatWebSocketService.messageRead(activeChatId);
       } catch (error) {
         console.error("Failed to send message:", error);
       }

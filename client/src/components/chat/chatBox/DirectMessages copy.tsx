@@ -39,7 +39,7 @@ const DirectMessages: React.FC<DirectMessagesProps> = ({ chat, messages }) => {
 
     if (hasUnread) {
       const timer = setTimeout(() => {
-        chatWebSocketService.markAsRead(chat?.myMemberId, lastMessageId);
+        chatWebSocketService.messageRead(chat?.myMemberId, lastMessageId);
       }, 1000);
 
       return () => clearTimeout(timer);

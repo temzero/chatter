@@ -4,7 +4,6 @@ import { webSocketService } from "./websocket.service";
 import { MessageResponse } from "@/types/messageResponse";
 
 export class ChatWebSocketService {
-
   async getChatStatus(
     chatId: string
   ): Promise<{ chatId: string; isOnline: boolean } | null> {
@@ -43,10 +42,6 @@ export class ChatWebSocketService {
     webSocketService.emit("chat:sendMessage", message);
   }
 
-  markAsRead(memberId: string, messageId: string) {
-    webSocketService.emit("chat:markAsRead", { memberId, messageId });
-  }
-
   // Event listeners
   onNewMessage(callback: (message: MessageResponse) => void) {
     webSocketService.on("chat:newMessage", callback);
@@ -76,12 +71,30 @@ export class ChatWebSocketService {
     webSocketService.off("chat:userTyping", callback);
   }
 
-  onMessagesRead(callback: (data: { memberId: string }) => void) {
-    webSocketService.on("chat:markAsRead", callback);
+  // Message Read
+  messageRead(chatId: string, memberId: string, messageId: string) {
+    console.log("Emitting chat:messageRead", { chatId, memberId, messageId });
+    webSocketService.emit("chat:messageRead", { chatId, memberId, messageId });
   }
 
-  offMessagesRead(callback: (data: { memberId: string }) => void) {
-    webSocketService.off("chat:markAsRead", callback);
+  onMessagesRead(
+    callback: (data: {
+      chatId: string;
+      memberId: string;
+      messageId: string;
+    }) => void
+  ) {
+    webSocketService.on("chat:messageRead", callback);
+  }
+
+  offMessagesRead(
+    callback: (data: {
+      chatId: string;
+      memberId: string;
+      messageId: string;
+    }) => void
+  ) {
+    webSocketService.off("chat:messageRead", callback);
   }
 }
 
