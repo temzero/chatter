@@ -15,7 +15,7 @@ interface ChatBarProps {
 }
 
 const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
-  console.log("CHAT BAR mounted");
+  // console.log("CHAT BAR mounted");
   const setDraftMessage = useMessageStore((state) => state.setDraftMessage);
   const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
 

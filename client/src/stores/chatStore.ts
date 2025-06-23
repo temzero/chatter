@@ -144,6 +144,7 @@ export const useChatStore = create<ChatStore>()(
         setActiveChat: async (chat) => {
           if (!chat) {
             set({ activeChat: null, isLoading: false });
+            useMessageStore.getState().setReplyToMessage(null); // Add this line
             return;
           }
 
@@ -155,6 +156,7 @@ export const useChatStore = create<ChatStore>()(
 
           set({ activeChat: chat, isLoading: true });
           window.history.pushState({}, "", `/${chat.id}`);
+          useMessageStore.getState().setReplyToMessage(null); // Add this line
 
           try {
             const fetchMessagesPromise = alreadyFetchedMessages

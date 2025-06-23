@@ -1,3 +1,4 @@
+// export default Message;
 import React, { useState, useEffect, useRef } from "react";
 import classNames from "classnames";
 import { motion } from "framer-motion";
@@ -12,7 +13,7 @@ import { ReactionPicker } from "../ui/MessageReactionPicker";
 import { MessageActions } from "../ui/MessageActions";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
 import { MessageReactionDisplay } from "../ui/MessageReactionsDisplay";
-import { MessageReplyPreview } from "../ui/MessageReplyPreview";
+import MessageReplyPreview from "../ui/MessageReplyPreview";
 
 const myMessageAnimation = {
   initial: { opacity: 0, scale: 0.1, x: 100, y: 0 },
@@ -54,9 +55,7 @@ const Message: React.FC<MessageProps> = ({
   const currentUserId = currentUser?.id;
   const isMe = message.senderId === currentUserId;
   const deleteMessage = useMessageStore((state) => state.deleteMessage);
-  // const reactions = message.reactions;
   const reactions = useMessageReactions(message.id);
-  console.log("reactions: ", reactions);
 
   const repliedMessage = useMessageStore((state) =>
     message.replyToMessageId
@@ -161,20 +160,35 @@ const Message: React.FC<MessageProps> = ({
         setShowReactionPicker(false);
       }}
     >
-      {repliedMessage && <MessageReplyPreview message={repliedMessage} />}
-      {isGroupChat &&
-        (showInfo && !isMe ? (
-          <div className="mt-auto mr-1 h-10 w-10 min-w-10 min-h-10 flex items-center justify-center rounded-full object-cover custom-border overflow-hidden">
+      {/* Avatar container - always takes same space */}
+      {isGroupChat && (
+        <div
+          className={classNames(
+            "flex-shrink-0 mt-auto mr-2 h-10 w-10 min-w-10",
+            {
+              "flex items-center justify-center rounded-full custom-border overflow-hidden":
+                showInfo && !isMe,
+              invisible: !(showInfo && !isMe),
+            }
+          )}
+        >
+          {showInfo && !isMe && (
             <Avatar
               avatarUrl={message.senderAvatarUrl}
               name={message.senderFirstName}
             />
-          </div>
-        ) : (
-          <div className="w-10 mr-1"></div>
-        ))}
+          )}
+        </div>
+      )}
 
-      <div className="flex relative flex-col">
+      <div className="flex relative flex-col w-full">
+        {/* Reply preview positioned above the message */}
+        {repliedMessage && (
+          <div className="mb-1 w-full">
+            <MessageReplyPreview message={repliedMessage} />
+          </div>
+        )}
+
         {media.length > 0 ? (
           <div
             className={classNames("message-media-bubble", {
@@ -263,7 +277,6 @@ const Message: React.FC<MessageProps> = ({
           </div>
         )}
 
-        {/* Emoji Picker on Hover */}
         {showReactionPicker && (
           <ReactionPicker
             onSelect={handleReaction}
@@ -271,7 +284,6 @@ const Message: React.FC<MessageProps> = ({
           />
         )}
 
-        {/* Action Buttons on Right Click */}
         {showActionButtons && (
           <MessageActions
             message={message}

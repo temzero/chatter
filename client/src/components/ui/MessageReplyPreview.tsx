@@ -1,16 +1,28 @@
+// components/ui/MessageReplyPreview.tsx
+import React from "react";
 import { MessageResponse } from "@/types/messageResponse";
+import { useCurrentUserId } from "@/stores/authStore";
 
-export const MessageReplyPreview = ({
-  message,
-}: {
+interface MessageReplyPreviewProps {
   message: MessageResponse;
-}) => (
-  <div className="text-sm text-gray-500 px-3 py-1 border-l-4 mb-1 rounded border-gray-400 bg-gray-50">
-    <div className="font-semibold text-gray-700">
-      {message.senderNickname || message.senderFirstName}
+}
+
+const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
+  message,
+}) => {
+  const currentUserId = useCurrentUserId();
+  const isMe = message.senderId === currentUserId;
+
+  return (
+    <div className={`message-bubble ${isMe && "self-message"}  opacity-60`}>
+      <h1 className="font-semibold">
+        {isMe ? "Me" : `${message.senderNickname || message.senderFirstName}`}
+      </h1>
+      <div className={`truncate opacity-40`}>
+        {message.content || "[media/attachment]"}
+      </div>
     </div>
-    <div className="truncate text-gray-600">
-      {message.content || "[media/attachment]"}
-    </div>
-  </div>
-);
+  );
+};
+
+export default React.memo(MessageReplyPreview);
