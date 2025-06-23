@@ -199,6 +199,7 @@ select:focus {
 /* Shared Styles for Both Bubbles */
 .message-bubble,
 .message-media-bubble {
+  position: relative;
   display: inline-block;
   border-radius: 8px;
   background-color: var(--message-color);

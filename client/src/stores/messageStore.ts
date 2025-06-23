@@ -21,9 +21,11 @@ export interface MessageStore {
   messages: ChatMessages;
   drafts: Record<string, string>;
   isLoading: boolean;
+  replyToMessage: MessageResponse | null;
 
   fetchMessages: (chatId: string) => Promise<void>;
   addMessage: (newMessage: MessageResponse) => void;
+  getMessageById: (messageId: string) => MessageResponse | undefined;
   deleteMessage: (messageId: string) => void;
   getChatMessages: (chatId: string) => MessageResponse[];
   getChatAttachments: (chatId: string) => AttachmentResponse[];
@@ -44,6 +46,8 @@ export interface MessageStore {
   ) => void;
   addReaction: (messageId: string, emoji: string, userId: string) => void;
   removeReaction: (messageId: string, emoji: string, userId: string) => void;
+
+  setReplyToMessage: (message: MessageResponse | null) => void;
 }
 
 export const getAttachmentsFromMessages = (
@@ -98,6 +102,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
   messages: {},
   drafts: {},
   isLoading: false,
+  replyToMessage: null,
 
   fetchMessages: async (chatId: string) => {
     set({ isLoading: true });
@@ -134,6 +139,15 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
     set({
       messages: updatedMessages,
     });
+  },
+
+  getMessageById: (messageId: string): MessageResponse | undefined => {
+    const messages = get().messages;
+    for (const chatId in messages) {
+      const found = messages[chatId].find((msg) => msg.id === messageId);
+      if (found) return found;
+    }
+    return undefined;
   },
 
   deleteMessage: (messageId: string) => {
@@ -350,6 +364,8 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
       return { messages: updatedMessages };
     });
   },
+
+  setReplyToMessage: (message) => set({ replyToMessage: message }),
 }));
 
 // Custom hooks for easier consumption in components

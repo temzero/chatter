@@ -41,7 +41,6 @@ export function useChatSocketListeners() {
       messageId: string;
       reactions: { [emoji: string]: string[] };
     }) => {
-      toast.success(`Reaction received from Server ${data.messageId} ${data.reactions}`)
       useMessageStore
         .getState()
         .updateMessageReactions(data.messageId, data.reactions);

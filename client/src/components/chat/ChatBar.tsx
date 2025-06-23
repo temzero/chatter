@@ -7,6 +7,7 @@ import FileImportPreviews from "../ui/FileImportPreview";
 import { SendMessagePayload } from "@/types/sendMessagePayload";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
 import useTypingIndicator from "@/hooks/useTypingIndicator";
+import ReplyToMessage from "../ui/ReplyToMessage";
 
 interface ChatBarProps {
   chatId: string;
@@ -17,6 +18,10 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
   console.log("CHAT BAR mounted");
   const setDraftMessage = useMessageStore((state) => state.setDraftMessage);
   const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
+
+  const replyToMessage = useMessageStore((state) => state.replyToMessage);
+  const replyToMessageId = replyToMessage?.id || null;
+  const setReplyToMessage = useMessageStore((state) => state.setReplyToMessage);
 
   const inputRef = useRef<HTMLTextAreaElement>(null!);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -62,6 +67,14 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
     return () => document.removeEventListener("keydown", handleGlobalKeyDown);
   }, []);
 
+  // Trigger reply to message
+  useEffect(() => {
+    if (replyToMessage && inputRef.current) {
+      inputRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      inputRef.current.focus();
+    }
+  }, [replyToMessage]);
+
   // Reset files when chat changes
   useEffect(() => {
     setAttachedFiles([]);
@@ -97,6 +110,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
           attachedFiles.length > 0
             ? attachedFiles.map((_, index) => String(Date.now() + index))
             : undefined,
+        replyToMessageId: replyToMessageId,
       };
 
       try {
@@ -110,12 +124,21 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
       setFilePreviewUrls([]);
       setHasTextContent(false);
       setIsMessageSent(true);
+      setReplyToMessage(null);
       setTimeout(() => setIsMessageSent(false), 200);
 
       updateInputHeight();
     }
     inputRef.current?.focus();
-  }, [attachedFiles, chatId, memberId, clearTypingState, setDraftMessage]);
+  }, [
+    attachedFiles,
+    chatId,
+    memberId,
+    replyToMessageId,
+    clearTypingState,
+    setDraftMessage,
+    setReplyToMessage,
+  ]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -173,6 +196,13 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
             setAttachedFiles((prev) => prev.filter((_, i) => i !== index));
             setFilePreviewUrls((prev) => prev.filter((_, i) => i !== index));
           }}
+        />
+      )}
+
+      {replyToMessage && (
+        <ReplyToMessage
+          replyToMessage={replyToMessage}
+          onCancelReply={() => setReplyToMessage(null)}
         />
       )}
 

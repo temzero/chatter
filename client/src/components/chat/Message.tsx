@@ -12,6 +12,7 @@ import { ReactionPicker } from "../ui/MessageReactionPicker";
 import { MessageActions } from "../ui/MessageActions";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
 import { MessageReactionDisplay } from "../ui/MessageReactionsDisplay";
+import { MessageReplyPreview } from "../ui/MessageReplyPreview";
 
 const myMessageAnimation = {
   initial: { opacity: 0, scale: 0.1, x: 100, y: 0 },
@@ -50,11 +51,18 @@ const Message: React.FC<MessageProps> = ({
   readUserAvatars,
 }) => {
   const currentUser = useCurrentUser();
-  const isMe = message.senderId === currentUser?.id;
+  const currentUserId = currentUser?.id;
+  const isMe = message.senderId === currentUserId;
   const deleteMessage = useMessageStore((state) => state.deleteMessage);
   // const reactions = message.reactions;
   const reactions = useMessageReactions(message.id);
   console.log("reactions: ", reactions);
+
+  const repliedMessage = useMessageStore((state) =>
+    message.replyToMessageId
+      ? state.getMessageById(message.replyToMessageId)
+      : undefined
+  );
 
   const [copied, setCopied] = useState(false);
   const [showReactionPicker, setShowReactionPicker] = useState(false);
@@ -153,6 +161,7 @@ const Message: React.FC<MessageProps> = ({
         setShowReactionPicker(false);
       }}
     >
+      {repliedMessage && <MessageReplyPreview message={repliedMessage} />}
       {isGroupChat &&
         (showInfo && !isMe ? (
           <div className="mt-auto mr-1 h-10 w-10 min-w-10 min-h-10 flex items-center justify-center rounded-full object-cover custom-border overflow-hidden">
@@ -189,6 +198,11 @@ const Message: React.FC<MessageProps> = ({
                 {message.content}
               </h1>
             )}
+            <MessageReactionDisplay
+              reactions={reactions}
+              isMe={isMe}
+              currentUserId={currentUserId}
+            />
           </div>
         ) : (
           <div
@@ -206,10 +220,13 @@ const Message: React.FC<MessageProps> = ({
             >
               {message.content}
             </h1>
+            <MessageReactionDisplay
+              reactions={reactions}
+              isMe={isMe}
+              currentUserId={currentUserId}
+            />
           </div>
         )}
-
-        <MessageReactionDisplay reactions={reactions} isMe={isMe} />
 
         {showInfo && isGroupChat && !isMe && (
           <h1 className="text-sm font-semibold opacity-70 mr-2">
@@ -257,6 +274,8 @@ const Message: React.FC<MessageProps> = ({
         {/* Action Buttons on Right Click */}
         {showActionButtons && (
           <MessageActions
+            message={message}
+            close={() => setShowActionButtons(false)}
             onDelete={() => deleteMessage(message.id)}
             position={isMe ? "left" : "right"}
           />
