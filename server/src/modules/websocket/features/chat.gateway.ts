@@ -28,7 +28,6 @@ export class ChatGateway {
     @MessageBody() chatId: string,
   ) {
     const userId = client.data.userId;
-    // console.log('Get chat Status for :', userId);
     if (!userId) return false;
 
     const isOnline = await this.hasAnyOtherMemberOnline(chatId, userId);
@@ -62,7 +61,6 @@ export class ChatGateway {
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: CreateMessageDto,
   ) {
-    console.log('message sent');
     try {
       const senderId = client.data.userId;
       if (!senderId) {
@@ -108,16 +106,41 @@ export class ChatGateway {
     }
   }
 
+  @SubscribeMessage('chat:reactToMessage')
+  async handleReactToMessage(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody()
+    payload: {
+      messageId: string;
+      chatId: string;
+      emoji: string;
+      userId: string;
+    },
+  ) {
+    const { messageId, chatId, emoji, userId } = payload;
+    await this.messageService.toggleReaction(messageId, userId, emoji);
+    const reactions =
+      await this.messageService.getReactionsForMessage(messageId);
+    const formatted = this.messageService.formatReactions(reactions);
+
+    await this.websocketService.emitToChatMembers(
+      chatId,
+      'chat:messageReaction',
+      {
+        messageId,
+        reactions: formatted,
+      },
+    );
+  }
+
   @SubscribeMessage(`${chatLink}messageRead`)
   async handleMarkAsRead(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody()
     data: { chatId: string; memberId: string; messageId: string },
   ) {
-    console.log('[WS] messageRead received', data); // <-- Add this
     const userId = client.data.userId;
     if (!userId) return;
-    console.log('messageRead', data.messageId);
 
     // Update read time in DB and get the member
     const member = await this.chatMemberService.updateLastRead(

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
-import { chatWebSocketService } from "@/lib/websocket/services/chat.socket.service";
+import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
 
 const useTypingIndicator = (
   inputRef: React.RefObject<HTMLTextAreaElement>,

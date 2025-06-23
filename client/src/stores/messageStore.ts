@@ -1,3 +1,4 @@
+// store/messageStore.ts
 import { create } from "zustand";
 import type {
   AttachmentResponse,
@@ -9,7 +10,7 @@ import { messageService } from "@/services/messageService";
 import { useMemo } from "react";
 import { handleError } from "@/utils/handleError";
 import { LastMessageResponse } from "@/types/messageResponse";
-import { useShallow } from "zustand/shallow";
+import { useShallow } from "zustand/react/shallow";
 import { useChatMemberStore } from "./chatMemberStore";
 
 interface ChatMessages {
@@ -35,6 +36,14 @@ export interface MessageStore {
     message: MessageResponse,
     memberId: string
   ) => boolean;
+  getUserReaction: (messageId: string, userId: string) => string | null;
+  getReactionCount: (messageId: string, emoji: string) => number;
+  updateMessageReactions: (
+    messageId: string,
+    newReactions: Record<string, string[]>
+  ) => void;
+  addReaction: (messageId: string, emoji: string, userId: string) => void;
+  removeReaction: (messageId: string, emoji: string, userId: string) => void;
 }
 
 export const getAttachmentsFromMessages = (
@@ -188,27 +197,160 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
       .getState()
       .getChatMember(chatId, memberId);
 
-    if (!member || !member.lastReadAt) return messages.length;
+    if (!member || !member.lastReadMessageId) return messages.length;
 
-    return messages.filter(
-      (message) =>
-        member.lastReadAt !== null &&
-        new Date(message.createdAt) > new Date(member.lastReadAt as string)
-    ).length;
+    const messagesInChat = messages;
+    const lastReadIndex = messagesInChat.findIndex(
+      (msg) => msg.id === member.lastReadMessageId
+    );
+
+    if (lastReadIndex === -1) return messagesInChat.length;
+
+    return messagesInChat.length - (lastReadIndex + 1);
   },
 
   isMessageReadByMember: (message, memberId) => {
     const member = useChatMemberStore
       .getState()
       .getChatMember(message.chatId, memberId);
-    return (
-      !!member?.lastReadAt &&
-      new Date(member.lastReadAt) >= new Date(message.createdAt)
+    if (!member?.lastReadMessageId) return false;
+
+    const messages = get().messages[message.chatId] || [];
+
+    const targetIndex = messages.findIndex((msg) => msg.id === message.id);
+    const readIndex = messages.findIndex(
+      (msg) => msg.id === member.lastReadMessageId
     );
+
+    return readIndex >= targetIndex && targetIndex !== -1;
+  },
+
+  getUserReaction: (messageId, userId) => {
+    const messages = get().messages;
+    for (const chatId in messages) {
+      const message = messages[chatId].find((msg) => msg.id === messageId);
+      if (message?.reactions) {
+        for (const [emoji, userIds] of Object.entries(message.reactions)) {
+          if (userIds.includes(userId)) {
+            return emoji;
+          }
+        }
+      }
+    }
+    return null;
+  },
+
+  getReactionCount: (messageId, emoji) => {
+    const messages = get().messages;
+    for (const chatId in messages) {
+      const message = messages[chatId].find((msg) => msg.id === messageId);
+      if (message?.reactions?.[emoji]) {
+        return message.reactions[emoji].length;
+      }
+    }
+    return 0;
+  },
+
+  updateMessageReactions: (messageId, newReactions) => {
+    set((state) => {
+      const updatedMessages = { ...state.messages };
+
+      for (const chatId in updatedMessages) {
+        const messageIndex = updatedMessages[chatId].findIndex(
+          (msg) => msg.id === messageId
+        );
+
+        if (messageIndex !== -1) {
+          const updatedMessage = {
+            ...updatedMessages[chatId][messageIndex],
+            reactions: newReactions,
+          };
+
+          updatedMessages[chatId][messageIndex] = updatedMessage;
+          break;
+        }
+      }
+
+      return { messages: updatedMessages };
+    });
+  },
+
+  addReaction: (messageId, emoji, userId) => {
+    set((state) => {
+      const updatedMessages = { ...state.messages };
+
+      for (const chatId in updatedMessages) {
+        const messageIndex = updatedMessages[chatId].findIndex(
+          (msg) => msg.id === messageId
+        );
+
+        if (messageIndex !== -1) {
+          const message = updatedMessages[chatId][messageIndex];
+          const currentReactions = message.reactions || {};
+          const currentUserIds = currentReactions[emoji] || [];
+
+          if (!currentUserIds.includes(userId)) {
+            updatedMessages[chatId][messageIndex] = {
+              ...message,
+              reactions: {
+                ...currentReactions,
+                [emoji]: [...currentUserIds, userId],
+              },
+            };
+          }
+          break;
+        }
+      }
+
+      return { messages: updatedMessages };
+    });
+  },
+
+  removeReaction: (messageId, emoji, userId) => {
+    set((state) => {
+      const updatedMessages = { ...state.messages };
+
+      for (const chatId in updatedMessages) {
+        const messageIndex = updatedMessages[chatId].findIndex(
+          (msg) => msg.id === messageId
+        );
+
+        if (messageIndex !== -1) {
+          const message = updatedMessages[chatId][messageIndex];
+          const currentReactions = message.reactions || {};
+          const currentUserIds = currentReactions[emoji] || [];
+
+          if (currentUserIds.includes(userId)) {
+            const filteredUserIds = currentUserIds.filter(
+              (id) => id !== userId
+            );
+            // Build updatedReactions without any undefined values
+            const updatedReactions: Record<string, string[]> = {};
+            Object.entries({
+              ...currentReactions,
+              [emoji]: filteredUserIds,
+            }).forEach(([key, value]) => {
+              if (value && value.length > 0) {
+                updatedReactions[key] = value;
+              }
+            });
+
+            updatedMessages[chatId][messageIndex] = {
+              ...message,
+              reactions:
+                Object.keys(updatedReactions).length > 0
+                  ? updatedReactions
+                  : undefined,
+            };
+          }
+          break;
+        }
+      }
+
+      return { messages: updatedMessages };
+    });
   },
 }));
-
-
 
 // Custom hooks for easier consumption in components
 export const useActiveChatMessages = () => {
@@ -262,4 +404,17 @@ export const useIsMessageReadByMember = (
   return useMessageStore((state) =>
     state.isMessageReadByMember(message, memberId)
   );
+};
+
+export const useMessageReactions = (messageId: string) => {
+  return useMessageStore((state) => {
+    const messages = state.messages;
+    for (const chatId in messages) {
+      const message = messages[chatId].find((msg) => msg.id === messageId);
+      if (message) {
+        return message.reactions || {};
+      }
+    }
+    return {};
+  });
 };

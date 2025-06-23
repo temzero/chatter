@@ -5,7 +5,7 @@ import EmojiPicker from "../ui/EmojiPicker";
 import AttachFile from "../ui/AttachFile";
 import FileImportPreviews from "../ui/FileImportPreview";
 import { SendMessagePayload } from "@/types/sendMessagePayload";
-import { chatWebSocketService } from "@/lib/websocket/services/chat.socket.service";
+import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
 import useTypingIndicator from "@/hooks/useTypingIndicator";
 
 interface ChatBarProps {

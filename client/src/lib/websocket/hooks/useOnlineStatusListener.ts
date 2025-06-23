@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { chatWebSocketService } from "@/lib/websocket/services/chat.socket.service";
+import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
 import { webSocketService } from "@/lib/websocket/services/websocket.service";
 import type { ChatResponse } from "@/types/chat";
 import { usePresenceStore } from "@/stores/chatPresenceStore";

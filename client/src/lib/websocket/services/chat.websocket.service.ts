@@ -96,6 +96,42 @@ export class ChatWebSocketService {
   ) {
     webSocketService.off("chat:messageRead", callback);
   }
+
+  reactToMessage(payload: {
+    messageId: string;
+    chatId: string;
+    emoji: string;
+    userId: string;
+  }) {
+    console.log("reactToMessage", payload);
+    webSocketService.emit("chat:reactToMessage", payload);
+  }
+
+  /**
+   * Listen for reaction updates
+   * @param callback Function to call when reactions are updated
+   */
+  onReaction(
+    callback: (data: {
+      messageId: string;
+      reactions: { [emoji: string]: string[] };
+    }) => void
+  ) {
+    webSocketService.on("chat:messageReaction", callback);
+  }
+
+  /**
+   * Remove reaction listener
+   * @param callback Same callback used in onReactionUpdate
+   */
+  offReaction(
+    callback: (data: {
+      messageId: string;
+      reactions: { [emoji: string]: string[] };
+    }) => void
+  ) {
+    webSocketService.off("chat:messageReaction", callback);
+  }
 }
 
 export const chatWebSocketService = new ChatWebSocketService();

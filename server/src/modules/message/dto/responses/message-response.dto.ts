@@ -3,7 +3,6 @@ import { Exclude, Expose, Type } from 'class-transformer';
 import { MessageStatus } from '../../constants/message-status.constants';
 import { MessageType } from '../../constants/message-type.constants';
 import { AttachmentResponseDto } from './attachment-response.dto';
-import { ReactionResponseDto } from './reaction-response.dto';
 
 @Exclude()
 export class MessageResponseDto {
@@ -28,10 +27,7 @@ export class MessageResponseDto {
   @Expose() deletedAt?: Date | null;
   @Expose() createdAt: Date;
   @Expose() updatedAt: Date;
-
-  @Expose()
-  @Type(() => ReactionResponseDto)
-  reactions?: ReactionResponseDto[];
+  @Expose() reactions: Record<string, string[]>;
 
   @Expose()
   @Type(() => AttachmentResponseDto)

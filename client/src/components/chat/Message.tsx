@@ -1,17 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import classNames from "classnames";
 import { motion } from "framer-motion";
-import { useMessageStore } from "@/stores/messageStore";
+import { useMessageReactions, useMessageStore } from "@/stores/messageStore";
 import { useCurrentUser } from "@/stores/authStore";
 import RenderMultipleMedia from "../ui/RenderMultipleMedia";
 import { formatTime } from "@/utils/formatTime";
 import { Avatar } from "../ui/avatar/Avatar";
 import type { MessageResponse } from "@/types/messageResponse";
 import { ChatType } from "@/types/enums/ChatType";
+import { ReactionPicker } from "../ui/MessageReactionPicker";
+import { MessageActions } from "../ui/MessageActions";
+import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
+import { MessageReactionDisplay } from "../ui/MessageReactionsDisplay";
 
-// Animation configurations
 const myMessageAnimation = {
-  // initial: { opacity: 0, scale: 0.1, x: -1000, y: 160 },
   initial: { opacity: 0, scale: 0.1, x: 100, y: 0 },
   animate: { opacity: 1, scale: 1, x: 0, y: 0 },
   transition: { type: "spring", stiffness: 300, damping: 29 },
@@ -41,7 +43,7 @@ interface MessageProps {
 
 const Message: React.FC<MessageProps> = ({
   message,
-  chatType = ChatType.DIRECT, // Default to direct chat
+  chatType = ChatType.DIRECT,
   shouldAnimate = false,
   showInfo = true,
   isRecent = false,
@@ -50,33 +52,15 @@ const Message: React.FC<MessageProps> = ({
   const currentUser = useCurrentUser();
   const isMe = message.senderId === currentUser?.id;
   const deleteMessage = useMessageStore((state) => state.deleteMessage);
+  // const reactions = message.reactions;
+  const reactions = useMessageReactions(message.id);
+  console.log("reactions: ", reactions);
 
   const [copied, setCopied] = useState(false);
+  const [showReactionPicker, setShowReactionPicker] = useState(false);
+  const [showActionButtons, setShowActionButtons] = useState(false);
 
-  const isGroupChat = chatType === "group";
-
-  const alignmentClass = {
-    "ml-auto": isMe,
-    "mr-auto": !isMe,
-    "pb-1": isRecent, // messages in middle of sequence
-    "pb-8": !isRecent, // standalone messages or end of sequence
-  };
-
-  const iconAlignmentClass = {
-    "absolute -bottom-1 -left-2 flex-row-reverse": isMe,
-    "absolute -bottom-1 -right-2": !isMe,
-  };
-
-  const displayName = message.senderNickname || message.senderFirstName;
-
-  // `${message.senderFirstName} ${message.senderLastName}`;
-
-  // Handle copy text
-  const handleCopyText = () => {
-    if (!message.content) return;
-    navigator.clipboard.writeText(message.content);
-    setCopied(true);
-  };
+  const messageRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -86,14 +70,56 @@ const Message: React.FC<MessageProps> = ({
     return () => clearTimeout(timer);
   }, [copied]);
 
-  // Determine animation
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        messageRef.current &&
+        !messageRef.current.contains(event.target as Node)
+      ) {
+        setShowActionButtons(false);
+        setShowReactionPicker(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
+
+  const handleCopyText = () => {
+    if (!message.content) return;
+    navigator.clipboard.writeText(message.content);
+    setCopied(true);
+  };
+
+  const handleReaction = (emoji: string) => {
+    if (!currentUser) return;
+
+    chatWebSocketService.reactToMessage({
+      messageId: message.id,
+      chatId: message.chatId,
+      emoji,
+      userId: currentUser.id,
+    });
+
+    setShowReactionPicker(false);
+  };
+
   const animationProps = shouldAnimate
     ? isMe
       ? myMessageAnimation
       : otherMessageAnimation
     : noAnimation;
 
-  // Convert attachments to media props if needed
+  const isGroupChat = chatType === "group";
+
+  const alignmentClass = {
+    "ml-auto": isMe,
+    "mr-auto": !isMe,
+    "pb-1": isRecent,
+    "pb-8": !isRecent,
+  };
+
+  const displayName = message.senderNickname || message.senderFirstName;
+
   const media =
     message.attachments?.map((attachment) => ({
       id: attachment.id,
@@ -108,10 +134,24 @@ const Message: React.FC<MessageProps> = ({
 
   return (
     <motion.div
+      ref={messageRef}
       className={classNames("flex max-w-[60%] group", alignmentClass)}
       initial={animationProps.initial}
       animate={animationProps.animate}
       transition={animationProps.transition}
+      onMouseEnter={() => {
+        if (!showActionButtons) {
+          setShowReactionPicker(true);
+        }
+      }}
+      onMouseLeave={() => {
+        setShowReactionPicker(false);
+      }}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        setShowActionButtons(true);
+        setShowReactionPicker(false);
+      }}
     >
       {isGroupChat &&
         (showInfo && !isMe ? (
@@ -126,7 +166,6 @@ const Message: React.FC<MessageProps> = ({
         ))}
 
       <div className="flex relative flex-col">
-        {/* Media and Text */}
         {media.length > 0 ? (
           <div
             className={classNames("message-media-bubble", {
@@ -170,7 +209,8 @@ const Message: React.FC<MessageProps> = ({
           </div>
         )}
 
-        {/* Sender Info */}
+        <MessageReactionDisplay reactions={reactions} isMe={isMe} />
+
         {showInfo && isGroupChat && !isMe && (
           <h1 className="text-sm font-semibold opacity-70 mr-2">
             {displayName}
@@ -178,15 +218,20 @@ const Message: React.FC<MessageProps> = ({
         )}
 
         {!isRecent && (
-          <p className={`opacity-0 group-hover:opacity-40 text-xs ${isMe ? 'ml-auto' : 'mr-auto'}`}>
+          <p
+            className={`opacity-0 group-hover:opacity-40 text-xs ${
+              isMe ? "ml-auto" : "mr-auto"
+            }`}
+          >
             {formatTime(message.createdAt)}
           </p>
         )}
+
         {readUserAvatars && (
           <div
             className={`flex ${
               isMe ? "justify-end" : "justify-start"
-            } items-center gap-1`}
+            } items-center`}
           >
             {readUserAvatars.map((avatarUrl, index) => (
               <div key={index}>
@@ -201,32 +246,21 @@ const Message: React.FC<MessageProps> = ({
           </div>
         )}
 
-        {/* Action Buttons */}
-        {/* <div
-          className={classNames(
-            "flex gap-1 opacity-0 group-hover:opacity-80 transition-opacity duration-200 cursor-pointer z-20",
-            iconAlignmentClass
-          )}
-        >
-          <i
-            className="material-symbols-outlined hover:scale-125 opacity-80 hover:opacity-100 duration-200 rounded-full"
-            onClick={() => deleteMessage(message.id)}
-          >
-            delete
-          </i>
-          <i className="material-symbols-outlined hover:scale-125 opacity-80 hover:opacity-100 duration-200 rounded-full">
-            keep
-          </i>
-          <i className="material-symbols-outlined hover:scale-125 opacity-80 hover:opacity-100 duration-200 rounded-full">
-            send
-          </i>
-          <i className="material-symbols-outlined hover:scale-125 opacity-80 hover:opacity-100 duration-200 rounded-full rotate-180">
-            reply
-          </i>
-          <i className="material-symbols-outlined hover:scale-125 opacity-80 hover:opacity-100 duration-200 rounded-full">
-            favorite
-          </i>
-        </div> */}
+        {/* Emoji Picker on Hover */}
+        {showReactionPicker && (
+          <ReactionPicker
+            onSelect={handleReaction}
+            position={isMe ? "right" : "left"}
+          />
+        )}
+
+        {/* Action Buttons on Right Click */}
+        {showActionButtons && (
+          <MessageActions
+            onDelete={() => deleteMessage(message.id)}
+            position={isMe ? "left" : "right"}
+          />
+        )}
       </div>
     </motion.div>
   );

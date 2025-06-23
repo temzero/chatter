@@ -58,7 +58,8 @@ export interface MessageResponse {
   deletedAt?: string | null;
   createdAt: string;
   updatedAt: string;
-  reactions?: ReactionResponse[];
+  // reactions?: ReactionResponse[];
+  reactions?: Record<string, string[]>;
   attachments?: AttachmentResponse[];
 }
 
@@ -77,4 +78,5 @@ export interface LastMessageResponse {
   content?: string;
   attachmentTypes?: AttachmentType;
   createdAt: string;
+  icon?: string;
 }

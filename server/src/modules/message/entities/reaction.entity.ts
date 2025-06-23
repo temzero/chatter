@@ -6,14 +6,14 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  Index,
   BeforeInsert,
+  Unique,
 } from 'typeorm';
 import { Message } from './message.entity';
 import { User } from '../../user/entities/user.entity';
 
 @Entity('reaction')
-@Index(['messageId', 'userId'], { unique: true })
+@Unique(['messageId', 'userId'])
 export class Reaction {
   @PrimaryGeneratedColumn('uuid')
   id: string;

@@ -12,6 +12,7 @@ export const messageService = {
     const { data } = await API.get(`/messages/chat/${chatId}`, {
       params: { offset, limit },
     });
+    console.log('chatMessages: ', data.payload)
     return data.payload;
   },
 

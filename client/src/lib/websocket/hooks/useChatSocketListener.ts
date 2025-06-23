@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { chatWebSocketService } from "../services/chat.socket.service";
+import { chatWebSocketService } from "../services/chat.websocket.service";
 import { useMessageStore } from "@/stores/messageStore";
 import { MessageResponse } from "@/types/messageResponse";
 import { useTypingStore } from "@/stores/typingStore";
@@ -28,25 +28,35 @@ export function useChatSocketListeners() {
 
     // New handler for mark as read
     const handleMessagesRead = (data: {
-      chatId: string; // Add this to match server payload
+      chatId: string;
       memberId: string;
       messageId: string;
     }) => {
-      toast.success("Message Read Triggered");
-      // No need to get chatId from store, it's in the payload
       useChatMemberStore
         .getState()
         .updateMemberLastRead(data.chatId, data.memberId, data.messageId);
     };
 
+    const handleReaction = (data: {
+      messageId: string;
+      reactions: { [emoji: string]: string[] };
+    }) => {
+      toast.success(`Reaction received from Server ${data.messageId} ${data.reactions}`)
+      useMessageStore
+        .getState()
+        .updateMessageReactions(data.messageId, data.reactions);
+    };
+
     // Subscribe to events
     chatWebSocketService.onNewMessage(handleNewMessage);
+    chatWebSocketService.onReaction(handleReaction);
     chatWebSocketService.onTyping(handleTyping);
     chatWebSocketService.onMessagesRead(handleMessagesRead);
 
     return () => {
       // Clean up listeners
       chatWebSocketService.offNewMessage(handleNewMessage);
+      chatWebSocketService.offReaction(handleReaction);
       chatWebSocketService.offTyping(handleTyping);
       chatWebSocketService.offMessagesRead(handleMessagesRead);
     };

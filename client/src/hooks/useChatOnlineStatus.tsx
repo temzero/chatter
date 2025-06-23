@@ -1,10 +1,10 @@
 // hooks/useChatOnlineStatus.ts
 import { useEffect, useState } from "react";
-import { chatWebSocketService } from "@/lib/websocket/services/chat.socket.service";
+import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
 import { webSocketService } from "@/lib/websocket/services/websocket.service";
 
 export const useChatOnlineStatus = (chatId?: string) => {
-  console.log('useChatOnlineStatus', chatId)
+  console.log("useChatOnlineStatus", chatId);
   const [isOnline, setIsOnline] = useState(false);
 
   useEffect(() => {

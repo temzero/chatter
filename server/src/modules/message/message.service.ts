@@ -8,6 +8,7 @@ import { CreateMessageDto } from './dto/requests/create-message.dto';
 import { UpdateMessageDto } from './dto/requests/update-message.dto';
 import { ErrorResponse } from '../../common/api-response/errors';
 import { GetMessagesDto } from './dto/queries/get-messages.dto';
+import { Reaction } from './entities/reaction.entity';
 
 @Injectable()
 export class MessageService {
@@ -18,6 +19,8 @@ export class MessageService {
     private readonly chatMemberRepo: Repository<ChatMember>,
     @InjectRepository(Message)
     private readonly messageRepo: Repository<Message>,
+    @InjectRepository(Reaction)
+    private readonly reactionRepo: Repository<Reaction>,
   ) {}
 
   private async getFullMessageById(id: string): Promise<Message> {
@@ -150,6 +153,7 @@ export class MessageService {
           'member',
           'member.user_id = sender.id',
         )
+        .leftJoinAndSelect('message.reactions', 'reactions')
         .select([
           'message',
           'sender.id',
@@ -157,6 +161,7 @@ export class MessageService {
           'sender.lastName',
           'sender.avatarUrl',
           'member.nickname',
+          'reactions',
         ])
         .where('message.chat_id = :chatId', { chatId })
         .andWhere('message.is_deleted = :isDeleted', { isDeleted: false })
@@ -216,5 +221,59 @@ export class MessageService {
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to delete message');
     }
+  }
+
+  // Reaction:
+  async toggleReaction(
+    messageId: string,
+    userId: string,
+    emoji: string,
+  ): Promise<void> {
+    try {
+      const existing = await this.reactionRepo.findOne({
+        where: { messageId, userId },
+      });
+
+      if (existing) {
+        if (existing.emoji === emoji) {
+          // Toggle off
+          await this.reactionRepo.delete({ id: existing.id });
+        } else {
+          // Update emoji
+          existing.emoji = emoji;
+          await this.reactionRepo.save(existing);
+        }
+      } else {
+        // New reaction
+        const reaction = this.reactionRepo.create({
+          messageId,
+          userId,
+          emoji,
+        });
+        await this.reactionRepo.save(reaction);
+      }
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to toggle reaction');
+    }
+  }
+
+  async getReactionsForMessage(messageId: string): Promise<Reaction[]> {
+    try {
+      return await this.reactionRepo.find({ where: { messageId } });
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to retrieve reactions');
+    }
+  }
+
+  /**
+   * Groups reactions by emoji -> userId[]
+   */
+  formatReactions(reactions: Reaction[]): { [emoji: string]: string[] } {
+    const grouped: { [emoji: string]: string[] } = {};
+    for (const r of reactions) {
+      if (!grouped[r.emoji]) grouped[r.emoji] = [];
+      grouped[r.emoji].push(r.userId);
+    }
+    return grouped;
   }
 }

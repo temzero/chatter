@@ -8,6 +8,9 @@ import { plainToInstance } from 'class-transformer';
 export class MessageMapper {
   toResponseDto(message: Message): MessageResponseDto {
     const senderMember = message.chat?.members?.[0];
+
+    const groupedReactions = this.groupReactions(message.reactions || []);
+
     const responseData = {
       id: message.id,
       chatId: message.chatId,
@@ -28,12 +31,25 @@ export class MessageMapper {
       deletedAt: message.deletedAt,
       createdAt: message.createdAt,
       updatedAt: message.updatedAt,
-      reactions: message.reactions,
+      reactions: groupedReactions, // ✅ transformed here
       attachments: message.attachments,
     };
 
     return plainToInstance(MessageResponseDto, responseData, {
       excludeExtraneousValues: true,
     });
+  }
+
+  private groupReactions(
+    reactions: { emoji: string; userId: string }[],
+  ): Record<string, string[]> {
+    const grouped: Record<string, string[]> = {};
+    for (const reaction of reactions) {
+      if (!grouped[reaction.emoji]) {
+        grouped[reaction.emoji] = [];
+      }
+      grouped[reaction.emoji].push(reaction.userId);
+    }
+    return grouped;
   }
 }

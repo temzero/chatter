@@ -9,7 +9,7 @@ import {
   shouldShowInfo,
 } from "@/utils/messageHelpers";
 import { useActiveMembers } from "@/stores/chatMemberStore";
-import { chatWebSocketService } from "@/lib/websocket/services/chat.socket.service";
+import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
 
 interface DirectMessagesProps {
   chat: ChatResponse;
