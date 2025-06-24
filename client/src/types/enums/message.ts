@@ -15,5 +15,6 @@ export enum MessageType {
   LOCATION = 'location',
   POLL = 'poll',
   SYSTEM = 'system',
+  FORWARD = 'forward',
 }
 

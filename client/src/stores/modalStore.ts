@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-type ModalType = "media" | "friend-request" | null;
+type ModalType = "media" | "friend-request" | "forward-message" | null;
 type ModalContent = {
   type: ModalType;
   props?: Record<string, unknown>;

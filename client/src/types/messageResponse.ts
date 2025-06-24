@@ -6,10 +6,7 @@ import { AttachmentType } from "./enums/attachmentType";
 export interface SenderResponse {
   id: string;
   avatarUrl?: string | null;
-  username: string;
-  nickname?: string | null;
-  firstName: string;
-  lastName: string;
+  displayName: string;
 }
 
 export interface ReactionResponse {
@@ -40,19 +37,25 @@ export interface AttachmentResponse {
 export interface MessageResponse {
   id: string;
   chatId: string;
-  senderId: string;
-  senderNickname: string;
-  senderFirstName: string;
-  senderLastName: string;
-  senderAvatarUrl?: string | null;
-  sender?: SenderResponse;
+  // senderId: string;
+  // senderDisplayName: string;
+  // senderFirstName: string;
+  // senderLastName: string;
+  // senderAvatarUrl?: string | null;
+  sender: SenderResponse;
   type: MessageType;
   content?: string | null;
   status: MessageStatus;
   isPinned: boolean;
   pinnedAt?: string | null;
+
   replyToMessageId?: string | null;
+  replyToMessage: MessageResponse | null;
   replyCount: number;
+
+  forwardedFromMessageId?: string | null;
+  forwardedFromMessage: MessageResponse | null;
+
   editedAt?: string | null;
   isDeleted: boolean;
   deletedAt?: string | null;

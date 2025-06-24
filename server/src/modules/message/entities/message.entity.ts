@@ -68,6 +68,13 @@ export class Message {
   @JoinColumn({ name: 'reply_to_message_id' })
   replyToMessage: Message | null;
 
+  @Column({ name: 'forwarded_from_message_id', nullable: true })
+  forwardedFromMessageId: string | null;
+
+  @ManyToOne(() => Message, { nullable: true })
+  @JoinColumn({ name: 'forwarded_from_message_id' })
+  forwardedFromMessage: Message | null;
+
   @Column({ name: 'reply_count', default: 0 })
   replyCount: number;
 

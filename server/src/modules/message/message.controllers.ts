@@ -94,7 +94,6 @@ export class MessageController {
       queryParams,
     );
 
-    // const messagesResponse = plainToInstance(MessageResponseDto, messages);
     const messagesResponse = messages.map((message) =>
       this.messageMapper.toResponseDto(message),
     );

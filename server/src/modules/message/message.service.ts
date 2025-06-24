@@ -102,6 +102,79 @@ export class MessageService {
     }
   }
 
+  async createForwardedMessage(
+    senderId: string,
+    chatId: string,
+    originalMessageId: string,
+  ): Promise<Message> {
+    // Verify the chat exists and user is a member
+    const chat = await this.chatRepo.findOne({
+      where: { id: chatId },
+      relations: ['lastMessage'],
+    });
+    if (!chat) {
+      ErrorResponse.notFound('Chat not found');
+    }
+
+    const isMember = await this.chatMemberRepo.exists({
+      where: {
+        chatId: chatId,
+        userId: senderId,
+      },
+    });
+    if (!isMember) {
+      ErrorResponse.notFound('You are not a member of this chat');
+    }
+
+    // Get the full original message with all relations
+    const originalMessage = await this.messageRepo.findOne({
+      where: { id: originalMessageId },
+      relations: [
+        'sender',
+        'attachments',
+        'forwardedFromMessage',
+        'forwardedFromMessage.sender',
+      ],
+    });
+    if (!originalMessage) {
+      ErrorResponse.notFound('Original message not found');
+    }
+
+    try {
+      // Create the forwarded message
+      const newMessage = this.messageRepo.create({
+        senderId: senderId,
+        chatId: chatId,
+        forwardedFromMessageId: originalMessage.id,
+      });
+
+      // Copy attachments if they exist
+      // if (originalMessage.attachments?.length > 0) {
+      //   newMessage.attachments = originalMessage.attachments.map(
+      //     (attachment) => {
+      //       const newAttachment = new Attachment();
+      //       newAttachment.fileUrl = attachment.fileUrl;
+      //       newAttachment.fileType = attachment.fileType;
+      //       newAttachment.fileName = attachment.fileName;
+      //       newAttachment.fileSize = attachment.fileSize;
+      //       return newAttachment;
+      //     },
+      //   );
+      // }
+
+      const savedMessage = await this.messageRepo.save(newMessage);
+
+      // Update chat's last message
+      chat.lastMessage = savedMessage;
+      await this.chatRepo.save(chat);
+
+      // Return the full message with all relations
+      return await this.getFullMessageById(savedMessage.id);
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to forward message');
+    }
+  }
+
   async getMessageById(id: string): Promise<Message> {
     try {
       const message = await this.messageRepo.findOne({
@@ -139,6 +212,43 @@ export class MessageService {
 
   async markMessagesAsRead() {}
 
+  // async getMessagesByChatId(
+  //   chatId: string,
+  //   queryParams: GetMessagesDto,
+  // ): Promise<Message[]> {
+  //   try {
+  //     const query = this.messageRepo
+  //       .createQueryBuilder('message')
+  //       .leftJoinAndSelect('message.sender', 'sender')
+  //       .leftJoinAndSelect('message.chat', 'chat')
+  //       .leftJoinAndSelect(
+  //         'chat.members',
+  //         'member',
+  //         'member.user_id = sender.id',
+  //       )
+  //       .leftJoinAndSelect('message.reactions', 'reactions')
+  //       .select([
+  //         'message',
+  //         'sender.id',
+  //         'sender.firstName',
+  //         'sender.lastName',
+  //         'sender.avatarUrl',
+  //         'member.nickname',
+  //         'reactions',
+  //       ])
+  //       .where('message.chat_id = :chatId', { chatId })
+  //       .andWhere('message.is_deleted = :isDeleted', { isDeleted: false })
+  //       .orderBy('message.createdAt', 'ASC');
+
+  //     if (queryParams.limit) query.take(queryParams.limit);
+  //     if (queryParams.offset) query.skip(queryParams.offset);
+
+  //     return await query.getMany();
+  //   } catch (error) {
+  //     ErrorResponse.throw(error, 'Failed to retrieve conversation messages');
+  //   }
+  // }
+
   async getMessagesByChatId(
     chatId: string,
     queryParams: GetMessagesDto,
@@ -154,6 +264,24 @@ export class MessageService {
           'member.user_id = sender.id',
         )
         .leftJoinAndSelect('message.reactions', 'reactions')
+        .leftJoinAndSelect('message.replyToMessage', 'replyToMessage')
+        .leftJoinAndSelect('replyToMessage.sender', 'replySender')
+        .leftJoinAndSelect(
+          'chat.members',
+          'replyMember',
+          'replyMember.user_id = replySender.id',
+        )
+        .leftJoinAndSelect(
+          'message.forwardedFromMessage',
+          'forwardedFromMessage',
+        )
+        .leftJoinAndSelect('forwardedFromMessage.sender', 'forwardedSender')
+        .leftJoinAndSelect('message.attachments', 'attachments')
+        .leftJoinAndSelect('replyToMessage.attachments', 'replyAttachments')
+        .leftJoinAndSelect(
+          'forwardedFromMessage.attachments',
+          'forwardedAttachments',
+        )
         .select([
           'message',
           'sender.id',
@@ -162,6 +290,28 @@ export class MessageService {
           'sender.avatarUrl',
           'member.nickname',
           'reactions',
+          'attachments',
+
+          // Reply
+          'replyToMessage.id',
+          'replyToMessage.content',
+          'replyToMessage.createdAt',
+          'replySender.id',
+          'replySender.firstName',
+          'replySender.lastName',
+          'replySender.avatarUrl',
+          'replyMember.nickname',
+          'replyAttachments',
+
+          // Forward
+          'forwardedFromMessage.id',
+          'forwardedFromMessage.content',
+          'forwardedFromMessage.createdAt',
+          'forwardedSender.id',
+          'forwardedSender.firstName',
+          'forwardedSender.lastName',
+          'forwardedSender.avatarUrl',
+          'forwardedAttachments',
         ])
         .where('message.chat_id = :chatId', { chatId })
         .andWhere('message.is_deleted = :isDeleted', { isDeleted: false })

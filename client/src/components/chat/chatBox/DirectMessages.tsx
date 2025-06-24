@@ -54,7 +54,7 @@ const DirectMessages: React.FC<DirectMessagesProps> = ({ chat, messages }) => {
     // 1. The message is not from current user (you don't need to mark your own messages as read)
     // 2. It's actually unread
     const isUnread =
-      lastMessage.senderId !== currentUser?.id &&
+      lastMessage.sender.id !== currentUser?.id &&
       (myLastReadMessageId === null || lastMessage.id !== myLastReadMessageId);
 
     console.log("isUnread", isUnread);

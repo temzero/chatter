@@ -4,29 +4,23 @@ import classNames from "classnames";
 import { motion } from "framer-motion";
 import { MessageResponse } from "@/types/messageResponse";
 import { useMessageStore } from "@/stores/messageStore";
+import { useModalStore } from "@/stores/modalStore";
 
 interface MessageActionsProps {
   message: MessageResponse;
-  onDelete: () => void;
-  onPin?: () => void;
-  onForward?: () => void;
-  onSave?: () => void;
-  close: () => void;
   position?: "left" | "right";
   className?: string;
+  close: () => void;
 }
 
 export const MessageActions: React.FC<MessageActionsProps> = ({
   message,
-  onDelete,
-  onForward,
-  onPin,
-  onSave,
-  close,
   position = "left",
   className = "",
+  close,
 }) => {
   const setReplyToMessage = useMessageStore((state) => state.setReplyToMessage);
+  const deleteMessage = useMessageStore((state) => state.deleteMessage);
 
   const positionClass =
     position === "right"
@@ -46,22 +40,25 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
     {
       icon: "send",
       label: "Forward",
-      action: onForward,
+      action: () => {
+        useModalStore.getState().openModal("forward-message", { message });
+        close();
+      },
     },
     {
       icon: "keep",
       label: "Pin",
-      action: onPin,
+      // action: onPin,
     },
     {
       icon: "bookmark",
       label: "Save",
-      action: onSave,
+      // action: onSave,
     },
     {
       icon: "delete",
       label: "Delete",
-      action: onDelete,
+      action: () => deleteMessage(message.id),
     },
   ];
 
@@ -82,7 +79,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
         <button
           key={index}
           className={classNames(
-            "p-1 rounded-full flex flex-col items-center justify-center",
+            "p-1 rounded-full flex flex-col items-center justify-center opacity-70 hover:opacity-100 ",
             "transition-all duration-200 cursor-pointer"
           )}
           onClick={(e) => {

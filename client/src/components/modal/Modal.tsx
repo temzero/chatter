@@ -1,10 +1,11 @@
 // Modal.tsx
 
-import MediaModal from "./media/MediaModal";
-import FriendRequestModal from "./FriendRequestModal";
 import { useModalStore } from "@/stores/modalStore";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect } from "react";
+import MediaModal from "./media/MediaModal";
+import FriendRequestModal from "./FriendRequestModal";
+import ForwardMessageModal from "./ForwardMessageModal";
 
 // Modal.tsx improvements:
 const Modal = () => {
@@ -33,7 +34,7 @@ const Modal = () => {
       case "friend-request":
         return (
           <FriendRequestModal
-            user={{
+            receiver={{
               id: "",
               username: "",
               firstName: "",
@@ -43,6 +44,9 @@ const Modal = () => {
             {...modalContent.props}
           />
         );
+
+      case "forward-message":
+        return <ForwardMessageModal {...modalContent.props} />;
       default:
         return null;
     }

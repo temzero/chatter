@@ -9,14 +9,5 @@ export class SenderResponseDto {
   avatarUrl?: string | null;
 
   @Expose()
-  username: string;
-
-  @Expose()
   displayName: string | null;
-
-  @Expose()
-  firstName: string;
-
-  @Expose()
-  lastName: string;
 }

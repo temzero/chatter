@@ -5,3 +5,8 @@ export interface SendMessagePayload {
   content?: string;
   attachmentIds?: string[];
 }
+
+export interface ForwardMessagePayload {
+  chatId: string;
+  messageId: string;
+}

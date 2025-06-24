@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import classNames from "classnames";
 import { motion } from "framer-motion";
-import { useMessageReactions, useMessageStore } from "@/stores/messageStore";
+import { useMessageReactions } from "@/stores/messageStore";
 import { useCurrentUser } from "@/stores/authStore";
 import RenderMultipleMedia from "../ui/RenderMultipleMedia";
 import { formatTime } from "@/utils/formatTime";
@@ -51,17 +51,13 @@ const Message: React.FC<MessageProps> = ({
   isRecent = false,
   readUserAvatars,
 }) => {
+  console.log("Message: ", message);
   const currentUser = useCurrentUser();
   const currentUserId = currentUser?.id;
-  const isMe = message.senderId === currentUserId;
-  const deleteMessage = useMessageStore((state) => state.deleteMessage);
+  const isMe = message.sender.id === currentUserId;
   const reactions = useMessageReactions(message.id);
 
-  const repliedMessage = useMessageStore((state) =>
-    message.replyToMessageId
-      ? state.getMessageById(message.replyToMessageId)
-      : undefined
-  );
+  const repliedMessage = message.replyToMessage;
 
   const [copied, setCopied] = useState(false);
   const [showReactionPicker, setShowReactionPicker] = useState(false);
@@ -125,8 +121,6 @@ const Message: React.FC<MessageProps> = ({
     "pb-8": !isRecent,
   };
 
-  const displayName = message.senderNickname || message.senderFirstName;
-
   const media =
     message.attachments?.map((attachment) => ({
       id: attachment.id,
@@ -141,6 +135,7 @@ const Message: React.FC<MessageProps> = ({
 
   return (
     <motion.div
+      id={`message-${message.id}`}
       ref={messageRef}
       className={classNames("flex max-w-[60%] group", alignmentClass)}
       initial={animationProps.initial}
@@ -174,8 +169,8 @@ const Message: React.FC<MessageProps> = ({
         >
           {showInfo && !isMe && (
             <Avatar
-              avatarUrl={message.senderAvatarUrl}
-              name={message.senderFirstName}
+              avatarUrl={message.sender.avatarUrl}
+              name={message.sender.displayName}
             />
           )}
         </div>
@@ -184,11 +179,20 @@ const Message: React.FC<MessageProps> = ({
       <div className="flex relative flex-col w-full">
         {/* Reply preview positioned above the message */}
         {repliedMessage && (
-          <div className="mb-1 w-full">
-            <MessageReplyPreview message={repliedMessage} />
+          <div
+            className={classNames("-mb-1 w-full", {
+              "text-right": repliedMessage.sender.id === currentUserId, // Align container if replying to my message
+            })}
+          >
+            <MessageReplyPreview
+              message={repliedMessage}
+              chatType={chatType}
+              isMe={isMe}
+              isSelfReply={repliedMessage.sender.id === message.sender.id}
+              isReplyToMe={repliedMessage.sender.id === currentUserId}
+            />
           </div>
         )}
-
         {media.length > 0 ? (
           <div
             className={classNames("message-media-bubble", {
@@ -241,13 +245,11 @@ const Message: React.FC<MessageProps> = ({
             />
           </div>
         )}
-
         {showInfo && isGroupChat && !isMe && (
           <h1 className="text-sm font-semibold opacity-70 mr-2">
-            {displayName}
+            {message.sender.displayName}
           </h1>
         )}
-
         {!isRecent && (
           <p
             className={`opacity-0 group-hover:opacity-40 text-xs ${
@@ -257,7 +259,6 @@ const Message: React.FC<MessageProps> = ({
             {formatTime(message.createdAt)}
           </p>
         )}
-
         {readUserAvatars && (
           <div
             className={`flex ${
@@ -268,7 +269,7 @@ const Message: React.FC<MessageProps> = ({
               <div key={index}>
                 <Avatar
                   avatarUrl={avatarUrl}
-                  name={displayName}
+                  name={message.sender.displayName}
                   size="5"
                   id={index}
                 />
@@ -276,20 +277,17 @@ const Message: React.FC<MessageProps> = ({
             ))}
           </div>
         )}
-
         {showReactionPicker && (
           <ReactionPicker
             onSelect={handleReaction}
             position={isMe ? "right" : "left"}
           />
         )}
-
         {showActionButtons && (
           <MessageActions
             message={message}
-            close={() => setShowActionButtons(false)}
-            onDelete={() => deleteMessage(message.id)}
             position={isMe ? "left" : "right"}
+            close={() => setShowActionButtons(false)}
           />
         )}
       </div>

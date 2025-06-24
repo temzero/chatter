@@ -3,6 +3,8 @@ import React from "react";
 import { MessageResponse } from "@/types/messageResponse";
 import { useCurrentUserId } from "@/stores/authStore";
 import { Avatar } from "./avatar/Avatar";
+import { formatTime } from "@/utils/formatTime";
+import { motion } from "framer-motion";
 
 interface ReplyToMessageProps {
   replyToMessage: MessageResponse;
@@ -17,10 +19,24 @@ const ReplyToMessage: React.FC<ReplyToMessageProps> = ({
   const isMe: boolean = replyToMessage.senderId === currentUserId;
 
   return (
-    <div className="w-full p-2 rounded bg-muted mb-2 flex justify-between items-center">
+    <motion.div
+      key={replyToMessage.id}
+      initial={{ y: -50, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      // exit={{ y: 0, opacity: 0 }}
+      // transition={{ duration: 0.3, ease: "easeOut" }}
+      className="w-full p-2 rounded bg-muted mb-2 flex justify-between items-center"
+    >
       <div className="flex items-center gap-2">
-        <span className="material-symbols-outlined">prompt_suggestion</span>
-        {/* <div className="flex items-end -space-x-1"> */}
+        <div className="flex flex-col items-center -space-y-2">
+          <h1 className="text-[10px] opacity-60">
+            {formatTime(replyToMessage.createdAt)}
+          </h1>
+          <span className="material-symbols-outlined text-3xl rotate-180">
+            reply
+          </span>
+        </div>
+
         {isMe || (
           <Avatar
             avatarUrl={replyToMessage.senderAvatarUrl}
@@ -30,10 +46,9 @@ const ReplyToMessage: React.FC<ReplyToMessageProps> = ({
             className="-mr-1"
           />
         )}
-        <div className={`message-bubble ${isMe && "self-message"}`}>
+        <p className={`message-bubble ${isMe && "self-message"}`}>
           {replyToMessage.content || "Attachment"}
-        </div>
-        {/* </div> */}
+        </p>
       </div>
       <button
         className="relative flex items-center justify-center w-6 h-6 bg-[var(--border-color)] opacity-80 hover:opacity-100 rounded-full"
@@ -44,7 +59,7 @@ const ReplyToMessage: React.FC<ReplyToMessageProps> = ({
           close
         </span>
       </button>
-    </div>
+    </motion.div>
   );
 };
 

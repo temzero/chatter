@@ -1,5 +1,5 @@
 // src/services/websocket/chat.service.ts
-import { SendMessagePayload } from "@/types/sendMessagePayload";
+import { ForwardMessagePayload, SendMessagePayload } from "@/types/sendMessagePayload";
 import { webSocketService } from "./websocket.service";
 import { MessageResponse } from "@/types/messageResponse";
 
@@ -49,6 +49,10 @@ export class ChatWebSocketService {
 
   offNewMessage(callback: (message: MessageResponse) => void) {
     webSocketService.off("chat:newMessage", callback);
+  }
+
+  async forwardMessage(message: ForwardMessagePayload) {
+    webSocketService.emit("chat:forwardMessage", message);
   }
 
   onTyping(

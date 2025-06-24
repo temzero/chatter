@@ -4,7 +4,7 @@ export function formatTime(time?: Date | string | null): string | null {
   const options: Intl.DateTimeFormatOptions = {
     hour: "numeric",
     minute: "numeric",
-    hour12: true,
+    hour12: false,
   };
   return date.toLocaleTimeString(undefined, options);
 }

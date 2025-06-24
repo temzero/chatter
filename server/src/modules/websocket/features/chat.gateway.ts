@@ -8,6 +8,7 @@ import { MessageService } from 'src/modules/message/message.service';
 import { WebsocketService } from '../websocket.service';
 import { AuthenticatedSocket } from '../constants/authenticatedSocket.type';
 import { CreateMessageDto } from 'src/modules/message/dto/requests/create-message.dto';
+import { ForwardMessageDto } from 'src/modules/message/dto/requests/forward-message.dto';
 import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
 import { MessageMapper } from 'src/modules/message/mappers/message.mapper';
 
@@ -103,6 +104,73 @@ export class ChatGateway {
     } catch (error) {
       console.error('Error handling sendMessage:', error);
       client.emit(`${chatLink}error`, { message: 'Failed to send message' });
+    }
+  }
+
+  @SubscribeMessage(`${chatLink}forwardMessage`)
+  async handleForwardMessage(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: ForwardMessageDto,
+  ) {
+    try {
+      const senderId = client.data.userId;
+      if (!senderId) {
+        client.emit(`${chatLink}error`, { message: 'Unauthorized' });
+        return;
+      }
+
+      // Create forwarded message in the target chat
+      const forwardedMessage = await this.messageService.createForwardedMessage(
+        senderId,
+        payload.chatId,
+        payload.messageId,
+      );
+
+      // Get the member ID of the sender in the target chat
+      const member = await this.chatMemberService.getMemberByChatIdAndUserId(
+        senderId,
+        payload.chatId,
+      );
+
+      if (!member) {
+        throw new Error(`User is not a member of chat ${payload.chatId}`);
+      }
+
+      // Update the sender's last read message in the target chat
+      await this.chatMemberService.updateLastRead(
+        member.id,
+        forwardedMessage.id,
+      );
+
+      // Convert to response DTO
+      const messageResponse =
+        this.messageMapper.toResponseDto(forwardedMessage);
+
+      // Emit the new message to all chat members
+      await this.websocketService.emitToChatMembers(
+        payload.chatId,
+        `${chatLink}newMessage`,
+        messageResponse,
+      );
+
+      // Emit the read update to all chat members
+      await this.websocketService.emitToChatMembers(
+        payload.chatId,
+        `${chatLink}messageRead`,
+        {
+          chatId: payload.chatId,
+          memberId: member.id,
+          messageId: forwardedMessage.id,
+        },
+      );
+
+      return messageResponse;
+    } catch (error) {
+      console.error('Error handling forwardMessage:', error);
+      client.emit(`${chatLink}error`, {
+        message: 'Failed to forward message',
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
