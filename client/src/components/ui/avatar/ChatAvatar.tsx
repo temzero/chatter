@@ -2,8 +2,6 @@ import { Avatar } from "./Avatar";
 import { OnlineDot } from "../OnlineDot";
 import type {
   ChatResponse,
-  DirectChatResponse,
-  GroupChatResponse,
 } from "@/types/chat";
 import { ChatType } from "@/types/enums/ChatType";
 

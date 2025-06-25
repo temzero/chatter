@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
+import { Repository, Like, LessThan, MoreThan } from 'typeorm';
 import { Message } from './entities/message.entity';
 import { Chat } from '../chat/entities/chat.entity';
 import { ChatMember } from '../chat-member/entities/chat-member.entity';
@@ -210,45 +210,6 @@ export class MessageService {
     }
   }
 
-  async markMessagesAsRead() {}
-
-  // async getMessagesByChatId(
-  //   chatId: string,
-  //   queryParams: GetMessagesDto,
-  // ): Promise<Message[]> {
-  //   try {
-  //     const query = this.messageRepo
-  //       .createQueryBuilder('message')
-  //       .leftJoinAndSelect('message.sender', 'sender')
-  //       .leftJoinAndSelect('message.chat', 'chat')
-  //       .leftJoinAndSelect(
-  //         'chat.members',
-  //         'member',
-  //         'member.user_id = sender.id',
-  //       )
-  //       .leftJoinAndSelect('message.reactions', 'reactions')
-  //       .select([
-  //         'message',
-  //         'sender.id',
-  //         'sender.firstName',
-  //         'sender.lastName',
-  //         'sender.avatarUrl',
-  //         'member.nickname',
-  //         'reactions',
-  //       ])
-  //       .where('message.chat_id = :chatId', { chatId })
-  //       .andWhere('message.is_deleted = :isDeleted', { isDeleted: false })
-  //       .orderBy('message.createdAt', 'ASC');
-
-  //     if (queryParams.limit) query.take(queryParams.limit);
-  //     if (queryParams.offset) query.skip(queryParams.offset);
-
-  //     return await query.getMany();
-  //   } catch (error) {
-  //     ErrorResponse.throw(error, 'Failed to retrieve conversation messages');
-  //   }
-  // }
-
   async getMessagesByChatId(
     chatId: string,
     queryParams: GetMessagesDto,
@@ -350,6 +311,123 @@ export class MessageService {
       ErrorResponse.throw(error, 'Failed to retrieve last message');
     }
   }
+
+  async getUnreadMessageCount(
+    chatId: string,
+    lastReadMessageId: string | null,
+  ): Promise<number> {
+    if (!lastReadMessageId) return 0;
+    try {
+      // First get the last message in the chat
+      const lastMessage = await this.messageRepo.findOne({
+        where: {
+          chatId,
+          isDeleted: false,
+        },
+        order: {
+          createdAt: 'DESC',
+        },
+        select: ['id'],
+      });
+
+      // If last read message is the same as the last message in chat, return 0
+      if (lastMessage && lastMessage.id === lastReadMessageId) {
+        return 0;
+      }
+
+      // Get the timestamp of the last read message
+      const lastReadMessage = await this.messageRepo.findOne({
+        where: {
+          id: lastReadMessageId,
+        },
+        select: ['createdAt'],
+      });
+
+      // console.log('lastReadMessage', lastReadMessage);
+
+      if (!lastReadMessage) {
+        // If last read message was deleted, find the most recent message before it that still exists
+        const previousValidMessage = await this.messageRepo.findOne({
+          where: {
+            chatId,
+            isDeleted: false,
+            createdAt: LessThan(new Date()), // All messages before now
+          },
+          order: {
+            createdAt: 'DESC',
+          },
+          select: ['createdAt'],
+        });
+
+        if (!previousValidMessage) {
+          return 0; // No valid messages in chat
+        }
+
+        // Count messages created after the previous valid message
+        return await this.messageRepo.count({
+          where: {
+            chatId,
+            createdAt: MoreThan(previousValidMessage.createdAt),
+            isDeleted: false,
+          },
+        });
+      }
+
+      // Count messages created after the last read message
+      const unreadCount = await this.messageRepo.count({
+        where: {
+          chatId,
+          createdAt: MoreThan(lastReadMessage.createdAt),
+          isDeleted: false,
+        },
+      });
+
+      // console.log('unreadCount', unreadCount);
+
+      return unreadCount;
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to get unread message count');
+    }
+  }
+
+  // async getUnreadMessageCount(
+  //   chatId: string,
+  //   lastReadMessageId: string | null,
+  // ): Promise<number> {
+  //   if (!lastReadMessageId) return 0;
+
+  //   try {
+  //     // Combined check for last message and count in a single query
+  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  //     const result = await this.messageRepo
+  //       .createQueryBuilder('message')
+  //       .select([
+  //         'COUNT(message.id) AS unread_count',
+  //         'MAX(message.id) AS last_message_id',
+  //       ])
+  //       .where('message.chat_id = :chatId', { chatId })
+  //       .andWhere('message.is_deleted = false')
+  //       .andWhere(
+  //         `message.created_at > COALESCE(
+  //         (SELECT m.created_at FROM message m WHERE m.id = :lastReadMessageId),
+  //         '1970-01-01'::timestamp
+  //       )`,
+  //         { lastReadMessageId },
+  //       )
+  //       .getRawOne();
+
+  //     // If the last message is the one we've read, return 0
+  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  //     if (result.last_message_id === lastReadMessageId) {
+  //       return 0;
+  //     }
+
+  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  //     return Number(result.unread_count) || 0;
+  //   } catch (error) {
+  //     ErrorResponse.throw(error, 'Failed to get unread message count');
+  //   }
+  // }
 
   async softDeleteMessage(id: string): Promise<Message> {
     try {

@@ -3,13 +3,14 @@ import { useMessageStore } from "@/stores/messageStore";
 import { useTypingUsersByChatId } from "@/stores/typingStore";
 import type { ChatResponse } from "@/types/chat";
 import { ChatAvatar } from "./avatar/ChatAvatar";
-import { getTimeAgo } from "@/utils/getTimeAgo";
+import { formatTimeAgo } from "@/utils/formatTimeAgo";
 import { OnlineDot } from "./OnlineDot";
 import SimpleTypingIndicator from "./typingIndicator/SimpleTypingIndicator";
 import { AnimatePresence, motion } from "framer-motion";
 // import { useChatOnlineStatus } from "@/hooks/useChatOnlineStatus";
 import { useChatStore, useIsActiveChat } from "@/stores/chatStore";
 import { useChatStatus } from "@/stores/presenceStore";
+import { ChatType } from "@/types/enums/ChatType";
 
 interface ChatListItemProps {
   chat: ChatResponse;
@@ -20,6 +21,7 @@ interface ChatListItemProps {
 const ChatListItem: React.FC<ChatListItemProps> = React.memo(
   ({ chat, isCompact = false, currentUserId = "" }) => {
     console.log("CHAT LIST ITEM");
+    console.log("chat Last message", chat.lastMessage);
 
     const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
     const typingUsers = useTypingUsersByChatId(chat.id);
@@ -29,6 +31,8 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
 
     const setActiveChatById = useChatStore.getState().setActiveChatById;
     const isActive = useIsActiveChat(chat.id);
+
+    const unreadCount = chat.unreadCount || 0;
 
     const handleClick = () => {
       if (!isActive) {
@@ -54,13 +58,18 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
         <span className="text-xs whitespace-nowrap text-ellipsis">{draft}</span>
       </p>
     ) : chat.lastMessage ? (
-      <p className="flex items-center opacity-70 gap-1 text-xs max-w-[196px] whitespace-nowrap text-ellipsis overflow-hidden min-h-6">
-        <strong>
-          {chat.lastMessage.senderId === currentUserId
-            ? "Me"
-            : chat.lastMessage.senderName}
-          :
-        </strong>
+      <p
+        className={`flex items-center gap-1 text-xs max-w-[196px] whitespace-nowrap text-ellipsis overflow-hidden min-h-6 
+      ${unreadCount > 1 ? "opacity-100" : "opacity-40"}
+      `}
+      >
+        {chat.lastMessage.senderId === currentUserId ? (
+          <strong>Me:</strong>
+        ) : chat.type !== ChatType.DIRECT ? (
+          <strong>{chat.lastMessage.senderDisplayName}:</strong>
+        ) : (
+          ""
+        )}
         {chat.lastMessage.content}
       </p>
     ) : null;
@@ -70,7 +79,9 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
         <div className={getUserItemClass()} onClick={handleClick}>
           <OnlineDot
             isOnline={isOnline}
-            className={`absolute top-1/2 left-[3px] -translate-y-1/2 ${isActive && 'bg-white border'}`}
+            className={`absolute top-1/2 left-[3px] -translate-y-1/2 ${
+              isActive && "bg-white border"
+            }`}
           />
           <ChatAvatar chat={chat} type="sidebar" />
 
@@ -109,8 +120,14 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
               </div>
 
               <p className="absolute top-2 right-4 text-xs opacity-40">
-                {getTimeAgo(chat.lastMessage?.createdAt ?? chat.updatedAt)}
+                {formatTimeAgo(chat.lastMessage?.createdAt ?? chat.updatedAt)}
               </p>
+
+              {unreadCount > 1 && (
+                <div className="absolute bottom-6 right-4 font-bold text-white bg-red-600 rounded-full text-xs flex items-center justify-center ml-auto w-4 h-4">
+                  {unreadCount}
+                </div>
+              )}
             </>
           )}
         </div>

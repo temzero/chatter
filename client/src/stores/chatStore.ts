@@ -84,6 +84,7 @@ export const useChatStore = create<ChatStore>()(
           set({ isLoading: true, error: null });
           try {
             const chats = await chatService.getAllChats();
+            console.log('Chats fetched', chats)
             set({ chats, filteredChats: chats, isLoading: false });
           } catch (error) {
             console.error("Failed to fetch chats:", error);

@@ -3,7 +3,7 @@ import { useChatStore } from "@/stores/chatStore";
 import { useMessageStore } from "@/stores/messageStore";
 import type { ChatResponse } from "@/types/chat";
 import { ChatAvatar } from "./avatar/ChatAvatar";
-import { getTimeAgo } from "@/utils/getTimeAgo";
+import { formatTimeAgo } from "@/utils/formatTimeAgo";
 import { OnlineDot } from "./OnlineDot";
 import SimpleTypingIndicator from "./typingIndicator/SimpleTypingIndicator";
 import { AnimatePresence, motion } from "framer-motion";
@@ -31,8 +31,7 @@ const ChatListItem: React.FC<ChatListItemProps> = ({
   const setActiveChatById = useChatStore.getState().setActiveChatById;
   const getDraftMessage = useMessageStore.getState().getDraftMessage;
 
-  console.log('ChatListItem for ChatId', activeChatId)
-
+  console.log("ChatListItem for ChatId", activeChatId);
 
   const handleChatSelect = async () => {
     try {
@@ -122,7 +121,7 @@ const ChatListItem: React.FC<ChatListItemProps> = ({
             </div>
 
             <p className="absolute top-2 right-4 text-xs opacity-40">
-              {getTimeAgo(chat.lastMessage?.createdAt ?? chat.updatedAt)}
+              {formatTimeAgo(chat.lastMessage?.createdAt ?? chat.updatedAt)}
             </p>
           </>
         )}

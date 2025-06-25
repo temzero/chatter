@@ -12,7 +12,7 @@ const chatTypes = ["all", "direct", "group", "channel"];
 
 const SidebarDefault: React.FC = () => {
   const allChats = useAllChats()
-  console.log('allChats', allChats)
+  // console.log('allChats', allChats)
   
   const setSidebar = useSidebarStore((state) => state.setSidebar);
   const isCompact = useSidebarStore((state) => state.isCompact);

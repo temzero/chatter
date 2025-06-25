@@ -8,11 +8,13 @@ import { ChatMember } from '../chat-member/entities/chat-member.entity';
 import { User } from '../user/entities/user.entity';
 import { FriendshipModule } from '../friendship/friendship.module';
 import { WebSocketModule } from '../websocket/websocket.module';
+import { MessageModule } from '../message/message.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Chat, ChatMember, User]),
     forwardRef(() => ChatMemberModule),
+    forwardRef(() => MessageModule),
     forwardRef(() => FriendshipModule),
     WebSocketModule,
   ],

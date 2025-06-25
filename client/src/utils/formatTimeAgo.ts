@@ -1,4 +1,4 @@
-export const getTimeAgo = (dateString: string): string => {
+export const formatTimeAgo = (dateString: string): string => {
   const createdAt = new Date(dateString);
   const now = new Date();
 
@@ -8,7 +8,7 @@ export const getTimeAgo = (dateString: string): string => {
   // Calculate seconds
   const diffSecs = Math.floor(diffMs / 1000);
   if (diffSecs < 60) {
-    return `${diffSecs}s`;
+    return `now`;
   }
 
   // Calculate minutes

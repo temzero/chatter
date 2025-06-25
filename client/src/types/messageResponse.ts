@@ -77,7 +77,7 @@ export interface DisplayMessage {
 export interface LastMessageResponse {
   id: string;
   senderId: string;
-  senderName: string;
+  senderDisplayName: string;
   content?: string;
   attachmentTypes?: AttachmentType;
   createdAt: string;

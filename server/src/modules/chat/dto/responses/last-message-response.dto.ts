@@ -10,7 +10,7 @@ export class LastMessageResponseDto {
   senderId: string;
 
   @Expose()
-  senderName: string;
+  senderDisplayName: string;
 
   @Expose()
   content?: string;

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Avatar } from "../../ui/avatar/Avatar";
-import { getTimeAgo } from "../../../utils/getTimeAgo";
+import { formatTimeAgo } from "../../../utils/formatTimeAgo";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import { FriendshipStatus } from "@/types/friendship";
 import { SlidingContainer } from "../../ui/SlidingContainer";
@@ -101,7 +101,7 @@ const SidebarFriendRequests: React.FC = () => {
                       <div className="flex justify-between items-center">
                         <h1 className="font-semibold">{request.senderName}</h1>
                         <p className="text-xs opacity-60">
-                          {getTimeAgo(request.updatedAt)}
+                          {formatTimeAgo(request.updatedAt)}
                         </p>
                       </div>
                       <p className="text-sm opacity-40">
@@ -172,7 +172,7 @@ const SidebarFriendRequests: React.FC = () => {
                     <div className="flex justify-between items-center">
                       <h1 className="font-semibold">{request.receiverName}</h1>
                       <p className="text-xs opacity-60">
-                        {getTimeAgo(request.updatedAt)}
+                        {formatTimeAgo(request.updatedAt)}
                       </p>
                     </div>
                     <p className="text-sm opacity-40">

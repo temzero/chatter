@@ -11,7 +11,7 @@ export interface ChatResponse {
   myMemberId: string;
   myRole?: ChatMemberRole;
   updatedAt: string;
-  unreadCount?: number;
-  lastMessage?: LastMessageResponse | null;
   otherMemberUserIds?: string[];
+  lastMessage?: LastMessageResponse | null;
+  unreadCount?: number;
 }

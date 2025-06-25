@@ -9,6 +9,7 @@ import {
   HttpStatus,
   UseGuards,
   HttpCode,
+  Req,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { ChatService } from './chat.service';
@@ -36,9 +37,14 @@ export class ChatController {
   @HttpCode(HttpStatus.OK)
   async findAll(
     @CurrentUser('id') userId: string,
+    @Req() request: Request, // Add this for debugging
   ): Promise<SuccessResponse<Array<ChatResponseDto>>> {
+    console.log('Extracted userId:', userId); // Check if this is undefined
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    console.log('Request user:', (request as any).user); // Inspect the user object
     try {
       const chats = await this.chatService.getChatsByUserId(userId);
+      console.log('chats', chats);
       return new SuccessResponse(chats, 'User chats retrieved successfully');
     } catch (error: unknown) {
       ErrorResponse.throw(error, 'Failed to retrieve user chats');

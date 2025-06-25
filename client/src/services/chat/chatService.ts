@@ -9,8 +9,14 @@ export const chatService = {
   ...groupChatService,
   // Get all direct and group chats
   async getAllChats(): Promise<ChatResponse[]> {
-    const response = await API.get(`/chat`);
-    return response.data.payload;
+    try {
+      const response = await API.get(`/chat`);
+      console.log("Fetched chats", response.data.payload);
+      return response.data.payload;
+    } catch (error) {
+      console.error("Failed to fetch chats:", error);
+      return []; // Return empty array or rethrow a custom error
+    }
   },
 
   // Get a specific chat by ID
