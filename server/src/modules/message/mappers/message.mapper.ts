@@ -12,13 +12,11 @@ export class MessageMapper {
     const responseData = {
       id: message.id,
       chatId: message.chatId,
-      sender: {
-        id: message.senderId,
-        avatarUrl: message.sender?.avatarUrl,
-        displayName:
-          senderMember?.nickname ||
-          `${message.sender?.firstName} ${message.sender?.lastName}`,
-      },
+      sender: this.mapSender(
+        message.senderId,
+        message.sender,
+        senderMember?.nickname,
+      ),
       type: message.type,
       content: message.content,
       status: message.status,
@@ -34,43 +32,37 @@ export class MessageMapper {
       reactions: groupedReactions,
       attachments: message.attachments,
 
-      // ✅ Nested replyToMessage with sender & attachments
-      replyToMessage: message.replyToMessage
-        ? {
-            id: message.replyToMessage.id,
-            content: message.replyToMessage.content,
-            createdAt: message.replyToMessage.createdAt,
-            attachments: message.replyToMessage.attachments || [],
-            sender: message.replyToMessage.sender
-              ? {
-                  id: message.replyToMessage.sender.id,
-                  displayName: `${message.replyToMessage.sender?.firstName} ${message.replyToMessage.sender?.lastName}`,
-                  avatarUrl: message.replyToMessage.sender.avatarUrl,
-                }
-              : null,
-          }
-        : null,
-
-      forwardedFromMessage: message.forwardedFromMessage
-        ? {
-            id: message.forwardedFromMessage.id,
-            content: message.forwardedFromMessage.content,
-            createdAt: message.forwardedFromMessage.createdAt,
-            attachments: message.forwardedFromMessage.attachments || [],
-            sender: message.forwardedFromMessage.sender
-              ? {
-                  id: message.forwardedFromMessage.sender.id,
-                  avatarUrl: message.forwardedFromMessage.sender.avatarUrl,
-                  displayName: `${message.forwardedFromMessage.sender?.firstName} ${message.forwardedFromMessage.sender?.lastName}`,
-                }
-              : null,
-          }
-        : null,
+      replyToMessage: this.mapNestedMessage(message.replyToMessage),
+      forwardedFromMessage: this.mapNestedMessage(message.forwardedFromMessage),
     };
 
     return plainToInstance(MessageResponseDto, responseData, {
       excludeExtraneousValues: true,
     });
+  }
+
+  private mapNestedMessage(msg: Message | null | undefined) {
+    if (!msg) return null;
+
+    return {
+      id: msg.id,
+      content: msg.content,
+      createdAt: msg.createdAt,
+      attachments: msg.attachments || [],
+      sender: this.mapSender(msg.senderId, msg.sender),
+    };
+  }
+
+  private mapSender(
+    senderId: string,
+    sender: Message['sender'] | undefined,
+    nickname?: string | null,
+  ) {
+    return {
+      id: senderId,
+      avatarUrl: sender?.avatarUrl,
+      displayName: nickname || `${sender?.firstName} ${sender?.lastName}`,
+    };
   }
 
   private groupReactions(

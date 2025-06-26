@@ -1,5 +1,4 @@
 import { Exclude, Expose } from 'class-transformer';
-import { AttachmentType } from 'src/modules/message/constants/attachment-type.constants';
 
 @Exclude()
 export class LastMessageResponseDto {
@@ -16,7 +15,10 @@ export class LastMessageResponseDto {
   content?: string;
 
   @Expose()
-  attachmentType?: AttachmentType;
+  icons?: string[];
+
+  @Expose()
+  isForwarded?: boolean;
 
   @Expose()
   createdAt: Date;

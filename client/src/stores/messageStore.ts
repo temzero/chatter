@@ -5,13 +5,13 @@ import type {
   MessageResponse,
 } from "@/types/messageResponse";
 import { useChatStore } from "./chatStore";
-import { AttachmentType } from "@/types/enums/attachmentType";
 import { messageService } from "@/services/messageService";
 import { useMemo } from "react";
 import { handleError } from "@/utils/handleError";
-import { LastMessageResponse } from "@/types/messageResponse";
 import { useShallow } from "zustand/react/shallow";
 import { useChatMemberStore } from "./chatMemberStore";
+import { useAuthStore } from "./authStore";
+import { createLastMessage } from "@/utils/createLastMessage";
 
 interface ChatMessages {
   [chatId: string]: MessageResponse[];
@@ -62,41 +62,51 @@ export const getAttachmentsFromMessages = (
       }))
     );
 
-const createLastMessage = (message: MessageResponse): LastMessageResponse => {
-  const {
-    id,
-    senderId,
-    senderFirstName,
-    senderNickname,
-    content = "",
-    attachments = [],
-    createdAt,
-  } = message;
+// const createLastMessage = (message: MessageResponse): LastMessageResponse => {
+//   const {
+//     id,
+//     sender,
+//     content = "",
+//     attachments = [],
+//     forwardedFromMessage,
+//     createdAt,
+//   } = message;
 
-  const senderName = senderNickname || senderFirstName;
+//   // Use forwarded message if exists
+//   const isForwarded = !!forwardedFromMessage;
 
-  const attachmentTypes = attachments.length ? attachments[0].type : undefined;
+//   const actualContent = isForwarded
+//     ? forwardedFromMessage.content || "Attachment"
+//     : content || "Attachment";
 
-  const icon = attachments.some((a) => a.type === AttachmentType.IMAGE)
-    ? "image"
-    : attachments.some((a) => a.type === AttachmentType.VIDEO)
-    ? "videocam"
-    : attachments.some((a) => a.type === AttachmentType.AUDIO)
-    ? "music_note"
-    : attachments.length
-    ? "folder_zip"
-    : undefined;
+//   const actualAttachments = isForwarded
+//     ? forwardedFromMessage.attachments || []
+//     : attachments;
 
-  return {
-    id,
-    senderId,
-    senderName,
-    content: content || "Attachment",
-    attachmentTypes,
-    createdAt,
-    icon,
-  };
-};
+//   const attachmentTypes = actualAttachments.length
+//     ? actualAttachments[0].type
+//     : undefined;
+
+//   const icon = actualAttachments.some((a) => a.type === AttachmentType.IMAGE)
+//     ? "image"
+//     : actualAttachments.some((a) => a.type === AttachmentType.VIDEO)
+//     ? "videocam"
+//     : actualAttachments.some((a) => a.type === AttachmentType.AUDIO)
+//     ? "music_note"
+//     : actualAttachments.length
+//     ? "folder_zip"
+//     : undefined;
+
+//   return {
+//     id,
+//     senderId: sender.id,
+//     senderDisplayName: sender.displayName,
+//     content: actualContent,
+//     icons,
+//     isForwarded,
+//     createdAt,
+//   };
+// };
 
 export const useMessageStore = create<MessageStore>((set, get) => ({
   messages: {},
@@ -131,10 +141,20 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
       [chatId]: [...(messages[chatId] || []), newMessage],
     };
 
+    // const currentUserId = useCurrentUserId();
+    const currentUser = useAuthStore.getState().currentUser;
+    const currentUserId = currentUser ? currentUser.id : undefined;
+    const isFromMe = newMessage.sender.id === currentUserId;
+
     const lastMessage = createLastMessage(newMessage);
 
     // Update last message in chat store
     useChatStore.getState().setLastMessage(chatId, lastMessage);
+
+    // Update unread count if not from me and chat is not active
+    if (!isFromMe) {
+      useChatStore.getState().setUnreadCount(chatId, +1);
+    }
 
     set({
       messages: updatedMessages,

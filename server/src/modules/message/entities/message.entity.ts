@@ -114,10 +114,11 @@ export class Message {
     const hasText = !!this.content;
     const hasAttachments =
       Array.isArray(this.attachments) && this.attachments.length > 0;
+    const hasForward = !!this.forwardedFromMessageId;
 
-    if (!hasText && !hasAttachments) {
+    if (!hasText && !hasAttachments && !hasForward) {
       throw new Error(
-        'Message must contain either text content or at least one attachment',
+        'Message must contain either text content, at least one attachment, or a forwarded message reference',
       );
     }
   }

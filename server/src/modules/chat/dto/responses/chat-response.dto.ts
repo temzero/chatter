@@ -15,10 +15,6 @@ export class ChatResponseDto {
 
   @Expose() unreadCount?: number;
 
-  @Expose()
-  @Type(() => LastMessageResponseDto)
-  lastMessage?: LastMessageResponseDto | null;
-
   @Expose() otherMemberUserIds?: string[];
 
   /**
@@ -37,4 +33,8 @@ export class ChatResponseDto {
   @Expose() description?: string | null;
 
   @Expose() myRole?: ChatMemberRole;
+
+  @Expose()
+  @Type(() => LastMessageResponseDto)
+  lastMessage?: LastMessageResponseDto | null;
 }

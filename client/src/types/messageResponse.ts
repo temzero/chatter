@@ -37,11 +37,6 @@ export interface AttachmentResponse {
 export interface MessageResponse {
   id: string;
   chatId: string;
-  // senderId: string;
-  // senderDisplayName: string;
-  // senderFirstName: string;
-  // senderLastName: string;
-  // senderAvatarUrl?: string | null;
   sender: SenderResponse;
   type: MessageType;
   content?: string | null;
@@ -66,20 +61,12 @@ export interface MessageResponse {
   attachments?: AttachmentResponse[];
 }
 
-export interface DisplayMessage {
-  id: string;
-  senderName: string;
-  content?: string;
-  attachmentTypes?: AttachmentType;
-  createdAt: string;
-}
-
 export interface LastMessageResponse {
   id: string;
   senderId: string;
   senderDisplayName: string;
   content?: string;
-  attachmentTypes?: AttachmentType;
+  icons?: string[];
+  isForwarded?: boolean;
   createdAt: string;
-  icon?: string;
 }

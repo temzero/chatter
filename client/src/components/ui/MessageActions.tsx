@@ -38,7 +38,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       },
     },
     {
-      icon: "send",
+      icon: "arrow_warm_up",
       label: "Forward",
       action: () => {
         useModalStore.getState().openModal("forward-message", { message });
@@ -88,7 +88,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
           }}
           title={action.label}
         >
-          <i className="material-symbols-outlined text-2xl hover:scale-150 transition-all duration-300">
+          <i className={`material-symbols-outlined text-2xl hover:scale-150 transition-all duration-300 ${action.label === 'Forward' && 'rotate-90'}`}>
             {action.icon}
           </i>
           {/* <span className="text-xs mt-0.5 opacity-80 hidden group-hover:block">

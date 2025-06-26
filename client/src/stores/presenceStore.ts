@@ -1,4 +1,4 @@
-// stores/presenceUsersStore.ts
+// stores/presenceStore.ts
 import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { webSocketService } from "@/lib/websocket/services/websocket.service";
@@ -14,7 +14,7 @@ interface PresenceStore {
   initialize: () => () => void; // Initialize function with cleanup
 }
 
-export const usePresenceUserStore = create<PresenceStore>((set) => ({
+export const usePresenceStore = create<PresenceStore>((set) => ({
   onlineUsers: [],
   setUserStatus: (userId, isOnline) =>
     set((state) => {
@@ -69,11 +69,11 @@ export const usePresenceUserStore = create<PresenceStore>((set) => ({
 
     // Handlers
     const handleInitialPresence = (statuses: Record<string, boolean>) => {
-      usePresenceUserStore.getState().setMultipleStatuses(statuses);
+      usePresenceStore.getState().setMultipleStatuses(statuses);
     };
 
     const handlePresenceUpdate = (userId: string, isOnline: boolean) => {
-      usePresenceUserStore.getState().setUserStatus(userId, isOnline);
+      usePresenceStore.getState().setUserStatus(userId, isOnline);
     };
 
     // Set up listeners
@@ -89,7 +89,7 @@ export const usePresenceUserStore = create<PresenceStore>((set) => ({
 }));
 
 export const useUserStatus = (userId: string) => {
-  return usePresenceUserStore(
+  return usePresenceStore(
     useShallow((state) => state.onlineUsers.includes(userId))
   );
 };
@@ -108,7 +108,7 @@ export const useChatStatus = (chatId: string, type: ChatType) => {
 
   // console.log("useChatStatus memberIds", memberIds);
 
-  return usePresenceUserStore(
+  return usePresenceStore(
     useShallow((state) =>
       memberIds.some((id) => state.onlineUsers.includes(id))
     )

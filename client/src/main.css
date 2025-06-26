@@ -198,11 +198,13 @@ select:focus {
 
 /* Shared Styles for Both Bubbles */
 .message-bubble,
+.message-forward-bubble,
 .message-media-bubble {
   position: relative;
   display: inline-block;
   border-radius: 8px;
   background-color: var(--message-color);
+  /* overflow: hidden; */
   word-break: break-word;
   white-space: pre-wrap;
   width: fit-content;
@@ -216,6 +218,7 @@ select:focus {
 }
 /* Hover Effect */
 .message-bubble:hover,
+.message-forward-bubble:hover,
 .message-media-bubble:hover {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transform: scale(1.1);
@@ -223,6 +226,7 @@ select:focus {
 
 /* Self Message Bubbles (Right-Aligned) */
 .message-bubble.self-message,
+.message-forward-bubble.self-message,
 .message-media-bubble.self-message {
   background-color: var(--active-chat-color);
   /* background-color: rgb(245, 245, 245); */

@@ -1,7 +1,7 @@
 // hooks/usePresenceSocketListeners.ts
 import { useEffect } from "react";
 import { webSocketService } from "../services/websocket.service";
-import { usePresenceUserStore } from "@/stores/presenceStore";
+import { usePresenceStore } from "@/stores/presenceStore";
 import { useChatStore } from "@/stores/chatStore";
 
 export function usePresenceSocketListeners() {
@@ -20,12 +20,12 @@ export function usePresenceSocketListeners() {
 
     // Handle initial presence statuses
     const handleInitialPresence = (statuses: Record<string, boolean>) => {
-      usePresenceUserStore.getState().setMultipleStatuses(statuses);
+      usePresenceStore.getState().setMultipleStatuses(statuses);
     };
 
     // Handle real-time presence updates
     const handlePresenceUpdate = (userId: string, isOnline: boolean) => {
-      usePresenceUserStore.getState().setUserStatus(userId, isOnline);
+      usePresenceStore.getState().setUserStatus(userId, isOnline);
     };
 
     // Set up listeners

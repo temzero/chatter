@@ -1,4 +1,3 @@
-// export default Message;
 import React, { useState, useEffect, useRef } from "react";
 import classNames from "classnames";
 import { motion } from "framer-motion";
@@ -14,6 +13,7 @@ import { MessageActions } from "../ui/MessageActions";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
 import { MessageReactionDisplay } from "../ui/MessageReactionsDisplay";
 import MessageReplyPreview from "../ui/MessageReplyPreview";
+import ForwardedMessagePreview from "../ui/ForwardMessagePreview";
 
 const myMessageAnimation = {
   initial: { opacity: 0, scale: 0.1, x: 100, y: 0 },
@@ -51,13 +51,13 @@ const Message: React.FC<MessageProps> = ({
   isRecent = false,
   readUserAvatars,
 }) => {
-  console.log("Message: ", message);
   const currentUser = useCurrentUser();
   const currentUserId = currentUser?.id;
   const isMe = message.sender.id === currentUserId;
   const reactions = useMessageReactions(message.id);
 
   const repliedMessage = message.replyToMessage;
+  const forwardedMessage = message.forwardedFromMessage;
 
   const [copied, setCopied] = useState(false);
   const [showReactionPicker, setShowReactionPicker] = useState(false);
@@ -155,7 +155,6 @@ const Message: React.FC<MessageProps> = ({
         setShowReactionPicker(false);
       }}
     >
-      {/* Avatar container - always takes same space */}
       {isGroupChat && (
         <div
           className={classNames(
@@ -177,11 +176,11 @@ const Message: React.FC<MessageProps> = ({
       )}
 
       <div className="flex relative flex-col w-full">
-        {/* Reply preview positioned above the message */}
+        {/* Reply Preview */}
         {repliedMessage && (
           <div
             className={classNames("-mb-1 w-full", {
-              "text-right": repliedMessage.sender.id === currentUserId, // Align container if replying to my message
+              "text-right": repliedMessage.sender.id === currentUserId,
             })}
           >
             <MessageReplyPreview
@@ -193,63 +192,109 @@ const Message: React.FC<MessageProps> = ({
             />
           </div>
         )}
-        {media.length > 0 ? (
-          <div
-            className={classNames("message-media-bubble", {
-              "self-message ml-auto": isMe,
-            })}
-            style={{
-              width:
-                media.length === 1
-                  ? "var(--media-width)"
-                  : "var(--media-width-large)",
-            }}
-          >
-            <RenderMultipleMedia media={media} />
-            {message.content && (
-              <h1
-                className={`p-2 break-words max-w-full cursor-pointer transition-all duration-200
-                  ${copied ? "scale-110 opacity-60" : ""}
-                `}
-                onClick={handleCopyText}
-              >
-                {message.content}
-              </h1>
-            )}
-            <MessageReactionDisplay
-              reactions={reactions}
-              isMe={isMe}
-              currentUserId={currentUserId}
-            />
-          </div>
-        ) : (
-          <div
-            className={classNames(
-              "message-bubble cursor-pointer transition-all duration-200",
-              { "self-message ml-auto": isMe },
-              { "scale-110": copied }
-            )}
-          >
-            <h1
-              className={`break-words max-w-full cursor-pointer transition-all duration-200
-                ${copied ? "scale-110 opacity-60" : ""}
-              `}
-              onClick={handleCopyText}
-            >
-              {message.content}
-            </h1>
-            <MessageReactionDisplay
-              reactions={reactions}
-              isMe={isMe}
-              currentUserId={currentUserId}
-            />
-          </div>
-        )}
+
+        {/* Main Content with switch */}
+        {(() => {
+          switch (true) {
+            case media.length > 0:
+              return (
+                <div
+                  className={classNames("message-media-bubble", {
+                    "self-message ml-auto": isMe,
+                  })}
+                  style={{
+                    width:
+                      media.length === 1
+                        ? "var(--media-width)"
+                        : "var(--media-width-large)",
+                  }}
+                >
+                  <RenderMultipleMedia media={media} />
+                  {message.content && (
+                    <h1
+                      className={`p-2 break-words max-w-full cursor-pointer transition-all duration-200 ${
+                        copied ? "scale-110 opacity-60" : ""
+                      }`}
+                      onClick={handleCopyText}
+                    >
+                      {message.content}
+                    </h1>
+                  )}
+                  <MessageReactionDisplay
+                    reactions={reactions}
+                    isMe={isMe}
+                    currentUserId={currentUserId}
+                  />
+                </div>
+              );
+
+            case !!forwardedMessage:
+              return (
+                <div
+                  className={classNames(
+                    "message-forward-bubble cursor-pointer transition-all duration-200",
+                    { "self-message ml-auto": isMe },
+                    { "scale-110": copied }
+                  )}
+                >
+                  <ForwardedMessagePreview
+                    message={forwardedMessage}
+                    isMe={isMe}
+                  />
+                  {message.content && (
+                    <h1
+                      className={`break-words max-w-full cursor-pointer transition-all duration-200 ${
+                        copied ? "scale-110 opacity-60" : ""
+                      }`}
+                      onClick={handleCopyText}
+                    >
+                      {message.content}
+                    </h1>
+                  )}
+
+                  <MessageReactionDisplay
+                    reactions={reactions}
+                    isMe={isMe}
+                    currentUserId={currentUserId}
+                  />
+                </div>
+              );
+
+            default:
+              return (
+                <div
+                  className={classNames(
+                    "message-bubble cursor-pointer transition-all duration-200",
+                    { "self-message ml-auto": isMe },
+                    { "scale-110": copied }
+                  )}
+                >
+                  <h1
+                    className={`break-words max-w-full cursor-pointer transition-all duration-200 ${
+                      copied ? "scale-110 opacity-60" : ""
+                    }`}
+                    onClick={handleCopyText}
+                  >
+                    {message.content}
+                  </h1>
+                  <MessageReactionDisplay
+                    reactions={reactions}
+                    isMe={isMe}
+                    currentUserId={currentUserId}
+                  />
+                </div>
+              );
+          }
+        })()}
+
+        {/* Sender Info */}
         {showInfo && isGroupChat && !isMe && (
           <h1 className="text-sm font-semibold opacity-70 mr-2">
             {message.sender.displayName}
           </h1>
         )}
+
+        {/* Time */}
         {!isRecent && (
           <p
             className={`opacity-0 group-hover:opacity-40 text-xs ${
@@ -259,6 +304,8 @@ const Message: React.FC<MessageProps> = ({
             {formatTime(message.createdAt)}
           </p>
         )}
+
+        {/* Read Receipts */}
         {readUserAvatars && (
           <div
             className={`flex ${
@@ -277,6 +324,8 @@ const Message: React.FC<MessageProps> = ({
             ))}
           </div>
         )}
+
+        {/* Pickers & Actions */}
         {showReactionPicker && (
           <ReactionPicker
             onSelect={handleReaction}

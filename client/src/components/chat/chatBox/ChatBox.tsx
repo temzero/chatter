@@ -15,7 +15,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ chat }) => {
   console.log("CHAT BOX RENDERED");
   const chatId = chat?.id || "";
   const messages = useMessagesByChatId(chatId);
-  console.log("activeChat", chat);
+  console.log("messages", messages);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 

@@ -65,7 +65,7 @@ export class ChatGateway {
     try {
       const senderId = client.data.userId;
       if (!senderId) {
-        client.emit(`${chatLink}error`, { message: 'Unauthorized' });
+        client.emit(`error`, { message: 'Unauthorized' });
         return;
       }
 
@@ -103,7 +103,7 @@ export class ChatGateway {
       }
     } catch (error) {
       console.error('Error handling sendMessage:', error);
-      client.emit(`${chatLink}error`, { message: 'Failed to send message' });
+      client.emit(`error`, { message: 'Failed to send message' });
     }
   }
 
@@ -113,47 +113,56 @@ export class ChatGateway {
     @MessageBody() payload: ForwardMessageDto,
   ) {
     try {
+      console.log('Received forwardMessage payload:', payload);
       const senderId = client.data.userId;
+      console.log('Sender ID:', senderId);
+
       if (!senderId) {
-        client.emit(`${chatLink}error`, { message: 'Unauthorized' });
+        console.warn('Unauthorized: senderId not found');
+        client.emit(`error`, { message: 'Unauthorized' });
         return;
       }
 
-      // Create forwarded message in the target chat
+      // Create forwarded message
       const forwardedMessage = await this.messageService.createForwardedMessage(
         senderId,
         payload.chatId,
         payload.messageId,
       );
+      console.log('Forwarded message created:', forwardedMessage);
 
-      // Get the member ID of the sender in the target chat
+      // Get member of sender in target chat
       const member = await this.chatMemberService.getMemberByChatIdAndUserId(
-        senderId,
         payload.chatId,
+        senderId,
       );
+      console.log('Chat member found:', member);
 
       if (!member) {
         throw new Error(`User is not a member of chat ${payload.chatId}`);
       }
 
-      // Update the sender's last read message in the target chat
+      // Update last read
       await this.chatMemberService.updateLastRead(
         member.id,
         forwardedMessage.id,
       );
+      console.log('Updated last read message ID:', forwardedMessage.id);
 
-      // Convert to response DTO
+      // Convert to DTO
       const messageResponse =
         this.messageMapper.toResponseDto(forwardedMessage);
+      console.log('Mapped message response:', messageResponse);
 
-      // Emit the new message to all chat members
+      // Emit new message to all chat members
       await this.websocketService.emitToChatMembers(
         payload.chatId,
         `${chatLink}newMessage`,
         messageResponse,
       );
+      console.log(`Emitted newMessage to chat ${payload.chatId}`);
 
-      // Emit the read update to all chat members
+      // Emit read update
       await this.websocketService.emitToChatMembers(
         payload.chatId,
         `${chatLink}messageRead`,
@@ -163,11 +172,12 @@ export class ChatGateway {
           messageId: forwardedMessage.id,
         },
       );
+      console.log(`Emitted messageRead to chat ${payload.chatId}`);
 
       return messageResponse;
     } catch (error) {
       console.error('Error handling forwardMessage:', error);
-      client.emit(`${chatLink}error`, {
+      client.emit(`error`, {
         message: 'Failed to forward message',
         error: error instanceof Error ? error.message : String(error),
       });
@@ -207,6 +217,7 @@ export class ChatGateway {
     @MessageBody()
     data: { chatId: string; memberId: string; messageId: string },
   ) {
+    console.log('message Read: ', data.messageId);
     const userId = client.data.userId;
     if (!userId) return;
 

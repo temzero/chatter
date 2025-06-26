@@ -59,7 +59,7 @@ export class FriendshipController {
       enableImplicitConversion: true,
     });
 
-    console.log('friendship accepted: ', response);
+    // console.log('friendship accepted: ', response);
 
     return new SuccessResponse(
       response,

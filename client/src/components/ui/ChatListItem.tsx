@@ -60,17 +60,35 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
     ) : chat.lastMessage ? (
       <p
         className={`flex items-center gap-1 text-xs max-w-[196px] whitespace-nowrap text-ellipsis overflow-hidden min-h-6 
-      ${unreadCount > 1 ? "opacity-100" : "opacity-40"}
-      `}
+    ${unreadCount > 0 ? "opacity-100" : "opacity-40"}
+  `}
       >
         {chat.lastMessage.senderId === currentUserId ? (
           <strong>Me:</strong>
         ) : chat.type !== ChatType.DIRECT ? (
           <strong>{chat.lastMessage.senderDisplayName}:</strong>
-        ) : (
-          ""
+        ) : null}
+
+        {/* If forwarded */}
+        {chat.lastMessage.isForwarded && (
+            <span className="material-symbols-outlined rotate-90">arrow_warm_up</span>
         )}
-        {chat.lastMessage.content}
+
+        {chat.lastMessage.icons?.length ? (
+          <span className="flex gap-1">
+            {chat.lastMessage.icons.map((icon, index) => (
+              <i
+                key={index}
+                className={`material-symbols-outlined text-base`}
+                aria-hidden="true"
+              >
+                {icon}
+              </i>
+            ))}
+          </span>
+        ) : (
+          <span>{chat.lastMessage.content}</span>
+        )}
       </p>
     ) : null;
 
@@ -123,8 +141,8 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
                 {formatTimeAgo(chat.lastMessage?.createdAt ?? chat.updatedAt)}
               </p>
 
-              {unreadCount > 1 && (
-                <div className="absolute bottom-6 right-4 font-bold text-white bg-red-600 rounded-full text-xs flex items-center justify-center ml-auto w-4 h-4">
+              {unreadCount > 0 && (
+                <div className="absolute bottom-6 right-4 font-bold text-white bg-red-500 rounded-full text-xs flex items-center justify-center ml-auto w-4 h-4">
                   {unreadCount}
                 </div>
               )}

@@ -12,7 +12,7 @@ import { useIsAuthenticated } from "@/stores/authStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { useFriendshipStore } from "@/stores/friendshipStore";
-import { usePresenceUserStore } from "@/stores/presenceStore";
+import { usePresenceStore } from "@/stores/presenceStore";
 import { useChatSocketListeners } from "@/lib/websocket/hooks/useChatSocketListener";
 import { useWebSocket } from "@/lib/websocket/hooks/useWebsocket";
 import { PuffLoader } from "react-spinners";
@@ -36,7 +36,7 @@ export const ChatContent: React.FC = () => {
     isLoading: friendshipsLoading,
     error: friendshipsError,
   } = useFriendshipStore();
-  const { initialize: initializePresence } = usePresenceUserStore();
+  const { initialize: initializePresence } = usePresenceStore();
 
   useWebSocket();
   useChatSocketListeners();

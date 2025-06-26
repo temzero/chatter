@@ -33,31 +33,24 @@ const DirectMessages: React.FC<DirectMessagesProps> = ({ chat, messages }) => {
     [members, chat.myMemberId]
   );
 
-  console.log("partnerMember", partnerMember);
-
   const myLastReadMessageId = myMember?.lastReadMessageId ?? null;
   console.log("myLastReadMessageId", myLastReadMessageId);
   const partnerLastReadMessageId = partnerMember?.lastReadMessageId ?? null;
   console.log("partnerLastReadMessageId", partnerLastReadMessageId);
+  console.log("messages", messages);
 
   // Update last read when new messages arrive
   useEffect(() => {
-    console.log("useEffect update last read");
-
     if (!chatId || !chat.myMemberId || messages.length === 0) return;
 
     const lastMessage = messages[messages.length - 1];
     const lastMessageId = lastMessage.id;
-    console.log("lastMessageId", lastMessage.id);
 
     // Only mark as read if:
     // 1. The message is not from current user (you don't need to mark your own messages as read)
     // 2. It's actually unread
     const isUnread =
-      lastMessage.sender.id !== currentUser?.id &&
-      (myLastReadMessageId === null || lastMessage.id !== myLastReadMessageId);
-
-    console.log("isUnread", isUnread);
+      myLastReadMessageId === null || lastMessage.id !== myLastReadMessageId;
 
     if (isUnread) {
       const timer = setTimeout(() => {

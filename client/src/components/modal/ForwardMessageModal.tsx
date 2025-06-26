@@ -17,12 +17,22 @@ const ForwardMessageModal: React.FC<ForwardMessageModalProps> = ({
 }) => {
   const closeModal = useModalStore((state) => state.closeModal);
   const filteredChats = useChatStore((state) => state.filteredChats);
-  const forwardChats = filteredChats.filter((chat) => chat.id !== message.chatId);
+  const forwardChats = filteredChats.filter(
+    (chat) => chat.id !== message.chatId
+  );
 
   const handleForward = async (chatId: string) => {
+    if (chatId === message.chatId) {
+      console.warn("Cannot forward to the same chat.");
+      return;
+    }
+
+    const alreadyForwarded = message.forwardedFromMessage;
+    const originalMessageId = alreadyForwarded?.id || message.id;
+
     const payload: ForwardMessagePayload = {
       chatId,
-      messageId: message.id,
+      messageId: originalMessageId,
     };
 
     try {
@@ -39,7 +49,7 @@ const ForwardMessageModal: React.FC<ForwardMessageModalProps> = ({
         Forward Message To...
         {/* <span className="material-symbols-outlined text-3xl">send</span> */}
       </h1>
-      <SearchBar placeholder='Search for chat to forward to'/>
+      <SearchBar placeholder="Search for chat to forward to" />
       <div className="flex flex-col items-start h-[50vh] overflow-y-auto mt-2">
         {forwardChats.map((chat) => (
           <div

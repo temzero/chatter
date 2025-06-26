@@ -7,7 +7,7 @@ export const messageService = {
   async getChatMessages(
     chatId: string,
     offset: number = 0,
-    limit: number = 50
+    limit: number = 20
   ): Promise<MessageResponse[]> {
     const { data } = await API.get(`/messages/chat/${chatId}`, {
       params: { offset, limit },

@@ -177,86 +177,6 @@ export class ChatService {
     }
   }
 
-  // async getChatsByUserId(userId: string): Promise<Array<ChatResponseDto>> {
-  //   try {
-  //     const chats = await this.chatRepo
-  //       .createQueryBuilder('chat')
-  //       .leftJoinAndSelect('chat.members', 'member')
-  //       .leftJoinAndSelect('member.user', 'memberUser')
-  //       .leftJoinAndSelect('chat.lastMessage', 'lastMessage')
-  //       .leftJoinAndSelect('lastMessage.sender', 'sender')
-  //       .leftJoinAndSelect('lastMessage.attachments', 'attachments')
-  //       .where(
-  //         'chat.id IN (SELECT "chat_id" FROM chat_member WHERE "user_id" = :userId)',
-  //         { userId },
-  //       )
-  //       .orderBy('COALESCE(lastMessage.createdAt, chat.createdAt)', 'DESC')
-  //       .getMany();
-
-  //     return Promise.all(
-  //       chats.map((chat) => {
-  //         if (chat.type === ChatType.DIRECT) {
-  //           return ChatMapper.transformToDirectChatDto(chat, userId, 2);
-  //         } else {
-  //           return ChatMapper.transformToGroupChatDto(chat, userId, 3);
-  //         }
-  //       }),
-  //     );
-  //   } catch (error) {
-  //     ErrorResponse.throw(error, 'Failed to retrieve user chats');
-  //   }
-  // }
-
-  // async getChatsByUserId(userId: string): Promise<Array<ChatResponseDto>> {
-  //   try {
-  //     const chats = await this.chatRepo
-  //       .createQueryBuilder('chat')
-  //       .leftJoinAndSelect('chat.members', 'member')
-  //       .leftJoinAndSelect('member.user', 'memberUser')
-  //       .leftJoinAndSelect('chat.lastMessage', 'lastMessage')
-  //       .leftJoinAndSelect('lastMessage.sender', 'sender')
-  //       .leftJoinAndSelect('lastMessage.attachments', 'attachments')
-  //       .where('member.user_id = :userId', { userId })
-  //       .orderBy('COALESCE(lastMessage.createdAt, chat.createdAt)', 'DESC')
-  //       .getMany();
-
-  //     return Promise.all(
-  //       chats.map(async (chat) => {
-  //         let unreadCount = 0;
-
-  //         try {
-  //           unreadCount = await this.messageService.getUnreadMessageCount(
-  //             chat.id,
-  //             userId,
-  //           );
-  //         } catch (error) {
-  //           console.error(
-  //             `Failed to get unread count for chat ${chat.id}`,
-  //             error,
-  //           );
-  //           unreadCount = 0; // fallback to 0
-  //         }
-
-  //         if (chat.type === ChatType.DIRECT) {
-  //           return ChatMapper.transformToDirectChatDto(
-  //             chat,
-  //             userId,
-  //             unreadCount,
-  //           );
-  //         } else {
-  //           return ChatMapper.transformToGroupChatDto(
-  //             chat,
-  //             userId,
-  //             unreadCount,
-  //           );
-  //         }
-  //       }),
-  //     );
-  //   } catch (error) {
-  //     ErrorResponse.throw(error, 'Failed to retrieve user chats');
-  //   }
-  // }
-
   // Inside ChatService
   async getChatsByUserId(userId: string): Promise<Array<ChatResponseDto>> {
     try {
@@ -270,6 +190,10 @@ export class ChatService {
         .leftJoinAndSelect('chat.lastMessage', 'lastMessage')
         .leftJoinAndSelect('lastMessage.sender', 'sender')
         .leftJoinAndSelect('lastMessage.attachments', 'attachments')
+        .leftJoinAndSelect(
+          'lastMessage.forwardedFromMessage',
+          'forwardedFromMessage',
+        )
         .orderBy('COALESCE(lastMessage.createdAt, chat.createdAt)', 'DESC')
         .getMany();
 
@@ -279,18 +203,18 @@ export class ChatService {
             return ChatMapper.transformToDirectChatDto(
               chat,
               userId,
-              // this.messageService,
+              this.messageService,
             );
           } else {
             return ChatMapper.transformToGroupChatDto(
               chat,
               userId,
-              // this.messageService,
+              this.messageService,
             );
           }
         }),
       );
-      console.log('chatsResponse', chatsResponse);
+      // console.log('chatsResponse', chatsResponse);
       return chatsResponse;
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to retrieve user chats');

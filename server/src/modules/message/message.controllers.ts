@@ -18,7 +18,7 @@ import { CurrentUser } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { MessageResponseDto } from './dto/responses/message-response.dto';
 import { ErrorResponse } from '../../common/api-response/errors';
-import { GetMessagesDto } from './dto/queries/get-messages.dto';
+import { GetMessagesQuery } from './dto/queries/get-messages.dto';
 import { MessageMapper } from './mappers/message.mapper';
 
 @Controller('messages')
@@ -44,7 +44,7 @@ export class MessageController {
     );
 
     const messageResponse = this.messageMapper.toResponseDto(message);
-    console.log('messageResponse: ', messageResponse);
+    // console.log('messageResponse: ', messageResponse);
 
     return new SuccessResponse(messageResponse, 'Message created successfully');
   }
@@ -54,11 +54,31 @@ export class MessageController {
     @Param('messageId') messageId: string,
   ): Promise<SuccessResponse<MessageResponseDto>> {
     const message = await this.messageService.getMessageById(messageId);
-    console.log('message: ', message);
+    // console.log('message: ', message);
 
     return new SuccessResponse(
       plainToInstance(MessageResponseDto, message),
       'Message retrieved successfully',
+    );
+  }
+
+  @Get('chat/:chatId')
+  async getChatMessages(
+    @Param('chatId') chatId: string,
+    @Query() queryParams: GetMessagesQuery,
+  ): Promise<SuccessResponse<MessageResponseDto[]>> {
+    const messages = await this.messageService.getMessagesByChatId(
+      chatId,
+      queryParams,
+    );
+
+    const messagesResponse = messages.map((message) =>
+      this.messageMapper.toResponseDto(message),
+    );
+
+    return new SuccessResponse(
+      messagesResponse,
+      'Chat messages retrieved successfully',
     );
   }
 
@@ -81,26 +101,6 @@ export class MessageController {
     return new SuccessResponse(
       plainToInstance(MessageResponseDto, updatedMessage),
       'Message updated successfully',
-    );
-  }
-
-  @Get('chat/:chatId')
-  async getChatMessages(
-    @Param('chatId') chatId: string,
-    @Query() queryParams: GetMessagesDto,
-  ): Promise<SuccessResponse<MessageResponseDto[]>> {
-    const messages = await this.messageService.getMessagesByChatId(
-      chatId,
-      queryParams,
-    );
-
-    const messagesResponse = messages.map((message) =>
-      this.messageMapper.toResponseDto(message),
-    );
-
-    return new SuccessResponse(
-      messagesResponse,
-      'Chat messages retrieved successfully',
     );
   }
 

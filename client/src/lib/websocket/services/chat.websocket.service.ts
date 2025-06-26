@@ -77,7 +77,6 @@ export class ChatWebSocketService {
 
   // Message Read
   messageRead(chatId: string, memberId: string, messageId: string) {
-    console.log("Emitting chat:messageRead", { chatId, memberId, messageId });
     webSocketService.emit("chat:messageRead", { chatId, memberId, messageId });
   }
 

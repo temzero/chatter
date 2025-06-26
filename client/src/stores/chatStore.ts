@@ -40,6 +40,7 @@ interface ChatStore {
     payload: Partial<ChatResponse>
   ) => Promise<void>;
   setLastMessage: (chatId: string, message: LastMessageResponse | null) => void;
+  setUnreadCount: (chatId: string, incrementBy: number) => void;
   setSearchTerm: (term: string) => void;
   leaveGroupChat: (chatId: string) => Promise<void>;
   deleteChat: (id: string, type: ChatType) => Promise<void>;
@@ -84,7 +85,7 @@ export const useChatStore = create<ChatStore>()(
           set({ isLoading: true, error: null });
           try {
             const chats = await chatService.getAllChats();
-            console.log('Chats fetched', chats)
+            console.log("Chats fetched", chats);
             set({ chats, filteredChats: chats, isLoading: false });
           } catch (error) {
             console.error("Failed to fetch chats:", error);
@@ -319,6 +320,30 @@ export const useChatStore = create<ChatStore>()(
               state.activeChat?.id === chatId
                 ? { ...state.activeChat, lastMessage: message }
                 : state.activeChat,
+          }));
+        },
+
+        setUnreadCount: (chatId: string, incrementBy: number) => {
+          const isActiveChat = get().activeChat?.id === chatId;
+          console.log('isActiveChat', isActiveChat)
+          if (isActiveChat) return;
+          set((state) => ({
+            chats: state.chats.map((chat) =>
+              chat.id === chatId
+                ? {
+                    ...chat,
+                    unreadCount: (chat.unreadCount || 0) + incrementBy,
+                  }
+                : chat
+            ),
+            filteredChats: state.filteredChats.map((chat) =>
+              chat.id === chatId
+                ? {
+                    ...chat,
+                    unreadCount: (chat.unreadCount || 0) + incrementBy,
+                  }
+                : chat
+            ),
           }));
         },
 

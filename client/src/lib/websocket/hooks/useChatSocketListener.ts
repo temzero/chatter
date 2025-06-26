@@ -10,6 +10,8 @@ export function useChatSocketListeners() {
   useEffect(() => {
     // Message handler
     const handleNewMessage = (message: MessageResponse) => {
+      toast.success(`New message received: ${message}`);
+      console.log(`New message received: ${message}`);
       useMessageStore.getState().addMessage(message);
     };
 
