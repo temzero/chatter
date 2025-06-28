@@ -5,11 +5,11 @@ import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { FriendshipStatus } from "@/types/friendship";
 import { ChatType } from "@/types/enums/ChatType";
 import { OnlineDot } from "../ui/OnlineDot";
-// import { useChatOnlineStatus } from "@/hooks/useChatOnlineStatus";
-import type { ChatResponse } from "@/types/chat";
 import { useChatStatus } from "@/stores/presenceStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
-// import { useChatStatus } from "@/stores/presenceStore";
+import type { ChatResponse } from "@/types/chat";
+import PinnedMessage from "./PinnedMessage";
+import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
 
 interface ChatHeaderProps {
   chat: ChatResponse;
@@ -49,6 +49,19 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ chat }) => {
       className="absolute top-0 left-0 w-full cursor-pointer hover:shadow-2xl flex items-center justify-between min-h-[var(--header-height)] max-h-[var(--header-height)] px-3 backdrop-blur-xl shadow z-40"
       onClick={toggleSidebarInfo}
     >
+      {chat?.pinnedMessage && (
+        <PinnedMessage
+          message={chat.pinnedMessage}
+          chatType={chat.type}
+          isBanner
+          onUnpin={() => {
+            chatWebSocketService.togglePinMessage({
+              chatId: chat.id,
+              messageId: null,
+            });
+          }}
+        />
+      )}
       <AnimatePresence mode="wait">
         <motion.div
           key={chat.id}

@@ -11,12 +11,14 @@ import { ChatMemberModule } from '../chat-member/chat-member.module';
 import { ChatGateway } from './features/chat.gateway';
 import { NotificationGateway } from './features/notifications.gateway';
 import { MessageMapper } from '../message/mappers/message.mapper';
+import { ChatModule } from '../chat/chat.module';
 
 @Module({
   imports: [
+    forwardRef(() => ChatModule),
     forwardRef(() => MessageModule),
-    forwardRef(() => UserModule), // Add UserModule import
-    forwardRef(() => ChatMemberModule), // Add UserModule import
+    forwardRef(() => UserModule),
+    forwardRef(() => ChatMemberModule),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({

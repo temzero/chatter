@@ -1,5 +1,8 @@
 // src/services/websocket/chat.service.ts
-import { ForwardMessagePayload, SendMessagePayload } from "@/types/sendMessagePayload";
+import {
+  ForwardMessagePayload,
+  SendMessagePayload,
+} from "@/types/sendMessagePayload";
 import { webSocketService } from "./websocket.service";
 import { MessageResponse } from "@/types/messageResponse";
 
@@ -134,6 +137,28 @@ export class ChatWebSocketService {
     }) => void
   ) {
     webSocketService.off("chat:messageReaction", callback);
+  }
+
+  togglePinMessage(payload: { chatId: string; messageId: string | null }) {
+    webSocketService.emit("chat:togglePinMessage", payload);
+  }
+
+  onMessagePin(
+    callback: (data: {
+      chatId: string;
+      message: MessageResponse | null;
+    }) => void
+  ) {
+    webSocketService.on("chat:pinMessageUpdated", callback);
+  }
+
+  offMessagePin(
+    callback: (data: {
+      chatId: string;
+      message: MessageResponse | null;
+    }) => void
+  ) {
+    webSocketService.off("chat:pinMessageUpdated", callback);
   }
 }
 

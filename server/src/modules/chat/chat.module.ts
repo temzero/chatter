@@ -9,6 +9,7 @@ import { User } from '../user/entities/user.entity';
 import { FriendshipModule } from '../friendship/friendship.module';
 import { WebSocketModule } from '../websocket/websocket.module';
 import { MessageModule } from '../message/message.module';
+import { ChatMapper } from './mappers/chat.mapper';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { MessageModule } from '../message/message.module';
     WebSocketModule,
   ],
   controllers: [ChatController],
-  providers: [ChatService],
+  providers: [ChatService, ChatMapper],
   exports: [ChatService, TypeOrmModule],
 })
 export class ChatModule {}

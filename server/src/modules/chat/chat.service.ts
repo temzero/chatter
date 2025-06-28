@@ -15,6 +15,7 @@ import { FriendshipStatus } from '../friendship/constants/friendship-status.cons
 import { plainToInstance } from 'class-transformer';
 import { ChatMapper } from './mappers/chat.mapper';
 import { MessageService } from '../message/message.service';
+import { Message } from '../message/entities/message.entity';
 
 @Injectable()
 export class ChatService {
@@ -28,8 +29,12 @@ export class ChatService {
     @InjectRepository(ChatMember)
     private readonly memberRepo: Repository<ChatMember>,
 
+    @InjectRepository(Message)
+    private readonly messageRepo: Repository<Message>,
+
     private readonly messageService: MessageService,
     private readonly friendshipService: FriendshipService,
+    private readonly chatMapper: ChatMapper,
   ) {}
 
   async getOrCreateDirectChat(
@@ -75,7 +80,10 @@ export class ChatService {
     if (existingChat) {
       const fullChat = await this.getFullChat(existingChat.id);
       return {
-        chat: await ChatMapper.transformToDirectChatDto(fullChat, myUserId),
+        chat: await this.chatMapper.transformToDirectChatDto(
+          fullChat,
+          myUserId,
+        ),
         wasExisting: true,
       };
     }
@@ -89,7 +97,7 @@ export class ChatService {
     const fullChat = await this.getFullChat(chat.id);
 
     return {
-      chat: await ChatMapper.transformToDirectChatDto(fullChat, myUserId),
+      chat: await this.chatMapper.transformToDirectChatDto(fullChat, myUserId),
       wasExisting: false,
     };
   }
@@ -138,7 +146,7 @@ export class ChatService {
     await this.addMembers(chat.id, allUserIds, userId);
     const fullChat = await this.getFullChat(chat.id);
 
-    return ChatMapper.transformToGroupChatDto(fullChat, userId);
+    return this.chatMapper.transformToGroupChatDto(fullChat, userId);
   }
 
   async updateChat(
@@ -168,9 +176,9 @@ export class ChatService {
       const chat = await this.getFullChat(chatId);
 
       if (chat.type === ChatType.DIRECT) {
-        return ChatMapper.transformToDirectChatDto(chat, userId);
+        return this.chatMapper.transformToDirectChatDto(chat, userId);
       } else {
-        return ChatMapper.transformToGroupChatDto(chat, userId);
+        return this.chatMapper.transformToGroupChatDto(chat, userId);
       }
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to get chat');
@@ -184,8 +192,8 @@ export class ChatService {
         .createQueryBuilder('chat')
         .innerJoin('chat.members', 'myMember', 'myMember.user_id = :userId', {
           userId,
-        }) // filter for relevant chats
-        .leftJoinAndSelect('chat.members', 'member') // load all members
+        })
+        .leftJoinAndSelect('chat.members', 'member')
         .leftJoinAndSelect('member.user', 'memberUser')
         .leftJoinAndSelect('chat.lastMessage', 'lastMessage')
         .leftJoinAndSelect('lastMessage.sender', 'sender')
@@ -194,19 +202,26 @@ export class ChatService {
           'lastMessage.forwardedFromMessage',
           'forwardedFromMessage',
         )
+        .leftJoinAndSelect('chat.pinnedMessage', 'pinnedMessage')
+        .leftJoinAndSelect('pinnedMessage.sender', 'pinnedSender')
+        .leftJoinAndSelect('pinnedMessage.attachments', 'pinnedAttachments')
+        .leftJoinAndSelect(
+          'pinnedMessage.forwardedFromMessage',
+          'pinnedForwardedFromMessage',
+        )
         .orderBy('COALESCE(lastMessage.createdAt, chat.createdAt)', 'DESC')
         .getMany();
 
       const chatsResponse = await Promise.all(
         chats.map((chat) => {
           if (chat.type === ChatType.DIRECT) {
-            return ChatMapper.transformToDirectChatDto(
+            return this.chatMapper.transformToDirectChatDto(
               chat,
               userId,
               this.messageService,
             );
           } else {
-            return ChatMapper.transformToGroupChatDto(
+            return this.chatMapper.transformToGroupChatDto(
               chat,
               userId,
               this.messageService,
@@ -230,6 +245,10 @@ export class ChatService {
         'lastMessage',
         'lastMessage.sender',
         'lastMessage.attachments',
+        'pinnedMessage',
+        'pinnedMessage.sender',
+        'pinnedMessage.attachments',
+        'pinnedMessage.forwardedFromMessage',
       ],
     });
 
@@ -277,6 +296,48 @@ export class ChatService {
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to add chat members');
     }
+  }
+
+  async pinMessage(
+    chatId: string,
+    messageId: string,
+    userId: string,
+  ): Promise<ChatResponseDto> {
+    const isParticipant = await this.isChatParticipant(chatId, userId);
+    if (!isParticipant) {
+      ErrorResponse.unauthorized('You are not a member of this chat');
+    }
+
+    const chat = await this.chatRepo.findOne({ where: { id: chatId } });
+    if (!chat) ErrorResponse.notFound('Chat not found');
+
+    const message = await this.messageRepo.findOne({
+      where: { id: messageId },
+    });
+    if (!message) ErrorResponse.notFound('Message not found');
+    chat.pinnedMessage = message;
+    await this.chatRepo.save(chat);
+
+    const fullChat = await this.getFullChat(chatId);
+    return this.chatMapper.transformToGroupChatDto(fullChat, userId);
+  }
+
+  async unpinMessage(chatId: string, userId: string): Promise<ChatResponseDto> {
+    const isParticipant = await this.isChatParticipant(chatId, userId);
+    if (!isParticipant) {
+      ErrorResponse.unauthorized('You are not a member of this chat');
+    }
+
+    const chat = await this.chatRepo.findOne({ where: { id: chatId } });
+    if (!chat) {
+      ErrorResponse.notFound('Chat not found');
+    }
+
+    chat.pinnedMessage = null;
+    await this.chatRepo.save(chat);
+
+    const fullChat = await this.getFullChat(chatId);
+    return this.chatMapper.transformToGroupChatDto(fullChat, userId);
   }
 
   async deleteChat(chatId: string, userId: string): Promise<ChatResponseDto> {

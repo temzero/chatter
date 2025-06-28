@@ -17,6 +17,7 @@ interface DirectMessagesProps {
 }
 
 const DirectMessages: React.FC<DirectMessagesProps> = ({ chat, messages }) => {
+  console.log("activeChat", chat);
   const chatId = chat?.id;
   const currentUser = useCurrentUser();
 

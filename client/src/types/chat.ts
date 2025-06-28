@@ -1,6 +1,6 @@
 import { ChatMemberRole } from "./ChatMemberRole";
 import { ChatType } from "./enums/ChatType";
-import { LastMessageResponse } from "./messageResponse";
+import { LastMessageResponse, MessageResponse } from "./messageResponse";
 
 export interface ChatResponse {
   id: string;
@@ -12,6 +12,7 @@ export interface ChatResponse {
   myRole?: ChatMemberRole;
   updatedAt: string;
   otherMemberUserIds?: string[];
+  pinnedMessage?: MessageResponse | null;
   lastMessage?: LastMessageResponse | null;
   unreadCount?: number;
 }

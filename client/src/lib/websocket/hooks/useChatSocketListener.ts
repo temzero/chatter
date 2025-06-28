@@ -5,6 +5,7 @@ import { MessageResponse } from "@/types/messageResponse";
 import { useTypingStore } from "@/stores/typingStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { toast } from "react-toastify";
+import { useChatStore } from "@/stores/chatStore";
 
 export function useChatSocketListeners() {
   useEffect(() => {
@@ -48,11 +49,19 @@ export function useChatSocketListeners() {
         .updateMessageReactions(data.messageId, data.reactions);
     };
 
+    const handleMessagePinned = (data: {
+      chatId: string;
+      message: MessageResponse | null;
+    }) => {
+      useChatStore.getState().setPinnedMessage(data.chatId, data.message);
+    };
+
     // Subscribe to events
     chatWebSocketService.onNewMessage(handleNewMessage);
     chatWebSocketService.onReaction(handleReaction);
     chatWebSocketService.onTyping(handleTyping);
     chatWebSocketService.onMessagesRead(handleMessagesRead);
+    chatWebSocketService.onMessagePin(handleMessagePinned);
 
     return () => {
       // Clean up listeners
@@ -60,6 +69,7 @@ export function useChatSocketListeners() {
       chatWebSocketService.offReaction(handleReaction);
       chatWebSocketService.offTyping(handleTyping);
       chatWebSocketService.offMessagesRead(handleMessagesRead);
+      chatWebSocketService.offMessagePin(handleMessagePinned);
     };
   }, []);
 }

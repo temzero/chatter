@@ -11,6 +11,7 @@ import { CreateMessageDto } from 'src/modules/message/dto/requests/create-messag
 import { ForwardMessageDto } from 'src/modules/message/dto/requests/forward-message.dto';
 import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
 import { MessageMapper } from 'src/modules/message/mappers/message.mapper';
+import { ChatService } from 'src/modules/chat/chat.service';
 
 const chatLink = 'chat:';
 
@@ -18,6 +19,7 @@ const chatLink = 'chat:';
 export class ChatGateway {
   constructor(
     private readonly messageService: MessageService,
+    private readonly chatService: ChatService,
     private readonly websocketService: WebsocketService,
     private readonly chatMemberService: ChatMemberService,
     private readonly messageMapper: MessageMapper,
@@ -74,7 +76,7 @@ export class ChatGateway {
         senderId,
         payload,
       );
-      const messageResponse = this.messageMapper.toResponseDto(message);
+      const messageResponse = this.messageMapper.toMessageResponseDto(message);
 
       // Update the sender's last read message to this new message
       const updatedMember = await this.chatMemberService.updateLastRead(
@@ -151,7 +153,7 @@ export class ChatGateway {
 
       // Convert to DTO
       const messageResponse =
-        this.messageMapper.toResponseDto(forwardedMessage);
+        this.messageMapper.toMessageResponseDto(forwardedMessage);
       console.log('Mapped message response:', messageResponse);
 
       // Emit new message to all chat members
@@ -239,6 +241,52 @@ export class ChatGateway {
         messageId: data.messageId,
       },
     );
+  }
+
+  @SubscribeMessage(`${chatLink}togglePinMessage`)
+  async handleTogglePinMessage(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() data: { chatId: string; messageId: string | null },
+  ) {
+    const userId = client.data.userId;
+    if (!userId) return;
+
+    console.log('togglePinMessage', data.chatId, data.messageId);
+
+    try {
+      if (data.messageId) {
+        const updatedChat = await this.chatService.pinMessage(
+          data.chatId,
+          data.messageId,
+          userId,
+        );
+
+        await this.websocketService.emitToChatMembers(
+          data.chatId,
+          `${chatLink}pinMessageUpdated`,
+          {
+            chatId: data.chatId,
+            message: updatedChat.pinnedMessage,
+          },
+        );
+      } else {
+        await this.chatService.unpinMessage(data.chatId, userId);
+
+        await this.websocketService.emitToChatMembers(
+          data.chatId,
+          `${chatLink}pinMessageUpdated`,
+          {
+            chatId: data.chatId,
+            message: null,
+          },
+        );
+      }
+    } catch (error) {
+      client.emit('error', {
+        message: 'Failed to toggle pin message',
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 
   // Utility to check if any other chat member is online (excluding one user)

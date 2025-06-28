@@ -8,7 +8,10 @@ import { useAuthStore } from "./authStore";
 import { useChatMemberStore } from "./chatMemberStore";
 import { ChatType } from "@/types/enums/ChatType";
 import type { ChatResponse } from "@/types/chat";
-import type { LastMessageResponse } from "@/types/messageResponse";
+import type {
+  LastMessageResponse,
+  MessageResponse,
+} from "@/types/messageResponse";
 
 interface ChatStore {
   chats: ChatResponse[];
@@ -41,6 +44,7 @@ interface ChatStore {
   ) => Promise<void>;
   setLastMessage: (chatId: string, message: LastMessageResponse | null) => void;
   setUnreadCount: (chatId: string, incrementBy: number) => void;
+  setPinnedMessage: (chatId: string, message: MessageResponse | null) => void;
   setSearchTerm: (term: string) => void;
   leaveGroupChat: (chatId: string) => Promise<void>;
   deleteChat: (id: string, type: ChatType) => Promise<void>;
@@ -325,7 +329,7 @@ export const useChatStore = create<ChatStore>()(
 
         setUnreadCount: (chatId: string, incrementBy: number) => {
           const isActiveChat = get().activeChat?.id === chatId;
-          console.log('isActiveChat', isActiveChat)
+          console.log("isActiveChat", isActiveChat);
           if (isActiveChat) return;
           set((state) => ({
             chats: state.chats.map((chat) =>
@@ -344,6 +348,22 @@ export const useChatStore = create<ChatStore>()(
                   }
                 : chat
             ),
+          }));
+        },
+
+        setPinnedMessage: (chatId: string, message: MessageResponse | null) => {
+          console.log('setPinnedMessage: ', chatId, message)
+          set((state) => ({
+            chats: state.chats.map((chat) =>
+              chat.id === chatId ? { ...chat, pinnedMessage: message } : chat
+            ),
+            filteredChats: state.filteredChats.map((chat) =>
+              chat.id === chatId ? { ...chat, pinnedMessage: message } : chat
+            ),
+            activeChat:
+              state.activeChat?.id === chatId
+                ? { ...state.activeChat, pinnedMessage: message }
+                : state.activeChat,
           }));
         },
 

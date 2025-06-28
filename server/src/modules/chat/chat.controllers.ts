@@ -158,6 +158,38 @@ export class ChatController {
     }
   }
 
+  @Put(':chatId/pin/:messageId')
+  async pinMessage(
+    @Param('chatId') chatId: string,
+    @Param('chatId') messageId: string,
+    @CurrentUser('id') userId: string,
+  ): Promise<SuccessResponse<ChatResponseDto>> {
+    const updatedChat = await this.chatService.pinMessage(
+      chatId,
+      messageId,
+      userId,
+    );
+
+    return new SuccessResponse(updatedChat, 'Message pinned successfully');
+  }
+
+  @Put(':chatId/unpin')
+  async unpinMessage(
+    @Param('chatId') chatId: string,
+    @CurrentUser('id') userId: string,
+  ): Promise<SuccessResponse<ChatResponseDto>> {
+    try {
+      const updatedChat = await this.chatService.unpinMessage(chatId, userId);
+
+      return new SuccessResponse(
+        plainToInstance(ChatResponseDto, updatedChat),
+        'Message unpinned successfully',
+      );
+    } catch (error: unknown) {
+      ErrorResponse.throw(error, 'Failed to unpin message');
+    }
+  }
+
   @Delete(':chatId')
   async delete(
     @Param('chatId') chatId: string,

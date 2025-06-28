@@ -6,7 +6,7 @@ import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class MessageMapper {
-  toResponseDto(message: Message): MessageResponseDto {
+  toMessageResponseDto(message: Message): MessageResponseDto {
     const senderMember = message.chat?.members?.[0];
 
     const groupedReactions = this.groupReactions(message.reactions || []);

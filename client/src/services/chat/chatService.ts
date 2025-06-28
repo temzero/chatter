@@ -26,6 +26,7 @@ export const chatService = {
     );
     return response.data.payload;
   },
+
   // Delete a chat by ID
   async deleteChat(chatId: string, type?: string): Promise<string> {
     if (type && type === "group") {

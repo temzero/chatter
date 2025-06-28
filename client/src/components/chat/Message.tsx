@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import classNames from "classnames";
 import { motion } from "framer-motion";
 import { useMessageReactions } from "@/stores/messageStore";
-import { useCurrentUser } from "@/stores/authStore";
+import { useCurrentUserId } from "@/stores/authStore";
 import RenderMultipleMedia from "../ui/RenderMultipleMedia";
 import { formatTime } from "@/utils/formatTime";
 import { Avatar } from "../ui/avatar/Avatar";
@@ -51,8 +51,7 @@ const Message: React.FC<MessageProps> = ({
   isRecent = false,
   readUserAvatars,
 }) => {
-  const currentUser = useCurrentUser();
-  const currentUserId = currentUser?.id;
+  const currentUserId = useCurrentUserId();
   const isMe = message.sender.id === currentUserId;
   const reactions = useMessageReactions(message.id);
 

@@ -2,6 +2,7 @@ import { ChatType } from '../../constants/chat-types.constants';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { LastMessageResponseDto } from './last-message-response.dto';
 import { ChatMemberRole } from 'src/modules/chat-member/constants/chat-member-roles.constants';
+import { MessageResponseDto } from 'src/modules/message/dto/responses/message-response.dto';
 
 @Exclude()
 export class ChatResponseDto {
@@ -33,6 +34,10 @@ export class ChatResponseDto {
   @Expose() description?: string | null;
 
   @Expose() myRole?: ChatMemberRole;
+
+  @Expose()
+  @Type(() => MessageResponseDto)
+  pinnedMessage?: MessageResponseDto | null;
 
   @Expose()
   @Type(() => LastMessageResponseDto)

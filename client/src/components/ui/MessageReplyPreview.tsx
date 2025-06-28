@@ -4,6 +4,7 @@ import { MessageResponse } from "@/types/messageResponse";
 import { ChatType } from "@/types/enums/ChatType";
 import { Avatar } from "./avatar/Avatar";
 import classNames from "classnames";
+import { scrollToMessageById } from "@/utils/scrollToMessageById";
 
 interface MessageReplyPreviewProps {
   message: MessageResponse;
@@ -22,25 +23,9 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
 }) => {
   const isNotDirectChat = chatType !== ChatType.DIRECT;
 
-  function scrollToMessage(): void {
-    const messageElement = document.getElementById(`message-${message.id}`);
-    if (messageElement) {
-      // Smooth scroll to the message
-      messageElement.scrollIntoView({
-        block: "center",
-      });
-
-      // Add temporary highlight effect
-      messageElement.classList.add("highlight-message");
-      setTimeout(() => {
-        messageElement.classList.remove("highlight-message");
-      }, 2000);
-    }
-  }
-
   return (
     <div
-      onClick={scrollToMessage}
+      onClick={() => scrollToMessageById(message.id)}
       className={classNames(
         "message-bubble opacity-60 scale-75 max-w-full inline-block hover:scale-90 hover:opacity-90 transition-transform duration-200",
         {

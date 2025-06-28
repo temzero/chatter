@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { MessageResponse } from "@/types/messageResponse";
 import { useMessageStore } from "@/stores/messageStore";
 import { useModalStore } from "@/stores/modalStore";
+import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
 
 interface MessageActionsProps {
   message: MessageResponse;
@@ -21,6 +22,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
 }) => {
   const setReplyToMessage = useMessageStore((state) => state.setReplyToMessage);
   const deleteMessage = useMessageStore((state) => state.deleteMessage);
+  const isPinned = false;
 
   const positionClass =
     position === "right"
@@ -46,9 +48,15 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       },
     },
     {
-      icon: "keep",
-      label: "Pin",
-      // action: onPin,
+      icon: isPinned ? "remove" : "keep",
+      label: isPinned ? "Unpin" : "Pin",
+      action: () => {
+        chatWebSocketService.togglePinMessage({
+          chatId: message.chatId,
+          messageId: isPinned ? null : message.id,
+        });
+        close();
+      },
     },
     {
       icon: "bookmark",
@@ -88,7 +96,11 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
           }}
           title={action.label}
         >
-          <i className={`material-symbols-outlined text-2xl hover:scale-150 transition-all duration-300 ${action.label === 'Forward' && 'rotate-90'}`}>
+          <i
+            className={`material-symbols-outlined text-2xl hover:scale-150 transition-all duration-300 ${
+              action.label === "Forward" && "rotate-90"
+            }`}
+          >
             {action.icon}
           </i>
           {/* <span className="text-xs mt-0.5 opacity-80 hidden group-hover:block">

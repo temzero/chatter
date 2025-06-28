@@ -1,4 +1,5 @@
 // src/modules/chat/mappers/chat.mapper.ts
+import { Injectable } from '@nestjs/common';
 import { Chat } from '../entities/chat.entity';
 import { ChatResponseDto } from '../dto/responses/chat-response.dto';
 import { LastMessageResponseDto } from '../dto/responses/last-message-response.dto';
@@ -7,9 +8,13 @@ import { ChatType } from '../constants/chat-types.constants';
 import { ChatMember } from 'src/modules/chat-member/entities/chat-member.entity';
 import { MessageService } from 'src/modules/message/message.service';
 import { AttachmentType } from 'src/modules/message/constants/attachment-type.constants';
+import { MessageMapper } from 'src/modules/message/mappers/message.mapper';
 
+@Injectable()
 export class ChatMapper {
-  static async transformToDirectChatDto(
+  constructor(private readonly messageMapper: MessageMapper) {}
+
+  async transformToDirectChatDto(
     chat: Chat,
     currentUserId: string,
     messageService?: MessageService,
@@ -38,7 +43,6 @@ export class ChatMapper {
         myMember.lastReadMessageId,
         currentUserId,
       );
-      // console.log('Mapper unreadCount', unreadCount);
     }
 
     return {
@@ -48,6 +52,9 @@ export class ChatMapper {
       name: displayName,
       avatarUrl: otherMember.user.avatarUrl ?? null,
       updatedAt: chat.updatedAt,
+      pinnedMessage: chat.pinnedMessage
+        ? this.messageMapper.toMessageResponseDto(chat.pinnedMessage)
+        : null,
       lastMessage: chat.lastMessage
         ? this.transformLastMessageDto(
             chat.lastMessage,
@@ -60,7 +67,7 @@ export class ChatMapper {
     };
   }
 
-  static async transformToGroupChatDto(
+  async transformToGroupChatDto(
     chat: Chat,
     currentUserId: string,
     messageService?: MessageService,
@@ -84,18 +91,20 @@ export class ChatMapper {
         myMember.lastReadMessageId,
         currentUserId,
       );
-      // console.log('Mapper unreadCount', unreadCount);
     }
 
     return {
       id: chat.id,
-      type: chat.type as ChatType.GROUP | ChatType.CHANNEL,
+      type: chat.type,
       myMemberId: myMember.id,
       myRole: myMember.role,
       name: chat.name ?? 'Unnamed Group',
       avatarUrl: chat.avatarUrl ?? null,
       description: chat.description ?? null,
       updatedAt: chat.updatedAt,
+      pinnedMessage: chat.pinnedMessage
+        ? this.messageMapper.toMessageResponseDto(chat.pinnedMessage)
+        : null,
       lastMessage: chat.lastMessage
         ? this.transformLastMessageDto(
             chat.lastMessage,
@@ -108,20 +117,18 @@ export class ChatMapper {
     };
   }
 
-  static transformLastMessageDto(
+  transformLastMessageDto(
     message: Message,
     members: ChatMember[],
     currentUserId?: string,
   ): LastMessageResponseDto {
     const isMe = message.senderId === currentUserId;
-
     const member = members.find((m) => m.userId === message.senderId);
 
     const senderDisplayName = isMe
       ? 'Me'
       : member?.nickname || member?.user?.firstName || 'Unknown';
 
-    // More robust forwarded message check
     const isForwarded = !!message.forwardedFromMessage;
 
     let content: string | undefined;
@@ -147,7 +154,7 @@ export class ChatMapper {
     };
   }
 
-  private static getAttachmentIcons(
+  private getAttachmentIcons(
     attachments?: { type: AttachmentType }[],
   ): string[] | undefined {
     if (!attachments || attachments.length === 0) return undefined;
@@ -175,6 +182,7 @@ export class ChatMapper {
         if (icons.length >= 5) break;
       }
     }
+
     return icons;
   }
 }

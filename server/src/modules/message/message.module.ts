@@ -15,6 +15,6 @@ import { Reaction } from './entities/reaction.entity';
   ],
   controllers: [MessageController],
   providers: [MessageService, MessageMapper],
-  exports: [MessageService],
+  exports: [MessageService, MessageMapper, TypeOrmModule],
 })
 export class MessageModule {}
