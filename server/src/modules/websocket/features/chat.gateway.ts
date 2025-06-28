@@ -251,8 +251,6 @@ export class ChatGateway {
     const userId = client.data.userId;
     if (!userId) return;
 
-    console.log('togglePinMessage', data.chatId, data.messageId);
-
     try {
       if (data.messageId) {
         const updatedChat = await this.chatService.pinMessage(

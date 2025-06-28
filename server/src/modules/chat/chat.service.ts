@@ -309,12 +309,28 @@ export class ChatService {
     }
 
     const chat = await this.chatRepo.findOne({ where: { id: chatId } });
-    if (!chat) ErrorResponse.notFound('Chat not found');
+    if (!chat) {
+      ErrorResponse.notFound('Chat not found');
+    }
 
+    // Unpin any existing pinned message in this chat
+    await this.messageRepo.update(
+      { chat: { id: chatId }, isPinned: true },
+      { isPinned: false, pinnedAt: null },
+    );
+
+    // Find and update the message to pin
     const message = await this.messageRepo.findOne({
       where: { id: messageId },
     });
-    if (!message) ErrorResponse.notFound('Message not found');
+    if (!message) {
+      ErrorResponse.notFound('Message not found');
+    }
+
+    message.isPinned = true;
+    message.pinnedAt = new Date();
+    await this.messageRepo.save(message); // ✅ Save before assigning to chat
+
     chat.pinnedMessage = message;
     await this.chatRepo.save(chat);
 
@@ -332,6 +348,12 @@ export class ChatService {
     if (!chat) {
       ErrorResponse.notFound('Chat not found');
     }
+
+    // Unpin all pinned messages in this chat
+    await this.messageRepo.update(
+      { chat: { id: chatId }, isPinned: true },
+      { isPinned: false, pinnedAt: null },
+    );
 
     chat.pinnedMessage = null;
     await this.chatRepo.save(chat);

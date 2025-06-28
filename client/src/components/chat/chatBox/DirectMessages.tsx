@@ -21,6 +21,8 @@ const DirectMessages: React.FC<DirectMessagesProps> = ({ chat, messages }) => {
   const chatId = chat?.id;
   const currentUser = useCurrentUser();
 
+  const isMessagePinned = chat.pinnedMessage !== null
+
   const rawMembers = useActiveMembers();
   const members = useMemo(() => rawMembers || [], [rawMembers]);
 
@@ -88,8 +90,8 @@ const DirectMessages: React.FC<DirectMessagesProps> = ({ chat, messages }) => {
     <>
       {messagesByDate.map((group) => (
         <React.Fragment key={`${group.date}-${chatId}`}>
-          <div className="sticky -top-5 z-10 flex justify-center mb-4">
-            <div className="bg-black bg-opacity-30 text-white text-xs p-1 rounded">
+          <div className={`sticky z-99 flex justify-center mb-4 ${isMessagePinned ? 'top-12' : 'top-0'}`}>
+            <div className="bg-[var(--background-color)] text-xs p-1 rounded">
               {group.date || "Today"}
             </div>
           </div>

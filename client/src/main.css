@@ -34,6 +34,7 @@
 
   --primary-color: #247cff;
   --primary-green: #00ae80;
+  --primary-green-50: #00ae8089;
 
   /* light theme defaults */
   --text-color: black;
@@ -45,6 +46,7 @@
   --border-color: rgba(0, 0, 0, 0.2);
   --hover-color: #ddd;
   --message-color: #eee;
+  --message-color-50: #eeeeee74;
   --scrollbar-color: #c1c1c1;
   --scrollbar-hover-color: #a8a8a8;
 
@@ -63,6 +65,7 @@ html[data-theme="dark"] {
   --input-border-color: rgba(255, 255, 255, 0.2);
   --hover-color: rgba(122, 122, 122, 0.2);
   --message-color: #303030;
+  --message-color-50: #303030ac;
   --scrollbar-color: #5f5f5f;
   --scrollbar-hover-color: #d0d0d0;
   --card-bg-color: rgb(20, 20, 20);
@@ -256,7 +259,7 @@ select:focus {
     opacity: 0.2;
   }
   75% {
-    scale: .94;
+    scale: 0.94;
     opacity: 0.8;
   }
   100% {

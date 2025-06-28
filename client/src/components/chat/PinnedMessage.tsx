@@ -3,14 +3,15 @@ import classNames from "classnames";
 import { motion } from "framer-motion";
 import { useCurrentUserId } from "@/stores/authStore";
 import { formatTime } from "@/utils/formatTime";
+import { formatDateTime } from "@/utils/formatDate";
 import { Avatar } from "../ui/avatar/Avatar";
 import type { MessageResponse } from "@/types/messageResponse";
 import { ChatType } from "@/types/enums/ChatType";
 import { scrollToMessageById } from "@/utils/scrollToMessageById";
 
 const pinMessageAnimation = {
-  initial: { opacity: 0, scale: 0.1, x: 100, y: 0 },
-  animate: { opacity: 1, scale: 1, x: 0, y: 0 },
+  initial: { opacity: 0, scale: 1.1, y: 50 },
+  animate: { opacity: 1, scale: 1, y: 0 },
   transition: { type: "spring", stiffness: 300, damping: 29 },
 };
 
@@ -80,13 +81,10 @@ const PinnedMessage: React.FC<MessageProps> = ({
       className={classNames(
         "flex items-center justify-center gap-1 max-w-[80%]"
       )}
-      // initial={animationProps.initial}
-      // animate={animationProps.animate}
-      // transition={animationProps.transition}
     >
       {isGroupChat && (
         <div
-          className={classNames("flex h-6 w-6 min-w-6", {
+          className={classNames("flex h-7 w-7 min-w-7", {
             "flex items-center justify-center rounded-full custom-border overflow-hidden":
               !isMe,
             invisible: !!isMe,
@@ -96,7 +94,7 @@ const PinnedMessage: React.FC<MessageProps> = ({
             <Avatar
               avatarUrl={message.sender.avatarUrl}
               name={message.sender.displayName}
-              size="6"
+              size="7"
             />
           )}
         </div>
@@ -120,7 +118,7 @@ const PinnedMessage: React.FC<MessageProps> = ({
 
       {isForwarded && (
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined rotate-90">
+          <span className="material-symbols-outlined rotate-90 opacity-60">
             arrow_warm_up
           </span>
           {!isMe && (
@@ -143,17 +141,28 @@ const PinnedMessage: React.FC<MessageProps> = ({
 
   if (isBanner) {
     return (
-      <div
+      <motion.div
         onClick={(e) => {
           e.stopPropagation();
           scrollToMessageById(message.id);
         }}
         className={`absolute custom-border w-full top-[var(--header-height)] left-1/2 -translate-x-1/2 flex gap-4 p-1 px-2 items-center justify-between
-           ${isMe ? "bg-[var(--primary-green)]" : "bg-[var(--message-color)]"}
-          `}
+            ${
+              isMe
+                ? "bg-[linear-gradient(to_right,var(--primary-green-50)_0%,var(--primary-green)_50%,var(--primary-green-50)_100%)]"
+                : "bg-[linear-gradient(to_right,var(--message-color-50)_0%,var(--message-color)_50%,var(--message-color-50)_100%)]"
+            }
+        `}
+        initial={animationProps.initial}
+        animate={animationProps.animate}
+        transition={animationProps.transition}
       >
         <button
-          className="group hover:bg-red-600 p-1 rounded-full -rotate-[25deg] custom-border"
+          className={`group custom-border hover:bg-red-500 p-1 rounded-full -rotate-[30deg]
+              ${
+                isMe ? "bg-[var(--primary-green)]" : "bg-[var(--message-color)]"
+              }
+            `}
           onClick={(e) => {
             e.stopPropagation();
             onUnpin?.();
@@ -167,8 +176,12 @@ const PinnedMessage: React.FC<MessageProps> = ({
           </span>
         </button>
         {renderMessageContent()}
-        <p className={`opacity-60`}>{formatTime(message.createdAt)}</p>
-      </div>
+        <p className="text-sm font-light italic">
+          {message.pinnedAt
+            ? `Pinned at ${formatDateTime(message.pinnedAt)}`
+            : `Sent at ${formatDateTime(message.createdAt)}`}
+        </p>
+      </motion.div>
     );
   }
 

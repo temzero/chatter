@@ -16,7 +16,7 @@ interface ChatHeaderProps {
 }
 
 const ChatHeader: React.FC<ChatHeaderProps> = ({ chat }) => {
-  console.log("CHAT HEADER rendered");
+  console.log("CHAT HEADER rendered", chat);
   const toggleSidebarInfo = useSidebarInfoStore(
     (state) => state.toggleSidebarInfo
   );
