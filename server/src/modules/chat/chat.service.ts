@@ -149,6 +149,67 @@ export class ChatService {
     return this.chatMapper.transformToGroupChatDto(fullChat, userId);
   }
 
+  // ✅ Fetch saved chat (raw Chat entity, minimal joins)
+  async findSavedChat(userId: string): Promise<Chat | null> {
+    return this.chatRepo
+      .createQueryBuilder('chat')
+      .innerJoin('chat.members', 'member')
+      .where('chat.type = :type', { type: ChatType.SAVED })
+      .andWhere('member.user.id = :userId', { userId })
+      .getOne();
+  }
+
+  // ✅ Create new saved chat with user as a member
+  async createSavedChat(userId: string): Promise<Chat> {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) {
+      ErrorResponse.notFound('User not found');
+    }
+
+    const savedChat = await this.chatRepo.save({
+      type: ChatType.SAVED,
+      name: 'Saved Messages',
+    });
+
+    await this.memberRepo.save({
+      user: { id: userId },
+      chat: savedChat,
+    });
+
+    return savedChat;
+  }
+
+  // ✅ Try getting saved chat, or create it if not exist
+  async getOrCreateSavedChat(userId: string): Promise<Chat> {
+    const existing = await this.findSavedChat(userId);
+    return existing ?? this.createSavedChat(userId);
+  }
+
+  // ✅ Fetch saved chat with full relations, and transform to DTO
+  async getSavedChat(userId: string): Promise<ChatResponseDto> {
+    const chat = await this.chatRepo.findOne({
+      where: {
+        type: ChatType.SAVED,
+        members: { user: { id: userId } },
+      },
+      relations: [
+        'members',
+        'members.user',
+        'pinnedMessage',
+        'pinnedMessage.sender',
+        'pinnedMessage.attachments',
+        'pinnedMessage.forwardedFromMessage',
+      ],
+    });
+
+    if (!chat) {
+      ErrorResponse.notFound('Saved chat not found');
+    }
+
+    const fullChat = await this.getFullChat(chat.id);
+    return this.chatMapper.transformToGroupChatDto(fullChat, userId);
+  }
+
   async updateChat(
     chat: ChatResponseDto,
     updateDto: UpdateChatDto,

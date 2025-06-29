@@ -6,7 +6,7 @@ export const useChats = () => {
 
   const chatsQuery = useQuery({
     queryKey: ["chats"],
-    queryFn: () => chatService.getAllChats(),
+    queryFn: () => chatService.fetchAllChats(),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 

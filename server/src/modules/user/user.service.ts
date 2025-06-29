@@ -11,14 +11,16 @@ import { TokenStorageService } from '../auth/services/token-storage.service';
 import { ChatPartnerResDto } from './dto/responses/user-response.dto';
 import { FriendshipStatus } from '../friendship/constants/friendship-status.constants';
 import { FriendshipService } from '../friendship/friendship.service';
+import { ChatService } from '../chat/chat.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private readonly userRepo: Repository<User>,
     private readonly configService: ConfigService,
     private readonly tokenStorageService: TokenStorageService,
+    private readonly chatService: ChatService,
     private readonly friendshipService: FriendshipService,
   ) {}
 
@@ -29,7 +31,7 @@ export class UserService {
   async getUserByIdentifier(identifier: string): Promise<User | null> {
     try {
       const normalizedIdentifier = this.normalizeIdentifier(identifier);
-      const user = await this.userRepository.findOne({
+      const user = await this.userRepo.findOne({
         where: [
           { username: normalizedIdentifier },
           { email: normalizedIdentifier },
@@ -46,7 +48,7 @@ export class UserService {
     currentUserId: string,
   ): Promise<ChatPartnerResDto> {
     // Find the user
-    const user = await this.userRepository.findOne({
+    const user = await this.userRepo.findOne({
       where: [
         { username: identifier },
         { email: identifier },
@@ -76,7 +78,7 @@ export class UserService {
 
   async getUserById(id: string): Promise<User> {
     try {
-      const user = await this.userRepository.findOneBy({ id });
+      const user = await this.userRepo.findOneBy({ id });
       if (!user) {
         ErrorResponse.notFound('User not found');
       }
@@ -88,7 +90,7 @@ export class UserService {
 
   async getAllUsers(): Promise<User[]> {
     try {
-      return await this.userRepository.find();
+      return await this.userRepo.find();
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to retrieve users');
     }
@@ -112,11 +114,16 @@ export class UserService {
       if (existingUser) {
         ErrorResponse.conflict('Email or username already taken');
       }
-      const user = this.userRepository.create({
+      // 1. Create and save the user
+      const user = this.userRepo.create({
         ...registerDto,
         passwordHash: await this.hashPassword(registerDto.password),
       });
-      await this.userRepository.save(user);
+      await this.userRepo.save(user);
+
+      // 2. Create the saved messages chat
+      await this.chatService.createSavedChat(user.id);
+
       return user;
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to create user');
@@ -130,7 +137,7 @@ export class UserService {
     try {
       const user = await this.getUserById(userId);
       Object.assign(user, updateUserDto);
-      const savedUser = await this.userRepository.save(user);
+      const savedUser = await this.userRepo.save(user);
       return savedUser;
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to update user');
@@ -141,7 +148,7 @@ export class UserService {
     try {
       const user = await this.getUserById(userId);
       user.passwordHash = await this.hashPassword(newPassword);
-      return await this.userRepository.save(user);
+      return await this.userRepo.save(user);
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to update password');
     }
@@ -164,7 +171,7 @@ export class UserService {
       }
 
       user.passwordHash = await this.hashPassword(newPassword);
-      await this.userRepository.save(user);
+      await this.userRepo.save(user);
 
       return {
         isSuccess: true,
@@ -182,7 +189,7 @@ export class UserService {
   async deleteUser(userId: string, deviceId: string): Promise<User> {
     try {
       const user = await this.getUserById(userId);
-      await this.userRepository.remove(user);
+      await this.userRepo.remove(user);
       if (userId && deviceId) {
         await this.tokenStorageService.deleteDeviceTokens(userId, deviceId);
       }
@@ -202,7 +209,7 @@ export class UserService {
       // Update the username
       const user = await this.getUserById(userId);
       user.username = username;
-      return await this.userRepository.save(user);
+      return await this.userRepo.save(user);
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to update username');
     }
@@ -211,7 +218,7 @@ export class UserService {
   async updateEmail(userId: string, newEmail: string): Promise<User> {
     try {
       // Check if email is already in use by another user
-      const existingUser = await this.userRepository.findOne({
+      const existingUser = await this.userRepo.findOne({
         where: { email: newEmail },
       });
 
@@ -227,7 +234,7 @@ export class UserService {
       user.emailVerified = true; // Mark as verified since we just verified it
 
       // Save and return the updated user
-      return await this.userRepository.save(user);
+      return await this.userRepo.save(user);
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to update user email');
     }
@@ -235,7 +242,7 @@ export class UserService {
 
   async isUsernameAvailable(username: string): Promise<boolean> {
     try {
-      const user = await this.userRepository.findOne({
+      const user = await this.userRepo.findOne({
         where: { username },
       });
       return !user; // Available if no user found

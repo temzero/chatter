@@ -4,15 +4,13 @@ import { useMessageStore } from "@/stores/messageStore";
 import { MessageResponse } from "@/types/messageResponse";
 import { useTypingStore } from "@/stores/typingStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
-import { toast } from "react-toastify";
 import { useChatStore } from "@/stores/chatStore";
+// import { toast } from "react-toastify";
 
 export function useChatSocketListeners() {
   useEffect(() => {
     // Message handler
     const handleNewMessage = (message: MessageResponse) => {
-      toast.success(`New message received: ${message}`);
-      console.log(`New message received: ${message}`);
       useMessageStore.getState().addMessage(message);
     };
 

@@ -8,13 +8,15 @@ import { SupabaseModule } from '../superbase/supabase.module';
 import { FriendshipModule } from '../friendship/friendship.module';
 import { AuthModule } from '../auth/modules/auth.module';
 import { VerificationCode } from '../auth/entities/verification_code.entity';
+import { ChatModule } from '../chat/chat.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, RefreshToken, VerificationCode]),
+    forwardRef(() => AuthModule), // Use forwardRef here
+    forwardRef(() => ChatModule),
     forwardRef(() => FriendshipModule),
     SupabaseModule,
-    forwardRef(() => AuthModule), // Use forwardRef here
   ],
   controllers: [UserController],
   providers: [UserService], // Removed MailService and TokenStorageService as they come from AuthModule

@@ -5,12 +5,14 @@ import { Avatar } from "../../ui/avatar/Avatar";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import ThemeSwitcher from "../../ui/ThemeSwitcher";
 import { SidebarMode } from "@/types/enums/sidebarMode";
+import { useSetActiveSavedChat } from "@/stores/chatStore";
 
 const SidebarMore: React.FC = () => {
   const currentUser = useCurrentUser();
   const { setSidebar, isCompact, toggleCompact } = useSidebarStore();
   const { receivedRequests, sentRequests } = useFriendshipStore();
   const requestsCount = receivedRequests.length + sentRequests.length;
+  const setActiveSavedChat = useSetActiveSavedChat();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -28,7 +30,8 @@ const SidebarMore: React.FC = () => {
     {
       icon: "bookmark",
       text: "Saved Messages",
-      onClick: () => setSidebar(SidebarMode.SAVED_MESSAGES),
+      // onClick: () => setSidebar(SidebarMode.SAVED_MESSAGES),
+      onClick: () => setActiveSavedChat(),
     },
     { type: "divider" }, // This will render the border divider
     {

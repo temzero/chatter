@@ -87,7 +87,7 @@ export class ChatMemberService {
     }
   }
 
-  async getAllMemberIds(chatId: string): Promise<string[]> {
+  async getAllMemberUserIds(chatId: string): Promise<string[]> {
     try {
       const members = await this.memberRepo.find({
         where: { chatId },

@@ -5,6 +5,7 @@ import {
 } from "@/types/sendMessagePayload";
 import { webSocketService } from "./websocket.service";
 import { MessageResponse } from "@/types/messageResponse";
+import { toast } from "react-toastify";
 
 export class ChatWebSocketService {
   async getChatStatus(
@@ -159,6 +160,19 @@ export class ChatWebSocketService {
     }) => void
   ) {
     webSocketService.off("chat:pinMessageUpdated", callback);
+  }
+
+  saveMessage(payload: { messageId: string | null }) {
+    toast.success(`emit to server saved message ${payload.messageId}`)
+    webSocketService.emit("chat:saveMessage", payload);
+  }
+
+  onSaveMessage(callback: (message: MessageResponse) => void) {
+    webSocketService.on("chat:saveMessage", callback);
+  }
+
+  offSaveMessage(callback: (message: MessageResponse) => void) {
+    webSocketService.off("chat:saveMessage", callback);
   }
 }
 

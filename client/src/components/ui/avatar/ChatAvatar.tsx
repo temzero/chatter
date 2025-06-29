@@ -1,8 +1,6 @@
 import { Avatar } from "./Avatar";
 import { OnlineDot } from "../OnlineDot";
-import type {
-  ChatResponse,
-} from "@/types/chat";
+import type { ChatResponse } from "@/types/chat";
 import { ChatType } from "@/types/enums/ChatType";
 
 type ChatAvatarProps = {
@@ -93,7 +91,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({ chat, type }) => {
 
   switch (chat.type) {
     case ChatType.CHANNEL: {
-      const channelChat = chat as GroupChatResponse;
+      const channelChat = chat;
       return (
         <div
           className={`group overflow-hidden ${sharedBase} ${styles.rounded} bg-[var(--border-color)] ${parentScaleClass}`}
@@ -117,7 +115,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({ chat, type }) => {
     }
 
     case ChatType.GROUP: {
-      const groupChat = chat as GroupChatResponse;
+      const groupChat = chat;
       return (
         <div
           className={`relative group overflow-hidden ${sharedBase} ${styles.rounded} ${parentScaleClass}`}
@@ -157,13 +155,13 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({ chat, type }) => {
     }
 
     case ChatType.DIRECT: {
-      const directChat = chat as DirectChatResponse;
+      const directChat = chat;
 
       return (
         <div className={`relative group overflow-hidden ${parentScaleClass}`}>
           <Avatar
             avatarUrl={directChat.avatarUrl ?? undefined}
-            name={directChat.name}
+            name={directChat.name ?? undefined}
             className={`${styles.size} ${styles.rounded} object-cover`}
           />
           {showOnlineDot && (
@@ -173,6 +171,12 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({ chat, type }) => {
             />
           )}
         </div>
+      );
+    }
+
+    case ChatType.SAVED: {
+      return (
+          <span className="material-symbols-outlined text-4xl">bookmark</span>
       );
     }
 

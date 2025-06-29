@@ -62,6 +62,21 @@ export class ChatController {
     }
   }
 
+  @Get('saved')
+  async getSavedChat(
+    @CurrentUser('id') userId: string,
+  ): Promise<SuccessResponse<ChatResponseDto>> {
+    try {
+      const savedChat = await this.chatService.getSavedChat(userId);
+      return new SuccessResponse(
+        savedChat,
+        'Saved chat retrieved successfully',
+      );
+    } catch (error: unknown) {
+      ErrorResponse.throw(error, 'Failed to retrieve saved chat');
+    }
+  }
+
   @Post('direct')
   async getOrCreateDirectChat(
     @Body() createDirectChatDto: CreateDirectChatDto,

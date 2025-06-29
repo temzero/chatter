@@ -112,14 +112,21 @@ export class WebsocketService {
   }
 
   async emitToChatMembers(chatId: string, event: string, payload: any) {
-    const memberIds = await this.chatMemberService.getAllMemberIds(chatId);
+    const userIds = await this.chatMemberService.getAllMemberUserIds(chatId);
 
-    for (const userId of memberIds) {
+    for (const userId of userIds) {
       const socketIds = this.getUserSocketIds(userId);
       // console.log('socketIds', socketIds);
       for (const socketId of socketIds) {
         this.server.to(socketId).emit(event, payload);
       }
+    }
+  }
+
+  emitToUser(userId: string, event: string, payload: any) {
+    const socketIds = this.getUserSocketIds(userId);
+    for (const socketId of socketIds) {
+      this.server.to(socketId).emit(event, payload);
     }
   }
 }

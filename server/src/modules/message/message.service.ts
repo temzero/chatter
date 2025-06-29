@@ -78,7 +78,7 @@ export class MessageService {
 
   async createForwardedMessage(
     senderId: string,
-    chatId: string,
+    targetChatId: string,
     messageId: string,
   ): Promise<Message> {
     const messageToForward = await this.getFullMessageById(messageId);
@@ -90,14 +90,14 @@ export class MessageService {
     const originalMessage =
       messageToForward.forwardedFromMessage ?? messageToForward;
 
-    const chat = await this.chatRepo.findOne({ where: { id: chatId } });
+    const chat = await this.chatRepo.findOne({ where: { id: targetChatId } });
     if (!chat) {
       ErrorResponse.notFound('Chat not found');
     }
 
     const newMessage = this.messageRepo.create({
       senderId,
-      chatId,
+      chatId: targetChatId,
       forwardedFromMessage: originalMessage,
     });
 

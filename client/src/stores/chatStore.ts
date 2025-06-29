@@ -12,9 +12,11 @@ import type {
   LastMessageResponse,
   MessageResponse,
 } from "@/types/messageResponse";
+import { toast } from "react-toastify";
 
 interface ChatStore {
   chats: ChatResponse[];
+  savedChat: ChatResponse | null;
   searchTerm: string;
   activeChat: ChatResponse | null;
   isLoading: boolean;
@@ -22,7 +24,7 @@ interface ChatStore {
   filteredChats: ChatResponse[];
 
   initialize: () => Promise<void>;
-  getChats: () => Promise<void>;
+  fetchChats: () => Promise<void>;
   fetchChatById: (chatId?: string) => Promise<void>;
   getDirectChatByUserId: (userId: string) => Promise<ChatResponse | null>;
   setActiveChat: (chat: ChatResponse | null) => Promise<void>;
@@ -67,6 +69,7 @@ export const useChatStore = create<ChatStore>()(
 
       return {
         chats: [],
+        savedChat: null,
         filteredChats: [],
         searchTerm: "",
         activeChat: null,
@@ -76,7 +79,7 @@ export const useChatStore = create<ChatStore>()(
         initialize: async () => {
           try {
             set({ isLoading: true, error: null });
-            await get().getChats();
+            await get().fetchChats();
             set({ isLoading: false });
           } catch (error) {
             console.error("Initialization failed:", error);
@@ -84,13 +87,26 @@ export const useChatStore = create<ChatStore>()(
             throw error;
           }
         },
-
-        getChats: async () => {
+        fetchChats: async () => {
           set({ isLoading: true, error: null });
           try {
-            const chats = await chatService.getAllChats();
-            console.log("Chats fetched", chats);
-            set({ chats, filteredChats: chats, isLoading: false });
+            const allChats = await chatService.fetchAllChats();
+
+            const savedChat =
+              allChats.find((chat) => chat.type === ChatType.SAVED) || null;
+            const otherChats = allChats.filter(
+              (chat) => chat.type !== ChatType.SAVED
+            );
+
+            set({
+              savedChat,
+              chats: otherChats,
+              filteredChats: otherChats,
+              isLoading: false,
+            });
+
+            console.log("Chats fetched:", otherChats);
+            console.log("Saved chat:", savedChat);
           } catch (error) {
             console.error("Failed to fetch chats:", error);
             set({ error: "Failed to load chats", isLoading: false });
@@ -352,7 +368,7 @@ export const useChatStore = create<ChatStore>()(
         },
 
         setPinnedMessage: (chatId: string, message: MessageResponse | null) => {
-          console.log('setPinnedMessage: ', chatId, message)
+          console.log("setPinnedMessage: ", chatId, message);
           set((state) => ({
             chats: state.chats.map((chat) =>
               chat.id === chatId ? { ...chat, pinnedMessage: message } : chat
@@ -417,3 +433,36 @@ export const useActiveChatId = () =>
 export const useIsActiveChat = (chatId: string) =>
   useChatStore((state) => state.activeChat?.id === chatId);
 export const useAllChats = () => useChatStore(useShallow((s) => s.chats));
+
+// Saved chat
+export const useSavedChat = () => useChatStore(useShallow((s) => s.savedChat));
+
+export const useSetActiveSavedChat = () => {
+  const getState = useChatStore;
+
+  return async () => {
+    const state = getState.getState();
+    let savedChat = state.savedChat;
+
+    if (!savedChat) {
+      toast.warning("Saved chat not found, fetching from server...");
+      try {
+        const fetchedSavedChat = await chatService.fetchSavedChat();
+
+        if (!fetchedSavedChat) {
+          toast.error("Saved chat does not exist in the database!");
+          return;
+        }
+        // Optional: store it in state.savedChat
+        useChatStore.setState({ savedChat: fetchedSavedChat });
+        savedChat = fetchedSavedChat;
+      } catch (error) {
+        toast.error("Error while fetching saved chat!");
+        console.error("Failed to fetch saved chat:", error);
+        return;
+      }
+    }
+
+    await state.setActiveChat(savedChat);
+  };
+};

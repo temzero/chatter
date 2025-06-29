@@ -126,7 +126,7 @@ export class GlobalGateway implements OnGatewayConnection, OnGatewayDisconnect {
   //   const uniqueUserIds = new Set<string>();
 
   //   for (const chatId of chatIds) {
-  //     const members = await this.chatMemberService.getAllMemberIds(chatId);
+  //     const members = await this.chatMemberService.getAllMemberUserIds(chatId);
   //     members.forEach((memberId) => {
   //       if (memberId !== userId) {
   //         uniqueUserIds.add(memberId);

@@ -8,7 +8,7 @@ export const chatService = {
   ...directChatService,
   ...groupChatService,
   // Get all direct and group chats
-  async getAllChats(): Promise<ChatResponse[]> {
+  async fetchAllChats(): Promise<ChatResponse[]> {
     try {
       const response = await API.get(`/chat`);
       console.log("Fetched chats", response.data.payload);
@@ -25,6 +25,18 @@ export const chatService = {
       `/chat/${chatId}`
     );
     return response.data.payload;
+  },
+
+  async fetchSavedChat(): Promise<ChatResponse> {
+    try {
+      const response = await API.get<ApiSuccessResponse<ChatResponse>>(
+        `/chat/saved`
+      );
+      return response.data.payload;
+    } catch (error) {
+      console.error("Failed to fetch saved chat:", error);
+      throw new Error("Unable to fetch saved chat.");
+    }
   },
 
   // Delete a chat by ID

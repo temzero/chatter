@@ -39,6 +39,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ chat }) => {
         return <GroupMessages chat={chat} messages={messages} />;
       case ChatType.CHANNEL:
         return <ChannelMessages chat={chat} messages={messages} />;
+      // case ChatType.SAVED:
+      //   return <SavedMessages chat={chat} messages={messages} />;
       default:
         return <DirectMessages chat={chat} messages={messages} />;
     }

@@ -61,7 +61,10 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
     {
       icon: "bookmark",
       label: "Save",
-      // action: onSave,
+      action: () => {
+        chatWebSocketService.saveMessage({ messageId: message.id });
+        close();
+      },
     },
     {
       icon: "delete",

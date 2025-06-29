@@ -287,12 +287,62 @@ export class ChatGateway {
     }
   }
 
+  @SubscribeMessage(`${chatLink}saveMessage`)
+  async handleSaveMessage(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() data: { messageId: string | null },
+  ) {
+    const userId = client.data.userId;
+    if (!userId || !data.messageId) {
+      client.emit('error', { message: 'Invalid save request' });
+      return;
+    }
+
+    console.log('Saved Message', data.messageId);
+
+    try {
+      // Step 1: Get or create the user's saved chat
+      const savedChat = await this.chatService.getOrCreateSavedChat(userId);
+
+      if (!savedChat) {
+        client.emit('error', { message: 'Saved chat not found!' });
+        console.log('Saved chat not found!');
+
+        return;
+      }
+
+      // 2. Forward the message into the saved chat
+      const savedMessage = await this.messageService.createForwardedMessage(
+        userId,
+        savedChat.id,
+        data.messageId,
+      );
+
+      // Step 3: Format and emit to client
+      const response = this.messageMapper.toMessageResponseDto(savedMessage);
+      client.emit(`${chatLink}saveMessage`, response);
+
+      // Optional: emit to all user's devices (if you track sockets by userId)
+      this.websocketService.emitToUser(
+        userId,
+        `${chatLink}saveMessage`,
+        response,
+      );
+    } catch (error) {
+      console.error('Error saving message:', error);
+      client.emit('error', {
+        message: 'Failed to save message',
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
   // Utility to check if any other chat member is online (excluding one user)
   async hasAnyOtherMemberOnline(
     chatId: string,
     excludeUserId: string,
   ): Promise<boolean> {
-    const memberIds = await this.chatMemberService.getAllMemberIds(chatId);
+    const memberIds = await this.chatMemberService.getAllMemberUserIds(chatId);
     return memberIds
       .filter((id) => id !== excludeUserId)
       .some((id) => this.websocketService.isUserOnline(id));

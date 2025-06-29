@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import classNames from "classnames";
 import { motion } from "framer-motion";
 import { useCurrentUserId } from "@/stores/authStore";
-import { formatTime } from "@/utils/formatTime";
 import { formatDateTime } from "@/utils/formatDate";
 import { Avatar } from "../ui/avatar/Avatar";
 import type { MessageResponse } from "@/types/messageResponse";
@@ -63,17 +62,17 @@ const PinnedMessage: React.FC<MessageProps> = ({
 
   const isGroupChat = chatType === "group";
 
-  const media =
-    message.attachments?.map((attachment) => ({
-      id: attachment.id,
-      messageId: message.id,
-      url: attachment.url,
-      type: attachment.type,
-      thumbnailUrl: attachment.thumbnailUrl,
-      width: attachment.width,
-      height: attachment.height,
-      duration: attachment.duration,
-    })) || [];
+  // const media =
+  //   message.attachments?.map((attachment) => ({
+  //     id: attachment.id,
+  //     messageId: message.id,
+  //     url: attachment.url,
+  //     type: attachment.type,
+  //     thumbnailUrl: attachment.thumbnailUrl,
+  //     width: attachment.width,
+  //     height: attachment.height,
+  //     duration: attachment.duration,
+  //   })) || [];
 
   const renderMessageContent = () => (
     <div
@@ -178,7 +177,7 @@ const PinnedMessage: React.FC<MessageProps> = ({
         {renderMessageContent()}
         <p className="text-sm font-light italic">
           {message.pinnedAt
-            ? `Pinned at ${formatDateTime(message.pinnedAt)}`
+            ? `${formatDateTime(message.pinnedAt)}`
             : `Sent at ${formatDateTime(message.createdAt)}`}
         </p>
       </motion.div>
