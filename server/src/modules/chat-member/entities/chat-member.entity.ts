@@ -12,6 +12,7 @@ import { Chat } from 'src/modules/chat/entities/chat.entity';
 import { User } from '../../user/entities/user.entity';
 import { ChatMemberRole } from '../constants/chat-member-roles.constants';
 import { ChatMemberStatus } from '../constants/chat-member-status.constants';
+import { Message } from 'src/modules/message/entities/message.entity';
 
 @Entity('chat_member')
 @Index(['chatId', 'userId'], { unique: true })
@@ -58,6 +59,13 @@ export class ChatMember {
 
   @Column({ name: 'last_read_message_id', type: 'varchar', nullable: true })
   lastReadMessageId: string | null;
+
+  @ManyToOne(() => Message, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'last_visible_message_id' })
+  lastVisibleMessage: Message | null;
+
+  @Column({ name: 'last_visible_message_id', type: 'uuid', nullable: true })
+  lastVisibleMessageId: string | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

@@ -38,7 +38,7 @@ export class ChatController {
     @CurrentUser('id') userId: string,
   ): Promise<SuccessResponse<Array<ChatResponseDto>>> {
     try {
-      const chats = await this.chatService.getChatsByUserId(userId);
+      const chats = await this.chatService.getUserChats(userId);
       return new SuccessResponse(chats, 'User chats retrieved successfully');
     } catch (error: unknown) {
       ErrorResponse.throw(error, 'Failed to retrieve user chats');

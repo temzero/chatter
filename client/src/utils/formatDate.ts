@@ -16,9 +16,8 @@ export function formatDateTime(time?: Date | string | null): string | null {
   };
 
   const dateOptions: Intl.DateTimeFormatOptions = {
-    year: "numeric",
-    month: "short", // or "2-digit" if you prefer
-    day: "numeric",
+    month: "short", // e.g. Jun
+    day: "numeric", // e.g. 30
   };
 
   if (isSameDay) {

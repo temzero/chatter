@@ -20,18 +20,12 @@ import { Message } from '../message/entities/message.entity';
 @Injectable()
 export class ChatService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepo: Repository<User>,
-
-    @InjectRepository(Chat)
-    private readonly chatRepo: Repository<Chat>,
-
+    @InjectRepository(User) private readonly userRepo: Repository<User>,
+    @InjectRepository(Chat) private readonly chatRepo: Repository<Chat>,
     @InjectRepository(ChatMember)
     private readonly memberRepo: Repository<ChatMember>,
-
     @InjectRepository(Message)
     private readonly messageRepo: Repository<Message>,
-
     private readonly messageService: MessageService,
     private readonly friendshipService: FriendshipService,
     private readonly chatMapper: ChatMapper,
@@ -40,10 +34,7 @@ export class ChatService {
   async getOrCreateDirectChat(
     myUserId: string,
     partnerId: string,
-  ): Promise<{
-    chat: ChatResponseDto;
-    wasExisting: boolean;
-  }> {
+  ): Promise<{ chat: ChatResponseDto; wasExisting: boolean }> {
     if (!myUserId || !partnerId) {
       ErrorResponse.badRequest('Missing userId');
     }
@@ -52,7 +43,6 @@ export class ChatService {
     const userCount = await this.userRepo.count({
       where: { id: In(memberUserIds) },
     });
-
     if (userCount !== memberUserIds.length) {
       ErrorResponse.badRequest('One or more Users do not exist!');
     }
@@ -61,7 +51,6 @@ export class ChatService {
       myUserId,
       partnerId,
     );
-
     if (friendshipStatus === FriendshipStatus.BLOCKED) {
       ErrorResponse.badRequest('Friendship Blocked');
     }
@@ -78,12 +67,8 @@ export class ChatService {
       .getOne();
 
     if (existingChat) {
-      const fullChat = await this.getFullChat(existingChat.id);
       return {
-        chat: await this.chatMapper.transformToDirectChatDto(
-          fullChat,
-          myUserId,
-        ),
+        chat: await this.getUserChat(existingChat.id, myUserId),
         wasExisting: true,
       };
     }
@@ -92,31 +77,20 @@ export class ChatService {
       type: ChatType.DIRECT,
       name: null,
     });
-
     await this.addMembers(chat.id, memberUserIds);
-    const fullChat = await this.getFullChat(chat.id);
-
     return {
-      chat: await this.chatMapper.transformToDirectChatDto(fullChat, myUserId),
+      chat: await this.getUserChat(chat.id, myUserId),
       wasExisting: false,
     };
   }
 
   async getChatType(chatId: string): Promise<ChatType> {
-    try {
-      const chat = await this.chatRepo.findOne({
-        where: { id: chatId },
-        select: ['type'],
-      });
-
-      if (!chat) {
-        ErrorResponse.notFound('Chat not found');
-      }
-
-      return chat.type;
-    } catch (error) {
-      ErrorResponse.throw(error, 'Failed to get chat type');
-    }
+    const chat = await this.chatRepo.findOne({
+      where: { id: chatId },
+      select: ['type'],
+    });
+    if (!chat) ErrorResponse.notFound('Chat not found');
+    return chat.type;
   }
 
   async createGroupChat(
@@ -124,12 +98,9 @@ export class ChatService {
     createDto: CreateGroupChatDto,
   ): Promise<ChatResponseDto> {
     const allUserIds = [userId, ...createDto.userIds];
-    const memberCount = allUserIds.length;
-
-    if (createDto.type === ChatType.GROUP && memberCount < 2) {
+    if (createDto.type === ChatType.GROUP && allUserIds.length < 2) {
       ErrorResponse.badRequest('Group must have at least 2 members');
     }
-
     if (!createDto.name) {
       ErrorResponse.badRequest('Group or Channel must have a name');
     }
@@ -137,19 +108,15 @@ export class ChatService {
     const userCount = await this.userRepo.count({
       where: { id: In(allUserIds) },
     });
-
-    if (userCount !== memberCount) {
+    if (userCount !== allUserIds.length) {
       ErrorResponse.badRequest('One or more Users do not exist!');
     }
 
     const chat = await this.chatRepo.save(createDto);
     await this.addMembers(chat.id, allUserIds, userId);
-    const fullChat = await this.getFullChat(chat.id);
-
-    return this.chatMapper.transformToGroupChatDto(fullChat, userId);
+    return this.getUserChat(chat.id, userId);
   }
 
-  // ✅ Fetch saved chat (raw Chat entity, minimal joins)
   async findSavedChat(userId: string): Promise<Chat | null> {
     return this.chatRepo
       .createQueryBuilder('chat')
@@ -159,39 +126,25 @@ export class ChatService {
       .getOne();
   }
 
-  // ✅ Create new saved chat with user as a member
   async createSavedChat(userId: string): Promise<Chat> {
     const user = await this.userRepo.findOne({ where: { id: userId } });
-    if (!user) {
-      ErrorResponse.notFound('User not found');
-    }
+    if (!user) ErrorResponse.notFound('User not found');
 
     const savedChat = await this.chatRepo.save({
       type: ChatType.SAVED,
       name: 'Saved Messages',
     });
-
-    await this.memberRepo.save({
-      user: { id: userId },
-      chat: savedChat,
-    });
-
+    await this.memberRepo.save({ user: { id: userId }, chat: savedChat });
     return savedChat;
   }
 
-  // ✅ Try getting saved chat, or create it if not exist
   async getOrCreateSavedChat(userId: string): Promise<Chat> {
-    const existing = await this.findSavedChat(userId);
-    return existing ?? this.createSavedChat(userId);
+    return (await this.findSavedChat(userId)) ?? this.createSavedChat(userId);
   }
 
-  // ✅ Fetch saved chat with full relations, and transform to DTO
   async getSavedChat(userId: string): Promise<ChatResponseDto> {
     const chat = await this.chatRepo.findOne({
-      where: {
-        type: ChatType.SAVED,
-        members: { user: { id: userId } },
-      },
+      where: { type: ChatType.SAVED, members: { user: { id: userId } } },
       relations: [
         'members',
         'members.user',
@@ -202,129 +155,167 @@ export class ChatService {
       ],
     });
 
-    if (!chat) {
-      ErrorResponse.notFound('Saved chat not found');
-    }
-
-    const fullChat = await this.getFullChat(chat.id);
-    return this.chatMapper.transformToGroupChatDto(fullChat, userId);
+    if (!chat) ErrorResponse.notFound('Saved chat not found');
+    return this.getUserChat(chat.id, userId);
   }
 
   async updateChat(
     chat: ChatResponseDto,
     updateDto: UpdateChatDto,
   ): Promise<ChatResponseDto> {
-    try {
-      const existingChat = await this.chatRepo.findOne({
-        where: { id: chat.id },
-      });
+    const existingChat = await this.chatRepo.findOne({
+      where: { id: chat.id },
+    });
+    if (!existingChat) ErrorResponse.notFound('Chat not found');
 
-      if (!existingChat) {
-        ErrorResponse.notFound('Chat not found');
-      }
-
-      Object.assign(existingChat, updateDto);
-      const updatedChat = await this.chatRepo.save(existingChat);
-
-      return plainToInstance(ChatResponseDto, updatedChat);
-    } catch (error) {
-      ErrorResponse.throw(error, 'Failed to update chat');
-    }
+    Object.assign(existingChat, updateDto);
+    const updatedChat = await this.chatRepo.save(existingChat);
+    return plainToInstance(ChatResponseDto, updatedChat);
   }
 
   async getChatById(chatId: string, userId: string): Promise<ChatResponseDto> {
-    try {
-      const chat = await this.getFullChat(chatId);
-
-      if (chat.type === ChatType.DIRECT) {
-        return this.chatMapper.transformToDirectChatDto(chat, userId);
-      } else {
-        return this.chatMapper.transformToGroupChatDto(chat, userId);
-      }
-    } catch (error) {
-      ErrorResponse.throw(error, 'Failed to get chat');
-    }
+    return this.getUserChat(chatId, userId);
   }
 
-  // Inside ChatService
-  async getChatsByUserId(userId: string): Promise<Array<ChatResponseDto>> {
-    try {
-      const chats = await this.chatRepo
-        .createQueryBuilder('chat')
-        .innerJoin('chat.members', 'myMember', 'myMember.user_id = :userId', {
+  async getUserChats(userId: string): Promise<ChatResponseDto[]> {
+    const chats = await this.buildFullChatQueryForUser(userId)
+      .orderBy('COALESCE(lastMessage.createdAt, chat.createdAt)', 'DESC')
+      .getMany();
+
+    return Promise.all(
+      chats.map((chat) =>
+        chat.type === ChatType.DIRECT
+          ? this.chatMapper.transformToDirectChatDto(
+              chat,
+              userId,
+              this.messageService,
+            )
+          : this.chatMapper.transformToGroupChatDto(
+              chat,
+              userId,
+              this.messageService,
+            ),
+      ),
+    );
+  }
+
+  async getUserChat(chatId: string, userId: string): Promise<ChatResponseDto> {
+    const chat = await this.buildFullChatQueryForUser(userId)
+      .andWhere('chat.id = :chatId', { chatId })
+      .getOne();
+
+    if (!chat) ErrorResponse.notFound('Chat not found or not accessible');
+
+    return chat.type === ChatType.DIRECT
+      ? this.chatMapper.transformToDirectChatDto(
+          chat,
           userId,
-        })
-        .leftJoinAndSelect('chat.members', 'member')
-        .leftJoinAndSelect('member.user', 'memberUser')
-        .leftJoinAndSelect('chat.lastMessage', 'lastMessage')
-        .leftJoinAndSelect('lastMessage.sender', 'sender')
-        .leftJoinAndSelect('lastMessage.attachments', 'attachments')
-        .leftJoinAndSelect(
-          'lastMessage.forwardedFromMessage',
-          'forwardedFromMessage',
+          this.messageService,
         )
-        .leftJoinAndSelect('chat.pinnedMessage', 'pinnedMessage')
-        .leftJoinAndSelect('pinnedMessage.sender', 'pinnedSender')
-        .leftJoinAndSelect('pinnedMessage.attachments', 'pinnedAttachments')
-        .leftJoinAndSelect(
-          'pinnedMessage.forwardedFromMessage',
-          'pinnedForwardedFromMessage',
-        )
-        .orderBy('COALESCE(lastMessage.createdAt, chat.createdAt)', 'DESC')
-        .getMany();
-
-      const chatsResponse = await Promise.all(
-        chats.map((chat) => {
-          if (chat.type === ChatType.DIRECT) {
-            return this.chatMapper.transformToDirectChatDto(
-              chat,
-              userId,
-              this.messageService,
-            );
-          } else {
-            return this.chatMapper.transformToGroupChatDto(
-              chat,
-              userId,
-              this.messageService,
-            );
-          }
-        }),
-      );
-      // console.log('chatsResponse', chatsResponse);
-      return chatsResponse;
-    } catch (error) {
-      ErrorResponse.throw(error, 'Failed to retrieve user chats');
-    }
+      : this.chatMapper.transformToGroupChatDto(
+          chat,
+          userId,
+          this.messageService,
+        );
   }
 
-  private async getFullChat(chatId: string): Promise<Chat> {
-    const fullChat = await this.chatRepo.findOne({
-      where: { id: chatId },
-      relations: [
-        'members',
-        'members.user',
-        'lastMessage',
-        'lastMessage.sender',
-        'lastMessage.attachments',
-        'pinnedMessage',
-        'pinnedMessage.sender',
-        'pinnedMessage.attachments',
-        'pinnedMessage.forwardedFromMessage',
-      ],
-    });
+  async pinMessage(
+    chatId: string,
+    messageId: string,
+    userId: string,
+  ): Promise<ChatResponseDto> {
+    const isParticipant = await this.isChatParticipant(chatId, userId);
+    if (!isParticipant)
+      ErrorResponse.unauthorized('You are not a member of this chat');
 
-    if (!fullChat) {
-      ErrorResponse.notFound('Chat not found');
+    const chat = await this.chatRepo.findOne({ where: { id: chatId } });
+    if (!chat) ErrorResponse.notFound('Chat not found');
+
+    await this.messageRepo.update(
+      { chat: { id: chatId }, isPinned: true },
+      { isPinned: false, pinnedAt: null },
+    );
+
+    const message = await this.messageRepo.findOne({
+      where: { id: messageId },
+    });
+    if (!message) ErrorResponse.notFound('Message not found');
+
+    message.isPinned = true;
+    message.pinnedAt = new Date();
+    await this.messageRepo.save(message);
+
+    chat.pinnedMessage = message;
+    await this.chatRepo.save(chat);
+
+    return this.getUserChat(chatId, userId); // ✅ Already transformed
+  }
+
+  async unpinMessage(chatId: string, userId: string): Promise<ChatResponseDto> {
+    const isParticipant = await this.isChatParticipant(chatId, userId);
+    if (!isParticipant)
+      ErrorResponse.unauthorized('You are not a member of this chat');
+
+    const chat = await this.chatRepo.findOne({ where: { id: chatId } });
+    if (!chat) ErrorResponse.notFound('Chat not found');
+
+    await this.messageRepo.update(
+      { chat: { id: chatId }, isPinned: true },
+      { isPinned: false, pinnedAt: null },
+    );
+
+    chat.pinnedMessage = null;
+    await this.chatRepo.save(chat);
+
+    return this.getUserChat(chatId, userId); // ✅ Already transformed
+  }
+
+  async deleteChat(chatId: string, userId: string): Promise<ChatResponseDto> {
+    const chat = await this.chatRepo.findOne({
+      where: { id: chatId },
+      relations: ['members'],
+    });
+    if (!chat) ErrorResponse.notFound('Chat not found');
+
+    const member = chat.members.find((m) => m.userId === userId);
+    if (!member)
+      ErrorResponse.unauthorized('You are not a member of this chat');
+
+    if (chat.type !== ChatType.DIRECT && member.role !== ChatMemberRole.OWNER) {
+      ErrorResponse.unauthorized('Only owners can delete group chats');
     }
-    return fullChat;
+
+    await this.chatRepo.delete(chatId);
+    return plainToInstance(ChatResponseDto, chat);
+  }
+
+  private buildFullChatQueryForUser(userId: string) {
+    return this.chatRepo
+      .createQueryBuilder('chat')
+      .innerJoin('chat.members', 'myMember', 'myMember.user_id = :userId', {
+        userId,
+      })
+      .leftJoinAndSelect('chat.members', 'member')
+      .leftJoinAndSelect('member.user', 'memberUser')
+      .leftJoinAndSelect('member.lastVisibleMessage', 'lastMessage')
+      .leftJoinAndSelect('lastMessage.sender', 'sender')
+      .leftJoinAndSelect('lastMessage.attachments', 'attachments')
+      .leftJoinAndSelect(
+        'lastMessage.forwardedFromMessage',
+        'forwardedFromMessage',
+      )
+      .leftJoinAndSelect('chat.pinnedMessage', 'pinnedMessage')
+      .leftJoinAndSelect('pinnedMessage.sender', 'pinnedSender')
+      .leftJoinAndSelect('pinnedMessage.attachments', 'pinnedAttachments')
+      .leftJoinAndSelect(
+        'pinnedMessage.forwardedFromMessage',
+        'pinnedForwardedFromMessage',
+      );
   }
 
   async isChatParticipant(chatId: string, userId: string): Promise<boolean> {
     return this.memberRepo.exist({
-      where: {
-        chat: { id: chatId },
-        user: { id: userId },
-      },
+      where: { chat: { id: chatId }, user: { id: userId } },
     });
   }
 
@@ -343,113 +334,14 @@ export class ChatService {
     memberIds: string[],
     creatorId?: string,
   ): Promise<void> {
-    try {
-      const membersToAdd = memberIds.map((userId) => ({
-        chat: { id: chatId },
-        user: { id: userId },
-        role:
-          userId === creatorId ? ChatMemberRole.OWNER : ChatMemberRole.MEMBER,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }));
+    const membersToAdd = memberIds.map((userId) => ({
+      chat: { id: chatId },
+      user: { id: userId },
+      role: userId === creatorId ? ChatMemberRole.OWNER : ChatMemberRole.MEMBER,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }));
 
-      await this.memberRepo.insert(membersToAdd);
-    } catch (error) {
-      ErrorResponse.throw(error, 'Failed to add chat members');
-    }
-  }
-
-  async pinMessage(
-    chatId: string,
-    messageId: string,
-    userId: string,
-  ): Promise<ChatResponseDto> {
-    const isParticipant = await this.isChatParticipant(chatId, userId);
-    if (!isParticipant) {
-      ErrorResponse.unauthorized('You are not a member of this chat');
-    }
-
-    const chat = await this.chatRepo.findOne({ where: { id: chatId } });
-    if (!chat) {
-      ErrorResponse.notFound('Chat not found');
-    }
-
-    // Unpin any existing pinned message in this chat
-    await this.messageRepo.update(
-      { chat: { id: chatId }, isPinned: true },
-      { isPinned: false, pinnedAt: null },
-    );
-
-    // Find and update the message to pin
-    const message = await this.messageRepo.findOne({
-      where: { id: messageId },
-    });
-    if (!message) {
-      ErrorResponse.notFound('Message not found');
-    }
-
-    message.isPinned = true;
-    message.pinnedAt = new Date();
-    await this.messageRepo.save(message); // ✅ Save before assigning to chat
-
-    chat.pinnedMessage = message;
-    await this.chatRepo.save(chat);
-
-    const fullChat = await this.getFullChat(chatId);
-    return this.chatMapper.transformToGroupChatDto(fullChat, userId);
-  }
-
-  async unpinMessage(chatId: string, userId: string): Promise<ChatResponseDto> {
-    const isParticipant = await this.isChatParticipant(chatId, userId);
-    if (!isParticipant) {
-      ErrorResponse.unauthorized('You are not a member of this chat');
-    }
-
-    const chat = await this.chatRepo.findOne({ where: { id: chatId } });
-    if (!chat) {
-      ErrorResponse.notFound('Chat not found');
-    }
-
-    // Unpin all pinned messages in this chat
-    await this.messageRepo.update(
-      { chat: { id: chatId }, isPinned: true },
-      { isPinned: false, pinnedAt: null },
-    );
-
-    chat.pinnedMessage = null;
-    await this.chatRepo.save(chat);
-
-    const fullChat = await this.getFullChat(chatId);
-    return this.chatMapper.transformToGroupChatDto(fullChat, userId);
-  }
-
-  async deleteChat(chatId: string, userId: string): Promise<ChatResponseDto> {
-    try {
-      const chat = await this.chatRepo.findOne({
-        where: { id: chatId },
-        relations: ['members'],
-      });
-
-      if (!chat) {
-        ErrorResponse.notFound('Chat not found');
-      }
-
-      const member = chat.members.find((m) => m.userId === userId);
-      if (!member) {
-        ErrorResponse.unauthorized('You are not a member of this chat');
-      }
-
-      if (chat.type !== ChatType.DIRECT) {
-        if (member.role !== ChatMemberRole.OWNER) {
-          ErrorResponse.unauthorized('Only owners can delete group chats');
-        }
-      }
-
-      await this.chatRepo.delete(chatId);
-
-      return plainToInstance(ChatResponseDto, chat);
-    } catch (error) {
-      ErrorResponse.throw(error, 'Failed to delete chat');
-    }
+    await this.memberRepo.insert(membersToAdd);
   }
 }

@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Put,
-  Delete,
   Param,
   Body,
   UseGuards,
@@ -31,7 +30,7 @@ export class MessageController {
 
   @Post()
   async create(
-    @CurrentUser('id') userId: string,
+    @CurrentUser('id') currentUserId: string,
     @Body() createMessageDto: CreateMessageDto,
   ): Promise<SuccessResponse<MessageResponseDto>> {
     if (!createMessageDto.content && !createMessageDto.attachmentIds) {
@@ -39,7 +38,7 @@ export class MessageController {
     }
 
     const message = await this.messageService.createMessage(
-      userId,
+      currentUserId,
       createMessageDto,
     );
 
@@ -64,11 +63,13 @@ export class MessageController {
 
   @Get('chat/:chatId')
   async getChatMessages(
+    @CurrentUser('id') currentUserId: string,
     @Param('chatId') chatId: string,
     @Query() queryParams: GetMessagesQuery,
   ): Promise<SuccessResponse<MessageResponseDto[]>> {
     const messages = await this.messageService.getMessagesByChatId(
       chatId,
+      currentUserId,
       queryParams,
     );
 
@@ -84,12 +85,12 @@ export class MessageController {
 
   @Put(':messageId')
   async update(
+    @CurrentUser('id') currentUserId: string,
     @Param('messageId') messageId: string,
     @Body() updateMessageDto: UpdateMessageDto,
-    @CurrentUser('id') userId: string,
   ): Promise<SuccessResponse<MessageResponseDto>> {
     const message = await this.messageService.getMessageById(messageId);
-    if (message.senderId !== userId) {
+    if (message.senderId !== currentUserId) {
       ErrorResponse.unauthorized('Unauthorized to update this message');
     }
 
@@ -101,25 +102,6 @@ export class MessageController {
     return new SuccessResponse(
       plainToInstance(MessageResponseDto, updatedMessage),
       'Message updated successfully',
-    );
-  }
-
-  @Delete(':messageId')
-  async remove(
-    @Param('messageId') messageId: string,
-    @CurrentUser('id') userId: string,
-  ): Promise<SuccessResponse<MessageResponseDto>> {
-    const message = await this.messageService.getMessageById(messageId);
-    if (message.senderId !== userId) {
-      ErrorResponse.unauthorized('Unauthorized to delete this message');
-    }
-
-    const deletedMessage =
-      await this.messageService.softDeleteMessage(messageId);
-
-    return new SuccessResponse(
-      plainToInstance(MessageResponseDto, deletedMessage),
-      'Message deleted successfully',
     );
   }
 }

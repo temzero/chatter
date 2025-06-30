@@ -21,7 +21,6 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   close,
 }) => {
   const setReplyToMessage = useMessageStore((state) => state.setReplyToMessage);
-  const deleteMessage = useMessageStore((state) => state.deleteMessage);
   const isPinned = false;
 
   const positionClass =
@@ -35,7 +34,6 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       label: "Reply",
       action: () => {
         setReplyToMessage(message);
-        // scrollToInput();
         close();
       },
     },
@@ -69,7 +67,10 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
     {
       icon: "delete",
       label: "Delete",
-      action: () => deleteMessage(message.id),
+      action: () => {
+        useModalStore.getState().openModal("delete-message", { message });
+        close();
+      },
     },
   ];
 
@@ -78,7 +79,6 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       initial={{ opacity: 0, scale: 0.5, y: -10 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.5, y: -10 }}
-      // transition={{ duration: 0.2 }}
       className={classNames(
         "absolute -bottom-10 flex gap-2 bg-[var(--sidebar-color)]",
         "p-1.5 rounded-lg shadow-lg z-50",
@@ -90,12 +90,12 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
         <button
           key={index}
           className={classNames(
-            "p-1 rounded-full flex flex-col items-center justify-center opacity-70 hover:opacity-100 ",
+            "p-1 rounded-full flex flex-col items-center justify-center opacity-70 hover:opacity-100",
             "transition-all duration-200 cursor-pointer"
           )}
           onClick={(e) => {
             e.stopPropagation();
-            action.action?.();
+            action.action();
           }}
           title={action.label}
         >
@@ -106,9 +106,6 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
           >
             {action.icon}
           </i>
-          {/* <span className="text-xs mt-0.5 opacity-80 hidden group-hover:block">
-            {action.label}
-          </span> */}
         </button>
       ))}
     </motion.div>

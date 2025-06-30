@@ -87,6 +87,14 @@ export class Message {
   @OneToMany(() => Attachment, (attachment) => attachment.message)
   attachments: Attachment[];
 
+  @Column({
+    name: 'deleted_for_userIds',
+    type: 'jsonb',
+    nullable: true,
+    default: null,
+  })
+  deletedForUserIds: string[] | null; // Array of USER IDs
+
   @Column({ name: 'is_deleted', default: false })
   isDeleted: boolean;
 

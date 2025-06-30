@@ -55,13 +55,13 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
         <i className="material-symbols-outlined flex items-center justify-center text-[16px] h-3">
           edit
         </i>
-        <span className="text-xs whitespace-nowrap text-ellipsis">{draft}</span>
+        <span className="text-xs truncate">{draft}</span>
       </p>
     ) : chat.lastMessage ? (
       <p
-        className={`flex items-center gap-1 text-xs max-w-[196px] whitespace-nowrap text-ellipsis overflow-hidden min-h-6 
-    ${unreadCount > 0 ? "opacity-100" : "opacity-40"}
-  `}
+        className={`flex items-center gap-1 text-xs max-w-[196px] min-h-6 
+          ${unreadCount > 0 ? "opacity-100" : "opacity-40"}
+        `}
       >
         {chat.lastMessage.senderId === currentUserId ? (
           <strong>Me:</strong>
@@ -71,11 +71,13 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
 
         {/* If forwarded */}
         {chat.lastMessage.isForwarded && (
-            <span className="material-symbols-outlined rotate-90">arrow_warm_up</span>
+          <span className="material-symbols-outlined rotate-90">
+            arrow_warm_up
+          </span>
         )}
 
         {chat.lastMessage.icons?.length ? (
-          <span className="flex gap-1">
+          <span className="flex gap-1 truncate">
             {chat.lastMessage.icons.map((icon, index) => (
               <i
                 key={index}
@@ -87,7 +89,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
             ))}
           </span>
         ) : (
-          <span>{chat.lastMessage.content}</span>
+          <span className="truncate">{chat.lastMessage.content}</span>
         )}
       </p>
     ) : null;

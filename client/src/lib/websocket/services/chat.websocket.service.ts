@@ -163,7 +163,7 @@ export class ChatWebSocketService {
   }
 
   saveMessage(payload: { messageId: string | null }) {
-    toast.success(`emit to server saved message ${payload.messageId}`)
+    toast.success(`emit to server saved message ${payload.messageId}`);
     webSocketService.emit("chat:saveMessage", payload);
   }
 
@@ -173,6 +173,29 @@ export class ChatWebSocketService {
 
   offSaveMessage(callback: (message: MessageResponse) => void) {
     webSocketService.off("chat:saveMessage", callback);
+  }
+
+  // --- Emit delete message request to server
+  deleteMessage(payload: {
+    messageId: string;
+    chatId: string;
+    isDeleteForEveryone: boolean;
+  }) {
+    webSocketService.emit("chat:deleteMessage", payload);
+  }
+
+  // --- Listen for deleted message notification
+  onDeleteMessage(
+    callback: (data: { messageId: string; chatId: string }) => void
+  ) {
+    webSocketService.on("chat:messageDeleted", callback);
+  }
+
+  // --- Remove listener
+  offDeleteMessage(
+    callback: (data: { messageId: string; chatId: string }) => void
+  ) {
+    webSocketService.off("chat:messageDeleted", callback);
   }
 }
 

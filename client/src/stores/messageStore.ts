@@ -26,7 +26,7 @@ export interface MessageStore {
   fetchMessages: (chatId: string) => Promise<void>;
   addMessage: (newMessage: MessageResponse) => void;
   getMessageById: (messageId: string) => MessageResponse | undefined;
-  deleteMessage: (messageId: string) => void;
+  deleteMessage: (chatId: string, messageId: string) => void;
   getChatMessages: (chatId: string) => MessageResponse[];
   getChatAttachments: (chatId: string) => AttachmentResponse[];
   setDraftMessage: (chatId: string, draft: string) => void;
@@ -170,22 +170,52 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
     return undefined;
   },
 
-  deleteMessage: (messageId: string) => {
+  // deleteMessage: (chatId: string, messageId: string) => {
+  //   const { messages } = get();
+  //   if (!chatId) return;
+
+  //   set({
+  //     messages: {
+  //       ...messages,
+  //       [chatId]: messages[chatId].filter((msg) => msg.id !== messageId),
+  //     },
+  //   });
+  // },
+
+  deleteMessage: (chatId: string, messageId: string) => {
     const { messages } = get();
-
-    // Find which chat contains this message
-    const chatId = Object.keys(messages).find((chatId) =>
-      messages[chatId].some((msg) => msg.id === messageId)
-    );
-
     if (!chatId) return;
+
+    const chatMessages = messages[chatId] || [];
+    const messageToDelete = chatMessages.find((msg) => msg.id === messageId);
 
     set({
       messages: {
         ...messages,
-        [chatId]: messages[chatId].filter((msg) => msg.id !== messageId),
+        [chatId]: chatMessages.filter((msg) => msg.id !== messageId),
       },
     });
+
+    // Check if the deleted message was the last message
+    if (
+      messageToDelete &&
+      chatMessages.length > 0 &&
+      chatMessages[chatMessages.length - 1].id === messageId
+    ) {
+      const updatedMessages = messages[chatId].filter(
+        (msg) => msg.id !== messageId
+      );
+
+      if (updatedMessages.length > 0) {
+        // There are still messages left - set the new last message
+        const newLastMessage = updatedMessages[updatedMessages.length - 1];
+        const lastMessage = createLastMessage(newLastMessage);
+        useChatStore.getState().setLastMessage(chatId, lastMessage);
+      } else {
+        // No messages left - set last message to null
+        useChatStore.getState().setLastMessage(chatId, null);
+      }
+    }
   },
 
   getChatMessages: (chatId) => {

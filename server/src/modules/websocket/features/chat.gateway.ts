@@ -12,6 +12,7 @@ import { ForwardMessageDto } from 'src/modules/message/dto/requests/forward-mess
 import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
 import { MessageMapper } from 'src/modules/message/mappers/message.mapper';
 import { ChatService } from 'src/modules/chat/chat.service';
+import { Message } from 'src/modules/message/entities/message.entity';
 
 const chatLink = 'chat:';
 
@@ -219,7 +220,6 @@ export class ChatGateway {
     @MessageBody()
     data: { chatId: string; memberId: string; messageId: string },
   ) {
-    console.log('message Read: ', data.messageId);
     const userId = client.data.userId;
     if (!userId) return;
 
@@ -332,6 +332,60 @@ export class ChatGateway {
       console.error('Error saving message:', error);
       client.emit('error', {
         message: 'Failed to save message',
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  @SubscribeMessage(`${chatLink}deleteMessage`)
+  async handleDeleteMessage(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody()
+    data: { messageId: string; chatId: string; isDeleteForEveryone: boolean },
+  ) {
+    const userId = client.data.userId;
+    if (!userId) {
+      client.emit('error', { message: 'Unauthorized' });
+      return;
+    }
+
+    try {
+      let deletedMessage: Message;
+
+      if (data.isDeleteForEveryone) {
+        // Delete for everyone
+        deletedMessage = await this.messageService.deleteForEveryone(
+          userId,
+          data.messageId,
+        );
+
+        // Notify all chat members that the message has been deleted
+        await this.websocketService.emitToChatMembers(
+          data.chatId,
+          `${chatLink}messageDeleted`,
+          {
+            messageId: data.messageId,
+            chatId: data.chatId,
+          },
+        );
+      } else {
+        // Delete for me only
+        deletedMessage = await this.messageService.deleteForMe(
+          userId,
+          data.messageId,
+        );
+
+        this.websocketService.emitToUser(userId, `${chatLink}messageDeleted`, {
+          messageId: data.messageId,
+          chatId: data.chatId,
+        });
+      }
+
+      return { success: true, message: deletedMessage };
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      client.emit('error', {
+        message: 'Failed to delete message',
         error: error instanceof Error ? error.message : String(error),
       });
     }

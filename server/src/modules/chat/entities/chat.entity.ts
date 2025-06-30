@@ -32,11 +32,7 @@ export class Chat {
   @OneToMany(() => Message, (message) => message.chat)
   messages: Message[];
 
-  @ManyToOne(() => Message, { nullable: true })
-  @JoinColumn({ name: 'last_message_id' })
-  lastMessage: Message | null;
-
-  @ManyToOne(() => Message, { nullable: true })
+  @ManyToOne(() => Message, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'pinned_message_id' })
   pinnedMessage: Message | null;
 

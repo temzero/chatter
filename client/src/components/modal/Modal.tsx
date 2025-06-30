@@ -6,6 +6,8 @@ import { useEffect } from "react";
 import MediaModal from "./media/MediaModal";
 import FriendRequestModal from "./FriendRequestModal";
 import ForwardMessageModal from "./ForwardMessageModal";
+import { MessageResponse } from "@/types/messageResponse";
+import DeleteMessageModal from "./DeleteMessageModal";
 
 // Modal.tsx improvements:
 const Modal = () => {
@@ -46,7 +48,17 @@ const Modal = () => {
         );
 
       case "forward-message":
-        return <ForwardMessageModal {...modalContent.props} />;
+        return (
+          <ForwardMessageModal
+            message={modalContent.props?.message as MessageResponse}
+          />
+        );
+      case "delete-message":
+        return (
+          <DeleteMessageModal
+            message={modalContent.props?.message as MessageResponse}
+          />
+        );
       default:
         return null;
     }

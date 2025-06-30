@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, MoreThan, Not } from 'typeorm';
+import { Repository, Like, MoreThan, Not, Raw } from 'typeorm';
 import { Message } from './entities/message.entity';
 import { Chat } from '../chat/entities/chat.entity';
 import { ChatMember } from '../chat-member/entities/chat-member.entity';
@@ -29,7 +29,6 @@ export class MessageService {
   ): Promise<Message> {
     const chat = await this.chatRepo.findOne({
       where: { id: createMessageDto.chatId },
-      relations: ['lastMessage'],
     });
     if (!chat) {
       ErrorResponse.notFound('Chat not found');
@@ -65,11 +64,13 @@ export class MessageService {
 
       const savedMessage = await this.messageRepo.save(newMessage);
 
-      chat.lastMessage = savedMessage;
-      await this.chatRepo.save(chat);
-      const fullMessage = await this.getFullMessageById(savedMessage.id);
-      // console.log('Message created:', fullMessage);
+      // ✅ Update lastVisibleMessageId for all members
+      await this.chatMemberRepo.update(
+        { chatId: chat.id },
+        { lastVisibleMessageId: savedMessage.id },
+      );
 
+      const fullMessage = await this.getFullMessageById(savedMessage.id);
       return fullMessage;
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to create message');
@@ -86,7 +87,6 @@ export class MessageService {
       ErrorResponse.badRequest(`Message ${messageId} not found`);
     }
 
-    // ✅ Step: resolve to the original message if this is already a forwarded message
     const originalMessage =
       messageToForward.forwardedFromMessage ?? messageToForward;
 
@@ -103,8 +103,11 @@ export class MessageService {
 
     const savedMessage = await this.messageRepo.save(newMessage);
 
-    chat.lastMessage = savedMessage;
-    await this.chatRepo.save(chat);
+    // ✅ Update lastVisibleMessageId for all members
+    await this.chatMemberRepo.update(
+      { chatId: chat.id },
+      { lastVisibleMessageId: savedMessage.id },
+    );
 
     return this.getFullMessageById(savedMessage.id);
   }
@@ -234,25 +237,93 @@ export class MessageService {
     }
   }
 
-  async softDeleteMessage(id: string): Promise<Message> {
+  async softDeleteMessage(
+    userId: string,
+    messageId: string,
+    clearDeletedForUsers = false,
+  ): Promise<Message> {
     try {
-      const message = await this.getMessageById(id);
+      const message = await this.getMessageById(messageId);
+
+      if (message.senderId !== userId) {
+        ErrorResponse.unauthorized(
+          'You do not have permission to soft delete this message',
+        );
+      }
+
+      if (message.isDeleted) return message;
+
       message.isDeleted = true;
       message.deletedAt = new Date();
+
+      if (clearDeletedForUsers) {
+        message.deletedForUserIds = null;
+      }
+
       await this.messageRepo.save(message);
+
+      const members = await this.chatMemberRepo.find({
+        where: { chatId: message.chatId },
+      });
+
+      const userIds = members.map((m) => m.userId);
+      await this.updateLastVisibleMessageIfMatch(
+        message.chatId,
+        message.id,
+        userIds,
+      );
+
       return message;
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to soft delete message');
     }
   }
 
-  async deleteMessage(id: string): Promise<Message> {
+  async deleteMessage(userId: string, messageId: string): Promise<Message> {
     try {
-      const message = await this.getMessageById(id);
-      await this.messageRepo.delete(id);
+      const message = await this.getMessageById(messageId);
+
+      if (message.senderId !== userId) {
+        ErrorResponse.unauthorized(
+          'You do not have permission to delete this message',
+        );
+      }
+      await this.messageRepo.delete(messageId);
       return message;
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to delete message');
+    }
+  }
+
+  async deleteForMe(userId: string, messageId: string): Promise<Message> {
+    try {
+      const message = await this.getMessageById(messageId);
+
+      if (!message.deletedForUserIds) {
+        message.deletedForUserIds = [];
+      }
+
+      if (!message.deletedForUserIds.includes(userId)) {
+        message.deletedForUserIds = [...message.deletedForUserIds, userId];
+        await this.messageRepo.save(message);
+
+        await this.updateLastVisibleMessageIfMatch(message.chatId, message.id, [
+          userId,
+        ]);
+      }
+
+      return message;
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to delete message for user');
+    }
+  }
+
+  async deleteForEveryone(userId: string, messageId: string): Promise<Message> {
+    try {
+      // Reuse soft delete with flag to clear deletedForUserIds
+      return await this.softDeleteMessage(userId, messageId, true);
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to delete message for everyone');
     }
   }
 
@@ -322,12 +393,17 @@ export class MessageService {
 
   async getMessagesByChatId(
     chatId: string,
+    currentUserId: string,
     queryParams: GetMessagesQuery,
   ): Promise<Message[]> {
     try {
       const query = this.buildFullMessageQuery()
         .where('message.chat_id = :chatId', { chatId })
         .andWhere('message.is_deleted = :isDeleted', { isDeleted: false })
+        .andWhere(
+          `(message.deletedForUserIds IS NULL OR NOT message.deletedForUserIds @> :userIdJson)`,
+          { userIdJson: JSON.stringify([currentUserId]) },
+        )
         .orderBy('message.createdAt', 'DESC');
 
       if (queryParams.limit) query.take(queryParams.limit);
@@ -393,5 +469,37 @@ export class MessageService {
         'forwardedSender.avatarUrl',
         'forwardedAttachments',
       ]);
+  }
+
+  private async updateLastVisibleMessageIfMatch(
+    chatId: string,
+    messageId: string,
+    userIds: string[],
+  ): Promise<void> {
+    const members = await this.chatMemberRepo.findBy(
+      userIds.map((userId) => ({ chatId, userId })),
+    );
+
+    for (const member of members) {
+      if (member.lastVisibleMessageId !== messageId) continue;
+
+      const fallback = await this.messageRepo.findOne({
+        where: {
+          chatId,
+          isDeleted: false,
+          id: Not(messageId),
+          deletedForUserIds: Raw(
+            (alias) =>
+              `(${alias} IS NULL OR NOT (${alias} @> '["${member.userId}"]'::jsonb))`,
+          ),
+        },
+        order: { createdAt: 'DESC' },
+      });
+
+      await this.chatMemberRepo.update(
+        { chatId, userId: member.userId },
+        { lastVisibleMessageId: fallback?.id || null },
+      );
+    }
   }
 }

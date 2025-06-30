@@ -54,12 +54,20 @@ export function useChatSocketListeners() {
       useChatStore.getState().setPinnedMessage(data.chatId, data.message);
     };
 
+    const handleMessageDeleted = (data: {
+      messageId: string;
+      chatId: string;
+    }) => {
+      useMessageStore.getState().deleteMessage(data.chatId, data.messageId);
+    };
+
     // Subscribe to events
     chatWebSocketService.onNewMessage(handleNewMessage);
     chatWebSocketService.onReaction(handleReaction);
     chatWebSocketService.onTyping(handleTyping);
     chatWebSocketService.onMessagesRead(handleMessagesRead);
     chatWebSocketService.onMessagePin(handleMessagePinned);
+    chatWebSocketService.onDeleteMessage(handleMessageDeleted);
 
     return () => {
       // Clean up listeners
@@ -68,6 +76,7 @@ export function useChatSocketListeners() {
       chatWebSocketService.offTyping(handleTyping);
       chatWebSocketService.offMessagesRead(handleMessagesRead);
       chatWebSocketService.offMessagePin(handleMessagePinned);
+      chatWebSocketService.offDeleteMessage(handleMessageDeleted);
     };
   }, []);
 }

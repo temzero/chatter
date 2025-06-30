@@ -55,9 +55,9 @@ export class ChatMapper {
       pinnedMessage: chat.pinnedMessage
         ? this.messageMapper.toMessageResponseDto(chat.pinnedMessage)
         : null,
-      lastMessage: chat.lastMessage
+      lastMessage: myMember.lastVisibleMessage
         ? this.transformLastMessageDto(
-            chat.lastMessage,
+            myMember.lastVisibleMessage,
             chat.members,
             currentUserId,
           )
@@ -105,9 +105,9 @@ export class ChatMapper {
       pinnedMessage: chat.pinnedMessage
         ? this.messageMapper.toMessageResponseDto(chat.pinnedMessage)
         : null,
-      lastMessage: chat.lastMessage
+      lastMessage: myMember.lastVisibleMessage
         ? this.transformLastMessageDto(
-            chat.lastMessage,
+            myMember.lastVisibleMessage,
             chat.members,
             currentUserId,
           )
