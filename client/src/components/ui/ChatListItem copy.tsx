@@ -1,7 +1,7 @@
 import React from "react";
 import { useChatStore } from "@/stores/chatStore";
 import { useMessageStore } from "@/stores/messageStore";
-import type { ChatResponse } from "@/types/chat";
+import type { ChatResponse } from "@/types/responses/chat.response";
 import { ChatAvatar } from "./avatar/ChatAvatar";
 import { formatTimeAgo } from "@/utils/formatTimeAgo";
 import { OnlineDot } from "./OnlineDot";

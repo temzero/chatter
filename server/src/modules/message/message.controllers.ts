@@ -33,7 +33,7 @@ export class MessageController {
     @CurrentUser('id') currentUserId: string,
     @Body() createMessageDto: CreateMessageDto,
   ): Promise<SuccessResponse<MessageResponseDto>> {
-    if (!createMessageDto.content && !createMessageDto.attachmentIds) {
+    if (!createMessageDto.content && !createMessageDto.attachments) {
       ErrorResponse.badRequest('Message must have at least Text or Attachment');
     }
 

@@ -8,10 +8,18 @@ import { ChatMember } from '../chat-member/entities/chat-member.entity';
 import { User } from '../user/entities/user.entity';
 import { MessageMapper } from './mappers/message.mapper';
 import { Reaction } from './entities/reaction.entity';
+import { Attachment } from './entities/attachment.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Message, Chat, ChatMember, User, Reaction]),
+    TypeOrmModule.forFeature([
+      Message,
+      Attachment,
+      Chat,
+      ChatMember,
+      User,
+      Reaction,
+    ]),
   ],
   controllers: [MessageController],
   providers: [MessageService, MessageMapper],

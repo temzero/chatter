@@ -1,5 +1,9 @@
 import API from "@/services/api/api";
-import { FriendRequestResDto, FriendshipResDto, SentRequestResDto } from "@/types/friendship";
+import {
+  FriendRequestResponse,
+  FriendshipResponse,
+  SentRequestResponse,
+} from "@/types/responses/friendship.response";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
 
 export const friendshipService = {
@@ -7,9 +11,12 @@ export const friendshipService = {
    * Send a friend request to a receiver by ID
    * @param receiverId - User ID to send request to
    */
-  async sendRequest(receiverId: string, requestMessage: string | undefined): Promise<SentRequestResDto> {
+  async sendRequest(
+    receiverId: string,
+    requestMessage: string | undefined
+  ): Promise<SentRequestResponse> {
     const { data } = await API.post(`/friendships/requests/${receiverId}`, {
-      requestMessage
+      requestMessage,
     });
     return data.payload;
   },
@@ -22,7 +29,7 @@ export const friendshipService = {
   async respondToRequest(
     friendshipId: string,
     status: FriendshipStatus
-  ): Promise<FriendshipResDto> {
+  ): Promise<FriendshipResponse> {
     const { data } = await API.patch(`/friendships/requests/${friendshipId}`, {
       status,
     });
@@ -32,7 +39,7 @@ export const friendshipService = {
   /**
    * Get all friends of the current user
    */
-  async getFriends(): Promise<FriendshipResDto[]> {
+  async getFriends(): Promise<FriendshipResponse[]> {
     const { data } = await API.get("/friendships");
     return data.payload;
   },
@@ -40,7 +47,7 @@ export const friendshipService = {
   /**
    * Get all pending friend requests for the current user
    */
-  async getPendingRequests(): Promise<FriendRequestResDto> {
+  async getPendingRequests(): Promise<FriendRequestResponse> {
     const { data } = await API.get("/friendships/requests/pending");
     return data.payload;
   },
@@ -60,19 +67,15 @@ export const friendshipService = {
    * delete to a friend request by friendship ID
    * @param friendshipId - Friend request ID
    */
-  async deleteRequest(
-    friendshipId: string
-  ): Promise<FriendshipResDto> {
+  async deleteRequest(friendshipId: string): Promise<FriendshipResponse> {
     const { data } = await API.delete(`/friendships/${friendshipId}`);
-    console.log('deleted: ', data)
+    console.log("deleted: ", data);
     return data.payload;
   },
 
-  async deleteByUserId(
-    userId: string
-  ): Promise<FriendshipResDto> {
+  async deleteByUserId(userId: string): Promise<FriendshipResponse> {
     const { data } = await API.delete(`/friendships/by-userid/${userId}`);
-    console.log('deleted: ', data)
+    console.log("deleted: ", data);
     return data.payload;
   },
 };

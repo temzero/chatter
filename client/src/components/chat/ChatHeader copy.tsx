@@ -2,14 +2,14 @@ import { useActiveChat } from "@/stores/chatStore";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
-import { FriendshipStatus } from "@/types/friendship";
+import { FriendshipStatus } from "@/types/enums/friendshipType";
 import { ChatType } from "@/types/enums/ChatType";
 import { OnlineDot } from "../ui/OnlineDot";
 import { useChatOnlineStatus } from "@/hooks/useChatOnlineStatus";
 import React from "react";
 
 const ChatHeader: React.FC = () => {
-  console.log('ChatHeader mounted');
+  console.log("ChatHeader mounted");
   const activeChat = useActiveChat();
 
   const toggleSidebarInfo = useSidebarInfoStore(

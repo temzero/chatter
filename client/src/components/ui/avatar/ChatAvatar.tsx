@@ -1,6 +1,6 @@
 import { Avatar } from "./Avatar";
 import { OnlineDot } from "../OnlineDot";
-import type { ChatResponse } from "@/types/chat";
+import type { ChatResponse } from "@/types/responses/chat.response";
 import { ChatType } from "@/types/enums/ChatType";
 
 type ChatAvatarProps = {
@@ -176,7 +176,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({ chat, type }) => {
 
     case ChatType.SAVED: {
       return (
-          <span className="material-symbols-outlined text-4xl">bookmark</span>
+        <span className="material-symbols-outlined text-4xl">bookmark</span>
       );
     }
 

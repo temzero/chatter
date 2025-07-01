@@ -2,19 +2,17 @@ import { useState, useMemo, useEffect } from "react";
 import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
-import { ChatResponse } from "@/types/chat";
+import { ChatResponse } from "@/types/responses/chat.response";
 import { useCurrentUser } from "@/stores/authStore";
 import { useFriendshipStore } from "@/stores/friendshipStore";
-import { FriendshipStatus } from "@/types/friendship";
+import { FriendshipStatus } from "@/types/enums/friendshipType";
 import { handleError } from "@/utils/handleError";
 import { toast } from "react-toastify";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 
 const DirectChatEdit = () => {
   const currentUser = useCurrentUser();
-  const activeChat = useChatStore(
-    (state) => state.activeChat
-  ) as ChatResponse;
+  const activeChat = useChatStore((state) => state.activeChat) as ChatResponse;
   const fetchChatById = useChatStore((state) => state.fetchChatById);
   const chatPartner = activeChat.chatPartner;
   const deleteChat = useChatStore((state) => state.deleteChat);
@@ -83,9 +81,9 @@ const DirectChatEdit = () => {
       }
 
       setSidebarInfo("default");
-      toast.success('Update successfully')
+      toast.success("Update successfully");
     } catch (error) {
-      handleError(error, 'Failed to update nickname')
+      handleError(error, "Failed to update nickname");
     }
   };
 

@@ -1,9 +1,9 @@
 import API from "../api/api";
-import type { ChatResponse } from "@/types/chat";
+import type { ChatResponse } from "@/types/responses/chat.response";
 import type {
   ApiSuccessResponse,
   DirectChatApiResponse,
-} from "@/types/apiSuccessResponse";
+} from "@/types/responses/apiSuccess.response";
 
 interface DirectChatDataResponse {
   payload: ChatResponse;

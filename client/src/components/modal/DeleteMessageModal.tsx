@@ -1,6 +1,6 @@
 // components/modals/DeleteMessageModal.tsx
 import React from "react";
-import { MessageResponse } from "@/types/messageResponse";
+import { MessageResponse } from "@/types/responses/message.response";
 import { useModalStore } from "@/stores/modalStore";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
 import MessagePreview from "../chat/MessagePreview";

@@ -9,6 +9,7 @@ import { UpdateMessageDto } from './dto/requests/update-message.dto';
 import { ErrorResponse } from '../../common/api-response/errors';
 import { GetMessagesQuery } from './dto/queries/get-messages.dto';
 import { Reaction } from './entities/reaction.entity';
+import { Attachment } from './entities/attachment.entity';
 
 @Injectable()
 export class MessageService {
@@ -19,6 +20,8 @@ export class MessageService {
     private readonly chatMemberRepo: Repository<ChatMember>,
     @InjectRepository(Message)
     private readonly messageRepo: Repository<Message>,
+    @InjectRepository(Attachment)
+    private readonly attachmentRepo: Repository<Attachment>,
     @InjectRepository(Reaction)
     private readonly reactionRepo: Repository<Reaction>,
   ) {}
@@ -57,6 +60,7 @@ export class MessageService {
     }
 
     try {
+      // Step 1: Save the message
       const newMessage = this.messageRepo.create({
         senderId: userId,
         ...createMessageDto,
@@ -64,12 +68,33 @@ export class MessageService {
 
       const savedMessage = await this.messageRepo.save(newMessage);
 
-      // ✅ Update lastVisibleMessageId for all members
+      // Step 2: Save attachments if any
+      if (createMessageDto.attachments?.length) {
+        const attachmentEntities = createMessageDto.attachments.map((att) =>
+          this.attachmentRepo.create({
+            messageId: savedMessage.id,
+            type: att.type,
+            url: att.url,
+            thumbnailUrl: att.thumbnailUrl || null,
+            filename: att.filename || null,
+            size: att.size || null,
+            mimeType: att.mimeType || null,
+            width: att.width || null,
+            height: att.height || null,
+            duration: att.duration || null,
+          }),
+        );
+
+        await this.attachmentRepo.save(attachmentEntities);
+      }
+
+      // Step 3: Update last visible message
       await this.chatMemberRepo.update(
         { chatId: chat.id },
         { lastVisibleMessageId: savedMessage.id },
       );
 
+      // Step 4: Return full message with joined relations
       const fullMessage = await this.getFullMessageById(savedMessage.id);
       return fullMessage;
     } catch (error) {

@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import ChannelMessage from "../MessageChannel";
-import { MessageResponse } from "@/types/messageResponse";
-import { ChatResponse } from "@/types/chat";
+import { MessageResponse } from "@/types/responses/message.response";
+import { ChatResponse } from "@/types/responses/chat.response";
 import { chatMemberService } from "@/services/chat/chatMemberService";
 
 interface ChannelMessagesProps {

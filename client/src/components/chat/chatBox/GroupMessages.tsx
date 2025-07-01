@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect } from "react";
 import Message from "../Message";
-import { MessageResponse } from "@/types/messageResponse";
-import { ChatResponse } from "@/types/chat";
+import { MessageResponse } from "@/types/responses/message.response";
+import { ChatResponse } from "@/types/responses/chat.response";
 import { ChatType } from "@/types/enums/ChatType";
 import {
   groupMessagesByDate,
@@ -94,7 +94,7 @@ const GroupMessages: React.FC<GroupMessagesProps> = ({ chat, messages }) => {
               isMessagePinned ? "top-12" : "top-0"
             }`}
           >
-            <div className="bg-[var(--background-color)] text-xs p-1 rounded">
+            <div className="bg-[var(--background-color)] text-xs p-1 rounded z-50">
               {group.date || "Today"}
             </div>
           </div>

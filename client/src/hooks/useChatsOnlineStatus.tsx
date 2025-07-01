@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
 import { webSocketService } from "@/lib/websocket/services/websocket.service";
-import type { ChatResponse } from "@/types/chat";
+import type { ChatResponse } from "@/types/responses/chat.response";
 
 type OnlineStatus = Record<string, boolean>;
 

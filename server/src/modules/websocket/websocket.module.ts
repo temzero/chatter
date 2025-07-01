@@ -12,6 +12,7 @@ import { ChatGateway } from './features/chat.gateway';
 import { NotificationGateway } from './features/notifications.gateway';
 import { MessageMapper } from '../message/mappers/message.mapper';
 import { ChatModule } from '../chat/chat.module';
+import { SupabaseModule } from '../superbase/supabase.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { ChatModule } from '../chat/chat.module';
     forwardRef(() => MessageModule),
     forwardRef(() => UserModule),
     forwardRef(() => ChatMemberModule),
+    forwardRef(() => SupabaseModule),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({

@@ -7,11 +7,11 @@ import { useMessageStore } from "./messageStore";
 import { useAuthStore } from "./authStore";
 import { useChatMemberStore } from "./chatMemberStore";
 import { ChatType } from "@/types/enums/ChatType";
-import type { ChatResponse } from "@/types/chat";
+import type { ChatResponse } from "@/types/responses/chat.response";
 import type {
   LastMessageResponse,
   MessageResponse,
-} from "@/types/messageResponse";
+} from "@/types/responses/message.response";
 import { toast } from "react-toastify";
 
 interface ChatStore {

@@ -1,7 +1,7 @@
-import { FriendshipStatus } from "./enums/friendshipType";
-import { User } from "./user";
+import { FriendshipStatus } from "../enums/friendshipType";
+import { User } from "./user.response";
 
-export interface FriendshipResDto {
+export interface FriendshipResponse {
   id: string;
   senderId: string;
   sender: User;
@@ -15,12 +15,12 @@ export interface FriendshipResDto {
   receiverUsername?: string;
 }
 
-export interface FriendRequestResDto {
-  sent: SentRequestResDto[];
-  received: ReceivedRequestsResDto[];
+export interface FriendRequestResponse {
+  sent: SentRequestResponse[];
+  received: ReceivedRequestsResponse[];
 }
 
-export interface ReceivedRequestsResDto {
+export interface ReceivedRequestsResponse {
   id: string;
   senderId: string;
   senderName: string;
@@ -30,7 +30,7 @@ export interface ReceivedRequestsResDto {
   updatedAt: string;
 }
 
-export interface SentRequestResDto {
+export interface SentRequestResponse {
   id: string;
   receiverId: string;
   receiverName: string;
@@ -39,6 +39,3 @@ export interface SentRequestResDto {
   requestMessage?: string | null;
   updatedAt: string;
 }
-
-export { FriendshipStatus };
-

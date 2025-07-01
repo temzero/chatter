@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { chatMemberService } from "@/services/chat/chatMemberService";
 import { useActiveChatId, useChatStore } from "./chatStore";
-import type { ChatMember } from "@/types/chatMember";
+import type { ChatMember } from "@/types/responses/chatMember.response";
 import { ChatType } from "@/types/enums/ChatType";
 import { useShallow } from "zustand/shallow";
 

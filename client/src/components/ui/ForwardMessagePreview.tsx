@@ -1,7 +1,7 @@
 // components/ui/ForwardedMessagePreview.tsx
 import React from "react";
 import classNames from "classnames";
-import type { MessageResponse } from "@/types/messageResponse";
+import type { MessageResponse } from "@/types/responses/message.response";
 import { useCurrentUser } from "@/stores/authStore";
 
 interface ForwardedMessagePreviewProps {

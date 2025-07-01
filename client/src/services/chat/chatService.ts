@@ -1,8 +1,8 @@
 import API from "../api/api";
-import type { ChatResponse } from "@/types/chat";
+import type { ChatResponse } from "@/types/responses/chat.response";
 import { directChatService } from "./directChatService";
 import { groupChatService } from "./groupChatService";
-import type { ApiSuccessResponse } from "@/types/apiSuccessResponse";
+import type { ApiSuccessResponse } from "@/types/responses/apiSuccess.response";
 
 export const chatService = {
   ...directChatService,

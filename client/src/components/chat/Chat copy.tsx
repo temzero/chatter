@@ -6,7 +6,7 @@ import ChatBar from "./ChatBar";
 import ChatBox from "./chatBox/ChatBox";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import React from "react";
-import { ChatResponse } from "@/types/chat";
+import { ChatResponse } from "@/types/responses/chat.response";
 
 // Memoized ChatContent component to prevent re-renders when props don't change
 const ChatContent = React.memo(({ chat }: { chat: ChatResponse }) => {

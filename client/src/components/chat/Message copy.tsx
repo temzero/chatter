@@ -6,7 +6,7 @@ import { useCurrentUser } from "@/stores/authStore";
 import RenderMultipleMedia from "../ui/RenderMultipleMedia";
 import { formatTime } from "@/utils/formatTime";
 import { Avatar } from "../ui/avatar/Avatar";
-import type { MessageResponse } from "@/types/messageResponse";
+import type { MessageResponse } from "@/types/responses/message.response";
 import { ChatType } from "@/types/enums/ChatType";
 import { ReactionPicker } from "../ui/MessageReactionPicker";
 import { MessageActions } from "../ui/MessageActions";

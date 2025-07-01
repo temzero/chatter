@@ -1,4 +1,3 @@
-// types/ChatMemberRole.ts
 export enum ChatMemberRole {
   OWNER = "owner",
   ADMIN = "admin",

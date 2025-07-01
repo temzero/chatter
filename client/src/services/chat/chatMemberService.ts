@@ -1,6 +1,10 @@
 import API from "../api/api";
-import { DirectChatMember, GroupChatMember, ChatMember } from "@/types/chatMember";
-import type { ApiSuccessResponse } from "@/types/apiSuccessResponse";
+import {
+  DirectChatMember,
+  GroupChatMember,
+  ChatMember,
+} from "@/types/responses/chatMember.response";
+import type { ApiSuccessResponse } from "@/types/responses/apiSuccess.response";
 
 export const chatMemberService = {
   // Get direct chat members

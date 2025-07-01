@@ -3,8 +3,8 @@ import { OnlineDot } from "@/components/ui/OnlineDot";
 import { useCurrentUser } from "@/stores/authStore";
 import { useChatStore } from "@/stores/chatStore";
 import { useUserStatus } from "@/stores/presenceStore";
-import { GroupChatMember } from "@/types/chatMember";
-import { ChatMemberRole } from "@/types/ChatMemberRole";
+import { GroupChatMember } from "@/types/responses/chatMember.response";
+import { ChatMemberRole } from "@/types/enums/ChatMemberRole";
 import { ChatMemberStatus } from "@/types/enums/chatMemberStatus";
 
 interface MemberItemProps {

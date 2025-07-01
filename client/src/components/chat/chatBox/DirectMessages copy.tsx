@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect } from "react";
 import Message from "../Message";
-import { MessageResponse } from "@/types/messageResponse";
-import { DirectChatResponse } from "@/types/chat";
+import { MessageResponse } from "@/types/responses/message.response";
+import { DirectChatResponse } from "@/types/responses/chat.response";
 import { useCurrentUser } from "@/stores/authStore";
 // import { formatTime } from "@/utils/formatTime";
 import {

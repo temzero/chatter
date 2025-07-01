@@ -1,7 +1,16 @@
 import { AttachmentType } from '../../constants/attachment-type.constants';
 import { IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
 
-export class UploadAttachmentDto {
+export class AttachmentUploadDto {
+  // additional field only process in server
+  @IsOptional()
+  @IsString()
+  url: string;
+
+  @IsOptional()
+  @IsString()
+  thumbnailUrl?: string;
+
   @IsEnum(AttachmentType)
   type: AttachmentType;
 

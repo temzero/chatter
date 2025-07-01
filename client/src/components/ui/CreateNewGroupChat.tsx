@@ -5,7 +5,7 @@ import ContactSelectionList from "../ui/ContactSelectionList";
 import { useChatStore } from "@/stores/chatStore";
 import { useCurrentUser } from "@/stores/authStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
-import type { ChatResponse } from "@/types/chat";
+import type { ChatResponse } from "@/types/responses/chat.response";
 import type { ChatType } from "@/types/enums/ChatType";
 import { SidebarMode } from "@/types/enums/sidebarMode";
 

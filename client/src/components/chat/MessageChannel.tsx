@@ -1,7 +1,7 @@
 import React from "react";
 import RenderMultipleMedia from "../ui/RenderMultipleMedia";
 import { formatTime } from "@/utils/formatTime";
-import type { MessageResponse } from "@/types/messageResponse";
+import type { MessageResponse } from "@/types/responses/message.response";
 
 interface ChannelMessageProps {
   message: MessageResponse;

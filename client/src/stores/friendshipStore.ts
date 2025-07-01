@@ -2,7 +2,11 @@
 import { create } from "zustand";
 import { friendshipService } from "@/services/friendshipService";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
-import { FriendshipResDto, ReceivedRequestsResDto, SentRequestResDto } from "@/types/friendship";
+import {
+  FriendshipResponse,
+  ReceivedRequestsResDto,
+  SentRequestResDto,
+} from "@/types/responses/friendship.response";
 
 type FriendshipState = {
   receivedRequests: ReceivedRequestsResDto[];
@@ -20,7 +24,7 @@ type FriendshipActions = {
   respondToRequest: (
     friendshipId: string,
     status: FriendshipStatus
-  ) => Promise<FriendshipResDto>;
+  ) => Promise<FriendshipResponse>;
   cancelRequest: (friendshipId: string) => Promise<void>;
   clearRequests: () => void;
   clearError: () => void;
@@ -84,7 +88,10 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
     respondToRequest: async (friendshipId, status) => {
       set({ isLoading: true, error: null });
       try {
-        const friendShip = await friendshipService.respondToRequest(friendshipId, status);
+        const friendShip = await friendshipService.respondToRequest(
+          friendshipId,
+          status
+        );
         set((state) => ({
           receivedRequests: state.receivedRequests.filter(
             (req) => req.id !== friendshipId

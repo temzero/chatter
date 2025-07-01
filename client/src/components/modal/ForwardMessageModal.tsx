@@ -1,10 +1,10 @@
 // components/modals/ForwardMessageModal.tsx
 import React from "react";
-import { MessageResponse } from "@/types/messageResponse";
+import { MessageResponse } from "@/types/responses/message.response";
 import { useModalStore } from "@/stores/modalStore";
 import { useChatStore } from "@/stores/chatStore";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
-import { ForwardMessagePayload } from "@/types/sendMessagePayload";
+import { ForwardMessageRequest } from "@/types/requests/forwardMessage.request";
 import { ChatAvatar } from "../ui/avatar/ChatAvatar";
 import SearchBar from "../ui/SearchBar";
 
@@ -30,7 +30,7 @@ const ForwardMessageModal: React.FC<ForwardMessageModalProps> = ({
     const alreadyForwarded = message.forwardedFromMessage;
     const originalMessageId = alreadyForwarded?.id || message.id;
 
-    const payload: ForwardMessagePayload = {
+    const payload: ForwardMessageRequest = {
       chatId,
       messageId: originalMessageId,
     };

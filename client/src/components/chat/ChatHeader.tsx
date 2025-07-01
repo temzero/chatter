@@ -2,15 +2,15 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
-import { FriendshipStatus } from "@/types/friendship";
+import { FriendshipStatus } from "@/types/enums/friendshipType";
 import { ChatType } from "@/types/enums/ChatType";
 import { OnlineDot } from "../ui/OnlineDot";
 import { useChatStatus } from "@/stores/presenceStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
-import type { ChatResponse } from "@/types/chat";
+import type { ChatResponse } from "@/types/responses/chat.response";
 import PinnedMessage from "./PinnedMessage";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
-import { DirectChatMember } from "@/types/chatMember";
+import { DirectChatMember } from "@/types/responses/chatMember.response";
 
 interface ChatHeaderProps {
   chat: ChatResponse;

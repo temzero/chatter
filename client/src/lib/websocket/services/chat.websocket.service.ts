@@ -1,10 +1,8 @@
 // src/services/websocket/chat.service.ts
-import {
-  ForwardMessagePayload,
-  SendMessagePayload,
-} from "@/types/sendMessagePayload";
+import { SendMessageRequest } from "@/types/requests/sendMessage.request";
+import { ForwardMessageRequest } from "@/types/requests/forwardMessage.request";
 import { webSocketService } from "./websocket.service";
-import { MessageResponse } from "@/types/messageResponse";
+import { MessageResponse } from "@/types/responses/message.response";
 import { toast } from "react-toastify";
 
 export class ChatWebSocketService {
@@ -42,7 +40,7 @@ export class ChatWebSocketService {
     webSocketService.emit("chat:typing", { chatId, isTyping });
   }
 
-  async sendMessage(message: SendMessagePayload) {
+  async sendMessage(message: SendMessageRequest) {
     webSocketService.emit("chat:sendMessage", message);
   }
 
@@ -55,7 +53,7 @@ export class ChatWebSocketService {
     webSocketService.off("chat:newMessage", callback);
   }
 
-  async forwardMessage(message: ForwardMessagePayload) {
+  async forwardMessage(message: ForwardMessageRequest) {
     webSocketService.emit("chat:forwardMessage", message);
   }
 

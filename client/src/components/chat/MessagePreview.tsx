@@ -2,16 +2,14 @@ import React from "react";
 import classNames from "classnames";
 import { formatDateTime } from "@/utils/formatDate";
 import { Avatar } from "../ui/avatar/Avatar";
-import type { MessageResponse } from "@/types/messageResponse";
+import type { MessageResponse } from "@/types/responses/message.response";
 import { useCurrentUserId } from "@/stores/authStore";
 
 interface MessagePreviewProps {
   message: MessageResponse;
 }
 
-const MessagePreview: React.FC<MessagePreviewProps> = ({
-  message,
-}) => {
+const MessagePreview: React.FC<MessagePreviewProps> = ({ message }) => {
   const currentUserId = useCurrentUserId();
   const isMe = message.sender.id === currentUserId;
 

@@ -1,5 +1,5 @@
 // src/utils/messageHelpers.ts
-import { MessageResponse } from "@/types/messageResponse";
+import { MessageResponse } from "@/types/responses/message.response";
 
 export interface MessagesByDateGroup {
   date: string;
@@ -41,19 +41,17 @@ export function isRecentMessage(
 ): boolean {
   const currentTime = new Date(currentMsg.createdAt).getTime();
 
-  const prevIsRecent =
-    !!(
-      prevMsg &&
-      prevMsg.senderId === currentMsg.senderId &&
-      currentTime - new Date(prevMsg.createdAt).getTime() <= periodMs
-    );
+  const prevIsRecent = !!(
+    prevMsg &&
+    prevMsg.senderId === currentMsg.senderId &&
+    currentTime - new Date(prevMsg.createdAt).getTime() <= periodMs
+  );
 
-  const nextIsRecent =
-    !!(
-      nextMsg &&
-      nextMsg.senderId === currentMsg.senderId &&
-      new Date(nextMsg.createdAt).getTime() - currentTime <= periodMs
-    );
+  const nextIsRecent = !!(
+    nextMsg &&
+    nextMsg.senderId === currentMsg.senderId &&
+    new Date(nextMsg.createdAt).getTime() - currentTime <= periodMs
+  );
 
   if (prevIsRecent && !nextIsRecent) return false;
 

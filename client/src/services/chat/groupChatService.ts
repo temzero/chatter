@@ -1,6 +1,6 @@
 import API from "../api/api";
-import type { ChatResponse } from "@/types/chat";
-import type { ApiSuccessResponse } from "@/types/apiSuccessResponse";
+import type { ChatResponse } from "@/types/responses/chat.response";
+import type { ApiSuccessResponse } from "@/types/responses/apiSuccess.response";
 import { ChatType } from "@/types/enums/ChatType";
 import logFormData from "@/utils/logFormdata";
 

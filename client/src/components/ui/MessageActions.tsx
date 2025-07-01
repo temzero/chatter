@@ -2,7 +2,7 @@
 import React from "react";
 import classNames from "classnames";
 import { motion } from "framer-motion";
-import { MessageResponse } from "@/types/messageResponse";
+import { MessageResponse } from "@/types/responses/message.response";
 import { useMessageStore } from "@/stores/messageStore";
 import { useModalStore } from "@/stores/modalStore";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";

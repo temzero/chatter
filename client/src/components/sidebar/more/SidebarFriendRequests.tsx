@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Avatar } from "../../ui/avatar/Avatar";
 import { formatTimeAgo } from "../../../utils/formatTimeAgo";
 import { useFriendshipStore } from "@/stores/friendshipStore";
-import { FriendshipStatus } from "@/types/friendship";
+import { FriendshipStatus } from "@/types/enums/friendshipType";
 import { SlidingContainer } from "../../ui/SlidingContainer";
 import { useChatStore } from "@/stores/chatStore";
 import SidebarLayout from "@/pages/SidebarLayout";

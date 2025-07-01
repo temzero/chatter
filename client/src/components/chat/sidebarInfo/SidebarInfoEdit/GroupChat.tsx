@@ -1,5 +1,5 @@
 import React from "react";
-import { ChatResponse } from "@/types/chat";
+import { ChatResponse } from "@/types/responses/chat.response";
 import { useActiveChat } from "@/stores/chatStore";
 import {
   SidebarInfoModes,
@@ -12,7 +12,7 @@ import { useActiveMembers } from "@/stores/chatMemberStore";
 const GroupChat: React.FC = () => {
   const activeChat = useActiveChat() as ChatResponse;
   const activeMembers = useActiveMembers() || [];
-  console.log('activeMembers', activeMembers)
+  console.log("activeMembers", activeMembers);
   const { setSidebarInfo } = useSidebarInfoStore();
 
   return (

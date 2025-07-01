@@ -1,5 +1,5 @@
 import API from "@/services/api/api";
-import { otherUser, User } from "@/types/user";
+import { otherUser, User } from "@/types/responses/user.response";
 import { ProfileFormData } from "@/components/sidebar/SidebarProfileEdit";
 
 export const userService = {
@@ -99,10 +99,10 @@ export const userService = {
    * @throws {Error} If email is invalid or sending fails
    */
   async sendEmailVerificationCode(email: string): Promise<boolean> {
-      const { data } = await API.post("/user/verify/email/send-code", {
-        email,
-      });
-      return data.payload;
+    const { data } = await API.post("/user/verify/email/send-code", {
+      email,
+    });
+    return data.payload;
   },
 
   /**
@@ -115,19 +115,19 @@ export const userService = {
     email: string,
     verificationCode: string
   ): Promise<User> {
-      // Validate code format before sending to server
-      if (!/^\d{6}$/.test(verificationCode)) {
-        throw new Error("Verification code must be 6 digits");
-      }
+    // Validate code format before sending to server
+    if (!/^\d{6}$/.test(verificationCode)) {
+      throw new Error("Verification code must be 6 digits");
+    }
 
-      const { data } = await API.post("/user/verify/email/confirm-code", {
-        email,
-        verificationCode,
-      });
+    const { data } = await API.post("/user/verify/email/confirm-code", {
+      email,
+      verificationCode,
+    });
 
-      console.log('data', data)
+    console.log("data", data);
 
-      return data.payload;
+    return data.payload;
   },
 
   /**

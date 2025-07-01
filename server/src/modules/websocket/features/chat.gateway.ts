@@ -13,6 +13,7 @@ import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
 import { MessageMapper } from 'src/modules/message/mappers/message.mapper';
 import { ChatService } from 'src/modules/chat/chat.service';
 import { Message } from 'src/modules/message/entities/message.entity';
+import { SupabaseService } from 'src/modules/superbase/supabase.service';
 
 const chatLink = 'chat:';
 
@@ -23,6 +24,7 @@ export class ChatGateway {
     private readonly chatService: ChatService,
     private readonly websocketService: WebsocketService,
     private readonly chatMemberService: ChatMemberService,
+    private readonly supabaseService: SupabaseService,
     private readonly messageMapper: MessageMapper,
   ) {}
 
@@ -72,27 +74,23 @@ export class ChatGateway {
         return;
       }
 
-      // Create the message
       const message = await this.messageService.createMessage(
         senderId,
         payload,
       );
       const messageResponse = this.messageMapper.toMessageResponseDto(message);
 
-      // Update the sender's last read message to this new message
       const updatedMember = await this.chatMemberService.updateLastRead(
         payload.memberId,
-        message.id, // using the newly created message's ID
+        message.id,
       );
 
-      // Emit the new message to all chat members
       await this.websocketService.emitToChatMembers(
         payload.chatId,
         `${chatLink}newMessage`,
         messageResponse,
       );
 
-      // Emit the read update to all chat members
       if (updatedMember) {
         await this.websocketService.emitToChatMembers(
           payload.chatId,

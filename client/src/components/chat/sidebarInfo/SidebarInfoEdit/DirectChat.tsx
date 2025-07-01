@@ -1,6 +1,6 @@
 import React from "react";
 import ContactInfoItem from "@/components/ui/contactInfoItem";
-import { ChatResponse } from "@/types/chat";
+import { ChatResponse } from "@/types/responses/chat.response";
 import {
   SidebarInfoModes,
   useSidebarInfoStore,
@@ -10,7 +10,7 @@ import FriendshipBtn from "@/components/ui/FriendshipBtn";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
 import { useActiveChat } from "@/stores/chatStore";
 import { useActiveMembers } from "@/stores/chatMemberStore";
-import { DirectChatMember } from "@/types/chatMember";
+import { DirectChatMember } from "@/types/responses/chatMember.response";
 
 const DirectChat: React.FC = () => {
   const activeChat = useActiveChat() as ChatResponse;

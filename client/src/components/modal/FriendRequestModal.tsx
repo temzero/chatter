@@ -3,7 +3,7 @@ import React, { useRef, useState } from "react";
 import { useModalStore } from "@/stores/modalStore";
 import { Avatar } from "../ui/avatar/Avatar";
 import { useFriendshipStore } from "@/stores/friendshipStore";
-import { FriendshipStatus } from "@/types/friendship";
+import { FriendshipStatus } from "@/types/enums/friendshipType";
 import { useChatStore } from "@/stores/chatStore";
 
 interface FriendRequestModalProps {

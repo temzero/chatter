@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import MediaModal from "./media/MediaModal";
 import FriendRequestModal from "./FriendRequestModal";
 import ForwardMessageModal from "./ForwardMessageModal";
-import { MessageResponse } from "@/types/messageResponse";
+import { MessageResponse } from "@/types/responses/message.response";
 import DeleteMessageModal from "./DeleteMessageModal";
 
 // Modal.tsx improvements:

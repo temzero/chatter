@@ -3,7 +3,7 @@ import { create } from "zustand";
 import type {
   AttachmentResponse,
   MessageResponse,
-} from "@/types/messageResponse";
+} from "@/types/responses/message.response";
 import { useChatStore } from "./chatStore";
 import { messageService } from "@/services/messageService";
 import { useMemo } from "react";

@@ -1,6 +1,6 @@
 import React from "react";
 import ChatListItem from "./ChatListItem";
-import type { ChatResponse } from "@/types/chat";
+import type { ChatResponse } from "@/types/responses/chat.response";
 import { useAuthStore } from "@/stores/authStore";
 
 interface ChatListProps {

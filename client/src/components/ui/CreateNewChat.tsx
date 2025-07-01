@@ -7,11 +7,11 @@ import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "./avatar/Avatar";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
 import FriendshipBtn from "./FriendshipBtn";
-import type { otherUser } from "@/types/user";
+import type { otherUser } from "@/types/responses/user.response";
 
 const CreateNewChat: React.FC = () => {
-    const currentUser = useCurrentUser();
-  
+  const currentUser = useCurrentUser();
+
   const createOrGetDirectChat = useChatStore((s) => s.createOrGetDirectChat);
 
   const [query, setQuery] = useState("");
@@ -27,7 +27,7 @@ const CreateNewChat: React.FC = () => {
 
     try {
       const foundUser = await userService.getUserByIdentifier(query.trim());
-      console.log('foundedUser: ', foundUser)
+      console.log("foundedUser: ", foundUser);
       setUser(foundUser);
     } catch (err: unknown) {
       console.log("Search for user: ", String(err));

@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import Message from "../Message";
-import { MessageResponse } from "@/types/messageResponse";
-import { ChatResponse } from "@/types/chat";
+import { MessageResponse } from "@/types/responses/message.response";
+import { ChatResponse } from "@/types/responses/chat.response";
 import { chatMemberService } from "@/services/chat/chatMemberService";
 import { useActiveMembers } from "@/stores/chatMemberStore";
 // import { useCurrentUser } from "@/stores/authStore";

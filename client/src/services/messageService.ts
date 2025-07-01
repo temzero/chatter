@@ -1,7 +1,7 @@
 import API from "./api/api";
-import { SendMessagePayload } from "@/types/sendMessagePayload";
-import { MessageResponse } from "@/types/messageResponse";
-import { UpdateMessageDto } from "@/types/updateMessageDto";
+import { SendMessageRequest } from "@/types/requests/sendMessage.request";
+import { MessageResponse } from "@/types/responses/message.response";
+import { UpdateMessageRequest } from "@/types/requests/updateMessage.request";
 
 export const messageService = {
   async getChatMessages(
@@ -12,11 +12,11 @@ export const messageService = {
     const { data } = await API.get(`/messages/chat/${chatId}`, {
       params: { offset, limit },
     });
-    console.log('chatMessages: ', data.payload)
+    console.log("chatMessages: ", data.payload);
     return data.payload;
   },
 
-  async sendMessage(payload: SendMessagePayload): Promise<MessageResponse> {
+  async sendMessage(payload: SendMessageRequest): Promise<MessageResponse> {
     if (!payload.content && !payload.attachmentIds) {
       throw new Error("Message must have content or attachments");
     }
@@ -26,7 +26,7 @@ export const messageService = {
 
   async editMessage(
     messageId: string,
-    updateData: UpdateMessageDto
+    updateData: UpdateMessageRequest
   ): Promise<MessageResponse> {
     const { data } = await API.put(`/messages/${messageId}`, updateData);
     return data;

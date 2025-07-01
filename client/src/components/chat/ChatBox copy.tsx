@@ -5,7 +5,7 @@ import { useSoundEffect } from "@/hooks/useSoundEffect";
 import messageSound from "@/assets/sound/message-sent2.mp3";
 import { ChatType } from "@/types/enums/ChatType";
 import TypingIndicator from "../ui/typingIndicator/TypingIndicator";
-import type { ChatResponse } from "@/types/chat";
+import type { ChatResponse } from "@/types/responses/chat.response";
 import { useMessagesByChatId } from "@/stores/messageStore";
 
 interface ChatBoxProps {

@@ -37,9 +37,9 @@ import { useMessageStore } from "@/stores/messageStore";
 import { useChatStore } from "@/stores/chatStore";
 import { debounce } from "lodash";
 import { useMemo, useState, useEffect } from "react";
-import type { ChatResponse } from "@/types/chat";
-import type { MessageResponse } from "@/types/messageResponse";
-import type { ChatMember } from "@/types/chatMember";
+import type { ChatResponse } from "@/types/responses/chat.response";
+import type { MessageResponse } from "@/types/responses/message.response";
+import type { ChatMember } from "@/types/responses/chatMember.response";
 
 // Debounce delay in milliseconds
 const DEBOUNCE_DELAY = 1200;
@@ -51,13 +51,13 @@ export const useChatBoxData = () => {
     chatMembers: [] as ChatMember[],
     isLoading: true,
   });
-  console.log('useChatBoxData')
+  console.log("useChatBoxData");
 
   // Get raw store data
   const isLoading = useChatStore((state) => state.isLoading);
-  console.log('isLoading from chatStore', isLoading)
+  console.log("isLoading from chatStore", isLoading);
   // const activeChat = useChatStore((state) => state.activeChat);
-  const activeChat = useChatStore.getState().activeChat
+  const activeChat = useChatStore.getState().activeChat;
   const activeChatId = activeChat?.id || "";
 
   // Debounced update function
@@ -81,7 +81,7 @@ export const useChatBoxData = () => {
           isLoading,
         });
 
-        console.log('useChatBoxData updated', {
+        console.log("useChatBoxData updated", {
           activeChat,
           messages: messages.length,
           chatMembers: chatMembers.length,

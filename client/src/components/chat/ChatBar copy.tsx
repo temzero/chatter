@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import EmojiPicker from "../ui/EmojiPicker";
 import AttachFile from "../ui/AttachFile";
 import FileImportPreviews from "../ui/FileImportPreview";
-import { SendMessagePayload } from "@/types/sendMessagePayload";
+import { SendMessageRequest } from "@/types/requests/sendMessage.request";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
 import useTypingIndicator from "@/hooks/useTypingIndicator";
 
@@ -93,7 +93,7 @@ const ChatBar: React.FC = () => {
     if ((trimmedInput || attachedFiles.length > 0) && activeChatId) {
       if (inputRef.current) inputRef.current.value = "";
 
-      const payload: SendMessagePayload = {
+      const payload: SendMessageRequest = {
         chatId: activeChatId,
         content: trimmedInput || undefined,
         attachmentIds:

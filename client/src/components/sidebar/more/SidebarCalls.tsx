@@ -3,7 +3,7 @@ import React from "react";
 import SidebarLayout from "@/pages/SidebarLayout";
 import { useChatStore } from "@/stores/chatStore";
 import { ChatType } from "@/types/enums/ChatType";
-import { ChatResponse } from "@/types/chat";
+import { ChatResponse } from "@/types/responses/chat.response";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 
 interface SidebarCallsProps {
@@ -21,21 +21,19 @@ const SidebarCalls: React.FC<SidebarCallsProps> = ({
       chat.type === ChatType.DIRECT && !!chat.chatPartner?.phoneNumber
   );
 
-  const handleVideoCall =
-    (chat: ChatResponse) => (e: React.MouseEvent) => {
-      e.stopPropagation();
-      if (onVideoCall && chat.chatPartner?.phoneNumber) {
-        onVideoCall(chat.chatPartner.phoneNumber);
-      }
-    };
+  const handleVideoCall = (chat: ChatResponse) => (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onVideoCall && chat.chatPartner?.phoneNumber) {
+      onVideoCall(chat.chatPartner.phoneNumber);
+    }
+  };
 
-  const handleAudioCall =
-    (chat: ChatResponse) => (e: React.MouseEvent) => {
-      e.stopPropagation();
-      if (onAudioCall && chat.chatPartner?.phoneNumber) {
-        onAudioCall(chat.chatPartner.phoneNumber);
-      }
-    };
+  const handleAudioCall = (chat: ChatResponse) => (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onAudioCall && chat.chatPartner?.phoneNumber) {
+      onAudioCall(chat.chatPartner.phoneNumber);
+    }
+  };
 
   return (
     <SidebarLayout title="Calls">

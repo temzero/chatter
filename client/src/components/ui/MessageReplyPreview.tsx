@@ -1,6 +1,6 @@
 // components/ui/MessageReplyPreview.tsx
 import React from "react";
-import { MessageResponse } from "@/types/messageResponse";
+import { MessageResponse } from "@/types/responses/message.response";
 import { ChatType } from "@/types/enums/ChatType";
 import { Avatar } from "./avatar/Avatar";
 import classNames from "classnames";

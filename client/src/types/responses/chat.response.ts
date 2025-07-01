@@ -1,6 +1,6 @@
-import { ChatMemberRole } from "./ChatMemberRole";
-import { ChatType } from "./enums/ChatType";
-import { LastMessageResponse, MessageResponse } from "./messageResponse";
+import { ChatMemberRole } from "../enums/ChatMemberRole";
+import { ChatType } from "../enums/ChatType";
+import { LastMessageResponse, MessageResponse } from "./message.response";
 
 export interface ChatResponse {
   id: string;

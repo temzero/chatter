@@ -1,11 +1,11 @@
 import { AttachmentType } from "@/types/enums/attachmentType";
-import type { MessageResponse } from "@/types/messageResponse";
-import type { LastMessageResponse } from "@/types/messageResponse";
+import type { MessageResponse } from "@/types/responses/message.response";
+import type { LastMessageResponse } from "@/types/responses/message.response";
 
 export function createLastMessage(
-  message: MessageResponse,
+  message: MessageResponse
 ): LastMessageResponse {
-//   const isMe = message.sender.id === currentUserId;
+  //   const isMe = message.sender.id === currentUserId;
 
   const isForwarded = !!message.forwardedFromMessage;
 
@@ -24,7 +24,7 @@ export function createLastMessage(
   return {
     id: message.id,
     senderId: message.sender.id,
-    senderDisplayName:message.sender.displayName,
+    senderDisplayName: message.sender.displayName,
     content,
     icons,
     isForwarded,

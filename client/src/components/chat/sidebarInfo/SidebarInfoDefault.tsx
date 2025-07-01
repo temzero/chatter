@@ -3,14 +3,14 @@ import { useChatStore } from "@/stores/chatStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { motion } from "framer-motion";
 import { ChatType } from "@/types/enums/ChatType";
-import { ChatMemberRole } from "@/types/ChatMemberRole";
+import { ChatMemberRole } from "@/types/enums/ChatMemberRole";
 // import { useActiveChatAttachments } from "@/stores/messageStore";
 // import RenderMedia from "@/components/ui/RenderMedia";
 import DirectChat from "./SidebarInfoEdit/DirectChat";
 import GroupChat from "./SidebarInfoEdit/GroupChat";
 
 const SidebarInfoDefault: React.FC = () => {
-  console.log('SIDEBAR-InfoDefault Rendered')
+  console.log("SIDEBAR-InfoDefault Rendered");
   const { activeChat } = useChatStore();
   // const activeAttachments = useActiveChatAttachments()
   // const activeAttachments: any[] = [];

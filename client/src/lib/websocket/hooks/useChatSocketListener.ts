@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { chatWebSocketService } from "../services/chat.websocket.service";
 import { useMessageStore } from "@/stores/messageStore";
-import { MessageResponse } from "@/types/messageResponse";
+import { MessageResponse } from "@/types/responses/message.response";
 import { useTypingStore } from "@/stores/typingStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useChatStore } from "@/stores/chatStore";

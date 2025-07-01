@@ -2,13 +2,13 @@ import { create } from "zustand";
 import type {
   AttachmentResponse,
   MessageResponse,
-} from "@/types/messageResponse";
+} from "@/types/responses/message.response";
 import { useChatStore } from "./chatStore";
 import { AttachmentType } from "@/types/enums/attachmentType";
 import { messageService } from "@/services/messageService";
 import { useMemo } from "react";
 import { handleError } from "@/utils/handleError";
-import { LastMessageResponse } from "@/types/chat";
+import { LastMessageResponse } from "@/types/responses/chat.response";
 import { useShallow } from "zustand/shallow";
 
 interface ChatMessages {

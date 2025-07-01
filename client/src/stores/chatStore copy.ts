@@ -12,7 +12,7 @@ import type {
   GroupChatResponse,
   ChatMember,
   LastMessageResponse,
-} from "@/types/chat";
+} from "@/types/responses/chat.response";
 import React from "react";
 
 interface ChatStore {

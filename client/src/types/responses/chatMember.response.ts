@@ -1,6 +1,6 @@
-import { ChatMemberRole } from "./ChatMemberRole";
-import { ChatMemberStatus } from "./enums/chatMemberStatus";
-import { FriendshipStatus } from "./friendship";
+import { ChatMemberRole } from "../enums/ChatMemberRole";
+import { ChatMemberStatus } from "../enums/chatMemberStatus";
+import { FriendshipStatus } from "../enums/friendshipType";
 
 export type ChatMember = DirectChatMember | GroupChatMember;
 

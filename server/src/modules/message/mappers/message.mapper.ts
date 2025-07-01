@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Message } from '../entities/message.entity';
 import { MessageResponseDto } from '../dto/responses/message-response.dto';
 import { plainToInstance } from 'class-transformer';
+import { AttachmentResponseDto } from '../dto/responses/attachment-response.dto';
 
 @Injectable()
 export class MessageMapper {
@@ -30,7 +31,10 @@ export class MessageMapper {
       createdAt: message.createdAt,
       updatedAt: message.updatedAt,
       reactions: groupedReactions,
-      attachments: message.attachments,
+      attachments: plainToInstance(
+        AttachmentResponseDto,
+        message.attachments || [],
+      ),
 
       replyToMessage: this.mapNestedMessage(message.replyToMessage),
       forwardedFromMessage: this.mapNestedMessage(message.forwardedFromMessage),
@@ -48,7 +52,10 @@ export class MessageMapper {
       id: msg.id,
       content: msg.content,
       createdAt: msg.createdAt,
-      attachments: msg.attachments || [],
+      attachments: plainToInstance(
+        AttachmentResponseDto,
+        msg.attachments || [],
+      ),
       sender: this.mapSender(msg.senderId, msg.sender),
     };
   }

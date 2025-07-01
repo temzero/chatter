@@ -1,6 +1,6 @@
 // components/ui/ReplyToMessage.tsx
 import React from "react";
-import { MessageResponse } from "@/types/messageResponse";
+import { MessageResponse } from "@/types/responses/message.response";
 import { useCurrentUserId } from "@/stores/authStore";
 import { Avatar } from "./avatar/Avatar";
 import { formatTime } from "@/utils/formatTime";

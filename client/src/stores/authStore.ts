@@ -6,7 +6,7 @@ import { authService } from "@/services/authService";
 import { useChatStore } from "@/stores/chatStore";
 import { useSidebarStore } from "./sidebarStore";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
-import type { User } from "@/types/user";
+import type { User } from "@/types/responses/user.response";
 import { SidebarMode } from "@/types/enums/sidebarMode";
 import { webSocketService } from "@/lib/websocket/services/websocket.service";
 
@@ -245,6 +245,8 @@ export const useAuthActions = () =>
 // Individual selectors (only for frequently used isolated values)
 export const useCurrentUser = () => useAuthStore((state) => state.currentUser);
 export const useCurrentUserId = () =>
-  useAuthStore((state) => state.currentUser ? state.currentUser.id : undefined);
+  useAuthStore((state) =>
+    state.currentUser ? state.currentUser.id : undefined
+  );
 export const useIsAuthenticated = () =>
   useAuthStore((state) => state.isAuthenticated);

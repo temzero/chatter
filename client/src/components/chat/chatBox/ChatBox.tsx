@@ -3,7 +3,7 @@ import DirectMessages from "./DirectMessages";
 import GroupMessages from "./GroupMessages";
 import ChannelMessages from "./ChannelMessages";
 import TypingIndicator from "../../ui/typingIndicator/TypingIndicator";
-import type { ChatResponse } from "@/types/chat";
+import type { ChatResponse } from "@/types/responses/chat.response";
 import { useMessagesByChatId } from "@/stores/messageStore";
 import { ChatType } from "@/types/enums/ChatType";
 

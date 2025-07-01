@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useChatStore } from "@/stores/chatStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
-import { ChatResponse } from "@/types/chat";
+import { ChatResponse } from "@/types/responses/chat.response";
 import AvatarEdit from "@/components/ui/avatar/AvatarEdit";
 import { fileStorageService } from "@/services/storage/fileStorageService";
 import { handleError } from "@/utils/handleError";
@@ -9,9 +9,7 @@ import { toast } from "react-toastify";
 import { useActiveMembers } from "@/stores/chatMemberStore";
 
 const GroupChatEdit = () => {
-  const activeChat = useChatStore(
-    (state) => state.activeChat
-  ) as ChatResponse;
+  const activeChat = useChatStore((state) => state.activeChat) as ChatResponse;
   const activeMembers = useActiveMembers();
   const deleteChat = useChatStore((state) => state.deleteChat);
   const leaveGroupChat = useChatStore((state) => state.leaveGroupChat);

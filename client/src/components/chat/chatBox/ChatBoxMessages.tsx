@@ -2,8 +2,8 @@ import React, { useMemo } from "react";
 import Message from "../Message";
 import ChannelMessage from "../MessageChannel";
 import { ChatType } from "@/types/enums/ChatType";
-import type { MessageResponse } from "@/types/messageResponse";
-import { ChatResponse } from "@/types/chat";
+import type { MessageResponse } from "@/types/responses/message.response";
+import { ChatResponse } from "@/types/responses/chat.response";
 import { chatMemberService } from "@/services/chat/chatMemberService";
 import { useMembersByChatId } from "@/stores/chatMemberStore";
 
