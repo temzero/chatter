@@ -111,6 +111,10 @@ export class Message {
   @BeforeInsert()
   @BeforeUpdate()
   validateContent() {
+    // Skip validation if this is a delete operation
+    if (this.isDeleted || this.deletedAt || this.deletedForUserIds) {
+      return;
+    }
     // Trim content if it exists
     if (this.content) {
       this.content = this.content.trim();

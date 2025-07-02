@@ -1,12 +1,19 @@
 import { create } from "zustand";
 
-type ModalType = "media" | "friend-request" | "forward-message" | "delete-message" | null;
+type ModalType =
+  | "media"
+  | "friend-request"
+  | "message"
+  | "forward-message"
+  | "delete-message"
+  | null;
 type ModalContent = {
   type: ModalType;
   props?: Record<string, unknown>;
 };
 
 interface ModalState {
+  modalMessageId?: string;
   modalContent: ModalContent | null;
   currentMediaId: string | null; // Keeping for backward compatibility
 }
@@ -44,6 +51,8 @@ export const useCurrentMediaId = () =>
   useModalStore((state) => state.currentMediaId);
 export const useModalContent = () =>
   useModalStore((state) => state.modalContent);
+export const useIsModalOpen = () =>
+  useModalStore((state) => state.modalContent !== null);
 export const useModalActions = () =>
   useModalStore((state) => ({
     openModal: state.openModal,

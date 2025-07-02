@@ -9,6 +9,7 @@ import { User } from '../user/entities/user.entity';
 import { MessageMapper } from './mappers/message.mapper';
 import { Reaction } from './entities/reaction.entity';
 import { Attachment } from './entities/attachment.entity';
+import { SupabaseModule } from '../superbase/supabase.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { Attachment } from './entities/attachment.entity';
       User,
       Reaction,
     ]),
+    SupabaseModule,
   ],
   controllers: [MessageController],
   providers: [MessageService, MessageMapper],

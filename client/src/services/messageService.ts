@@ -7,7 +7,7 @@ export const messageService = {
   async getChatMessages(
     chatId: string,
     offset: number = 0,
-    limit: number = 20
+    limit: number = 20,
   ): Promise<MessageResponse[]> {
     const { data } = await API.get(`/messages/chat/${chatId}`, {
       params: { offset, limit },
@@ -17,7 +17,7 @@ export const messageService = {
   },
 
   async sendMessage(payload: SendMessageRequest): Promise<MessageResponse> {
-    if (!payload.content && !payload.attachmentIds) {
+    if (!payload.content && !payload.attachments) {
       throw new Error("Message must have content or attachments");
     }
     const { data } = await API.post("/messages", payload);

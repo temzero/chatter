@@ -45,7 +45,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ chat }) => {
 
   return (
     <header
-      className="absolute top-0 left-0 w-full cursor-pointer hover:shadow-2xl flex items-center justify-between min-h-[var(--header-height)] max-h-[var(--header-height)] px-3 backdrop-blur-xl shadow z-40"
+      className="absolute top-0 left-0 w-full cursor-pointer hover:shadow-2xl flex items-center justify-between min-h-[var(--header-height)] max-h-[var(--header-height)] px-3 backdrop-blur-xl shadow z-[80]"
       onClick={toggleSidebarInfo}
     >
       {chat.pinnedMessage && (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import classNames from "classnames";
 import { motion } from "framer-motion";
-import { useCurrentUserId } from "@/stores/authStore";
+import { useIsMe } from "@/stores/authStore";
 import { formatDateTime } from "@/utils/formatDate";
 import { Avatar } from "../ui/avatar/Avatar";
 import type { MessageResponse } from "@/types/responses/message.response";
@@ -35,8 +35,7 @@ const PinnedMessage: React.FC<MessageProps> = ({
   isBanner = false,
   onUnpin,
 }) => {
-  const currentUserId = useCurrentUserId();
-  const isMe = message.sender.id === currentUserId;
+  const isMe = useIsMe(message.sender.id);
 
   const forwardedMessage = message.forwardedFromMessage;
   const isForwarded = forwardedMessage !== null;
@@ -143,7 +142,7 @@ const PinnedMessage: React.FC<MessageProps> = ({
       <motion.div
         onClick={(e) => {
           e.stopPropagation();
-          scrollToMessageById(message.id);
+          scrollToMessageById(message.id, { smooth: false });
         }}
         className={`absolute custom-border w-full top-[var(--header-height)] left-1/2 -translate-x-1/2 flex gap-4 p-1 px-2 items-center justify-between
             ${

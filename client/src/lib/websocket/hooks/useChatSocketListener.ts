@@ -42,6 +42,7 @@ export function useChatSocketListeners() {
       messageId: string;
       reactions: { [emoji: string]: string[] };
     }) => {
+      console.log("reactions return", data.reactions);
       useMessageStore
         .getState()
         .updateMessageReactions(data.messageId, data.reactions);

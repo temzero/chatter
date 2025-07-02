@@ -3,7 +3,7 @@ import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { useMessageStore } from "@/stores/messageStore";
 
 import { SlidingContainer } from "@/components/ui/SlidingContainer";
-import RenderMedia from "@/components/ui/RenderMedia";
+import RenderMedia from "@/components/ui/RenderAttachment";
 
 const mediaTypes = ["images", "videos", "audio", "files"];
 

@@ -106,9 +106,7 @@ export class ChatWebSocketService {
     messageId: string;
     chatId: string;
     emoji: string;
-    userId: string;
   }) {
-    console.log("reactToMessage", payload);
     webSocketService.emit("chat:reactToMessage", payload);
   }
 

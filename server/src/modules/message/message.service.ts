@@ -10,6 +10,7 @@ import { ErrorResponse } from '../../common/api-response/errors';
 import { GetMessagesQuery } from './dto/queries/get-messages.dto';
 import { Reaction } from './entities/reaction.entity';
 import { Attachment } from './entities/attachment.entity';
+import { SupabaseService } from '../superbase/supabase.service';
 
 @Injectable()
 export class MessageService {
@@ -24,6 +25,8 @@ export class MessageService {
     private readonly attachmentRepo: Repository<Attachment>,
     @InjectRepository(Reaction)
     private readonly reactionRepo: Repository<Reaction>,
+
+    private readonly supabaseService: SupabaseService,
   ) {}
 
   async createMessage(
@@ -50,12 +53,21 @@ export class MessageService {
     if (createMessageDto.replyToMessageId) {
       const repliedMessage = await this.messageRepo.findOne({
         where: { id: createMessageDto.replyToMessageId },
+        select: ['id', 'chatId', 'replyToMessageId'], // Only select needed fields
       });
+
       if (!repliedMessage) {
         ErrorResponse.notFound('Replied message not found');
       }
       if (repliedMessage.chatId !== createMessageDto.chatId) {
         ErrorResponse.badRequest('Replied message is not from the same chat');
+      }
+
+      // THE GUARD - Single place to prevent reply chains
+      if (repliedMessage.replyToMessageId) {
+        ErrorResponse.badRequest(
+          'Cannot reply to a message that is already a reply',
+        );
       }
     }
 
@@ -262,96 +274,6 @@ export class MessageService {
     }
   }
 
-  async softDeleteMessage(
-    userId: string,
-    messageId: string,
-    clearDeletedForUsers = false,
-  ): Promise<Message> {
-    try {
-      const message = await this.getMessageById(messageId);
-
-      if (message.senderId !== userId) {
-        ErrorResponse.unauthorized(
-          'You do not have permission to soft delete this message',
-        );
-      }
-
-      if (message.isDeleted) return message;
-
-      message.isDeleted = true;
-      message.deletedAt = new Date();
-
-      if (clearDeletedForUsers) {
-        message.deletedForUserIds = null;
-      }
-
-      await this.messageRepo.save(message);
-
-      const members = await this.chatMemberRepo.find({
-        where: { chatId: message.chatId },
-      });
-
-      const userIds = members.map((m) => m.userId);
-      await this.updateLastVisibleMessageIfMatch(
-        message.chatId,
-        message.id,
-        userIds,
-      );
-
-      return message;
-    } catch (error) {
-      ErrorResponse.throw(error, 'Failed to soft delete message');
-    }
-  }
-
-  async deleteMessage(userId: string, messageId: string): Promise<Message> {
-    try {
-      const message = await this.getMessageById(messageId);
-
-      if (message.senderId !== userId) {
-        ErrorResponse.unauthorized(
-          'You do not have permission to delete this message',
-        );
-      }
-      await this.messageRepo.delete(messageId);
-      return message;
-    } catch (error) {
-      ErrorResponse.throw(error, 'Failed to delete message');
-    }
-  }
-
-  async deleteForMe(userId: string, messageId: string): Promise<Message> {
-    try {
-      const message = await this.getMessageById(messageId);
-
-      if (!message.deletedForUserIds) {
-        message.deletedForUserIds = [];
-      }
-
-      if (!message.deletedForUserIds.includes(userId)) {
-        message.deletedForUserIds = [...message.deletedForUserIds, userId];
-        await this.messageRepo.save(message);
-
-        await this.updateLastVisibleMessageIfMatch(message.chatId, message.id, [
-          userId,
-        ]);
-      }
-
-      return message;
-    } catch (error) {
-      ErrorResponse.throw(error, 'Failed to delete message for user');
-    }
-  }
-
-  async deleteForEveryone(userId: string, messageId: string): Promise<Message> {
-    try {
-      // Reuse soft delete with flag to clear deletedForUserIds
-      return await this.softDeleteMessage(userId, messageId, true);
-    } catch (error) {
-      ErrorResponse.throw(error, 'Failed to delete message for everyone');
-    }
-  }
-
   // Reaction:
   async toggleReaction(
     messageId: string,
@@ -435,65 +357,271 @@ export class MessageService {
       if (queryParams.offset) query.skip(queryParams.offset);
 
       const messages = await query.getMany();
-      return messages.reverse(); // reverse for chronological order
+      return messages.reverse();
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to retrieve conversation messages');
     }
   }
 
+  // Delete message
+  async softDeleteMessage(
+    userId: string,
+    messageId: string,
+    clearDeletedForUsers = false,
+  ): Promise<Message> {
+    try {
+      const message = await this.getMessageById(messageId);
+
+      if (message.senderId !== userId) {
+        ErrorResponse.unauthorized(
+          'You do not have permission to soft delete this message',
+        );
+      }
+
+      if (message.isDeleted) return message;
+
+      message.isDeleted = true;
+      message.deletedAt = new Date();
+
+      if (clearDeletedForUsers) {
+        message.deletedForUserIds = null;
+      }
+
+      await this.messageRepo.save(message);
+
+      const members = await this.chatMemberRepo.find({
+        where: { chatId: message.chatId },
+      });
+
+      const userIds = members.map((m) => m.userId);
+      await this.updateLastVisibleMessageIfMatch(
+        message.chatId,
+        message.id,
+        userIds,
+      );
+
+      return message;
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to soft delete message');
+    }
+  }
+
+  async hardDeleteMessage(userId: string, messageId: string): Promise<Message> {
+    try {
+      const message = await this.getFullMessageById(messageId);
+
+      if (message.senderId !== userId) {
+        ErrorResponse.unauthorized(
+          'You do not have permission to delete this message',
+        );
+      }
+
+      // 1. Delete all attachments from Supabase
+      if (message.attachments?.length) {
+        for (const attachment of message.attachments) {
+          // Delete main file
+          if (attachment.url) {
+            await this.supabaseService.deleteFileByUrl(attachment.url);
+          }
+
+          // Delete thumbnail if exists
+          if (attachment.thumbnailUrl) {
+            await this.supabaseService.deleteFileByUrl(attachment.thumbnailUrl);
+          }
+        }
+
+        // 2. Delete attachment records from DB
+        const attachmentIds = message.attachments.map((a) => a.id);
+        await this.attachmentRepo.delete(attachmentIds);
+      }
+
+      // 3. Delete the message itself
+      await this.messageRepo.delete(messageId);
+
+      return message;
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to hard delete message');
+    }
+  }
+
+  async deleteForMe(userId: string, messageId: string): Promise<Message> {
+    try {
+      const message = await this.getMessageById(messageId);
+
+      if (!message.deletedForUserIds) {
+        message.deletedForUserIds = [];
+      }
+
+      if (!message.deletedForUserIds.includes(userId)) {
+        message.deletedForUserIds = [...message.deletedForUserIds, userId];
+        await this.messageRepo.save(message);
+
+        await this.updateLastVisibleMessageIfMatch(message.chatId, message.id, [
+          userId,
+        ]);
+      }
+
+      return message;
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to delete message for user');
+    }
+  }
+
+  async deleteForEveryone(userId: string, messageId: string): Promise<Message> {
+    try {
+      // For testing: Change soft delete to hard delete
+      return await this.hardDeleteMessage(userId, messageId);
+
+      // Original implementation:
+      // return await this.softDeleteMessage(userId, messageId, true);
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to delete message for everyone');
+    }
+  }
+
+  // private buildFullMessageQuery() {
+  //   return this.messageRepo
+  //     .createQueryBuilder('message')
+  //     .leftJoinAndSelect('message.sender', 'sender')
+  //     .leftJoinAndSelect('message.chat', 'chat')
+  //     .leftJoinAndSelect('chat.members', 'member', 'member.user_id = sender.id')
+  //     .leftJoinAndSelect('message.reactions', 'reactions')
+  //     .leftJoinAndSelect('message.replyToMessage', 'replyToMessage')
+  //     .leftJoinAndSelect('replyToMessage.sender', 'replySender')
+  //     .leftJoinAndSelect(
+  //       'chat.members',
+  //       'replyMember',
+  //       'replyMember.user_id = replySender.id',
+  //     )
+  //     .leftJoinAndSelect('message.forwardedFromMessage', 'forwardedFromMessage')
+  //     .leftJoinAndSelect('forwardedFromMessage.sender', 'forwardedSender')
+  //     .leftJoinAndSelect('message.attachments', 'attachments')
+  //     .leftJoinAndSelect('replyToMessage.attachments', 'replyAttachments')
+  //     .leftJoinAndSelect(
+  //       'forwardedFromMessage.attachments',
+  //       'forwardedAttachments',
+  //     )
+  //     .select([
+  //       'message',
+  //       'sender.id',
+  //       'sender.firstName',
+  //       'sender.lastName',
+  //       'sender.avatarUrl',
+  //       'member.nickname',
+  //       'reactions',
+  //       'attachments',
+
+  //       // Reply
+  //       'replyToMessage.id',
+  //       'replyToMessage.content',
+  //       'replyToMessage.createdAt',
+  //       'replySender.id',
+  //       'replySender.firstName',
+  //       'replySender.lastName',
+  //       'replySender.avatarUrl',
+  //       'replyMember.nickname',
+  //       'replyAttachments',
+
+  //       // Forward
+  //       'forwardedFromMessage.id',
+  //       'forwardedFromMessage.content',
+  //       'forwardedFromMessage.createdAt',
+  //       'forwardedSender.id',
+  //       'forwardedSender.firstName',
+  //       'forwardedSender.lastName',
+  //       'forwardedSender.avatarUrl',
+  //       'forwardedAttachments',
+  //     ]);
+  // }
+
   private buildFullMessageQuery() {
-    return this.messageRepo
-      .createQueryBuilder('message')
-      .leftJoinAndSelect('message.sender', 'sender')
-      .leftJoinAndSelect('message.chat', 'chat')
-      .leftJoinAndSelect('chat.members', 'member', 'member.user_id = sender.id')
-      .leftJoinAndSelect('message.reactions', 'reactions')
-      .leftJoinAndSelect('message.replyToMessage', 'replyToMessage')
-      .leftJoinAndSelect('replyToMessage.sender', 'replySender')
-      .leftJoinAndSelect(
-        'chat.members',
-        'replyMember',
-        'replyMember.user_id = replySender.id',
-      )
-      .leftJoinAndSelect('message.forwardedFromMessage', 'forwardedFromMessage')
-      .leftJoinAndSelect('forwardedFromMessage.sender', 'forwardedSender')
-      .leftJoinAndSelect('message.attachments', 'attachments')
-      .leftJoinAndSelect('replyToMessage.attachments', 'replyAttachments')
-      .leftJoinAndSelect(
-        'forwardedFromMessage.attachments',
-        'forwardedAttachments',
-      )
-      .select([
-        'message',
-        'sender.id',
-        'sender.firstName',
-        'sender.lastName',
-        'sender.avatarUrl',
-        'member.nickname',
-        'reactions',
-        'attachments',
+    return (
+      this.messageRepo
+        .createQueryBuilder('message')
+        .leftJoinAndSelect('message.sender', 'sender')
+        .leftJoinAndSelect('message.chat', 'chat')
+        .leftJoinAndSelect(
+          'chat.members',
+          'member',
+          'member.user_id = sender.id',
+        )
+        .leftJoinAndSelect('message.reactions', 'reactions')
+        .leftJoinAndSelect('message.attachments', 'attachments')
 
-        // Reply
-        'replyToMessage.id',
-        'replyToMessage.content',
-        'replyToMessage.createdAt',
-        'replySender.id',
-        'replySender.firstName',
-        'replySender.lastName',
-        'replySender.avatarUrl',
-        'replyMember.nickname',
-        'replyAttachments',
+        // Direct reply message
+        .leftJoinAndSelect('message.replyToMessage', 'replyToMessage')
+        .leftJoinAndSelect('replyToMessage.sender', 'replySender')
+        .leftJoinAndSelect('replyToMessage.attachments', 'replyAttachments')
+        .leftJoinAndSelect(
+          'chat.members',
+          'replyMember',
+          'replyMember.user_id = replySender.id',
+        )
 
-        // Forward
-        'forwardedFromMessage.id',
-        'forwardedFromMessage.content',
-        'forwardedFromMessage.createdAt',
-        'forwardedSender.id',
-        'forwardedSender.firstName',
-        'forwardedSender.lastName',
-        'forwardedSender.avatarUrl',
-        'forwardedAttachments',
-      ]);
+        // ✅ Forwarded message of the reply
+        .leftJoinAndSelect(
+          'replyToMessage.forwardedFromMessage',
+          'replyForwarded',
+        )
+        .leftJoinAndSelect('replyForwarded.sender', 'replyForwardedSender')
+        .leftJoinAndSelect(
+          'replyForwarded.attachments',
+          'replyForwardedAttachments',
+        )
+
+        // Direct forwarded message (of current message)
+        .leftJoinAndSelect(
+          'message.forwardedFromMessage',
+          'forwardedFromMessage',
+        )
+        .leftJoinAndSelect('forwardedFromMessage.sender', 'forwardedSender')
+        .leftJoinAndSelect(
+          'forwardedFromMessage.attachments',
+          'forwardedAttachments',
+        )
+
+        .select([
+          'message',
+          'sender.id',
+          'sender.firstName',
+          'sender.lastName',
+          'sender.avatarUrl',
+          'member.nickname',
+          'reactions',
+          'attachments',
+
+          // Reply
+          'replyToMessage.id',
+          'replyToMessage.content',
+          'replyToMessage.createdAt',
+          'replySender.id',
+          'replySender.firstName',
+          'replySender.lastName',
+          'replySender.avatarUrl',
+          'replyMember.nickname',
+          'replyAttachments',
+
+          // Reply's forwarded message
+          'replyForwarded.id',
+          'replyForwarded.content',
+          'replyForwarded.createdAt',
+          'replyForwardedSender.id',
+          'replyForwardedSender.firstName',
+          'replyForwardedSender.lastName',
+          'replyForwardedSender.avatarUrl',
+          'replyForwardedAttachments',
+
+          // Forwarded from current message
+          'forwardedFromMessage.id',
+          'forwardedFromMessage.content',
+          'forwardedFromMessage.createdAt',
+          'forwardedSender.id',
+          'forwardedSender.firstName',
+          'forwardedSender.lastName',
+          'forwardedSender.avatarUrl',
+          'forwardedAttachments',
+        ])
+    );
   }
 
   private async updateLastVisibleMessageIfMatch(

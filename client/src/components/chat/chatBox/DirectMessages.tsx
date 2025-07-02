@@ -17,7 +17,7 @@ interface DirectMessagesProps {
 }
 
 const DirectMessages: React.FC<DirectMessagesProps> = ({ chat, messages }) => {
-  console.log("activeChat", chat);
+  // console.log("activeChat", chat);
   const chatId = chat?.id;
   const currentUser = useCurrentUser();
 
@@ -37,10 +37,10 @@ const DirectMessages: React.FC<DirectMessagesProps> = ({ chat, messages }) => {
   );
 
   const myLastReadMessageId = myMember?.lastReadMessageId ?? null;
-  console.log("myLastReadMessageId", myLastReadMessageId);
+  // console.log("myLastReadMessageId", myLastReadMessageId);
   const partnerLastReadMessageId = partnerMember?.lastReadMessageId ?? null;
-  console.log("partnerLastReadMessageId", partnerLastReadMessageId);
-  console.log("messages", messages);
+  // console.log("partnerLastReadMessageId", partnerLastReadMessageId);
+  // console.log("messages", messages);
 
   // Update last read when new messages arrive
   useEffect(() => {
@@ -91,7 +91,7 @@ const DirectMessages: React.FC<DirectMessagesProps> = ({ chat, messages }) => {
       {messagesByDate.map((group) => (
         <React.Fragment key={`${group.date}-${chatId}`}>
           <div
-            className={`sticky z-99 flex justify-center mb-4 ${
+            className={`sticky z-50 flex justify-center mb-4 ${
               isMessagePinned ? "top-12" : "top-0"
             }`}
           >

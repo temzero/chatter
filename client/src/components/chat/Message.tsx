@@ -3,17 +3,16 @@ import classNames from "classnames";
 import { motion } from "framer-motion";
 import { useMessageReactions } from "@/stores/messageStore";
 import { useCurrentUserId } from "@/stores/authStore";
-import RenderMultipleMedia from "../ui/RenderMultipleMedia";
+import RenderMultipleAttachments from "../ui/RenderMultipleAttachments";
 import { formatTime } from "@/utils/formatTime";
 import { Avatar } from "../ui/avatar/Avatar";
 import type { MessageResponse } from "@/types/responses/message.response";
 import { ChatType } from "@/types/enums/ChatType";
-import { ReactionPicker } from "../ui/MessageReactionPicker";
-import { MessageActions } from "../ui/MessageActions";
-import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
 import { MessageReactionDisplay } from "../ui/MessageReactionsDisplay";
 import MessageReplyPreview from "../ui/MessageReplyPreview";
 import ForwardedMessagePreview from "../ui/ForwardMessagePreview";
+import { useIsModalOpen, useModalStore } from "@/stores/modalStore";
+import { scrollToMessageById } from "@/utils/scrollToMessageById";
 
 const myMessageAnimation = {
   initial: { opacity: 0, scale: 0.1, x: 100, y: 0 },
@@ -41,6 +40,7 @@ interface MessageProps {
   isRecent?: boolean;
   isRead?: boolean;
   readUserAvatars?: string[];
+  isPreview?: boolean;
 }
 
 const Message: React.FC<MessageProps> = ({
@@ -50,6 +50,7 @@ const Message: React.FC<MessageProps> = ({
   showInfo = true,
   isRecent = false,
   readUserAvatars,
+  isPreview = true,
 }) => {
   const currentUserId = useCurrentUserId();
   const isMe = message.sender.id === currentUserId;
@@ -58,10 +59,11 @@ const Message: React.FC<MessageProps> = ({
   const repliedMessage = message.replyToMessage;
   const forwardedMessage = message.forwardedFromMessage;
 
-  const [copied, setCopied] = useState(false);
-  const [showReactionPicker, setShowReactionPicker] = useState(false);
-  const [showActionButtons, setShowActionButtons] = useState(false);
+  const { openModal } = useModalStore();
+  const isModalOpen = useIsModalOpen();
 
+  const [copied, setCopied] = useState(false);
+  const [rightClick, setRightClick] = useState(false);
   const messageRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -72,37 +74,16 @@ const Message: React.FC<MessageProps> = ({
     return () => clearTimeout(timer);
   }, [copied]);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        messageRef.current &&
-        !messageRef.current.contains(event.target as Node)
-      ) {
-        setShowActionButtons(false);
-        setShowReactionPicker(false);
-      }
-    };
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, []);
+  const handleMessageRightClick = (message: MessageResponse) => {
+    setRightClick(true)
+    scrollToMessageById(message.id, { animate: false });
+    openModal("message", { message });
+  };
 
   const handleCopyText = () => {
     if (!message.content) return;
     navigator.clipboard.writeText(message.content);
     setCopied(true);
-  };
-
-  const handleReaction = (emoji: string) => {
-    if (!currentUser) return;
-
-    chatWebSocketService.reactToMessage({
-      messageId: message.id,
-      chatId: message.chatId,
-      emoji,
-      userId: currentUser.id,
-    });
-
-    setShowReactionPicker(false);
   };
 
   const animationProps = shouldAnimate
@@ -117,20 +98,12 @@ const Message: React.FC<MessageProps> = ({
     "ml-auto": isMe,
     "mr-auto": !isMe,
     "pb-1": isRecent,
-    "pb-8": !isRecent,
+    "pb-8": !isRecent && isPreview,
+    // "opacity-0": isModalOpen,
+    "opacity-0": rightClick,
   };
 
-  const media =
-    message.attachments?.map((attachment) => ({
-      id: attachment.id,
-      messageId: message.id,
-      url: attachment.url,
-      type: attachment.type,
-      thumbnailUrl: attachment.thumbnailUrl,
-      width: attachment.width,
-      height: attachment.height,
-      duration: attachment.duration,
-    })) || [];
+  const attachments = message.attachments || [];
 
   return (
     <motion.div
@@ -140,18 +113,12 @@ const Message: React.FC<MessageProps> = ({
       initial={animationProps.initial}
       animate={animationProps.animate}
       transition={animationProps.transition}
-      onMouseEnter={() => {
-        if (!showActionButtons) {
-          setShowReactionPicker(true);
-        }
-      }}
-      onMouseLeave={() => {
-        setShowReactionPicker(false);
-      }}
+      onClick={(e) => e.stopPropagation()}
       onContextMenu={(e) => {
         e.preventDefault();
-        setShowActionButtons(true);
-        setShowReactionPicker(false);
+        if (isPreview) {
+          handleMessageRightClick(message);
+        }
       }}
     >
       {isGroupChat && (
@@ -195,20 +162,20 @@ const Message: React.FC<MessageProps> = ({
         {/* Main Content with switch */}
         {(() => {
           switch (true) {
-            case media.length > 0:
+            case attachments.length > 0:
               return (
                 <div
-                  className={classNames("message-media-bubble", {
+                  className={classNames("message-attachment-bubble", {
                     "self-message ml-auto": isMe,
                   })}
                   style={{
                     width:
-                      media.length === 1
-                        ? "var(--media-width)"
-                        : "var(--media-width-large)",
+                      attachments.length === 1
+                        ? "var(--attachment-width)"
+                        : "var(--attachment-width-large)",
                   }}
                 >
-                  <RenderMultipleMedia media={media} />
+                  <RenderMultipleAttachments attachments={attachments} />
                   {message.content && (
                     <h1
                       className={`p-2 break-words max-w-full cursor-pointer transition-all duration-200 ${
@@ -294,9 +261,9 @@ const Message: React.FC<MessageProps> = ({
         )}
 
         {/* Time */}
-        {!isRecent && (
+        {!isRecent && isPreview && (
           <p
-            className={`opacity-0 group-hover:opacity-40 text-xs ${
+            className={`text-xs opacity-40 py-1 ${
               isMe ? "ml-auto" : "mr-auto"
             }`}
           >
@@ -322,21 +289,6 @@ const Message: React.FC<MessageProps> = ({
               </div>
             ))}
           </div>
-        )}
-
-        {/* Pickers & Actions */}
-        {showReactionPicker && (
-          <ReactionPicker
-            onSelect={handleReaction}
-            position={isMe ? "right" : "left"}
-          />
-        )}
-        {showActionButtons && (
-          <MessageActions
-            message={message}
-            position={isMe ? "left" : "right"}
-            close={() => setShowActionButtons(false)}
-          />
         )}
       </div>
     </motion.div>

@@ -3,7 +3,7 @@ import { MessageStatus } from '../../constants/message-status.constants';
 import { MessageType } from '../../constants/message-type.constants';
 import { AttachmentResponseDto } from './attachment-response.dto';
 import { SenderResponseDto } from './sender-response.dto';
-import { NestedMessageDto } from './message-nested.dto';
+// import { NestedMessageDto } from './message-nested.dto';
 
 @Exclude()
 export class MessageResponseDto {
@@ -21,16 +21,16 @@ export class MessageResponseDto {
   @Expose() replyToMessageId?: string | null;
 
   @Expose()
-  @Type(() => NestedMessageDto)
-  replyToMessage?: NestedMessageDto | null;
+  @Type(() => MessageResponseDto)
+  replyToMessage?: MessageResponseDto | null;
 
   @Expose() replyCount: number;
 
   @Expose() forwardedFromMessageId?: string | null;
 
   @Expose()
-  @Type(() => NestedMessageDto)
-  forwardedFromMessage?: NestedMessageDto | null;
+  @Type(() => MessageResponseDto)
+  forwardedFromMessage?: MessageResponseDto | null;
 
   @Expose() editedAt?: Date | null;
   @Expose() isDeleted: boolean;

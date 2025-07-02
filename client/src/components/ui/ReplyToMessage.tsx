@@ -1,7 +1,7 @@
 // components/ui/ReplyToMessage.tsx
 import React from "react";
 import { MessageResponse } from "@/types/responses/message.response";
-import { useCurrentUserId } from "@/stores/authStore";
+import { useIsMe } from "@/stores/authStore";
 import { Avatar } from "./avatar/Avatar";
 import { formatTime } from "@/utils/formatTime";
 import { motion } from "framer-motion";
@@ -15,8 +15,8 @@ const ReplyToMessage: React.FC<ReplyToMessageProps> = ({
   replyToMessage,
   onCancelReply,
 }) => {
-  const currentUserId = useCurrentUserId();
-  const isMe: boolean = replyToMessage.senderId === currentUserId;
+  const isMe = useIsMe(replyToMessage.sender.id)
+
 
   return (
     <motion.div
@@ -39,10 +39,8 @@ const ReplyToMessage: React.FC<ReplyToMessageProps> = ({
 
         {isMe || (
           <Avatar
-            avatarUrl={replyToMessage.senderAvatarUrl}
-            name={
-              replyToMessage.senderNickname || replyToMessage.senderFirstName
-            }
+            avatarUrl={replyToMessage.sender.avatarUrl}
+            name={replyToMessage.sender.displayName}
             className="-mr-1"
           />
         )}

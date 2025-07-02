@@ -31,7 +31,6 @@ const GroupMessages: React.FC<GroupMessagesProps> = ({ chat, messages }) => {
 
   // Update last read message ID for my member
   useEffect(() => {
-    console.log("useEffect update last read");
     if (!chatId || !chat.myMemberId || messages.length === 0) return;
 
     const lastMessageId = messages[messages.length - 1].id;
@@ -39,8 +38,6 @@ const GroupMessages: React.FC<GroupMessagesProps> = ({ chat, messages }) => {
     const isUnread =
       myLastReadMessageId === null ||
       messages[messages.length - 1].id !== myLastReadMessageId;
-
-    console.log("isUnread", isUnread);
 
     if (isUnread) {
       const timer = setTimeout(() => {
@@ -61,17 +58,16 @@ const GroupMessages: React.FC<GroupMessagesProps> = ({ chat, messages }) => {
     updateMemberLastRead,
   ]);
 
-  useEffect(() => {
-    if (members) {
-      console.log("All members' last read message IDs:");
-      members.forEach((member) => {
-        console.log(
-          `Member ${member.id} (${member.firstName} ${member.lastName}):`,
-          member.lastReadMessageId
-        );
-      });
-    }
-  }, [members]);
+  // useEffect(() => {
+  //   if (members) {
+  //     members.forEach((member) => {
+  //       console.log(
+  //         `Member ${member.id} (${member.firstName} ${member.lastName}):`,
+  //         member.lastReadMessageId
+  //       );
+  //     });
+  //   }
+  // }, [members]);
 
   const messagesByDate = useMemo(() => {
     return groupMessagesByDate(messages);
@@ -90,7 +86,7 @@ const GroupMessages: React.FC<GroupMessagesProps> = ({ chat, messages }) => {
       {messagesByDate.map((group) => (
         <React.Fragment key={`${group.date}-${chatId}`}>
           <div
-            className={`sticky z-99 flex justify-center mb-4 ${
+            className={`sticky z-50 flex justify-center mb-4 ${
               isMessagePinned ? "top-12" : "top-0"
             }`}
           >

@@ -1,5 +1,5 @@
 import React from "react";
-import RenderMultipleMedia from "../ui/RenderMultipleMedia";
+import RenderMultipleAttachments from "../ui/RenderMultipleAttachments";
 import { formatTime } from "@/utils/formatTime";
 import type { MessageResponse } from "@/types/responses/message.response";
 
@@ -27,7 +27,7 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ message }) => {
       <div className="relative py-8 w-[70%]">
         {media.length > 0 && (
           <div className="rounded overflow-hidden mb-2">
-            <RenderMultipleMedia media={media} />
+            <RenderMultipleAttachments media={media} />
           </div>
         )}
         {message.content && <p>{message.content}</p>}

@@ -45,8 +45,15 @@ export class MessageMapper {
     });
   }
 
-  private mapNestedMessage(msg: Message | null | undefined) {
-    if (!msg) return null;
+  private mapNestedMessage(
+    msg: Message | null | undefined,
+    depth = 0,
+    maxDepth = 3,
+  ): MessageResponseDto | null {
+    if (!msg || depth > maxDepth) return null;
+
+    const senderId = msg.senderId || msg.sender?.id || '';
+    const sender = this.mapSender(senderId, msg.sender);
 
     return {
       id: msg.id,
@@ -56,8 +63,18 @@ export class MessageMapper {
         AttachmentResponseDto,
         msg.attachments || [],
       ),
-      sender: this.mapSender(msg.senderId, msg.sender),
-    };
+      sender,
+      replyToMessage: this.mapNestedMessage(
+        msg.replyToMessage,
+        depth + 1,
+        maxDepth,
+      ),
+      forwardedFromMessage: this.mapNestedMessage(
+        msg.forwardedFromMessage,
+        depth + 1,
+        maxDepth,
+      ),
+    } as MessageResponseDto;
   }
 
   private mapSender(
@@ -67,8 +84,11 @@ export class MessageMapper {
   ) {
     return {
       id: senderId,
-      avatarUrl: sender?.avatarUrl,
-      displayName: nickname || `${sender?.firstName} ${sender?.lastName}`,
+      avatarUrl: sender?.avatarUrl || null,
+      displayName:
+        nickname ||
+        `${sender?.firstName ?? ''} ${sender?.lastName ?? ''}`.trim() ||
+        'Unknown',
     };
   }
 

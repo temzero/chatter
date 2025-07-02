@@ -4,6 +4,10 @@ import { formatDateTime } from "@/utils/formatDate";
 import { Avatar } from "../ui/avatar/Avatar";
 import type { MessageResponse } from "@/types/responses/message.response";
 import { useCurrentUserId } from "@/stores/authStore";
+import RenderMultipleAttachments from "../ui/RenderMultipleAttachments";
+import ForwardedMessagePreview from "../ui/ForwardMessagePreview";
+import MessageReplyPreview from "../ui/MessageReplyPreview";
+import ReplyToMessage from "../ui/ReplyToMessage";
 
 interface MessagePreviewProps {
   message: MessageResponse;
@@ -13,20 +17,9 @@ const MessagePreview: React.FC<MessagePreviewProps> = ({ message }) => {
   const currentUserId = useCurrentUserId();
   const isMe = message.sender.id === currentUserId;
 
-  const media =
-    message.attachments?.map((attachment) => ({
-      id: attachment.id,
-      url: attachment.url,
-      type: attachment.type,
-    })) || [];
-
-  const previewText = (() => {
-    if (media.length > 0) return "[Media]";
-    if (message.forwardedFromMessage) return "Forwarded message";
-    if (message.replyToMessage)
-      return `Reply: ${message.replyToMessage.content || "Message"}`;
-    return message.content || "";
-  })();
+  const attachments = message.attachments || [];
+  const repliedMessage = message.replyToMessage;
+  const forwardedMessage = message.forwardedFromMessage;
 
   return (
     <div
@@ -35,7 +28,7 @@ const MessagePreview: React.FC<MessagePreviewProps> = ({ message }) => {
         "bg-[var(--message-color)]": !isMe,
       })}
     >
-      <div className="flex gap-2 items-center w-full pb-2 mb-2 border-b border-[var(--input-border-color)]">
+      <div className="flex gap-2 items-center w-full pb-2">
         <Avatar
           avatarUrl={message.sender.avatarUrl}
           name={message.sender.displayName}
@@ -52,7 +45,59 @@ const MessagePreview: React.FC<MessagePreviewProps> = ({ message }) => {
           {formatDateTime(message.createdAt)}
         </span>
       </div>
-      <p>{previewText}</p>
+
+      <div className="max-h-[40vh] overflow-y-auto overflow-x-auto rounded">
+        {/* Reply Preview */}
+        {repliedMessage && (
+          // <MessageReplyPreview
+          //   message={repliedMessage}
+          //   // chatType={chatType}
+          //   isMe={isMe}
+          //   isSelfReply={repliedMessage.sender.id === currentUserId && isMe}
+          //   isReplyToMe={repliedMessage.sender.id === currentUserId && !isMe}
+          // />
+          <div className="flex gap-2 items-center">
+            <span className="material-symbols-outlined rotate-180">reply</span>
+            <div
+              className={classNames(
+                "flex gap-2 border rounded w-full p-2",
+                {
+                  // Only add this background class if sender is not current user
+                  "bg-[var(--message-color)]":
+                    repliedMessage.sender.id !== currentUserId,
+                }
+              )}
+            >
+              <Avatar
+                avatarUrl={repliedMessage.sender.avatarUrl}
+                name={repliedMessage.sender.displayName}
+                size="6"
+              />
+              <p>{repliedMessage.content}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Forwarded Message Preview */}
+        {forwardedMessage && (
+          <ForwardedMessagePreview message={forwardedMessage} isMe={isMe} />
+        )}
+
+        {/* Attachments */}
+        {attachments.length > 0 && (
+          <RenderMultipleAttachments
+            attachments={attachments}
+            className="w-full max-w-full"
+            // previewMode={true}
+          />
+        )}
+      </div>
+      {/* Message Content */}
+      {message.content && (
+        <p className="pt-2">
+          {message.content}
+        </p>
+      )}
     </div>
   );
 };

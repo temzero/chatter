@@ -170,18 +170,6 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
     return undefined;
   },
 
-  // deleteMessage: (chatId: string, messageId: string) => {
-  //   const { messages } = get();
-  //   if (!chatId) return;
-
-  //   set({
-  //     messages: {
-  //       ...messages,
-  //       [chatId]: messages[chatId].filter((msg) => msg.id !== messageId),
-  //     },
-  //   });
-  // },
-
   deleteMessage: (chatId: string, messageId: string) => {
     const { messages } = get();
     if (!chatId) return;

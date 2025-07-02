@@ -28,9 +28,9 @@
   --sidebar-width: 300px;
   --sidebar-width-small: 96px;
   --sidebar-width-large: 400px;
-  --media-width: 300px;
-  --media-width-large: 450px;
-  --media-height: 420px;
+  --attachment-width: 300px;
+  --attachment-width-large: 450px;
+  --attachment-height: 420px;
 
   --primary-color: #247cff;
   --primary-green: #00ae80;
@@ -202,7 +202,7 @@ select:focus {
 /* Shared Styles for Both Bubbles */
 .message-bubble,
 .message-forward-bubble,
-.message-media-bubble {
+.message-attachment-bubble {
   position: relative;
   display: inline-block;
   border-radius: 8px;
@@ -222,7 +222,7 @@ select:focus {
 /* Hover Effect */
 .message-bubble:hover,
 .message-forward-bubble:hover,
-.message-media-bubble:hover {
+.message-attachment-bubble:hover {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transform: scale(1.1);
 }
@@ -230,7 +230,7 @@ select:focus {
 /* Self Message Bubbles (Right-Aligned) */
 .message-bubble.self-message,
 .message-forward-bubble.self-message,
-.message-media-bubble.self-message {
+.message-attachment-bubble.self-message {
   background-color: var(--active-chat-color);
   /* background-color: rgb(245, 245, 245); */
   transform-origin: bottom right;
@@ -242,8 +242,8 @@ select:focus {
   transform-origin: center;
 }
 
-/* Media Bubble Adjustments */
-.message-media-bubble {
+/* attachment Bubble Adjustments */
+.message-attachment-bubble {
   object-fit: cover;
   overflow: hidden;
 }

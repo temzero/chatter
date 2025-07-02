@@ -8,10 +8,8 @@ import { useSidebarInfoVisibility } from "@/stores/sidebarInfoStore";
 import React from "react";
 import { ChatMemberRole } from "@/types/enums/ChatMemberRole";
 
-// Memoized ChatContent component to prevent re-renders when props don't change
 const ChatContent = React.memo(() => {
   const activeChat = useActiveChat();
-  // const activeChat = useChatStore.getState().activeChat
   if (!activeChat) return null;
 
   return (

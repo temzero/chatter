@@ -32,8 +32,8 @@ const DeleteMessageModal: React.FC<DeleteMessageModalProps> = ({ message }) => {
           <h2 className="text-2xl font-semibold">Delete Message</h2>
         </div>
         <p className="mb-6 text-sm text-gray-400">
-          Are you sure you want to delete this message? This action cannot be
-          undone.
+          Are you sure you want to delete this message? <br />
+          This action cannot be undone.
         </p>
 
         <MessagePreview message={message} />

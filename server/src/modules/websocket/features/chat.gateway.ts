@@ -193,10 +193,10 @@ export class ChatGateway {
       messageId: string;
       chatId: string;
       emoji: string;
-      userId: string;
     },
   ) {
-    const { messageId, chatId, emoji, userId } = payload;
+    const userId = client.data.userId;
+    const { messageId, chatId, emoji } = payload;
     await this.messageService.toggleReaction(messageId, userId, emoji);
     const reactions =
       await this.messageService.getReactionsForMessage(messageId);

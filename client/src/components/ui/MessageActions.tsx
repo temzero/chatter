@@ -9,40 +9,37 @@ import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.se
 
 interface MessageActionsProps {
   message: MessageResponse;
-  position?: "left" | "right";
   className?: string;
-  close: () => void;
 }
 
 export const MessageActions: React.FC<MessageActionsProps> = ({
   message,
-  position = "left",
   className = "",
-  close,
 }) => {
   const setReplyToMessage = useMessageStore((state) => state.setReplyToMessage);
+  const { openModal, closeModal } = useModalStore(); // Use hook properly
   const isPinned = false;
+  const isAlreadyReply = !!message.replyToMessageId;
 
-  const positionClass =
-    position === "right"
-      ? "origin-bottom-left left-0"
-      : "origin-bottom-right right-0";
-
-  const actions = [
-    {
-      icon: "prompt_suggestion",
-      label: "Reply",
-      action: () => {
-        setReplyToMessage(message);
-        close();
-      },
-    },
+  const baseActions = [
+    // Only show reply action if this message isn't already a reply
+    ...(!isAlreadyReply
+      ? [
+          {
+            icon: "prompt_suggestion",
+            label: "Reply",
+            action: () => {
+              setReplyToMessage(message);
+              closeModal();
+            },
+          },
+        ]
+      : []),
     {
       icon: "arrow_warm_up",
       label: "Forward",
       action: () => {
-        useModalStore.getState().openModal("forward-message", { message });
-        close();
+        openModal("forward-message", { message });
       },
     },
     {
@@ -53,7 +50,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
           chatId: message.chatId,
           messageId: isPinned ? null : message.id,
         });
-        close();
+        closeModal();
       },
     },
     {
@@ -61,15 +58,14 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       label: "Save",
       action: () => {
         chatWebSocketService.saveMessage({ messageId: message.id });
-        close();
+        closeModal();
       },
     },
     {
       icon: "delete",
       label: "Delete",
       action: () => {
-        useModalStore.getState().openModal("delete-message", { message });
-        close();
+        openModal("delete-message", { message });
       },
     },
   ];
@@ -80,13 +76,12 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.5, y: -10 }}
       className={classNames(
-        "absolute -bottom-10 flex gap-2 bg-[var(--sidebar-color)]",
-        "p-1.5 rounded-lg shadow-lg z-50",
-        positionClass,
+        "flex gap-2 bg-[var(--sidebar-color)] p-1.5 rounded-lg shadow-lg z-[99]",
         className
       )}
+      onClick={(e) => e.stopPropagation()}
     >
-      {actions.map((action, index) => (
+      {baseActions.map((action, index) => (
         <button
           key={index}
           className={classNames(

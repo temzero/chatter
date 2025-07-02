@@ -16,16 +16,17 @@ interface MessageReplyPreviewProps {
 
 const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
   message,
-  chatType,
+  chatType = ChatType.DIRECT,
   isMe = false,
   isSelfReply = false,
   isReplyToMe = false,
 }) => {
   const isNotDirectChat = chatType !== ChatType.DIRECT;
+  console.log("message reply", message);
 
   return (
     <div
-      onClick={() => scrollToMessageById(message.id)}
+      onClick={() => scrollToMessageById(message.id, { smooth: false })}
       className={classNames(
         "message-bubble opacity-60 scale-75 max-w-full inline-block hover:scale-90 hover:opacity-90 transition-transform duration-200",
         {
@@ -35,9 +36,32 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
         }
       )}
     >
-      <div className={`truncate opacity-80 mb-2`}>
-        {message.content || "[media/attachment]"}
-      </div>
+      {message.forwardedFromMessage ? (
+        <div className="truncate opacity-80 mb-2 flex gap-2 items-center">
+          {isSelfReply ? (
+            <>
+              {message.forwardedFromMessage?.content}
+              <span className="material-symbols-outlined -rotate-90">
+                arrow_warm_up
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="material-symbols-outlined rotate-90">
+                arrow_warm_up
+              </span>
+              {message.forwardedFromMessage?.content}
+            </>
+          )}
+        </div>
+      ) : (
+        <>
+          {message.attachments && message.attachments.length > 0 && (
+            <div className={`truncate opacity-80 mb-2`}>{"[Attachment]"}</div>
+          )}
+          <div className={`truncate opacity-80 mb-2`}>{message.content}</div>
+        </>
+      )}
 
       <div className="flex items-center gap-1">
         {isNotDirectChat && !isSelfReply && !isReplyToMe && (

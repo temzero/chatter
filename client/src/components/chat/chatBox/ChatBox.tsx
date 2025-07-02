@@ -25,9 +25,28 @@ const ChatBox: React.FC<ChatBoxProps> = ({ chat }) => {
     }
   };
 
+  const prevMessagesLengthRef = useRef(0);
+  const hasScrolledInitially = useRef(false);
+
   useEffect(() => {
-    scrollToBottom();
-  }, [chatId, messages.length]);
+    const prevLength = prevMessagesLengthRef.current;
+    const currLength = messages.length;
+
+    const lastMsg = messages[currLength - 1];
+    const prevLastMsg = messages[prevLength - 1];
+
+    const isNewMessage =
+      currLength > prevLength && lastMsg?.id !== prevLastMsg?.id;
+
+    const isFirstLoad = !hasScrolledInitially.current && currLength > 0;
+
+    if ((isNewMessage || isFirstLoad) && chatId !== "") {
+      scrollToBottom();
+      hasScrolledInitially.current = true;
+    }
+
+    prevMessagesLengthRef.current = currLength;
+  }, [chatId, messages]);
 
   const renderMessages = () => {
     if (!chat) return null;
@@ -49,7 +68,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ chat }) => {
   return (
     <div
       ref={containerRef}
-      className="px-6 py-16 pb-[160px] flex-1 h-full w-full flex flex-col overflow-x-hidden overflow-y-auto backdrop-blur-sm"
+      className="relative px-6 py-16 pb-[160px] flex-1 h-full w-full flex flex-col overflow-x-hidden overflow-y-auto backdrop-blur-sm"
+
+      // className="px-6 py-16 pb-[160px] flex-1 h-full w-full flex flex-col overflow-x-hidden overflow-y-auto backdrop-blur-sm"
     >
       {chat && renderMessages()}
       <TypingIndicator chatId={chatId} />

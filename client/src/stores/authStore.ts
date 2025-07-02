@@ -248,5 +248,10 @@ export const useCurrentUserId = () =>
   useAuthStore((state) =>
     state.currentUser ? state.currentUser.id : undefined
   );
+
+export const useIsMe = (userId: string): boolean => {
+  const currentUser = useCurrentUser();
+  return currentUser?.id === userId;
+};
 export const useIsAuthenticated = () =>
   useAuthStore((state) => state.isAuthenticated);

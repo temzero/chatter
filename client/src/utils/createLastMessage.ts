@@ -5,8 +5,6 @@ import type { LastMessageResponse } from "@/types/responses/message.response";
 export function createLastMessage(
   message: MessageResponse
 ): LastMessageResponse {
-  //   const isMe = message.sender.id === currentUserId;
-
   const isForwarded = !!message.forwardedFromMessage;
 
   let content: string | undefined;
@@ -41,12 +39,9 @@ function getAttachmentIcons(
     [AttachmentType.IMAGE]: "image",
     [AttachmentType.VIDEO]: "videocam",
     [AttachmentType.AUDIO]: "music_note",
-    [AttachmentType.TEXT]: "",
     [AttachmentType.FILE]: "folder_zip",
     [AttachmentType.VOICE]: "voice",
     [AttachmentType.LOCATION]: "location",
-    [AttachmentType.POLL]: "poll",
-    [AttachmentType.SYSTEM]: "system",
   };
 
   const seen = new Set<string>();
