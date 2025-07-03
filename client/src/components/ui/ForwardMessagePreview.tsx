@@ -19,7 +19,7 @@ const ForwardedMessagePreview: React.FC<ForwardedMessagePreviewProps> = ({
   return (
     <>
       <div
-        className={classNames("p-2 rounded-lg custom-border-b shadow-xl", {
+        className={classNames("p-2 rounded-lg custom-border shadow-xl", {
           "bg-[var(--active-chat-color)]": isFromMe,
           "bg-[var(--message-color)] ": !isFromMe,
         })}

@@ -1,8 +1,9 @@
-// components/chat/ReactionPicker.tsx
 import React from "react";
 import { motion } from "framer-motion";
 import { useModalStore } from "@/stores/modalStore";
 import { handleReaction } from "@/utils/handleReaction";
+import addReactionSound from "@/assets/sound/message-pop.mp3"; // Make sure path is correct
+import { playSound } from "@/utils/playSound";
 import classNames from "classnames";
 
 const emojis = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
@@ -31,7 +32,6 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = ({
       )}
       initial={{ scale: 0 }}
       animate={{ scale: 1 }}
-      // exit={{ scale: 0 }}
       style={{
         transformOrigin: isMe ? "bottom right" : "bottom left",
       }}
@@ -41,14 +41,15 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = ({
         <button
           key={emoji}
           className="text-xl hover:scale-150 transition-transform duration-150"
-          onClick={() =>
+          onClick={() => {
+            playSound(addReactionSound, 1);
             handleReaction({
               emoji,
               messageId,
               chatId,
               onClose: closeModal,
-            })
-          }
+            });
+          }}
         >
           {emoji}
         </button>

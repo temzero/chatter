@@ -5,8 +5,9 @@ import EmojiPicker from "../ui/EmojiPicker";
 import AttachFile from "../ui/AttachFile";
 import FileImportPreviews from "../ui/FileImportPreview";
 import useTypingIndicator from "@/hooks/useTypingIndicator";
-import ReplyToMessage from "../ui/ReplyToMessage";
 import { handleSendMessage } from "@/utils/sendMessageHandler";
+import classNames from "classnames";
+import { useModalStore, useReplyToMessageId } from "@/stores/modalStore";
 
 interface ChatBarProps {
   chatId: string;
@@ -16,10 +17,8 @@ interface ChatBarProps {
 const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
   const setDraftMessage = useMessageStore((state) => state.setDraftMessage);
   const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
-
-  const replyToMessage = useMessageStore((state) => state.replyToMessage);
-  const replyToMessageId = replyToMessage?.id || null;
-  const setReplyToMessage = useMessageStore((state) => state.setReplyToMessage);
+  const replyToMessageId = useReplyToMessageId();
+  const closeModal = useModalStore((state) => state.closeModal);
 
   const inputRef = useRef<HTMLTextAreaElement>(null!);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -63,11 +62,11 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
   }, []);
 
   useEffect(() => {
-    if (replyToMessage && inputRef.current) {
+    if (replyToMessageId && inputRef.current) {
       inputRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
       inputRef.current.focus();
     }
-  }, [replyToMessage]);
+  }, [replyToMessageId]);
 
   useEffect(() => {
     setAttachedFiles([]);
@@ -110,7 +109,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
             setFilePreviewUrls([]);
             setHasTextContent(false);
             setIsMessageSent(true);
-            setReplyToMessage(null);
+            closeModal();
             setTimeout(() => setIsMessageSent(false), 200);
             updateInputHeight();
           },
@@ -125,7 +124,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
       replyToMessageId,
       clearTypingState,
       setDraftMessage,
-      setReplyToMessage,
+      closeModal,
     ]
   );
 
@@ -161,7 +160,12 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
   }, []);
 
   return (
-    <div className="absolute bottom-0 left-0 backdrop-blur-xl w-full flex flex-col items-center p-4 justify-between shadow border-[var(--border-color)] z-40">
+    <div
+      className={classNames(
+        "absolute bottom-0 left-0 backdrop-blur-xl w-full flex flex-col items-center p-4 justify-between shadow border-[var(--border-color)]",
+        replyToMessageId ? "z-[999]" : "z-40"
+      )}
+    >
       {filePreviewUrls.length > 0 && (
         <FileImportPreviews
           files={attachedFiles}
@@ -173,87 +177,99 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
         />
       )}
 
-      {replyToMessage && (
-        <ReplyToMessage
-          replyToMessage={replyToMessage}
-          onCancelReply={() => setReplyToMessage(null)}
-        />
-      )}
+      <div className="flex w-full items-end">
+        {replyToMessageId && (
+          <span className="material-symbols-outlined text-3xl rotate-180 mr-2 mb-1 pointer-events-none">
+            reply
+          </span>
+        )}
 
-      <div
-        ref={containerRef}
-        id="input-container"
-        className="chatInput flex gap-2 items-end w-full transition-[height] duration-200 ease-in-out"
-      >
-        <textarea
-          ref={inputRef}
-          defaultValue=""
-          onInput={handleInput}
-          onKeyDown={handleKeyDown}
-          className={`w-full outline-none bg-transparent resize-none overflow-hidden ${
-            isMessageSent
-              ? "opacity-10 transition-opacity duration-100 ease-in-out"
-              : ""
-          }`}
-          placeholder={
-            chatId ? "Message..." : "Select a chat to start messaging"
-          }
-          aria-label="Message"
-          rows={1}
-          disabled={!chatId}
-        />
+        <div
+          ref={containerRef}
+          id="input-container"
+          className={`chatInput flex gap-2 items-end w-full transition-[height] duration-200 ease-in-out`}
+        >
+          <textarea
+            ref={inputRef}
+            defaultValue=""
+            onInput={handleInput}
+            onKeyDown={handleKeyDown}
+            className={`w-full outline-none bg-transparent resize-none overflow-hidden ${
+              isMessageSent
+                ? "opacity-10 transition-opacity duration-100 ease-in-out"
+                : ""
+            }`}
+            placeholder={
+              chatId ? "Message..." : "Select a chat to start messaging"
+            }
+            aria-label="Message"
+            rows={1}
+            disabled={!chatId}
+          />
 
-        <div className="flex items-center justify-between gap-2 h-[24px]">
-          {chatId && (
-            <>
-              <motion.div
-                className="flex gap-2 items-center"
-                animate={{
-                  transition: {
-                    type: "spring",
-                    stiffness: 300,
-                    damping: 20,
-                  },
-                }}
-              >
-                <EmojiPicker onSelect={handleEmojiSelect} />
-                <AttachFile onFileSelect={handleFileSelect} />
-              </motion.div>
-
-              <button
-                className={`rounded bg-[var(--primary-green)] border-2 border-green-400 flex items-center justify-center text-white transition-all duration-300 ${
-                  shouldShowSendButton
-                    ? "w-[30px] opacity-100 ml-0 pointer-events-auto"
-                    : "w-0 opacity-0 -ml-2 pointer-events-none"
-                }`}
-                onClick={async () => {
-                  await handleSendMessage({
-                    chatId,
-                    memberId,
-                    inputRef,
-                    attachments: attachedFiles,
-                    replyToMessageId,
-                    onSuccess: () => {
-                      clearTypingState();
-                      setDraftMessage(chatId, "");
-                      setAttachedFiles([]);
-                      setFilePreviewUrls([]);
-                      setHasTextContent(false);
-                      setIsMessageSent(true);
-                      setReplyToMessage(null);
-                      setTimeout(() => setIsMessageSent(false), 200);
-                      updateInputHeight();
+          <div className="flex items-center justify-between gap-2 h-[24px]">
+            {chatId && (
+              <>
+                <motion.div
+                  className="flex gap-2 items-center"
+                  animate={{
+                    transition: {
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 20,
                     },
-                  });
-                  inputRef.current?.focus();
-                }}
-                aria-label="Send message"
-              >
-                <span className="material-symbols-outlined">send</span>
-              </button>
-            </>
-          )}
+                  }}
+                >
+                  <EmojiPicker onSelect={handleEmojiSelect} />
+
+                  {!replyToMessageId && (
+                    <AttachFile onFileSelect={handleFileSelect} />
+                  )}
+                </motion.div>
+
+                <button
+                  className={`rounded bg-[var(--primary-green)] border-2 border-green-400 flex items-center justify-center text-white transition-all duration-300 ${
+                    shouldShowSendButton
+                      ? "w-[30px] opacity-100 ml-0 pointer-events-auto"
+                      : "w-0 opacity-0 -ml-2 pointer-events-none"
+                  }`}
+                  onClick={async () => {
+                    await handleSendMessage({
+                      chatId,
+                      memberId,
+                      inputRef,
+                      attachments: attachedFiles,
+                      replyToMessageId,
+                      onSuccess: () => {
+                        clearTypingState();
+                        setDraftMessage(chatId, "");
+                        setAttachedFiles([]);
+                        setFilePreviewUrls([]);
+                        setHasTextContent(false);
+                        setIsMessageSent(true);
+                        closeModal();
+                        setTimeout(() => setIsMessageSent(false), 200);
+                        updateInputHeight();
+                      },
+                    });
+                    inputRef.current?.focus();
+                  }}
+                  aria-label="Send message"
+                >
+                  <span className="material-symbols-outlined">send</span>
+                </button>
+              </>
+            )}
+          </div>
         </div>
+        {replyToMessageId && (
+          <button
+            className="aspect-square rounded-full opacity-70 hover:opacity-100 hover:bg-red-500 ml-2 mb-1.5"
+            onClick={closeModal}
+          >
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        )}
       </div>
     </div>
   );

@@ -26,11 +26,11 @@ const MessagePreview: React.FC<MessagePreviewProps> = ({ message }) => {
         "bg-[var(--message-color)]": !isMe,
       })}
     >
-      <div className="flex gap-2 items-center w-full pb-2">
+      <div className="flex gap-1 items-center w-full pb-2">
         <Avatar
           avatarUrl={message.sender.avatarUrl}
           name={message.sender.displayName}
-          size="7"
+          size="8"
         />
         {isMe ? (
           "Me"

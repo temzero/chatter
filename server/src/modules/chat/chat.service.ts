@@ -304,13 +304,21 @@ export class ChatService {
         'lastMessage.forwardedFromMessage',
         'forwardedFromMessage',
       )
+      .leftJoinAndSelect(
+        'forwardedFromMessage.sender',
+        'forwardedFromMessageSender',
+      ) // Add this
       .leftJoinAndSelect('chat.pinnedMessage', 'pinnedMessage')
       .leftJoinAndSelect('pinnedMessage.sender', 'pinnedSender')
       .leftJoinAndSelect('pinnedMessage.attachments', 'pinnedAttachments')
       .leftJoinAndSelect(
         'pinnedMessage.forwardedFromMessage',
         'pinnedForwardedFromMessage',
-      );
+      )
+      .leftJoinAndSelect(
+        'pinnedForwardedFromMessage.sender',
+        'pinnedForwardedFromMessageSender',
+      ); // Add this
   }
 
   async isChatParticipant(chatId: string, userId: string): Promise<boolean> {

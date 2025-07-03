@@ -13,7 +13,7 @@ import MessageReplyPreview from "../ui/MessageReplyPreview";
 import ForwardedMessagePreview from "../ui/ForwardMessagePreview";
 import { MessageActions } from "../ui/MessageActions";
 import { ReactionPicker } from "../ui/MessageReactionPicker";
-import { useFocusMessageId, useModalStore } from "@/stores/modalStore";
+import { useFocusMessageId, useModalStore, useReplyToMessageId } from "@/stores/modalStore";
 
 const myMessageAnimation = {
   initial: { opacity: 0, scale: 0.1, x: 100, y: 0 },
@@ -54,6 +54,9 @@ const Message: React.FC<MessageProps> = ({
   const currentUserId = useCurrentUserId();
   const isMe = message.sender.id === currentUserId;
   const reactions = useMessageReactions(message.id);
+
+  // Hide actions buttons, reaction picker when replyToMessageId not null
+  const replyToMessageId = useReplyToMessageId();
 
   // Modal Focus overlay
   const isFocusMessageId = useFocusMessageId();
@@ -130,7 +133,7 @@ const Message: React.FC<MessageProps> = ({
       )}
 
       <div className="flex relative flex-col w-full">
-        {isFocus && (
+        {isFocus && !replyToMessageId && (
           <ReactionPicker
             messageId={message.id}
             chatId={message.chatId}
@@ -297,7 +300,7 @@ const Message: React.FC<MessageProps> = ({
             ))}
           </div>
         )}
-        {isFocus && <MessageActions message={message} isMe={isMe} />}
+        {isFocus && !replyToMessageId && <MessageActions message={message} isMe={isMe} />}
       </div>
     </motion.div>
   );

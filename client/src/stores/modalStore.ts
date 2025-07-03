@@ -1,4 +1,3 @@
-// store/modalStore.ts
 import { create } from "zustand";
 
 export enum ModalType {
@@ -18,6 +17,7 @@ interface ModalState {
   modalContent: ModalContent | null;
   currentMediaId: string | null;
   focusMessageId: string | null;
+  replyToMessageId: string | null;
 }
 
 interface ModalActions {
@@ -26,12 +26,14 @@ interface ModalActions {
   openMediaModal: (mediaId: string) => void;
   closeModal: () => void;
   setFocusMessageId: (messageId: string | null) => void;
+  setReplyToMessageId: (messageId: string | null) => void;
 }
 
 export const useModalStore = create<ModalState & ModalActions>((set) => ({
   modalContent: null,
   currentMediaId: null,
   focusMessageId: null,
+  replyToMessageId: null,
 
   openModal: (type, props) => {
     set({
@@ -56,11 +58,14 @@ export const useModalStore = create<ModalState & ModalActions>((set) => ({
       modalContent: null,
       currentMediaId: null,
       focusMessageId: null,
+      replyToMessageId: null,
     }),
 
   setFocusMessageId: (messageId) => set({ focusMessageId: messageId }),
+  setReplyToMessageId: (messageId) => set({ replyToMessageId: messageId }),
 }));
 
+// Selectors and custom hooks
 export const useCurrentMediaId = () =>
   useModalStore((state) => state.currentMediaId);
 
@@ -76,7 +81,14 @@ export const useModalActions = () =>
     openMediaModal: state.openMediaModal,
     closeModal: state.closeModal,
     setFocusMessageId: state.setFocusMessageId,
+    setReplyToMessageId: state.setReplyToMessageId,
   }));
 
 export const useFocusMessageId = () =>
   useModalStore((state) => state.focusMessageId);
+
+export const useReplyToMessageId = () =>
+  useModalStore((state) => state.replyToMessageId);
+
+export const useSetReplyToMessageId = () =>
+  useModalStore((state) => state.setReplyToMessageId);

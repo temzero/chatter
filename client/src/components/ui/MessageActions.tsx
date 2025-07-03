@@ -3,9 +3,13 @@ import React from "react";
 import classNames from "classnames";
 import { motion } from "framer-motion";
 import { MessageResponse } from "@/types/responses/message.response";
-import { useMessageStore } from "@/stores/messageStore";
-import { ModalType, useModalStore } from "@/stores/modalStore";
+import {
+  ModalType,
+  useModalStore,
+  useSetReplyToMessageId,
+} from "@/stores/modalStore";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
+import { scrollToMessageById } from "@/utils/scrollToMessageById";
 
 interface MessageActionsProps {
   message: MessageResponse;
@@ -18,8 +22,8 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   className = "",
   isMe,
 }) => {
-  const setReplyToMessage = useMessageStore((state) => state.setReplyToMessage);
-  const { openModal, closeModal } = useModalStore(); // Use hook properly
+  const { openModal, closeModal } = useModalStore();
+  const setReplyToMessageId = useSetReplyToMessageId();
   const isPinned = false;
   const isAlreadyReply = !!message.replyToMessageId;
 
@@ -30,7 +34,8 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
             icon: "reply",
             label: "Reply",
             action: () => {
-              setReplyToMessage(message);
+              setReplyToMessageId(message.id);
+              scrollToMessageById(message.id, { animate: false });
             },
           },
         ]
@@ -39,6 +44,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       icon: "arrow_warm_up",
       label: "Forward",
       action: () => {
+        closeModal();
         openModal(ModalType.FORWARD_MESSAGE, { message });
       },
     },
@@ -50,6 +56,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
           chatId: message.chatId,
           messageId: isPinned ? null : message.id,
         });
+        closeModal();
       },
     },
     {
@@ -57,12 +64,14 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       label: "Save",
       action: () => {
         chatWebSocketService.saveMessage({ messageId: message.id });
+        closeModal();
       },
     },
     {
       icon: "delete",
       label: "Delete",
       action: () => {
+        closeModal();
         openModal(ModalType.DELETE_MESSAGE, { message });
       },
     },
@@ -95,7 +104,6 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
           )}
           onClick={(e) => {
             e.stopPropagation();
-            closeModal();
             action.action();
           }}
           title={action.label}

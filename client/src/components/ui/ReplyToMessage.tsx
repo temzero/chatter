@@ -1,10 +1,10 @@
 // components/ui/ReplyToMessage.tsx
 import React from "react";
 import { MessageResponse } from "@/types/responses/message.response";
-import { useIsMe } from "@/stores/authStore";
-import { Avatar } from "./avatar/Avatar";
 import { formatTime } from "@/utils/formatTime";
 import { motion } from "framer-motion";
+import { MessageHorizontalPreview } from "../chat/MessageHorizontalPreview";
+import { ChatType } from "@/types/enums/ChatType";
 
 interface ReplyToMessageProps {
   replyToMessage: MessageResponse;
@@ -15,9 +15,6 @@ const ReplyToMessage: React.FC<ReplyToMessageProps> = ({
   replyToMessage,
   onCancelReply,
 }) => {
-  const isMe = useIsMe(replyToMessage.sender.id)
-
-
   return (
     <motion.div
       key={replyToMessage.id}
@@ -36,17 +33,7 @@ const ReplyToMessage: React.FC<ReplyToMessageProps> = ({
             reply
           </span>
         </div>
-
-        {isMe || (
-          <Avatar
-            avatarUrl={replyToMessage.sender.avatarUrl}
-            name={replyToMessage.sender.displayName}
-            className="-mr-1"
-          />
-        )}
-        <p className={`message-bubble ${isMe && "self-message"}`}>
-          {replyToMessage.content || "Attachment"}
-        </p>
+        <MessageHorizontalPreview message={replyToMessage} chatType={ChatType.GROUP} isBubble={true} />
       </div>
       <button
         className="relative flex items-center justify-center w-6 h-6 bg-[var(--border-color)] opacity-80 hover:opacity-100 rounded-full"

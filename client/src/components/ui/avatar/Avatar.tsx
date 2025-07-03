@@ -22,7 +22,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   return (
     <div
       key={id}
-      className={`w-${size} h-${size} flex items-center justify-center overflow-hidden rounded-full border-2 border-[var(--border-color)] ${className}`}
+      className={`w-${size} h-${size} aspect-square flex items-center justify-center overflow-hidden rounded-full border-2 border-[var(--border-color)] ${className}`}
       onClick={onClick}
     >
       {avatarUrl ? (

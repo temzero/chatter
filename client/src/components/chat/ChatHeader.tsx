@@ -52,7 +52,6 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ chat }) => {
         <PinnedMessage
           message={chat.pinnedMessage}
           chatType={chat.type}
-          isBanner
           onUnpin={() => {
             chatWebSocketService.togglePinMessage({
               chatId: chat.id,

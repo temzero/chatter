@@ -13,6 +13,7 @@ import type {
   MessageResponse,
 } from "@/types/responses/message.response";
 import { toast } from "react-toastify";
+import { useModalStore } from "./modalStore";
 
 interface ChatStore {
   chats: ChatResponse[];
@@ -166,7 +167,7 @@ export const useChatStore = create<ChatStore>()(
         setActiveChat: async (chat) => {
           if (!chat) {
             set({ activeChat: null, isLoading: false });
-            useMessageStore.getState().setReplyToMessage(null); // Add this line
+            useModalStore.getState().setReplyToMessageId(null);
             return;
           }
 
@@ -178,7 +179,7 @@ export const useChatStore = create<ChatStore>()(
 
           set({ activeChat: chat, isLoading: true });
           window.history.pushState({}, "", `/${chat.id}`);
-          useMessageStore.getState().setReplyToMessage(null); // Add this line
+          useModalStore.getState().setReplyToMessageId(null);
 
           try {
             const fetchMessagesPromise = alreadyFetchedMessages
