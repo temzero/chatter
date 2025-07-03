@@ -46,7 +46,6 @@ export interface MessageStore {
   ) => void;
   addReaction: (messageId: string, emoji: string, userId: string) => void;
   removeReaction: (messageId: string, emoji: string, userId: string) => void;
-
   setReplyToMessage: (message: MessageResponse | null) => void;
 }
 
@@ -61,52 +60,6 @@ export const getAttachmentsFromMessages = (
         messageId: msg.id,
       }))
     );
-
-// const createLastMessage = (message: MessageResponse): LastMessageResponse => {
-//   const {
-//     id,
-//     sender,
-//     content = "",
-//     attachments = [],
-//     forwardedFromMessage,
-//     createdAt,
-//   } = message;
-
-//   // Use forwarded message if exists
-//   const isForwarded = !!forwardedFromMessage;
-
-//   const actualContent = isForwarded
-//     ? forwardedFromMessage.content || "Attachment"
-//     : content || "Attachment";
-
-//   const actualAttachments = isForwarded
-//     ? forwardedFromMessage.attachments || []
-//     : attachments;
-
-//   const attachmentTypes = actualAttachments.length
-//     ? actualAttachments[0].type
-//     : undefined;
-
-//   const icon = actualAttachments.some((a) => a.type === AttachmentType.IMAGE)
-//     ? "image"
-//     : actualAttachments.some((a) => a.type === AttachmentType.VIDEO)
-//     ? "videocam"
-//     : actualAttachments.some((a) => a.type === AttachmentType.AUDIO)
-//     ? "music_note"
-//     : actualAttachments.length
-//     ? "folder_zip"
-//     : undefined;
-
-//   return {
-//     id,
-//     senderId: sender.id,
-//     senderDisplayName: sender.displayName,
-//     content: actualContent,
-//     icons,
-//     isForwarded,
-//     createdAt,
-//   };
-// };
 
 export const useMessageStore = create<MessageStore>((set, get) => ({
   messages: {},
@@ -357,7 +310,6 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
       return { messages: updatedMessages };
     });
   },
-
   removeReaction: (messageId, emoji, userId) => {
     set((state) => {
       const updatedMessages = { ...state.messages };

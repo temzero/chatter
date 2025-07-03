@@ -4,7 +4,7 @@ type AvatarProps = {
   size?: string;
   textSize?: string;
   className?: string;
-  id?: number; // renamed from key
+  id?: number;
   onClick?: () => void;
 };
 
@@ -14,14 +14,14 @@ export const Avatar: React.FC<AvatarProps> = ({
   size = "10",
   textSize = "text-4xl",
   className = "",
-  id, // renamed from key
+  id,
   onClick,
 }) => {
   const nameInitial = name?.charAt(0)?.toUpperCase();
 
   return (
     <div
-      key={id} // you can still use it as a key here if needed
+      key={id}
       className={`w-${size} h-${size} flex items-center justify-center overflow-hidden rounded-full border-2 border-[var(--border-color)] ${className}`}
       onClick={onClick}
     >

@@ -59,6 +59,7 @@ export class ChatGateway {
       data.chatId,
       `${chatLink}userTyping`,
       payload,
+      userId,
     );
   }
 

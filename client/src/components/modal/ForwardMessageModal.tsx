@@ -44,7 +44,7 @@ const ForwardMessageModal: React.FC<ForwardMessageModalProps> = ({
   };
 
   return (
-    <div className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded p-4 max-w-xl w-[400px] custom-border">
+    <div className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded p-4 max-w-xl w-[400px] custom-border z-[99]">
       <h1 className="font-bold text-center text-xl mb-4 flex items-center justify-center gap-2">
         Forward Message To...
         {/* <span className="material-symbols-outlined text-3xl">send</span> */}

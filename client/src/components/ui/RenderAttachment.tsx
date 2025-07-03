@@ -129,9 +129,7 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
           src={getMediaUrl()}
           alt={attachment.filename || "Image attachment"}
           onClick={handleOpenModal}
-          className={`w-full h-full transition-all duration-300 ${
-            previewMode ? "" : "hover:scale-125"
-          } object-cover`}
+          className={`w-full h-full transition-all duration-300 object-cover`}
           style={{
             aspectRatio:
               aspectRatio ||
@@ -145,9 +143,7 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
     case AttachmentType.VIDEO:
       return renderContainer(
         <video
-          className={`w-full h-full transition-all duration-300 ${
-            previewMode ? "" : "hover:scale-125"
-          } object-cover`}
+          className={`w-full h-full transition-all duration-300 object-cover`}
           controls={!previewMode}
           onClick={previewMode ? handleOpenModal : undefined}
           onLoadedMetadata={handleVideoLoadedMetadata}

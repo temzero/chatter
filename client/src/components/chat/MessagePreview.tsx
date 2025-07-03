@@ -6,8 +6,6 @@ import type { MessageResponse } from "@/types/responses/message.response";
 import { useCurrentUserId } from "@/stores/authStore";
 import RenderMultipleAttachments from "../ui/RenderMultipleAttachments";
 import ForwardedMessagePreview from "../ui/ForwardMessagePreview";
-import MessageReplyPreview from "../ui/MessageReplyPreview";
-import ReplyToMessage from "../ui/ReplyToMessage";
 
 interface MessagePreviewProps {
   message: MessageResponse;

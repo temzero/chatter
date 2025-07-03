@@ -207,7 +207,6 @@ select:focus {
   display: inline-block;
   border-radius: 8px;
   background-color: var(--message-color);
-  /* overflow: hidden; */
   word-break: break-word;
   white-space: pre-wrap;
   width: fit-content;
@@ -224,7 +223,7 @@ select:focus {
 .message-forward-bubble:hover,
 .message-attachment-bubble:hover {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transform: scale(1.1);
+  /* transform: scale(1.1); */
 }
 
 /* Self Message Bubbles (Right-Aligned) */
@@ -232,7 +231,6 @@ select:focus {
 .message-forward-bubble.self-message,
 .message-attachment-bubble.self-message {
   background-color: var(--active-chat-color);
-  /* background-color: rgb(245, 245, 245); */
   transform-origin: bottom right;
   color: white;
 }

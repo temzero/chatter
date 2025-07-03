@@ -111,12 +111,18 @@ export class WebsocketService {
     return sockets ? Array.from(sockets) : [];
   }
 
-  async emitToChatMembers(chatId: string, event: string, payload: any) {
+  async emitToChatMembers(
+    chatId: string,
+    event: string,
+    payload: any,
+    excludeUserId?: string,
+  ) {
     const userIds = await this.chatMemberService.getAllMemberUserIds(chatId);
 
     for (const userId of userIds) {
+      if (userId === excludeUserId) continue; // ✅ Skip excluded user
+
       const socketIds = this.getUserSocketIds(userId);
-      // console.log('socketIds', socketIds);
       for (const socketId of socketIds) {
         this.server.to(socketId).emit(event, payload);
       }

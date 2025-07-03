@@ -49,7 +49,7 @@ const FriendRequestModal: React.FC<FriendRequestModalProps> = ({
   };
 
   return (
-    <div className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded p-4 max-w-xl w-[400px] custom-border">
+    <div className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded p-4 max-w-xl w-[400px] custom-border z-[99]">
       <h1 className="font-bold text-center text-xl">Send Friend Request to</h1>
       <div className="flex items-center gap-4 custom-border p-2 my-4 rounded-lg">
         <Avatar

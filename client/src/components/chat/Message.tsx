@@ -11,8 +11,9 @@ import { ChatType } from "@/types/enums/ChatType";
 import { MessageReactionDisplay } from "../ui/MessageReactionsDisplay";
 import MessageReplyPreview from "../ui/MessageReplyPreview";
 import ForwardedMessagePreview from "../ui/ForwardMessagePreview";
-import { useIsModalOpen, useModalStore } from "@/stores/modalStore";
-import { scrollToMessageById } from "@/utils/scrollToMessageById";
+import { MessageActions } from "../ui/MessageActions";
+import { ReactionPicker } from "../ui/MessageReactionPicker";
+import { useFocusMessageId, useModalStore } from "@/stores/modalStore";
 
 const myMessageAnimation = {
   initial: { opacity: 0, scale: 0.1, x: 100, y: 0 },
@@ -40,7 +41,6 @@ interface MessageProps {
   isRecent?: boolean;
   isRead?: boolean;
   readUserAvatars?: string[];
-  isPreview?: boolean;
 }
 
 const Message: React.FC<MessageProps> = ({
@@ -50,20 +50,20 @@ const Message: React.FC<MessageProps> = ({
   showInfo = true,
   isRecent = false,
   readUserAvatars,
-  isPreview = true,
 }) => {
   const currentUserId = useCurrentUserId();
   const isMe = message.sender.id === currentUserId;
   const reactions = useMessageReactions(message.id);
 
+  // Modal Focus overlay
+  const isFocusMessageId = useFocusMessageId();
+  const isFocus = isFocusMessageId === message.id;
+  const { openMessageModal } = useModalStore();
+
   const repliedMessage = message.replyToMessage;
   const forwardedMessage = message.forwardedFromMessage;
 
-  const { openModal } = useModalStore();
-  const isModalOpen = useIsModalOpen();
-
   const [copied, setCopied] = useState(false);
-  const [rightClick, setRightClick] = useState(false);
   const messageRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -73,12 +73,6 @@ const Message: React.FC<MessageProps> = ({
     }
     return () => clearTimeout(timer);
   }, [copied]);
-
-  const handleMessageRightClick = (message: MessageResponse) => {
-    setRightClick(true)
-    scrollToMessageById(message.id, { animate: false });
-    openModal("message", { message });
-  };
 
   const handleCopyText = () => {
     if (!message.content) return;
@@ -98,9 +92,8 @@ const Message: React.FC<MessageProps> = ({
     "ml-auto": isMe,
     "mr-auto": !isMe,
     "pb-1": isRecent,
-    "pb-8": !isRecent && isPreview,
-    // "opacity-0": isModalOpen,
-    "opacity-0": rightClick,
+    "pb-8": !isRecent,
+    "z-[99]": isFocus,
   };
 
   const attachments = message.attachments || [];
@@ -109,30 +102,25 @@ const Message: React.FC<MessageProps> = ({
     <motion.div
       id={`message-${message.id}`}
       ref={messageRef}
-      className={classNames("flex max-w-[60%] group", alignmentClass)}
+      className={classNames("flex max-w-[60%] group relative", alignmentClass, {
+        "z-40": isFocus, // Higher than the blur modal's z-index
+      })}
       initial={animationProps.initial}
       animate={animationProps.animate}
       transition={animationProps.transition}
       onClick={(e) => e.stopPropagation()}
       onContextMenu={(e) => {
         e.preventDefault();
-        if (isPreview) {
-          handleMessageRightClick(message);
-        }
+        openMessageModal(message.id);
       }}
     >
       {isGroupChat && (
         <div
           className={classNames(
-            "flex-shrink-0 mt-auto mr-2 h-10 w-10 min-w-10",
-            {
-              "flex items-center justify-center rounded-full custom-border overflow-hidden":
-                showInfo && !isMe,
-              invisible: !(showInfo && !isMe),
-            }
+            "flex-shrink-0 mt-auto mr-2 h-10 w-10 min-w-10"
           )}
         >
-          {showInfo && !isMe && (
+          {!isRecent && !isMe && (
             <Avatar
               avatarUrl={message.sender.avatarUrl}
               name={message.sender.displayName}
@@ -142,6 +130,13 @@ const Message: React.FC<MessageProps> = ({
       )}
 
       <div className="flex relative flex-col w-full">
+        {isFocus && (
+          <ReactionPicker
+            messageId={message.id}
+            chatId={message.chatId}
+            isMe={isMe}
+          />
+        )}
         {/* Reply Preview */}
         {repliedMessage && (
           <div
@@ -164,34 +159,42 @@ const Message: React.FC<MessageProps> = ({
           switch (true) {
             case attachments.length > 0:
               return (
-                <div
-                  className={classNames("message-attachment-bubble", {
-                    "self-message ml-auto": isMe,
-                  })}
-                  style={{
-                    width:
-                      attachments.length === 1
-                        ? "var(--attachment-width)"
-                        : "var(--attachment-width-large)",
-                  }}
-                >
-                  <RenderMultipleAttachments attachments={attachments} />
-                  {message.content && (
-                    <h1
-                      className={`p-2 break-words max-w-full cursor-pointer transition-all duration-200 ${
-                        copied ? "scale-110 opacity-60" : ""
-                      }`}
-                      onClick={handleCopyText}
-                    >
-                      {message.content}
-                    </h1>
-                  )}
-                  <MessageReactionDisplay
-                    reactions={reactions}
-                    isMe={isMe}
-                    currentUserId={currentUserId}
-                  />
-                </div>
+                <>
+                  <div
+                    className={classNames("message-attachment-bubble", {
+                      "self-message ml-auto": isMe,
+                    })}
+                    style={{
+                      width:
+                        attachments.length === 1
+                          ? "var(--attachment-width)"
+                          : "var(--attachment-width-large)",
+                    }}
+                  >
+                    <RenderMultipleAttachments attachments={attachments} />
+                    {message.content && (
+                      <h1
+                        className={`p-2 break-words max-w-full cursor-pointer transition-all duration-200 ${
+                          copied ? "scale-110 opacity-60" : ""
+                        }`}
+                        onClick={handleCopyText}
+                      >
+                        {message.content}
+                      </h1>
+                    )}
+                  </div>
+
+                  {/* Render outside so it's not affected by bubble's overflow */}
+                  <div className="mt-1">
+                    <MessageReactionDisplay
+                      reactions={reactions}
+                      isMe={isMe}
+                      currentUserId={currentUserId}
+                      messageId={message.id}
+                      chatId={message.chatId}
+                    />
+                  </div>
+                </>
               );
 
             case !!forwardedMessage:
@@ -222,6 +225,8 @@ const Message: React.FC<MessageProps> = ({
                     reactions={reactions}
                     isMe={isMe}
                     currentUserId={currentUserId}
+                    messageId={message.id}
+                    chatId={message.chatId}
                   />
                 </div>
               );
@@ -247,6 +252,8 @@ const Message: React.FC<MessageProps> = ({
                     reactions={reactions}
                     isMe={isMe}
                     currentUserId={currentUserId}
+                    messageId={message.id}
+                    chatId={message.chatId}
                   />
                 </div>
               );
@@ -261,7 +268,7 @@ const Message: React.FC<MessageProps> = ({
         )}
 
         {/* Time */}
-        {!isRecent && isPreview && (
+        {!isRecent && (
           <p
             className={`text-xs opacity-40 py-1 ${
               isMe ? "ml-auto" : "mr-auto"
@@ -290,6 +297,7 @@ const Message: React.FC<MessageProps> = ({
             ))}
           </div>
         )}
+        {isFocus && <MessageActions message={message} isMe={isMe} />}
       </div>
     </motion.div>
   );

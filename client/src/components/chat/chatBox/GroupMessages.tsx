@@ -58,17 +58,6 @@ const GroupMessages: React.FC<GroupMessagesProps> = ({ chat, messages }) => {
     updateMemberLastRead,
   ]);
 
-  // useEffect(() => {
-  //   if (members) {
-  //     members.forEach((member) => {
-  //       console.log(
-  //         `Member ${member.id} (${member.firstName} ${member.lastName}):`,
-  //         member.lastReadMessageId
-  //       );
-  //     });
-  //   }
-  // }, [members]);
-
   const messagesByDate = useMemo(() => {
     return groupMessagesByDate(messages);
   }, [messages]);
@@ -86,11 +75,11 @@ const GroupMessages: React.FC<GroupMessagesProps> = ({ chat, messages }) => {
       {messagesByDate.map((group) => (
         <React.Fragment key={`${group.date}-${chatId}`}>
           <div
-            className={`sticky z-50 flex justify-center mb-4 ${
+            className={`sticky z-20 flex justify-center mb-4 ${
               isMessagePinned ? "top-12" : "top-0"
             }`}
           >
-            <div className="bg-[var(--background-color)] text-xs p-1 rounded z-50">
+            <div className="bg-[var(--background-color)] text-xs p-1 rounded z-30">
               {group.date || "Today"}
             </div>
           </div>

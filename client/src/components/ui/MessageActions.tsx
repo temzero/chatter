@@ -4,17 +4,19 @@ import classNames from "classnames";
 import { motion } from "framer-motion";
 import { MessageResponse } from "@/types/responses/message.response";
 import { useMessageStore } from "@/stores/messageStore";
-import { useModalStore } from "@/stores/modalStore";
+import { ModalType, useModalStore } from "@/stores/modalStore";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
 
 interface MessageActionsProps {
   message: MessageResponse;
   className?: string;
+  isMe?: boolean;
 }
 
 export const MessageActions: React.FC<MessageActionsProps> = ({
   message,
   className = "",
+  isMe,
 }) => {
   const setReplyToMessage = useMessageStore((state) => state.setReplyToMessage);
   const { openModal, closeModal } = useModalStore(); // Use hook properly
@@ -22,15 +24,13 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   const isAlreadyReply = !!message.replyToMessageId;
 
   const baseActions = [
-    // Only show reply action if this message isn't already a reply
     ...(!isAlreadyReply
       ? [
           {
-            icon: "prompt_suggestion",
+            icon: "reply",
             label: "Reply",
             action: () => {
               setReplyToMessage(message);
-              closeModal();
             },
           },
         ]
@@ -39,7 +39,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       icon: "arrow_warm_up",
       label: "Forward",
       action: () => {
-        openModal("forward-message", { message });
+        openModal(ModalType.FORWARD_MESSAGE, { message });
       },
     },
     {
@@ -50,7 +50,6 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
           chatId: message.chatId,
           messageId: isPinned ? null : message.id,
         });
-        closeModal();
       },
     },
     {
@@ -58,25 +57,31 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       label: "Save",
       action: () => {
         chatWebSocketService.saveMessage({ messageId: message.id });
-        closeModal();
       },
     },
     {
       icon: "delete",
       label: "Delete",
       action: () => {
-        openModal("delete-message", { message });
+        openModal(ModalType.DELETE_MESSAGE, { message });
       },
     },
   ];
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.5, y: -10 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.5, y: -10 }}
+      initial={{ opacity: 0, scale: 0 }}
+      animate={{ opacity: 1, scale: 1 }}
+      // exit={{ opacity: 0, scale: 0.5, y: -10 }}
+      style={{
+        transformOrigin: isMe ? "top right" : "top left",
+      }}
       className={classNames(
-        "flex gap-2 bg-[var(--sidebar-color)] p-1.5 rounded-lg shadow-lg z-[99]",
+        "absolute -bottom-[50px] flex bg-[var(--sidebar-color)] custom-border rounded-lg shadow-lg z-50",
+        {
+          "right-0": isMe,
+          "left-0": !isMe,
+        },
         className
       )}
       onClick={(e) => e.stopPropagation()}
@@ -85,19 +90,23 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
         <button
           key={index}
           className={classNames(
-            "p-1 rounded-full flex flex-col items-center justify-center opacity-70 hover:opacity-100",
-            "transition-all duration-200 cursor-pointer"
+            "py-2 px-3 flex flex-col items-center justify-center opacity-70",
+            "hover:opacity-100 hover:bg-[--hover-color]"
           )}
           onClick={(e) => {
             e.stopPropagation();
+            closeModal();
             action.action();
           }}
           title={action.label}
         >
           <i
-            className={`material-symbols-outlined text-2xl hover:scale-150 transition-all duration-300 ${
-              action.label === "Forward" && "rotate-90"
-            }`}
+            className={classNames(
+              "material-symbols-outlined text-2xl",
+              action.label === "Reply" && "rotate-180",
+              action.label === "Forward" && "rotate-90",
+              action.label === "Delete" && "text-red-400"
+            )}
           >
             {action.icon}
           </i>
