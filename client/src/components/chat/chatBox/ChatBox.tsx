@@ -141,7 +141,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ chat }) => {
   return (
     <div
       ref={containerRef}
-      className="relative px-6 py-16 pb-[160px] flex-1 h-full w-full flex flex-col overflow-x-hidden overflow-y-auto"
+      className="px-6 py-16 pb-[160px] flex-1 h-full w-full flex flex-col overflow-x-hidden overflow-y-auto"
     >
       {renderMessages()}
       <TypingIndicator chatId={chatId} />

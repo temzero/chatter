@@ -35,6 +35,7 @@
   --primary-color: #247cff;
   --primary-green: #00ae80;
   --primary-green-50: #00ae8089;
+  --primary-green-glow: rgba(134, 239, 172, 1);
 
   /* light theme defaults */
   --text-color: black;
@@ -147,14 +148,24 @@ input[type="number"]::-webkit-inner-spin-button {
   border-radius: 4px;
 }
 
-.chatInput {
+.chat-input,
+.chat-input-reply {
   height: 36px;
   width: 100%;
   padding: 6px;
   padding-right: 3px;
-  border: 2px solid var(--input-border-color);
   background-color: var(--input-color);
   border-radius: 4px;
+  transition: border 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.chat-input {
+  border: 2px solid var(--input-border-color);
+}
+
+.chat-input-reply {
+  border: 2px solid var(--primary-green-glow);
+  box-shadow: 0 0 8px var(--primary-green-glow);
 }
 
 select {
@@ -169,6 +180,16 @@ select:focus {
 /* icon */
 .material-symbols-outlined.filled {
   font-variation-settings: "FILL" 1;
+}
+
+.blur-card {
+  color: white;
+  background: rgba(255, 255, 255, 0.1); /* White with 10% opacity */
+  backdrop-filter: blur(10px); /* Blur the background behind */
+  -webkit-backdrop-filter: blur(10px); /* Safari support */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Optional custom border */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3); /* Equivalent to shadow-xl */
+  overflow: hidden;
 }
 
 .custom-border {
@@ -200,36 +221,40 @@ select:focus {
 }
 
 /* Shared Styles for Both Bubbles */
-.message-bubble,
-.message-forward-bubble,
-.message-attachment-bubble {
+.message-bubble {
   position: relative;
-  display: inline-block;
   border-radius: 8px;
   background-color: var(--message-color);
   word-break: break-word;
   white-space: pre-wrap;
   width: fit-content;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   transform-origin: bottom left;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  color: var(--text-color);
 }
-.message-bubble {
+
+.message-bubble p {
   padding: 8px;
 }
+
+.message-bubble-reply {
+  border: 2px solid var(--primary-green-glow);
+  box-shadow: 0 0 12px var(--primary-green-glow);
+}
+
 /* Hover Effect */
 .message-bubble:hover,
-.message-forward-bubble:hover,
-.message-attachment-bubble:hover {
+.message-forward-bubble:hover:hover {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   /* transform: scale(1.1); */
 }
 
 /* Self Message Bubbles (Right-Aligned) */
 .message-bubble.self-message,
-.message-forward-bubble.self-message,
-.message-attachment-bubble.self-message {
+.message-forward-bubble.self-message.self-message {
   background-color: var(--active-chat-color);
   transform-origin: bottom right;
   color: white;
@@ -238,12 +263,6 @@ select:focus {
 /* Channel-specific Bubble (Optional Adjustment) */
 .channel-message-bubble {
   transform-origin: center;
-}
-
-/* attachment Bubble Adjustments */
-.message-attachment-bubble {
-  object-fit: cover;
-  overflow: hidden;
 }
 
 /* Scrolling to message */

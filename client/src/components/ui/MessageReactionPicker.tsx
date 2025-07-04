@@ -23,18 +23,18 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = ({
 
   return (
     <motion.div
-      className={classNames(
-        "absolute -top-10 bg-[var(--border-color)] custom-border rounded-full shadow-lg p-1 flex gap-1 z-50",
-        {
-          "right-0": isMe,
-          "left-0": !isMe,
-        }
-      )}
       initial={{ scale: 0 }}
       animate={{ scale: 1 }}
       style={{
         transformOrigin: isMe ? "bottom right" : "bottom left",
       }}
+      className={classNames(
+        "absolute -top-11 flex gap-1 rounded-full p-1 blur-card z-50",
+        {
+          "right-0": isMe,
+          "left-0": !isMe,
+        }
+      )}
       onClick={(e) => e.stopPropagation()}
     >
       {emojis.map((emoji) => (

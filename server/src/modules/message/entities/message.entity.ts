@@ -112,7 +112,14 @@ export class Message {
   @BeforeUpdate()
   validateContent() {
     // Skip validation if this is a delete operation
-    if (this.isDeleted || this.deletedAt || this.deletedForUserIds) {
+    if (
+      this.isDeleted ||
+      this.deletedAt ||
+      this.deletedForUserIds ||
+      (Object.keys(this).length === 2 &&
+        'isPinned' in this &&
+        'pinnedAt' in this)
+    ) {
       return;
     }
     // Trim content if it exists

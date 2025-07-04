@@ -65,8 +65,8 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
       }}
       whileTap={{ scale: 0.8 }}
       className={classNames(
-        "absolute -bottom-3 z-10 flex bg-black/50 rounded-full",
-        isMe ? "left-0" : "right-0 flex-row-reverse"
+        "message-reaction absolute -bottom-2 z-10 flex bg-black/50 rounded-full",
+        isMe ? "-left-4" : "-right-4 flex-row-reverse"
       )}
     >
       <AnimatePresence mode="wait">

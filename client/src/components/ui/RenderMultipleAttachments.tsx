@@ -5,22 +5,14 @@ import { AttachmentType } from "@/types/enums/attachmentType";
 
 interface RenderMultipleAttachmentsProps {
   attachments: AttachmentResponse[];
-  text?: string;
   className?: string;
 }
 
 const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
   attachments,
-  text,
   className = "",
 }) => {
-  if (attachments.length === 0) {
-    return text ? (
-      <div className="p-2">{text}</div>
-    ) : (
-      <span>No attachments available</span>
-    );
-  }
+  if (attachments.length === 0) return null
 
   // Categorize attachments by type
   const visualMedia = attachments.filter(
@@ -116,9 +108,6 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
           <RenderAttachment attachment={mediaItem} />
         </div>
       ))}
-
-      {/* Optional text content */}
-      {text && <div className="p-2 break-words max-w-full">{text}</div>}
     </div>
   );
 };

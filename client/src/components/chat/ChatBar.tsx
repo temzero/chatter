@@ -1,13 +1,13 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useMessageStore } from "@/stores/messageStore";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import EmojiPicker from "../ui/EmojiPicker";
 import AttachFile from "../ui/AttachFile";
-import FileImportPreviews from "../ui/FileImportPreview";
+import AttachmentImportedPreview from "../ui/AttachmentImportedPreview";
 import useTypingIndicator from "@/hooks/useTypingIndicator";
 import { handleSendMessage } from "@/utils/sendMessageHandler";
-import classNames from "classnames";
 import { useModalStore, useReplyToMessageId } from "@/stores/modalStore";
+import classNames from "classnames";
 
 interface ChatBarProps {
   chatId: string;
@@ -167,7 +167,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
       )}
     >
       {filePreviewUrls.length > 0 && (
-        <FileImportPreviews
+        <AttachmentImportedPreview
           files={attachedFiles}
           urls={filePreviewUrls}
           onRemove={(index) => {
@@ -178,27 +178,45 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
       )}
 
       <div className="flex w-full items-end">
-        {replyToMessageId && (
-          <span className="material-symbols-outlined text-3xl rotate-180 mr-2 mb-1 pointer-events-none">
-            reply
-          </span>
-        )}
+        <AnimatePresence>
+          {replyToMessageId && (
+            <motion.div
+              key="reply-indicator"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              // exit={{ opacity: 0, x: -20 }}
+              style={{ transformOrigin: "top left" }}
+            >
+              <span className="material-symbols-outlined text-3xl rotate-180 mr-2 mb-1 pointer-events-none">
+                reply
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div
           ref={containerRef}
           id="input-container"
-          className={`chatInput flex gap-2 items-end w-full transition-[height] duration-200 ease-in-out`}
+          className={classNames(
+            "flex gap-2 items-end w-full transition-[height] duration-200 ease-in-out",
+            {
+              "chat-input": !replyToMessageId,
+              "chat-input-reply": replyToMessageId,
+            }
+          )}
         >
           <textarea
             ref={inputRef}
             defaultValue=""
             onInput={handleInput}
             onKeyDown={handleKeyDown}
-            className={`w-full outline-none bg-transparent resize-none overflow-hidden ${
-              isMessageSent
-                ? "opacity-10 transition-opacity duration-100 ease-in-out"
-                : ""
-            }`}
+            className={classNames(
+              "w-full outline-none bg-transparent resize-none overflow-hidden",
+              {
+                "opacity-10 transition-opacity duration-100 ease-in-out":
+                  isMessageSent,
+              }
+            )}
             placeholder={
               chatId ? "Message..." : "Select a chat to start messaging"
             }
@@ -228,11 +246,15 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
                 </motion.div>
 
                 <button
-                  className={`rounded bg-[var(--primary-green)] border-2 border-green-400 flex items-center justify-center text-white transition-all duration-300 ${
-                    shouldShowSendButton
-                      ? "w-[30px] opacity-100 ml-0 pointer-events-auto"
-                      : "w-0 opacity-0 -ml-2 pointer-events-none"
-                  }`}
+                  className={classNames(
+                    "rounded bg-[var(--primary-green)] border-2 border-green-400 flex items-center justify-center text-white transition-all duration-300",
+                    {
+                      "w-[30px] opacity-100 ml-0 pointer-events-auto":
+                        shouldShowSendButton,
+                      "w-0 opacity-0 -ml-2 pointer-events-none":
+                        !shouldShowSendButton,
+                    }
+                  )}
                   onClick={async () => {
                     await handleSendMessage({
                       chatId,
@@ -262,14 +284,23 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
             )}
           </div>
         </div>
-        {replyToMessageId && (
-          <button
-            className="aspect-square rounded-full opacity-70 hover:opacity-100 hover:bg-red-500 ml-2 mb-1.5"
-            onClick={closeModal}
-          >
-            <span className="material-symbols-outlined">close</span>
-          </button>
-        )}
+        <AnimatePresence>
+          {replyToMessageId && (
+            <motion.div
+              key="close-reply"
+              initial={{ opacity: 0, scale: 0.1 }}
+              animate={{ opacity: 1, scale: 1 }}
+              // exit={{ opacity: 0, scale: 0.5 }}
+            >
+              <button
+                className="aspect-square overflow-hidden rounded-full opacity-70 hover:opacity-100 hover:bg-red-500 ml-2 mb-1.5"
+                onClick={closeModal}
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

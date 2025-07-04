@@ -86,7 +86,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
         transformOrigin: isMe ? "top right" : "top left",
       }}
       className={classNames(
-        "absolute -bottom-[50px] flex bg-[var(--sidebar-color)] custom-border rounded-lg shadow-lg z-50",
+        "absolute -bottom-14 flex rounded blur-card z-50",
         {
           "right-0": isMe,
           "left-0": !isMe,
@@ -99,8 +99,8 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
         <button
           key={index}
           className={classNames(
-            "py-2 px-3 flex flex-col items-center justify-center opacity-70",
-            "hover:opacity-100 hover:bg-[--hover-color]"
+            "py-2 px-3 flex flex-col items-center justify-center",
+            "hover:bg-black/30"
           )}
           onClick={(e) => {
             e.stopPropagation();

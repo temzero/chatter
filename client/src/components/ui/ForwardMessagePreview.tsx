@@ -2,26 +2,27 @@
 import React from "react";
 import classNames from "classnames";
 import type { MessageResponse } from "@/types/responses/message.response";
-import { useCurrentUser } from "@/stores/authStore";
 
 interface ForwardedMessagePreviewProps {
-  message: MessageResponse;
+  message?: MessageResponse;
+  currentUserId?: string;
   isMe: boolean;
 }
 
 const ForwardedMessagePreview: React.FC<ForwardedMessagePreviewProps> = ({
   message,
+  currentUserId,
   isMe,
 }) => {
-  const currentUser = useCurrentUser();
-  const isFromMe = message.sender.id === currentUser?.id;
+  if (!message) return null;
+  const isFromMe = message.sender.id === currentUserId;
 
   return (
     <>
       <div
-        className={classNames("p-2 rounded-lg custom-border shadow-xl", {
-          "bg-[var(--active-chat-color)]": isFromMe,
-          "bg-[var(--message-color)] ": !isFromMe,
+        style={{ width: "100%" }}
+        className={classNames("message-bubble custom-border", {
+          "self-message": isFromMe,
         })}
       >
         {message.content && <p className="italic">{message.content}</p>}

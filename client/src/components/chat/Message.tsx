@@ -13,24 +13,56 @@ import MessageReplyPreview from "../ui/MessageReplyPreview";
 import ForwardedMessagePreview from "../ui/ForwardMessagePreview";
 import { MessageActions } from "../ui/MessageActions";
 import { ReactionPicker } from "../ui/MessageReactionPicker";
-import { useFocusMessageId, useModalStore, useReplyToMessageId } from "@/stores/modalStore";
+import {
+  useFocusMessageId,
+  useModalStore,
+  useReplyToMessageId,
+} from "@/stores/modalStore";
+import { handleQuickReaction } from "@/utils/quickReaction";
 
-const myMessageAnimation = {
-  initial: { opacity: 0, scale: 0.1, x: 100, y: 0 },
-  animate: { opacity: 1, scale: 1, x: 0, y: 0 },
-  transition: { type: "spring", stiffness: 300, damping: 29 },
+// Shared animation configurations
+const messageAnimations = {
+  myMessage: {
+    initial: { opacity: 0, scale: 0.1, x: 100, y: 0 },
+    animate: { opacity: 1, scale: 1, x: 0, y: 0 },
+    transition: { type: "spring", stiffness: 300, damping: 29 },
+  },
+  otherMessage: {
+    initial: { opacity: 0, scale: 0.1, x: -200, y: 30 },
+    animate: { opacity: 1, scale: 1, x: 0, y: 0 },
+    transition: { type: "spring", stiffness: 222, damping: 20 },
+  },
+  none: {
+    initial: false,
+    animate: false,
+    transition: {},
+  },
 };
 
-const otherMessageAnimation = {
-  initial: { opacity: 0, scale: 0.1, x: -200, y: 30 },
-  animate: { opacity: 1, scale: 1, x: 0, y: 0 },
-  transition: { type: "spring", stiffness: 222, damping: 20 },
-};
+const MessageContent = ({
+  content,
+  onCopy,
+  copied,
+}: {
+  content?: string;
+  onCopy: () => void;
+  copied: boolean;
+}) => {
+  if (!content) return null;
 
-const noAnimation = {
-  initial: false,
-  animate: false,
-  transition: {},
+  return (
+    <p
+      className={classNames(
+        "break-words max-w-full cursor-pointer transition-all duration-200",
+        {
+          "scale-110 opacity-60": copied,
+        }
+      )}
+      onClick={onCopy}
+    >
+      {content}
+    </p>
+  );
 };
 
 interface MessageProps {
@@ -55,17 +87,17 @@ const Message: React.FC<MessageProps> = ({
   const isMe = message.sender.id === currentUserId;
   const reactions = useMessageReactions(message.id);
 
-  // Hide actions buttons, reaction picker when replyToMessageId not null
   const replyToMessageId = useReplyToMessageId();
+  const isMessageReplying = replyToMessageId === message.id;
 
-  // Modal Focus overlay
   const isFocusMessageId = useFocusMessageId();
   const isFocus = isFocusMessageId === message.id;
-  const { openMessageModal } = useModalStore();
+  console.log("isFocus", isFocus);
 
   const repliedMessage = message.replyToMessage;
   const forwardedMessage = message.forwardedFromMessage;
 
+  const { openMessageModal } = useModalStore();
   const [copied, setCopied] = useState(false);
   const messageRef = useRef<HTMLDivElement | null>(null);
 
@@ -85,45 +117,41 @@ const Message: React.FC<MessageProps> = ({
 
   const animationProps = shouldAnimate
     ? isMe
-      ? myMessageAnimation
-      : otherMessageAnimation
-    : noAnimation;
+      ? messageAnimations.myMessage
+      : messageAnimations.otherMessage
+    : messageAnimations.none;
 
   const isGroupChat = chatType === "group";
-
-  const alignmentClass = {
-    "ml-auto": isMe,
-    "mr-auto": !isMe,
-    "pb-1": isRecent,
-    "pb-8": !isRecent,
-    "z-[99]": isFocus,
-  };
-
   const attachments = message.attachments || [];
 
   return (
     <motion.div
       id={`message-${message.id}`}
       ref={messageRef}
-      className={classNames("flex max-w-[60%] group relative", alignmentClass, {
-        "z-40": isFocus, // Higher than the blur modal's z-index
+      className={classNames("flex max-w-[60%] group relative", {
+        "ml-auto": isMe,
+        "mr-auto": !isMe,
+        "pb-1": isRecent,
+        "pb-2": !isRecent,
+        "z-[99]": isFocus,
       })}
       initial={animationProps.initial}
       animate={animationProps.animate}
       transition={animationProps.transition}
       onClick={(e) => e.stopPropagation()}
+      onDoubleClick={() => handleQuickReaction(message.id, message.chatId)}
       onContextMenu={(e) => {
         e.preventDefault();
         openMessageModal(message.id);
       }}
     >
-      {isGroupChat && (
+      {isGroupChat && !isMe && (
         <div
           className={classNames(
             "flex-shrink-0 mt-auto mr-2 h-10 w-10 min-w-10"
           )}
         >
-          {!isRecent && !isMe && (
+          {!isRecent && (
             <Avatar
               avatarUrl={message.sender.avatarUrl}
               name={message.sender.displayName}
@@ -132,161 +160,98 @@ const Message: React.FC<MessageProps> = ({
         </div>
       )}
 
-      <div className="flex relative flex-col w-full">
-        {isFocus && !replyToMessageId && (
-          <ReactionPicker
-            messageId={message.id}
-            chatId={message.chatId}
-            isMe={isMe}
-          />
-        )}
-        {/* Reply Preview */}
-        {repliedMessage && (
-          <div
-            className={classNames("-mb-1 w-full", {
-              "text-right": repliedMessage.sender.id === currentUserId,
-            })}
-          >
+      <div className="flex flex-col w-full">
+        <div
+          className={classNames("relative flex flex-col transition-all", {
+            "scale-[1.1]": isMessageReplying,
+            "origin-bottom-right items-end": isMe,
+            "origin-bottom-left items-start": !isMe,
+          })}
+        >
+          {repliedMessage && (
             <MessageReplyPreview
-              message={repliedMessage}
+              replyMessage={repliedMessage}
               chatType={chatType}
               isMe={isMe}
-              isSelfReply={repliedMessage.sender.id === message.sender.id}
-              isReplyToMe={repliedMessage.sender.id === currentUserId}
+              currentUserId={currentUserId ?? ""}
+              senderId={message.sender.id}
+              isHidden={isFocus}
             />
+          )}
+
+          <div className="relative">
+            <div
+              className={classNames("message-bubble", {
+                "self-message ml-auto": isMe,
+                "scale-110": copied,
+                "message-bubble-reply": isMessageReplying,
+              })}
+              style={{
+                width:
+                  attachments.length === 1
+                    ? "var(--attachment-width)"
+                    : attachments.length > 1
+                    ? "var(--attachment-width-large)"
+                    : undefined,
+              }}
+            >
+              {forwardedMessage && (
+                <ForwardedMessagePreview
+                  message={forwardedMessage}
+                  currentUserId={currentUserId ?? undefined}
+                  isMe={isMe}
+                />
+              )}
+              <RenderMultipleAttachments attachments={attachments} />
+              <MessageContent
+                content={message.content ?? undefined}
+                onCopy={handleCopyText}
+                copied={copied}
+              />
+            </div>
+            <MessageReactionDisplay
+              reactions={reactions}
+              isMe={isMe}
+              currentUserId={currentUserId}
+              messageId={message.id}
+              chatId={message.chatId}
+            />
+            {isFocus && !replyToMessageId && (
+              <>
+                <ReactionPicker
+                  messageId={message.id}
+                  chatId={message.chatId}
+                  isMe={isMe}
+                />
+                <MessageActions message={message} isMe={isMe} />
+              </>
+            )}
           </div>
-        )}
+        </div>
 
-        {/* Main Content with switch */}
-        {(() => {
-          switch (true) {
-            case attachments.length > 0:
-              return (
-                <>
-                  <div
-                    className={classNames("message-attachment-bubble", {
-                      "self-message ml-auto": isMe,
-                    })}
-                    style={{
-                      width:
-                        attachments.length === 1
-                          ? "var(--attachment-width)"
-                          : "var(--attachment-width-large)",
-                    }}
-                  >
-                    <RenderMultipleAttachments attachments={attachments} />
-                    {message.content && (
-                      <h1
-                        className={`p-2 break-words max-w-full cursor-pointer transition-all duration-200 ${
-                          copied ? "scale-110 opacity-60" : ""
-                        }`}
-                        onClick={handleCopyText}
-                      >
-                        {message.content}
-                      </h1>
-                    )}
-                  </div>
-
-                  {/* Render outside so it's not affected by bubble's overflow */}
-                  <div className="mt-1">
-                    <MessageReactionDisplay
-                      reactions={reactions}
-                      isMe={isMe}
-                      currentUserId={currentUserId}
-                      messageId={message.id}
-                      chatId={message.chatId}
-                    />
-                  </div>
-                </>
-              );
-
-            case !!forwardedMessage:
-              return (
-                <div
-                  className={classNames(
-                    "message-forward-bubble cursor-pointer transition-all duration-200",
-                    { "self-message ml-auto": isMe },
-                    { "scale-110": copied }
-                  )}
-                >
-                  <ForwardedMessagePreview
-                    message={forwardedMessage}
-                    isMe={isMe}
-                  />
-                  {message.content && (
-                    <h1
-                      className={`break-words max-w-full cursor-pointer transition-all duration-200 ${
-                        copied ? "scale-110 opacity-60" : ""
-                      }`}
-                      onClick={handleCopyText}
-                    >
-                      {message.content}
-                    </h1>
-                  )}
-
-                  <MessageReactionDisplay
-                    reactions={reactions}
-                    isMe={isMe}
-                    currentUserId={currentUserId}
-                    messageId={message.id}
-                    chatId={message.chatId}
-                  />
-                </div>
-              );
-
-            default:
-              return (
-                <div
-                  className={classNames(
-                    "message-bubble cursor-pointer transition-all duration-200",
-                    { "self-message ml-auto": isMe },
-                    { "scale-110": copied }
-                  )}
-                >
-                  <h1
-                    className={`break-words max-w-full cursor-pointer transition-all duration-200 ${
-                      copied ? "scale-110 opacity-60" : ""
-                    }`}
-                    onClick={handleCopyText}
-                  >
-                    {message.content}
-                  </h1>
-                  <MessageReactionDisplay
-                    reactions={reactions}
-                    isMe={isMe}
-                    currentUserId={currentUserId}
-                    messageId={message.id}
-                    chatId={message.chatId}
-                  />
-                </div>
-              );
-          }
-        })()}
-
-        {/* Sender Info */}
         {showInfo && isGroupChat && !isMe && (
-          <h1 className="text-sm font-semibold opacity-70 mr-2">
+          <h1 className={classNames("text-sm font-semibold opacity-70 mr-2")}>
             {message.sender.displayName}
           </h1>
         )}
 
-        {/* Time */}
         {!isRecent && (
           <p
-            className={`text-xs opacity-40 py-1 ${
-              isMe ? "ml-auto" : "mr-auto"
-            }`}
+            className={classNames("text-xs py-1 opacity-40", {
+              "ml-auto": isMe,
+              "mr-auto": !isMe,
+            })}
           >
             {formatTime(message.createdAt)}
           </p>
         )}
 
-        {/* Read Receipts */}
         {readUserAvatars && (
           <div
-            className={`flex ${
-              isMe ? "justify-end" : "justify-start"
-            } items-center`}
+            className={classNames("flex items-center", {
+              "justify-end": isMe,
+              "justify-start": !isMe,
+            })}
           >
             {readUserAvatars.map((avatarUrl, index) => (
               <div key={index}>
@@ -300,7 +265,6 @@ const Message: React.FC<MessageProps> = ({
             ))}
           </div>
         )}
-        {isFocus && !replyToMessageId && <MessageActions message={message} isMe={isMe} />}
       </div>
     </motion.div>
   );

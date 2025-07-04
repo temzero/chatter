@@ -4,7 +4,7 @@ import { useMessageStore } from "@/stores/messageStore";
 import { motion } from "framer-motion";
 import EmojiPicker from "../ui/EmojiPicker";
 import AttachFile from "../ui/AttachFile";
-import FileImportPreviews from "../ui/FileImportPreview";
+import FileImportPreviews from "../ui/AttachmentImportedPreview";
 import { SendMessageRequest } from "@/types/requests/sendMessage.request";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
 import useTypingIndicator from "@/hooks/useTypingIndicator";
@@ -183,7 +183,7 @@ const ChatBar: React.FC = () => {
       <div
         ref={containerRef}
         id="input-container"
-        className="chatInput flex gap-2 items-end w-full transition-[height] duration-200 ease-in-out"
+        className="chat-input flex gap-2 items-end w-full transition-[height] duration-200 ease-in-out"
       >
         <textarea
           ref={inputRef}

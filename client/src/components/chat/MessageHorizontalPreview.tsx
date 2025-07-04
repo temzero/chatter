@@ -5,6 +5,8 @@ import { Avatar } from "../ui/avatar/Avatar";
 import { MessageResponse } from "@/types/responses/message.response";
 import { ChatType } from "@/types/enums/ChatType";
 import { useCurrentUserId } from "@/stores/authStore";
+import RenderAttachment from "../ui/RenderAttachment";
+import RenderPinnedAttachment from "../ui/RenderPinnedAttachment";
 
 interface MessageHorizontalPreviewProps {
   message: MessageResponse;
@@ -20,7 +22,6 @@ export const MessageHorizontalPreview: React.FC<
 
   const isGroupChat = chatType === ChatType.GROUP;
   const forwardedMessage = message.forwardedFromMessage;
-  const isForwarded = forwardedMessage !== null;
 
   // const isReplyToMe = currentUserId === message.replyToMessage?.sender.id;
   const isForwardedFromMe =
@@ -55,29 +56,38 @@ export const MessageHorizontalPreview: React.FC<
   return (
     <div
       ref={messageRef}
-      className={`flex items-center justify-center gap-[2px] ${messageClass}`}
+      className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center gap-2 ${messageClass}`}
     >
       {isGroupChat && !isMe && (
-        <div>
-          <Avatar
-            avatarUrl={message.sender.avatarUrl}
-            name={message.sender.displayName}
-            size="6"
-          />
-
-        </div>
+        <Avatar
+          avatarUrl={message.sender.avatarUrl}
+          name={message.sender.displayName}
+          size="6"
+        />
       )}
 
-      <h1
+      <p
         className={`break-words max-w-full cursor-pointer transition-all duration-200 ${
           copied ? "scale-110 opacity-60" : ""
         }`}
         onClick={handleCopyText}
       >
         {message.content}
-      </h1>
+      </p>
 
-      {isForwarded && (
+      {message?.attachments && message?.attachments?.length > 0 && (
+        <div className="flex gap-1">
+          {message.attachments.map((attachment) => (
+            <RenderPinnedAttachment
+              key={attachment.id}
+              attachment={attachment}
+              className="w-8 h-8 max-h-32 object-cover rounded"
+            />
+          ))}
+        </div>
+      )}
+
+      {forwardedMessage && (
         <div className="flex items-center gap-1">
           <span className="material-symbols-outlined rotate-90 opacity-60">
             arrow_warm_up
@@ -93,6 +103,19 @@ export const MessageHorizontalPreview: React.FC<
             <p className="text-sm font-semibold opacity-70 mr-2">
               {forwardedMessage?.content}
             </p>
+
+            {forwardedMessage?.attachments &&
+              forwardedMessage?.attachments?.length > 0 && (
+                <div className="grid grid-cols-2 gap-1">
+                  {forwardedMessage.attachments.map((attachment) => (
+                    <RenderAttachment
+                      key={attachment.id}
+                      attachment={attachment}
+                      className="w-full h-full max-h-32 object-cover rounded"
+                    />
+                  ))}
+                </div>
+              )}
           </div>
         </div>
       )}

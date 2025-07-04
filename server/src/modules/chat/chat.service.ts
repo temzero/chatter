@@ -238,6 +238,7 @@ export class ChatService {
 
     const message = await this.messageRepo.findOne({
       where: { id: messageId },
+      relations: ['attachments', 'forwardedFromMessage'],
     });
     if (!message) ErrorResponse.notFound('Message not found');
 
