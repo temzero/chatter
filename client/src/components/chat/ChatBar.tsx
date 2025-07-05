@@ -15,10 +15,13 @@ interface ChatBarProps {
 }
 
 const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
+  console.log('chatBar Render')
+
   const setDraftMessage = useMessageStore((state) => state.setDraftMessage);
   const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
-  const replyToMessageId = useReplyToMessageId();
   const closeModal = useModalStore((state) => state.closeModal);
+  const replyToMessageId = useReplyToMessageId();
+  // const replyToMessageId = null;
 
   const inputRef = useRef<HTMLTextAreaElement>(null!);
   const containerRef = useRef<HTMLDivElement>(null);

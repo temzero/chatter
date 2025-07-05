@@ -1,8 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { useModalStore } from "@/stores/modalStore";
 import { handleReaction } from "@/utils/handleReaction";
-import addReactionSound from "@/assets/sound/message-pop.mp3"; // Make sure path is correct
+import addReactionSound from "@/assets/sound/message-pop.mp3";
 import { playSound } from "@/utils/playSound";
 import classNames from "classnames";
 
@@ -12,14 +11,15 @@ interface ReactionPickerProps {
   messageId: string;
   chatId: string;
   isMe?: boolean;
+  onClose?: () => void;
 }
 
 export const ReactionPicker: React.FC<ReactionPickerProps> = ({
   messageId,
   chatId,
   isMe,
+  onClose,
 }) => {
-  const closeModal = useModalStore.getState().closeModal;
 
   return (
     <motion.div
@@ -47,7 +47,7 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = ({
               emoji,
               messageId,
               chatId,
-              onClose: closeModal,
+              onClose,
             });
           }}
         >

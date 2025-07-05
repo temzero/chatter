@@ -67,7 +67,7 @@ export const MessageHorizontalPreview: React.FC<
       )}
 
       <p
-        className={`break-words max-w-full cursor-pointer transition-all duration-200 ${
+        className={`break-words truncate max-w-full cursor-pointer transition-all duration-200 ${
           copied ? "scale-110 opacity-60" : ""
         }`}
         onClick={handleCopyText}

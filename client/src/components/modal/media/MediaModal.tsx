@@ -9,9 +9,16 @@ import { useModalStore } from "@/stores/modalStore";
 import { useMessageStore } from "@/stores/messageStore";
 import { RenderModalMedia } from "./RenderModalMedia";
 import { MediaSlidingContainer } from "./MediaSlidingContainer";
+import { useShallow } from "zustand/shallow";
 
 export const MediaModal = () => {
-  const { currentMediaId, closeModal } = useModalStore();
+const { currentMediaId, closeModal } = useModalStore(
+  useShallow((state) => ({
+    currentMediaId: state.currentMediaId,
+    closeModal: state.closeModal,
+  }))
+);
+
   const activeMedia = useMessageStore((state) => state.activeMedia);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);

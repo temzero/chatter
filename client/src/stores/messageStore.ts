@@ -23,6 +23,7 @@ export interface MessageStore {
   isLoading: boolean;
 
   fetchMessages: (chatId: string) => Promise<void>;
+  fetchMoreMessages: (chatId: string) => Promise<number>;
   addMessage: (newMessage: MessageResponse) => void;
   getMessageById: (messageId: string) => MessageResponse | undefined;
   deleteMessage: (chatId: string, messageId: string) => void;
@@ -78,6 +79,35 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
     } catch (error) {
       handleError(error, "Fail fetching messages");
       set({ isLoading: false });
+    }
+  },
+
+  fetchMoreMessages: async (chatId: string) => {
+    set({ isLoading: true });
+    try {
+      const existingMessages = get().messages[chatId] || [];
+      if (existingMessages.length === 0) return 0;
+
+      const newMessages = await messageService.getChatMessages(chatId, {
+        beforeMessageId: existingMessages[0].id,
+      });
+      if (newMessages.length > 0) {
+        set((state) => {
+          const existing = state.messages[chatId] || [];
+          return {
+            messages: {
+              ...state.messages,
+              [chatId]: [...newMessages, ...existing],
+            },
+            isLoading: false,
+          };
+        });
+      }
+      return newMessages.length;
+    } catch (err) {
+      handleError(err, "Failed to fetch more messages");
+      set({ isLoading: false });
+      return 0;
     }
   },
 
@@ -366,15 +396,16 @@ export const useIsMessageReadByMember = (
   );
 };
 
-export const useMessageReactions = (messageId: string) => {
-  return useMessageStore((state) => {
-    const messages = state.messages;
-    for (const chatId in messages) {
-      const message = messages[chatId].find((msg) => msg.id === messageId);
-      if (message) {
-        return message.reactions || {};
+export const useMessageReactions = (messageId: string) =>
+  useMessageStore(
+    useShallow((state) => {
+      const messages = state.messages;
+      for (const chatId in messages) {
+        const message = messages[chatId].find((msg) => msg.id === messageId);
+        if (message) {
+          return message.reactions || {};
+        }
       }
-    }
-    return {};
-  });
-};
+      return {};
+    })
+  );

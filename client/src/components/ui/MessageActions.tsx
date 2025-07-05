@@ -15,14 +15,16 @@ interface MessageActionsProps {
   message: MessageResponse;
   className?: string;
   isMe?: boolean;
+  onClose?: () => void;
 }
 
 export const MessageActions: React.FC<MessageActionsProps> = ({
   message,
   className = "",
   isMe,
+  onClose,
 }) => {
-  const { openModal, closeModal } = useModalStore();
+  const openModal = useModalStore(state => state.openModal);
   const setReplyToMessageId = useSetReplyToMessageId();
   const isPinned = false;
   const isAlreadyReply = !!message.replyToMessageId;
@@ -44,7 +46,9 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       icon: "arrow_warm_up",
       label: "Forward",
       action: () => {
-        closeModal();
+        // closeModal();
+        if (onClose) onClose();
+
         openModal(ModalType.FORWARD_MESSAGE, { message });
       },
     },
@@ -56,22 +60,26 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
           chatId: message.chatId,
           messageId: isPinned ? null : message.id,
         });
-        closeModal();
+        // closeModal();
+        if (onClose) onClose();
       },
     },
     {
       icon: "bookmark",
       label: "Save",
       action: () => {
+        // closeModal();
+        if (onClose) onClose();
         chatWebSocketService.saveMessage({ messageId: message.id });
-        closeModal();
       },
     },
     {
       icon: "delete",
       label: "Delete",
       action: () => {
-        closeModal();
+        // closeModal();
+        if (onClose) onClose();
+
         openModal(ModalType.DELETE_MESSAGE, { message });
       },
     },
@@ -86,7 +94,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
         transformOrigin: isMe ? "top right" : "top left",
       }}
       className={classNames(
-        "absolute -bottom-14 flex rounded blur-card z-50",
+        "absolute -bottom-14 flex rounded-lg blur-card z-50",
         {
           "right-0": isMe,
           "left-0": !isMe,
@@ -99,8 +107,8 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
         <button
           key={index}
           className={classNames(
-            "py-2 px-3 flex flex-col items-center justify-center",
-            "hover:bg-black/30"
+            "py-2 px-3 flex flex-col items-center justify-center rounded-lg",
+            "hover:bg-black/40 hover:text-green-300 hover:scale-110 transition-all"
           )}
           onClick={(e) => {
             e.stopPropagation();

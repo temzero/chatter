@@ -5,9 +5,9 @@ import { handleReaction } from "@/utils/handleReaction";
 import { useSoundEffect } from "@/hooks/useSoundEffect";
 import addReactionSound from "@/assets/sound/message-pop.mp3";
 import removeReactionSound from "@/assets/sound/click.mp3";
+import { useMessageReactions } from "@/stores/messageStore";
 
 interface MessageReactionDisplayProps {
-  reactions: Record<string, string[]>;
   isMe: boolean;
   currentUserId?: string;
   messageId: string;
@@ -15,7 +15,6 @@ interface MessageReactionDisplayProps {
 }
 
 export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
-  reactions,
   isMe,
   currentUserId,
   messageId,
@@ -23,6 +22,7 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
 }) => {
   const [playAddSound] = useSoundEffect(addReactionSound);
   const [playRemoveSound] = useSoundEffect(removeReactionSound);
+  const reactions = useMessageReactions(messageId);
 
   if (!reactions || Object.keys(reactions).length === 0) return null;
 
@@ -73,10 +73,6 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
         {sortedReactions.map(([emoji, userIds]) => {
           const hasMyReaction =
             currentUserId && userIds.includes(currentUserId);
-          const othersCount = hasMyReaction
-            ? userIds.length - 1
-            : userIds.length;
-
           return (
             <motion.button
               key={emoji}
@@ -96,8 +92,8 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
               onClick={() => handleClick(emoji)}
             >
               <span>{emoji}</span>
-              {othersCount > 0 && (
-                <span className="text-xs ml-0.5">{othersCount}</span>
+              {userIds.length > 1 && (
+                <span className="text-xs ml-0.5">{userIds.length}</span>
               )}
             </motion.button>
           );

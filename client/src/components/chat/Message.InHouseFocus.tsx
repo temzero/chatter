@@ -13,13 +13,9 @@ import ForwardedMessagePreview from "../ui/ForwardMessagePreview";
 import { MessageActions } from "../ui/MessageActions";
 import { ReactionPicker } from "../ui/MessageReactionPicker";
 import { handleQuickReaction } from "@/utils/quickReaction";
-import {
-  useIsMessageFocus,
-  useIsReplyToThisMessage,
-  useModalStore,
-} from "@/stores/modalStore";
+import { useIsReplyToThisMessage } from "@/stores/modalStore";
+import Overlay from "../modal/Overlay";
 
-// Shared animation configurations
 const messageAnimations = {
   myMessage: {
     initial: { opacity: 0, scale: 0.1, x: 100, y: 0 },
@@ -86,15 +82,14 @@ const Message: React.FC<MessageProps> = ({
   const isMe = message.sender.id === currentUserId;
 
   const isRelyToThisMessage = useIsReplyToThisMessage(message.id);
-  const isFocus = useIsMessageFocus(message.id);
-  console.log("isFocus", isFocus);
 
   const repliedMessage = message.replyToMessage;
   const forwardedMessage = message.forwardedFromMessage;
 
-  const openMessageModal = useModalStore((state) => state.openMessageModal);
   const [copied, setCopied] = useState(false);
+  const [isFocus, setIsFocus] = useState(false);
   const messageRef = useRef<HTMLDivElement | null>(null);
+  console.log("IsFocus", isFocus);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -137,15 +132,12 @@ const Message: React.FC<MessageProps> = ({
       onDoubleClick={() => handleQuickReaction(message.id, message.chatId)}
       onContextMenu={(e) => {
         e.preventDefault();
-        openMessageModal(message.id);
+        setIsFocus(true);
       }}
     >
+      {isFocus && <Overlay onClick={() => setIsFocus(false)} />}
       {isGroupChat && !isMe && (
-        <div
-          className={classNames(
-            "flex-shrink-0 mt-auto mr-2 h-10 w-10 min-w-10"
-          )}
-        >
+        <div className="flex-shrink-0 mt-auto mr-2 h-10 w-10 min-w-10">
           {!isRecent && (
             <Avatar
               avatarUrl={message.sender.avatarUrl}
@@ -204,28 +196,34 @@ const Message: React.FC<MessageProps> = ({
                 copied={copied}
               />
             </div>
+
             <MessageReactionDisplay
-              // reactions={reactions}
               isMe={isMe}
               currentUserId={currentUserId}
               messageId={message.id}
               chatId={message.chatId}
             />
+
             {isFocus && !isRelyToThisMessage && (
               <>
                 <ReactionPicker
                   messageId={message.id}
                   chatId={message.chatId}
                   isMe={isMe}
+                  onClose={() => setIsFocus(false)}
                 />
-                <MessageActions message={message} isMe={isMe} />
+                <MessageActions
+                  message={message}
+                  isMe={isMe}
+                  onClose={() => setIsFocus(false)}
+                />
               </>
             )}
           </div>
         </div>
 
         {showInfo && isGroupChat && !isMe && (
-          <h1 className={classNames("text-sm font-semibold opacity-70 mr-2")}>
+          <h1 className="text-sm font-semibold opacity-70 mr-2">
             {message.sender.displayName}
           </h1>
         )}

@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { useShallow } from "zustand/shallow";
 
 export enum ModalType {
   MEDIA = "media",
@@ -75,20 +76,14 @@ export const useModalContent = () =>
 export const useIsModalOpen = () =>
   useModalStore((state) => state.modalContent !== null);
 
-export const useModalActions = () =>
-  useModalStore((state) => ({
-    openModal: state.openModal,
-    openMediaModal: state.openMediaModal,
-    closeModal: state.closeModal,
-    setFocusMessageId: state.setFocusMessageId,
-    setReplyToMessageId: state.setReplyToMessageId,
-  }));
-
-export const useFocusMessageId = () =>
-  useModalStore((state) => state.focusMessageId);
+export const useIsMessageFocus = (messageId: string) =>
+  useModalStore(useShallow((state) => state.focusMessageId === messageId));
 
 export const useReplyToMessageId = () =>
-  useModalStore((state) => state.replyToMessageId);
+  useModalStore(useShallow((state) => state.replyToMessageId));
+
+export const useIsReplyToThisMessage = (messageId: string) => 
+  useModalStore(useShallow(state => state.replyToMessageId === messageId))
 
 export const useSetReplyToMessageId = () =>
   useModalStore((state) => state.setReplyToMessageId);

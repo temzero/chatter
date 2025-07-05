@@ -14,8 +14,6 @@ interface ChatBoxProps {
 }
 
 const ChatBox: React.FC<ChatBoxProps> = ({ chat }) => {
-  console.log("chatBox Render");
-
   const chatId = chat?.id || "";
   const messages = useMessagesByChatId(chatId);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -39,12 +37,12 @@ const ChatBox: React.FC<ChatBoxProps> = ({ chat }) => {
     const lastMsg = messages[currLength - 1];
     const prevLastMsg = messages[prevLength - 1];
 
-    const isFirstLoad = !hasScrolledInitially.current && currLength > 0;
-    const isAppendingToBottom =
+    const isNewMessage =
       currLength > prevLength && lastMsg?.id !== prevLastMsg?.id;
 
-    // Only scroll to bottom on first load or if new message is added at the bottom
-    if ((isFirstLoad || isAppendingToBottom) && chatId !== "") {
+    const isFirstLoad = !hasScrolledInitially.current && currLength > 0;
+
+    if ((isNewMessage || isFirstLoad) && chatId !== "") {
       scrollToBottom();
       hasScrolledInitially.current = true;
     }
@@ -69,24 +67,12 @@ const ChatBox: React.FC<ChatBoxProps> = ({ chat }) => {
 
   async function handleScroll(e: React.UIEvent<HTMLDivElement>) {
     const element = e.currentTarget;
-
     if (element.scrollTop === 0 && chatId) {
-      const prevScrollHeight = element.scrollHeight;
-
       toast.info("Loading more messages...");
       const addedCount = await fetchMoreMessages(chatId);
-
       if (addedCount === 0) {
         toast.info("No more messages.");
-        return;
       }
-
-      // Preserve scroll position after new messages are prepended
-      requestAnimationFrame(() => {
-        const newScrollHeight = element.scrollHeight;
-        const scrollDiff = newScrollHeight - prevScrollHeight;
-        element.scrollTop = scrollDiff;
-      });
     }
   }
 
@@ -100,10 +86,10 @@ const ChatBox: React.FC<ChatBoxProps> = ({ chat }) => {
             ? "pt-[calc(var(--header-height)+var(--pinned-message-height)+4px)]"
             : "pt-[calc(var(--header-height)+4px)]"
         }
-      `}
+        `}
     >
       {isLoading && (
-        <div className="w-full flex justify-center py-4">
+        <div className="w-full flex justify-center py-2">
           <RingLoader color="#777777" size={32} />
         </div>
       )}

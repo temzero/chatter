@@ -30,7 +30,7 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
 
   return (
     <div
-      className={classNames("relative flex items-start w-full -mb-1", {
+      className={classNames("relative flex items-start w-full -mb-2", {
         "items-start": isReplyToMe,
         "items-end": !isReplyToMe,
         "opacity-0": isHidden,
@@ -42,8 +42,8 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
           {
             "ml-auto origin-bottom-right": isReplyToMe,
             "origin-bottom-left": !isReplyToMe,
-            "translate-x-4 ": !isMe && isReplyToMe,
-            "-translate-x-4 ": !isSelfReply,
+            "translate-x-4": !isMe && isReplyToMe,
+            "-translate-x-4": !isSelfReply,
           }
         )}
       >

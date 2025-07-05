@@ -92,7 +92,7 @@ const MessagePreview: React.FC<MessagePreviewProps> = ({ message }) => {
       </div>
       {/* Message Content */}
       {message.content && (
-        <p className="pt-2">
+        <p className="pt-2 custom-border-t">
           {message.content}
         </p>
       )}

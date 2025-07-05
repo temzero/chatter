@@ -6,13 +6,29 @@ import { UpdateMessageRequest } from "@/types/requests/updateMessage.request";
 export const messageService = {
   async getChatMessages(
     chatId: string,
-    offset: number = 0,
-    limit: number = 20,
+    options: { offset?: number; beforeMessageId?: string; limit?: number } = {}
   ): Promise<MessageResponse[]> {
+    const { offset, beforeMessageId, limit = 20 } = options;
+
     const { data } = await API.get(`/messages/chat/${chatId}`, {
-      params: { offset, limit },
+      params: {
+        ...(offset !== undefined ? { offset } : {}),
+        ...(beforeMessageId ? { beforeMessageId } : {}),
+        limit,
+      },
     });
-    console.log("chatMessages: ", data.payload);
+
+    return data.payload;
+  },
+
+  async getMoreChatMessages(
+    chatId: string,
+    beforeMessageId: string,
+    limit: number = 10
+  ): Promise<MessageResponse[]> {
+    const { data } = await API.get(`/messages/chat/more/${chatId}`, {
+      params: { beforeMessageId, limit },
+    });
     return data.payload;
   },
 

@@ -6,6 +6,7 @@ import FriendRequestModal from "./FriendRequestModal";
 import ForwardMessageModal from "./ForwardMessageModal";
 import DeleteMessageModal from "./DeleteMessageModal";
 import { MessageResponse } from "@/types/responses/message.response";
+import { useShallow } from "zustand/shallow";
 
 // Animation presets for different modal types
 const modalAnimations = {
@@ -36,7 +37,12 @@ const modalAnimations = {
 };
 
 const Modal = () => {
-  const { modalContent, closeModal } = useModalStore();
+  const { modalContent, closeModal } = useModalStore(
+    useShallow((state) => ({
+      modalContent: state.modalContent,
+      closeModal: state.closeModal,
+    }))
+  );
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {

@@ -1,7 +1,7 @@
 // FriendshipBtn.tsx
 import { useChatStore } from "@/stores/chatStore";
 import { useFriendshipStore } from "@/stores/friendshipStore";
-import { useModalStore } from "@/stores/modalStore";
+import { ModalType, useModalStore } from "@/stores/modalStore";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
 
 interface FriendshipBtnProps {
@@ -25,7 +25,7 @@ const FriendshipBtn: React.FC<FriendshipBtnProps> = ({
   onStatusChange,
   className,
 }) => {
-  const { openModal } = useModalStore();
+  const openModal = useModalStore(state => state.openModal);
   const {
     receivedRequests,
     sentRequests,
@@ -46,7 +46,7 @@ const FriendshipBtn: React.FC<FriendshipBtnProps> = ({
   const outgoingRequest = sentRequests.find((req) => req.receiverId === userId);
 
   function handleOpenFriendRequest() {
-    openModal("friend-request", {
+    openModal(ModalType.FRIEND_REQUEST, {
       receiver: {
         id: userId,
         username,

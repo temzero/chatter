@@ -17,7 +17,7 @@ const RenderPinnedAttachment: React.FC<RenderPinnedAttachmentProps> = ({
   const baseStyle =
     "rounded flex items-center justify-center overflow-hidden border";
 
-  const { openMediaModal } = useModalStore();
+  const openMediaModal = useModalStore(state => state.openMediaModal);
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     openMediaModal(attachment.url)

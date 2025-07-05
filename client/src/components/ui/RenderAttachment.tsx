@@ -34,13 +34,9 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
   type,
   previewMode = false,
 }) => {
-  const { openMediaModal } = useModalStore();
-  const [hovered, setHovered] = useState(false);
+  const openMediaModal = useModalStore((state) => state.openMediaModal);
+
   const [aspectRatio, setAspectRatio] = useState<string | null>(null);
-  const [dimensions, setDimensions] = useState<{
-    width: number;
-    height: number;
-  } | null>(null);
 
   useEffect(() => {
     if (attachment.type === AttachmentType.IMAGE) {
@@ -52,10 +48,6 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
 
       const img = new Image();
       img.onload = () => {
-        setDimensions({
-          width: attachment.width || img.width,
-          height: attachment.height || img.height,
-        });
         setAspectRatio(
           calculateAspectRatio(
             attachment.width || img.width,
@@ -74,18 +66,14 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
     attachment.height,
   ]);
 
-  // Determine if media is horizontal based on aspect ratio or provided dimensions
-  const isHorizontal =
-    (dimensions?.width || attachment.width || 0) >
-    (dimensions?.height || attachment.height || 0);
+  const playSound = useSoundEffect(popupSound);
 
-  console.log('isHorizontal', isHorizontal)
+  if (!attachment) return null;
+  console.log("attachment");
 
   const renderContainer = (content: React.ReactNode, extraClass = "") => (
     <div
       className={`relative cursor-pointer overflow-hidden ${className} ${extraClass}`}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
     >
       {content}
     </div>
@@ -104,11 +92,9 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
     const video = e.target as HTMLVideoElement;
     const width = video.videoWidth;
     const height = video.videoHeight;
-    setDimensions({ width, height });
     setAspectRatio(calculateAspectRatio(width, height));
   };
 
-  const playSound = useSoundEffect(popupSound);
   const handleOpenModal = () => {
     openMediaModal(attachment.id);
     playSound[0]();
@@ -203,13 +189,13 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
           >
             {attachment.filename || "Download File"}
           </a>
-          {hovered ? (
+          <p className="opacity-70 ml-auto">
+            ({attachment.size ? formatFileSize(attachment.size) : "???"})
+          </p>
+
+          {/* <div className="fixed inset-0 flex bg-black/30 backdrop-blur-sm">
             <i className="material-symbols-outlined ml-auto">download</i>
-          ) : (
-            <p className="opacity-70 ml-auto">
-              ({attachment.size ? formatFileSize(attachment.size) : "???"})
-            </p>
-          )}
+          </div> */}
         </div>
       );
 
@@ -218,4 +204,4 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
   }
 };
 
-export default RenderAttachment;
+export default React.memo(RenderAttachment);

@@ -77,9 +77,6 @@ export class MessageController {
       this.messageMapper.toMessageResponseDto(message),
     );
 
-    // console.log('messages', messages);
-    // console.log('messagesResponse', messagesResponse);
-
     return new SuccessResponse(
       messagesResponse,
       'Chat messages retrieved successfully',

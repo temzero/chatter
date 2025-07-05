@@ -338,6 +338,31 @@ export class MessageService {
     }
   }
 
+  // async getMessagesByChatId(
+  //   chatId: string,
+  //   currentUserId: string,
+  //   queryParams: GetMessagesQuery,
+  // ): Promise<Message[]> {
+  //   try {
+  //     const query = this.buildFullMessageQuery()
+  //       .where('message.chat_id = :chatId', { chatId })
+  //       .andWhere('message.is_deleted = :isDeleted', { isDeleted: false })
+  //       .andWhere(
+  //         `(message.deletedForUserIds IS NULL OR NOT message.deletedForUserIds @> :userIdJson)`,
+  //         { userIdJson: JSON.stringify([currentUserId]) },
+  //       )
+  //       .orderBy('message.createdAt', 'DESC');
+
+  //     if (queryParams.limit) query.take(queryParams.limit);
+  //     if (queryParams.offset) query.skip(queryParams.offset);
+
+  //     const messages = await query.getMany();
+  //     return messages.reverse();
+  //   } catch (error) {
+  //     ErrorResponse.throw(error, 'Failed to retrieve conversation messages');
+  //   }
+  // }
+
   async getMessagesByChatId(
     chatId: string,
     currentUserId: string,
@@ -346,17 +371,35 @@ export class MessageService {
     try {
       const query = this.buildFullMessageQuery()
         .where('message.chat_id = :chatId', { chatId })
-        .andWhere('message.is_deleted = :isDeleted', { isDeleted: false })
+        .andWhere('message.is_deleted = false')
         .andWhere(
           `(message.deletedForUserIds IS NULL OR NOT message.deletedForUserIds @> :userIdJson)`,
           { userIdJson: JSON.stringify([currentUserId]) },
-        )
-        .orderBy('message.createdAt', 'DESC');
+        );
 
-      if (queryParams.limit) query.take(queryParams.limit);
-      if (queryParams.offset) query.skip(queryParams.offset);
+      // ✅ Support beforeMessageId for pagination
+      if (queryParams.beforeMessageId) {
+        const beforeMessage = await this.messageRepo.findOne({
+          where: { id: queryParams.beforeMessageId },
+          select: ['createdAt'],
+        });
+
+        if (beforeMessage) {
+          query.andWhere('message.createdAt < :beforeDate', {
+            beforeDate: beforeMessage.createdAt,
+          });
+        }
+      }
+
+      // ✅ Order newest first in query
+      query.orderBy('message.createdAt', 'DESC');
+
+      if (queryParams.limit) query.take(Number(queryParams.limit));
+      if (queryParams.offset) query.skip(Number(queryParams.offset));
 
       const messages = await query.getMany();
+
+      // ✅ Return messages in chronological order for display
       return messages.reverse();
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to retrieve conversation messages');

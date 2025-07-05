@@ -14,7 +14,6 @@ interface TypingIndicatorProps {
 const TypingIndicator = ({ chatId }: TypingIndicatorProps) => {
   console.log("TypingIndicator Mounted", chatId);
 
-  // const typingMembers = [];
   const { typingMembers, isTyping } = useTypingMembers(chatId);
   // console.log("typingMembers", typingMembers);
 

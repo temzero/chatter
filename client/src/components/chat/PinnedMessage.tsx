@@ -42,7 +42,7 @@ const PinnedMessage: React.FC<MessageProps> = ({
         e.stopPropagation();
         scrollToMessageById(message.id, { smooth: false });
       }}
-      className={`absolute custom-border w-full top-[var(--header-height)] left-1/2 -translate-x-1/2 flex gap-4 p-1 px-2 items-center justify-between
+      className={`absolute custom-border w-full h-[--pinned-message-height] top-[var(--header-height)] left-1/2 -translate-x-1/2 flex gap-4 p-1 px-2 items-center justify-between
           ${
             isMe
               ? "bg-[linear-gradient(to_right,var(--primary-green-50)_0%,var(--primary-green)_50%,var(--primary-green-50)_100%)]"
