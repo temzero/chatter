@@ -66,8 +66,10 @@ export class MessageController {
     @CurrentUser('id') currentUserId: string,
     @Param('chatId') chatId: string,
     @Query() queryParams: GetMessagesQuery,
-  ): Promise<SuccessResponse<MessageResponseDto[]>> {
-    const messages = await this.messageService.getMessagesByChatId(
+  ): Promise<
+    SuccessResponse<{ messages: MessageResponseDto[]; hasMore: boolean }>
+  > {
+    const { messages, hasMore } = await this.messageService.getMessagesByChatId(
       chatId,
       currentUserId,
       queryParams,
@@ -78,7 +80,7 @@ export class MessageController {
     );
 
     return new SuccessResponse(
-      messagesResponse,
+      { messages: messagesResponse, hasMore },
       'Chat messages retrieved successfully',
     );
   }

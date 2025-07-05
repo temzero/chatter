@@ -19,6 +19,7 @@ interface ChatMessages {
 
 export interface MessageStore {
   messages: ChatMessages;
+  hasMoreMessages: Record<string, boolean>;
   drafts: Record<string, string>;
   isLoading: boolean;
 
@@ -62,17 +63,25 @@ export const getAttachmentsFromMessages = (
 
 export const useMessageStore = create<MessageStore>((set, get) => ({
   messages: {},
+  hasMoreMessages: {},
   drafts: {},
   isLoading: false,
 
   fetchMessages: async (chatId: string) => {
     set({ isLoading: true });
     try {
-      const messages = await messageService.getChatMessages(chatId);
+      const { messages, hasMore } = await messageService.getChatMessages(
+        chatId
+      );
+
       set((state) => ({
         messages: {
           ...state.messages,
           [chatId]: messages,
+        },
+        hasMoreMessages: {
+          ...state.hasMoreMessages,
+          [chatId]: hasMore,
         },
         isLoading: false,
       }));
@@ -86,11 +95,16 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
     set({ isLoading: true });
     try {
       const existingMessages = get().messages[chatId] || [];
-      if (existingMessages.length === 0) return 0;
+      if (existingMessages.length === 0) {
+        set({ isLoading: false });
+        return 0;
+      }
 
-      const newMessages = await messageService.getChatMessages(chatId, {
-        beforeMessageId: existingMessages[0].id,
-      });
+      const { messages: newMessages, hasMore } =
+        await messageService.getChatMessages(chatId, {
+          beforeMessageId: existingMessages[0].id,
+        });
+
       if (newMessages.length > 0) {
         set((state) => {
           const existing = state.messages[chatId] || [];
@@ -99,10 +113,24 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
               ...state.messages,
               [chatId]: [...newMessages, ...existing],
             },
+            hasMoreMessages: {
+              ...state.hasMoreMessages,
+              [chatId]: hasMore,
+            },
             isLoading: false,
           };
         });
+      } else {
+        // still update hasMoreMessages in case server returned 0 and hasMore = false
+        set((state) => ({
+          hasMoreMessages: {
+            ...state.hasMoreMessages,
+            [chatId]: hasMore,
+          },
+          isLoading: false,
+        }));
       }
+
       return newMessages.length;
     } catch (err) {
       handleError(err, "Failed to fetch more messages");
@@ -409,3 +437,7 @@ export const useMessageReactions = (messageId: string) =>
       return {};
     })
   );
+
+export const useHasMoreMessages = (chatId: string) => {
+  return useMessageStore((state) => state.hasMoreMessages[chatId] ?? true);
+};

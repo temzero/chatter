@@ -1,8 +1,10 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import ChannelMessage from "../MessageChannel";
 import { MessageResponse } from "@/types/responses/message.response";
 import { ChatResponse } from "@/types/responses/chat.response";
-import { chatMemberService } from "@/services/chat/chatMemberService";
+import { useCurrentUser } from "@/stores/authStore";
+import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
+import { useActiveMembers } from "@/stores/chatMemberStore";
 
 interface ChannelMessagesProps {
   chat: ChatResponse;
@@ -14,13 +16,38 @@ const ChannelMessages: React.FC<ChannelMessagesProps> = ({
   messages,
 }) => {
   const chatId = chat?.id;
+  const currentUser = useCurrentUser();
+  const rawMembers = useActiveMembers();
+  const members = useMemo(() => rawMembers || [], [rawMembers]);
 
-  // Update my last read at
-  if (chat?.myMemberId) {
-    chatMemberService.updateLastRead(chat.myMemberId);
-  }
+  const myMember = useMemo(
+    () => members.find((m) => m.id === chat.myMemberId),
+    [members, chat.myMemberId]
+  );
 
-  const mylastReatAt = chat.myLastReadAt;
+  const myLastReadMessageId = myMember?.lastReadMessageId ?? null;
+
+  // Send read receipt if the last message is unread and not sent by you
+  useEffect(() => {
+    if (!chatId || !chat.myMemberId || messages.length === 0) return;
+
+    const lastMessage = messages[messages.length - 1];
+    const isFromOther = lastMessage.sender?.id !== currentUser?.id;
+    const isUnread =
+      myLastReadMessageId === null || lastMessage.id !== myLastReadMessageId;
+
+    if (isUnread && isFromOther) {
+      const timer = setTimeout(() => {
+        chatWebSocketService.messageRead(
+          chatId,
+          chat.myMemberId,
+          lastMessage.id
+        );
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [chatId, chat.myMemberId, messages, myLastReadMessageId, currentUser?.id]);
 
   const messagesByDate = useMemo(() => {
     const groups: { date: string; messages: MessageResponse[] }[] = [];
@@ -59,25 +86,20 @@ const ChannelMessages: React.FC<ChannelMessagesProps> = ({
               {group.date || "Today"}
             </div>
           </div>
+
           {group.messages.map((msg, index) => {
             const nextMsg = group.messages[index + 1];
 
             const isLastRead =
-              mylastReatAt &&
-              new Date(msg.createdAt).getTime() <=
-                new Date(mylastReatAt).getTime() &&
-              (!nextMsg ||
-                new Date(nextMsg.createdAt).getTime() >
-                  new Date(mylastReatAt).getTime());
+              myLastReadMessageId === msg.id &&
+              (!nextMsg || nextMsg.id !== myLastReadMessageId);
 
             return (
               <React.Fragment key={msg.id}>
                 <ChannelMessage message={msg} />
                 {isLastRead && (
-                  <div className="flex items-center gap-1 text-xs text-gray-400 ml-auto">
-                    <span className="material-symbols-outlined">
-                      check_small
-                    </span>
+                  <div className="flex justify-center my-2 text-xs text-gray-400 italic">
+                    You’ve read up to here
                   </div>
                 )}
               </React.Fragment>

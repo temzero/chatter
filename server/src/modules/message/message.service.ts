@@ -338,36 +338,11 @@ export class MessageService {
     }
   }
 
-  // async getMessagesByChatId(
-  //   chatId: string,
-  //   currentUserId: string,
-  //   queryParams: GetMessagesQuery,
-  // ): Promise<Message[]> {
-  //   try {
-  //     const query = this.buildFullMessageQuery()
-  //       .where('message.chat_id = :chatId', { chatId })
-  //       .andWhere('message.is_deleted = :isDeleted', { isDeleted: false })
-  //       .andWhere(
-  //         `(message.deletedForUserIds IS NULL OR NOT message.deletedForUserIds @> :userIdJson)`,
-  //         { userIdJson: JSON.stringify([currentUserId]) },
-  //       )
-  //       .orderBy('message.createdAt', 'DESC');
-
-  //     if (queryParams.limit) query.take(queryParams.limit);
-  //     if (queryParams.offset) query.skip(queryParams.offset);
-
-  //     const messages = await query.getMany();
-  //     return messages.reverse();
-  //   } catch (error) {
-  //     ErrorResponse.throw(error, 'Failed to retrieve conversation messages');
-  //   }
-  // }
-
   async getMessagesByChatId(
     chatId: string,
     currentUserId: string,
     queryParams: GetMessagesQuery,
-  ): Promise<Message[]> {
+  ): Promise<{ messages: Message[]; hasMore: boolean }> {
     try {
       const query = this.buildFullMessageQuery()
         .where('message.chat_id = :chatId', { chatId })
@@ -377,7 +352,7 @@ export class MessageService {
           { userIdJson: JSON.stringify([currentUserId]) },
         );
 
-      // ✅ Support beforeMessageId for pagination
+      // Apply beforeMessageId for pagination
       if (queryParams.beforeMessageId) {
         const beforeMessage = await this.messageRepo.findOne({
           where: { id: queryParams.beforeMessageId },
@@ -391,7 +366,7 @@ export class MessageService {
         }
       }
 
-      // ✅ Order newest first in query
+      // Order newest to oldest in DB query
       query.orderBy('message.createdAt', 'DESC');
 
       if (queryParams.limit) query.take(Number(queryParams.limit));
@@ -399,8 +374,30 @@ export class MessageService {
 
       const messages = await query.getMany();
 
-      // ✅ Return messages in chronological order for display
-      return messages.reverse();
+      // Reverse to chronological order (oldest first)
+      const sortedMessages = messages.reverse();
+
+      // Check if more messages exist
+      let hasMore = false;
+      if (sortedMessages.length > 0) {
+        const oldest = sortedMessages[0];
+
+        const countQuery = this.buildFullMessageQuery()
+          .where('message.chat_id = :chatId', { chatId })
+          .andWhere('message.is_deleted = false')
+          .andWhere(
+            `(message.deletedForUserIds IS NULL OR NOT message.deletedForUserIds @> :userIdJson)`,
+            { userIdJson: JSON.stringify([currentUserId]) },
+          )
+          .andWhere('message.createdAt < :beforeDate', {
+            beforeDate: oldest.createdAt,
+          });
+
+        const remainingCount = await countQuery.getCount();
+        hasMore = remainingCount > 0;
+      }
+
+      return { messages: sortedMessages, hasMore };
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to retrieve conversation messages');
     }

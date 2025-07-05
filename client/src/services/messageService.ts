@@ -7,7 +7,7 @@ export const messageService = {
   async getChatMessages(
     chatId: string,
     options: { offset?: number; beforeMessageId?: string; limit?: number } = {}
-  ): Promise<MessageResponse[]> {
+  ): Promise<{ messages: MessageResponse[]; hasMore: boolean }> {
     const { offset, beforeMessageId, limit = 20 } = options;
 
     const { data } = await API.get(`/messages/chat/${chatId}`, {
@@ -18,18 +18,8 @@ export const messageService = {
       },
     });
 
-    return data.payload;
-  },
-
-  async getMoreChatMessages(
-    chatId: string,
-    beforeMessageId: string,
-    limit: number = 10
-  ): Promise<MessageResponse[]> {
-    const { data } = await API.get(`/messages/chat/more/${chatId}`, {
-      params: { beforeMessageId, limit },
-    });
-    return data.payload;
+    const { messages, hasMore } = data.payload;
+    return { messages, hasMore };
   },
 
   async sendMessage(payload: SendMessageRequest): Promise<MessageResponse> {
