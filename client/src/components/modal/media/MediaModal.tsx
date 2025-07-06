@@ -6,44 +6,46 @@ import { MediaBottomInfo } from "./MediaBottomInfo";
 import { useSoundEffect } from "@/hooks/useSoundEffect";
 import slidingSound from "@/assets/sound/click.mp3";
 import { useModalStore } from "@/stores/modalStore";
-import { useMessageStore } from "@/stores/messageStore";
+import { useActiveChatAttachments } from "@/stores/messageStore";
 import { RenderModalMedia } from "./RenderModalMedia";
 import { MediaSlidingContainer } from "./MediaSlidingContainer";
 import { useShallow } from "zustand/shallow";
+import { handleDownload } from "@/utils/handleDownload";
 
 export const MediaModal = () => {
-const { currentMediaId, closeModal } = useModalStore(
-  useShallow((state) => ({
-    currentMediaId: state.currentMediaId,
-    closeModal: state.closeModal,
-  }))
-);
+  const { currentMediaId, closeModal } = useModalStore(
+    useShallow((state) => ({
+      currentMediaId: state.currentMediaId,
+      closeModal: state.closeModal,
+    }))
+  );
 
-  const activeMedia = useMessageStore((state) => state.activeMedia);
+  // const activeMedia = useMessageStore((state) => state.activeMedia);
+  const activeAttachments = useActiveChatAttachments();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const [rotation, setRotation] = useState(0);
 
-  const playSound = useSoundEffect(slidingSound);
+  const [playSound] = useSoundEffect(slidingSound);
 
   useEffect(() => {
-    if (currentMediaId && activeMedia) {
-      const index = activeMedia.findIndex(
+    if (currentMediaId && activeAttachments) {
+      const index = activeAttachments.findIndex(
         (media) => media.id === currentMediaId
       );
       setCurrentIndex(Math.max(0, index));
       setRotation(0);
     }
-  }, [currentMediaId, activeMedia]);
+  }, [currentMediaId, activeAttachments]);
 
   const goNext = useCallback(() => {
-    if (activeMedia && currentIndex < activeMedia.length - 1) {
+    if (activeAttachments && currentIndex < activeAttachments.length - 1) {
       setDirection(1);
       setCurrentIndex((prev) => prev + 1);
       setRotation(0);
       playSound();
     }
-  }, [activeMedia, currentIndex]);
+  }, [activeAttachments, currentIndex, playSound]);
 
   const goPrev = useCallback(() => {
     if (currentIndex > 0) {
@@ -52,7 +54,7 @@ const { currentMediaId, closeModal } = useModalStore(
       setRotation(0);
       playSound();
     }
-  }, [currentIndex]);
+  }, [currentIndex, playSound]);
 
   const handleRotate = useCallback(() => {
     setRotation((prev) => prev + 90);
@@ -84,10 +86,10 @@ const { currentMediaId, closeModal } = useModalStore(
       } else if (e.key.toLowerCase() === "d") {
         e.preventDefault();
         e.stopPropagation();
-        if (activeMedia) handleDownload(activeMedia[currentIndex]);
+        if (activeAttachments) handleDownload(activeAttachments[currentIndex]);
       }
     },
-    [goNext, goPrev, handleClose, handleRotate, currentIndex, activeMedia]
+    [goNext, goPrev, handleClose, handleRotate, currentIndex, activeAttachments]
   );
 
   useEffect(() => {
@@ -99,9 +101,10 @@ const { currentMediaId, closeModal } = useModalStore(
     };
   }, [currentMediaId, handleKeyDown]);
 
-  if (!currentMediaId || !activeMedia || activeMedia.length === 0) return null;
+  if (!currentMediaId || !activeAttachments || activeAttachments.length === 0)
+    return null;
 
-  const currentMedia = activeMedia[currentIndex];
+  const currentMedia = activeAttachments[currentIndex];
 
   return (
     <>
@@ -113,23 +116,21 @@ const { currentMediaId, closeModal } = useModalStore(
 
       <MediaNavigationButtons
         currentIndex={currentIndex}
-        mediaLength={activeMedia.length}
+        mediaLength={activeAttachments.length}
         onNext={goNext}
         onPrev={goPrev}
       />
 
       <motion.div
-        className="w-full h-full"
+        // className="w-full h-full border-4"
         initial={{ opacity: 0, scale: 0.1, y: 2000 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.1, y: 2000 }}
         transition={{ type: "spring", stiffness: 300, damping: 29 }}
       >
         <MediaSlidingContainer
-          currentIndex={currentIndex}
           direction={direction}
-          currentMedia={currentMedia}
-          rotation={rotation}
+          uniqueKey={currentMedia.id}
         >
           <RenderModalMedia media={currentMedia} rotation={rotation} />
         </MediaSlidingContainer>
@@ -138,7 +139,7 @@ const { currentMediaId, closeModal } = useModalStore(
       <MediaBottomInfo
         media={currentMedia}
         currentIndex={currentIndex}
-        mediaLength={activeMedia.length}
+        mediaLength={activeAttachments.length}
       />
     </>
   );

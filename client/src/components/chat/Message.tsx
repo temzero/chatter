@@ -94,7 +94,7 @@ const Message: React.FC<MessageProps> = ({
 
   const openMessageModal = useModalStore((state) => state.openMessageModal);
   const [copied, setCopied] = useState(false);
-  const messageRef = useRef<HTMLDivElement | null>(null);
+  const messageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;

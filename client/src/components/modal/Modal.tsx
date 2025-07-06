@@ -111,16 +111,10 @@ const Modal = () => {
         <motion.div
           key={modalContent.type}
           {...animation.backdrop}
-          className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-[96] flex flex-col items-center justify-center text-white"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[96] flex flex-col items-center justify-center text-white"
           onClick={handleBackdropClick}
         >
-          {type === "message" ? (
-            <div className="relative">{renderModalContent()}</div>
-          ) : (
-            <motion.div {...animation.content} className="relative">
-              {renderModalContent()}
-            </motion.div>
-          )}
+          <div className="relative w-full h-full">{renderModalContent()}</div>
         </motion.div>
       )}
     </AnimatePresence>

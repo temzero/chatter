@@ -7,19 +7,16 @@ const sliderVariants = {
     x: direction > 0 ? "100%" : "-100%",
     scale: 0.4,
     opacity: 0,
-    position: "absolute",
   }),
   active: {
     x: 0,
     scale: 1,
     opacity: 1,
-    position: "relative",
   },
   exit: (direction: number) => ({
     x: direction > 0 ? "-100%" : "100%",
     scale: 0.4,
     opacity: 0,
-    position: "absolute",
   }),
 };
 

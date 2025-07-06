@@ -4,7 +4,7 @@ import type {
   AttachmentResponse,
   MessageResponse,
 } from "@/types/responses/message.response";
-import { useChatStore } from "./chatStore";
+import { useActiveChatId, useChatStore } from "./chatStore";
 import { messageService } from "@/services/messageService";
 import { useMemo } from "react";
 import { handleError } from "@/utils/handleError";
@@ -386,15 +386,15 @@ export const useMessagesByChatId = (chatId: string) => {
 };
 
 export const useActiveChatAttachments = () => {
-  const activeChat = useChatStore((state) => state.activeChat);
+  const activeChatId = useActiveChatId();
   const isLoading = useMessageStore((state) => state.isLoading);
   const getChatAttachments = useMessageStore(
     (state) => state.getChatAttachments
   );
 
   return useMemo(
-    () => (activeChat && !isLoading ? getChatAttachments(activeChat.id) : []),
-    [activeChat, isLoading, getChatAttachments]
+    () => (activeChatId && !isLoading ? getChatAttachments(activeChatId) : []),
+    [activeChatId, isLoading, getChatAttachments]
   );
 };
 

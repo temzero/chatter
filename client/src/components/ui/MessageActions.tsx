@@ -24,7 +24,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   isMe,
   onClose,
 }) => {
-  const openModal = useModalStore(state => state.openModal);
+  const openModal = useModalStore((state) => state.openModal);
   const setReplyToMessageId = useSetReplyToMessageId();
   const isPinned = false;
   const isAlreadyReply = !!message.replyToMessageId;
@@ -98,6 +98,8 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
         {
           "right-0": isMe,
           "left-0": !isMe,
+          // "-bottom-14": !flip, // Default position below
+          // "-top-14": flip, // Flipped position above
         },
         className
       )}

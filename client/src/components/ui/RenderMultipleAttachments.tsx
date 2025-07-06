@@ -12,8 +12,8 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
   attachments,
   className = "",
 }) => {
-  if (attachments.length === 0) return null
-  console.log('renderMultipleAttachment')
+  if (attachments.length === 0) return null;
+  console.log("renderMultipleAttachment");
 
   // Categorize attachments by type
   const visualMedia = attachments.filter(
@@ -31,7 +31,7 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
     >
       {items.map((mediaItem) => (
         <div key={mediaItem.id} className="aspect-square">
-          <RenderAttachment attachment={mediaItem} className="w-full h-full" />
+          <RenderAttachment attachment={mediaItem} />
         </div>
       ))}
     </div>
@@ -47,15 +47,15 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
         return <RenderAttachment attachment={visualMedia[0]} />;
       case 3:
         return (
-          <div className="grid grid-cols-6 grid-rows-2 gap-[1px]">
+          <div className={`grid grid-cols-6 grid-rows-2 gap-[1px] `}>
             <div className="col-span-4 row-span-2">
-              <RenderAttachment attachment={visualMedia[0]} className="w-full h-full" />
+              <RenderAttachment attachment={visualMedia[0]} />
             </div>
             <div className="col-span-2">
-              <RenderAttachment attachment={visualMedia[1]} className="w-full h-full" />
+              <RenderAttachment attachment={visualMedia[1]} />
             </div>
             <div className="col-span-2">
-              <RenderAttachment attachment={visualMedia[2]} className="w-full h-full" />
+              <RenderAttachment attachment={visualMedia[2]} />
             </div>
           </div>
         );

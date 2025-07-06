@@ -20,7 +20,6 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = ({
   isMe,
   onClose,
 }) => {
-
   return (
     <motion.div
       initial={{ scale: 0 }}
@@ -33,6 +32,8 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = ({
         {
           "right-0": isMe,
           "left-0": !isMe,
+          // "-top-11": !flip, // Default position below
+          // "-bottom-11 ": flip, // Flipped position above
         }
       )}
       onClick={(e) => e.stopPropagation()}

@@ -5,6 +5,8 @@ import { ChatType } from "@/types/enums/ChatType";
 import { Avatar } from "./avatar/Avatar";
 import classNames from "classnames";
 import { scrollToMessageById } from "@/utils/scrollToMessageById";
+import RenderMultipleAttachments from "./RenderMultipleAttachments";
+import { useModalStore } from "@/stores/modalStore";
 
 interface MessageReplyPreviewProps {
   replyMessage: MessageResponse;
@@ -12,7 +14,7 @@ interface MessageReplyPreviewProps {
   isMe: boolean;
   currentUserId: string;
   senderId: string;
-  isHidden:boolean;
+  isHidden: boolean;
 }
 
 const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
@@ -23,6 +25,7 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
   senderId,
   isHidden = false,
 }) => {
+  const closeModal = useModalStore((state) => state.closeModal);
   if (!replyMessage) return null;
   const isSelfReply = replyMessage.sender.id === senderId;
   const isReplyToMe = replyMessage.sender.id === currentUserId;
@@ -30,22 +33,22 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
 
   return (
     <div
-      className={classNames("relative flex items-start w-full -mb-2", {
+      onClick={closeModal}
+      className={classNames("relative flex items-start -mb-2", {
         "items-start": isReplyToMe,
         "items-end": !isReplyToMe,
-        "opacity-0": isHidden,
+        "opacity-60": isHidden,
       })}
     >
       <div
-        className={classNames(
-          "opacity-60 hover:opacity-90 scale-[0.8] hover:scale-100 transition-all",
-          {
-            "ml-auto origin-bottom-right": isReplyToMe,
-            "origin-bottom-left": !isReplyToMe,
-            "translate-x-4": !isMe && isReplyToMe,
-            "-translate-x-4": !isSelfReply,
-          }
-        )}
+        className={classNames("opacity-60 scale-[0.8] transition-all", {
+          "ml-auto origin-bottom-right": isReplyToMe,
+          "origin-bottom-left": !isReplyToMe,
+          "translate-x-4": !isMe && isReplyToMe,
+          "-translate-x-4": !isSelfReply,
+          "[&>*]:pointer-events-none": isHidden,
+          "hover:opacity-90 hover:scale-100 ": !isHidden,
+        })}
       >
         <div
           onClick={() =>
@@ -78,11 +81,14 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
               )}
             </div>
           ) : (
-            <div className="truncate opacity-80">
-              {replyMessage.attachments &&
-                replyMessage.attachments.length > 0 && <p>{"[Attachment]"}</p>}
+            <div className="opacity-80 pointer-events-none max-w-[300px] max-h-[500px]">
+              {replyMessage.attachments && (
+                <RenderMultipleAttachments
+                  attachments={replyMessage.attachments}
+                />
+              )}
               {replyMessage.content && (
-                <p className={`truncate`}>{replyMessage.content}</p>
+                <p className={``}>{replyMessage.content}</p>
               )}
             </div>
           )}
