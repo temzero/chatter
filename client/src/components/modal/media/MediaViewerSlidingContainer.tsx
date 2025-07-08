@@ -1,10 +1,10 @@
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 // Animation variants
 const sliderVariants = {
   incoming: (direction: number) => ({
-    x: direction > 0 ? "100%" : "-100%",
+    x: direction > 0 ? "200%" : "-200%",
     scale: 0.4,
     opacity: 0,
   }),
@@ -14,7 +14,7 @@ const sliderVariants = {
     opacity: 1,
   },
   exit: (direction: number) => ({
-    x: direction > 0 ? "-100%" : "100%",
+    x: direction > 0 ? "-200%" : "200%",
     scale: 0.4,
     opacity: 0,
   }),
@@ -32,14 +32,14 @@ interface SlidingContainerProps {
   className?: string;
 }
 
-export const MediaSlidingContainer: React.FC<SlidingContainerProps> = ({
+export const MediaViewerSlidingContainer: React.FC<SlidingContainerProps> = ({
   children,
   direction,
   uniqueKey,
   className = "",
 }) => {
   return (
-    <AnimatePresence initial={false} custom={direction}>
+    // <AnimatePresence initial={false} custom={direction}>
       <motion.div
         key={uniqueKey}
         custom={direction}
@@ -48,10 +48,10 @@ export const MediaSlidingContainer: React.FC<SlidingContainerProps> = ({
         animate="active"
         exit="exit"
         transition={sliderTransition}
-        className={`w-full h-full ${className}`}
+        className={`${className}`}
       >
         {children}
       </motion.div>
-    </AnimatePresence>
+    // </AnimatePresence>
   );
 };

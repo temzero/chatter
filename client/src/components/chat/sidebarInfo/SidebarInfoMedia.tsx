@@ -1,37 +1,36 @@
 import React, { useState, useMemo } from "react";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
-import { useMessageStore } from "@/stores/messageStore";
-
+import { useActiveChatAttachments } from "@/stores/messageStore";
 import { SlidingContainer } from "@/components/ui/SlidingContainer";
-import RenderMedia from "@/components/ui/RenderAttachment";
+import { AttachmentType } from "@/types/enums/attachmentType";
+import RenderAttachment from "@/components/ui/RenderAttachment";
 
 const mediaTypes = ["images", "videos", "audio", "files"];
 
 const ChatInfoMedia: React.FC = () => {
   const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
-  const activeMedia = useMessageStore((state) => state.activeMedia);
-
+  const activeAttachments = useActiveChatAttachments();
 
   const [selectedType, setSelectedType] = useState<string>(mediaTypes[0]);
   const [direction, setDirection] = useState<number>(1);
 
   // Filter media by type
   const filteredMedia = useMemo(() => {
-    return activeMedia.filter((media) => {
+    return activeAttachments.filter((attachment) => {
       switch (selectedType) {
         case "images":
-          return media.type === "image";
+          return attachment.type === AttachmentType.IMAGE;
         case "videos":
-          return media.type === "video";
+          return attachment.type === AttachmentType.VIDEO;
         case "audio":
-          return media.type === "audio";
+          return attachment.type === AttachmentType.AUDIO;
         case "files":
-          return media.type === "document";
+          return attachment.type === AttachmentType.FILE;
         default:
           return false;
       }
     });
-  }, [activeMedia, selectedType]);
+  }, [activeAttachments, selectedType]);
 
   const getTypeClass = React.useCallback(
     (type: string) =>
@@ -79,13 +78,13 @@ const ChatInfoMedia: React.FC = () => {
                 : "overflow-hidden aspect-square custom-border"
             }
           >
-            <RenderMedia
-              media={media}
+            <RenderAttachment
+              attachment={media}
               type="info"
               className={
                 selectedType === "files" || selectedType === "audio"
                   ? "w-full"
-                  : "w-full h-full"
+                  : "w-full h-full hover:scale-125 transition-transform duration-300 ease-in-out"
               }
             />
           </div>

@@ -1,7 +1,7 @@
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect } from "react";
-import MediaModal from "./media/MediaModal";
+import MediaViewer from "./media/MediaViewer";
 import FriendRequestModal from "./FriendRequestModal";
 import ForwardMessageModal from "./ForwardMessageModal";
 import DeleteMessageModal from "./DeleteMessageModal";
@@ -15,14 +15,23 @@ const modalAnimations = {
       initial: { opacity: 0 },
       animate: { opacity: 1 },
       exit: { opacity: 0 },
-      transition: { duration: 0.15 },
-    },
-    content: {
-      initial: { scale: 0.8, opacity: 0 },
-      animate: { scale: 1, opacity: 1 },
-      exit: { scale: 0.8, opacity: 0 },
       transition: { duration: 0.2 },
     },
+    content: {
+      initial: { scale: 0.6, opacity: 0 },
+      animate: { scale: 1, opacity: 1 },
+      exit: { scale: 0.6, opacity: 0 },
+    },
+  },
+  media: {
+    // No animation for media modal
+    backdrop: {
+      initial: { opacity: 0 },
+      animate: { opacity: 1 },
+      exit: { opacity: 0 },
+      transition: { duration: 0.2 },
+    },
+    content: {},
   },
   message: {
     // No animation for message modal
@@ -30,7 +39,7 @@ const modalAnimations = {
       initial: { opacity: 0 },
       animate: { opacity: 1 },
       exit: { opacity: 0 },
-      transition: { duration: 0.15 },
+      transition: { duration: 0.2 },
     },
     content: {},
   },
@@ -63,7 +72,7 @@ const Modal = () => {
 
     switch (modalContent.type) {
       case ModalType.MEDIA:
-        return <MediaModal {...modalContent.props} />;
+        return <MediaViewer {...modalContent.props} />;
 
       case ModalType.FRIEND_REQUEST:
         return (
@@ -114,7 +123,8 @@ const Modal = () => {
           className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[96] flex flex-col items-center justify-center text-white"
           onClick={handleBackdropClick}
         >
-          <div className="relative w-full h-full">{renderModalContent()}</div>
+          {/* {renderModalContent()} */}
+          <motion.div className="w-full h-full" {...animation.content}>{renderModalContent()}</motion.div>
         </motion.div>
       )}
     </AnimatePresence>

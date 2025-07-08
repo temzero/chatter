@@ -3,6 +3,7 @@ import { create } from "zustand";
 import type {
   AttachmentResponse,
   MessageResponse,
+  SenderResponse,
 } from "@/types/responses/message.response";
 import { useActiveChatId, useChatStore } from "./chatStore";
 import { messageService } from "@/services/messageService";
@@ -383,6 +384,13 @@ export const useActiveChatMessages = () => {
 
 export const useMessagesByChatId = (chatId: string) => {
   return useMessageStore(useShallow((state) => state.messages[chatId] || []));
+};
+
+export const useSenderByMessageId = (messageId: string): SenderResponse | undefined => {
+  return useMessageStore((state) => {
+    const message = state.getMessageById(messageId);
+    return message?.sender;
+  });
 };
 
 export const useActiveChatAttachments = () => {

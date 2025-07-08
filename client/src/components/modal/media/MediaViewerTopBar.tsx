@@ -1,26 +1,42 @@
 import { useCallback } from "react";
 import { useSoundEffect } from "@/hooks/useSoundEffect";
 import slideSound from "@/assets/sound/click.mp3";
-import { MediaProps } from "@/data/media";
+import { AttachmentResponse } from "@/types/responses/message.response";
 import { handleDownload } from "@/utils/handleDownload";
+import { useSenderByMessageId } from "@/stores/messageStore";
+import { Avatar } from "@/components/ui/avatar/Avatar";
 
-interface MediaTopBarProps {
-  media: MediaProps;
+interface MediaViewerTopBarProps {
+  attachment: AttachmentResponse;
   onRotate: () => void;
   onClose: () => void;
 }
 
-export const MediaTopBar = ({ media, onRotate, onClose }: MediaTopBarProps) => {
-  const playSound = useSoundEffect(slideSound);
+export const MediaViewerTopBar = ({
+  attachment,
+  onRotate,
+  onClose,
+}: MediaViewerTopBarProps) => {
+  const [playSound] = useSoundEffect(slideSound);
+  const sender = useSenderByMessageId(attachment.messageId);
 
   const handleDownloadClick = useCallback(() => {
-    playSound("next");
-    handleDownload(media);
-  }, [media, playSound]);
+    playSound();
+    handleDownload(attachment);
+  }, [attachment, playSound]);
 
   return (
-    <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-2 pb-8 z-20">
-      <div className="text-white font-medium">{media.senderId || "Sender"}</div>
+    <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-3 pb-8 z-20">
+      <div className="flex items-center gap-2">
+        <Avatar
+          avatarUrl={sender?.avatarUrl}
+          name={sender?.displayName}
+          size="8"
+        />
+        <div className="text-white font-medium">
+          {sender?.displayName || "Sender"}
+        </div>
+      </div>
       <div className="flex items-center gap-4">
         <button
           onClick={onRotate}

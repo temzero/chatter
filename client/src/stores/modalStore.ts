@@ -16,7 +16,7 @@ type ModalContent = {
 
 interface ModalState {
   modalContent: ModalContent | null;
-  currentMediaId: string | null;
+  currentAttachmentId: string | null;
   focusMessageId: string | null;
   replyToMessageId: string | null;
 }
@@ -32,13 +32,14 @@ interface ModalActions {
 
 export const useModalStore = create<ModalState & ModalActions>((set) => ({
   modalContent: null,
-  currentMediaId: null,
+  currentAttachmentId: null,
   focusMessageId: null,
   replyToMessageId: null,
 
   openModal: (type, props) => {
     set({
       modalContent: { type, props },
+      focusMessageId: null,
     });
   },
 
@@ -50,14 +51,14 @@ export const useModalStore = create<ModalState & ModalActions>((set) => ({
 
   openMediaModal: (mediaId) =>
     set({
-      currentMediaId: mediaId,
+      currentAttachmentId: mediaId,
       modalContent: { type: ModalType.MEDIA, props: { mediaId } },
     }),
 
   closeModal: () =>
     set({
       modalContent: null,
-      currentMediaId: null,
+      // currentAttachmentId: null,
       focusMessageId: null,
       replyToMessageId: null,
     }),
@@ -68,7 +69,7 @@ export const useModalStore = create<ModalState & ModalActions>((set) => ({
 
 // Selectors and custom hooks
 export const useCurrentMediaId = () =>
-  useModalStore((state) => state.currentMediaId);
+  useModalStore((state) => state.currentAttachmentId);
 
 export const useModalContent = () =>
   useModalStore((state) => state.modalContent);
@@ -82,8 +83,8 @@ export const useIsMessageFocus = (messageId: string) =>
 export const useReplyToMessageId = () =>
   useModalStore(useShallow((state) => state.replyToMessageId));
 
-export const useIsReplyToThisMessage = (messageId: string) => 
-  useModalStore(useShallow(state => state.replyToMessageId === messageId))
+export const useIsReplyToThisMessage = (messageId: string) =>
+  useModalStore(useShallow((state) => state.replyToMessageId === messageId));
 
 export const useSetReplyToMessageId = () =>
   useModalStore((state) => state.setReplyToMessageId);
