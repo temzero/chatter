@@ -1,6 +1,6 @@
 // components/ui/ForwardedMessagePreview.tsx
 import React from "react";
-import classNames from "classnames";
+import clsx from "clsx";
 import type { MessageResponse } from "@/types/responses/message.response";
 
 interface ForwardedMessagePreviewProps {
@@ -21,7 +21,7 @@ const ForwardedMessagePreview: React.FC<ForwardedMessagePreviewProps> = ({
     <>
       <div
         style={{ width: "100%" }}
-        className={classNames("message-bubble custom-border", {
+        className={clsx("message-bubble custom-border", {
           "self-message": isFromMe,
         })}
       >

@@ -134,7 +134,7 @@ export const MediaViewer = () => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [currentAttachmentId, handleKeyDown]);
+  }, [currentAttachmentId, handleKeyDown, playSound]);
 
   useEffect(() => {
     const onResize = () => {
@@ -149,8 +149,8 @@ export const MediaViewer = () => {
           transition: { type: "spring", stiffness: 290, damping: 29 },
         });
       } else {
-        controls.set({ x: targetX });
         hasMounted.current = true;
+        controls.set({ x: targetX });
       }
     };
 
@@ -158,7 +158,7 @@ export const MediaViewer = () => {
     const resizeHandler = () => onResize();
     window.addEventListener("resize", resizeHandler);
     return () => window.removeEventListener("resize", resizeHandler);
-  }, [containerRef, currentIndex, controls]);
+  }, [containerRef, currentIndex, controls, playSound]);
 
   if (!isReady) return null;
 

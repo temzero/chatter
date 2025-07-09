@@ -27,6 +27,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCurrentSidebar } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/types/enums/sidebarMode";
 import { JSX } from "react";
+import { sidebarAnimations } from "@/animations/sidebarAnimations";
 import SidebarSettingsEmail from "./settings/account/sidebarSettingsEmail";
 import SidebarSettingsUsername from "./settings/account/sidebarSettingsUsername";
 import SidebarSettingsPhoneNumber from "./settings/account/sidebarSettingsPhoneNumber";
@@ -71,98 +72,18 @@ const Sidebar = () => {
     [SidebarMode.SETTINGS_LANGUAGE]: <SidebarSettingsLanguage />,
   };
 
-  // Define different animations for each sidebar
-  const animations = {
-    [SidebarMode.DEFAULT]: {
-      initial: { opacity: 0, scale: 0.9 },
-      animate: {
-        opacity: 1,
-        scale: 1,
-        transition: { duration: 0.2, ease: "easeOut" },
-      },
-      exit: {
-        opacity: 0,
-        transition: {
-          duration: 0,
-        },
-      },
-    },
-    [SidebarMode.SEARCH]: {
-      initial: { opacity: 0, y: 400 },
-      animate: {
-        opacity: 1,
-        y: 0,
-        transition: {
-          type: "spring",
-          stiffness: 300,
-          damping: 28,
-          bounce: 0.2,
-        },
-      },
-      exit: {
-        opacity: 0,
-        y: 400,
-        transition: {
-          duration: 0.2,
-        },
-      },
-    },
-    [SidebarMode.NEW_CHAT]: {
-      initial: { opacity: 0, y: 400 },
-      animate: {
-        opacity: 1,
-        y: 0,
-        transition: {
-          type: "spring",
-          stiffness: 300,
-          damping: 28,
-          bounce: 0.2,
-        },
-      },
-      exit: {
-        opacity: 0,
-        y: 400,
-        transition: {
-          duration: 0.2,
-        },
-      },
-    },
-    fallback: {
-      initial: { opacity: 0, x: -300 },
-      animate: {
-        opacity: 1,
-        x: 0,
-        transition: {
-          type: "spring",
-          stiffness: 300,
-          damping: 28,
-          bounce: 0.2,
-        },
-      },
-      exit: {
-        opacity: 0,
-        x: -300,
-        transition: {
-          duration: 0.2,
-        },
-      },
-    },
-  };
-
   // Get the animations for the current sidebar or use fallback
   const CurrentComponent = sidebars[currentSidebar] || null;
-  const currentAnimation =
-    animations[currentSidebar as unknown as keyof typeof animations] ||
-    animations.fallback;
+  const animation =
+    sidebarAnimations[currentSidebar as unknown as keyof typeof sidebarAnimations] ||
+    sidebarAnimations.fallback;
 
   return (
     <div className="bg-[var(--sidebar-color)] h-full flex flex-col shadow border-[var(--border-color)] border-r-2 transition-all duration-300 ease-in-out z-50">
       <AnimatePresence mode="wait">
         <motion.div
           key={currentSidebar}
-          initial={currentAnimation.initial}
-          animate={currentAnimation.animate}
-          exit={currentAnimation.exit}
+          {...animation}
           className="h-full"
         >
           {CurrentComponent}

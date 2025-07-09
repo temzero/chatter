@@ -5,6 +5,8 @@ import { useModalStore } from "@/stores/modalStore";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
 import MessagePreview from "../chat/MessagePreview";
 import { useCurrentUserId } from "@/stores/authStore";
+import { motion } from "framer-motion";
+import { childrenModalAnimation } from "@/animations/modalAnimations";
 
 interface DeleteMessageModalProps {
   message: MessageResponse;
@@ -25,7 +27,10 @@ const DeleteMessageModal: React.FC<DeleteMessageModalProps> = ({ message }) => {
   };
 
   return (
-    <div className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border z-[99]">
+    <motion.div
+      {...childrenModalAnimation}
+      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border z-[99]"
+    >
       <div className="p-4">
         <div className="flex gap-2 items-center mb-3">
           <span className="material-symbols-outlined text-3xl">chat_error</span>
@@ -54,7 +59,7 @@ const DeleteMessageModal: React.FC<DeleteMessageModalProps> = ({ message }) => {
           </button>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

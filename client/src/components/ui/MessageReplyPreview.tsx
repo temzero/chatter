@@ -3,7 +3,7 @@ import React from "react";
 import { MessageResponse } from "@/types/responses/message.response";
 import { ChatType } from "@/types/enums/ChatType";
 import { Avatar } from "./avatar/Avatar";
-import classNames from "classnames";
+import clsx from "clsx";
 import { scrollToMessageById } from "@/utils/scrollToMessageById";
 import RenderMultipleAttachments from "./RenderMultipleAttachments";
 import { useModalStore } from "@/stores/modalStore";
@@ -34,14 +34,14 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
   return (
     <div
       onClick={closeModal}
-      className={classNames("relative flex items-start -mb-2", {
+      className={clsx("relative flex items-start -mb-2", {
         "items-start": isReplyToMe,
         "items-end": !isReplyToMe,
         "opacity-60": isHidden,
       })}
     >
       <div
-        className={classNames("opacity-60 scale-[0.8] transition-all", {
+        className={clsx("opacity-60 scale-[0.8] transition-all", {
           "ml-auto origin-bottom-right": isReplyToMe,
           "origin-bottom-left": !isReplyToMe,
           "translate-x-4": !isMe && isReplyToMe,
@@ -54,7 +54,7 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
           onClick={() =>
             scrollToMessageById(replyMessage.id, { smooth: false })
           }
-          className={classNames("message-bubble", {
+          className={clsx("message-bubble", {
             "self-message ": isReplyToMe,
           })}
         >
@@ -109,7 +109,7 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
         {/* Display Reply Icon */}
         {isSelfReply ? (
           <span
-            className={classNames(
+            className={clsx(
               "material-symbols-outlined text-2xl rotate-180 absolute",
               {
                 "-bottom-[16px] -right-[20px] scale-x-[-1]": isMe,
@@ -121,7 +121,7 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
           </span>
         ) : (
           <span
-            className={classNames(
+            className={clsx(
               "material-symbols-outlined text-2xl absolute z-50 rotate-180",
               {
                 "-bottom-[16px] -left-[5px]": isMe,

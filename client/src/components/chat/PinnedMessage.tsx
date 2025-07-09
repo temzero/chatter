@@ -6,18 +6,7 @@ import { scrollToMessageById } from "@/utils/scrollToMessageById";
 import type { MessageResponse } from "@/types/responses/message.response";
 import { ChatType } from "@/types/enums/ChatType";
 import { MessageHorizontalPreview } from "./MessageHorizontalPreview";
-
-const pinMessageAnimation = {
-  initial: { opacity: 0, scale: 1.1, y: 50 },
-  animate: { opacity: 1, scale: 1, y: 0 },
-  transition: { type: "spring", stiffness: 300, damping: 29 },
-};
-
-const noAnimation = {
-  initial: false,
-  animate: false,
-  transition: {},
-};
+import { messageAnimations } from "@/animations/messageAnimations";
 
 interface MessageProps {
   message: MessageResponse;
@@ -33,7 +22,7 @@ const PinnedMessage: React.FC<MessageProps> = ({
   onUnpin,
 }) => {
   const isMe = useIsMe(message.sender.id);
-  const animationProps = shouldAnimate ? pinMessageAnimation : noAnimation;
+  const animationProps = shouldAnimate ? messageAnimations.pinMessage : messageAnimations.none;
   console.log('pinnedMessage', message)
 
   return (

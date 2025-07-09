@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { handleReaction } from "@/utils/handleReaction";
 import addReactionSound from "@/assets/sound/message-pop.mp3";
 import { playSound } from "@/utils/playSound";
-import classNames from "classnames";
+import clsx from "clsx";
 
 const emojis = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
 
@@ -27,7 +27,7 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = ({
       style={{
         transformOrigin: isMe ? "bottom right" : "bottom left",
       }}
-      className={classNames(
+      className={clsx(
         "absolute -top-11 flex gap-1 rounded-full p-1 blur-card z-50",
         {
           "right-0": isMe,

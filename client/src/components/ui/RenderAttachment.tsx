@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import CustomAudioPlayer from "./CustomAudioPlayer";
 import { formatFileSize } from "@/utils/formatFileSize";
 import { getFileIcon } from "@/utils/getFileIcon";
-import { useSoundEffect } from "@/hooks/useSoundEffect";
-import popupSound from "@/assets/sound/flip-switch.mp3";
 import { useModalStore } from "@/stores/modalStore";
 import { AttachmentResponse } from "@/types/responses/message.response";
 import { AttachmentType } from "@/types/enums/attachmentType";
+import { playSound } from "@/utils/playSound";
+import flipSwitchSound from "@/assets/sound/flip-switch.mp3";
+import CustomVideoPlayer from "./CustomVideoPlayer";
 
 // Helper function to calculate greatest common divisor (GCD)
 const gcd = (a: number, b: number): number => {
@@ -32,9 +33,10 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
   attachment,
   className = "",
   type,
-  previewMode = false,
+  previewMode = true,
 }) => {
   const openMediaModal = useModalStore((state) => state.openMediaModal);
+  const closeModal = useModalStore((state) => state.closeModal);
 
   const [aspectRatio, setAspectRatio] = useState<string | null>(null);
 
@@ -66,10 +68,7 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
     attachment.height,
   ]);
 
-  const playSound = useSoundEffect(popupSound);
-
   if (!attachment) return null;
-  console.log("attachment");
 
   const renderContainer = (content: React.ReactNode, extraClass = "") => (
     <div
@@ -96,8 +95,9 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
   };
 
   const handleOpenModal = () => {
+    closeModal();
     openMediaModal(attachment.id);
-    playSound[0]();
+    playSound(flipSwitchSound);
   };
 
   // Get appropriate source URL based on preview mode
@@ -128,30 +128,12 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
 
     case AttachmentType.VIDEO:
       return renderContainer(
-        <video
-          className={`w-full h-full transition-all duration-300 object-cover`}
-          controls={!previewMode}
-          onClick={previewMode ? handleOpenModal : undefined}
+        <CustomVideoPlayer
+          videoAttachment={attachment}
+          previewMode={previewMode}
+          onOpenModal={handleOpenModal}
           onLoadedMetadata={handleVideoLoadedMetadata}
-          style={{
-            aspectRatio:
-              aspectRatio ||
-              (attachment.width && attachment.height
-                ? `${attachment.width}/${attachment.height}`
-                : undefined),
-          }}
-        >
-          <source
-            src={attachment.url}
-            type={attachment.mimeType || "video/mp4"}
-          />
-          Your browser does not support the video tag.
-          {previewMode && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
-              <span className="text-white text-lg">▶</span>
-            </div>
-          )}
-        </video>
+        />
       );
 
     case AttachmentType.AUDIO:
@@ -165,6 +147,7 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
             mediaUrl={attachment.url}
             fileName={attachment.filename ?? undefined}
             type={type}
+            attachmentType={AttachmentType.AUDIO}
           />
         </div>
       );

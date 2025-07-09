@@ -1,5 +1,5 @@
 import React from "react";
-import classNames from "classnames";
+import clsx from "clsx";
 import { formatDateTime } from "@/utils/formatDate";
 import { Avatar } from "../ui/avatar/Avatar";
 import type { MessageResponse } from "@/types/responses/message.response";
@@ -21,7 +21,7 @@ const MessagePreview: React.FC<MessagePreviewProps> = ({ message }) => {
 
   return (
     <div
-      className={classNames("rounded p-2", {
+      className={clsx("rounded p-2", {
         "bg-[var(--primary-green)]": isMe,
         "bg-[var(--message-color)]": !isMe,
       })}
@@ -47,24 +47,13 @@ const MessagePreview: React.FC<MessagePreviewProps> = ({ message }) => {
       <div className="max-h-[40vh] overflow-y-auto overflow-x-auto rounded">
         {/* Reply Preview */}
         {repliedMessage && (
-          // <MessageReplyPreview
-          //   message={repliedMessage}
-          //   // chatType={chatType}
-          //   isMe={isMe}
-          //   isSelfReply={repliedMessage.sender.id === currentUserId && isMe}
-          //   isReplyToMe={repliedMessage.sender.id === currentUserId && !isMe}
-          // />
           <div className="flex gap-2 items-center">
             <span className="material-symbols-outlined rotate-180">reply</span>
             <div
-              className={classNames(
-                "flex gap-2 border rounded w-full p-2",
-                {
-                  // Only add this background class if sender is not current user
-                  "bg-[var(--message-color)]":
-                    repliedMessage.sender.id !== currentUserId,
-                }
-              )}
+              className={clsx("flex gap-2 border rounded w-full p-2", {
+                "bg-[var(--message-color)]":
+                  repliedMessage.sender.id !== currentUserId,
+              })}
             >
               <Avatar
                 avatarUrl={repliedMessage.sender.avatarUrl}
@@ -86,15 +75,12 @@ const MessagePreview: React.FC<MessagePreviewProps> = ({ message }) => {
           <RenderMultipleAttachments
             attachments={attachments}
             className="w-full max-w-full"
-            // previewMode={true}
           />
         )}
       </div>
       {/* Message Content */}
       {message.content && (
-        <p className="pt-2 custom-border-t">
-          {message.content}
-        </p>
+        <p className="pt-2 custom-border-t">{message.content}</p>
       )}
     </div>
   );

@@ -7,7 +7,7 @@ import AttachmentImportedPreview from "../ui/AttachmentImportedPreview";
 import useTypingIndicator from "@/hooks/useTypingIndicator";
 import { handleSendMessage } from "@/utils/sendMessageHandler";
 import { useModalStore, useReplyToMessageId } from "@/stores/modalStore";
-import classNames from "classnames";
+import clsx from "clsx";
 
 interface ChatBarProps {
   chatId: string;
@@ -15,13 +15,10 @@ interface ChatBarProps {
 }
 
 const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
-  console.log('chatBar Render')
-
   const setDraftMessage = useMessageStore((state) => state.setDraftMessage);
   const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
   const closeModal = useModalStore((state) => state.closeModal);
   const replyToMessageId = useReplyToMessageId();
-  // const replyToMessageId = null;
 
   const inputRef = useRef<HTMLTextAreaElement>(null!);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -31,7 +28,6 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
   const [hasTextContent, setHasTextContent] = useState(false);
 
   const { clearTypingState } = useTypingIndicator(inputRef, chatId ?? null);
-
   const shouldShowSendButton = hasTextContent || attachedFiles.length > 0;
 
   useEffect(() => {
@@ -164,7 +160,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
 
   return (
     <div
-      className={classNames(
+      className={clsx(
         "absolute bottom-0 left-0 backdrop-blur-xl w-full flex flex-col items-center p-4 justify-between shadow border-[var(--border-color)]",
         replyToMessageId ? "z-[999]" : "z-40"
       )}
@@ -187,7 +183,6 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
               key="reply-indicator"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              // exit={{ opacity: 0, x: -20 }}
               style={{ transformOrigin: "top left" }}
             >
               <span className="material-symbols-outlined text-3xl rotate-180 mr-2 mb-1 pointer-events-none">
@@ -200,7 +195,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
         <div
           ref={containerRef}
           id="input-container"
-          className={classNames(
+          className={clsx(
             "flex gap-2 items-end w-full transition-[height] duration-200 ease-in-out",
             {
               "chat-input": !replyToMessageId,
@@ -213,7 +208,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
             defaultValue=""
             onInput={handleInput}
             onKeyDown={handleKeyDown}
-            className={classNames(
+            className={clsx(
               "w-full outline-none bg-transparent resize-none overflow-hidden",
               {
                 "opacity-10 transition-opacity duration-100 ease-in-out":
@@ -249,7 +244,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
                 </motion.div>
 
                 <button
-                  className={classNames(
+                  className={clsx(
                     "rounded bg-[var(--primary-green)] border-2 border-green-400 flex items-center justify-center text-white transition-all duration-300",
                     {
                       "w-[30px] opacity-100 ml-0 pointer-events-auto":
@@ -293,7 +288,6 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
               key="close-reply"
               initial={{ opacity: 0, scale: 0.1 }}
               animate={{ opacity: 1, scale: 1 }}
-              // exit={{ opacity: 0, scale: 0.5 }}
             >
               <button
                 className="aspect-square overflow-hidden rounded-full opacity-70 hover:opacity-100 hover:bg-red-500 ml-2 mb-1.5"

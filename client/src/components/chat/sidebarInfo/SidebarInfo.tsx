@@ -5,6 +5,7 @@ import ChatInfoMedia from "./SidebarInfoMedia";
 import ChatInfoSaved from "./SidebarInfoSaved";
 import PrivateChatEdit from "./SidebarInfoEdit/DirectChatEdit";
 import GroupChatEdit from "./SidebarInfoEdit/GroupChatEdit";
+import { sidebarInfoAnimations } from "@/animations/sidebarInfoAnimations";
 
 const SidebarInfo: React.FC = () => {
   const currentSidebarInfo = useCurrentSidebarInfo();
@@ -18,95 +19,12 @@ const SidebarInfo: React.FC = () => {
     groupEdit: <GroupChatEdit />,
   };
 
-  // Animation configurations
-  const animations = {
-    default: {
-      initial: { opacity: 0 },
-      animate: {
-        opacity: 1,
-        transition: {
-          type: "spring",
-          stiffness: 300,
-          damping: 20,
-          bounce: 0.2,
-        },
-      },
-      exit: {
-        opacity: 0,
-        transition: {
-          duration: 0,
-        },
-      },
-    },
-    media: {
-      initial: { opacity: 0, y: 700 },
-      animate: {
-        opacity: 1,
-        y: 0,
-        transition: {
-          type: "spring",
-          stiffness: 300,
-          damping: 26,
-          bounce: 0.2,
-        },
-      },
-      exit: {
-        opacity: 0,
-        y: 900, // Different direction and distance for exit
-        transition: {
-          duration: 0.3,
-          ease: [0.4, 0, 0.2, 1], // Smoother ease-out
-        },
-      },
-    },
-
-    saved: {
-      initial: { opacity: 0, y: 700 },
-      animate: {
-        opacity: 1,
-        y: 0,
-        transition: {
-          type: "spring",
-          stiffness: 300,
-          damping: 26,
-          bounce: 0.2,
-        },
-      },
-      exit: {
-        opacity: 0,
-        y: 900, // Different direction and distance for exit
-        transition: {
-          duration: 0.3,
-          ease: [0.4, 0, 0.2, 1], // Smoother ease-out
-        },
-      },
-    },
-
-    fallback: {
-      initial: { opacity: 0, x: "var(--sidebar-width)" },
-      animate: {
-        opacity: 1,
-        x: 0,
-        transition: {
-          type: "spring",
-          stiffness: 300,
-          damping: 28,
-          bounce: 0.2,
-        },
-      },
-      exit: {
-        opacity: 0,
-        x: "var(--sidebar-width)",
-        transition: { duration: 0.2 },
-      },
-    },
-  };
-
   // Get the current component and animation
   const CurrentComponent = chatInfoComponents[currentSidebarInfo] || null;
-  const currentAnimation =
-    animations[currentSidebarInfo as keyof typeof animations] ||
-    animations.fallback;
+  const animation =
+    sidebarInfoAnimations[
+      currentSidebarInfo as keyof typeof sidebarInfoAnimations
+    ] || sidebarInfoAnimations.fallback;
 
   return (
     <div className="h-full w-full relative overflow-hidden bg-[var(--sidebar-color)] border-l-2 border-[var(--border-color)] shadow-lg">
@@ -114,9 +32,7 @@ const SidebarInfo: React.FC = () => {
         {CurrentComponent && (
           <motion.div
             key={currentSidebarInfo}
-            initial={currentAnimation.initial}
-            animate={currentAnimation.animate}
-            exit={currentAnimation.exit}
+            {...animation}
             className="absolute inset-0 overflow-y-auto"
           >
             {CurrentComponent}

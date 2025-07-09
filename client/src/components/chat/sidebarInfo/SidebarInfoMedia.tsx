@@ -4,6 +4,7 @@ import { useActiveChatAttachments } from "@/stores/messageStore";
 import { SlidingContainer } from "@/components/ui/SlidingContainer";
 import { AttachmentType } from "@/types/enums/attachmentType";
 import RenderAttachment from "@/components/ui/RenderAttachment";
+import clsx from "clsx";
 
 const mediaTypes = ["images", "videos", "audio", "files"];
 
@@ -63,11 +64,12 @@ const ChatInfoMedia: React.FC = () => {
 
     return (
       <div
-        className={
+        className={clsx(
+          "border-4",
           selectedType === "files" || selectedType === "audio"
             ? "flex flex-col"
             : "grid grid-cols-3 pb-10"
-        }
+        )}
       >
         {filteredMedia.map((media, index) => (
           <div
@@ -86,6 +88,7 @@ const ChatInfoMedia: React.FC = () => {
                   ? "w-full"
                   : "w-full h-full hover:scale-125 transition-transform duration-300 ease-in-out"
               }
+              previewMode={false}
             />
           </div>
         ))}

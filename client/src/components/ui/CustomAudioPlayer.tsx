@@ -9,7 +9,7 @@ import React, {
 interface CustomAudioPlayerProps {
   mediaUrl: string;
   fileName?: string;
-  attachmentType: AttachmentType;
+  attachmentType: AttachmentType.AUDIO | AttachmentType.VOICE;
   isDisplayName?: boolean;
   type?: string;
 }
@@ -94,7 +94,7 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
         </button>
 
         <div className="flex flex-col gap-2 flex-1 min-w-0">
-          {isDisplayName && <div className="flex gap-2">
+          {isDisplayName && <div className="flex items-center">
             {attachmentType && attachmentType === AttachmentType.AUDIO ? (
               <i className="material-symbols-outlined">music_note</i>
             ) : (

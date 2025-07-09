@@ -1,6 +1,6 @@
 // components/ui/MessageActions.tsx
 import React from "react";
-import classNames from "classnames";
+import clsx from "clsx";
 import { motion } from "framer-motion";
 import { MessageResponse } from "@/types/responses/message.response";
 import {
@@ -93,7 +93,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       style={{
         transformOrigin: isMe ? "top right" : "top left",
       }}
-      className={classNames(
+      className={clsx(
         "absolute -bottom-14 flex rounded-lg blur-card z-50",
         {
           "right-0": isMe,
@@ -108,7 +108,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       {baseActions.map((action, index) => (
         <button
           key={index}
-          className={classNames(
+          className={clsx(
             "py-2 px-3 flex flex-col items-center justify-center rounded-lg",
             "hover:bg-black/40 hover:text-green-300 hover:scale-110 transition-all"
           )}
@@ -119,7 +119,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
           title={action.label}
         >
           <i
-            className={classNames(
+            className={clsx(
               "material-symbols-outlined text-2xl",
               action.label === "Reply" && "rotate-180",
               action.label === "Forward" && "rotate-90",

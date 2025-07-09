@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import classNames from "classnames";
+import clsx from "clsx";
 import { motion } from "framer-motion";
 import { useCurrentUserId } from "@/stores/authStore";
 import RenderMultipleAttachments from "../ui/RenderMultipleAttachments";
@@ -13,30 +13,12 @@ import ForwardedMessagePreview from "../ui/ForwardMessagePreview";
 import { MessageActions } from "../ui/MessageActions";
 import { ReactionPicker } from "../ui/MessageReactionPicker";
 import { handleQuickReaction } from "@/utils/quickReaction";
+import { messageAnimations } from "@/animations/messageAnimations";
 import {
   useIsMessageFocus,
   useIsReplyToThisMessage,
   useModalStore,
 } from "@/stores/modalStore";
-
-// Shared animation configurations
-const messageAnimations = {
-  myMessage: {
-    initial: { opacity: 0, scale: 0.1, x: 100, y: 0 },
-    animate: { opacity: 1, scale: 1, x: 0, y: 0 },
-    transition: { type: "spring", stiffness: 300, damping: 29 },
-  },
-  otherMessage: {
-    initial: { opacity: 0, scale: 0.1, x: -200, y: 30 },
-    animate: { opacity: 1, scale: 1, x: 0, y: 0 },
-    transition: { type: "spring", stiffness: 222, damping: 20 },
-  },
-  none: {
-    initial: false,
-    animate: false,
-    transition: {},
-  },
-};
 
 const MessageContent = ({
   content,
@@ -51,7 +33,7 @@ const MessageContent = ({
 
   return (
     <p
-      className={classNames(
+      className={clsx(
         "break-words max-w-full cursor-pointer transition-all duration-200",
         {
           "scale-110 opacity-60": copied,
@@ -119,11 +101,16 @@ const Message: React.FC<MessageProps> = ({
   const isGroupChat = chatType === "group";
   const attachments = message.attachments || [];
 
+  // const handleClick = (e: React.MouseEvent) => {
+  //   e.stopPropagation();
+  //   closeModal();
+  // };
+
   return (
     <motion.div
       id={`message-${message.id}`}
       ref={messageRef}
-      className={classNames("flex max-w-[60%] group relative", {
+      className={clsx("flex max-w-[60%] group relative", {
         "ml-auto": isMe,
         "mr-auto": !isMe,
         "pb-1": isRecent,
@@ -133,7 +120,7 @@ const Message: React.FC<MessageProps> = ({
       initial={animationProps.initial}
       animate={animationProps.animate}
       transition={animationProps.transition}
-      onClick={(e) => e.stopPropagation()}
+      // onClick={handleClick}
       onDoubleClick={() => handleQuickReaction(message.id, message.chatId)}
       onContextMenu={(e) => {
         e.preventDefault();
@@ -141,11 +128,7 @@ const Message: React.FC<MessageProps> = ({
       }}
     >
       {isGroupChat && !isMe && (
-        <div
-          className={classNames(
-            "flex-shrink-0 mt-auto mr-2 h-10 w-10 min-w-10"
-          )}
-        >
+        <div className={clsx("flex-shrink-0 mt-auto mr-2 h-10 w-10 min-w-10")}>
           {!isRecent && (
             <Avatar
               avatarUrl={message.sender.avatarUrl}
@@ -157,7 +140,7 @@ const Message: React.FC<MessageProps> = ({
 
       <div className="flex flex-col w-full">
         <div
-          className={classNames("relative flex flex-col transition-all", {
+          className={clsx("relative flex flex-col transition-all", {
             "scale-[1.1]": isRelyToThisMessage,
             "origin-bottom-right items-end": isMe,
             "origin-bottom-left items-start": !isMe,
@@ -176,7 +159,7 @@ const Message: React.FC<MessageProps> = ({
 
           <div className="relative">
             <div
-              className={classNames("message-bubble", {
+              className={clsx("message-bubble", {
                 "self-message ml-auto": isMe,
                 "scale-110": copied,
                 "message-bubble-reply": isRelyToThisMessage,
@@ -225,14 +208,14 @@ const Message: React.FC<MessageProps> = ({
         </div>
 
         {showInfo && isGroupChat && !isMe && (
-          <h1 className={classNames("text-sm font-semibold opacity-70 mr-2")}>
+          <h1 className={clsx("text-sm font-semibold opacity-70 mr-2")}>
             {message.sender.displayName}
           </h1>
         )}
 
         {!isRecent && (
           <p
-            className={classNames("text-xs py-1 opacity-40", {
+            className={clsx("text-xs py-1 opacity-40", {
               "ml-auto": isMe,
               "mr-auto": !isMe,
             })}
@@ -243,7 +226,7 @@ const Message: React.FC<MessageProps> = ({
 
         {readUserAvatars && (
           <div
-            className={classNames("flex items-center", {
+            className={clsx("flex items-center", {
               "justify-end": isMe,
               "justify-start": !isMe,
             })}

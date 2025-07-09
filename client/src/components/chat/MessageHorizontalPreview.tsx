@@ -1,6 +1,6 @@
 // components/ui/MessageHorizontalPreview.tsx
 import React, { useRef, useState, useEffect } from "react";
-import classNames from "classnames";
+import clsx from "clsx";
 import { Avatar } from "../ui/avatar/Avatar";
 import { MessageResponse } from "@/types/responses/message.response";
 import { ChatType } from "@/types/enums/ChatType";
@@ -44,11 +44,11 @@ export const MessageHorizontalPreview: React.FC<
     setCopied(true);
   };
 
-  const messageClass = classNames({
+  const messageClass = clsx({
     "bg-[--message-color] py-1 px-2 rounded": isBubble,
     "bg-[--primary-green]": isBubble && isMe,
   });
-  const nestedMessageClass = classNames({
+  const nestedMessageClass = clsx({
     "bg-[--message-color] p-1 rounded": isBubble,
     "bg-[--primary-green]": isBubble && isForwardedFromMe,
   });
@@ -56,7 +56,10 @@ export const MessageHorizontalPreview: React.FC<
   return (
     <div
       ref={messageRef}
-      className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center gap-2 ${messageClass}`}
+      className={clsx(
+        "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center gap-2",
+        messageClass
+      )}
     >
       {isGroupChat && !isMe && (
         <Avatar
@@ -67,9 +70,12 @@ export const MessageHorizontalPreview: React.FC<
       )}
 
       <p
-        className={`break-words truncate max-w-full cursor-pointer transition-all duration-200 ${
-          copied ? "scale-110 opacity-60" : ""
-        }`}
+        className={clsx(
+          "break-words truncate max-w-full cursor-pointer transition-all duration-200",
+          {
+            "scale-110 opacity-60": copied,
+          }
+        )}
         onClick={handleCopyText}
       >
         {message.content}
@@ -92,7 +98,7 @@ export const MessageHorizontalPreview: React.FC<
           <span className="material-symbols-outlined rotate-90 opacity-60">
             arrow_warm_up
           </span>
-          <div className={`flex gap-2 items-center ${nestedMessageClass}`}>
+          <div className={clsx("flex gap-2 items-center", nestedMessageClass)}>
             {!isForwardedFromMe && (
               <Avatar
                 avatarUrl={forwardedMessage?.sender.avatarUrl}

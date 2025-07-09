@@ -5,6 +5,8 @@ import { Avatar } from "../ui/avatar/Avatar";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
 import { useChatStore } from "@/stores/chatStore";
+import { motion } from "framer-motion";
+import { childrenModalAnimation } from "@/animations/modalAnimations";
 
 interface FriendRequestModalProps {
   receiver: {
@@ -49,7 +51,10 @@ const FriendRequestModal: React.FC<FriendRequestModalProps> = ({
   };
 
   return (
-    <div className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded p-4 max-w-xl w-[400px] custom-border z-[99]">
+    <motion.div
+      {...childrenModalAnimation}
+      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded p-4 max-w-xl w-[400px] custom-border z-[99]"
+    >
       <h1 className="font-bold text-center text-xl">Send Friend Request to</h1>
       <div className="flex items-center gap-4 custom-border p-2 my-4 rounded-lg">
         <Avatar
@@ -91,7 +96,7 @@ const FriendRequestModal: React.FC<FriendRequestModalProps> = ({
           Send Friend Request
         </button>
       </form>
-    </div>
+    </motion.div>
   );
 };
 

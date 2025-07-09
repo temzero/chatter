@@ -46,7 +46,7 @@ export const useModalStore = create<ModalState & ModalActions>((set) => ({
   openMessageModal: (messageId) =>
     set({
       focusMessageId: messageId,
-      modalContent: { type: ModalType.MEDIA, props: { messageId } },
+      modalContent: { type: ModalType.MESSAGE, props: { messageId } },
     }),
 
   openMediaModal: (mediaId) =>

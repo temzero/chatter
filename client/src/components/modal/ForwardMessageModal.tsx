@@ -1,5 +1,6 @@
 // components/modals/ForwardMessageModal.tsx
 import React from "react";
+import { motion } from "framer-motion";
 import { MessageResponse } from "@/types/responses/message.response";
 import { useModalStore } from "@/stores/modalStore";
 import { useChatStore } from "@/stores/chatStore";
@@ -7,6 +8,7 @@ import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.se
 import { ForwardMessageRequest } from "@/types/requests/forwardMessage.request";
 import { ChatAvatar } from "../ui/avatar/ChatAvatar";
 import SearchBar from "../ui/SearchBar";
+import { childrenModalAnimation } from "@/animations/modalAnimations";
 
 interface ForwardMessageModalProps {
   message: MessageResponse;
@@ -44,12 +46,16 @@ const ForwardMessageModal: React.FC<ForwardMessageModalProps> = ({
   };
 
   return (
-    <div className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded p-4 max-w-xl w-[400px] custom-border z-[99]">
+    <motion.div
+      {...childrenModalAnimation}
+      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded p-4 max-w-xl w-[400px] custom-border z-[99]"
+    >
       <h1 className="font-bold text-center text-xl mb-4 flex items-center justify-center gap-2">
         Forward Message To...
-        {/* <span className="material-symbols-outlined text-3xl">send</span> */}
       </h1>
+
       <SearchBar placeholder="Search for chat to forward to" />
+
       <div className="flex flex-col items-start h-[50vh] overflow-y-auto mt-2">
         {forwardChats.map((chat) => (
           <div
@@ -58,13 +64,8 @@ const ForwardMessageModal: React.FC<ForwardMessageModalProps> = ({
           >
             <ChatAvatar chat={chat} type="header" />
             <h2 className="font-medium">{chat.name}</h2>
-            {/* <button className="ml-auto " onClick={() => handleForward(chat.id)}>
-              Forward
-            </button> */}
-
             <button
-              className={` ml-auto w-10 h-8 opacity-60 hover:opacity-100 rounded hover:bg-[var(--primary-green)] hover:border-2 hover:border-green-400 flex items-center justify-center text-white transition-all duration-300
-              }`}
+              className="ml-auto w-10 h-8 opacity-60 hover:opacity-100 rounded hover:bg-[var(--primary-green)] hover:border-2 hover:border-green-400 flex items-center justify-center text-white transition-all duration-300"
               onClick={() => handleForward(chat.id)}
               aria-label="Send message"
             >
@@ -73,7 +74,7 @@ const ForwardMessageModal: React.FC<ForwardMessageModalProps> = ({
           </div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

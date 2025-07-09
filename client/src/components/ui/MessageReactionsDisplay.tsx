@@ -1,5 +1,5 @@
 import React from "react";
-import classNames from "classnames";
+import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
 import { handleReaction } from "@/utils/handleReaction";
 import { useSoundEffect } from "@/hooks/useSoundEffect";
@@ -64,7 +64,7 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
         damping: 28,
       }}
       whileTap={{ scale: 0.8 }}
-      className={classNames(
+      className={clsx(
         "message-reaction absolute -bottom-2 z-10 flex bg-black/50 rounded-full",
         isMe ? "-left-4" : "-right-4 flex-row-reverse"
       )}
@@ -83,7 +83,7 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
                 stiffness: 500,
                 damping: 28,
               }}
-              className={classNames(
+              className={clsx(
                 "text-sm flex items-center px-1 py-0.5 cursor-pointer",
                 {
                   "bg-blue-600/80 rounded-full": hasMyReaction,
