@@ -4,7 +4,34 @@ import React, {
   useRef,
   forwardRef,
   useImperativeHandle,
+  useEffect,
 } from "react";
+
+// Audio manager implementation
+let currentAudio: HTMLAudioElement | null = null;
+
+const playAudio = (audioElement: HTMLAudioElement) => {
+  // Pause the currently playing audio if it exists
+  if (currentAudio && currentAudio !== audioElement) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    // Dispatch pause event to sync other players
+    const event = new Event('pause');
+    currentAudio.dispatchEvent(event);
+  }
+
+  // Set the new audio as current and play it
+  currentAudio = audioElement;
+  audioElement.play();
+};
+
+const stopCurrentAudio = () => {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    currentAudio = null;
+  }
+};
 
 interface CustomAudioPlayerProps {
   mediaUrl: string;
@@ -26,11 +53,33 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
 
+    // Handle play/pause events from other audio players
+    useEffect(() => {
+      const handleExternalPause = () => {
+        setIsPlaying(false);
+      };
+
+      const audioElement = audioRef.current;
+      if (audioElement) {
+        audioElement.addEventListener('pause', handleExternalPause);
+      }
+
+      return () => {
+        if (audioElement) {
+          audioElement.removeEventListener('pause', handleExternalPause);
+          if (currentAudio === audioElement) {
+            stopCurrentAudio();
+          }
+          audioElement.pause();
+        }
+      };
+    }, []);
+
     // Expose methods to parent via ref
     useImperativeHandle(ref, () => ({
       play: () => {
         if (audioRef.current) {
-          audioRef.current.play();
+          playAudio(audioRef.current);
           setIsPlaying(true);
         }
       },
@@ -46,7 +95,7 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
             audioRef.current.pause();
             setIsPlaying(false);
           } else {
-            audioRef.current.play();
+            playAudio(audioRef.current);
             setIsPlaying(true);
           }
         }
@@ -57,10 +106,11 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
       if (audioRef.current) {
         if (isPlaying) {
           audioRef.current.pause();
+          setIsPlaying(false);
         } else {
-          audioRef.current.play();
+          playAudio(audioRef.current);
+          setIsPlaying(true);
         }
-        setIsPlaying(!isPlaying);
       }
     };
 
@@ -105,15 +155,25 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
 
           <audio
             ref={audioRef}
-            className="hidden" // hide native audio element
+            className="hidden"
             onTimeUpdate={handleTimeUpdate}
             onLoadedMetadata={handleTimeUpdate}
+            onPause={() => {
+              if (audioRef.current !== currentAudio) {
+                setIsPlaying(false);
+              }
+            }}
+            onEnded={() => {
+              setIsPlaying(false);
+              if (audioRef.current === currentAudio) {
+                currentAudio = null;
+              }
+            }}
           >
             <source src={mediaUrl} type={getAudioType(fileName || "")} />
             Your browser does not support the audio element.
           </audio>
 
-          {/* Range input styled to stay within parent */}
           <input
             type="range"
             value={progress}
@@ -134,7 +194,7 @@ const getAudioType = (fileName: string) => {
   if (fileName.endsWith(".m4a")) return "audio/x-m4a";
   if (fileName.endsWith(".wav")) return "audio/wav";
   if (fileName.endsWith(".ogg")) return "audio/ogg";
-  return "audio/mpeg"; // Fallback to mp3 type if unknown
+  return "audio/mpeg";
 };
 
 export default CustomAudioPlayer;

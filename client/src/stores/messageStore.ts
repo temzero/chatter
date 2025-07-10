@@ -28,6 +28,11 @@ export interface MessageStore {
   fetchMoreMessages: (chatId: string) => Promise<number>;
   addMessage: (newMessage: MessageResponse) => void;
   getMessageById: (messageId: string) => MessageResponse | undefined;
+  updateMessageById: (
+    chatId: string,
+    messageId: string,
+    updatedMessage: Partial<MessageResponse>
+  ) => void;
   deleteMessage: (chatId: string, messageId: string) => void;
   getChatMessages: (chatId: string) => MessageResponse[];
   getChatAttachments: (chatId: string) => AttachmentResponse[];
@@ -170,6 +175,33 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
       if (found) return found;
     }
     return undefined;
+  },
+
+  updateMessageById: (chatId, messageId, updatedMessage) => {
+    set((state) => {
+      const chatMessages = state.messages[chatId] || [];
+      const index = chatMessages.findIndex((msg) => msg.id === messageId);
+      if (index === -1) return {}; // Message not found
+
+      const updatedMessages = [...chatMessages];
+      updatedMessages[index] = {
+        ...updatedMessages[index],
+        ...updatedMessage,
+      };
+
+      const lastMessage = updatedMessages[updatedMessages.length - 1];
+      if (lastMessage?.id === messageId) {
+        const newLast = createLastMessage(updatedMessages[index]);
+        useChatStore.getState().setLastMessage(chatId, newLast);
+      }
+
+      return {
+        messages: {
+          ...state.messages,
+          [chatId]: updatedMessages,
+        },
+      };
+    });
   },
 
   deleteMessage: (chatId, messageId) => {
@@ -386,7 +418,9 @@ export const useMessagesByChatId = (chatId: string) => {
   return useMessageStore(useShallow((state) => state.messages[chatId] || []));
 };
 
-export const useSenderByMessageId = (messageId: string): SenderResponse | undefined => {
+export const useSenderByMessageId = (
+  messageId: string
+): SenderResponse | undefined => {
   return useMessageStore((state) => {
     const message = state.getMessageById(messageId);
     return message?.sender;

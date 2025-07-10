@@ -1,12 +1,15 @@
-import { IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsOptional, IsString, IsUUID, ValidateNested } from 'class-validator';
 import { AttachmentUploadDto } from './attachment-upload.dto';
 import { Type } from 'class-transformer';
 
 export class CreateMessageDto {
-  @IsString()
+  @IsUUID()
+  id: string;
+
+  @IsUUID()
   chatId: string;
 
-  @IsString()
+  @IsUUID()
   memberId: string;
 
   @IsOptional()

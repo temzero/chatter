@@ -1,6 +1,6 @@
 // utils/handleDoubleClickReaction.ts
 import { handleReaction } from "@/utils/handleReaction";
-import { playSound } from "@/utils/playSound";
+import { playSoundEffect } from "@/utils/playSoundEffect";
 import addReactionSound from "@/assets/sound/message-pop.mp3";
 
 export const handleQuickReaction = (
@@ -8,7 +8,7 @@ export const handleQuickReaction = (
   chatId: string,
   emoji?: string
 ) => {
-  playSound(addReactionSound, 1);
+  playSoundEffect(addReactionSound, 1);
   handleReaction({
     emoji: emoji || "❤️",
     messageId: messageId,

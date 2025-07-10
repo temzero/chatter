@@ -5,13 +5,27 @@ import { MessageResponse } from "@/types/responses/message.response";
 import { useTypingStore } from "@/stores/typingStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useChatStore } from "@/stores/chatStore";
+import { useAuthStore } from "@/stores/authStore";
+import { MessageStatus } from "@/types/enums/message";
 // import { toast } from "react-toastify";
 
 export function useChatSocketListeners() {
   useEffect(() => {
-    // Message handler
     const handleNewMessage = (message: MessageResponse) => {
-      useMessageStore.getState().addMessage(message);
+      const currentUserId = useAuthStore.getState().currentUser?.id;
+
+      if (
+        message.sender.id === currentUserId &&
+        useMessageStore.getState().getMessageById(message.id)
+      ) {
+        // It's my message and already exists → update it with server-confirmed data
+        useMessageStore
+          .getState()
+          .updateMessageById(message.chatId, message.id, message);
+      } else {
+        // Not my message or not found → add to store
+        useMessageStore.getState().addMessage(message);
+      }
     };
 
     const handleTyping = (data: {
@@ -61,6 +75,23 @@ export function useChatSocketListeners() {
       useMessageStore.getState().deleteMessage(data.chatId, data.messageId);
     };
 
+    const handleMessageError = (error: {
+      messageId: string;
+      chatId: string;
+      error: string;
+      code?: string;
+    }) => {
+      // Update specific message state
+      useMessageStore
+        .getState()
+        .updateMessageById(error.chatId, error.messageId, {
+          status: MessageStatus.FAILED,
+        });
+
+      // Show contextual error
+      // toast.error(`Message failed: ${error.error}`);
+    };
+
     // Subscribe to events
     chatWebSocketService.onNewMessage(handleNewMessage);
     chatWebSocketService.onReaction(handleReaction);
@@ -68,6 +99,7 @@ export function useChatSocketListeners() {
     chatWebSocketService.onMessagesRead(handleMessagesRead);
     chatWebSocketService.onMessagePin(handleMessagePinned);
     chatWebSocketService.onDeleteMessage(handleMessageDeleted);
+    chatWebSocketService.onMessageError(handleMessageError);
 
     return () => {
       // Clean up listeners
@@ -77,6 +109,7 @@ export function useChatSocketListeners() {
       chatWebSocketService.offMessagesRead(handleMessagesRead);
       chatWebSocketService.offMessagePin(handleMessagePinned);
       chatWebSocketService.offDeleteMessage(handleMessageDeleted);
+      chatWebSocketService.offMessageError(handleMessageError);
     };
   }, []);
 }

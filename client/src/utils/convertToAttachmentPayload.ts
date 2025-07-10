@@ -1,5 +1,5 @@
 import { AttachmentUploadRequest } from "@/types/requests/sendMessage.request";
-import { AttachmentType } from "@/types/enums/attachmentType";
+import { determineAttachmentType } from "./determineAttachmentType";
 import { createClient } from "@supabase/supabase-js";
 
 // Initialize Supabase with proper checks
@@ -15,14 +15,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-function determineAttachmentType(file: File): AttachmentType {
-  const mime = file.type.toLowerCase();
-  if (mime.startsWith("image/")) return AttachmentType.IMAGE;
-  if (mime.startsWith("video/")) return AttachmentType.VIDEO;
-  if (mime.startsWith("audio/")) return AttachmentType.AUDIO;
-  return AttachmentType.FILE;
-}
 
 export async function convertToAttachmentPayload(
   file: File

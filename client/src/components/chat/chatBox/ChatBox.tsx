@@ -11,6 +11,7 @@ import {
 import ChannelMessages from "./ChannelMessages";
 import TypingIndicator from "../../ui/typingIndicator/TypingIndicator";
 import ChatMessages from "./ChatMessages";
+import { isNearBottom } from "@/utils/isNearBottom";
 
 interface ChatBoxProps {
   chat?: ChatResponse;
@@ -22,9 +23,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ chat }) => {
   const isMessagePinned = chat?.pinnedMessage !== null;
 
   // Refs
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const prevMessagesLengthRef = useRef(0);
-  const hasScrolledInitially = useRef(false);
+  const chatBoxRef = useRef<HTMLDivElement | null>(null);
   const isFetchingRef = useRef(false);
   const scrollPositionRef = useRef(0);
 
@@ -33,21 +32,23 @@ const ChatBox: React.FC<ChatBoxProps> = ({ chat }) => {
 
   // Store hooks
   const messages = useMessagesByChatId(chatId);
-  console.log(messages)
+  console.log(messages);
   const hasMoreMessages = useHasMoreMessages(chatId);
   const fetchMoreMessages = useMessageStore((state) => state.fetchMoreMessages);
 
-  // Handlers
   const scrollToBottom = useCallback((behavior: ScrollBehavior = "auto") => {
-    if (containerRef.current) {
-      containerRef.current.scrollTo({
-        top: containerRef.current.scrollHeight,
-        behavior,
-      });
-    }
+    setTimeout(() => {
+      if (chatBoxRef.current) {
+        chatBoxRef.current.scrollTo({
+          top: chatBoxRef.current.scrollHeight,
+          behavior,
+        });
+      }
+    }, 1);
   }, []);
 
-  const handleScroll = useCallback(
+  // Load messages when scroll
+  const handleInfiniteScroll = useCallback(
     async (e: React.UIEvent<HTMLDivElement>) => {
       if (!hasMoreMessages || isFetchingRef.current) return;
 
@@ -72,9 +73,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ chat }) => {
           // Use double requestAnimationFrame for smoother rendering
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
-              if (containerRef.current) {
-                const newScrollHeight = containerRef.current.scrollHeight;
-                containerRef.current.scrollTop =
+              if (chatBoxRef.current) {
+                const newScrollHeight = chatBoxRef.current.scrollHeight;
+                chatBoxRef.current.scrollTop =
                   newScrollHeight - prevScrollHeight;
               }
             });
@@ -88,32 +89,19 @@ const ChatBox: React.FC<ChatBoxProps> = ({ chat }) => {
     [chatId, hasMoreMessages, fetchMoreMessages]
   );
 
-  // Effects
+  // Scroll to bottom when fist render
   useEffect(() => {
-    const prevLength = prevMessagesLengthRef.current;
-    const currLength = messages.length;
+    scrollToBottom();
+  }, [scrollToBottom]);
 
-    const isFirstLoad = !hasScrolledInitially.current && currLength > 0;
-    const isAppendingToBottom = currLength > prevLength;
-
-    if (isFirstLoad && chatId) {
+  // Scroll to bottom when messages change and near to bottom
+  useEffect(() => {
+    if (isNearBottom(chatBoxRef.current)) {
       scrollToBottom();
-      hasScrolledInitially.current = true;
-    } else if (isAppendingToBottom) {
-      // Only auto-scroll if we were near the bottom before new messages arrived
-      const wasNearBottom =
-        scrollPositionRef.current >
-        (containerRef.current?.scrollHeight || 0) -
-          (containerRef.current?.clientHeight || 0) -
-          100;
-
-      if (wasNearBottom) {
-        scrollToBottom("smooth");
-      }
+    } else {
+      toast.info('New Message')
     }
-
-    prevMessagesLengthRef.current = currLength;
-  }, [chatId, messages, scrollToBottom]);
+  }, [messages, scrollToBottom]);
 
   // Render functions
   const renderMessages = useCallback(() => {
@@ -129,8 +117,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ chat }) => {
 
   return (
     <div
-      ref={containerRef}
-      onScroll={handleScroll}
+      ref={chatBoxRef}
+      onScroll={handleInfiniteScroll}
       className={`px-6 pb-[calc(3*var(--header-height))] flex-1 h-full w-full flex flex-col overflow-x-hidden overflow-y-auto ${
         isMessagePinned
           ? "pt-[calc(var(--header-height)+var(--pinned-message-height)+4px)]"

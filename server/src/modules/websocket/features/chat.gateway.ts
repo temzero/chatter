@@ -105,7 +105,12 @@ export class ChatGateway {
       }
     } catch (error) {
       console.error('Error handling sendMessage:', error);
-      client.emit(`error`, { message: 'Failed to send message' });
+      // client.emit(`error`, { message: 'Failed to send message' });
+      client.emit(`${chatLink}messageError`, {
+        messageId: payload.id,
+        error: this.getErrorMessage(error),
+        timestamp: new Date().toISOString(),
+      });
     }
   }
 
@@ -388,6 +393,12 @@ export class ChatGateway {
         error: error instanceof Error ? error.message : String(error),
       });
     }
+  }
+
+  private getErrorMessage(error: unknown): string {
+    if (error instanceof Error) return error.message;
+    if (typeof error === 'string') return error;
+    return 'Message processing failed';
   }
 
   // Utility to check if any other chat member is online (excluding one user)

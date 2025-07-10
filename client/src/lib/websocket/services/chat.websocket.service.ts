@@ -193,6 +193,38 @@ export class ChatWebSocketService {
   ) {
     webSocketService.off("chat:messageDeleted", callback);
   }
+
+  /**
+   * Listen for message errors
+   */
+  onMessageError(
+    callback: (error: {
+      messageId: string;
+      chatId: string;
+      error: string;
+      code?: string;
+    }) => void
+  ) {
+    webSocketService.on("chat:messageError", callback);
+  }
+
+  /**
+   * Remove message error listener
+   */
+  offMessageError(
+    callback?: (error: {
+      messageId: string;
+      chatId: string;
+      error: string;
+      code?: string;
+    }) => void
+  ) {
+    if (callback) {
+      webSocketService.off("chat:messageError", callback);
+    } else {
+      webSocketService.off("chat:messageError");
+    }
+  }
 }
 
 export const chatWebSocketService = new ChatWebSocketService();

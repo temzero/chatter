@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { handleReaction } from "@/utils/handleReaction";
 import addReactionSound from "@/assets/sound/message-pop.mp3";
-import { playSound } from "@/utils/playSound";
+import { playSoundEffect } from "@/utils/playSoundEffect";
 import clsx from "clsx";
 
 const emojis = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
@@ -43,7 +43,7 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = ({
           key={emoji}
           className="text-xl hover:scale-150 transition-transform duration-150"
           onClick={() => {
-            playSound(addReactionSound, 1);
+            playSoundEffect(addReactionSound, 1);
             handleReaction({
               emoji,
               messageId,

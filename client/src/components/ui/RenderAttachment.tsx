@@ -5,7 +5,7 @@ import { getFileIcon } from "@/utils/getFileIcon";
 import { useModalStore } from "@/stores/modalStore";
 import { AttachmentResponse } from "@/types/responses/message.response";
 import { AttachmentType } from "@/types/enums/attachmentType";
-import { playSound } from "@/utils/playSound";
+import { playSoundEffect } from "@/utils/playSoundEffect";
 import flipSwitchSound from "@/assets/sound/flip-switch.mp3";
 import CustomVideoPlayer from "./CustomVideoPlayer";
 
@@ -97,7 +97,7 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
   const handleOpenModal = () => {
     closeModal();
     openMediaModal(attachment.id);
-    playSound(flipSwitchSound);
+    playSoundEffect(flipSwitchSound);
   };
 
   // Get appropriate source URL based on preview mode

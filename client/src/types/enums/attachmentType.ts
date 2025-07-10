@@ -5,4 +5,5 @@ export enum AttachmentType {
   VOICE = "voice",
   LOCATION = "location",
   FILE = "file",
+  PDF = "pdf",
 }

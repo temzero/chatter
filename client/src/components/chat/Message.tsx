@@ -19,6 +19,8 @@ import {
   useIsReplyToThisMessage,
   useModalStore,
 } from "@/stores/modalStore";
+import { MessageStatus } from "@/types/enums/message";
+import { BeatLoader } from "react-spinners";
 
 const MessageContent = ({
   content,
@@ -163,6 +165,9 @@ const Message: React.FC<MessageProps> = ({
                 "self-message ml-auto": isMe,
                 "scale-110": copied,
                 "message-bubble-reply": isRelyToThisMessage,
+                "opacity-60": message.status === MessageStatus.SENDING,
+                "opacity-60 border-2 border-red-500":
+                  message.status === MessageStatus.FAILED,
               })}
               style={{
                 width:
@@ -213,7 +218,7 @@ const Message: React.FC<MessageProps> = ({
           </h1>
         )}
 
-        {!isRecent && (
+        {!isRecent && message.status !== MessageStatus.SENDING && message.status !== MessageStatus.FAILED && (
           <p
             className={clsx("text-xs py-1 opacity-40", {
               "ml-auto": isMe,
@@ -222,6 +227,17 @@ const Message: React.FC<MessageProps> = ({
           >
             {formatTime(message.createdAt)}
           </p>
+        )}
+
+        {message.status === MessageStatus.SENDING && (
+          <div className="rounded-full flex justify-end mt-1">
+            <BeatLoader color="gray" size={8} />
+          </div>
+        )}
+        {message.status === MessageStatus.FAILED && (
+          <h1 className="text-red-500 text-sm text-right">
+            Failed to send message
+          </h1>
         )}
 
         {readUserAvatars && (

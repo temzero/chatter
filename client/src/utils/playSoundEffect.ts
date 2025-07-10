@@ -3,7 +3,7 @@
  * @param soundUrl - Path/URL to the audio file
  * @param volume - Volume level (0.0 to 1.0, default: 0.5)
  */
-export const playSound = (soundUrl: string, volume = 0.5) => {
+export const playSoundEffect = (soundUrl: string, volume = 0.5) => {
   try {
     const audio = new Audio(soundUrl);
     audio.volume = volume;

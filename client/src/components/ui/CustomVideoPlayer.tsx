@@ -1,8 +1,31 @@
 import { AttachmentResponse } from "@/types/responses/message.response";
 import { useRef, useState, MouseEvent, useEffect } from "react";
 import { formatDuration } from "@/utils/formatDuration";
-import { toast } from "react-toastify";
 import { ModalType, useModalContent } from "@/stores/modalStore";
+
+// Video manager implementation
+let currentVideo: HTMLVideoElement | null = null;
+
+const playVideo = (videoElement: HTMLVideoElement) => {
+  // Pause the currently playing video if it exists
+  if (currentVideo && currentVideo !== videoElement) {
+    currentVideo.pause();
+    // Dispatch pause event to sync other players
+    const event = new Event("pause");
+    currentVideo.dispatchEvent(event);
+  }
+
+  // Set the new video as current and play it
+  currentVideo = videoElement;
+  videoElement.play().catch(console.error);
+};
+
+const stopCurrentVideo = () => {
+  if (currentVideo) {
+    currentVideo.pause();
+    currentVideo = null;
+  }
+};
 
 interface CustomVideoPlayerProps {
   videoAttachment: AttachmentResponse;
@@ -21,7 +44,7 @@ const CustomVideoPlayer = ({
   const rafId = useRef<number>(0);
   const displayRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false); // Default to muted for better UX
+  const [isMuted, setIsMuted] = useState(false);
   const [totalDuration, setTotalDuration] = useState(
     videoAttachment.duration || 0
   );
@@ -42,10 +65,29 @@ const CustomVideoPlayer = ({
     }
   };
 
+  // Handle play/pause events from other video players
   useEffect(() => {
-    return () => {
+    const handleExternalPause = () => {
+      setIsPlaying(false);
       if (rafId.current) {
         cancelAnimationFrame(rafId.current);
+      }
+    };
+
+    const videoElement = videoRef.current;
+    if (videoElement) {
+      videoElement.addEventListener("pause", handleExternalPause);
+    }
+
+    return () => {
+      if (videoElement) {
+        videoElement.removeEventListener("pause", handleExternalPause);
+        if (currentVideo === videoElement) {
+          stopCurrentVideo();
+        }
+        if (rafId.current) {
+          cancelAnimationFrame(rafId.current);
+        }
       }
     };
   }, []);
@@ -53,7 +95,7 @@ const CustomVideoPlayer = ({
   const togglePlayPause = () => {
     if (videoRef.current) {
       if (videoRef.current.paused) {
-        videoRef.current.play().catch(console.error);
+        playVideo(videoRef.current);
         setIsPlaying(true);
         rafId.current = requestAnimationFrame(updateTimeDisplay);
       } else {
@@ -91,6 +133,7 @@ const CustomVideoPlayer = ({
     e.preventDefault();
     e.stopPropagation();
     if (onOpenModal) {
+      togglePlayPause();
       onOpenModal();
     }
   };
@@ -122,13 +165,24 @@ const CustomVideoPlayer = ({
           rafId.current = requestAnimationFrame(updateTimeDisplay);
         }}
         onPause={() => {
-          setIsPlaying(false);
+          if (videoRef.current !== currentVideo) {
+            setIsPlaying(false);
+          }
           if (rafId.current) {
             cancelAnimationFrame(rafId.current);
           }
           if (videoRef.current && displayRef.current) {
             const total = videoRef.current.duration || totalDuration;
             displayRef.current.textContent = formatDuration(total);
+          }
+        }}
+        onEnded={() => {
+          setIsPlaying(false);
+          if (videoRef.current === currentVideo) {
+            currentVideo = null;
+          }
+          if (rafId.current) {
+            cancelAnimationFrame(rafId.current);
           }
         }}
         onLoadedMetadata={handleLoadedMetadata}

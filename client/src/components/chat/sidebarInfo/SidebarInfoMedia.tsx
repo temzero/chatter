@@ -65,7 +65,6 @@ const ChatInfoMedia: React.FC = () => {
     return (
       <div
         className={clsx(
-          "border-4",
           selectedType === "files" || selectedType === "audio"
             ? "flex flex-col"
             : "grid grid-cols-3 pb-10"

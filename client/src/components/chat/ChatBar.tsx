@@ -8,13 +8,16 @@ import useTypingIndicator from "@/hooks/useTypingIndicator";
 import { handleSendMessage } from "@/utils/sendMessageHandler";
 import { useModalStore, useReplyToMessageId } from "@/stores/modalStore";
 import clsx from "clsx";
+import { useCurrentUserId } from "@/stores/authStore";
 
 interface ChatBarProps {
   chatId: string;
-  memberId: string;
+  myMemberId: string;
 }
 
-const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
+const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
+  const currentUserId = useCurrentUserId();
+
   const setDraftMessage = useMessageStore((state) => state.setDraftMessage);
   const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
   const closeModal = useModalStore((state) => state.closeModal);
@@ -67,10 +70,38 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
     }
   }, [replyToMessageId]);
 
+  // Open attachFile without open menu
   useEffect(() => {
-    setAttachedFiles([]);
-    setFilePreviewUrls([]);
-  }, [chatId]);
+    const handleMenuKey = (e: KeyboardEvent) => {
+      if (e.key === "ContextMenu") {
+        if (document.activeElement === inputRef.current) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const fileInput = document.querySelector(
+            'input[type="file"]'
+          ) as HTMLInputElement;
+          if (fileInput) {
+            fileInput.accept = "*";
+            fileInput.click();
+          }
+
+          return false;
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleMenuKey, {
+      capture: true,
+      passive: false,
+    });
+
+    return () => {
+      document.removeEventListener("keydown", handleMenuKey, {
+        capture: true,
+      });
+    };
+  }, []);
 
   const updateInputHeight = () => {
     if (inputRef.current && containerRef.current) {
@@ -95,30 +126,27 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
         updateInputHeight();
       } else if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
-        await handleSendMessage({
+        sendMessageAndReset({
           chatId,
-          memberId,
+          myMemberId,
           inputRef,
           attachments: attachedFiles,
           replyToMessageId,
-          onSuccess: () => {
-            clearTypingState();
-            setDraftMessage(chatId, "");
-            setAttachedFiles([]);
-            setFilePreviewUrls([]);
-            setHasTextContent(false);
-            setIsMessageSent(true);
-            closeModal();
-            setTimeout(() => setIsMessageSent(false), 200);
-            updateInputHeight();
-          },
+          clearTypingState,
+          setDraftMessage,
+          setAttachedFiles,
+          setFilePreviewUrls,
+          setHasTextContent,
+          setIsMessageSent,
+          closeModal,
+          updateInputHeight,
         });
-        inputRef.current?.focus();
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       chatId,
-      memberId,
+      myMemberId,
       attachedFiles,
       replyToMessageId,
       clearTypingState,
@@ -157,6 +185,63 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
       reader.readAsDataURL(file);
     });
   }, []);
+
+  async function sendMessageAndReset({
+    chatId,
+    myMemberId,
+    inputRef,
+    attachments,
+    replyToMessageId,
+    clearTypingState,
+    setDraftMessage,
+    setAttachedFiles,
+    setFilePreviewUrls,
+    setHasTextContent,
+    setIsMessageSent,
+    closeModal,
+    updateInputHeight,
+  }: {
+    chatId: string;
+    myMemberId: string;
+    inputRef: React.RefObject<HTMLTextAreaElement>;
+    attachments: File[];
+    replyToMessageId?: string | null;
+    clearTypingState: () => void;
+    setDraftMessage: (chatId: string, message: string) => void;
+    setAttachedFiles: React.Dispatch<React.SetStateAction<File[]>>;
+    setFilePreviewUrls: React.Dispatch<React.SetStateAction<string[]>>;
+    setHasTextContent: React.Dispatch<React.SetStateAction<boolean>>;
+    setIsMessageSent: React.Dispatch<React.SetStateAction<boolean>>;
+    closeModal: () => void;
+    updateInputHeight: () => void;
+  }) {
+    // Send message
+    handleSendMessage({
+      chatId,
+      myUserId: currentUserId,
+      myMemberId,
+      inputRef,
+      attachments,
+      filePreviewUrls,
+      replyToMessageId,
+      onSuccess: () => {
+        clearTypingState();
+        setDraftMessage(chatId, "");
+        setIsMessageSent(true);
+        closeModal();
+        setTimeout(() => setIsMessageSent(false), 200);
+      },
+    });
+
+    // reset UI
+    if (inputRef.current) inputRef.current.value = "";
+    setAttachedFiles([]);
+    setFilePreviewUrls([]);
+    setHasTextContent(false);
+    updateInputHeight();
+
+    inputRef.current?.focus();
+  }
 
   return (
     <div
@@ -253,27 +338,23 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, memberId }) => {
                         !shouldShowSendButton,
                     }
                   )}
-                  onClick={async () => {
-                    await handleSendMessage({
+                  onClick={() =>
+                    sendMessageAndReset({
                       chatId,
-                      memberId,
+                      myMemberId,
                       inputRef,
                       attachments: attachedFiles,
                       replyToMessageId,
-                      onSuccess: () => {
-                        clearTypingState();
-                        setDraftMessage(chatId, "");
-                        setAttachedFiles([]);
-                        setFilePreviewUrls([]);
-                        setHasTextContent(false);
-                        setIsMessageSent(true);
-                        closeModal();
-                        setTimeout(() => setIsMessageSent(false), 200);
-                        updateInputHeight();
-                      },
-                    });
-                    inputRef.current?.focus();
-                  }}
+                      clearTypingState,
+                      setDraftMessage,
+                      setAttachedFiles,
+                      setFilePreviewUrls,
+                      setHasTextContent,
+                      setIsMessageSent,
+                      closeModal,
+                      updateInputHeight,
+                    })
+                  }
                   aria-label="Send message"
                 >
                   <span className="material-symbols-outlined">send</span>
