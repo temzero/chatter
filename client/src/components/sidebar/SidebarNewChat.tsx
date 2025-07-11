@@ -6,6 +6,8 @@ import { SlidingContainer } from "../ui/SlidingContainer";
 import { ChatType } from "@/types/enums/ChatType";
 import { SidebarMode } from "@/types/enums/sidebarMode";
 
+const sidebarChatTypes = [ChatType.DIRECT, ChatType.GROUP, ChatType.CHANNEL];
+
 const SidebarNewChat: React.FC = () => {
   const setSidebar = useSidebarStore((state) => state.setSidebar);
   const [selectedType, setSelectedType] = useState<ChatType>(ChatType.DIRECT);
@@ -78,7 +80,7 @@ const SidebarNewChat: React.FC = () => {
       </header>
 
       <div className="flex custom-border-t">
-        {Object.values(ChatType).map((type) => (
+        {sidebarChatTypes.map((type) => (
           <button
             key={type}
             className={getTypeClass(type)}

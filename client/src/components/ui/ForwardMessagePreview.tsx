@@ -2,6 +2,7 @@
 import React from "react";
 import clsx from "clsx";
 import type { MessageResponse } from "@/types/responses/message.response";
+import RenderMultipleAttachments from "./RenderMultipleAttachments";
 
 interface ForwardedMessagePreviewProps {
   message?: MessageResponse;
@@ -25,6 +26,9 @@ const ForwardedMessagePreview: React.FC<ForwardedMessagePreviewProps> = ({
           "self-message": isFromMe,
         })}
       >
+        {message.attachments && (
+          <RenderMultipleAttachments attachments={message.attachments} />
+        )}
         {message.content && <p className="italic">{message.content}</p>}
       </div>
       {/* reverse this when isMe */}

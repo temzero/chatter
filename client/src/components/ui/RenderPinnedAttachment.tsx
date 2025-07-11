@@ -13,6 +13,7 @@ interface RenderPinnedAttachmentProps {
 }
 
 const baseBoxClass = "border-2 border-[var(--input-border-color)]";
+const sizeClass = "w-10 h-10"
 
 const RenderPinnedAttachment: React.FC<RenderPinnedAttachmentProps> = ({
   attachment,
@@ -39,7 +40,7 @@ const RenderPinnedAttachment: React.FC<RenderPinnedAttachmentProps> = ({
     <div
       className={`rounded overflow-hidden relative ${
         attachment.type !== AttachmentType.AUDIO
-          ? "flex items-center justify-center"
+          ? `flex items-center justify-center ${sizeClass}`
           : ""
       } ${baseBoxClass} ${className}`}
       onClick={
@@ -56,7 +57,7 @@ const RenderPinnedAttachment: React.FC<RenderPinnedAttachmentProps> = ({
         <img
           src={attachment.thumbnailUrl || attachment.url}
           alt={attachment.filename || "Image"}
-          className="object-cover w-full h-full"
+          className={`object-cover w-full h-full`}
         />
       ) : attachment.type === AttachmentType.VIDEO ? (
         <>
@@ -74,7 +75,6 @@ const RenderPinnedAttachment: React.FC<RenderPinnedAttachmentProps> = ({
           />
         </>
       ) : attachment.type === AttachmentType.AUDIO ? (
-        // index === 0 ? (
         <div
           className={` ${
             index === 0 ? "w-120" : "w-40"

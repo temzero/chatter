@@ -193,7 +193,6 @@ const Message: React.FC<MessageProps> = ({
               />
             </div>
             <MessageReactionDisplay
-              // reactions={reactions}
               isMe={isMe}
               currentUserId={currentUserId}
               messageId={message.id}
