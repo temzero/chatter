@@ -41,6 +41,7 @@ export class ChatWebSocketService {
   }
 
   async sendMessage(message: SendMessageRequest) {
+    console.log('sendMessage', message)
     webSocketService.emit("chat:sendMessage", message);
   }
 

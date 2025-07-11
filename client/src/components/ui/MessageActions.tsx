@@ -25,6 +25,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   onClose,
 }) => {
   const openModal = useModalStore((state) => state.openModal);
+  const closeModal = useModalStore((state) => state.closeModal);
   const setReplyToMessageId = useSetReplyToMessageId();
   const isPinned = false;
   const isAlreadyReply = !!message.replyToMessageId;
@@ -46,9 +47,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       icon: "arrow_warm_up",
       label: "Forward",
       action: () => {
-        // closeModal();
         if (onClose) onClose();
-
         openModal(ModalType.FORWARD_MESSAGE, { message });
       },
     },
@@ -60,27 +59,27 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
           chatId: message.chatId,
           messageId: isPinned ? null : message.id,
         });
-        // closeModal();
         if (onClose) onClose();
+        closeModal();
       },
     },
     {
       icon: "bookmark",
       label: "Save",
       action: () => {
-        // closeModal();
         if (onClose) onClose();
         chatWebSocketService.saveMessage({ messageId: message.id });
+        closeModal();
       },
     },
     {
       icon: "delete",
       label: "Delete",
       action: () => {
-        // closeModal();
         if (onClose) onClose();
-
-        openModal(ModalType.DELETE_MESSAGE, { message });
+        openModal(ModalType.DELETE_MESSAGE, {
+          messageId: message.id,
+        });
       },
     },
   ];

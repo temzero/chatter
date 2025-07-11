@@ -2,89 +2,100 @@ import React from "react";
 import { AttachmentResponse } from "@/types/responses/message.response";
 import { AttachmentType } from "@/types/enums/attachmentType";
 import { getFileIcon } from "@/utils/getFileIcon";
-import { formatFileSize } from "@/utils/formatFileSize";
+// import { formatFileSize } from "@/utils/formatFileSize";
 import { useModalStore } from "@/stores/modalStore";
+import CustomAudioPlayer from "./CustomAudioPlayer";
 
 interface RenderPinnedAttachmentProps {
   attachment: AttachmentResponse;
   className?: string;
+  index?: number;
 }
+
+const baseBoxClass = "border-2 border-[var(--input-border-color)]";
 
 const RenderPinnedAttachment: React.FC<RenderPinnedAttachmentProps> = ({
   attachment,
   className = "",
+  index,
 }) => {
-  const baseStyle =
-    "rounded flex items-center justify-center overflow-hidden border";
+  const openMediaModal = useModalStore((state) => state.openMediaModal);
 
-  const openMediaModal = useModalStore(state => state.openMediaModal);
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    openMediaModal(attachment.url)
-    // window.open(attachment.url, "_blank");
+    openMediaModal(attachment.id);
   };
 
-  switch (attachment.type) {
-    case AttachmentType.IMAGE:
-      return (
-        <div
-          className={`${baseStyle} ${className}`}
-          onClick={handleClick}
-          style={{ cursor: "pointer" }}
-        >
-          <img
-            src={attachment.thumbnailUrl || attachment.url}
-            alt={attachment.filename || "Image"}
-            className="object-cover w-full h-full"
-          />
-        </div>
-      );
+  const handleFileClick = () => {
+    window.open(attachment.url, "_blank");
+  };
 
-    case AttachmentType.VIDEO:
-      return (
-        <div
-          className={`${baseStyle} ${className}`}
-          onClick={handleClick}
-          style={{ cursor: "pointer" }}
-        >
+  const icon =
+    attachment.type === AttachmentType.AUDIO
+      ? "music_note"
+      : getFileIcon(attachment.filename || "", attachment.mimeType || "");
+
+  return (
+    <div
+      className={`rounded overflow-hidden relative ${
+        attachment.type !== AttachmentType.AUDIO
+          ? "flex items-center justify-center"
+          : ""
+      } ${baseBoxClass} ${className}`}
+      onClick={
+        attachment.type === AttachmentType.FILE ? handleFileClick : handleClick
+      }
+      style={{
+        cursor: "pointer",
+        ...(attachment.type === AttachmentType.AUDIO
+          ? { padding: 0, height: "auto" }
+          : {}),
+      }}
+    >
+      {attachment.type === AttachmentType.IMAGE ? (
+        <img
+          src={attachment.thumbnailUrl || attachment.url}
+          alt={attachment.filename || "Image"}
+          className="object-cover w-full h-full"
+        />
+      ) : attachment.type === AttachmentType.VIDEO ? (
+        <>
+          <div className="flex items-center justify-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full aspect-square w-8 h-8 overflow-hidden">
+            <i className="material-symbols-outlined size-xs">videocam</i>
+          </div>
+          {/* <p className="two-line-truncate text-xs break-words absolute bottom-0 left-1">
+            {attachment.filename}
+          </p> */}
           <video
             src={attachment.url}
-            className="object-cover w-full h-full"
+            className="w-full h-full object-cover"
             muted
             preload="metadata"
           />
-        </div>
-      );
-
-    case AttachmentType.AUDIO:
-      return (
+        </>
+      ) : attachment.type === AttachmentType.AUDIO ? (
+        // index === 0 ? (
         <div
-          onClick={handleClick}
-          className={`${baseStyle} ${className} bg-purple-100`}
+          className={` ${
+            index === 0 ? "w-120" : "w-40"
+          } h-8 flex justify-between items-center`}
         >
-          🎵 Audio
+          <CustomAudioPlayer
+            mediaUrl={attachment.url}
+            fileName={attachment.filename ?? ""}
+            attachmentType={attachment.type}
+            isCompact={true}
+          />
         </div>
-      );
-
-    case AttachmentType.FILE:
-      return (
-        <div
-          className={`${baseStyle} ${className} bg-purple-200 flex-col px-2 text-center`}
-          onClick={() => window.open(attachment.url, "_blank")}
-        >
-          <i className="material-symbols-outlined text-2xl">
-            {getFileIcon(attachment.filename || "", attachment.mimeType || "")}
-          </i>
-          <p className="text-xs truncate w-full">{attachment.filename}</p>
-          <span className="text-xs opacity-60">
-            {attachment.size ? formatFileSize(attachment.size) : "?"}
-          </span>
+      ) : (
+        <div className="w-full h-full p-1 flex flex-col justify-between items-center">
+          <div className="flex items-center justify-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full aspect-square w-8 h-8 overflow-hidden">
+            <i className="material-symbols-outlined size-xs">{icon}</i>
+          </div>
         </div>
-      );
-
-    default:
-      return null;
-  }
+      )}
+    </div>
+  );
 };
 
 export default RenderPinnedAttachment;

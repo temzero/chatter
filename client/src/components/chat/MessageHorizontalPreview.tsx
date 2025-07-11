@@ -57,7 +57,7 @@ export const MessageHorizontalPreview: React.FC<
     <div
       ref={messageRef}
       className={clsx(
-        "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center gap-2",
+        "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-[80%] flex items-center justify-center gap-2",
         messageClass
       )}
     >
@@ -83,11 +83,12 @@ export const MessageHorizontalPreview: React.FC<
 
       {message?.attachments && message?.attachments?.length > 0 && (
         <div className="flex gap-1">
-          {message.attachments.map((attachment) => (
+          {message.attachments.map((attachment, index) => (
             <RenderPinnedAttachment
+              index={index}
               key={attachment.id}
               attachment={attachment}
-              className="w-8 h-8 max-h-32 object-cover rounded"
+              // className="w-8 h-8 max-h-32 object-cover rounded"
             />
           ))}
         </div>

@@ -19,17 +19,20 @@ interface FriendRequestModalProps {
   onSuccess?: (status: string) => void;
 }
 
-const FriendRequestModal: React.FC<FriendRequestModalProps> = ({
-  receiver,
-  onSuccess,
-}) => {
-  const fetchChatById = useChatStore((state) => state.fetchChatById);
-  const { sendFriendRequest } = useFriendshipStore();
-  const closeModal = useModalStore((s) => s.closeModal);
+const FriendRequestModal: React.FC = () => {
+  const modalContent = useModalStore((state) => state.modalContent);
+  const props = modalContent?.props as FriendRequestModalProps | undefined;
+
+  const fetchChatById = useChatStore.getState().fetchChatById;
+  const sendFriendRequest = useFriendshipStore.getState().sendFriendRequest;
+  const closeModal = useModalStore.getState().closeModal;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [charCount, setCharCount] = useState(0);
   const [requestMessage, setRequestMessage] = useState("");
   const maxChar = 200;
+
+  if (!props) return null;
+  const { receiver, onSuccess } = props;
 
   const handleFriendRequest = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -98,9 +98,10 @@ const ChatBox: React.FC<ChatBoxProps> = ({ chat }) => {
   useEffect(() => {
     if (isNearBottom(chatBoxRef.current)) {
       scrollToBottom();
-    } else {
-      toast.info('New Message')
     }
+    //  else {
+    //   toast.info('New Message')
+    // }
   }, [messages, scrollToBottom]);
 
   // Render functions

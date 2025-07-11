@@ -1,4 +1,5 @@
 import { AttachmentType } from "@/types/enums/attachmentType";
+import clsx from "clsx";
 import React, {
   useState,
   useRef,
@@ -11,16 +12,12 @@ import React, {
 let currentAudio: HTMLAudioElement | null = null;
 
 const playAudio = (audioElement: HTMLAudioElement) => {
-  // Pause the currently playing audio if it exists
   if (currentAudio && currentAudio !== audioElement) {
     currentAudio.pause();
     currentAudio.currentTime = 0;
-    // Dispatch pause event to sync other players
-    const event = new Event('pause');
+    const event = new Event("pause");
     currentAudio.dispatchEvent(event);
   }
-
-  // Set the new audio as current and play it
   currentAudio = audioElement;
   audioElement.play();
 };
@@ -39,6 +36,7 @@ interface CustomAudioPlayerProps {
   attachmentType: AttachmentType.AUDIO | AttachmentType.VOICE;
   isDisplayName?: boolean;
   type?: string;
+  isCompact?: boolean;
 }
 
 export interface AudioPlayerRef {
@@ -48,34 +46,37 @@ export interface AudioPlayerRef {
 }
 
 const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
-  ({ mediaUrl, fileName, attachmentType, isDisplayName = true }, ref) => {
+  (
+    {
+      mediaUrl,
+      fileName,
+      attachmentType,
+      isDisplayName = true,
+      isCompact = false,
+    },
+    ref
+  ) => {
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
 
-    // Handle play/pause events from other audio players
     useEffect(() => {
-      const handleExternalPause = () => {
-        setIsPlaying(false);
-      };
+      const handleExternalPause = () => setIsPlaying(false);
 
       const audioElement = audioRef.current;
       if (audioElement) {
-        audioElement.addEventListener('pause', handleExternalPause);
+        audioElement.addEventListener("pause", handleExternalPause);
       }
 
       return () => {
         if (audioElement) {
-          audioElement.removeEventListener('pause', handleExternalPause);
-          if (currentAudio === audioElement) {
-            stopCurrentAudio();
-          }
+          audioElement.removeEventListener("pause", handleExternalPause);
+          if (currentAudio === audioElement) stopCurrentAudio();
           audioElement.pause();
         }
       };
     }, []);
 
-    // Expose methods to parent via ref
     useImperativeHandle(ref, () => ({
       play: () => {
         if (audioRef.current) {
@@ -102,15 +103,16 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
       },
     }));
 
-    const togglePlayPause = () => {
-      if (audioRef.current) {
-        if (isPlaying) {
-          audioRef.current.pause();
-          setIsPlaying(false);
-        } else {
-          playAudio(audioRef.current);
-          setIsPlaying(true);
-        }
+    const togglePlayPause = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      e.stopPropagation();
+
+      if (!audioRef.current) return;
+      if (isPlaying) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        playAudio(audioRef.current);
+        setIsPlaying(true);
       }
     };
 
@@ -124,34 +126,51 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
 
     const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (audioRef.current) {
-        const newTime: number =
+        const newTime =
           (Number(e.target.value) / 100) * audioRef.current.duration;
         audioRef.current.currentTime = newTime;
       }
     };
 
     return (
-      <div className="w-full p-2 py-3 flex items-center gap-1 custom-border-b overflow-hidden">
+      <div
+        className={clsx(
+          "w-full p-2 pl-0.5 flex items-center custom-border-b overflow-hidden",
+          isCompact ? "max-w-60px" : "gap-1"
+        )}
+      >
         <button
-          onClick={togglePlayPause}
+          onClick={(e) => togglePlayPause(e)}
           className="rounded-full hover:opacity-70"
         >
-          {isPlaying ? (
-            <i className="material-symbols-outlined text-4xl">pause_circle</i>
-          ) : (
-            <i className="material-symbols-outlined text-4xl">play_circle</i>
-          )}
+          <i
+            className={clsx(
+              "material-symbols-outlined",
+              isCompact ? "text-3xl" : "text-4xl"
+            )}
+          >
+            {isPlaying ? "pause_circle" : "play_circle"}
+          </i>
         </button>
 
         <div className="flex flex-col gap-2 flex-1 min-w-0">
-          {isDisplayName && <div className="flex items-center">
-            {attachmentType && attachmentType === AttachmentType.AUDIO ? (
-              <i className="material-symbols-outlined">music_note</i>
-            ) : (
-              ""
-            )}
-            <h1 className="truncate">{fileName || "Audio file"}</h1>
-          </div>}
+          {isDisplayName && (
+            <div className="flex items-center">
+              {attachmentType === AttachmentType.AUDIO && (
+                <i
+                  className={clsx(
+                    "material-symbols-outlined",
+                    isCompact && "text-xl"
+                  )}
+                >
+                  music_note
+                </i>
+              )}
+              <h1 className={clsx("truncate", isCompact && "text-xs")}>
+                {fileName || "Audio file"}
+              </h1>
+            </div>
+          )}
 
           <audio
             ref={audioRef}
@@ -174,15 +193,17 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
             Your browser does not support the audio element.
           </audio>
 
-          <input
-            type="range"
-            value={progress}
-            onChange={handleSeek}
-            className="w-full h-1 rounded-full cursor-pointer appearance-none custom-slider"
-            style={{
-              background: `linear-gradient(to right, blue ${progress}%, gray ${progress}%)`,
-            }}
-          />
+          {!isCompact && (
+            <input
+              type="range"
+              value={progress}
+              onChange={handleSeek}
+              className="w-full h-1 rounded-full cursor-pointer appearance-none custom-slider"
+              style={{
+                background: `linear-gradient(to right, blue ${progress}%, gray ${progress}%)`,
+              }}
+            />
+          )}
         </div>
       </div>
     );

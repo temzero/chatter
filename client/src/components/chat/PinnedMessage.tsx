@@ -22,8 +22,10 @@ const PinnedMessage: React.FC<MessageProps> = ({
   onUnpin,
 }) => {
   const isMe = useIsMe(message.sender.id);
-  const animationProps = shouldAnimate ? messageAnimations.pinMessage : messageAnimations.none;
-  console.log('pinnedMessage', message)
+  const animationProps = shouldAnimate
+    ? messageAnimations.pinMessage
+    : messageAnimations.none;
+  console.log("pinnedMessage", message);
 
   return (
     <motion.div
@@ -59,7 +61,9 @@ const PinnedMessage: React.FC<MessageProps> = ({
         </span>
       </button>
 
-      <MessageHorizontalPreview message={message} chatType={chatType} />
+      {/* <div className="w-[80%] h-full border truncate overflow-hidden"> */}
+        <MessageHorizontalPreview message={message} chatType={chatType} />
+      {/* </div> */}
 
       <p className="text-sm font-light italic">
         {message.pinnedAt

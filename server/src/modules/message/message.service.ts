@@ -33,11 +33,17 @@ export class MessageService {
     userId: string,
     createMessageDto: CreateMessageDto,
   ): Promise<Message> {
-    const existing = await this.messageRepo.findOne({
-      where: { id: createMessageDto.id },
-    });
-    if (existing) {
-      ErrorResponse.badRequest('Message with this ID already exists');
+    console.log('createMessage', createMessageDto);
+    console.log('🔍 createMessageDto.id', createMessageDto.id);
+
+    if (createMessageDto.id) {
+      const existing = await this.messageRepo.findOne({
+        where: { id: createMessageDto.id },
+      });
+
+      if (existing) {
+        ErrorResponse.badRequest('Message with this ID already exists');
+      }
     }
 
     const chat = await this.chatRepo.findOne({

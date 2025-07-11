@@ -10,7 +10,7 @@ export class CreateMessageDto {
   chatId: string;
 
   @IsUUID()
-  memberId: string;
+  memberId?: string;
 
   @IsOptional()
   @IsString()

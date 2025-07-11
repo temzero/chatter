@@ -75,6 +75,20 @@ export class ChatGateway {
         return;
       }
 
+      if (!payload.memberId) {
+        const member = await this.chatMemberService.getMemberByChatIdAndUserId(
+          payload.chatId,
+          senderId,
+        );
+        if (!member) {
+          client.emit(`error`, {
+            message: 'You are not a member of this chat',
+          });
+          return;
+        }
+        payload.memberId = member.id;
+      }
+
       const message = await this.messageService.createMessage(
         senderId,
         payload,

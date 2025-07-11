@@ -1,21 +1,21 @@
 // components/modals/DeleteMessageModal.tsx
 import React from "react";
-import { MessageResponse } from "@/types/responses/message.response";
 import { useModalStore } from "@/stores/modalStore";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
-import MessagePreview from "../chat/MessagePreview";
 import { useCurrentUserId } from "@/stores/authStore";
 import { motion } from "framer-motion";
 import { childrenModalAnimation } from "@/animations/modalAnimations";
+import { useMessageStore } from "@/stores/messageStore";
 
-interface DeleteMessageModalProps {
-  message: MessageResponse;
-}
-
-const DeleteMessageModal: React.FC<DeleteMessageModalProps> = ({ message }) => {
-  const currentUserId = useCurrentUserId();
-  const isMe = message.sender.id === currentUserId;
+const DeleteMessageModal: React.FC = () => {
   const closeModal = useModalStore((state) => state.closeModal);
+  const modalContent = useModalStore((state) => state.modalContent);
+  const messageId = modalContent?.props?.messageId as string;
+  
+  const currentUserId = useCurrentUserId();
+  const message = useMessageStore.getState().getMessageById(messageId);
+  if (!message) return;
+  const isMe = message.sender.id === currentUserId;
 
   const handleDelete = (isDeleteForEveryone: boolean = false) => {
     chatWebSocketService.deleteMessage({
@@ -41,7 +41,7 @@ const DeleteMessageModal: React.FC<DeleteMessageModalProps> = ({ message }) => {
           This action cannot be undone.
         </p>
 
-        <MessagePreview message={message} />
+        {/* <MessagePreview message={message} /> */}
       </div>
       <div className="flex custom-border-t">
         <button

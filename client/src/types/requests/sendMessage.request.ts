@@ -1,9 +1,9 @@
 import { AttachmentType } from "../enums/attachmentType";
 
 export interface SendMessageRequest {
-  id: string;
+  id?: string;
   chatId: string;
-  memberId: string;
+  memberId?: string;
   content?: string;
   replyToMessageId?: string | null;
   attachments?: AttachmentUploadRequest[];

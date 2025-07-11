@@ -13,8 +13,6 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
   className = "",
 }) => {
   if (attachments.length === 0) return null;
-  console.log("renderMultipleAttachment");
-
   // Categorize attachments by type
   const visualMedia = attachments.filter(
     (m) => m.type === AttachmentType.IMAGE || m.type === AttachmentType.VIDEO

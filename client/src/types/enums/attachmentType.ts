@@ -6,4 +6,10 @@ export enum AttachmentType {
   LOCATION = "location",
   FILE = "file",
   PDF = "pdf",
+  WORD = "word",
+  EXCEL = "excel",
+  PPT = "powerpoint",
+  ARCHIVE = "archive",
+  TEXT = "text",
+  CODE = "code",
 }

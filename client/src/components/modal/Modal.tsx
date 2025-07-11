@@ -5,7 +5,6 @@ import MediaViewer from "./media/MediaViewer";
 import FriendRequestModal from "./FriendRequestModal";
 import ForwardMessageModal from "./ForwardMessageModal";
 import DeleteMessageModal from "./DeleteMessageModal";
-import { MessageResponse } from "@/types/responses/message.response";
 import { useShallow } from "zustand/shallow";
 import { modalAnimation } from "@/animations/modalAnimations";
 
@@ -35,32 +34,13 @@ const Modal = () => {
 
     switch (modalContent.type) {
       case ModalType.MEDIA:
-        return <MediaViewer {...modalContent.props} />;
+        return <MediaViewer />;
       case ModalType.FRIEND_REQUEST:
-        return (
-          <FriendRequestModal
-            receiver={{
-              id: "",
-              username: "",
-              firstName: "",
-              lastName: "",
-              avatarUrl: "",
-            }}
-            {...modalContent.props}
-          />
-        );
+        return <FriendRequestModal />;
       case ModalType.FORWARD_MESSAGE:
-        return (
-          <ForwardMessageModal
-            message={modalContent.props?.message as MessageResponse}
-          />
-        );
+        return <ForwardMessageModal />;
       case ModalType.DELETE_MESSAGE:
-        return (
-          <DeleteMessageModal
-            message={modalContent.props?.message as MessageResponse}
-          />
-        );
+        return <DeleteMessageModal />;
       default:
         return null;
     }

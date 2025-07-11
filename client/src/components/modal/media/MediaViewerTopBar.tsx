@@ -5,6 +5,7 @@ import { AttachmentResponse } from "@/types/responses/message.response";
 import { handleDownload } from "@/utils/handleDownload";
 import { useSenderByMessageId } from "@/stores/messageStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
+import { ModalType, useModalStore } from "@/stores/modalStore";
 
 interface MediaViewerTopBarProps {
   attachment: AttachmentResponse;
@@ -17,6 +18,8 @@ export const MediaViewerTopBar = ({
   onRotate,
   onClose,
 }: MediaViewerTopBarProps) => {
+  const openModal = useModalStore((state) => state.openModal);
+
   const [playSound] = useSoundEffect(slideSound);
   const sender = useSenderByMessageId(attachment.messageId);
 
@@ -24,6 +27,16 @@ export const MediaViewerTopBar = ({
     playSound();
     handleDownload(attachment);
   }, [attachment, playSound]);
+
+  const handleForwardAttachment = () => {
+    openModal(ModalType.FORWARD_MESSAGE, { attachment });
+  };
+  const handleDeleteMessage = () => {
+    // openModal(ModalType.DELETE_MESSAGE, { message });
+    openModal(ModalType.DELETE_MESSAGE, {
+      messageId: attachment.messageId,
+    });
+  };
 
   return (
     <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-3 pb-8 z-20">
@@ -44,7 +57,10 @@ export const MediaViewerTopBar = ({
         >
           <i className="material-symbols-outlined">refresh</i>
         </button>
-        <button className="text-white/60 hover:text-white rounded-full">
+        <button
+          onClick={handleForwardAttachment}
+          className="text-white/60 hover:text-white rounded-full"
+        >
           <i className="material-symbols-outlined">send</i>
         </button>
         <button
@@ -53,7 +69,10 @@ export const MediaViewerTopBar = ({
         >
           <i className="material-symbols-outlined">download</i>
         </button>
-        <button className="text-white/60 hover:text-white rounded-full">
+        <button
+          onClick={handleDeleteMessage}
+          className="text-white/60 hover:text-white rounded-full"
+        >
           <i className="material-symbols-outlined">delete</i>
         </button>
         <button

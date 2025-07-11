@@ -132,8 +132,12 @@ const CustomVideoPlayer = ({
     if (modalContent?.type !== ModalType.MESSAGE) return;
     e.preventDefault();
     e.stopPropagation();
+    if (videoRef.current?.play) {
+      videoRef.current.pause();
+      setIsPlaying(false);
+    }
     if (onOpenModal) {
-      togglePlayPause();
+      // togglePlayPause();
       onOpenModal();
     }
   };

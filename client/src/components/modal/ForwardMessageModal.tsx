@@ -1,7 +1,10 @@
 // components/modals/ForwardMessageModal.tsx
 import React from "react";
 import { motion } from "framer-motion";
-import { MessageResponse } from "@/types/responses/message.response";
+import {
+  AttachmentResponse,
+  MessageResponse,
+} from "@/types/responses/message.response";
 import { useModalStore } from "@/stores/modalStore";
 import { useChatStore } from "@/stores/chatStore";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
@@ -9,39 +12,61 @@ import { ForwardMessageRequest } from "@/types/requests/forwardMessage.request";
 import { ChatAvatar } from "../ui/avatar/ChatAvatar";
 import SearchBar from "../ui/SearchBar";
 import { childrenModalAnimation } from "@/animations/modalAnimations";
+import { AttachmentType } from "@/types/enums/attachmentType";
+import { AttachmentUploadRequest } from "@/types/requests/sendMessage.request";
 
-interface ForwardMessageModalProps {
-  message: MessageResponse;
-}
-
-const ForwardMessageModal: React.FC<ForwardMessageModalProps> = ({
-  message,
-}) => {
+const ForwardMessageModal: React.FC = () => {
+  const modalContent = useModalStore((state) => state.modalContent);
+  const message = modalContent?.props?.message as MessageResponse | undefined;
+  const attachment = modalContent?.props?.attachment as
+    | AttachmentResponse
+    | undefined;
   const closeModal = useModalStore((state) => state.closeModal);
   const filteredChats = useChatStore((state) => state.filteredChats);
-  const forwardChats = filteredChats.filter(
-    (chat) => chat.id !== message.chatId
+
+  const forwardChats = filteredChats.filter((chat) =>
+    message ? chat.id !== message.chatId : true
   );
 
   const handleForward = async (chatId: string) => {
-    if (chatId === message.chatId) {
-      console.warn("Cannot forward to the same chat.");
-      return;
-    }
-
-    const alreadyForwarded = message.forwardedFromMessage;
-    const originalMessageId = alreadyForwarded?.id || message.id;
-
-    const payload: ForwardMessageRequest = {
-      chatId,
-      messageId: originalMessageId,
-    };
-
     try {
-      chatWebSocketService.forwardMessage(payload);
+      if (message) {
+        console.log("forward Message", message);
+        const alreadyForwarded = message.forwardedFromMessage;
+        const originalMessageId = alreadyForwarded?.id || message.id;
+
+        const payload: ForwardMessageRequest = {
+          chatId,
+          messageId: originalMessageId,
+        };
+
+        chatWebSocketService.forwardMessage(payload);
+      } else if (attachment) {
+        console.log("forward Attachment", attachment);
+
+        const attachmentPayload: AttachmentUploadRequest = {
+          url: attachment.url,
+          type: attachment.type as AttachmentType,
+          filename: attachment.filename || "untitled",
+          size: attachment.size || 0,
+          mimeType: attachment.mimeType || undefined,
+          width: attachment.width || undefined,
+          height: attachment.height || undefined,
+          duration: attachment.duration || undefined,
+        };
+
+        const payload = {
+          chatId,
+          content: "", // No text content
+          attachments: [attachmentPayload],
+        };
+
+        chatWebSocketService.sendMessage(payload);
+      }
+
       closeModal();
     } catch (error) {
-      console.error("Failed to forward message:", error);
+      console.error("Failed to forward:", error);
     }
   };
 
@@ -51,7 +76,14 @@ const ForwardMessageModal: React.FC<ForwardMessageModalProps> = ({
       className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded p-4 max-w-xl w-[400px] custom-border z-[99]"
     >
       <h1 className="font-bold text-center text-xl mb-4 flex items-center justify-center gap-2">
-        Forward Message To...
+        {message
+          ? "Forward Message To..."
+          : `Send This ${
+              attachment?.type
+                ? attachment.type.charAt(0).toUpperCase() +
+                  attachment.type.slice(1).toLowerCase()
+                : "Attachment"
+            } To...`}
       </h1>
 
       <SearchBar placeholder="Search for chat to forward to" />
@@ -67,7 +99,7 @@ const ForwardMessageModal: React.FC<ForwardMessageModalProps> = ({
             <button
               className="ml-auto w-10 h-8 opacity-60 hover:opacity-100 rounded hover:bg-[var(--primary-green)] hover:border-2 hover:border-green-400 flex items-center justify-center text-white transition-all duration-300"
               onClick={() => handleForward(chat.id)}
-              aria-label="Send message"
+              aria-label="Send"
             >
               <span className="material-symbols-outlined text-3xl">send</span>
             </button>
