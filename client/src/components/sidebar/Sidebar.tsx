@@ -31,6 +31,7 @@ import { sidebarAnimations } from "@/animations/sidebarAnimations";
 import SidebarSettingsEmail from "./settings/account/sidebarSettingsEmail";
 import SidebarSettingsUsername from "./settings/account/sidebarSettingsUsername";
 import SidebarSettingsPhoneNumber from "./settings/account/sidebarSettingsPhoneNumber";
+import SidebarNewFolder from "./more/SidebarNewFolders";
 
 const Sidebar = () => {
   const currentSidebar = useCurrentSidebar();
@@ -49,6 +50,7 @@ const Sidebar = () => {
     [SidebarMode.CONTACTS]: <SidebarContacts />,
     [SidebarMode.FRIEND_REQUESTS]: <SidebarFriendRequests />,
     [SidebarMode.FOLDERS]: <SidebarFolders />,
+    [SidebarMode.NEW_FOLDER]: <SidebarNewFolder />,
     [SidebarMode.PRIVATE_CHATS]: <SidebarPrivateChats />,
     [SidebarMode.BLOCKED_USERS]: <SidebarBlockedUsers />,
 
@@ -75,17 +77,14 @@ const Sidebar = () => {
   // Get the animations for the current sidebar or use fallback
   const CurrentComponent = sidebars[currentSidebar] || null;
   const animation =
-    sidebarAnimations[currentSidebar as unknown as keyof typeof sidebarAnimations] ||
-    sidebarAnimations.fallback;
+    sidebarAnimations[
+      currentSidebar as unknown as keyof typeof sidebarAnimations
+    ] || sidebarAnimations.fallback;
 
   return (
     <div className="bg-[var(--sidebar-color)] h-full flex flex-col shadow border-[var(--border-color)] border-r-2 transition-all duration-300 ease-in-out z-50">
       <AnimatePresence mode="wait">
-        <motion.div
-          key={currentSidebar}
-          {...animation}
-          className="h-full"
-        >
+        <motion.div key={currentSidebar} {...animation} className="h-full">
           {CurrentComponent}
         </motion.div>
       </AnimatePresence>

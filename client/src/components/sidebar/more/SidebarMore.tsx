@@ -52,7 +52,7 @@ const SidebarMore: React.FC = () => {
     { type: "divider" }, // Another divider
     {
       icon: "folder",
-      text: "Folders",
+      text: "Chat Folders",
       onClick: () => setSidebar(SidebarMode.FOLDERS),
     },
     {

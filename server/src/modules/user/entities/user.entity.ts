@@ -17,6 +17,7 @@ import * as bcrypt from 'bcrypt';
 import { UserRole } from '../constants/user-role.constants';
 import { UserStatus } from '../constants/user-status.constants';
 import { UserSettings } from './user-settings.entity';
+import { Folder } from 'src/modules/folder/entities/folder.entity';
 
 @Entity('user')
 @Index(['email'], { unique: true })
@@ -82,6 +83,9 @@ export class User {
 
   @OneToMany(() => Reaction, (reaction) => reaction.user)
   reactions: Reaction[];
+
+  @OneToMany(() => Folder, (folder) => folder.user)
+  folders: Folder[];
 
   @OneToOne(() => UserSettings, (settings) => settings.user, { cascade: true })
   settings: UserSettings;

@@ -112,7 +112,7 @@ button.primary {
 input,
 textarea {
   outline: none;
-  /* border: none; */
+  border: none;
   border-radius: 4px !important;
   box-shadow: none;
   background-color: transparent !important;

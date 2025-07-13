@@ -7,6 +7,7 @@ import ForwardMessageModal from "./ForwardMessageModal";
 import DeleteMessageModal from "./DeleteMessageModal";
 import { useShallow } from "zustand/shallow";
 import { modalAnimation } from "@/animations/modalAnimations";
+import AddFolderModal from "./AddFolderModal";
 
 const Modal = () => {
   const { modalContent, closeModal } = useModalStore(
@@ -41,6 +42,8 @@ const Modal = () => {
         return <ForwardMessageModal />;
       case ModalType.DELETE_MESSAGE:
         return <DeleteMessageModal />;
+      case ModalType.ADD_FOLDER:
+        return <AddFolderModal />;
       default:
         return null;
     }

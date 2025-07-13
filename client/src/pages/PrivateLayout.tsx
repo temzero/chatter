@@ -17,6 +17,7 @@ import { useChatSocketListeners } from "@/lib/websocket/hooks/useChatSocketListe
 import { useWebSocket } from "@/lib/websocket/hooks/useWebsocket";
 import { PuffLoader } from "react-spinners";
 import ErrorView from "@/components/ui/ErrorView";
+import { useFolderStore } from "@/stores/folderStore";
 
 export const ChatContent: React.FC = () => {
   const { id: chatId } = useParams();
@@ -36,6 +37,12 @@ export const ChatContent: React.FC = () => {
     isLoading: friendshipsLoading,
     error: friendshipsError,
   } = useFriendshipStore();
+  const {
+    initialize: initializeFolders,
+    isLoading: foldersLoading,
+    error: folderError,
+  } = useFolderStore();
+
   const { initialize: initializePresence } = usePresenceStore();
 
   useWebSocket();
@@ -48,9 +55,10 @@ export const ChatContent: React.FC = () => {
 
         // 1. Initialize auth first
         await initializeAuth();
-
+        
         // 2. Initialize chats and friendships in parallel
         await Promise.all([initializeChats(), fetchPendingRequests()]);
+        await initializeFolders();
 
         // 3. Set active chat after data is loaded
         await setActiveChatById(chatId || null);
@@ -82,7 +90,7 @@ export const ChatContent: React.FC = () => {
   ]);
 
   // Show loading if initialization is in progress or stores are loading
-  if (chatsLoading || friendshipsLoading) {
+  if (chatsLoading || friendshipsLoading || foldersLoading) {
     return (
       <div className="w-full h-full flex items-center justify-center">
         <PuffLoader color="#6a6a6a" />;
@@ -91,11 +99,11 @@ export const ChatContent: React.FC = () => {
   }
 
   // Show error if initialization failed or stores have errors
-  if (chatError || friendshipsError) {
+  if (chatError || friendshipsError || folderError) {
     return (
       <ErrorView
         message={
-          chatError || friendshipsError || "Failed to initialize application"
+          chatError || friendshipsError || folderError || "Failed to initialize application"
         }
         onRetry={() => window.location.reload()}
       />

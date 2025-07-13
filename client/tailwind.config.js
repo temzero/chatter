@@ -7,10 +7,5 @@ export default {
   },
   plugins: [
     require("tailwind-scrollbar-hide"),
-    // require("daisyui")({
-    //   base: false, // Disables base styles (buttons, inputs, etc.)
-    //   utils: false, // Disables utility classes (like .btn)
-    //   prefix: "daisy-",
-    // }),
   ],
 };
