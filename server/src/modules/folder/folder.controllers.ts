@@ -2,18 +2,19 @@ import {
   Controller,
   Get,
   Post,
-  Body,
   Param,
   Delete,
   Patch,
   UseGuards,
   HttpStatus,
   HttpCode,
+  Body,
 } from '@nestjs/common';
 import { FolderService } from './folder.service';
-import { Folder } from './entities/folder.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { CurrentUser } from '../auth/decorators/user.decorator';
+import { FolderResponseDto } from './dto/folder-response.dto';
+import { Folder } from './entities/folder.entity';
 
 @Controller('folders')
 @UseGuards(JwtAuthGuard)
@@ -22,7 +23,9 @@ export class FolderController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  async findAll(@CurrentUser('id') userId: string): Promise<Folder[]> {
+  async findAll(
+    @CurrentUser('id') userId: string,
+  ): Promise<FolderResponseDto[]> {
     return this.folderService.findAll(userId);
   }
 
@@ -30,16 +33,16 @@ export class FolderController {
   async findOne(
     @Param('id') id: string,
     @CurrentUser('id') userId: string,
-  ): Promise<Folder> {
+  ): Promise<FolderResponseDto> {
     return this.folderService.findOne(id, userId);
   }
 
   @Post()
   async create(
     @CurrentUser('id') userId: string,
-    @Body() body: Partial<Folder>,
-  ): Promise<Folder> {
-    return this.folderService.create({ ...body, userId });
+    @Body() data: Partial<Folder>,
+  ): Promise<FolderResponseDto> {
+    return this.folderService.create(data, userId);
   }
 
   @Patch(':id')
@@ -47,8 +50,17 @@ export class FolderController {
     @Param('id') id: string,
     @CurrentUser('id') userId: string,
     @Body() body: Partial<Folder>,
-  ): Promise<Folder> {
+  ): Promise<FolderResponseDto> {
     return this.folderService.update(id, body, userId);
+  }
+
+  @Patch(':id/position')
+  async updatePosition(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+    @Body('position') position: number,
+  ): Promise<FolderResponseDto> {
+    return this.folderService.updateFolderPosition(id, position, userId);
   }
 
   @Delete(':id')
@@ -64,7 +76,7 @@ export class FolderController {
     @Param('id') folderId: string,
     @Body('chatIds') chatIds: string[],
     @CurrentUser('id') userId: string,
-  ): Promise<Folder> {
+  ): Promise<FolderResponseDto> {
     return this.folderService.addChatsToFolder(folderId, chatIds, userId);
   }
 
@@ -73,7 +85,7 @@ export class FolderController {
     @Param('folderId') folderId: string,
     @Param('chatId') chatId: string,
     @CurrentUser('id') userId: string,
-  ): Promise<Folder> {
+  ): Promise<FolderResponseDto> {
     return this.folderService.removeChatFromFolder(folderId, chatId, userId);
   }
 }

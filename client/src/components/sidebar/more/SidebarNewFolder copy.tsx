@@ -1,13 +1,12 @@
 // components/sidebar/SidebarNewFolder.tsx
 import React, { useState } from "react";
 import { useChatStore } from "@/stores/chatStore";
-import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import SidebarLayout from "@/pages/SidebarLayout";
-// import { ChatType } from "@/types/enums/ChatType";
 import { SidebarMode } from "@/types/enums/sidebarMode";
 import { ChatType } from "@/types/enums/ChatType";
 import { useFolderStore } from "@/stores/folderStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
+import ChatListItemSelection from "@/components/ui/ChatListItemSelection";
 
 const COLORS = [
   null,
@@ -183,26 +182,12 @@ const SidebarNewFolder: React.FC = () => {
               {chats.length > 0 ? (
                 <ul className="divide-y divide-[var(--border-color)]">
                   {chats.map((chat) => (
-                    <li
+                    <ChatListItemSelection
                       key={chat.id}
-                      className="flex items-center justify-between p-2 hover:bg-[var(--hover-color)] cursor-pointer"
-                      onClick={() => toggleChatSelection(chat.id)}
-                    >
-                      <div className="flex items-center gap-2">
-                        <ChatAvatar chat={chat} type="header" />
-                        <h1 className="truncate font-medium">{chat.name}</h1>
-                      </div>
-
-                      <div className="flex items-center justify-center">
-                        <input
-                          type="checkbox"
-                          checked={selectedChats.includes(chat.id)}
-                          onChange={() => toggleChatSelection(chat.id)}
-                          onClick={(e) => e.stopPropagation()}
-                          className="w-4 h-4 rounded border-[var(--border-color)] accent-[var(--primary-green)]"
-                        />
-                      </div>
-                    </li>
+                      chat={chat}
+                      isSelected={selectedChats.includes(chat.id)}
+                      toggleChatSelection={toggleChatSelection}
+                    />
                   ))}
                 </ul>
               ) : (

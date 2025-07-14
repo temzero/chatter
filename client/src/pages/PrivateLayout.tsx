@@ -16,8 +16,8 @@ import { usePresenceStore } from "@/stores/presenceStore";
 import { useChatSocketListeners } from "@/lib/websocket/hooks/useChatSocketListener";
 import { useWebSocket } from "@/lib/websocket/hooks/useWebsocket";
 import { PuffLoader } from "react-spinners";
-import ErrorView from "@/components/ui/ErrorView";
 import { useFolderStore } from "@/stores/folderStore";
+import { toast } from "react-toastify";
 
 export const ChatContent: React.FC = () => {
   const { id: chatId } = useParams();
@@ -55,7 +55,7 @@ export const ChatContent: React.FC = () => {
 
         // 1. Initialize auth first
         await initializeAuth();
-        
+
         // 2. Initialize chats and friendships in parallel
         await Promise.all([initializeChats(), fetchPendingRequests()]);
         await initializeFolders();
@@ -100,13 +100,11 @@ export const ChatContent: React.FC = () => {
 
   // Show error if initialization failed or stores have errors
   if (chatError || friendshipsError || folderError) {
-    return (
-      <ErrorView
-        message={
-          chatError || friendshipsError || folderError || "Failed to initialize application"
-        }
-        onRetry={() => window.location.reload()}
-      />
+    toast.error(
+      chatError ||
+        friendshipsError ||
+        folderError ||
+        "Failed to initialize application"
     );
   }
 

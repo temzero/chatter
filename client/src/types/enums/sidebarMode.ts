@@ -13,6 +13,7 @@ export enum SidebarMode {
   CONTACTS = "contacts",
   FRIEND_REQUESTS = "friendRequests",
   FOLDERS = "folders",
+  FOLDER = "folder",
   NEW_FOLDER = "newFolder",
   PRIVATE_CHATS = "privateChats",
   BLOCKED_USERS = "blockedUsers",

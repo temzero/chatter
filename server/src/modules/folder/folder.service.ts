@@ -2,66 +2,95 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Folder } from './entities/folder.entity';
 import { Repository } from 'typeorm';
-import { Chat } from '../chat/entities/chat.entity';
 import { User } from '../user/entities/user.entity';
+import { plainToInstance } from 'class-transformer';
+import { FolderResponseDto } from './dto/folder-response.dto';
 
 @Injectable()
 export class FolderService {
   constructor(
     @InjectRepository(Folder)
     private folderRepository: Repository<Folder>,
-
-    @InjectRepository(Chat)
-    private chatRepository: Repository<Chat>,
-
     @InjectRepository(User)
     private userRepository: Repository<User>,
   ) {}
 
-  async findAll(userId: string): Promise<Folder[]> {
-    return this.folderRepository.find({
-      where: { user: { id: userId } },
-      relations: ['chats'],
-    });
+  private toDto(folder: Folder): FolderResponseDto {
+    return plainToInstance(FolderResponseDto, folder);
   }
 
-  async findOne(id: string, userId: string): Promise<Folder> {
+  async findAll(userId: string): Promise<FolderResponseDto[]> {
+    const folders = await this.folderRepository.find({
+      where: { user: { id: userId } },
+      order: { position: 'ASC' },
+    });
+    return folders.map((folder) => this.toDto(folder));
+  }
+
+  async findOne(id: string, userId: string): Promise<FolderResponseDto> {
     const folder = await this.folderRepository.findOne({
       where: { id, user: { id: userId } },
-      relations: ['chats'],
     });
     if (!folder) throw new NotFoundException('Folder not found');
-    return folder;
+    return this.toDto(folder);
   }
 
-  async create(data: Partial<Folder> & { userId: string }): Promise<Folder> {
+  async create(
+    data: Partial<Folder>,
+    userId: string,
+  ): Promise<FolderResponseDto> {
     const user = await this.userRepository.findOne({
-      where: { id: data.userId },
+      where: { id: userId },
     });
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
+    // Use correct column name: user_id (not userId)
+    const rawMax = await this.folderRepository
+      .createQueryBuilder('folder')
+      .select('MAX(folder.position)', 'max')
+      .where('folder.user_id = :userId', { userId })
+      .getRawOne<{ max: string | null }>();
+
+    const maxPosition =
+      rawMax?.max !== null && rawMax?.max !== undefined
+        ? Number(rawMax.max)
+        : -1;
+
+    const newPosition = maxPosition + 1;
+
     const folder = this.folderRepository.create({
       ...data,
       user,
+      position: newPosition,
     });
 
-    return this.folderRepository.save(folder);
+    const savedFolder = await this.folderRepository.save(folder);
+    return this.toDto(savedFolder);
   }
 
   async update(
     id: string,
     data: Partial<Folder>,
     userId: string,
-  ): Promise<Folder> {
-    const folder = await this.findOne(id, userId);
+  ): Promise<FolderResponseDto> {
+    const folder = await this.folderRepository.findOne({
+      where: { id, user: { id: userId } },
+    });
+    if (!folder) throw new NotFoundException('Folder not found');
+
     Object.assign(folder, data);
-    return this.folderRepository.save(folder);
+    const updatedFolder = await this.folderRepository.save(folder);
+    return this.toDto(updatedFolder);
   }
 
   async remove(id: string, userId: string): Promise<void> {
-    const folder = await this.findOne(id, userId);
+    const folder = await this.folderRepository.findOne({
+      where: { id, user: { id: userId } },
+    });
+    if (!folder) throw new NotFoundException('Folder not found');
     await this.folderRepository.remove(folder);
   }
 
@@ -69,20 +98,53 @@ export class FolderService {
     folderId: string,
     chatIds: string[],
     userId: string,
-  ): Promise<Folder> {
-    const folder = await this.findOne(folderId, userId);
-    const chats = await this.chatRepository.findByIds(chatIds);
-    folder.chats = [...(folder.chats || []), ...chats];
-    return this.folderRepository.save(folder);
+  ): Promise<FolderResponseDto> {
+    const folder = await this.folderRepository.findOne({
+      where: { id: folderId, user: { id: userId } },
+    });
+    if (!folder) throw new NotFoundException('Folder not found');
+
+    // Filter out duplicates and null/undefined values
+    const uniqueNewChatIds = [...new Set(chatIds.filter(Boolean))];
+    const existingChatIds = new Set(folder.chatIds || []);
+
+    // Only add chats that aren't already in the folder
+    const chatsToAdd = uniqueNewChatIds.filter(
+      (id) => !existingChatIds.has(id),
+    );
+    folder.chatIds = [...folder.chatIds, ...chatsToAdd];
+
+    const updatedFolder = await this.folderRepository.save(folder);
+    return this.toDto(updatedFolder);
   }
 
   async removeChatFromFolder(
     folderId: string,
     chatId: string,
     userId: string,
-  ): Promise<Folder> {
-    const folder = await this.findOne(folderId, userId);
-    folder.chats = folder.chats.filter((chat) => chat.id !== chatId);
-    return this.folderRepository.save(folder);
+  ): Promise<FolderResponseDto> {
+    const folder = await this.folderRepository.findOne({
+      where: { id: folderId, user: { id: userId } },
+    });
+    if (!folder) throw new NotFoundException('Folder not found');
+
+    folder.chatIds = (folder.chatIds || []).filter((id) => id !== chatId);
+    const updatedFolder = await this.folderRepository.save(folder);
+    return this.toDto(updatedFolder);
+  }
+
+  async updateFolderPosition(
+    folderId: string,
+    position: number,
+    userId: string,
+  ): Promise<FolderResponseDto> {
+    const folder = await this.folderRepository.findOne({
+      where: { id: folderId, user: { id: userId } },
+    });
+    if (!folder) throw new NotFoundException('Folder not found');
+
+    folder.position = position;
+    const updatedFolder = await this.folderRepository.save(folder);
+    return this.toDto(updatedFolder);
   }
 }

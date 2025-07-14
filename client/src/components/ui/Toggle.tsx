@@ -28,7 +28,10 @@ const Toggle: React.FC<ToggleProps> = ({
         ${enabled ? "bg-indigo-600" : "bg-gray-200 dark:bg-gray-600"}
         ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
         ${className}`}
-      onClick={toggle}
+      onClick={(e) => {
+        e.stopPropagation();
+        toggle();
+      }}
       disabled={disabled}
       aria-pressed={enabled}
     >

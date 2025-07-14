@@ -9,12 +9,10 @@ import {
   BeforeInsert,
   BeforeUpdate,
   OneToMany,
-  ManyToMany,
 } from 'typeorm';
 import { Message } from '../../message/entities/message.entity';
 import { ChatMember } from 'src/modules/chat-member/entities/chat-member.entity';
 import { ChatType } from '../constants/chat-types.constants';
-import { Folder } from 'src/modules/folder/entities/folder.entity';
 
 @Entity('chat')
 export class Chat {
@@ -54,9 +52,6 @@ export class Chat {
 
   @Column({ default: false, nullable: true })
   is_broadcast_only?: boolean;
-
-  @ManyToMany(() => Folder, (folder) => folder.chats)
-  folders: Folder[];
 
   /* Timestamps */
   @CreateDateColumn({ name: 'created_at' })

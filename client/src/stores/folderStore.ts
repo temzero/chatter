@@ -1,6 +1,6 @@
 // stores/folderStore.ts
 import { create } from "zustand";
-import { FolderResponse } from "@/types/responses/folder.response"; // define this type from backend
+import { FolderResponse } from "@/types/responses/folder.response";
 import { folderService } from "@/services/folderService";
 import { ChatType } from "@/types/enums/ChatType";
 
@@ -10,6 +10,7 @@ interface FolderStore {
   error: string | null;
 
   initialize: () => Promise<void>;
+  getFolderById: (folderId: string) => FolderResponse | undefined;
   createFolder: (folderData: {
     name: string;
     types: ChatType[];
@@ -17,11 +18,16 @@ interface FolderStore {
     chatIds: string[];
   }) => Promise<FolderResponse>;
   addFolder: (folder: FolderResponse) => void;
-  removeFolder: (folderId: string) => void;
-  updateFolder: (folder: FolderResponse) => void;
+  updateFolder: (folder: Partial<FolderResponse>) => Promise<void>;
+  deleteFolder: (folderId: string) => Promise<void>;
 }
 
-export const useFolderStore = create<FolderStore>((set) => ({
+// Helper function to sort folders by position
+const sortByPosition = (folders: FolderResponse[]) => {
+  return [...folders].sort((a, b) => a.position - b.position);
+};
+
+export const useFolderStore = create<FolderStore>((set, get) => ({
   folders: [],
   isLoading: false,
   error: null,
@@ -30,8 +36,7 @@ export const useFolderStore = create<FolderStore>((set) => ({
     try {
       set({ isLoading: true, error: null });
       const folders = await folderService.getFolders();
-      console.log("Fetched folders:", folders);
-      set({ folders, isLoading: false });
+      set({ folders: sortByPosition(folders), isLoading: false });
     } catch (error: unknown) {
       set({
         error:
@@ -41,20 +46,17 @@ export const useFolderStore = create<FolderStore>((set) => ({
     }
   },
 
-  createFolder: async (folderData: {
-    name: string;
-    types: ChatType[];
-    color: string | null;
-    chatIds: string[];
-  }) => {
+  getFolderById: (folderId: string) => {
+    const { folders } = get();
+    return folders.find((folder: { id: string }) => folder.id === folderId);
+  },
+
+  createFolder: async (folderData) => {
     try {
       const newFolder = await folderService.createFolder(folderData);
-      console.log("Created new folder:", newFolder);
-      set((state) => {
-        const updatedFolders = [...(state.folders || []), newFolder];
-        console.log("Updated folders after creation:", updatedFolders);
-        return { folders: updatedFolders };
-      });
+      set((state) => ({
+        folders: sortByPosition([...state.folders, newFolder]),
+      }));
       return newFolder;
     } catch (error) {
       const message =
@@ -65,15 +67,43 @@ export const useFolderStore = create<FolderStore>((set) => ({
   },
 
   addFolder: (folder) =>
-    set((state) => ({ folders: [...state.folders, folder] })),
-
-  removeFolder: (folderId) =>
     set((state) => ({
-      folders: state.folders.filter((f) => f.id !== folderId),
+      folders: sortByPosition([...state.folders, folder]),
     })),
 
-  updateFolder: (folder) =>
-    set((state) => ({
-      folders: state.folders.map((f) => (f.id === folder.id ? folder : f)),
-    })),
+  updateFolder: async (folder) => {
+    try {
+      set({ isLoading: true, error: null });
+      if (!folder.id) {
+        throw new Error("Cannot update folder: missing folder id");
+      }
+      const updatedFolder = await folderService.updateFolder(folder.id, folder);
+      set((state) => ({
+        folders: sortByPosition(
+          state.folders.map((f) => (f.id === folder.id ? updatedFolder : f))
+        ),
+        isLoading: false,
+      }));
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to update folder";
+      set({ error: message, isLoading: false });
+      throw new Error(message);
+    }
+  },
+
+  deleteFolder: async (folderId: string) => {
+    try {
+      await folderService.deleteFolder(folderId);
+      set((state) => ({
+        folders: state.folders.filter((f) => f.id !== folderId),
+        // No need to re-sort after deletion (order remains consistent)
+      }));
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to delete folder";
+      set({ error: message });
+      throw new Error(message);
+    }
+  },
 }));

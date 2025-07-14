@@ -4,12 +4,9 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  ManyToMany,
-  JoinTable,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Chat } from 'src/modules/chat/entities/chat.entity';
 import { User } from 'src/modules/user/entities/user.entity';
 
 @Entity('folder')
@@ -33,13 +30,11 @@ export class Folder {
   @Column({ type: 'simple-array' })
   types: string[]; // ["direct", "group", "channel"]
 
-  @ManyToMany(() => Chat, (chat) => chat.folders)
-  @JoinTable({
-    name: 'folder_chats',
-    joinColumn: { name: 'folder_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'chat_id', referencedColumnName: 'id' },
-  })
-  chats: Chat[];
+  @Column({ type: 'simple-array', nullable: true })
+  chatIds: string[]; // Store chat IDs directly as an array
+
+  @Column({ type: 'int', default: 0 })
+  position: number;
 
   @CreateDateColumn()
   createdAt: Date;

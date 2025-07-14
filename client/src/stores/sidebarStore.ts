@@ -5,8 +5,9 @@ import { SidebarMode } from "@/types/enums/sidebarMode";
 
 interface SidebarStore {
   currentSidebar: SidebarMode;
+  sidebarData: unknown;
   isCompact: boolean;
-  setSidebar: (sidebar: SidebarMode) => void;
+  setSidebar: (sidebar: SidebarMode, data?: unknown) => void;
   toggleCompact: () => void;
   initializeKeyListeners: () => void;
   cleanupKeyListener: () => void;
@@ -16,9 +17,14 @@ export const useSidebarStore = create<SidebarStore>()(
   persist(
     (set, get) => ({
       currentSidebar: SidebarMode.DEFAULT,
+      sidebarData: null,
       isCompact: false,
 
-      setSidebar: (sidebar) => set({ currentSidebar: sidebar }),
+      setSidebar: (sidebar, data = null) =>
+        set({
+          currentSidebar: sidebar,
+          sidebarData: data,
+        }),
 
       toggleCompact: () => {
         const newCompactState = !get().isCompact;
@@ -27,9 +33,15 @@ export const useSidebarStore = create<SidebarStore>()(
 
       initializeKeyListeners: () => {
         const handleKeyDown = (e: KeyboardEvent) => {
-          if (e.key === "Escape" && get().currentSidebar !== SidebarMode.DEFAULT) {
+          if (
+            e.key === "Escape" &&
+            get().currentSidebar !== SidebarMode.DEFAULT
+          ) {
             e.preventDefault();
-            set({ currentSidebar: SidebarMode.DEFAULT });
+            set({
+              currentSidebar: SidebarMode.DEFAULT,
+              sidebarData: null,
+            });
             e.stopPropagation();
           }
         };

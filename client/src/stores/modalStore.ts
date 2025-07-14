@@ -7,6 +7,7 @@ export enum ModalType {
   MESSAGE = "message",
   FORWARD_MESSAGE = "forward-message",
   DELETE_MESSAGE = "delete-message",
+  DELETE_FOLDER = "delete-folder",
   ADD_FOLDER = "add-folder",
   ADD_CONTACT = "add-contact",
   BLOCK_USER = "block-user",
