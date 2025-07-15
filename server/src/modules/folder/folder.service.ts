@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Folder } from './entities/folder.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
 import { plainToInstance } from 'class-transformer';
 import { FolderResponseDto } from './dto/folder-response.dto';
+import { ErrorResponse } from 'src/common/api-response/errors';
 
 @Injectable()
 export class FolderService {
@@ -31,7 +32,10 @@ export class FolderService {
     const folder = await this.folderRepository.findOne({
       where: { id, user: { id: userId } },
     });
-    if (!folder) throw new NotFoundException('Folder not found');
+    if (!folder) {
+      ErrorResponse.notFound('Folder not found');
+    }
+
     return this.toDto(folder);
   }
 
@@ -44,7 +48,7 @@ export class FolderService {
     });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      ErrorResponse.notFound('User not found');
     }
 
     // Use correct column name: user_id (not userId)
@@ -79,18 +83,49 @@ export class FolderService {
     const folder = await this.folderRepository.findOne({
       where: { id, user: { id: userId } },
     });
-    if (!folder) throw new NotFoundException('Folder not found');
+    if (!folder) {
+      ErrorResponse.notFound('Folder not found');
+    }
 
     Object.assign(folder, data);
     const updatedFolder = await this.folderRepository.save(folder);
     return this.toDto(updatedFolder);
   }
 
+  async reorderFolders(
+    userId: string,
+    newOrder: Array<{ id: string; position: number }>,
+  ) {
+    // Validate all folders belong to user
+    const folderIds = newOrder.map((u) => u.id);
+    const folders = await this.folderRepository.find({
+      where: { id: In(folderIds), user: { id: userId } },
+    });
+
+    if (folders.length !== newOrder.length) {
+      ErrorResponse.notFound('Some folders not found');
+    }
+
+    // Update positions
+    const updateOps = newOrder.map((update) => {
+      const folder = folders.find((f) => f.id === update.id);
+      if (folder) {
+        folder.position = update.position;
+        return this.folderRepository.save(folder);
+      }
+    });
+
+    await Promise.all(updateOps);
+    return folders.map((f) => this.toDto(f));
+  }
+
   async remove(id: string, userId: string): Promise<void> {
     const folder = await this.folderRepository.findOne({
       where: { id, user: { id: userId } },
     });
-    if (!folder) throw new NotFoundException('Folder not found');
+    if (!folder) {
+      ErrorResponse.notFound('Folder not found');
+    }
     await this.folderRepository.remove(folder);
   }
 
@@ -102,7 +137,9 @@ export class FolderService {
     const folder = await this.folderRepository.findOne({
       where: { id: folderId, user: { id: userId } },
     });
-    if (!folder) throw new NotFoundException('Folder not found');
+    if (!folder) {
+      ErrorResponse.notFound('Folder not found');
+    }
 
     // Filter out duplicates and null/undefined values
     const uniqueNewChatIds = [...new Set(chatIds.filter(Boolean))];
@@ -126,7 +163,9 @@ export class FolderService {
     const folder = await this.folderRepository.findOne({
       where: { id: folderId, user: { id: userId } },
     });
-    if (!folder) throw new NotFoundException('Folder not found');
+    if (!folder) {
+      ErrorResponse.notFound('Folder not found');
+    }
 
     folder.chatIds = (folder.chatIds || []).filter((id) => id !== chatId);
     const updatedFolder = await this.folderRepository.save(folder);
@@ -141,7 +180,9 @@ export class FolderService {
     const folder = await this.folderRepository.findOne({
       where: { id: folderId, user: { id: userId } },
     });
-    if (!folder) throw new NotFoundException('Folder not found');
+    if (!folder) {
+      ErrorResponse.notFound('Folder not found');
+    }
 
     folder.position = position;
     const updatedFolder = await this.folderRepository.save(folder);

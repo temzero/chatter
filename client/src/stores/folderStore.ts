@@ -19,6 +19,7 @@ interface FolderStore {
   }) => Promise<FolderResponse>;
   addFolder: (folder: FolderResponse) => void;
   updateFolder: (folder: Partial<FolderResponse>) => Promise<void>;
+  reorderFolders: (newOrderIds: string[]) => Promise<void>;
   deleteFolder: (folderId: string) => Promise<void>;
 }
 
@@ -89,6 +90,45 @@ export const useFolderStore = create<FolderStore>((set, get) => ({
         error instanceof Error ? error.message : "Failed to update folder";
       set({ error: message, isLoading: false });
       throw new Error(message);
+    }
+  },
+
+  reorderFolders: async (newOrderIds) => {
+    try {
+      set({ isLoading: true });
+
+      // Get current folders
+      const currentFolders = get().folders;
+
+      // Create new folder array with updated positions
+      const updatedFolders = newOrderIds.map((id, index) => {
+        const folder = currentFolders.find((f) => f.id === id);
+        if (!folder) throw new Error(`Folder ${id} not found`);
+        return { ...folder, position: index + 1 }; // 1-based indexing
+      });
+
+      // Optimistic update
+      set({ folders: updatedFolders });
+
+      // Prepare position updates for API
+      const positionUpdates = updatedFolders.map((folder) => ({
+        id: folder.id,
+        position: folder.position,
+      }));
+
+      // API call
+      await folderService.reorderFolders(positionUpdates);
+
+      set({ isLoading: false });
+    } catch (error) {
+      // Revert on error
+      set({
+        error:
+          error instanceof Error ? error.message : "Failed to reorder folders",
+        isLoading: false,
+        folders: get().folders, // revert to previous state
+      });
+      throw error;
     }
   },
 

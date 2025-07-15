@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useAllChats } from "@/stores/chatStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
+import { useFolderStore } from "@/stores/folderStore";
 import { Logo } from "../ui/Logo";
 import { SlidingContainer } from "../ui/SlidingContainer";
 import ChatList from "@/components/ui/ChatList";
@@ -10,70 +11,62 @@ import { SidebarMode } from "@/types/enums/sidebarMode";
 import { ChatType } from "@/types/enums/ChatType";
 
 const chatTypes = ["all", ChatType.DIRECT, ChatType.GROUP, ChatType.CHANNEL];
-const chatFolders = ["Working", "Family", "Friends", "Other"];
-
-const combinedTabs = [...chatTypes, ...chatFolders];
 
 const SidebarDefault: React.FC = () => {
+  // State & Store Hooks
   const allChats = useAllChats();
   const setSidebar = useSidebarStore((state) => state.setSidebar);
   const isCompact = useSidebarStore((state) => state.isCompact);
   const toggleCompact = useSidebarStore((state) => state.toggleCompact);
 
+  const { folders, initialize } = useFolderStore();
+  const chatFolders = folders.map((folder) => folder.name);
+  const combinedTabs = [...chatTypes, ...chatFolders];
+
+  // Refs
   const scrollRef = useRef<HTMLDivElement>(null);
   const canScrollLeftRef = useRef(false);
   const canScrollRightRef = useRef(false);
 
+  // State
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
-
-  const updateScrollButtons = () => {
-    const container = scrollRef.current;
-    if (!container) return;
-
-    const SCROLL_MARGIN = 4;
-
-    const { scrollLeft, scrollWidth, clientWidth } = container;
-    const newCanScrollLeft = scrollLeft > SCROLL_MARGIN;
-    const newCanScrollRight =
-      scrollLeft < scrollWidth - clientWidth - SCROLL_MARGIN;
-
-    if (canScrollLeftRef.current !== newCanScrollLeft) {
-      canScrollLeftRef.current = newCanScrollLeft;
-      setCanScrollLeft(newCanScrollLeft);
-    }
-
-    if (canScrollRightRef.current !== newCanScrollRight) {
-      canScrollRightRef.current = newCanScrollRight;
-      setCanScrollRight(newCanScrollRight);
-    }
-  };
-
-  const scrollLeft = () => {
-    scrollRef.current?.scrollBy({ left: -200, behavior: "smooth" });
-  };
-
-  const scrollRight = () => {
-    scrollRef.current?.scrollBy({ left: 200, behavior: "smooth" });
-  };
-
   const [selectedFolder, setSelectedFolder] = useState<string>(combinedTabs[0]);
   const [direction, setDirection] = useState<number>(1);
 
-  const filteredChatsByType = React.useMemo(() => {
-    return filterChatsByType(allChats, selectedFolder);
-  }, [selectedFolder, allChats]);
+  // Initialize folders on mount
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
 
-  const getTypeClass = React.useCallback(
-    (type: string) =>
-      `flex items-center justify-center cursor-pointer p-2 ${
+  // Memoized filtered chats
+  const filteredChats = React.useMemo(() => {
+    if (chatFolders.includes(selectedFolder)) {
+      const folder = folders.find((f) => f.name === selectedFolder);
+      if (!folder) return [];
+
+      return allChats.filter(
+        (chat) =>
+          folder.chatIds.includes(chat.id) &&
+          (folder.types.length === 0 || folder.types.includes(chat.type))
+      );
+    }
+    return filterChatsByType(allChats, selectedFolder);
+  }, [selectedFolder, allChats, folders, chatFolders]);
+
+  // Memoized tab class generator
+  const getTypeClass = useCallback(
+    (type: string) => {
+      return `flex items-center justify-center cursor-pointer font-semibold p-2 ${
         selectedFolder === type
-          ? "opacity-100 font-bold"
-          : "opacity-50 hover:opacity-80"
-      }`,
+          ? "opacity-100 font-bold border-b-2"
+          : "opacity-70 hover:opacity-100"
+      }`;
+    },
     [selectedFolder]
   );
 
+  // Handle tab change
   const handleChatTypeChange = (type: string) => {
     if (type === selectedFolder) return;
 
@@ -84,6 +77,39 @@ const SidebarDefault: React.FC = () => {
     setSelectedFolder(type);
   };
 
+  // Update scroll buttons (memoized)
+  const updateScrollButtons = useCallback(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    const SCROLL_MARGIN = 4;
+    const { scrollLeft, scrollWidth, clientWidth } = container;
+    const newCanScrollLeft = scrollLeft > SCROLL_MARGIN;
+    const newCanScrollRight =
+      scrollLeft < scrollWidth - clientWidth - SCROLL_MARGIN;
+
+    // Avoid unnecessary state updates
+    if (canScrollLeftRef.current !== newCanScrollLeft) {
+      canScrollLeftRef.current = newCanScrollLeft;
+      setCanScrollLeft(newCanScrollLeft);
+    }
+
+    if (canScrollRightRef.current !== newCanScrollRight) {
+      canScrollRightRef.current = newCanScrollRight;
+      setCanScrollRight(newCanScrollRight);
+    }
+  }, []);
+
+  // Scroll handlers
+  const scrollLeft = () => {
+    scrollRef.current?.scrollBy({ left: -200, behavior: "smooth" });
+  };
+
+  const scrollRight = () => {
+    scrollRef.current?.scrollBy({ left: 200, behavior: "smooth" });
+  };
+
+  // Keyboard shortcut (toggle compact mode)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "`") {
@@ -95,10 +121,17 @@ const SidebarDefault: React.FC = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [toggleCompact]);
 
+  // Scroll & Resize Observers (Merged)
   useEffect(() => {
     const container = scrollRef.current;
     if (!container) return;
 
+    // Initial check
+    updateScrollButtons();
+
+    // Observers
+    const resizeObserver = new ResizeObserver(updateScrollButtons);
+    const handleScroll = () => updateScrollButtons();
     const handleWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
         e.preventDefault();
@@ -106,17 +139,20 @@ const SidebarDefault: React.FC = () => {
       }
     };
 
-    container.addEventListener("scroll", updateScrollButtons);
+    resizeObserver.observe(container);
+    container.addEventListener("scroll", handleScroll);
     container.addEventListener("wheel", handleWheel, { passive: false });
 
-    // Initial update to make sure buttons reflect scroll state on load
-    updateScrollButtons();
+    // Delayed check (for initial render)
+    const timer = setTimeout(updateScrollButtons, 50);
 
     return () => {
-      container.removeEventListener("scroll", updateScrollButtons);
+      clearTimeout(timer);
+      resizeObserver.disconnect();
+      container.removeEventListener("scroll", handleScroll);
       container.removeEventListener("wheel", handleWheel);
     };
-  }, []);
+  }, [updateScrollButtons]);
 
   return (
     <aside
@@ -178,15 +214,30 @@ const SidebarDefault: React.FC = () => {
               {selectedFolder.charAt(0).toUpperCase() + selectedFolder.slice(1)}
             </a>
           ) : (
-            combinedTabs.map((type) => (
-              <a
-                key={type}
-                className={getTypeClass(type)}
-                onClick={() => handleChatTypeChange(type)}
-              >
-                {type.charAt(0).toUpperCase() + type.slice(1)}
-              </a>
-            ))
+            combinedTabs.map((type) => {
+              const isFolder = chatFolders.includes(type);
+              const folder = isFolder
+                ? folders.find((f) => f.name === type)
+                : null;
+
+              return (
+                <a
+                  key={type}
+                  className={getTypeClass(type)}
+                  onClick={() => handleChatTypeChange(type)}
+                  style={
+                    isFolder && folder?.color
+                      ? {
+                          color: folder.color,
+                          borderColor: folder.color,
+                        }
+                      : {}
+                  }
+                >
+                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                </a>
+              );
+            })
           )}
         </div>
 
@@ -215,7 +266,7 @@ const SidebarDefault: React.FC = () => {
 
       {/* Chat List Container */}
       <SlidingContainer direction={direction} uniqueKey={selectedFolder}>
-        <ChatList chats={filteredChatsByType} isCompact={isCompact} />
+        <ChatList chats={filteredChats} isCompact={isCompact} />
       </SlidingContainer>
     </aside>
   );

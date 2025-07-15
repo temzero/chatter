@@ -32,6 +32,23 @@ export const folderService = {
     return data;
   },
 
+  async updateFolderPosition(
+    id: string,
+    position: number
+  ): Promise<FolderResponse> {
+    const { data } = await API.patch(`/folders/position/${id}`, position);
+    return data;
+  },
+
+  async reorderFolders(
+    positionUpdates: Array<{ id: string; position: number }>
+  ): Promise<FolderResponse[]> {
+    const { data } = await API.patch("/folders/reorder", {
+      newOrder: positionUpdates,
+    });
+    return data;
+  },
+
   async deleteFolder(id: string): Promise<void> {
     await API.delete(`/folders/${id}`);
   },

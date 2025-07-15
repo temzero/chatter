@@ -21,6 +21,14 @@ import { Folder } from './entities/folder.entity';
 export class FolderController {
   constructor(private readonly folderService: FolderService) {}
 
+  @Patch('reorder')
+  async reorderFolders(
+    @CurrentUser('id') userId: string,
+    @Body() body: { newOrder: Array<{ id: string; position: number }> },
+  ) {
+    return this.folderService.reorderFolders(userId, body.newOrder);
+  }
+
   @Get()
   @HttpCode(HttpStatus.OK)
   async findAll(
@@ -54,7 +62,7 @@ export class FolderController {
     return this.folderService.update(id, body, userId);
   }
 
-  @Patch(':id/position')
+  @Patch('position/:id')
   async updatePosition(
     @Param('id') id: string,
     @CurrentUser('id') userId: string,

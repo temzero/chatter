@@ -32,26 +32,23 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({
   };
 
   return (
-    <aside className="relative w-[var(--sidebar-width)] flex h-full flex-col border-4">
-      <header className="flex w-full justify-between items-center min-h-[var(--header-height)] custom-border-b">
+    <aside className="relative w-[var(--sidebar-width)] flex h-full flex-col">
+      <header className="flex w-full justify-between items-center min-h-[var(--header-height)] custom-border-b select-none">
         <div className="flex items-center">
-          <i
-            className="material-symbols-outlined nav-btn"
-            onClick={handleBackClick}
-          >
-            arrow_back
-          </i>
+          <button className="nav-btn" onClick={handleBackClick}>
+            <i className="material-symbols-outlined">arrow_back</i>
+          </button>
           <h1 className="font-semibold text-lg">{title}</h1>
         </div>
         {rightButton ? (
           rightButton
         ) : (
-          <i
-            className="material-symbols-outlined nav-btn ml-auto"
+          <button
+            className="nav-btn"
             onClick={() => setSidebar(SidebarMode.DEFAULT)}
           >
-            close
-          </i>
+            <i className="material-symbols-outlined">close</i>
+          </button>
         )}
       </header>
 
