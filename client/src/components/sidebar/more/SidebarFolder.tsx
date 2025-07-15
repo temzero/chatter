@@ -49,7 +49,9 @@ const SidebarFolder: React.FC = () => {
         style={{
           borderColor: folder.color || "",
         }}
-        className={`relative h-full  w-[var(--sidebar-width)] rounded-lg ${folder.color && "border-4"}`}
+        className={`relative h-full  w-[var(--sidebar-width)] rounded-lg ${
+          folder.color && "border-4"
+        }`}
       >
         <div
           className="px-3 py-2"
@@ -73,22 +75,24 @@ const SidebarFolder: React.FC = () => {
 
         <div className="p-2">
           {/* <h1>Types</h1> */}
-          <div className="flex gap-2 mb-4">
-            {folder.types?.map((type) => (
-              <div
-                key={type}
-                className="custom-border p-1 rounded w-full flex items-center justify-center"
-              >
-                <span className="material-symbols-outlined">
-                  {type === ChatType.DIRECT
-                    ? "person"
-                    : type === ChatType.GROUP
-                    ? "groups"
-                    : "campaign"}
-                </span>
-              </div>
-            ))}
-          </div>
+          {folder.types && folder.types.length > 0 && (
+            <div className="flex gap-2 mb-2">
+              {folder.types?.map((type) => (
+                <div
+                  key={type}
+                  className="custom-border p-1 rounded w-full flex items-center justify-center"
+                >
+                  <span className="material-symbols-outlined">
+                    {type === ChatType.DIRECT
+                      ? "person"
+                      : type === ChatType.GROUP
+                      ? "groups"
+                      : "campaign"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className="space-y-1">
             {/* <h1>Chats:</h1> */}
@@ -106,12 +110,13 @@ const SidebarFolder: React.FC = () => {
           </div>
 
           <button
-            className="absolute bottom-0 left-0 py-1 flex-1 mt-4 w-full custom-border rounded text-red-500 hover:bg-red-500/10"
+            className="absolute bottom-0 left-0 py-1 flex-1 mt-4 w-full rounded text-red-500 hover:bg-red-500/10"
             // onClick={() => deleteFolder(folder.id)}
             onClick={() =>
               openModal(ModalType.DELETE_FOLDER, { folderId: folder.id })
             }
           >
+            <span className="material-symbols-outlined">delete</span>
             Delete Folder
           </button>
         </div>

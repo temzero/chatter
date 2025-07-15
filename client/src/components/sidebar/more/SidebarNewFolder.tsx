@@ -1,5 +1,5 @@
 // components/sidebar/SidebarNewFolder.tsx
-import React, { useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useChatStore } from "@/stores/chatStore";
 import SidebarLayout from "@/pages/SidebarLayout";
 import { SidebarMode } from "@/types/enums/sidebarMode";
@@ -7,17 +7,18 @@ import { ChatType } from "@/types/enums/ChatType";
 import { useFolderStore } from "@/stores/folderStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import ChatListItemSelection from "@/components/ui/ChatListItemSelection";
+import { toast } from "react-toastify";
 
 const COLORS = [
   null,
-  "#FF5252", // red
-  "#E040FB", // purple
-  "#536DFE", // indigo
-  "#00BCD4", // cyan (darker for distinction)
-  "#4CAF50", // green
-  "#CDDC39", // lime (less neon than #EEFF41)
-  "#FFEB3B", // yellow (brighter, less neon)
-  "#FF9800", // orange
+  "#FF5252",
+  "#E040FB",
+  "#536DFE",
+  "#00BCD4",
+  "#4CAF50",
+  "#CDDC39",
+  "#FFEB3B",
+  "#FF9800",
 ];
 
 interface folderToEdit {
@@ -37,10 +38,9 @@ const SidebarNewFolder: React.FC = () => {
     | { folderToEdit?: folderToEdit }
     | undefined;
   const folderToEdit = sidebarData?.folderToEdit;
-
   const isEditMode = !!folderToEdit;
 
-  const [folderName, setFolderName] = useState(folderToEdit?.name || "");
+  const folderNameRef = useRef<HTMLInputElement>(null);
   const [folderTypes, setFolderTypes] = useState<
     (ChatType.DIRECT | ChatType.GROUP | ChatType.CHANNEL)[]
   >(folderToEdit?.types || []);
@@ -52,43 +52,45 @@ const SidebarNewFolder: React.FC = () => {
   );
   const [searchQuery, setSearchQuery] = useState("");
 
+  const filteredChats = chats
+    .filter((chat) => {
+      const isSelected = selectedChats.includes(chat.id);
+      const isTypeAlreadyIncluded = folderTypes.includes(
+        chat.type as (typeof folderTypes)[number]
+      );
+      return isSelected || !isTypeAlreadyIncluded;
+    })
+    .filter((chat) =>
+      (chat.name ?? "").toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
   useEffect(() => {
-    if (folderToEdit) {
-      setFolderName(folderToEdit.name);
-      setFolderTypes(folderToEdit.types);
-      setSelectedColor(folderToEdit.color);
-      setSelectedChats(folderToEdit.chatIds);
+    if (folderToEdit && folderNameRef.current) {
+      folderNameRef.current.value = folderToEdit.name;
     }
   }, [folderToEdit]);
 
   const handleSubmit = async () => {
-    if (!folderName.trim()) return;
+    const folderName = folderNameRef.current?.value.trim();
+    if (!folderName) {
+      toast.error("Folder name cannot be empty");
+      return
+    };
 
     const payload = {
-      name: folderName.trim(),
+      name: folderName,
       types: folderTypes,
       color: selectedColor,
       chatIds: selectedChats,
     };
 
     if (isEditMode && folderToEdit) {
-      updateFolder({
-        ...folderToEdit,
-        ...payload,
-      });
+      updateFolder({ ...folderToEdit, ...payload });
     } else {
       await createFolder(payload);
     }
-    setSidebar(SidebarMode.FOLDERS);
-  };
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value.length === 1) {
-      setFolderName(value.toUpperCase());
-    } else {
-      setFolderName(value);
-    }
+    setSidebar(SidebarMode.FOLDERS);
   };
 
   const toggleChatSelection = (chatId: string) => {
@@ -100,9 +102,7 @@ const SidebarNewFolder: React.FC = () => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      handleSubmit();
-    }
+    if (e.key === "Enter") handleSubmit();
   };
 
   return (
@@ -115,8 +115,7 @@ const SidebarNewFolder: React.FC = () => {
       }
     >
       <div className="flex flex-col h-full">
-        {/* Content */}
-        <div className="flex flex-col gap-4 p-2 overflow-y-auto flex-1">
+        <div className="flex flex-col gap-4 p-2 overflow-y-auto pb-48 flex-1">
           {/* Color Selection */}
           <div className="grid grid-cols-9 gap-2 mt-2">
             {COLORS.map((color) => (
@@ -128,17 +127,13 @@ const SidebarNewFolder: React.FC = () => {
                     ? "ring-4 -ring-offset-4 ring-offset-[var(--sidebar-color)] ring-[--border-color]"
                     : ""
                 }`}
-                style={{
-                  backgroundColor: color ?? "transparent",
-                }}
+                style={{ backgroundColor: color ?? "transparent" }}
                 title={color ?? "Default Text Color"}
               >
-                {color === null ? (
+                {color === null && (
                   <span className="material-symbols-outlined opacity-70">
                     close
                   </span>
-                ) : (
-                  ""
                 )}
               </button>
             ))}
@@ -146,13 +141,12 @@ const SidebarNewFolder: React.FC = () => {
 
           {/* Folder Type Multi-Select */}
           <div>
-            <h2 className="mb-2">
-              Chat Types{" "}
-              {(folderTypes.length === 3 || folderTypes.length === 0) && (
-                <span className="text-[--primary-green] text-sm font-semibold">
-                  (All)
-                </span>
-              )}
+            <h2 className="mb-2 font-bold">
+              {folderTypes.length === 3
+                ? "All Chats"
+                : folderTypes.length > 0
+                ? "All Chats with type:"
+                : "Chat Types"}
             </h2>
             <div className="flex gap-1">
               {[ChatType.DIRECT, ChatType.GROUP, ChatType.CHANNEL].map(
@@ -167,13 +161,7 @@ const SidebarNewFolder: React.FC = () => {
                         setFolderTypes((prev) =>
                           isSelected
                             ? prev.filter((t) => t !== type)
-                            : [
-                                ...prev,
-                                type as
-                                  | ChatType.DIRECT
-                                  | ChatType.GROUP
-                                  | ChatType.CHANNEL,
-                              ]
+                            : [...prev, type as (typeof folderTypes)[number]]
                         )
                       }
                       className={`flex-1 py-1 rounded border-2 border-[var(--border-color)] text-sm capitalize transition-colors duration-200 ${
@@ -198,13 +186,16 @@ const SidebarNewFolder: React.FC = () => {
           {/* Chat Selection */}
           <div>
             <div className="flex justify-between items-center mb-2">
-              <h2>Chats ({selectedChats.length})</h2>
+              <h2 className="font-bold">
+                {selectedChats.length > 0 && selectedChats.length} Chats{" "}
+                {selectedChats.length > 0 && "Included"}
+              </h2>
               {selectedChats.length > 0 && (
                 <button
                   onClick={() => setSelectedChats([])}
-                  className="text-xs opacity-70 hover:opacity-100"
+                  className="text-xs opacity-70 hover:opacity-100 text-red-400"
                 >
-                  Clear selection
+                  <span className="material-symbols-outlined">delete</span>
                 </button>
               )}
             </div>
@@ -220,9 +211,9 @@ const SidebarNewFolder: React.FC = () => {
             </div>
 
             <div className="overflow-y-auto">
-              {chats.length > 0 ? (
+              {filteredChats.length > 0 && (
                 <ul className="divide-y divide-[var(--border-color)]">
-                  {chats.map((chat) => (
+                  {filteredChats.map((chat) => (
                     <ChatListItemSelection
                       key={chat.id}
                       chat={chat}
@@ -231,63 +222,54 @@ const SidebarNewFolder: React.FC = () => {
                     />
                   ))}
                 </ul>
-              ) : (
-                <div className="flex flex-col items-center justify-center h-full p-4 opacity-40">
-                  <span className="material-symbols-outlined text-4xl mb-2">
-                    search_off
-                  </span>
-                  <p className="text-sm">No chats found</p>
-                </div>
               )}
             </div>
           </div>
         </div>
 
         {/* Footer Actions */}
-        <div
-          style={{
-            color: selectedColor ? "black" : "var(--text-color)",
-            backgroundColor: selectedColor || "",
-          }}
-          className="custom-border shadow-xl p-3 bg-[--background-color] rounded-lg"
-        >
-          {/* Header */}
+        <div className="absolute bottom-0 left-0 right-0 -space-y-4">
           <div
-            // style={{
-            //   color: selectedColor || "var(--text-color)",
-            // }}
+            style={{
+              color: selectedColor ? "black" : "var(--text-color)",
+              backgroundColor: selectedColor || "",
+            }}
+            className="inline-block z-10 bg-[--background-color] rounded-t-lg px-4 pt-1 pb-0 border-t-4 border-l-4 border-black/30 -mb-4 select-none"
           >
             <span className="material-symbols-outlined font-bold text-4xl">
               {isEditMode ? "bookmark_manager" : "create_new_folder"}
             </span>
-            <div className="mb-3">
-              <input
-                type="text"
-                value={folderName}
-                onChange={handleNameChange}
-                onKeyDown={handleKeyDown}
-                placeholder="Folder Name"
-                className="flex-1 outline-none text-2xl w-full font-semibold "
-                autoFocus
-                maxLength={50}
-              />
-            </div>
           </div>
-
-          <button
-            onClick={handleSubmit}
-            disabled={!folderName.trim()}
-            className={`border border-black w-full py-2 rounded flex items-center justify-center gap-2 shadow-xl ${
-              folderName.trim()
-                ? "bg-[--primary-green] hover:bg-[--primary-green-dark)]"
-                : "bg-gray-300 cursor-not-allowed"
-            }`}
+          <div
+            style={{
+              color: selectedColor ? "black" : "var(--text-color)",
+              backgroundColor: selectedColor || "",
+            }}
+            className="z-20 p-3 bg-[--background-color] border-t-4 border-l-4 border-black/30 shadow-4xl rounded-tr-lg"
           >
-            <span className="material-symbols-outlined">
-              {isEditMode ? "save" : "create_new_folder"}
-            </span>
-            {isEditMode ? "Save Changes" : "Create Folder"}
-          </button>
+            <div>
+              <div className="mb-3">
+                <input
+                  type="text"
+                  ref={folderNameRef}
+                  defaultValue={folderToEdit?.name || ""}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Folder Name"
+                  className="flex-1 outline-none text-2xl w-full font-semibold"
+                  autoFocus
+                  maxLength={24}
+                  style={{ textTransform: "none" }}
+                />
+              </div>
+            </div>
+
+            <button
+              onClick={handleSubmit}
+              className="border-t-2 border-l-2 border-black/30 w-full py-2 rounded flex items-center justify-center gap-2 shadow-xl bg-[--primary-green] hover:bg-[--primary-green-dark)]"
+            >
+              {isEditMode ? "Save Changes" : "Create Folder"}
+            </button>
+          </div>
         </div>
       </div>
     </SidebarLayout>
