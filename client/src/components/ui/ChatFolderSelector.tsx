@@ -1,19 +1,16 @@
-// components/ui/ChatFolderSelector.tsx
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useFolderStore } from "@/stores/folderStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 
 type Props = {
   selectedFolder: string;
-  onSelectFolder: (type: string) => void;
-  combinedTabs: string[];
+  onSelectFolder: (folder: string) => void;
   chatFolders: string[];
 };
 
 const ChatFolderSelector: React.FC<Props> = ({
   selectedFolder,
   onSelectFolder,
-  combinedTabs,
   chatFolders,
 }) => {
   const { folders } = useFolderStore();
@@ -26,10 +23,13 @@ const ChatFolderSelector: React.FC<Props> = ({
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  const getTypeClass = useCallback(
-    (type: string) =>
+  // Add "All" to the beginning of the folders list
+  const allFolders = ["All", ...chatFolders];
+
+  const getFolderClass = useCallback(
+    (folder: string) =>
       `flex items-center justify-center cursor-pointer font-semibold p-2 px-2.5 whitespace-nowrap ${
-        selectedFolder === type
+        selectedFolder === folder
           ? "opacity-100 font-bold border-b-2"
           : "opacity-70 hover:opacity-100"
       }`,
@@ -86,6 +86,8 @@ const ChatFolderSelector: React.FC<Props> = ({
     };
   }, [updateScrollButtons]);
 
+  if (!allFolders.length) return <div className="custom-border"></div>;
+
   const scrollLeft = () => {
     scrollRef.current?.scrollBy({ left: -200, behavior: "smooth" });
   };
@@ -101,28 +103,25 @@ const ChatFolderSelector: React.FC<Props> = ({
         className="flex items-center overflow-x-auto no-scrollbar scrollbar-hide"
       >
         {isCompact ? (
-          <a className={getTypeClass(selectedFolder)}>
+          <a className={getFolderClass(selectedFolder)}>
             {selectedFolder.charAt(0).toUpperCase() + selectedFolder.slice(1)}
           </a>
         ) : (
-          combinedTabs.map((type) => {
-            const isFolder = chatFolders.includes(type);
-            const folder = isFolder
-              ? folders.find((f) => f.name === type)
-              : null;
+          allFolders.map((folderName) => {
+            const folder = folders.find((f) => f.name === folderName);
 
             return (
               <a
-                key={type}
-                className={getTypeClass(type)}
-                onClick={() => onSelectFolder(type)}
+                key={folderName}
+                className={getFolderClass(folderName)}
+                onClick={() => onSelectFolder(folderName)}
                 style={
-                  isFolder && folder?.color
+                  folder?.color
                     ? { color: folder.color, borderColor: folder.color }
                     : {}
                 }
               >
-                {type.charAt(0).toUpperCase() + type.slice(1)}
+                {folderName.charAt(0).toUpperCase() + folderName.slice(1)}
               </a>
             );
           })

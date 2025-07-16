@@ -10,7 +10,7 @@ import {
   ReceivedRequestsResDto,
   SentRequestResDto,
 } from './dto/responses/friend-request-response.dto';
-import { FriendshipResponseDto } from './dto/responses/friendship-response.dto';
+// import { FriendshipResponseDto } from './dto/responses/friendship-response.dto';
 
 @Injectable()
 export class FriendshipService {
@@ -43,18 +43,14 @@ export class FriendshipService {
         // If I'm the sender and receiver has declined/blocked
         if (
           friendship.senderId === senderId &&
-          [FriendshipStatus.DECLINED, FriendshipStatus.BLOCKED].includes(
-            friendship.receiverStatus,
-          )
+          [FriendshipStatus.DECLINED].includes(friendship.receiverStatus)
         ) {
           return true;
         }
         // If I'm the receiver and sender has declined/blocked
         if (
           friendship.receiverId === senderId &&
-          [FriendshipStatus.DECLINED, FriendshipStatus.BLOCKED].includes(
-            friendship.senderStatus,
-          )
+          [FriendshipStatus.DECLINED].includes(friendship.senderStatus)
         ) {
           return true;
         }

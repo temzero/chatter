@@ -1,13 +1,18 @@
 import API from "@/services/api/api";
-import { otherUser, User } from "@/types/responses/user.response";
+import { UserResponse } from "@/types/responses/user.response";
 import { ProfileFormData } from "@/components/sidebar/SidebarProfileEdit";
 
 export const userService = {
   /**
    * Get all users
    */
-  async getAllUsers(): Promise<User[]> {
+  async getAllUsers(): Promise<UserResponse[]> {
     const { data } = await API.get("/user");
+    return data.payload;
+  },
+
+  async getAllBlockedUsers(): Promise<UserResponse[]> {
+    const { data } = await API.get("/block");
     return data.payload;
   },
 
@@ -15,7 +20,7 @@ export const userService = {
    * Get user by ID
    * @param userId - User ID
    */
-  async getUserById(userId: string): Promise<User> {
+  async getUserById(userId: string): Promise<UserResponse> {
     const { data } = await API.get(`/user/${userId}`);
     return data.payload;
   },
@@ -24,7 +29,7 @@ export const userService = {
    * Get user by identifier (username, email, or phone)
    * @param identifier - Username, email, or phone
    */
-  async getUserByIdentifier(identifier: string): Promise<otherUser> {
+  async getUserByIdentifier(identifier: string): Promise<UserResponse> {
     const { data } = await API.get(`/user/find/${identifier}`);
     return data.payload;
   },
@@ -47,7 +52,7 @@ export const userService = {
    * Update the currently authenticated user
    * @param updatedData - Data to update
    */
-  async updateUser(updatedData: FormData): Promise<User> {
+  async updateUser(updatedData: FormData): Promise<UserResponse> {
     const { data } = await API.put("/user", updatedData);
     return data.payload;
   },
@@ -56,7 +61,7 @@ export const userService = {
    * Update the currently authenticated user
    * @param updatedData - Data to update
    */
-  async updateUsername(username: string): Promise<User> {
+  async updateUsername(username: string): Promise<UserResponse> {
     const { data } = await API.put("/user/username", { username });
     console.log("updated username data: ", data);
     return data.payload;
@@ -114,7 +119,7 @@ export const userService = {
   async updateEmailWithCode(
     email: string,
     verificationCode: string
-  ): Promise<User> {
+  ): Promise<UserResponse> {
     // Validate code format before sending to server
     if (!/^\d{6}$/.test(verificationCode)) {
       throw new Error("Verification code must be 6 digits");

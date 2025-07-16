@@ -3,18 +3,16 @@ import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { ChatResponse } from "@/types/responses/chat.response";
-import { useCurrentUser } from "@/stores/authStore";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
 import { handleError } from "@/utils/handleError";
 import { toast } from "react-toastify";
-import { useChatMemberStore } from "@/stores/chatMemberStore";
+import { useChatMemberStore, useActiveMembers } from "@/stores/chatMemberStore";
+import { DirectChatMember } from "@/types/responses/chatMember.response";
 
 const DirectChatEdit = () => {
-  const currentUser = useCurrentUser();
   const activeChat = useChatStore((state) => state.activeChat) as ChatResponse;
   const fetchChatById = useChatStore((state) => state.fetchChatById);
-  const chatPartner = activeChat.chatPartner;
   const deleteChat = useChatStore((state) => state.deleteChat);
   const updateMemberNickname = useChatMemberStore(
     (state) => state.updateMemberNickname
@@ -23,25 +21,33 @@ const DirectChatEdit = () => {
   const deleteFriendshipByUserId = useFriendshipStore(
     (state) => state.deleteFriendshipByUserId
   );
+  const chatMembers = useActiveMembers();
+
+  const chatPartner = chatMembers?.find(
+    (member) => member.id !== activeChat.myMemberId
+  ) as DirectChatMember;
 
   const initialFormData = useMemo(
     () => ({
       partnerNickname: chatPartner?.nickname || "",
-      myNickname: activeChat.myNickname || "",
+      myNickname:
+        chatMembers?.find((m) => m.id === activeChat.myMemberId)?.nickname ||
+        "",
     }),
-    [chatPartner, activeChat.myNickname]
+    [chatPartner?.nickname, chatMembers, activeChat.myMemberId]
   );
 
   const [formData, setFormData] = useState(initialFormData);
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Compare current form data with initial data to determine if there are changes
   useEffect(() => {
     const isChanged =
       formData.partnerNickname !== initialFormData.partnerNickname ||
       formData.myNickname !== initialFormData.myNickname;
     setHasChanges(isChanged);
   }, [formData, initialFormData]);
+
+  // if (!activeChat || activeChat.type !== "direct" || chatPartner) return null;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -50,32 +56,24 @@ const DirectChatEdit = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!activeChat?.id) {
-      console.error("No active chat ID found");
-      return;
-    }
+    if (!activeChat?.id || !chatPartner) return;
 
     try {
-      // Update partner's nickname
       if (formData.partnerNickname !== initialFormData.partnerNickname) {
         await updateMemberNickname(
           activeChat.id,
-          chatPartner.userId,
+          chatPartner.id,
           formData.partnerNickname
         );
       }
 
-      // Update my nickname (you might need a separate action for this)
-      if (formData.myNickname !== initialFormData.myNickname) {
-        // Assuming you have a way to get current user's ID
-        if (!currentUser?.id) {
-          console.error("cannot find currentUserID");
-          return;
-        } // Replace with actual current user ID
+      const myMember = chatMembers?.find((m) => m.id === activeChat.myMemberId);
+      if (!myMember) return;
 
+      if (formData.myNickname !== initialFormData.myNickname) {
         await updateMemberNickname(
           activeChat.id,
-          currentUser.id,
+          myMember.id,
           formData.myNickname
         );
       }
@@ -89,15 +87,13 @@ const DirectChatEdit = () => {
 
   const handleUnfriend = async () => {
     try {
-      await deleteFriendshipByUserId(activeChat.chatPartner.userId);
+      await deleteFriendshipByUserId(chatPartner.userId);
       setSidebarInfo("default");
       fetchChatById();
     } catch (error) {
       console.error("Failed to unfriend:", error);
     }
   };
-
-  if (!activeChat || activeChat.type !== "direct") return null;
 
   return (
     <aside className="relative w-full h-full overflow-hidden flex flex-col">
@@ -170,8 +166,7 @@ const DirectChatEdit = () => {
         </form>
 
         <div className="custom-border-t absolute bottom-0 w-full flex">
-          {activeChat.chatPartner.friendshipStatus ===
-            FriendshipStatus.ACCEPTED && (
+          {chatPartner.friendshipStatus === FriendshipStatus.ACCEPTED && (
             <button
               className="flex gap-2 justify-center items-center p-2 text-yellow-500 w-full font-medium rounded-none custom-border-r"
               onClick={handleUnfriend}

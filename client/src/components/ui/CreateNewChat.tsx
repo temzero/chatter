@@ -7,15 +7,16 @@ import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "./avatar/Avatar";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
 import FriendshipBtn from "./FriendshipBtn";
-import type { otherUser } from "@/types/responses/user.response";
+import type { UserResponse } from "@/types/responses/user.response";
+import { blockService } from "@/services/blockService";
+import { toast } from "react-toastify";
 
 const CreateNewChat: React.FC = () => {
   const currentUser = useCurrentUser();
-
   const createOrGetDirectChat = useChatStore((s) => s.createOrGetDirectChat);
 
   const [query, setQuery] = useState("");
-  const [user, setUser] = useState<otherUser | null>(null);
+  const [user, setUser] = useState<UserResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -27,15 +28,31 @@ const CreateNewChat: React.FC = () => {
 
     try {
       const foundUser = await userService.getUserByIdentifier(query.trim());
-      console.log("foundedUser: ", foundUser);
       setUser(foundUser);
     } catch (err: unknown) {
-      console.log("Search for user: ", String(err));
+      console.error("Search for user: ", String(err));
       setError("User not found!");
     } finally {
       setLoading(false);
     }
   }
+
+  const handleUnblock = async (blockedId: string, name: string) => {
+    try {
+      await blockService.unblockUser(blockedId);
+      setUser((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          isBlockedByMe: false,
+        };
+      });
+      toast.success(`${name} has been unblocked`);
+    } catch (err) {
+      console.error("Failed to unblock user", err);
+      toast.error("Failed to unblock user");
+    }
+  };
 
   const updateFriendshipStatus = (newStatus: FriendshipStatus | null) => {
     if (!user) return;
@@ -71,6 +88,7 @@ const CreateNewChat: React.FC = () => {
       </form>
 
       {error && <p className="text-red-400 text-center">{error}</p>}
+
       <AnimatePresence mode="wait">
         {user && (
           <motion.div
@@ -85,71 +103,120 @@ const CreateNewChat: React.FC = () => {
             }}
             className="bg-[var(--card-bg-color)] custom-border rounded-lg flex flex-col justify-between h-full overflow-hidden"
           >
-            <div className="flex-1 flex flex-col items-center justify-start gap-2 p-2 pt-4 overflow-y-auto">
-              <Avatar
-                avatarUrl={user.avatarUrl}
-                name={user.firstName}
-                className="w-[120px] h-[120px] cursor-pointer hover:border-4 transform transition-transform duration-300 hover:scale-110"
-                onClick={() => createOrGetDirectChat(user.id)}
-              />
-
-              <h1 className="font-bold text-xl">
-                {user.firstName} {user.lastName}
-              </h1>
-              {user.friendshipStatus === FriendshipStatus.ACCEPTED && (
-                <h1 className="text-[var(--primary-green)] -mt-1">Friend</h1>
-              )}
-              <h1>{user.bio}</h1>
-
-              <div className="w-full flex flex-col font-light my-2 custom-border-t custom-border-b">
-                <ContactInfoItem
-                  icon="alternate_email"
-                  value={user.username}
-                  copyType="username"
-                  defaultText="No username"
-                />
-                <ContactInfoItem
-                  icon="call"
-                  value={user.phoneNumber}
-                  copyType="phone"
-                />
-                <ContactInfoItem
-                  icon="mail"
-                  value={user.email}
-                  copyType="email"
-                />
-                <ContactInfoItem
-                  icon="cake"
-                  value={user.birthday}
-                  copyType="birthday"
-                />
+            {user.isBlockedMe ? (
+              <div className="flex-1 flex flex-col gap-2 items-center justify-center text-center text-red-500 p-6">
+                <i className="material-symbols-outlined text-8xl rotate-90 opacity-60 select-none">
+                  block
+                </i>
+                <p>
+                  This user has blocked you. You cannot view their profile or
+                  interact with them.
+                </p>
               </div>
-            </div>
+            ) : (
+              <>
+                <div className="flex-1 flex flex-col items-center justify-start gap-2 p-2 pt-4 overflow-y-auto">
+                  {user.isBlockedByMe ? (
+                    <div className="relative select-none">
+                      <Avatar
+                        avatarUrl={user.avatarUrl}
+                        name={user.firstName}
+                        className="w-[120px] h-[120px]"
+                      />
+                      <span className="absolute inset-0 flex items-center justify-center text-red-500 opacity-50 hover:opacity-100 cursor-pointer transition-opacity duration-200">
+                        <i className="material-symbols-outlined text-[150px] rotate-90">
+                          block
+                        </i>
+                      </span>
+                    </div>
+                  ) : (
+                    <Avatar
+                      avatarUrl={user.avatarUrl ?? undefined}
+                      name={user.firstName}
+                      className="w-[120px] h-[120px] cursor-pointer hover:border-4 transform transition-transform duration-300 hover:scale-110"
+                      onClick={() => createOrGetDirectChat(user.id)}
+                    />
+                  )}
 
-            {user.id === currentUser?.id || (
-              <div className="w-full border-t-2 border-[var(--border-color)]">
-                {user.friendshipStatus !== FriendshipStatus.ACCEPTED ? (
-                  <FriendshipBtn
-                    userId={user.id}
-                    username={user.username}
-                    firstName={user.firstName}
-                    lastName={user.lastName}
-                    avatarUrl={user.avatarUrl}
-                    friendshipStatus={user.friendshipStatus}
-                    onStatusChange={updateFriendshipStatus}
-                  />
-                ) : (
-                  <button
-                    className="w-full py-1 flex gap-1 items-center justify-center hover:bg-[var(--primary-green)]"
-                    onClick={() => createOrGetDirectChat(user.id)}
-                  >
-                    Start Chat
-                    <span className="material-symbols-outlined">
-                      arrow_right_alt
-                    </span>
-                  </button>
+                  <h1 className="font-bold text-xl">
+                    {user.firstName} {user.lastName}
+                  </h1>
+
+                  {user.friendshipStatus === FriendshipStatus.ACCEPTED && (
+                    <h1
+                      className={`-mt-1 ${
+                        user.isBlockedByMe
+                          ? "text-red-500"
+                          : "text-[var(--primary-green)]"
+                      }`}
+                    >
+                      {user.isBlockedByMe ? "Friend but blocked" : "Friend"}
+                    </h1>
+                  )}
+
+                  <h1>{user.bio}</h1>
+
+                  <div className="w-full flex flex-col font-light my-2 custom-border-t custom-border-b">
+                    <ContactInfoItem
+                      icon="alternate_email"
+                      value={user.username}
+                      copyType="username"
+                      defaultText="No username"
+                    />
+                    <ContactInfoItem
+                      icon="call"
+                      value={user.phoneNumber}
+                      copyType="phone"
+                    />
+                    <ContactInfoItem
+                      icon="mail"
+                      value={user.email}
+                      copyType="email"
+                    />
+                    <ContactInfoItem
+                      icon="cake"
+                      value={user.birthday}
+                      copyType="birthday"
+                    />
+                  </div>
+                </div>
+
+                {user.id !== currentUser?.id && (
+                  <div className="w-full border-t-2 border-[var(--border-color)]">
+                    {user.friendshipStatus !== FriendshipStatus.ACCEPTED ? (
+                      <FriendshipBtn
+                        userId={user.id}
+                        username={user.username}
+                        firstName={user.firstName}
+                        lastName={user.lastName}
+                        avatarUrl={user.avatarUrl ?? undefined}
+                        friendshipStatus={user.friendshipStatus}
+                        onStatusChange={updateFriendshipStatus}
+                      />
+                    ) : user.isBlockedByMe ? (
+                      <button
+                        className="w-full py-1 flex gap-1 items-center justify-center hover:bg-[var(--primary-green)]"
+                        onClick={() => handleUnblock(user.id, user.firstName)}
+                      >
+                        <span className="material-symbols-outlined">
+                          replay
+                        </span>
+                        Unblock
+                      </button>
+                    ) : (
+                      <button
+                        className="w-full py-1 flex gap-1 items-center justify-center hover:bg-[var(--primary-green)]"
+                        onClick={() => createOrGetDirectChat(user.id)}
+                      >
+                        Start Chat
+                        <span className="material-symbols-outlined">
+                          arrow_right_alt
+                        </span>
+                      </button>
+                    )}
+                  </div>
                 )}
-              </div>
+              </>
             )}
           </motion.div>
         )}

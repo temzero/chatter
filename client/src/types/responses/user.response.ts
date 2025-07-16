@@ -4,63 +4,24 @@ export type Theme = "light" | "dark" | "system";
 export type LastSeenSetting = "everyone" | "contacts" | "nobody";
 export type FontSize = "small" | "medium" | "large";
 
-export interface User {
+export interface UserResponse {
   id: string;
   username: string;
   email: string;
-  password_hash: string;
-  avatarUrl?: string;
-  firstName?: string;
-  lastName?: string;
-  phoneNumber?: string;
-  birthday?: Date | string; // ISO string format for consistency
-  bio?: string;
-  status?: string;
-  last_seen?: string;
-  created_at: string;
-  updated_at: string;
-  is_email_verified: boolean;
-  is_deleted: boolean;
-  deleted_at?: string;
-}
+  avatarUrl?: string | null;
+  firstName: string;
+  lastName: string;
+  phoneNumber?: string | null;
+  birthday?: Date | string | null;
+  bio: string | null;
+  status: string;
+  role: string;
+  lastActiveAt: Date | string | null;
+  emailVerified: boolean;
+  phoneVerified: boolean;
 
-export interface otherUser extends User {
+  // Relationship fields
   friendshipStatus?: FriendshipStatus | null;
-}
-
-export interface UserSettings {
-  user_id: string;
-  user: Pick<User, "id" | "username" | "email" | "avatarUrl">;
-
-  // Notifications
-  notifications_enabled: boolean;
-  email_notifications: boolean;
-  push_notifications: boolean;
-  message_notifications: boolean;
-  mention_notifications: boolean;
-
-  // Theme, language, and privacy
-  theme: Theme;
-  language: string;
-  last_seen: LastSeenSetting;
-  profile_picture_visible: boolean;
-  read_receipts_enabled: boolean;
-
-  // Security
-  two_factor_enabled: boolean;
-  encrypted_chats: boolean;
-
-  // History
-  save_chat_history: boolean;
-  message_history_duration: string;
-
-  // Display
-  font_size: FontSize;
-
-  // Advanced privacy
-  privacy_settings?: Record<string, unknown>;
-
-  // Timestamps
-  created_at: string;
-  updated_at: string;
+  isBlockedByMe?: boolean;
+  isBlockedMe?: boolean;
 }

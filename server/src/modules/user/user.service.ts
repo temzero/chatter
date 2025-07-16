@@ -8,10 +8,11 @@ import { ConfigService } from '@nestjs/config';
 import { User } from 'src/modules/user/entities/user.entity';
 import { ErrorResponse } from 'src/common/api-response/errors';
 import { TokenStorageService } from '../auth/services/token-storage.service';
-import { ChatPartnerResDto } from './dto/responses/user-response.dto';
+import { UserResponseDto } from './dto/responses/user-response.dto';
 import { FriendshipStatus } from '../friendship/constants/friendship-status.constants';
 import { FriendshipService } from '../friendship/friendship.service';
 import { ChatService } from '../chat/chat.service';
+import { BlockService } from '../block/block.service';
 
 @Injectable()
 export class UserService {
@@ -22,6 +23,7 @@ export class UserService {
     private readonly tokenStorageService: TokenStorageService,
     private readonly chatService: ChatService,
     private readonly friendshipService: FriendshipService,
+    private readonly blockService: BlockService,
   ) {}
 
   private normalizeIdentifier(identifier: string): string {
@@ -46,7 +48,7 @@ export class UserService {
   async getOtherUserByIdentifier(
     identifier: string,
     currentUserId: string,
-  ): Promise<ChatPartnerResDto> {
+  ): Promise<UserResponseDto> {
     // Find the user
     const user = await this.userRepo.findOne({
       where: [
@@ -61,18 +63,26 @@ export class UserService {
     }
 
     let friendshipStatus: FriendshipStatus | null = null;
+    let isBlockedByMe = false;
+    let isBlockedMe = false;
 
-    // Only check friendship if currentUserId is provided
     if (currentUserId && currentUserId !== user.id) {
       friendshipStatus = await this.friendshipService.getFriendshipStatus(
         currentUserId,
         user.id,
       );
+
+      ({ isBlockedByMe, isBlockedMe } = await this.blockService.getBlockStatus(
+        currentUserId,
+        user.id,
+      ));
     }
 
     return {
       ...user,
       friendshipStatus,
+      isBlockedByMe,
+      isBlockedMe,
     };
   }
 

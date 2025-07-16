@@ -10,8 +10,6 @@ import { ErrorResponse } from 'src/common/api-response/errors';
 import { ChatType } from './constants/chat-types.constants';
 import { CreateGroupChatDto } from './dto/requests/create-chat.dto';
 import { ChatResponseDto } from './dto/responses/chat-response.dto';
-import { FriendshipService } from '../friendship/friendship.service';
-import { FriendshipStatus } from '../friendship/constants/friendship-status.constants';
 import { plainToInstance } from 'class-transformer';
 import { ChatMapper } from './mappers/chat.mapper';
 import { MessageService } from '../message/message.service';
@@ -27,7 +25,6 @@ export class ChatService {
     @InjectRepository(Message)
     private readonly messageRepo: Repository<Message>,
     private readonly messageService: MessageService,
-    private readonly friendshipService: FriendshipService,
     private readonly chatMapper: ChatMapper,
   ) {}
 
@@ -47,13 +44,13 @@ export class ChatService {
       ErrorResponse.badRequest('One or more Users do not exist!');
     }
 
-    const friendshipStatus = await this.friendshipService.getFriendshipStatus(
-      myUserId,
-      partnerId,
-    );
-    if (friendshipStatus === FriendshipStatus.BLOCKED) {
-      ErrorResponse.badRequest('Friendship Blocked');
-    }
+    // const friendshipStatus = await this.friendshipService.getFriendshipStatus(
+    //   myUserId,
+    //   partnerId,
+    // );
+    // if (friendshipStatus === FriendshipStatus.BLOCKED) {
+    //   ErrorResponse.badRequest('Friendship Blocked');
+    // }
 
     const existingChat = await this.chatRepo
       .createQueryBuilder('chat')

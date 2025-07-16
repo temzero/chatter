@@ -6,26 +6,21 @@ import { Logo } from "../ui/Logo";
 import { SlidingContainer } from "../ui/SlidingContainer";
 import ChatList from "@/components/ui/ChatList";
 import { motion } from "framer-motion";
-import { filterChatsByType } from "@/utils/filterChatsByType";
 import { SidebarMode } from "@/types/enums/sidebarMode";
-import { ChatType } from "@/types/enums/ChatType";
 import ChatFolderSelector from "../ui/ChatFolderSelector";
-
-const chatTypes = ["all", ChatType.DIRECT, ChatType.GROUP, ChatType.CHANNEL];
 
 const SidebarDefault: React.FC = () => {
   // State & Store Hooks
   const allChats = useAllChats();
   const setSidebar = useSidebarStore((state) => state.setSidebar);
   const isCompact = useSidebarStore((state) => state.isCompact);
-  const toggleCompact = useSidebarStore((state) => state.toggleCompact);
 
   const { folders, initialize } = useFolderStore();
   const chatFolders = folders.map((folder) => folder.name);
-  const combinedTabs = [...chatTypes, ...chatFolders];
+  const defaultFolder = chatFolders[0] || "all";
 
   // State for selected folder and scroll direction
-  const [selectedFolder, setSelectedFolder] = useState<string>(combinedTabs[0]);
+  const [selectedFolder, setSelectedFolder] = useState<string>(defaultFolder);
   const [direction, setDirection] = useState<number>(1);
 
   // Initialize folders on mount
@@ -35,40 +30,25 @@ const SidebarDefault: React.FC = () => {
 
   // Memoized filtered chats
   const filteredChats = React.useMemo(() => {
-    if (chatFolders.includes(selectedFolder)) {
-      const folder = folders.find((f) => f.name === selectedFolder);
-      if (!folder) return [];
+    const folder = folders.find((f) => f.name === selectedFolder);
+    if (!folder) return allChats; // Return all chats if no folder is selected or found
 
-      return allChats.filter(
-        (chat) =>
-          folder.chatIds.includes(chat.id) || folder.types.includes(chat.type)
-      );
-    }
-    return filterChatsByType(allChats, selectedFolder);
-  }, [selectedFolder, allChats, folders, chatFolders]);
+    return allChats.filter(
+      (chat) =>
+        folder.chatIds.includes(chat.id) || folder.types.includes(chat.type)
+    );
+  }, [selectedFolder, allChats, folders]);
 
   // Handle tab change
-  const handleChatTypeChange = (type: string) => {
-    if (type === selectedFolder) return;
+  const handleChatTypeChange = (folder: string) => {
+    if (folder === selectedFolder) return;
 
-    const currentIndex = combinedTabs.indexOf(selectedFolder);
-    const newIndex = combinedTabs.indexOf(type);
+    const currentIndex = chatFolders.indexOf(selectedFolder);
+    const newIndex = chatFolders.indexOf(folder);
 
     setDirection(newIndex > currentIndex ? 1 : -1);
-    setSelectedFolder(type);
+    setSelectedFolder(folder);
   };
-
-  // Keyboard shortcut (toggle compact mode)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "`") {
-        e.preventDefault();
-        toggleCompact();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [toggleCompact]);
 
   return (
     <aside
@@ -120,12 +100,15 @@ const SidebarDefault: React.FC = () => {
       </header>
 
       {/* Chat Folder Selector Bar */}
-      <ChatFolderSelector
-        selectedFolder={selectedFolder}
-        onSelectFolder={handleChatTypeChange}
-        combinedTabs={combinedTabs}
-        chatFolders={chatFolders}
-      />
+      {chatFolders.length > 0 ? (
+        <ChatFolderSelector
+          selectedFolder={selectedFolder}
+          onSelectFolder={handleChatTypeChange}
+          chatFolders={chatFolders}
+        />
+      ) : (
+        <div className="custom-border" />
+      )}
 
       {/* Chat List Container */}
       <SlidingContainer direction={direction} uniqueKey={selectedFolder}>

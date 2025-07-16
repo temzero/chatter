@@ -1,4 +1,5 @@
 // stores/sidebarInfoStore.ts
+import { SidebarMode } from "@/types/enums/sidebarMode";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useShallow } from "zustand/shallow";
@@ -14,7 +15,7 @@ interface SidebarInfoStore {
   isSidebarInfoVisible: boolean;
   currentSidebarInfo: SidebarInfoModes;
   toggleSidebarInfo: () => void;
-  setSidebarInfo: (mode: SidebarInfoModes) => void;
+  setSidebarInfo: (mode?: SidebarInfoModes) => void;
   initializeKeyListeners: () => () => void;
 }
 
@@ -32,7 +33,8 @@ export const useSidebarInfoStore = create<SidebarInfoStore>()(
         });
       },
 
-      setSidebarInfo: (mode) => set({ currentSidebarInfo: mode }),
+      setSidebarInfo: (mode = SidebarMode.DEFAULT) =>
+        set({ currentSidebarInfo: mode }),
 
       initializeKeyListeners: () => {
         const handleKeyDown = (e: KeyboardEvent) => {

@@ -9,6 +9,8 @@ import { useShallow } from "zustand/shallow";
 import { modalAnimation } from "@/animations/modalAnimations";
 import AddFolderModal from "./AddFolderModal";
 import DeleteFolderModal from "./DeleteFolderModal";
+import BlockUserModal from "./BlockUserModal";
+import UnblockUserModal from "./UnblockUserModal";
 
 const Modal = () => {
   const { modalContent, closeModal } = useModalStore(
@@ -47,6 +49,10 @@ const Modal = () => {
         return <DeleteFolderModal />;
       case ModalType.ADD_FOLDER:
         return <AddFolderModal />;
+      case ModalType.BLOCK_USER:
+        return <BlockUserModal />;
+      case ModalType.UNBLOCK_USER:
+        return <UnblockUserModal />;
       default:
         return null;
     }

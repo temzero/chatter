@@ -1,6 +1,6 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ChatController } from './chat.controllers';
+import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
 import { Chat } from './entities/chat.entity';
 import { ChatMemberModule } from '../chat-member/chat-member.module';
@@ -10,6 +10,7 @@ import { FriendshipModule } from '../friendship/friendship.module';
 import { WebSocketModule } from '../websocket/websocket.module';
 import { MessageModule } from '../message/message.module';
 import { ChatMapper } from './mappers/chat.mapper';
+import { BlockModule } from '../block/block.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ChatMapper } from './mappers/chat.mapper';
     forwardRef(() => ChatMemberModule),
     forwardRef(() => MessageModule),
     forwardRef(() => FriendshipModule),
+    forwardRef(() => BlockModule),
     WebSocketModule,
   ],
   controllers: [ChatController],

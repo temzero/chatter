@@ -14,6 +14,7 @@ import type {
 } from "@/types/responses/message.response";
 import { toast } from "react-toastify";
 import { useModalStore } from "./modalStore";
+import { useSidebarInfoStore } from "./sidebarInfoStore";
 
 interface ChatStore {
   chats: ChatResponse[];
@@ -165,6 +166,7 @@ export const useChatStore = create<ChatStore>()(
         },
 
         setActiveChat: async (chat) => {
+          useSidebarInfoStore.getState().setSidebarInfo();
           if (!chat) {
             set({ activeChat: null, isLoading: false });
             useModalStore.getState().setReplyToMessageId(null);

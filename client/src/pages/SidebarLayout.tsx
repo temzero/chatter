@@ -32,7 +32,7 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({
   };
 
   return (
-    <aside className="relative w-[var(--sidebar-width)] flex h-full flex-col">
+    <aside className="relative w-[var(--sidebar-width)] flex h-full flex-col overflow-x-hidden">
       <header className="flex w-full justify-between items-center min-h-[var(--header-height)] custom-border-b select-none">
         <div className="flex items-center">
           <button className="nav-btn" onClick={handleBackClick}>

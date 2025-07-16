@@ -15,10 +15,7 @@ import { UserService } from './user.service';
 import { SuccessResponse } from 'src/common/api-response/success';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { CurrentUser } from '../auth/decorators/user.decorator';
-import {
-  ChatPartnerResDto,
-  UserResponseDto,
-} from './dto/responses/user-response.dto';
+import { UserResponseDto } from './dto/responses/user-response.dto';
 import { JwtPayload } from '../auth/types/jwt-payload.type';
 import { UpdateProfileDto } from './dto/requests/update-profile.dto';
 import { ChangePasswordDto } from './dto/requests/change-password.dto';
@@ -74,13 +71,13 @@ export class UserController {
   async findOneByIdentifier(
     @CurrentUser('id') userId: string,
     @Param('identifier') identifier: string,
-  ): Promise<SuccessResponse<ChatPartnerResDto>> {
+  ): Promise<SuccessResponse<UserResponseDto>> {
     const user = await this.userService.getOtherUserByIdentifier(
       identifier.trim(),
       userId,
     );
     return new SuccessResponse(
-      plainToInstance(ChatPartnerResDto, user),
+      plainToInstance(UserResponseDto, user),
       'User retrieved successfully',
     );
   }
