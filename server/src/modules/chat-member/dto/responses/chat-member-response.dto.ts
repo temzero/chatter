@@ -33,6 +33,10 @@ export class GroupChatMemberResponseDto {
 
   @Expose() lastReadMessageId: string | null;
 
+  @Expose() isBlockedByMe: boolean;
+
+  @Expose() isBlockedMe: boolean;
+
   @Expose() createdAt: Date;
 }
 

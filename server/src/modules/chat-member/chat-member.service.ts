@@ -8,6 +8,9 @@ import { ErrorResponse } from '../../common/api-response/errors';
 import { UpdateChatMemberDto } from './dto/requests/update-chat-member.dto';
 import { User } from '../user/entities/user.entity';
 import { Chat } from '../chat/entities/chat.entity';
+import { ChatMemberResponseDto } from './dto/responses/chat-member-response.dto';
+import { mapChatMemberToResponseDto } from './mappers/chat-member.mapper';
+import { ChatType } from '../chat/constants/chat-types.constants';
 
 @Injectable()
 export class ChatMemberService {
@@ -29,6 +32,75 @@ export class ChatMemberService {
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to retrieve chat members');
     }
+  }
+
+  async findByChatIdWithBlockFilter(
+    chatId: string,
+    currentUserId: string,
+  ): Promise<ChatMember[]> {
+    try {
+      return await this.memberRepo
+        .createQueryBuilder('member')
+        .leftJoinAndSelect('member.user', 'user')
+        .leftJoin(
+          'block',
+          'block1',
+          'block1.blockerId = :currentUserId AND block1.blockedId = member.userId',
+          { currentUserId },
+        )
+        .leftJoin(
+          'block',
+          'block2',
+          'block2.blockerId = member.userId AND block2.blockedId = :currentUserId',
+          { currentUserId },
+        )
+        .where('member.chatId = :chatId', { chatId })
+        .andWhere('block1.id IS NULL AND block2.id IS NULL')
+        .getMany();
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to retrieve filtered chat members');
+    }
+  }
+
+  async findByChatIdWithBlockStatus(
+    chatId: string,
+    currentUserId: string,
+    chatType: ChatType,
+  ): Promise<ChatMemberResponseDto[]> {
+    const { entities, raw } = await this.memberRepo
+      .createQueryBuilder('member')
+      .leftJoinAndSelect('member.user', 'user')
+      .leftJoin(
+        'block',
+        'block1',
+        'block1.blockerId = :currentUserId AND block1.blockedId = member.userId',
+        { currentUserId },
+      )
+      .leftJoin(
+        'block',
+        'block2',
+        'block2.blockerId = member.userId AND block2.blockedId = :currentUserId',
+        { currentUserId },
+      )
+      .addSelect(['block1.id AS block1_id', 'block2.id AS block2_id']) // Explicitly select block IDs
+      .where('member.chatId = :chatId', { chatId })
+      .getRawAndEntities();
+
+    type BlockRaw = { block1_id?: string | null; block2_id?: string | null };
+    const typedRaw = raw as BlockRaw[];
+
+    return entities.map((member, i) => {
+      const row = typedRaw[i];
+      const isBlockedByMe = !!row?.block1_id; // Check if block record exists
+      const isBlockedMe = !!row?.block2_id;
+
+      return mapChatMemberToResponseDto(
+        member,
+        chatType,
+        isBlockedByMe,
+        isBlockedMe,
+      );
+    });
   }
 
   async getMember(memberId: string): Promise<ChatMember> {
@@ -100,7 +172,6 @@ export class ChatMemberService {
         );
       }
 
-      // Extract just the IDs from the member objects
       return members.map((member) => member.userId);
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to retrieve chat member IDs');
@@ -129,19 +200,16 @@ export class ChatMemberService {
     userId: string,
     role: ChatMemberRole = ChatMemberRole.MEMBER,
   ): Promise<ChatMember> {
-    // Check if user exists
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) {
       ErrorResponse.notFound('User does not exist');
     }
 
-    // Check if chat exists
     const chat = await this.chatRepo.findOne({ where: { id: chatId } });
     if (!chat) {
       ErrorResponse.notFound('Chat does not exist');
     }
 
-    // Check if user is already a member
     const existingMember = await this.memberRepo.findOne({
       where: { chatId, userId },
     });
@@ -149,7 +217,6 @@ export class ChatMemberService {
       ErrorResponse.badRequest('User is already a member of this chat');
     }
 
-    // Create new member
     const newMember = this.memberRepo.create({
       chatId,
       userId,
@@ -173,7 +240,7 @@ export class ChatMemberService {
       if (result.affected === 0) {
         ErrorResponse.notFound('Chat member not found');
       }
-      // Then return the updated entity
+
       const member = await this.memberRepo.findOne({
         where: { id: memberId },
         relations: ['user'],
@@ -195,7 +262,6 @@ export class ChatMemberService {
   ): Promise<ChatMember> {
     try {
       return await this.updateMember(memberId, {
-        // automatically update to now
         lastReadMessageId: messageId,
       });
     } catch (error) {
@@ -208,7 +274,6 @@ export class ChatMemberService {
     nickname: string | null,
   ): Promise<string | null> {
     try {
-      // Validate nickname length if provided
       if (nickname && nickname.length > 32) {
         ErrorResponse.badRequest('Nickname must be 32 characters or less');
       }

@@ -34,6 +34,7 @@ export const useFolderStore = create<FolderStore>((set, get) => ({
   error: null,
 
   initialize: async () => {
+    if (get().folders.length > 0) return;
     try {
       set({ isLoading: true, error: null });
       const folders = await folderService.getFolders();

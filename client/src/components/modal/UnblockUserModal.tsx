@@ -7,19 +7,24 @@ import { DirectChatMember } from "@/types/responses/chatMember.response";
 import { Avatar } from "../ui/avatar/Avatar";
 import { blockService } from "@/services/blockService";
 import { toast } from "react-toastify";
+import { useChatMemberStore } from "@/stores/chatMemberStore";
 
 const UnblockUserModal: React.FC = () => {
   const closeModal = useModalStore((state) => state.closeModal);
   const modalContent = useModalStore((state) => state.modalContent);
+  const updateMemberLocally = useChatMemberStore.getState().updateMemberLocally;
 
   // Extract user data from modal props
-  const chatPartner = modalContent?.props?.chatPartner as DirectChatMember;
-  if (!chatPartner) return null;
+  const blockedUser = modalContent?.props?.blockedUser as DirectChatMember;
+  if (!blockedUser) return null;
 
   const handleUnblock = async () => {
     try {
-      await blockService.unblockUser(chatPartner.userId);
-      toast.success(`${chatPartner.username || chatPartner.firstName} has been unblocked`);
+      await blockService.unblockUser(blockedUser.userId);
+      updateMemberLocally(blockedUser.chatId, blockedUser.id, { isBlockedByMe: false });
+      toast.success(
+        `${blockedUser.username || blockedUser.firstName} has been unblocked`
+      );
     } catch (error) {
       console.error("Error unblocking user:", error);
       toast.error("Failed to unblock user");
@@ -35,25 +40,22 @@ const UnblockUserModal: React.FC = () => {
     >
       <div className="p-4">
         {/* Changed to green color and "Unblock User" title */}
-        <h2 className="text-2xl font-semibold mb-4 text-green-500">
-          Unblock User
-        </h2>
+        <div className="flex gap-2 items-center mb-4 text-[--primary-green] font-semibold">
+          <span className="material-symbols-outlined text-3xl font-bold">
+            lock_open_right
+          </span>
+          <h2 className="text-2xl">Unblock User</h2>
+        </div>
 
         <div className="flex items-center gap-3 mb-6">
-          <div className="relative select-none">
-            <Avatar
-              avatarUrl={chatPartner.avatarUrl}
-              name={chatPartner.nickname || chatPartner.firstName}
-            />
-            {/* Changed icon to "undo" and color to green */}
-            <span className="absolute inset-0 flex items-center justify-center text-green-500 opacity-50 hover:opacity-100 cursor-pointer transition-opacity duration-200">
-              <i className="material-symbols-outlined text-6xl">replay</i>
-            </span>
-          </div>
-
+          <Avatar
+            avatarUrl={blockedUser.avatarUrl}
+            name={blockedUser.nickname || blockedUser.firstName}
+            isBlocked={true}
+          />
           <div>
-            <h3 className="font-medium">{chatPartner.username}</h3>
-            <p className="text-sm opacity-70">{chatPartner.email}</p>
+            <h3 className="font-medium">{blockedUser.username}</h3>
+            <p className="text-sm opacity-70">{blockedUser.email}</p>
           </div>
         </div>
 
@@ -66,13 +68,13 @@ const UnblockUserModal: React.FC = () => {
       <div className="flex custom-border-t">
         {/* Changed button text and color to green */}
         <button
-          className="p-3 text-green-500 hover:bg-[var(--background-secondary)] opacity-80 hover:opacity-100 flex-1"
+          className="p-3 text-[--primary-green] hover:bg-[var(--background-secondary)] font-semibold hover:font-bold opacity-80 hover:opacity-100 flex-1"
           onClick={handleUnblock}
         >
           Unblock
         </button>
         <button
-          className="p-3 hover:bg-[var(--background-secondary)] opacity-80 hover:opacity-100 flex-1"
+          className="p-3 hover:bg-[var(--background-secondary)] font-semibold hover:font-bold opacity-80 hover:opacity-100 flex-1"
           onClick={closeModal}
         >
           Cancel

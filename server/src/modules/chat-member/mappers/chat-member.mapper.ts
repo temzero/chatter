@@ -10,7 +10,25 @@ import { ChatType } from '../../chat/constants/chat-types.constants';
 export function mapChatMemberToResponseDto(
   member: ChatMember,
   chatType?: ChatType,
+  isBlockedByMe?: boolean,
+  isBlockedMe?: boolean,
 ) {
+  // If the user has blocked me, return minimal information
+  if (isBlockedMe) {
+    const blockedMember = {
+      id: member.id,
+      chatId: member.chatId,
+      userId: member.userId,
+      isBlockedMe: true, // Make it clear this user blocked me
+      // Don't include any other personal information
+    };
+
+    return chatType === ChatType.DIRECT
+      ? plainToInstance(DirectChatMemberResponseDto, blockedMember)
+      : plainToInstance(GroupChatMemberResponseDto, blockedMember);
+  }
+
+  // Normal response if not blocked
   const baseMember = {
     id: member.id,
     chatId: member.chatId,
@@ -24,6 +42,8 @@ export function mapChatMemberToResponseDto(
     customTitle: member.customTitle,
     mutedUntil: member.mutedUntil,
     lastReadMessageId: member.lastReadMessageId,
+    isBlockedByMe: isBlockedByMe,
+    isBlockedMe: false,
     createdAt: member.createdAt,
   };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useAllChats } from "@/stores/chatStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useFolderStore } from "@/stores/folderStore";
@@ -15,18 +15,13 @@ const SidebarDefault: React.FC = () => {
   const setSidebar = useSidebarStore((state) => state.setSidebar);
   const isCompact = useSidebarStore((state) => state.isCompact);
 
-  const { folders, initialize } = useFolderStore();
+  const folders = useFolderStore(state => state.folders);
   const chatFolders = folders.map((folder) => folder.name);
   const defaultFolder = chatFolders[0] || "all";
 
   // State for selected folder and scroll direction
   const [selectedFolder, setSelectedFolder] = useState<string>(defaultFolder);
   const [direction, setDirection] = useState<number>(1);
-
-  // Initialize folders on mount
-  useEffect(() => {
-    initialize();
-  }, [initialize]);
 
   // Memoized filtered chats
   const filteredChats = React.useMemo(() => {

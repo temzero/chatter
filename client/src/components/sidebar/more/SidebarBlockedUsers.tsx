@@ -3,11 +3,12 @@ import SidebarLayout from "@/pages/SidebarLayout";
 import { blockService } from "@/services/blockService";
 import { BlockResponseDto } from "@/types/responses/block.response";
 import { Avatar } from "@/components/ui/avatar/Avatar";
-import { toast } from "react-toastify";
 import { FadeLoader } from "react-spinners";
+import { ModalType, useModalStore } from "@/stores/modalStore";
 
 const SidebarBlockedUsers: React.FC = () => {
   const [blockedUsers, setBlockedUsers] = useState<BlockResponseDto[]>([]);
+  const openModal = useModalStore((state) => state.openModal);
   const [loading, setLoading] = useState(true);
 
   const fetchBlockedUsers = async () => {
@@ -18,17 +19,6 @@ const SidebarBlockedUsers: React.FC = () => {
       console.error("Failed to fetch blocked users", err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleUnblock = async (blockedId: string, name: string) => {
-    try {
-      await blockService.unblockUser(blockedId);
-      setBlockedUsers((prev) => prev.filter((b) => b.blocked.id !== blockedId));
-      toast.success(`${name} has been unblocked`);
-    } catch (err) {
-      console.error("Failed to unblock user", err);
-      toast.error("Failed to unblock user");
     }
   };
 
@@ -54,39 +44,20 @@ const SidebarBlockedUsers: React.FC = () => {
           </p>
         </div>
       ) : (
-        <div className="space-y-4 overflow-x-hidden">
+        <div className="overflow-x-hidden">
           {blockedUsers.map(({ id, blocked }) => (
             <div key={id} className="flex flex-col items-center group">
-              <button
+              <div
                 key={id}
-                className="w-full flex items-center justify-between p-4 rounded-none hover:bg-[var(--hover-color)]"
-                onClick={() =>
-                  handleUnblock(
-                    blocked.id,
-                    blocked.username || blocked.firstName
-                  )
-                }
+                className="w-full flex items-center justify-between p-3"
               >
                 <div className="flex items-center gap-3">
-                  <div className="relative select-none ">
+                  <div className="relative">
                     <Avatar
                       avatarUrl={blocked.avatarUrl}
                       name={blocked.username || blocked.firstName}
+                      isBlocked={true} // Always true in this component
                     />
-
-                    {/* Default block icon (visible until hover) */}
-                    <span className="absolute inset-0 flex items-center justify-center text-red-500 opacity-50 group-hover:opacity-0">
-                      <i className="material-symbols-outlined text-6xl rotate-90">
-                        block
-                      </i>
-                    </span>
-
-                    {/* Replay icon (hidden until hover) */}
-                    <span className="absolute inset-0 flex items-center justify-center text-green-500 opacity-0 group-hover:opacity-100">
-                      <i className="material-symbols-outlined text-6xl">
-                        replay
-                      </i>
-                    </span>
                   </div>
 
                   <div className="flex flex-col items-start">
@@ -96,10 +67,19 @@ const SidebarBlockedUsers: React.FC = () => {
                     <p className="text-sm opacity-50">@{blocked.username}</p>
                   </div>
                 </div>
-                <h1 className="opacity-0 group-hover:opacity-100 text-green-500 font-semibold">
-                  Unblock
-                </h1>
-              </button>
+                <button
+                  onClick={() =>
+                    openModal(ModalType.UNBLOCK_USER, {
+                      blockedUser: blocked,
+                    })
+                  }
+                  className="opacity-0 custom-border p-1.5 rounded-full hover:bg-[--primary-green] hover:text-[--sidebar-color] group-hover:opacity-100 text-[--primary-green] text-sm font-semibold"
+                >
+                  <span className="material-symbols-outlined">
+                    lock_open_right
+                  </span>
+                </button>
+              </div>
               <div className="custom-border-b w-[90%]"></div>
             </div>
           ))}

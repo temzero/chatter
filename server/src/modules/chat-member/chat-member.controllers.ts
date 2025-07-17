@@ -21,6 +21,7 @@ import { UpdateChatMemberDto } from './dto/requests/update-chat-member.dto';
 import { mapChatMemberToResponseDto } from './mappers/chat-member.mapper';
 import { ChatService } from '../chat/chat.service';
 import { ChatType } from '../chat/constants/chat-types.constants';
+import { CurrentUser } from '../auth/decorators/user.decorator';
 
 @Controller('chat-members')
 @UseGuards(JwtAuthGuard)
@@ -30,20 +31,51 @@ export class ChatMemberController {
     private readonly chatService: ChatService,
   ) {}
 
+  // @Get('direct/:chatId')
+  // async getDirectChatMembers(
+  //   @Param('chatId') chatId: string,
+  // ): Promise<SuccessResponse<DirectChatMemberResponseDto[]>> {
+  //   const members = await this.memberService.findByChatId(chatId);
+  //   const membersResponse = members.map(
+  //     (member) =>
+  //       mapChatMemberToResponseDto(
+  //         member,
+  //         ChatType.DIRECT,
+  //       ) as DirectChatMemberResponseDto,
+  //   );
+  //   return new SuccessResponse(
+  //     membersResponse,
+  //     'Direct chat members retrieved successfully',
+  //   );
+  // }
+
+  // @Get('group/:chatId')
+  // async getGroupChatMembers(
+  //   @Param('chatId') chatId: string,
+  // ): Promise<SuccessResponse<GroupChatMemberResponseDto[]>> {
+  //   const members = await this.memberService.findByChatId(chatId);
+  //   const membersResponse = members.map((member) =>
+  //     mapChatMemberToResponseDto(member, ChatType.GROUP),
+  //   );
+  //   return new SuccessResponse(
+  //     membersResponse,
+  //     'Group chat members retrieved successfully',
+  //   );
+  // }
+
   @Get('direct/:chatId')
   async getDirectChatMembers(
     @Param('chatId') chatId: string,
+    @CurrentUser('id') currentUserId: string,
   ): Promise<SuccessResponse<DirectChatMemberResponseDto[]>> {
-    const members = await this.memberService.findByChatId(chatId);
-    const membersResponse = members.map(
-      (member) =>
-        mapChatMemberToResponseDto(
-          member,
-          ChatType.DIRECT,
-        ) as DirectChatMemberResponseDto,
+    const members = await this.memberService.findByChatIdWithBlockStatus(
+      chatId,
+      currentUserId,
+      ChatType.DIRECT,
     );
+
     return new SuccessResponse(
-      membersResponse,
+      members as DirectChatMemberResponseDto[],
       'Direct chat members retrieved successfully',
     );
   }
@@ -51,13 +83,16 @@ export class ChatMemberController {
   @Get('group/:chatId')
   async getGroupChatMembers(
     @Param('chatId') chatId: string,
+    @CurrentUser('id') currentUserId: string,
   ): Promise<SuccessResponse<GroupChatMemberResponseDto[]>> {
-    const members = await this.memberService.findByChatId(chatId);
-    const membersResponse = members.map((member) =>
-      mapChatMemberToResponseDto(member, ChatType.GROUP),
+    const members = await this.memberService.findByChatIdWithBlockStatus(
+      chatId,
+      currentUserId,
+      ChatType.GROUP,
     );
+
     return new SuccessResponse(
-      membersResponse,
+      members as GroupChatMemberResponseDto[],
       'Group chat members retrieved successfully',
     );
   }

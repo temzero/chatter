@@ -5,13 +5,13 @@ import {
   SidebarInfoModes,
   useSidebarInfoStore,
 } from "@/stores/sidebarInfoStore";
-import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import FriendshipBtn from "@/components/ui/FriendshipBtn";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
 import { useActiveChat } from "@/stores/chatStore";
 import { DirectChatMember } from "@/types/responses/chatMember.response";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { useActiveMembers } from "@/stores/chatMemberStore";
+import { Avatar } from "@/components/ui/avatar/Avatar";
 
 const DirectChat: React.FC = () => {
   const activeChat = useActiveChat() as ChatResponse;
@@ -26,19 +26,39 @@ const DirectChat: React.FC = () => {
   if (!chatPartner || !activeChat) return null;
 
   // Header buttons specific to direct chat
-  const headerIcons = [
-    { icon: "notifications", action: () => {} },
-    { icon: "search", action: () => {} },
-    {
+  const headerIcons = [];
+
+  if (chatPartner.isBlockedByMe) {
+    headerIcons.push({
+      icon: "lock_open_right",
+      action: () =>
+        openModal(ModalType.UNBLOCK_USER, { blockedUser: chatPartner }),
+      className: "text-[--primary-green]",
+    });
+  } else if (chatPartner.isBlockedMe) {
+    headerIcons.push({
       icon: "block",
-      action: () => openModal(ModalType.BLOCK_USER, { chatPartner: chatPartner }),
-      className: "rotate-90",
-    },
-    {
-      icon: "edit",
-      action: () => setSidebarInfo("directEdit"),
-    },
-  ];
+      action: () =>
+        openModal(ModalType.BLOCK_USER, { userToBlock: chatPartner }),
+      className: "",
+    });
+  } else {
+    headerIcons.push(
+      { icon: "notifications", action: () => {}, className: "" },
+      { icon: "search", action: () => {}, className: "" },
+      {
+        icon: "block",
+        action: () =>
+          openModal(ModalType.BLOCK_USER, { userToBlock: chatPartner }),
+        className: "",
+      },
+      {
+        icon: "edit",
+        action: () => setSidebarInfo("directEdit"),
+        className: "",
+      }
+    );
+  }
 
   return (
     <div className="flex flex-col w-full h-full">
@@ -57,7 +77,12 @@ const DirectChat: React.FC = () => {
 
       {/* Chat content */}
       <div className="flex flex-col justify-center items-center gap-4 p-4 w-full h-full overflow-y-auto">
-        <ChatAvatar chat={activeChat} type="info" />
+        <Avatar
+          size="36"
+          avatarUrl={chatPartner.avatarUrl}
+          name={chatPartner.nickname || chatPartner.firstName}
+          isBlocked={chatPartner.isBlockedByMe}
+        />
         <h1 className="text-xl font-semibold">{activeChat.name}</h1>
         {chatPartner.nickname && (
           <h2 className="text-sm opacity-80 -mt-1">
@@ -68,15 +93,27 @@ const DirectChat: React.FC = () => {
           <p className="text-center opacity-80">{chatPartner.bio}</p>
         )}
 
-        <FriendshipBtn
-          userId={chatPartner.userId}
-          username={chatPartner.username}
-          firstName={chatPartner.firstName}
-          lastName={chatPartner.lastName}
-          avatarUrl={chatPartner.avatarUrl ?? undefined}
-          friendshipStatus={chatPartner.friendshipStatus}
-          className="bg-[var(--primary-green)]"
-        />
+        {chatPartner.isBlockedMe && (
+          <h1 className="text-red-500">Blocked Me</h1>
+        )}
+        {chatPartner.isBlockedByMe ? (
+          <h1 className="text-red-500">
+            You've blocked this{" "}
+            {chatPartner.friendshipStatus === FriendshipStatus.ACCEPTED
+              ? "friend"
+              : "user"}
+          </h1>
+        ) : (
+          <FriendshipBtn
+            userId={chatPartner.userId}
+            username={chatPartner.username}
+            firstName={chatPartner.firstName}
+            lastName={chatPartner.lastName}
+            avatarUrl={chatPartner.avatarUrl ?? undefined}
+            friendshipStatus={chatPartner.friendshipStatus}
+            className="bg-[var(--primary-green)]"
+          />
+        )}
 
         {chatPartner.friendshipStatus === FriendshipStatus.ACCEPTED && (
           <div className="w-full flex flex-col items-center rounded font-light custom-border overflow-hidden">

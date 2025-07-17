@@ -72,10 +72,8 @@ export class UserService {
         user.id,
       );
 
-      ({ isBlockedByMe, isBlockedMe } = await this.blockService.getBlockStatus(
-        currentUserId,
-        user.id,
-      ));
+      ({ isBlockedByMe, isBlockedMe } =
+        await this.blockService.getBlockStatusBetween(currentUserId, user.id));
     }
 
     return {

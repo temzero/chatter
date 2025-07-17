@@ -7,20 +7,26 @@ import { DirectChatMember } from "@/types/responses/chatMember.response";
 import { Avatar } from "../ui/avatar/Avatar";
 import { toast } from "react-toastify";
 import { blockService } from "@/services/blockService";
+import { useChatMemberStore } from "@/stores/chatMemberStore";
 
 const BlockUserModal: React.FC = () => {
-  // const { blockUser } = useBlockUser();
   const closeModal = useModalStore((state) => state.closeModal);
   const modalContent = useModalStore((state) => state.modalContent);
+  const updateMemberLocally = useChatMemberStore.getState().updateMemberLocally;
 
   // Extract user data from modal props
-  const chatPartner = modalContent?.props?.chatPartner as DirectChatMember;
-  if (!chatPartner) return null;
+  const userToBlock = modalContent?.props?.userToBlock as DirectChatMember;
+  if (!userToBlock) return null;
 
   const handleBlock = async () => {
     try {
-      await blockService.blockUser({ blockedId: chatPartner.userId });
-      toast.success(`${chatPartner.username || chatPartner.firstName} has been blocked`);
+      await blockService.blockUser({ blockedId: userToBlock.userId });
+      updateMemberLocally(userToBlock.chatId, userToBlock.id, {
+        isBlockedByMe: true,
+      });
+      toast.success(
+        `${userToBlock.username || userToBlock.firstName} has been blocked`
+      );
     } catch (error) {
       console.error("Error blocking user:", error);
       toast.error("Failed to block user");
@@ -40,8 +46,8 @@ const BlockUserModal: React.FC = () => {
         <div className="flex items-center gap-3 mb-6">
           <div className="relative select-none">
             <Avatar
-              avatarUrl={chatPartner.avatarUrl}
-              name={chatPartner.nickname || chatPartner.firstName}
+              avatarUrl={userToBlock.avatarUrl}
+              name={userToBlock.nickname || userToBlock.firstName}
             />
             <span className="absolute inset-0 flex items-center justify-center text-red-500 opacity-50 hover:opacity-100 cursor-pointer transition-opacity duration-200">
               <i className="material-symbols-outlined text-6xl rotate-90">
@@ -51,8 +57,8 @@ const BlockUserModal: React.FC = () => {
           </div>
 
           <div>
-            <h3 className="font-medium">{chatPartner.username}</h3>
-            <p className="text-sm opacity-70">{chatPartner.email}</p>
+            <h3 className="font-medium">{userToBlock.username}</h3>
+            <p className="text-sm opacity-70">{userToBlock.email}</p>
           </div>
         </div>
 

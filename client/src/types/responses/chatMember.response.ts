@@ -16,8 +16,13 @@ export interface GroupChatMember {
   role: ChatMemberRole;
   status: ChatMemberStatus;
   customTitle: string | null;
-  mutedUntil: string | null; // Dates are usually serialized as strings
+  mutedUntil: string | null;
   lastReadMessageId: string | null;
+
+  // block status fields:
+  isBlockedByMe: boolean;
+  isBlockedMe: boolean;
+
   createdAt: string;
 }
 

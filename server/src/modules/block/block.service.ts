@@ -112,19 +112,19 @@ export class BlockService {
   }
 
   // block.service.ts
-  async getBlockStatus(
-    me: string,
-    user: string,
+  async getBlockStatusBetween(
+    currentUserId: string,
+    otherUserId: string,
   ): Promise<{ isBlockedByMe: boolean; isBlockedMe: boolean }> {
     const blocks = await this.blockRepo.find({
       where: [
-        { blockerId: me, blockedId: user },
-        { blockerId: user, blockedId: me },
+        { blockerId: currentUserId, blockedId: otherUserId },
+        { blockerId: otherUserId, blockedId: currentUserId },
       ],
     });
 
-    const isBlockedByMe = blocks.some((b) => b.blockerId === me);
-    const isBlockedMe = blocks.some((b) => b.blockerId === user);
+    const isBlockedByMe = blocks.some((b) => b.blockerId === currentUserId);
+    const isBlockedMe = blocks.some((b) => b.blockerId === otherUserId);
 
     return { isBlockedByMe, isBlockedMe };
   }

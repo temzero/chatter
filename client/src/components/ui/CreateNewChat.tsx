@@ -116,27 +116,17 @@ const CreateNewChat: React.FC = () => {
             ) : (
               <>
                 <div className="flex-1 flex flex-col items-center justify-start gap-2 p-2 pt-4 overflow-y-auto">
-                  {user.isBlockedByMe ? (
-                    <div className="relative select-none">
-                      <Avatar
-                        avatarUrl={user.avatarUrl}
-                        name={user.firstName}
-                        className="w-[120px] h-[120px]"
-                      />
-                      <span className="absolute inset-0 flex items-center justify-center text-red-500 opacity-50 hover:opacity-100 cursor-pointer transition-opacity duration-200">
-                        <i className="material-symbols-outlined text-[150px] rotate-90">
-                          block
-                        </i>
-                      </span>
-                    </div>
-                  ) : (
+                  <div className="relative">
                     <Avatar
                       avatarUrl={user.avatarUrl ?? undefined}
                       name={user.firstName}
                       className="w-[120px] h-[120px] cursor-pointer hover:border-4 transform transition-transform duration-300 hover:scale-110"
-                      onClick={() => createOrGetDirectChat(user.id)}
+                      onClick={() =>
+                        !user.isBlockedByMe && createOrGetDirectChat(user.id)
+                      }
+                      isBlocked={user.isBlockedByMe}
                     />
-                  )}
+                  </div>
 
                   <h1 className="font-bold text-xl">
                     {user.firstName} {user.lastName}
@@ -183,19 +173,10 @@ const CreateNewChat: React.FC = () => {
 
                 {user.id !== currentUser?.id && (
                   <div className="w-full border-t-2 border-[var(--border-color)]">
-                    {user.friendshipStatus !== FriendshipStatus.ACCEPTED ? (
-                      <FriendshipBtn
-                        userId={user.id}
-                        username={user.username}
-                        firstName={user.firstName}
-                        lastName={user.lastName}
-                        avatarUrl={user.avatarUrl ?? undefined}
-                        friendshipStatus={user.friendshipStatus}
-                        onStatusChange={updateFriendshipStatus}
-                      />
-                    ) : user.isBlockedByMe ? (
+                    {/* Unblock button takes priority when user is blocked */}
+                    {user.isBlockedByMe ? (
                       <button
-                        className="w-full py-1 flex gap-1 items-center justify-center hover:bg-[var(--primary-green)]"
+                        className="w-full py-1 flex gap-1 items-center justify-center hover:bg-[var(--primary-green)] bg-red-500 hover:bg-red-600 text-white"
                         onClick={() => handleUnblock(user.id, user.firstName)}
                       >
                         <span className="material-symbols-outlined">
@@ -204,15 +185,29 @@ const CreateNewChat: React.FC = () => {
                         Unblock
                       </button>
                     ) : (
-                      <button
-                        className="w-full py-1 flex gap-1 items-center justify-center hover:bg-[var(--primary-green)]"
-                        onClick={() => createOrGetDirectChat(user.id)}
-                      >
-                        Start Chat
-                        <span className="material-symbols-outlined">
-                          arrow_right_alt
-                        </span>
-                      </button>
+                      <>
+                        {user.friendshipStatus !== FriendshipStatus.ACCEPTED ? (
+                          <FriendshipBtn
+                            userId={user.id}
+                            username={user.username}
+                            firstName={user.firstName}
+                            lastName={user.lastName}
+                            avatarUrl={user.avatarUrl ?? undefined}
+                            friendshipStatus={user.friendshipStatus}
+                            onStatusChange={updateFriendshipStatus}
+                          />
+                        ) : (
+                          <button
+                            className="w-full py-1 flex gap-1 items-center justify-center hover:bg-[var(--primary-green)]"
+                            onClick={() => createOrGetDirectChat(user.id)}
+                          >
+                            Start Chat
+                            <span className="material-symbols-outlined">
+                              arrow_right_alt
+                            </span>
+                          </button>
+                        )}
+                      </>
                     )}
                   </div>
                 )}

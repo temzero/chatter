@@ -57,7 +57,7 @@ export const chatMemberService = {
   // Update a chat member
   async updateMember(
     memberId: string,
-    updates: { role?: string; mutedUntil?: Date }
+    updates: Partial<ChatMember>
   ): Promise<ChatMember> {
     const response = await API.patch<ApiSuccessResponse<ChatMember>>(
       `/chat-members/${memberId}`,

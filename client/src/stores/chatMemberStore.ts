@@ -15,14 +15,19 @@ interface ChatMemberStore {
   getChatMemberUserIds: (chatId: string, type: ChatType) => string[];
   getAllChatMemberIds: () => string[];
   getAllUserIdsInChats: () => string[];
+  updateMemberLocally: (
+    chatId: string,
+    memberId: string,
+    updates: Partial<ChatMember>
+  ) => void;
   updateMember: (
     chatId: string,
-    userId: string,
-    updates: { role?: string; mutedUntil?: Date }
+    memberId: string,
+    updates: Partial<ChatMember>
   ) => Promise<void>;
   updateMemberNickname: (
     chatId: string,
-    userId: string,
+    memberId: string,
     nickname: string
   ) => Promise<string>;
   updateMemberLastRead: (
@@ -30,10 +35,6 @@ interface ChatMemberStore {
     memberId: string,
     messageId: string
   ) => Promise<void>;
-  getGroupMemberById: (
-    chatId: string,
-    userId: string
-  ) => ChatMember | undefined;
   addGroupMember: (chatId: string, member: ChatMember) => void;
   removeGroupMember: (chatId: string, userId: string) => void;
 }
@@ -107,6 +108,28 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
     return Array.from(allUserIds);
   },
 
+  updateMemberLocally: (chatId, memberId, updates) => {
+    set((state) => {
+      const currentMembers = state.chatMembers[chatId] || [];
+      const memberIndex = currentMembers.findIndex((m) => m.id === memberId);
+
+      if (memberIndex === -1) return state;
+
+      const updatedMembers = [...currentMembers];
+      updatedMembers[memberIndex] = {
+        ...updatedMembers[memberIndex],
+        ...updates,
+      };
+
+      return {
+        chatMembers: {
+          ...state.chatMembers,
+          [chatId]: updatedMembers,
+        },
+      };
+    });
+  },
+
   updateMember: async (chatId, memberId, updates) => {
     set({ isLoading: true });
     try {
@@ -115,19 +138,9 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
         updates
       );
 
-      set((state) => {
-        const currentMembers = state.chatMembers[chatId] || [];
-        const updatedMembers = currentMembers.map((member) =>
-          member.id === memberId ? updatedMember : member
-        );
-        return {
-          chatMembers: {
-            ...state.chatMembers,
-            [chatId]: updatedMembers,
-          },
-          isLoading: false,
-        };
-      });
+      // Use the local update function instead of direct state manipulation
+      get().updateMemberLocally(chatId, memberId, updatedMember);
+      set({ isLoading: false });
     } catch (error) {
       console.error("Failed to update chat member:", error);
       set({ error: "Failed to update member", isLoading: false });
@@ -135,13 +148,17 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
     }
   },
 
-  updateMemberNickname: async (memberId, nickname) => {
+  updateMemberNickname: async (chatId, memberId, nickname) => {
     set({ isLoading: true });
     try {
       const updatedNickname = await chatMemberService.updateMemberNickname(
         memberId,
         nickname
       );
+
+      get().updateMemberLocally(chatId, memberId, {
+        nickname: updatedNickname,
+      });
 
       return updatedNickname;
     } catch (error) {
@@ -151,48 +168,15 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
     }
   },
 
-  // In chatMemberStore.ts
   updateMemberLastRead: async (
     chatId: string,
     memberId: string,
     messageId: string
   ) => {
-    set((state) => {
-      const members = state.chatMembers[chatId];
-      if (!members) return state;
-
-      const memberIndex = members.findIndex((m) => m.id === memberId);
-      if (memberIndex === -1) return state;
-
-      const member = members[memberIndex];
-
-      // Only update if the new messageId is more recent
-      if (
-        member.lastReadMessageId &&
-        compareMessageIds(member.lastReadMessageId, messageId) >= 0
-      ) {
-        return state;
-      }
-
-      const updatedMembers = [...members];
-      updatedMembers[memberIndex] = {
-        ...member,
-        lastReadMessageId: messageId,
-      };
-
-      return {
-        ...state,
-        chatMembers: {
-          ...state.chatMembers,
-          [chatId]: updatedMembers,
-        },
-      };
+    // Just update directly without comparison
+    get().updateMemberLocally(chatId, memberId, {
+      lastReadMessageId: messageId,
     });
-  },
-
-  getGroupMemberById: (chatId, userId) => {
-    const members = get().chatMembers[chatId];
-    return members?.find((member) => member.userId === userId);
   },
 
   addGroupMember: (chatId, member) => {
@@ -226,6 +210,12 @@ export const useActiveMembers = (): ChatMember[] | undefined => {
     useShallow((state) => (activeChatId ? state.chatMembers[activeChatId] : []))
   );
 };
+// export const useActiveMembers = (): ChatMember[] | undefined => {
+//   const activeChatId = useActiveChatId();
+//   return useChatMemberStore((state) =>
+//     activeChatId ? state.chatMembers[activeChatId] : []
+//   );
+// };
 
 export const useMembersByChatId = (
   chatId: string
@@ -261,12 +251,3 @@ export const useGroupOtherMembers = (
     })
   );
 };
-
-function compareMessageIds(a: string, b: string): number {
-  // Implement your message ID comparison logic
-  // This depends on how your message IDs are generated
-  // For timestamp-based IDs:
-  return new Date(a).getTime() - new Date(b).getTime();
-  // For sequential IDs:
-  // return parseInt(a) - parseInt(b);
-}
