@@ -32,7 +32,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ chat }) => {
 
   // Store hooks
   const messages = useMessagesByChatId(chatId);
-  console.log(messages);
   const hasMoreMessages = useHasMoreMessages(chatId);
   const fetchMoreMessages = useMessageStore((state) => state.fetchMoreMessages);
 

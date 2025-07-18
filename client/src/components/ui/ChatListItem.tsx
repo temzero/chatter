@@ -11,6 +11,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useChatStore, useIsActiveChat } from "@/stores/chatStore";
 import { useChatStatus } from "@/stores/presenceStore";
 import { ChatType } from "@/types/enums/ChatType";
+import { useBlockStatus } from "@/hooks/useBlockStatus";
 
 interface ChatListItemProps {
   chat: ChatResponse;
@@ -31,6 +32,11 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
 
     const setActiveChatById = useChatStore.getState().setActiveChatById;
     const isActive = useIsActiveChat(chat.id);
+
+    const { isBlockedByMe } = useBlockStatus(
+      chat.id,
+      chat.myMemberId
+    );
 
     const unreadCount = chat.unreadCount || 0;
 
@@ -103,7 +109,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
               isActive && "bg-white border"
             }`}
           />
-          <ChatAvatar chat={chat} type="sidebar" />
+          <ChatAvatar chat={chat} type="sidebar" isBlocked={isBlockedByMe} />
 
           {!isCompact && (
             <>

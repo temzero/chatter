@@ -11,6 +11,8 @@ import { GetMessagesQuery } from './dto/queries/get-messages.dto';
 import { Reaction } from './entities/reaction.entity';
 import { Attachment } from './entities/attachment.entity';
 import { SupabaseService } from '../superbase/supabase.service';
+import { BlockService } from '../block/block.service';
+import { ChatType } from '../chat/constants/chat-types.constants';
 
 @Injectable()
 export class MessageService {
@@ -26,16 +28,14 @@ export class MessageService {
     @InjectRepository(Reaction)
     private readonly reactionRepo: Repository<Reaction>,
 
+    private readonly blockService: BlockService,
     private readonly supabaseService: SupabaseService,
   ) {}
 
   async createMessage(
-    userId: string,
+    senderId: string,
     createMessageDto: CreateMessageDto,
   ): Promise<Message> {
-    console.log('createMessage', createMessageDto);
-    console.log('🔍 createMessageDto.id', createMessageDto.id);
-
     if (createMessageDto.id) {
       const existing = await this.messageRepo.findOne({
         where: { id: createMessageDto.id },
@@ -48,15 +48,19 @@ export class MessageService {
 
     const chat = await this.chatRepo.findOne({
       where: { id: createMessageDto.chatId },
+      relations: ['members'],
     });
     if (!chat) {
       ErrorResponse.notFound('Chat not found');
     }
 
+    // ⛔ Blocking check only in direct chat
+    await this.ensureNoBlockingInDirectChat(senderId, chat);
+
     const isMember = await this.chatMemberRepo.exists({
       where: {
         chatId: createMessageDto.chatId,
-        userId: userId,
+        userId: senderId,
       },
     });
     if (!isMember) {
@@ -87,7 +91,7 @@ export class MessageService {
     try {
       // Step 1: Save the message
       const newMessage = this.messageRepo.create({
-        senderId: userId,
+        senderId,
         ...createMessageDto,
       });
 
@@ -140,10 +144,16 @@ export class MessageService {
     const originalMessage =
       messageToForward.forwardedFromMessage ?? messageToForward;
 
-    const chat = await this.chatRepo.findOne({ where: { id: targetChatId } });
+    const chat = await this.chatRepo.findOne({
+      where: { id: targetChatId },
+      relations: ['members'],
+    });
     if (!chat) {
       ErrorResponse.notFound('Chat not found');
     }
+
+    // ⛔ Blocking check only in direct chat
+    await this.ensureNoBlockingInDirectChat(senderId, chat);
 
     const newMessage = this.messageRepo.create({
       senderId,
@@ -705,6 +715,36 @@ export class MessageService {
       await this.chatMemberRepo.update(
         { chatId, userId: member.userId },
         { lastVisibleMessageId: fallback?.id || null },
+      );
+    }
+  }
+
+  private async ensureNoBlockingInDirectChat(senderId: string, chat: Chat) {
+    // Apply blocking logic only for direct chats
+    if (chat.type !== ChatType.DIRECT) return;
+
+    // Add null check for chat.members
+    if (!chat.members) {
+      throw new Error('Chat members not loaded');
+    }
+
+    // Get the other member in a 1-on-1 chat
+    const otherMember = chat.members.find((m) => m.userId !== senderId);
+    if (!otherMember) return;
+
+    const { isBlockedByMe, isBlockedMe } =
+      await this.blockService.getBlockStatusBetween(
+        senderId,
+        otherMember.userId,
+      );
+
+    if (isBlockedByMe || isBlockedMe) {
+      throw new Error(
+        isBlockedByMe && isBlockedMe
+          ? 'You both have blocked each other.'
+          : isBlockedByMe
+            ? 'You have blocked this user.'
+            : 'You are blocked by this user.',
       );
     }
   }

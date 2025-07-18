@@ -14,9 +14,10 @@ import { DirectChatMember } from "@/types/responses/chatMember.response";
 
 interface ChatHeaderProps {
   chat: ChatResponse;
+  isBlockedByMe: boolean;
 }
 
-const ChatHeader: React.FC<ChatHeaderProps> = ({ chat }) => {
+const ChatHeader: React.FC<ChatHeaderProps> = ({ chat, isBlockedByMe = false }) => {
   const toggleSidebarInfo = useSidebarInfoStore(
     (state) => state.toggleSidebarInfo
   );
@@ -70,7 +71,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ chat }) => {
           exit={{ opacity: 0.2, scale: 0.9 }}
           transition={{ type: "tween", duration: 0.1, ease: "easeInOut" }}
         >
-          <ChatAvatar chat={chat} type="header" />
+          <ChatAvatar chat={chat} type="header" isBlocked={isBlockedByMe} />
           <h1 className="text-xl font-medium">{chat.name}</h1>
         </motion.div>
       </AnimatePresence>

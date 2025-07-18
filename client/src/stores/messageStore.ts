@@ -13,6 +13,7 @@ import { useShallow } from "zustand/react/shallow";
 import { useChatMemberStore } from "./chatMemberStore";
 import { useAuthStore } from "./authStore";
 import { createLastMessage } from "@/utils/createLastMessage";
+import { useMembersByChatId } from "./chatMemberStore";
 
 interface ChatMessages {
   [chatId: string]: MessageResponse[];
@@ -414,8 +415,28 @@ export const useActiveChatMessages = () => {
   }, [activeChat, isLoading, messages]);
 };
 
-export const useMessagesByChatId = (chatId: string) => {
-  return useMessageStore(useShallow((state) => state.messages[chatId] || []));
+// export const useMessagesByChatId = (chatId: string) => {
+//   return useMessageStore(useShallow((state) => state.messages[chatId] || []));
+// };
+
+export const useMessagesByChatId = (chatId: string): MessageResponse[] => {
+  const allMessages = useMessageStore(
+    useShallow((state) => state.messages[chatId] || [])
+  );
+  const members = useMembersByChatId(chatId) || [];
+  const currentUserId = useAuthStore.getState().currentUser?.id;
+
+  // Build a set of blocked userIds by me
+  const blockedUserIds = new Set(
+    members
+      .filter(
+        (member) => member.userId !== currentUserId && member.isBlockedByMe
+      )
+      .map((member) => member.userId)
+  );
+
+  // Filter out messages from blocked users
+  return allMessages.filter((msg) => !blockedUserIds.has(msg.sender.id));
 };
 
 export const useSenderByMessageId = (

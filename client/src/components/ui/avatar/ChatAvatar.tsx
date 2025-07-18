@@ -6,9 +6,10 @@ import { ChatType } from "@/types/enums/ChatType";
 type ChatAvatarProps = {
   chat?: ChatResponse | null;
   type?: "header" | "sidebar" | "info" | "contact";
+  isBlocked?: boolean;
 };
 
-export const ChatAvatar: React.FC<ChatAvatarProps> = ({ chat, type }) => {
+export const ChatAvatar: React.FC<ChatAvatarProps> = ({ chat, type, isBlocked = false }) => {
   const isOnline = false;
 
   const parentScaleClass =
@@ -163,6 +164,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({ chat, type }) => {
             avatarUrl={directChat.avatarUrl ?? undefined}
             name={directChat.name ?? undefined}
             className={`${styles.size} ${styles.rounded} object-cover`}
+            isBlocked={isBlocked}
           />
           {showOnlineDot && (
             <OnlineDot

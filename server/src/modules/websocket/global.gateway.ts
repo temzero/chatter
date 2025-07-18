@@ -10,6 +10,7 @@ import {
 import { Server } from 'socket.io';
 import { WebsocketService } from './websocket.service';
 import { ChatMemberService } from '../chat-member/chat-member.service';
+import { emitWsError } from './utils/emitWsError';
 import type { AuthenticatedSocket } from './constants/authenticatedSocket.type';
 
 @WebSocketGateway({
@@ -54,7 +55,7 @@ export class GlobalGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       client.emit('connection_ack', { success: true });
     } catch (error) {
-      console.error('Connection error:', error);
+      emitWsError(client, error, 'Connection failed');
       client.disconnect();
     }
   }
@@ -74,31 +75,6 @@ export class GlobalGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  // @SubscribeMessage('presence:subscribe')
-  // async handlePresenceSubscribe(
-  //   @ConnectedSocket() client: AuthenticatedSocket,
-  // ) {
-  //   const userId = client.data.userId;
-  //   if (!userId) return;
-
-  //   try {
-  //     // Get all relevant users (chat members + friends + recent contacts)
-  //     const relevantUsers = await this.getRelevantUsers(userId);
-
-  //     // Subscribe to their presence updates
-  //     relevantUsers.forEach((targetUserId) => {
-  //       this.websocketService.addPresenceSubscriber(client.id, targetUserId);
-  //     });
-
-  //     // Send initial statuses
-  //     const initialStatuses =
-  //       this.websocketService.getUsersStatus(relevantUsers);
-  //     client.emit('presence:init', initialStatuses);
-  //   } catch (error) {
-  //     console.error('Presence subscription error:', error);
-  //   }
-  // }
-
   @SubscribeMessage('presence:subscribe')
   handlePresenceSubscribe(
     @ConnectedSocket() client: AuthenticatedSocket,
@@ -117,25 +93,9 @@ export class GlobalGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const initialStatuses = this.websocketService.getUsersStatus(userIds);
       client.emit('presence:init', initialStatuses); // e.g., { "user123": true, "user456": false }
     } catch (error) {
-      console.error('Presence subscription error:', error);
+      emitWsError(client, error, 'Failed to subscribe to presence updates');
     }
   }
-
-  // private async getRelevantUsers(userId: string): Promise<string[]> {
-  //   const chatIds = await this.chatMemberService.getChatIdsByUserId(userId);
-  //   const uniqueUserIds = new Set<string>();
-
-  //   for (const chatId of chatIds) {
-  //     const members = await this.chatMemberService.getAllMemberUserIds(chatId);
-  //     members.forEach((memberId) => {
-  //       if (memberId !== userId) {
-  //         uniqueUserIds.add(memberId);
-  //       }
-  //     });
-  //   }
-
-  //   return Array.from(uniqueUserIds);
-  // }
 
   @SubscribeMessage('ping')
   handlePing(@ConnectedSocket() client: AuthenticatedSocket) {

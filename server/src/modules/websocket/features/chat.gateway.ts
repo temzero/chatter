@@ -12,8 +12,8 @@ import { ForwardMessageDto } from 'src/modules/message/dto/requests/forward-mess
 import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
 import { MessageMapper } from 'src/modules/message/mappers/message.mapper';
 import { ChatService } from 'src/modules/chat/chat.service';
+import { emitWsError } from '../utils/emitWsError';
 import { Message } from 'src/modules/message/entities/message.entity';
-import { SupabaseService } from 'src/modules/superbase/supabase.service';
 
 const chatLink = 'chat:';
 
@@ -24,7 +24,6 @@ export class ChatGateway {
     private readonly chatService: ChatService,
     private readonly websocketService: WebsocketService,
     private readonly chatMemberService: ChatMemberService,
-    private readonly supabaseService: SupabaseService,
     private readonly messageMapper: MessageMapper,
   ) {}
 
@@ -118,13 +117,7 @@ export class ChatGateway {
         );
       }
     } catch (error) {
-      console.error('Error handling sendMessage:', error);
-      // client.emit(`error`, { message: 'Failed to send message' });
-      client.emit(`${chatLink}messageError`, {
-        messageId: payload.id,
-        error: this.getErrorMessage(error),
-        timestamp: new Date().toISOString(),
-      });
+      emitWsError(client, error, 'Failed to react to message');
     }
   }
 
@@ -298,10 +291,7 @@ export class ChatGateway {
         );
       }
     } catch (error) {
-      client.emit('error', {
-        message: 'Failed to toggle pin message',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      emitWsError(client, error, 'Failed to toggle pin message');
     }
   }
 
@@ -324,8 +314,6 @@ export class ChatGateway {
 
       if (!savedChat) {
         client.emit('error', { message: 'Saved chat not found!' });
-        console.log('Saved chat not found!');
-
         return;
       }
 
@@ -347,11 +335,7 @@ export class ChatGateway {
         response,
       );
     } catch (error) {
-      console.error('Error saving message:', error);
-      client.emit('error', {
-        message: 'Failed to save message',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      emitWsError(client, error, 'Failed to save message');
     }
   }
 
@@ -401,18 +385,8 @@ export class ChatGateway {
 
       return { success: true, message: deletedMessage };
     } catch (error) {
-      console.error('Error deleting message:', error);
-      client.emit('error', {
-        message: 'Failed to delete message',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      emitWsError(client, error, 'Failed to delete message');
     }
-  }
-
-  private getErrorMessage(error: unknown): string {
-    if (error instanceof Error) return error.message;
-    if (typeof error === 'string') return error;
-    return 'Message processing failed';
   }
 
   // Utility to check if any other chat member is online (excluding one user)

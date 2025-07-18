@@ -71,7 +71,6 @@ const Message: React.FC<MessageProps> = ({
 
   const isRelyToThisMessage = useIsReplyToThisMessage(message.id);
   const isFocus = useIsMessageFocus(message.id);
-  console.log("isFocus", isFocus);
 
   const repliedMessage = message.replyToMessage;
   const forwardedMessage = message.forwardedFromMessage;
