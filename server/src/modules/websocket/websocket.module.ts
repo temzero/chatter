@@ -13,6 +13,7 @@ import { NotificationGateway } from './features/notifications.gateway';
 import { MessageMapper } from '../message/mappers/message.mapper';
 import { ChatModule } from '../chat/chat.module';
 import { SupabaseModule } from '../superbase/supabase.module';
+import { BlockModule } from '../block/block.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { SupabaseModule } from '../superbase/supabase.module';
     forwardRef(() => MessageModule),
     forwardRef(() => UserModule),
     forwardRef(() => ChatMemberModule),
+    forwardRef(() => BlockModule),
     forwardRef(() => SupabaseModule),
     JwtModule.registerAsync({
       imports: [ConfigModule],

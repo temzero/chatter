@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, MoreThan, Not, Raw } from 'typeorm';
+import { Repository, Like, MoreThan, Not, Raw, In } from 'typeorm';
 import { Message } from './entities/message.entity';
 import { Chat } from '../chat/entities/chat.entity';
 import { ChatMember } from '../chat-member/entities/chat-member.entity';
@@ -222,6 +222,11 @@ export class MessageService {
     if (!lastReadMessageId) return 0;
 
     try {
+      // 👇 Fetch blocked user IDs directly inside
+      const blockedUserIds =
+        await this.blockService.getBlockedUserIds(currentUserId);
+      const excludedSenderIds = [currentUserId, ...blockedUserIds];
+
       const lastMessage = await this.messageRepo.findOne({
         where: {
           chatId,
@@ -248,7 +253,7 @@ export class MessageService {
             chatId,
             createdAt: MoreThan(lastReadMessage.createdAt),
             isDeleted: false,
-            senderId: Not(currentUserId),
+            senderId: Not(In(excludedSenderIds)),
           },
         });
         return Math.max(0, count - 1);
@@ -269,9 +274,10 @@ export class MessageService {
           chatId,
           createdAt: MoreThan(deletedMessage.createdAt),
           isDeleted: false,
-          senderId: Not(currentUserId),
+          senderId: Not(In(excludedSenderIds)),
         },
       });
+
       return Math.max(0, count - 1);
     } catch (error) {
       console.error('Failed to count unread messages:', error);

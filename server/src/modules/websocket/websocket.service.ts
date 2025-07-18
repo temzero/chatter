@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Server } from 'socket.io';
 import { ChatMemberService } from '../chat-member/chat-member.service';
+import { BlockService } from '../block/block.service';
 
 @Injectable()
 export class WebsocketService {
@@ -14,7 +15,10 @@ export class WebsocketService {
   private readonly presenceSubscriptions = new Map<string, Set<string>>(); // targetUserId → subscriberSocketIds
   private readonly socketSubscriptions = new Map<string, Set<string>>(); // socketId → targetUserIds
 
-  constructor(private readonly chatMemberService: ChatMemberService) {}
+  constructor(
+    private readonly chatMemberService: ChatMemberService,
+    private readonly blockService: BlockService,
+  ) {}
 
   setServer(server: Server) {
     this.server = server;
@@ -115,12 +119,44 @@ export class WebsocketService {
     chatId: string,
     event: string,
     payload: any,
-    excludeUserId?: string,
+    senderId?: string, // Made optional with ?
   ) {
     const userIds = await this.chatMemberService.getAllMemberUserIds(chatId);
 
+    // Only check blocked users if senderId is provided
+    const blockedUserIds = senderId
+      ? await this.blockService.getBlockedUserIds(senderId)
+      : [];
+
     for (const userId of userIds) {
-      if (userId === excludeUserId) continue; // ✅ Skip excluded user
+      // Check if the current user is in the blocked list
+      if (senderId && blockedUserIds.includes(userId)) continue;
+
+      const socketIds = this.getUserSocketIds(userId);
+      for (const socketId of socketIds) {
+        this.server.to(socketId).emit(event, payload);
+      }
+    }
+  }
+
+  async emitToChatMembersExcludeSenderId(
+    chatId: string,
+    event: string,
+    payload: any,
+    senderId?: string, // Made optional with ?
+  ) {
+    const userIds = await this.chatMemberService.getAllMemberUserIds(chatId);
+
+    // Only check blocked users if senderId is provided
+    const blockedUserIds = senderId
+      ? await this.blockService.getBlockedUserIds(senderId)
+      : [];
+
+    for (const userId of userIds) {
+      // Check if the current user is in the blocked list
+      if (senderId && userId === senderId) continue;
+
+      if (senderId && blockedUserIds.includes(userId)) continue;
 
       const socketIds = this.getUserSocketIds(userId);
       for (const socketId of socketIds) {

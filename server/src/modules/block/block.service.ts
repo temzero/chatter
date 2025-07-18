@@ -66,14 +66,31 @@ export class BlockService {
     return plainToInstance(BlockResponseDto, block);
   }
 
-  async getBlockedUsers(userId: string): Promise<string[]> {
+  async getBlockedUserIds(userId: string): Promise<string[]> {
     const blocks = await this.blockRepo.find({
-      where: [{ blockerId: userId }, { blockedId: userId }],
+      where: [
+        { blockerId: userId }, // Users YOU blocked
+        { blockedId: userId }, // Users who blocked YOU
+      ],
     });
+    return blocks
+      .map((block) =>
+        block.blockerId === userId ? block.blockedId : block.blockerId,
+      )
+      .filter((id) => id !== userId);
+  }
 
-    return blocks.map((block) =>
-      block.blockerId === userId ? block.blockedId : block.blockerId,
-    );
+  async getUserIdsWhoIBlocked(userId: string): Promise<string[]> {
+    const blocks = await this.blockRepo.find({
+      where: [
+        { blockerId: userId }, // Users YOU blocked
+      ],
+    });
+    return blocks
+      .map((block) =>
+        block.blockerId === userId ? block.blockedId : block.blockerId,
+      )
+      .filter((id) => id !== userId);
   }
 
   async getMutualBlocks(userId1: string, userId2: string): Promise<Block[]> {

@@ -54,7 +54,7 @@ export class ChatGateway {
     };
 
     // Broadcast to all other members in the chat
-    await this.websocketService.emitToChatMembers(
+    await this.websocketService.emitToChatMembersExcludeSenderId(
       data.chatId,
       `${chatLink}userTyping`,
       payload,
@@ -103,6 +103,7 @@ export class ChatGateway {
         payload.chatId,
         `${chatLink}newMessage`,
         messageResponse,
+        senderId,
       );
 
       if (updatedMember) {
@@ -114,6 +115,7 @@ export class ChatGateway {
             memberId: updatedMember.id,
             messageId: message.id,
           },
+          senderId,
         );
       }
     } catch (error) {
@@ -127,9 +129,7 @@ export class ChatGateway {
     @MessageBody() payload: ForwardMessageDto,
   ) {
     try {
-      console.log('Received forwardMessage payload:', payload);
       const senderId = client.data.userId;
-      console.log('Sender ID:', senderId);
 
       if (!senderId) {
         console.warn('Unauthorized: senderId not found');
@@ -143,14 +143,12 @@ export class ChatGateway {
         payload.chatId,
         payload.messageId,
       );
-      console.log('Forwarded message created:', forwardedMessage);
 
       // Get member of sender in target chat
       const member = await this.chatMemberService.getMemberByChatIdAndUserId(
         payload.chatId,
         senderId,
       );
-      console.log('Chat member found:', member);
 
       if (!member) {
         throw new Error(`User is not a member of chat ${payload.chatId}`);
@@ -161,20 +159,18 @@ export class ChatGateway {
         member.id,
         forwardedMessage.id,
       );
-      console.log('Updated last read message ID:', forwardedMessage.id);
 
       // Convert to DTO
       const messageResponse =
         this.messageMapper.toMessageResponseDto(forwardedMessage);
-      console.log('Mapped message response:', messageResponse);
 
       // Emit new message to all chat members
       await this.websocketService.emitToChatMembers(
         payload.chatId,
         `${chatLink}newMessage`,
         messageResponse,
+        senderId,
       );
-      console.log(`Emitted newMessage to chat ${payload.chatId}`);
 
       // Emit read update
       await this.websocketService.emitToChatMembers(
@@ -185,8 +181,8 @@ export class ChatGateway {
           memberId: member.id,
           messageId: forwardedMessage.id,
         },
+        senderId,
       );
-      console.log(`Emitted messageRead to chat ${payload.chatId}`);
 
       return messageResponse;
     } catch (error) {
@@ -208,9 +204,9 @@ export class ChatGateway {
       emoji: string;
     },
   ) {
-    const userId = client.data.userId;
+    const senderId = client.data.userId;
     const { messageId, chatId, emoji } = payload;
-    await this.messageService.toggleReaction(messageId, userId, emoji);
+    await this.messageService.toggleReaction(messageId, senderId, emoji);
     const reactions =
       await this.messageService.getReactionsForMessage(messageId);
     const formatted = this.messageService.formatReactions(reactions);
@@ -222,6 +218,7 @@ export class ChatGateway {
         messageId,
         reactions: formatted,
       },
+      senderId,
     );
   }
 
@@ -251,6 +248,7 @@ export class ChatGateway {
         memberId: member.id, // This matches what client expects
         messageId: data.messageId,
       },
+      userId,
     );
   }
 
@@ -305,9 +303,6 @@ export class ChatGateway {
       client.emit('error', { message: 'Invalid save request' });
       return;
     }
-
-    console.log('Saved Message', data.messageId);
-
     try {
       // Step 1: Get or create the user's saved chat
       const savedChat = await this.chatService.getOrCreateSavedChat(userId);

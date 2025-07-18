@@ -38,7 +38,7 @@ export class ChatPermissionService {
     messages: Message[],
     userId: string,
   ): Promise<Message[]> {
-    const blockedUserIds = await this.blockService.getBlockedUsers(userId);
+    const blockedUserIds = await this.blockService.getBlockedUserIds(userId);
     return messages.filter(
       (message) => !blockedUserIds.includes(message.senderId),
     );
