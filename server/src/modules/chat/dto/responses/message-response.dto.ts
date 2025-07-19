@@ -37,4 +37,7 @@ export class MessageResponseDto {
 
   @Expose()
   updatedAt: Date;
+
+  @Expose()
+  isMuted: boolean;
 }

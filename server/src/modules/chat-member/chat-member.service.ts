@@ -163,7 +163,7 @@ export class ChatMemberService {
     try {
       const members = await this.memberRepo.find({
         where: { chatId },
-        select: ['userId'],
+        select: ['userId'], // Select only the userId field
       });
 
       if (!members || members.length === 0) {
@@ -174,7 +174,36 @@ export class ChatMemberService {
 
       return members.map((member) => member.userId);
     } catch (error) {
-      ErrorResponse.throw(error, 'Failed to retrieve chat member IDs');
+      ErrorResponse.throw(error, 'Failed to retrieve chat members');
+    }
+  }
+
+  async getMemberUserIdsAndMuteStatus(
+    chatId: string,
+  ): Promise<Array<{ userId: string; isMuted: boolean }>> {
+    try {
+      const members = await this.memberRepo.find({
+        where: { chatId },
+        select: ['userId', 'mutedUntil'], // Include mutedUntil in the select
+      });
+
+      if (!members || members.length === 0) {
+        ErrorResponse.notFound(
+          'No members found for this chat or chat does not exist!',
+        );
+      }
+
+      return members.map((member) => ({
+        userId: member.userId,
+        isMuted: member.mutedUntil
+          ? new Date(member.mutedUntil) > new Date()
+          : false,
+      }));
+    } catch (error) {
+      ErrorResponse.throw(
+        error,
+        'Failed to retrieve chat member IDs and mute statuses',
+      );
     }
   }
 
@@ -308,6 +337,36 @@ export class ChatMemberService {
       return member;
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to remove chat member');
+    }
+  }
+
+  checkAndClearExpiredMute(member: ChatMember): Date | null {
+    if (!member.mutedUntil) return null;
+
+    const now = new Date();
+    const mutedUntil = new Date(member.mutedUntil);
+
+    if (mutedUntil <= now) {
+      // Fire-and-forget the update (don't await)
+      this.clearExpiredMute(member.id).catch(console.error);
+      return null;
+    }
+
+    return mutedUntil;
+  }
+
+  /**
+   * Clears an expired mute in the database
+   * @param memberId The ID of the member to update
+   */
+  private async clearExpiredMute(memberId: string): Promise<void> {
+    try {
+      await this.memberRepo.update(memberId, { mutedUntil: null });
+    } catch (error) {
+      console.error(
+        `Failed to clear expired mute for member ${memberId}`,
+        error,
+      );
     }
   }
 }

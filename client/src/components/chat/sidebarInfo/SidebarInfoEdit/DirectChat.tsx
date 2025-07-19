@@ -7,17 +7,19 @@ import {
 } from "@/stores/sidebarInfoStore";
 import FriendshipBtn from "@/components/ui/FriendshipBtn";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
-import { useActiveChat } from "@/stores/chatStore";
+import { useActiveChat, useChatStore } from "@/stores/chatStore";
 import { DirectChatMember } from "@/types/responses/chatMember.response";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { useActiveMembers } from "@/stores/chatMemberStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
+import { toast } from "react-toastify";
 
 const DirectChat: React.FC = () => {
   const activeChat = useActiveChat() as ChatResponse;
   const { setSidebarInfo } = useSidebarInfoStore();
   const chatMembers = useActiveMembers();
   const openModal = useModalStore((state) => state.openModal);
+  const setMute = useChatStore((state) => state.setMute);
 
   const chatPartner = chatMembers?.find(
     (member) => member.id !== activeChat.myMemberId
@@ -25,12 +27,28 @@ const DirectChat: React.FC = () => {
 
   if (!chatPartner || !activeChat) return null;
 
-  // Header buttons specific to direct chat
-  const headerIcons = [];
+  const handleUnmute = async () => {
+    try {
+      await setMute(activeChat.id, activeChat.myMemberId, null);
+      toast.success("Unmuted chat member successfully");
+    } catch (error) {
+      console.error("Failed to unmute chat member:", error);
+      toast.error("Failed to unmute chat member");
+    }
+  };
+
+  // Header buttons with title
+  const headerIcons: {
+    icon: string;
+    title: string;
+    action: () => void;
+    className?: string;
+  }[] = [];
 
   if (chatPartner.isBlockedByMe) {
     headerIcons.push({
       icon: "lock_open_right",
+      title: "Unblock User",
       action: () =>
         openModal(ModalType.UNBLOCK_USER, { blockedUser: chatPartner }),
       className: "text-[--primary-green]",
@@ -38,35 +56,56 @@ const DirectChat: React.FC = () => {
   } else if (chatPartner.isBlockedMe) {
     headerIcons.push({
       icon: "block",
+      title: "Blocked by User",
       action: () =>
         openModal(ModalType.BLOCK_USER, { userToBlock: chatPartner }),
-      className: "",
     });
   } else {
+    if (activeChat.mutedUntil) {
+      headerIcons.push({
+        icon: "notifications_off",
+        title: "Unmute",
+        action: handleUnmute,
+      });
+    } else {
+      headerIcons.push({
+        icon: "notifications",
+        title: "Mute",
+        action: () =>
+          openModal(ModalType.MUTE, {
+            chatId: activeChat.id,
+            myMemberId: activeChat.myMemberId,
+          }),
+      });
+    }
+
     headerIcons.push(
-      { icon: "notifications", action: () => {}, className: "" },
-      { icon: "search", action: () => {}, className: "" },
+      {
+        icon: "search",
+        title: "Search",
+        action: () => {},
+      },
       {
         icon: "block",
+        title: "Block User",
         action: () =>
           openModal(ModalType.BLOCK_USER, { userToBlock: chatPartner }),
-        className: "",
       },
       {
         icon: "edit",
+        title: "Edit",
         action: () => setSidebarInfo("directEdit"),
-        className: "",
       }
     );
   }
 
   return (
     <div className="flex flex-col w-full h-full">
-      {/* Header moved inside DirectChat */}
       <header className="flex w-full justify-around items-center min-h-[var(--header-height)] custom-border-b">
-        {headerIcons.map(({ icon, action, className = "" }) => (
+        {headerIcons.map(({ icon, title, action, className = "" }) => (
           <a
             key={icon}
+            title={title}
             className={`flex items-center rounded-full cursor-pointer opacity-50 hover:opacity-100 ${className}`}
             onClick={action}
           >
@@ -75,7 +114,6 @@ const DirectChat: React.FC = () => {
         ))}
       </header>
 
-      {/* Chat content */}
       <div className="flex flex-col justify-center items-center gap-4 p-4 w-full h-full overflow-y-auto">
         <Avatar
           size="36"

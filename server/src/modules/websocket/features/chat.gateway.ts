@@ -53,12 +53,12 @@ export class ChatGateway {
       isTyping: data.isTyping,
     };
 
-    // Broadcast to all other members in the chat
-    await this.websocketService.emitToChatMembersExcludeSenderId(
+    // Broadcast to all other members in the chat (excluding sender)
+    await this.websocketService.emitToChatMembers(
       data.chatId,
       `${chatLink}userTyping`,
       payload,
-      userId,
+      { senderId: userId, excludeSender: true },
     );
   }
 
@@ -99,11 +99,12 @@ export class ChatGateway {
         message.id,
       );
 
+      // Include sender in the broadcast
       await this.websocketService.emitToChatMembers(
         payload.chatId,
         `${chatLink}newMessage`,
         messageResponse,
-        senderId,
+        { senderId },
       );
 
       if (updatedMember) {
@@ -115,7 +116,7 @@ export class ChatGateway {
             memberId: updatedMember.id,
             messageId: message.id,
           },
-          senderId,
+          { senderId },
         );
       }
     } catch (error) {
@@ -164,15 +165,15 @@ export class ChatGateway {
       const messageResponse =
         this.messageMapper.toMessageResponseDto(forwardedMessage);
 
-      // Emit new message to all chat members
+      // Emit new message to all chat members (including sender)
       await this.websocketService.emitToChatMembers(
         payload.chatId,
         `${chatLink}newMessage`,
         messageResponse,
-        senderId,
+        { senderId },
       );
 
-      // Emit read update
+      // Emit read update (including sender)
       await this.websocketService.emitToChatMembers(
         payload.chatId,
         `${chatLink}messageRead`,
@@ -181,7 +182,7 @@ export class ChatGateway {
           memberId: member.id,
           messageId: forwardedMessage.id,
         },
-        senderId,
+        { senderId },
       );
 
       return messageResponse;
@@ -218,7 +219,7 @@ export class ChatGateway {
         messageId,
         reactions: formatted,
       },
-      senderId,
+      { senderId },
     );
   }
 
@@ -239,16 +240,16 @@ export class ChatGateway {
 
     if (!member) return;
 
-    // Notify other participants with memberId and messageId
+    // Notify other participants with memberId and messageId (including sender)
     await this.websocketService.emitToChatMembers(
       data.chatId,
       `${chatLink}messageRead`,
       {
         chatId: data.chatId,
-        memberId: member.id, // This matches what client expects
+        memberId: member.id,
         messageId: data.messageId,
       },
-      userId,
+      { senderId: userId },
     );
   }
 
@@ -356,7 +357,7 @@ export class ChatGateway {
           data.messageId,
         );
 
-        // Notify all chat members that the message has been deleted
+        // Notify all chat members that the message has been deleted (including sender)
         await this.websocketService.emitToChatMembers(
           data.chatId,
           `${chatLink}messageDeleted`,
@@ -364,6 +365,7 @@ export class ChatGateway {
             messageId: data.messageId,
             chatId: data.chatId,
           },
+          { senderId: userId },
         );
       } else {
         // Delete for me only

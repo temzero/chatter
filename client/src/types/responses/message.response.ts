@@ -28,6 +28,8 @@ export interface MessageResponse {
   // reactions?: ReactionResponse[];
   reactions?: Record<string, string[]>;
   attachments?: AttachmentResponse[];
+
+  isMuted?: boolean;
 }
 
 export interface LastMessageResponse {

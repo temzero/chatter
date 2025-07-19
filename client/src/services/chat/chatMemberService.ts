@@ -89,6 +89,17 @@ export const chatMemberService = {
     return response.data.payload;
   },
 
+  async setMute(
+    myMemberId: string,
+    mutedUntil: string | Date | null
+  ): Promise<Date | null> {
+    const response = await API.patch<ApiSuccessResponse<Date | null>>(
+      `/chat-members/mute/${myMemberId}`,
+      { mutedUntil }
+    );
+    return response.data.payload;
+  },
+
   // Remove member using chatId and userId
   async removeMember(chatId: string, userId: string): Promise<ChatMember> {
     const response = await API.delete<ApiSuccessResponse<ChatMember>>(

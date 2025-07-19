@@ -42,4 +42,7 @@ export class ChatResponseDto {
   @Expose()
   @Type(() => LastMessageResponseDto)
   lastMessage?: LastMessageResponseDto | null;
+
+  @Expose()
+  mutedUntil?: string | Date | null;
 }

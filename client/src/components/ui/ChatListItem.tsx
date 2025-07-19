@@ -21,22 +21,15 @@ interface ChatListItemProps {
 
 const ChatListItem: React.FC<ChatListItemProps> = React.memo(
   ({ chat, isCompact = false, currentUserId = "" }) => {
-    console.log("CHAT LIST ITEM");
-    console.log("chat Last message", chat.lastMessage);
-
     const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
     const typingUsers = useTypingUsersByChatId(chat.id);
 
     const isOnline = useChatStatus(chat?.id, chat.type);
-    console.log("ChatListItem isOnline", isOnline);
 
     const setActiveChatById = useChatStore.getState().setActiveChatById;
     const isActive = useIsActiveChat(chat.id);
 
-    const { isBlockedByMe } = useBlockStatus(
-      chat.id,
-      chat.myMemberId
-    );
+    const { isBlockedByMe } = useBlockStatus(chat.id, chat.myMemberId);
 
     const unreadCount = chat.unreadCount || 0;
 
@@ -117,6 +110,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
                 <h1 className="text-lg font-semibold whitespace-nowrap text-ellipsis">
                   {chat.name}
                 </h1>
+
                 <AnimatePresence mode="wait" initial={false}>
                   {typingUsers.length > 0 ? (
                     <motion.div
@@ -145,9 +139,26 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
                 </AnimatePresence>
               </div>
 
-              <p className="absolute top-2 right-4 text-xs opacity-40">
-                {formatTimeAgo(chat.lastMessage?.createdAt ?? chat.updatedAt)}
-              </p>
+              <div className="flex gap-1 absolute top-2 right-4 text-xs opacity-40">
+                <p className="">
+                  {formatTimeAgo(chat.lastMessage?.createdAt ?? chat.updatedAt)}
+                </p>
+                <AnimatePresence>
+                  {chat.mutedUntil && (
+                    <motion.div
+                      key="typing"
+                      initial={{ opacity: 0, scale: 3 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: .1 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <span className="material-symbols-outlined text-[18px]">
+                        notifications_off
+                      </span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
               {unreadCount > 0 && (
                 <div className="absolute bottom-6 right-4 font-bold text-white bg-red-500 rounded-full text-xs flex items-center justify-center ml-auto w-4 h-4">

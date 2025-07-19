@@ -4,27 +4,40 @@ import { useMessageStore } from "@/stores/messageStore";
 import { MessageResponse } from "@/types/responses/message.response";
 import { useTypingStore } from "@/stores/typingStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
-import { useChatStore } from "@/stores/chatStore";
-import { useAuthStore } from "@/stores/authStore";
+import { useActiveChatId, useChatStore } from "@/stores/chatStore";
 import { MessageStatus } from "@/types/enums/message";
-// import { toast } from "react-toastify";
+import { playSoundEffect } from "@/utils/playSoundEffect";
+import newMessageSound from "@/assets/sound/message-pop.mp3";
+import { WsMessageResponse } from "@/types/websocket/websocketMessageRes";
 
 export function useChatSocketListeners() {
+  const activeChatId = useActiveChatId();
+  console.log('activeChatId', activeChatId)
   useEffect(() => {
-    const handleNewMessage = (message: MessageResponse) => {
-      const currentUserId = useAuthStore.getState().currentUser?.id;
+    const handleNewMessage = (WsMessageResponse: WsMessageResponse) => {
+      const { meta, ...message } = WsMessageResponse as MessageResponse & {
+        meta?: {
+          isMuted?: boolean;
+          isOwnMessage?: boolean;
+        };
+      };
+
+      const isMuted = meta?.isMuted ?? false;
+      const isOwnMessage = meta?.isOwnMessage ?? false;
 
       if (
-        message.sender.id === currentUserId &&
+        isOwnMessage &&
         useMessageStore.getState().getMessageById(message.id)
       ) {
-        // It's my message and already exists → update it with server-confirmed data
         useMessageStore
           .getState()
           .updateMessageById(message.chatId, message.id, message);
       } else {
-        // Not my message or not found → add to store
         useMessageStore.getState().addMessage(message);
+
+        if (!isMuted && activeChatId !== message.chatId) {
+          playSoundEffect(newMessageSound);
+        }
       }
     };
 

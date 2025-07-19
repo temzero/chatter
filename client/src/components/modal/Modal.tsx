@@ -11,6 +11,7 @@ import AddFolderModal from "./AddFolderModal";
 import DeleteFolderModal from "./DeleteFolderModal";
 import BlockUserModal from "./BlockUserModal";
 import UnblockUserModal from "./UnblockUserModal";
+import MuteChatModal from "./MuteChatModal";
 
 const Modal = () => {
   const { modalContent, closeModal } = useModalStore(
@@ -49,6 +50,8 @@ const Modal = () => {
         return <DeleteFolderModal />;
       case ModalType.ADD_FOLDER:
         return <AddFolderModal />;
+      case ModalType.MUTE:
+        return <MuteChatModal />;
       case ModalType.BLOCK_USER:
         return <BlockUserModal />;
       case ModalType.UNBLOCK_USER:

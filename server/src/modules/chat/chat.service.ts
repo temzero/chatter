@@ -293,6 +293,7 @@ export class ChatService {
       .innerJoin('chat.members', 'myMember', 'myMember.user_id = :userId', {
         userId,
       })
+      .addSelect('myMember.muted_until', 'myMember_muted_until')
       .leftJoinAndSelect('chat.members', 'member')
       .leftJoinAndSelect('member.user', 'memberUser')
       .leftJoinAndSelect('member.lastVisibleMessage', 'lastMessage')

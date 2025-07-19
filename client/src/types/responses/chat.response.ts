@@ -15,4 +15,5 @@ export interface ChatResponse {
   pinnedMessage?: MessageResponse | null;
   lastMessage?: LastMessageResponse | null;
   unreadCount?: number;
+  mutedUntil?: string | Date | null;
 }

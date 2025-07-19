@@ -10,6 +10,7 @@ export enum ModalType {
   DELETE_FOLDER = "delete-folder",
   ADD_FOLDER = "add-folder",
   ADD_CONTACT = "add-contact",
+  MUTE = "mute",
   BLOCK_USER = "block-user",
   UNBLOCK_USER = "unblock-user",
 }

@@ -185,6 +185,24 @@ export class ChatMemberController {
     );
   }
 
+  @Patch('mute/:memberId')
+  async updateMute(
+    @Param('memberId') memberId: string,
+    @Body() body: { mutedUntil: string | null },
+  ): Promise<SuccessResponse<Date | null>> {
+    const parsedMutedUntil =
+      body.mutedUntil !== null ? new Date(body.mutedUntil) : null;
+
+    const updatedMember = await this.memberService.updateMember(memberId, {
+      mutedUntil: parsedMutedUntil,
+    });
+
+    return new SuccessResponse(
+      updatedMember.mutedUntil,
+      'Muted until updated successfully',
+    );
+  }
+
   @Delete(':chatId/:userId')
   async removeMember(
     @Param('chatId') chatId: string,

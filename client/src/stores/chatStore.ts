@@ -46,6 +46,7 @@ interface ChatStore {
     id: string,
     payload: Partial<ChatResponse>
   ) => Promise<void>;
+  setMute: (chatId: string, memberId: string, mutedUntil: Date | null) => void;
   setLastMessage: (chatId: string, message: LastMessageResponse | null) => void;
   setUnreadCount: (chatId: string, incrementBy: number) => void;
   setPinnedMessage: (chatId: string, message: MessageResponse | null) => void;
@@ -326,6 +327,48 @@ export const useChatStore = create<ChatStore>()(
           } catch (error) {
             console.error("Failed to update group chat:", error);
             set({ error: "Failed to update group chat", isLoading: false });
+            throw error;
+          }
+        },
+
+        setMute: async (
+          chatId: string,
+          memberId: string,
+          mutedUntil: Date | null
+        ) => {
+          try {
+            const updatedMuteUntil = await chatMemberService.setMute(
+              memberId,
+              mutedUntil
+            );
+
+            set((state) => ({
+              chats: state.chats.map((chat) =>
+                chat.id === chatId
+                  ? {
+                      ...chat,
+                      mutedUntil: updatedMuteUntil,
+                    }
+                  : chat
+              ),
+              filteredChats: state.filteredChats.map((chat) =>
+                chat.id === chatId
+                  ? {
+                      ...chat,
+                      mutedUntil: updatedMuteUntil,
+                    }
+                  : chat
+              ),
+              activeChat:
+                state.activeChat?.id === chatId
+                  ? {
+                      ...state.activeChat,
+                      mutedUntil: updatedMuteUntil,
+                    }
+                  : state.activeChat,
+            }));
+          } catch (error) {
+            console.error("Failed to set mute:", error);
             throw error;
           }
         },

@@ -1,11 +1,9 @@
-/**
- * Plays a sound from a given URL
- * @param soundUrl - Path/URL to the audio file
- * @param volume - Volume level (0.0 to 1.0, default: 0.5)
- */
-export const playSoundEffect = (soundUrl: string, volume = 0.5) => {
+import defaultSound from "@/assets/sound/message-pop.mp3";
+
+export const playSoundEffect = (soundUrl?: string, volume = 0.5) => {
   try {
-    const audio = new Audio(soundUrl);
+    const src = soundUrl || defaultSound;
+    const audio = new Audio(src);
     audio.volume = volume;
     audio.play().catch((e) => console.error("Audio playback error:", e));
 

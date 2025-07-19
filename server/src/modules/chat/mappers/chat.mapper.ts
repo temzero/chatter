@@ -9,10 +9,14 @@ import { ChatMember } from 'src/modules/chat-member/entities/chat-member.entity'
 import { MessageService } from 'src/modules/message/message.service';
 import { AttachmentType } from 'src/modules/message/constants/attachment-type.constants';
 import { MessageMapper } from 'src/modules/message/mappers/message.mapper';
+import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
 
 @Injectable()
 export class ChatMapper {
-  constructor(private readonly messageMapper: MessageMapper) {}
+  constructor(
+    private readonly messageMapper: MessageMapper,
+    private readonly chatMemberService: ChatMemberService,
+  ) {}
 
   async transformToDirectChatDto(
     chat: Chat,
@@ -44,6 +48,9 @@ export class ChatMapper {
         currentUserId,
       );
     }
+    const mutedUntil = myMember
+      ? this.chatMemberService.checkAndClearExpiredMute(myMember)
+      : null;
 
     return {
       id: chat.id,
@@ -64,6 +71,7 @@ export class ChatMapper {
         : null,
       otherMemberUserIds: [otherMember.userId],
       unreadCount,
+      mutedUntil,
     };
   }
 
@@ -92,6 +100,9 @@ export class ChatMapper {
         currentUserId,
       );
     }
+    const mutedUntil = myMember
+      ? this.chatMemberService.checkAndClearExpiredMute(myMember)
+      : null;
 
     return {
       id: chat.id,
@@ -114,6 +125,7 @@ export class ChatMapper {
         : null,
       otherMemberUserIds: otherMembers.map((m) => m.userId),
       unreadCount,
+      mutedUntil,
     };
   }
 

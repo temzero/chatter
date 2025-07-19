@@ -3,6 +3,14 @@ import { Server } from 'socket.io';
 import { ChatMemberService } from '../chat-member/chat-member.service';
 import { BlockService } from '../block/block.service';
 
+interface EnhancedPayload {
+  payload: any;
+  meta?: {
+    isMuted?: boolean;
+    isOwnMessage?: boolean;
+  };
+}
+
 @Injectable()
 export class WebsocketService {
   private server: Server;
@@ -119,49 +127,42 @@ export class WebsocketService {
     chatId: string,
     event: string,
     payload: any,
-    senderId?: string, // Made optional with ?
+    options: {
+      senderId?: string;
+      excludeSender?: boolean;
+    } = {},
   ) {
-    const userIds = await this.chatMemberService.getAllMemberUserIds(chatId);
+    const members =
+      await this.chatMemberService.getMemberUserIdsAndMuteStatus(chatId);
 
-    // Only check blocked users if senderId is provided
-    const blockedUserIds = senderId
-      ? await this.blockService.getBlockedUserIds(senderId)
+    const blockedUserIds = options.senderId
+      ? await this.blockService.getBlockedUserIds(options.senderId)
       : [];
 
-    for (const userId of userIds) {
-      // Check if the current user is in the blocked list
-      if (senderId && blockedUserIds.includes(userId)) continue;
-
-      const socketIds = this.getUserSocketIds(userId);
-      for (const socketId of socketIds) {
-        this.server.to(socketId).emit(event, payload);
+    for (const { userId, isMuted } of members) {
+      if (
+        options.excludeSender &&
+        options.senderId &&
+        userId === options.senderId
+      ) {
+        continue;
       }
-    }
-  }
 
-  async emitToChatMembersExcludeSenderId(
-    chatId: string,
-    event: string,
-    payload: any,
-    senderId?: string, // Made optional with ?
-  ) {
-    const userIds = await this.chatMemberService.getAllMemberUserIds(chatId);
-
-    // Only check blocked users if senderId is provided
-    const blockedUserIds = senderId
-      ? await this.blockService.getBlockedUserIds(senderId)
-      : [];
-
-    for (const userId of userIds) {
-      // Check if the current user is in the blocked list
-      if (senderId && userId === senderId) continue;
-
-      if (senderId && blockedUserIds.includes(userId)) continue;
-
-      const socketIds = this.getUserSocketIds(userId);
-      for (const socketId of socketIds) {
-        this.server.to(socketId).emit(event, payload);
+      if (options.senderId && blockedUserIds.includes(userId)) {
+        continue;
       }
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const enhancedPayload: EnhancedPayload = {
+        ...payload,
+        meta: {
+          isMuted,
+          isOwnMessage: options.senderId ? userId === options.senderId : false,
+        },
+      };
+
+      // ✅ Reuse emitToUser
+      this.emitToUser(userId, event, enhancedPayload);
     }
   }
 
