@@ -2,7 +2,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useCurrentSidebarInfo } from "@/stores/sidebarInfoStore";
 import ChatInfoDefault from "./SidebarInfoDefault";
 import ChatInfoMedia from "./SidebarInfoMedia";
-import ChatInfoSaved from "./SidebarInfoSaved";
 import PrivateChatEdit from "./SidebarInfoEdit/DirectChatEdit";
 import GroupChatEdit from "./SidebarInfoEdit/GroupChatEdit";
 import { sidebarInfoAnimations } from "@/animations/sidebarInfoAnimations";
@@ -14,7 +13,6 @@ const SidebarInfo: React.FC = () => {
   const chatInfoComponents = {
     default: <ChatInfoDefault />,
     media: <ChatInfoMedia />,
-    saved: <ChatInfoSaved />,
     directEdit: <PrivateChatEdit />,
     groupEdit: <GroupChatEdit />,
   };

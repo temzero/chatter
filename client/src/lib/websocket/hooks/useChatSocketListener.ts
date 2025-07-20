@@ -12,7 +12,7 @@ import { WsMessageResponse } from "@/types/websocket/websocketMessageRes";
 
 export function useChatSocketListeners() {
   const activeChatId = useActiveChatId();
-  console.log('activeChatId', activeChatId)
+  console.log("activeChatId", activeChatId);
   useEffect(() => {
     const handleNewMessage = (WsMessageResponse: WsMessageResponse) => {
       const { meta, ...message } = WsMessageResponse as MessageResponse & {
@@ -124,5 +124,6 @@ export function useChatSocketListeners() {
       chatWebSocketService.offDeleteMessage(handleMessageDeleted);
       chatWebSocketService.offMessageError(handleMessageError);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 }

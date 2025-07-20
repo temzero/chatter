@@ -7,7 +7,6 @@ import { useShallow } from "zustand/shallow";
 export type SidebarInfoModes =
   | "default"
   | "media"
-  | "saved"
   | "directEdit"
   | "groupEdit";
 

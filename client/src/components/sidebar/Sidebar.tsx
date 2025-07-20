@@ -17,7 +17,6 @@ import SidebarSettingsNotifications from "./settings/sidebarSettingsNotification
 import SidebarSettingsData from "./settings/sidebarSettingsData";
 import SidebarSettingsLanguage from "./settings/sidebarSettingsLanguage";
 import SidebarFriendRequests from "./more/SidebarFriendRequests";
-import SidebarSavedMessages from "./more/SidebarSavedMessages";
 import SidebarCalls from "./more/SidebarCalls";
 import SidebarContacts from "./more/SidebarContacts";
 import SidebarFolders from "./more/SidebarFolders";
@@ -46,7 +45,6 @@ const Sidebar = () => {
     // More tab
     [SidebarMode.PROFILE]: <SidebarProfile />,
     [SidebarMode.PROFILE_EDIT]: <SidebarProfileEdit />,
-    [SidebarMode.SAVED_MESSAGES]: <SidebarSavedMessages />,
     [SidebarMode.CALLS]: <SidebarCalls />,
     [SidebarMode.CONTACTS]: <SidebarContacts />,
     [SidebarMode.FRIEND_REQUESTS]: <SidebarFriendRequests />,

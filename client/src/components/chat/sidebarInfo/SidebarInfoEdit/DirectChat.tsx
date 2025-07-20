@@ -1,41 +1,33 @@
 import React from "react";
 import ContactInfoItem from "@/components/ui/contactInfoItem";
 import { ChatResponse } from "@/types/responses/chat.response";
-import {
-  SidebarInfoModes,
-  useSidebarInfoStore,
-} from "@/stores/sidebarInfoStore";
+import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import FriendshipBtn from "@/components/ui/FriendshipBtn";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
-import { useActiveChat, useChatStore } from "@/stores/chatStore";
+import { useActiveChat } from "@/stores/chatStore";
 import { DirectChatMember } from "@/types/responses/chatMember.response";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { useActiveMembers } from "@/stores/chatMemberStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
-import { toast } from "react-toastify";
+import { useMessageStore } from "@/stores/messageStore";
+import { useMuteControl } from "@/hooks/useMuteControl";
+import { SidebarInfoHeaderIcons } from "@/components/ui/SidebarInfoHeaderIcons";
 
 const DirectChat: React.FC = () => {
   const activeChat = useActiveChat() as ChatResponse;
-  const { setSidebarInfo } = useSidebarInfoStore();
+  const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
   const chatMembers = useActiveMembers();
   const openModal = useModalStore((state) => state.openModal);
-  const setMute = useChatStore((state) => state.setMute);
+  const setDisplaySearchMessage = useMessageStore(
+    (state) => state.setDisplaySearchMessage
+  );
+  const { mute, unmute } = useMuteControl(activeChat.id, activeChat.myMemberId);
 
   const chatPartner = chatMembers?.find(
     (member) => member.id !== activeChat.myMemberId
   ) as DirectChatMember;
 
   if (!chatPartner || !activeChat) return null;
-
-  const handleUnmute = async () => {
-    try {
-      await setMute(activeChat.id, activeChat.myMemberId, null);
-      toast.success("Unmuted chat member successfully");
-    } catch (error) {
-      console.error("Failed to unmute chat member:", error);
-      toast.error("Failed to unmute chat member");
-    }
-  };
 
   // Header buttons with title
   const headerIcons: {
@@ -65,17 +57,13 @@ const DirectChat: React.FC = () => {
       headerIcons.push({
         icon: "notifications_off",
         title: "Unmute",
-        action: handleUnmute,
+        action: unmute,
       });
     } else {
       headerIcons.push({
         icon: "notifications",
         title: "Mute",
-        action: () =>
-          openModal(ModalType.MUTE, {
-            chatId: activeChat.id,
-            myMemberId: activeChat.myMemberId,
-          }),
+        action: mute,
       });
     }
 
@@ -83,7 +71,9 @@ const DirectChat: React.FC = () => {
       {
         icon: "search",
         title: "Search",
-        action: () => {},
+        action: () => {
+          setDisplaySearchMessage(true);
+        },
       },
       {
         icon: "block",
@@ -101,20 +91,9 @@ const DirectChat: React.FC = () => {
 
   return (
     <div className="flex flex-col w-full h-full">
-      <header className="flex w-full justify-around items-center min-h-[var(--header-height)] custom-border-b">
-        {headerIcons.map(({ icon, title, action, className = "" }) => (
-          <a
-            key={icon}
-            title={title}
-            className={`flex items-center rounded-full cursor-pointer opacity-50 hover:opacity-100 ${className}`}
-            onClick={action}
-          >
-            <i className="material-symbols-outlined">{icon}</i>
-          </a>
-        ))}
-      </header>
+      <SidebarInfoHeaderIcons icons={headerIcons} />
 
-      <div className="flex flex-col justify-center items-center gap-4 p-4 w-full h-full overflow-y-auto">
+      <div className="flex border flex-col justify-center items-center gap-4 p-4 w-full h-full overflow-y-auto">
         <Avatar
           size="36"
           avatarUrl={chatPartner.avatarUrl}
@@ -178,34 +157,6 @@ const DirectChat: React.FC = () => {
             />
           </div>
         )}
-
-        <div className="flex flex-col custom-border rounded w-full">
-          {[
-            {
-              icon: "bookmark",
-              text: "Saved Messages",
-              action: "saved" as SidebarInfoModes,
-            },
-            {
-              icon: "attach_file",
-              text: "Media & Files",
-              action: "media" as SidebarInfoModes,
-            },
-          ].map(({ icon, text, action }) => (
-            <div
-              key={text}
-              className="flex p-2 items-center justify-between w-full cursor-pointer hover:bg-[var(--hover-color)]"
-              onClick={() => setSidebarInfo(action)}
-            >
-              <div className="flex gap-2">
-                <span className="flex flex-col justify-center items-center cursor-pointer opacity-60 hover:opacity-100">
-                  <i className="material-symbols-outlined">{icon}</i>
-                </span>
-                <h1>{text}</h1>
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );

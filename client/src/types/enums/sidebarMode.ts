@@ -8,7 +8,6 @@ export enum SidebarMode {
   // More Tab
   PROFILE = "profile",
   PROFILE_EDIT = "profileEdit",
-  SAVED_MESSAGES = "savedMessages",
   CALLS = "calls",
   CONTACTS = "contacts",
   FRIEND_REQUESTS = "friendRequests",

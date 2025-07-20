@@ -43,12 +43,7 @@ const MuteChatModal: React.FC = () => {
       closeModal();
     }
   };
-
-  if (!modalContent?.props) {
-    closeModal();
-    return null;
-  }
-
+  
   return (
     <motion.div
       {...childrenModalAnimation}

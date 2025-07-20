@@ -23,6 +23,8 @@ export interface MessageStore {
   messages: ChatMessages;
   hasMoreMessages: Record<string, boolean>;
   drafts: Record<string, string>;
+  searchQuery: string;
+  isSearchMessages: boolean;
   isLoading: boolean;
 
   fetchMessages: (chatId: string) => Promise<void>;
@@ -54,6 +56,8 @@ export interface MessageStore {
   ) => void;
   addReaction: (messageId: string, emoji: string, userId: string) => void;
   removeReaction: (messageId: string, emoji: string, userId: string) => void;
+  setDisplaySearchMessage: (isOpen: boolean) => void;
+  setSearchQuery: (query: string) => void;
 }
 
 export const getAttachmentsFromMessages = (
@@ -72,6 +76,8 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
   messages: {},
   hasMoreMessages: {},
   drafts: {},
+  searchQuery: "",
+  isSearchMessages: false,
   isLoading: false,
 
   fetchMessages: async (chatId: string) => {
@@ -402,6 +408,13 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
       return { messages: updatedMessages };
     });
   },
+
+  setDisplaySearchMessage: (isOpen: boolean) =>
+    set(() => ({
+      isSearchMessages: isOpen,
+    })),
+
+  setSearchQuery: (query: string) => set({ searchQuery: query }),
 }));
 
 // Hooks remain unchanged
@@ -419,10 +432,31 @@ export const useActiveChatMessages = () => {
 //   return useMessageStore(useShallow((state) => state.messages[chatId] || []));
 // };
 
+// export const useMessagesByChatId = (chatId: string): MessageResponse[] => {
+//   const allMessages = useMessageStore(
+//     useShallow((state) => state.messages[chatId] || [])
+//   );
+//   const members = useMembersByChatId(chatId) || [];
+//   const currentUserId = useAuthStore.getState().currentUser?.id;
+
+//   // Build a set of blocked userIds by me
+//   const blockedUserIds = new Set(
+//     members
+//       .filter(
+//         (member) => member.userId !== currentUserId && member.isBlockedByMe
+//       )
+//       .map((member) => member.userId)
+//   );
+
+//   // Filter out messages from blocked users
+//   return allMessages.filter((msg) => !blockedUserIds.has(msg.sender.id));
+// };
+
 export const useMessagesByChatId = (chatId: string): MessageResponse[] => {
   const allMessages = useMessageStore(
     useShallow((state) => state.messages[chatId] || [])
   );
+  const searchQuery = useMessageStore((state) => state.searchQuery);
   const members = useMembersByChatId(chatId) || [];
   const currentUserId = useAuthStore.getState().currentUser?.id;
 
@@ -435,8 +469,14 @@ export const useMessagesByChatId = (chatId: string): MessageResponse[] => {
       .map((member) => member.userId)
   );
 
-  // Filter out messages from blocked users
-  return allMessages.filter((msg) => !blockedUserIds.has(msg.sender.id));
+  // Filter out blocked and apply search
+  return allMessages.filter((msg) => {
+    const notBlocked = !blockedUserIds.has(msg.sender.id);
+    const matchesQuery =
+      !searchQuery ||
+      msg.content?.toLowerCase().includes(searchQuery.toLowerCase());
+    return notBlocked && matchesQuery;
+  });
 };
 
 export const useSenderByMessageId = (

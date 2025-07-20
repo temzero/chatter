@@ -168,6 +168,7 @@ export const useChatStore = create<ChatStore>()(
 
         setActiveChat: async (chat) => {
           useSidebarInfoStore.getState().setSidebarInfo();
+          useMessageStore.getState().setDisplaySearchMessage(false);
           if (!chat) {
             set({ activeChat: null, isLoading: false });
             useModalStore.getState().setReplyToMessageId(null);

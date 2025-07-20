@@ -5,30 +5,19 @@ import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import MemberItem from "./GroupChatMember";
 import { ChatMemberRole } from "@/types/enums/ChatMemberRole";
-import { SidebarInfoModes } from "@/stores/sidebarInfoStore";
-import { useActiveMembers, useChatMemberStore } from "@/stores/chatMemberStore";
-import { ModalType, useModalStore } from "@/stores/modalStore";
-import { toast } from "react-toastify";
+import { useActiveMembers } from "@/stores/chatMemberStore";
+import { useMessageStore } from "@/stores/messageStore";
+import { useMuteControl } from "@/hooks/useMuteControl";
+import { SidebarInfoHeaderIcons } from "@/components/ui/SidebarInfoHeaderIcons";
 
 const GroupChat: React.FC = () => {
   const activeChat = useActiveChat() as ChatResponse;
   const activeMembers = useActiveMembers() || [];
-  const openModal = useModalStore((state) => state.openModal);
-  const { setSidebarInfo } = useSidebarInfoStore();
-
-  const handleUnmute = async () => {
-    try {
-      await useChatMemberStore
-        .getState()
-        .updateMember(activeChat.id, activeChat.myMemberId, {
-          mutedUntil: null,
-        });
-      toast.success("Unmuted group chat successfully");
-    } catch (error) {
-      console.error("Failed to unmute group chat:", error);
-      toast.error("Failed to unmute group chat");
-    }
-  };
+  const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
+  const setDisplaySearchMessage = useMessageStore(
+    (state) => state.setDisplaySearchMessage
+  );
+  const { mute, unmute } = useMuteControl(activeChat.id, activeChat.myMemberId);
 
   // Header buttons specific to group chat
   const showEditButton =
@@ -41,7 +30,13 @@ const GroupChat: React.FC = () => {
     action: () => void;
     className?: string;
   }[] = [
-    { icon: "search", title: "Search", action: () => {} },
+    {
+      icon: "search",
+      title: "Search",
+      action: () => {
+        setDisplaySearchMessage(true);
+      },
+    },
     ...(showEditButton
       ? [
           {
@@ -58,18 +53,14 @@ const GroupChat: React.FC = () => {
     headerIcons.unshift({
       icon: "notifications_off",
       title: "Unmute",
-      action: handleUnmute,
+      action: unmute,
       className: "",
     });
   } else {
     headerIcons.unshift({
       icon: "notifications",
       title: "Mute",
-      action: () =>
-        openModal(ModalType.MUTE, {
-          chatId: activeChat.id,
-          myMemberId: activeChat.myMemberId,
-        }),
+      action: mute,
       className: "",
     });
   }
@@ -77,18 +68,7 @@ const GroupChat: React.FC = () => {
   return (
     <div className="flex flex-col w-full h-full">
       {/* Header moved inside GroupChat */}
-      <header className="flex w-full justify-around items-center min-h-[var(--header-height)] custom-border-b">
-        {headerIcons.map(({ icon, title, action, className = "" }) => (
-          <a
-            key={icon}
-            title={title}
-            className={`flex items-center rounded-full p-2 cursor-pointer opacity-50 hover:opacity-100 ${className}`}
-            onClick={action}
-          >
-            <i className="material-symbols-outlined">{icon}</i>
-          </a>
-        ))}
-      </header>
+      <SidebarInfoHeaderIcons icons={headerIcons} />
 
       {/* Chat content */}
       <div className="flex flex-col justify-center items-center gap-4 p-4 w-full overflow-y-auto">
@@ -97,35 +77,6 @@ const GroupChat: React.FC = () => {
         {activeChat.description && (
           <p className="text-sm opacity-80 mb-2">{activeChat.description}</p>
         )}
-
-        <div className="flex flex-col custom-border rounded w-full">
-          {[
-            {
-              icon: "bookmark",
-              title: "Saved Messages",
-              action: "saved" as SidebarInfoModes,
-            },
-            {
-              icon: "attach_file",
-              title: "Media & Files",
-              action: "media" as SidebarInfoModes,
-            },
-          ].map(({ icon, title, action }) => (
-            <div
-              key={title}
-              title={title}
-              className="flex p-2 items-center justify-between w-full cursor-pointer hover:bg-[var(--hover-color)]"
-              onClick={() => setSidebarInfo(action)}
-            >
-              <div className="flex gap-2">
-                <span className="flex flex-col justify-center items-center cursor-pointer opacity-60 hover:opacity-100">
-                  <i className="material-symbols-outlined">{icon}</i>
-                </span>
-                <h1>{title}</h1>
-              </div>
-            </div>
-          ))}
-        </div>
 
         {activeMembers.length > 0 && (
           <div className="flex flex-col rounded overflow-hidden custom-border w-full">

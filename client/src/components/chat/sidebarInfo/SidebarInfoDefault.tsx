@@ -5,6 +5,7 @@ import { ChatType } from "@/types/enums/ChatType";
 import DirectChat from "./SidebarInfoEdit/DirectChat";
 import GroupChat from "./SidebarInfoEdit/GroupChat";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
+import OpenAttachmentBtn from "@/components/ui/OpenAttachmentBtn";
 
 const SidebarInfoDefault: React.FC = () => {
   const activeChat = useActiveChat();
@@ -17,19 +18,18 @@ const SidebarInfoDefault: React.FC = () => {
 
   return (
     <aside className="relative w-full h-full overflow-hidden flex flex-col">
-      {/* Header will be rendered inside DirectChat/GroupChat */}
-      {/* <div className="overflow-x-hidden overflow-y-auto h-screen"> */}
-        {isSidebarInfoVisible && (
-          <motion.div
-            key={activeChat.id}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="flex flex-col gap-4 w-full min-w-[240px]"
-          >
-            {isDirect ? <DirectChat /> : <GroupChat />}
-          </motion.div>
-        )}
-      {/* </div> */}
+      {isSidebarInfoVisible && (
+        <motion.div
+          key={activeChat.id}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.2 }}
+          className="flex flex-col gap-4 w-full min-w-[240px]"
+        >
+          {isDirect ? <DirectChat /> : <GroupChat />}
+        </motion.div>
+      )}
+      <OpenAttachmentBtn />
     </aside>
   );
 };

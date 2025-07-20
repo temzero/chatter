@@ -11,24 +11,29 @@ import type { ChatResponse } from "@/types/responses/chat.response";
 import PinnedMessage from "./PinnedMessage";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
 import { DirectChatMember } from "@/types/responses/chatMember.response";
+import { useMessageStore } from "@/stores/messageStore";
+import MessageSearchBar from "../ui/MessageSearchBar";
 
 interface ChatHeaderProps {
   chat: ChatResponse;
   isBlockedByMe: boolean;
 }
 
-const ChatHeader: React.FC<ChatHeaderProps> = ({ chat, isBlockedByMe = false }) => {
+const ChatHeader: React.FC<ChatHeaderProps> = ({
+  chat,
+  isBlockedByMe = false,
+}) => {
   const toggleSidebarInfo = useSidebarInfoStore(
     (state) => state.toggleSidebarInfo
   );
 
   const chatListMembers = useChatMemberStore.getState().chatMembers[chat.id];
   const isOnline = useChatStatus(chat?.id, chat.type);
+  const isSearchMessages = useMessageStore((state) => state.isSearchMessages);
 
   const isChannel = chat.type === ChatType.CHANNEL;
   const isDirect = chat.type === ChatType.DIRECT;
   const isGroup = chat.type === ChatType.GROUP;
-  // const isSaved = chat.type === ChatType.SAVED;
 
   // Get chat partner's friendship status if DIRECT chat
   let canCall = false;
@@ -76,21 +81,40 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ chat, isBlockedByMe = false }) 
         </motion.div>
       </AnimatePresence>
 
-      <div className="flex items-center gap-1">
-        <div className="flex items-center cursor-pointer rounded-full opacity-60 hover:opacity-100 p-1">
-          {isDirect && canCall && (
-            <i className="material-symbols-outlined text-3xl">phone_enabled</i>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={isSearchMessages ? "search" : "buttons"}
+          initial={{ opacity: 0, x: 25 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: 25 }}
+          className={`flex justify-end ${
+            isSearchMessages ? "w-[49%]" : "w-auto"
+          }`}
+        >
+          {isSearchMessages ? (
+            <MessageSearchBar />
+          ) : (
+            <div className="flex items-center gap-1">
+              <div className="flex items-center cursor-pointer rounded-full opacity-60 hover:opacity-100 p-1">
+                {isDirect && canCall && (
+                  <i className="material-symbols-outlined text-3xl">
+                    phone_enabled
+                  </i>
+                )}
+                {isGroup && (
+                  <i className="material-symbols-outlined text-3xl">videocam</i>
+                )}
+                {isChannel && (
+                  <i className="material-symbols-outlined text-3xl">
+                    connected_tv
+                  </i>
+                )}
+              </div>
+              <OnlineDot isOnline={isOnline} />
+            </div>
           )}
-          {isGroup && (
-            <i className="material-symbols-outlined text-3xl">videocam</i>
-          )}
-          {isChannel && (
-            <i className="material-symbols-outlined text-3xl">connected_tv</i>
-          )}
-        </div>
-
-        <OnlineDot isOnline={isOnline} />
-      </div>
+        </motion.div>
+      </AnimatePresence>
     </header>
   );
 };
