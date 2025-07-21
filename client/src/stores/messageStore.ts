@@ -24,6 +24,7 @@ export interface MessageStore {
   hasMoreMessages: Record<string, boolean>;
   drafts: Record<string, string>;
   searchQuery: string;
+  showImportantOnly: boolean;
   isSearchMessages: boolean;
   isLoading: boolean;
 
@@ -54,6 +55,7 @@ export interface MessageStore {
     messageId: string,
     newReactions: Record<string, string[]>
   ) => void;
+  setShowImportantOnly: (value: boolean) => void;
   addReaction: (messageId: string, emoji: string, userId: string) => void;
   removeReaction: (messageId: string, emoji: string, userId: string) => void;
   setDisplaySearchMessage: (isOpen: boolean) => void;
@@ -77,6 +79,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
   hasMoreMessages: {},
   drafts: {},
   searchQuery: "",
+  showImportantOnly: false,
   isSearchMessages: false,
   isLoading: false,
 
@@ -348,6 +351,8 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
     });
   },
 
+  setShowImportantOnly: (value) => set({ showImportantOnly: value }),
+
   addReaction: (messageId, emoji, userId) => {
     set((state) => {
       const updatedMessages = { ...state.messages };
@@ -428,35 +433,12 @@ export const useActiveChatMessages = () => {
   }, [activeChat, isLoading, messages]);
 };
 
-// export const useMessagesByChatId = (chatId: string) => {
-//   return useMessageStore(useShallow((state) => state.messages[chatId] || []));
-// };
-
-// export const useMessagesByChatId = (chatId: string): MessageResponse[] => {
-//   const allMessages = useMessageStore(
-//     useShallow((state) => state.messages[chatId] || [])
-//   );
-//   const members = useMembersByChatId(chatId) || [];
-//   const currentUserId = useAuthStore.getState().currentUser?.id;
-
-//   // Build a set of blocked userIds by me
-//   const blockedUserIds = new Set(
-//     members
-//       .filter(
-//         (member) => member.userId !== currentUserId && member.isBlockedByMe
-//       )
-//       .map((member) => member.userId)
-//   );
-
-//   // Filter out messages from blocked users
-//   return allMessages.filter((msg) => !blockedUserIds.has(msg.sender.id));
-// };
-
 export const useMessagesByChatId = (chatId: string): MessageResponse[] => {
   const allMessages = useMessageStore(
     useShallow((state) => state.messages[chatId] || [])
   );
   const searchQuery = useMessageStore((state) => state.searchQuery);
+  const showImportantOnly = useMessageStore((state) => state.showImportantOnly);
   const members = useMembersByChatId(chatId) || [];
   const currentUserId = useAuthStore.getState().currentUser?.id;
 
@@ -469,15 +451,45 @@ export const useMessagesByChatId = (chatId: string): MessageResponse[] => {
       .map((member) => member.userId)
   );
 
-  // Filter out blocked and apply search
+  // Filter logic
   return allMessages.filter((msg) => {
     const notBlocked = !blockedUserIds.has(msg.sender.id);
     const matchesQuery =
       !searchQuery ||
       msg.content?.toLowerCase().includes(searchQuery.toLowerCase());
-    return notBlocked && matchesQuery;
+
+    const isImportant = !showImportantOnly || msg.isImportant;
+
+    return notBlocked && matchesQuery && isImportant;
   });
 };
+
+// export const useMessagesByChatId = (chatId: string): MessageResponse[] => {
+//   const allMessages = useMessageStore(
+//     useShallow((state) => state.messages[chatId] || [])
+//   );
+//   const searchQuery = useMessageStore((state) => state.searchQuery);
+//   const members = useMembersByChatId(chatId) || [];
+//   const currentUserId = useAuthStore.getState().currentUser?.id;
+
+//   // Build a set of blocked userIds by me
+//   const blockedUserIds = new Set(
+//     members
+//       .filter(
+//         (member) => member.userId !== currentUserId && member.isBlockedByMe
+//       )
+//       .map((member) => member.userId)
+//   );
+
+//   // Filter out blocked and apply search
+//   return allMessages.filter((msg) => {
+//     const notBlocked = !blockedUserIds.has(msg.sender.id);
+//     const matchesQuery =
+//       !searchQuery ||
+//       msg.content?.toLowerCase().includes(searchQuery.toLowerCase());
+//     return notBlocked && matchesQuery;
+//   });
+// };
 
 export const useSenderByMessageId = (
   messageId: string

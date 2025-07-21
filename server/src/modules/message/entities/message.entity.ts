@@ -10,6 +10,7 @@ import {
   BeforeUpdate,
   Index,
   OneToMany,
+  RelationId,
 } from 'typeorm';
 import { Chat } from 'src/modules/chat/entities/chat.entity';
 import { User } from '../../user/entities/user.entity';
@@ -61,17 +62,19 @@ export class Message {
   @Column({ name: 'pinned_at', nullable: true, type: 'timestamp' })
   pinnedAt: Date | null;
 
-  @Column({ name: 'reply_to_message_id', nullable: true })
+  // @Column({ name: 'reply_to_message_id', nullable: true })
+  @RelationId((message: Message) => message.replyToMessage)
   replyToMessageId: string | null;
 
-  @ManyToOne(() => Message, { nullable: true })
+  @ManyToOne(() => Message, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'reply_to_message_id' })
   replyToMessage: Message | null;
 
-  @Column({ name: 'forwarded_from_message_id', nullable: true })
+  // @Column({ name: 'forwarded_from_message_id', nullable: true })
+  @RelationId((message: Message) => message.forwardedFromMessage)
   forwardedFromMessageId: string | null;
 
-  @ManyToOne(() => Message, { nullable: true })
+  @ManyToOne(() => Message, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'forwarded_from_message_id' })
   forwardedFromMessage: Message | null;
 
@@ -94,6 +97,9 @@ export class Message {
     default: null,
   })
   deletedForUserIds: string[] | null; // Array of USER IDs
+
+  @Column({ default: false })
+  isImportant: boolean;
 
   @Column({ name: 'is_deleted', default: false })
   isDeleted: boolean;

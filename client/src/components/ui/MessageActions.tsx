@@ -73,6 +73,20 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       },
     },
     {
+      icon: message.isImportant ? "label_important" : "label_important_outline",
+      label: message.isImportant ? "Unmark Important" : "Mark Important",
+      className: message.isImportant ? "text-red-500 font-bold" : "",
+      action: () => {
+        if (onClose) onClose();
+        chatWebSocketService.toggleImportantMessage({
+          messageId: message.id,
+          chatId: message.chatId,
+          isImportant: !message.isImportant,
+        });
+        closeModal();
+      },
+    },
+    {
       icon: "delete",
       label: "Delete",
       action: () => {
@@ -109,7 +123,8 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
           key={index}
           className={clsx(
             "py-2 px-3 flex flex-col items-center justify-center rounded-lg",
-            "hover:bg-black/40 hover:text-green-300 hover:scale-110 transition-all"
+            "hover:bg-black/40 hover:scale-110 transition-all",
+            action.className
           )}
           onClick={(e) => {
             e.stopPropagation();
@@ -122,7 +137,10 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
               "material-symbols-outlined text-2xl",
               action.label === "Reply" && "rotate-180",
               action.label === "Forward" && "rotate-90",
-              action.label === "Delete" && "text-red-400"
+              action.label === "Delete" && "text-red-400",
+              action.label.includes("Important") &&
+                message.isImportant &&
+                "font-filled" // Custom class we'll define below
             )}
           >
             {action.icon}

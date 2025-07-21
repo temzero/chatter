@@ -9,6 +9,7 @@ import { useActiveMembers } from "@/stores/chatMemberStore";
 import { useMessageStore } from "@/stores/messageStore";
 import { useMuteControl } from "@/hooks/useMuteControl";
 import { SidebarInfoHeaderIcons } from "@/components/ui/SidebarInfoHeaderIcons";
+import ImportantMessagesBtn from "@/components/ui/ImportantMessagesBtn";
 
 const GroupChat: React.FC = () => {
   const activeChat = useActiveChat() as ChatResponse;
@@ -77,6 +78,7 @@ const GroupChat: React.FC = () => {
         {activeChat.description && (
           <p className="text-sm opacity-80 mb-2">{activeChat.description}</p>
         )}
+        <ImportantMessagesBtn />
 
         {activeMembers.length > 0 && (
           <div className="flex flex-col rounded overflow-hidden custom-border w-full">

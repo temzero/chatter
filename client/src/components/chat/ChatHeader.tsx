@@ -13,6 +13,7 @@ import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.se
 import { DirectChatMember } from "@/types/responses/chatMember.response";
 import { useMessageStore } from "@/stores/messageStore";
 import MessageSearchBar from "../ui/MessageSearchBar";
+import ImportantLabel from "../ImportantLabel";
 
 interface ChatHeaderProps {
   chat: ChatResponse;
@@ -87,7 +88,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
           initial={{ opacity: 0, x: 25 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 25 }}
-          className={`flex justify-end ${
+          className={`flex justify-end items-center ${
             isSearchMessages ? "w-[49%]" : "w-auto"
           }`}
         >
@@ -113,6 +114,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
               <OnlineDot isOnline={isOnline} />
             </div>
           )}
+          <ImportantLabel />
         </motion.div>
       </AnimatePresence>
     </header>

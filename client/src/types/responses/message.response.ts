@@ -19,7 +19,8 @@ export interface MessageResponse {
 
   forwardedFromMessageId?: string | null;
   forwardedFromMessage: MessageResponse | null;
-
+  
+  isImportant?: boolean;
   editedAt?: string | null;
   isDeleted: boolean;
   deletedAt?: string | null;

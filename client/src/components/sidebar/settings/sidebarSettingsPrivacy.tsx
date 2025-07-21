@@ -4,7 +4,7 @@ import { SidebarMode } from "@/types/enums/sidebarMode";
 import { useAuthStore } from "@/stores/authStore";
 import { useCurrentUser } from "@/stores/authStore";
 import { userService } from "@/services/userService";
-import Toggle from "@/components/ui/Toggle";
+import SwitchBtn from "@/components/ui/SwitchBtn";
 
 const SidebarSettingsPrivacy: React.FC = () => {
   const currentUser = useCurrentUser();
@@ -37,7 +37,7 @@ const SidebarSettingsPrivacy: React.FC = () => {
 
   const handleSettingChange = (
     setting: keyof typeof privacySettings,
-    value: any
+    value: unknown
   ) => {
     setPrivacySettings((prev) => ({
       ...prev,
@@ -91,9 +91,11 @@ const SidebarSettingsPrivacy: React.FC = () => {
                   : "Anyone can see your content"}
               </p>
             </div>
-            <Toggle
-              enabled={privacySettings.isPrivateAccount}
-              setEnabled={(val) => handleSettingChange("isPrivateAccount", val)}
+            <SwitchBtn
+              checked={privacySettings.isPrivateAccount}
+              onCheckedChange={(val) =>
+                handleSettingChange("isPrivateAccount", val)
+              }
             />
           </div>
 
@@ -106,9 +108,11 @@ const SidebarSettingsPrivacy: React.FC = () => {
                   : "People won't see when you've read their messages"}
               </p>
             </div>
-            <Toggle
-              enabled={privacySettings.readReceipts}
-              setEnabled={(val) => handleSettingChange("readReceipts", val)}
+            <SwitchBtn
+              checked={privacySettings.readReceipts}
+              onCheckedChange={(val) =>
+                handleSettingChange("readReceipts", val)
+              }
             />
           </div>
 
@@ -121,9 +125,11 @@ const SidebarSettingsPrivacy: React.FC = () => {
                   : "People won't see when you're online"}
               </p>
             </div>
-            <Toggle
-              enabled={privacySettings.showOnlineStatus}
-              setEnabled={(val) => handleSettingChange("showOnlineStatus", val)}
+            <SwitchBtn
+              checked={privacySettings.showOnlineStatus}
+              onCheckedChange={(val) =>
+                handleSettingChange("showOnlineStatus", val)
+              }
             />
           </div>
 

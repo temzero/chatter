@@ -12,6 +12,7 @@ import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useMessageStore } from "@/stores/messageStore";
 import { useMuteControl } from "@/hooks/useMuteControl";
 import { SidebarInfoHeaderIcons } from "@/components/ui/SidebarInfoHeaderIcons";
+import ImportantMessagesBtn from "@/components/ui/ImportantMessagesBtn";
 
 const DirectChat: React.FC = () => {
   const activeChat = useActiveChat() as ChatResponse;
@@ -93,7 +94,7 @@ const DirectChat: React.FC = () => {
     <div className="flex flex-col w-full h-full">
       <SidebarInfoHeaderIcons icons={headerIcons} />
 
-      <div className="flex border flex-col justify-center items-center gap-4 p-4 w-full h-full overflow-y-auto">
+      <div className="flex flex-col justify-center items-center gap-4 p-4 w-full h-full overflow-y-auto">
         <Avatar
           size="36"
           avatarUrl={chatPartner.avatarUrl}
@@ -131,6 +132,8 @@ const DirectChat: React.FC = () => {
             className="bg-[var(--primary-green)]"
           />
         )}
+
+        <ImportantMessagesBtn />
 
         {chatPartner.friendshipStatus === FriendshipStatus.ACCEPTED && (
           <div className="w-full flex flex-col items-center rounded font-light custom-border overflow-hidden">

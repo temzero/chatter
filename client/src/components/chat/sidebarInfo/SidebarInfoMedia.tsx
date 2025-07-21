@@ -126,7 +126,7 @@ const ChatInfoMedia: React.FC = () => {
       </div>
 
       <a
-        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-10 flex items-center justify-center cursor-pointer opacity-50 hover:opacity-90 bg-[var(--sidebar-color)]"
+        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-10 flex items-center justify-center cursor-pointer opacity-50 hover:opacity-90 bg-[var(--sidebar-color)] select-none"
         onClick={() => setSidebarInfo("default")}
       >
         <i className="material-symbols-outlined rotate-90">arrow_forward_ios</i>

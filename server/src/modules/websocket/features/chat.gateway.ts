@@ -322,9 +322,6 @@ export class ChatGateway {
 
       // Step 3: Format and emit to client
       const response = this.messageMapper.toMessageResponseDto(savedMessage);
-      client.emit(`${chatLink}saveMessage`, response);
-
-      // Optional: emit to all user's devices (if you track sockets by userId)
       this.websocketService.emitToUser(
         userId,
         `${chatLink}saveMessage`,
@@ -332,6 +329,36 @@ export class ChatGateway {
       );
     } catch (error) {
       emitWsError(client, error, 'Failed to save message');
+    }
+  }
+
+  @SubscribeMessage('chat:toggleImportant')
+  async handleToggleImportant(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody()
+    data: { messageId: string; chatId: string; isImportant: boolean },
+  ) {
+    const userId = client.data.userId;
+    if (!userId) return;
+
+    try {
+      const updated = await this.messageService.markMessageAsImportant(
+        userId,
+        data.messageId,
+        data.isImportant,
+      );
+
+      const updatedMessageToggled =
+        this.messageMapper.toMessageResponseDto(updated);
+
+      await this.websocketService.emitToChatMembers(
+        data.chatId,
+        'chat:messageImportantToggled',
+        updatedMessageToggled,
+        { senderId: userId },
+      );
+    } catch (error) {
+      emitWsError(client, error, 'Failed to toggle important');
     }
   }
 

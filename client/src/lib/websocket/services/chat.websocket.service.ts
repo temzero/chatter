@@ -3,7 +3,6 @@ import { SendMessageRequest } from "@/types/requests/sendMessage.request";
 import { ForwardMessageRequest } from "@/types/requests/forwardMessage.request";
 import { webSocketService } from "./websocket.service";
 import { MessageResponse } from "@/types/responses/message.response";
-import { toast } from "react-toastify";
 
 export class ChatWebSocketService {
   async getChatStatus(
@@ -41,7 +40,6 @@ export class ChatWebSocketService {
   }
 
   async sendMessage(message: SendMessageRequest) {
-    console.log('sendMessage', message)
     webSocketService.emit("chat:sendMessage", message);
   }
 
@@ -160,7 +158,6 @@ export class ChatWebSocketService {
   }
 
   saveMessage(payload: { messageId: string | null }) {
-    toast.success(`emit to server saved message ${payload.messageId}`);
     webSocketService.emit("chat:saveMessage", payload);
   }
 
@@ -170,6 +167,22 @@ export class ChatWebSocketService {
 
   offSaveMessage(callback: (message: MessageResponse) => void) {
     webSocketService.off("chat:saveMessage", callback);
+  }
+
+  toggleImportantMessage(payload: {
+    messageId: string;
+    chatId: string;
+    isImportant: boolean;
+  }) {
+    webSocketService.emit("chat:toggleImportant", payload);
+  }
+
+  onImportantMessage(callback: (message: MessageResponse) => void) {
+    webSocketService.on("chat:messageImportantToggled", callback);
+  }
+
+  offImportantMessage(callback: (message: MessageResponse) => void) {
+    webSocketService.off("chat:messageImportantToggled", callback);
   }
 
   // --- Emit delete message request to server

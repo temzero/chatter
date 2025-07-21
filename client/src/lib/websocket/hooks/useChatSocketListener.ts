@@ -9,10 +9,10 @@ import { MessageStatus } from "@/types/enums/message";
 import { playSoundEffect } from "@/utils/playSoundEffect";
 import newMessageSound from "@/assets/sound/message-pop.mp3";
 import { WsMessageResponse } from "@/types/websocket/websocketMessageRes";
+import { toast } from "react-toastify";
 
 export function useChatSocketListeners() {
   const activeChatId = useActiveChatId();
-  console.log("activeChatId", activeChatId);
   useEffect(() => {
     const handleNewMessage = (WsMessageResponse: WsMessageResponse) => {
       const { meta, ...message } = WsMessageResponse as MessageResponse & {
@@ -39,6 +39,11 @@ export function useChatSocketListeners() {
           playSoundEffect(newMessageSound);
         }
       }
+    };
+
+    const handleMessageSaved = (message: MessageResponse) => {
+      toast.success("Message saved!");
+      useMessageStore.getState().addMessage(message);
     };
 
     const handleTyping = (data: {
@@ -81,6 +86,12 @@ export function useChatSocketListeners() {
       useChatStore.getState().setPinnedMessage(data.chatId, data.message);
     };
 
+    const handleMessageMarkedImportant = (message: MessageResponse) => {
+      useMessageStore
+        .getState()
+        .updateMessageById(message.chatId, message.id, message);
+    };
+
     const handleMessageDeleted = (data: {
       messageId: string;
       chatId: string;
@@ -107,23 +118,27 @@ export function useChatSocketListeners() {
 
     // Subscribe to events
     chatWebSocketService.onNewMessage(handleNewMessage);
+    chatWebSocketService.onSaveMessage(handleMessageSaved);
     chatWebSocketService.onReaction(handleReaction);
     chatWebSocketService.onTyping(handleTyping);
     chatWebSocketService.onMessagesRead(handleMessagesRead);
     chatWebSocketService.onMessagePin(handleMessagePinned);
+    chatWebSocketService.onImportantMessage(handleMessageMarkedImportant);
     chatWebSocketService.onDeleteMessage(handleMessageDeleted);
     chatWebSocketService.onMessageError(handleMessageError);
 
     return () => {
       // Clean up listeners
       chatWebSocketService.offNewMessage(handleNewMessage);
+      chatWebSocketService.offSaveMessage(handleMessageSaved);
       chatWebSocketService.offReaction(handleReaction);
       chatWebSocketService.offTyping(handleTyping);
       chatWebSocketService.offMessagesRead(handleMessagesRead);
       chatWebSocketService.offMessagePin(handleMessagePinned);
+      chatWebSocketService.offImportantMessage(handleMessageMarkedImportant);
       chatWebSocketService.offDeleteMessage(handleMessageDeleted);
       chatWebSocketService.offMessageError(handleMessageError);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 }

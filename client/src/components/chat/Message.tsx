@@ -36,7 +36,7 @@ const MessageContent = ({
   return (
     <p
       className={clsx(
-        "break-words max-w-full cursor-pointer transition-all duration-200",
+        "break-words max-w-full cursor-pointer transition-all duration-200 shadow-xl rounded-b-xl",
         {
           "scale-110 opacity-60": copied,
         }
@@ -73,7 +73,6 @@ const Message: React.FC<MessageProps> = ({
   const isFocus = useIsMessageFocus(message.id);
 
   const repliedMessage = message.replyToMessage;
-  const forwardedMessage = message.forwardedFromMessage;
 
   const openMessageModal = useModalStore((state) => state.openMessageModal);
   const [copied, setCopied] = useState(false);
@@ -111,7 +110,7 @@ const Message: React.FC<MessageProps> = ({
     <motion.div
       id={`message-${message.id}`}
       ref={messageRef}
-      className={clsx("flex max-w-[60%] group relative", {
+      className={clsx("flex max-w-[60%] group relative ", {
         "ml-auto": isMe,
         "mr-auto": !isMe,
         "pb-1": isRecent,
@@ -161,6 +160,7 @@ const Message: React.FC<MessageProps> = ({
           <div className="relative">
             <div
               className={clsx("message-bubble", {
+                "border-4 border-red-500/80": message.isImportant,
                 "self-message ml-auto": isMe,
                 "scale-110": copied,
                 "message-bubble-reply": isRelyToThisMessage,
@@ -177,19 +177,20 @@ const Message: React.FC<MessageProps> = ({
                     : undefined,
               }}
             >
-              {forwardedMessage && (
-                <ForwardedMessagePreview
-                  message={forwardedMessage}
-                  currentUserId={currentUserId ?? undefined}
-                  isMe={isMe}
-                />
-              )}
               <RenderMultipleAttachments attachments={attachments} />
               <MessageContent
                 content={message.content ?? undefined}
                 onCopy={handleCopyText}
                 copied={copied}
               />
+              {message.forwardedFromMessage && (
+                <ForwardedMessagePreview
+                  message={message}
+                  originalSender={message.forwardedFromMessage?.sender}
+                  currentUserId={currentUserId ?? undefined}
+                  isMe={isMe}
+                />
+              )}
             </div>
             <MessageReactionDisplay
               isMe={isMe}
@@ -216,16 +217,18 @@ const Message: React.FC<MessageProps> = ({
           </h1>
         )}
 
-        {!isRecent && message.status !== MessageStatus.SENDING && message.status !== MessageStatus.FAILED && (
-          <p
-            className={clsx("text-xs py-1 opacity-40", {
-              "ml-auto": isMe,
-              "mr-auto": !isMe,
-            })}
-          >
-            {formatTime(message.createdAt)}
-          </p>
-        )}
+        {!isRecent &&
+          message.status !== MessageStatus.SENDING &&
+          message.status !== MessageStatus.FAILED && (
+            <p
+              className={clsx("text-xs py-1 opacity-40", {
+                "ml-auto": isMe,
+                "mr-auto": !isMe,
+              })}
+            >
+              {formatTime(message.createdAt)}
+            </p>
+          )}
 
         {message.status === MessageStatus.SENDING && (
           <div className="rounded-full flex justify-end mt-1">

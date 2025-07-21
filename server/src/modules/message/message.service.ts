@@ -158,6 +158,8 @@ export class MessageService {
     const newMessage = this.messageRepo.create({
       senderId,
       chatId: targetChatId,
+      content: originalMessage.content,
+      attachments: [...originalMessage.attachments],
       forwardedFromMessage: originalMessage,
     });
 
@@ -430,6 +432,25 @@ export class MessageService {
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to retrieve conversation messages');
     }
+  }
+
+  async markMessageAsImportant(
+    userId: string,
+    messageId: string,
+    isImportant: boolean,
+  ): Promise<Message> {
+    const message = await this.messageRepo.findOneBy({ id: messageId });
+
+    if (!message) {
+      throw new Error('Message not found');
+    }
+
+    if (message.senderId !== userId) {
+      throw new Error('Only sender can mark message as important');
+    }
+
+    message.isImportant = isImportant;
+    return this.messageRepo.save(message);
   }
 
   // Delete message

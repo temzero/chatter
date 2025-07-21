@@ -16,7 +16,7 @@ const OpenAttachmentBtn: React.FC = () => {
         mass: 1,
       }}
       whileHover={{
-        bottom: -1,
+        bottom: -4,
         opacity: 1,
         transition: {
           type: "tween", // For faster, linear movement
@@ -24,17 +24,17 @@ const OpenAttachmentBtn: React.FC = () => {
           ease: "easeOut", // Quick acceleration, smooth stop
         },
       }}
-      className="absolute -bottom-6 left-0 flex flex-col custom-border rounded-t-xl overflow-hidden w-full opacity-60"
+      className="absolute -bottom-[36px] left-0 flex flex-col border-2 border-b-0 border-[--border-color] rounded-t-xl overflow-hidden w-full opacity-60 select-none"
     >
       <div
-        className="flex flex-col p-2 pb-6 items-center justify-between w-full cursor-pointer hover:bg-[var(--hover-color)]"
+        className="flex flex-col p-1 pb-10 items-center justify-between w-full cursor-pointer shadow-xl hover:bg-gradient-to-b from-[--hover-color] to-transparent"
         onClick={() => setSidebarInfo("media")}
       >
-        <span className="material-symbols-outlined">keyboard_control_key</span>
+        <span className="material-symbols-outlined -mb-1">keyboard_control_key</span>
         <div className="flex gap-2">
-          <span className="flex flex-col justify-center items-center cursor-pointer">
+          {/* <span className="flex flex-col justify-center items-center cursor-pointer">
             <i className="material-symbols-outlined">attach_file</i>
-          </span>
+          </span> */}
           <h1>Media & Files</h1>
         </div>
       </div>

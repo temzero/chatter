@@ -25,6 +25,7 @@ export class MessageMapper {
       pinnedAt: message.pinnedAt,
       replyToMessageId: message.replyToMessageId,
       replyCount: message.replyCount,
+      isImportant: message.isImportant,
       editedAt: message.editedAt,
       isDeleted: message.isDeleted,
       deletedAt: message.deletedAt,

@@ -32,6 +32,7 @@ export class MessageResponseDto {
   @Type(() => MessageResponseDto)
   forwardedFromMessage?: MessageResponseDto | null;
 
+  @Expose() isImportant?: boolean;
   @Expose() editedAt?: Date | null;
   @Expose() isDeleted: boolean;
   @Expose() deletedAt?: Date | null;
