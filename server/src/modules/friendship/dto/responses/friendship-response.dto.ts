@@ -30,15 +30,3 @@ export class FriendshipResponseDto {
   @Expose()
   updatedAt: Date;
 }
-
-// For friendship status with a specific user
-export class FriendshipStatusResponseDto {
-  @Expose()
-  status: FriendshipStatus;
-
-  @Expose({ name: 'request_message' })
-  requestMessage: string | null;
-
-  @Expose({ name: 'created_at' })
-  createdAt: Date;
-}

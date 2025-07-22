@@ -3,10 +3,9 @@ import React, { useRef, useState } from "react";
 import { useModalStore } from "@/stores/modalStore";
 import { Avatar } from "../ui/avatar/Avatar";
 import { useFriendshipStore } from "@/stores/friendshipStore";
-import { FriendshipStatus } from "@/types/enums/friendshipType";
-import { useChatStore } from "@/stores/chatStore";
 import { motion } from "framer-motion";
 import { childrenModalAnimation } from "@/animations/modalAnimations";
+import { toast } from "react-toastify";
 
 interface FriendRequestModalProps {
   receiver: {
@@ -16,14 +15,12 @@ interface FriendRequestModalProps {
     lastName: string;
     avatarUrl: string;
   };
-  onSuccess?: (status: string) => void;
 }
 
 const FriendRequestModal: React.FC = () => {
   const modalContent = useModalStore((state) => state.modalContent);
   const props = modalContent?.props as FriendRequestModalProps | undefined;
 
-  const fetchChatById = useChatStore.getState().fetchChatById;
   const sendFriendRequest = useFriendshipStore.getState().sendFriendRequest;
   const closeModal = useModalStore.getState().closeModal;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -32,20 +29,12 @@ const FriendRequestModal: React.FC = () => {
   const maxChar = 200;
 
   if (!props) return null;
-  const { receiver, onSuccess } = props;
+  const { receiver } = props;
 
   const handleFriendRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await sendFriendRequest(receiver.id, requestMessage);
-      if (onSuccess) {
-        onSuccess(FriendshipStatus.PENDING);
-      }
-      closeModal();
-      fetchChatById();
-    } catch (err: unknown) {
-      console.error("Failed to send friend request:", err);
-    }
+    closeModal();
+    await sendFriendRequest(receiver.id, receiver.firstName, requestMessage);
   };
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

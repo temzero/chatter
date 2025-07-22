@@ -8,12 +8,14 @@ import {
   CreateDateColumn,
   Index,
   UpdateDateColumn,
+  Unique,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { FriendshipStatus } from '../constants/friendship-status.constants';
 
 @Entity('friendship')
 @Index(['senderId', 'receiverId'])
+@Unique(['senderId', 'receiverId'])
 export class Friendship {
   @PrimaryGeneratedColumn('uuid')
   id: string;

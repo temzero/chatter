@@ -4,6 +4,7 @@ import { useActiveChatId, useChatStore } from "./chatStore";
 import type { ChatMember } from "@/types/responses/chatMember.response";
 import { ChatType } from "@/types/enums/ChatType";
 import { useShallow } from "zustand/shallow";
+import { FriendshipStatus } from "@/types/enums/friendshipType";
 
 interface ChatMemberStore {
   chatMembers: Record<string, ChatMember[]>; // chatId -> members
@@ -35,6 +36,7 @@ interface ChatMemberStore {
     memberId: string,
     messageId: string
   ) => Promise<void>;
+  updateFriendshipStatus: (otherUserId: string, status: FriendshipStatus) => void;
   addGroupMember: (chatId: string, member: ChatMember) => void;
   removeGroupMember: (chatId: string, userId: string) => void;
 }
@@ -166,6 +168,29 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
       set({ error: "Failed to update nickname", isLoading: false });
       throw error;
     }
+  },
+
+  updateFriendshipStatus: (otherUserId, status) => {
+    set((state) => {
+      const updatedChatMembers = { ...state.chatMembers };
+
+      // Update all members matching the userId across all chats
+      Object.entries(updatedChatMembers).forEach(([chatId, members]) => {
+        updatedChatMembers[chatId] = members.map((member) => {
+          if (member.userId === otherUserId) {
+            return {
+              ...member,
+              friendshipStatus: status,
+            };
+          }
+          return member;
+        });
+      });
+
+      return {
+        chatMembers: updatedChatMembers,
+      };
+    });
   },
 
   updateMemberLastRead: async (

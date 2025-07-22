@@ -14,6 +14,7 @@ import { MessageMapper } from '../message/mappers/message.mapper';
 import { ChatModule } from '../chat/chat.module';
 import { SupabaseModule } from '../superbase/supabase.module';
 import { BlockModule } from '../block/block.module';
+import { NotificationWsService } from './notification.service';
 
 @Module({
   imports: [
@@ -39,7 +40,8 @@ import { BlockModule } from '../block/block.module';
     NotificationGateway,
     WsJwtGuard,
     MessageMapper,
+    NotificationWsService,
   ],
-  exports: [GlobalGateway, WebsocketService],
+  exports: [GlobalGateway, WebsocketService, NotificationWsService],
 })
 export class WebSocketModule {}

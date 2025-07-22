@@ -1,8 +1,7 @@
 import API from "@/services/api/api";
 import {
-  FriendRequestResponse,
   FriendshipResponse,
-  SentRequestResponse,
+  FriendRequestResponse,
 } from "@/types/responses/friendship.response";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
 
@@ -14,7 +13,7 @@ export const friendshipService = {
   async sendRequest(
     receiverId: string,
     requestMessage: string | undefined
-  ): Promise<SentRequestResponse> {
+  ): Promise<FriendRequestResponse> {
     const { data } = await API.post(`/friendships/requests/${receiverId}`, {
       requestMessage,
     });
@@ -47,7 +46,7 @@ export const friendshipService = {
   /**
    * Get all pending friend requests for the current user
    */
-  async getPendingRequests(): Promise<FriendRequestResponse> {
+  async getPendingRequests(): Promise<FriendRequestResponse[]> {
     const { data } = await API.get("/friendships/requests/pending");
     return data.payload;
   },

@@ -5,12 +5,7 @@ import { Friendship } from './entities/friendship.entity';
 import { UserService } from '../user/user.service';
 import { FriendshipStatus } from './constants/friendship-status.constants';
 import { ErrorResponse } from '../../common/api-response/errors';
-import {
-  FriendRequestResDto,
-  ReceivedRequestsResDto,
-  SentRequestResDto,
-} from './dto/responses/friend-request-response.dto';
-// import { FriendshipResponseDto } from './dto/responses/friendship-response.dto';
+import { FriendRequestResponseDto } from './dto/responses/friend-request-response.dto';
 
 @Injectable()
 export class FriendshipService {
@@ -25,12 +20,13 @@ export class FriendshipService {
     senderId: string,
     receiverId: string,
     requestMessage?: string,
-  ): Promise<SentRequestResDto> {
+  ): Promise<FriendRequestResponseDto> {
     try {
-      // Check if user exists and get receiver details
-      const receiver = await this.userService.getUserById(receiverId);
+      const [sender, receiver] = await Promise.all([
+        this.userService.getUserById(senderId),
+        this.userService.getUserById(receiverId),
+      ]);
 
-      // Check all existing friendships between these users
       const existingFriendships = await this.friendshipRepo.find({
         where: [
           { senderId, receiverId },
@@ -38,16 +34,17 @@ export class FriendshipService {
         ],
       });
 
-      // Check if we're blocked by the other user
+      if (existingFriendships.length > 0) {
+        ErrorResponse.unauthorized('Friend request already exists');
+      }
+
       const isBlockedByOtherUser = existingFriendships.some((friendship) => {
-        // If I'm the sender and receiver has declined/blocked
         if (
           friendship.senderId === senderId &&
           [FriendshipStatus.DECLINED].includes(friendship.receiverStatus)
         ) {
           return true;
         }
-        // If I'm the receiver and sender has declined/blocked
         if (
           friendship.receiverId === senderId &&
           [FriendshipStatus.DECLINED].includes(friendship.senderStatus)
@@ -63,33 +60,31 @@ export class FriendshipService {
         );
       }
 
-      // Delete ALL existing friendship records between these users
-      // (We'll create a fresh one below)
-      if (existingFriendships.length > 0) {
-        await this.friendshipRepo.remove(existingFriendships);
-      }
-
-      // Create new friendship request
       const friendship = await this.friendshipRepo.save({
         senderId,
         receiverId,
         requestMessage: requestMessage || null,
-        senderStatus: FriendshipStatus.ACCEPTED, // Sender always accepts their own request
-        receiverStatus: FriendshipStatus.PENDING, // Receiver needs to respond
+        senderStatus: FriendshipStatus.ACCEPTED,
+        receiverStatus: FriendshipStatus.PENDING,
       });
 
-      // Get mutual friends count
       const mutualFriends = await this.getMutualFriendsCount(
         senderId,
         receiverId,
       );
 
-      // Return the response
       return {
         id: friendship.id,
-        receiverId: receiver.id,
-        receiverName: receiver.firstName + ' ' + receiver.lastName,
-        receiverAvatarUrl: receiver.avatarUrl,
+        sender: {
+          id: sender.id,
+          name: `${sender.firstName} ${sender.lastName}`,
+          avatarUrl: sender.avatarUrl,
+        },
+        receiver: {
+          id: receiver.id,
+          name: `${receiver.firstName} ${receiver.lastName}`,
+          avatarUrl: receiver.avatarUrl,
+        },
         mutualFriends,
         requestMessage: friendship.requestMessage,
         updatedAt: friendship.updatedAt,
@@ -163,7 +158,9 @@ export class FriendshipService {
     }
   }
 
-  async getPendingRequests(userId: string): Promise<FriendRequestResDto> {
+  async getPendingRequests(
+    userId: string,
+  ): Promise<FriendRequestResponseDto[]> {
     try {
       // Get received requests (where user is the receiver and status is pending)
       const receivedRequests = await this.friendshipRepo.find({
@@ -171,7 +168,7 @@ export class FriendshipService {
           receiverId: userId,
           receiverStatus: FriendshipStatus.PENDING,
         },
-        relations: ['sender'],
+        relations: ['sender', 'receiver'],
       });
 
       // Get sent requests (where user is the sender and receiver hasn't responded yet)
@@ -181,55 +178,37 @@ export class FriendshipService {
           receiverStatus: FriendshipStatus.PENDING,
           senderStatus: FriendshipStatus.ACCEPTED,
         },
-        relations: ['receiver'],
+        relations: ['sender', 'receiver'],
       });
 
-      // Process received requests
-      const receivedResults: ReceivedRequestsResDto[] = await Promise.all(
-        receivedRequests.map(async (request) => {
+      // Combine both into one unified format
+      const requests = await Promise.all(
+        [...receivedRequests, ...sentRequests].map(async (request) => {
           const mutualFriends = await this.getMutualFriendsCount(
-            userId,
             request.senderId,
-          );
-
-          return {
-            id: request.id,
-            senderId: request.senderId,
-            senderName:
-              request.sender.firstName + ' ' + request.sender.lastName,
-            senderAvatarUrl: request.sender.avatarUrl,
-            requestMessage: request.requestMessage,
-            mutualFriends,
-            updatedAt: request.updatedAt,
-          };
-        }),
-      );
-
-      // Process sent requests
-      const sentResults: SentRequestResDto[] = await Promise.all(
-        sentRequests.map(async (request) => {
-          const mutualFriends = await this.getMutualFriendsCount(
-            userId,
             request.receiverId,
           );
 
           return {
             id: request.id,
-            receiverId: request.receiverId,
-            receiverName:
-              request.receiver.firstName + ' ' + request.receiver.lastName,
-            receiverAvatarUrl: request.receiver.avatarUrl,
-            requestMessage: request.requestMessage,
+            sender: {
+              id: request.sender.id,
+              name: `${request.sender.firstName} ${request.sender.lastName}`,
+              avatarUrl: request.sender.avatarUrl,
+            },
+            receiver: {
+              id: request.receiver.id,
+              name: `${request.receiver.firstName} ${request.receiver.lastName}`,
+              avatarUrl: request.receiver.avatarUrl,
+            },
             mutualFriends,
+            requestMessage: request.requestMessage,
             updatedAt: request.updatedAt,
           };
         }),
       );
 
-      return {
-        sent: sentResults,
-        received: receivedResults,
-      };
+      return requests;
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to retrieve pending friend requests');
     }

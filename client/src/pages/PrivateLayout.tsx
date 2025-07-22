@@ -18,6 +18,7 @@ import { useWebSocket } from "@/lib/websocket/hooks/useWebsocket";
 import { PuffLoader } from "react-spinners";
 import { useFolderStore } from "@/stores/folderStore";
 import { toast } from "react-toastify";
+import { useNotificationSocketListeners } from "@/lib/websocket/hooks/useNotificationSocketListener";
 
 export const ChatContent: React.FC = () => {
   const { id: chatId } = useParams();
@@ -32,11 +33,8 @@ export const ChatContent: React.FC = () => {
     isLoading: chatsLoading,
     error: chatError,
   } = useChatStore();
-  const {
-    fetchPendingRequests,
-    isLoading: friendshipsLoading,
-    error: friendshipsError,
-  } = useFriendshipStore();
+  const { fetchPendingRequests, isLoading: friendshipsLoading } =
+    useFriendshipStore();
   const {
     initialize: initializeFolders,
     isLoading: foldersLoading,
@@ -46,6 +44,7 @@ export const ChatContent: React.FC = () => {
   const { initialize: initializePresence } = usePresenceStore();
 
   useWebSocket();
+  useNotificationSocketListeners();
   useChatSocketListeners();
 
   useEffect(() => {
@@ -83,6 +82,7 @@ export const ChatContent: React.FC = () => {
     fetchPendingRequests,
     initializeAuth,
     initializeChats,
+    initializeFolders,
     initializePresence,
     initializeSidebar,
     initializeSidebarInfo,
@@ -99,13 +99,8 @@ export const ChatContent: React.FC = () => {
   }
 
   // Show error if initialization failed or stores have errors
-  if (chatError || friendshipsError || folderError) {
-    toast.error(
-      chatError ||
-        friendshipsError ||
-        folderError ||
-        "Failed to initialize application"
-    );
+  if (chatError || folderError) {
+    toast.error(chatError || folderError || "Failed to initialize application");
   }
 
   return activeChat ? <Chat /> : null;

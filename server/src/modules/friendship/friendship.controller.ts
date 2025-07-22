@@ -16,29 +16,36 @@ import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { FriendshipResponseDto } from './dto/responses/friendship-response.dto';
 import { FriendshipStatus } from './constants/friendship-status.constants';
 import { RespondToRequestDto } from './dto/requests/response-to-request.dto';
-import {
-  FriendRequestResDto,
-  SentRequestResDto,
-} from './dto/responses/friend-request-response.dto';
+import { FriendRequestResponseDto } from './dto/responses/friend-request-response.dto';
 import { Friendship } from './entities/friendship.entity';
+import { UserService } from '../user/user.service';
+import { ErrorResponse } from 'src/common/api-response/errors';
+import { FriendshipUpdateNotificationDto } from './dto/responses/friendship-update-notification.dto';
+import { NotificationWsService } from '../websocket/notification.service';
 
 @Controller('friendships')
 @UseGuards(JwtAuthGuard)
 export class FriendshipController {
-  constructor(private readonly friendshipService: FriendshipService) {}
+  constructor(
+    private readonly friendshipService: FriendshipService,
+    private readonly userService: UserService,
+    private readonly notificationWsService: NotificationWsService,
+  ) {}
 
   @Post('requests/:receiverId')
   async sendRequest(
     @CurrentUser('id') senderId: string,
     @Param('receiverId') receiverId: string,
     @Body() body: { requestMessage?: string },
-  ): Promise<SuccessResponse<SentRequestResDto>> {
+  ): Promise<SuccessResponse<FriendRequestResponseDto>> {
     const sentRequest = await this.friendshipService.sendRequest(
       senderId,
       receiverId,
       body.requestMessage,
     );
 
+    // Notify receiver
+    this.notificationWsService.notifyFriendRequest(receiverId, sentRequest);
     return new SuccessResponse(sentRequest, 'Friend request sent successfully');
   }
 
@@ -48,18 +55,35 @@ export class FriendshipController {
     @Param('friendshipId') friendshipId: string,
     @Body() body: RespondToRequestDto,
   ): Promise<SuccessResponse<FriendshipResponseDto>> {
+    // 1. Update friendship status
     const friendship = await this.friendshipService.respondToRequest(
       receiverId,
       friendshipId,
       body.status,
     );
 
+    // 2. Fetch the receiver's first name (assuming you have a UserService)
+    const receiver = await this.userService.getUserById(receiverId); // Or fetch from FriendshipService
+    if (!receiver) {
+      ErrorResponse.notFound('Receiver not found!');
+    }
+
+    this.notificationWsService.notifyFriendshipUpdate(
+      friendship.senderId,
+      plainToInstance(FriendshipUpdateNotificationDto, {
+        friendshipId: friendship.id,
+        status: body.status,
+        firstName: receiver.firstName,
+        userId: receiverId,
+        timestamp: new Date().toISOString(),
+      }),
+    );
+
+    // 4. Return REST response
     const response = plainToInstance(FriendshipResponseDto, friendship, {
       excludeExtraneousValues: true,
       enableImplicitConversion: true,
     });
-
-    // console.log('friendship accepted: ', response);
 
     return new SuccessResponse(
       response,
@@ -82,7 +106,7 @@ export class FriendshipController {
   @Get('requests/pending')
   async getPendingRequests(
     @CurrentUser('id') userId: string,
-  ): Promise<SuccessResponse<FriendRequestResDto>> {
+  ): Promise<SuccessResponse<FriendRequestResponseDto[]>> {
     const requests = await this.friendshipService.getPendingRequests(userId);
 
     return new SuccessResponse(

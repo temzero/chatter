@@ -6,21 +6,18 @@ import { FriendshipStatus } from "@/types/enums/friendshipType";
 import { SlidingContainer } from "../../ui/SlidingContainer";
 import { useChatStore } from "@/stores/chatStore";
 import SidebarLayout from "@/pages/SidebarLayout";
-import { useCurrentUserId } from "@/stores/authStore"; // Assuming this holds current user info
 
 type RequestTab = "received" | "sent";
 
 const SidebarFriendRequests: React.FC = () => {
-  const currentUserId = useCurrentUserId();
   const createOrGetDirectChat = useChatStore(
     (state) => state.createOrGetDirectChat
   );
   const getDirectChatByUserId = useChatStore(
     (state) => state.getDirectChatByUserId
   );
-  const { pendingRequests, respondToRequest, removeRequest } =
+  const { receivedRequests, sentRequests, respondToRequest, removeRequest } =
     useFriendshipStore();
-
   const [activeTab, setActiveTab] = useState<RequestTab>("received");
   const [direction, setDirection] = useState<number>(1);
 
@@ -39,28 +36,23 @@ const SidebarFriendRequests: React.FC = () => {
     }
   };
 
-  const handleDeclineRequest = async (requestId: string) => {
+  const handleDeclineRequest = async (requestId: string, senderId: string) => {
     try {
       await respondToRequest(requestId, FriendshipStatus.DECLINED);
+      getDirectChatByUserId(senderId);
     } catch (error) {
       console.error("Failed to decline friend request:", error);
     }
   };
 
-  const handleCancelRequest = async (requestId: string) => {
+  const handleCancelRequest = async (requestId: string, receiverId: string) => {
     try {
       await removeRequest(requestId);
+      getDirectChatByUserId(receiverId);
     } catch (error) {
       console.error("Failed to cancel friend request:", error);
     }
   };
-
-  const receivedRequests = pendingRequests.filter(
-    (req) => req.receiver.id === currentUserId
-  );
-  const sentRequests = pendingRequests.filter(
-    (req) => req.sender.id === currentUserId
-  );
 
   return (
     <SidebarLayout title="Friend Requests">
@@ -84,22 +76,22 @@ const SidebarFriendRequests: React.FC = () => {
         </button>
       </div>
 
-      {/* Content */}
+      {/* Content with sliding animation */}
       <SlidingContainer uniqueKey={activeTab} direction={direction}>
         <div className="overflow-x-hidden overflow-y-auto flex-1">
           {activeTab === "received" ? (
             receivedRequests.length > 0 ? (
               receivedRequests.map((request) => {
-                const firstName = request.sender.name.split(" ")[0];
+                const [firstName] = request.senderName.split(" ");
 
                 return (
                   <div
                     key={request.id}
                     className="flex p-3 gap-4 w-full custom-border-b cursor-pointer"
-                    onClick={() => createOrGetDirectChat(request.sender.id)}
+                    onClick={() => createOrGetDirectChat(request.senderId)}
                   >
                     <Avatar
-                      avatarUrl={request.sender.avatarUrl}
+                      avatarUrl={request.senderAvatarUrl}
                       name={firstName}
                       size="12"
                       className="mt-1"
@@ -107,7 +99,7 @@ const SidebarFriendRequests: React.FC = () => {
 
                     <div className="flex flex-col flex-1 gap-1">
                       <div className="flex justify-between items-center">
-                        <h1 className="font-semibold">{request.sender.name}</h1>
+                        <h1 className="font-semibold">{request.senderName}</h1>
                         <p className="text-xs opacity-60">
                           {formatTimeAgo(request.updatedAt)}
                         </p>
@@ -129,7 +121,7 @@ const SidebarFriendRequests: React.FC = () => {
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            handleAcceptRequest(request.id, request.sender.id);
+                            handleAcceptRequest(request.id, request.senderId);
                           }}
                         >
                           Accept
@@ -139,7 +131,7 @@ const SidebarFriendRequests: React.FC = () => {
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            handleDeclineRequest(request.id);
+                            handleDeclineRequest(request.id, request.senderId);
                           }}
                         >
                           Decline
@@ -159,7 +151,7 @@ const SidebarFriendRequests: React.FC = () => {
             )
           ) : sentRequests.length > 0 ? (
             sentRequests.map((request) => {
-              const firstName = request.receiver.name.split(" ")[0];
+              const [firstName] = request.receiverName.split(" ");
 
               return (
                 <div
@@ -167,7 +159,7 @@ const SidebarFriendRequests: React.FC = () => {
                   className="flex p-3 gap-4 w-full custom-border-b cursor-pointer"
                 >
                   <Avatar
-                    avatarUrl={request.receiver.avatarUrl}
+                    avatarUrl={request.receiverAvatarUrl}
                     name={firstName}
                     size="12"
                     className="mt-1"
@@ -175,10 +167,10 @@ const SidebarFriendRequests: React.FC = () => {
 
                   <div
                     className="flex flex-col flex-1 gap-1"
-                    onClick={() => createOrGetDirectChat(request.receiver.id)}
+                    onClick={() => createOrGetDirectChat(request.receiverId)}
                   >
                     <div className="flex justify-between items-center">
-                      <h1 className="font-semibold">{request.receiver.name}</h1>
+                      <h1 className="font-semibold">{request.receiverName}</h1>
                       <p className="text-xs opacity-60">
                         {formatTimeAgo(request.updatedAt)}
                       </p>
@@ -194,7 +186,7 @@ const SidebarFriendRequests: React.FC = () => {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          handleCancelRequest(request.id);
+                          handleCancelRequest(request.id, request.receiverId);
                         }}
                       >
                         Cancel Request

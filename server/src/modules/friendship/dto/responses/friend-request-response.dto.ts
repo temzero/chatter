@@ -1,24 +1,35 @@
-export interface FriendRequestResDto {
-  sent: SentRequestResDto[];
-  received: ReceivedRequestsResDto[];
+// src/modules/friendship/dto/responses/friend-request-response.dto.ts
+import { Expose, Type } from 'class-transformer';
+
+class FriendRequestUserDto {
+  @Expose()
+  id: string;
+
+  @Expose()
+  name: string;
+
+  @Expose()
+  avatarUrl?: string | null;
 }
 
-export interface ReceivedRequestsResDto {
+export class FriendRequestResponseDto {
+  @Expose()
   id: string;
-  senderId: string;
-  senderName: string;
-  senderAvatarUrl?: string | null;
-  mutualFriends: number;
-  requestMessage?: string | null;
-  updatedAt: Date;
-}
 
-export interface SentRequestResDto {
-  id: string;
-  receiverId: string;
-  receiverName: string;
-  receiverAvatarUrl?: string | null;
+  @Expose()
+  @Type(() => FriendRequestUserDto)
+  sender: FriendRequestUserDto;
+
+  @Expose()
+  @Type(() => FriendRequestUserDto)
+  receiver: FriendRequestUserDto;
+
+  @Expose()
   mutualFriends: number;
+
+  @Expose()
   requestMessage?: string | null;
+
+  @Expose()
   updatedAt: Date;
 }

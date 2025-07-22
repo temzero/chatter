@@ -31,13 +31,4 @@ export class NotificationGateway {
     void client.join(`notifications_${userId}`);
     return { success: true };
   }
-
-  @SubscribeMessage(`${notificationsLink}messageRead`)
-  handleMarkAsRead(
-    @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() notificationId: string,
-  ) {
-    // Implement your notification read logic here
-    return { success: true, notificationId };
-  }
 }

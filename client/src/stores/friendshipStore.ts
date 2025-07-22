@@ -1,165 +1,137 @@
-// friendshipStore.ts
 import { create } from "zustand";
 import { friendshipService } from "@/services/friendshipService";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
+import { handleError } from "@/utils/handleError";
 import {
+  FriendRequestResponse,
   FriendshipResponse,
-  ReceivedRequestsResDto,
-  SentRequestResDto,
 } from "@/types/responses/friendship.response";
+import { toast } from "react-toastify";
 
 type FriendshipState = {
-  receivedRequests: ReceivedRequestsResDto[];
-  sentRequests: SentRequestResDto[];
+  pendingRequests: FriendRequestResponse[];
   isLoading: boolean;
-  error: string | null;
 };
 
 type FriendshipActions = {
   sendFriendRequest: (
     receiverId: string,
+    receiverName: string,
     message?: string
-  ) => Promise<SentRequestResDto>;
+  ) => Promise<FriendRequestResponse>;
   fetchPendingRequests: () => Promise<void>;
   respondToRequest: (
     friendshipId: string,
     status: FriendshipStatus
   ) => Promise<FriendshipResponse>;
-  cancelRequest: (friendshipId: string) => Promise<void>;
-  clearRequests: () => void;
-  clearError: () => void;
+  addPendingRequest: (request: FriendRequestResponse) => void;
+  removeRequest: (friendshipId: string) => Promise<void>;
   deleteFriendshipByUserId: (userId: string) => Promise<void>;
+  clearRequests: () => void;
 };
 
 export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
   (set) => ({
-    receivedRequests: [],
-    sentRequests: [],
+    pendingRequests: [],
     isLoading: false,
-    error: null,
 
-    sendFriendRequest: async (receiverId, message) => {
-      set({ isLoading: true, error: null });
+    sendFriendRequest: async (receiverId, receiverName, message) => {
+      set({ isLoading: true });
       try {
-        const newSentRequest = await friendshipService.sendRequest(
+        const newRequest = await friendshipService.sendRequest(
           receiverId,
           message
         );
-        console.log("newSentRequest", newSentRequest);
         set((state) => ({
-          sentRequests: [...state.sentRequests, newSentRequest],
+          pendingRequests: [...state.pendingRequests, newRequest],
           isLoading: false,
         }));
-        return newSentRequest;
+        toast.success(`New friend request sent to ${receiverName}`);
+        return newRequest;
       } catch (error) {
+        set({ isLoading: false });
         console.error("Failed to send friend request:", error);
-        set({
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to send friend request",
-          isLoading: false,
-        });
+        handleError(error, "Failed to send friend request");
         throw error;
       }
     },
 
     fetchPendingRequests: async () => {
-      set({ isLoading: true, error: null });
+      set({ isLoading: true });
       try {
-        const { sent, received } = await friendshipService.getPendingRequests();
-        set({
-          receivedRequests: received,
-          sentRequests: sent,
-          isLoading: false,
-        });
+        const requests = await friendshipService.getPendingRequests();
+        set({ pendingRequests: requests, isLoading: false });
       } catch (error) {
         console.error("Failed to fetch friend requests:", error);
-        set({
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to fetch friend requests",
-          isLoading: false,
-        });
+        set({ isLoading: false });
       }
     },
 
     respondToRequest: async (friendshipId, status) => {
-      set({ isLoading: true, error: null });
+      set({ isLoading: true });
       try {
-        const friendShip = await friendshipService.respondToRequest(
+        const friendship = await friendshipService.respondToRequest(
           friendshipId,
           status
         );
         set((state) => ({
-          receivedRequests: state.receivedRequests.filter(
+          pendingRequests: state.pendingRequests.filter(
             (req) => req.id !== friendshipId
           ),
           isLoading: false,
         }));
-        return friendShip;
+        return friendship;
       } catch (error) {
         console.error("Failed to respond to friend request:", error);
-        set({
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to respond to friend request",
-          isLoading: false,
-        });
+        set({ isLoading: false });
         throw error;
       }
     },
 
-    cancelRequest: async (friendshipId) => {
-      set({ isLoading: true, error: null });
+    addPendingRequest: (request) => {
+      set((state) => {
+        const exists = state.pendingRequests.some((r) => r.id === request.id);
+        if (exists) return state;
+        return {
+          pendingRequests: [...state.pendingRequests, request],
+        };
+      });
+    },
+
+    removeRequest: async (friendshipId) => {
+      set({ isLoading: true });
       try {
         await friendshipService.deleteRequest(friendshipId);
         set((state) => ({
-          sentRequests: state.sentRequests.filter(
+          pendingRequests: state.pendingRequests.filter(
             (req) => req.id !== friendshipId
           ),
           isLoading: false,
         }));
       } catch (error) {
-        console.error("Failed to cancel friend request:", error);
-        set({
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to cancel friend request",
-          isLoading: false,
-        });
+        console.error("Failed to remove friend request:", error);
+        set({ isLoading: false });
         throw error;
       }
     },
 
     deleteFriendshipByUserId: async (userId) => {
-      set({ isLoading: true, error: null });
+      set({ isLoading: true });
       try {
         await friendshipService.deleteByUserId(userId);
         set((state) => ({
-          // Remove from sent requests where receiverId matches
-          sentRequests: state.sentRequests.filter(
-            (req) => req.receiverId !== userId
+          pendingRequests: state.pendingRequests.filter(
+            (req) => req.sender.id !== userId && req.receiver.id !== userId
           ),
           isLoading: false,
         }));
       } catch (error) {
         console.error("Failed to delete friendship:", error);
-        set({
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to delete friendship",
-          isLoading: false,
-        });
+        set({ isLoading: false });
         throw error;
       }
     },
 
-    clearRequests: () => set({ receivedRequests: [], sentRequests: [] }),
-    clearError: () => set({ error: null }),
+    clearRequests: () => set({ pendingRequests: [] }),
   })
 );

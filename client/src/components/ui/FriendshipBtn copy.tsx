@@ -1,8 +1,8 @@
+// FriendshipBtn.tsx
 import { useChatStore } from "@/stores/chatStore";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
-import { useCurrentUserId } from "@/stores/authStore"; // Access current user
 
 interface FriendshipBtnProps {
   userId: string;
@@ -25,22 +25,25 @@ const FriendshipBtn: React.FC<FriendshipBtnProps> = ({
   onStatusChange,
   className,
 }) => {
-  const currentUserId = useCurrentUserId(); // Ensure this exists
   const openModal = useModalStore((state) => state.openModal);
-  const { pendingRequests, respondToRequest, removeRequest } =
-    useFriendshipStore();
+  const {
+    receivedRequests,
+    sentRequests,
+    respondToRequest,
+    removeRequest,
+    // deleteFriendshipByUserId,
+  } = useFriendshipStore();
 
   const getDirectChatByUserId = useChatStore(
     (state) => state.getDirectChatByUserId
   );
-
-  const incomingRequest = pendingRequests.find(
-    (req) => req.sender.id === userId && req.receiver.id === currentUserId
+  // Check if this is an incoming request
+  const incomingRequest = receivedRequests.find(
+    (req) => req.senderId === userId
   );
 
-  const outgoingRequest = pendingRequests.find(
-    (req) => req.receiver.id === userId && req.sender.id === currentUserId
-  );
+  // Check if this is an outgoing request
+  const outgoingRequest = sentRequests.find((req) => req.receiverId === userId);
 
   function handleOpenFriendRequest() {
     openModal(ModalType.FRIEND_REQUEST, {
@@ -60,7 +63,7 @@ const FriendshipBtn: React.FC<FriendshipBtnProps> = ({
     try {
       await respondToRequest(incomingRequest.id, FriendshipStatus.ACCEPTED);
       onStatusChange?.(FriendshipStatus.ACCEPTED);
-      getDirectChatByUserId(incomingRequest.sender.id);
+      getDirectChatByUserId(incomingRequest.senderId);
     } catch (error) {
       console.error("Failed to accept friend request:", error);
     }
@@ -71,7 +74,7 @@ const FriendshipBtn: React.FC<FriendshipBtnProps> = ({
     try {
       await respondToRequest(incomingRequest.id, FriendshipStatus.DECLINED);
       onStatusChange?.(null);
-      getDirectChatByUserId(incomingRequest.sender.id);
+      getDirectChatByUserId(incomingRequest.senderId);
     } catch (error) {
       console.error("Failed to decline friend request:", error);
     }
@@ -82,7 +85,7 @@ const FriendshipBtn: React.FC<FriendshipBtnProps> = ({
     try {
       await removeRequest(outgoingRequest.id);
       onStatusChange?.(null);
-      getDirectChatByUserId(outgoingRequest.receiver.id);
+      getDirectChatByUserId(outgoingRequest.receiverId);
     } catch (error) {
       console.error("Failed to cancel friend request:", error);
     }
@@ -110,6 +113,15 @@ const FriendshipBtn: React.FC<FriendshipBtnProps> = ({
           <span className="material-symbols-outlined">person_add</span>
           <span>Add Friend Again</span>
         </button>
+        // <div className="flex flex-col gap-2 items-center justify-center w-full">
+        //   <h1 className="text-sm text-red-400">Friendship Declined</h1>
+        //   <button
+        //     className="text-sm text-blue-400 mt-1 custom-border w-full py-1"
+        //     onClick={handleOpenFriendRequest}
+        //   >
+        //     Try again
+        //   </button>
+        // </div>
       );
 
     case FriendshipStatus.BLOCKED:
@@ -143,7 +155,7 @@ const FriendshipBtn: React.FC<FriendshipBtnProps> = ({
             </div>
           </div>
         );
-      } else if (outgoingRequest) {
+      } else {
         return (
           <button
             className="w-full custom-border text-red-400 px-3 py-1 text-sm"
@@ -152,9 +164,22 @@ const FriendshipBtn: React.FC<FriendshipBtnProps> = ({
             Cancel Request
           </button>
         );
-      } else {
-        return null;
       }
+
+    // case FriendshipStatus.ACCEPTED:
+    //   return (
+    //     <div className="flex flex-col items-center w-full">
+    //       <h1 className="w-full text-sm text-center text-[var(--primary-green)] mb-2">
+    //         Friends
+    //       </h1>
+    //       <button
+    //         className="w-full custom-border text-red-400 px-3 py-1 text-sm"
+    //         onClick={handleRemoveFriend}
+    //       >
+    //         Remove Friend
+    //       </button>
+    //     </div>
+    //   );
 
     default:
       return null;

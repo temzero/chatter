@@ -10,8 +10,8 @@ import { useSetActiveSavedChat } from "@/stores/chatStore";
 const SidebarMore: React.FC = () => {
   const currentUser = useCurrentUser();
   const { setSidebar, isCompact, toggleCompact } = useSidebarStore();
-  const { receivedRequests, sentRequests } = useFriendshipStore();
-  const requestsCount = receivedRequests.length + sentRequests.length;
+  const { pendingRequests } = useFriendshipStore();
+  const requestsCount = pendingRequests.length;
   const setActiveSavedChat = useSetActiveSavedChat();
 
   useEffect(() => {

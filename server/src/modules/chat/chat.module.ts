@@ -19,7 +19,7 @@ import { BlockModule } from '../block/block.module';
     forwardRef(() => MessageModule),
     forwardRef(() => FriendshipModule),
     forwardRef(() => BlockModule),
-    WebSocketModule,
+    forwardRef(() => WebSocketModule),
   ],
   controllers: [ChatController],
   providers: [ChatService, ChatMapper],

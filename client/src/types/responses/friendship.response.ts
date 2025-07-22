@@ -16,26 +16,18 @@ export interface FriendshipResponse {
 }
 
 export interface FriendRequestResponse {
-  sent: SentRequestResponse[];
-  received: ReceivedRequestsResponse[];
-}
-
-export interface ReceivedRequestsResponse {
   id: string;
-  senderId: string;
-  senderName: string;
-  senderAvatarUrl?: string | null;
+  sender: {
+    id: string;
+    name: string;
+    avatarUrl?: string | null;
+  };
+  receiver: {
+    id: string;
+    name: string;
+    avatarUrl?: string | null;
+  };
   mutualFriends: number;
   requestMessage?: string | null;
-  updatedAt: string;
-}
-
-export interface SentRequestResponse {
-  id: string;
-  receiverId: string;
-  receiverName: string;
-  receiverAvatarUrl?: string | null;
-  mutualFriends: number;
-  requestMessage?: string | null;
-  updatedAt: string;
+  updatedAt: Date | string; // or Date, depending on how you want to handle it
 }
