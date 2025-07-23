@@ -8,11 +8,15 @@ export enum ModalType {
   FORWARD_MESSAGE = "forward-message",
   DELETE_MESSAGE = "delete-message",
   DELETE_FOLDER = "delete-folder",
+  DELETE_CHAT = "delete-chat",
   ADD_FOLDER = "add-folder",
   ADD_CONTACT = "add-contact",
   MUTE = "mute",
   BLOCK_USER = "block-user",
   UNBLOCK_USER = "unblock-user",
+  UNFRIEND = "unfriend",
+  ADD_MEMBER = "add-member",
+  LEAVE_GROUP = "leave-group",
 }
 
 type ModalContent = {

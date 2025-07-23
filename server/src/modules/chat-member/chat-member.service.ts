@@ -11,6 +11,7 @@ import { Chat } from '../chat/entities/chat.entity';
 import { ChatMemberResponseDto } from './dto/responses/chat-member-response.dto';
 import { mapChatMemberToResponseDto } from './mappers/chat-member.mapper';
 import { ChatType } from '../chat/constants/chat-types.constants';
+import { FriendshipStatus } from '../friendship/constants/friendship-status.constants';
 
 @Injectable()
 export class ChatMemberService {
@@ -82,43 +83,98 @@ export class ChatMemberService {
         'block2.blockerId = member.userId AND block2.blockedId = :currentUserId',
         { currentUserId },
       )
-      .addSelect(['block1.id AS block1_id', 'block2.id AS block2_id']) // Explicitly select block IDs
+      // Updated friendship join to match your entity
+      .leftJoin(
+        'friendship',
+        'friendship',
+        '(friendship.sender_id = :currentUserId AND friendship.receiver_id = member.user_id) OR ' +
+          '(friendship.sender_id = member.user_id AND friendship.receiver_id = :currentUserId)',
+        { currentUserId },
+      )
+      .addSelect([
+        'block1.id AS block1_id',
+        'block2.id AS block2_id',
+        // Get both statuses and determine the overall friendship status
+        'friendship.sender_status AS sender_status',
+        'friendship.receiver_status AS receiver_status',
+      ])
       .where('member.chatId = :chatId', { chatId })
       .getRawAndEntities();
 
-    type BlockRaw = { block1_id?: string | null; block2_id?: string | null };
-    const typedRaw = raw as BlockRaw[];
+    type RawType = {
+      block1_id?: string | null;
+      block2_id?: string | null;
+      sender_status?: string | null;
+      receiver_status?: string | null;
+    };
 
     return entities.map((member, i) => {
-      const row = typedRaw[i];
-      const isBlockedByMe = !!row?.block1_id; // Check if block record exists
+      const row = raw[i] as RawType;
+      const isBlockedByMe = !!row?.block1_id;
       const isBlockedMe = !!row?.block2_id;
+
+      // Determine friendship status based on who is the current user
+      let friendshipStatus: FriendshipStatus | null = null;
+      if (row?.sender_status && row?.receiver_status) {
+        if (member.userId === currentUserId) {
+          // Current user is the sender
+          friendshipStatus = row.sender_status as FriendshipStatus;
+        } else {
+          // Current user is the receiver
+          friendshipStatus = row.receiver_status as FriendshipStatus;
+        }
+      }
 
       return mapChatMemberToResponseDto(
         member,
         chatType,
         isBlockedByMe,
         isBlockedMe,
+        friendshipStatus,
       );
     });
   }
 
-  async getMember(memberId: string): Promise<ChatMember> {
-    try {
-      const member = await this.memberRepo.findOne({
-        where: { id: memberId },
-        relations: ['user'],
-      });
+  // async findByChatIdWithBlockStatus(
+  //   chatId: string,
+  //   currentUserId: string,
+  //   chatType: ChatType,
+  // ): Promise<ChatMemberResponseDto[]> {
+  //   const { entities, raw } = await this.memberRepo
+  //     .createQueryBuilder('member')
+  //     .leftJoinAndSelect('member.user', 'user')
+  //     .leftJoin(
+  //       'block',
+  //       'block1',
+  //       'block1.blockerId = :currentUserId AND block1.blockedId = member.userId',
+  //       { currentUserId },
+  //     )
+  //     .leftJoin(
+  //       'block',
+  //       'block2',
+  //       'block2.blockerId = member.userId AND block2.blockedId = :currentUserId',
+  //       { currentUserId },
+  //     )
+  //     .addSelect(['block1.id AS block1_id', 'block2.id AS block2_id']) // Explicitly select block IDs
+  //     .where('member.chatId = :chatId', { chatId })
+  //     .getRawAndEntities();
 
-      if (!member) {
-        ErrorResponse.notFound('Chat member not found');
-      }
+  //   type BlockRaw = { block1_id?: string | null; block2_id?: string | null };
+  //   const typedRaw = raw as BlockRaw[];
 
-      return member;
-    } catch (error) {
-      ErrorResponse.throw(error, 'Failed to retrieve chat member');
-    }
-  }
+  //   return entities.map((member, i) => {
+  //     const row = typedRaw[i];
+  //     const isBlockedByMe = !!row?.block1_id; // Check if block record exists
+  //     const isBlockedMe = !!row?.block2_id;
+
+  //     return mapChatMemberToResponseDto(
+  //       member,
+  //       chatType,
+  //       isBlockedByMe,
+  //       isBlockedMe,
+  //     );
+  //   });
+  // }
 
   async getMemberByChatIdAndUserId(
     chatId: string,

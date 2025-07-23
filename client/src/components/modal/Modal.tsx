@@ -12,6 +12,10 @@ import DeleteFolderModal from "./DeleteFolderModal";
 import BlockUserModal from "./BlockUserModal";
 import UnblockUserModal from "./UnblockUserModal";
 import MuteChatModal from "./MuteChatModal";
+import DeleteChatModal from "./DeleteChatModal";
+import UnfriendModal from "./UnfriendModal";
+import LeaveGroupModal from "./LeaveGroupModal";
+import AddMemberModal from "./AddMemberModal";
 
 const Modal = () => {
   const { modalContent, closeModal } = useModalStore(
@@ -41,21 +45,33 @@ const Modal = () => {
       case ModalType.MEDIA:
         return <MediaViewer />;
       case ModalType.FRIEND_REQUEST:
+        
         return <FriendRequestModal />;
       case ModalType.FORWARD_MESSAGE:
         return <ForwardMessageModal />;
       case ModalType.DELETE_MESSAGE:
+
         return <DeleteMessageModal />;
       case ModalType.DELETE_FOLDER:
         return <DeleteFolderModal />;
       case ModalType.ADD_FOLDER:
         return <AddFolderModal />;
+
       case ModalType.MUTE:
         return <MuteChatModal />;
       case ModalType.BLOCK_USER:
         return <BlockUserModal />;
       case ModalType.UNBLOCK_USER:
         return <UnblockUserModal />;
+
+      case ModalType.DELETE_CHAT:
+        return <DeleteChatModal />;
+      case ModalType.UNFRIEND:
+        return <UnfriendModal />;
+      case ModalType.LEAVE_GROUP:
+        return <LeaveGroupModal />;
+      case ModalType.ADD_MEMBER:
+        return <AddMemberModal />;
       default:
         return null;
     }

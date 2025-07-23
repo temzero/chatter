@@ -13,7 +13,6 @@ import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.se
 import { DirectChatMember } from "@/types/responses/chatMember.response";
 import { useMessageStore } from "@/stores/messageStore";
 import MessageSearchBar from "../ui/MessageSearchBar";
-import ImportantLabel from "../ImportantLabel";
 
 interface ChatHeaderProps {
   chat: ChatResponse;
@@ -114,7 +113,6 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
               <OnlineDot isOnline={isOnline} />
             </div>
           )}
-          <ImportantLabel />
         </motion.div>
       </AnimatePresence>
     </header>

@@ -3,25 +3,21 @@ import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { ChatResponse } from "@/types/responses/chat.response";
-import { useFriendshipStore } from "@/stores/friendshipStore";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
 import { handleError } from "@/utils/handleError";
 import { toast } from "react-toastify";
 import { useChatMemberStore, useActiveMembers } from "@/stores/chatMemberStore";
 import { DirectChatMember } from "@/types/responses/chatMember.response";
+import { ModalType, useModalStore } from "@/stores/modalStore";
 
 const DirectChatEdit = () => {
   const activeChat = useChatStore((state) => state.activeChat) as ChatResponse;
-  const fetchChatById = useChatStore((state) => state.fetchChatById);
-  const deleteChat = useChatStore((state) => state.deleteChat);
   const updateMemberNickname = useChatMemberStore(
     (state) => state.updateMemberNickname
   );
   const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
-  const deleteFriendshipByUserId = useFriendshipStore(
-    (state) => state.deleteFriendshipByUserId
-  );
   const chatMembers = useActiveMembers();
+  const openModal = useModalStore((state) => state.openModal);
 
   const chatPartner = chatMembers?.find(
     (member) => member.id !== activeChat.myMemberId
@@ -85,14 +81,17 @@ const DirectChatEdit = () => {
     }
   };
 
-  const handleUnfriend = async () => {
-    try {
-      await deleteFriendshipByUserId(chatPartner.userId);
-      setSidebarInfo("default");
-      fetchChatById();
-    } catch (error) {
-      console.error("Failed to unfriend:", error);
-    }
+  const handleOpenUnfriendModal = () => {
+    openModal(ModalType.UNFRIEND, {
+      userToUnfriend: chatPartner,
+    });
+  };
+
+  const handleOpenDeleteChatModal = () => {
+    openModal(ModalType.DELETE_CHAT, {
+      chat: activeChat,
+      chatPartner,
+    });
   };
 
   return (
@@ -169,7 +168,7 @@ const DirectChatEdit = () => {
           {chatPartner.friendshipStatus === FriendshipStatus.ACCEPTED && (
             <button
               className="flex gap-2 justify-center items-center p-2 text-yellow-500 w-full font-medium rounded-none custom-border-r"
-              onClick={handleUnfriend}
+              onClick={handleOpenUnfriendModal}
             >
               <span className="material-symbols-outlined">person_cancel</span>
               Unfriend
@@ -178,7 +177,7 @@ const DirectChatEdit = () => {
 
           <button
             className="flex justify-center items-center p-2 text-red-500 w-full font-medium"
-            onClick={() => deleteChat(activeChat.id, activeChat.type)}
+            onClick={handleOpenDeleteChatModal}
           >
             <i className="material-symbols-outlined">delete</i>
             Delete Chat

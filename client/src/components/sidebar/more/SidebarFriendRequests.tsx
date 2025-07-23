@@ -18,8 +18,12 @@ const SidebarFriendRequests: React.FC = () => {
   const getDirectChatByUserId = useChatStore(
     (state) => state.getDirectChatByUserId
   );
-  const { pendingRequests, respondToRequest, removeRequest } =
-    useFriendshipStore();
+  
+  const pendingRequests = useFriendshipStore((state) => state.pendingRequests);
+  const respondToRequest = useFriendshipStore(
+    (state) => state.respondToRequest
+  );
+  const removeRequest = useFriendshipStore((state) => state.removeRequest);
 
   const [activeTab, setActiveTab] = useState<RequestTab>("received");
   const [direction, setDirection] = useState<number>(1);

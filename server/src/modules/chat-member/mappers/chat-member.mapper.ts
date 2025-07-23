@@ -6,12 +6,14 @@ import {
   GroupChatMemberResponseDto,
 } from '../dto/responses/chat-member-response.dto';
 import { ChatType } from '../../chat/constants/chat-types.constants';
+import { FriendshipStatus } from 'src/modules/friendship/constants/friendship-status.constants';
 
 export function mapChatMemberToResponseDto(
   member: ChatMember,
   chatType?: ChatType,
   isBlockedByMe?: boolean,
   isBlockedMe?: boolean,
+  friendshipStatus?: FriendshipStatus | null,
 ) {
   // If the user has blocked me, return minimal information
   if (isBlockedMe) {
@@ -55,6 +57,7 @@ export function mapChatMemberToResponseDto(
       phoneNumber: member.user.phoneNumber,
       birthday: member.user.birthday,
       bio: member.user.bio,
+      friendshipStatus,
     });
   }
 

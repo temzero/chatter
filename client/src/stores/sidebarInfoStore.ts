@@ -1,20 +1,14 @@
 // stores/sidebarInfoStore.ts
-import { SidebarMode } from "@/types/enums/sidebarMode";
+import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useShallow } from "zustand/shallow";
 
-export type SidebarInfoModes =
-  | "default"
-  | "media"
-  | "directEdit"
-  | "groupEdit";
-
 interface SidebarInfoStore {
   isSidebarInfoVisible: boolean;
-  currentSidebarInfo: SidebarInfoModes;
+  currentSidebarInfo: SidebarInfoMode;
   toggleSidebarInfo: () => void;
-  setSidebarInfo: (mode?: SidebarInfoModes) => void;
+  setSidebarInfo: (mode?: SidebarInfoMode) => void;
   initializeKeyListeners: () => () => void;
 }
 
@@ -22,17 +16,17 @@ export const useSidebarInfoStore = create<SidebarInfoStore>()(
   persist(
     (set, get) => ({
       isSidebarInfoVisible: false,
-      currentSidebarInfo: "default",
+      currentSidebarInfo: SidebarInfoMode.DEFAULT,
 
       toggleSidebarInfo: () => {
         const currentVisibility = get().isSidebarInfoVisible;
         set({
           isSidebarInfoVisible: !currentVisibility,
-          currentSidebarInfo: "default", // Reset mode when toggling
+          currentSidebarInfo: SidebarInfoMode.DEFAULT, // Reset mode when toggling
         });
       },
 
-      setSidebarInfo: (mode = SidebarMode.DEFAULT) =>
+      setSidebarInfo: (mode = SidebarInfoMode.DEFAULT) =>
         set({ currentSidebarInfo: mode }),
 
       initializeKeyListeners: () => {
@@ -44,7 +38,7 @@ export const useSidebarInfoStore = create<SidebarInfoStore>()(
 
           if (e.key === "Escape") {
             e.preventDefault();
-            set({ currentSidebarInfo: "default" });
+            set({ currentSidebarInfo: SidebarInfoMode.DEFAULT });
             e.stopPropagation();
           }
         };

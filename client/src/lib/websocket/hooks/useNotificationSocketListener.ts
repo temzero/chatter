@@ -28,7 +28,8 @@ export function useNotificationSocketListeners() {
       firstName: string;
       userId: string;
     }) => {
-      if (data.userId === currentUserId) return null;
+      toast.info(`Friendship Update, ${data.userId} ${data.userId}`);
+      if (data.userId === data.userId) return null;
       // Single targeted update
       chatMemberStore.updateFriendshipStatus(data.userId, data.status);
       friendshipStore.removeRequest(data.friendshipId);

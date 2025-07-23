@@ -1,22 +1,24 @@
+import { ChatType } from "@/types/enums/ChatType";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 interface AvatarEditProps {
   avatarUrl: string | null | undefined;
-  type?: "user" | "group" | "channel";
+  type?: ChatType;
   onAvatarChange: (newAvatar: string, file?: File) => void;
   targetSize?: number;
 }
 
 const DEFAULT_AVATAR_ICONS = {
-  user: "person",
-  group: "groups",
-  channel: "tv",
+  [ChatType.DIRECT]: "person",
+  [ChatType.GROUP]: "groups",
+  [ChatType.CHANNEL]: "tv",
+  [ChatType.SAVED]: "bookmark",
 } as const;
 
 const AvatarEdit: React.FC<AvatarEditProps> = ({
   avatarUrl,
   onAvatarChange,
-  type = "user",
+  type = ChatType.DIRECT,
   targetSize = 512,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -34,40 +36,43 @@ const AvatarEdit: React.FC<AvatarEditProps> = ({
   }, [croppedUrl, avatarUrl]);
 
   // Handle image crop and resize
-  const cropAndResizeImage = useCallback((img: HTMLImageElement): Promise<Blob> => {
-    return new Promise((resolve) => {
-      const canvas = document.createElement("canvas");
-      canvas.width = targetSize;
-      canvas.height = targetSize;
+  const cropAndResizeImage = useCallback(
+    (img: HTMLImageElement): Promise<Blob> => {
+      return new Promise((resolve) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = targetSize;
+        canvas.height = targetSize;
 
-      const ctx = canvas.getContext("2d")!;
+        const ctx = canvas.getContext("2d")!;
 
-      // Calculate square crop (centered)
-      const minSize = Math.min(img.width, img.height);
-      const offsetX = (img.width - minSize) / 2;
-      const offsetY = (img.height - minSize) / 2;
+        // Calculate square crop (centered)
+        const minSize = Math.min(img.width, img.height);
+        const offsetX = (img.width - minSize) / 2;
+        const offsetY = (img.height - minSize) / 2;
 
-      // Draw cropped and resized image
-      ctx.drawImage(
-        img,
-        offsetX,
-        offsetY,
-        minSize,
-        minSize, // Source crop
-        0,
-        0,
-        targetSize,
-        targetSize // Destination resize
-      );
+        // Draw cropped and resized image
+        ctx.drawImage(
+          img,
+          offsetX,
+          offsetY,
+          minSize,
+          minSize, // Source crop
+          0,
+          0,
+          targetSize,
+          targetSize // Destination resize
+        );
 
-      // Convert to Blob (WebP for smaller size)
-      canvas.toBlob(
-        (blob) => resolve(blob!),
-        "image/webp",
-        0.9 // Quality
-      );
-    });
-  }, [targetSize]);
+        // Convert to Blob (WebP for smaller size)
+        canvas.toBlob(
+          (blob) => resolve(blob!),
+          "image/webp",
+          0.9 // Quality
+        );
+      });
+    },
+    [targetSize]
+  );
 
   // Handle file selection
   const handleFileChange = useCallback(

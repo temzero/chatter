@@ -97,17 +97,17 @@ export class ChatMemberController {
     );
   }
 
-  @Get(':memberId')
-  async getMember(
-    @Param('memberId') memberId: string,
-  ): Promise<SuccessResponse<GroupChatMemberResponseDto>> {
-    const member = await this.memberService.getMember(memberId);
-    const memberResponse = mapChatMemberToResponseDto(member);
-    return new SuccessResponse(
-      memberResponse,
-      'Chat member retrieved successfully',
-    );
-  }
+  // @Get(':memberId')
+  // async getMember(
+  //   @Param('memberId') memberId: string,
+  // ): Promise<SuccessResponse<GroupChatMemberResponseDto>> {
+  //   const member = await this.memberService.getMember(memberId);
+  //   const memberResponse = mapChatMemberToResponseDto(member);
+  //   return new SuccessResponse(
+  //     memberResponse,
+  //     'Chat member retrieved successfully',
+  //   );
+  // }
 
   @Get(':chatId/:userId')
   async getMemberByChatIdAndUserId(

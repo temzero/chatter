@@ -7,15 +7,15 @@ import { fileStorageService } from "@/services/storage/fileStorageService";
 import { handleError } from "@/utils/handleError";
 import { toast } from "react-toastify";
 import { useActiveMembers } from "@/stores/chatMemberStore";
+import { ModalType, useModalStore } from "@/stores/modalStore";
 
 const GroupChatEdit = () => {
   const activeChat = useChatStore((state) => state.activeChat) as ChatResponse;
   const activeMembers = useActiveMembers();
-  const deleteChat = useChatStore((state) => state.deleteChat);
-  const leaveGroupChat = useChatStore((state) => state.leaveGroupChat);
   const updateGroupChat = useChatStore((state) => state.updateGroupChat);
 
   const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
+  const openModal = useModalStore((state) => state.openModal);
 
   const initialFormData = useMemo(
     () => ({
@@ -86,6 +86,24 @@ const GroupChatEdit = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleOpenAddMemberModal = () => {
+    openModal(ModalType.ADD_MEMBER, {
+      chat: activeChat,
+    });
+  };
+
+  const handleOpenLeaveGroupModal = () => {
+    openModal(ModalType.LEAVE_GROUP, {
+      chat: activeChat,
+    });
+  };
+
+  const handleOpenDeleteChatModal = () => {
+    openModal(ModalType.DELETE_CHAT, {
+      chat: activeChat,
+    });
   };
 
   if (!activeChat) return null;
@@ -162,10 +180,17 @@ const GroupChatEdit = () => {
         </form>
 
         <div className="custom-border-t absolute bottom-0 w-full">
-          {activeMembers.length > 1 && (
+          <button
+            className="flex gap-2 justify-center custom-border-b items-center p-2 text-[--primary-green] w-full font-medium"
+            onClick={handleOpenAddMemberModal}
+          >
+            <span className="material-symbols-outlined">person_add</span>
+            Add member
+          </button>
+          {activeMembers && activeMembers.length > 1 && (
             <button
               className="flex gap-2 justify-center items-center p-2 text-yellow-500 w-full font-medium"
-              onClick={() => leaveGroupChat(activeChat.id)}
+              onClick={handleOpenLeaveGroupModal}
             >
               <span className="material-symbols-outlined">logout</span>
               Leave {activeChat.type}
@@ -174,7 +199,7 @@ const GroupChatEdit = () => {
 
           <button
             className="flex justify-center items-center p-2 text-red-500 w-full font-medium custom-border-t"
-            onClick={() => deleteChat(activeChat.id, activeChat.type)}
+            onClick={handleOpenDeleteChatModal}
           >
             <i className="material-symbols-outlined">delete</i>
             Delete {activeChat.type}

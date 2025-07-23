@@ -7,6 +7,7 @@ import {
   FriendshipResponse,
 } from "@/types/responses/friendship.response";
 import { toast } from "react-toastify";
+import { useChatMemberStore } from "./chatMemberStore";
 
 type FriendshipState = {
   pendingRequests: FriendRequestResponse[];
@@ -26,7 +27,7 @@ type FriendshipActions = {
   ) => Promise<FriendshipResponse>;
   addPendingRequest: (request: FriendRequestResponse) => void;
   removeRequest: (friendshipId: string) => Promise<void>;
-  deleteFriendshipByUserId: (userId: string) => Promise<void>;
+  deleteFriendship: (userId: string) => Promise<void>;
   clearRequests: () => void;
 };
 
@@ -115,10 +116,13 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
       }
     },
 
-    deleteFriendshipByUserId: async (userId) => {
+    deleteFriendship: async (userId) => {
       set({ isLoading: true });
       try {
         await friendshipService.deleteByUserId(userId);
+        // Update friendship status in chat member store
+        useChatMemberStore.getState().updateFriendshipStatus(userId, null);
+        // update friendship status in direct chat member in chatmemberstore
         set((state) => ({
           pendingRequests: state.pendingRequests.filter(
             (req) => req.sender.id !== userId && req.receiver.id !== userId

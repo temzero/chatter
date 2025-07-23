@@ -4,19 +4,24 @@ import { useShallow } from "zustand/shallow";
 import { debounce } from "lodash";
 
 const MessageSearchBar: React.FC = () => {
-  console.log("MessageSearchBar render"); // add to the MessageSearchBar
-
   const searchMessageInputRef = useRef<HTMLInputElement>(null);
-  const { searchQuery, setSearchQuery, setDisplaySearchMessage } =
-    useMessageStore(
-      useShallow((state) => ({
-        searchQuery: state.searchQuery,
-        setSearchQuery: state.setSearchQuery,
-        setDisplaySearchMessage: state.setDisplaySearchMessage,
-      }))
-    );
 
-  // Debounce the setSearchQuery function
+  const {
+    searchQuery,
+    setSearchQuery,
+    setDisplaySearchMessage,
+    showImportantOnly,
+    setShowImportantOnly,
+  } = useMessageStore(
+    useShallow((state) => ({
+      searchQuery: state.searchQuery,
+      setSearchQuery: state.setSearchQuery,
+      setDisplaySearchMessage: state.setDisplaySearchMessage,
+      showImportantOnly: state.showImportantOnly,
+      setShowImportantOnly: state.setShowImportantOnly,
+    }))
+  );
+
   const debouncedSetSearchQuery = useMemo(
     () => debounce((value: string) => setSearchQuery(value), 300),
     [setSearchQuery]
@@ -32,7 +37,12 @@ const MessageSearchBar: React.FC = () => {
 
   const handleClose = () => {
     setDisplaySearchMessage(false);
+    setShowImportantOnly(false);
     setSearchQuery("");
+  };
+
+  const toggleImportantFilter = () => {
+    setShowImportantOnly(!showImportantOnly);
   };
 
   return (
@@ -43,6 +53,7 @@ const MessageSearchBar: React.FC = () => {
       <span className="material-symbols-outlined select-none">
         manage_search
       </span>
+
       <input
         ref={searchMessageInputRef}
         className="w-full"
@@ -52,6 +63,22 @@ const MessageSearchBar: React.FC = () => {
         onChange={handleChange}
         autoFocus
       />
+
+      {/* Toggle flag icon */}
+      <button
+        onClick={toggleImportantFilter}
+        className="flex items-center justify-center"
+        title="Filter Important"
+      >
+        <span
+          className={`material-symbols-outlined mr-1 ${
+            showImportantOnly ? "filled text-red-400" : ""
+          }`}
+        >
+          flag
+        </span>
+      </button>
+
       <button
         onClick={handleClose}
         className="rounded-full flex items-center justify-center w-6 h-6 -ml-2 opacity-70 hover:opacity-100 hover:bg-red-500/30"

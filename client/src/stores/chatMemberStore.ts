@@ -36,7 +36,10 @@ interface ChatMemberStore {
     memberId: string,
     messageId: string
   ) => Promise<void>;
-  updateFriendshipStatus: (otherUserId: string, status: FriendshipStatus) => void;
+  updateFriendshipStatus: (
+    otherUserId: string,
+    status: FriendshipStatus | null
+  ) => void;
   addGroupMember: (chatId: string, member: ChatMember) => void;
   removeGroupMember: (chatId: string, userId: string) => void;
 }

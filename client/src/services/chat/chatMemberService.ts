@@ -33,13 +33,13 @@ export const chatMemberService = {
     return response.data.payload;
   },
 
-  // Get a member by memberId
-  async getMember(memberId: string): Promise<ChatMember> {
-    const response = await API.get<ApiSuccessResponse<ChatMember>>(
-      `/chat-members/${memberId}`
-    );
-    return response.data.payload;
-  },
+  // // Get a member by memberId
+  // async getMember(memberId: string): Promise<ChatMember> {
+  //   const response = await API.get<ApiSuccessResponse<ChatMember>>(
+  //     `/chat-members/${memberId}`
+  //   );
+  //   return response.data.payload;
+  // },
 
   // Add a new member
   async addMember(
