@@ -2,6 +2,7 @@ import API from "@/services/api/api";
 import {
   FriendshipResponse,
   FriendRequestResponse,
+  FriendshipUpdateNotification,
 } from "@/types/responses/friendship.response";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
 
@@ -28,7 +29,7 @@ export const friendshipService = {
   async respondToRequest(
     friendshipId: string,
     status: FriendshipStatus
-  ): Promise<FriendshipResponse> {
+  ): Promise<FriendshipUpdateNotification> {
     const { data } = await API.patch(`/friendships/requests/${friendshipId}`, {
       status,
     });
@@ -66,9 +67,8 @@ export const friendshipService = {
    * delete to a friend request by friendship ID
    * @param friendshipId - Friend request ID
    */
-  async deleteRequest(friendshipId: string): Promise<FriendshipResponse> {
-    const { data } = await API.delete(`/friendships/${friendshipId}`);
-    console.log("deleted: ", data);
+  async deleteRequest(friendshipId: string, userId?: string): Promise<FriendshipResponse> {
+    const { data } = await API.delete(`/friendships/${friendshipId}/${userId}`);
     return data.payload;
   },
 

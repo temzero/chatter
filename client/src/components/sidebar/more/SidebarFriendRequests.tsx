@@ -18,7 +18,7 @@ const SidebarFriendRequests: React.FC = () => {
   const getDirectChatByUserId = useChatStore(
     (state) => state.getDirectChatByUserId
   );
-  
+
   const pendingRequests = useFriendshipStore((state) => state.pendingRequests);
   const respondToRequest = useFriendshipStore(
     (state) => state.respondToRequest
@@ -35,28 +35,16 @@ const SidebarFriendRequests: React.FC = () => {
   };
 
   const handleAcceptRequest = async (requestId: string, senderId: string) => {
-    try {
-      await respondToRequest(requestId, FriendshipStatus.ACCEPTED);
-      getDirectChatByUserId(senderId);
-    } catch (error) {
-      console.error("Failed to accept friend request:", error);
-    }
+    await respondToRequest(requestId, FriendshipStatus.ACCEPTED);
+    getDirectChatByUserId(senderId);
   };
 
   const handleDeclineRequest = async (requestId: string) => {
-    try {
-      await respondToRequest(requestId, FriendshipStatus.DECLINED);
-    } catch (error) {
-      console.error("Failed to decline friend request:", error);
-    }
+    await respondToRequest(requestId, FriendshipStatus.DECLINED);
   };
 
   const handleCancelRequest = async (requestId: string) => {
-    try {
-      await removeRequest(requestId);
-    } catch (error) {
-      console.error("Failed to cancel friend request:", error);
-    }
+    await removeRequest(requestId);
   };
 
   const receivedRequests = pendingRequests.filter(
@@ -116,10 +104,12 @@ const SidebarFriendRequests: React.FC = () => {
                           {formatTimeAgo(request.updatedAt)}
                         </p>
                       </div>
-                      <p className="text-sm opacity-40">
-                        {request.mutualFriends} mutual friend
-                        {request.mutualFriends !== 1 ? "s" : ""}
-                      </p>
+                      {request.mutualFriends > 0 && (
+                        <p className="text-sm opacity-40">
+                          {request.mutualFriends} mutual friend
+                          {request.mutualFriends !== 1 ? "s" : ""}
+                        </p>
+                      )}
 
                       {request.requestMessage && (
                         <p className="text-sm opacity-60 italic">

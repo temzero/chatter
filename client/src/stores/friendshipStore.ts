@@ -4,7 +4,7 @@ import { FriendshipStatus } from "@/types/enums/friendshipType";
 import { handleError } from "@/utils/handleError";
 import {
   FriendRequestResponse,
-  FriendshipResponse,
+  FriendshipUpdateNotification,
 } from "@/types/responses/friendship.response";
 import { toast } from "react-toastify";
 import { useChatMemberStore } from "./chatMemberStore";
@@ -24,9 +24,10 @@ type FriendshipActions = {
   respondToRequest: (
     friendshipId: string,
     status: FriendshipStatus
-  ) => Promise<FriendshipResponse>;
+  ) => Promise<FriendshipUpdateNotification>;
   addPendingRequest: (request: FriendRequestResponse) => void;
-  removeRequest: (friendshipId: string) => Promise<void>;
+  removeRequest: (friendshipId: string, userId?: string) => Promise<void>;
+  removeRequestLocally: (friendshipId?: string, senderId?: string) => void;
   deleteFriendship: (userId: string) => Promise<void>;
   clearRequests: () => void;
 };
@@ -39,6 +40,9 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
     sendFriendRequest: async (receiverId, receiverName, message) => {
       set({ isLoading: true });
       try {
+        useChatMemberStore
+          .getState()
+          .updateFriendshipStatus(receiverId, FriendshipStatus.PENDING);
         const newRequest = await friendshipService.sendRequest(
           receiverId,
           message
@@ -75,17 +79,22 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
           friendshipId,
           status
         );
+        useChatMemberStore
+          .getState()
+          .updateFriendshipStatus(friendship.userId, status);
+
+        return friendship;
+      } catch (error) {
+        console.error("Failed to respond to friend request:", error);
+        set({ isLoading: false });
+        throw handleError(error, "Failed to respond to friend request");
+      } finally {
         set((state) => ({
           pendingRequests: state.pendingRequests.filter(
             (req) => req.id !== friendshipId
           ),
           isLoading: false,
         }));
-        return friendship;
-      } catch (error) {
-        console.error("Failed to respond to friend request:", error);
-        set({ isLoading: false });
-        throw error;
       }
     },
 
@@ -99,10 +108,13 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
       });
     },
 
-    removeRequest: async (friendshipId) => {
+    removeRequest: async (friendshipId, userId) => {
       set({ isLoading: true });
       try {
-        await friendshipService.deleteRequest(friendshipId);
+        if (userId) {
+          useChatMemberStore.getState().updateFriendshipStatus(userId, null);
+        }
+        await friendshipService.deleteRequest(friendshipId, userId);
         set((state) => ({
           pendingRequests: state.pendingRequests.filter(
             (req) => req.id !== friendshipId
@@ -116,13 +128,46 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
       }
     },
 
+    removeRequestLocally: (friendshipId, senderId) => {
+      set((state) => {
+        // If no identifiers provided, return current state
+        if (!friendshipId && !senderId) return state;
+
+        const newPendingRequests = state.pendingRequests.filter((req) => {
+          // Case 1: Both identifiers provided - remove if either matches
+          if (friendshipId && senderId) {
+            return req.id !== friendshipId && req.sender.id !== senderId;
+          }
+          // Case 2: Only friendshipId provided
+          if (friendshipId) {
+            return req.id !== friendshipId;
+          }
+          // Case 3: Only senderId provided
+          if (senderId) {
+            return req.sender.id !== senderId;
+          }
+          return true;
+        });
+
+        // Only update if something actually changed
+        if (newPendingRequests.length === state.pendingRequests.length) {
+          return state;
+        }
+
+        return { pendingRequests: newPendingRequests };
+      });
+
+      // Also update chat member status if senderId was provided
+      if (senderId) {
+        useChatMemberStore.getState().updateFriendshipStatus(senderId, null);
+      }
+    },
+
     deleteFriendship: async (userId) => {
       set({ isLoading: true });
       try {
         await friendshipService.deleteByUserId(userId);
-        // Update friendship status in chat member store
         useChatMemberStore.getState().updateFriendshipStatus(userId, null);
-        // update friendship status in direct chat member in chatmemberstore
         set((state) => ({
           pendingRequests: state.pendingRequests.filter(
             (req) => req.sender.id !== userId && req.receiver.id !== userId

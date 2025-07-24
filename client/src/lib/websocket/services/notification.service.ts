@@ -1,7 +1,7 @@
 // src/services/friendship.websocket.service.ts
 import { FriendRequestResponse } from "@/types/responses/friendship.response";
 import { webSocketService } from "./websocket.service";
-import { FriendshipUpdateNotification } from "@/types/websocket/friendshipUpdateNotification";
+import { FriendshipUpdateNotification } from "@/types/responses/friendship.response";
 
 const notificationsLink = "notifications:";
 
@@ -20,5 +20,23 @@ export const notificationWebSocketService = {
 
   offNewFriendRequest(callback: (data: FriendRequestResponse) => void) {
     webSocketService.off(`${notificationsLink}newFriendRequest`, callback);
+  },
+
+  onFriendshipCancelRequest(
+    callback: (data: { friendshipId: string; senderId: string }) => void
+  ) {
+    webSocketService.on(
+      `${notificationsLink}friendshipCancelRequest`,
+      callback
+    );
+  },
+
+  offFriendshipCancelRequest(
+    callback: (data: { friendshipId: string; senderId: string }) => void
+  ) {
+    webSocketService.off(
+      `${notificationsLink}friendshipCancelRequest`,
+      callback
+    );
   },
 };

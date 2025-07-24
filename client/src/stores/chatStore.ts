@@ -28,7 +28,7 @@ interface ChatStore {
   initialize: () => Promise<void>;
   fetchChats: () => Promise<void>;
   fetchChatById: (chatId?: string) => Promise<void>;
-  getDirectChatByUserId: (userId: string) => Promise<ChatResponse | null>;
+  getDirectChatByUserId: (userId: string) => Promise<ChatResponse | void>;
   setActiveChat: (chat: ChatResponse | null) => Promise<void>;
   setActiveChatById: (chatId: string | null) => Promise<void>;
   getAllUserIdsInChats: () => string[];
@@ -147,7 +147,7 @@ export const useChatStore = create<ChatStore>()(
             await get().fetchChatById(existingChat.id);
             return existingChat;
           }
-          return null;
+          return;
         },
 
         setSearchTerm: (term) => {

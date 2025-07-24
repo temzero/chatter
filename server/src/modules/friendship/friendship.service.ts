@@ -16,84 +16,6 @@ export class FriendshipService {
     private readonly userService: UserService,
   ) {}
 
-  // async sendRequest(
-  //   senderId: string,
-  //   receiverId: string,
-  //   requestMessage?: string,
-  // ): Promise<FriendRequestResponseDto> {
-  //   try {
-  //     const [sender, receiver] = await Promise.all([
-  //       this.userService.getUserById(senderId),
-  //       this.userService.getUserById(receiverId),
-  //     ]);
-
-  //     const existingFriendships = await this.friendshipRepo.find({
-  //       where: [
-  //         { senderId, receiverId },
-  //         { senderId: receiverId, receiverId: senderId },
-  //       ],
-  //     });
-
-  //     if (existingFriendships.length > 0) {
-  //       ErrorResponse.unauthorized('Friend request already exists');
-  //     }
-
-  //     const isBlockedByOtherUser = existingFriendships.some((friendship) => {
-  //       if (
-  //         friendship.senderId === senderId &&
-  //         [FriendshipStatus.DECLINED].includes(friendship.receiverStatus)
-  //       ) {
-  //         return true;
-  //       }
-  //       if (
-  //         friendship.receiverId === senderId &&
-  //         [FriendshipStatus.DECLINED].includes(friendship.senderStatus)
-  //       ) {
-  //         return true;
-  //       }
-  //       return false;
-  //     });
-
-  //     if (isBlockedByOtherUser) {
-  //       ErrorResponse.conflict(
-  //         'Cannot send request - user has blocked or declined your previous request',
-  //       );
-  //     }
-
-  //     const friendship = await this.friendshipRepo.save({
-  //       senderId,
-  //       receiverId,
-  //       requestMessage: requestMessage || null,
-  //       senderStatus: FriendshipStatus.ACCEPTED,
-  //       receiverStatus: FriendshipStatus.PENDING,
-  //     });
-
-  //     const mutualFriends = await this.getMutualFriendsCount(
-  //       senderId,
-  //       receiverId,
-  //     );
-
-  //     return {
-  //       id: friendship.id,
-  //       sender: {
-  //         id: sender.id,
-  //         name: `${sender.firstName} ${sender.lastName}`,
-  //         avatarUrl: sender.avatarUrl,
-  //       },
-  //       receiver: {
-  //         id: receiver.id,
-  //         name: `${receiver.firstName} ${receiver.lastName}`,
-  //         avatarUrl: receiver.avatarUrl,
-  //       },
-  //       mutualFriends,
-  //       requestMessage: friendship.requestMessage,
-  //       updatedAt: friendship.updatedAt,
-  //     };
-  //   } catch (error) {
-  //     ErrorResponse.throw(error, 'Failed to send friend request');
-  //   }
-  // }
-
   async sendRequest(
     senderId: string,
     receiverId: string,
@@ -130,7 +52,10 @@ export class FriendshipService {
         }
 
         if (isSentByCurrentUser) {
-          if (friendship.receiverStatus === FriendshipStatus.PENDING) {
+          if (
+            friendship.receiverStatus === FriendshipStatus.PENDING ||
+            friendship.receiverStatus === FriendshipStatus.DECLINED
+          ) {
             ErrorResponse.unauthorized(
               'You already sent a friend request to this user',
             );
@@ -139,13 +64,12 @@ export class FriendshipService {
 
         if (isSentByOtherUser) {
           if (friendship.senderStatus === FriendshipStatus.PENDING) {
-            // Allow other user to send a request to you (no restriction here)
-            continue;
-          }
-
-          if (friendship.senderStatus === FriendshipStatus.ACCEPTED) {
             ErrorResponse.unauthorized(
-              'You are already friends with this user',
+              'You already sent a friend request to this user',
+            );
+          } else if (friendship.receiverStatus === FriendshipStatus.PENDING) {
+            ErrorResponse.unauthorized(
+              'You already received a friend request from this user',
             );
           }
         }
@@ -233,6 +157,26 @@ export class FriendshipService {
         request.updatedAt = new Date();
         const updatedFriendship = await this.friendshipRepo.save(request);
 
+        // Check for mutual decline (both users declined each other)
+        const oppositeDeclinedRequest = await this.friendshipRepo.findOne({
+          where: {
+            senderId: request.receiverId, // Opposite direction
+            receiverId: request.senderId,
+            receiverStatus: FriendshipStatus.DECLINED,
+          },
+        });
+
+        if (oppositeDeclinedRequest) {
+          // Delete ALL records between these users
+          await this.friendshipRepo.delete([
+            { senderId: request.senderId, receiverId: request.receiverId },
+            { senderId: request.receiverId, receiverId: request.senderId },
+          ]);
+          return {
+            message: 'Friendship data reset - both users declined each other',
+          };
+        }
+
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { receiver, ...friendshipWithoutReceiver } = updatedFriendship;
         return friendshipWithoutReceiver;
@@ -241,50 +185,6 @@ export class FriendshipService {
       ErrorResponse.throw(error, 'Failed to respond to friend request');
     }
   }
-
-  // async respondToRequest(
-  //   receiverId: string,
-  //   friendshipId: string,
-  //   status: FriendshipStatus.ACCEPTED | FriendshipStatus.DECLINED,
-  // ) {
-  //   try {
-  //     const request = await this.friendshipRepo.findOne({
-  //       where: {
-  //         id: friendshipId,
-  //         receiverId,
-  //         receiverStatus: FriendshipStatus.PENDING,
-  //       },
-  //       relations: ['sender', 'receiver'], // Include both sender and receiver relations
-  //     });
-
-  //     if (!request) {
-  //       ErrorResponse.notFound('Friend request not found');
-  //     }
-
-  //     // Update both statuses when accepting
-  //     if (status === FriendshipStatus.ACCEPTED) {
-  //       request.receiverStatus = FriendshipStatus.ACCEPTED;
-  //       request.senderStatus = FriendshipStatus.ACCEPTED; // Add this line
-  //       request.requestMessage = null;
-  //     } else {
-  //       request.receiverStatus = FriendshipStatus.DECLINED;
-  //     }
-
-  //     request.updatedAt = new Date();
-  //     const updatedFriendship = await this.friendshipRepo.save(request);
-
-  //     if (status === FriendshipStatus.ACCEPTED) {
-  //       return updatedFriendship; // Returns with both sender and receiver
-  //     } else {
-  //       // For DECLINED, remove receiver before returning
-  //       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  //       const { receiver, ...friendshipWithoutReceiver } = updatedFriendship;
-  //       return friendshipWithoutReceiver;
-  //     }
-  //   } catch (error) {
-  //     ErrorResponse.throw(error, 'Failed to respond to friend request');
-  //   }
-  // }
 
   async getFriends(userId: string): Promise<Friendship[]> {
     try {

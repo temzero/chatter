@@ -8,7 +8,7 @@ export class FriendshipUpdateNotificationDto {
   friendshipId: string;
 
   @Expose()
-  status: FriendshipStatus;
+  status: FriendshipStatus | null;
 
   @Expose()
   firstName: string;

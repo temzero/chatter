@@ -21,13 +21,30 @@ export class NotificationWsService {
   }
 
   notifyFriendshipUpdate(
-    senderId: string,
+    senderId: string | null,
     dto: FriendshipUpdateNotificationDto,
   ) {
+    if (!senderId) return;
     this.websocketService.emitToUser(
       senderId,
       `${notificationsLink}friendshipUpdate`,
       dto,
+    );
+  }
+
+  notifyCancelFriendRequest(
+    friendshipId: string | null,
+    receiverId: string | null,
+    senderId: string | null,
+  ) {
+    if (!receiverId) return;
+    this.websocketService.emitToUser(
+      receiverId,
+      `${notificationsLink}friendshipCancelRequest`,
+      {
+        friendshipId,
+        senderId,
+      },
     );
   }
 }

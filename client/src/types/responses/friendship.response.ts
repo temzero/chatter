@@ -31,3 +31,11 @@ export interface FriendRequestResponse {
   requestMessage?: string | null;
   updatedAt: Date | string; // or Date, depending on how you want to handle it
 }
+
+export interface FriendshipUpdateNotification {
+  friendshipId: string;
+  status: FriendshipStatus;
+  firstName: string;
+  userId: string;
+  timestamp: string;
+}

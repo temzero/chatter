@@ -12,6 +12,7 @@ import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useMessageStore } from "@/stores/messageStore";
 import { useMuteControl } from "@/hooks/useMuteControl";
 import { SidebarInfoHeaderIcons } from "@/components/ui/SidebarInfoHeaderIcons";
+import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
 
 const DirectChat: React.FC = () => {
   const activeChat = useActiveChat() as ChatResponse;
@@ -23,11 +24,18 @@ const DirectChat: React.FC = () => {
   );
   const { mute, unmute } = useMuteControl(activeChat.id, activeChat.myMemberId);
 
+  const myMember = chatMembers?.find(
+    (member) => member.id === activeChat.myMemberId
+  ) as DirectChatMember;
   const chatPartner = chatMembers?.find(
     (member) => member.id !== activeChat.myMemberId
   ) as DirectChatMember;
 
   if (!chatPartner || !activeChat) return null;
+
+  const bothAccepted =
+    myMember?.friendshipStatus === FriendshipStatus.ACCEPTED &&
+    chatPartner?.friendshipStatus === FriendshipStatus.ACCEPTED;
 
   // Header buttons with title
   const headerIcons: {
@@ -84,7 +92,7 @@ const DirectChat: React.FC = () => {
       {
         icon: "edit",
         title: "Edit",
-        action: () => setSidebarInfo("directEdit"),
+        action: () => setSidebarInfo(SidebarInfoMode.DIRECT_EDIT),
       }
     );
   }
@@ -132,7 +140,7 @@ const DirectChat: React.FC = () => {
           />
         )}
 
-        {chatPartner.friendshipStatus === FriendshipStatus.ACCEPTED && (
+        {bothAccepted && (
           <div className="w-full flex flex-col items-center rounded font-light custom-border overflow-hidden">
             <ContactInfoItem
               icon="alternate_email"

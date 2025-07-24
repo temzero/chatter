@@ -54,7 +54,8 @@ export class FriendshipController {
     @CurrentUser('id') receiverId: string,
     @Param('friendshipId') friendshipId: string,
     @Body() body: RespondToRequestDto,
-  ): Promise<SuccessResponse<FriendshipResponseDto>> {
+  ): Promise<SuccessResponse<FriendshipUpdateNotificationDto>> {
+    // Changed return type
     // 1. Update friendship status
     const friendship = await this.friendshipService.respondToRequest(
       receiverId,
@@ -62,32 +63,42 @@ export class FriendshipController {
       body.status,
     );
 
-    // 2. Fetch the receiver's first name (assuming you have a UserService)
-    const receiver = await this.userService.getUserById(receiverId); // Or fetch from FriendshipService
+    // 2. Prepare notification data
+    const receiver = await this.userService.getUserById(receiverId);
     if (!receiver) {
       ErrorResponse.notFound('Receiver not found!');
     }
 
-    this.notificationWsService.notifyFriendshipUpdate(
-      friendship.senderId,
-      plainToInstance(FriendshipUpdateNotificationDto, {
-        friendshipId: friendship.id,
+    // 3. Create the response DTO
+    const response = plainToInstance(
+      FriendshipUpdateNotificationDto,
+      {
+        friendshipId,
         status: body.status,
         firstName: receiver.firstName,
         userId: receiverId,
         timestamp: new Date().toISOString(),
-      }),
+      },
+      {
+        excludeExtraneousValues: true,
+        enableImplicitConversion: true,
+      },
     );
 
-    // 4. Return REST response
-    const response = plainToInstance(FriendshipResponseDto, friendship, {
-      excludeExtraneousValues: true,
-      enableImplicitConversion: true,
-    });
+    // 4. Notify if accepted
+    if (body.status === FriendshipStatus.ACCEPTED) {
+      this.notificationWsService.notifyFriendshipUpdate(
+        (friendship as { senderId: string }).senderId,
+        response, // Reuse the same DTO instance
+      );
+    }
 
+    // 5. Return the notification DTO as response
     return new SuccessResponse(
       response,
-      'Friend request responded successfully',
+      body.status === FriendshipStatus.ACCEPTED
+        ? 'Friend request accepted successfully'
+        : 'Friend request declined successfully',
     );
   }
 
@@ -131,15 +142,24 @@ export class FriendshipController {
     );
   }
 
-  @Delete(':id')
+  @Delete(':friendshipId/:receiverId')
   async deleteFriendRequest(
     @CurrentUser('id') currentUserId: string,
-    @Param('id') id: string,
+    @Param('friendshipId') friendshipId: string,
+    @Param('receiverId') receiverId: string,
   ): Promise<SuccessResponse<Friendship>> {
     const deletedFriendship = await this.friendshipService.deleteFriendship(
-      id,
+      friendshipId,
       currentUserId,
     );
+
+    if (receiverId) {
+      this.notificationWsService.notifyCancelFriendRequest(
+        friendshipId,
+        receiverId,
+        currentUserId,
+      );
+    }
 
     return new SuccessResponse(
       deletedFriendship,

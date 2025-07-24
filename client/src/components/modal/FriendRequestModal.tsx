@@ -5,7 +5,6 @@ import { Avatar } from "../ui/avatar/Avatar";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import { motion } from "framer-motion";
 import { childrenModalAnimation } from "@/animations/modalAnimations";
-import { toast } from "react-toastify";
 
 interface FriendRequestModalProps {
   receiver: {

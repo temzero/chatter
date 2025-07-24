@@ -1,8 +1,6 @@
 import { toast } from "react-toastify";
 
 export function handleError(error: unknown, defaultMessage: string) {
-  console.error(error);
-
   // Handle Axios error structure
   if (typeof error === "object" && error !== null) {
     const axiosError = error as {
@@ -18,28 +16,29 @@ export function handleError(error: unknown, defaultMessage: string) {
     // Check for array message in response
     if (Array.isArray(axiosError?.response?.data?.message)) {
       toast.error(axiosError.response.data.message[0] || defaultMessage);
-      return;
+      throw error;
     }
 
     // Check for string message in response
     if (typeof axiosError?.response?.data?.message === "string") {
       toast.error(axiosError.response.data.message || defaultMessage);
-      return;
+      throw error;
     }
 
     // Check for error field in response
     if (axiosError?.response?.data?.error) {
       toast.error(axiosError.response.data.error || defaultMessage);
-      return;
+      throw error;
     }
 
     // Check for top-level message
     if (axiosError.message) {
       toast.error(axiosError.message || defaultMessage);
-      return;
+      throw error;
     }
   }
 
   // Fallback to default message
   toast.error(defaultMessage);
+  throw error;
 }

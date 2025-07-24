@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import { useChatMemberStore, useActiveMembers } from "@/stores/chatMemberStore";
 import { DirectChatMember } from "@/types/responses/chatMember.response";
 import { ModalType, useModalStore } from "@/stores/modalStore";
+import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
 
 const DirectChatEdit = () => {
   const activeChat = useChatStore((state) => state.activeChat) as ChatResponse;
@@ -74,7 +75,7 @@ const DirectChatEdit = () => {
         );
       }
 
-      setSidebarInfo("default");
+      setSidebarInfo(SidebarInfoMode.DEFAULT);
       toast.success("Update successfully");
     } catch (error) {
       handleError(error, "Failed to update nickname");
