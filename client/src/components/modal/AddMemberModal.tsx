@@ -49,7 +49,7 @@ const AddMemberModal: React.FC = () => {
     >
       <h1 className="font-bold text-center text-xl mb-4 flex items-center justify-center gap-2">
         <span className="material-symbols-outlined font-bold text-3xl">person_add</span>
-        Invite members
+        Invite Members
       </h1>
 
       <SearchBar placeholder="Search for people..." />

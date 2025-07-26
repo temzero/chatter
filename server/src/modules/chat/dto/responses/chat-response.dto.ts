@@ -45,4 +45,7 @@ export class ChatResponseDto {
 
   @Expose()
   mutedUntil?: string | Date | null;
+
+  @Expose()
+  isDeleted?: boolean | null;
 }

@@ -24,18 +24,22 @@ const DirectChat: React.FC = () => {
   );
   const { mute, unmute } = useMuteControl(activeChat.id, activeChat.myMemberId);
 
-  const myMember = chatMembers?.find(
-    (member) => member.id === activeChat.myMemberId
-  ) as DirectChatMember;
+  // const myMember = chatMembers?.find(
+  //   (member) => member.id === activeChat.myMemberId
+  // ) as DirectChatMember;
   const chatPartner = chatMembers?.find(
     (member) => member.id !== activeChat.myMemberId
   ) as DirectChatMember;
 
   if (!chatPartner || !activeChat) return null;
 
-  const bothAccepted =
-    myMember?.friendshipStatus === FriendshipStatus.ACCEPTED &&
-    chatPartner?.friendshipStatus === FriendshipStatus.ACCEPTED;
+  // const bothAccepted =
+  //   myMember?.friendshipStatus === FriendshipStatus.ACCEPTED &&
+  //   chatPartner?.friendshipStatus === FriendshipStatus.ACCEPTED;
+
+  const isFriend = chatPartner?.friendshipStatus === FriendshipStatus.ACCEPTED;
+
+  // toast.info(`myMember friendshipStatus ${myMember?.friendshipStatus}, chatPartner friendshipStatus ${chatPartner?.friendshipStatus}`);
 
   // Header buttons with title
   const headerIcons: {
@@ -140,7 +144,7 @@ const DirectChat: React.FC = () => {
           />
         )}
 
-        {bothAccepted && (
+        {isFriend && (
           <div className="w-full flex flex-col items-center rounded font-light custom-border overflow-hidden">
             <ContactInfoItem
               icon="alternate_email"

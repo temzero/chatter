@@ -70,20 +70,13 @@ export class FriendshipController {
     }
 
     // 3. Create the response DTO
-    const response = plainToInstance(
-      FriendshipUpdateNotificationDto,
-      {
-        friendshipId,
-        status: body.status,
-        firstName: receiver.firstName,
-        userId: receiverId,
-        timestamp: new Date().toISOString(),
-      },
-      {
-        excludeExtraneousValues: true,
-        enableImplicitConversion: true,
-      },
-    );
+    const response = plainToInstance(FriendshipUpdateNotificationDto, {
+      friendshipId,
+      status: body.status,
+      firstName: receiver.firstName,
+      userId: receiverId,
+      timestamp: new Date().toISOString(),
+    });
 
     // 4. Notify if accepted
     if (body.status === FriendshipStatus.ACCEPTED) {
@@ -142,13 +135,30 @@ export class FriendshipController {
     );
   }
 
-  @Delete(':friendshipId/:receiverId')
+  @Delete('by-userid/:userId')
+  async deleteByUserId(
+    @CurrentUser('id') currentUserId: string,
+    @Param('userId') userId: string,
+  ): Promise<SuccessResponse<Friendship>> {
+    const deletedFriendship =
+      await this.friendshipService.deleteFriendshipByUserId(
+        userId,
+        currentUserId,
+      );
+
+    return new SuccessResponse(
+      deletedFriendship,
+      'Friendship deleted successfully',
+    );
+  }
+
+  @Delete('/cancel/:friendshipId/:receiverId')
   async deleteFriendRequest(
     @CurrentUser('id') currentUserId: string,
     @Param('friendshipId') friendshipId: string,
     @Param('receiverId') receiverId: string,
-  ): Promise<SuccessResponse<Friendship>> {
-    const deletedFriendship = await this.friendshipService.deleteFriendship(
+  ): Promise<SuccessResponse<Friendship | null>> {
+    const deletedFriendship = await this.friendshipService.cancelFriendRequest(
       friendshipId,
       currentUserId,
     );
@@ -160,23 +170,6 @@ export class FriendshipController {
         currentUserId,
       );
     }
-
-    return new SuccessResponse(
-      deletedFriendship,
-      'Friendship deleted successfully',
-    );
-  }
-
-  @Delete('by-userid/:userId')
-  async deleteByUserId(
-    @CurrentUser('id') currentUserId: string,
-    @Param('userId') userId: string,
-  ): Promise<SuccessResponse<Friendship>> {
-    const deletedFriendship =
-      await this.friendshipService.deleteFriendshipByUserId(
-        userId,
-        currentUserId,
-      );
 
     return new SuccessResponse(
       deletedFriendship,

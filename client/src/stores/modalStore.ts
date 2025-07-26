@@ -9,6 +9,7 @@ export enum ModalType {
   DELETE_MESSAGE = "delete-message",
   DELETE_FOLDER = "delete-folder",
   DELETE_CHAT = "delete-chat",
+  DELETE_DIRECT_CHAT = "delete-direct-chat",
   ADD_FOLDER = "add-folder",
   ADD_CONTACT = "add-contact",
   MUTE = "mute",
@@ -16,7 +17,7 @@ export enum ModalType {
   UNBLOCK_USER = "unblock-user",
   UNFRIEND = "unfriend",
   ADD_MEMBER = "add-member",
-  LEAVE_GROUP = "leave-group",
+  LEAVE_CHAT = "leave-chat",
 }
 
 type ModalContent = {

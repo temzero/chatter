@@ -60,7 +60,7 @@ const MuteChatModal: React.FC = () => {
           {MUTE_OPTIONS.map((option) => (
             <button
               key={option.label}
-              className="p-1 rounded custom-border w-full hover:bg-[--primary-green]"
+              className="p-1 rounded custom-border w-full hover:bg-[--hover-color]"
               onClick={() => handleMute(option.value)}
             >
               {option.label}

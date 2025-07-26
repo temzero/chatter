@@ -28,7 +28,7 @@ const ChatContent = React.memo(() => {
       <ChatHeader chat={activeChat} isBlockedByMe={isBlockedByMe} />
       <ChatBox chat={activeChat} />
       <AnimatePresence>
-        {!isBlocked ? (
+        {!isBlocked && !activeChat.isDeleted ? (
           !(
             activeChat.type === "channel" &&
             activeChat.myRole !== ChatMemberRole.OWNER

@@ -5,6 +5,7 @@ import type { ChatMember } from "@/types/responses/chatMember.response";
 import { ChatType } from "@/types/enums/ChatType";
 import { useShallow } from "zustand/shallow";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
+import { useCurrentUserId } from "./authStore";
 
 interface ChatMemberStore {
   chatMembers: Record<string, ChatMember[]>; // chatId -> members
@@ -41,7 +42,7 @@ interface ChatMemberStore {
     status: FriendshipStatus | null
   ) => void;
   addGroupMember: (chatId: string, member: ChatMember) => void;
-  removeGroupMember: (chatId: string, userId: string) => void;
+  removeMemberLocally: (chatId: string, userId: string) => void;
 }
 
 export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
@@ -219,7 +220,7 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
     });
   },
 
-  removeGroupMember: (chatId, userId) => {
+  removeMemberLocally: (chatId, userId) => {
     set((state) => {
       const currentMembers = state.chatMembers[chatId] || [];
       return {
@@ -253,10 +254,20 @@ export const useMembersByChatId = (
   );
 };
 
+export const useMyChatMember = (chatId: string): ChatMember | undefined => {
+  const myMemberId = useCurrentUserId();
+  return useChatMemberStore(
+    useShallow((state) => {
+      const members = state.chatMembers[chatId];
+      return members.find((member) => member.id === myMemberId);
+    })
+  );
+};
+
 export const useDirectChatPartner = (
-  chatId: string,
-  myMemberId: string
+  chatId: string
 ): ChatMember | undefined => {
+  const myMemberId = useCurrentUserId();
   return useChatMemberStore(
     useShallow((state) => {
       const members = state.chatMembers[chatId];
@@ -267,10 +278,8 @@ export const useDirectChatPartner = (
   );
 };
 
-export const useGroupOtherMembers = (
-  chatId: string,
-  myMemberId: string
-): ChatMember[] => {
+export const useGroupOtherMembers = (chatId: string): ChatMember[] => {
+  const myMemberId = useCurrentUserId();
   return useChatMemberStore(
     useShallow((state) => {
       const members = state.chatMembers[chatId];

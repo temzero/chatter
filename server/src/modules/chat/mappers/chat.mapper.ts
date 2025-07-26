@@ -18,22 +18,88 @@ export class ChatMapper {
     private readonly chatMemberService: ChatMemberService,
   ) {}
 
+  // async transformToDirectChatDto(
+  //   chat: Chat,
+  //   currentUserId: string,
+  //   messageService?: MessageService,
+  // ): Promise<ChatResponseDto> {
+  //   const myMember = chat.members.find((m) => m.userId === currentUserId);
+  //   const otherMember = chat.members.find((m) => m.userId !== currentUserId);
+
+  //   if (!otherMember || !myMember) {
+  //     throw new Error('Invalid chat members');
+  //   }
+
+  //   const fullName = [otherMember.user.firstName, otherMember.user.lastName]
+  //     .filter(Boolean)
+  //     .join(' ');
+  //   const displayName = otherMember.nickname || fullName || 'Unknown User';
+
+  //   let unreadCount = 0;
+  //   if (
+  //     messageService &&
+  //     myMember.lastReadMessageId &&
+  //     myMember.lastReadMessageId !== 'undefined' &&
+  //     myMember.lastReadMessageId !== 'null'
+  //   ) {
+  //     unreadCount = await messageService.getUnreadMessageCount(
+  //       chat.id,
+  //       myMember.lastReadMessageId,
+  //       currentUserId,
+  //     );
+  //   }
+  //   const mutedUntil = myMember
+  //     ? this.chatMemberService.checkAndClearExpiredMute(myMember)
+  //     : null;
+
+  //   return {
+  //     id: chat.id,
+  //     type: ChatType.DIRECT,
+  //     myMemberId: myMember.id,
+  //     name: displayName,
+  //     avatarUrl: otherMember.user.avatarUrl ?? null,
+  //     updatedAt: chat.updatedAt,
+  //     pinnedMessage: chat.pinnedMessage
+  //       ? this.messageMapper.toMessageResponseDto(chat.pinnedMessage)
+  //       : null,
+  //     lastMessage: myMember.lastVisibleMessage
+  //       ? this.transformLastMessageDto(
+  //           myMember.lastVisibleMessage,
+  //           chat.members,
+  //           currentUserId,
+  //         )
+  //       : null,
+  //     otherMemberUserIds: [otherMember.userId],
+  //     unreadCount,
+  //     mutedUntil,
+  //   };
+  // }
+
   async transformToDirectChatDto(
     chat: Chat,
     currentUserId: string,
     messageService?: MessageService,
   ): Promise<ChatResponseDto> {
+    // Find current user's member (must be active due to query)
     const myMember = chat.members.find((m) => m.userId === currentUserId);
+
+    // Find other member (can be soft-deleted)
     const otherMember = chat.members.find((m) => m.userId !== currentUserId);
 
-    if (!otherMember || !myMember) {
-      throw new Error('Invalid chat members');
+    if (!myMember) {
+      throw new Error('Current user is not a valid member of this chat');
     }
 
-    const fullName = [otherMember.user.firstName, otherMember.user.lastName]
-      .filter(Boolean)
-      .join(' ');
-    const displayName = otherMember.nickname || fullName || 'Unknown User';
+    // Handle case where other member doesn't exist or is soft-deleted
+    const displayName = otherMember
+      ? otherMember.nickname ||
+        [otherMember.user?.firstName, otherMember.user?.lastName]
+          .filter(Boolean)
+          .join(' ') ||
+        'Unknown User'
+      : '????';
+
+    const avatarUrl = otherMember?.user?.avatarUrl ?? null;
 
     let unreadCount = 0;
     if (
@@ -48,6 +114,7 @@ export class ChatMapper {
         currentUserId,
       );
     }
+
     const mutedUntil = myMember
       ? this.chatMemberService.checkAndClearExpiredMute(myMember)
       : null;
@@ -57,7 +124,7 @@ export class ChatMapper {
       type: ChatType.DIRECT,
       myMemberId: myMember.id,
       name: displayName,
-      avatarUrl: otherMember.user.avatarUrl ?? null,
+      avatarUrl,
       updatedAt: chat.updatedAt,
       pinnedMessage: chat.pinnedMessage
         ? this.messageMapper.toMessageResponseDto(chat.pinnedMessage)
@@ -69,9 +136,10 @@ export class ChatMapper {
             currentUserId,
           )
         : null,
-      otherMemberUserIds: [otherMember.userId],
+      otherMemberUserIds: otherMember ? [otherMember.userId] : [],
       unreadCount,
       mutedUntil,
+      isDeleted: !!otherMember?.deletedAt, // Optional: add deletion status
     };
   }
 

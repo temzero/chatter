@@ -16,4 +16,5 @@ export interface ChatResponse {
   lastMessage?: LastMessageResponse | null;
   unreadCount?: number;
   mutedUntil?: string | Date | null;
+  isDeleted?: boolean | null;
 }

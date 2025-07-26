@@ -6,10 +6,14 @@ import { ChatResponse } from "@/types/responses/chat.response";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
 import { handleError } from "@/utils/handleError";
 import { toast } from "react-toastify";
-import { useChatMemberStore, useActiveMembers } from "@/stores/chatMemberStore";
-import { DirectChatMember } from "@/types/responses/chatMember.response";
+import {
+  useChatMemberStore,
+  useActiveMembers,
+  useDirectChatPartner,
+} from "@/stores/chatMemberStore";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
+import { DirectChatMember } from "@/types/responses/chatMember.response";
 
 const DirectChatEdit = () => {
   const activeChat = useChatStore((state) => state.activeChat) as ChatResponse;
@@ -20,9 +24,7 @@ const DirectChatEdit = () => {
   const chatMembers = useActiveMembers();
   const openModal = useModalStore((state) => state.openModal);
 
-  const chatPartner = chatMembers?.find(
-    (member) => member.id !== activeChat.myMemberId
-  ) as DirectChatMember;
+  const chatPartner = useDirectChatPartner(activeChat.id) as DirectChatMember;
 
   const initialFormData = useMemo(
     () => ({
@@ -110,7 +112,7 @@ const DirectChatEdit = () => {
           )}
           <button
             className="flex items-center rounded-full p-2 cursor-pointer opacity-70 hover:opacity-80 h-10 w-10 hover:bg-[var(--hover-color)]"
-            onClick={() => setSidebarInfo("default")}
+            onClick={() => setSidebarInfo(SidebarInfoMode.DEFAULT)}
           >
             <i className="material-symbols-outlined">close</i>
           </button>
@@ -165,10 +167,12 @@ const DirectChatEdit = () => {
           </div>
         </form>
 
-        <div className="custom-border-t absolute bottom-0 w-full flex">
+        <div
+          className="custom-border border-b-0 absolute bottom-0 w-full overflow-hidden shadow-xl rounded-t-xl"
+        >
           {chatPartner.friendshipStatus === FriendshipStatus.ACCEPTED && (
             <button
-              className="flex gap-2 justify-center items-center p-2 text-yellow-500 w-full font-medium rounded-none custom-border-r"
+              className="flex gap-2 justify-center items-center p-2 text-orange-500 w-full font-medium rounded-none custom-border-t"
               onClick={handleOpenUnfriendModal}
             >
               <span className="material-symbols-outlined">person_cancel</span>
@@ -177,7 +181,20 @@ const DirectChatEdit = () => {
           )}
 
           <button
-            className="flex justify-center items-center p-2 text-red-500 w-full font-medium"
+            className="flex gap-2 justify-center items-center p-2 text-yellow-500 w-full font-medium custom-border-t"
+            onClick={() =>
+              openModal(ModalType.LEAVE_CHAT, {
+                chat: activeChat,
+                chatPartner,
+              })
+            }
+          >
+            <span className="material-symbols-outlined">logout</span>
+            Leave Chat
+          </button>
+
+          <button
+            className="flex justify-center items-center p-2 text-red-500 w-full font-medium custom-border-t"
             onClick={handleOpenDeleteChatModal}
           >
             <i className="material-symbols-outlined">delete</i>

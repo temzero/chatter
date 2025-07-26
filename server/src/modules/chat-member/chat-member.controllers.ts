@@ -31,38 +31,6 @@ export class ChatMemberController {
     private readonly chatService: ChatService,
   ) {}
 
-  // @Get('direct/:chatId')
-  // async getDirectChatMembers(
-  //   @Param('chatId') chatId: string,
-  // ): Promise<SuccessResponse<DirectChatMemberResponseDto[]>> {
-  //   const members = await this.memberService.findByChatId(chatId);
-  //   const membersResponse = members.map(
-  //     (member) =>
-  //       mapChatMemberToResponseDto(
-  //         member,
-  //         ChatType.DIRECT,
-  //       ) as DirectChatMemberResponseDto,
-  //   );
-  //   return new SuccessResponse(
-  //     membersResponse,
-  //     'Direct chat members retrieved successfully',
-  //   );
-  // }
-
-  // @Get('group/:chatId')
-  // async getGroupChatMembers(
-  //   @Param('chatId') chatId: string,
-  // ): Promise<SuccessResponse<GroupChatMemberResponseDto[]>> {
-  //   const members = await this.memberService.findByChatId(chatId);
-  //   const membersResponse = members.map((member) =>
-  //     mapChatMemberToResponseDto(member, ChatType.GROUP),
-  //   );
-  //   return new SuccessResponse(
-  //     membersResponse,
-  //     'Group chat members retrieved successfully',
-  //   );
-  // }
-
   @Get('direct/:chatId')
   async getDirectChatMembers(
     @Param('chatId') chatId: string,
@@ -203,13 +171,20 @@ export class ChatMemberController {
     );
   }
 
-  @Delete(':chatId/:userId')
-  async removeMember(
+  @Delete('soft-delete/:chatId/:userId')
+  async softDeleteMember(
     @Param('chatId') chatId: string,
     @Param('userId') userId: string,
-  ): Promise<SuccessResponse<GroupChatMemberResponseDto>> {
-    const removedMember = await this.memberService.removeMember(chatId, userId);
-    const memberResponse = mapChatMemberToResponseDto(removedMember);
-    return new SuccessResponse(memberResponse, 'Member removed successfully');
+  ): Promise<SuccessResponse<{ chatDeleted: boolean }>> {
+    const { chatDeleted } = await this.memberService.softDeleteMember(
+      chatId,
+      userId,
+    );
+    return new SuccessResponse(
+      { chatDeleted },
+      chatDeleted
+        ? 'Chat deleted as no members remain'
+        : 'Member removed successfully',
+    );
   }
 }

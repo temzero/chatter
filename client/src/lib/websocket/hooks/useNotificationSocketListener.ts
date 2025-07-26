@@ -20,11 +20,6 @@ export function useNotificationSocketListeners() {
     const handleNewFriendRequest = (request: FriendRequestResponse) => {
       const isReceiver = request.receiver.id === currentUserId;
       if (!isReceiver) return;
-
-      chatMemberStore.updateFriendshipStatus(
-        request.sender.id,
-        FriendshipStatus.ACCEPTED
-      );
       friendshipStore.addPendingRequest(request);
       toast.info(`New friend request from ${request.sender.name}`);
     };
@@ -38,7 +33,7 @@ export function useNotificationSocketListeners() {
 
       // 3. Only process if we're the affected party
       chatMemberStore.updateFriendshipStatus(data.userId, data.status);
-      friendshipStore.removeRequest(data.friendshipId);
+      friendshipStore.removeRequestLocally(data.friendshipId);
 
       // 4. Show notification with correct context
       if (data.status === FriendshipStatus.ACCEPTED) {
@@ -55,7 +50,6 @@ export function useNotificationSocketListeners() {
       friendshipId: string;
       senderId: string;
     }) => {
-      toast.info(`Friend request was canceled ${friendshipId}`);
       friendshipStore.removeRequestLocally(friendshipId, senderId);
     };
 

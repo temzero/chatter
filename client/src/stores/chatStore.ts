@@ -51,7 +51,7 @@ interface ChatStore {
   setUnreadCount: (chatId: string, incrementBy: number) => void;
   setPinnedMessage: (chatId: string, message: MessageResponse | null) => void;
   setSearchTerm: (term: string) => void;
-  leaveGroupChat: (chatId: string) => Promise<void>;
+  leaveChat: (chatId: string) => Promise<void>;
   deleteChat: (id: string, type: ChatType) => Promise<void>;
   clearChats: () => void;
 }
@@ -430,25 +430,36 @@ export const useChatStore = create<ChatStore>()(
           }));
         },
 
-        leaveGroupChat: async (chatId) => {
+        leaveChat: async (chatId) => {
           set({ isLoading: true });
           try {
             const currentUserId = useAuthStore.getState().currentUser?.id;
             if (!currentUserId) throw new Error("User not authenticated");
-            await chatMemberService.removeMember(chatId, currentUserId);
+            const { chatDeleted } = await chatMemberService.softDeleteMember(
+              chatId,
+              currentUserId
+            );
             cleanupChat(chatId);
+
+            if (chatDeleted) {
+              toast.info("This chat was deleted because no members remained.");
+            } else {
+              toast.success("You left the chat.");
+            }
+
             set({ isLoading: false });
           } catch (error) {
             console.error("Failed to leave chat:", error);
             set({ error: "Failed to leave chat", isLoading: false });
+            toast.error("Something went wrong while leaving the chat.");
             throw error;
           }
         },
 
-        deleteChat: async (id, type) => {
+        deleteChat: async (id) => {
           set({ isLoading: true });
           try {
-            await chatService.deleteChat(id, type);
+            await chatService.deleteChat(id);
             cleanupChat(id);
             set({ isLoading: false });
           } catch (error) {

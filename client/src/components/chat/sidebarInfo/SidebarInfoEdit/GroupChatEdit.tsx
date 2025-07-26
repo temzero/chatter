@@ -8,14 +8,24 @@ import { handleError } from "@/utils/handleError";
 import { toast } from "react-toastify";
 import { useActiveMembers } from "@/stores/chatMemberStore";
 import { ModalType, useModalStore } from "@/stores/modalStore";
+import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
+import { GroupChatMember } from "@/types/responses/chatMember.response";
+import { useCurrentUserId } from "@/stores/authStore";
+import { ChatMemberRole } from "@/types/enums/ChatMemberRole";
+import { ChatType } from "@/types/enums/ChatType";
 
 const GroupChatEdit = () => {
+  const currentUserId = useCurrentUserId();
   const activeChat = useChatStore((state) => state.activeChat) as ChatResponse;
   const activeMembers = useActiveMembers();
   const updateGroupChat = useChatStore((state) => state.updateGroupChat);
 
   const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
   const openModal = useModalStore((state) => state.openModal);
+
+  const myMember = activeMembers?.find(
+    (member) => member.userId === currentUserId
+  ) as GroupChatMember;
 
   const initialFormData = useMemo(
     () => ({
@@ -41,6 +51,8 @@ const GroupChatEdit = () => {
     setHasChanges(changed);
   }, [formData, initialFormData, avatarFile]);
 
+  if (!activeChat || !activeMembers || !myMember) return null;
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -65,7 +77,7 @@ const GroupChatEdit = () => {
         newAvatarUrl = await fileStorageService.uploadAvatar(
           avatarFile,
           oldAvatarUrl,
-          "group"
+          ChatType.GROUP
         );
 
         // Update form data with new avatar URL
@@ -79,7 +91,7 @@ const GroupChatEdit = () => {
         description: formData.description,
       });
 
-      setSidebarInfo("default"); // Close sidebar on success
+      setSidebarInfo(SidebarInfoMode.DEFAULT); // Close sidebar on success
       toast.success("Update successfully");
     } catch (error) {
       handleError(error, "Update failed!");
@@ -94,8 +106,8 @@ const GroupChatEdit = () => {
     });
   };
 
-  const handleOpenLeaveGroupModal = () => {
-    openModal(ModalType.LEAVE_GROUP, {
+  const handleOpenLeaveChatModal = () => {
+    openModal(ModalType.LEAVE_CHAT, {
       chat: activeChat,
     });
   };
@@ -106,7 +118,8 @@ const GroupChatEdit = () => {
     });
   };
 
-  if (!activeChat) return null;
+  const chatTypeDisplay =
+    activeChat.type.charAt(0).toUpperCase() + activeChat.type.slice(1);
 
   return (
     <aside className="relative w-full h-full overflow-hidden flex flex-col">
@@ -133,7 +146,7 @@ const GroupChatEdit = () => {
           )}
           <button
             className="flex items-center rounded-full p-2 cursor-pointer opacity-70 hover:opacity-80 h-10 w-10 hover:bg-[var(--hover-color)]"
-            onClick={() => setSidebarInfo("default")}
+            onClick={() => setSidebarInfo(SidebarInfoMode.DEFAULT)}
             aria-label="Close editor"
           >
             <i className="material-symbols-outlined">close</i>
@@ -179,31 +192,36 @@ const GroupChatEdit = () => {
           </div>
         </form>
 
-        <div className="custom-border-t absolute bottom-0 w-full">
-          <button
-            className="flex gap-2 justify-center custom-border-b items-center p-2 text-[--primary-green] w-full font-medium"
-            onClick={handleOpenAddMemberModal}
-          >
-            <span className="material-symbols-outlined">person_add</span>
-            Add member
-          </button>
-          {activeMembers && activeMembers.length > 1 && (
+        <div className="custom-border absolute bottom-0 w-full overflow-hidden shadow-xl rounded-t-xl">
+          {(myMember.role === ChatMemberRole.ADMIN ||
+            myMember.role === ChatMemberRole.OWNER) && (
             <button
-              className="flex gap-2 justify-center items-center p-2 text-yellow-500 w-full font-medium"
-              onClick={handleOpenLeaveGroupModal}
+              className="flex gap-2 justify-center items-center p-2 text-[--primary-green] w-full font-medium custom-border-t"
+              onClick={handleOpenAddMemberModal}
             >
-              <span className="material-symbols-outlined">logout</span>
-              Leave {activeChat.type}
+              <span className="material-symbols-outlined">person_add</span>
+              Add Member
             </button>
           )}
 
-          <button
-            className="flex justify-center items-center p-2 text-red-500 w-full font-medium custom-border-t"
-            onClick={handleOpenDeleteChatModal}
-          >
-            <i className="material-symbols-outlined">delete</i>
-            Delete {activeChat.type}
-          </button>
+          {activeMembers && activeMembers.length > 1 && (
+            <button
+              className="flex gap-2 justify-center items-center p-2 text-yellow-500 w-full font-medium custom-border-t"
+              onClick={handleOpenLeaveChatModal}
+            >
+              <span className="material-symbols-outlined">logout</span>
+              Leave {chatTypeDisplay}
+            </button>
+          )}
+          {myMember.role === ChatMemberRole.OWNER && (
+            <button
+              className="flex justify-center items-center p-2 text-red-500 w-full font-medium custom-border-t"
+              onClick={handleOpenDeleteChatModal}
+            >
+              <i className="material-symbols-outlined">delete</i>
+              Delete {chatTypeDisplay}
+            </button>
+          )}
         </div>
       </div>
     </aside>

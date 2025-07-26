@@ -133,9 +133,6 @@ export class FriendshipService {
         request.senderStatus = FriendshipStatus.ACCEPTED;
         request.requestMessage = null;
 
-        request.updatedAt = new Date();
-        const updatedFriendship = await this.friendshipRepo.save(request);
-
         // 🔥 Delete all other friendships between these users (excluding the accepted one)
         await this.friendshipRepo.delete([
           {
@@ -150,11 +147,17 @@ export class FriendshipService {
           },
         ]);
 
-        return updatedFriendship;
+        const updatedFriendship = await this.friendshipRepo.save(request);
+        const freshFriendship = await this.friendshipRepo.findOne({
+          where: { id: updatedFriendship.id },
+          relations: ['sender', 'receiver'], // Include related users if needed
+        });
+
+        // console.log('freshFriendship', freshFriendship);
+        return freshFriendship;
       } else {
         // DECLINED
         request.receiverStatus = FriendshipStatus.DECLINED;
-        request.updatedAt = new Date();
         const updatedFriendship = await this.friendshipRepo.save(request);
 
         // Check for mutual decline (both users declined each other)
@@ -176,6 +179,7 @@ export class FriendshipService {
             message: 'Friendship data reset - both users declined each other',
           };
         }
+        console.log('Declined');
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { receiver, ...friendshipWithoutReceiver } = updatedFriendship;
@@ -349,32 +353,45 @@ export class FriendshipService {
     }
   }
 
-  async deleteFriendship(
+  async cancelFriendRequest(
     id: string,
     currentUserId: string,
-  ): Promise<Friendship> {
+  ): Promise<Friendship | null> {
     try {
-      // First, find the friendship by ID only
-      const friendship = await this.friendshipRepo.findOneBy({ id });
+      const friendship = await this.friendshipRepo.findOne({
+        where: { id },
+        select: [
+          'id',
+          'senderId',
+          'receiverId',
+          'senderStatus',
+          'receiverStatus',
+        ],
+      });
 
       if (!friendship) {
-        ErrorResponse.notFound('Friendship not found');
+        ErrorResponse.unauthorized('Friend request not found');
       }
 
-      // Then verify the current user is either sender or receiver
+      // Verify authorization
       if (
         friendship.senderId !== currentUserId &&
         friendship.receiverId !== currentUserId
       ) {
-        ErrorResponse.unauthorized(
-          'You are not authorized to delete this friendship',
-        );
+        ErrorResponse.unauthorized('Not authorized to cancel this request');
       }
 
-      await this.friendshipRepo.remove(friendship);
+      // Allow cancellation if EITHER side is pending
+      if (
+        friendship.senderStatus === FriendshipStatus.PENDING ||
+        friendship.receiverStatus === FriendshipStatus.PENDING
+      ) {
+        await this.friendshipRepo.remove(friendship);
+      }
+
       return friendship;
     } catch (error) {
-      ErrorResponse.throw(error, 'Failed to delete friendship');
+      ErrorResponse.throw(error, 'Failed to cancel friend request');
     }
   }
 

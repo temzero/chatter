@@ -44,14 +44,6 @@ export class ChatService {
       ErrorResponse.badRequest('One or more Users do not exist!');
     }
 
-    // const friendshipStatus = await this.friendshipService.getFriendshipStatus(
-    //   myUserId,
-    //   partnerId,
-    // );
-    // if (friendshipStatus === FriendshipStatus.BLOCKED) {
-    //   ErrorResponse.badRequest('Friendship Blocked');
-    // }
-
     const existingChat = await this.chatRepo
       .createQueryBuilder('chat')
       .innerJoin('chat.members', 'member1', 'member1.user_id = :user1', {
@@ -196,6 +188,35 @@ export class ChatService {
     );
   }
 
+  // async getUserChats(userId: string): Promise<ChatResponseDto[]> {
+  //   const chats = await this.buildFullChatQueryForUser(userId)
+  //     .orderBy('COALESCE(lastMessage.createdAt, chat.createdAt)', 'DESC')
+  //     .getMany();
+
+  //   const chatResults = await Promise.allSettled(
+  //     chats.map((chat) =>
+  //       chat.type === ChatType.DIRECT
+  //         ? this.chatMapper.transformToDirectChatDto(
+  //             chat,
+  //             userId,
+  //             this.messageService,
+  //           )
+  //         : this.chatMapper.transformToGroupChatDto(
+  //             chat,
+  //             userId,
+  //             this.messageService,
+  //           ),
+  //     ),
+  //   );
+
+  //   return chatResults
+  //     .filter(
+  //       (result): result is PromiseFulfilledResult<ChatResponseDto> =>
+  //         result.status === 'fulfilled',
+  //     )
+  //     .map((result) => result.value);
+  // }
+
   async getUserChat(chatId: string, userId: string): Promise<ChatResponseDto> {
     const chat = await this.buildFullChatQueryForUser(userId)
       .andWhere('chat.id = :chatId', { chatId })
@@ -290,9 +311,12 @@ export class ChatService {
   private buildFullChatQueryForUser(userId: string) {
     return this.chatRepo
       .createQueryBuilder('chat')
-      .innerJoin('chat.members', 'myMember', 'myMember.user_id = :userId', {
-        userId,
-      })
+      .innerJoin(
+        'chat.members',
+        'myMember',
+        'myMember.user_id = :userId AND myMember.deleted_at IS NULL',
+        { userId },
+      )
       .addSelect('myMember.muted_until', 'myMember_muted_until')
       .leftJoinAndSelect('chat.members', 'member')
       .leftJoinAndSelect('member.user', 'memberUser')

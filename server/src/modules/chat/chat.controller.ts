@@ -104,46 +104,6 @@ export class ChatController {
     }
   }
 
-  // @Post('direct')
-  // async getOrCreateDirectChat(
-  //   @Body() createDirectChatDto: CreateDirectChatDto,
-  //   @CurrentUser('id') userId: string,
-  // ): Promise<GetOrCreateResponse<ChatResponseDto>> {
-  //   try {
-  //     // Check if either user has blocked the other
-  //     const isBlocked = await this.chatService.checkIfBlocked(
-  //       userId,
-  //       createDirectChatDto.partnerId,
-  //     );
-
-  //     if (isBlocked) {
-  //       ErrorResponse.throw(
-  //         'Cannot create or access chat with blocked user',
-  //         HttpStatus.FORBIDDEN,
-  //       );
-  //     }
-
-  //     const result = await this.chatService.getOrCreateDirectChat(
-  //       userId,
-  //       createDirectChatDto.partnerId,
-  //     );
-
-  //     return new GetOrCreateResponse(
-  //       plainToInstance(ChatResponseDto, result.chat),
-  //       result.wasExisting,
-  //       result.wasExisting
-  //         ? 'Direct chat already created — retrieved successfully'
-  //         : 'Direct chat created successfully',
-  //     );
-  //   } catch (error: unknown) {
-  //     ErrorResponse.throw(
-  //       error,
-  //       'Failed to process direct chat request',
-  //       HttpStatus.BAD_REQUEST,
-  //     );
-  //   }
-  // }
-
   @Post('group')
   async createGroupChat(
     @CurrentUser('id') userId: string,

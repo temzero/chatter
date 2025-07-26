@@ -14,7 +14,7 @@ import UnblockUserModal from "./UnblockUserModal";
 import MuteChatModal from "./MuteChatModal";
 import DeleteChatModal from "./DeleteChatModal";
 import UnfriendModal from "./UnfriendModal";
-import LeaveGroupModal from "./LeaveGroupModal";
+import LeaveChatModal from "./LeaveChatModal";
 import AddMemberModal from "./AddMemberModal";
 
 const Modal = () => {
@@ -68,8 +68,8 @@ const Modal = () => {
         return <DeleteChatModal />;
       case ModalType.UNFRIEND:
         return <UnfriendModal />;
-      case ModalType.LEAVE_GROUP:
-        return <LeaveGroupModal />;
+      case ModalType.LEAVE_CHAT:
+        return <LeaveChatModal />;
       case ModalType.ADD_MEMBER:
         return <AddMemberModal />;
       default:

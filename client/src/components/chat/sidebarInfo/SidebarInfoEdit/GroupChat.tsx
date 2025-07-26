@@ -9,6 +9,7 @@ import { useActiveMembers } from "@/stores/chatMemberStore";
 import { useMessageStore } from "@/stores/messageStore";
 import { useMuteControl } from "@/hooks/useMuteControl";
 import { SidebarInfoHeaderIcons } from "@/components/ui/SidebarInfoHeaderIcons";
+import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
 
 const GroupChat: React.FC = () => {
   const activeChat = useActiveChat() as ChatResponse;
@@ -42,7 +43,7 @@ const GroupChat: React.FC = () => {
           {
             icon: "edit",
             title: "Edit",
-            action: () => setSidebarInfo("groupEdit"),
+            action: () => setSidebarInfo(SidebarInfoMode.GROUP_EDIT),
           },
         ]
       : []),

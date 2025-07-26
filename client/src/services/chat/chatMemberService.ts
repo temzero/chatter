@@ -101,10 +101,13 @@ export const chatMemberService = {
   },
 
   // Remove member using chatId and userId
-  async removeMember(chatId: string, userId: string): Promise<ChatMember> {
-    const response = await API.delete<ApiSuccessResponse<ChatMember>>(
-      `/chat-members/${chatId}/${userId}`
-    );
+  async softDeleteMember(
+    chatId: string,
+    userId: string
+  ): Promise<{ chatDeleted: boolean }> {
+    const response = await API.delete<
+      ApiSuccessResponse<{ chatDeleted: boolean }>
+    >(`/chat-members/soft-delete/${chatId}/${userId}`);
     return response.data.payload;
   },
 };

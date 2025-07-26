@@ -5,6 +5,7 @@ import { Avatar } from "../ui/avatar/Avatar";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import { motion } from "framer-motion";
 import { childrenModalAnimation } from "@/animations/modalAnimations";
+import { useCurrentUserId } from "@/stores/authStore";
 
 interface FriendRequestModalProps {
   receiver: {
@@ -19,6 +20,7 @@ interface FriendRequestModalProps {
 const FriendRequestModal: React.FC = () => {
   const modalContent = useModalStore((state) => state.modalContent);
   const props = modalContent?.props as FriendRequestModalProps | undefined;
+  const currentUserId = useCurrentUserId();
 
   const sendFriendRequest = useFriendshipStore.getState().sendFriendRequest;
   const closeModal = useModalStore.getState().closeModal;
@@ -33,7 +35,12 @@ const FriendRequestModal: React.FC = () => {
   const handleFriendRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     closeModal();
-    await sendFriendRequest(receiver.id, receiver.firstName, requestMessage);
+    await sendFriendRequest(
+      currentUserId,
+      receiver.id,
+      receiver.firstName,
+      requestMessage
+    );
   };
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

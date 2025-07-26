@@ -16,6 +16,7 @@ type FriendshipState = {
 
 type FriendshipActions = {
   sendFriendRequest: (
+    currentUserId: string,
     receiverId: string,
     receiverName: string,
     message?: string
@@ -23,10 +24,11 @@ type FriendshipActions = {
   fetchPendingRequests: () => Promise<void>;
   respondToRequest: (
     friendshipId: string,
+    userId: string,
     status: FriendshipStatus
   ) => Promise<FriendshipUpdateNotification>;
   addPendingRequest: (request: FriendRequestResponse) => void;
-  removeRequest: (friendshipId: string, userId?: string) => Promise<void>;
+  cancelRequest: (friendshipId: string, userId?: string) => Promise<void>;
   removeRequestLocally: (friendshipId?: string, senderId?: string) => void;
   deleteFriendship: (userId: string) => Promise<void>;
   clearRequests: () => void;
@@ -37,9 +39,17 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
     pendingRequests: [],
     isLoading: false,
 
-    sendFriendRequest: async (receiverId, receiverName, message) => {
+    sendFriendRequest: async (
+      currentUserId,
+      receiverId,
+      receiverName,
+      message
+    ) => {
       set({ isLoading: true });
       try {
+        useChatMemberStore
+          .getState()
+          .updateFriendshipStatus(currentUserId, FriendshipStatus.ACCEPTED);
         useChatMemberStore
           .getState()
           .updateFriendshipStatus(receiverId, FriendshipStatus.PENDING);
@@ -72,16 +82,16 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
       }
     },
 
-    respondToRequest: async (friendshipId, status) => {
+    respondToRequest: async (friendshipId, userId, status) => {
       set({ isLoading: true });
       try {
         const friendship = await friendshipService.respondToRequest(
           friendshipId,
           status
         );
-        useChatMemberStore
-          .getState()
-          .updateFriendshipStatus(friendship.userId, status);
+
+        console.log("friendship", friendship);
+        useChatMemberStore.getState().updateFriendshipStatus(userId, status);
 
         return friendship;
       } catch (error) {
@@ -108,13 +118,10 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
       });
     },
 
-    removeRequest: async (friendshipId, userId) => {
+    cancelRequest: async (friendshipId, userId) => {
       set({ isLoading: true });
       try {
-        if (userId) {
-          useChatMemberStore.getState().updateFriendshipStatus(userId, null);
-        }
-        await friendshipService.deleteRequest(friendshipId, userId);
+        await friendshipService.cancelRequest(friendshipId, userId);
         set((state) => ({
           pendingRequests: state.pendingRequests.filter(
             (req) => req.id !== friendshipId
@@ -122,9 +129,13 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
           isLoading: false,
         }));
       } catch (error) {
-        console.error("Failed to remove friend request:", error);
         set({ isLoading: false });
+        handleError(error, "Failed to cancel friend request");
         throw error;
+      } finally {
+        if (userId) {
+          useChatMemberStore.getState().updateFriendshipStatus(userId, null);
+        }
       }
     },
 

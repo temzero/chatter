@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 
 import { ChatMember } from './entities/chat-member.entity';
 import { ChatMemberRole } from './constants/chat-member-roles.constants';
@@ -375,6 +375,60 @@ export class ChatMemberService {
       return nickname;
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to update nickname');
+    }
+  }
+
+  async softDeleteMember(
+    chatId: string,
+    userId: string,
+  ): Promise<{ member: ChatMember; chatDeleted: boolean }> {
+    try {
+      // Find the member (only non-deleted ones)
+      const member = await this.memberRepo.findOne({
+        where: { chatId, userId, deletedAt: IsNull() },
+      });
+
+      if (!member) {
+        ErrorResponse.notFound('Chat member not found');
+      }
+
+      // Soft delete by setting deletedAt
+      member.deletedAt = new Date();
+      await this.memberRepo.save(member);
+
+      // Count only non-deleted members
+      const activeMembers = await this.memberRepo.count({
+        where: { chatId, deletedAt: IsNull() },
+      });
+
+      let chatDeleted = false;
+
+      // If no active members, permanently delete the chat
+      if (activeMembers === 0) {
+        await this.chatRepo.delete(chatId);
+        chatDeleted = true;
+      }
+
+      return { member, chatDeleted };
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to soft delete chat member');
+    }
+  }
+
+  async restoreMember(
+    chatId: string,
+    userId: string,
+  ): Promise<ChatMember | null> {
+    try {
+      const result = await this.memberRepo.restore({ chatId, userId });
+
+      if (result.affected === 0) {
+        ErrorResponse.notFound('Chat member not found or already active');
+      }
+
+      return await this.memberRepo.findOne({ where: { chatId, userId } });
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to restore chat member');
     }
   }
 

@@ -2,21 +2,18 @@ import React from "react";
 import { useModalStore } from "@/stores/modalStore";
 import { motion } from "framer-motion";
 import { childrenModalAnimation } from "@/animations/modalAnimations";
-import { DirectChatMember } from "@/types/responses/chatMember.response";
 import { ChatResponse } from "@/types/responses/chat.response";
-import { Avatar } from "../ui/avatar/Avatar";
+import { DirectChatMember } from "@/types/responses/chatMember.response";
 import { toast } from "react-toastify";
 import { useChatStore } from "@/stores/chatStore";
 import { ChatAvatar } from "../ui/avatar/ChatAvatar";
+import { Avatar } from "../ui/avatar/Avatar";
 import { ChatType } from "@/types/enums/ChatType";
-import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
-import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
 
-const DeleteChatModal: React.FC = () => {
+const LeaveChatModal: React.FC = () => {
   const closeModal = useModalStore((state) => state.closeModal);
   const modalContent = useModalStore((state) => state.modalContent);
-  const deleteChat = useChatStore((state) => state.deleteChat);
-  const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
+  const leaveChat = useChatStore((state) => state.leaveChat);
 
   const chat = modalContent?.props?.chat as ChatResponse;
   const chatPartner = modalContent?.props?.chatPartner as DirectChatMember;
@@ -27,15 +24,13 @@ const DeleteChatModal: React.FC = () => {
   const capitalizedChatType =
     chat.type.charAt(0).toUpperCase() + chat.type.slice(1);
 
-  const handleDeleteChat = async () => {
+  const handleLeaveChat = async () => {
     try {
-      closeModal();
-      setSidebarInfo(SidebarInfoMode.DEFAULT);
-      await deleteChat(chat.id, chat.type);
-      toast.success("Chat deleted successfully");
+      await leaveChat(chat.id);
+      toast.success("You have left the chat");
     } catch (error) {
-      console.error("Failed to delete chat:", error);
-      toast.error("Failed to delete chat");
+      console.error("Failed to leave chat:", error);
+      toast.error("Failed to leave chat");
     } finally {
       closeModal();
     }
@@ -47,12 +42,12 @@ const DeleteChatModal: React.FC = () => {
       className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border z-[99]"
     >
       <div className="p-4">
-        <div className="flex gap-2 items-center mb-4 text-red-500 font-semibold">
+        <div className="flex gap-2 items-center mb-4 text-yellow-500 font-semibold">
           <span className="material-symbols-outlined text-3xl font-bold">
-            delete
+            logout
           </span>
           <h2 className="text-2xl">
-            {isDirectChat ? "Delete Chat" : `Delete ${capitalizedChatType}`}
+            {isDirectChat ? "Leave Chat" : `Leave ${capitalizedChatType}`}
           </h2>
         </div>
 
@@ -80,28 +75,18 @@ const DeleteChatModal: React.FC = () => {
         </div>
 
         <p className="mb-6 text-sm opacity-70">
-          {isDirectChat ? (
-            <>
-              Are you sure you want to delete this chat? <br />
-              This action is permanent, you and{" "}
-              {chatPartner.nickname || chatPartner.firstName} won’t be able to
-              access it again.
-            </>
-          ) : (
-            <>
-              Are you sure you want to delete this {chat.type}? <br />
-              This will permanently remove the conversation for all members.
-            </>
-          )}
+          {isDirectChat
+            ? "Are you sure you want to leave this chat? You won’t be able to access it again."
+            : `Are you sure you want to leave this ${chat.type}? You’ll no longer receive messages from it.`}
         </p>
       </div>
 
       <div className="flex custom-border-t">
         <button
-          className="p-3 text-red-500 hover:bg-[var(--background-secondary)] font-semibold hover:font-bold opacity-80 hover:opacity-100 flex-1"
-          onClick={handleDeleteChat}
+          className="p-3 text-yellow-500 hover:bg-[var(--background-secondary)] font-semibold hover:font-bold opacity-80 hover:opacity-100 flex-1"
+          onClick={handleLeaveChat}
         >
-          Delete
+          Leave
         </button>
         <button
           className="p-3 hover:bg-[var(--background-secondary)] font-semibold hover:font-bold opacity-80 hover:opacity-100 flex-1"
@@ -114,4 +99,4 @@ const DeleteChatModal: React.FC = () => {
   );
 };
 
-export default DeleteChatModal;
+export default LeaveChatModal;

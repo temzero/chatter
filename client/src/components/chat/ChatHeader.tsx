@@ -78,6 +78,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
         >
           <ChatAvatar chat={chat} type="header" isBlocked={isBlockedByMe} />
           <h1 className="text-xl font-medium">{chat.name}</h1>
+          {chat.isDeleted && <h1 className="text-red-500">Has left this chat</h1>}
         </motion.div>
       </AnimatePresence>
 

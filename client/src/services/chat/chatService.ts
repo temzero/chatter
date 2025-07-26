@@ -39,18 +39,10 @@ export const chatService = {
     }
   },
 
-  // Delete a chat by ID
-  async deleteChat(chatId: string, type?: string): Promise<string> {
-    if (type && type === "group") {
-      const response = await API.delete<ApiSuccessResponse<string>>(
-        `/chat-group/${chatId}`
-      );
-      return response.data.payload; // This returns the deleted chat's ID
-    } else {
-      const response = await API.delete<ApiSuccessResponse<string>>(
-        `/chat/${chatId}`
-      );
-      return response.data.payload; // This returns the deleted chat's ID
-    }
+  async deleteChat(chatId: string): Promise<string> {
+    const response = await API.delete<ApiSuccessResponse<string>>(
+      `/chat-group/${chatId}`
+    );
+    return response.data.payload;
   },
 };

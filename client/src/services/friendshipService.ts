@@ -67,14 +67,16 @@ export const friendshipService = {
    * delete to a friend request by friendship ID
    * @param friendshipId - Friend request ID
    */
-  async deleteRequest(friendshipId: string, userId?: string): Promise<FriendshipResponse> {
-    const { data } = await API.delete(`/friendships/${friendshipId}/${userId}`);
+  async cancelRequest(
+    friendshipId: string,
+    userId?: string
+  ): Promise<FriendshipResponse> {
+    const { data } = await API.delete(`/friendships/cancel/${friendshipId}/${userId}`);
     return data.payload;
   },
 
   async deleteByUserId(userId: string): Promise<FriendshipResponse> {
     const { data } = await API.delete(`/friendships/by-userid/${userId}`);
-    console.log("deleted: ", data);
     return data.payload;
   },
 };
