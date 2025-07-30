@@ -10,6 +10,7 @@ import { useMessageStore } from "@/stores/messageStore";
 import { useMuteControl } from "@/hooks/useMuteControl";
 import { SidebarInfoHeaderIcons } from "@/components/ui/SidebarInfoHeaderIcons";
 import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
+import { ModalType, useModalStore } from "@/stores/modalStore";
 
 const GroupChat: React.FC = () => {
   const activeChat = useActiveChat() as ChatResponse;
@@ -18,6 +19,7 @@ const GroupChat: React.FC = () => {
   const setDisplaySearchMessage = useMessageStore(
     (state) => state.setDisplaySearchMessage
   );
+  const openModal = useModalStore((state) => state.openModal);
   const { mute, unmute } = useMuteControl(activeChat.id, activeChat.myMemberId);
 
   // Header buttons specific to group chat
@@ -46,7 +48,13 @@ const GroupChat: React.FC = () => {
             action: () => setSidebarInfo(SidebarInfoMode.GROUP_EDIT),
           },
         ]
-      : []),
+      : [
+          {
+            icon: "logout",
+            title: "Leave",
+            action: () => openModal(ModalType.LEAVE_CHAT, { chat: activeChat }),
+          },
+        ]),
   ];
 
   // Conditionally add mute/unmute buttons at the beginning

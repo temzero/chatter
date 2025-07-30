@@ -28,6 +28,50 @@ export class ChatService {
     private readonly chatMapper: ChatMapper,
   ) {}
 
+  // async getOrCreateDirectChat(
+  //   myUserId: string,
+  //   partnerId: string,
+  // ): Promise<{ chat: ChatResponseDto; wasExisting: boolean }> {
+  //   if (!myUserId || !partnerId) {
+  //     ErrorResponse.badRequest('Missing userId');
+  //   }
+
+  //   const memberUserIds = [myUserId, partnerId];
+  //   const userCount = await this.userRepo.count({
+  //     where: { id: In(memberUserIds) },
+  //   });
+  //   if (userCount !== memberUserIds.length) {
+  //     ErrorResponse.badRequest('One or more Users do not exist!');
+  //   }
+
+  //   const existingChat = await this.chatRepo
+  //     .createQueryBuilder('chat')
+  //     .innerJoin('chat.members', 'member1', 'member1.user_id = :user1', {
+  //       user1: myUserId,
+  //     })
+  //     .innerJoin('chat.members', 'member2', 'member2.user_id = :user2', {
+  //       user2: partnerId,
+  //     })
+  //     .where('chat.type = :type', { type: ChatType.DIRECT })
+  //     .getOne();
+
+  //   if (existingChat) {
+  //     return {
+  //       chat: await this.getUserChat(existingChat.id, myUserId),
+  //       wasExisting: true,
+  //     };
+  //   }
+
+  //   const chat = await this.chatRepo.save({
+  //     type: ChatType.DIRECT,
+  //     name: null,
+  //   });
+  //   await this.addMembers(chat.id, memberUserIds);
+  //   return {
+  //     chat: await this.getUserChat(chat.id, myUserId),
+  //     wasExisting: false,
+  //   };
+  // }
   async getOrCreateDirectChat(
     myUserId: string,
     partnerId: string,
@@ -44,6 +88,7 @@ export class ChatService {
       ErrorResponse.badRequest('One or more Users do not exist!');
     }
 
+    // Modified query to check for active or soft-deleted chats
     const existingChat = await this.chatRepo
       .createQueryBuilder('chat')
       .innerJoin('chat.members', 'member1', 'member1.user_id = :user1', {
@@ -53,6 +98,9 @@ export class ChatService {
         user2: partnerId,
       })
       .where('chat.type = :type', { type: ChatType.DIRECT })
+      // Only consider chats where both members are active (not soft-deleted)
+      .andWhere('member1.deleted_at IS NULL')
+      .andWhere('member2.deleted_at IS NULL')
       .getOne();
 
     if (existingChat) {
@@ -62,6 +110,7 @@ export class ChatService {
       };
     }
 
+    // Create new chat if no active chat exists
     const chat = await this.chatRepo.save({
       type: ChatType.DIRECT,
       name: null,
@@ -187,35 +236,6 @@ export class ChatService {
       ),
     );
   }
-
-  // async getUserChats(userId: string): Promise<ChatResponseDto[]> {
-  //   const chats = await this.buildFullChatQueryForUser(userId)
-  //     .orderBy('COALESCE(lastMessage.createdAt, chat.createdAt)', 'DESC')
-  //     .getMany();
-
-  //   const chatResults = await Promise.allSettled(
-  //     chats.map((chat) =>
-  //       chat.type === ChatType.DIRECT
-  //         ? this.chatMapper.transformToDirectChatDto(
-  //             chat,
-  //             userId,
-  //             this.messageService,
-  //           )
-  //         : this.chatMapper.transformToGroupChatDto(
-  //             chat,
-  //             userId,
-  //             this.messageService,
-  //           ),
-  //     ),
-  //   );
-
-  //   return chatResults
-  //     .filter(
-  //       (result): result is PromiseFulfilledResult<ChatResponseDto> =>
-  //         result.status === 'fulfilled',
-  //     )
-  //     .map((result) => result.value);
-  // }
 
   async getUserChat(chatId: string, userId: string): Promise<ChatResponseDto> {
     const chat = await this.buildFullChatQueryForUser(userId)

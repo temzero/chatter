@@ -24,7 +24,7 @@ export class WebSocketService {
       });
 
       this.socket.on("connect", () => {
-        // console.log("Connected to WebSocket, socketId: ", this.socket?.id);
+        console.log("Connected to WebSocket, socketId: ", this.socket?.id);
         resolve(this.socket as Socket);
       });
 
@@ -48,6 +48,7 @@ export class WebSocketService {
       this.socket.disconnect();
       this.socket = null;
       this.connectionPromise = null;
+      console.log("[WS] 🔌 disconnected ");
     }
   }
 

@@ -13,14 +13,12 @@ import {
 
 export function useNotificationSocketListeners() {
   const currentUserId = useCurrentUserId();
-  const friendshipStore = useFriendshipStore();
-  const chatMemberStore = useChatMemberStore();
 
   useEffect(() => {
     const handleNewFriendRequest = (request: FriendRequestResponse) => {
       const isReceiver = request.receiver.id === currentUserId;
       if (!isReceiver) return;
-      friendshipStore.addPendingRequest(request);
+      useFriendshipStore.getState().addPendingRequest(request);
       toast.info(`New friend request from ${request.sender.name}`);
     };
 
@@ -32,8 +30,8 @@ export function useNotificationSocketListeners() {
       }
 
       // 3. Only process if we're the affected party
-      chatMemberStore.updateFriendshipStatus(data.userId, data.status);
-      friendshipStore.removeRequestLocally(data.friendshipId);
+      useChatMemberStore.getState().updateFriendshipStatus(data.userId, data.status);
+      useFriendshipStore.getState().removeRequestLocally(data.friendshipId);
 
       // 4. Show notification with correct context
       if (data.status === FriendshipStatus.ACCEPTED) {
@@ -50,7 +48,7 @@ export function useNotificationSocketListeners() {
       friendshipId: string;
       senderId: string;
     }) => {
-      friendshipStore.removeRequestLocally(friendshipId, senderId);
+      useFriendshipStore.getState().removeRequestLocally(friendshipId, senderId);
     };
 
     // Subscribe to events
@@ -68,5 +66,5 @@ export function useNotificationSocketListeners() {
         handleCancelFriendRequest
       );
     };
-  }, [chatMemberStore, currentUserId, friendshipStore]);
+  }, [currentUserId]);
 }

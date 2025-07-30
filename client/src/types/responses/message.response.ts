@@ -2,6 +2,7 @@
 import { MessageStatus } from "../enums/message";
 import { MessageType } from "../enums/message";
 import { AttachmentType } from "../enums/attachmentType";
+import { SystemEventType } from "../enums/systemEventType";
 
 export interface MessageResponse {
   id: string;
@@ -19,8 +20,9 @@ export interface MessageResponse {
 
   forwardedFromMessageId?: string | null;
   forwardedFromMessage: MessageResponse | null;
-  
+
   isImportant?: boolean;
+  systemEvent?: SystemEventType | null;
   editedAt?: string | null;
   isDeleted: boolean;
   deletedAt?: string | null;
@@ -40,6 +42,7 @@ export interface LastMessageResponse {
   content?: string;
   icons?: string[];
   isForwarded?: boolean;
+  systemEvent?: SystemEventType | null;
   createdAt: string;
 }
 

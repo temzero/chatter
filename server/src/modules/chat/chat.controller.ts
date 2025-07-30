@@ -26,11 +26,17 @@ import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { ErrorResponse } from 'src/common/api-response/errors';
 import { ChatResponseDto } from './dto/responses/chat-response.dto';
 import { ChatType } from './constants/chat-types.constants';
+import { SystemEventType } from '../message/constants/system-event-type.constants';
+import { MessageService } from '../message/message.service';
+import { MessageResponseDto } from '../message/dto/responses/message-response.dto';
 
 @Controller('chat')
 @UseGuards(JwtAuthGuard)
 export class ChatController {
-  constructor(private readonly chatService: ChatService) {}
+  constructor(
+    private readonly chatService: ChatService,
+    private readonly messageService: MessageService,
+  ) {}
 
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -157,21 +163,114 @@ export class ChatController {
         }
       }
 
+      // 🔍 Check what's changed before update
+      const nameChanged =
+        updateChatDto.name !== undefined && updateChatDto.name !== chat.name;
+      const avatarChanged =
+        updateChatDto.avatarUrl !== undefined &&
+        updateChatDto.avatarUrl !== chat.avatarUrl;
+      const descriptionChanged =
+        updateChatDto.description !== undefined &&
+        updateChatDto.description !== chat.description;
+
+      // ✅ Update the chat
       const updatedChat = await this.chatService.updateChat(
         chat,
         updateChatDto,
       );
 
-      const responseData =
-        updatedChat.type === ChatType.DIRECT
-          ? plainToInstance(ChatResponseDto, updatedChat)
-          : plainToInstance(ChatResponseDto, updatedChat);
+      // ✅ Explicitly typed array to store message creation promises
+      const createSystemMessages: Promise<MessageResponseDto>[] = [];
 
+      if (nameChanged) {
+        createSystemMessages.push(
+          this.messageService.createSystemEventMessage(
+            chatId,
+            userId,
+            SystemEventType.CHAT_RENAMED,
+            updateChatDto.name,
+          ),
+        );
+      }
+
+      if (avatarChanged && updateChatDto.avatarUrl) {
+        createSystemMessages.push(
+          this.messageService.createSystemEventMessage(
+            chatId,
+            userId,
+            SystemEventType.CHAT_UPDATE_AVATAR,
+            updateChatDto.avatarUrl,
+          ),
+        );
+      }
+
+      if (descriptionChanged && updateChatDto.description) {
+        createSystemMessages.push(
+          this.messageService.createSystemEventMessage(
+            chatId,
+            userId,
+            SystemEventType.CHAT_UPDATE_DESCRIPTION,
+            updateChatDto.description,
+          ),
+        );
+      }
+
+      // 🔔 Emit all system messages concurrently
+      if (createSystemMessages.length > 0) {
+        await Promise.all(createSystemMessages);
+      }
+
+      const responseData = plainToInstance(ChatResponseDto, updatedChat);
       return new SuccessResponse(responseData, 'Chat updated successfully');
     } catch (error: unknown) {
       ErrorResponse.throw(error, 'Failed to update chat');
     }
   }
+
+  // @Put(':chatId')
+  // async update(
+  //   @CurrentUser('id') userId: string,
+  //   @Param('chatId') chatId: string,
+  //   @Body() updateChatDto: UpdateChatDto,
+  // ): Promise<SuccessResponse<ChatResponseDto>> {
+  //   try {
+  //     const chat = await this.chatService.getChatById(chatId, userId);
+
+  //     if (chat.type === ChatType.DIRECT) {
+  //       const isParticipant = await this.chatService.isChatParticipant(
+  //         chatId,
+  //         userId,
+  //       );
+  //       if (!isParticipant) {
+  //         ErrorResponse.unauthorized('Unauthorized to update chat');
+  //       }
+  //     } else {
+  //       const isAdminOrOwner = await this.chatService.isAdminOrOwner(
+  //         chatId,
+  //         userId,
+  //       );
+  //       if (!isAdminOrOwner) {
+  //         ErrorResponse.unauthorized(
+  //           'User must be Admin or Owner to update chat',
+  //         );
+  //       }
+  //     }
+
+  //     const updatedChat = await this.chatService.updateChat(
+  //       chat,
+  //       updateChatDto,
+  //     );
+
+  //     const responseData =
+  //       updatedChat.type === ChatType.DIRECT
+  //         ? plainToInstance(ChatResponseDto, updatedChat)
+  //         : plainToInstance(ChatResponseDto, updatedChat);
+
+  //     return new SuccessResponse(responseData, 'Chat updated successfully');
+  //   } catch (error: unknown) {
+  //     ErrorResponse.throw(error, 'Failed to update chat');
+  //   }
+  // }
 
   @Put(':chatId/pin/:messageId')
   async pinMessage(

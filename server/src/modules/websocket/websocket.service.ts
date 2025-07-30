@@ -118,9 +118,29 @@ export class WebsocketService {
   }
 
   // Helper Methods
+  // getUserSocketIds(userId: string): string[] {
+  //   const sockets = this.userSocketMap.get(userId);
+  //   return sockets ? Array.from(sockets) : [];
+  // }
+
   getUserSocketIds(userId: string): string[] {
     const sockets = this.userSocketMap.get(userId);
-    return sockets ? Array.from(sockets) : [];
+    if (!sockets) return [];
+
+    // Verify each socket still exists
+    const validSockets = Array.from(sockets).filter((socketId) =>
+      this.server?.sockets?.sockets?.has(socketId),
+    );
+
+    // Clean up invalid sockets
+    if (validSockets.length !== sockets.size) {
+      this.userSocketMap.set(userId, new Set(validSockets));
+      console.warn(
+        `[WS Cleanup] Removed ${sockets.size - validSockets.length} stale sockets for ${userId}`,
+      );
+    }
+
+    return validSockets;
   }
 
   async emitToChatMembers(
@@ -132,23 +152,30 @@ export class WebsocketService {
       excludeSender?: boolean;
     } = {},
   ) {
+    console.log(`🔔 Emitting event '${event}' to chat '${chatId}'`);
     const members =
       await this.chatMemberService.getMemberUserIdsAndMuteStatus(chatId);
+    console.log('👥 Members to notify:', members);
 
     const blockedUserIds = options.senderId
       ? await this.blockService.getBlockedUserIds(options.senderId)
       : [];
+    console.log('⛔ Blocked userIds:', blockedUserIds);
 
     for (const { userId, isMuted } of members) {
+      console.log(`➡️ Checking member: ${userId}, muted: ${isMuted}`);
+
       if (
         options.excludeSender &&
         options.senderId &&
         userId === options.senderId
       ) {
+        console.log(`🚫 Skipping sender (excludeSender = true): ${userId}`);
         continue;
       }
 
       if (options.senderId && blockedUserIds.includes(userId)) {
+        console.log(`🚫 Skipping blocked user: ${userId}`);
         continue;
       }
 
@@ -161,14 +188,21 @@ export class WebsocketService {
         },
       };
 
-      // ✅ Reuse emitToUser
+      console.log(`📤 Emitting to user ${userId}:`, {
+        event,
+        payload: enhancedPayload,
+      });
+
       this.emitToUser(userId, event, enhancedPayload);
     }
   }
 
   emitToUser(userId: string, event: string, payload: any) {
     const socketIds = this.getUserSocketIds(userId);
+    console.log(`🔌 Emitting to user ${userId} via sockets:`, socketIds);
+
     for (const socketId of socketIds) {
+      console.log(`📡 Sending to socket ${socketId}`);
       this.server.to(socketId).emit(event, payload);
     }
   }

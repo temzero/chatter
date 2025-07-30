@@ -27,38 +27,40 @@ const ChatContent = React.memo(() => {
     <section className="relative flex-1 flex flex-col justify-between h-full overflow-hidden">
       <ChatHeader chat={activeChat} isBlockedByMe={isBlockedByMe} />
       <ChatBox chat={activeChat} />
-      <AnimatePresence>
-        {!isBlocked && !activeChat.isDeleted ? (
-          !(
-            activeChat.type === "channel" &&
-            activeChat.myRole !== ChatMemberRole.OWNER
-          ) && (
-            <motion.div
-              initial={{ height: 0 }}
-              animate={{ height: "auto" }}
-              exit={{ height: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <ChatBar
-                chatId={activeChat.id}
-                myMemberId={activeChat.myMemberId}
-              />
-            </motion.div>
-          )
-        ) : (
-          <div className="absolute bottom-0 left-0 backdrop-blur-xl w-full flex flex-col items-center p-4 justify-between shadow border-[var(--border-color)]">
-            <h1 className="text-red-500 font-semibold">
-              {isBlockedByMe &&
-                isBlockedMe &&
-                "You and this user have blocked each other."}
-              {!isBlockedByMe &&
-                isBlockedMe &&
-                "You have been blocked by this user."}
-              {isBlockedByMe && !isBlockedMe && "You have blocked this user."}
-            </h1>
-          </div>
-        )}
-      </AnimatePresence>
+      {!activeChat.isDeleted && (
+        <AnimatePresence>
+          {!isBlocked ? (
+            !(
+              activeChat.type === "channel" &&
+              activeChat.myRole !== ChatMemberRole.OWNER
+            ) && (
+              <motion.div
+                initial={{ height: 0 }}
+                animate={{ height: "auto" }}
+                exit={{ height: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChatBar
+                  chatId={activeChat.id}
+                  myMemberId={activeChat.myMemberId}
+                />
+              </motion.div>
+            )
+          ) : (
+            <div className="absolute bottom-0 left-0 backdrop-blur-xl w-full flex flex-col items-center p-4 justify-between shadow border-[var(--border-color)]">
+              <h1 className="text-red-500 font-semibold">
+                {isBlockedByMe &&
+                  isBlockedMe &&
+                  "You and this user have blocked each other."}
+                {!isBlockedByMe &&
+                  isBlockedMe &&
+                  "You have been blocked by this user."}
+                {isBlockedByMe && !isBlockedMe && "You have blocked this user."}
+              </h1>
+            </div>
+          )}
+        </AnimatePresence>
+      )}
     </section>
   );
 });

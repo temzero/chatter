@@ -1,4 +1,4 @@
-import { ChatMemberRole } from "../enums/ChatMemberRole";
+import { ChatMemberRole } from "../enums/chatMemberRole";
 import { ChatType } from "../enums/ChatType";
 import { LastMessageResponse, MessageResponse } from "./message.response";
 

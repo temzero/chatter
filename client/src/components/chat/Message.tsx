@@ -21,6 +21,7 @@ import {
 } from "@/stores/modalStore";
 import { MessageStatus } from "@/types/enums/message";
 import { BeatLoader } from "react-spinners";
+import SystemMessage from "./SystemMessage";
 
 const MessageContent = ({
   content,
@@ -105,6 +106,22 @@ const Message: React.FC<MessageProps> = ({
   //   e.stopPropagation();
   //   closeModal();
   // };
+
+  // Check if the message is a system message
+  const isSystemMessage = !!message.systemEvent;
+
+  if (isSystemMessage) {
+    return (
+      <div className="p-1 w-full flex items-center justify-center">
+        <SystemMessage
+          systemEvent={message.systemEvent}
+          senderId={message.sender.id}
+          senderDisplayName={message.sender.displayName}
+          content={message.content}
+        />
+      </div>
+    );
+  }
 
   return (
     <motion.div

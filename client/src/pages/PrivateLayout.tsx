@@ -43,10 +43,6 @@ export const ChatContent: React.FC = () => {
 
   const { initialize: initializePresence } = usePresenceStore();
 
-  useWebSocket();
-  useNotificationSocketListeners();
-  useChatSocketListeners();
-
   useEffect(() => {
     const initialize = async () => {
       try {
@@ -108,6 +104,10 @@ export const ChatContent: React.FC = () => {
 
 const PrivateLayout: React.FC = () => {
   const isAuthenticated = useIsAuthenticated();
+
+  useWebSocket();
+  useNotificationSocketListeners();
+  useChatSocketListeners();
 
   if (!isAuthenticated) {
     return <Navigate to={ROUTES.PUBLIC.LOGIN} replace />;

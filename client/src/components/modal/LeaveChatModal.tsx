@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { childrenModalAnimation } from "@/animations/modalAnimations";
 import { ChatResponse } from "@/types/responses/chat.response";
 import { DirectChatMember } from "@/types/responses/chatMember.response";
-import { toast } from "react-toastify";
 import { useChatStore } from "@/stores/chatStore";
 import { ChatAvatar } from "../ui/avatar/ChatAvatar";
 import { Avatar } from "../ui/avatar/Avatar";
@@ -25,15 +24,8 @@ const LeaveChatModal: React.FC = () => {
     chat.type.charAt(0).toUpperCase() + chat.type.slice(1);
 
   const handleLeaveChat = async () => {
-    try {
-      await leaveChat(chat.id);
-      toast.success("You have left the chat");
-    } catch (error) {
-      console.error("Failed to leave chat:", error);
-      toast.error("Failed to leave chat");
-    } finally {
-      closeModal();
-    }
+    await leaveChat(chat.id);
+    closeModal();
   };
 
   return (

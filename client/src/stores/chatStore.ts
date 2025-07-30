@@ -15,6 +15,7 @@ import type {
 import { toast } from "react-toastify";
 import { useModalStore } from "./modalStore";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
+import { handleError } from "@/utils/handleError";
 
 interface ChatStore {
   chats: ChatResponse[];
@@ -42,10 +43,12 @@ interface ChatStore {
     id: string,
     payload: Partial<ChatResponse>
   ) => Promise<void>;
+  updateGroupChatLocally: (id: string, payload: Partial<ChatResponse>) => void;
   updateGroupChat: (
     id: string,
     payload: Partial<ChatResponse>
   ) => Promise<void>;
+  addMembersToChat: (chatId: string, userIds: string[]) => Promise<void>;
   setMute: (chatId: string, memberId: string, mutedUntil: Date | null) => void;
   setLastMessage: (chatId: string, message: LastMessageResponse | null) => void;
   setUnreadCount: (chatId: string, incrementBy: number) => void;
@@ -53,23 +56,13 @@ interface ChatStore {
   setSearchTerm: (term: string) => void;
   leaveChat: (chatId: string) => Promise<void>;
   deleteChat: (id: string, type: ChatType) => Promise<void>;
+  cleanupChat: (chatId: string) => void;
   clearChats: () => void;
 }
 
 export const useChatStore = create<ChatStore>()(
   persist(
     (set, get) => {
-      const cleanupChat = (chatId: string) => {
-        useMessageStore.getState().clearChatMessages(chatId);
-        set((state) => ({
-          chats: state.chats.filter((chat) => chat.id !== chatId),
-          filteredChats: state.filteredChats.filter(
-            (chat) => chat.id !== chatId
-          ),
-          activeChat: state.activeChat?.id === chatId ? null : state.activeChat,
-        }));
-      };
-
       return {
         chats: [],
         savedChat: null,
@@ -83,13 +76,15 @@ export const useChatStore = create<ChatStore>()(
           try {
             set({ isLoading: true, error: null });
             await get().fetchChats();
-            set({ isLoading: false });
           } catch (error) {
             console.error("Initialization failed:", error);
-            set({ error: "Failed to initialize chat data", isLoading: false });
+            set({ error: "Failed to initialize chat data" });
             throw error;
+          } finally {
+            set({ isLoading: false });
           }
         },
+
         fetchChats: async () => {
           set({ isLoading: true, error: null });
           try {
@@ -105,14 +100,16 @@ export const useChatStore = create<ChatStore>()(
               savedChat,
               chats: otherChats,
               filteredChats: otherChats,
-              isLoading: false,
             });
 
             console.log("Chats fetched:", otherChats);
             console.log("Saved chat:", savedChat);
           } catch (error) {
             console.error("Failed to fetch chats:", error);
-            set({ error: "Failed to load chats", isLoading: false });
+            set({ error: "Failed to load chats" });
+            handleError(error, "Failed to load chats");
+          } finally {
+            set({ isLoading: false });
           }
         },
 
@@ -126,14 +123,17 @@ export const useChatStore = create<ChatStore>()(
             set((state) => ({
               chats: state.chats.some((c) => c.id === targetChatId)
                 ? state.chats.map((c) => (c.id === targetChatId ? chat : c))
-                : [...state.chats, chat],
+                : [chat, ...state.chats],
               activeChat:
                 state.activeChat?.id === targetChatId ? chat : state.activeChat,
-              isLoading: false,
             }));
           } catch (error) {
-            console.error("Failed to fetch chat:", error);
-            set({ error: "Failed to load chat", isLoading: false });
+            set({ activeChat: null, error: "Failed to load chat" });
+            handleError(error, "Failed to fetch chat");
+            window.history.pushState({}, "", "/");
+            // window.location.reload();
+          } finally {
+            set({ isLoading: false });
           }
         },
 
@@ -179,7 +179,6 @@ export const useChatStore = create<ChatStore>()(
           const { chatMembers } = useChatMemberStore.getState();
           const alreadyFetchedMessages = !!messages[chat.id];
           const alreadyFetchedMembers = !!chatMembers[chat.id];
-          console.log("alreadyFetchedMembers", alreadyFetchedMembers);
 
           set({ activeChat: chat, isLoading: true });
           window.history.pushState({}, "", `/${chat.id}`);
@@ -207,10 +206,10 @@ export const useChatStore = create<ChatStore>()(
               filteredChats: state.filteredChats.map((c) =>
                 c.id === chat.id ? { ...c, unreadCount: 0 } : c
               ),
-              isLoading: false,
             }));
           } catch (error) {
-            console.error("Failed to set active chat:", error);
+            handleError(error, "Failed to set active chat");
+          } finally {
             set({ isLoading: false });
           }
         },
@@ -258,12 +257,13 @@ export const useChatStore = create<ChatStore>()(
             }
 
             await get().setActiveChat(payload);
-            set({ isLoading: false });
             return payload;
           } catch (error) {
-            console.error("Failed to create/get direct chat:", error);
-            set({ error: "Failed to create chat", isLoading: false });
+            set({ error: "Failed to create chat" });
+            handleError(error, "Failed to create/get direct chat:");
             throw error;
+          } finally {
+            set({ isLoading: false });
           }
         },
 
@@ -274,13 +274,15 @@ export const useChatStore = create<ChatStore>()(
             set((state) => ({
               chats: [newChat, ...state.chats],
               filteredChats: [newChat, ...state.filteredChats],
-              isLoading: false,
             }));
             return newChat;
           } catch (error) {
             console.error("Failed to create group chat:", error);
-            set({ error: "Failed to create chat", isLoading: false });
+            set({ error: "Failed to create chat" });
+            handleError(error, "Failed to create group chat");
             throw error;
+          } finally {
+            set({ isLoading: false });
           }
         },
 
@@ -299,36 +301,57 @@ export const useChatStore = create<ChatStore>()(
                 state.activeChat?.id === id
                   ? { ...state.activeChat, ...updatedChat }
                   : state.activeChat,
-              isLoading: false,
             }));
           } catch (error) {
-            console.error("Failed to update direct chat:", error);
-            set({ error: "Failed to update direct chat", isLoading: false });
+            set({ error: "Failed to update direct chat" });
+            handleError(error, "Failed to update chat");
             throw error;
+          } finally {
+            set({ isLoading: false });
           }
+        },
+
+        updateGroupChatLocally: (id, payload) => {
+          set((state) => ({
+            chats: state.chats.map((chat) =>
+              chat.id === id ? { ...chat, ...payload } : chat
+            ),
+            filteredChats: state.filteredChats.map((chat) =>
+              chat.id === id ? { ...chat, ...payload } : chat
+            ),
+            activeChat:
+              state.activeChat?.id === id
+                ? { ...state.activeChat, ...payload }
+                : state.activeChat,
+          }));
         },
 
         updateGroupChat: async (id, payload) => {
           set({ isLoading: true });
           try {
             const updatedChat = await chatService.updateGroupChat(id, payload);
-            set((state) => ({
-              chats: state.chats.map((chat) =>
-                chat.id === id ? { ...chat, ...updatedChat } : chat
-              ),
-              filteredChats: state.filteredChats.map((chat) =>
-                chat.id === id ? { ...chat, ...updatedChat } : chat
-              ),
-              activeChat:
-                state.activeChat?.id === id
-                  ? { ...state.activeChat, ...updatedChat }
-                  : state.activeChat,
-              isLoading: false,
-            }));
+            get().updateGroupChatLocally(id, updatedChat);
           } catch (error) {
-            console.error("Failed to update group chat:", error);
-            set({ error: "Failed to update group chat", isLoading: false });
+            set({ error: "Failed to update group chat" });
+            handleError(error, "Failed to update group chat");
             throw error;
+          } finally {
+            set({ isLoading: false });
+          }
+        },
+
+        addMembersToChat: async (chatId, userIds) => {
+          set({ isLoading: true });
+          try {
+            // 1. Call your API/service to add the user
+            await chatMemberService.addMembers(chatId, userIds); // must exist in your service
+
+            // // 2. Optional: Refetch chat to get updated members
+            // await get().fetchChatById(chatId);
+          } catch (error) {
+            handleError(error, "Error adding user to chat");
+          } finally {
+            set({ isLoading: false });
           }
         },
 
@@ -369,7 +392,7 @@ export const useChatStore = create<ChatStore>()(
                   : state.activeChat,
             }));
           } catch (error) {
-            console.error("Failed to set mute:", error);
+            handleError(error, "Failed to set mute");
             throw error;
           }
         },
@@ -435,24 +458,25 @@ export const useChatStore = create<ChatStore>()(
           try {
             const currentUserId = useAuthStore.getState().currentUser?.id;
             if (!currentUserId) throw new Error("User not authenticated");
-            const { chatDeleted } = await chatMemberService.softDeleteMember(
+            const { chatDeleted } = await chatMemberService.DeleteMember(
               chatId,
               currentUserId
             );
-            cleanupChat(chatId);
+            get().cleanupChat(chatId);
+            window.history.pushState({}, "", "/");
 
             if (chatDeleted) {
               toast.info("This chat was deleted because no members remained.");
             } else {
               toast.success("You left the chat.");
             }
-
-            set({ isLoading: false });
           } catch (error) {
             console.error("Failed to leave chat:", error);
-            set({ error: "Failed to leave chat", isLoading: false });
-            toast.error("Something went wrong while leaving the chat.");
+            set({ error: "Failed to leave chat" });
+            handleError(error, "Failed to leave chat");
             throw error;
+          } finally {
+            set({ isLoading: false });
           }
         },
 
@@ -460,17 +484,33 @@ export const useChatStore = create<ChatStore>()(
           set({ isLoading: true });
           try {
             await chatService.deleteChat(id);
-            cleanupChat(id);
-            set({ isLoading: false });
+            get().cleanupChat(id);
+            window.history.pushState({}, "", "/");
+            toast.success("Chat deleted");
           } catch (error) {
-            console.error("Failed to delete chat:", error);
-            set({ error: "Failed to delete chat", isLoading: false });
+            set({ error: "Failed to delete chat" });
+            handleError(error, "Failed to delete chat");
             throw error;
+          } finally {
+            set({ isLoading: false });
           }
         },
 
         clearChats: () => {
           set({ chats: [], filteredChats: [], activeChat: null });
+        },
+
+        cleanupChat: (chatId: string) => {
+          useMessageStore.getState().clearChatMessages(chatId);
+          useChatMemberStore.getState().clearChatMembers(chatId);
+          set((state) => ({
+            chats: state.chats.filter((chat) => chat.id !== chatId),
+            filteredChats: state.filteredChats.filter(
+              (chat) => chat.id !== chatId
+            ),
+            activeChat:
+              state.activeChat?.id === chatId ? null : state.activeChat,
+          }));
         },
       };
     },

@@ -4,9 +4,9 @@ import { JwtModule } from '@nestjs/jwt';
 import { GlobalGateway } from './global.gateway';
 import { WebsocketService } from './websocket.service';
 import { MessageModule } from '../message/message.module';
-import { UserModule } from '../user/user.module'; // Add this import
+import { UserModule } from '../user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { WsJwtGuard } from '../auth/guards/ws-jwt.guard'; // Import the guard
+import { WsJwtGuard } from '../auth/guards/ws-jwt.guard';
 import { ChatMemberModule } from '../chat-member/chat-member.module';
 import { ChatGateway } from './features/chat.gateway';
 import { NotificationGateway } from './features/notifications.gateway';

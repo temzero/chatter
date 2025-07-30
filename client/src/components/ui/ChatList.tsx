@@ -10,7 +10,6 @@ interface ChatListProps {
 
 const ChatList: React.FC<ChatListProps> = React.memo(
   ({ chats, isCompact = false }) => {
-    console.log("chatList");
     const currentUserId = useAuthStore((state) => state.currentUser?.id || "");
 
     return (

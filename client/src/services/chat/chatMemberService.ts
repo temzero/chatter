@@ -33,23 +33,11 @@ export const chatMemberService = {
     return response.data.payload;
   },
 
-  // // Get a member by memberId
-  // async getMember(memberId: string): Promise<ChatMember> {
-  //   const response = await API.get<ApiSuccessResponse<ChatMember>>(
-  //     `/chat-members/${memberId}`
-  //   );
-  //   return response.data.payload;
-  // },
-
   // Add a new member
-  async addMember(
-    chatId: string,
-    userId: string,
-    role?: string
-  ): Promise<ChatMember> {
+  async addMembers(chatId: string, userIds: string[]): Promise<ChatMember> {
     const response = await API.post<ApiSuccessResponse<ChatMember>>(
       `/chat-members`,
-      { chatId, userId, role }
+      { chatId, userIds }
     );
     return response.data.payload;
   },
@@ -108,6 +96,16 @@ export const chatMemberService = {
     const response = await API.delete<
       ApiSuccessResponse<{ chatDeleted: boolean }>
     >(`/chat-members/soft-delete/${chatId}/${userId}`);
+    return response.data.payload;
+  },
+
+  async DeleteMember(
+    chatId: string,
+    userId: string
+  ): Promise<{ chatDeleted: boolean }> {
+    const response = await API.delete<
+      ApiSuccessResponse<{ chatDeleted: boolean }>
+    >(`/chat-members/${chatId}/${userId}`);
     return response.data.payload;
   },
 };

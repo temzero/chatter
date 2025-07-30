@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MessageController } from './message.controllers';
 import { MessageService } from './message.service';
@@ -11,6 +11,7 @@ import { Reaction } from './entities/reaction.entity';
 import { Attachment } from './entities/attachment.entity';
 import { SupabaseModule } from '../superbase/supabase.module';
 import { BlockModule } from '../block/block.module';
+import { WebSocketModule } from '../websocket/websocket.module';
 
 @Module({
   imports: [
@@ -22,8 +23,9 @@ import { BlockModule } from '../block/block.module';
       User,
       Reaction,
     ]),
-    BlockModule,
-    SupabaseModule,
+    forwardRef(() => BlockModule),
+    forwardRef(() => SupabaseModule),
+    forwardRef(() => WebSocketModule),
   ],
   controllers: [MessageController],
   providers: [MessageService, MessageMapper],

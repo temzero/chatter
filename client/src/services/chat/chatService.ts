@@ -41,7 +41,7 @@ export const chatService = {
 
   async deleteChat(chatId: string): Promise<string> {
     const response = await API.delete<ApiSuccessResponse<string>>(
-      `/chat-group/${chatId}`
+      `/chat/${chatId}`
     );
     return response.data.payload;
   },

@@ -25,7 +25,6 @@ const PinnedMessage: React.FC<MessageProps> = ({
   const animationProps = shouldAnimate
     ? messageAnimations.pinMessage
     : messageAnimations.none;
-  console.log("pinnedMessage", message);
 
   return (
     <motion.div
@@ -62,7 +61,7 @@ const PinnedMessage: React.FC<MessageProps> = ({
       </button>
 
       {/* <div className="w-[80%] h-full border truncate overflow-hidden"> */}
-        <MessageHorizontalPreview message={message} chatType={chatType} />
+      <MessageHorizontalPreview message={message} chatType={chatType} />
       {/* </div> */}
 
       <p className="text-sm font-light italic">

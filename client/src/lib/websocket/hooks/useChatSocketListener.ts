@@ -4,26 +4,47 @@ import { useMessageStore } from "@/stores/messageStore";
 import { MessageResponse } from "@/types/responses/message.response";
 import { useTypingStore } from "@/stores/typingStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
-import { useActiveChatId, useChatStore } from "@/stores/chatStore";
+import { useChatStore } from "@/stores/chatStore";
 import { MessageStatus } from "@/types/enums/message";
 import { playSoundEffect } from "@/utils/playSoundEffect";
 import newMessageSound from "@/assets/sound/message-pop.mp3";
 import { WsMessageResponse } from "@/types/websocket/websocketMessageRes";
 import { toast } from "react-toastify";
+import { ChatMember } from "@/types/responses/chatMember.response";
+import { useCurrentUserId } from "@/stores/authStore";
+import { handleSystemEventMessage } from "@/utils/handleSystemEventMessage";
 
 export function useChatSocketListeners() {
-  const activeChatId = useActiveChatId();
+  const currentUserId = useCurrentUserId();
+
   useEffect(() => {
-    const handleNewMessage = (WsMessageResponse: WsMessageResponse) => {
+    const handleNewMessage = async (WsMessageResponse: WsMessageResponse) => {
       const { meta, ...message } = WsMessageResponse as MessageResponse & {
         meta?: {
           isMuted?: boolean;
           isOwnMessage?: boolean;
         };
       };
+      console.log("newMessage", WsMessageResponse);
 
       const isMuted = meta?.isMuted ?? false;
       const isOwnMessage = meta?.isOwnMessage ?? false;
+
+      const chatExists = useChatStore
+        .getState()
+        .chats.some((chat) => chat.id === message.chatId);
+
+      if (!chatExists) {
+        try {
+          await useChatStore.getState().fetchChatById(message.chatId);
+        } catch (error) {
+          console.error("Failed to fetch chat for incoming message:", error);
+          toast.error("New message received but chat not found!");
+          return;
+        }
+      }
+
+      handleSystemEventMessage(message);
 
       if (
         isOwnMessage &&
@@ -34,7 +55,7 @@ export function useChatSocketListeners() {
           .updateMessageById(message.chatId, message.id, message);
       } else {
         useMessageStore.getState().addMessage(message);
-
+        const activeChatId = useChatStore.getState().activeChat?.id;
         if (!isMuted && activeChatId !== message.chatId) {
           playSoundEffect(newMessageSound);
         }
@@ -116,6 +137,52 @@ export function useChatSocketListeners() {
       // toast.error(`Message failed: ${error.error}`);
     };
 
+    const handleMembersAdded = (newMember: ChatMember) => {
+      toast.success(`Member Added`);
+
+      // Check if the added member is the current user
+      const isMe = newMember.userId === currentUserId;
+      toast.success(`Member added, isMe: ${isMe}`);
+      if (isMe) {
+        // Fetch the group chat details
+        useChatStore
+          .getState()
+          .fetchChatById(newMember.chatId)
+          .then(() => {
+            toast.success(`You've been added to a new group chat`);
+          });
+      } else {
+        const chat = useChatStore
+          .getState()
+          .chats.find((c) => c.id === newMember.chatId);
+        const chatName = chat?.name || "the group";
+        // For other members, just update the member list if viewing this chat
+        useChatMemberStore.getState().addMemberLocally(newMember);
+        toast.success(`${newMember.firstName} Joined ${chatName}`);
+      }
+    };
+
+    const handleMemberRemoved = (member: ChatMember) => {
+      toast.success(`Member Removed`);
+
+      const isMe = member.userId === currentUserId;
+      const memberName = member.nickname || member.firstName;
+      toast.success(`Member Removed, isMe: ${isMe}`);
+
+      if (isMe) {
+        // Current user was removed - remove the entire chat
+        useChatStore.getState().cleanupChat(member.chatId);
+        toast.warning(`You've been removed from the chat`);
+      } else {
+        // Another member was removed - just update members list
+        useChatMemberStore
+          .getState()
+          .removeMemberLocally(member.chatId, member.userId);
+        console.log(`${memberName} has left the chat`);
+        toast.info(`${memberName} has left the chat`);
+      }
+    };
+
     // Subscribe to events
     chatWebSocketService.onNewMessage(handleNewMessage);
     chatWebSocketService.onSaveMessage(handleMessageSaved);
@@ -126,6 +193,9 @@ export function useChatSocketListeners() {
     chatWebSocketService.onImportantMessage(handleMessageMarkedImportant);
     chatWebSocketService.onDeleteMessage(handleMessageDeleted);
     chatWebSocketService.onMessageError(handleMessageError);
+
+    chatWebSocketService.onMemberAdded(handleMembersAdded);
+    chatWebSocketService.onMemberRemoved(handleMemberRemoved);
 
     return () => {
       // Clean up listeners
@@ -138,6 +208,9 @@ export function useChatSocketListeners() {
       chatWebSocketService.offImportantMessage(handleMessageMarkedImportant);
       chatWebSocketService.offDeleteMessage(handleMessageDeleted);
       chatWebSocketService.offMessageError(handleMessageError);
+
+      chatWebSocketService.offMemberAdded(handleMembersAdded);
+      chatWebSocketService.offMemberRemoved(handleMemberRemoved);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

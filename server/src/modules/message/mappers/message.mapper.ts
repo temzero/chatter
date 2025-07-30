@@ -18,7 +18,7 @@ export class MessageMapper {
         message.sender,
         senderMember?.nickname,
       ),
-      type: message.type,
+      systemEvent: message.systemEvent,
       content: message.content,
       status: message.status,
       isPinned: message.isPinned,
@@ -65,6 +65,7 @@ export class MessageMapper {
         msg.attachments || [],
       ),
       sender,
+      systemEvent: msg.systemEvent,
       replyToMessage: this.mapNestedMessage(
         msg.replyToMessage,
         depth + 1,

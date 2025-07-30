@@ -17,7 +17,7 @@ import { User } from '../../user/entities/user.entity';
 import { Reaction } from './reaction.entity';
 import { Attachment } from './attachment.entity';
 import { MessageStatus } from '../constants/message-status.constants';
-import { MessageType } from '../constants/message-type.constants';
+import { SystemEventType } from '../constants/system-event-type.constants';
 
 @Entity('message')
 @Index(['chatId']) // Index for faster chat message queries
@@ -96,10 +96,13 @@ export class Message {
     nullable: true,
     default: null,
   })
-  deletedForUserIds: string[] | null; // Array of USER IDs
+  deletedForUserIds: string[] | null;
 
   @Column({ default: false })
   isImportant: boolean;
+
+  @Column({ type: 'enum', enum: SystemEventType, nullable: true })
+  systemEvent: SystemEventType | null;
 
   @Column({ name: 'is_deleted', default: false })
   isDeleted: boolean;
@@ -112,7 +115,6 @@ export class Message {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
-  type: MessageType;
 
   @BeforeInsert()
   @BeforeUpdate()
@@ -122,6 +124,7 @@ export class Message {
       this.isDeleted ||
       this.deletedAt ||
       this.deletedForUserIds ||
+      this.systemEvent ||
       (Object.keys(this).length === 2 &&
         'isPinned' in this &&
         'pinnedAt' in this)

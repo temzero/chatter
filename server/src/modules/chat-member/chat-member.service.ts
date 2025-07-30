@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Repository } from 'typeorm';
+import { In, IsNull, Repository } from 'typeorm';
 
 import { ChatMember } from './entities/chat-member.entity';
-import { ChatMemberRole } from './constants/chat-member-roles.constants';
 import { ErrorResponse } from '../../common/api-response/errors';
 import { UpdateChatMemberDto } from './dto/requests/update-chat-member.dto';
 import { User } from '../user/entities/user.entity';
@@ -12,6 +11,7 @@ import { ChatMemberResponseDto } from './dto/responses/chat-member-response.dto'
 import { mapChatMemberToResponseDto } from './mappers/chat-member.mapper';
 import { ChatType } from '../chat/constants/chat-types.constants';
 import { FriendshipStatus } from '../friendship/constants/friendship-status.constants';
+import { ChatMemberStatus } from './constants/chat-member-status.constants';
 
 @Injectable()
 export class ChatMemberService {
@@ -23,6 +23,23 @@ export class ChatMemberService {
     @InjectRepository(ChatMember)
     private readonly memberRepo: Repository<ChatMember>,
   ) {}
+
+  async findById(memberId: string): Promise<ChatMember> {
+    try {
+      const member = await this.memberRepo.findOne({
+        where: { id: memberId },
+        relations: ['user'],
+      });
+
+      if (!member) {
+        ErrorResponse.notFound('Chat member not found');
+      }
+
+      return member;
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to retrieve chat member by ID');
+    }
+  }
 
   async findByChatId(chatId: string): Promise<ChatMember[]> {
     try {
@@ -98,7 +115,7 @@ export class ChatMemberService {
         'friendship.sender_status AS sender_status',
         'friendship.receiver_status AS receiver_status',
       ])
-      .where('member.chatId = :chatId', { chatId })
+      .where('member.chatId = :chatId AND member.deletedAt IS NULL', { chatId })
       .getRawAndEntities();
 
     type RawType = {
@@ -134,47 +151,6 @@ export class ChatMemberService {
       );
     });
   }
-
-  // async findByChatIdWithBlockStatus(
-  //   chatId: string,
-  //   currentUserId: string,
-  //   chatType: ChatType,
-  // ): Promise<ChatMemberResponseDto[]> {
-  //   const { entities, raw } = await this.memberRepo
-  //     .createQueryBuilder('member')
-  //     .leftJoinAndSelect('member.user', 'user')
-  //     .leftJoin(
-  //       'block',
-  //       'block1',
-  //       'block1.blockerId = :currentUserId AND block1.blockedId = member.userId',
-  //       { currentUserId },
-  //     )
-  //     .leftJoin(
-  //       'block',
-  //       'block2',
-  //       'block2.blockerId = member.userId AND block2.blockedId = :currentUserId',
-  //       { currentUserId },
-  //     )
-  //     .addSelect(['block1.id AS block1_id', 'block2.id AS block2_id']) // Explicitly select block IDs
-  //     .where('member.chatId = :chatId', { chatId })
-  //     .getRawAndEntities();
-
-  //   type BlockRaw = { block1_id?: string | null; block2_id?: string | null };
-  //   const typedRaw = raw as BlockRaw[];
-
-  //   return entities.map((member, i) => {
-  //     const row = typedRaw[i];
-  //     const isBlockedByMe = !!row?.block1_id; // Check if block record exists
-  //     const isBlockedMe = !!row?.block2_id;
-
-  //     return mapChatMemberToResponseDto(
-  //       member,
-  //       chatType,
-  //       isBlockedByMe,
-  //       isBlockedMe,
-  //     );
-  //   });
-  // }
 
   async getMemberByChatIdAndUserId(
     chatId: string,
@@ -239,8 +215,8 @@ export class ChatMemberService {
   ): Promise<Array<{ userId: string; isMuted: boolean }>> {
     try {
       const members = await this.memberRepo.find({
-        where: { chatId },
-        select: ['userId', 'mutedUntil'], // Include mutedUntil in the select
+        where: { chatId, deletedAt: IsNull() },
+        select: ['userId', 'mutedUntil'],
       });
 
       if (!members || members.length === 0) {
@@ -280,38 +256,66 @@ export class ChatMemberService {
     }
   }
 
-  async addMember(
-    chatId: string,
-    userId: string,
-    role: ChatMemberRole = ChatMemberRole.MEMBER,
-  ): Promise<ChatMember> {
-    const user = await this.userRepo.findOne({ where: { id: userId } });
-    if (!user) {
-      ErrorResponse.notFound('User does not exist');
-    }
-
+  async addMembers(chatId: string, userIds: string[]): Promise<ChatMember[]> {
     const chat = await this.chatRepo.findOne({ where: { id: chatId } });
     if (!chat) {
       ErrorResponse.notFound('Chat does not exist');
     }
 
-    const existingMember = await this.memberRepo.findOne({
-      where: { chatId, userId },
+    const users = await this.userRepo.find({
+      where: userIds.map((id) => ({ id })),
     });
-    if (existingMember) {
-      ErrorResponse.badRequest('User is already a member of this chat');
+
+    if (users.length !== userIds.length) {
+      ErrorResponse.notFound('One or more users do not exist');
     }
 
-    const newMember = this.memberRepo.create({
-      chatId,
-      userId,
-      role,
+    const existingMembers = await this.memberRepo.find({
+      where: userIds.map((id) => ({ chatId, userId: id })),
+      withDeleted: true, // includes soft-deleted records
+      relations: ['user'], // Load user relation for existing members
     });
 
+    const membersToReactivate: ChatMember[] = [];
+    const newMembers: ChatMember[] = [];
+
+    for (const user of users) {
+      const existing = existingMembers.find((m) => m.userId === user.id);
+
+      if (existing) {
+        if (existing.deletedAt) {
+          existing.deletedAt = null;
+          existing.status = ChatMemberStatus.ACTIVE;
+          membersToReactivate.push(existing);
+        }
+        // If already active, skip
+      } else {
+        const newMember = this.memberRepo.create({
+          chatId,
+          userId: user.id,
+          user: user, // Set the user relation
+        });
+        newMembers.push(newMember);
+      }
+    }
+
     try {
-      return await this.memberRepo.save(newMember);
+      const savedReactivated = membersToReactivate.length
+        ? await this.memberRepo.save(membersToReactivate)
+        : [];
+      const savedNew = newMembers.length
+        ? await this.memberRepo.save(newMembers)
+        : [];
+
+      // Return all saved members with their user relations loaded
+      return await this.memberRepo.find({
+        where: {
+          id: In([...savedReactivated, ...savedNew].map((m) => m.id)),
+        },
+        relations: ['user'], // Ensure user relation is loaded
+      });
     } catch (error) {
-      ErrorResponse.throw(error, 'Failed to add chat member');
+      ErrorResponse.throw(error, 'Failed to add chat members');
     }
   }
 
@@ -357,10 +361,23 @@ export class ChatMemberService {
   async updateNickname(
     memberId: string,
     nickname: string | null,
-  ): Promise<string | null> {
+  ): Promise<{
+    chatId: string;
+    oldNickname: string | null;
+    newNickname: string | null;
+  }> {
     try {
       if (nickname && nickname.length > 32) {
         ErrorResponse.badRequest('Nickname must be 32 characters or less');
+      }
+
+      const member = await this.memberRepo.findOne({
+        where: { id: memberId },
+        select: ['nickname', 'chatId'], // only fetch necessary fields
+      });
+
+      if (!member) {
+        ErrorResponse.notFound('Chat member not found');
       }
 
       const result = await this.memberRepo.update(
@@ -369,10 +386,14 @@ export class ChatMemberService {
       );
 
       if (result.affected === 0) {
-        ErrorResponse.notFound('Chat member not found');
+        ErrorResponse.notFound('Failed to update nickname');
       }
 
-      return nickname;
+      return {
+        chatId: member.chatId,
+        oldNickname: member.nickname,
+        newNickname: nickname,
+      };
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to update nickname');
     }
@@ -386,6 +407,7 @@ export class ChatMemberService {
       // Find the member (only non-deleted ones)
       const member = await this.memberRepo.findOne({
         where: { chatId, userId, deletedAt: IsNull() },
+        relations: ['user'],
       });
 
       if (!member) {
@@ -432,20 +454,38 @@ export class ChatMemberService {
     }
   }
 
-  async removeMember(chatId: string, userId: string): Promise<ChatMember> {
+  async removeMember(
+    chatId: string,
+    userId: string,
+  ): Promise<{ member: ChatMember; chatDeleted: boolean }> {
     try {
-      const member = await this.memberRepo.findOneBy({
-        chatId,
-        userId,
+      // Find the member
+      const member = await this.memberRepo.findOne({
+        where: { chatId, userId },
+        relations: ['user'], // for WebSocket payload
       });
 
       if (!member) {
         ErrorResponse.notFound('Member not found');
       }
 
-      await this.memberRepo.remove(member);
-      return member;
+      // Delete the member
+      await this.memberRepo.delete(member.id);
+
+      // Check remaining members
+      const remainingMembers = await this.memberRepo.count({
+        where: { chatId, deletedAt: IsNull() },
+      });
+
+      let chatDeleted = false;
+      if (remainingMembers === 0) {
+        await this.chatRepo.delete(chatId);
+        chatDeleted = true;
+      }
+
+      return { member, chatDeleted };
     } catch (error) {
+      console.error('Error in removeMember:', error);
       ErrorResponse.throw(error, 'Failed to remove chat member');
     }
   }

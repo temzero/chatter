@@ -26,6 +26,7 @@ export function createLastMessage(
     content,
     icons,
     isForwarded,
+    systemEvent: message.systemEvent,
     createdAt: message.createdAt,
   };
 }
@@ -42,6 +43,13 @@ function getAttachmentIcons(
     [AttachmentType.FILE]: "folder_zip",
     [AttachmentType.VOICE]: "voice",
     [AttachmentType.LOCATION]: "location",
+    [AttachmentType.PDF]: "",
+    [AttachmentType.WORD]: "",
+    [AttachmentType.EXCEL]: "",
+    [AttachmentType.PPT]: "",
+    [AttachmentType.ARCHIVE]: "",
+    [AttachmentType.TEXT]: "",
+    [AttachmentType.CODE]: "",
   };
 
   const seen = new Set<string>();

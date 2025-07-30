@@ -12,6 +12,7 @@ import { useChatStore, useIsActiveChat } from "@/stores/chatStore";
 import { useChatStatus } from "@/stores/presenceStore";
 import { ChatType } from "@/types/enums/ChatType";
 import { useBlockStatus } from "@/hooks/useBlockStatus";
+import SystemMessage from "../chat/SystemMessage";
 
 interface ChatListItemProps {
   chat: ChatResponse;
@@ -22,16 +23,13 @@ interface ChatListItemProps {
 const ChatListItem: React.FC<ChatListItemProps> = React.memo(
   ({ chat, isCompact = false, currentUserId = "" }) => {
     const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
-    const typingUsers = useTypingUsersByChatId(chat.id);
-
-    const isOnline = useChatStatus(chat?.id, chat.type);
-
     const setActiveChatById = useChatStore.getState().setActiveChatById;
+    const typingUsers = useTypingUsersByChatId(chat.id);
+    const isOnline = useChatStatus(chat?.id, chat.type);
     const isActive = useIsActiveChat(chat.id);
-
-    const { isBlockedByMe } = useBlockStatus(chat.id, chat.myMemberId);
-
     const unreadCount = chat.unreadCount || 0;
+    const lastMessage = chat.lastMessage;
+    const { isBlockedByMe } = useBlockStatus(chat.id, chat.myMemberId);
 
     const handleClick = () => {
       if (!isActive) {
@@ -56,58 +54,76 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
         </i>
         <span className="text-xs truncate">{draft}</span>
       </p>
-    ) : chat.lastMessage ? (
-      <p
-        className={`flex items-center gap-1 text-xs max-w-[196px] min-h-6 
+    ) : lastMessage ? (
+      lastMessage.systemEvent ? (
+        // System message
+        <SystemMessage
+          isSidebar={true}
+          systemEvent={lastMessage.systemEvent}
+          senderId={lastMessage.senderId}
+          senderDisplayName={lastMessage.senderDisplayName}
+          content={lastMessage.content}
+        />
+      ) : (
+        <p
+          className={`flex items-center gap-1 text-xs max-w-[196px] min-h-6 
           ${unreadCount > 0 ? "opacity-100" : "opacity-40"}
         `}
-      >
-        {chat.lastMessage.senderId === currentUserId ? (
-          <strong>Me:</strong>
-        ) : chat.type !== ChatType.DIRECT ? (
-          <strong>{chat.lastMessage.senderDisplayName}:</strong>
-        ) : null}
+        >
+          {lastMessage.senderId === currentUserId ? (
+            <strong>Me:</strong>
+          ) : chat.type !== ChatType.DIRECT ? (
+            <strong>{lastMessage.senderDisplayName}:</strong>
+          ) : null}
 
-        {/* If forwarded */}
-        {chat.lastMessage.isForwarded && (
-          <span className="material-symbols-outlined rotate-90">
-            arrow_warm_up
-          </span>
-        )}
+          {/* If forwarded */}
+          {lastMessage.isForwarded && (
+            <span className="material-symbols-outlined rotate-90">
+              arrow_warm_up
+            </span>
+          )}
 
-        {chat.lastMessage.icons?.length ? (
-          <span className="flex gap-1 truncate">
-            {chat.lastMessage.icons.map((icon, index) => (
-              <i
-                key={index}
-                className={`material-symbols-outlined text-base`}
-                aria-hidden="true"
-              >
-                {icon}
-              </i>
-            ))}
-          </span>
-        ) : (
-          <span className="truncate">{chat.lastMessage.content}</span>
-        )}
-      </p>
+          {lastMessage.icons?.length ? (
+            <span className="flex gap-1 truncate">
+              {lastMessage.icons.map((icon, index) => (
+                <i
+                  key={index}
+                  className={`material-symbols-outlined text-base`}
+                  aria-hidden="true"
+                >
+                  {icon}
+                </i>
+              ))}
+            </span>
+          ) : (
+            <span className="truncate">{lastMessage.content}</span>
+          )}
+        </p>
+      )
     ) : null;
 
     return (
       <>
         <div className={getUserItemClass()} onClick={handleClick}>
-          <OnlineDot
-            isOnline={isOnline}
-            className={`absolute top-1/2 left-[3px] -translate-y-1/2 ${
-              isActive && "bg-white border"
-            }`}
-          />
+          {!chat.isDeleted && (
+            <OnlineDot
+              isOnline={isOnline}
+              className={`absolute top-1/2 left-[3px] -translate-y-1/2 ${
+                isActive && "bg-white border"
+              }`}
+            />
+          )}
           <ChatAvatar chat={chat} type="sidebar" isBlocked={isBlockedByMe} />
 
           {!isCompact && (
             <>
               <div className="flex flex-col justify-center gap-1">
-                <h1 className="text-lg font-semibold whitespace-nowrap text-ellipsis">
+                <h1
+                  className={`text-lg font-semibold whitespace-nowrap text-ellipsis ${
+                    chat.isDeleted ? "text-yellow-500/80" : ""
+                  }`}
+                >
+                  {chat.isDeleted && <span className="font-bold mr-1">!</span>}
                   {chat.name}
                 </h1>
 
@@ -141,7 +157,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
 
               <div className="flex gap-1 absolute top-2 right-4 text-xs opacity-40">
                 <p className="">
-                  {formatTimeAgo(chat.lastMessage?.createdAt ?? chat.updatedAt)}
+                  {formatTimeAgo(lastMessage?.createdAt ?? chat.updatedAt)}
                 </p>
                 <AnimatePresence>
                   {chat.mutedUntil && (
@@ -149,7 +165,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
                       key="typing"
                       initial={{ opacity: 0, scale: 3 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: .1 }}
+                      exit={{ opacity: 0, scale: 0.1 }}
                       transition={{ duration: 0.3 }}
                     >
                       <span className="material-symbols-outlined text-[18px]">

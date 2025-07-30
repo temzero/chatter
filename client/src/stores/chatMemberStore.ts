@@ -1,7 +1,10 @@
 import { create } from "zustand";
 import { chatMemberService } from "@/services/chat/chatMemberService";
 import { useActiveChatId, useChatStore } from "./chatStore";
-import type { ChatMember } from "@/types/responses/chatMember.response";
+import type {
+  ChatMember,
+  GroupChatMember,
+} from "@/types/responses/chatMember.response";
 import { ChatType } from "@/types/enums/ChatType";
 import { useShallow } from "zustand/shallow";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
@@ -17,6 +20,7 @@ interface ChatMemberStore {
   getChatMemberUserIds: (chatId: string, type: ChatType) => string[];
   getAllChatMemberIds: () => string[];
   getAllUserIdsInChats: () => string[];
+  addMemberLocally: (newMember: GroupChatMember) => void;
   updateMemberLocally: (
     chatId: string,
     memberId: string,
@@ -43,6 +47,7 @@ interface ChatMemberStore {
   ) => void;
   addGroupMember: (chatId: string, member: ChatMember) => void;
   removeMemberLocally: (chatId: string, userId: string) => void;
+  clearChatMembers: (chatId: string) => void;
 }
 
 export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
@@ -112,6 +117,22 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
     });
 
     return Array.from(allUserIds);
+  },
+
+  addMemberLocally: (newMember) => {
+    set((state) => {
+      const currentMembers = state.chatMembers[newMember.chatId] || [];
+      // Check if member already exists to avoid duplicates
+      const memberExists = currentMembers.some((m) => m.id === newMember.id);
+      if (memberExists) return state;
+
+      return {
+        chatMembers: {
+          ...state.chatMembers,
+          [newMember.chatId]: [...currentMembers, newMember],
+        },
+      };
+    });
   },
 
   updateMemberLocally: (chatId, memberId, updates) => {
@@ -229,6 +250,13 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
           [chatId]: currentMembers.filter((m) => m.userId !== userId),
         },
       };
+    });
+  },
+  clearChatMembers: (chatId: string) => {
+    set((state) => {
+      const newMembers = { ...state.chatMembers };
+      delete newMembers[chatId];
+      return { chatMembers: newMembers };
     });
   },
 }));

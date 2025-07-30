@@ -18,63 +18,6 @@ export class ChatMapper {
     private readonly chatMemberService: ChatMemberService,
   ) {}
 
-  // async transformToDirectChatDto(
-  //   chat: Chat,
-  //   currentUserId: string,
-  //   messageService?: MessageService,
-  // ): Promise<ChatResponseDto> {
-  //   const myMember = chat.members.find((m) => m.userId === currentUserId);
-  //   const otherMember = chat.members.find((m) => m.userId !== currentUserId);
-
-  //   if (!otherMember || !myMember) {
-  //     throw new Error('Invalid chat members');
-  //   }
-
-  //   const fullName = [otherMember.user.firstName, otherMember.user.lastName]
-  //     .filter(Boolean)
-  //     .join(' ');
-  //   const displayName = otherMember.nickname || fullName || 'Unknown User';
-
-  //   let unreadCount = 0;
-  //   if (
-  //     messageService &&
-  //     myMember.lastReadMessageId &&
-  //     myMember.lastReadMessageId !== 'undefined' &&
-  //     myMember.lastReadMessageId !== 'null'
-  //   ) {
-  //     unreadCount = await messageService.getUnreadMessageCount(
-  //       chat.id,
-  //       myMember.lastReadMessageId,
-  //       currentUserId,
-  //     );
-  //   }
-  //   const mutedUntil = myMember
-  //     ? this.chatMemberService.checkAndClearExpiredMute(myMember)
-  //     : null;
-
-  //   return {
-  //     id: chat.id,
-  //     type: ChatType.DIRECT,
-  //     myMemberId: myMember.id,
-  //     name: displayName,
-  //     avatarUrl: otherMember.user.avatarUrl ?? null,
-  //     updatedAt: chat.updatedAt,
-  //     pinnedMessage: chat.pinnedMessage
-  //       ? this.messageMapper.toMessageResponseDto(chat.pinnedMessage)
-  //       : null,
-  //     lastMessage: myMember.lastVisibleMessage
-  //       ? this.transformLastMessageDto(
-  //           myMember.lastVisibleMessage,
-  //           chat.members,
-  //           currentUserId,
-  //         )
-  //       : null,
-  //     otherMemberUserIds: [otherMember.userId],
-  //     unreadCount,
-  //     mutedUntil,
-  //   };
-  // }
-
   async transformToDirectChatDto(
     chat: Chat,
     currentUserId: string,
@@ -206,8 +149,11 @@ export class ChatMapper {
     const member = members.find((m) => m.userId === message.senderId);
 
     const senderDisplayName = isMe
-      ? 'Me'
-      : member?.nickname || member?.user?.firstName || 'Unknown';
+      ? 'You'
+      : member?.nickname ||
+        member?.user?.firstName ||
+        message.sender?.firstName ||
+        'User';
 
     const isForwarded = !!message.forwardedFromMessage;
 
@@ -230,6 +176,7 @@ export class ChatMapper {
       content,
       icons,
       isForwarded,
+      systemEvent: message.systemEvent,
       createdAt: message.createdAt,
     };
   }

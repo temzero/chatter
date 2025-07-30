@@ -5,7 +5,6 @@ import { childrenModalAnimation } from "@/animations/modalAnimations";
 import { DirectChatMember } from "@/types/responses/chatMember.response";
 import { ChatResponse } from "@/types/responses/chat.response";
 import { Avatar } from "../ui/avatar/Avatar";
-import { toast } from "react-toastify";
 import { useChatStore } from "@/stores/chatStore";
 import { ChatAvatar } from "../ui/avatar/ChatAvatar";
 import { ChatType } from "@/types/enums/ChatType";
@@ -28,17 +27,9 @@ const DeleteChatModal: React.FC = () => {
     chat.type.charAt(0).toUpperCase() + chat.type.slice(1);
 
   const handleDeleteChat = async () => {
-    try {
-      closeModal();
-      setSidebarInfo(SidebarInfoMode.DEFAULT);
-      await deleteChat(chat.id, chat.type);
-      toast.success("Chat deleted successfully");
-    } catch (error) {
-      console.error("Failed to delete chat:", error);
-      toast.error("Failed to delete chat");
-    } finally {
-      closeModal();
-    }
+    closeModal();
+    setSidebarInfo(SidebarInfoMode.DEFAULT);
+    await deleteChat(chat.id, chat.type);
   };
 
   return (

@@ -13,6 +13,10 @@ import { Attachment } from './entities/attachment.entity';
 import { SupabaseService } from '../superbase/supabase.service';
 import { BlockService } from '../block/block.service';
 import { ChatType } from '../chat/constants/chat-types.constants';
+import { SystemEventType } from './constants/system-event-type.constants';
+import { MessageMapper } from './mappers/message.mapper';
+import { WebsocketService } from '../websocket/websocket.service';
+import { MessageResponseDto } from './dto/responses/message-response.dto';
 
 @Injectable()
 export class MessageService {
@@ -30,6 +34,8 @@ export class MessageService {
 
     private readonly blockService: BlockService,
     private readonly supabaseService: SupabaseService,
+    private readonly messageMapper: MessageMapper,
+    private readonly websocketService: WebsocketService,
   ) {}
 
   async createMessage(
@@ -172,6 +178,34 @@ export class MessageService {
     );
 
     return this.getFullMessageById(savedMessage.id);
+  }
+
+  async createSystemEventMessage(
+    chatId: string,
+    senderId: string,
+    eventType: SystemEventType,
+    content?: string | null,
+  ): Promise<MessageResponseDto> {
+    const message = this.messageRepo.create({
+      chatId,
+      senderId,
+      systemEvent: eventType,
+      content: content || null, // can hold text or image URL depending on event
+    });
+
+    const savedMessage = await this.messageRepo.save(message);
+
+    const fullMessage = await this.getFullMessageById(savedMessage.id);
+    const messageResponse =
+      this.messageMapper.toMessageResponseDto(fullMessage);
+
+    await this.websocketService.emitToChatMembers(
+      chatId,
+      'chat:newMessage',
+      messageResponse,
+    );
+
+    return messageResponse;
   }
 
   async getMessageById(id: string): Promise<Message> {

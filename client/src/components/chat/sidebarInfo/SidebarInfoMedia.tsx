@@ -5,6 +5,7 @@ import { SlidingContainer } from "@/components/ui/SlidingContainer";
 import { AttachmentType } from "@/types/enums/attachmentType";
 import RenderAttachment from "@/components/ui/RenderAttachment";
 import clsx from "clsx";
+import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
 
 const mediaTypes = ["images", "videos", "audio", "files"];
 
@@ -101,7 +102,7 @@ const ChatInfoMedia: React.FC = () => {
         <h1 className="text-xl font-semibold">Media & Files</h1>
         <a
           className="flex items-center rounded-full cursor-pointer opacity-50 hover:opacity-100 ml-auto"
-          onClick={() => setSidebarInfo("default")}
+          onClick={() => setSidebarInfo(SidebarInfoMode.DEFAULT)}
         >
           <i className="material-symbols-outlined">edit</i>
         </a>
@@ -127,7 +128,7 @@ const ChatInfoMedia: React.FC = () => {
 
       <a
         className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-10 flex items-center justify-center cursor-pointer opacity-50 hover:opacity-90 bg-[var(--sidebar-color)] select-none"
-        onClick={() => setSidebarInfo("default")}
+        onClick={() => setSidebarInfo(SidebarInfoMode.DEFAULT)}
       >
         <i className="material-symbols-outlined rotate-90">arrow_forward_ios</i>
       </a>

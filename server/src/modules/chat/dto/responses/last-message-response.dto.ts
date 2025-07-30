@@ -1,4 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
+import { SystemEventType } from 'src/modules/message/constants/system-event-type.constants';
 
 @Exclude()
 export class LastMessageResponseDto {
@@ -19,6 +20,9 @@ export class LastMessageResponseDto {
 
   @Expose()
   isForwarded?: boolean;
+
+  @Expose()
+  systemEvent?: SystemEventType | null;
 
   @Expose()
   createdAt: Date;
