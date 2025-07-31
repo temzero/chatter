@@ -2,22 +2,30 @@ import React from "react";
 import RenderMultipleAttachments from "../ui/RenderMultipleAttachments";
 import { formatTime } from "@/utils/formatTime";
 import type { MessageResponse } from "@/types/responses/message.response";
+import SystemMessage from "./SystemMessage";
 
 interface ChannelMessageProps {
   message: MessageResponse;
 }
 
 const ChannelMessage: React.FC<ChannelMessageProps> = ({ message }) => {
-  // Convert attachments to media props if needed
-  const media =
-    message.attachments?.map((attachment) => ({
-      url: attachment.url,
-      type: attachment.type,
-      thumbnailUrl: attachment.thumbnailUrl,
-      width: attachment.width,
-      height: attachment.height,
-      duration: attachment.duration,
-    })) || [];
+  // Check if the message is a system message
+  const isSystemMessage = !!message.systemEvent;
+
+  if (isSystemMessage) {
+    return (
+      <div className="p-1 w-full flex items-center justify-center">
+        <SystemMessage
+          systemEvent={message.systemEvent}
+          senderId={message.sender.id}
+          senderDisplayName={message.sender.displayName}
+          content={message.content}
+        />
+      </div>
+    );
+  }
+
+  const attachments = message.attachments ?? [];
 
   return (
     <div
@@ -25,9 +33,9 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ message }) => {
       className="relative flex flex-col gap-1 items-center justify-center group custom-border-b"
     >
       <div className="relative py-8 w-[70%]">
-        {media.length > 0 && (
+        {attachments.length > 0 && (
           <div className="rounded overflow-hidden mb-2">
-            <RenderMultipleAttachments media={media} />
+            <RenderMultipleAttachments attachments={attachments} />
           </div>
         )}
         {message.content && <p>{message.content}</p>}

@@ -1,5 +1,4 @@
 import React, { useRef, useEffect, useCallback, useState } from "react";
-import { toast } from "react-toastify";
 import { RingLoader } from "react-spinners";
 import type { ChatResponse } from "@/types/responses/chat.response";
 import { ChatType } from "@/types/enums/ChatType";
@@ -65,7 +64,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ chat }) => {
           const addedCount = await fetchMoreMessages(chatId);
 
           if (addedCount === 0) {
-            toast.info("No more messages.");
             return;
           }
 

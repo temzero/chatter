@@ -5,6 +5,7 @@ import {
   FriendshipUpdateNotification,
 } from "@/types/responses/friendship.response";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
+import { FriendContactResponse } from "@/types/responses/friendContact.response";
 
 export const friendshipService = {
   /**
@@ -39,8 +40,9 @@ export const friendshipService = {
   /**
    * Get all friends of the current user
    */
-  async getFriends(): Promise<FriendshipResponse[]> {
-    const { data } = await API.get("/friendships");
+  async getFriendContacts(): Promise<FriendContactResponse[]> {
+    const { data } = await API.get("/friendships/contacts");
+    console.log('Friend contacts', data.payload)
     return data.payload;
   },
 
@@ -71,7 +73,9 @@ export const friendshipService = {
     friendshipId: string,
     userId?: string
   ): Promise<FriendshipResponse> {
-    const { data } = await API.delete(`/friendships/cancel/${friendshipId}/${userId}`);
+    const { data } = await API.delete(
+      `/friendships/cancel/${friendshipId}/${userId}`
+    );
     return data.payload;
   },
 

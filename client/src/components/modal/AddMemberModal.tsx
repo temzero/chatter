@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { useModalStore } from "@/stores/modalStore";
 import { useChatStore } from "@/stores/chatStore";
 import { ChatResponse } from "@/types/responses/chat.response";
-import { ChatType } from "@/types/enums/ChatType";
 import { Avatar } from "../ui/avatar/Avatar";
 import SearchBar from "../ui/SearchBar";
 import { childrenModalAnimation } from "@/animations/modalAnimations";
@@ -12,6 +11,9 @@ import { copyToClipboard } from "@/utils/copyToClipboard";
 import { handleError } from "@/utils/handleError";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
+import { FriendContactResponse } from "@/types/responses/friendContact.response";
+import { useFriendContacts } from "@/hooks/useFriendContacts";
+import { useAllUniqueMembers } from "@/hooks/useAllUniqueMembers";
 
 const AddMemberModal: React.FC = () => {
   const [copied, setCopied] = useState(false);
@@ -22,36 +24,45 @@ const AddMemberModal: React.FC = () => {
   const closeModal = useModalStore((state) => state.closeModal);
   const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
 
-  const filteredChats = useChatStore((state) => state.filteredChats);
-  const directChats = filteredChats.filter((c) => c.type === ChatType.DIRECT);
+  const chatMemberUserIds = chat?.otherMemberUserIds || [];
 
-  const handleContactToggle = (contactId: string) => {
+  // Use the new hook to get unique members from other chats
+  const allUniqueMembers = useAllUniqueMembers(chat?.id);
+  const { contacts: friendContacts, loading } =
+    useFriendContacts(chatMemberUserIds);
+
+  // Combine friend contacts with unique members from other chats
+  const combinedContacts = [
+    ...friendContacts,
+    ...allUniqueMembers.filter(
+      (uniqueMember) =>
+        !friendContacts.some((friend) => friend.userId === uniqueMember.userId)
+    ),
+  ];
+
+  const handleContactToggle = (userId: string) => {
     setSelectedContacts((prev) =>
-      prev.includes(contactId)
-        ? prev.filter((id) => id !== contactId)
-        : [...prev, contactId]
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId]
     );
   };
 
-  const handleRemoveContact = (contactId: string) => {
-    setSelectedContacts((prev) => prev.filter((id) => id !== contactId));
+  const handleRemoveContact = (userId: string) => {
+    setSelectedContacts((prev) => prev.filter((id) => id !== userId));
   };
 
-  const getSelectedChats = (): ChatResponse[] => {
-    return directChats.filter((chat) => selectedContacts.includes(chat.id));
+  const getSelectedContacts = (): FriendContactResponse[] => {
+    return combinedContacts.filter((contact) =>
+      selectedContacts.includes(contact.userId)
+    );
   };
 
   const handleAddMembers = async () => {
     if (!chat) return;
     try {
       closeModal();
-      const selectedChats = getSelectedChats();
-      const userIds = selectedChats
-        .map((chat) => chat.otherMemberUserIds?.[0])
-        .filter((id): id is string => typeof id === "string");
-
-      // Add all selected members at once
-      await useChatStore.getState().addMembersToChat(chat.id, userIds);
+      await useChatStore.getState().addMembersToChat(chat.id, selectedContacts);
       setSidebarInfo(SidebarInfoMode.DEFAULT);
     } catch (error) {
       handleError(error, "Failed to add members");
@@ -64,9 +75,7 @@ const AddMemberModal: React.FC = () => {
   const handleCopy = async () => {
     const success = await copyToClipboard(invitationLink);
     if (success) {
-      toast.success(
-        "Invitation Link copied! You can use this to invite people"
-      );
+      toast.success("Invitation Link copied!");
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } else {
@@ -89,28 +98,34 @@ const AddMemberModal: React.FC = () => {
       <SearchBar placeholder="Search for people..." />
 
       <div className="flex flex-col items-start h-[50vh] overflow-y-auto mt-2">
-        {directChats.length > 0 ? (
-          directChats.map((chat) => (
+        {loading ? (
+          <p className="text-center w-full text-gray-500">
+            Loading contacts...
+          </p>
+        ) : combinedContacts.length > 0 ? (
+          combinedContacts.map((contact) => (
             <div
-              key={chat.id}
+              key={contact.userId}
               className="flex items-center w-full gap-3 p-2 text-left transition custom-border-b hover:bg-[var(--hover-color)] cursor-pointer"
-              onClick={() => handleContactToggle(chat.id)}
+              onClick={() => handleContactToggle(contact.userId)}
             >
               <div className="flex items-center gap-3 flex-1">
                 <Avatar
-                  avatarUrl={chat.avatarUrl}
-                  name={chat.name ?? undefined}
+                  avatarUrl={contact.avatarUrl}
+                  name={contact.firstName}
                 />
-                <h2 className="font-medium">{chat.name}</h2>
+                <h2 className="font-medium">
+                  {contact.firstName} {contact.lastName}
+                </h2>
               </div>
               <div
                 className={`w-4 h-4 rounded border-2 ${
-                  selectedContacts.includes(chat.id)
+                  selectedContacts.includes(contact.userId)
                     ? "bg-[var(--primary-green)] border-[var(--primary-green)]"
                     : "border-[var(--border-color)]"
                 } flex items-center justify-center`}
               >
-                {selectedContacts.includes(chat.id) && (
+                {selectedContacts.includes(contact.userId) && (
                   <span className="material-symbols-outlined text-white">
                     check
                   </span>
@@ -129,17 +144,16 @@ const AddMemberModal: React.FC = () => {
       {/* Selected contacts preview */}
       {selectedContacts.length > 0 && (
         <div className="flex flex-wrap gap-1 items-center py-2">
-          {getSelectedChats().map((chat) => (
-            <div key={chat.id} className="flex items-center gap-2">
+          {getSelectedContacts().map((contact) => (
+            <div key={contact.userId} className="flex items-center gap-2">
               <div
-                key={chat.id}
                 className="relative w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 cursor-pointer group"
-                onClick={() => handleRemoveContact(chat.id)}
+                onClick={() => handleRemoveContact(contact.userId)}
               >
                 <div className="relative">
                   <Avatar
-                    avatarUrl={chat.avatarUrl}
-                    name={chat.name || ""}
+                    avatarUrl={contact.avatarUrl}
+                    name={contact.firstName}
                     size="8"
                     textSize="text-sm"
                   />
@@ -151,7 +165,9 @@ const AddMemberModal: React.FC = () => {
                 </div>
               </div>
               {selectedContacts.length === 1 && (
-                <span className="text-sm font-medium">{chat.name}</span>
+                <span className="text-sm font-medium">
+                  {contact.firstName} {contact.lastName}
+                </span>
               )}
             </div>
           ))}

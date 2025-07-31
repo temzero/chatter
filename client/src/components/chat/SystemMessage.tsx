@@ -74,8 +74,8 @@ const SystemMessage = ({
         return "block";
       case SystemEventType.CHAT_RENAMED:
         return "edit";
-      // case SystemEventType.CHAT_UPDATE_AVATAR:
-      //   return "image";
+      case SystemEventType.CHAT_UPDATE_AVATAR:
+        return "image";
       case SystemEventType.CHAT_UPDATE_DESCRIPTION:
         return "notes";
       case SystemEventType.MEMBER_UPDATE_NICKNAME:
@@ -90,23 +90,30 @@ const SystemMessage = ({
   };
 
   return (
-    <p
-      className={`flex items-center gap-1 opacity-60 italic truncate text-center ${getClass()}`}
-    >
-      {getIconName() && (
-        <span className="material-symbols-outlined">{getIconName()}</span>
-      )}
-      {getSystemMessageContent()}
+    <div className="flex flex-col items-center">
       {systemEvent === SystemEventType.CHAT_UPDATE_AVATAR &&
         content &&
         !isSidebar && (
           <img
             src={content}
             alt="Chat Avatar"
-            className="w-10 h-10 custom-border rounded-lg ml-1"
+            className="aspect-square w-[200px] h-[200px] rounded-[32px] border-4 border-[--border-color]"
+            onError={(e) => {
+              // Hide the image if it fails to load
+              const target = e.target as HTMLImageElement;
+              target.style.display = "none";
+            }}
           />
         )}
-    </p>
+      <p
+        className={`flex items-center gap-1 opacity-60 italic truncate text-center ${getClass()}`}
+      >
+        {getIconName() && (
+          <span className="material-symbols-outlined">{getIconName()}</span>
+        )}
+        {getSystemMessageContent()}
+      </p>
+    </div>
   );
 };
 

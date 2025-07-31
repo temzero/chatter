@@ -28,7 +28,10 @@ interface ChatStore {
 
   initialize: () => Promise<void>;
   fetchChats: () => Promise<void>;
-  fetchChatById: (chatId?: string) => Promise<void>;
+  fetchChatById: (
+    chatId?: string,
+    options?: { fetchFullData?: boolean }
+  ) => Promise<ChatResponse>;
   getDirectChatByUserId: (userId: string) => Promise<ChatResponse | void>;
   setActiveChat: (chat: ChatResponse | null) => Promise<void>;
   setActiveChatById: (chatId: string | null) => Promise<void>;
@@ -113,13 +116,17 @@ export const useChatStore = create<ChatStore>()(
           }
         },
 
-        fetchChatById: async (chatId) => {
+        fetchChatById: async (chatId, options = { fetchFullData: false }) => {
           const targetChatId = chatId || get().activeChat?.id;
-          if (!targetChatId) return;
+          if (!targetChatId) {
+            throw new Error("No chat ID provided and no active chat");
+          }
 
           set({ isLoading: true });
           try {
             const chat = await chatService.fetchChatById(targetChatId);
+
+            // Update chat in state
             set((state) => ({
               chats: state.chats.some((c) => c.id === targetChatId)
                 ? state.chats.map((c) => (c.id === targetChatId ? chat : c))
@@ -127,11 +134,23 @@ export const useChatStore = create<ChatStore>()(
               activeChat:
                 state.activeChat?.id === targetChatId ? chat : state.activeChat,
             }));
+
+            // Optionally fetch full data
+            if (options.fetchFullData) {
+              await Promise.all([
+                useChatMemberStore
+                  .getState()
+                  .fetchChatMembers(targetChatId, chat.type),
+                useMessageStore.getState().fetchMessages(targetChatId),
+              ]);
+            }
+
+            return chat;
           } catch (error) {
-            set({ activeChat: null, error: "Failed to load chat" });
+            set({ activeChat: null });
             handleError(error, "Failed to fetch chat");
             window.history.pushState({}, "", "/");
-            // window.location.reload();
+            throw error;
           } finally {
             set({ isLoading: false });
           }

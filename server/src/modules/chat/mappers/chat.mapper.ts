@@ -95,7 +95,7 @@ export class ChatMapper {
     const otherMembers = chat.members.filter((m) => m.userId !== currentUserId);
 
     if (!myMember) {
-      throw new Error('Current user is not a member of this group chat');
+      throw new Error('You must be a member to access this chat');
     }
 
     let unreadCount = 0;
@@ -137,6 +137,26 @@ export class ChatMapper {
       otherMemberUserIds: otherMembers.map((m) => m.userId),
       unreadCount,
       mutedUntil,
+    };
+  }
+
+  transformToPublicChatDto(chat: Chat): ChatResponseDto {
+    return {
+      id: chat.id,
+      type: ChatType.CHANNEL,
+      myMemberId: null,
+      myRole: null,
+      name: chat.name ?? 'Unnamed Channel',
+      avatarUrl: chat.avatarUrl ?? null,
+      description: chat.description ?? null,
+      updatedAt: chat.updatedAt,
+      pinnedMessage: chat.pinnedMessage
+        ? this.messageMapper.toMessageResponseDto(chat.pinnedMessage)
+        : null,
+      lastMessage: null, // Optional: you can fetch the most recent public message if needed
+      otherMemberUserIds: [],
+      unreadCount: 0,
+      mutedUntil: null,
     };
   }
 

@@ -13,7 +13,6 @@ import { FriendshipService } from './friendship.service';
 import { SuccessResponse } from '../../common/api-response/success';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
-import { FriendshipResponseDto } from './dto/responses/friendship-response.dto';
 import { FriendshipStatus } from './constants/friendship-status.constants';
 import { RespondToRequestDto } from './dto/requests/response-to-request.dto';
 import { FriendRequestResponseDto } from './dto/responses/friend-request-response.dto';
@@ -22,6 +21,8 @@ import { UserService } from '../user/user.service';
 import { ErrorResponse } from 'src/common/api-response/errors';
 import { FriendshipUpdateNotificationDto } from './dto/responses/friendship-update-notification.dto';
 import { NotificationWsService } from '../websocket/notification.service';
+import { ContactResponseDto } from './dto/responses/friend-contact-response.dto';
+import { mapToFriendContactResponseDto } from './mappers/friendContacts.mapper';
 
 @Controller('friendships')
 @UseGuards(JwtAuthGuard)
@@ -95,16 +96,15 @@ export class FriendshipController {
     );
   }
 
-  @Get()
-  async getFriends(
+  @Get('/contacts')
+  async getFriendContacts(
     @CurrentUser('id') userId: string,
-  ): Promise<SuccessResponse<FriendshipResponseDto[]>> {
+  ): Promise<SuccessResponse<ContactResponseDto[]>> {
     const friendships = await this.friendshipService.getFriends(userId);
-
-    return new SuccessResponse(
-      plainToInstance(FriendshipResponseDto, friendships),
-      'Friends retrieved successfully',
-    );
+    console.log('friendships', friendships);
+    const contacts = mapToFriendContactResponseDto(friendships, userId);
+    console.log('contacts', contacts);
+    return new SuccessResponse(contacts, 'Friends retrieved successfully');
   }
 
   @Get('requests/pending')

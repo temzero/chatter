@@ -10,7 +10,7 @@ export class ChatResponseDto {
 
   @Expose() type: ChatType;
 
-  @Expose() myMemberId: string;
+  @Expose() myMemberId: string | null;
 
   @Expose() updatedAt: Date;
 
@@ -33,7 +33,7 @@ export class ChatResponseDto {
   /** Group/channel only */
   @Expose() description?: string | null;
 
-  @Expose() myRole?: ChatMemberRole;
+  @Expose() myRole?: ChatMemberRole | null;
 
   @Expose()
   @Type(() => MessageResponseDto)

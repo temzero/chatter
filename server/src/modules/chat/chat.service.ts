@@ -211,10 +211,6 @@ export class ChatService {
     return plainToInstance(ChatResponseDto, updatedChat);
   }
 
-  async getChatById(chatId: string, userId: string): Promise<ChatResponseDto> {
-    return this.getUserChat(chatId, userId);
-  }
-
   async getUserChats(userId: string): Promise<ChatResponseDto[]> {
     const chats = await this.buildFullChatQueryForUser(userId)
       .orderBy('COALESCE(lastMessage.createdAt, chat.createdAt)', 'DESC')
@@ -237,24 +233,108 @@ export class ChatService {
     );
   }
 
+  // async getUserChat(chatId: string, userId: string): Promise<ChatResponseDto> {
+  //   const chat = await this.buildFullChatQueryForUser(userId)
+  //     .andWhere('chat.id = :chatId', { chatId })
+  //     .getOne();
+
+  //   if (!chat) ErrorResponse.notFound('Chat not found or not accessible');
+
+  //   return chat.type === ChatType.DIRECT
+  //     ? this.chatMapper.transformToDirectChatDto(
+  //         chat,
+  //         userId,
+  //         this.messageService,
+  //       )
+  //     : this.chatMapper.transformToGroupChatDto(
+  //         chat,
+  //         userId,
+  //         this.messageService,
+  //       );
+  // }
+
+  // async getUserChat(chatId: string, userId: string): Promise<ChatResponseDto> {
+  //   // First try to get chat with user membership (normal flow)
+  //   const chat = await this.buildFullChatQueryForUser(userId)
+  //     .andWhere('chat.id = :chatId', { chatId })
+  //     .getOne();
+
+  //   // If not found, try to get the chat directly — only if it's a public channel
+  //   if (!chat) {
+  //     const channel = await this.chatRepo.findOne({
+  //       where: { id: chatId, type: ChatType.CHANNEL },
+  //       relations: [
+  //         'members',
+  //         'members.user',
+  //         'pinnedMessage',
+  //         'pinnedMessage.sender',
+  //         'pinnedMessage.attachments',
+  //         'pinnedMessage.forwardedFromMessage',
+  //       ],
+  //     });
+
+  //     if (!channel) {
+  //       ErrorResponse.notFound('Chat not found or not accessible');
+  //     }
+
+  //     return this.chatMapper.transformToGroupChatDto(
+  //       channel,
+  //       userId,
+  //       this.messageService,
+  //     );
+  //   }
+
+  //   return chat.type === ChatType.DIRECT
+  //     ? this.chatMapper.transformToDirectChatDto(
+  //         chat,
+  //         userId,
+  //         this.messageService,
+  //       )
+  //     : this.chatMapper.transformToGroupChatDto(
+  //         chat,
+  //         userId,
+  //         this.messageService,
+  //       );
+  // }
+
   async getUserChat(chatId: string, userId: string): Promise<ChatResponseDto> {
+    // First try to get chat with user membership
     const chat = await this.buildFullChatQueryForUser(userId)
       .andWhere('chat.id = :chatId', { chatId })
       .getOne();
 
-    if (!chat) ErrorResponse.notFound('Chat not found or not accessible');
+    if (chat) {
+      return chat.type === ChatType.DIRECT
+        ? this.chatMapper.transformToDirectChatDto(
+            chat,
+            userId,
+            this.messageService,
+          )
+        : this.chatMapper.transformToGroupChatDto(
+            chat,
+            userId,
+            this.messageService,
+          );
+    }
 
-    return chat.type === ChatType.DIRECT
-      ? this.chatMapper.transformToDirectChatDto(
-          chat,
-          userId,
-          this.messageService,
-        )
-      : this.chatMapper.transformToGroupChatDto(
-          chat,
-          userId,
-          this.messageService,
-        );
+    // If not a member, allow access only if it's a public channel
+    const channel = await this.chatRepo.findOne({
+      where: { id: chatId, type: ChatType.CHANNEL },
+      relations: [
+        'members',
+        'members.user',
+        'pinnedMessage',
+        'pinnedMessage.sender',
+        'pinnedMessage.attachments',
+        'pinnedMessage.forwardedFromMessage',
+      ],
+    });
+
+    if (!channel) {
+      ErrorResponse.notFound('Chat not found or not accessible');
+    }
+
+    return this.chatMapper.transformToPublicChatDto(channel);
   }
 
   async pinMessage(

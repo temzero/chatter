@@ -152,30 +152,30 @@ export class WebsocketService {
       excludeSender?: boolean;
     } = {},
   ) {
-    console.log(`🔔 Emitting event '${event}' to chat '${chatId}'`);
+    // console.log(`🔔 Emitting event '${event}' to chat '${chatId}'`);
     const members =
       await this.chatMemberService.getMemberUserIdsAndMuteStatus(chatId);
-    console.log('👥 Members to notify:', members);
+    // console.log('👥 Members to notify:', members);
 
     const blockedUserIds = options.senderId
       ? await this.blockService.getBlockedUserIds(options.senderId)
       : [];
-    console.log('⛔ Blocked userIds:', blockedUserIds);
+    // console.log('⛔ Blocked userIds:', blockedUserIds);
 
     for (const { userId, isMuted } of members) {
-      console.log(`➡️ Checking member: ${userId}, muted: ${isMuted}`);
+      // console.log(`➡️ Checking member: ${userId}, muted: ${isMuted}`);
 
       if (
         options.excludeSender &&
         options.senderId &&
         userId === options.senderId
       ) {
-        console.log(`🚫 Skipping sender (excludeSender = true): ${userId}`);
+        // console.log(`🚫 Skipping sender (excludeSender = true): ${userId}`);
         continue;
       }
 
       if (options.senderId && blockedUserIds.includes(userId)) {
-        console.log(`🚫 Skipping blocked user: ${userId}`);
+        // console.log(`🚫 Skipping blocked user: ${userId}`);
         continue;
       }
 
@@ -188,10 +188,10 @@ export class WebsocketService {
         },
       };
 
-      console.log(`📤 Emitting to user ${userId}:`, {
-        event,
-        payload: enhancedPayload,
-      });
+      // console.log(`📤 Emitting to user ${userId}:`, {
+      //   event,
+      //   payload: enhancedPayload,
+      // });
 
       this.emitToUser(userId, event, enhancedPayload);
     }
@@ -199,10 +199,10 @@ export class WebsocketService {
 
   emitToUser(userId: string, event: string, payload: any) {
     const socketIds = this.getUserSocketIds(userId);
-    console.log(`🔌 Emitting to user ${userId} via sockets:`, socketIds);
+    // console.log(`🔌 Emitting to user ${userId} via sockets:`, socketIds);
 
     for (const socketId of socketIds) {
-      console.log(`📡 Sending to socket ${socketId}`);
+      // console.log(`📡 Sending to socket ${socketId}`);
       this.server.to(socketId).emit(event, payload);
     }
   }

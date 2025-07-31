@@ -11,7 +11,7 @@ import { ModalType, useModalStore } from "@/stores/modalStore";
 import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
 import { GroupChatMember } from "@/types/responses/chatMember.response";
 import { useCurrentUserId } from "@/stores/authStore";
-import { ChatMemberRole } from "@/types/enums/ChatMemberRole";
+import { ChatMemberRole } from "@/types/enums/chatMemberRole";
 import { ChatType } from "@/types/enums/ChatType";
 
 const GroupChatEdit = () => {

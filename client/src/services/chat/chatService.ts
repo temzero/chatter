@@ -3,6 +3,7 @@ import type { ChatResponse } from "@/types/responses/chat.response";
 import { directChatService } from "./directChatService";
 import { groupChatService } from "./groupChatService";
 import type { ApiSuccessResponse } from "@/types/responses/apiSuccess.response";
+import { toast } from "react-toastify";
 
 export const chatService = {
   ...directChatService,
@@ -21,6 +22,7 @@ export const chatService = {
 
   // Get a specific chat by ID
   async fetchChatById(chatId: string): Promise<ChatResponse> {
+    toast.info("Fetch chat");
     const response = await API.get<ApiSuccessResponse<ChatResponse>>(
       `/chat/${chatId}`
     );

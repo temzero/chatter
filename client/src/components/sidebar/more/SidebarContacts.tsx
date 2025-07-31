@@ -1,12 +1,9 @@
 // SidebarContacts.tsx
 import React from "react";
 import SidebarLayout from "@/pages/SidebarLayout";
-import { useChatStore } from "@/stores/chatStore";
-import { ChatType } from "@/types/enums/ChatType";
-import { ChatResponse } from "@/types/responses/chat.response";
-import { useDirectChatPartner } from "@/stores/chatMemberStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
-import { DirectChatMember } from "@/types/responses/chatMember.response";
+import { useFriendContacts } from "@/hooks/useFriendContacts";
+import { FriendContactResponse } from "@/types/responses/friendContact.response";
 
 interface SidebarContactsProps {
   onVideoCall?: (phoneNumber: string) => void;
@@ -14,32 +11,27 @@ interface SidebarContactsProps {
 }
 
 interface ContactItemProps {
-  chat: ChatResponse;
+  contact: FriendContactResponse;
   onVideoCall?: (phoneNumber: string) => void;
   onAudioCall?: (phoneNumber: string) => void;
 }
 
 const ContactItem: React.FC<ContactItemProps> = ({
-  chat,
+  contact,
   onVideoCall,
   onAudioCall,
 }) => {
-  const chatPartner = useDirectChatPartner(
-    chat.id,
-    chat.myMemberId
-  ) as DirectChatMember;
-
   const handleVideoCall = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (chatPartner?.phoneNumber) {
-      onVideoCall?.(chatPartner.phoneNumber);
+    if (contact?.phoneNumber) {
+      onVideoCall?.(contact.phoneNumber);
     }
   };
 
   const handleAudioCall = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (chatPartner?.phoneNumber) {
-      onAudioCall?.(chatPartner.phoneNumber);
+    if (contact?.phoneNumber) {
+      onAudioCall?.(contact.phoneNumber);
     }
   };
 
@@ -47,16 +39,16 @@ const ContactItem: React.FC<ContactItemProps> = ({
     <div className="flex gap-3 items-center justify-between custom-border-b p-3 hover:bg-[var(--hover-color)] cursor-pointer">
       <div className="flex items-center gap-3">
         <Avatar
-          avatarUrl={chatPartner?.avatarUrl}
-          name={chatPartner?.firstName || ""}
+          avatarUrl={contact.avatarUrl}
+          name={contact.firstName}
           size="10"
         />
         <h1 className="font-medium">
-          {chatPartner?.firstName || chat.name || "Unknown"}
+          {contact.firstName} {contact.lastName}
         </h1>
       </div>
       <div className="flex gap-2 items-center">
-        {chatPartner?.phoneNumber && (
+        {contact?.phoneNumber && (
           <>
             <button
               className="opacity-60 hover:opacity-100 hover:text-green-500"
@@ -83,18 +75,19 @@ const SidebarContacts: React.FC<SidebarContactsProps> = ({
   onVideoCall,
   onAudioCall,
 }) => {
-  const chats = useChatStore((s) => s.chats);
-  const directChats = chats.filter(
-    (chat): chat is ChatResponse => chat.type === ChatType.DIRECT
-  );
+  const { contacts: friendContacts, loading } = useFriendContacts();
 
   return (
     <SidebarLayout title="Contacts">
-      {directChats.length > 0 ? (
-        directChats.map((chat) => (
+      {loading ? (
+        <div className="text-center py-4 text-gray-400">
+          Loading contacts...
+        </div>
+      ) : friendContacts.length > 0 ? (
+        friendContacts.map((contact) => (
           <ContactItem
-            key={chat.id}
-            chat={chat}
+            key={contact.userId}
+            contact={contact}
             onVideoCall={onVideoCall}
             onAudioCall={onAudioCall}
           />

@@ -57,7 +57,7 @@ export class ChatController {
     @CurrentUser('id') userId: string,
   ): Promise<SuccessResponse<ChatResponseDto>> {
     try {
-      const chat = await this.chatService.getChatById(id, userId);
+      const chat = await this.chatService.getUserChat(id, userId);
 
       return new SuccessResponse(
         chat,
@@ -141,7 +141,7 @@ export class ChatController {
     @Body() updateChatDto: UpdateChatDto,
   ): Promise<SuccessResponse<ChatResponseDto>> {
     try {
-      const chat = await this.chatService.getChatById(chatId, userId);
+      const chat = await this.chatService.getUserChat(chatId, userId);
 
       if (chat.type === ChatType.DIRECT) {
         const isParticipant = await this.chatService.isChatParticipant(
@@ -226,51 +226,6 @@ export class ChatController {
       ErrorResponse.throw(error, 'Failed to update chat');
     }
   }
-
-  // @Put(':chatId')
-  // async update(
-  //   @CurrentUser('id') userId: string,
-  //   @Param('chatId') chatId: string,
-  //   @Body() updateChatDto: UpdateChatDto,
-  // ): Promise<SuccessResponse<ChatResponseDto>> {
-  //   try {
-  //     const chat = await this.chatService.getChatById(chatId, userId);
-
-  //     if (chat.type === ChatType.DIRECT) {
-  //       const isParticipant = await this.chatService.isChatParticipant(
-  //         chatId,
-  //         userId,
-  //       );
-  //       if (!isParticipant) {
-  //         ErrorResponse.unauthorized('Unauthorized to update chat');
-  //       }
-  //     } else {
-  //       const isAdminOrOwner = await this.chatService.isAdminOrOwner(
-  //         chatId,
-  //         userId,
-  //       );
-  //       if (!isAdminOrOwner) {
-  //         ErrorResponse.unauthorized(
-  //           'User must be Admin or Owner to update chat',
-  //         );
-  //       }
-  //     }
-
-  //     const updatedChat = await this.chatService.updateChat(
-  //       chat,
-  //       updateChatDto,
-  //     );
-
-  //     const responseData =
-  //       updatedChat.type === ChatType.DIRECT
-  //         ? plainToInstance(ChatResponseDto, updatedChat)
-  //         : plainToInstance(ChatResponseDto, updatedChat);
-
-  //     return new SuccessResponse(responseData, 'Chat updated successfully');
-  //   } catch (error: unknown) {
-  //     ErrorResponse.throw(error, 'Failed to update chat');
-  //   }
-  // }
 
   @Put(':chatId/pin/:messageId')
   async pinMessage(

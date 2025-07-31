@@ -36,7 +36,10 @@ export function useChatSocketListeners() {
 
       if (!chatExists) {
         try {
-          await useChatStore.getState().fetchChatById(message.chatId);
+          // Fetch both chat info and messages in one call
+          await useChatStore.getState().fetchChatById(message.chatId, {
+            fetchFullData: true,
+          });
         } catch (error) {
           console.error("Failed to fetch chat for incoming message:", error);
           toast.error("New message received but chat not found!");

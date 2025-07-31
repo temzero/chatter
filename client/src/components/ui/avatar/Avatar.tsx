@@ -24,6 +24,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   return (
     <div
       key={id}
+      title={name}
       className={`relative w-${size} h-${size} aspect-square flex items-center justify-center overflow-hidden rounded-full border-2 ${
         isBlocked ? "border-red-500/60" : "border-[var(--border-color)]"
       } ${className}`}
