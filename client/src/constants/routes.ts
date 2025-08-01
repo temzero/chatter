@@ -9,6 +9,7 @@ export const ROUTES = {
   },
   PRIVATE: {
     HOME: "/",
-    CHAT: "/:id",
+    CHAT: ":id",
+    INVITE: "invite/:token",
   },
 };

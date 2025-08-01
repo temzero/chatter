@@ -14,6 +14,7 @@ import { plainToInstance } from 'class-transformer';
 import { ChatMapper } from './mappers/chat.mapper';
 import { MessageService } from '../message/message.service';
 import { Message } from '../message/entities/message.entity';
+import { InviteLinkService } from '../invite-link/invite-link.service';
 
 @Injectable()
 export class ChatService {
@@ -26,6 +27,7 @@ export class ChatService {
     private readonly messageRepo: Repository<Message>,
     private readonly messageService: MessageService,
     private readonly chatMapper: ChatMapper,
+    private readonly inviteLinkService: InviteLinkService,
   ) {}
 
   // async getOrCreateDirectChat(
@@ -152,6 +154,12 @@ export class ChatService {
 
     const chat = await this.chatRepo.save(createDto);
     await this.addMembers(chat.id, allUserIds, userId);
+
+    // ✅ Generate invite link
+    if (createDto.type === ChatType.GROUP) {
+      await this.inviteLinkService.createInviteLink(chat.id, userId);
+    }
+
     return this.getUserChat(chat.id, userId);
   }
 
@@ -367,7 +375,7 @@ export class ChatService {
     chat.pinnedMessage = message;
     await this.chatRepo.save(chat);
 
-    return this.getUserChat(chatId, userId); // ✅ Already transformed
+    return this.getUserChat(chatId, userId);
   }
 
   async unpinMessage(chatId: string, userId: string): Promise<ChatResponseDto> {
@@ -386,7 +394,7 @@ export class ChatService {
     chat.pinnedMessage = null;
     await this.chatRepo.save(chat);
 
-    return this.getUserChat(chatId, userId); // ✅ Already transformed
+    return this.getUserChat(chatId, userId);
   }
 
   async deleteChat(chatId: string, userId: string): Promise<ChatResponseDto> {
@@ -441,7 +449,8 @@ export class ChatService {
       .leftJoinAndSelect(
         'pinnedForwardedFromMessage.sender',
         'pinnedForwardedFromMessageSender',
-      ); // Add this
+      )
+      .leftJoinAndSelect('chat.inviteLinks', 'inviteLinks');
   }
 
   async isChatParticipant(chatId: string, userId: string): Promise<boolean> {

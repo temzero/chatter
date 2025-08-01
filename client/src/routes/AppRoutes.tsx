@@ -5,6 +5,7 @@ import PublicRoutes from "./PublicRoutes";
 import PrivateLayout, { ChatContent } from "../pages/PrivateLayout";
 import { useIsAuthenticated, useAuthStore } from "@/stores/authStore";
 import { useEffect } from "react";
+import InvitePage from "@/components/ui/invitePage";
 
 const RouteMessageCleaner = () => {
   const location = useLocation();
@@ -32,6 +33,18 @@ const AppRoutes: React.FC = () => {
               <Navigate to={ROUTES.PRIVATE.HOME} replace />
             ) : (
               <PublicRoutes />
+            )
+          }
+        />
+
+        {/* Invite route is a special case — still protected */}
+        <Route
+          path={ROUTES.PRIVATE.INVITE}
+          element={
+            isAuthenticated ? (
+              <InvitePage />
+            ) : (
+              <Navigate to={ROUTES.PUBLIC.LOGIN} />
             )
           }
         />

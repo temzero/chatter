@@ -32,7 +32,7 @@ const Login = () => {
   };
 
   return (
-    <AuthenticationLayout showExampleButton loading={loading}>
+    <AuthenticationLayout loading={loading}>
       <motion.div
         initial={{ scale: 1.2, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}

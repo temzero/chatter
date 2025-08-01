@@ -4,6 +4,7 @@ import { directChatService } from "./directChatService";
 import { groupChatService } from "./groupChatService";
 import type { ApiSuccessResponse } from "@/types/responses/apiSuccess.response";
 import { toast } from "react-toastify";
+import { handleError } from "@/utils/handleError";
 
 export const chatService = {
   ...directChatService,
@@ -46,5 +47,65 @@ export const chatService = {
       `/chat/${chatId}`
     );
     return response.data.payload;
+  },
+
+  async joinChatWithInvite(
+    token: string
+  ): Promise<{ chatId: string; message: string }> {
+    const validToken = token.split("/").pop()?.trim();
+    if (!validToken || validToken.includes("/")) {
+      throw new Error("Invalid token format");
+    }
+
+    try {
+      const response = await API.post<{
+        payload: string;
+        message: string;
+      }>(`/invite/join/${validToken}`);
+      const chatId = response.data.payload;
+      const message = response.data.message;
+      return { chatId, message };
+    } catch (error) {
+      handleError(error, "Could not join chat with this invite link");
+      throw error;
+    }
+  },
+
+  async generateInviteLink(
+    chatId: string,
+    options?: { expiresAt?: string; maxUses?: number }
+  ): Promise<string> {
+    try {
+      const response = await API.post<ApiSuccessResponse<string>>(
+        `/invite/${chatId}`,
+        {
+          expiresAt: options?.expiresAt,
+          maxUses: options?.maxUses,
+        }
+      );
+      toast.success("Invite link created!");
+      return response.data.payload;
+    } catch (error) {
+      handleError(error, "Could not generate invite link");
+      throw error;
+    }
+  },
+
+  async refreshInviteLink(token: string): Promise<string> {
+    const validToken = token.split("/").pop()?.trim();
+    if (!validToken || validToken.includes("/")) {
+      throw new Error("Invalid token format");
+    }
+
+    try {
+      const response = await API.post<ApiSuccessResponse<string>>(
+        `/invite/refresh/${validToken}`
+      );
+      toast.success("Invite link refreshed!");
+      return response.data.payload;
+    } catch (error) {
+      handleError(error, "Could not refresh invite link");
+      throw error;
+    }
   },
 };

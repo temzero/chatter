@@ -13,6 +13,7 @@ import {
 import { Message } from '../../message/entities/message.entity';
 import { ChatMember } from 'src/modules/chat-member/entities/chat-member.entity';
 import { ChatType } from '../constants/chat-types.constants';
+import { InviteLink } from 'src/modules/invite-link/entities/invite-link.entity';
 
 @Entity('chat')
 export class Chat {
@@ -52,6 +53,9 @@ export class Chat {
 
   @Column({ default: false, nullable: true })
   is_broadcast_only?: boolean;
+
+  @OneToMany(() => InviteLink, (invite) => invite.chat)
+  inviteLinks: InviteLink[];
 
   /* Timestamps */
   @CreateDateColumn({ name: 'created_at' })

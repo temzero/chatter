@@ -101,9 +101,7 @@ export class FriendshipController {
     @CurrentUser('id') userId: string,
   ): Promise<SuccessResponse<ContactResponseDto[]>> {
     const friendships = await this.friendshipService.getFriends(userId);
-    console.log('friendships', friendships);
     const contacts = mapToFriendContactResponseDto(friendships, userId);
-    console.log('contacts', contacts);
     return new SuccessResponse(contacts, 'Friends retrieved successfully');
   }
 

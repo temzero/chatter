@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useModalStore } from "@/stores/modalStore";
-import { useChatStore } from "@/stores/chatStore";
-import { ChatResponse } from "@/types/responses/chat.response";
+import { useActiveChat, useChatStore } from "@/stores/chatStore";
 import { Avatar } from "../ui/avatar/Avatar";
 import SearchBar from "../ui/SearchBar";
 import { childrenModalAnimation } from "@/animations/modalAnimations";
@@ -17,10 +16,10 @@ import { useAllUniqueMembers } from "@/hooks/useAllUniqueMembers";
 
 const AddMemberModal: React.FC = () => {
   const [copied, setCopied] = useState(false);
+  const [refreshed, setRefreshed] = useState(false);
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
 
-  const modalContent = useModalStore((state) => state.modalContent);
-  const chat = modalContent?.props?.chat as ChatResponse | undefined;
+  const chat = useActiveChat();
   const closeModal = useModalStore((state) => state.closeModal);
   const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
 
@@ -70,10 +69,25 @@ const AddMemberModal: React.FC = () => {
     }
   };
 
-  const invitationLink = `https://chatter.com/invite/${chat?.id || ""}`;
+  const primaryInviteLink = chat?.inviteLinks?.[0];
+  const primaryInviteLinkToken = primaryInviteLink?.split("/").pop() ?? "";
+
+  const generateInviteLink = async () => {
+    if (!chat) return;
+    await useChatStore.getState().generateInviteLink(chat.id);
+  };
+
+  const handleRefreshInviteLink = async () => {
+    if (!chat || refreshed) return;
+    await useChatStore
+      .getState()
+      .refreshInviteLink(chat.id, primaryInviteLinkToken);
+    setRefreshed(true);
+    // setTimeout(() => setRefreshed(false), 2000);
+  };
 
   const handleCopy = async () => {
-    const success = await copyToClipboard(invitationLink);
+    const success = await copyToClipboard(primaryInviteLink);
     if (success) {
       toast.success("Invitation Link copied!");
       setCopied(true);
@@ -175,7 +189,7 @@ const AddMemberModal: React.FC = () => {
       )}
 
       {/* Action buttons */}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col">
         {selectedContacts.length > 0 ? (
           <button
             className="w-full bg-[var(--primary-green)] p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed"
@@ -186,22 +200,56 @@ const AddMemberModal: React.FC = () => {
               : `Add ${selectedContacts.length} Members`}
           </button>
         ) : (
-          <div className="flex items-center gap-2 bg-[var(--input-bg)] rounded w-full border-2 border-[--border-color]">
-            <p className="text-sm p-1 px-1.5 whitespace-nowrap overflow-auto scrollbar-hide">
-              {invitationLink}
-            </p>
-            <button
-              className="border-l-2 border-[--border-color] p-1 px-2 select-none hover:bg-[--hover-color]"
-              onClick={handleCopy}
-            >
-              <span
-                className={`material-symbols-outlined ${
-                  copied && "text-green-500 font-bold"
-                }`}
+          <div className="flex items-center bg-[var(--input-bg)] rounded w-full border-2 border-[--border-color]">
+            {primaryInviteLink ? (
+              <div className="flex items-center w-full gap-1">
+                {!refreshed && (
+                  <button
+                    title="Refresh"
+                    className={`border-r-2 border-[--border-color] p-1 px-2 select-none ${
+                      refreshed
+                        ? "cursor-not-allowed"
+                        : "hover:bg-[--hover-color]"
+                    }`}
+                    onClick={handleRefreshInviteLink}
+                    disabled={refreshed}
+                  >
+                    <span
+                      className={`material-symbols-outlined ${
+                        refreshed && "text-green-500 font-bold"
+                      }`}
+                    >
+                      {refreshed ? "check" : "refresh"}
+                    </span>
+                  </button>
+                )}
+
+                <p className="text-sm p-1 px-2 whitespace-nowrap overflow-auto scrollbar-hide">
+                  {primaryInviteLink}
+                </p>
+                <button
+                  title="Copy"
+                  className="ml-auto border-l-2 border-[--border-color] p-1 px-2 select-none hover:bg-[--hover-color]"
+                  onClick={handleCopy}
+                >
+                  <span
+                    className={`material-symbols-outlined ${
+                      copied && "text-green-500 font-bold"
+                    }`}
+                  >
+                    {copied ? "check" : "content_copy"}
+                  </span>
+                </button>
+              </div>
+            ) : (
+              <button
+                className="w-full p-1 px-2 select-none hover:bg-[--hover-color] hover:text-green-400"
+                onClick={generateInviteLink}
               >
-                {copied ? "check" : "content_copy"}
-              </span>
-            </button>
+                <span className="material-symbols-outlined mr-2">add_link</span>
+                Generate Invite Link
+              </button>
+            )}
           </div>
         )}
       </div>

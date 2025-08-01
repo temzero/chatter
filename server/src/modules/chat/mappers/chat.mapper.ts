@@ -10,6 +10,7 @@ import { MessageService } from 'src/modules/message/message.service';
 import { AttachmentType } from 'src/modules/message/constants/attachment-type.constants';
 import { MessageMapper } from 'src/modules/message/mappers/message.mapper';
 import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
+import { getActiveInviteLinks } from 'src/common/utils/invite-link.util';
 
 @Injectable()
 export class ChatMapper {
@@ -135,6 +136,7 @@ export class ChatMapper {
           )
         : null,
       otherMemberUserIds: otherMembers.map((m) => m.userId),
+      inviteLinks: getActiveInviteLinks(chat.inviteLinks),
       unreadCount,
       mutedUntil,
     };

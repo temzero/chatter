@@ -29,7 +29,7 @@ export class GlobalGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   afterInit(server: Server) {
     this.websocketService.setServer(server);
-    console.log('[WS] WebSocket server initialized');
+    // console.log('[WS] WebSocket server initialized');
   }
 
   handleConnection(client: AuthenticatedSocket) {
@@ -41,7 +41,7 @@ export class GlobalGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return;
       }
 
-      console.log(`[WS] New connection: ${client.id} for user ${userId}`);
+      // console.log(`[WS] New connection: ${client.id} for user ${userId}`);
 
       // 1. Register connection with enhanced validation
       const isFirstConnection = this.websocketService.userConnected(
@@ -64,7 +64,7 @@ export class GlobalGateway implements OnGatewayConnection, OnGatewayDisconnect {
         pingInterval: 10000,
       });
 
-      console.log(`[WS] Connection established for ${userId} (${client.id})`);
+      // console.log(`[WS] Connection established for ${userId} (${client.id})`);
     } catch (error) {
       console.error(`[WS] Connection error for ${client.id}:`, error);
       emitWsError(client, error, 'Connection failed');
@@ -73,7 +73,7 @@ export class GlobalGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   handleDisconnect(client: AuthenticatedSocket) {
-    console.log(`[WS] Disconnecting: ${client.id}`);
+    // console.log(`[WS] Disconnecting: ${client.id}`);
 
     const result = this.websocketService.userDisconnected(client.id);
     if (!result) {
@@ -88,7 +88,7 @@ export class GlobalGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
     }, 5000); // 5-second grace period for reconnection
 
-    console.log(`[WS] User ${result.userId} disconnected (${client.id})`);
+    // console.log(`[WS] User ${result.userId} disconnected (${client.id})`);
   }
 
   // --- Helper Methods ---
@@ -120,9 +120,9 @@ export class GlobalGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       const subscribers = this.websocketService.getSubscribersForUser(userId);
       if (subscribers.length > 0) {
-        console.log(
-          `[WS] Notifying ${subscribers.length} subscribers of ${userId}'s status`,
-        );
+        // console.log(
+        //   `[WS] Notifying ${subscribers.length} subscribers of ${userId}'s status`,
+        // );
         subscribers.forEach((socketId) => {
           this.server.to(socketId).emit('presence:update', {
             userId,
@@ -152,9 +152,9 @@ export class GlobalGateway implements OnGatewayConnection, OnGatewayDisconnect {
         throw new Error('Expected array of userIds');
       }
 
-      console.log(
-        `[WS] ${currentUserId} subscribing to ${userIds.length} users`,
-      );
+      // console.log(
+      //   `[WS] ${currentUserId} subscribing to ${userIds.length} users`,
+      // );
 
       // Add subscriptions
       userIds.forEach((targetUserId) => {

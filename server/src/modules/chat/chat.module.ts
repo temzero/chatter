@@ -11,6 +11,7 @@ import { WebSocketModule } from '../websocket/websocket.module';
 import { MessageModule } from '../message/message.module';
 import { ChatMapper } from './mappers/chat.mapper';
 import { BlockModule } from '../block/block.module';
+import { InviteLinkModule } from '../invite-link/invite-link.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { BlockModule } from '../block/block.module';
     forwardRef(() => FriendshipModule),
     forwardRef(() => BlockModule),
     forwardRef(() => WebSocketModule),
+    forwardRef(() => InviteLinkModule),
   ],
   controllers: [ChatController],
   providers: [ChatService, ChatMapper],

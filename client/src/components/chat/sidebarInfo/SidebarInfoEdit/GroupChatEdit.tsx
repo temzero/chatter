@@ -102,7 +102,7 @@ const GroupChatEdit = () => {
 
   const handleOpenAddMemberModal = () => {
     openModal(ModalType.ADD_MEMBER, {
-      chat: activeChat,
+      chatId: activeChat.id,
     });
   };
 

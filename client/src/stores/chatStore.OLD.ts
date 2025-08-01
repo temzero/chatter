@@ -57,7 +57,6 @@ interface ChatStore {
   setUnreadCount: (chatId: string, incrementBy: number) => void;
   setPinnedMessage: (chatId: string, message: MessageResponse | null) => void;
   generateInviteLink: (chatId: string) => Promise<string>;
-  refreshInviteLink: (chatId: string, token: string) => Promise<string>;
   setSearchTerm: (term: string) => void;
   leaveChat: (chatId: string) => Promise<void>;
   deleteChat: (id: string, type: ChatType) => Promise<void>;
@@ -68,24 +67,6 @@ interface ChatStore {
 export const useChatStore = create<ChatStore>()(
   persist(
     (set, get) => {
-      // Helper function to update chat state consistently
-      const updateChatState = (
-        state: ChatStore,
-        chatId: string,
-        updateFn: (chat: ChatResponse) => ChatResponse
-      ) => ({
-        chats: state.chats.map((chat) =>
-          chat.id === chatId ? updateFn(chat) : chat
-        ),
-        filteredChats: state.filteredChats.map((chat) =>
-          chat.id === chatId ? updateFn(chat) : chat
-        ),
-        activeChat:
-          state.activeChat?.id === chatId
-            ? updateFn(state.activeChat)
-            : state.activeChat,
-      });
-
       return {
         chats: [],
         savedChat: null,
@@ -238,12 +219,14 @@ export const useChatStore = create<ChatStore>()(
               [fetchMessagesPromise, fetchMembersPromise].filter(Boolean)
             );
 
-            set((state) =>
-              updateChatState(state, chat.id, (c) => ({
-                ...c,
-                unreadCount: 0,
-              }))
-            );
+            set((state) => ({
+              chats: state.chats.map((c) =>
+                c.id === chat.id ? { ...c, unreadCount: 0 } : c
+              ),
+              filteredChats: state.filteredChats.map((c) =>
+                c.id === chat.id ? { ...c, unreadCount: 0 } : c
+              ),
+            }));
           } catch (error) {
             handleError(error, "Failed to set active chat");
           } finally {
@@ -327,12 +310,18 @@ export const useChatStore = create<ChatStore>()(
           set({ isLoading: true });
           try {
             const updatedChat = await chatService.updateDirectChat(id, payload);
-            set((state) =>
-              updateChatState(state, id, (chat) => ({
-                ...chat,
-                ...updatedChat,
-              }))
-            );
+            set((state) => ({
+              chats: state.chats.map((chat) =>
+                chat.id === id ? { ...chat, ...updatedChat } : chat
+              ),
+              filteredChats: state.filteredChats.map((chat) =>
+                chat.id === id ? { ...chat, ...updatedChat } : chat
+              ),
+              activeChat:
+                state.activeChat?.id === id
+                  ? { ...state.activeChat, ...updatedChat }
+                  : state.activeChat,
+            }));
           } catch (error) {
             set({ error: "Failed to update direct chat" });
             handleError(error, "Failed to update chat");
@@ -343,12 +332,18 @@ export const useChatStore = create<ChatStore>()(
         },
 
         updateGroupChatLocally: (id, payload) => {
-          set((state) =>
-            updateChatState(state, id, (chat) => ({
-              ...chat,
-              ...payload,
-            }))
-          );
+          set((state) => ({
+            chats: state.chats.map((chat) =>
+              chat.id === id ? { ...chat, ...payload } : chat
+            ),
+            filteredChats: state.filteredChats.map((chat) =>
+              chat.id === id ? { ...chat, ...payload } : chat
+            ),
+            activeChat:
+              state.activeChat?.id === id
+                ? { ...state.activeChat, ...payload }
+                : state.activeChat,
+          }));
         },
 
         updateGroupChat: async (id, payload) => {
@@ -368,7 +363,11 @@ export const useChatStore = create<ChatStore>()(
         addMembersToChat: async (chatId, userIds) => {
           set({ isLoading: true });
           try {
-            await chatMemberService.addMembers(chatId, userIds);
+            // 1. Call your API/service to add the user
+            await chatMemberService.addMembers(chatId, userIds); // must exist in your service
+
+            // // 2. Optional: Refetch chat to get updated members
+            // await get().fetchChatById(chatId);
           } catch (error) {
             handleError(error, "Error adding user to chat");
           } finally {
@@ -387,12 +386,31 @@ export const useChatStore = create<ChatStore>()(
               mutedUntil
             );
 
-            set((state) =>
-              updateChatState(state, chatId, (chat) => ({
-                ...chat,
-                mutedUntil: updatedMuteUntil,
-              }))
-            );
+            set((state) => ({
+              chats: state.chats.map((chat) =>
+                chat.id === chatId
+                  ? {
+                      ...chat,
+                      mutedUntil: updatedMuteUntil,
+                    }
+                  : chat
+              ),
+              filteredChats: state.filteredChats.map((chat) =>
+                chat.id === chatId
+                  ? {
+                      ...chat,
+                      mutedUntil: updatedMuteUntil,
+                    }
+                  : chat
+              ),
+              activeChat:
+                state.activeChat?.id === chatId
+                  ? {
+                      ...state.activeChat,
+                      mutedUntil: updatedMuteUntil,
+                    }
+                  : state.activeChat,
+            }));
           } catch (error) {
             handleError(error, "Failed to set mute");
             throw error;
@@ -401,66 +419,87 @@ export const useChatStore = create<ChatStore>()(
 
         setLastMessage: (chatId, message) => {
           if (!chatId || !message) return;
-          set((state) =>
-            updateChatState(state, chatId, (chat) => ({
-              ...chat,
-              lastMessage: message,
-            }))
-          );
+          set((state) => ({
+            chats: state.chats.map((chat) =>
+              chat.id === chatId ? { ...chat, lastMessage: message } : chat
+            ),
+            filteredChats: state.filteredChats.map((chat) =>
+              chat.id === chatId ? { ...chat, lastMessage: message } : chat
+            ),
+            activeChat:
+              state.activeChat?.id === chatId
+                ? { ...state.activeChat, lastMessage: message }
+                : state.activeChat,
+          }));
         },
 
         setUnreadCount: (chatId: string, incrementBy: number) => {
           const isActiveChat = get().activeChat?.id === chatId;
           console.log("isActiveChat", isActiveChat);
           if (isActiveChat) return;
-          set((state) =>
-            updateChatState(state, chatId, (chat) => ({
-              ...chat,
-              unreadCount: (chat.unreadCount || 0) + incrementBy,
-            }))
-          );
+          set((state) => ({
+            chats: state.chats.map((chat) =>
+              chat.id === chatId
+                ? {
+                    ...chat,
+                    unreadCount: (chat.unreadCount || 0) + incrementBy,
+                  }
+                : chat
+            ),
+            filteredChats: state.filteredChats.map((chat) =>
+              chat.id === chatId
+                ? {
+                    ...chat,
+                    unreadCount: (chat.unreadCount || 0) + incrementBy,
+                  }
+                : chat
+            ),
+          }));
         },
 
         setPinnedMessage: (chatId: string, message: MessageResponse | null) => {
           console.log("setPinnedMessage: ", chatId, message);
-          set((state) =>
-            updateChatState(state, chatId, (chat) => ({
-              ...chat,
-              pinnedMessage: message,
-            }))
-          );
+          set((state) => ({
+            chats: state.chats.map((chat) =>
+              chat.id === chatId ? { ...chat, pinnedMessage: message } : chat
+            ),
+            filteredChats: state.filteredChats.map((chat) =>
+              chat.id === chatId ? { ...chat, pinnedMessage: message } : chat
+            ),
+            activeChat:
+              state.activeChat?.id === chatId
+                ? { ...state.activeChat, pinnedMessage: message }
+                : state.activeChat,
+          }));
         },
 
         generateInviteLink: async (chatId: string) => {
           try {
+            // Use chatService instead of direct API call
             const newInviteLink = await chatService.generateInviteLink(chatId);
-            set((state) =>
-              updateChatState(state, chatId, (chat) => ({
-                ...chat,
-                inviteLinks: [newInviteLink],
-              }))
-            );
+            toast.success("New invite link generated!");
+
+            // Update the local state with the new invite link
+            set((state) => ({
+              chats: state.chats.map((chat) =>
+                chat.id === chatId
+                  ? { ...chat, inviteLinks: [newInviteLink] }
+                  : chat
+              ),
+              filteredChats: state.filteredChats.map((chat) =>
+                chat.id === chatId
+                  ? { ...chat, inviteLinks: [newInviteLink] }
+                  : chat
+              ),
+              activeChat:
+                state.activeChat?.id === chatId
+                  ? { ...state.activeChat, inviteLinks: [newInviteLink] }
+                  : state.activeChat,
+            }));
 
             return newInviteLink;
           } catch (error) {
-            handleError(error, "Failed to generate invite link");
-            throw error;
-          }
-        },
-
-        refreshInviteLink: async (chatId: string, token: string) => {
-          try {
-            const newInviteLink = await chatService.refreshInviteLink(token);
-            set((state) =>
-              updateChatState(state, chatId, (chat) => ({
-                ...chat,
-                inviteLinks: [newInviteLink],
-              }))
-            );
-
-            return newInviteLink;
-          } catch (error) {
-            handleError(error, "Failed to refresh invite link");
+            toast.error("Failed to generate invite link");
             throw error;
           }
         },
@@ -563,6 +602,7 @@ export const useSetActiveSavedChat = () => {
           toast.error("Saved chat does not exist in the database!");
           return;
         }
+        // Optional: store it in state.savedChat
         useChatStore.setState({ savedChat: fetchedSavedChat });
         savedChat = fetchedSavedChat;
       } catch (error) {

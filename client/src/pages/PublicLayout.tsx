@@ -6,7 +6,6 @@ import BackgroundContent from "@/components/ui/BackgroundContent";
 
 interface AuthenticationLayoutProps {
   children: ReactNode;
-  showExampleButton?: boolean;
   loading?: boolean;
 }
 

@@ -47,5 +47,8 @@ export class ChatResponseDto {
   mutedUntil?: string | Date | null;
 
   @Expose()
+  inviteLinks?: string[];
+
+  @Expose()
   isDeleted?: boolean | null;
 }
