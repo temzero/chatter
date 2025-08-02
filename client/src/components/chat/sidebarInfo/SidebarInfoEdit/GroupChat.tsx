@@ -3,7 +3,7 @@ import { ChatResponse } from "@/types/responses/chat.response";
 import { useActiveChat } from "@/stores/chatStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
-import MemberItem from "./GroupChatMember";
+import MemberItem from "./MemberItem";
 import { ChatMemberRole } from "@/types/enums/chatMemberRole";
 import { useActiveMembers } from "@/stores/chatMemberStore";
 import { useMessageStore } from "@/stores/messageStore";

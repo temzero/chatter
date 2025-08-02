@@ -152,6 +152,17 @@ export class ChatMemberService {
     });
   }
 
+  async isMemberExists(chatId: string, userId: string): Promise<boolean> {
+    try {
+      const count = await this.memberRepo.count({
+        where: { chatId, userId, deletedAt: IsNull() },
+      });
+      return count > 0;
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to check member existence');
+    }
+  }
+
   async getMemberByChatIdAndUserId(
     chatId: string,
     userId: string,
@@ -163,7 +174,7 @@ export class ChatMemberService {
       });
 
       if (!member) {
-        ErrorResponse.notFound('Chat member not found or Chat not exist!');
+        ErrorResponse.notFound('Chat member not found!');
       }
 
       return member;

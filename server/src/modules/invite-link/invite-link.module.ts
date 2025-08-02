@@ -6,10 +6,12 @@ import { InviteLink } from './entities/invite-link.entity';
 import { Chat } from '../chat/entities/chat.entity';
 import { ChatMember } from '../chat-member/entities/chat-member.entity';
 import { ChatMemberModule } from '../chat-member/chat-member.module';
+import { MessageModule } from '../message/message.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([InviteLink, Chat, ChatMember]),
+    forwardRef(() => MessageModule),
     forwardRef(() => ChatMemberModule),
   ],
   providers: [InviteLinkService],

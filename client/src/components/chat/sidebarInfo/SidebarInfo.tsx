@@ -5,6 +5,7 @@ import ChatInfoMedia from "./SidebarInfoMedia";
 import PrivateChatEdit from "./SidebarInfoEdit/DirectChatEdit";
 import GroupChatEdit from "./SidebarInfoEdit/GroupChatEdit";
 import { sidebarInfoAnimations } from "@/animations/sidebarInfoAnimations";
+import ChatMembersEdit from "./SidebarInfoEdit/ChatMembersEdit";
 
 const SidebarInfo: React.FC = () => {
   const currentSidebarInfo = useCurrentSidebarInfo();
@@ -15,6 +16,7 @@ const SidebarInfo: React.FC = () => {
     media: <ChatInfoMedia />,
     directEdit: <PrivateChatEdit />,
     groupEdit: <GroupChatEdit />,
+    membersEdit: <ChatMembersEdit />,
   };
 
   // Get the current component and animation

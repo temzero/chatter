@@ -1,4 +1,4 @@
-import { ChatMemberRole } from "../enums/ChatMemberRole";
+import { ChatMemberRole } from "../enums/chatMemberRole";
 import { ChatMemberStatus } from "../enums/chatMemberStatus";
 import { FriendshipStatus } from "../enums/friendshipType";
 

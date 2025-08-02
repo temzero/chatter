@@ -15,6 +15,8 @@ import { generateInviteLink } from 'src/common/utils/invite-link.util';
 import { SuccessResponse } from 'src/common/api-response/success';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { ErrorResponse } from 'src/common/api-response/errors';
+import { SystemEventType } from '../message/constants/system-event-type.constants';
+import { MessageService } from '../message/message.service';
 
 @UseGuards(JwtAuthGuard)
 @Controller('invite')
@@ -22,6 +24,7 @@ export class InviteLinkController {
   constructor(
     private readonly inviteLinkService: InviteLinkService,
     private readonly chatMemberService: ChatMemberService,
+    private readonly messageService: MessageService,
   ) {}
 
   @Post(':chatId')
@@ -49,24 +52,6 @@ export class InviteLinkController {
     }
   }
 
-  // @Post('/join/:token')
-  // @HttpCode(HttpStatus.OK)
-  // async joinChat(
-  //   @CurrentUser('id') currentUserId: string,
-  //   @Param('token') token: string,
-  // ): Promise<SuccessResponse<string>> {
-  //   try {
-  //     const invite = await this.inviteLinkService.validateAndUse(token);
-  //     const chatId = invite.chat.id;
-
-  //     await this.chatMemberService.addMembers(chatId, [currentUserId]);
-
-  //     return new SuccessResponse(chatId, 'You joined the chat successfully');
-  //   } catch (error: unknown) {
-  //     ErrorResponse.throw(error, 'Failed to join chat');
-  //   }
-  // }
-
   @Post('/join/:token')
   @HttpCode(HttpStatus.OK)
   async joinChat(
@@ -78,20 +63,23 @@ export class InviteLinkController {
       const chatId = invite.chat.id;
 
       // Check if user is already a member
-      const existingMember =
-        await this.chatMemberService.getMemberByChatIdAndUserId(
-          chatId,
-          currentUserId,
-        );
+      const memberExist = await this.chatMemberService.isMemberExists(
+        chatId,
+        currentUserId,
+      );
 
-      if (existingMember) {
-        return new SuccessResponse(
-          chatId,
-          'You are already a member of this chat',
-        );
+      if (memberExist) {
+        return new SuccessResponse(chatId, 'You already joined this chat');
       }
 
       await this.chatMemberService.addMembers(chatId, [currentUserId]);
+
+      // Emit system event message for MEMBER_JOINED
+      await this.messageService.createSystemEventMessage(
+        chatId,
+        currentUserId,
+        SystemEventType.MEMBER_JOINED,
+      );
 
       return new SuccessResponse(chatId, 'You joined the chat successfully');
     } catch (error: unknown) {

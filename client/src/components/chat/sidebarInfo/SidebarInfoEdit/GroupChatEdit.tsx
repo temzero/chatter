@@ -17,6 +17,7 @@ import { ChatType } from "@/types/enums/ChatType";
 const GroupChatEdit = () => {
   const currentUserId = useCurrentUserId();
   const activeChat = useChatStore((state) => state.activeChat) as ChatResponse;
+  console.log("activeChat", activeChat);
   const activeMembers = useActiveMembers();
   const updateGroupChat = useChatStore((state) => state.updateGroupChat);
 
@@ -121,6 +122,14 @@ const GroupChatEdit = () => {
   const chatTypeDisplay =
     activeChat.type.charAt(0).toUpperCase() + activeChat.type.slice(1);
 
+  const canLeaveChat =
+    activeMembers &&
+    activeMembers.length > 1 &&
+    !(
+      activeChat.type === ChatType.CHANNEL &&
+      myMember.role === ChatMemberRole.OWNER
+    );
+
   return (
     <aside className="relative w-full h-full overflow-hidden flex flex-col">
       <header className="flex w-full justify-between px-2 items-center min-h-[var(--header-height)] custom-border-b">
@@ -154,10 +163,10 @@ const GroupChatEdit = () => {
         </div>
       </header>
 
-      <div className="overflow-y-auto h-screen">
+      <div className="overflow-y-auto h-screen p-4">
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col items-center p-4 gap-4 w-full"
+          className="flex flex-col items-center gap-4 w-full"
           encType="multipart/form-data"
         >
           <AvatarEdit
@@ -192,7 +201,18 @@ const GroupChatEdit = () => {
           </div>
         </form>
 
-        <div className="custom-border absolute bottom-0 w-full overflow-hidden shadow-xl rounded-t-xl">
+        <button
+          onClick={() => {
+            setSidebarInfo(SidebarInfoMode.MEMBERS_EDIT);
+          }}
+          className="mt-4 border-2 border-[--border-color] text-lg px-3 py-2 rounded flex justify-start items-center gap-2 w-full hover:bg-[--hover-color]"
+        >
+          <span className="material-symbols-outlined text-3xl">groups</span>
+          <h1>Members</h1>
+          <h1 className="ml-auto">{activeMembers.length}</h1>
+        </button>
+
+        <div className="custom-border absolute left-0 bottom-0 w-full overflow-hidden shadow-xl rounded-t-xl">
           {(myMember.role === ChatMemberRole.ADMIN ||
             myMember.role === ChatMemberRole.OWNER) && (
             <button
@@ -204,7 +224,7 @@ const GroupChatEdit = () => {
             </button>
           )}
 
-          {activeMembers && activeMembers.length > 1 && (
+          {canLeaveChat && (
             <button
               className="flex gap-2 justify-center items-center p-2 text-yellow-500 w-full font-medium custom-border-t"
               onClick={handleOpenLeaveChatModal}

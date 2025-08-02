@@ -57,18 +57,14 @@ export const chatService = {
       throw new Error("Invalid token format");
     }
 
-    try {
-      const response = await API.post<{
-        payload: string;
-        message: string;
-      }>(`/invite/join/${validToken}`);
-      const chatId = response.data.payload;
-      const message = response.data.message;
-      return { chatId, message };
-    } catch (error) {
-      handleError(error, "Could not join chat with this invite link");
-      throw error;
-    }
+    const response = await API.post<{
+      payload: string;
+      message: string;
+    }>(`/invite/join/${validToken}`);
+
+    const chatId = response.data.payload;
+    const message = response.data.message;
+    return { chatId, message };
   },
 
   async generateInviteLink(

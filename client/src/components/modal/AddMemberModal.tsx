@@ -83,7 +83,6 @@ const AddMemberModal: React.FC = () => {
       .getState()
       .refreshInviteLink(chat.id, primaryInviteLinkToken);
     setRefreshed(true);
-    // setTimeout(() => setRefreshed(false), 2000);
   };
 
   const handleCopy = async () => {
@@ -111,7 +110,7 @@ const AddMemberModal: React.FC = () => {
 
       <SearchBar placeholder="Search for people..." />
 
-      <div className="flex flex-col items-start h-[50vh] overflow-y-auto mt-2">
+      <div className="flex flex-col items-start h-[50vh] overflow-y-auto mt-2 select-none">
         {loading ? (
           <p className="text-center w-full text-gray-500">
             Loading contacts...
@@ -120,7 +119,7 @@ const AddMemberModal: React.FC = () => {
           combinedContacts.map((contact) => (
             <div
               key={contact.userId}
-              className="flex items-center w-full gap-3 p-2 text-left transition custom-border-b hover:bg-[var(--hover-color)] cursor-pointer"
+              className="flex items-center w-full select-none gap-3 p-2 text-left transition custom-border-b hover:bg-[var(--hover-color)] cursor-pointer"
               onClick={() => handleContactToggle(contact.userId)}
             >
               <div className="flex items-center gap-3 flex-1">
@@ -133,7 +132,7 @@ const AddMemberModal: React.FC = () => {
                 </h2>
               </div>
               <div
-                className={`w-4 h-4 rounded border-2 ${
+                className={`w-4 h-4 rounded border-2 select-none ${
                   selectedContacts.includes(contact.userId)
                     ? "bg-[var(--primary-green)] border-[var(--primary-green)]"
                     : "border-[var(--border-color)]"
@@ -157,7 +156,7 @@ const AddMemberModal: React.FC = () => {
 
       {/* Selected contacts preview */}
       {selectedContacts.length > 0 && (
-        <div className="flex flex-wrap gap-1 items-center py-2">
+        <div className="flex flex-wrap gap-1 items-center py-2 select-none">
           {getSelectedContacts().map((contact) => (
             <div key={contact.userId} className="flex items-center gap-2">
               <div
@@ -189,7 +188,7 @@ const AddMemberModal: React.FC = () => {
       )}
 
       {/* Action buttons */}
-      <div className="flex flex-col">
+      <div className="h-8 flex">
         {selectedContacts.length > 0 ? (
           <button
             className="w-full bg-[var(--primary-green)] p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed"
@@ -202,11 +201,20 @@ const AddMemberModal: React.FC = () => {
         ) : (
           <div className="flex items-center bg-[var(--input-bg)] rounded w-full border-2 border-[--border-color]">
             {primaryInviteLink ? (
-              <div className="flex items-center w-full gap-1">
+              <div className="flex items-center w-full h-full overflow-hidden">
+                <p
+                  onClick={handleCopy}
+                  className={`h-full w-full text-sm p-1 px-2 whitespace-nowrap overflow-auto scrollbar-hide cursor-pointer hover:bg-[--hover-color] ${
+                    copied ? "text-green-500 font-semibold" : ""
+                  }`}
+                  title={copied ? "Link copied!" : "Copy invite link"}
+                >
+                  {copied ? "Copied ✓" : primaryInviteLink}
+                </p>
                 {!refreshed && (
                   <button
                     title="Refresh"
-                    className={`border-r-2 border-[--border-color] p-1 px-2 select-none ${
+                    className={`border-l-2 border-[--border-color] p-1 px-2 opacity-60 hover:opacity-100 select-none ${
                       refreshed
                         ? "cursor-not-allowed"
                         : "hover:bg-[--hover-color]"
@@ -223,30 +231,13 @@ const AddMemberModal: React.FC = () => {
                     </span>
                   </button>
                 )}
-
-                <p className="text-sm p-1 px-2 whitespace-nowrap overflow-auto scrollbar-hide">
-                  {primaryInviteLink}
-                </p>
-                <button
-                  title="Copy"
-                  className="ml-auto border-l-2 border-[--border-color] p-1 px-2 select-none hover:bg-[--hover-color]"
-                  onClick={handleCopy}
-                >
-                  <span
-                    className={`material-symbols-outlined ${
-                      copied && "text-green-500 font-bold"
-                    }`}
-                  >
-                    {copied ? "check" : "content_copy"}
-                  </span>
-                </button>
               </div>
             ) : (
               <button
                 className="w-full p-1 px-2 select-none hover:bg-[--hover-color] hover:text-green-400"
                 onClick={generateInviteLink}
               >
-                <span className="material-symbols-outlined mr-2">add_link</span>
+                <span className="material-symbols-outlined mr-1">wand_stars</span>
                 Generate Invite Link
               </button>
             )}

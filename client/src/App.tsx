@@ -22,7 +22,7 @@ const App: React.FC = () => {
         autoClose={3000}
         hideProgressBar={true}
         newestOnTop={false}
-        closeOnClick
+        // closeOnClick
         rtl={false}
         pauseOnFocusLoss
         draggable

@@ -155,10 +155,10 @@ export class ChatService {
     const chat = await this.chatRepo.save(createDto);
     await this.addMembers(chat.id, allUserIds, userId);
 
-    // ✅ Generate invite link
-    if (createDto.type === ChatType.GROUP) {
-      await this.inviteLinkService.createInviteLink(chat.id, userId);
-    }
+    // // ✅ Generate invite link
+    // if (createDto.type === ChatType.GROUP) {
+    //   await this.inviteLinkService.createInviteLink(chat.id, userId);
+    // }
 
     return this.getUserChat(chat.id, userId);
   }

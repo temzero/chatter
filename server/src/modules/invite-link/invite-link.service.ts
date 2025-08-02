@@ -46,8 +46,9 @@ export class InviteLinkService {
       relations: ['chat'],
     });
 
-    if (!invite || invite.isRevoked)
-      throw new NotFoundException('Invalid or revoked invite link');
+    if (!invite) throw new NotFoundException('Invite link not found');
+    if (invite.isRevoked)
+      throw new BadRequestException('Invite link has been revoked');
     if (invite.expiresAt && new Date() > invite.expiresAt)
       throw new BadRequestException('Invite link has expired');
     if (invite.maxUses !== null && invite.useCount >= invite.maxUses)
