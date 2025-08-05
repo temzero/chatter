@@ -129,6 +129,7 @@ export function useChatSocketListeners() {
       error: string;
       code?: string;
     }) => {
+      console.log('handleMessageError', error)
       // Update specific message state
       useMessageStore
         .getState()
@@ -180,7 +181,7 @@ export function useChatSocketListeners() {
         // Another member was removed - just update members list
         useChatMemberStore
           .getState()
-          .removeMemberLocally(member.chatId, member.userId);
+          .clearChatMember(member.chatId, member.userId);
         console.log(`${memberName} has left the chat`);
         toast.info(`${memberName} has left the chat`);
       }

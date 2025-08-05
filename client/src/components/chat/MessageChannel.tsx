@@ -2,7 +2,7 @@ import React from "react";
 import RenderMultipleAttachments from "../ui/RenderMultipleAttachments";
 import { formatTime } from "@/utils/formatTime";
 import type { MessageResponse } from "@/types/responses/message.response";
-import SystemMessage from "./SystemMessage";
+import SystemMessage, { SystemMessageContent } from "./SystemMessage";
 
 interface ChannelMessageProps {
   message: MessageResponse;
@@ -16,10 +16,11 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ message }) => {
     return (
       <div className="p-1 w-full flex items-center justify-center">
         <SystemMessage
+          message={message}
           systemEvent={message.systemEvent}
           senderId={message.sender.id}
           senderDisplayName={message.sender.displayName}
-          content={message.content}
+          content={message.content as SystemMessageContent}
         />
       </div>
     );

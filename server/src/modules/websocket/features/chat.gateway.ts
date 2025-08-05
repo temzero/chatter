@@ -70,36 +70,46 @@ export class ChatGateway {
     try {
       const senderId = client.data.userId;
       if (!senderId) {
-        client.emit(`error`, { message: 'Unauthorized' });
+        client.emit('error', {
+          messageId: payload.id,
+          chatId: payload.chatId,
+          error: 'Unauthorized',
+        });
         return;
       }
 
+      // Resolve memberId if not provided
       if (!payload.memberId) {
         const member = await this.chatMemberService.getMemberByChatIdAndUserId(
           payload.chatId,
           senderId,
         );
         if (!member) {
-          client.emit(`error`, {
-            message: 'You are not a member of this chat',
+          client.emit(`${chatLink}messageError`, {
+            messageId: payload.id,
+            chatId: payload.chatId,
+            error: 'You are not a member of this chat',
           });
           return;
         }
         payload.memberId = member.id;
       }
 
-      const message = await this.messageService.createMessage(
-        senderId,
-        payload,
-      );
+      // Create the message in database
+      // ✅ Use correct method based on whether it's a reply
+      const message = payload.replyToMessageId
+        ? await this.messageService.createReplyMessage(senderId, payload)
+        : await this.messageService.createMessage(senderId, payload);
+
       const messageResponse = this.messageMapper.toMessageResponseDto(message);
 
+      // Update last read position
       const updatedMember = await this.chatMemberService.updateLastRead(
         payload.memberId,
         message.id,
       );
 
-      // Include sender in the broadcast
+      // Broadcast new message to all chat members (including sender)
       await this.websocketService.emitToChatMembers(
         payload.chatId,
         `${chatLink}newMessage`,
@@ -107,6 +117,7 @@ export class ChatGateway {
         { senderId },
       );
 
+      // Broadcast read receipt if updated
       if (updatedMember) {
         await this.websocketService.emitToChatMembers(
           payload.chatId,
@@ -120,7 +131,21 @@ export class ChatGateway {
         );
       }
     } catch (error) {
-      emitWsError(client, error, 'Failed to react to message');
+      // Handle specific message errors
+      if (payload?.id) {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Failed to send message';
+
+        // Notify the client
+        client.emit(`${chatLink}messageError`, {
+          messageId: payload.id,
+          chatId: payload.chatId,
+          error: errorMessage,
+        });
+      } else {
+        // Fallback for messages without ID
+        emitWsError(client, error, 'Failed to send message');
+      }
     }
   }
 

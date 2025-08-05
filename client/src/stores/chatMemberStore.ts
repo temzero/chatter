@@ -9,6 +9,7 @@ import { ChatType } from "@/types/enums/ChatType";
 import { useShallow } from "zustand/shallow";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
 import { useCurrentUserId } from "./authStore";
+import { handleError } from "@/utils/handleError";
 
 interface ChatMemberStore {
   chatMembers: Record<string, ChatMember[]>; // chatId -> members
@@ -46,7 +47,8 @@ interface ChatMemberStore {
     status: FriendshipStatus | null
   ) => void;
   addGroupMember: (chatId: string, member: ChatMember) => void;
-  removeMemberLocally: (chatId: string, userId: string) => void;
+  removeChatMember: (chatId: string, userId: string) => void;
+  clearChatMember: (chatId: string, userId: string) => void;
   clearChatMembers: (chatId: string) => void;
 }
 
@@ -241,7 +243,16 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
     });
   },
 
-  removeMemberLocally: (chatId, userId) => {
+  removeChatMember: async (chatId, userId) => {
+    try {
+      await chatMemberService.DeleteMember(chatId, userId);
+      get().clearChatMember(chatId, userId);
+    } catch (error) {
+      handleError(error, "Failed to remove member");
+    }
+  },
+
+  clearChatMember: (chatId, userId) => {
     set((state) => {
       const currentMembers = state.chatMembers[chatId] || [];
       return {
@@ -267,12 +278,6 @@ export const useActiveMembers = (): ChatMember[] | undefined => {
     useShallow((state) => (activeChatId ? state.chatMembers[activeChatId] : []))
   );
 };
-// export const useActiveMembers = (): ChatMember[] | undefined => {
-//   const activeChatId = useActiveChatId();
-//   return useChatMemberStore((state) =>
-//     activeChatId ? state.chatMembers[activeChatId] : []
-//   );
-// };
 
 export const useMembersByChatId = (
   chatId: string

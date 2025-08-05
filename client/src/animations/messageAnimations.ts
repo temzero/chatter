@@ -1,3 +1,4 @@
+
 // Shared animation configurations
 export const messageAnimations = {
   myMessage: {
@@ -9,6 +10,11 @@ export const messageAnimations = {
     initial: { opacity: 0, scale: 0.1, x: -200, y: 30 },
     animate: { opacity: 1, scale: 1, x: 0, y: 0 },
     transition: { type: "spring", stiffness: 222, damping: 20 },
+  },
+  SystemMessage: {
+    initial: { opacity: 0, scale: 0.1 , y: 60 },
+    animate: { opacity: 1, scale: 1, y: 0 },
+    transition: { type: "spring", stiffness: 300, damping: 29 },
   },
   pinMessage: {
     initial: { opacity: 0, scale: 1.1, y: 50 },

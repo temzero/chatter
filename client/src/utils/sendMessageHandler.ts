@@ -9,6 +9,7 @@ import { MessageStatus, MessageType } from "@/types/enums/message";
 import { v4 as uuidv4 } from "uuid";
 import { AttachmentResponse } from "@/types/responses/message.response";
 import { determineAttachmentType } from "./determineAttachmentType";
+import { handleError } from "./handleError";
 
 function toOptimisticAttachmentResponseFromFile(
   file: File,
@@ -128,14 +129,16 @@ export async function handleSendMessage({
       attachments: uploadedAttachments,
     };
 
+    console.log("messagePayload", messagePayload);
+
     // ✅ Send to WebSocket only if all uploads succeeded
     chatWebSocketService.sendMessage(messagePayload);
     onSuccess?.();
   } catch (error) {
-    console.error("Failed to send message:", error);
     useMessageStore.getState().updateMessageById(chatId, messageId, {
       status: MessageStatus.FAILED,
     });
     onError?.(error);
+    handleError(error, "Failed to send message");
   }
 }

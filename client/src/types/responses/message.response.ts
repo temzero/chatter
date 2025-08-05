@@ -33,6 +33,8 @@ export interface MessageResponse {
   attachments?: AttachmentResponse[];
 
   isMuted?: boolean;
+
+  shouldAnimate?: boolean;
 }
 
 export interface LastMessageResponse {

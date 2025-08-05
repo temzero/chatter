@@ -7,6 +7,10 @@ import clsx from "clsx";
 import { scrollToMessageById } from "@/utils/scrollToMessageById";
 import RenderMultipleAttachments from "./RenderMultipleAttachments";
 import { useModalStore } from "@/stores/modalStore";
+import {
+  SystemMessageContent,
+  SystemMessageJSONContent,
+} from "./SystemMessageContent";
 
 interface MessageReplyPreviewProps {
   replyMessage: MessageResponse;
@@ -27,9 +31,11 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
 }) => {
   const closeModal = useModalStore((state) => state.closeModal);
   if (!replyMessage) return null;
+
   const isSelfReply = replyMessage.sender.id === senderId;
   const isReplyToMe = replyMessage.sender.id === currentUserId;
   const isNotDirectChat = chatType !== ChatType.DIRECT;
+  const isSystemMessage = !!replyMessage.systemEvent;
 
   return (
     <div
@@ -55,29 +61,25 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
             scrollToMessageById(replyMessage.id, { smooth: false })
           }
           className={clsx("message-bubble", {
-            "self-message ": isReplyToMe,
+            "self-message": isReplyToMe,
           })}
         >
           {replyMessage.forwardedFromMessage ? (
             <div className="truncate opacity-80 flex gap-2 items-center">
               {isSelfReply ? (
-                <>
-                  <p className="flex items-center gap-2">
-                    {replyMessage.forwardedFromMessage?.content}
-                    <span className="material-symbols-outlined -rotate-90">
-                      arrow_warm_up
-                    </span>
-                  </p>
-                </>
+                <p className="flex items-center gap-2">
+                  {replyMessage.forwardedFromMessage?.content}
+                  <span className="material-symbols-outlined -rotate-90">
+                    arrow_warm_up
+                  </span>
+                </p>
               ) : (
-                <>
-                  <p className="flex items-center gap-2">
-                    <span className="material-symbols-outlined rotate-90">
-                      arrow_warm_up
-                    </span>
-                    {replyMessage.forwardedFromMessage?.content}
-                  </p>
-                </>
+                <p className="flex items-center gap-2">
+                  <span className="material-symbols-outlined rotate-90">
+                    arrow_warm_up
+                  </span>
+                  {replyMessage.forwardedFromMessage?.content}
+                </p>
               )}
             </div>
           ) : (
@@ -87,8 +89,20 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
                   attachments={replyMessage.attachments}
                 />
               )}
-              {replyMessage.content && (
-                <p className={``}>{replyMessage.content}</p>
+
+              {isSystemMessage ? (
+                <SystemMessageContent
+                  systemEvent={replyMessage.systemEvent}
+                  currentUserId={currentUserId}
+                  senderId={replyMessage.sender.id}
+                  senderDisplayName={replyMessage.sender.displayName}
+                  JSONcontent={replyMessage.content as SystemMessageJSONContent}
+                  ClassName="gap-1"
+                />
+              ) : (
+                replyMessage.content && (
+                  <p className="">{replyMessage.content}</p>
+                )
               )}
             </div>
           )}
@@ -106,6 +120,7 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
             </div>
           )}
         </div>
+
         {/* Display Reply Icon */}
         {isSelfReply ? (
           <span

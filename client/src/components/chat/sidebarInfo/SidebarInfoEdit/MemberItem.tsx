@@ -4,7 +4,6 @@ import { useCurrentUser } from "@/stores/authStore";
 import { useChatStore } from "@/stores/chatStore";
 import { useUserStatus } from "@/stores/presenceStore";
 import { GroupChatMember } from "@/types/responses/chatMember.response";
-import { ChatMemberRole } from "@/types/enums/chatMemberRole";
 import { ChatMemberStatus } from "@/types/enums/chatMemberStatus";
 
 interface MemberItemProps {
@@ -21,7 +20,6 @@ const MemberItem: React.FC<MemberItemProps> = ({ member }) => {
   const hasBlockedMe = member.isBlockedMe;
   const isBlocked = isBlockedByMe || hasBlockedMe;
 
-  // When user has blocked you, we might not get their profile info
   const showBlockedContent = hasBlockedMe && !member.firstName;
 
   const handleClick = () => {
@@ -70,15 +68,8 @@ const MemberItem: React.FC<MemberItemProps> = ({ member }) => {
           {hasBlockedMe && !showBlockedContent && " (Blocked you)"}
         </h1>
       </div>
-      {!showBlockedContent && member.status === ChatMemberStatus.BANNED ? (
+      {!showBlockedContent && member.status === ChatMemberStatus.BANNED && (
         <span className="material-symbols-outlined">dangerous</span>
-      ) : (
-        !showBlockedContent &&
-        member.role === ChatMemberRole.ADMIN && (
-          <span className="material-symbols-outlined opacity-50">
-            manage_accounts
-          </span>
-        )
       )}
     </div>
   );

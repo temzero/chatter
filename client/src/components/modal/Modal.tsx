@@ -16,6 +16,7 @@ import DeleteChatModal from "./DeleteChatModal";
 import UnfriendModal from "./UnfriendModal";
 import LeaveChatModal from "./LeaveChatModal";
 import AddMemberModal from "./AddMemberModal";
+import SetNicknameModal from "./SetNicknameModal";
 
 const Modal = () => {
   const { modalContent, closeModal } = useModalStore(
@@ -45,12 +46,10 @@ const Modal = () => {
       case ModalType.MEDIA:
         return <MediaViewer />;
       case ModalType.FRIEND_REQUEST:
-        
         return <FriendRequestModal />;
       case ModalType.FORWARD_MESSAGE:
         return <ForwardMessageModal />;
       case ModalType.DELETE_MESSAGE:
-
         return <DeleteMessageModal />;
       case ModalType.DELETE_FOLDER:
         return <DeleteFolderModal />;
@@ -72,6 +71,8 @@ const Modal = () => {
         return <LeaveChatModal />;
       case ModalType.ADD_MEMBER:
         return <AddMemberModal />;
+      case ModalType.SET_NICKNAME:
+        return <SetNicknameModal />;
       default:
         return null;
     }

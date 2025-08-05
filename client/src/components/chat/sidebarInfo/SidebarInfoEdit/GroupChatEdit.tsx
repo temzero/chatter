@@ -101,12 +101,6 @@ const GroupChatEdit = () => {
     }
   };
 
-  const handleOpenAddMemberModal = () => {
-    openModal(ModalType.ADD_MEMBER, {
-      chatId: activeChat.id,
-    });
-  };
-
   const handleOpenLeaveChatModal = () => {
     openModal(ModalType.LEAVE_CHAT, {
       chat: activeChat,
@@ -213,17 +207,6 @@ const GroupChatEdit = () => {
         </button>
 
         <div className="custom-border absolute left-0 bottom-0 w-full overflow-hidden shadow-xl rounded-t-xl">
-          {(myMember.role === ChatMemberRole.ADMIN ||
-            myMember.role === ChatMemberRole.OWNER) && (
-            <button
-              className="flex gap-2 justify-center items-center p-2 text-[--primary-green] w-full font-medium custom-border-t"
-              onClick={handleOpenAddMemberModal}
-            >
-              <span className="material-symbols-outlined">person_add</span>
-              Add Member
-            </button>
-          )}
-
           {canLeaveChat && (
             <button
               className="flex gap-2 justify-center items-center p-2 text-yellow-500 w-full font-medium custom-border-t"

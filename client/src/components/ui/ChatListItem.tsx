@@ -12,7 +12,10 @@ import { useChatStore, useIsActiveChat } from "@/stores/chatStore";
 import { useChatStatus } from "@/stores/presenceStore";
 import { ChatType } from "@/types/enums/ChatType";
 import { useBlockStatus } from "@/hooks/useBlockStatus";
-import SystemMessage from "../chat/SystemMessage";
+import {
+  SystemMessageContent,
+  SystemMessageJSONContent,
+} from "./SystemMessageContent";
 
 interface ChatListItemProps {
   chat: ChatResponse;
@@ -56,13 +59,13 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
       </p>
     ) : lastMessage ? (
       lastMessage.systemEvent ? (
-        // System message
-        <SystemMessage
-          isSidebar={true}
+        <SystemMessageContent
           systemEvent={lastMessage.systemEvent}
+          currentUserId={currentUserId}
           senderId={lastMessage.senderId}
           senderDisplayName={lastMessage.senderDisplayName}
-          content={lastMessage.content}
+          JSONcontent={lastMessage.content as SystemMessageJSONContent}
+          ClassName="gap-1 max-w-[196px]"
         />
       ) : (
         <p

@@ -1,15 +1,31 @@
 import { useCurrentUserId } from "@/stores/authStore";
 import { SystemEventType } from "@/types/enums/systemEventType";
+import { MessageResponse } from "@/types/responses/message.response";
+import { MessageActions } from "../ui/MessageActions";
+import { ReactionPicker } from "../ui/MessageReactionPicker";
+import {
+  useIsMessageFocus,
+  useIsReplyToThisMessage,
+  useModalStore,
+} from "@/stores/modalStore";
+import clsx from "clsx";
+import { MessageReactionDisplay } from "../ui/MessageReactionsDisplay";
+import { motion } from "framer-motion";
+import { messageAnimations } from "@/animations/messageAnimations";
+import { SystemMessageContent } from "../ui/SystemMessageContent";
+import { SystemMessageJSONContent } from "../ui/SystemMessageContent";
 
 type Props = {
+  message: MessageResponse;
   isSidebar?: boolean;
   systemEvent?: SystemEventType | null;
   senderId: string;
   senderDisplayName: string;
-  content?: string | null;
+  content?: SystemMessageJSONContent | null;
 };
 
 const SystemMessage = ({
+  message,
   isSidebar,
   systemEvent,
   senderId,
@@ -17,35 +33,13 @@ const SystemMessage = ({
   content,
 }: Props) => {
   const currentUserId = useCurrentUserId();
-  const isMe = currentUserId === senderId;
-  const displayName = isMe ? "You" : senderDisplayName;
+  const messageId = message.id;
 
-  const getSystemMessageContent = () => {
-    switch (systemEvent) {
-      case SystemEventType.MEMBER_JOINED:
-        return `${displayName} joined the chat`;
-      case SystemEventType.MEMBER_LEFT:
-        return `${displayName} left the chat`;
-      case SystemEventType.MEMBER_KICKED:
-        return `${displayName} was removed from the chat`;
-      case SystemEventType.MEMBER_BANNED:
-        return `${displayName} was banned from the chat`;
-      case SystemEventType.CHAT_RENAMED:
-        return `${displayName} renamed chat to "${content}"`;
-      case SystemEventType.CHAT_UPDATE_AVATAR:
-        return `${displayName} updated chat avatar`;
-      case SystemEventType.CHAT_UPDATE_DESCRIPTION:
-        return `${displayName} updated description "${content}"`;
-      case SystemEventType.MEMBER_UPDATE_NICKNAME:
-        return `${displayName} changed nickname to "${content}"`;
-      case SystemEventType.MEMBER_UPDATE_ROLE:
-        return `${displayName} changed role to "${content}"`;
-      case SystemEventType.MEMBER_UPDATE_STATUS:
-        return `${displayName} changed status to "${content}"`;
-      default:
-        return `System event occurred.`;
-    }
-  };
+  const isRelyToThisMessage = useIsReplyToThisMessage(messageId);
+  const isFocus = useIsMessageFocus(messageId);
+  const openMessageModal = useModalStore((state) => state.openMessageModal);
+
+  if (!message) return null;
 
   const getClass = () => {
     const classes = [];
@@ -56,64 +50,79 @@ const SystemMessage = ({
       case SystemEventType.MEMBER_LEFT:
       case SystemEventType.MEMBER_KICKED:
       case SystemEventType.MEMBER_BANNED:
+      case SystemEventType.CHAT_DELETED:
         classes.push("text-red-400");
         break;
     }
     return classes.join(" ");
   };
 
-  const getIconName = () => {
-    switch (systemEvent) {
-      case SystemEventType.MEMBER_JOINED:
-        return "login";
-      case SystemEventType.MEMBER_LEFT:
-        return "logout";
-      case SystemEventType.MEMBER_KICKED:
-        return "sports_gymnastics";
-      case SystemEventType.MEMBER_BANNED:
-        return "block";
-      case SystemEventType.CHAT_RENAMED:
-        return "edit";
-      case SystemEventType.CHAT_UPDATE_AVATAR:
-        return "image";
-      case SystemEventType.CHAT_UPDATE_DESCRIPTION:
-        return "notes";
-      case SystemEventType.MEMBER_UPDATE_NICKNAME:
-        return "badge";
-      case SystemEventType.MEMBER_UPDATE_ROLE:
-        return "supervisor_account";
-      case SystemEventType.MEMBER_UPDATE_STATUS:
-        return "sync_alt";
-      default:
-        return null;
-    }
-  };
+  const animationProps = message.shouldAnimate
+    ? messageAnimations.SystemMessage
+    : messageAnimations.none;
 
   return (
-    <div className="flex flex-col items-center">
+    <motion.div
+      id={`message-${messageId}`}
+      initial={animationProps.initial}
+      animate={animationProps.animate}
+      transition={animationProps.transition}
+      className={clsx("flex flex-col items-center p-1 cursor-pointer", {
+        "z-[99]": isFocus,
+      })}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        openMessageModal(messageId);
+      }}
+    >
       {systemEvent === SystemEventType.CHAT_UPDATE_AVATAR &&
-        content &&
+        content?.newValue &&
         !isSidebar && (
           <img
-            src={content}
+            src={content.newValue}
             alt="Chat Avatar"
             className="aspect-square w-[200px] h-[200px] rounded-[32px] border-4 border-[--border-color]"
             onError={(e) => {
-              // Hide the image if it fails to load
               const target = e.target as HTMLImageElement;
               target.style.display = "none";
             }}
           />
         )}
-      <p
-        className={`flex items-center gap-1 opacity-60 italic truncate text-center ${getClass()}`}
-      >
-        {getIconName() && (
-          <span className="material-symbols-outlined">{getIconName()}</span>
+
+      <div className="relative">
+        <SystemMessageContent
+          systemEvent={systemEvent}
+          currentUserId={currentUserId}
+          senderId={senderId}
+          senderDisplayName={senderDisplayName}
+          JSONcontent={content}
+          ClassName={`opacity-60 italic truncate text-center ${getClass()}`}
+        />
+
+        <MessageReactionDisplay
+          isMe={false}
+          isSystemMessage={true}
+          currentUserId={currentUserId}
+          messageId={messageId}
+          chatId={message.chatId}
+        />
+
+        {isFocus && !isRelyToThisMessage && (
+          <div>
+            <ReactionPicker
+              messageId={messageId}
+              chatId={message.chatId}
+              isMe={false}
+            />
+            <MessageActions
+              message={message}
+              isMe={false}
+              isSystemMessage={true}
+            />
+          </div>
         )}
-        {getSystemMessageContent()}
-      </p>
-    </div>
+      </div>
+    </motion.div>
   );
 };
 

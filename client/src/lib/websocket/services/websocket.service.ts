@@ -69,6 +69,27 @@ export class WebSocketService {
     }
   }
 
+  emitWithAck<T = void, D = unknown>(event: string, data: D): Promise<T> {
+    return new Promise((resolve, reject) => {
+      if (!this.socket) {
+        console.warn("Socket not connected. Cannot emit event:", event);
+        return reject(new Error("Socket not connected"));
+      }
+
+      this.socket.emit(
+        event,
+        data,
+        (response: { success: boolean; data?: T; error?: string }) => {
+          if (response?.success) {
+            resolve(response.data as T);
+          } else {
+            reject(new Error(response?.error || "WebSocket emit failed"));
+          }
+        }
+      );
+    });
+  }
+
   // Helper method to listen to events
   on<T>(event: string, callback: (data: T) => void) {
     if (!this.socket) {

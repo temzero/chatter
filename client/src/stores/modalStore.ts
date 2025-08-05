@@ -17,6 +17,7 @@ export enum ModalType {
   UNBLOCK_USER = "unblock-user",
   UNFRIEND = "unfriend",
   ADD_MEMBER = "add-member",
+  SET_NICKNAME = "set-nickname",
   LEAVE_CHAT = "leave-chat",
 }
 
@@ -88,14 +89,22 @@ export const useModalContent = () =>
 export const useIsModalOpen = () =>
   useModalStore((state) => state.modalContent !== null);
 
-export const useIsMessageFocus = (messageId: string) =>
-  useModalStore(useShallow((state) => state.focusMessageId === messageId));
+export const useIsMessageFocus = (messageId: string | null | undefined) =>
+  useModalStore(
+    useShallow((state) =>
+      messageId ? state.focusMessageId === messageId : false
+    )
+  );
 
 export const useReplyToMessageId = () =>
   useModalStore(useShallow((state) => state.replyToMessageId));
 
-export const useIsReplyToThisMessage = (messageId: string) =>
-  useModalStore(useShallow((state) => state.replyToMessageId === messageId));
+export const useIsReplyToThisMessage = (messageId: string | null | undefined) =>
+  useModalStore(
+    useShallow((state) =>
+      messageId ? state.replyToMessageId === messageId : false
+    )
+  );
 
 export const useSetReplyToMessageId = () =>
   useModalStore((state) => state.setReplyToMessageId);

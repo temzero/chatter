@@ -15,6 +15,7 @@ interface MessageActionsProps {
   message: MessageResponse;
   className?: string;
   isMe?: boolean;
+  isSystemMessage?: boolean;
   onClose?: () => void;
 }
 
@@ -22,6 +23,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   message,
   className = "",
   isMe,
+  isSystemMessage,
   onClose,
 }) => {
   const openModal = useModalStore((state) => state.openModal);
@@ -30,72 +32,93 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   const isPinned = false;
   const isAlreadyReply = !!message.replyToMessageId;
 
-  const baseActions = [
-    ...(!isAlreadyReply
-      ? [
-          {
-            icon: "reply",
-            label: "Reply",
-            action: () => {
-              setReplyToMessageId(message.id);
-              scrollToMessageById(message.id, { animate: false });
-            },
+  const baseActions = isSystemMessage
+    ? [
+        {
+          icon: "reply",
+          label: "Reply",
+          action: () => {
+            setReplyToMessageId(message.id);
+            scrollToMessageById(message.id, { animate: false });
           },
-        ]
-      : []),
-    {
-      icon: "arrow_warm_up",
-      label: "Forward",
-      action: () => {
-        if (onClose) onClose();
-        openModal(ModalType.FORWARD_MESSAGE, { message });
-      },
-    },
-    {
-      icon: isPinned ? "remove" : "keep",
-      label: isPinned ? "Unpin" : "Pin",
-      action: () => {
-        chatWebSocketService.togglePinMessage({
-          chatId: message.chatId,
-          messageId: isPinned ? null : message.id,
-        });
-        if (onClose) onClose();
-        closeModal();
-      },
-    },
-    {
-      icon: "bookmark",
-      label: "Save",
-      action: () => {
-        if (onClose) onClose();
-        chatWebSocketService.saveMessage({ messageId: message.id });
-        closeModal();
-      },
-    },
-    {
-      icon: "flag",
-      label: message.isImportant ? "Unmark Important" : "Mark Important",
-      action: () => {
-        if (onClose) onClose();
-        chatWebSocketService.toggleImportantMessage({
-          messageId: message.id,
-          chatId: message.chatId,
-          isImportant: !message.isImportant,
-        });
-        closeModal();
-      },
-    },
-    {
-      icon: "delete",
-      label: "Delete",
-      action: () => {
-        if (onClose) onClose();
-        openModal(ModalType.DELETE_MESSAGE, {
-          messageId: message.id,
-        });
-      },
-    },
-  ];
+        },
+        {
+          icon: "delete",
+          label: "Delete",
+          action: () => {
+            if (onClose) onClose();
+            openModal(ModalType.DELETE_MESSAGE, {
+              messageId: message.id,
+            });
+          },
+        },
+      ]
+    : [
+        ...(!isAlreadyReply
+          ? [
+              {
+                icon: "reply",
+                label: "Reply",
+                action: () => {
+                  setReplyToMessageId(message.id);
+                  scrollToMessageById(message.id, { animate: false });
+                },
+              },
+            ]
+          : []),
+        {
+          icon: "arrow_warm_up",
+          label: "Forward",
+          action: () => {
+            if (onClose) onClose();
+            openModal(ModalType.FORWARD_MESSAGE, { message });
+          },
+        },
+        {
+          icon: isPinned ? "remove" : "keep",
+          label: isPinned ? "Unpin" : "Pin",
+          action: () => {
+            chatWebSocketService.togglePinMessage({
+              chatId: message.chatId,
+              messageId: isPinned ? null : message.id,
+            });
+            if (onClose) onClose();
+            closeModal();
+          },
+        },
+        {
+          icon: "bookmark",
+          label: "Save",
+          action: () => {
+            if (onClose) onClose();
+            chatWebSocketService.saveMessage({ messageId: message.id });
+            closeModal();
+          },
+        },
+        {
+          icon: "flag",
+          label: message.isImportant ? "Unmark Important" : "Mark Important",
+          action: () => {
+            if (onClose) onClose();
+            chatWebSocketService.toggleImportantMessage({
+              messageId: message.id,
+              chatId: message.chatId,
+              isImportant: !message.isImportant,
+            });
+            closeModal();
+          },
+        },
+        {
+          icon: "delete",
+          label: "Delete",
+          action: () => {
+            if (onClose) onClose();
+            openModal(ModalType.DELETE_MESSAGE, {
+              messageId: message.id,
+            });
+          },
+        },
+      ];
 
   return (
     <motion.div

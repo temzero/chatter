@@ -163,7 +163,7 @@ export class ChatController {
         }
       }
 
-      // 🔍 Check what's changed before update
+      // 🔍 Check what’s changed
       const nameChanged =
         updateChatDto.name !== undefined && updateChatDto.name !== chat.name;
       const avatarChanged =
@@ -179,7 +179,6 @@ export class ChatController {
         updateChatDto,
       );
 
-      // ✅ Explicitly typed array to store message creation promises
       const createSystemMessages: Promise<MessageResponseDto>[] = [];
 
       if (nameChanged) {
@@ -188,34 +187,42 @@ export class ChatController {
             chatId,
             userId,
             SystemEventType.CHAT_RENAMED,
-            updateChatDto.name,
+            {
+              oldValue: chat.name ?? undefined,
+              newValue: updateChatDto.name,
+            },
           ),
         );
       }
 
-      if (avatarChanged && updateChatDto.avatarUrl) {
+      if (avatarChanged) {
         createSystemMessages.push(
           this.messageService.createSystemEventMessage(
             chatId,
             userId,
             SystemEventType.CHAT_UPDATE_AVATAR,
-            updateChatDto.avatarUrl,
+            {
+              oldValue: chat.avatarUrl ?? undefined,
+              newValue: updateChatDto.avatarUrl,
+            },
           ),
         );
       }
 
-      if (descriptionChanged && updateChatDto.description) {
+      if (descriptionChanged) {
         createSystemMessages.push(
           this.messageService.createSystemEventMessage(
             chatId,
             userId,
             SystemEventType.CHAT_UPDATE_DESCRIPTION,
-            updateChatDto.description,
+            {
+              oldValue: chat.description ?? undefined,
+              newValue: updateChatDto.description,
+            },
           ),
         );
       }
 
-      // 🔔 Emit all system messages concurrently
       if (createSystemMessages.length > 0) {
         await Promise.all(createSystemMessages);
       }

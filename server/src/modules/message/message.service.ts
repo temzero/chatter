@@ -17,10 +17,13 @@ import { SystemEventType } from './constants/system-event-type.constants';
 import { MessageMapper } from './mappers/message.mapper';
 import { WebsocketService } from '../websocket/websocket.service';
 import { MessageResponseDto } from './dto/responses/message-response.dto';
+import { User } from '../user/entities/user.entity';
 
 @Injectable()
 export class MessageService {
   constructor(
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
     @InjectRepository(Chat)
     private readonly chatRepo: Repository<Chat>,
     @InjectRepository(ChatMember)
@@ -38,104 +41,240 @@ export class MessageService {
     private readonly websocketService: WebsocketService,
   ) {}
 
+  // Updated createMessage method
   async createMessage(
     senderId: string,
-    createMessageDto: CreateMessageDto,
+    dto: CreateMessageDto,
   ): Promise<Message> {
-    if (createMessageDto.id) {
-      const existing = await this.messageRepo.findOne({
-        where: { id: createMessageDto.id },
-      });
-
-      if (existing) {
-        ErrorResponse.badRequest('Message with this ID already exists');
-      }
+    if (dto.replyToMessageId) {
+      ErrorResponse.badRequest('Use createReplyMessage for replying');
     }
 
     const chat = await this.chatRepo.findOne({
-      where: { id: createMessageDto.chatId },
+      where: { id: dto.chatId },
       relations: ['members'],
     });
-    if (!chat) {
-      ErrorResponse.notFound('Chat not found');
-    }
+    if (!chat) ErrorResponse.notFound('Chat not found');
 
-    // ⛔ Blocking check only in direct chat
     await this.ensureNoBlockingInDirectChat(senderId, chat);
 
     const isMember = await this.chatMemberRepo.exists({
-      where: {
-        chatId: createMessageDto.chatId,
-        userId: senderId,
-      },
+      where: { chatId: dto.chatId, userId: senderId },
     });
-    if (!isMember) {
-      ErrorResponse.notFound('You are not a member of this chat');
-    }
+    if (!isMember) ErrorResponse.notFound('You are not a member of this chat');
 
-    if (createMessageDto.replyToMessageId) {
-      const repliedMessage = await this.messageRepo.findOne({
-        where: { id: createMessageDto.replyToMessageId },
-        select: ['id', 'chatId', 'replyToMessageId'], // Only select needed fields
-      });
+    const message = this.messageRepo.create({
+      id: dto.id,
+      chatId: dto.chatId,
+      senderId,
+      content: dto.content,
+      attachments: [],
+    });
 
-      if (!repliedMessage) {
-        ErrorResponse.notFound('Replied message not found');
-      }
-      if (repliedMessage.chatId !== createMessageDto.chatId) {
-        ErrorResponse.badRequest('Replied message is not from the same chat');
-      }
+    const saved = await this.messageRepo.save(message);
 
-      // THE GUARD - Single place to prevent reply chains
-      if (repliedMessage.replyToMessageId) {
-        ErrorResponse.badRequest(
-          'Cannot reply to a message that is already a reply',
-        );
-      }
-    }
-
-    try {
-      // Step 1: Save the message
-      const newMessage = this.messageRepo.create({
-        senderId,
-        ...createMessageDto,
-      });
-
-      const savedMessage = await this.messageRepo.save(newMessage);
-
-      // Step 2: Save attachments if any
-      if (createMessageDto.attachments?.length) {
-        const attachmentEntities = createMessageDto.attachments.map((att) =>
-          this.attachmentRepo.create({
-            messageId: savedMessage.id,
-            type: att.type,
-            url: att.url,
-            thumbnailUrl: att.thumbnailUrl || null,
-            filename: att.filename || null,
-            size: att.size || null,
-            mimeType: att.mimeType || null,
-            width: att.width || null,
-            height: att.height || null,
-            duration: att.duration || null,
-          }),
-        );
-
-        await this.attachmentRepo.save(attachmentEntities);
-      }
-
-      // Step 3: Update last visible message
-      await this.chatMemberRepo.update(
-        { chatId: chat.id },
-        { lastVisibleMessageId: savedMessage.id },
+    if (dto.attachments?.length) {
+      const attachments = dto.attachments.map((att) =>
+        this.attachmentRepo.create({
+          messageId: saved.id,
+          ...att,
+          thumbnailUrl: att.thumbnailUrl ?? null,
+          filename: att.filename ?? null,
+          size: att.size ?? null,
+          mimeType: att.mimeType ?? null,
+          width: att.width ?? null,
+          height: att.height ?? null,
+          duration: att.duration ?? null,
+        }),
       );
-
-      // Step 4: Return full message with joined relations
-      const fullMessage = await this.getFullMessageById(savedMessage.id);
-      return fullMessage;
-    } catch (error) {
-      ErrorResponse.throw(error, 'Failed to create message');
+      await this.attachmentRepo.save(attachments);
     }
+
+    await this.chatMemberRepo.update(
+      { chatId: dto.chatId },
+      { lastVisibleMessageId: saved.id },
+    );
+
+    return await this.getFullMessageById(saved.id);
   }
+
+  async createReplyMessage(
+    senderId: string,
+    dto: CreateMessageDto,
+  ): Promise<Message> {
+    if (!dto.replyToMessageId) {
+      ErrorResponse.badRequest('Missing replyToMessageId');
+    }
+
+    const chat = await this.chatRepo.findOne({
+      where: { id: dto.chatId },
+      relations: ['members'],
+    });
+    if (!chat) ErrorResponse.notFound('Chat not found');
+
+    await this.ensureNoBlockingInDirectChat(senderId, chat);
+
+    const isMember = await this.chatMemberRepo.exists({
+      where: { chatId: dto.chatId, userId: senderId },
+    });
+    if (!isMember) ErrorResponse.notFound('You are not a member of this chat');
+
+    const replyToMessage = await this.messageRepo.findOne({
+      where: { id: dto.replyToMessageId },
+    });
+    console.log('replyMessage', replyToMessage);
+    if (!replyToMessage) ErrorResponse.notFound('Replied message not found');
+    if (replyToMessage.chatId !== dto.chatId) {
+      ErrorResponse.badRequest('Replied message is from another chat');
+    }
+    if (replyToMessage.isDeleted) {
+      ErrorResponse.badRequest('Cannot reply to a deleted message');
+    }
+    if (replyToMessage.replyToMessageId) {
+      ErrorResponse.badRequest('Cannot reply to a reply');
+    }
+
+    const message = this.messageRepo.create({
+      id: dto.id,
+      chatId: dto.chatId,
+      senderId,
+      content: dto.content,
+      replyToMessageId: dto.replyToMessageId,
+      replyToMessage: replyToMessage,
+      attachments: [],
+    });
+
+    const saved = await this.messageRepo.save(message);
+
+    await this.messageRepo.increment(
+      { id: dto.replyToMessageId },
+      'replyCount',
+      1,
+    );
+
+    if (dto.attachments?.length) {
+      const attachments = dto.attachments.map((att) =>
+        this.attachmentRepo.create({
+          messageId: saved.id,
+          ...att,
+          thumbnailUrl: att.thumbnailUrl ?? null,
+          filename: att.filename ?? null,
+          size: att.size ?? null,
+          mimeType: att.mimeType ?? null,
+          width: att.width ?? null,
+          height: att.height ?? null,
+          duration: att.duration ?? null,
+        }),
+      );
+      await this.attachmentRepo.save(attachments);
+    }
+
+    await this.chatMemberRepo.update(
+      { chatId: dto.chatId },
+      { lastVisibleMessageId: saved.id },
+    );
+
+    return await this.getFullMessageById(saved.id);
+  }
+
+  // async createMessage(
+  //   senderId: string,
+  //   createMessageDto: CreateMessageDto,
+  // ): Promise<Message> {
+  //   if (createMessageDto.id) {
+  //     const existing = await this.messageRepo.findOne({
+  //       where: { id: createMessageDto.id },
+  //     });
+
+  //     if (existing) {
+  //       ErrorResponse.badRequest('Message with this ID already exists');
+  //     }
+  //   }
+
+  //   const chat = await this.chatRepo.findOne({
+  //     where: { id: createMessageDto.chatId },
+  //     relations: ['members'],
+  //   });
+  //   if (!chat) {
+  //     ErrorResponse.notFound('Chat not found');
+  //   }
+
+  //   // ⛔ Blocking check only in direct chat
+  //   await this.ensureNoBlockingInDirectChat(senderId, chat);
+
+  //   const isMember = await this.chatMemberRepo.exists({
+  //     where: {
+  //       chatId: createMessageDto.chatId,
+  //       userId: senderId,
+  //     },
+  //   });
+  //   if (!isMember) {
+  //     ErrorResponse.notFound('You are not a member of this chat');
+  //   }
+
+  //   if (createMessageDto.replyToMessageId) {
+  //     const repliedMessage = await this.messageRepo.findOne({
+  //       where: { id: createMessageDto.replyToMessageId },
+  //       select: ['id', 'chatId', 'replyToMessageId'], // Only select needed fields
+  //     });
+
+  //     if (!repliedMessage) {
+  //       ErrorResponse.notFound('Replied message not found');
+  //     }
+  //     if (repliedMessage.chatId !== createMessageDto.chatId) {
+  //       ErrorResponse.badRequest('Replied message is not from the same chat');
+  //     }
+
+  //     // THE GUARD - Single place to prevent reply chains
+  //     if (repliedMessage.replyToMessageId) {
+  //       ErrorResponse.badRequest(
+  //         'Cannot reply to a message that is already a reply',
+  //       );
+  //     }
+  //   }
+
+  //   try {
+  //     // Step 1: Save the message
+  //     const newMessage = this.messageRepo.create({
+  //       senderId,
+  //       ...createMessageDto,
+  //     });
+
+  //     const savedMessage = await this.messageRepo.save(newMessage);
+
+  //     // Step 2: Save attachments if any
+  //     if (createMessageDto.attachments?.length) {
+  //       const attachmentEntities = createMessageDto.attachments.map((att) =>
+  //         this.attachmentRepo.create({
+  //           messageId: savedMessage.id,
+  //           type: att.type,
+  //           url: att.url,
+  //           thumbnailUrl: att.thumbnailUrl || null,
+  //           filename: att.filename || null,
+  //           size: att.size || null,
+  //           mimeType: att.mimeType || null,
+  //           width: att.width || null,
+  //           height: att.height || null,
+  //           duration: att.duration || null,
+  //         }),
+  //       );
+
+  //       await this.attachmentRepo.save(attachmentEntities);
+  //     }
+
+  //     // Step 3: Update last visible message
+  //     await this.chatMemberRepo.update(
+  //       { chatId: chat.id },
+  //       { lastVisibleMessageId: savedMessage.id },
+  //     );
+
+  //     // Step 4: Return full message with joined relations
+  //     const fullMessage = await this.getFullMessageById(savedMessage.id);
+  //     return fullMessage;
+  //   } catch (error) {
+  //     ErrorResponse.throw(error, 'Failed to create message');
+  //   }
+  // }
 
   async createForwardedMessage(
     senderId: string,
@@ -184,13 +323,29 @@ export class MessageService {
     chatId: string,
     senderId: string,
     eventType: SystemEventType,
-    content?: string | null,
+    options?: {
+      oldValue?: string;
+      newValue?: string;
+      targetId?: string;
+      targetName?: string;
+    },
   ): Promise<MessageResponseDto> {
+    let targetName: string | undefined;
+    if (options?.targetId && options.targetId !== senderId) {
+      targetName =
+        options.targetName ?? (await this.getUserFirstName(options.targetId));
+    }
+
     const message = this.messageRepo.create({
       chatId,
       senderId,
       systemEvent: eventType,
-      content: content || null, // can hold text or image URL depending on event
+      content: this.formatSystemMessageContent(
+        options?.oldValue,
+        options?.newValue,
+        options?.targetId,
+        targetName,
+      ),
     });
 
     const savedMessage = await this.messageRepo.save(message);
@@ -603,61 +758,6 @@ export class MessageService {
     }
   }
 
-  // private buildFullMessageQuery() {
-  //   return this.messageRepo
-  //     .createQueryBuilder('message')
-  //     .leftJoinAndSelect('message.sender', 'sender')
-  //     .leftJoinAndSelect('message.chat', 'chat')
-  //     .leftJoinAndSelect('chat.members', 'member', 'member.user_id = sender.id')
-  //     .leftJoinAndSelect('message.reactions', 'reactions')
-  //     .leftJoinAndSelect('message.replyToMessage', 'replyToMessage')
-  //     .leftJoinAndSelect('replyToMessage.sender', 'replySender')
-  //     .leftJoinAndSelect(
-  //       'chat.members',
-  //       'replyMember',
-  //       'replyMember.user_id = replySender.id',
-  //     )
-  //     .leftJoinAndSelect('message.forwardedFromMessage', 'forwardedFromMessage')
-  //     .leftJoinAndSelect('forwardedFromMessage.sender', 'forwardedSender')
-  //     .leftJoinAndSelect('message.attachments', 'attachments')
-  //     .leftJoinAndSelect('replyToMessage.attachments', 'replyAttachments')
-  //     .leftJoinAndSelect(
-  //       'forwardedFromMessage.attachments',
-  //       'forwardedAttachments',
-  //     )
-  //     .select([
-  //       'message',
-  //       'sender.id',
-  //       'sender.firstName',
-  //       'sender.lastName',
-  //       'sender.avatarUrl',
-  //       'member.nickname',
-  //       'reactions',
-  //       'attachments',
-
-  //       // Reply
-  //       'replyToMessage.id',
-  //       'replyToMessage.content',
-  //       'replyToMessage.createdAt',
-  //       'replySender.id',
-  //       'replySender.firstName',
-  //       'replySender.lastName',
-  //       'replySender.avatarUrl',
-  //       'replyMember.nickname',
-  //       'replyAttachments',
-
-  //       // Forward
-  //       'forwardedFromMessage.id',
-  //       'forwardedFromMessage.content',
-  //       'forwardedFromMessage.createdAt',
-  //       'forwardedSender.id',
-  //       'forwardedSender.firstName',
-  //       'forwardedSender.lastName',
-  //       'forwardedSender.avatarUrl',
-  //       'forwardedAttachments',
-  //     ]);
-  // }
-
   private buildFullMessageQuery() {
     return (
       this.messageRepo
@@ -718,6 +818,7 @@ export class MessageService {
           'replyToMessage.id',
           'replyToMessage.content',
           'replyToMessage.createdAt',
+          'replyToMessage.systemEvent',
           'replySender.id',
           'replySender.firstName',
           'replySender.lastName',
@@ -780,6 +881,14 @@ export class MessageService {
     }
   }
 
+  private async getUserFirstName(userId: string): Promise<string> {
+    const user = await this.userRepo.findOne({
+      where: { id: userId },
+      select: ['firstName'],
+    });
+    return user?.firstName || '';
+  }
+
   private async ensureNoBlockingInDirectChat(senderId: string, chat: Chat) {
     // Apply blocking logic only for direct chats
     if (chat.type !== ChatType.DIRECT) return;
@@ -808,5 +917,21 @@ export class MessageService {
             : 'You are blocked by this user.',
       );
     }
+  }
+
+  private formatSystemMessageContent(
+    oldValue?: string,
+    newValue?: string,
+    targetId?: string,
+    targetName?: string,
+  ): string | null {
+    const content: Record<string, string> = {};
+
+    if (oldValue !== undefined) content.oldValue = oldValue;
+    if (newValue !== undefined) content.newValue = newValue;
+    if (targetId !== undefined) content.targetId = targetId;
+    if (targetName !== undefined) content.targetName = targetName;
+
+    return Object.keys(content).length > 0 ? JSON.stringify(content) : null;
   }
 }

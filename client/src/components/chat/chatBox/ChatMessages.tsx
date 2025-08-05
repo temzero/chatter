@@ -21,7 +21,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ chat, messages }) => {
   const currentUser = useCurrentUser();
   const rawMembers = useActiveMembers();
   const members = useMemo(() => rawMembers || [], [rawMembers]);
-  console.log("Messages: ", messages);
+  // console.log("Messages: ", messages);
   const myMember = useMemo(
     () => members.find((m) => m.id === chat.myMemberId),
     [members, chat.myMemberId]
@@ -74,7 +74,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ chat, messages }) => {
     <>
       {messagesByDate.map((group) => (
         <React.Fragment key={`${group.date}-${chatId}`}>
-          <div className="sticky top-0 z-20 flex justify-center mb-4">
+          <div className="sticky top-0 z-20 flex justify-center">
             <div className="bg-[var(--background-color)] text-xs p-1 rounded z-30">
               {group.date || "Today"}
             </div>
@@ -85,7 +85,6 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ chat, messages }) => {
             const nextMsg = group.messages[index + 1];
             const showInfo = shouldShowInfo(msg, prevMsg, nextMsg);
             const isRecent = isRecentMessage(msg, prevMsg, nextMsg);
-
             const readUserAvatars: string[] = [];
 
             if (msg.id === myLastReadMessageId && currentUser?.avatarUrl) {
@@ -103,7 +102,6 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ chat, messages }) => {
                 key={msg.id}
                 message={msg}
                 chatType={chat.type}
-                shouldAnimate={isRecent}
                 showInfo={showInfo}
                 isRecent={isRecent}
                 readUserAvatars={readUserAvatars}

@@ -9,6 +9,7 @@ import { useMessageReactions } from "@/stores/messageStore";
 
 interface MessageReactionDisplayProps {
   isMe: boolean;
+  isSystemMessage?: boolean;
   currentUserId?: string;
   messageId: string;
   chatId: string;
@@ -16,6 +17,7 @@ interface MessageReactionDisplayProps {
 
 export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
   isMe,
+  isSystemMessage = false,
   currentUserId,
   messageId,
   chatId,
@@ -66,7 +68,10 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
       whileTap={{ scale: 0.8 }}
       className={clsx(
         "message-reaction absolute -bottom-2 z-10 flex bg-black/50 rounded-full",
-        isMe ? "-left-4" : "-right-4 flex-row-reverse"
+        {
+          "-left-4": isMe && !isSystemMessage,
+          "-right-4 -bottom-4 flex-row-reverse": !isMe || isSystemMessage,
+        }
       )}
     >
       <AnimatePresence mode="wait">

@@ -4,9 +4,14 @@ import { ChatMemberRole } from "@/types/enums/chatMemberRole";
 import { ChatMemberStatus } from "@/types/enums/chatMemberStatus";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import React from "react";
+import { ModalType, useModalStore } from "@/stores/modalStore";
+import { useChatMemberStore } from "@/stores/chatMemberStore";
+import { useCurrentUserId } from "@/stores/authStore";
+import { rolePriority } from "@/types/enums/chatMemberRole";
 
 interface ChatMemberItemsProps {
   members: GroupChatMember[];
+  chatId: string;
   currentUserId: string;
 }
 
@@ -32,13 +37,6 @@ const getStatusDisplayName = (status: ChatMemberStatus) => {
     default:
       return null;
   }
-};
-
-const rolePriority = {
-  [ChatMemberRole.OWNER]: 1,
-  [ChatMemberRole.ADMIN]: 2,
-  [ChatMemberRole.GUEST]: 3,
-  [ChatMemberRole.MEMBER]: 4,
 };
 
 export const ChatMemberItems = ({
@@ -78,7 +76,7 @@ export const ChatMemberItems = ({
         ChatMemberRole.MEMBER,
       ].includes(myRole)
     ) {
-      return; // Block context menu for guests or undefined roles
+      return;
     }
 
     const menuWidth = 192;
@@ -97,21 +95,6 @@ export const ChatMemberItems = ({
 
   const handleClickMember = (member: GroupChatMember) => {
     console.log("Clicked member:", member);
-  };
-
-  const handleSetNickname = (member: GroupChatMember) => {
-    console.log("Set nickname for:", member);
-    setContextMenu(null);
-  };
-
-  const handleRemoveMember = (member: GroupChatMember) => {
-    console.log("Remove member:", member);
-    setContextMenu(null);
-  };
-
-  const handleChangeRole = (member: GroupChatMember, role: ChatMemberRole) => {
-    console.log(`Change role of ${member.firstName} to ${role}`);
-    setContextMenu(null);
   };
 
   const itemClasses =
@@ -168,9 +151,9 @@ export const ChatMemberItems = ({
 
       {sortedGroups.map(([role, groupMembers]) => (
         <div key={role} className="custom-border rounded">
-          <div className="p-2 bg-[--hover-color] text-sm font-medium text-[var(--text-secondary)]">
-            {getRoleDisplayName(role as ChatMemberRole)}s ({groupMembers.length}
-            )
+          <div className="flex items-center justify-between p-2 bg-[--hover-color] text-sm font-medium">
+            <h1>{getRoleDisplayName(role as ChatMemberRole)}s</h1>
+            <p>{groupMembers.length}</p>
           </div>
           {groupMembers.map((member) => (
             <div
@@ -210,9 +193,6 @@ export const ChatMemberItems = ({
           member={contextMenu.member}
           currentRole={myRole}
           onClose={() => setContextMenu(null)}
-          onSetNickname={handleSetNickname}
-          onRemoveMember={handleRemoveMember}
-          onChangeRole={handleChangeRole}
           ref={menuRef}
         />
       )}
@@ -226,85 +206,82 @@ interface ContextMenuProps {
   member: GroupChatMember;
   currentRole: ChatMemberRole;
   onClose: () => void;
-  onSetNickname: (member: GroupChatMember) => void;
-  onRemoveMember: (member: GroupChatMember) => void;
-  onChangeRole: (member: GroupChatMember, role: ChatMemberRole) => void;
 }
 
 const ContextMenu = React.forwardRef<HTMLDivElement, ContextMenuProps>(
-  (
-    {
-      x,
-      y,
-      member,
-      currentRole,
-      onClose,
-      onSetNickname,
-      onRemoveMember,
-      onChangeRole,
-    },
-    ref
-  ) => {
+  ({ x, y, member, currentRole, onClose }, ref) => {
+    const openModal = useModalStore((s) => s.openModal);
+    const updateMember = useChatMemberStore.getState().updateMember;
+    const removeMember = useChatMemberStore.getState().removeChatMember;
+    const currentUserId = useCurrentUserId();
+
     const classes =
       "flex items-center gap-1 px-4 py-2 hover:bg-[--hover-color] cursor-pointer";
+
+    const isMyself = member.userId === currentUserId;
+    const canManageOthers =
+      currentRole === ChatMemberRole.OWNER ||
+      currentRole === ChatMemberRole.ADMIN;
+
+    const handleOpenNicknameModal = () => {
+      openModal(ModalType.SET_NICKNAME, { member });
+      onClose();
+    };
+
+    const handleChangeRole = (role: ChatMemberRole) => {
+      updateMember(member.chatId, member.id, { role });
+      onClose();
+    };
+
+    const handleRemoveMember = () => {
+      removeMember(member.chatId, member.id);
+      onClose();
+    };
 
     return (
       <div
         ref={ref}
-        className="fixed z-[1000] bg-[--background-color] border custom-border rounded shadow-lg w-48"
+        className="fixed z-[999] bg-[--background-color] border custom-border rounded shadow-lg w-48"
         style={{ top: `${y}px`, left: `${x}px` }}
       >
-        <div
-          className={classes}
-          onClick={() => {
-            onSetNickname(member);
-            onClose();
-          }}
-        >
-          Set Nickname
-        </div>
-
-        {currentRole === ChatMemberRole.OWNER && (
-          <>
-            <div
-              className={classes}
-              onClick={() => {
-                onChangeRole(member, ChatMemberRole.ADMIN);
-                onClose();
-              }}
-            >
-              Set as Admin
-            </div>
-            <div
-              className={classes}
-              onClick={() => {
-                onChangeRole(member, ChatMemberRole.MEMBER);
-                onClose();
-              }}
-            >
-              Set as Member
-            </div>
-            <div
-              className={classes}
-              onClick={() => {
-                onChangeRole(member, ChatMemberRole.OWNER);
-                onClose();
-              }}
-            >
-              Promote to Owner
-            </div>
-          </>
+        {/* Show Set Nickname if it's yourself or if current user is admin/owner */}
+        {(isMyself || canManageOthers) && (
+          <div className={classes} onClick={handleOpenNicknameModal}>
+            Set Nickname
+          </div>
         )}
 
-        {(currentRole === ChatMemberRole.ADMIN ||
-          currentRole === ChatMemberRole.OWNER) && (
+        {/* Admin/Owner managing others */}
+        {!isMyself && canManageOthers && (
           <>
+            {currentRole === ChatMemberRole.OWNER && (
+              <>
+                <div
+                  className={classes}
+                  onClick={() => handleChangeRole(ChatMemberRole.OWNER)}
+                >
+                  Promote to Owner
+                </div>
+                <div
+                  className={classes}
+                  onClick={() => handleChangeRole(ChatMemberRole.ADMIN)}
+                >
+                  Set as Admin
+                </div>
+                {member.role !== ChatMemberRole.MEMBER && (
+                  <div
+                    className={classes}
+                    onClick={() => handleChangeRole(ChatMemberRole.MEMBER)}
+                  >
+                    Set as Member
+                  </div>
+                )}
+              </>
+            )}
+
             <div
               className={`${classes} text-red-500`}
-              onClick={() => {
-                onRemoveMember(member);
-                onClose();
-              }}
+              onClick={handleRemoveMember}
             >
               Remove
             </div>

@@ -4,6 +4,7 @@ import { handleReaction } from "@/utils/handleReaction";
 import addReactionSound from "@/assets/sound/message-pop.mp3";
 import { playSoundEffect } from "@/utils/playSoundEffect";
 import clsx from "clsx";
+import { useModalStore } from "@/stores/modalStore";
 
 const emojis = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
 
@@ -11,15 +12,14 @@ interface ReactionPickerProps {
   messageId: string;
   chatId: string;
   isMe?: boolean;
-  onClose?: () => void;
 }
 
 export const ReactionPicker: React.FC<ReactionPickerProps> = ({
   messageId,
   chatId,
   isMe,
-  onClose,
 }) => {
+  const closeModal = useModalStore.getState().closeModal;
   return (
     <motion.div
       initial={{ scale: 0 }}
@@ -48,8 +48,8 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = ({
               emoji,
               messageId,
               chatId,
-              onClose,
             });
+            closeModal();
           }}
         >
           {emoji}

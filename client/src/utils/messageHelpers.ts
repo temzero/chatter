@@ -30,7 +30,7 @@ export function shouldShowInfo(
   _prevMsg: MessageResponse | undefined,
   nextMsg: MessageResponse | undefined
 ): boolean {
-  return !nextMsg || nextMsg.senderId !== currentMsg.senderId;
+  return !nextMsg || nextMsg.sender.id !== currentMsg.sender.id;
 }
 
 export function isRecentMessage(
@@ -43,13 +43,13 @@ export function isRecentMessage(
 
   const prevIsRecent = !!(
     prevMsg &&
-    prevMsg.senderId === currentMsg.senderId &&
+    prevMsg.sender.id === currentMsg.sender.id &&
     currentTime - new Date(prevMsg.createdAt).getTime() <= periodMs
   );
 
   const nextIsRecent = !!(
     nextMsg &&
-    nextMsg.senderId === currentMsg.senderId &&
+    nextMsg.sender.id === currentMsg.sender.id &&
     new Date(nextMsg.createdAt).getTime() - currentTime <= periodMs
   );
 

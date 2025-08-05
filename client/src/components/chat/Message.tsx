@@ -21,38 +21,12 @@ import {
 } from "@/stores/modalStore";
 import { MessageStatus } from "@/types/enums/message";
 import { BeatLoader } from "react-spinners";
+import { SystemMessageJSONContent } from "../ui/SystemMessageContent";
 import SystemMessage from "./SystemMessage";
-
-const MessageContent = ({
-  content,
-  onCopy,
-  copied,
-}: {
-  content?: string;
-  onCopy: () => void;
-  copied: boolean;
-}) => {
-  if (!content) return null;
-
-  return (
-    <p
-      className={clsx(
-        "break-words max-w-full cursor-pointer transition-all duration-200 shadow-xl rounded-b-xl",
-        {
-          "scale-110 opacity-60": copied,
-        }
-      )}
-      onClick={onCopy}
-    >
-      {content}
-    </p>
-  );
-};
 
 interface MessageProps {
   message: MessageResponse;
   chatType?: ChatType;
-  shouldAnimate?: boolean;
   showInfo?: boolean;
   isRecent?: boolean;
   isRead?: boolean;
@@ -62,7 +36,6 @@ interface MessageProps {
 const Message: React.FC<MessageProps> = ({
   message,
   chatType = ChatType.DIRECT,
-  shouldAnimate = false,
   showInfo = true,
   isRecent = false,
   readUserAvatars,
@@ -93,7 +66,7 @@ const Message: React.FC<MessageProps> = ({
     setCopied(true);
   };
 
-  const animationProps = shouldAnimate
+  const animationProps = message.shouldAnimate
     ? isMe
       ? messageAnimations.myMessage
       : messageAnimations.otherMessage
@@ -114,10 +87,11 @@ const Message: React.FC<MessageProps> = ({
     return (
       <div className="p-1 w-full flex items-center justify-center">
         <SystemMessage
+          message={message}
           systemEvent={message.systemEvent}
           senderId={message.sender.id}
           senderDisplayName={message.sender.displayName}
-          content={message.content}
+          content={message.content as SystemMessageJSONContent}
         />
       </div>
     );
@@ -283,3 +257,29 @@ const Message: React.FC<MessageProps> = ({
 };
 
 export default React.memo(Message);
+
+const MessageContent = ({
+  content,
+  onCopy,
+  copied,
+}: {
+  content?: string;
+  onCopy: () => void;
+  copied: boolean;
+}) => {
+  if (!content) return null;
+
+  return (
+    <p
+      className={clsx(
+        "break-words max-w-full cursor-pointer transition-all duration-200 shadow-xl rounded-b-xl",
+        {
+          "scale-110 opacity-60": copied,
+        }
+      )}
+      onClick={onCopy}
+    >
+      {content}
+    </p>
+  );
+};

@@ -155,27 +155,98 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
     }
   },
 
+  // addMessage: (newMessage) => {
+  //   // 1. Get current messages from the store
+  //   const { messages } = get();
+  //   const chatId = newMessage.chatId;
+
+  //   // 2. Add the new message to the chat's message list
+  //   const updatedMessages = {
+  //     ...messages, // Preserve existing chats
+  //     [chatId]: [...(messages[chatId] || []), newMessage], // Append new message
+  //   };
+
+  //   // 3. Check if the message is from the current user
+  //   const currentUser = useAuthStore.getState().currentUser;
+  //   const currentUserId = currentUser ? currentUser.id : undefined;
+  //   const isFromMe = newMessage.sender.id === currentUserId;
+
+  //   // 4. Update the chat's last message
+  //   const lastMessage = createLastMessage(newMessage);
+  //   useChatStore.getState().setLastMessage(chatId, lastMessage);
+
+  //   // 5. Increment unread count if the message is from another user
+  //   if (!isFromMe) {
+  //     useChatStore.getState().setUnreadCount(chatId, +1);
+  //   }
+
+  //   // 6. Update the store with the new messages
+  //   set({ messages: updatedMessages });
+  // },
+
   addMessage: (newMessage) => {
+    // 1. Get current state
     const { messages } = get();
     const chatId = newMessage.chatId;
 
-    const updatedMessages = {
-      ...messages,
-      [chatId]: [...(messages[chatId] || []), newMessage],
+    // 2. Add animation flag (client-side only)
+    const messageWithAnimation = {
+      ...newMessage,
+      shouldAnimate: true, // This triggers the animation
     };
 
-    const currentUser = useAuthStore.getState().currentUser;
-    const currentUserId = currentUser ? currentUser.id : undefined;
-    const isFromMe = newMessage.sender.id === currentUserId;
-    const lastMessage = createLastMessage(newMessage);
+    // 3. Update messages array
+    const updatedMessages = {
+      ...messages,
+      [chatId]: [...(messages[chatId] || []), messageWithAnimation],
+    };
 
+    // 4. Check sender
+    const currentUser = useAuthStore.getState().currentUser;
+    const currentUserId = currentUser?.id;
+    const isFromMe = newMessage.sender.id === currentUserId;
+
+    // 5. Update last message
+    const lastMessage = createLastMessage(newMessage);
     useChatStore.getState().setLastMessage(chatId, lastMessage);
 
+    // 6. Handle unread count
     if (!isFromMe) {
       useChatStore.getState().setUnreadCount(chatId, +1);
     }
 
+    // 7. Update store
     set({ messages: updatedMessages });
+
+    // 8. Clean up animation after 500ms
+    const timer = setTimeout(() => {
+      set((state) => {
+        const chatMessages = state.messages[chatId] || [];
+        const messageIndex = chatMessages.findIndex(
+          (m) => m.id === newMessage.id
+        );
+
+        if (messageIndex === -1) return state; // Message not found
+
+        // Create new array with animation disabled
+        const newChatMessages = [...chatMessages];
+        newChatMessages[messageIndex] = {
+          ...newChatMessages[messageIndex],
+          shouldAnimate: false,
+        };
+
+        return {
+          messages: {
+            ...state.messages,
+            [chatId]: newChatMessages,
+          },
+        };
+      });
+    }, 500); // Match this to your CSS animation duration
+
+    // Return cleanup for useEffect (if used in a component)
+    // In Zustand, you'd handle this differently (see note below)
+    return () => clearTimeout(timer);
   },
 
   getMessageById: (messageId) => {

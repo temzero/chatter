@@ -10,6 +10,7 @@ import { useMessageStore } from "@/stores/messageStore";
 import { useMuteControl } from "@/hooks/useMuteControl";
 import { SidebarInfoHeaderIcons } from "@/components/ui/SidebarInfoHeaderIcons";
 import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
+import { rolePriority } from "@/types/enums/chatMemberRole";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 
 const GroupChat: React.FC = () => {
@@ -74,6 +75,21 @@ const GroupChat: React.FC = () => {
     });
   }
 
+  // Group members by role
+  const groupedMembers = activeMembers.reduce((acc, member) => {
+    const role = member.role || ChatMemberRole.MEMBER;
+    if (!acc[role]) acc[role] = [];
+    acc[role].push(member);
+    return acc;
+  }, {} as Record<ChatMemberRole, typeof activeMembers>);
+
+  // Sort groups by role priority
+  const sortedGroups = Object.entries(groupedMembers).sort(
+    ([roleA], [roleB]) =>
+      (rolePriority[roleA as ChatMemberRole] || 4) -
+      (rolePriority[roleB as ChatMemberRole] || 4)
+  );
+
   return (
     <div className="flex flex-col w-full h-full">
       {/* Header moved inside GroupChat */}
@@ -89,8 +105,13 @@ const GroupChat: React.FC = () => {
 
         {activeMembers.length > 0 && (
           <div className="flex flex-col rounded overflow-hidden custom-border w-full">
-            {activeMembers.map((member) => (
-              <MemberItem key={member.userId} member={member} />
+            {/* Display all members grouped by role */}
+            {sortedGroups.map(([role, members]) => (
+              <div key={role}>
+                {members.map((member) => (
+                  <MemberItem key={member.userId} member={member} />
+                ))}
+              </div>
             ))}
           </div>
         )}

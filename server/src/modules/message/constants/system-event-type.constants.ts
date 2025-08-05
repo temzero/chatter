@@ -9,4 +9,8 @@ export enum SystemEventType {
   CHAT_UPDATE_AVATAR = 'chat_update_avatar',
   CHAT_UPDATE_DESCRIPTION = 'chat_update_description',
   CHAT_RENAMED = 'chat_renamed',
+
+  MESSAGE_PINNED = 'message_pinned',
+  MESSAGE_UNPINNED = 'message_unpinned',
+  CHAT_DELETED = 'chat_deleted',
 }

@@ -69,10 +69,10 @@ export const handleSystemEventMessage = (message: MessageResponse) => {
     },
 
     [SystemEventType.MEMBER_LEFT]: () =>
-      sender?.id && memberStore.removeMemberLocally?.(chatId, sender.id),
+      sender?.id && memberStore.clearChatMember?.(chatId, sender.id),
 
     [SystemEventType.MEMBER_KICKED]: () =>
-      sender?.id && memberStore.removeMemberLocally?.(chatId, sender.id),
+      sender?.id && memberStore.clearChatMember?.(chatId, sender.id),
 
     [SystemEventType.MEMBER_BANNED]: () =>
       sender?.id &&

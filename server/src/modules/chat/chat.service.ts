@@ -15,6 +15,7 @@ import { ChatMapper } from './mappers/chat.mapper';
 import { MessageService } from '../message/message.service';
 import { Message } from '../message/entities/message.entity';
 import { InviteLinkService } from '../invite-link/invite-link.service';
+import { SystemEventType } from '../message/constants/system-event-type.constants';
 
 @Injectable()
 export class ChatService {
@@ -354,13 +355,16 @@ export class ChatService {
     if (!isParticipant)
       ErrorResponse.unauthorized('You are not a member of this chat');
 
-    const chat = await this.chatRepo.findOne({ where: { id: chatId } });
+    const chat = await this.chatRepo.findOne({
+      where: { id: chatId },
+      relations: ['pinnedMessage'], // Include pinnedMessage relation
+    });
     if (!chat) ErrorResponse.notFound('Chat not found');
 
-    await this.messageRepo.update(
-      { chat: { id: chatId }, isPinned: true },
-      { isPinned: false, pinnedAt: null },
-    );
+    // Check if the message is already pinned
+    if (chat.pinnedMessage?.id === messageId) {
+      ErrorResponse.badRequest('This message is already pinned');
+    }
 
     const message = await this.messageRepo.findOne({
       where: { id: messageId },
@@ -368,12 +372,35 @@ export class ChatService {
     });
     if (!message) ErrorResponse.notFound('Message not found');
 
+    // Unpin all other messages (only if we're pinning a different message)
+    if (chat.pinnedMessage?.id !== messageId) {
+      await this.messageRepo.update(
+        { chat: { id: chatId }, isPinned: true },
+        { isPinned: false, pinnedAt: null },
+      );
+    }
+
+    // Update and save the pinned message
     message.isPinned = true;
     message.pinnedAt = new Date();
     await this.messageRepo.save(message);
 
+    // Update chat's pinned message
     chat.pinnedMessage = message;
     await this.chatRepo.save(chat);
+
+    await this.messageService.createSystemEventMessage(
+      chatId,
+      userId,
+      SystemEventType.MESSAGE_PINNED,
+      {
+        newValue:
+          typeof message.content === 'string'
+            ? message.content.slice(0, 100)
+            : undefined,
+        targetId: message.id,
+      },
+    );
 
     return this.getUserChat(chatId, userId);
   }

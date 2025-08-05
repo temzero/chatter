@@ -373,7 +373,9 @@ export class ChatMemberService {
     memberId: string,
     nickname: string | null,
   ): Promise<{
+    userId: string;
     chatId: string;
+    firstName: string | null;
     oldNickname: string | null;
     newNickname: string | null;
   }> {
@@ -384,7 +386,8 @@ export class ChatMemberService {
 
       const member = await this.memberRepo.findOne({
         where: { id: memberId },
-        select: ['nickname', 'chatId'], // only fetch necessary fields
+        relations: ['user'],
+        select: ['id', 'nickname', 'chatId', 'userId'],
       });
 
       if (!member) {
@@ -401,7 +404,9 @@ export class ChatMemberService {
       }
 
       return {
+        userId: member.userId,
         chatId: member.chatId,
+        firstName: member.user.firstName,
         oldNickname: member.nickname,
         newNickname: nickname,
       };
