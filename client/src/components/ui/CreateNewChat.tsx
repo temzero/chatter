@@ -1,15 +1,17 @@
 import React, { useState } from "react";
-import { userService } from "@/services/userService";
 import ContactInfoItem from "./contactInfoItem";
+import { userService } from "@/services/userService";
 import { useCurrentUser } from "@/stores/authStore";
 import { AnimatePresence, motion } from "framer-motion";
 import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "./avatar/Avatar";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
-import FriendshipBtn from "./FriendshipBtn";
-import type { UserResponse } from "@/types/responses/user.response";
 import { blockService } from "@/services/blockService";
 import { toast } from "react-toastify";
+import FriendshipBtn from "./FriendshipBtn";
+import type { UserResponse } from "@/types/responses/user.response";
+import { OnlineDot } from "./OnlineDot";
+import { useUserStatus } from "@/stores/presenceStore";
 
 const CreateNewChat: React.FC = () => {
   const currentUser = useCurrentUser();
@@ -61,6 +63,9 @@ const CreateNewChat: React.FC = () => {
       friendshipStatus: newStatus,
     });
   };
+
+  const isUserOnline = useUserStatus(user?.id);
+  toast.info(`IsOnline: ${isUserOnline}`);
 
   return (
     <div className="flex flex-col gap-3 p-2 h-full relative overflow-hidden">
@@ -126,6 +131,12 @@ const CreateNewChat: React.FC = () => {
                       }
                       isBlocked={user.isBlockedByMe}
                     />
+                    {!user.isBlockedMe && (
+                      <OnlineDot
+                        isOnline={isUserOnline}
+                        className={`absolute top-1/2 left-[3px] -translate-y-1/2`}
+                      />
+                    )}
                   </div>
 
                   <h1 className="font-bold text-xl">

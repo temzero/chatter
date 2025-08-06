@@ -13,6 +13,8 @@ import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.se
 import { DirectChatMember } from "@/types/responses/chatMember.response";
 import { useMessageStore } from "@/stores/messageStore";
 import MessageSearchBar from "../ui/MessageSearchBar";
+import { useUserLastSeen } from "@/stores/presenceStore";
+import { formatTimeAgo } from "@/utils/formatTimeAgo";
 
 interface ChatHeaderProps {
   chat: ChatResponse;
@@ -34,6 +36,13 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   const isChannel = chat.type === ChatType.CHANNEL;
   const isDirect = chat.type === ChatType.DIRECT;
   const isGroup = chat.type === ChatType.GROUP;
+
+  const partnerId =
+    isDirect && chat.otherMemberUserIds?.length
+      ? chat.otherMemberUserIds[0]
+      : undefined;
+
+  const lastSeen = useUserLastSeen(partnerId);
 
   // Get chat partner's friendship status if DIRECT chat
   let canCall = false;
@@ -78,6 +87,11 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
         >
           <ChatAvatar chat={chat} type="header" isBlocked={isBlockedByMe} />
           <h1 className="text-xl font-medium">{chat.name}</h1>
+          {isDirect && !isOnline && lastSeen && (
+            <span className="text-xs text-gray-400">
+              Last seen {formatTimeAgo(lastSeen)}
+            </span>
+          )}
           {chat.isDeleted && (
             <h1 className="text-yellow-500/80">Has left the chat</h1>
           )}

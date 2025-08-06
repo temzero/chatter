@@ -7,7 +7,6 @@ import { formatTimeAgo } from "@/utils/formatTimeAgo";
 import { OnlineDot } from "./OnlineDot";
 import SimpleTypingIndicator from "./typingIndicator/SimpleTypingIndicator";
 import { AnimatePresence, motion } from "framer-motion";
-// import { useChatOnlineStatus } from "@/hooks/useChatOnlineStatus";
 import { useChatStore, useIsActiveChat } from "@/stores/chatStore";
 import { useChatStatus } from "@/stores/presenceStore";
 import { ChatType } from "@/types/enums/ChatType";

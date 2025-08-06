@@ -124,9 +124,8 @@ export const useChatStore = create<ChatStore>()(
               chats: otherChats,
               filteredChats: otherChats,
             });
-
-            console.log("Chats fetched:", otherChats);
-            console.log("Saved chat:", savedChat);
+            // console.log("Chats fetched:", otherChats);
+            // console.log("Saved chat:", savedChat);
           } catch (error) {
             console.error("Failed to fetch chats:", error);
             set({ error: "Failed to load chats" });
@@ -411,7 +410,7 @@ export const useChatStore = create<ChatStore>()(
 
         setUnreadCount: (chatId: string, incrementBy: number) => {
           const isActiveChat = get().activeChat?.id === chatId;
-          console.log("isActiveChat", isActiveChat);
+          // console.log("isActiveChat", isActiveChat);
           if (isActiveChat) return;
           set((state) =>
             updateChatState(state, chatId, (chat) => ({
@@ -422,7 +421,7 @@ export const useChatStore = create<ChatStore>()(
         },
 
         setPinnedMessage: (chatId: string, message: MessageResponse | null) => {
-          console.log("setPinnedMessage: ", chatId, message);
+          // console.log("setPinnedMessage: ", chatId, message);
           set((state) =>
             updateChatState(state, chatId, (chat) => ({
               ...chat,

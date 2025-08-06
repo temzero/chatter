@@ -14,7 +14,8 @@ import { MessageMapper } from 'src/modules/message/mappers/message.mapper';
 import { ChatService } from 'src/modules/chat/chat.service';
 import { emitWsError } from '../utils/emitWsError';
 import { Message } from 'src/modules/message/entities/message.entity';
-import { ChatEvent } from '../constants/websocket-events';
+
+const chatLink = 'chat:';
 
 @WebSocketGateway()
 export class ChatGateway {
@@ -26,7 +27,7 @@ export class ChatGateway {
     private readonly messageMapper: MessageMapper,
   ) {}
 
-  @SubscribeMessage(ChatEvent.GET_STATUS)
+  @SubscribeMessage(`${chatLink}getStatus`)
   async handleGetStatus(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() chatId: string,
@@ -38,7 +39,7 @@ export class ChatGateway {
     return { chatId, isOnline };
   }
 
-  @SubscribeMessage(ChatEvent.TYPING)
+  @SubscribeMessage(`${chatLink}typing`)
   async handleTyping(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() data: { chatId: string; isTyping: boolean },
@@ -55,13 +56,13 @@ export class ChatGateway {
     // Broadcast to all other members in the chat (excluding sender)
     await this.websocketService.emitToChatMembers(
       data.chatId,
-      ChatEvent.USER_TYPING,
+      `${chatLink}userTyping`,
       payload,
       { senderId: userId, excludeSender: true },
     );
   }
 
-  @SubscribeMessage(ChatEvent.SEND_MESSAGE)
+  @SubscribeMessage(`${chatLink}sendMessage`)
   async handleMessage(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: CreateMessageDto,
@@ -84,7 +85,7 @@ export class ChatGateway {
           senderId,
         );
         if (!member) {
-          client.emit(ChatEvent.MESSAGE_ERROR, {
+          client.emit(`${chatLink}messageError`, {
             messageId: payload.id,
             chatId: payload.chatId,
             error: 'You are not a member of this chat',
@@ -111,7 +112,7 @@ export class ChatGateway {
       // Broadcast new message to all chat members (including sender)
       await this.websocketService.emitToChatMembers(
         payload.chatId,
-        ChatEvent.NEW_MESSAGE,
+        `${chatLink}newMessage`,
         messageResponse,
         { senderId },
       );
@@ -120,7 +121,7 @@ export class ChatGateway {
       if (updatedMember) {
         await this.websocketService.emitToChatMembers(
           payload.chatId,
-          ChatEvent.MESSAGE_READ,
+          `${chatLink}messageRead`,
           {
             chatId: payload.chatId,
             memberId: updatedMember.id,
@@ -136,7 +137,7 @@ export class ChatGateway {
           error instanceof Error ? error.message : 'Failed to send message';
 
         // Notify the client
-        client.emit(ChatEvent.MESSAGE_ERROR, {
+        client.emit(`${chatLink}messageError`, {
           messageId: payload.id,
           chatId: payload.chatId,
           error: errorMessage,
@@ -148,7 +149,7 @@ export class ChatGateway {
     }
   }
 
-  @SubscribeMessage(ChatEvent.FORWARD_MESSAGE)
+  @SubscribeMessage(`${chatLink}forwardMessage`)
   async handleForwardMessage(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: ForwardMessageDto,
@@ -192,7 +193,7 @@ export class ChatGateway {
       // Emit new message to all chat members (including sender)
       await this.websocketService.emitToChatMembers(
         payload.chatId,
-        ChatEvent.NEW_MESSAGE,
+        `${chatLink}newMessage`,
         messageResponse,
         { senderId },
       );
@@ -200,7 +201,7 @@ export class ChatGateway {
       // Emit read update (including sender)
       await this.websocketService.emitToChatMembers(
         payload.chatId,
-        ChatEvent.MESSAGE_READ,
+        `${chatLink}messageRead`,
         {
           chatId: payload.chatId,
           memberId: member.id,
@@ -219,7 +220,7 @@ export class ChatGateway {
     }
   }
 
-  @SubscribeMessage(ChatEvent.REACT_TO_MESSAGE)
+  @SubscribeMessage('chat:reactToMessage')
   async handleReactToMessage(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody()
@@ -238,7 +239,7 @@ export class ChatGateway {
 
     await this.websocketService.emitToChatMembers(
       chatId,
-      ChatEvent.MESSAGE_REACTION,
+      'chat:messageReaction',
       {
         messageId,
         reactions: formatted,
@@ -247,7 +248,7 @@ export class ChatGateway {
     );
   }
 
-  @SubscribeMessage(ChatEvent.MESSAGE_READ)
+  @SubscribeMessage(`${chatLink}messageRead`)
   async handleMarkAsRead(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody()
@@ -267,7 +268,7 @@ export class ChatGateway {
     // Notify other participants with memberId and messageId (including sender)
     await this.websocketService.emitToChatMembers(
       data.chatId,
-      ChatEvent.MESSAGE_READ,
+      `${chatLink}messageRead`,
       {
         chatId: data.chatId,
         memberId: member.id,
@@ -277,7 +278,7 @@ export class ChatGateway {
     );
   }
 
-  @SubscribeMessage(ChatEvent.TOGGLE_PIN_MESSAGE)
+  @SubscribeMessage(`${chatLink}togglePinMessage`)
   async handleTogglePinMessage(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() data: { chatId: string; messageId: string | null },
@@ -295,7 +296,7 @@ export class ChatGateway {
 
         await this.websocketService.emitToChatMembers(
           data.chatId,
-          ChatEvent.PIN_UPDATED,
+          `${chatLink}pinMessageUpdated`,
           {
             chatId: data.chatId,
             message: updatedChat.pinnedMessage,
@@ -306,7 +307,7 @@ export class ChatGateway {
 
         await this.websocketService.emitToChatMembers(
           data.chatId,
-          ChatEvent.PIN_UPDATED,
+          `${chatLink}pinMessageUpdated`,
           {
             chatId: data.chatId,
             message: null,
@@ -318,7 +319,7 @@ export class ChatGateway {
     }
   }
 
-  @SubscribeMessage(ChatEvent.SAVE_MESSAGE)
+  @SubscribeMessage(`${chatLink}saveMessage`)
   async handleSaveMessage(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() data: { messageId: string | null },
@@ -348,7 +349,7 @@ export class ChatGateway {
       const response = this.messageMapper.toMessageResponseDto(savedMessage);
       this.websocketService.emitToUser(
         userId,
-        ChatEvent.SAVE_MESSAGE,
+        `${chatLink}saveMessage`,
         response,
       );
     } catch (error) {
@@ -356,7 +357,7 @@ export class ChatGateway {
     }
   }
 
-  @SubscribeMessage(ChatEvent.TOGGLE_IMPORTANT)
+  @SubscribeMessage('chat:toggleImportant')
   async handleToggleImportant(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody()
@@ -377,7 +378,7 @@ export class ChatGateway {
 
       await this.websocketService.emitToChatMembers(
         data.chatId,
-        ChatEvent.MESSAGE_IMPORTANT_TOGGLED,
+        'chat:messageImportantToggled',
         updatedMessageToggled,
         { senderId: userId },
       );
@@ -386,7 +387,7 @@ export class ChatGateway {
     }
   }
 
-  @SubscribeMessage(ChatEvent.DELETE_MESSAGE)
+  @SubscribeMessage(`${chatLink}deleteMessage`)
   async handleDeleteMessage(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody()
@@ -411,7 +412,7 @@ export class ChatGateway {
         // Notify all chat members that the message has been deleted (including sender)
         await this.websocketService.emitToChatMembers(
           data.chatId,
-          ChatEvent.MESSAGE_DELETED,
+          `${chatLink}messageDeleted`,
           {
             messageId: data.messageId,
             chatId: data.chatId,
@@ -425,7 +426,7 @@ export class ChatGateway {
           data.messageId,
         );
 
-        this.websocketService.emitToUser(userId, ChatEvent.MESSAGE_DELETED, {
+        this.websocketService.emitToUser(userId, `${chatLink}messageDeleted`, {
           messageId: data.messageId,
           chatId: data.chatId,
         });

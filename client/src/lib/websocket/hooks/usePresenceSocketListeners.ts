@@ -1,41 +1,35 @@
-// hooks/usePresenceSocketListeners.ts
 import { useEffect } from "react";
-import { webSocketService } from "../services/websocket.service";
 import { usePresenceStore } from "@/stores/presenceStore";
 import { useChatStore } from "@/stores/chatStore";
+import { presenceWebSocketService } from "../services/presence.service";
+import {
+  PresenceInitEvent,
+  PresenceUpdateEvent,
+} from "../services/presence.service";
 
 export function usePresenceSocketListeners() {
   useEffect(() => {
-    const socket = webSocketService.getSocket();
-    console.log("usePresenceSocketListeners socket", socket);
-
-    if (!socket) return;
-
-    // Get all user IDs from chats (direct partners + group members)
     const userIds = useChatStore.getState().getAllUserIdsInChats();
-    console.log("usePresenceSocketListeners userIds", userIds);
+    presenceWebSocketService.subscribe(userIds);
 
-    // Subscribe to presence updates for these users
-    socket.emit("presence:subscribe", userIds);
-
-    // Handle initial presence statuses
-    const handleInitialPresence = (statuses: Record<string, boolean>) => {
-      usePresenceStore.getState().setMultipleStatuses(statuses);
+    const handleInit = (event: PresenceInitEvent) => {
+      usePresenceStore.getState().setMultipleStatuses(event.statuses);
     };
 
-    // Handle real-time presence updates
-    const handlePresenceUpdate = (userId: string, isOnline: boolean) => {
-      usePresenceStore.getState().setUserStatus(userId, isOnline);
+    const handleUpdate = (event: PresenceUpdateEvent) => {
+      usePresenceStore.getState().setUserStatus(event.userId, event.isOnline);
+      if (!event.isOnline && event.lastSeen) {
+        usePresenceStore.getState().setLastSeen(event.userId, event.lastSeen);
+      }
     };
 
-    // Set up listeners
-    socket.on("presence:init", handleInitialPresence);
-    socket.on("presence:update", handlePresenceUpdate);
+    const cleanupInit = presenceWebSocketService.onInit(handleInit);
+    const cleanupUpdate = presenceWebSocketService.onUpdate(handleUpdate);
 
-    // Cleanup listeners on unmount
     return () => {
-      socket.off("presence:init", handleInitialPresence);
-      socket.off("presence:update", handlePresenceUpdate);
+      cleanupInit();
+      cleanupUpdate();
+      presenceWebSocketService.unsubscribe(userIds);
     };
-  }, []); // Runs once on component mount
+  }, []);
 }

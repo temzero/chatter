@@ -1,101 +1,78 @@
-// stores/presenceStore.ts
 import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
-import { webSocketService } from "@/lib/websocket/services/websocket.service";
+import { useMemo } from "react";
 import { useCurrentUserId } from "./authStore";
 import { ChatType } from "@/types/enums/ChatType";
-import { useMemo } from "react";
 import { useChatMemberStore } from "./chatMemberStore";
 
 interface PresenceStore {
-  onlineUsers: string[];
-  setUserStatus: (userId: string, isOnline: boolean) => void;
+  onlineUserIds: string[];
+  lastSeenMap: Record<string, string>; // userId → ISO timestamp
+  setUserStatus: (userId: string, isOnline: boolean, lastSeen?: string) => void;
   setMultipleStatuses: (statuses: Record<string, boolean>) => void;
-  initialize: () => () => void; // Initialize function with cleanup
+  setLastSeen: (userId: string, timestamp: string) => void;
+  getLastSeen: (userId: string) => string | undefined;
 }
 
-export const usePresenceStore = create<PresenceStore>((set) => ({
-  onlineUsers: [],
-  setUserStatus: (userId, isOnline) =>
+export const usePresenceStore = create<PresenceStore>((set, get) => ({
+  onlineUserIds: [],
+  lastSeenMap: {},
+
+  setUserStatus: (userId, isOnline, lastSeen) =>
     set((state) => {
-      const exists = state.onlineUsers.includes(userId);
+      const exists = state.onlineUserIds.includes(userId);
+
+      // Update online status
+      let onlineUserIds = state.onlineUserIds;
       if (isOnline && !exists) {
-        return { onlineUsers: [...state.onlineUsers, userId] };
+        onlineUserIds = [...state.onlineUserIds, userId];
+      } else if (!isOnline && exists) {
+        onlineUserIds = state.onlineUserIds.filter((id) => id !== userId);
       }
-      if (!isOnline && exists) {
-        return { onlineUsers: state.onlineUsers.filter((id) => id !== userId) };
-      }
-      return state;
+
+      // Update last seen if provided
+      const lastSeenMap = lastSeen
+        ? { ...state.lastSeenMap, [userId]: lastSeen }
+        : state.lastSeenMap;
+
+      return { onlineUserIds, lastSeenMap };
     }),
+
   setMultipleStatuses: (statuses) =>
     set((state) => {
-      // console.log("⬅️ Previous onlineUsers:", state.onlineUsers);
+      const onlineUserIds = Object.entries(statuses)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .filter(([_, isOnline]) => isOnline)
+        .map(([userId]) => userId);
 
-      const prevOnlineSet = new Set(state.onlineUsers);
-      const newOnlineSet = new Set<string>();
-
-      Object.entries(statuses).forEach(([userId, isOnline]) => {
-        if (isOnline) {
-          newOnlineSet.add(userId);
-        }
-      });
-
-      // Determine who went offline
-      const loggedOutUsers: string[] = [];
-      prevOnlineSet.forEach((userId) => {
-        if (!newOnlineSet.has(userId)) {
-          loggedOutUsers.push(userId);
-        }
-      });
-
-      if (loggedOutUsers.length > 0) {
-        console.log("🔻 Logged out users:", loggedOutUsers);
-      }
-
-      const updatedOnlineUsers = Array.from(newOnlineSet);
-      // console.log("✅ Updated onlineUsers:", updatedOnlineUsers);
-
-      return { onlineUsers: updatedOnlineUsers };
+      // Preserve existing lastSeen data
+      return { onlineUserIds, lastSeenMap: state.lastSeenMap };
     }),
 
-  initialize: () => {
-    const socket = webSocketService.getSocket();
-    if (!socket) return () => {}; // Return empty cleanup if no socket
+  setLastSeen: (userId, timestamp) =>
+    set((state) => ({
+      lastSeenMap: { ...state.lastSeenMap, [userId]: timestamp },
+    })),
 
-    // Get user IDs from chat store
-    const userIds = useChatMemberStore.getState().getAllUserIdsInChats();
-    // console.log("userIds: ", userIds);
-    socket.emit("presence:subscribe", userIds);
-
-    // Handlers
-    const handleInitialPresence = (statuses: Record<string, boolean>) => {
-      usePresenceStore.getState().setMultipleStatuses(statuses);
-    };
-
-    const handlePresenceUpdate = (userId: string, isOnline: boolean) => {
-      usePresenceStore.getState().setUserStatus(userId, isOnline);
-    };
-
-    // Set up listeners
-    socket.on("presence:init", handleInitialPresence);
-    socket.on("presence:update", handlePresenceUpdate);
-
-    // Return cleanup function
-    return () => {
-      socket.off("presence:init", handleInitialPresence);
-      socket.off("presence:update", handlePresenceUpdate);
-    };
-  },
+  getLastSeen: (userId) => get().lastSeenMap[userId],
 }));
 
-export const useUserStatus = (userId: string) => {
+// Existing hooks remain the same, but we'll add new ones:
+export const useUserStatus = (userId?: string) => {
   return usePresenceStore(
-    useShallow((state) => state.onlineUsers.includes(userId))
+    useShallow((state) =>
+      userId ? state.onlineUserIds.includes(userId) : false
+    )
+  );
+};
+
+export const useUserLastSeen = (userId?: string) => {
+  return usePresenceStore(
+    useShallow((state) => (userId ? state.lastSeenMap[userId] : undefined))
   );
 };
 
 export const useChatStatus = (chatId: string, type: ChatType) => {
-  console.log("useChatStatus", type);
   const currentUserId = useCurrentUserId();
   const getChatMemberUserIds = useChatMemberStore(
     (state) => state.getChatMemberUserIds
@@ -106,11 +83,9 @@ export const useChatStatus = (chatId: string, type: ChatType) => {
     return raw.filter((id) => id !== currentUserId);
   }, [chatId, type, getChatMemberUserIds, currentUserId]);
 
-  // console.log("useChatStatus memberIds", memberIds);
-
   return usePresenceStore(
     useShallow((state) =>
-      memberIds.some((id) => state.onlineUsers.includes(id))
+      memberIds.some((id) => state.onlineUserIds.includes(id))
     )
   );
 };

@@ -12,13 +12,13 @@ import { useIsAuthenticated } from "@/stores/authStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { useFriendshipStore } from "@/stores/friendshipStore";
-import { usePresenceStore } from "@/stores/presenceStore";
 import { useChatSocketListeners } from "@/lib/websocket/hooks/useChatSocketListener";
 import { useWebSocket } from "@/lib/websocket/hooks/useWebsocket";
 import { PuffLoader } from "react-spinners";
 import { useFolderStore } from "@/stores/folderStore";
 import { toast } from "react-toastify";
 import { useNotificationSocketListeners } from "@/lib/websocket/hooks/useNotificationSocketListener";
+import { usePresenceSocketListeners } from "@/lib/websocket/hooks/usePresenceSocketListeners";
 
 export const ChatContent: React.FC = () => {
   const { id: chatId } = useParams();
@@ -41,8 +41,6 @@ export const ChatContent: React.FC = () => {
     error: folderError,
   } = useFolderStore();
 
-  const { initialize: initializePresence } = usePresenceStore();
-
   useEffect(() => {
     const initialize = async () => {
       try {
@@ -58,10 +56,7 @@ export const ChatContent: React.FC = () => {
         // 3. Set active chat after data is loaded
         await setActiveChatById(chatId || null);
 
-        // 4. Initialize presence
-        initializePresence();
-
-        // 5. Initialize sidebar UI components
+        // 4. Initialize sidebar UI components
         initializeSidebar();
         initializeSidebarInfo();
 
@@ -79,7 +74,6 @@ export const ChatContent: React.FC = () => {
     initializeAuth,
     initializeChats,
     initializeFolders,
-    initializePresence,
     initializeSidebar,
     initializeSidebarInfo,
     setActiveChatById,
@@ -108,6 +102,7 @@ const PrivateLayout: React.FC = () => {
   useWebSocket();
   useNotificationSocketListeners();
   useChatSocketListeners();
+  usePresenceSocketListeners();
 
   if (!isAuthenticated) {
     return <Navigate to={ROUTES.PUBLIC.LOGIN} replace />;

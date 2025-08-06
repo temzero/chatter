@@ -1,19 +1,19 @@
+import clsx from "clsx";
 import { useCurrentUserId } from "@/stores/authStore";
 import { SystemEventType } from "@/types/enums/systemEventType";
 import { MessageResponse } from "@/types/responses/message.response";
 import { MessageActions } from "../ui/MessageActions";
 import { ReactionPicker } from "../ui/MessageReactionPicker";
-import {
-  useIsMessageFocus,
-  useIsReplyToThisMessage,
-  useModalStore,
-} from "@/stores/modalStore";
-import clsx from "clsx";
 import { MessageReactionDisplay } from "../ui/MessageReactionsDisplay";
 import { motion } from "framer-motion";
 import { messageAnimations } from "@/animations/messageAnimations";
 import { SystemMessageContent } from "../ui/SystemMessageContent";
 import { SystemMessageJSONContent } from "../ui/SystemMessageContent";
+import {
+  useIsMessageFocus,
+  useIsReplyToThisMessage,
+  useModalStore,
+} from "@/stores/modalStore";
 
 type Props = {
   message: MessageResponse;

@@ -10,6 +10,7 @@ import { useShallow } from "zustand/shallow";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
 import { useCurrentUserId } from "./authStore";
 import { handleError } from "@/utils/handleError";
+import { useMemo } from "react";
 
 interface ChatMemberStore {
   chatMembers: Record<string, ChatMember[]>; // chatId -> members
@@ -20,7 +21,7 @@ interface ChatMemberStore {
   getChatMember: (chatId: string, memberId: string) => ChatMember | undefined;
   getChatMemberUserIds: (chatId: string, type: ChatType) => string[];
   getAllChatMemberIds: () => string[];
-  getAllUserIdsInChats: () => string[];
+  getAllUniqueUserIds: () => string[];
   addMemberLocally: (newMember: GroupChatMember) => void;
   updateMemberLocally: (
     chatId: string,
@@ -106,13 +107,11 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
     return Array.from(allMemberIds);
   },
 
-  getAllUserIdsInChats: () => {
-    const chats = useChatStore.getState().chats;
+  getAllUniqueUserIds: () => {
     const { chatMembers } = get();
     const allUserIds = new Set<string>();
 
-    chats.forEach((chat) => {
-      const members = chatMembers[chat.id] || [];
+    Object.values(chatMembers).forEach((members) => {
       members.forEach((member) => {
         allUserIds.add(member.userId);
       });
@@ -320,4 +319,22 @@ export const useGroupOtherMembers = (chatId: string): ChatMember[] => {
       return members.filter((member) => member.id !== myMemberId);
     })
   );
+};
+
+export const useAllUniqueUserIds = (): string[] => {
+  const chatMembers = useChatMemberStore(
+    useShallow((state) => state.chatMembers)
+  );
+
+  return useMemo(() => {
+    const allUserIds = new Set<string>();
+
+    Object.values(chatMembers).forEach((members) => {
+      members.forEach((member) => {
+        allUserIds.add(member.userId);
+      });
+    });
+
+    return Array.from(allUserIds);
+  }, [chatMembers]);
 };

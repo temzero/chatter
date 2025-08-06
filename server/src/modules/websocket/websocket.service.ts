@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Server } from 'socket.io';
 import { ChatMemberService } from '../chat-member/chat-member.service';
 import { BlockService } from '../block/block.service';
+import { PresenceUpdateEvent } from './constants/presenceEvent.type';
 
 interface EnhancedPayload {
   payload: any;
@@ -100,9 +101,31 @@ export class WebsocketService {
     }
   }
 
-  getSubscribersForUser(userId: string): string[] {
-    return Array.from(this.presenceSubscriptions.get(userId) || []);
+  removePresenceSubscriber(socketId: string, targetUserId: string): boolean {
+    // Remove from target's subscriber list
+    const targetSubscribers = this.presenceSubscriptions.get(targetUserId);
+    if (targetSubscribers) {
+      targetSubscribers.delete(socketId);
+      if (targetSubscribers.size === 0) {
+        this.presenceSubscriptions.delete(targetUserId);
+      }
+    }
+
+    // Remove from socket's subscription list
+    const socketSubscriptions = this.socketSubscriptions.get(socketId);
+    if (socketSubscriptions) {
+      socketSubscriptions.delete(targetUserId);
+      if (socketSubscriptions.size === 0) {
+        this.socketSubscriptions.delete(socketId);
+      }
+    }
+
+    return true;
   }
+
+  // getSubscribersForUser(userId: string): string[] {
+  //   return Array.from(this.presenceSubscriptions.get(userId) || []);
+  // }
 
   // Status Utilities
   isUserOnline(userId: string): boolean {
@@ -141,6 +164,29 @@ export class WebsocketService {
     }
 
     return validSockets;
+  }
+
+  // In WebsocketService
+  notifyPresenceSubscribers(userId: string, isOnline: boolean): void {
+    try {
+      const subscribers = this.presenceSubscriptions.get(userId);
+      if (!subscribers || subscribers.size === 0) return;
+
+      // Optimized payload construction
+      const payload: PresenceUpdateEvent = {
+        userId, // Direct property assignment
+        isOnline, // Direct property assignment
+        ...(!isOnline && {
+          lastSeen: new Date().toISOString(), // Only include when offline
+        }),
+      };
+
+      // Batch emit to all subscribers
+      this.server.to(Array.from(subscribers)).emit('presence:update', payload);
+    } catch (error) {
+      console.error(`[WS] Presence notification error for ${userId}:`, error);
+      // Consider adding error metrics/logging here
+    }
   }
 
   async emitToChatMembers(

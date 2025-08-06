@@ -13,7 +13,7 @@ export const chatService = {
   async fetchAllChats(): Promise<ChatResponse[]> {
     try {
       const response = await API.get(`/chat`);
-      console.log("Fetched chats", response.data.payload);
+      // console.log("Fetched chats", response.data.payload);
       return response.data.payload;
     } catch (error) {
       console.error("Failed to fetch chats:", error);

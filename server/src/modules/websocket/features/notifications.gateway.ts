@@ -9,15 +9,15 @@ import { UseGuards } from '@nestjs/common';
 import { WsJwtGuard } from 'src/modules/auth/guards/ws-jwt.guard';
 import { WebsocketService } from '../websocket.service';
 import { AuthenticatedSocket } from '../constants/authenticatedSocket.type';
-
-const notificationsLink = 'notifications:';
+import { NotificationEvent } from '../constants/websocket-events';
+import { FriendRequestResponseDto } from 'src/modules/friendship/dto/responses/friend-request-response.dto';
 
 @WebSocketGateway()
 @UseGuards(WsJwtGuard)
 export class NotificationGateway {
   constructor(private readonly websocketService: WebsocketService) {}
 
-  @SubscribeMessage(`${notificationsLink}subscribeToNotifications`)
+  @SubscribeMessage(NotificationEvent.SUBSCRIBE)
   handleSubscribe(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() userId: string,
@@ -30,5 +30,14 @@ export class NotificationGateway {
     // Join user-specific notification room
     void client.join(`notifications_${userId}`);
     return { success: true };
+  }
+
+  // Example notification method
+  notifyFriendRequest(receiverId: string, payload: FriendRequestResponseDto) {
+    this.websocketService.emitToUser(
+      receiverId,
+      NotificationEvent.FRIEND_REQUEST,
+      payload,
+    );
   }
 }

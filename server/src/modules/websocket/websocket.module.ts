@@ -1,7 +1,7 @@
 // src/websocket/websocket.module.ts
 import { Module, forwardRef } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { GlobalGateway } from './global.gateway';
+import { GlobalGateway } from './features/global.gateway';
 import { WebsocketService } from './websocket.service';
 import { MessageModule } from '../message/message.module';
 import { UserModule } from '../user/user.module';
