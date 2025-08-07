@@ -14,21 +14,26 @@ export const enum ChatEvent {
   // Status Events
   USER_TYPING = 'chat:user-typing',
   GET_STATUS = 'chat:get-status',
+  STATUS_CHANGED = 'chat:status-changed',
 
   // Management Events
   PIN_UPDATED = 'chat:pin-updated',
   TOGGLE_IMPORTANT = 'chat:toggle-important',
+  MESSAGE_IMPORTANT_TOGGLED = 'chat:message-important-toggled',
 
-  // Additional Events from your code
+  // Member Events
+  MEMBER_ADDED = 'chat:member-added',
+  MEMBER_REMOVED = 'chat:member-removed',
+
+  // Action Events
   TYPING = 'chat:typing',
-  SEND_MESSAGE = 'chat:sendMessage',
-  FORWARD_MESSAGE = 'chat:forwardMessage',
-  REACT_TO_MESSAGE = 'chat:reactToMessage',
-  TOGGLE_PIN_MESSAGE = 'chat:togglePinMessage',
-  SAVE_MESSAGE = 'chat:saveMessage',
-  DELETE_MESSAGE = 'chat:deleteMessage',
-  MESSAGE_ERROR = 'chat:messageError',
-  MESSAGE_IMPORTANT_TOGGLED = 'chat:messageImportantToggled',
+  SEND_MESSAGE = 'chat:send-message',
+  FORWARD_MESSAGE = 'chat:forward-message',
+  REACT_TO_MESSAGE = 'chat:react-to-message',
+  TOGGLE_PIN_MESSAGE = 'chat:toggle-pin-message',
+  SAVE_MESSAGE = 'chat:save-message',
+  DELETE_MESSAGE = 'chat:delete-message',
+  MESSAGE_ERROR = 'chat:message-error',
 }
 
 export const enum PresenceEvent {
@@ -39,8 +44,10 @@ export const enum PresenceEvent {
 }
 
 export const enum NotificationEvent {
-  FRIEND_REQUEST = 'notification:friend-request',
   SUBSCRIBE = 'notification:subscribe',
+  FRIEND_REQUEST = 'notification:friend-request',
+  CANCEL_FRIEND_REQUEST = 'notification:cancel-friend-request',
+  FRIENDSHIP_UPDATE = 'notification:friendship-update',
 }
 
 export const enum SystemEvent {

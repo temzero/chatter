@@ -338,3 +338,12 @@ export const useAllUniqueUserIds = (): string[] => {
     return Array.from(allUserIds);
   }, [chatMembers]);
 };
+
+export const useMemberAvatars = (chatId: string, limit: number = 4) => {
+  const members = useChatMemberStore.getState().chatMembers[chatId] || [];
+  // Filter out members without avatars and get their avatar URLs
+  return members
+    .filter((member) => member.avatarUrl)
+    .slice(0, limit)
+    .map((member) => member.avatarUrl as string);
+};

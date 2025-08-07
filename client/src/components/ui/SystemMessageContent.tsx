@@ -40,10 +40,10 @@ export const SystemMessageContent = ({
 
   return (
     <div
-      className={`flex items-center text-muted-foreground text-sm ${ClassName}`}
+      className={`flex gap-1 items-center text-muted-foreground text-sm opacity-40 ${ClassName}`}
     >
       <SystemEventIcon systemEvent={systemEvent} />
-      <span>{text}</span>
+      <span className="truncate max-w-[200px]">{text}</span>
     </div>
   );
 };
@@ -79,6 +79,8 @@ function getSystemMessageText({
   switch (systemEvent) {
     case SystemEventType.MEMBER_JOINED:
       return `${displayName} joined the chat`;
+    case SystemEventType.MEMBER_ADDED:
+      return `${displayName} added ${targetName} to the chat`;
     case SystemEventType.MEMBER_LEFT:
       return `${displayName} left the chat`;
     case SystemEventType.MEMBER_KICKED:

@@ -18,6 +18,7 @@ import { MessageMapper } from './mappers/message.mapper';
 import { WebsocketService } from '../websocket/websocket.service';
 import { MessageResponseDto } from './dto/responses/message-response.dto';
 import { User } from '../user/entities/user.entity';
+import { ChatEvent } from '../websocket/constants/websocket-events';
 
 @Injectable()
 export class MessageService {
@@ -177,105 +178,6 @@ export class MessageService {
     return await this.getFullMessageById(saved.id);
   }
 
-  // async createMessage(
-  //   senderId: string,
-  //   createMessageDto: CreateMessageDto,
-  // ): Promise<Message> {
-  //   if (createMessageDto.id) {
-  //     const existing = await this.messageRepo.findOne({
-  //       where: { id: createMessageDto.id },
-  //     });
-
-  //     if (existing) {
-  //       ErrorResponse.badRequest('Message with this ID already exists');
-  //     }
-  //   }
-
-  //   const chat = await this.chatRepo.findOne({
-  //     where: { id: createMessageDto.chatId },
-  //     relations: ['members'],
-  //   });
-  //   if (!chat) {
-  //     ErrorResponse.notFound('Chat not found');
-  //   }
-
-  //   // ⛔ Blocking check only in direct chat
-  //   await this.ensureNoBlockingInDirectChat(senderId, chat);
-
-  //   const isMember = await this.chatMemberRepo.exists({
-  //     where: {
-  //       chatId: createMessageDto.chatId,
-  //       userId: senderId,
-  //     },
-  //   });
-  //   if (!isMember) {
-  //     ErrorResponse.notFound('You are not a member of this chat');
-  //   }
-
-  //   if (createMessageDto.replyToMessageId) {
-  //     const repliedMessage = await this.messageRepo.findOne({
-  //       where: { id: createMessageDto.replyToMessageId },
-  //       select: ['id', 'chatId', 'replyToMessageId'], // Only select needed fields
-  //     });
-
-  //     if (!repliedMessage) {
-  //       ErrorResponse.notFound('Replied message not found');
-  //     }
-  //     if (repliedMessage.chatId !== createMessageDto.chatId) {
-  //       ErrorResponse.badRequest('Replied message is not from the same chat');
-  //     }
-
-  //     // THE GUARD - Single place to prevent reply chains
-  //     if (repliedMessage.replyToMessageId) {
-  //       ErrorResponse.badRequest(
-  //         'Cannot reply to a message that is already a reply',
-  //       );
-  //     }
-  //   }
-
-  //   try {
-  //     // Step 1: Save the message
-  //     const newMessage = this.messageRepo.create({
-  //       senderId,
-  //       ...createMessageDto,
-  //     });
-
-  //     const savedMessage = await this.messageRepo.save(newMessage);
-
-  //     // Step 2: Save attachments if any
-  //     if (createMessageDto.attachments?.length) {
-  //       const attachmentEntities = createMessageDto.attachments.map((att) =>
-  //         this.attachmentRepo.create({
-  //           messageId: savedMessage.id,
-  //           type: att.type,
-  //           url: att.url,
-  //           thumbnailUrl: att.thumbnailUrl || null,
-  //           filename: att.filename || null,
-  //           size: att.size || null,
-  //           mimeType: att.mimeType || null,
-  //           width: att.width || null,
-  //           height: att.height || null,
-  //           duration: att.duration || null,
-  //         }),
-  //       );
-
-  //       await this.attachmentRepo.save(attachmentEntities);
-  //     }
-
-  //     // Step 3: Update last visible message
-  //     await this.chatMemberRepo.update(
-  //       { chatId: chat.id },
-  //       { lastVisibleMessageId: savedMessage.id },
-  //     );
-
-  //     // Step 4: Return full message with joined relations
-  //     const fullMessage = await this.getFullMessageById(savedMessage.id);
-  //     return fullMessage;
-  //   } catch (error) {
-  //     ErrorResponse.throw(error, 'Failed to create message');
-  //   }
-  // }
-
   async createForwardedMessage(
     senderId: string,
     targetChatId: string,
@@ -356,7 +258,7 @@ export class MessageService {
 
     await this.websocketService.emitToChatMembers(
       chatId,
-      'chat:newMessage',
+      ChatEvent.NEW_MESSAGE,
       messageResponse,
     );
 

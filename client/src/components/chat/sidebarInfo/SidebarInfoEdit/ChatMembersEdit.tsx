@@ -27,7 +27,7 @@ const ChatMembersEdit = () => {
       chatId: activeChat.id,
     });
   };
-  
+
   return (
     <aside className="relative w-full h-full overflow-hidden flex flex-col">
       <header className="flex w-full justify-between px-2 items-center min-h-[var(--header-height)] custom-border-b">
@@ -46,6 +46,7 @@ const ChatMembersEdit = () => {
       <div className="overflow-y-auto h-screen p-4">
         {activeMembers.length > 0 && (
           <ChatMemberItems
+            chatId={activeChat.id}
             members={activeMembers}
             currentUserId={currentUserId}
           />

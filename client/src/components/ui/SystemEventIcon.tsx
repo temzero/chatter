@@ -17,6 +17,7 @@ export const SystemEventIcon = ({
 const getSystemEventIconName = (systemEvent: SystemEventType): string => {
   switch (systemEvent) {
     case SystemEventType.MEMBER_JOINED:
+    case SystemEventType.MEMBER_ADDED:
       return "person_add";
     case SystemEventType.MEMBER_LEFT:
       return "person_remove";

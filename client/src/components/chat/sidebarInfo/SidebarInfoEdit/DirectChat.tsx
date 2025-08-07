@@ -24,22 +24,13 @@ const DirectChat: React.FC = () => {
   );
   const { mute, unmute } = useMuteControl(activeChat.id, activeChat.myMemberId);
 
-  // const myMember = chatMembers?.find(
-  //   (member) => member.id === activeChat.myMemberId
-  // ) as DirectChatMember;
   const chatPartner = chatMembers?.find(
     (member) => member.id !== activeChat.myMemberId
   ) as DirectChatMember;
 
   if (!chatPartner || !activeChat) return null;
 
-  // const bothAccepted =
-  //   myMember?.friendshipStatus === FriendshipStatus.ACCEPTED &&
-  //   chatPartner?.friendshipStatus === FriendshipStatus.ACCEPTED;
-
   const isFriend = chatPartner?.friendshipStatus === FriendshipStatus.ACCEPTED;
-
-  // toast.info(`myMember friendshipStatus ${myMember?.friendshipStatus}, chatPartner friendshipStatus ${chatPartner?.friendshipStatus}`);
 
   // Header buttons with title
   const headerIcons: {
@@ -108,6 +99,7 @@ const DirectChat: React.FC = () => {
       <div className="flex flex-col justify-center items-center gap-4 p-4 w-full h-full overflow-y-auto">
         <Avatar
           size="36"
+          textSize="text-6xl"
           avatarUrl={chatPartner.avatarUrl}
           name={chatPartner.nickname || chatPartner.firstName}
           isBlocked={chatPartner.isBlockedByMe}

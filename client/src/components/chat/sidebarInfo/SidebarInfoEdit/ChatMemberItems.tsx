@@ -234,7 +234,7 @@ const ContextMenu = React.forwardRef<HTMLDivElement, ContextMenuProps>(
     };
 
     const handleRemoveMember = () => {
-      removeMember(member.chatId, member.id);
+      removeMember(member.chatId, member.userId);
       onClose();
     };
 

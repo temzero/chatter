@@ -5,7 +5,7 @@ import { presenceWebSocketService } from "../services/presence.service";
 import {
   PresenceInitEvent,
   PresenceUpdateEvent,
-} from "../services/presence.service";
+} from "../constants/present-payload.type";
 
 export function usePresenceSocketListeners() {
   useEffect(() => {

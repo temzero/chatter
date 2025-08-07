@@ -18,4 +18,14 @@ export interface ChatResponse {
   mutedUntil?: string | Date | null;
   inviteLinks?: string[];
   isDeleted?: boolean | null;
+  previewMembers?: ChatMemberPreview[];
+}
+
+export interface ChatMemberPreview {
+  id: string;
+  userId: string;
+  avatarUrl?: string | null;
+  nickname?: string | null;
+  firstName: string | null;
+  lastName: string | null;
 }

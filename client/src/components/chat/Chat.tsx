@@ -10,11 +10,9 @@ import { ChatMemberRole } from "@/types/enums/chatMemberRole";
 import { useBlockStatus } from "@/hooks/useBlockStatus";
 import { ChatType } from "@/types/enums/ChatType";
 import { chatMemberService } from "@/services/chat/chatMemberService";
-import { useCurrentUserId } from "@/stores/authStore";
 
 const ChatContent = React.memo(() => {
   const activeChat = useActiveChat();
-  const currentUserId = useCurrentUserId();
   const { isBlockedByMe, isBlockedMe } = useBlockStatus(
     activeChat?.id ?? "",
     activeChat?.myMemberId ?? ""
@@ -61,9 +59,7 @@ const ChatContent = React.memo(() => {
                 <button
                   className="text-[--primary-green] font-semibold rounded hover:text-white hover:bg-[--primary-green] px-2 py-1 text-lg"
                   onClick={async () => {
-                    await chatMemberService.addMembers(activeChat.id, [
-                      currentUserId,
-                    ]);
+                    await chatMemberService.joinChat(activeChat.id);
                     window.location.reload();
                   }}
                 >

@@ -7,7 +7,10 @@ import { ChatMemberStatus } from "@/types/enums/chatMemberStatus";
 import { chatMemberService } from "@/services/chat/chatMemberService";
 
 export const handleSystemEventMessage = (message: MessageResponse) => {
-  if (!message.systemEvent) return;
+  if (!message.systemEvent) {
+    console.log('not a system message')
+    return
+  };
 
   const chatStore = useChatStore.getState();
   const memberStore = useChatMemberStore.getState();

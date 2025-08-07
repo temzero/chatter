@@ -1,25 +1,9 @@
 import { webSocketService } from "./websocket.service";
-
-export type PresenceStatusMap = Record<string, boolean>;
-
-export type PresenceInitEvent = {
-  statuses: PresenceStatusMap;
-  subscribedCount: number;
-  serverTime: string;
-};
-
-export type PresenceUpdateEvent = {
-  userId: string;
-  isOnline: boolean;
-  lastSeen?: string;
-};
-
-export const enum PresenceEvent {
-  INIT = "presence:init",
-  UPDATE = "presence:update",
-  SUBSCRIBE = "presence:subscribe",
-  UNSUBSCRIBE = "presence:unsubscribe"
-}
+import { PresenceEvent } from "../constants/websocket-event.type";
+import {
+  PresenceInitEvent,
+  PresenceUpdateEvent,
+} from "../constants/present-payload.type";
 
 export const presenceWebSocketService = {
   subscribe(userIds: string[]) {

@@ -42,6 +42,13 @@ export const chatMemberService = {
     return response.data.payload;
   },
 
+  async joinChat(chatId: string): Promise<ChatMember> {
+    const response = await API.post<ApiSuccessResponse<ChatMember>>(
+      `/chat-members/join/${chatId}`
+    );
+    return response.data.payload;
+  },
+
   // Update a chat member
   async updateMember(
     memberId: string,

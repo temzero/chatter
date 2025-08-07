@@ -1,5 +1,6 @@
 export enum SystemEventType {
   MEMBER_JOINED = 'member_joined',
+  MEMBER_ADDED = 'member_added',
   MEMBER_LEFT = 'member_left',
   MEMBER_KICKED = 'member_kicked',
   MEMBER_BANNED = 'member_banned',

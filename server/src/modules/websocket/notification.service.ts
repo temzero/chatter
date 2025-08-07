@@ -3,8 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { WebsocketService } from './websocket.service';
 import { FriendRequestResponseDto } from '../friendship/dto/responses/friend-request-response.dto';
 import { FriendshipUpdateNotificationDto } from '../friendship/dto/responses/friendship-update-notification.dto';
-
-const notificationsLink = 'notifications:';
+import { NotificationEvent } from './constants/websocket-events';
 
 // notification-ws.service.ts
 @Injectable()
@@ -15,7 +14,7 @@ export class NotificationWsService {
   notifyFriendRequest(receiverId: string, payload: FriendRequestResponseDto) {
     this.websocketService.emitToUser(
       receiverId,
-      `${notificationsLink}newFriendRequest`,
+      NotificationEvent.FRIEND_REQUEST,
       payload,
     );
   }
@@ -27,7 +26,7 @@ export class NotificationWsService {
     if (!senderId) return;
     this.websocketService.emitToUser(
       senderId,
-      `${notificationsLink}friendshipUpdate`,
+      NotificationEvent.FRIENDSHIP_UPDATE,
       dto,
     );
   }
@@ -40,7 +39,7 @@ export class NotificationWsService {
     if (!receiverId) return;
     this.websocketService.emitToUser(
       receiverId,
-      `${notificationsLink}friendshipCancelRequest`,
+      NotificationEvent.CANCEL_FRIEND_REQUEST,
       {
         friendshipId,
         senderId,

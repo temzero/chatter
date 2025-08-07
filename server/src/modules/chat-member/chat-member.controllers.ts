@@ -88,33 +88,49 @@ export class ChatMemberController {
     );
   }
 
+  @Post('join/:chatId')
+  async joinChat(
+    @Param('chatId') chatId: string,
+    @CurrentUser('id') currentUserId: string,
+  ) {
+    const member = await this.memberService.addMembers(chatId, [currentUserId]);
+
+    await this.messageService.createSystemEventMessage(
+      chatId,
+      currentUserId, // The user who joined is the sender
+      SystemEventType.MEMBER_JOINED,
+    );
+
+    return new SuccessResponse(member, 'Successfully joined the chat');
+  }
+
   @Post()
   async addMembers(
     @Body() body: { chatId: string; userIds: string[] },
     @CurrentUser('id') currentUserId: string,
-  ): Promise<SuccessResponse<GroupChatMemberResponseDto[]>> {
-    const { chatId, userIds } = body;
-    const newMembers = await this.memberService.addMembers(chatId, userIds);
-    const memberResponses = newMembers.map((member) =>
-      plainToInstance(
-        GroupChatMemberResponseDto,
-        mapChatMemberToResponseDto(member),
-      ),
+  ) {
+    const members = await this.memberService.addMembers(
+      body.chatId,
+      body.userIds,
     );
 
-    // Create system message for each added member
-    for (const userId of userIds) {
+    // System messages
+    for (const member of members) {
       await this.messageService.createSystemEventMessage(
-        chatId,
-        currentUserId, // Use currentUserId instead of userId as sender
-        SystemEventType.MEMBER_JOINED,
+        body.chatId,
+        currentUserId,
+        SystemEventType.MEMBER_ADDED,
         {
-          targetId: userId, // Pass the target user ID
+          targetId: member.userId,
+          targetName: member.nickname ?? member.user.firstName,
         },
       );
     }
 
-    return new SuccessResponse(memberResponses, 'Members added successfully');
+    return new SuccessResponse(
+      members.map((m) => mapChatMemberToResponseDto(m)),
+      'Members added successfully',
+    );
   }
 
   @Patch(':memberId')
@@ -272,13 +288,16 @@ export class ChatMemberController {
       userId,
     );
 
+    const isSelfRemoval = currentUserId === userId;
+    const eventType = isSelfRemoval
+      ? SystemEventType.MEMBER_LEFT
+      : SystemEventType.MEMBER_KICKED;
+
     await this.messageService.createSystemEventMessage(
       chatId,
       currentUserId,
-      SystemEventType.MEMBER_LEFT,
-      {
-        targetId: userId, // Pass target user ID
-      },
+      eventType,
+      !isSelfRemoval ? { targetId: userId } : undefined,
     );
 
     return new SuccessResponse(
@@ -295,18 +314,26 @@ export class ChatMemberController {
     @Param('chatId') chatId: string,
     @Param('userId') userId: string,
   ): Promise<SuccessResponse<{ chatDeleted: boolean }>> {
-    const { chatDeleted } = await this.memberService.removeMember(
+    const { member, chatDeleted } = await this.memberService.removeMember(
       chatId,
       userId,
     );
 
+    const isSelfRemoval = currentUserId === userId;
+    const eventType = isSelfRemoval
+      ? SystemEventType.MEMBER_LEFT
+      : SystemEventType.MEMBER_KICKED;
+
     await this.messageService.createSystemEventMessage(
       chatId,
       currentUserId,
-      SystemEventType.MEMBER_LEFT,
-      {
-        targetId: userId, // Pass target user ID
-      },
+      eventType,
+      !isSelfRemoval
+        ? {
+            targetId: userId,
+            targetName: member.nickname ?? member.user.firstName,
+          }
+        : undefined,
     );
 
     return new SuccessResponse(

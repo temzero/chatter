@@ -11,6 +11,7 @@ import { AttachmentType } from 'src/modules/message/constants/attachment-type.co
 import { MessageMapper } from 'src/modules/message/mappers/message.mapper';
 import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
 import { getActiveInviteLinks } from 'src/common/utils/invite-link.util';
+import { ChatMemberPreviewDto } from '../dto/responses/chat-member-preview.dto';
 
 @Injectable()
 export class ChatMapper {
@@ -81,6 +82,9 @@ export class ChatMapper {
           )
         : null,
       otherMemberUserIds: otherMember ? [otherMember.userId] : [],
+      previewMembers: otherMember
+        ? [this.transformToMemberPreviewDto(otherMember)]
+        : [],
       unreadCount,
       mutedUntil,
       isDeleted: !!otherMember?.deletedAt, // Optional: add deletion status
@@ -94,6 +98,12 @@ export class ChatMapper {
   ): Promise<ChatResponseDto> {
     const myMember = chat.members.find((m) => m.userId === currentUserId);
     const otherMembers = chat.members.filter((m) => m.userId !== currentUserId);
+    const previewMembers = [
+      ...(myMember ? [this.transformToMemberPreviewDto(myMember)] : []),
+      ...otherMembers
+        .slice(0, myMember ? 3 : 4) // Take one less from others if we include current user
+        .map((m) => this.transformToMemberPreviewDto(m)),
+    ];
 
     if (!myMember) {
       throw new Error('You must be a member to access this chat');
@@ -136,6 +146,7 @@ export class ChatMapper {
           )
         : null,
       otherMemberUserIds: otherMembers.map((m) => m.userId),
+      previewMembers,
       inviteLinks: getActiveInviteLinks(chat.inviteLinks),
       unreadCount,
       mutedUntil,
@@ -200,6 +211,19 @@ export class ChatMapper {
       isForwarded,
       systemEvent: message.systemEvent,
       createdAt: message.createdAt,
+    };
+  }
+
+  private transformToMemberPreviewDto(
+    member: ChatMember,
+  ): ChatMemberPreviewDto {
+    return {
+      id: member.id,
+      userId: member.userId,
+      avatarUrl: member.user?.avatarUrl ?? null,
+      nickname: member.nickname ?? null,
+      firstName: member.user?.firstName ?? null,
+      lastName: member.user?.lastName ?? null,
     };
   }
 

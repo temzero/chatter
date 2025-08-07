@@ -3,6 +3,7 @@ import { Server } from 'socket.io';
 import { ChatMemberService } from '../chat-member/chat-member.service';
 import { BlockService } from '../block/block.service';
 import { PresenceUpdateEvent } from './constants/presenceEvent.type';
+import { ChatEvent, PresenceEvent } from './constants/websocket-events';
 
 interface EnhancedPayload {
   payload: any;
@@ -182,7 +183,9 @@ export class WebsocketService {
       };
 
       // Batch emit to all subscribers
-      this.server.to(Array.from(subscribers)).emit('presence:update', payload);
+      this.server
+        .to(Array.from(subscribers))
+        .emit(PresenceEvent.UPDATE, payload);
     } catch (error) {
       console.error(`[WS] Presence notification error for ${userId}:`, error);
       // Consider adding error metrics/logging here
@@ -191,7 +194,7 @@ export class WebsocketService {
 
   async emitToChatMembers(
     chatId: string,
-    event: string,
+    event: ChatEvent,
     payload: any,
     options: {
       senderId?: string;
