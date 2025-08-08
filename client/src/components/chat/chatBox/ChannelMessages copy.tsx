@@ -100,13 +100,11 @@ const ChannelMessages: React.FC<ChannelMessagesProps> = ({
                   <ChannelMessage message={msg} />
                 </div>
                 {isLastRead && (
-                  <div className="relative flex items-center gap-1 justify-center text-xs opacity-50 italic w-full p-2">
+                  <div className="flex items-center gap-1 justify-center text-xs opacity-50 italic w-full custom-border-t">
                     <span className="material-symbols-outlined text-xl">
                       visibility
                     </span>
-                    <span>Last Read</span>
-                    {/* Bar in the middle, behind text */}
-                    <div className="absolute left-0 right-0 h-[2px] bg-[--border-color] top-1/2 -translate-y-1/2 z-0"></div>
+                    Last Read
                   </div>
                 )}
               </React.Fragment>

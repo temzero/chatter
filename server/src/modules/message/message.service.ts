@@ -19,6 +19,7 @@ import { WebsocketService } from '../websocket/websocket.service';
 import { MessageResponseDto } from './dto/responses/message-response.dto';
 import { User } from '../user/entities/user.entity';
 import { ChatEvent } from '../websocket/constants/websocket-events';
+import { ChatMemberRole } from '../chat-member/constants/chat-member-roles.constants';
 
 @Injectable()
 export class MessageService {
@@ -198,6 +199,15 @@ export class MessageService {
     if (!chat) {
       ErrorResponse.notFound('Chat not found');
     }
+
+    const myMember = chat.members.find((m) => m.userId === senderId);
+
+    if (!myMember) {
+      ErrorResponse.unauthorized('You are not a member of this Chat');
+    }
+
+    // ⛔ Channel-only permission checks for forwarding
+    this.ensureCanForwardInChannel(chat, myMember);
 
     // ⛔ Blocking check only in direct chat
     await this.ensureNoBlockingInDirectChat(senderId, chat);
@@ -835,5 +845,34 @@ export class MessageService {
     if (targetName !== undefined) content.targetName = targetName;
 
     return Object.keys(content).length > 0 ? JSON.stringify(content) : null;
+  }
+
+  private ensureCanForwardInChannel(chat: Chat, member: ChatMember) {
+    if (chat.type !== ChatType.CHANNEL) {
+      return; // Not a channel → no extra checks
+    }
+
+    switch (member.role) {
+      case ChatMemberRole.GUEST:
+        ErrorResponse.unauthorized(
+          'Guests cannot forward messages in this channel',
+        );
+        break;
+      case ChatMemberRole.MEMBER:
+        if (chat.is_broadcast_only) {
+          ErrorResponse.unauthorized(
+            'Members cannot forward messages in broadcast-only channels',
+          );
+        }
+        break;
+      case ChatMemberRole.ADMIN:
+      case ChatMemberRole.OWNER:
+        // ✅ Allowed
+        break;
+      default:
+        ErrorResponse.unauthorized(
+          'You do not have permission to forward messages in this channel',
+        );
+    }
   }
 }

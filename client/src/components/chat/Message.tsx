@@ -5,24 +5,23 @@ import { useCurrentUserId } from "@/stores/authStore";
 import RenderMultipleAttachments from "../ui/RenderMultipleAttachments";
 import { formatTime } from "@/utils/formatTime";
 import { Avatar } from "../ui/avatar/Avatar";
-import type { MessageResponse } from "@/types/responses/message.response";
 import { ChatType } from "@/types/enums/ChatType";
 import { MessageReactionDisplay } from "../ui/MessageReactionsDisplay";
 import MessageReplyPreview from "../ui/MessageReplyPreview";
 import ForwardedMessagePreview from "../ui/ForwardMessagePreview";
-import { MessageActions } from "../ui/MessageActions";
-import { ReactionPicker } from "../ui/MessageReactionPicker";
 import { handleQuickReaction } from "@/utils/quickReaction";
 import { messageAnimations } from "@/animations/messageAnimations";
+import { MessageStatus } from "@/types/enums/message";
+import { BeatLoader } from "react-spinners";
+import { SystemMessageJSONContent } from "../ui/SystemMessageContent";
+import SystemMessage from "./SystemMessage";
 import {
   useIsMessageFocus,
   useIsReplyToThisMessage,
   useModalStore,
 } from "@/stores/modalStore";
-import { MessageStatus } from "@/types/enums/message";
-import { BeatLoader } from "react-spinners";
-import { SystemMessageJSONContent } from "../ui/SystemMessageContent";
-import SystemMessage from "./SystemMessage";
+import { MessageContextMenu } from "./MessageContextMenu";
+import type { MessageResponse } from "@/types/responses/message.response";
 
 interface MessageProps {
   message: MessageResponse;
@@ -51,6 +50,20 @@ const Message: React.FC<MessageProps> = ({
   const openMessageModal = useModalStore((state) => state.openMessageModal);
   const [copied, setCopied] = useState(false);
   const messageRef = useRef<HTMLDivElement>(null);
+  const [contextMenuPosition, setContextMenuPosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    openMessageModal(message.id);
+    setContextMenuPosition({ x: e.clientX, y: e.clientY });
+  };
+
+  const closeContextMenu = () => {
+    setContextMenuPosition(null);
+  };
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -74,11 +87,6 @@ const Message: React.FC<MessageProps> = ({
 
   const isGroupChat = chatType === "group";
   const attachments = message.attachments || [];
-
-  // const handleClick = (e: React.MouseEvent) => {
-  //   e.stopPropagation();
-  //   closeModal();
-  // };
 
   // Check if the message is a system message
   const isSystemMessage = !!message.systemEvent;
@@ -111,12 +119,8 @@ const Message: React.FC<MessageProps> = ({
       initial={animationProps.initial}
       animate={animationProps.animate}
       transition={animationProps.transition}
-      // onClick={handleClick}
       onDoubleClick={() => handleQuickReaction(message.id, message.chatId)}
-      onContextMenu={(e) => {
-        e.preventDefault();
-        openMessageModal(message.id);
-      }}
+      onContextMenu={handleContextMenu}
     >
       {isGroupChat && !isMe && (
         <div className={clsx("flex-shrink-0 mt-auto mr-2 h-10 w-10 min-w-10")}>
@@ -190,14 +194,13 @@ const Message: React.FC<MessageProps> = ({
               chatId={message.chatId}
             />
             {isFocus && !isRelyToThisMessage && (
-              <>
-                <ReactionPicker
-                  messageId={message.id}
-                  chatId={message.chatId}
-                  isMe={isMe}
-                />
-                <MessageActions message={message} isMe={isMe} />
-              </>
+              <MessageContextMenu
+                message={message}
+                isMe={isMe}
+                isChannel={false}
+                position={contextMenuPosition || undefined}
+                onClose={closeContextMenu}
+              />
             )}
           </div>
         </div>

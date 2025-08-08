@@ -10,6 +10,8 @@ import { useCurrentUserId } from "@/stores/authStore";
 import { MessageReactionDisplay } from "../ui/MessageReactionsDisplay";
 import MessageReplyPreview from "../ui/MessageReplyPreview";
 import ForwardedMessagePreview from "../ui/ForwardMessagePreview";
+import { MessageActions } from "../ui/MessageActions";
+import { ReactionPicker } from "../ui/MessageReactionPicker";
 import { handleQuickReaction } from "@/utils/quickReaction";
 import { messageAnimations } from "@/animations/messageAnimations";
 import {
@@ -19,7 +21,6 @@ import {
 } from "@/stores/modalStore";
 import { MessageStatus } from "@/types/enums/message";
 import { ChatType } from "@/types/enums/ChatType";
-import { MessageContextMenu } from "./MessageContextMenu";
 
 interface ChannelMessageProps {
   message: MessageResponse;
@@ -36,21 +37,7 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ message }) => {
   const openMessageModal = useModalStore((state) => state.openMessageModal);
   const [copied, setCopied] = useState(false);
   const messageRef = useRef<HTMLDivElement>(null);
-  const [contextMenuPosition, setContextMenuPosition] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault();
-    // Open your existing modal
-    openMessageModal(message.id);
-    // Set position for reaction picker
-    setContextMenuPosition({ x: e.clientX, y: e.clientY });
-  };
 
-  const closeContextMenu = () => {
-    setContextMenuPosition(null);
-  };
   const attachments = message.attachments ?? [];
 
   // Copy text handler
@@ -103,7 +90,10 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ message }) => {
       animate={animationProps.animate}
       transition={animationProps.transition}
       onDoubleClick={() => handleQuickReaction(message.id, message.chatId)}
-      onContextMenu={handleContextMenu}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        openMessageModal(message.id);
+      }}
     >
       <div className="rounded-xl custom-border overflow-hidden">
         {repliedMessage && (
@@ -151,13 +141,15 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ message }) => {
       />
 
       {isFocus && !isReplyToThisMessage && (
-        <MessageContextMenu
-          message={message}
-          isMe={isMe}
-          isChannel={true}
-          position={contextMenuPosition || undefined}
-          onClose={closeContextMenu}
-        />
+        <>
+          <ReactionPicker
+            messageId={message.id}
+            chatId={message.chatId}
+            isMe={isMe}
+            isChannel={true}
+          />
+          <MessageActions message={message} isMe={isMe} isChannel={true} />
+        </>
       )}
 
       <div className="absolute bottom-1 right-1 text-xs italic opacity-0 group-hover:opacity-80 font-semibold bg-[--sidebar-color] p-0.5 px-1.5 rounded-full z-9 backdrop-blur-lg">

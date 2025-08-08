@@ -14,6 +14,7 @@ import SearchBar from "../ui/SearchBar";
 import { childrenModalAnimation } from "@/animations/modalAnimations";
 import { AttachmentType } from "@/types/enums/attachmentType";
 import { AttachmentUploadRequest } from "@/types/requests/sendMessage.request";
+import { ChatType } from "@/types/enums/ChatType";
 
 const ForwardMessageModal: React.FC = () => {
   const modalContent = useModalStore((state) => state.modalContent);
@@ -24,8 +25,10 @@ const ForwardMessageModal: React.FC = () => {
   const closeModal = useModalStore((state) => state.closeModal);
   const filteredChats = useChatStore((state) => state.filteredChats);
 
-  const forwardChats = filteredChats.filter((chat) =>
-    message ? chat.id !== message.chatId : true
+  const forwardChats = filteredChats.filter(
+    (chat) =>
+      (message ? chat.id !== message.chatId : true) &&
+      chat.type !== ChatType.CHANNEL
   );
 
   const handleForward = async (chatId: string) => {

@@ -51,7 +51,7 @@ export class Chat {
   @Column({ default: false, nullable: true })
   is_public?: boolean;
 
-  @Column({ default: false, nullable: true })
+  @Column({ default: true, nullable: true })
   is_broadcast_only?: boolean;
 
   @OneToMany(() => InviteLink, (invite) => invite.chat)

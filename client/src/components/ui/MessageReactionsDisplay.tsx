@@ -8,7 +8,8 @@ import removeReactionSound from "@/assets/sound/click.mp3";
 import { useMessageReactions } from "@/stores/messageStore";
 
 interface MessageReactionDisplayProps {
-  isMe: boolean;
+  isMe?: boolean;
+  isChannel?: boolean;
   isSystemMessage?: boolean;
   currentUserId?: string;
   messageId: string;
@@ -16,7 +17,8 @@ interface MessageReactionDisplayProps {
 }
 
 export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
-  isMe,
+  isMe = false,
+  isChannel = false,
   isSystemMessage = false,
   currentUserId,
   messageId,
@@ -67,11 +69,12 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
       }}
       whileTap={{ scale: 0.8 }}
       className={clsx(
-        "message-reaction absolute -bottom-2 z-10 flex bg-black/50 rounded-full",
-        {
-          "-left-4": isMe && !isSystemMessage,
-          "-right-4 -bottom-4 flex-row-reverse": !isMe || isSystemMessage,
-        }
+        "message-reaction absolute z-10 flex bg-black/50 rounded-full",
+        isChannel
+          ? "left-1 -bottom-2" // ✅ new class for channels
+          : isMe && !isSystemMessage
+          ? "-left-4 -bottom-2"
+          : "-right-4 -bottom-4 flex-row-reverse"
       )}
     >
       <AnimatePresence mode="wait">

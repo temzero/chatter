@@ -69,6 +69,16 @@ export const GroupAvatarLayout: React.FC<{
   const length = members.length;
   const textSize = "text-xl";
 
+  if (length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full w-full">
+        <span className="material-symbols-outlined opacity-50 text-3xl">
+          groups
+        </span>
+      </div>
+    );
+  }
+
   if (length === 1) {
     return (
       <div className="flex items-center justify-center h-full w-full">

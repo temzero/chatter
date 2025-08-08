@@ -170,7 +170,7 @@ export const MediaViewer = () => {
   if (!currentMedia) return null;
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center">
+    <div className="relative w-full h-full flex flex-col items-center justify-center select-none">
       <MediaViewerTopBar
         attachment={currentMedia}
         onRotate={handleRotate}

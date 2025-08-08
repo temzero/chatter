@@ -1,7 +1,5 @@
-// components/ui/MessageActions.tsx
 import React from "react";
 import clsx from "clsx";
-import { motion } from "framer-motion";
 import { MessageResponse } from "@/types/responses/message.response";
 import {
   ModalType,
@@ -16,14 +14,16 @@ interface MessageActionsProps {
   className?: string;
   isMe?: boolean;
   isSystemMessage?: boolean;
+  isChannel?: boolean;
   onClose?: () => void;
 }
 
 export const MessageActions: React.FC<MessageActionsProps> = ({
   message,
   className = "",
-  isMe,
-  isSystemMessage,
+  isMe = false,
+  isChannel = false,
+  isSystemMessage = false,
   onClose,
 }) => {
   const openModal = useModalStore((state) => state.openModal);
@@ -32,112 +32,98 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   const isPinned = false;
   const isAlreadyReply = !!message.replyToMessageId;
 
-  const baseActions = isSystemMessage
-    ? [
-        {
-          icon: "reply",
-          label: "Reply",
-          action: () => {
-            setReplyToMessageId(message.id);
-            scrollToMessageById(message.id, { animate: false });
-          },
-        },
-        {
-          icon: "delete",
-          label: "Delete",
-          action: () => {
-            if (onClose) onClose();
-            openModal(ModalType.DELETE_MESSAGE, {
-              messageId: message.id,
-            });
-          },
-        },
-      ]
-    : [
-        ...(!isAlreadyReply
-          ? [
-              {
-                icon: "reply",
-                label: "Reply",
-                action: () => {
-                  setReplyToMessageId(message.id);
-                  scrollToMessageById(message.id, { animate: false });
-                },
-              },
-            ]
-          : []),
-        {
-          icon: "arrow_warm_up",
-          label: "Forward",
-          action: () => {
-            if (onClose) onClose();
-            openModal(ModalType.FORWARD_MESSAGE, { message });
-          },
-        },
-        {
-          icon: isPinned ? "remove" : "keep",
-          label: isPinned ? "Unpin" : "Pin",
-          action: () => {
-            chatWebSocketService.togglePinMessage({
-              chatId: message.chatId,
-              messageId: isPinned ? null : message.id,
-            });
-            if (onClose) onClose();
-            closeModal();
-          },
-        },
-        {
-          icon: "bookmark",
-          label: "Save",
-          action: () => {
-            if (onClose) onClose();
-            chatWebSocketService.saveMessage({ messageId: message.id });
-            closeModal();
-          },
-        },
-        {
-          icon: "flag",
-          label: message.isImportant ? "Unmark Important" : "Mark Important",
-          action: () => {
-            if (onClose) onClose();
-            chatWebSocketService.toggleImportantMessage({
-              messageId: message.id,
-              chatId: message.chatId,
-              isImportant: !message.isImportant,
-            });
-            closeModal();
-          },
-        },
-        {
-          icon: "delete",
-          label: "Delete",
-          action: () => {
-            if (onClose) onClose();
-            openModal(ModalType.DELETE_MESSAGE, {
-              messageId: message.id,
-            });
-          },
-        },
-      ];
+  // 🔹 Helper to stop repeat code
+  const actions = {
+    reply: {
+      icon: "reply",
+      label: "Reply",
+      action: () => {
+        setReplyToMessageId(message.id);
+        scrollToMessageById(message.id, { animate: false });
+      },
+    },
+    forward: {
+      icon: "arrow_warm_up",
+      label: "Forward",
+      action: () => {
+        if (onClose) onClose();
+        openModal(ModalType.FORWARD_MESSAGE, { message });
+      },
+    },
+    pin: {
+      icon: isPinned ? "remove" : "keep",
+      label: isPinned ? "Unpin" : "Pin",
+      action: () => {
+        chatWebSocketService.togglePinMessage({
+          chatId: message.chatId,
+          messageId: isPinned ? null : message.id,
+        });
+        if (onClose) onClose();
+        closeModal();
+      },
+    },
+    save: {
+      icon: "bookmark",
+      label: "Save",
+      action: () => {
+        if (onClose) onClose();
+        chatWebSocketService.saveMessage({ messageId: message.id });
+        closeModal();
+      },
+    },
+    important: {
+      icon: "flag",
+      label: message.isImportant ? "Unmark Important" : "Mark Important",
+      action: () => {
+        if (onClose) onClose();
+        chatWebSocketService.toggleImportantMessage({
+          messageId: message.id,
+          chatId: message.chatId,
+          isImportant: !message.isImportant,
+        });
+        closeModal();
+      },
+    },
+    delete: {
+      icon: "delete",
+      label: "Delete",
+      action: () => {
+        if (onClose) onClose();
+        openModal(ModalType.DELETE_MESSAGE, { messageId: message.id });
+      },
+    },
+  };
+
+  // 🔹 Build the list dynamically
+  let baseActions: (typeof actions)[keyof typeof actions][] = [];
+
+  if (isChannel) {
+    baseActions = isMe
+      ? [
+          ...(!isAlreadyReply ? [actions.reply] : []),
+          actions.forward,
+          actions.pin,
+          actions.save,
+          actions.important,
+          actions.delete,
+        ]
+      : [actions.forward, actions.save, actions.delete];
+  } else if (isSystemMessage) {
+    baseActions = [actions.reply, actions.delete];
+  } else {
+    baseActions = [
+      ...(!isAlreadyReply ? [actions.reply] : []),
+      actions.forward,
+      actions.pin,
+      actions.save,
+      actions.important,
+      actions.delete,
+    ];
+  }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0 }}
-      animate={{ opacity: 1, scale: 1 }}
-      // exit={{ opacity: 0, scale: 0.5, y: -10 }}
-      style={{
-        transformOrigin: isMe ? "top right" : "top left",
-      }}
-      className={clsx(
-        "absolute -bottom-14 flex rounded-lg blur-card z-50",
-        {
-          "right-0": isMe,
-          "left-0": !isMe,
-          // "-bottom-14": !flip, // Default position below
-          // "-top-14": flip, // Flipped position above
-        },
-        className
-      )}
+    <div
+      className={clsx("flex rounded-lg blur-card z-50", className)}
       onClick={(e) => e.stopPropagation()}
     >
       {baseActions.map((action, index) => (
@@ -161,13 +147,13 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
               action.label === "Delete" && "text-red-400",
               action.label.includes("Important") &&
                 message.isImportant &&
-                "filled text-red-500 font-bold" // Custom class we'll define below
+                "filled text-red-500 font-bold"
             )}
           >
             {action.icon}
           </i>
         </button>
       ))}
-    </motion.div>
+    </div>
   );
 };

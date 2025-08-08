@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { GroupChatMember } from "@/types/responses/chatMember.response";
 import { ChatMemberRole } from "@/types/enums/chatMemberRole";
 import { ChatMemberStatus } from "@/types/enums/chatMemberStatus";
@@ -8,6 +8,10 @@ import { ModalType, useModalStore } from "@/stores/modalStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useCurrentUserId } from "@/stores/authStore";
 import { rolePriority } from "@/types/enums/chatMemberRole";
+import {
+  calculateContextMenuPosition,
+  useClickOutside,
+} from "@/utils/contextMenuUtils";
 
 interface ChatMemberItemsProps {
   members: GroupChatMember[];
@@ -44,22 +48,14 @@ export const ChatMemberItems = ({
   currentUserId,
 }: ChatMemberItemsProps) => {
   const [contextMenu, setContextMenu] = useState<{
-    x: number;
-    y: number;
+    position: { x: number; y: number };
+    transformOrigin: string;
     member: GroupChatMember | null;
   } | null>(null);
 
   const menuRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setContextMenu(null);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  useClickOutside(menuRef, () => setContextMenu(null));
 
   const myMember = members.find((m) => m.userId === currentUserId);
   const myRole = myMember?.role;
@@ -81,16 +77,13 @@ export const ChatMemberItems = ({
 
     const menuWidth = 192;
     const menuHeight = 160;
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
+    const position = calculateContextMenuPosition(
+      { x: e.clientX, y: e.clientY },
+      menuWidth,
+      menuHeight
+    );
 
-    let x = e.clientX;
-    let y = e.clientY;
-
-    if (x + menuWidth > windowWidth) x = windowWidth - menuWidth;
-    if (y + menuHeight > windowHeight) y = windowHeight - menuHeight;
-
-    setContextMenu({ x, y, member });
+    setContextMenu({ ...position, member });
   };
 
   const handleClickMember = (member: GroupChatMember) => {
@@ -187,9 +180,9 @@ export const ChatMemberItems = ({
       ))}
 
       {contextMenu?.member && myRole && (
-        <ContextMenu
-          x={contextMenu.x}
-          y={contextMenu.y}
+        <MemberContextMenu
+          x={contextMenu.position.x}
+          y={contextMenu.position.y}
           member={contextMenu.member}
           currentRole={myRole}
           onClose={() => setContextMenu(null)}
@@ -208,7 +201,7 @@ interface ContextMenuProps {
   onClose: () => void;
 }
 
-const ContextMenu = React.forwardRef<HTMLDivElement, ContextMenuProps>(
+const MemberContextMenu = React.forwardRef<HTMLDivElement, ContextMenuProps>(
   ({ x, y, member, currentRole, onClose }, ref) => {
     const openModal = useModalStore((s) => s.openModal);
     const updateMember = useChatMemberStore.getState().updateMember;
@@ -243,15 +236,17 @@ const ContextMenu = React.forwardRef<HTMLDivElement, ContextMenuProps>(
         ref={ref}
         className="fixed z-[999] bg-[--background-color] border custom-border rounded shadow-lg w-48"
         style={{ top: `${y}px`, left: `${x}px` }}
+        onContextMenu={(e: React.MouseEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
       >
-        {/* Show Set Nickname if it's yourself or if current user is admin/owner */}
         {(isMyself || canManageOthers) && (
           <div className={classes} onClick={handleOpenNicknameModal}>
             Set Nickname
           </div>
         )}
 
-        {/* Admin/Owner managing others */}
         {!isMyself && canManageOthers && (
           <>
             {currentRole === ChatMemberRole.OWNER && (
@@ -292,4 +287,4 @@ const ContextMenu = React.forwardRef<HTMLDivElement, ContextMenuProps>(
   }
 );
 
-ContextMenu.displayName = "ContextMenu";
+MemberContextMenu.displayName = "MemberContextMenu";

@@ -75,7 +75,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
           {lastMessage.senderId === currentUserId ? (
             <strong>Me:</strong>
           ) : chat.type !== ChatType.DIRECT ? (
-            <strong>{lastMessage.senderDisplayName}:</strong>
+            <strong>{lastMessage.senderDisplayName.split(" ")[0]}:</strong>
           ) : null}
 
           {/* If forwarded */}
