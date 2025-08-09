@@ -1,66 +1,53 @@
 // components/ui/MessageHorizontalPreview.tsx
-import React, { useRef, useState, useEffect } from "react";
 import clsx from "clsx";
+import React, { useRef } from "react";
 import { Avatar } from "../ui/avatar/Avatar";
 import { MessageResponse } from "@/types/responses/message.response";
 import { ChatType } from "@/types/enums/ChatType";
 import { useCurrentUserId } from "@/stores/authStore";
 import RenderAttachment from "../ui/RenderAttachment";
 import RenderPinnedAttachment from "../ui/RenderPinnedAttachment";
+import { MessageHorizontalPreviewTypes } from "@/types/enums/MessageHorizontalPreviewTypes";
 
 interface MessageHorizontalPreviewProps {
   message: MessageResponse;
   chatType?: ChatType;
   isBubble?: boolean;
+  type: MessageHorizontalPreviewTypes;
 }
 
 export const MessageHorizontalPreview: React.FC<
   MessageHorizontalPreviewProps
-> = ({ message, chatType = ChatType.DIRECT, isBubble = false }) => {
+> = ({ message, chatType = ChatType.DIRECT, isBubble = false, type }) => {
   const currentUserId = useCurrentUserId();
   const isMe = currentUserId === message.sender.id;
 
   const isGroupChat = chatType === ChatType.GROUP;
   const forwardedMessage = message.forwardedFromMessage;
-
-  // const isReplyToMe = currentUserId === message.replyToMessage?.sender.id;
   const isForwardedFromMe =
     currentUserId === message.forwardedFromMessage?.sender.id;
 
-  const [copied, setCopied] = useState(false);
   const messageRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (copied) {
-      timer = setTimeout(() => setCopied(false), 200);
-    }
-    return () => clearTimeout(timer);
-  }, [copied]);
-
-  const handleCopyText = () => {
-    if (!message.content) return;
-    navigator.clipboard.writeText(message.content);
-    setCopied(true);
-  };
-
-  const messageClass = clsx({
+  const containerClass = clsx("flex items-center gap-2", {
     "bg-[--message-color] py-1 px-2 rounded": isBubble,
     "bg-[--primary-green]": isBubble && isMe,
   });
-  const nestedMessageClass = clsx({
+
+  const nestedMessageClass = clsx("flex gap-2 items-center", {
     "bg-[--message-color] p-1 rounded": isBubble,
     "bg-[--primary-green]": isBubble && isForwardedFromMe,
   });
 
+  const messageTextClass = clsx("overflow-hidden", {
+    "font-semibold opacity-70": !!forwardedMessage,
+    "truncate": type === MessageHorizontalPreviewTypes.PIN,
+    "line-clamp-2":
+      type === MessageHorizontalPreviewTypes.REPLY_CHANNEL_MESSAGE,
+  });
+
   return (
-    <div
-      ref={messageRef}
-      className={clsx(
-        "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-[80%] flex items-center justify-center gap-2",
-        messageClass
-      )}
-    >
+    <div ref={messageRef} className={containerClass}>
       {isGroupChat && !isMe && (
         <Avatar
           avatarUrl={message.sender.avatarUrl}
@@ -69,18 +56,6 @@ export const MessageHorizontalPreview: React.FC<
         />
       )}
 
-      <p
-        className={clsx(
-          "break-words truncate max-w-full cursor-pointer transition-all duration-200",
-          {
-            "scale-110 opacity-60": copied,
-          }
-        )}
-        onClick={handleCopyText}
-      >
-        {message.content}
-      </p>
-
       {message?.attachments && message?.attachments?.length > 0 && (
         <div className="flex gap-1">
           {message.attachments.map((attachment, index) => (
@@ -88,18 +63,19 @@ export const MessageHorizontalPreview: React.FC<
               index={index}
               key={attachment.id}
               attachment={attachment}
-              // className="w-8 h-8 max-h-32 object-cover rounded"
             />
           ))}
         </div>
       )}
+
+      <p className={messageTextClass}>{message.content}</p>
 
       {forwardedMessage && (
         <div className="flex items-center gap-1">
           <span className="material-symbols-outlined rotate-90 opacity-60">
             arrow_warm_up
           </span>
-          <div className={clsx("flex gap-2 items-center", nestedMessageClass)}>
+          <div className={nestedMessageClass}>
             {!isForwardedFromMe && (
               <Avatar
                 avatarUrl={forwardedMessage?.sender.avatarUrl}
@@ -107,9 +83,7 @@ export const MessageHorizontalPreview: React.FC<
                 size="6"
               />
             )}
-            <p className="text-sm font-semibold opacity-70 mr-2">
-              {forwardedMessage?.content}
-            </p>
+            <p className={messageTextClass}>{forwardedMessage?.content}</p>
 
             {forwardedMessage?.attachments &&
               forwardedMessage?.attachments?.length > 0 && (
@@ -118,7 +92,7 @@ export const MessageHorizontalPreview: React.FC<
                     <RenderAttachment
                       key={attachment.id}
                       attachment={attachment}
-                      className="w-full h-full max-h-32 object-cover rounded"
+                      className="w-full h-full max-h-16 object-cover rounded"
                     />
                   ))}
                 </div>

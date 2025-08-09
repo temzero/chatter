@@ -72,7 +72,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       },
     },
     important: {
-      icon: "flag",
+      icon: "star",
       label: message.isImportant ? "Unmark Important" : "Mark Important",
       action: () => {
         if (onClose) onClose();

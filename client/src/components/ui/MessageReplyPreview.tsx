@@ -36,24 +36,25 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
   const isReplyToMe = replyMessage.sender.id === currentUserId;
   const isNotDirectChat = chatType !== ChatType.DIRECT;
   const isSystemMessage = !!replyMessage.systemEvent;
+  const isChannel = (chatType = ChatType.CHANNEL);
 
   return (
     <div
       onClick={closeModal}
-      className={clsx("relative flex items-start -mb-2", {
+      className={clsx("relative flex -mb-2 text-xs w-full", {
+        "opacity-60": isHidden,
         "items-start": isReplyToMe,
         "items-end": !isReplyToMe,
-        "opacity-60": isHidden,
       })}
     >
       <div
-        className={clsx("opacity-60 scale-[0.8] transition-all", {
+        className={clsx("opacity-50 transition-all w-full", {
+          "[&>*]:pointer-events-none": isHidden,
+          "hover:opacity-90 hover:scale-100 ": !isHidden,
           "ml-auto origin-bottom-right": isReplyToMe,
           "origin-bottom-left": !isReplyToMe,
           "translate-x-4": !isMe && isReplyToMe,
           "-translate-x-4": !isSelfReply,
-          "[&>*]:pointer-events-none": isHidden,
-          "hover:opacity-90 hover:scale-100 ": !isHidden,
         })}
       >
         <div
@@ -61,20 +62,20 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
             scrollToMessageById(replyMessage.id, { smooth: false })
           }
           className={clsx("message-bubble", {
-            "self-message": isReplyToMe,
+            "self-message": !isChannel && isReplyToMe,
           })}
         >
           {replyMessage.forwardedFromMessage ? (
-            <div className="truncate opacity-80 flex gap-2 items-center">
+            <div className="flex gap-2 items-center">
               {isSelfReply ? (
-                <p className="flex items-center gap-2">
+                <p className="reply-text flex items-center gap-2">
                   {replyMessage.forwardedFromMessage?.content}
                   <span className="material-symbols-outlined -rotate-90">
                     arrow_warm_up
                   </span>
                 </p>
               ) : (
-                <p className="flex items-center gap-2">
+                <p className="reply-text flex items-center gap-2">
                   <span className="material-symbols-outlined rotate-90">
                     arrow_warm_up
                   </span>
@@ -83,7 +84,7 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
               )}
             </div>
           ) : (
-            <div className="opacity-80 pointer-events-none max-w-[300px] max-h-[500px]">
+            <div className="pointer-events-none">
               {replyMessage.attachments && (
                 <RenderMultipleAttachments
                   attachments={replyMessage.attachments}
@@ -101,7 +102,7 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
                 />
               ) : (
                 replyMessage.content && (
-                  <p className="">{replyMessage.content}</p>
+                  <p className="truncate reply-text">{replyMessage.content}</p>
                 )
               )}
             </div>
@@ -121,31 +122,35 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
           )}
         </div>
 
-        {/* Display Reply Icon */}
-        {isSelfReply ? (
-          <span
-            className={clsx(
-              "material-symbols-outlined text-2xl rotate-180 absolute",
-              {
-                "-bottom-[16px] -right-[20px] scale-x-[-1]": isMe,
-                "-bottom-[16px] -left-[20px]": !isMe,
-              }
+        {/* Reply Icon */}
+        {!isChannel && (
+          <>
+            {isSelfReply ? (
+              <span
+                className={clsx(
+                  "material-symbols-outlined text-2xl rotate-180 absolute",
+                  {
+                    "-bottom-[16px] -right-[20px] scale-x-[-1]": isMe,
+                    "-bottom-[16px] -left-[20px]": !isMe,
+                  }
+                )}
+              >
+                undo
+              </span>
+            ) : (
+              <span
+                className={clsx(
+                  "material-symbols-outlined text-2xl absolute z-50 rotate-180",
+                  {
+                    "-bottom-[16px] -left-[5px]": isMe,
+                    "-bottom-[16px] -right-[5px] scale-x-[-1]": !isMe,
+                  }
+                )}
+              >
+                reply
+              </span>
             )}
-          >
-            undo
-          </span>
-        ) : (
-          <span
-            className={clsx(
-              "material-symbols-outlined text-2xl absolute z-50 rotate-180",
-              {
-                "-bottom-[16px] -left-[5px]": isMe,
-                "-bottom-[16px] -right-[5px] scale-x-[-1]": !isMe,
-              }
-            )}
-          >
-            reply
-          </span>
+          </>
         )}
       </div>
     </div>

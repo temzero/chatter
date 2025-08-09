@@ -262,7 +262,10 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
     set((state) => {
       const chatMessages = state.messages[chatId] || [];
       const index = chatMessages.findIndex((msg) => msg.id === messageId);
-      if (index === -1) return {}; // Message not found
+      if (index === -1) {
+        console.log("Message not found");
+        return state;
+      } // Message not found
 
       const updatedMessages = [...chatMessages];
       updatedMessages[index] = {

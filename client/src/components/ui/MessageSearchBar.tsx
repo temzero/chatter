@@ -75,7 +75,7 @@ const MessageSearchBar: React.FC = () => {
             showImportantOnly ? "filled text-red-400" : ""
           }`}
         >
-          flag
+          star
         </span>
       </button>
 

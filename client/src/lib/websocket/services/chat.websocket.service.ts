@@ -175,11 +175,23 @@ export const chatWebSocketService = {
     webSocketService.emit(ChatEvent.TOGGLE_IMPORTANT, payload);
   },
 
-  onImportantMessage(callback: (message: MessageResponse) => void) {
+  onImportantMessage(
+    callback: (update: {
+      chatId: string;
+      messageId: string;
+      isImportant: boolean;
+    }) => void
+  ) {
     webSocketService.on(ChatEvent.MESSAGE_IMPORTANT_TOGGLED, callback);
   },
 
-  offImportantMessage(callback: (message: MessageResponse) => void) {
+  offImportantMessage(
+    callback: (update: {
+      chatId: string;
+      messageId: string;
+      isImportant: boolean;
+    }) => void
+  ) {
     webSocketService.off(ChatEvent.MESSAGE_IMPORTANT_TOGGLED, callback);
   },
 

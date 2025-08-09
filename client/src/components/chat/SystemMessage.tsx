@@ -17,7 +17,6 @@ import {
 
 type Props = {
   message: MessageResponse;
-  isSidebar?: boolean;
   systemEvent?: SystemEventType | null;
   senderId: string;
   senderDisplayName: string;
@@ -26,7 +25,6 @@ type Props = {
 
 const SystemMessage = ({
   message,
-  isSidebar,
   systemEvent,
   senderId,
   senderDisplayName,
@@ -43,9 +41,6 @@ const SystemMessage = ({
 
   const getClass = () => {
     const classes = [];
-    if (isSidebar) {
-      classes.push("text-xs", "max-w-[196px]");
-    }
     switch (systemEvent) {
       case SystemEventType.MEMBER_LEFT:
       case SystemEventType.MEMBER_KICKED:
@@ -67,17 +62,19 @@ const SystemMessage = ({
       initial={animationProps.initial}
       animate={animationProps.animate}
       transition={animationProps.transition}
-      className={clsx("flex flex-col items-center p-1 cursor-pointer", {
-        "z-[99]": isFocus,
-      })}
+      className={clsx(
+        "cursor-pointer max-w-[80%] opacity-50 pb-2 mx-auto flex items-center justify-center",
+        {
+          "z-[99]": isFocus,
+        }
+      )}
       onContextMenu={(e) => {
         e.preventDefault();
         openMessageModal(messageId);
       }}
     >
       {systemEvent === SystemEventType.CHAT_UPDATE_AVATAR &&
-        content?.newValue &&
-        !isSidebar && (
+        content?.newValue && (
           <img
             src={content.newValue}
             alt="Chat Avatar"
@@ -96,7 +93,7 @@ const SystemMessage = ({
           senderId={senderId}
           senderDisplayName={senderDisplayName}
           JSONcontent={content}
-          ClassName={`opacity-60 italic truncate text-center ${getClass()}`}
+          ClassName={`italic truncate text-center ${getClass()}`}
         />
 
         <MessageReactionDisplay

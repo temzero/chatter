@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import { useCurrentUserId } from "@/stores/authStore";
@@ -48,7 +48,6 @@ const Message: React.FC<MessageProps> = ({
   const repliedMessage = message.replyToMessage;
 
   const openMessageModal = useModalStore((state) => state.openMessageModal);
-  const [copied, setCopied] = useState(false);
   const messageRef = useRef<HTMLDivElement>(null);
   const [contextMenuPosition, setContextMenuPosition] = useState<{
     x: number;
@@ -65,20 +64,6 @@ const Message: React.FC<MessageProps> = ({
     setContextMenuPosition(null);
   };
 
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (copied) {
-      timer = setTimeout(() => setCopied(false), 200);
-    }
-    return () => clearTimeout(timer);
-  }, [copied]);
-
-  const handleCopyText = () => {
-    if (!message.content) return;
-    navigator.clipboard.writeText(message.content);
-    setCopied(true);
-  };
-
   const animationProps = message.shouldAnimate
     ? isMe
       ? messageAnimations.myMessage
@@ -93,7 +78,7 @@ const Message: React.FC<MessageProps> = ({
 
   if (isSystemMessage) {
     return (
-      <div className="p-1 w-full flex items-center justify-center">
+      <div className="w-full flex items-center justify-center">
         <SystemMessage
           message={message}
           systemEvent={message.systemEvent}
@@ -157,7 +142,6 @@ const Message: React.FC<MessageProps> = ({
               className={clsx("message-bubble", {
                 "border-4 border-red-500/80": message.isImportant,
                 "self-message ml-auto": isMe,
-                "scale-110": copied,
                 "message-bubble-reply": isRelyToThisMessage,
                 "opacity-60": message.status === MessageStatus.SENDING,
                 "opacity-60 border-2 border-red-500":
@@ -173,11 +157,9 @@ const Message: React.FC<MessageProps> = ({
               }}
             >
               <RenderMultipleAttachments attachments={attachments} />
-              <MessageContent
-                content={message.content ?? undefined}
-                onCopy={handleCopyText}
-                copied={copied}
-              />
+              <p className="break-words max-w-full cursor-pointer transition-all duration-200 shadow-xl rounded-b-xl">
+                {message.content}
+              </p>
               {message.forwardedFromMessage && (
                 <ForwardedMessagePreview
                   message={message}
@@ -260,29 +242,3 @@ const Message: React.FC<MessageProps> = ({
 };
 
 export default React.memo(Message);
-
-const MessageContent = ({
-  content,
-  onCopy,
-  copied,
-}: {
-  content?: string;
-  onCopy: () => void;
-  copied: boolean;
-}) => {
-  if (!content) return null;
-
-  return (
-    <p
-      className={clsx(
-        "break-words max-w-full cursor-pointer transition-all duration-200 shadow-xl rounded-b-xl",
-        {
-          "scale-110 opacity-60": copied,
-        }
-      )}
-      onClick={onCopy}
-    >
-      {content}
-    </p>
-  );
-};

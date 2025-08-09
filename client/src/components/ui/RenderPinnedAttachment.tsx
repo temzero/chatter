@@ -12,8 +12,7 @@ interface RenderPinnedAttachmentProps {
   index?: number;
 }
 
-const baseBoxClass = "border-2 border-[var(--input-border-color)]";
-const sizeClass = "w-10 h-10"
+const sizeClass = "w-8 h-8";
 
 const RenderPinnedAttachment: React.FC<RenderPinnedAttachmentProps> = ({
   attachment,
@@ -42,7 +41,7 @@ const RenderPinnedAttachment: React.FC<RenderPinnedAttachmentProps> = ({
         attachment.type !== AttachmentType.AUDIO
           ? `flex items-center justify-center ${sizeClass}`
           : ""
-      } ${baseBoxClass} ${className}`}
+      } ${className}`}
       onClick={
         attachment.type === AttachmentType.FILE ? handleFileClick : handleClick
       }

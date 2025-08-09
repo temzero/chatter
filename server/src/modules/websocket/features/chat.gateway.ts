@@ -366,19 +366,26 @@ export class ChatGateway {
     if (!userId) return;
 
     try {
-      const updated = await this.messageService.markMessageAsImportant(
-        userId,
-        data.messageId,
-        data.isImportant,
-      );
+      const isImportantUpdated =
+        await this.messageService.markMessageAsImportant(
+          userId,
+          data.messageId,
+          data.isImportant,
+        );
 
-      const updatedMessageToggled =
-        this.messageMapper.toMessageResponseDto(updated);
+      // Instead of mapping to full DTO, just send minimal data
+      const importantUpdate = {
+        chatId: data.chatId,
+        messageId: data.messageId,
+        isImportant: isImportantUpdated,
+      };
+
+      console.log('isImportant', data.isImportant);
 
       await this.websocketService.emitToChatMembers(
         data.chatId,
         ChatEvent.MESSAGE_IMPORTANT_TOGGLED,
-        updatedMessageToggled,
+        importantUpdate,
         { senderId: userId },
       );
     } catch (error) {

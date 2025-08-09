@@ -64,7 +64,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
           senderId={lastMessage.senderId}
           senderDisplayName={lastMessage.senderDisplayName}
           JSONcontent={lastMessage.content as SystemMessageJSONContent}
-          ClassName="gap-1 max-w-[196px]"
+          ClassName="gap-1 max-w-[196px] opacity-60"
         />
       ) : (
         <p

@@ -7,19 +7,19 @@ import type { MessageResponse } from "@/types/responses/message.response";
 import { ChatType } from "@/types/enums/ChatType";
 import { MessageHorizontalPreview } from "./MessageHorizontalPreview";
 import { messageAnimations } from "@/animations/messageAnimations";
+import { MessageHorizontalPreviewTypes } from "@/types/enums/MessageHorizontalPreviewTypes";
+import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
 
 interface MessageProps {
   message: MessageResponse;
   chatType?: ChatType;
   shouldAnimate?: boolean;
-  onUnpin?: () => void;
 }
 
 const PinnedMessage: React.FC<MessageProps> = ({
   message,
   chatType = ChatType.DIRECT,
   shouldAnimate = false,
-  onUnpin,
 }) => {
   const isMe = useIsMe(message.sender.id);
   const animationProps = shouldAnimate
@@ -49,7 +49,10 @@ const PinnedMessage: React.FC<MessageProps> = ({
           `}
         onClick={(e) => {
           e.stopPropagation();
-          onUnpin?.();
+          chatWebSocketService.togglePinMessage({
+            chatId: message.chatId,
+            messageId: null,
+          });
         }}
       >
         <span className="material-symbols-outlined block group-hover:hidden">
@@ -60,9 +63,13 @@ const PinnedMessage: React.FC<MessageProps> = ({
         </span>
       </button>
 
-      {/* <div className="w-[80%] h-full border truncate overflow-hidden"> */}
-      <MessageHorizontalPreview message={message} chatType={chatType} />
-      {/* </div> */}
+      <div className="max-w-[80%]">
+        <MessageHorizontalPreview
+          message={message}
+          chatType={chatType}
+          type={MessageHorizontalPreviewTypes.PIN}
+        />
+      </div>
 
       <p className="text-sm font-light italic">
         {message.pinnedAt

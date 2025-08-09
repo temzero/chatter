@@ -92,21 +92,21 @@ const ChannelMessages: React.FC<ChannelMessagesProps> = ({
             const isLastRead =
               myLastReadMessageId === msg.id &&
               (!nextMsg || nextMsg.id !== myLastReadMessageId);
-            const isNotLastMessage = index < group.messages.length - 1;
 
             return (
               <React.Fragment key={msg.id}>
-                <div className={isNotLastMessage ? "mb-4" : ""}>
-                  <ChannelMessage message={msg} />
-                </div>
+                <ChannelMessage message={msg} />
                 {isLastRead && (
-                  <div className="relative flex items-center gap-1 justify-center text-xs opacity-50 italic w-full p-2">
-                    <span className="material-symbols-outlined text-xl">
-                      visibility
-                    </span>
-                    <span>Last Read</span>
-                    {/* Bar in the middle, behind text */}
-                    <div className="absolute left-0 right-0 h-[2px] bg-[--border-color] top-1/2 -translate-y-1/2 z-0"></div>
+                  <div className="relative flex items-center gap-1 justify-between text-xs italic w-full select-none text-white">
+                    <div className="h-6 flex items-center bg-[--primary-green] rounded-full px-1 z-10">
+                      <span className="material-symbols-outlined text-xl">
+                        visibility
+                      </span>
+                    </div>
+                    <div className="h-6 flex items-center bg-[--primary-green] rounded-full px-2 z-10">
+                      Last Read
+                    </div>
+                    <div className="absolute left-0 right-0 h-[2px] bg-[--primary-green] top-1/2 -translate-y-1/2 z-0"></div>
                   </div>
                 )}
               </React.Fragment>

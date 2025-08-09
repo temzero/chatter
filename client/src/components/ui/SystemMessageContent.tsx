@@ -40,10 +40,10 @@ export const SystemMessageContent = ({
 
   return (
     <div
-      className={`flex gap-1 items-center text-muted-foreground text-sm opacity-40 ${ClassName}`}
+      className={`flex gap-1 items-center text-muted-foreground text-sm ${ClassName}`}
     >
       <SystemEventIcon systemEvent={systemEvent} />
-      <span className="truncate max-w-[200px]">{text}</span>
+      <span className="truncate">{text}</span>
     </div>
   );
 };

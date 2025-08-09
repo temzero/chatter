@@ -13,7 +13,7 @@ import { useSidebarStore } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/types/enums/sidebarMode";
 import { useFolderStore } from "@/stores/folderStore";
 import FolderCard from "@/components/ui/FolderCard";
-import { FolderResponse } from "@/types/responses/folder.response";
+import type FolderResponse from "@/types/responses/folder.response";
 
 const SidebarFolders: React.FC = () => {
   const setSidebar = useSidebarStore((state) => state.setSidebar);

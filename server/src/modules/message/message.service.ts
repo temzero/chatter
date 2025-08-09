@@ -539,7 +539,7 @@ export class MessageService {
     userId: string,
     messageId: string,
     isImportant: boolean,
-  ): Promise<Message> {
+  ): Promise<boolean> {
     const message = await this.messageRepo.findOneBy({ id: messageId });
 
     if (!message) {
@@ -551,7 +551,8 @@ export class MessageService {
     }
 
     message.isImportant = isImportant;
-    return this.messageRepo.save(message);
+    const updatedMessage = await this.messageRepo.save(message);
+    return updatedMessage.isImportant;
   }
 
   // Delete message

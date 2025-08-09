@@ -71,13 +71,13 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
       className={clsx(
         "message-reaction absolute z-10 flex bg-black/50 rounded-full",
         isChannel
-          ? "left-1 -bottom-2" // ✅ new class for channels
+          ? "left-1 -bottom-2"
           : isMe && !isSystemMessage
           ? "-left-4 -bottom-2"
           : "-right-4 -bottom-4 flex-row-reverse"
       )}
     >
-      <AnimatePresence mode="wait">
+      <AnimatePresence>
         {sortedReactions.map(([emoji, userIds]) => {
           const hasMyReaction =
             currentUserId && userIds.includes(currentUserId);

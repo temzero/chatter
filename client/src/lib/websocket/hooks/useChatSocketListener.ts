@@ -110,10 +110,17 @@ export function useChatSocketListeners() {
       useChatStore.getState().setPinnedMessage(data.chatId, data.message);
     };
 
-    const handleMessageMarkedImportant = (message: MessageResponse) => {
+    const handleMessageMarkedImportant = (update: {
+      chatId: string;
+      messageId: string;
+      isImportant: boolean;
+    }) => {
+      console.log('isImportant', update.isImportant)
       useMessageStore
         .getState()
-        .updateMessageById(message.chatId, message.id, message);
+        .updateMessageById(update.chatId, update.messageId, {
+          isImportant: update.isImportant,
+        });
     };
 
     const handleMessageDeleted = (data: {
@@ -129,7 +136,7 @@ export function useChatSocketListeners() {
       error: string;
       code?: string;
     }) => {
-      console.log('handleMessageError', error)
+      console.log("handleMessageError", error);
       // Update specific message state
       useMessageStore
         .getState()

@@ -9,7 +9,6 @@ import { useChatStatus } from "@/stores/presenceStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import type { ChatResponse } from "@/types/responses/chat.response";
 import PinnedMessage from "./PinnedMessage";
-import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
 import { DirectChatMember } from "@/types/responses/chatMember.response";
 import { useMessageStore } from "@/stores/messageStore";
 import MessageSearchBar from "../ui/MessageSearchBar";
@@ -67,12 +66,6 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
         <PinnedMessage
           message={chat.pinnedMessage}
           chatType={chat.type}
-          onUnpin={() => {
-            chatWebSocketService.togglePinMessage({
-              chatId: chat.id,
-              messageId: null,
-            });
-          }}
         />
       )}
 
@@ -86,7 +79,9 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
           transition={{ type: "tween", duration: 0.1, ease: "easeInOut" }}
         >
           <ChatAvatar chat={chat} type="header" isBlocked={isBlockedByMe} />
-          <h1 className="text-xl font-medium">{chat.name}</h1>
+          <h1 className="text-xl font-medium">
+            {chat.type === ChatType.SAVED ? "Saved" : chat.name}
+          </h1>
           {isDirect && !isOnline && lastSeen && (
             <span className="text-xs text-gray-400">
               Last seen {formatTimeAgo(lastSeen)}

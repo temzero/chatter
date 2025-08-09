@@ -1,6 +1,6 @@
 import { ChatType } from "../enums/ChatType";
 
-export interface FolderResponse {
+export default interface FolderResponse {
   id: string;
   name: string;
   color: string | null;
