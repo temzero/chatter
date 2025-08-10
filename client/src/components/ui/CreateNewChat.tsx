@@ -65,7 +65,6 @@ const CreateNewChat: React.FC = () => {
   };
 
   const isUserOnline = useUserStatus(user?.id);
-  toast.info(`IsOnline: ${isUserOnline}`);
 
   return (
     <div className="flex flex-col gap-3 p-2 h-full relative overflow-hidden">

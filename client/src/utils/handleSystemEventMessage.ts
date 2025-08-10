@@ -6,22 +6,33 @@ import { ChatMemberRole } from "@/types/enums/chatMemberRole";
 import { ChatMemberStatus } from "@/types/enums/chatMemberStatus";
 import { chatMemberService } from "@/services/chat/chatMemberService";
 
+type SystemMessageJSONContent = {
+  oldValue?: string;
+  newValue?: string;
+  targetId?: string;
+  targetName?: string;
+};
+
 export const handleSystemEventMessage = (message: MessageResponse) => {
   if (!message.systemEvent) {
-    console.log('not a system message')
-    return
-  };
+    console.log("not a system message");
+    return;
+  }
 
   const chatStore = useChatStore.getState();
   const memberStore = useChatMemberStore.getState();
 
-  const { chatId, content, sender, systemEvent } = message;
+  const { chatId, sender, systemEvent, content } = message;
 
-  let updatedValue: string | undefined;
+  let updatedValue: string | null | undefined;
+  let targetId: string | undefined;
 
   try {
-    const parsed = content ? JSON.parse(content) : null;
-    updatedValue = parsed?.new ?? content;
+    const parsed: SystemMessageJSONContent | null = content
+      ? JSON.parse(content)
+      : null;
+    updatedValue = parsed?.newValue ?? content;
+    targetId = parsed?.targetId;
   } catch {
     updatedValue = content ?? "";
   }
@@ -57,9 +68,21 @@ export const handleSystemEventMessage = (message: MessageResponse) => {
       memberStore.updateMemberLocally?.(chatId, sender.id, {
         status: updatedValue as ChatMemberStatus,
       }),
+
+    [SystemEventType.MEMBER_ADDED]: async () => {
+      if (!targetId) return;
+      try {
+        const newMember = await chatMemberService.getMemberByChatIdAndUserId(
+          chatId,
+          targetId
+        );
+        memberStore.addMemberLocally?.(newMember);
+      } catch (error) {
+        console.error("Failed to fetch new member:", error);
+      }
+    },
     [SystemEventType.MEMBER_JOINED]: async () => {
       if (!sender?.id) return;
-
       try {
         const newMember = await chatMemberService.getMemberByChatIdAndUserId(
           chatId,
@@ -71,17 +94,26 @@ export const handleSystemEventMessage = (message: MessageResponse) => {
       }
     },
 
-    [SystemEventType.MEMBER_LEFT]: () =>
-      sender?.id && memberStore.clearChatMember?.(chatId, sender.id),
+    [SystemEventType.MEMBER_LEFT]: () => {
+      if (sender?.id) {
+        memberStore.clearChatMember?.(chatId, sender.id);
+      }
+    },
 
-    [SystemEventType.MEMBER_KICKED]: () =>
-      sender?.id && memberStore.clearChatMember?.(chatId, sender.id),
+    [SystemEventType.MEMBER_KICKED]: () => {
+      if (targetId) {
+        memberStore.clearChatMember?.(chatId, targetId);
+      }
+    },
 
-    [SystemEventType.MEMBER_BANNED]: () =>
-      sender?.id &&
-      memberStore.updateMemberLocally?.(chatId, sender.id, {
-        status: ChatMemberStatus.BANNED,
-      }),
+    [SystemEventType.MEMBER_BANNED]: () => {
+      if (targetId) {
+        memberStore.updateMemberLocally?.(chatId, targetId, {
+          status: ChatMemberStatus.BANNED,
+        });
+      }
+    },
   };
+
   updateMap[systemEvent]?.();
 };

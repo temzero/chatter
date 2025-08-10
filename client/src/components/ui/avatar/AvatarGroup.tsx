@@ -32,7 +32,7 @@ export const GroupAvatar: React.FC<GroupAvatarProps> = ({
   isOnline = false,
 }) => {
   const members = chat.previewMembers || [];
-  const displayMembers = members.slice(0, 4); // Max 4
+  const displayMembers = members.slice(0, 8); // Max 8
 
   return (
     <div
@@ -146,21 +146,96 @@ export const GroupAvatarLayout: React.FC<{
     );
   }
 
-  return (
-    <div className="grid grid-cols-2 grid-rows-2 h-full w-full gap-0">
-      {members.slice(0, 4).map((member, idx) => (
-        <div
-          key={member.id ?? idx}
-          className="flex items-center justify-center overflow-hidden"
-        >
+  if (length === 4) {
+    return (
+      <div className="grid grid-cols-2 grid-rows-2 h-full w-full gap-0">
+        {members.slice(0, 4).map((member, idx) => (
+          <div
+            key={member.id ?? idx}
+            className="flex items-center justify-center overflow-hidden"
+          >
+            <Avatar
+              avatarUrl={member.avatarUrl}
+              name={member.nickname ?? member.firstName ?? undefined}
+              className={`h-full w-full`}
+              textSize={textSize}
+            />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // For length >= 4
+  // 4 is normal 2x2 grid
+  // 5,6,7 show first 3 normal squares + last square is smaller avatars of the rest
+
+  if (length >= 4 && length <= 7) {
+    // first 3 members are normal squares, each 1/4
+    // last square is the container of the remaining avatars (members.slice(3))
+    // The last square is bottom-right corner
+
+    const overflowMembers = members.slice(3);
+
+    return (
+      <div className="grid grid-cols-2 grid-rows-2 h-full w-full gap-0">
+        {/* First avatar top-left */}
+        <div className="flex items-center justify-center overflow-hidden">
           <Avatar
-            avatarUrl={member.avatarUrl}
-            name={member.nickname ?? member.firstName ?? undefined}
-            className={`h-full w-full`}
+            avatarUrl={members[0].avatarUrl}
+            name={members[0].nickname ?? members[0].firstName ?? undefined}
+            className="h-full w-full"
             textSize={textSize}
           />
         </div>
-      ))}
-    </div>
-  );
+
+        {/* Second avatar top-right */}
+        <div className="flex items-center justify-center overflow-hidden">
+          <Avatar
+            avatarUrl={members[1].avatarUrl}
+            name={members[1].nickname ?? members[1].firstName ?? undefined}
+            className="h-full w-full"
+            textSize={textSize}
+          />
+        </div>
+
+        {/* Third avatar bottom-left */}
+        <div className="flex items-center justify-center overflow-hidden">
+          <Avatar
+            avatarUrl={members[2].avatarUrl}
+            name={members[2].nickname ?? members[2].firstName ?? undefined}
+            className="h-full w-full"
+            textSize={textSize}
+          />
+        </div>
+
+        {/* Last square bottom-right */}
+        <div className="grid grid-cols-2 grid-rows-2 gap-0.5 overflow-hidden p-0.5">
+          {overflowMembers.slice(0, 4).map((member, idx) => {
+            // Check if this is the 4th member and if there are more than 4 members
+            const isLastAndMore = idx === 3 && overflowMembers.length > 4;
+
+            return (
+              <div
+                key={member.id ?? idx}
+                className="relative flex items-center justify-center overflow-hidden rounded-full w-full h-full"
+              >
+                <Avatar
+                  avatarUrl={member.avatarUrl}
+                  name={member.nickname ?? member.firstName ?? undefined}
+                  className="h-full w-full"
+                  textSize="text-xs"
+                />
+                {isLastAndMore && (
+                  <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center rounded-full text-white text-xl font-bold">
+                    ...
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
 };

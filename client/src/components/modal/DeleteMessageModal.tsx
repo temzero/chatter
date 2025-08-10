@@ -6,12 +6,14 @@ import { useCurrentUserId } from "@/stores/authStore";
 import { motion } from "framer-motion";
 import { childrenModalAnimation } from "@/animations/modalAnimations";
 import { useMessageStore } from "@/stores/messageStore";
+import { MessageHorizontalPreview } from "../chat/MessageHorizontalPreview";
+import { MessageHorizontalPreviewTypes } from "@/types/enums/MessageHorizontalPreviewTypes";
 
 const DeleteMessageModal: React.FC = () => {
   const closeModal = useModalStore((state) => state.closeModal);
   const modalContent = useModalStore((state) => state.modalContent);
   const messageId = modalContent?.props?.messageId as string;
-  
+
   const currentUserId = useCurrentUserId();
   const message = useMessageStore.getState().getMessageById(messageId);
   if (!message) return;
@@ -40,6 +42,12 @@ const DeleteMessageModal: React.FC = () => {
           Are you sure you want to delete this message? <br />
           This action cannot be undone.
         </p>
+        <div className="w-full p-2 custom-border rounded-lg bg-[--message-color]">
+          <MessageHorizontalPreview
+            message={message}
+            type={MessageHorizontalPreviewTypes.DELETE}
+          />
+        </div>
 
         {/* <MessagePreview message={message} /> */}
       </div>

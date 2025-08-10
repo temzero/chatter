@@ -237,7 +237,9 @@ const AddMemberModal: React.FC = () => {
                 className="w-full p-1 px-2 select-none hover:bg-[--hover-color] hover:text-green-400"
                 onClick={generateInviteLink}
               >
-                <span className="material-symbols-outlined mr-1">wand_stars</span>
+                <span className="material-symbols-outlined mr-1">
+                  wand_stars
+                </span>
                 Generate Invite Link
               </button>
             )}

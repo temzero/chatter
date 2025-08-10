@@ -123,9 +123,18 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
   addMemberLocally: (newMember) => {
     set((state) => {
       const currentMembers = state.chatMembers[newMember.chatId] || [];
-      // Check if member already exists to avoid duplicates
       const memberExists = currentMembers.some((m) => m.id === newMember.id);
       if (memberExists) return state;
+
+      // Update preview members through chat store
+      useChatStore.getState().addToGroupPreviewMembers(newMember.chatId, {
+        id: newMember.id,
+        userId: newMember.userId,
+        avatarUrl: newMember.avatarUrl,
+        nickname: newMember.nickname,
+        firstName: newMember.firstName,
+        lastName: newMember.lastName,
+      });
 
       return {
         chatMembers: {
@@ -254,6 +263,8 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
   clearChatMember: (chatId, userId) => {
     set((state) => {
       const currentMembers = state.chatMembers[chatId] || [];
+      // Update preview members through chat store
+      useChatStore.getState().removeFromGroupPreviewMembers(chatId, userId);
       return {
         chatMembers: {
           ...state.chatMembers,
@@ -262,6 +273,7 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
       };
     });
   },
+
   clearChatMembers: (chatId: string) => {
     set((state) => {
       const newMembers = { ...state.chatMembers };

@@ -87,7 +87,9 @@ export class Message {
   @OneToMany(() => Reaction, (reaction) => reaction.message)
   reactions: Reaction[];
 
-  @OneToMany(() => Attachment, (attachment) => attachment.message)
+  @OneToMany(() => Attachment, (attachment) => attachment.message, {
+    cascade: ['insert', 'update'], // <- enable cascading saves
+  })
   attachments: Attachment[];
 
   @Column({

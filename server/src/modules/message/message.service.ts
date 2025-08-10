@@ -65,20 +65,10 @@ export class MessageService {
     });
     if (!isMember) ErrorResponse.notFound('You are not a member of this chat');
 
-    const message = this.messageRepo.create({
-      id: dto.id,
-      chatId: dto.chatId,
-      senderId,
-      content: dto.content,
-      attachments: [],
-    });
-
-    const saved = await this.messageRepo.save(message);
-
-    if (dto.attachments?.length) {
-      const attachments = dto.attachments.map((att) =>
+    // 🔹 Convert raw DTO attachments to Attachment entities before saving Message
+    const attachmentEntities =
+      dto.attachments?.map((att) =>
         this.attachmentRepo.create({
-          messageId: saved.id,
           ...att,
           thumbnailUrl: att.thumbnailUrl ?? null,
           filename: att.filename ?? null,
@@ -88,9 +78,17 @@ export class MessageService {
           height: att.height ?? null,
           duration: att.duration ?? null,
         }),
-      );
-      await this.attachmentRepo.save(attachments);
-    }
+      ) || [];
+
+    const message = this.messageRepo.create({
+      id: dto.id,
+      chatId: dto.chatId,
+      senderId,
+      content: dto.content,
+      attachments: attachmentEntities, // ✅ Real entities here
+    });
+
+    const saved = await this.messageRepo.save(message);
 
     await this.chatMemberRepo.update(
       { chatId: dto.chatId },

@@ -157,9 +157,11 @@ const Message: React.FC<MessageProps> = ({
               }}
             >
               <RenderMultipleAttachments attachments={attachments} />
-              <p className="break-words max-w-full cursor-pointer transition-all duration-200 shadow-xl rounded-b-xl">
-                {message.content}
-              </p>
+              {message.content && (
+                <p className="break-words max-w-full cursor-pointer transition-all duration-200 shadow-xl rounded-b-xl">
+                  {message.content}
+                </p>
+              )}
               {message.forwardedFromMessage && (
                 <ForwardedMessagePreview
                   message={message}

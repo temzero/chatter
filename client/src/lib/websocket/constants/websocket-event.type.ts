@@ -21,10 +21,6 @@ export const enum ChatEvent {
   TOGGLE_IMPORTANT = "chat:toggle-important",
   MESSAGE_IMPORTANT_TOGGLED = "chat:message-important-toggled",
 
-  // Member Events
-  MEMBER_ADDED = "chat:member-added",
-  MEMBER_REMOVED = "chat:member-removed",
-
   // Action Events
   TYPING = "chat:typing",
   SEND_MESSAGE = "chat:send-message",

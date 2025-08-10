@@ -7,7 +7,10 @@ import { useMessageStore } from "./messageStore";
 import { useAuthStore } from "./authStore";
 import { useChatMemberStore } from "./chatMemberStore";
 import { ChatType } from "@/types/enums/ChatType";
-import type { ChatResponse } from "@/types/responses/chat.response";
+import type {
+  ChatMemberPreview,
+  ChatResponse,
+} from "@/types/responses/chat.response";
 import type {
   LastMessageResponse,
   MessageResponse,
@@ -63,6 +66,9 @@ interface ChatStore {
   deleteChat: (id: string, type: ChatType) => Promise<void>;
   cleanupChat: (chatId: string) => void;
   clearChats: () => void;
+
+  addToGroupPreviewMembers: (chatId: string, member: ChatMemberPreview) => void;
+  removeFromGroupPreviewMembers: (chatId: string, userId: string) => void;
 }
 
 export const useChatStore = create<ChatStore>()(
@@ -462,6 +468,49 @@ export const useChatStore = create<ChatStore>()(
             handleError(error, "Failed to refresh invite link");
             throw error;
           }
+        },
+
+        addToGroupPreviewMembers: (
+          chatId: string,
+          member: ChatMemberPreview
+        ) => {
+          const chat = get().chats.find((c) => c.id === chatId);
+          if (!chat || chat.type === ChatType.DIRECT || chat.avatarUrl) return;
+
+          const currentPreviews = chat.previewMembers || [];
+          const currentMemberIds = chat.otherMemberUserIds || [];
+
+          const exists = currentPreviews.some(
+            (m) => m.userId === member.userId
+          );
+
+          if (!exists) {
+            const updatedPreviews = [...currentPreviews, member].slice(0, 4);
+            const updatedMemberIds = [...currentMemberIds, member.userId];
+
+            get().updateGroupChatLocally(chatId, {
+              previewMembers: updatedPreviews,
+              otherMemberUserIds: updatedMemberIds,
+            });
+          }
+        },
+
+        removeFromGroupPreviewMembers: (chatId: string, userId: string) => {
+          const chat = get().chats.find((c) => c.id === chatId);
+          if (!chat || chat.type === ChatType.DIRECT || chat.avatarUrl) return;
+
+          const updatedPreviews = (chat.previewMembers || []).filter(
+            (m) => m.userId !== userId
+          );
+
+          const updatedMemberIds = (chat.otherMemberUserIds || []).filter(
+            (id) => id !== userId
+          );
+
+          get().updateGroupChatLocally(chatId, {
+            previewMembers: updatedPreviews,
+            otherMemberUserIds: updatedMemberIds,
+          });
         },
 
         leaveChat: async (chatId) => {

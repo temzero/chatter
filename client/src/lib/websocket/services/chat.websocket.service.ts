@@ -3,7 +3,6 @@ import { webSocketService } from "./websocket.service";
 import { SendMessageRequest } from "@/types/requests/sendMessage.request";
 import { ForwardMessageRequest } from "@/types/requests/forwardMessage.request";
 import { MessageResponse } from "@/types/responses/message.response";
-import { ChatMember } from "@/types/responses/chatMember.response";
 import { ChatEvent } from "../constants/websocket-event.type";
 
 export const chatWebSocketService = {
@@ -239,21 +238,5 @@ export const chatWebSocketService = {
     } else {
       webSocketService.off(ChatEvent.MESSAGE_ERROR);
     }
-  },
-
-  onMemberAdded(callback: (member: ChatMember) => void) {
-    webSocketService.on(ChatEvent.MEMBER_ADDED, callback);
-  },
-
-  offMemberAdded(callback: (member: ChatMember) => void) {
-    webSocketService.off(ChatEvent.MEMBER_ADDED, callback);
-  },
-
-  onMemberRemoved(callback: (member: ChatMember) => void) {
-    webSocketService.on(ChatEvent.MEMBER_REMOVED, callback);
-  },
-
-  offMemberRemoved(callback: (member: ChatMember) => void) {
-    webSocketService.off(ChatEvent.MEMBER_REMOVED, callback);
   },
 };

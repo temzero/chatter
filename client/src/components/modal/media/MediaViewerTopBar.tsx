@@ -53,30 +53,30 @@ export const MediaViewerTopBar = ({
       <div className="flex items-center gap-4">
         <button
           onClick={onRotate}
-          className="text-white/60 hover:text-white rounded-full"
+          className="opacity-60 hover:opacity-100 rounded-full"
         >
           <i className="material-symbols-outlined">refresh</i>
         </button>
         <button
           onClick={handleForwardAttachment}
-          className="text-white/60 hover:text-white rounded-full"
+          className="opacity-60 hover:opacity-100 rounded-full"
         >
           <i className="material-symbols-outlined">send</i>
         </button>
         <button
           onClick={handleDownloadClick}
-          className="text-white/60 hover:text-white rounded-full"
+          className="opacity-60 hover:opacity-100 rounded-full"
         >
           <i className="material-symbols-outlined">download</i>
         </button>
         <button
           onClick={handleDeleteMessage}
-          className="text-white/60 hover:text-white rounded-full"
+          className="opacity-60 hover:opacity-100 rounded-full"
         >
           <i className="material-symbols-outlined">delete</i>
         </button>
         <button
-          className="text-white/60 hover:text-white rounded-full"
+          className="p-0.5 opacity-60 hover:opacity-100 hover:bg-red-500/80 rounded-full"
           onClick={onClose}
         >
           <i className="material-symbols-outlined">close</i>

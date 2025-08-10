@@ -93,12 +93,16 @@ const ChatBox: React.FC<ChatBoxProps> = ({ chat }) => {
 
   // Scroll to bottom when messages change and near to bottom
   useEffect(() => {
-    if (isNearBottom(chatBoxRef.current)) {
+    if (messages.length === 0) return;
+
+    const lastMessage = messages[messages.length - 1];
+
+    // Adjust this condition to fit your actual system message detection
+    const isLastMessageSystem = lastMessage.systemEvent;
+
+    if (!isLastMessageSystem && isNearBottom(chatBoxRef.current)) {
       scrollToBottom();
     }
-    //  else {
-    //   toast.info('New Message')
-    // }
   }, [messages, scrollToBottom]);
 
   // Render functions

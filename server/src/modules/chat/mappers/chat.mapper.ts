@@ -101,7 +101,7 @@ export class ChatMapper {
     const previewMembers = [
       ...(myMember ? [this.transformToMemberPreviewDto(myMember)] : []),
       ...otherMembers
-        .slice(0, myMember ? 3 : 4) // Take one less from others if we include current user
+        .slice(0, myMember ? 7 : 8) // Take one less from others if we include current user
         .map((m) => this.transformToMemberPreviewDto(m)),
     ];
 

@@ -396,7 +396,9 @@ export class ChatService {
       {
         newValue:
           typeof message.content === 'string'
-            ? message.content.slice(0, 100)
+            ? message.content.length > 100
+              ? message.content.slice(0, 97) + '...'
+              : message.content
             : undefined,
         targetId: message.id,
       },
