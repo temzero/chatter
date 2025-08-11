@@ -9,6 +9,7 @@ import {
   HttpStatus,
   UseGuards,
   HttpCode,
+  Query,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { ChatService } from './chat.service';
@@ -29,6 +30,7 @@ import { ChatType } from './constants/chat-types.constants';
 import { SystemEventType } from '../message/constants/system-event-type.constants';
 import { MessageService } from '../message/message.service';
 import { MessageResponseDto } from '../message/dto/responses/message-response.dto';
+import { PaginationQuery } from '../message/dto/queries/pagination-query.dto';
 
 @Controller('chat')
 @UseGuards(JwtAuthGuard)
@@ -40,12 +42,20 @@ export class ChatController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  async findAll(
+  async findByPagination(
     @CurrentUser('id') userId: string,
-  ): Promise<SuccessResponse<Array<ChatResponseDto>>> {
+    @Query() queryParams: PaginationQuery,
+  ): Promise<SuccessResponse<{ chats: ChatResponseDto[]; hasMore: boolean }>> {
     try {
-      const chats = await this.chatService.getUserChats(userId);
-      return new SuccessResponse(chats, 'User chats retrieved successfully');
+      const { chats, hasMore } = await this.chatService.getUserChats(
+        userId,
+        queryParams,
+      );
+
+      return new SuccessResponse(
+        { chats, hasMore },
+        'User chats retrieved successfully',
+      );
     } catch (error: unknown) {
       ErrorResponse.throw(error, 'Failed to retrieve user chats');
     }

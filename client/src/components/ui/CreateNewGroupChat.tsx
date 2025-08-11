@@ -82,7 +82,7 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
   return (
     <div className="flex flex-col h-full">
       <div className="p-2">
-        <SearchBar placeholder="Search for contacts..." />
+        <SearchBar placeholder="Search for members..." />
       </div>
 
       {privateChats.length > 0 ? (

@@ -1,7 +1,8 @@
+// src/common/dto/pagination-query.dto.ts
 import { Type } from 'class-transformer';
 import { IsOptional, IsInt, Min, IsString } from 'class-validator';
 
-export class GetMessagesQuery {
+export class PaginationQuery {
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -16,5 +17,5 @@ export class GetMessagesQuery {
 
   @IsOptional()
   @IsString()
-  beforeMessageId?: string;
+  beforeId?: string; // Generic ID parameter
 }

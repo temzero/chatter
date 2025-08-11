@@ -71,7 +71,7 @@ const MessageSearchBar: React.FC = () => {
         title="Filter Important"
       >
         <span
-          className={`material-symbols-outlined mr-1 ${
+          className={`material-symbols-outlined mr-1 opacity-60 hover:opacity-90 ${
             showImportantOnly ? "filled text-red-400" : ""
           }`}
         >

@@ -30,7 +30,6 @@ const SidebarMore: React.FC = () => {
     {
       icon: "bookmark",
       text: "Saved Messages",
-      // onClick: () => setSidebar(SidebarMode.SAVED_MESSAGES),
       onClick: () => setActiveSavedChat(),
     },
     { type: "divider" }, // This will render the border divider

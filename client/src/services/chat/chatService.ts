@@ -5,19 +5,31 @@ import { groupChatService } from "./groupChatService";
 import type { ApiSuccessResponse } from "@/types/responses/apiSuccess.response";
 import { toast } from "react-toastify";
 import { handleError } from "@/utils/handleError";
+import { PaginationQuery } from "@/types/query/paginationQuery";
 
 export const chatService = {
   ...directChatService,
   ...groupChatService,
   // Get all direct and group chats
-  async fetchAllChats(): Promise<ChatResponse[]> {
+  async fetchChats(
+    options: PaginationQuery = { limit: 4 }
+  ): Promise<{ chats: ChatResponse[]; hasMore: boolean }> {
     try {
-      const response = await API.get(`/chat`);
-      // console.log("Fetched chats", response.data.payload);
-      return response.data.payload;
+      const { offset, beforeId, limit } = options;
+
+      const { data } = await API.get(`/chat`, {
+        params: {
+          ...(offset !== undefined ? { offset } : {}),
+          ...(beforeId ? { beforeId } : {}),
+          limit,
+        },
+      });
+
+      const { chats, hasMore } = data.payload;
+      return { chats, hasMore };
     } catch (error) {
       console.error("Failed to fetch chats:", error);
-      return []; // Return empty array or rethrow a custom error
+      return { chats: [], hasMore: false };
     }
   },
 

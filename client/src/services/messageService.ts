@@ -2,18 +2,19 @@ import API from "./api/api";
 import { SendMessageRequest } from "@/types/requests/sendMessage.request";
 import { MessageResponse } from "@/types/responses/message.response";
 import { UpdateMessageRequest } from "@/types/requests/updateMessage.request";
+import { PaginationQuery } from "@/types/query/paginationQuery";
 
 export const messageService = {
   async getChatMessages(
     chatId: string,
-    options: { offset?: number; beforeMessageId?: string; limit?: number } = {}
+    options: PaginationQuery = { limit: 20 }
   ): Promise<{ messages: MessageResponse[]; hasMore: boolean }> {
-    const { offset, beforeMessageId, limit = 20 } = options;
+    const { offset, beforeId, limit } = options;
 
     const { data } = await API.get(`/messages/chat/${chatId}`, {
       params: {
         ...(offset !== undefined ? { offset } : {}),
-        ...(beforeMessageId ? { beforeMessageId } : {}),
+        ...(beforeId ? { beforeId } : {}),
         limit,
       },
     });

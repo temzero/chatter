@@ -17,8 +17,8 @@ import { CurrentUser } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { MessageResponseDto } from './dto/responses/message-response.dto';
 import { ErrorResponse } from '../../common/api-response/errors';
-import { GetMessagesQuery } from './dto/queries/get-messages.dto';
 import { MessageMapper } from './mappers/message.mapper';
+import { PaginationQuery } from './dto/queries/pagination-query.dto';
 
 @Controller('messages')
 @UseGuards(JwtAuthGuard)
@@ -65,7 +65,7 @@ export class MessageController {
   async getChatMessages(
     @CurrentUser('id') currentUserId: string,
     @Param('chatId') chatId: string,
-    @Query() queryParams: GetMessagesQuery,
+    @Query() queryParams: PaginationQuery,
   ): Promise<
     SuccessResponse<{ messages: MessageResponseDto[]; hasMore: boolean }>
   > {

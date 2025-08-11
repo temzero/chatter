@@ -1,7 +1,10 @@
 import React from "react";
+import InfiniteScroller from "@/components/ui/infiniteScroller";
 import ChatListItem from "./ChatListItem";
 import type { ChatResponse } from "@/types/responses/chat.response";
 import { useAuthStore } from "@/stores/authStore";
+import { useChatStore } from "@/stores/chatStore";
+import { useShallow } from "zustand/shallow";
 
 interface ChatListProps {
   chats: ChatResponse[];
@@ -11,9 +14,22 @@ interface ChatListProps {
 const ChatList: React.FC<ChatListProps> = React.memo(
   ({ chats, isCompact = false }) => {
     const currentUserId = useAuthStore((state) => state.currentUser?.id || "");
+    const { fetchMoreChats, hasMoreChats } = useChatStore(
+      useShallow((state) => ({
+        fetchMoreChats: state.fetchMoreChats,
+        hasMoreChats: state.hasMoreChats,
+        // isLoading: state.isLoading,
+      }))
+    );
 
     return (
-      <div className="flex-1 overflow-y-auto overflow-x-hidden relative">
+      <InfiniteScroller
+        onLoadMore={fetchMoreChats}
+        hasMore={hasMoreChats}
+        threshold={10}
+        loader={<div className="p-4 text-center opacity-40">Loading more chats...</div>}
+        className="flex-1 relative"
+      >
         {chats.map((chat) => (
           <ChatListItem
             key={chat.id}
@@ -22,9 +38,12 @@ const ChatList: React.FC<ChatListProps> = React.memo(
             currentUserId={currentUserId}
           />
         ))}
-      </div>
+        {/* {!hasMoreChats && chats.length > 0 && (
+          <div className="p-2 text-center opacity-40">No more chats</div>
+        )} */}
+      </InfiniteScroller>
     );
   }
 );
 
-export default React.memo(ChatList);
+export default ChatList;

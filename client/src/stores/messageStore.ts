@@ -118,7 +118,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
 
       const { messages: newMessages, hasMore } =
         await messageService.getChatMessages(chatId, {
-          beforeMessageId: existingMessages[0].id,
+          beforeId: existingMessages[0].id,
         });
 
       if (newMessages.length > 0) {

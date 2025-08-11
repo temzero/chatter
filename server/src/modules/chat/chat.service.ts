@@ -16,6 +16,7 @@ import { MessageService } from '../message/message.service';
 import { Message } from '../message/entities/message.entity';
 import { InviteLinkService } from '../invite-link/invite-link.service';
 import { SystemEventType } from '../message/constants/system-event-type.constants';
+import { PaginationQuery } from '../message/dto/queries/pagination-query.dto';
 
 @Injectable()
 export class ChatService {
@@ -220,91 +221,86 @@ export class ChatService {
     return plainToInstance(ChatResponseDto, updatedChat);
   }
 
-  async getUserChats(userId: string): Promise<ChatResponseDto[]> {
-    const chats = await this.buildFullChatQueryForUser(userId)
-      .orderBy('COALESCE(lastMessage.createdAt, chat.createdAt)', 'DESC')
-      .getMany();
+  // async getUserChats(userId: string): Promise<ChatResponseDto[]> {
+  //   const chats = await this.buildFullChatQueryForUser(userId)
+  //     .orderBy('COALESCE(lastMessage.createdAt, chat.createdAt)', 'DESC')
+  //     .getMany();
 
-    return Promise.all(
-      chats.map((chat) =>
-        chat.type === ChatType.DIRECT
-          ? this.chatMapper.transformToDirectChatDto(
-              chat,
-              userId,
-              this.messageService,
-            )
-          : this.chatMapper.transformToGroupChatDto(
-              chat,
-              userId,
-              this.messageService,
-            ),
-      ),
-    );
+  //   return Promise.all(
+  //     chats.map((chat) =>
+  //       chat.type === ChatType.DIRECT
+  //         ? this.chatMapper.transformToDirectChatDto(
+  //             chat,
+  //             userId,
+  //             this.messageService,
+  //           )
+  //         : this.chatMapper.transformToGroupChatDto(
+  //             chat,
+  //             userId,
+  //             this.messageService,
+  //           ),
+  //     ),
+  //   );
+  // }
+
+  async getUserChats(
+    userId: string,
+    options: PaginationQuery = { offset: 0, limit: 20 },
+  ): Promise<{ chats: ChatResponseDto[]; hasMore: boolean }> {
+    const { offset, limit } = options;
+    const savedChat = await this.getSavedChat(userId).catch(() => null);
+
+    const query = this.buildFullChatQueryForUser(userId)
+      .andWhere('chat.type != :savedType', { savedType: 'saved' })
+      .addSelect(
+        'COALESCE(lastMessage.created_at, chat.created_at)',
+        'last_activity_at',
+      )
+      .orderBy('last_activity_at', 'DESC')
+      .skip(offset ?? 0);
+
+    // Only apply limit if provided
+    if (limit != null && Number.isFinite(limit)) {
+      query.take(limit + 1); // fetch 1 extra to check hasMore
+    }
+
+    const chats = await query.getMany();
+
+    let hasMore = false;
+    if (limit != null && Number.isFinite(limit)) {
+      hasMore = chats.length > limit;
+      if (hasMore) {
+        chats.pop(); // remove the extra one
+      }
+    }
+
+    const chatDtos = (
+      await Promise.all(
+        chats.map(async (chat) => {
+          try {
+            return chat.type === ChatType.DIRECT
+              ? await this.chatMapper.transformToDirectChatDto(
+                  chat,
+                  userId,
+                  this.messageService,
+                )
+              : await this.chatMapper.transformToGroupChatDto(
+                  chat,
+                  userId,
+                  this.messageService,
+                );
+          } catch (err) {
+            console.error('❌ Failed to transform chat:', chat.id, err);
+            return null;
+          }
+        }),
+      )
+    ).filter((dto): dto is ChatResponseDto => dto !== null); // 👈 Type guard
+
+    const resultChats = savedChat ? [savedChat, ...chatDtos] : chatDtos;
+
+    return { chats: resultChats, hasMore };
   }
-
-  // async getUserChat(chatId: string, userId: string): Promise<ChatResponseDto> {
-  //   const chat = await this.buildFullChatQueryForUser(userId)
-  //     .andWhere('chat.id = :chatId', { chatId })
-  //     .getOne();
-
-  //   if (!chat) ErrorResponse.notFound('Chat not found or not accessible');
-
-  //   return chat.type === ChatType.DIRECT
-  //     ? this.chatMapper.transformToDirectChatDto(
-  //         chat,
-  //         userId,
-  //         this.messageService,
-  //       )
-  //     : this.chatMapper.transformToGroupChatDto(
-  //         chat,
-  //         userId,
-  //         this.messageService,
-  //       );
-  // }
-
-  // async getUserChat(chatId: string, userId: string): Promise<ChatResponseDto> {
-  //   // First try to get chat with user membership (normal flow)
-  //   const chat = await this.buildFullChatQueryForUser(userId)
-  //     .andWhere('chat.id = :chatId', { chatId })
-  //     .getOne();
-
-  //   // If not found, try to get the chat directly — only if it's a public channel
-  //   if (!chat) {
-  //     const channel = await this.chatRepo.findOne({
-  //       where: { id: chatId, type: ChatType.CHANNEL },
-  //       relations: [
-  //         'members',
-  //         'members.user',
-  //         'pinnedMessage',
-  //         'pinnedMessage.sender',
-  //         'pinnedMessage.attachments',
-  //         'pinnedMessage.forwardedFromMessage',
-  //       ],
-  //     });
-
-  //     if (!channel) {
-  //       ErrorResponse.notFound('Chat not found or not accessible');
-  //     }
-
-  //     return this.chatMapper.transformToGroupChatDto(
-  //       channel,
-  //       userId,
-  //       this.messageService,
-  //     );
-  //   }
-
-  //   return chat.type === ChatType.DIRECT
-  //     ? this.chatMapper.transformToDirectChatDto(
-  //         chat,
-  //         userId,
-  //         this.messageService,
-  //       )
-  //     : this.chatMapper.transformToGroupChatDto(
-  //         chat,
-  //         userId,
-  //         this.messageService,
-  //       );
-  // }
 
   async getUserChat(chatId: string, userId: string): Promise<ChatResponseDto> {
     // First try to get chat with user membership
@@ -455,7 +451,7 @@ export class ChatService {
         { userId },
       )
       .addSelect('myMember.muted_until', 'myMember_muted_until')
-      .leftJoinAndSelect('chat.members', 'member')
+      .leftJoinAndSelect('chat.members', 'member', 'member.deleted_at IS NULL')
       .leftJoinAndSelect('member.user', 'memberUser')
       .leftJoinAndSelect('member.lastVisibleMessage', 'lastMessage')
       .leftJoinAndSelect('lastMessage.sender', 'sender')

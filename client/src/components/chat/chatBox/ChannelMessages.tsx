@@ -98,12 +98,12 @@ const ChannelMessages: React.FC<ChannelMessagesProps> = ({
                 <ChannelMessage message={msg} />
                 {isLastRead && (
                   <div className="relative flex items-center gap-1 justify-between text-xs italic w-full select-none text-white">
-                    <div className="h-6 flex items-center bg-[--primary-green] rounded-full px-1 z-10">
+                    <div className="h-4 flex items-center bg-[--primary-green] rounded-full px-0.5 z-10">
                       <span className="material-symbols-outlined text-xl">
                         visibility
                       </span>
                     </div>
-                    <div className="h-6 flex items-center bg-[--primary-green] rounded-full px-2 z-10">
+                    <div className="h-4 flex items-center bg-[--primary-green] rounded-full px-2 z-10">
                       Last Read
                     </div>
                     <div className="absolute left-0 right-0 h-[2px] bg-[--primary-green] top-1/2 -translate-y-1/2 z-0"></div>

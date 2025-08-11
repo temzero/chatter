@@ -7,7 +7,6 @@ import { ChatMember } from '../chat-member/entities/chat-member.entity';
 import { CreateMessageDto } from './dto/requests/create-message.dto';
 import { UpdateMessageDto } from './dto/requests/update-message.dto';
 import { ErrorResponse } from '../../common/api-response/errors';
-import { GetMessagesQuery } from './dto/queries/get-messages.dto';
 import { Reaction } from './entities/reaction.entity';
 import { Attachment } from './entities/attachment.entity';
 import { SupabaseService } from '../superbase/supabase.service';
@@ -20,6 +19,7 @@ import { MessageResponseDto } from './dto/responses/message-response.dto';
 import { User } from '../user/entities/user.entity';
 import { ChatEvent } from '../websocket/constants/websocket-events';
 import { ChatMemberRole } from '../chat-member/constants/chat-member-roles.constants';
+import { PaginationQuery } from './dto/queries/pagination-query.dto';
 
 @Injectable()
 export class MessageService {
@@ -471,7 +471,7 @@ export class MessageService {
   async getMessagesByChatId(
     chatId: string,
     currentUserId: string,
-    queryParams: GetMessagesQuery,
+    queryParams: PaginationQuery,
   ): Promise<{ messages: Message[]; hasMore: boolean }> {
     try {
       const query = this.buildFullMessageQuery()
@@ -482,10 +482,10 @@ export class MessageService {
           { userIdJson: JSON.stringify([currentUserId]) },
         );
 
-      // Apply beforeMessageId for pagination
-      if (queryParams.beforeMessageId) {
+      // Apply beforeId for pagination
+      if (queryParams.beforeId) {
         const beforeMessage = await this.messageRepo.findOne({
-          where: { id: queryParams.beforeMessageId },
+          where: { id: queryParams.beforeId },
           select: ['createdAt'],
         });
 

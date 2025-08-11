@@ -5,7 +5,7 @@ import PublicRoutes from "./PublicRoutes";
 import PrivateLayout, { ChatContent } from "../pages/PrivateLayout";
 import { useIsAuthenticated, useAuthStore } from "@/stores/authStore";
 import { useEffect } from "react";
-import InvitePage from "@/components/ui/invitePage";
+import InvitePage from "@/components/ui/InvitePage";
 
 const RouteMessageCleaner = () => {
   const location = useLocation();
