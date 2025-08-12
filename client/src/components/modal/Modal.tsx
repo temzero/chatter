@@ -17,6 +17,7 @@ import UnfriendModal from "./UnfriendModal";
 import LeaveChatModal from "./LeaveChatModal";
 import AddMemberModal from "./AddMemberModal";
 import SetNicknameModal from "./SetNicknameModal";
+import CallModal from "./CallModal";
 
 const Modal = () => {
   const { modalContent, closeModal } = useModalStore(
@@ -55,6 +56,9 @@ const Modal = () => {
         return <DeleteFolderModal />;
       case ModalType.ADD_FOLDER:
         return <AddFolderModal />;
+
+      case ModalType.CALL:
+        return <CallModal />;
 
       case ModalType.MUTE:
         return <MuteChatModal />;

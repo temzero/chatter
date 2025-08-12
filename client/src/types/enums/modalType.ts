@@ -1,0 +1,36 @@
+export enum ModalType {
+  MEDIA = "media",
+  FRIEND_REQUEST = "friend-request",
+  MESSAGE = "message",
+  FORWARD_MESSAGE = "forward-message",
+  DELETE_MESSAGE = "delete-message",
+  DELETE_FOLDER = "delete-folder",
+  DELETE_CHAT = "delete-chat",
+  DELETE_DIRECT_CHAT = "delete-direct-chat",
+  ADD_FOLDER = "add-folder",
+  ADD_CONTACT = "add-contact",
+  MUTE = "mute",
+  BLOCK_USER = "block-user",
+  UNBLOCK_USER = "unblock-user",
+  UNFRIEND = "unfriend",
+  ADD_MEMBER = "add-member",
+  SET_NICKNAME = "set-nickname",
+  LEAVE_CHAT = "leave-chat",
+  CALL = "call",
+}
+
+export enum CallType {
+  VOICE = "voice",
+  VIDEO = "video",
+}
+
+export enum CallMode {
+  DIRECT = "direct",
+  GROUP = "group",
+}
+
+export enum CallStatus {
+  CALLING = "calling",
+  INCOMING = "incoming",
+  IN_CALL = "in-call",
+}

@@ -1,25 +1,6 @@
+import { ModalType } from "@/types/enums/modalType";
 import { create } from "zustand";
 import { useShallow } from "zustand/shallow";
-
-export enum ModalType {
-  MEDIA = "media",
-  FRIEND_REQUEST = "friend-request",
-  MESSAGE = "message",
-  FORWARD_MESSAGE = "forward-message",
-  DELETE_MESSAGE = "delete-message",
-  DELETE_FOLDER = "delete-folder",
-  DELETE_CHAT = "delete-chat",
-  DELETE_DIRECT_CHAT = "delete-direct-chat",
-  ADD_FOLDER = "add-folder",
-  ADD_CONTACT = "add-contact",
-  MUTE = "mute",
-  BLOCK_USER = "block-user",
-  UNBLOCK_USER = "unblock-user",
-  UNFRIEND = "unfriend",
-  ADD_MEMBER = "add-member",
-  SET_NICKNAME = "set-nickname",
-  LEAVE_CHAT = "leave-chat",
-}
 
 type ModalContent = {
   type: ModalType | null;
@@ -108,3 +89,5 @@ export const useIsReplyToThisMessage = (messageId: string | null | undefined) =>
 
 export const useSetReplyToMessageId = () =>
   useModalStore((state) => state.setReplyToMessageId);
+export { ModalType };
+

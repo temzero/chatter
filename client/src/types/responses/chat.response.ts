@@ -29,3 +29,8 @@ export interface ChatMemberPreview {
   firstName: string | null;
   lastName: string | null;
 }
+
+export interface ChatWithMessagesResponse extends ChatResponse {
+  messages: MessageResponse[];
+  hasMoreMessages: boolean;
+}

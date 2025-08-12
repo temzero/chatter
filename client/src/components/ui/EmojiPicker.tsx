@@ -119,7 +119,7 @@ const CustomEmojiPicker = ({ onSelect }: CustomEmojiPickerProps) => {
     <div className="" ref={pickerRef}>
       <a
         onClick={() => setIsOpen(!isOpen)}
-        className="opacity-50 hover:opacity-90 cursor-pointer rounded flex items-center select-none"
+        className={` hover:opacity-90 rounded-full cursor-pointer flex items-center select-none ${isOpen ? "bg-[--border-color] opacity-100" : "opacity-50"}`}
         aria-label="Open emoji picker"
       >
         <i className="material-symbols-outlined">sentiment_satisfied</i>

@@ -538,33 +538,6 @@ export const useMessagesByChatId = (chatId: string): MessageResponse[] => {
   });
 };
 
-// export const useMessagesByChatId = (chatId: string): MessageResponse[] => {
-//   const allMessages = useMessageStore(
-//     useShallow((state) => state.messages[chatId] || [])
-//   );
-//   const searchQuery = useMessageStore((state) => state.searchQuery);
-//   const members = useMembersByChatId(chatId) || [];
-//   const currentUserId = useAuthStore.getState().currentUser?.id;
-
-//   // Build a set of blocked userIds by me
-//   const blockedUserIds = new Set(
-//     members
-//       .filter(
-//         (member) => member.userId !== currentUserId && member.isBlockedByMe
-//       )
-//       .map((member) => member.userId)
-//   );
-
-//   // Filter out blocked and apply search
-//   return allMessages.filter((msg) => {
-//     const notBlocked = !blockedUserIds.has(msg.sender.id);
-//     const matchesQuery =
-//       !searchQuery ||
-//       msg.content?.toLowerCase().includes(searchQuery.toLowerCase());
-//     return notBlocked && matchesQuery;
-//   });
-// };
-
 export const useSenderByMessageId = (
   messageId: string
 ): SenderResponse | undefined => {

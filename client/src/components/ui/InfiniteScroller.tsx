@@ -5,7 +5,6 @@ import React, {
   useRef,
   useEffect,
 } from "react";
-// import { toast } from "react-toastify";
 
 interface InfiniteScrollerProps {
   children: React.ReactNode;
@@ -75,11 +74,11 @@ const InfiniteScroller = forwardRef<HTMLDivElement, InfiniteScrollerProps>(
 
       const checkNoScrollbar = () => {
         const noScroll = el.scrollHeight <= el.clientHeight;
-        console.log("[InfiniteScroller] checkNoScrollbar:", {
-          scrollHeight: el.scrollHeight,
-          clientHeight: el.clientHeight,
-          noScroll,
-        });
+        // console.log("[InfiniteScroller] checkNoScrollbar:", {
+        //   scrollHeight: el.scrollHeight,
+        //   clientHeight: el.clientHeight,
+        //   noScroll,
+        // });
 
         if (hasMore && noScroll) {
           hasAutoLoadedRef.current = true;

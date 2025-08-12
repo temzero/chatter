@@ -9,14 +9,18 @@ import { ChatMemberRole } from 'src/modules/chat-member/constants/chat-member-ro
 import { ErrorResponse } from 'src/common/api-response/errors';
 import { ChatType } from './constants/chat-types.constants';
 import { CreateGroupChatDto } from './dto/requests/create-chat.dto';
-import { ChatResponseDto } from './dto/responses/chat-response.dto';
+import {
+  ChatResponseDto,
+  ChatWithMessagesResponseDto,
+} from './dto/responses/chat-response.dto';
 import { plainToInstance } from 'class-transformer';
 import { ChatMapper } from './mappers/chat.mapper';
 import { MessageService } from '../message/message.service';
 import { Message } from '../message/entities/message.entity';
-import { InviteLinkService } from '../invite-link/invite-link.service';
 import { SystemEventType } from '../message/constants/system-event-type.constants';
 import { PaginationQuery } from '../message/dto/queries/pagination-query.dto';
+import InitialDataResponse from './dto/responses/initial-data-response.dto';
+import { MessageMapper } from '../message/mappers/message.mapper';
 
 @Injectable()
 export class ChatService {
@@ -29,53 +33,44 @@ export class ChatService {
     private readonly messageRepo: Repository<Message>,
     private readonly messageService: MessageService,
     private readonly chatMapper: ChatMapper,
-    private readonly inviteLinkService: InviteLinkService,
+    private readonly messageMapper: MessageMapper,
   ) {}
 
-  // async getOrCreateDirectChat(
-  //   myUserId: string,
-  //   partnerId: string,
-  // ): Promise<{ chat: ChatResponseDto; wasExisting: boolean }> {
-  //   if (!myUserId || !partnerId) {
-  //     ErrorResponse.badRequest('Missing userId');
-  //   }
+  async getInitialChatsWithMessages(
+    userId: string,
+    chatLimit: number,
+    messageLimit: number,
+  ): Promise<InitialDataResponse> {
+    // 1. Get base chats with pagination
+    const { chats: baseChats, hasMore: hasMoreChats } = await this.getUserChats(
+      userId,
+      { limit: chatLimit },
+    );
 
-  //   const memberUserIds = [myUserId, partnerId];
-  //   const userCount = await this.userRepo.count({
-  //     where: { id: In(memberUserIds) },
-  //   });
-  //   if (userCount !== memberUserIds.length) {
-  //     ErrorResponse.badRequest('One or more Users do not exist!');
-  //   }
+    // 2. Fetch messages for each chat
+    const chatsWithMessages: ChatWithMessagesResponseDto[] = await Promise.all(
+      baseChats.map(async (chat) => {
+        const { messages, hasMore } =
+          await this.messageService.getMessagesByChatId(chat.id, userId, {
+            limit: messageLimit,
+          });
 
-  //   const existingChat = await this.chatRepo
-  //     .createQueryBuilder('chat')
-  //     .innerJoin('chat.members', 'member1', 'member1.user_id = :user1', {
-  //       user1: myUserId,
-  //     })
-  //     .innerJoin('chat.members', 'member2', 'member2.user_id = :user2', {
-  //       user2: partnerId,
-  //     })
-  //     .where('chat.type = :type', { type: ChatType.DIRECT })
-  //     .getOne();
+        return {
+          ...chat,
+          messages: messages.map((m) =>
+            this.messageMapper.toMessageResponseDto(m),
+          ),
+          hasMoreMessages: hasMore,
+        };
+      }),
+    );
 
-  //   if (existingChat) {
-  //     return {
-  //       chat: await this.getUserChat(existingChat.id, myUserId),
-  //       wasExisting: true,
-  //     };
-  //   }
+    return {
+      chats: chatsWithMessages,
+      hasMoreChats,
+    };
+  }
 
-  //   const chat = await this.chatRepo.save({
-  //     type: ChatType.DIRECT,
-  //     name: null,
-  //   });
-  //   await this.addMembers(chat.id, memberUserIds);
-  //   return {
-  //     chat: await this.getUserChat(chat.id, myUserId),
-  //     wasExisting: false,
-  //   };
-  // }
   async getOrCreateDirectChat(
     myUserId: string,
     partnerId: string,
@@ -220,28 +215,6 @@ export class ChatService {
     const updatedChat = await this.chatRepo.save(existingChat);
     return plainToInstance(ChatResponseDto, updatedChat);
   }
-
-  // async getUserChats(userId: string): Promise<ChatResponseDto[]> {
-  //   const chats = await this.buildFullChatQueryForUser(userId)
-  //     .orderBy('COALESCE(lastMessage.createdAt, chat.createdAt)', 'DESC')
-  //     .getMany();
-
-  //   return Promise.all(
-  //     chats.map((chat) =>
-  //       chat.type === ChatType.DIRECT
-  //         ? this.chatMapper.transformToDirectChatDto(
-  //             chat,
-  //             userId,
-  //             this.messageService,
-  //           )
-  //         : this.chatMapper.transformToGroupChatDto(
-  //             chat,
-  //             userId,
-  //             this.messageService,
-  //           ),
-  //     ),
-  //   );
-  // }
 
   async getUserChats(
     userId: string,

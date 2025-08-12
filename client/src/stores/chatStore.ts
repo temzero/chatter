@@ -104,10 +104,65 @@ export const useChatStore = create<ChatStore>()(
         isLoading: false,
         error: null,
 
+        // initialize: async () => {
+        //   try {
+        //     set({ isLoading: true, error: null });
+        //     await get().fetchChats();
+        //   } catch (error) {
+        //     console.error("Initialization failed:", error);
+        //     set({ error: "Failed to initialize chat data" });
+        //     throw error;
+        //   } finally {
+        //     set({ isLoading: false });
+        //   }
+        // },
+
         initialize: async () => {
           try {
             set({ isLoading: true, error: null });
-            await get().fetchChats();
+
+            // Fetch initial data (chats + messages)
+            const initialData = await chatService.fetchInitialData();
+            if (!initialData) {
+              await get().fetchChats(); // Fallback to regular fetch if initial fails
+              return;
+            }
+
+            // Process chats (without messages)
+            const chats = initialData.chats.map((chat) => {
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              const { messages, hasMoreMessages, ...chatData } = chat;
+              return chatData;
+            });
+
+            const savedChat =
+              chats.find((chat) => chat.type === ChatType.SAVED) || null;
+            const otherChats = chats.filter(
+              (chat) => chat.type !== ChatType.SAVED
+            );
+
+            // Update chat store
+            set({
+              savedChat,
+              chats: otherChats,
+              filteredChats: otherChats,
+              hasMoreChats: initialData.hasMoreChats,
+            });
+
+            // Process messages for each chat
+            initialData.chats.forEach((chat) => {
+              if (chat.messages?.length) {
+                useMessageStore
+                  .getState()
+                  .setChatMessages(chat.id, chat.messages);
+                useMessageStore.setState((state) => ({
+                  hasMoreMessages: {
+                    ...state.hasMoreMessages,
+                    [chat.id]: chat.hasMoreMessages,
+                  },
+                }));
+              }
+            });
           } catch (error) {
             console.error("Initialization failed:", error);
             set({ error: "Failed to initialize chat data" });

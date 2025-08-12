@@ -6,11 +6,32 @@ import type { ApiSuccessResponse } from "@/types/responses/apiSuccess.response";
 import { toast } from "react-toastify";
 import { handleError } from "@/utils/handleError";
 import { PaginationQuery } from "@/types/query/paginationQuery";
+import InitialDataResponse from "@/types/responses/initialData.response";
 
 export const chatService = {
   ...directChatService,
   ...groupChatService,
   // Get all direct and group chats
+  async fetchInitialData(
+    chatLimit = 20,
+    messageLimit = 20
+  ): Promise<InitialDataResponse | null> {
+    try {
+      const response = await API.get<ApiSuccessResponse<InitialDataResponse>>(
+        "/chat/initial",
+        {
+          params: { chatLimit, messageLimit },
+        }
+      );
+
+      return response.data.payload;
+    } catch (error) {
+      console.error("Failed to fetch initial data:", error);
+      toast.error("Failed to load initial chat data");
+      return null;
+    }
+  },
+
   async fetchChats(
     options: PaginationQuery = { limit: 4 }
   ): Promise<{ chats: ChatResponse[]; hasMore: boolean }> {

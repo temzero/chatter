@@ -31,6 +31,7 @@ import { SystemEventType } from '../message/constants/system-event-type.constant
 import { MessageService } from '../message/message.service';
 import { MessageResponseDto } from '../message/dto/responses/message-response.dto';
 import { PaginationQuery } from '../message/dto/queries/pagination-query.dto';
+import InitialDataResponse from './dto/responses/initial-data-response.dto';
 
 @Controller('chat')
 @UseGuards(JwtAuthGuard)
@@ -39,6 +40,25 @@ export class ChatController {
     private readonly chatService: ChatService,
     private readonly messageService: MessageService,
   ) {}
+
+  @Get('initial')
+  async getInitialData(
+    @CurrentUser('id') userId: string,
+    @Query('chatLimit') chatLimit: number = 20,
+    @Query('messageLimit') messageLimit: number = 10,
+  ): Promise<SuccessResponse<InitialDataResponse>> {
+    try {
+      const result = await this.chatService.getInitialChatsWithMessages(
+        userId,
+        chatLimit,
+        messageLimit,
+      );
+
+      return new SuccessResponse(result, 'Initial data loaded');
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to load initial data');
+    }
+  }
 
   @Get()
   @HttpCode(HttpStatus.OK)

@@ -7,7 +7,7 @@ import { PaginationQuery } from "@/types/query/paginationQuery";
 export const messageService = {
   async getChatMessages(
     chatId: string,
-    options: PaginationQuery = { limit: 20 }
+    options: PaginationQuery = { limit: 10 }
   ): Promise<{ messages: MessageResponse[]; hasMore: boolean }> {
     const { offset, beforeId, limit } = options;
 

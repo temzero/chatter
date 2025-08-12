@@ -4,8 +4,8 @@ import { useModalStore } from "@/stores/modalStore";
 import { motion } from "framer-motion";
 import { childrenModalAnimation } from "@/animations/modalAnimations";
 import { useChatStore } from "@/stores/chatStore";
-import { filterChatsByType } from "@/utils/filterChatsByType";
 import { Avatar } from "../ui/avatar/Avatar";
+import { ChatType } from "@/types/enums/ChatType";
 
 const COLORS = [
   null,
@@ -28,9 +28,7 @@ const AddFolderModal: React.FC = () => {
   // Get initial folder name from props or use empty string
   const initialFolderName = (modalContent?.props?.folderName as string) || "";
   const [folderName, setFolderName] = useState(initialFolderName);
-  const [folderTypes, setFolderTypes] = useState<
-    ("direct" | "group" | "channel")[]
-  >([]);
+  const [folderTypes, setFolderTypes] = useState<ChatType[]>([]);
   const [selectedColor, setSelectedColor] = useState<string | null>(COLORS[0]);
   const [selectedChats, setSelectedChats] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -49,7 +47,7 @@ const AddFolderModal: React.FC = () => {
       result = result.filter(
         (chat) =>
           chat.name?.toLowerCase().includes(query) ||
-          chat.lastMessage?.content.toLowerCase().includes(query)
+          (chat.lastMessage?.content ?? "").toLowerCase().includes(query)
       );
     }
 
@@ -174,7 +172,7 @@ const AddFolderModal: React.FC = () => {
                     setFolderTypes((prev) =>
                       isSelected
                         ? prev.filter((t) => t !== type)
-                        : [...prev, type as "direct" | "group" | "channel"]
+                        : [...prev, type as ChatType]
                     )
                   }
                   className={`flex-1 py-1 rounded border-2 border-[var(--border-color)] text-sm capitalize transition-colors duration-200 ${

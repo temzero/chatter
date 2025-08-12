@@ -14,6 +14,8 @@ import { useMessageStore } from "@/stores/messageStore";
 import MessageSearchBar from "../ui/MessageSearchBar";
 import { useUserLastSeen } from "@/stores/presenceStore";
 import { formatTimeAgo } from "@/utils/formatTimeAgo";
+import { ModalType, useModalStore } from "@/stores/modalStore";
+import { CallMode, CallStatus, CallType } from "@/types/enums/modalType";
 
 interface ChatHeaderProps {
   chat: ChatResponse;
@@ -31,6 +33,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   const chatListMembers = useChatMemberStore.getState().chatMembers[chat.id];
   const isOnline = useChatStatus(chat?.id, chat.type);
   const isSearchMessages = useMessageStore((state) => state.isSearchMessages);
+  const openModal = useModalStore((state) => state.openModal);
 
   const isChannel = chat.type === ChatType.CHANNEL;
   const isDirect = chat.type === ChatType.DIRECT;
@@ -63,10 +66,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
       onClick={toggleSidebarInfo}
     >
       {chat.pinnedMessage && (
-        <PinnedMessage
-          message={chat.pinnedMessage}
-          chatType={chat.type}
-        />
+        <PinnedMessage message={chat.pinnedMessage} chatType={chat.type} />
       )}
 
       <AnimatePresence mode="wait">
@@ -102,6 +102,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
           className={`flex justify-end items-center ${
             isSearchMessages ? "w-[49%]" : "w-auto"
           }`}
+          onClick={(e) => e.stopPropagation()}
         >
           {isSearchMessages ? (
             <MessageSearchBar />
@@ -109,17 +110,48 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
             <div className="flex items-center gap-1">
               <div className="flex items-center cursor-pointer rounded-full opacity-60 hover:opacity-100 p-1">
                 {isDirect && canCall && (
-                  <i className="material-symbols-outlined text-3xl">
-                    phone_enabled
-                  </i>
+                  <button
+                    onClick={() =>
+                      openModal(ModalType.CALL, {
+                        callType: CallType.VOICE,
+                        callMode: CallMode.DIRECT,
+                        status: CallStatus.CALLING,
+                        partner: {
+                          id: partnerId!,
+                          name: chat.name,
+                          avatarUrl: chat.avatarUrl ?? "",
+                        },
+                      })
+                    }
+                  >
+                    <i className="material-symbols-outlined text-3xl">
+                      phone_enabled
+                    </i>
+                  </button>
                 )}
+
                 {isGroup && (
-                  <i className="material-symbols-outlined text-3xl">videocam</i>
+                  <button
+                    onClick={() =>
+                      openModal(ModalType.CALL, {
+                        callType: CallType.VIDEO,
+                        callMode: CallMode.GROUP,
+                        status: CallStatus.CALLING,
+                      })
+                    }
+                  >
+                    <i className="material-symbols-outlined text-3xl">
+                      videocam
+                    </i>
+                  </button>
                 )}
+
                 {isChannel && (
-                  <i className="material-symbols-outlined text-3xl">
-                    connected_tv
-                  </i>
+                  <button>
+                    <i className="material-symbols-outlined text-3xl">
+                      connected_tv
+                    </i>
+                  </button>
                 )}
               </div>
               {!chat.isDeleted && <OnlineDot isOnline={isOnline} />}

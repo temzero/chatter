@@ -57,3 +57,19 @@ export class ChatResponseDto {
   @Expose()
   isDeleted?: boolean | null;
 }
+
+@Exclude()
+export class ChatWithMessagesResponseDto extends ChatResponseDto {
+  /**
+   * Array of messages in this chat
+   */
+  @Expose()
+  @Type(() => MessageResponseDto)
+  messages: MessageResponseDto[];
+
+  /**
+   * Indicates if there are more messages available to load
+   */
+  @Expose()
+  hasMoreMessages: boolean;
+}
