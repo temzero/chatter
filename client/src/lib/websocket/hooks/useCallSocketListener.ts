@@ -31,7 +31,7 @@ export function useCallSocketListeners() {
       // **JOIN the call, instead of starting it**
       useCallStore
         .getState()
-        .openCall(data.chat, data.isVideoCall, data.isGroupCall);
+        .openCall(data.chat, data.isVideoCall, data.isGroupCall, CallStatus.INCOMING);
 
       toast.info(
         `Incoming ${data.isVideoCall ? "video" : "voice"} call from ${
