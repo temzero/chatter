@@ -3,7 +3,7 @@ import type { ChatResponse } from "@/types/responses/chat.response";
 
 type ChannelAvatarProps = {
   chat: ChatResponse;
-  type?: "header" | "sidebar" | "info" | "contact";
+  type?: "header" | "sidebar" | "info" | "contact" | "call";
   styles: {
     size: string;
     rounded: string;

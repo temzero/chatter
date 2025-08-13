@@ -19,6 +19,7 @@ import { useFolderStore } from "@/stores/folderStore";
 import { toast } from "react-toastify";
 import { useNotificationSocketListeners } from "@/lib/websocket/hooks/useNotificationSocketListener";
 import { usePresenceSocketListeners } from "@/lib/websocket/hooks/usePresenceSocketListeners";
+import { useCallSocketListeners } from "@/lib/websocket/hooks/useCallSocketListener";
 
 export const ChatContent: React.FC = () => {
   const { id: chatId } = useParams();
@@ -102,6 +103,7 @@ const PrivateLayout: React.FC = () => {
   useWebSocket();
   useNotificationSocketListeners();
   useChatSocketListeners();
+  useCallSocketListeners();
   usePresenceSocketListeners();
 
   if (!isAuthenticated) {

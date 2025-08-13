@@ -14,8 +14,7 @@ import { useMessageStore } from "@/stores/messageStore";
 import MessageSearchBar from "../ui/MessageSearchBar";
 import { useUserLastSeen } from "@/stores/presenceStore";
 import { formatTimeAgo } from "@/utils/formatTimeAgo";
-import { ModalType, useModalStore } from "@/stores/modalStore";
-import { CallMode, CallStatus, CallType } from "@/types/enums/modalType";
+import { useCallStore } from "@/stores/callStore";
 
 interface ChatHeaderProps {
   chat: ChatResponse;
@@ -33,7 +32,8 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   const chatListMembers = useChatMemberStore.getState().chatMembers[chat.id];
   const isOnline = useChatStatus(chat?.id, chat.type);
   const isSearchMessages = useMessageStore((state) => state.isSearchMessages);
-  const openModal = useModalStore((state) => state.openModal);
+
+  const startCall = useCallStore((state) => state.startCall);
 
   const isChannel = chat.type === ChatType.CHANNEL;
   const isDirect = chat.type === ChatType.DIRECT;
@@ -110,20 +110,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
             <div className="flex items-center gap-1">
               <div className="flex items-center cursor-pointer rounded-full opacity-60 hover:opacity-100 p-1">
                 {isDirect && canCall && (
-                  <button
-                    onClick={() =>
-                      openModal(ModalType.CALL, {
-                        callType: CallType.VOICE,
-                        callMode: CallMode.DIRECT,
-                        status: CallStatus.CALLING,
-                        partner: {
-                          id: partnerId!,
-                          name: chat.name,
-                          avatarUrl: chat.avatarUrl ?? "",
-                        },
-                      })
-                    }
-                  >
+                  <button onClick={() => startCall(chat, false, false)}>
                     <i className="material-symbols-outlined text-3xl">
                       phone_enabled
                     </i>
@@ -131,15 +118,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                 )}
 
                 {isGroup && (
-                  <button
-                    onClick={() =>
-                      openModal(ModalType.CALL, {
-                        callType: CallType.VIDEO,
-                        callMode: CallMode.GROUP,
-                        status: CallStatus.CALLING,
-                      })
-                    }
-                  >
+                  <button onClick={() => startCall(chat, true, true)}>
                     <i className="material-symbols-outlined text-3xl">
                       videocam
                     </i>

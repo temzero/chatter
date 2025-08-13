@@ -157,15 +157,7 @@ export function useChatSocketListeners() {
 
     return () => {
       // Clean up listeners
-      chatWebSocketService.offNewMessage(handleNewMessage);
-      chatWebSocketService.offSaveMessage(handleMessageSaved);
-      chatWebSocketService.offReaction(handleReaction);
-      chatWebSocketService.offTyping(handleTyping);
-      chatWebSocketService.offMessagesRead(handleMessagesRead);
-      chatWebSocketService.offMessagePin(handleMessagePinned);
-      chatWebSocketService.offImportantMessage(handleMessageMarkedImportant);
-      chatWebSocketService.offDeleteMessage(handleMessageDeleted);
-      chatWebSocketService.offMessageError(handleMessageError);
+      chatWebSocketService.removeAllListeners();
     };
   }, []);
 }

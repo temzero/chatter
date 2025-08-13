@@ -15,6 +15,7 @@ import { ChatModule } from '../chat/chat.module';
 import { SupabaseModule } from '../superbase/supabase.module';
 import { BlockModule } from '../block/block.module';
 import { NotificationWsService } from './notification.service';
+import { CallGateway } from './features/call.gateway';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { NotificationWsService } from './notification.service';
     WebsocketService,
     GlobalGateway,
     ChatGateway,
+    CallGateway,
     NotificationGateway,
     WsJwtGuard,
     MessageMapper,

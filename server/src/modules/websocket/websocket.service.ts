@@ -4,6 +4,7 @@ import { ChatMemberService } from '../chat-member/chat-member.service';
 import { BlockService } from '../block/block.service';
 import { PresenceUpdateEvent } from './constants/presenceEvent.type';
 import { ChatEvent, PresenceEvent } from './constants/websocket-events';
+import { CallEvent } from './constants/callEvent.type';
 
 interface EnhancedPayload {
   payload: any;
@@ -194,7 +195,7 @@ export class WebsocketService {
 
   async emitToChatMembers(
     chatId: string,
-    event: ChatEvent,
+    event: ChatEvent | CallEvent,
     payload: any,
     options: {
       senderId?: string;

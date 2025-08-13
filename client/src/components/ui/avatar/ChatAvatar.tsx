@@ -7,7 +7,7 @@ import { ChannelAvatar } from "./AvatarChannel";
 
 type ChatAvatarProps = {
   chat?: ChatResponse | null;
-  type?: "header" | "sidebar" | "info" | "contact";
+  type?: "header" | "sidebar" | "info" | "contact" | "call";
   isBlocked?: boolean;
 };
 
@@ -73,6 +73,16 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
           onlineDotClass: "right-0 bottom-0",
           textSize: "text-xl",
         };
+      case "call":
+        return {
+          size: "h-24 w-24",
+          rounded: "rounded-[32px]",
+          iconSize: "text-6xl",
+          fallbackIconSize: "text-8xl",
+          borderWidth: "6px",
+          onlineDotClass: "right-0 bottom-0",
+          textSize: "text-xl",
+        };
       case "sidebar":
       default:
         return {
@@ -124,7 +134,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
             avatarUrl={chat.avatarUrl ?? undefined}
             name={chat.name ?? undefined}
             textSize={styles.textSize}
-            className={`${styles.size} ${styles.rounded} object-cover`}
+            className={`${styles.size} object-cover`}
             isBlocked={isBlocked}
           />
           {showOnlineDot && (

@@ -19,18 +19,9 @@ export enum ModalType {
   CALL = "call",
 }
 
-export enum CallType {
-  VOICE = "voice",
-  VIDEO = "video",
-}
-
-export enum CallMode {
-  DIRECT = "direct",
-  GROUP = "group",
-}
-
 export enum CallStatus {
   CALLING = "calling",
   INCOMING = "incoming",
   IN_CALL = "in-call",
+  ENDED = "ended",
 }

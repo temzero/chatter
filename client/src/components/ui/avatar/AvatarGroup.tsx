@@ -7,7 +7,7 @@ import type {
 
 type GroupAvatarProps = {
   chat: ChatResponse;
-  type?: "header" | "sidebar" | "info" | "contact";
+  type?: "header" | "sidebar" | "info" | "contact" | "call";
   styles: {
     size: string;
     rounded: string;

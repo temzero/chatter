@@ -239,4 +239,18 @@ export const chatWebSocketService = {
       webSocketService.off(ChatEvent.MESSAGE_ERROR);
     }
   },
+
+  removeAllListeners() {
+    // Remove all chat-related event listeners
+    webSocketService.off(ChatEvent.STATUS_CHANGED);
+    webSocketService.off(ChatEvent.NEW_MESSAGE);
+    webSocketService.off(ChatEvent.USER_TYPING);
+    webSocketService.off(ChatEvent.MESSAGE_READ);
+    webSocketService.off(ChatEvent.MESSAGE_REACTION);
+    webSocketService.off(ChatEvent.PIN_UPDATED);
+    webSocketService.off(ChatEvent.SAVE_MESSAGE);
+    webSocketService.off(ChatEvent.MESSAGE_IMPORTANT_TOGGLED);
+    webSocketService.off(ChatEvent.MESSAGE_DELETED);
+    webSocketService.off(ChatEvent.MESSAGE_ERROR);
+  },
 };
