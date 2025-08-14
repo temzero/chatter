@@ -33,13 +33,9 @@ export class CallGateway {
     @MessageBody() payload: InitiateCallPayload,
   ) {
     const senderId = client.data.userId;
-    console.log('INITIATE_CALL', payload);
-
-    // Get full ChatResponse for the payload
-    const chat = await this.chatService.getUserChat(payload.chatId, senderId);
 
     const response: IncomingCallPayload = {
-      chat,
+      chatId: payload.chatId,
       isVideoCall: payload.isVideoCall,
       isGroupCall: payload.isGroupCall,
       callerId: senderId,
@@ -72,11 +68,13 @@ export class CallGateway {
       payload.chatId,
       CallEvent.ACCEPT_CALL,
       response,
-      { senderId },
+      {
+        senderId,
+        excludeSender: true,
+      },
     );
   }
 
-  // 3️⃣ Callee rejects
   @SubscribeMessage(CallEvent.REJECT_CALL)
   async handleCallReject(
     @ConnectedSocket() client: AuthenticatedSocket,
@@ -84,17 +82,21 @@ export class CallGateway {
   ) {
     const senderId = client.data.userId;
 
-    const response: CallUserActionPayload = {
+    const response: CallUserActionPayload & { isCallerCancel?: boolean } = {
       chatId: payload.chatId,
       userId: senderId,
       timestamp: Date.now(),
+      ...(payload.isCallerCancel ? { isCallerCancel: true } : {}), // only added if true
     };
 
     await this.websocketService.emitToChatMembers(
       payload.chatId,
       CallEvent.REJECT_CALL,
       response,
-      { senderId },
+      {
+        senderId,
+        excludeSender: true,
+      },
     );
   }
 
@@ -116,7 +118,10 @@ export class CallGateway {
       payload.chatId,
       CallEvent.END_CALL,
       response,
-      { senderId },
+      {
+        senderId,
+        excludeSender: true,
+      },
     );
   }
 

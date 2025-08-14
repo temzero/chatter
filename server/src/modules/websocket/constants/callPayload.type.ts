@@ -1,6 +1,4 @@
 // src/calls/dto/call-payload.dto.ts
-import { ChatResponseDto } from 'src/modules/chat/dto/responses/chat-response.dto';
-
 export class InitiateCallPayload {
   chatId: string;
   isVideoCall: boolean;
@@ -8,7 +6,7 @@ export class InitiateCallPayload {
 }
 
 export class IncomingCallPayload {
-  chat: ChatResponseDto;
+  chatId: string;
   isVideoCall: boolean;
   isGroupCall: boolean;
   callerId: string;
@@ -17,6 +15,7 @@ export class IncomingCallPayload {
 
 export class CallActionPayload {
   chatId: string;
+  isCallerCancel?: boolean; // Optional, true if the caller cancels the call
 }
 
 export class CallUserActionPayload {

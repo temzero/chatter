@@ -9,7 +9,6 @@ import {
   RtcAnswerPayload,
   IceCandidatePayload,
 } from "@/types/responses/callPayload.response";
-import { toast } from "react-toastify";
 
 /**
  * Service for handling call-related WebSocket communications
@@ -23,7 +22,6 @@ export const callWebSocketService = {
    * Initiate a new call
    */
   initiateCall(payload: InitiateCallPayload) {
-    toast.info(`Initiating ${payload.isVideoCall ? "video" : "voice"} call...`);
     webSocketService.emit(CallEvent.INITIATE_CALL, payload);
   },
 
@@ -70,16 +68,35 @@ export const callWebSocketService = {
   },
 
   /**
+   * Cancel an outgoing call before it’s accepted
+   * (sent as a reject event with `isCallerCancel: true`)
+   */
+  cancelCall(payload: CallActionPayload) {
+    webSocketService.emit(CallEvent.REJECT_CALL, {
+      ...payload,
+      isCallerCancel: true,
+    });
+  },
+
+  /**
    * Listen for call reject events
    */
-  onCallRejected(callback: (data: CallUserActionPayload) => void) {
+  onCallRejected(
+    callback: (
+      data: CallUserActionPayload & { isCallerCancel?: boolean }
+    ) => void
+  ) {
     webSocketService.on(CallEvent.REJECT_CALL, callback);
   },
 
   /**
    * Remove call reject listener
    */
-  offCallRejected(callback: (data: CallUserActionPayload) => void) {
+  offCallRejected(
+    callback: (
+      data: CallUserActionPayload & { isCallerCancel?: boolean }
+    ) => void
+  ) {
     webSocketService.off(CallEvent.REJECT_CALL, callback);
   },
 

@@ -4,6 +4,7 @@ export const enum CallEvent {
   INCOMING_CALL = 'call:incoming',
   ACCEPT_CALL = 'call:accept', // or "call:accepted"
   REJECT_CALL = 'call:reject', // or "call:rejected"
+  CANCEL_CALL = 'call:cancel', // or "call:rejected"
   END_CALL = 'call:end', // or "call:ended"
   CALL_TIMEOUT = 'call:timeout',
 

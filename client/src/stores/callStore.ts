@@ -3,8 +3,8 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { CallStatus, ModalType } from "@/types/enums/modalType";
 import { useModalStore } from "@/stores/modalStore";
-import { ChatResponse } from "@/types/responses/chat.response";
 import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
+import { toast } from "react-toastify";
 
 interface CallParticipant {
   id: string;
@@ -18,7 +18,7 @@ interface IncomingCallData {
 }
 
 interface CallState {
-  chat: ChatResponse | null;
+  chatId: string | null;
   isVideoCall: boolean;
   isGroupCall: boolean;
   callStatus: CallStatus | null;
@@ -34,20 +34,23 @@ interface CallState {
   peerConnection: RTCPeerConnection | null;
   isMuted: boolean;
   isLocalVideoDisabled: boolean;
+  callError: "permission_denied" | "device_unavailable" | null;
 
   // Actions
   startCall: (
-    chat: ChatResponse,
+    chatId: string,
     isVideo: boolean,
     isGroup: boolean
   ) => Promise<void>;
   openCall: (
-    chat: ChatResponse,
+    chatId: string,
     isVideo: boolean,
     isGroup: boolean,
     callStatus: CallStatus
   ) => void;
-  endCall: (callId?: string) => void;
+  acceptCall: () => Promise<void>;
+  rejectCall: (isCancel?: boolean) => void;
+  endCall: (isCancel?: boolean, isRejected?: boolean) => void;
   setStatus: (status: CallStatus) => void;
   switchType: () => Promise<void>;
   toggleMute: () => void;
@@ -64,11 +67,12 @@ interface CallState {
   setRemoteAnswer: (answer: RTCSessionDescriptionInit) => void;
   addIceCandidate: (candidate: RTCIceCandidateInit) => void;
   getCallDuration: () => number;
+  closeCallModal: () => void;
 }
 
 export const useCallStore = create<CallState>()(
   devtools((set, get) => ({
-    chat: null,
+    chatId: null,
     isVideoCall: false,
     isGroupCall: false,
     callStatus: null,
@@ -84,27 +88,50 @@ export const useCallStore = create<CallState>()(
     peerConnection: null,
     isMuted: false,
     isLocalVideoDisabled: false,
+    callError: null,
 
     // 📞 Start Call with media setup
-    startCall: async (chat, isVideo, isGroup) => {
+    startCall: async (chatId, isVideo, isGroup) => {
       try {
-        await get().setupLocalStream();
-        get().openCall(chat, isVideo, isGroup, CallStatus.CALLING);
+        // 1. Request media permissions
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: isVideo,
+        });
 
+        // 2. Save stream to state
+        set({
+          localStream: stream,
+          isVideoCall: isVideo,
+          isGroupCall: isGroup,
+          chatId,
+          callStatus: CallStatus.OUTGOING,
+        });
+
+        // 3. Use openCall to open the modal and set basic call state
+        // get().openCall(chatId, isVideo, isGroup, CallStatus.OUTGOING);
+        get().openCall(chatId, isVideo, isGroup, CallStatus.CALLING);
+
+        // 4. Initiate WebRTC connection
         callWebSocketService.initiateCall({
-          chatId: chat.id,
+          chatId,
           isVideoCall: isVideo,
           isGroupCall: isGroup,
         });
       } catch (error) {
-        console.error("Failed to start call:", error);
+        useModalStore.getState().closeModal();
+        console.error("Permission denied:", error);
         get().cleanupStreams();
+        set({ callError: "permission_denied" });
+        toast.error(
+          "Permission denied! Please allow camera and microphone access."
+        );
       }
     },
 
-    openCall: (chat, isVideo, isGroup, callStatus) => {
+    openCall: (chatId, isVideo, isGroup, callStatus) => {
       set({
-        chat,
+        chatId,
         isVideoCall: isVideo,
         isGroupCall: isGroup,
         callStatus,
@@ -112,37 +139,120 @@ export const useCallStore = create<CallState>()(
       useModalStore.getState().openModal(ModalType.CALL);
     },
 
+    acceptCall: async () => {
+      const { chatId, isVideoCall, setStatus, createPeerConnection } = get();
+
+      if (!chatId) {
+        console.error("No chatId found for accepting call");
+        return;
+      }
+
+      try {
+        // // 1. Request local media stream
+        // const stream = await navigator.mediaDevices.getUserMedia({
+        //   audio: true,
+        //   video: isVideoCall,
+        // });
+
+        // set({ localStream: stream });
+
+        // // 2. Create PeerConnection & attach local tracks
+        // const pc = createPeerConnection();
+        // stream.getTracks().forEach((track) => {
+        //   pc.addTrack(track, stream);
+        // });
+
+        // 3. Notify server that we accepted the call
+        callWebSocketService.acceptCall({ chatId });
+
+        // 4. Update UI state
+        setStatus(CallStatus.CALLING);
+      } catch (error) {
+        console.error("Error accepting call:", error);
+        set({ callError: "permission_denied" });
+        toast.error(
+          "Could not access camera/microphone. Please check permissions."
+        );
+      }
+    },
+
+    rejectCall: (isCancel: false) => {
+      const { chatId, endCall } = get();
+
+      if (!chatId) {
+        console.error("No chatId found for rejecting call");
+        return;
+      }
+
+      try {
+        // Tell server we rejected the call
+        callWebSocketService.rejectCall({ chatId, isCallerCancel: isCancel });
+
+        // Close modal and clean up
+        endCall(isCancel, true); // true → close modal without marking as ended
+      } catch (error) {
+        console.error("Error rejecting call:", error);
+        toast.error("Failed to reject call. Please try again.");
+      }
+    },
+
     // 🛑 End Call with cleanup
-    endCall: () => {
-      const { peerConnection, localStream, remoteStream } = get();
+    endCall: (isCancel = false, isRejected = false) => {
+      const { peerConnection, localStream, remoteStream, callStatus } = get();
 
-      if (peerConnection) {
-        peerConnection.close();
+      // Early return if already ended
+      if (
+        callStatus === CallStatus.ENDED ||
+        callStatus === CallStatus.CANCELED ||
+        callStatus === CallStatus.REJECTED
+      ) {
+        return;
       }
 
-      if (localStream) {
-        localStream.getTracks().forEach((track) => track.stop());
+      try {
+        // Helper to stop all tracks in a stream
+        const stopAllTracks = (stream: MediaStream | null) => {
+          stream?.getTracks().forEach((track) => {
+            track.enabled = false;
+            track.stop();
+          });
+        };
+
+        stopAllTracks(localStream);
+        stopAllTracks(remoteStream);
+
+        if (peerConnection) {
+          peerConnection.ontrack = null;
+          peerConnection.onicecandidate = null;
+          peerConnection.oniceconnectionstatechange = null;
+          if (peerConnection.connectionState !== "closed") {
+            peerConnection.close();
+          }
+        }
+
+        set({
+          callStatus: isCancel
+            ? CallStatus.CANCELED
+            : isRejected
+            ? CallStatus.REJECTED
+            : CallStatus.ENDED,
+          callEndTime: new Date(),
+          participants: [],
+          incomingCall: null,
+          remoteOffer: null,
+          remoteAnswer: null,
+          iceCandidates: [],
+          localStream: null,
+          remoteStream: null,
+          peerConnection: null,
+          isMuted: false,
+          isLocalVideoDisabled: false,
+        });
+      } catch (error) {
+        console.error("Call termination error:", error);
+        toast.error("Failed to properly end call");
+        set({ callStatus: CallStatus.ENDED });
       }
-
-      if (remoteStream) {
-        remoteStream.getTracks().forEach((track) => track.stop());
-      }
-
-      set({
-        callStatus: CallStatus.ENDED,
-        participants: [],
-        incomingCall: null,
-        remoteOffer: null,
-        remoteAnswer: null,
-        iceCandidates: [],
-        localStream: null,
-        remoteStream: null,
-        peerConnection: null,
-        isMuted: false,
-        isLocalVideoDisabled: false,
-      });
-
-      useModalStore.getState().closeModal();
     },
 
     getCallDuration: (): number => {
@@ -208,13 +318,22 @@ export const useCallStore = create<CallState>()(
     // � Cleanup media streams
     cleanupStreams: () => {
       const { localStream, remoteStream } = get();
-      if (localStream) {
-        localStream.getTracks().forEach((track) => track.stop());
-      }
-      if (remoteStream) {
-        remoteStream.getTracks().forEach((track) => track.stop());
-      }
-      set({ localStream: null, remoteStream: null });
+
+      // Stop all tracks safely
+      [localStream, remoteStream].forEach((stream) => {
+        if (stream) {
+          stream.getTracks().forEach((track) => {
+            track.stop();
+            track.enabled = false;
+          });
+        }
+      });
+
+      set({
+        localStream: null,
+        remoteStream: null,
+        callError: null, // Reset error on cleanup
+      });
     },
 
     // 🤝 Create WebRTC peer connection
@@ -262,30 +381,57 @@ export const useCallStore = create<CallState>()(
 
     // 🔄 Switch between video/voice
     switchType: async () => {
-      const { isVideoCall, chat, isGroupCall, localStream } = get();
+      const { isVideoCall, chatId, isGroupCall, localStream } = get();
       const newType = !isVideoCall;
 
       try {
-        if (newType && !localStream) {
-          await get().setupLocalStream();
-        } else if (localStream) {
-          const videoTracks = localStream.getVideoTracks();
-          videoTracks.forEach((track) => {
-            track.enabled = newType;
+        if (newType) {
+          // Switching to video - need to request video permissions
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: {
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+              facingMode: "user",
+            },
           });
+
+          // Replace existing stream
+          get().cleanupStreams();
+          set({
+            localStream: stream,
+            isVideoCall: newType,
+            isLocalVideoDisabled: false,
+          });
+
+          // Add tracks to peer connection if exists
+          const { peerConnection } = get();
+          if (peerConnection) {
+            stream.getTracks().forEach((track) => {
+              peerConnection.addTrack(track, stream);
+            });
+          }
+        } else {
+          // Switching to audio
+          set({ isVideoCall: newType });
+          if (localStream) {
+            localStream.getVideoTracks().forEach((track) => track.stop());
+          }
         }
 
-        set({ isVideoCall: newType });
-
-        if (chat?.id) {
+        if (chatId) {
           callWebSocketService.initiateCall({
-            chatId: chat.id,
+            chatId: chatId,
             isVideoCall: newType,
             isGroupCall,
           });
         }
       } catch (error) {
         console.error("Error switching call type:", error);
+        // Revert if there was an error
+        set({ isVideoCall });
+        toast.error("Could not access camera. Please check permissions.");
+        throw error;
       }
     },
 
@@ -305,6 +451,32 @@ export const useCallStore = create<CallState>()(
       set((state) => ({
         iceCandidates: [...state.iceCandidates, candidate],
       }));
+    },
+
+    closeCallModal: () => {
+      // Close the modal first to provide immediate feedback
+      useModalStore.getState().closeModal();
+
+      // Additional cleanup if needed
+      set({
+        chatId: null,
+        isVideoCall: false,
+        isGroupCall: false,
+        callStatus: null,
+        callStartTime: null,
+        callEndTime: null,
+        participants: [],
+        incomingCall: null,
+        remoteOffer: null,
+        remoteAnswer: null,
+        iceCandidates: [],
+        localStream: null,
+        remoteStream: null,
+        peerConnection: null,
+        isMuted: false,
+        isLocalVideoDisabled: false,
+        callError: null,
+      });
     },
   }))
 );

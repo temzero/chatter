@@ -1,5 +1,3 @@
-import { ChatResponse } from "@/types/responses/chat.response";
-
 export interface InitiateCallPayload {
   chatId: string;
   isVideoCall: boolean;
@@ -7,7 +5,7 @@ export interface InitiateCallPayload {
 }
 
 export interface IncomingCallPayload {
-  chat: ChatResponse;
+  chatId: string;
   isVideoCall: boolean;
   isGroupCall: boolean;
   callerId: string;
@@ -16,12 +14,14 @@ export interface IncomingCallPayload {
 
 export interface CallActionPayload {
   chatId: string;
+  isCallerCancel?: boolean; // Optional, true if the caller cancels the call
 }
 
 export interface CallUserActionPayload {
   chatId: string;
   userId: string;
   timestamp: number;
+  isCallerCancel?: boolean;
 }
 
 export interface RtcOfferPayload {

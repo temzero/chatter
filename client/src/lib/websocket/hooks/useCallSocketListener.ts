@@ -18,43 +18,47 @@ export function useCallSocketListeners() {
   useEffect(() => {
     const handleIncomingCall = (data: IncomingCallPayload) => {
       if (data.callerId === currentUserId) return;
-      toast.info(
-        `Incoming ${data.isVideoCall ? "video" : "voice"} call from ${
-          data.chat.name || "Unknown"
-        }`
-      );
       useCallStore.getState().setIncomingCall({
         fromUserId: data.callerId,
-        callId: data.chat.id,
+        callId: data.chatId,
       });
 
       // **JOIN the call, instead of starting it**
       useCallStore
         .getState()
-        .openCall(data.chat, data.isVideoCall, data.isGroupCall, CallStatus.INCOMING);
+        .openCall(
+          data.chatId,
+          data.isVideoCall,
+          data.isGroupCall,
+          CallStatus.INCOMING
+        );
 
       toast.info(
-        `Incoming ${data.isVideoCall ? "video" : "voice"} call from ${
-          data.chat.name || "Unknown"
-        }`
+        `Incoming ${data.isVideoCall ? "video" : "voice"} call
+        `
       );
     };
 
     const handleCallAccepted = (data: CallUserActionPayload) => {
       console.log("Call accepted", data);
-      useCallStore.getState().setCallStatus(CallStatus.IN_CALL);
+      useCallStore.getState().setCallStatus(CallStatus.CALLING);
       toast.success("Call accepted");
     };
 
     const handleCallRejected = (data: CallUserActionPayload) => {
-      console.log("Call rejected", data);
-      useCallStore.getState().endCall(data.chatId);
-      toast.error("Call rejected");
+      if (data.userId === currentUserId) return;
+      if (data.isCallerCancel) {
+        useCallStore.getState().endCall(true);
+        toast.info("Call canceled by caller");
+      } else {
+        useCallStore.getState().endCall(false, true);
+        toast.info("Call rejected");
+      }
     };
 
     const handleCallEnded = (data: CallUserActionPayload) => {
       console.log("Call ended", data);
-      useCallStore.getState().endCall(data.chatId);
+      useCallStore.getState().endCall();
       toast.info("Call ended");
     };
 

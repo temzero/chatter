@@ -19,13 +19,15 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   icon?: string; // Icon name from your icon library
   iconPosition?: "left" | "right";
   fullWidth?: boolean;
+  isRoundedFull?: boolean; // Optional prop for full rounded corners
+  className?: string;
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary: "bg-blue-600 hover:bg-blue-700 text-white",
   secondary: "bg-gray-200 hover:bg-gray-300 text-gray-800",
-  success: "bg-green-600 hover:bg-green-700 text-white",
-  danger: "bg-red-600 hover:bg-red-700 text-white",
+  success: "bg-[--primary-green] hover:bg-[--primary-green-50] text-white",
+  danger: "bg-red-500 hover:bg-red-600 text-white",
   ghost: "bg-transparent hover:bg-gray-100/10 text-current",
   link: "bg-transparent hover:underline text-blue-600 p-0",
 };
@@ -46,39 +48,43 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       icon,
       iconPosition = "left",
       fullWidth = false,
+      isRoundedFull = false,
       className = "",
       disabled,
+      onClick,
     },
     ref
   ) => {
     const baseClasses =
-      "rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed";
+      "font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
     const widthClass = fullWidth ? "w-full" : "";
     const iconOnly = icon && !children;
+    const roundedClass = isRoundedFull ? "rounded-full" : "rounded-md";
 
     return (
       <motion.button
         ref={ref}
-        className={`flex items-center justify-center gap-2 ${baseClasses} ${
+        className={`flex items-center justify-center gap-2 ${baseClasses} ${roundedClass} ${
           variantClasses[variant]
         } ${sizeClasses[size]} ${widthClass} ${
           iconOnly ? "p-2" : ""
         } ${className}`}
         disabled={disabled || loading}
-        whileTap={{ scale: disabled ? 1 : 0.95 }}
+        whileTap={{ scale: disabled ? 1 : 0.96 }}
+        onClick={onClick}
       >
         {loading ? (
           <span className="animate-spin">
-            <Icon name="refresh" size={size === "sm" ? 16 : 20} />
+            <Icon name="refresh" size={size === "sm" ? 20 : 28} />
           </span>
         ) : (
           <>
             {icon && iconPosition === "left" && (
-              <Icon name={icon} size={size === "sm" ? 16 : 20} />
+              <Icon name={icon} size={size === "sm" ? 20 : 28} />
             )}
             {children}
             {icon && iconPosition === "right" && (
-              <Icon name={icon} size={size === "sm" ? 16 : 20} />
+              <Icon name={icon} size={size === "sm" ? 20 : 28} />
             )}
           </>
         )}

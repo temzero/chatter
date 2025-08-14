@@ -22,6 +22,8 @@ export enum ModalType {
 export enum CallStatus {
   CALLING = "calling",
   INCOMING = "incoming",
-  IN_CALL = "in-call",
+  OUTGOING = "outgoing",
+  CANCELED = "canceled",
+  REJECTED = "rejected",
   ENDED = "ended",
 }
