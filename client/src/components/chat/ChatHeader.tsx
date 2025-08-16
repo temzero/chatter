@@ -15,6 +15,7 @@ import MessageSearchBar from "../ui/MessageSearchBar";
 import { useUserLastSeen } from "@/stores/presenceStore";
 import { formatTimeAgo } from "@/utils/formatTimeAgo";
 import { useCallStore } from "@/stores/callStore";
+import { useCurrentUserId } from "@/stores/authStore";
 
 interface ChatHeaderProps {
   chat: ChatResponse;
@@ -28,6 +29,8 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   const toggleSidebarInfo = useSidebarInfoStore(
     (state) => state.toggleSidebarInfo
   );
+
+  const currentUserId = useCurrentUserId();
 
   const chatListMembers = useChatMemberStore.getState().chatMembers[chat.id];
   const isOnline = useChatStatus(chat?.id, chat.type);
@@ -110,7 +113,11 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
             <div className="flex items-center gap-1">
               <div className="flex items-center cursor-pointer rounded-full opacity-60 hover:opacity-100 p-1">
                 {isDirect && canCall && (
-                  <button onClick={() => startCall(chat.id, false, false)}>
+                  <button
+                    onClick={() =>
+                      startCall(chat.id, false, false, currentUserId)
+                    }
+                  >
                     <i className="material-symbols-outlined text-3xl">
                       phone_enabled
                     </i>
@@ -118,7 +125,11 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                 )}
 
                 {isGroup && (
-                  <button onClick={() => startCall(chat.id, true, true)}>
+                  <button
+                    onClick={() =>
+                      startCall(chat.id, true, true, currentUserId)
+                    }
+                  >
                     <i className="material-symbols-outlined text-3xl">
                       videocam
                     </i>

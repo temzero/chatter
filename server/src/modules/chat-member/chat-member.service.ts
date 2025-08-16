@@ -183,6 +183,29 @@ export class ChatMemberService {
     }
   }
 
+  async getChatMemberIdFromUserId(
+    chatId: string,
+    userId: string,
+  ): Promise<string> {
+    try {
+      const member = await this.memberRepo.findOne({
+        where: { chatId, userId },
+        select: ['id'], // We only need the ID
+      });
+
+      if (!member) {
+        ErrorResponse.notFound('Chat member not found');
+      }
+
+      return member.id;
+    } catch (error) {
+      ErrorResponse.throw(
+        error,
+        'Failed to retrieve chat member ID from user ID',
+      );
+    }
+  }
+
   async getAllMembers(chatId: string): Promise<ChatMember[]> {
     try {
       const members = await this.memberRepo.find({

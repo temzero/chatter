@@ -8,7 +8,7 @@ import type {
 import { ChatType } from "@/types/enums/ChatType";
 import { useShallow } from "zustand/shallow";
 import { FriendshipStatus } from "@/types/enums/friendshipType";
-import { useCurrentUserId } from "./authStore";
+import { useAuthStore, useCurrentUserId } from "./authStore";
 import { handleError } from "@/utils/handleError";
 import { useMemo } from "react";
 
@@ -20,6 +20,10 @@ interface ChatMemberStore {
   fetchChatMembers: (chatId: string, type: ChatType) => Promise<ChatMember[]>;
   getChatMember: (chatId: string, memberId: string) => ChatMember | undefined;
   getChatMemberUserIds: (chatId: string, type: ChatType) => string[];
+  getDirectChatOtherMemberId: (
+    chatId: string,
+    myUserId: string
+  ) => string | null;
   getAllChatMemberIds: () => string[];
   getAllUniqueUserIds: () => string[];
   addMemberLocally: (newMember: GroupChatMember) => void;
@@ -92,6 +96,18 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
     const chat = useChatStore.getState().chats.find((c) => c.id === chatId);
     if (!chat) return [];
     return chat.otherMemberUserIds || [];
+  },
+
+  getDirectChatOtherMemberId: (
+    chatId: string,
+    myUserId: string
+  ): string | null => {
+    const members = get().chatMembers[chatId];
+    if (!members || members.length !== 2) return null;
+
+    // Find the other member (different userId than mine)
+    const otherMember = members.find((m) => m.userId !== myUserId);
+    return otherMember ? otherMember.id : null;
   },
 
   getAllChatMemberIds: () => {
@@ -299,13 +315,19 @@ export const useMembersByChatId = (
 };
 
 export const useMyChatMember = (chatId: string): ChatMember | undefined => {
-  const myMemberId = useCurrentUserId();
+  const currentUserId = useCurrentUserId();
   return useChatMemberStore(
     useShallow((state) => {
       const members = state.chatMembers[chatId];
-      return members.find((member) => member.id === myMemberId);
+      return members.find((member) => member.userId === currentUserId);
     })
   );
+};
+
+export const getMyChatMemberId = (chatId: string): string | undefined => {
+  const currentUserId = useAuthStore.getState().currentUser.id;
+  const members = useChatMemberStore.getState().chatMembers[chatId] || [];
+  return members.find((m) => m.userId === currentUserId)?.id;
 };
 
 export const useDirectChatPartner = (

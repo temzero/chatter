@@ -50,6 +50,7 @@ export const enum CallEvent {
   // Call state events
   CALL_STATE_CHANGE = "call:state-change",
   PARTICIPANTS_CHANGED = "call:participants-changed",
+  SFU_ICE_CANDIDATE = "call:sfu-ice-candidate", // SFU specific ICE candidate event
 }
 
 export const enum PresenceEvent {

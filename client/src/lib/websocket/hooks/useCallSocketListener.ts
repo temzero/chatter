@@ -4,26 +4,25 @@ import { toast } from "react-toastify";
 import { useCallStore } from "@/stores/callStore";
 import { CallStatus } from "@/types/enums/modalType";
 import {
-  IncomingCallPayload,
-  CallUserActionPayload,
-  RtcOfferPayload,
-  RtcAnswerPayload,
-  IceCandidatePayload,
-} from "@/types/responses/callPayload.response";
-import { useCurrentUserId } from "@/stores/authStore";
+  IncomingCallResponse,
+  CallActionResponse,
+  RtcOfferResponse,
+  RtcAnswerResponse,
+  IceCandidateResponse,
+} from "@/types/callPayload";
+import { getMyChatMemberId } from "@/stores/chatMemberStore";
 
 export function useCallSocketListeners() {
-  const currentUserId = useCurrentUserId();
-
   useEffect(() => {
-    const handleIncomingCall = (data: IncomingCallPayload) => {
-      if (data.callerId === currentUserId) return;
+    const handleIncomingCall = (data: IncomingCallResponse) => {
+      const myMemberId = getMyChatMemberId(data.chatId);
+
+      if (data.fromMemberId === myMemberId) return;
       useCallStore.getState().setIncomingCall({
-        fromUserId: data.callerId,
+        fromMemberId: data.fromMemberId,
         callId: data.chatId,
       });
 
-      // **JOIN the call, instead of starting it**
       useCallStore
         .getState()
         .openCall(
@@ -33,20 +32,26 @@ export function useCallSocketListeners() {
           CallStatus.INCOMING
         );
 
-      toast.info(
-        `Incoming ${data.isVideoCall ? "video" : "voice"} call
-        `
-      );
+      toast.info(`Incoming ${data.isVideoCall ? "video" : "voice"} call`);
     };
 
-    const handleCallAccepted = (data: CallUserActionPayload) => {
-      console.log("Call accepted", data);
-      useCallStore.getState().setCallStatus(CallStatus.CALLING);
-      toast.success("Call accepted");
+    const handleCallAccepted = async (data: CallActionResponse) => {
+      const myMemberId = getMyChatMemberId(data.chatId);
+
+      if (data.fromMemberId === myMemberId) return;
+
+      const store = useCallStore.getState();
+      store.setCallStatus(CallStatus.CONNECTING);
+
+      if (store.callStatus === CallStatus.OUTGOING) {
+        await store.sendOffer(data.fromMemberId);
+      }
     };
 
-    const handleCallRejected = (data: CallUserActionPayload) => {
-      if (data.userId === currentUserId) return;
+    const handleCallRejected = (data: CallActionResponse) => {
+      const myMemberId = getMyChatMemberId(data.chatId);
+
+      if (data.fromMemberId === myMemberId) return;
       if (data.isCallerCancel) {
         useCallStore.getState().endCall(true);
         toast.info("Call canceled by caller");
@@ -56,23 +61,23 @@ export function useCallSocketListeners() {
       }
     };
 
-    const handleCallEnded = (data: CallUserActionPayload) => {
+    const handleCallEnded = (data: CallActionResponse) => {
       console.log("Call ended", data);
       useCallStore.getState().endCall();
       toast.info("Call ended");
     };
 
-    const handleRtcOffer = (data: RtcOfferPayload) => {
+    const handleRtcOffer = (data: RtcOfferResponse) => {
       console.log("RTC offer received", data.offer);
       useCallStore.getState().setRemoteOffer(data.offer);
     };
 
-    const handleRtcAnswer = (data: RtcAnswerPayload) => {
+    const handleRtcAnswer = (data: RtcAnswerResponse) => {
       console.log("RTC answer received", data.answer);
       useCallStore.getState().setRemoteAnswer(data.answer);
     };
 
-    const handleIceCandidate = (data: IceCandidatePayload) => {
+    const handleIceCandidate = (data: IceCandidateResponse) => {
       console.log("ICE candidate received", data.candidate);
       useCallStore.getState().addIceCandidate(data.candidate);
     };
@@ -87,7 +92,6 @@ export function useCallSocketListeners() {
     callWebSocketService.onIceCandidate(handleIceCandidate);
 
     return () => {
-      // Cleanup listeners
       callWebSocketService.removeAllListeners();
     };
   }, []);
