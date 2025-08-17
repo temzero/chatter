@@ -1,46 +1,42 @@
-// Requests
+// -------------------- Requests --------------------
+
+// Call control (no from/to member IDs needed except optional toMemberId for 1:1)
 export interface InitiateCallRequest {
   chatId: string;
   isVideoCall: boolean;
   isGroupCall: boolean;
-  toMemberId?: string; // Optional for 1:1 calls
 }
 
 export interface CallActionRequest {
   chatId: string;
-  fromMemberId: string; // Who is performing the action
-  isCallerCancel?: boolean;
+  isCallerCancel?: boolean; // Action flags
 }
 
+// RTC / SFU signaling (client only specifies recipient if needed)
 export interface RtcOfferRequest {
   chatId: string;
   offer: RTCSessionDescriptionInit;
-  fromMemberId: string; // Who is sending the offer
-  toMemberId?: string; // Optional (group vs direct)
 }
 
 export interface RtcAnswerRequest {
   chatId: string;
   answer: RTCSessionDescriptionInit;
-  fromMemberId: string; // Who is sending the answer
-  toMemberId: string; // Who this answer is for
 }
 
 export interface IceCandidateRequest {
   chatId: string;
   candidate: RTCIceCandidateInit;
-  fromMemberId: string; // Who is sending this candidate
-  toMemberId: string; // Who this candidate is for
 }
 
-// Responses
+// -------------------- Responses --------------------
+
+// Call control responses (server injects fromMemberId for context)
 export interface IncomingCallResponse {
   chatId: string;
   isVideoCall: boolean;
   isGroupCall: boolean;
-  fromMemberId: string; // Caller
+  fromMemberId: string; // Caller (added by server)
   timestamp: number;
-  toMemberId?: string; // For directed calls
 }
 
 export interface CallActionResponse {
@@ -50,23 +46,24 @@ export interface CallActionResponse {
   isCallerCancel?: boolean;
 }
 
+// RTC / SFU signaling responses (always include fromMemberId)
 export interface RtcOfferResponse {
   chatId: string;
   offer: RTCSessionDescriptionInit;
-  fromMemberId: string; // Sender of offer
-  toMemberId?: string; // Undefined means broadcast
+  fromMemberId: string;
+  toMemberId?: string; // Undefined means broadcast (SFU)
 }
 
 export interface RtcAnswerResponse {
   chatId: string;
   answer: RTCSessionDescriptionInit;
-  fromMemberId: string; // Sender of answer
-  toMemberId: string; // Always specific
+  fromMemberId: string;
+  toMemberId: string; // Always directed
 }
 
 export interface IceCandidateResponse {
   chatId: string;
   candidate: RTCIceCandidateInit;
-  fromMemberId: string; // Sender of candidate
-  toMemberId: string; // Always specific
+  fromMemberId: string;
+  toMemberId?: string; // Empty = broadcast to all in chat
 }

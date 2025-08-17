@@ -7,8 +7,10 @@ import {
   IncomingCallResponse,
   CallActionResponse,
   RtcAnswerResponse,
+  IceCandidateRequest,
   IceCandidateResponse,
   RtcOfferResponse,
+  RtcAnswerRequest,
 } from "@/types/callPayload";
 
 /**
@@ -146,7 +148,7 @@ export const callWebSocketService = {
   /**
    * Send WebRTC answer
    */
-  sendAnswer(payload: RtcAnswerResponse) {
+  sendAnswer(payload: RtcAnswerRequest) {
     webSocketService.emit(CallEvent.ANSWER_SDP, payload);
   },
 
@@ -167,7 +169,7 @@ export const callWebSocketService = {
   /**
    * Send ICE candidate
    */
-  sendIceCandidate(payload: IceCandidateResponse) {
+  sendIceCandidate(payload: IceCandidateRequest) {
     webSocketService.emit(CallEvent.ICE_CANDIDATE, payload);
   },
 
@@ -218,7 +220,7 @@ export const callWebSocketService = {
   },
 
   // SFU ICE Candidate methods
-  sendSfuIceCandidate(payload: IceCandidateResponse) {
+  sendSfuIceCandidate(payload: IceCandidateRequest) {
     webSocketService.emit(CallEvent.SFU_ICE_CANDIDATE, payload);
   },
 

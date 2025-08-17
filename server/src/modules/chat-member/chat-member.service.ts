@@ -183,10 +183,7 @@ export class ChatMemberService {
     }
   }
 
-  async getChatMemberIdFromUserId(
-    chatId: string,
-    userId: string,
-  ): Promise<string> {
+  async getChatMemberId(chatId: string, userId: string): Promise<string> {
     try {
       const member = await this.memberRepo.findOne({
         where: { chatId, userId },

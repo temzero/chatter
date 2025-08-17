@@ -36,7 +36,7 @@ export class CallGateway {
     @MessageBody() payload: InitiateCallRequest,
   ) {
     const userId = client.data.userId;
-    const fromMemberId = await this.chatMemberService.getChatMemberIdFromUserId(
+    const fromMemberId = await this.chatMemberService.getChatMemberId(
       payload.chatId,
       userId,
     );
@@ -47,7 +47,6 @@ export class CallGateway {
       isGroupCall: payload.isGroupCall,
       fromMemberId,
       timestamp: Date.now(),
-      ...(payload.toMemberId ? { toMemberId: payload.toMemberId } : {}),
     };
 
     await this.websocketService.emitToChatMembers(
@@ -65,7 +64,7 @@ export class CallGateway {
     @MessageBody() payload: CallActionRequest,
   ) {
     const userId = client.data.userId;
-    const fromMemberId = await this.chatMemberService.getChatMemberIdFromUserId(
+    const fromMemberId = await this.chatMemberService.getChatMemberId(
       payload.chatId,
       userId,
     );
@@ -74,7 +73,7 @@ export class CallGateway {
       chatId: payload.chatId,
       fromMemberId,
       timestamp: Date.now(),
-      ...(payload.isCallerCancel ? { isCallerCancel: true } : {}),
+      isCallerCancel: payload.isCallerCancel,
     };
 
     await this.websocketService.emitToChatMembers(
@@ -91,7 +90,7 @@ export class CallGateway {
     @MessageBody() payload: CallActionRequest,
   ) {
     const userId = client.data.userId;
-    const fromMemberId = await this.chatMemberService.getChatMemberIdFromUserId(
+    const fromMemberId = await this.chatMemberService.getChatMemberId(
       payload.chatId,
       userId,
     );
@@ -100,7 +99,7 @@ export class CallGateway {
       chatId: payload.chatId,
       fromMemberId,
       timestamp: Date.now(),
-      ...(payload.isCallerCancel ? { isCallerCancel: true } : {}),
+      isCallerCancel: payload.isCallerCancel,
     };
 
     await this.websocketService.emitToChatMembers(
@@ -118,7 +117,7 @@ export class CallGateway {
     @MessageBody() payload: CallActionRequest,
   ) {
     const userId = client.data.userId;
-    const fromMemberId = await this.chatMemberService.getChatMemberIdFromUserId(
+    const fromMemberId = await this.chatMemberService.getChatMemberId(
       payload.chatId,
       userId,
     );
@@ -133,18 +132,18 @@ export class CallGateway {
       payload.chatId,
       CallEvent.END_CALL,
       response,
-      { senderId: userId, excludeSender: true },
-    );
+      { senderId: userId },
+    ); // Include sender for full cleanup
   }
 
-  // 5️⃣ WebRTC Signaling: Offer
+  // 5️⃣ WebRTC Signaling: Offer (SFU-compatible)
   @SubscribeMessage(CallEvent.OFFER_SDP)
   async handleRtcOffer(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: RtcOfferRequest,
   ) {
     const userId = client.data.userId;
-    const fromMemberId = await this.chatMemberService.getChatMemberIdFromUserId(
+    const fromMemberId = await this.chatMemberService.getChatMemberId(
       payload.chatId,
       userId,
     );
@@ -153,7 +152,7 @@ export class CallGateway {
       chatId: payload.chatId,
       offer: payload.offer,
       fromMemberId,
-      ...(payload.toMemberId ? { toMemberId: payload.toMemberId } : {}),
+      // SFU will handle routing - no toMemberId needed
     };
 
     await this.websocketService.emitToChatMembers(
@@ -164,41 +163,42 @@ export class CallGateway {
     );
   }
 
-  // 6️⃣ WebRTC Signaling: Answer
+  // 6️⃣ WebRTC Signaling: Answer (Directed)
   @SubscribeMessage(CallEvent.ANSWER_SDP)
   async handleRtcAnswer(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: RtcAnswerRequest,
   ) {
     const userId = client.data.userId;
-    const fromMemberId = await this.chatMemberService.getChatMemberIdFromUserId(
+    const fromMemberId = await this.chatMemberService.getChatMemberId(
       payload.chatId,
       userId,
     );
 
+    // In SFU mode, answers should go to the SFU server only
     const response: RtcAnswerResponse = {
       chatId: payload.chatId,
       answer: payload.answer,
       fromMemberId,
-      toMemberId: payload.toMemberId,
+      toMemberId: 'sfu', // Special ID for SFU server
     };
 
     await this.websocketService.emitToChatMembers(
       payload.chatId,
       CallEvent.ANSWER_SDP,
       response,
-      { senderId: userId, excludeSender: true },
+      // { senderId: userId, targetId: 'sfu' }, // Direct to SFU
     );
   }
 
-  // 7️⃣ WebRTC Signaling: ICE Candidate
+  // 7️⃣ WebRTC Signaling: ICE Candidate (SFU-compatible)
   @SubscribeMessage(CallEvent.ICE_CANDIDATE)
   async handleRtcIceCandidate(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: IceCandidateRequest,
   ) {
     const userId = client.data.userId;
-    const fromMemberId = await this.chatMemberService.getChatMemberIdFromUserId(
+    const fromMemberId = await this.chatMemberService.getChatMemberId(
       payload.chatId,
       userId,
     );
@@ -207,14 +207,19 @@ export class CallGateway {
       chatId: payload.chatId,
       candidate: payload.candidate,
       fromMemberId,
-      toMemberId: payload.toMemberId,
+      // No toMemberId - SFU will handle broadcasting
     };
 
     await this.websocketService.emitToChatMembers(
       payload.chatId,
       CallEvent.ICE_CANDIDATE,
       response,
-      { senderId: userId, excludeSender: true },
+      {
+        senderId: userId,
+        // SFU mode: broadcast to all except sender
+        excludeSender: true,
+        // For P2P: add targetId: payload.toMemberId
+      },
     );
   }
 }

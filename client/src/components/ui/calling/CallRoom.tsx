@@ -7,7 +7,7 @@ import { callWebSocketService } from "@/lib/websocket/services/call.websocket.se
 import { CallHeader } from "./components/CallHeader";
 import { Timer } from "../Timer";
 
-export const Calling = ({ chat }: { chat: ChatResponse }) => {
+export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
   const {
     isVideoCall,
     localStream,

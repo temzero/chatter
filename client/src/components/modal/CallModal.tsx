@@ -5,12 +5,13 @@ import { useCallStore } from "@/stores/callStore";
 import { CallStatus } from "@/types/enums/modalType";
 
 // Import UI components
-import { Calling } from "../ui/calling/Calling";
+import { CallRoom } from "../ui/calling/CallRoom";
 import { IncomingCall } from "../ui/calling/IncomingCall";
 import { SummaryCall } from "../ui/calling/SummaryCall";
 import { OutgoingCall } from "../ui/calling/OutgoingCall";
 import { useChatStore } from "@/stores/chatStore";
 import clsx from "clsx";
+import { ConnectingCall } from "../ui/calling/ConnectingCall";
 
 const CallModal: React.FC = () => {
   const { chatId, callStatus } = useCallStore();
@@ -33,8 +34,10 @@ const CallModal: React.FC = () => {
         return <OutgoingCall chat={chat} />;
       case CallStatus.INCOMING:
         return <IncomingCall chat={chat} />;
-      case CallStatus.CALLING:
-        return <Calling chat={chat} />;
+      case CallStatus.CONNECTING:
+        return <ConnectingCall chat={chat} />;
+      case CallStatus.CONNECTED:
+        return <CallRoom chat={chat} />;
       case CallStatus.ENDED:
       case CallStatus.CANCELED:
       case CallStatus.REJECTED:
@@ -45,7 +48,7 @@ const CallModal: React.FC = () => {
   };
 
   const getSizeClasses = () => {
-    return callStatus === CallStatus.CALLING
+    return callStatus === CallStatus.CONNECTED
       ? "w-full h-full custom-border"
       : "w-full max-w-[420px] p-6";
   };

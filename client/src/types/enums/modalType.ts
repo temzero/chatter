@@ -20,8 +20,8 @@ export enum ModalType {
 }
 
 export enum CallStatus {
-  CALLING = "calling",
   CONNECTING = "connecting",
+  CONNECTED = "connected",
   INCOMING = "incoming",
   OUTGOING = "outgoing",
   CANCELED = "canceled",

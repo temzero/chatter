@@ -6,9 +6,10 @@ import { useModalStore } from "@/stores/modalStore";
 import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
 import { toast } from "react-toastify";
 import { handleError } from "@/utils/handleError";
+import { getMyChatMemberId } from "./chatMemberStore";
 interface CallParticipant {
   id: string;
-  name: string;
+  name?: string;
   avatar?: string;
 }
 
@@ -32,8 +33,6 @@ interface CallState {
   /* --------------------------------------------------
    * 2️⃣ WebRTC Signaling Data
    * -------------------------------------------------- */
-  remoteOffer: RTCSessionDescriptionInit | null; // Remote peer's SDP offer
-  remoteAnswer: RTCSessionDescriptionInit | null; // Remote peer's SDP answer
   iceCandidates: RTCIceCandidateInit[]; // Collected ICE candidates from remote peers
 
   /* --------------------------------------------------
@@ -89,25 +88,23 @@ interface CallState {
   cleanupStreams: () => void; // Stop all streams and cleanup
   createPeerConnection: (memberId: string) => RTCPeerConnection; // Create new WebRTC connection
   handleRemoteStream: (participantId: string, event: RTCTrackEvent) => void; // Handle track added by remote peer
+  createSfuConnection: () => Promise<RTCSessionDescriptionInit>;
+  disconnectFromSfu: () => void;
 
   /* --------------------------------------------------
    * 7️⃣ Socket Event Handlers (Signaling)
    * -------------------------------------------------- */
   sendOffer: (targetUserId: string) => Promise<void>;
   setIncomingCall: (data: IncomingCallData) => void;
-  setCallStatus: (status: CallStatus) => void;
-  setRemoteOffer: (offer: RTCSessionDescriptionInit) => void;
-  setRemoteAnswer: (answer: RTCSessionDescriptionInit) => void;
+
   addIceCandidate: (candidate: RTCIceCandidateInit) => void;
 
   /* --------------------------------------------------
    * 8️⃣ Utility
    * -------------------------------------------------- */
+  setCallStatus: (status: CallStatus) => void; // Set call status
   getCallDuration: () => number; // Returns call length in seconds
   closeCallModal: () => void; // Hide UI modal for call
-
-  createSfuConnection: () => Promise<RTCSessionDescriptionInit>;
-  disconnectFromSfu: () => void;
 }
 
 export const useCallStore = create<CallState>()(
@@ -120,15 +117,17 @@ export const useCallStore = create<CallState>()(
     callEndTime: null,
     participants: [],
     incomingCall: null,
-    remoteOffer: null,
-    remoteAnswer: null,
     iceCandidates: [],
+    peerConnections: {},
+    remoteStreams: {},
+    participantStreams: {},
     localStream: null,
-    remoteStream: null,
-    peerConnection: null,
+    activeSpeakers: [],
     isMuted: false,
     isLocalVideoDisabled: false,
     callError: null,
+    sfuConnection: null,
+    sfuStreams: {},
 
     // 📞 Start Call with media setup
     startCall: async (chatId, isVideo, isGroup) => {
@@ -181,6 +180,16 @@ export const useCallStore = create<CallState>()(
 
     acceptCall: async () => {
       const { isVideoCall, localStream, chatId, incomingCall } = get();
+      const myMemberId = getMyChatMemberId(chatId!);
+
+      if (!myMemberId) {
+        toast.error("Could not determine your member ID for this chat.");
+        set({
+          callError: "device_unavailable",
+          callStatus: CallStatus.ENDED,
+        });
+        return;
+      }
 
       try {
         // 1. Clean up any existing stream first
@@ -225,7 +234,7 @@ export const useCallStore = create<CallState>()(
         if (incomingCall) {
           callWebSocketService.acceptCall({
             chatId: chatId!,
-            // Include any other required payload fields
+            isCallerCancel: false,
           });
         }
 
@@ -320,8 +329,6 @@ export const useCallStore = create<CallState>()(
         callEndTime: new Date(),
         participants: [],
         incomingCall: null,
-        remoteOffer: null,
-        remoteAnswer: null,
         iceCandidates: [],
         localStream: null, // Clear the local stream reference
         remoteStreams: {},
@@ -329,6 +336,10 @@ export const useCallStore = create<CallState>()(
         isMuted: false,
         isLocalVideoDisabled: false,
       });
+    },
+
+    setCallStatus: (status: CallStatus) => {
+      set({ callStatus: status });
     },
 
     getCallDuration: (): number => {
@@ -351,20 +362,6 @@ export const useCallStore = create<CallState>()(
       }
       set({ isMuted: !isMuted });
     },
-
-    // 📹 Toggle video
-    // toggleVideo: async () => {
-    //   const { localStream, isLocalVideoDisabled } = get();
-    //   if (localStream) {
-    //     localStream.getVideoTracks().forEach((track) => {
-    //       track.enabled = isLocalVideoDisabled;
-    //     });
-    //     set({ isLocalVideoDisabled: !isLocalVideoDisabled });
-    //   } else if (!isLocalVideoDisabled) {
-    //     // If enabling video and no stream exists
-    //     await get().setupLocalStream();
-    //   }
-    // },
 
     // 🎥 Setup local media stream
     setupLocalStream: async () => {
@@ -411,38 +408,50 @@ export const useCallStore = create<CallState>()(
 
     // 🤝 Create WebRTC peer connection
     createPeerConnection: (memberId: string) => {
+      const { chatId, localStream } = get();
+
       const pc = new RTCPeerConnection({
-        iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+        iceServers: [
+          { urls: "stun:stun.l.google.com:19302" },
+          // Add TURN servers here if needed
+        ],
       });
 
+      // ICE Candidate Handling
       pc.onicecandidate = (event) => {
         if (event.candidate) {
           callWebSocketService.sendIceCandidate({
-            chatId: get().chatId || "",
+            chatId: chatId || "",
             candidate: event.candidate.toJSON(),
-            senderMemberId: memberId,
-            targetMemberId: ""
           });
         }
       };
 
+      // Track Handling
       pc.ontrack = (event) => {
         get().handleRemoteStream(memberId, event);
       };
 
-      // Attach local stream tracks to this new connection
-      const { localStream } = get();
+      // Connection Monitoring
+      pc.oniceconnectionstatechange = () => {
+        if (pc.iceConnectionState === "failed") {
+          console.error("ICE failed - attempting restart");
+          pc.restartIce();
+        }
+      };
+
+      // Add local media
       if (localStream) {
         localStream.getTracks().forEach((track) => {
-          pc.addTrack(track, localStream);
+          if (!pc.getSenders().some((s) => s.track === track)) {
+            pc.addTrack(track, localStream);
+          }
         });
       }
 
+      // Store connection
       set((state) => ({
-        peerConnections: {
-          ...state.peerConnections,
-          [memberId]: pc,
-        },
+        peerConnections: { ...state.peerConnections, [memberId]: pc },
       }));
 
       return pc;
@@ -451,16 +460,75 @@ export const useCallStore = create<CallState>()(
     // 📺 Handle incoming remote stream
     handleRemoteStream: (participantId: string, event: RTCTrackEvent) => {
       set((state) => {
+        // 1. Validate incoming track
+        if (!event.track) {
+          console.error("Received track event without track!", event);
+          return state;
+        }
+
+        // 2. Get or create stream
         let stream = state.remoteStreams[participantId];
         if (!stream) {
           stream = new MediaStream();
+          console.log(`Created new stream for ${participantId}`);
         }
+
+        // 3. Check for duplicate tracks
+        const existingTrack = stream
+          .getTracks()
+          .find((t) => t.id === event.track.id);
+        if (existingTrack) {
+          console.warn(
+            `Duplicate ${event.track.kind} track from ${participantId}`
+          );
+          return state;
+        }
+
+        // 4. Add track with lifecycle handlers
         stream.addTrack(event.track);
+        console.log(
+          `Added ${event.track.kind} track to ${participantId}'s stream`
+        );
+
+        // 5. Track state monitoring
+        event.track.onmute = () => {
+          console.log(`Track ${event.track.id} muted`);
+          // Update UI if needed
+        };
+
+        event.track.onunmute = () => {
+          console.log(`Track ${event.track.id} active`);
+          // Update UI if needed
+        };
+
+        event.track.onended = () => {
+          console.log(`Track ${event.track.id} ended`);
+          set((s) => {
+            const newStream = new MediaStream(
+              s.remoteStreams[participantId]
+                ?.getTracks()
+                .filter((t) => t.id !== event.track.id) || []
+            );
+            return {
+              remoteStreams: {
+                ...s.remoteStreams,
+                [participantId]: newStream,
+              },
+            };
+          });
+        };
+
+        // 6. Return updated state
         return {
+          ...state,
           remoteStreams: {
             ...state.remoteStreams,
             [participantId]: stream,
           },
+          // Update participants list if new
+          participants: state.participants.some((p) => p.id === participantId)
+            ? state.participants
+            : [...state.participants, { id: participantId }],
         };
       });
     },
@@ -548,45 +616,54 @@ export const useCallStore = create<CallState>()(
 
     setStatus: (status) => set({ callStatus: status }),
 
-    sendOffer: async (targetMemberId) => {
-      const { chatId, localStream, peerConnections } = get();
+    sendOffer: async (toMemberId) => {
+      // 1. Verify member ID exists
+      const myMemberId = getMyChatMemberId(get().chatId!);
+      if (!myMemberId)
+        throw new Error("Cannot send offer - no member ID found");
 
-      if (!chatId) {
+      // 2. Get current state
+      const { chatId, localStream, peerConnections } = get();
+      console.log("Creating call offer..."); // First console.log to track flow
+
+      if (!chatId)
         throw new Error("Cannot send offer - no active chat session");
-      }
 
       try {
-        // Create or reuse peer connection
+        // 3. Create or reuse peer connection
         const pc =
-          peerConnections[targetMemberId] ||
-          get().createPeerConnection(targetMemberId);
+          peerConnections[toMemberId] || get().createPeerConnection(toMemberId);
+        console.log("Peer connection created"); // Second console.log
 
-        // Add local streams if they exist
+        // 4. Add local streams if they exist
         if (localStream) {
           localStream.getTracks().forEach((track) => {
             if (!pc.getSenders().some((s) => s.track === track)) {
               pc.addTrack(track, localStream);
             }
           });
+          console.log("Local tracks added to peer connection"); // Third console.log
         }
 
-        // Create and send offer
+        // 5. Create and send offer
         const offer = await pc.createOffer({
           offerToReceiveAudio: true,
           offerToReceiveVideo: true,
         });
+        console.log("Offer created"); // Fourth console.log
 
         await pc.setLocalDescription(offer);
+        console.log("Local description set"); // Fifth console.log
 
         callWebSocketService.sendOffer({
           chatId,
           offer,
-          targetMemberId,
         });
+        console.log("Offer sent successfully"); // Final toast
 
         set({ callStatus: CallStatus.CONNECTING });
       } catch (error) {
-        console.error("Failed to create/send offer:", error);
+        handleError(error, "Failed to create/send offer");
         get().endCall();
         throw error;
       }
@@ -596,22 +673,23 @@ export const useCallStore = create<CallState>()(
       set({ incomingCall: data, callStatus: CallStatus.INCOMING });
       useModalStore.getState().openModal(ModalType.CALL);
     },
-    setCallStatus: (status) => set({ callStatus: status }),
-    setRemoteOffer: (offer) => set({ remoteOffer: offer }),
-    setRemoteAnswer: (answer) => set({ remoteAnswer: answer }),
 
     addIceCandidate: (
       participantId: string,
       candidate: RTCIceCandidateInit
     ) => {
-      const { peerConnections } = get();
-      const pc = peerConnections[participantId];
-      if (pc) {
-        pc.addIceCandidate(new RTCIceCandidate(candidate));
+      const { peerConnections, sfuConnection } = get();
+
+      // Case 1: P2P call (participantId is the other user)
+      if (peerConnections[participantId]) {
+        peerConnections[participantId].addIceCandidate(
+          new RTCIceCandidate(candidate)
+        );
       }
-      set((state) => ({
-        iceCandidates: [...state.iceCandidates, candidate],
-      }));
+      // Case 2: SFU call (participantId === "sfu")
+      else if (participantId === "sfu" && sfuConnection) {
+        sfuConnection.addIceCandidate(new RTCIceCandidate(candidate));
+      }
     },
 
     addParticipant: (participant: CallParticipant) => {
@@ -639,7 +717,6 @@ export const useCallStore = create<CallState>()(
       }));
     },
 
-    // Implementation in your store
     createSfuConnection: async () => {
       const { localStream, chatId } = get();
 
@@ -647,74 +724,114 @@ export const useCallStore = create<CallState>()(
         throw new Error("No chatId available for SFU connection");
       }
 
-      // 1. Create peer connection specifically for SFU
+      // 1. Create peer connection with proper error handling
       const pc = new RTCPeerConnection({
         iceServers: [
           { urls: "stun:stun.l.google.com:19302" },
-          // Add your TURN servers here if needed
+          // Add TURN servers here if needed:
+          // { urls: "turn:your-turn-server.com", username: "user", credential: "pass" }
         ],
-        bundlePolicy: "max-bundle", // Better for SFU
-        rtcpMuxPolicy: "require", // Better for SFU
+        bundlePolicy: "max-bundle",
+        rtcpMuxPolicy: "require",
       });
 
-      // 2. Add local stream tracks
-      if (localStream) {
-        localStream.getTracks().forEach((track) => {
-          pc.addTrack(track, localStream);
-        });
+      // 2. Add local stream tracks with cleanup guard
+      try {
+        if (localStream) {
+          localStream.getTracks().forEach((track) => {
+            // Prevent duplicate track addition
+            if (!pc.getSenders().some((s) => s.track === track)) {
+              pc.addTrack(track, localStream);
+            }
+          });
+        }
+      } catch (error) {
+        console.error("Error adding tracks:", error);
+        pc.close();
+        throw error;
       }
 
-      // 3. ICE candidate handling
+      // 3. ICE candidate handling with null check
       pc.onicecandidate = (event) => {
         if (event.candidate) {
-          callWebSocketService.sendSfuIceCandidate({
-            chatId,
-            candidate: event.candidate.toJSON(),
-            senderMemberId: "current-user-id", // Replace with actual user ID
-          });
+          try {
+            callWebSocketService.sendIceCandidate({
+              chatId,
+              candidate: event.candidate.toJSON(),
+            });
+          } catch (error) {
+            console.error("Error sending ICE candidate:", error);
+          }
         }
       };
 
-      // 4. Handle incoming tracks from SFU
+      // 4. Handle incoming tracks with stream management
       pc.ontrack = (event) => {
+        if (!event.streams || event.streams.length === 0) return;
+
         const kind = event.track.kind as "audio" | "video";
         set((state) => {
           const sfuStreams = { ...state.sfuStreams };
+
+          // Create stream if doesn't exist
           if (!sfuStreams[kind]) {
             sfuStreams[kind] = new MediaStream();
           }
-          sfuStreams[kind]!.addTrack(event.track);
+
+          // Add track if not already present
+          if (
+            !sfuStreams[kind]!.getTracks().some((t) => t.id === event.track.id)
+          ) {
+            sfuStreams[kind]!.addTrack(event.track);
+          }
+
           return { sfuStreams };
         });
       };
 
-      // 5. Connection state monitoring
+      // 5. Enhanced connection state monitoring
       pc.onconnectionstatechange = () => {
-        if (pc.connectionState === "connected") {
-          set({ callStatus: CallStatus.CALLING });
-        } else if (pc.connectionState === "failed") {
-          get().disconnectFromSfu();
+        const connectionState = pc.connectionState;
+        console.log("SFU connection state:", connectionState);
+
+        switch (connectionState) {
+          case "connected":
+            set({ callStatus: CallStatus.CONNECTED });
+            break;
+          case "disconnected":
+          case "failed":
+            get().disconnectFromSfu();
+            break;
+          case "closed":
+            set({ sfuConnection: null });
+            break;
         }
       };
 
-      // 6. Create and return offer
-      const offer = await pc.createOffer({
-        offerToReceiveAudio: true,
-        offerToReceiveVideo: true,
-      });
+      // 6. Offer creation with proper error handling
+      try {
+        const offer = await pc.createOffer({
+          offerToReceiveAudio: true,
+          offerToReceiveVideo: true,
+        });
 
-      await pc.setLocalDescription(offer);
+        await pc.setLocalDescription(offer);
 
-      // Store the SFU connection
-      set((state) => ({
-        sfuConnection: pc,
-        peerConnections: {
-          ...state.peerConnections,
-          sfu: pc, // Special key for SFU connection
-        },
-      }));
+        // Store connection with cleanup reference
+        set((state) => ({
+          sfuConnection: pc,
+          peerConnections: {
+            ...state.peerConnections,
+            sfu: pc,
+          },
+        }));
 
-      return offer;
+        return offer;
+      } catch (error) {
+        console.error("Error creating offer:", error);
+        pc.close();
+        throw error;
+      }
     },
 
     disconnectFromSfu: () => {
@@ -725,7 +842,7 @@ export const useCallStore = create<CallState>()(
       }
 
       // Clean up SFU streams
-      Object.values(sfuStreams || {}).forEach((stream) => {
+      Object.values(sfuStreams ?? {}).forEach((stream) => {
         stream.getTracks().forEach((track) => track.stop());
       });
 
@@ -750,8 +867,6 @@ export const useCallStore = create<CallState>()(
         callEndTime: null,
         participants: [],
         incomingCall: null,
-        remoteOffer: null,
-        remoteAnswer: null,
         iceCandidates: [],
         localStream: null,
         remoteStreams: {},

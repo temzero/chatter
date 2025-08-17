@@ -11,6 +11,7 @@ import {
   IceCandidateResponse,
 } from "@/types/callPayload";
 import { getMyChatMemberId } from "@/stores/chatMemberStore";
+import { handleError } from "@/utils/handleError";
 
 export function useCallSocketListeners() {
   useEffect(() => {
@@ -43,7 +44,8 @@ export function useCallSocketListeners() {
       const store = useCallStore.getState();
       store.setCallStatus(CallStatus.CONNECTING);
 
-      if (store.callStatus === CallStatus.OUTGOING) {
+      const currentStatus = store.callStatus;
+      if (currentStatus === CallStatus.OUTGOING) {
         await store.sendOffer(data.fromMemberId);
       }
     };
@@ -67,14 +69,79 @@ export function useCallSocketListeners() {
       toast.info("Call ended");
     };
 
-    const handleRtcOffer = (data: RtcOfferResponse) => {
-      console.log("RTC offer received", data.offer);
-      useCallStore.getState().setRemoteOffer(data.offer);
+    // In useCallSocketListeners.ts - Modified handlers
+    const handleOffer = async ({
+      chatId,
+      fromMemberId,
+      offer,
+    }: RtcOfferResponse) => {
+      const store = useCallStore.getState();
+
+      try {
+        if (!store.isGroupCall) {
+          // P2P Call
+          const pc =
+            store.peerConnections[fromMemberId] ||
+            store.createPeerConnection(fromMemberId);
+
+          if (pc.signalingState === "closed")
+            throw new Error("PeerConnection closed");
+
+          await pc.setRemoteDescription(new RTCSessionDescription(offer));
+          const answer = await pc.createAnswer({
+            offerToReceiveAudio: true,
+            offerToReceiveVideo: store.isVideoCall,
+          });
+
+          await pc.setLocalDescription(answer);
+          callWebSocketService.sendAnswer({
+            chatId,
+            answer,
+          });
+        } else {
+          // SFU Call
+          if (!store.sfuConnection) {
+            store.sfuConnection = new RTCPeerConnection({
+              iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+            });
+            store.sfuConnection.onicecandidate = (e) =>
+              e.candidate &&
+              callWebSocketService.sendIceCandidate({
+                chatId,
+                candidate: e.candidate.toJSON(),
+              });
+          }
+
+          await store.sfuConnection.setRemoteDescription(offer);
+        }
+
+        store.setCallStatus(CallStatus.CONNECTING);
+      } catch (err) {
+        handleError(err, "Call offer handling failed");
+        store.endCall();
+      }
     };
 
-    const handleRtcAnswer = (data: RtcAnswerResponse) => {
-      console.log("RTC answer received", data.answer);
-      useCallStore.getState().setRemoteAnswer(data.answer);
+    const handleAnswer = async (data: RtcAnswerResponse) => {
+      const store = useCallStore.getState();
+      try {
+        if (store.isGroupCall) {
+          await store.sfuConnection?.setRemoteDescription(
+            new RTCSessionDescription(data.answer)
+          );
+        } else {
+          const pc = store.peerConnections[data.fromMemberId];
+          if (pc) {
+            await pc.setRemoteDescription(
+              new RTCSessionDescription(data.answer)
+            );
+          }
+        }
+        store.setCallStatus(CallStatus.CONNECTED);
+      } catch (error) {
+        console.error("Answer handling failed:", error);
+        store.endCall();
+      }
     };
 
     const handleIceCandidate = (data: IceCandidateResponse) => {
@@ -87,8 +154,8 @@ export function useCallSocketListeners() {
     callWebSocketService.onCallAccepted(handleCallAccepted);
     callWebSocketService.onCallRejected(handleCallRejected);
     callWebSocketService.onCallEnded(handleCallEnded);
-    callWebSocketService.onRtcOffer(handleRtcOffer);
-    callWebSocketService.onRtcAnswer(handleRtcAnswer);
+    callWebSocketService.onOffer(handleOffer);
+    callWebSocketService.onAnswer(handleAnswer);
     callWebSocketService.onIceCandidate(handleIceCandidate);
 
     return () => {
