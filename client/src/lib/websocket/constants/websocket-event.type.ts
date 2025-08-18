@@ -36,6 +36,7 @@ export const enum CallEvent {
   // Call lifecycle events
   INITIATE_CALL = "call:initiate", // or "call:initiated"
   INCOMING_CALL = "call:incoming",
+  UPDATE_CALL = "call:update",
   ACCEPT_CALL = "call:accept", // or "call:accepted"
   REJECT_CALL = "call:reject", // or "call:rejected"
   CANCEL_CALL = "call:cancel", // or "call:rejected"

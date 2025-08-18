@@ -4,7 +4,7 @@ import { CallHeader } from "./components/CallHeader";
 import { formatDuration } from "@/utils/formatDuration";
 import { useCallStore } from "@/stores/callStore";
 import { CallStatus } from "@/types/enums/modalType";
-import { useEffect } from "react"; // Import useEffect
+import { useEffect } from "react";
 
 export const SummaryCall = ({
   chat,
@@ -16,7 +16,7 @@ export const SummaryCall = ({
   const callStatus = useCallStore((state) => state.callStatus);
   const closeCallModal = useCallStore((state) => state.closeCallModal);
 
-  // Add this useEffect to close modal when call is canceled
+  // Auto-close when call is canceled
   useEffect(() => {
     if (callStatus === CallStatus.CANCELED) {
       closeCallModal();
@@ -31,6 +31,8 @@ export const SummaryCall = ({
         return "Call rejected";
       case CallStatus.ENDED:
         return duration > 0 ? formatDuration(duration) : "Call ended";
+      case CallStatus.ERROR:
+        return "Something went wrong!";
       default:
         return null;
     }
@@ -41,7 +43,11 @@ export const SummaryCall = ({
       <div className="flex flex-col items-center z-20">
         <CallHeader chat={chat} />
         {getStatusMessage() && (
-          <div className="mt-2 text-lg tabular-nums text-gray-400">
+          <div
+            className={`mt-2 text-lg tabular-nums text-center ${
+              callStatus === CallStatus.ERROR ? "text-red-500" : "text-gray-400"
+            }`}
+          >
             {getStatusMessage()}
           </div>
         )}
@@ -52,10 +58,12 @@ export const SummaryCall = ({
           className={`material-symbols-outlined text-6xl ${
             callStatus === CallStatus.CANCELED
               ? "text-gray-400"
-              : "text-red-500"
+              : callStatus === CallStatus.ERROR
+              ? "text-red-500 animate-pulse"
+              : "text-red-400"
           }`}
         >
-          call_end
+          {callStatus === CallStatus.ERROR ? "e911_avatar" : "call_end"}
         </span>
       </div>
 

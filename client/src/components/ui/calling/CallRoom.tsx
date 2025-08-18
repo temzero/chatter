@@ -1,4 +1,3 @@
-// Calling.tsx
 import { ChatResponse } from "@/types/responses/chat.response";
 import { Button } from "../Button";
 import { VideoStream } from "./components/VideoStream";
@@ -6,6 +5,8 @@ import { useCallStore } from "@/stores/callStore";
 import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
 import { CallHeader } from "./components/CallHeader";
 import { Timer } from "../Timer";
+import { VoiceVisualizerBar } from "../VoiceVisualizerBar";
+import { VoiceVisualizerButton } from "../VoiceVisualizerBtn";
 
 export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
   const {
@@ -14,16 +15,14 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
     remoteStreams,
     callStartTime,
     isMuted,
-    isLocalVideoDisabled,
     toggleMute,
-    toggleVideo,
+    switchType,
   } = useCallStore();
 
   const endCall = useCallStore((state) => state.endCall);
   const closeCallModal = useCallStore((state) => state.closeCallModal);
 
   if (!chat) return null;
-  console.log("Calling component rendered with chat:", chat);
 
   const handleEndCall = () => {
     callWebSocketService.endCall({ chatId: chat.id });
@@ -37,7 +36,7 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
 
   const handleToggleVideo = async () => {
     try {
-      await toggleVideo();
+      await switchType();
     } catch (error) {
       console.error("Failed to toggle video:", error);
     }
@@ -48,23 +47,47 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
       {isVideoCall ? (
         <div className="relative w-full h-full bg-black">
           {/* Remote video streams */}
-          <div className="w-full h-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+          <div
+            className={`w-full h-full grid gap-2 auto-rows-fr ${
+              Object.keys(remoteStreams).length === 1
+                ? "grid-cols-1"
+                : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
+            }`}
+          >
             {Object.entries(remoteStreams).map(([participantId, stream]) => (
-              <VideoStream
+              <div
                 key={participantId}
-                stream={stream}
-                className="w-full h-full object-cover"
-              />
+                className="relative w-full overflow-hidden"
+              >
+                {/* Aspect-ratio wrapper to control height cleanly */}
+                <VideoStream
+                  stream={stream}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+
+                {Object.keys(remoteStreams).length === 1 && (
+                  <VoiceVisualizerBar
+                    stream={stream}
+                    isMuted={false}
+                    width={200}
+                    height={40}
+                    className="w-full h-10 opacity-20 absolute bottom-16 left-0"
+                    barColor="white"
+                  />
+                )}
+              </div>
             ))}
           </div>
 
           {/* Local video overlay */}
           {localStream && (
-            <VideoStream
-              stream={localStream}
-              className="absolute bottom-4 right-4 w-52 h-52 rounded-md object-cover border-2 border-white"
-              muted
-            />
+            <div className="absolute bottom-4 right-4">
+              <VideoStream
+                stream={localStream}
+                className="w-52 h-52 rounded-md object-cover border-2 border-white"
+                muted
+              />
+            </div>
           )}
         </div>
       ) : (
@@ -77,45 +100,43 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
       {/* Top overlay with timer & name */}
       <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10">
         <p className="text-sm truncate max-w-[200px]">{chat.name}</p>
-
         <div className="flex items-center gap-2">
-          <Timer startTime={callStartTime} />
           {isVideoCall && (
-            <span className="material-symbols-outlined text-sm">videocam</span>
+            <span className="material-symbols-outlined">videocam</span>
           )}
+          <Timer startTime={callStartTime} />
         </div>
       </div>
 
       {/* Bottom controls */}
-      <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-6 z-10">
-        <Button
-          variant="ghost"
-          className={`rounded-full p-3 ${
-            isMuted
-              ? "bg-red-500/50 hover:bg-red-600/50"
-              : "bg-gray-700/50 hover:bg-gray-600/50"
-          }`}
-          icon={isMuted ? "mic_off" : "mic"}
-          onClick={handleToggleMic}
-        />
-        {isVideoCall && (
+      <div className="absolute bottom-4 left-0 right-0 z-10">
+        <div className="flex justify-center gap-6">
           <Button
             variant="ghost"
-            className={`rounded-full p-3 ${
-              isLocalVideoDisabled
-                ? "bg-red-500/50 hover:bg-red-600/50"
-                : "bg-gray-700/50 hover:bg-gray-600/50"
+            className={`w-14 h-14 ${
+              isVideoCall
+                ? "bg-gray-700/50  text-green-500"
+                : " bg-red-500/50 opacity-60"
             }`}
-            icon={isLocalVideoDisabled ? "videocam_off" : "videocam"}
+            icon={isVideoCall ? "videocam" : "videocam_off"}
+            isRoundedFull
             onClick={handleToggleVideo}
           />
-        )}
-        <Button
-          variant="danger"
-          className="rounded-full p-3"
-          onClick={handleEndCall}
-          icon="call_end"
-        />
+          <VoiceVisualizerButton
+            variant="ghost"
+            stream={localStream}
+            isMuted={isMuted}
+            onClick={handleToggleMic}
+            className="w-14 h-14 custom-border rounded-full"
+          />
+          <Button
+            variant="ghost"
+            className="hover:bg-red-500/50 w-14 h-14"
+            isRoundedFull
+            onClick={handleEndCall}
+            icon="call_end"
+          />
+        </div>
       </div>
     </div>
   );

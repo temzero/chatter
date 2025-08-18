@@ -9,6 +9,7 @@ import {
   RtcOfferResponse,
   RtcAnswerResponse,
   IceCandidateResponse,
+  updateCallPayload,
 } from "@/types/callPayload";
 import { getMyChatMemberId } from "@/stores/chatMemberStore";
 import { handleError } from "@/utils/handleError";
@@ -34,6 +35,34 @@ export function useCallSocketListeners() {
         );
 
       toast.info(`Incoming ${data.isVideoCall ? "video" : "voice"} call`);
+    };
+
+    const handleUpdateCall = (data: updateCallPayload) => {
+      const { chatId, isVideoCall, isGroupCall } = data;
+      const currentState = useCallStore.getState();
+
+      // Only update if it's for the current active call
+      if (currentState.chatId === chatId) {
+        useCallStore.setState({
+          isVideoCall,
+          isGroupCall,
+          // Update any other relevant state here
+        });
+
+        // If switching to video, we might need to setup local stream
+        if (isVideoCall && !currentState.isVideoCall) {
+          currentState.setupLocalStream().catch((error) => {
+            console.error("Failed to setup video stream:", error);
+          });
+        }
+
+        // If switching to audio, stop video tracks
+        if (!isVideoCall && currentState.isVideoCall) {
+          currentState.localStream
+            ?.getVideoTracks()
+            .forEach((track) => track.stop());
+        }
+      }
     };
 
     const handleCallAccepted = async (data: CallActionResponse) => {
@@ -151,6 +180,7 @@ export function useCallSocketListeners() {
 
     // Subscribe to call events
     callWebSocketService.onIncomingCall(handleIncomingCall);
+    callWebSocketService.onCallTypeUpdated(handleUpdateCall);
     callWebSocketService.onCallAccepted(handleCallAccepted);
     callWebSocketService.onCallRejected(handleCallRejected);
     callWebSocketService.onCallEnded(handleCallEnded);

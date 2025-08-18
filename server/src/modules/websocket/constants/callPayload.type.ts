@@ -7,6 +7,12 @@ export interface InitiateCallRequest {
   isGroupCall: boolean;
 }
 
+export interface updateCallPayload {
+  chatId: string;
+  isVideoCall: boolean;
+  isGroupCall: boolean;
+}
+
 export interface CallActionRequest {
   chatId: string;
   isCallerCancel?: boolean; // Action flags

@@ -49,7 +49,6 @@ interface CallState {
    * 4️⃣ Local User State
    * -------------------------------------------------- */
   isMuted: boolean; // Whether the microphone is muted
-  isLocalVideoDisabled: boolean; // Whether the camera is disabled
   callError: "permission_denied" | "device_unavailable" | null; // Error type if media devices fail
 
   sfuConnection: RTCPeerConnection | null;
@@ -161,7 +160,7 @@ export const useCallStore = create<CallState>()(
         useModalStore.getState().closeModal();
         console.error("Permission denied:", error);
         get().cleanupStreams();
-        set({ callError: "permission_denied" });
+        set({ callError: "permission_denied", callStatus: CallStatus.ERROR });
         toast.error(
           "Permission denied! Please allow camera and microphone access."
         );
@@ -180,16 +179,6 @@ export const useCallStore = create<CallState>()(
 
     acceptCall: async () => {
       const { isVideoCall, localStream, chatId, incomingCall } = get();
-      const myMemberId = getMyChatMemberId(chatId!);
-
-      if (!myMemberId) {
-        toast.error("Could not determine your member ID for this chat.");
-        set({
-          callError: "device_unavailable",
-          callStatus: CallStatus.ENDED,
-        });
-        return;
-      }
 
       try {
         // 1. Clean up any existing stream first
@@ -226,7 +215,6 @@ export const useCallStore = create<CallState>()(
         // 3. Set stream in state
         set({
           localStream: stream,
-          isLocalVideoDisabled: !isVideoCall,
           callStatus: CallStatus.CONNECTING,
         });
 
@@ -251,7 +239,7 @@ export const useCallStore = create<CallState>()(
 
         set({
           callError: "device_unavailable",
-          callStatus: CallStatus.ENDED,
+          callStatus: CallStatus.ERROR,
         });
       }
     },
@@ -273,6 +261,10 @@ export const useCallStore = create<CallState>()(
       } catch (error) {
         console.error("Error rejecting call:", error);
         toast.error("Failed to reject call. Please try again.");
+        set({
+          callError: "device_unavailable",
+          callStatus: CallStatus.ERROR,
+        });
       }
     },
 
@@ -334,7 +326,6 @@ export const useCallStore = create<CallState>()(
         remoteStreams: {},
         peerConnections: {},
         isMuted: false,
-        isLocalVideoDisabled: false,
       });
     },
 
@@ -380,7 +371,6 @@ export const useCallStore = create<CallState>()(
 
         set({
           localStream: stream,
-          isLocalVideoDisabled: !isVideoCall,
         });
       } catch (error) {
         console.error("Error accessing media devices:", error);
@@ -545,61 +535,65 @@ export const useCallStore = create<CallState>()(
       const newType = !isVideoCall;
 
       try {
+        // 1. Stop all existing video tracks if switching to audio
+        if (!newType && localStream) {
+          localStream.getVideoTracks().forEach((track) => track.stop());
+        }
+
+        // 2. For video calls, get new media stream
         if (newType) {
-          // Keep existing audio tracks while adding video
           const currentAudioTracks = localStream?.getAudioTracks() || [];
 
-          const videoStream = await navigator.mediaDevices.getUserMedia({
-            video: {
-              width: { ideal: 1280 },
-              height: { ideal: 720 },
-              facingMode: "user",
-            },
-          });
+          // Get new video stream
+          const videoStream = await navigator.mediaDevices
+            .getUserMedia({
+              video: {
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+                facingMode: "user",
+              },
+            })
+            .catch((error) => {
+              console.error("Camera access error:", error);
+              throw new Error("Could not access camera");
+            });
 
+          // Create new combined stream
           const newStream = new MediaStream([
             ...currentAudioTracks,
             ...videoStream.getVideoTracks(),
           ]);
 
+          // 3. Update all peer connections
+          Object.values(peerConnections).forEach((pc) => {
+            if (!pc) return;
+
+            // Remove all existing tracks
+            pc.getSenders().forEach((sender) => {
+              if (sender.track) {
+                pc.removeTrack(sender);
+              }
+            });
+
+            // Add new tracks
+            newStream.getTracks().forEach((track) => {
+              pc.addTrack(track, newStream);
+            });
+          });
+
+          // 4. Update state
           set({
             localStream: newStream,
             isVideoCall: newType,
-            isLocalVideoDisabled: false,
           });
-
-          // Safely handle peer connections
-          if (peerConnections && typeof peerConnections === "object") {
-            Object.values(peerConnections).forEach((pc) => {
-              if (pc) {
-                // Additional null check for individual connections
-                pc.getSenders().forEach((sender) => {
-                  if (sender.track?.kind === "video") {
-                    pc.removeTrack(sender);
-                  }
-                });
-                newStream.getTracks().forEach((track) => {
-                  pc.addTrack(track, newStream);
-                });
-              }
-            });
-          }
-
-          // Clean up old video stream only
-          if (localStream) {
-            localStream.getVideoTracks().forEach((track) => track.stop());
-          }
         } else {
-          // Switching to audio - just stop video tracks
+          // Audio-only mode - just update state
           set({ isVideoCall: newType });
-          if (localStream) {
-            localStream.getVideoTracks().forEach((track) => track.stop());
-          }
         }
 
         // Notify other participants
         if (chatId) {
-          callWebSocketService.initiateCall({
+          callWebSocketService.updateCallType({
             chatId,
             isVideoCall: newType,
             isGroupCall,
@@ -607,8 +601,7 @@ export const useCallStore = create<CallState>()(
         }
       } catch (error) {
         console.error("Error switching call type:", error);
-        toast.error("Could not access camera. Please check permissions.");
-        // Revert UI state if error occurs
+        // Revert to previous state if error occurs
         set({ isVideoCall });
         throw error;
       }
@@ -872,7 +865,6 @@ export const useCallStore = create<CallState>()(
         remoteStreams: {},
         peerConnections: {},
         isMuted: false,
-        isLocalVideoDisabled: false,
         callError: null,
       });
     },

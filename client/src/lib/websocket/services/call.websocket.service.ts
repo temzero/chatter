@@ -11,6 +11,7 @@ import {
   IceCandidateResponse,
   RtcOfferResponse,
   RtcAnswerRequest,
+  updateCallPayload,
 } from "@/types/callPayload";
 
 /**
@@ -40,6 +41,19 @@ export const callWebSocketService = {
    */
   offIncomingCall(callback: (data: IncomingCallResponse) => void) {
     webSocketService.off(CallEvent.INCOMING_CALL, callback);
+  },
+
+  // First, add to your callWebSocketService.ts
+  updateCallType(payload: updateCallPayload) {
+    webSocketService.emit(CallEvent.UPDATE_CALL, payload);
+  },
+
+  onCallTypeUpdated(callback: (data: updateCallPayload) => void) {
+    webSocketService.on(CallEvent.UPDATE_CALL, callback);
+  },
+
+  offCallTypeUpdated(callback: (data: updateCallPayload) => void) {
+    webSocketService.off(CallEvent.UPDATE_CALL, callback);
   },
 
   /**

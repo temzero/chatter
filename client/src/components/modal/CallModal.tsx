@@ -39,6 +39,7 @@ const CallModal: React.FC = () => {
       case CallStatus.CONNECTED:
         return <CallRoom chat={chat} />;
       case CallStatus.ENDED:
+      case CallStatus.ERROR:
       case CallStatus.CANCELED:
       case CallStatus.REJECTED:
         return <SummaryCall chat={chat} />;

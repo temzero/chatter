@@ -27,4 +27,5 @@ export enum CallStatus {
   CANCELED = "canceled",
   REJECTED = "rejected",
   ENDED = "ended",
+  ERROR = "error",
 }

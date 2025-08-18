@@ -19,6 +19,7 @@ import {
   RtcAnswerResponse,
   IceCandidateRequest,
   IceCandidateResponse,
+  updateCallPayload,
 } from '../constants/callPayload.type';
 import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
 
@@ -52,6 +53,27 @@ export class CallGateway {
     await this.websocketService.emitToChatMembers(
       payload.chatId,
       CallEvent.INCOMING_CALL,
+      response,
+      { senderId: userId, excludeSender: true },
+    );
+  }
+
+  @SubscribeMessage(CallEvent.UPDATE_CALL)
+  async handleUpdate(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: updateCallPayload,
+  ) {
+    const userId = client.data.userId;
+
+    const response: updateCallPayload = {
+      chatId: payload.chatId,
+      isVideoCall: payload.isVideoCall,
+      isGroupCall: payload.isGroupCall,
+    };
+
+    await this.websocketService.emitToChatMembers(
+      payload.chatId,
+      CallEvent.UPDATE_CALL,
       response,
       { senderId: userId, excludeSender: true },
     );

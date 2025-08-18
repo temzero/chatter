@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 
-// VideoStream component implementation
 export const VideoStream = ({
   stream,
   className = "",
@@ -9,6 +8,7 @@ export const VideoStream = ({
   stream: MediaStream | null;
   className?: string;
   muted?: boolean;
+  showVisualizer?: boolean;
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -19,12 +19,15 @@ export const VideoStream = ({
   }, [stream]);
 
   return (
-    <video
-      ref={videoRef}
-      className={className}
-      autoPlay
-      playsInline
-      muted={muted}
-    />
+    <div className={`${className} relative aspect-video overflow-hidden`}>
+      {/* Video as background */}
+      <video
+        ref={videoRef}
+        className="absolute inset-0 w-full h-full object-cover z-0"
+        autoPlay
+        playsInline
+        muted={muted}
+      />
+    </div>
   );
 };
