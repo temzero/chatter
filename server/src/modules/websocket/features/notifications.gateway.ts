@@ -7,15 +7,17 @@ import {
 } from '@nestjs/websockets';
 import { UseGuards } from '@nestjs/common';
 import { WsJwtGuard } from 'src/modules/auth/guards/ws-jwt.guard';
-import { WebsocketService } from '../websocket.service';
 import { AuthenticatedSocket } from '../constants/authenticatedSocket.type';
 import { NotificationEvent } from '../constants/websocket-events';
 import { FriendRequestResponseDto } from 'src/modules/friendship/dto/responses/friend-request-response.dto';
+import { WebsocketNotificationService } from '../services/websocket-notification.service';
 
 @WebSocketGateway()
 @UseGuards(WsJwtGuard)
 export class NotificationGateway {
-  constructor(private readonly websocketService: WebsocketService) {}
+  constructor(
+    private readonly websocketNotificationService: WebsocketNotificationService,
+  ) {}
 
   @SubscribeMessage(NotificationEvent.SUBSCRIBE)
   handleSubscribe(
@@ -34,7 +36,7 @@ export class NotificationGateway {
 
   // Example notification method
   notifyFriendRequest(receiverId: string, payload: FriendRequestResponseDto) {
-    this.websocketService.emitToUser(
+    this.websocketNotificationService.emitToUser(
       receiverId,
       NotificationEvent.FRIEND_REQUEST,
       payload,

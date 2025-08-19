@@ -37,6 +37,10 @@ export interface IceCandidateRequest {
 // -------------------- Responses --------------------
 
 // Call control responses (server injects fromMemberId for context)
+export interface PendingCallsResponse {
+  pendingCalls: IncomingCallResponse[];
+}
+
 export interface IncomingCallResponse {
   chatId: string;
   isVideoCall: boolean;

@@ -5,9 +5,9 @@ import { ChatMemberService } from './chat-member.service';
 import { ChatMember } from './entities/chat-member.entity';
 import { ChatModule } from '../chat/chat.module';
 import { FriendshipModule } from '../friendship/friendship.module';
-import { WebsocketService } from '../websocket/websocket.service';
 import { BlockModule } from '../block/block.module';
 import { MessageModule } from '../message/message.module';
+import { WebSocketModule } from '../websocket/websocket.module';
 
 @Module({
   imports: [
@@ -16,9 +16,10 @@ import { MessageModule } from '../message/message.module';
     forwardRef(() => MessageModule),
     forwardRef(() => FriendshipModule),
     forwardRef(() => BlockModule),
+    forwardRef(() => WebSocketModule),
   ],
   controllers: [ChatMemberController],
-  providers: [ChatMemberService, WebsocketService],
-  exports: [ChatMemberService, WebsocketService, TypeOrmModule],
+  providers: [ChatMemberService],
+  exports: [ChatMemberService, TypeOrmModule],
 })
 export class ChatMemberModule {}

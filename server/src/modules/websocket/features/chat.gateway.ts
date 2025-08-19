@@ -5,7 +5,6 @@ import {
   WebSocketGateway,
 } from '@nestjs/websockets';
 import { MessageService } from 'src/modules/message/message.service';
-import { WebsocketService } from '../websocket.service';
 import { AuthenticatedSocket } from '../constants/authenticatedSocket.type';
 import { CreateMessageDto } from 'src/modules/message/dto/requests/create-message.dto';
 import { ForwardMessageDto } from 'src/modules/message/dto/requests/forward-message.dto';
@@ -15,13 +14,16 @@ import { ChatService } from 'src/modules/chat/chat.service';
 import { emitWsError } from '../utils/emitWsError';
 import { Message } from 'src/modules/message/entities/message.entity';
 import { ChatEvent } from '../constants/websocket-events';
+import { WebsocketNotificationService } from '../services/websocket-notification.service';
+import { WebsocketConnectionService } from '../services/websocket-connection.service';
 
 @WebSocketGateway()
 export class ChatGateway {
   constructor(
     private readonly messageService: MessageService,
     private readonly chatService: ChatService,
-    private readonly websocketService: WebsocketService,
+    private readonly websocketNotificationService: WebsocketNotificationService,
+    private readonly websocketConnectionService: WebsocketConnectionService,
     private readonly chatMemberService: ChatMemberService,
     private readonly messageMapper: MessageMapper,
   ) {}
@@ -53,7 +55,7 @@ export class ChatGateway {
     };
 
     // Broadcast to all other members in the chat (excluding sender)
-    await this.websocketService.emitToChatMembers(
+    await this.websocketNotificationService.emitToChatMembers(
       data.chatId,
       ChatEvent.USER_TYPING,
       payload,
@@ -109,7 +111,7 @@ export class ChatGateway {
       );
 
       // Broadcast new message to all chat members (including sender)
-      await this.websocketService.emitToChatMembers(
+      await this.websocketNotificationService.emitToChatMembers(
         payload.chatId,
         ChatEvent.NEW_MESSAGE,
         messageResponse,
@@ -118,7 +120,7 @@ export class ChatGateway {
 
       // Broadcast read receipt if updated
       if (updatedMember) {
-        await this.websocketService.emitToChatMembers(
+        await this.websocketNotificationService.emitToChatMembers(
           payload.chatId,
           ChatEvent.MESSAGE_READ,
           {
@@ -190,7 +192,7 @@ export class ChatGateway {
         this.messageMapper.toMessageResponseDto(forwardedMessage);
 
       // Emit new message to all chat members (including sender)
-      await this.websocketService.emitToChatMembers(
+      await this.websocketNotificationService.emitToChatMembers(
         payload.chatId,
         ChatEvent.NEW_MESSAGE,
         messageResponse,
@@ -198,7 +200,7 @@ export class ChatGateway {
       );
 
       // Emit read update (including sender)
-      await this.websocketService.emitToChatMembers(
+      await this.websocketNotificationService.emitToChatMembers(
         payload.chatId,
         ChatEvent.MESSAGE_READ,
         {
@@ -236,7 +238,7 @@ export class ChatGateway {
       await this.messageService.getReactionsForMessage(messageId);
     const formatted = this.messageService.formatReactions(reactions);
 
-    await this.websocketService.emitToChatMembers(
+    await this.websocketNotificationService.emitToChatMembers(
       chatId,
       ChatEvent.MESSAGE_REACTION,
       {
@@ -265,7 +267,7 @@ export class ChatGateway {
     if (!member) return;
 
     // Notify other participants with memberId and messageId (including sender)
-    await this.websocketService.emitToChatMembers(
+    await this.websocketNotificationService.emitToChatMembers(
       data.chatId,
       ChatEvent.MESSAGE_READ,
       {
@@ -293,7 +295,7 @@ export class ChatGateway {
           userId,
         );
 
-        await this.websocketService.emitToChatMembers(
+        await this.websocketNotificationService.emitToChatMembers(
           data.chatId,
           ChatEvent.PIN_UPDATED,
           {
@@ -304,7 +306,7 @@ export class ChatGateway {
       } else {
         await this.chatService.unpinMessage(data.chatId, userId);
 
-        await this.websocketService.emitToChatMembers(
+        await this.websocketNotificationService.emitToChatMembers(
           data.chatId,
           ChatEvent.PIN_UPDATED,
           {
@@ -346,7 +348,7 @@ export class ChatGateway {
 
       // Step 3: Format and emit to client
       const response = this.messageMapper.toMessageResponseDto(savedMessage);
-      this.websocketService.emitToUser(
+      this.websocketNotificationService.emitToUser(
         userId,
         ChatEvent.SAVE_MESSAGE,
         response,
@@ -382,7 +384,7 @@ export class ChatGateway {
 
       console.log('isImportant', data.isImportant);
 
-      await this.websocketService.emitToChatMembers(
+      await this.websocketNotificationService.emitToChatMembers(
         data.chatId,
         ChatEvent.MESSAGE_IMPORTANT_TOGGLED,
         importantUpdate,
@@ -416,7 +418,7 @@ export class ChatGateway {
         );
 
         // Notify all chat members that the message has been deleted (including sender)
-        await this.websocketService.emitToChatMembers(
+        await this.websocketNotificationService.emitToChatMembers(
           data.chatId,
           ChatEvent.MESSAGE_DELETED,
           {
@@ -432,10 +434,14 @@ export class ChatGateway {
           data.messageId,
         );
 
-        this.websocketService.emitToUser(userId, ChatEvent.MESSAGE_DELETED, {
-          messageId: data.messageId,
-          chatId: data.chatId,
-        });
+        this.websocketNotificationService.emitToUser(
+          userId,
+          ChatEvent.MESSAGE_DELETED,
+          {
+            messageId: data.messageId,
+            chatId: data.chatId,
+          },
+        );
       }
 
       return { success: true, message: deletedMessage };
@@ -452,6 +458,6 @@ export class ChatGateway {
     const memberIds = await this.chatMemberService.getAllMemberUserIds(chatId);
     return memberIds
       .filter((id) => id !== excludeUserId)
-      .some((id) => this.websocketService.isUserOnline(id));
+      .some((id) => this.websocketConnectionService.isUserOnline(id));
   }
 }

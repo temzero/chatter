@@ -1,7 +1,7 @@
 // src/websocket/websocket.module.ts
 import { Module, forwardRef } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { GlobalGateway } from './features/global.gateway';
+import { WebsocketGateway } from './features/websocket.gateway';
 import { WebsocketService } from './websocket.service';
 import { MessageModule } from '../message/message.module';
 import { UserModule } from '../user/user.module';
@@ -14,8 +14,10 @@ import { MessageMapper } from '../message/mappers/message.mapper';
 import { ChatModule } from '../chat/chat.module';
 import { SupabaseModule } from '../superbase/supabase.module';
 import { BlockModule } from '../block/block.module';
-import { NotificationWsService } from './notification.service';
+import { WebsocketConnectionService } from './services/websocket-connection.service';
 import { CallGateway } from './features/call.gateway';
+import { WebsocketCallService } from './services/websocket-call.service';
+import { WebsocketNotificationService } from './services/websocket-notification.service';
 
 @Module({
   imports: [
@@ -36,14 +38,22 @@ import { CallGateway } from './features/call.gateway';
   ],
   providers: [
     WebsocketService,
-    GlobalGateway,
+    WebsocketGateway,
     ChatGateway,
     CallGateway,
     NotificationGateway,
     WsJwtGuard,
     MessageMapper,
-    NotificationWsService,
+    WebsocketConnectionService,
+    WebsocketCallService,
+    WebsocketNotificationService,
   ],
-  exports: [GlobalGateway, WebsocketService, NotificationWsService],
+  exports: [
+    WebsocketGateway,
+    WebsocketService,
+    WebsocketConnectionService,
+    WebsocketCallService,
+    WebsocketNotificationService,
+  ],
 })
 export class WebSocketModule {}

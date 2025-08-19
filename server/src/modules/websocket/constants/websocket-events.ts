@@ -36,6 +36,29 @@ export const enum ChatEvent {
   MESSAGE_ERROR = 'chat:message-error',
 }
 
+export const enum CallEvent {
+  // Call lifecycle events
+  PENDING_CALLS = 'call:pending',
+  INITIATE_CALL = 'call:initiate',
+  INCOMING_CALL = 'call:incoming',
+  UPDATE_CALL = 'call:update',
+  ACCEPT_CALL = 'call:accept',
+  REJECT_CALL = 'call:reject',
+  CANCEL_CALL = 'call:cancel',
+  END_CALL = 'call:end',
+  CALL_TIMEOUT = 'call:timeout',
+
+  // WebRTC signaling events
+  OFFER_SDP = 'call:offer',
+  ANSWER_SDP = 'call:answer',
+  ICE_CANDIDATE = 'call:ice-candidate',
+
+  // Call state events
+  CALL_STATE_CHANGE = 'call:state-change',
+  PARTICIPANTS_CHANGED = 'call:participants-changed',
+  SFU_ICE_CANDIDATE = 'call:sfu-ice-candidate',
+}
+
 export const enum PresenceEvent {
   INIT = 'presence:init',
   UPDATE = 'presence:update',

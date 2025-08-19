@@ -203,7 +203,7 @@ export class ChatMemberService {
     }
   }
 
-  async getAllMembers(chatId: string): Promise<ChatMember[]> {
+  async getChatMembers(chatId: string): Promise<ChatMember[]> {
     try {
       const members = await this.memberRepo.find({
         where: { chatId },

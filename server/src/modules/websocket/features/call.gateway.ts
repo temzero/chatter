@@ -5,9 +5,8 @@ import {
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets';
-import { WebsocketService } from '../websocket.service';
 import { AuthenticatedSocket } from '../constants/authenticatedSocket.type';
-import { CallEvent } from '../constants/callEvent.type';
+import { CallEvent } from '../constants/websocket-events';
 import {
   InitiateCallRequest,
   IncomingCallResponse,
@@ -20,17 +19,37 @@ import {
   IceCandidateRequest,
   IceCandidateResponse,
   updateCallPayload,
+  PendingCallsResponse,
 } from '../constants/callPayload.type';
 import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
+import { ChatService } from 'src/modules/chat/chat.service';
+import { WebsocketNotificationService } from '../services/websocket-notification.service';
+import { WebsocketCallService } from '../services/websocket-call.service';
 
 @WebSocketGateway()
 export class CallGateway {
   constructor(
-    private readonly websocketService: WebsocketService,
+    private readonly websocketNotificationService: WebsocketNotificationService,
+    private readonly websocketCallService: WebsocketCallService,
     private readonly chatMemberService: ChatMemberService,
+    private readonly chatService: ChatService,
   ) {}
 
-  // 1️⃣ Caller initiates a call
+  /**
+   * Clear pending calls for all participants in a chat
+   * @param chatId - The chat ID
+   * @param userId - The user ID initiating the action
+   */
+  private async clearPendingCalls(chatId: string, userId: string) {
+    const chatMembers = await this.chatMemberService.getChatMembers(chatId);
+    chatMembers.forEach((member) => {
+      if (member.userId !== userId) {
+        const key = `${chatId}:${member.userId}`;
+        this.websocketCallService.getAndRemovePendingCall(key);
+      }
+    });
+  }
+
   @SubscribeMessage(CallEvent.INITIATE_CALL)
   async handleCallInitiate(
     @ConnectedSocket() client: AuthenticatedSocket,
@@ -50,12 +69,51 @@ export class CallGateway {
       timestamp: Date.now(),
     };
 
-    await this.websocketService.emitToChatMembers(
+    // Store the call for offline users using websocketService
+    const chatMembers = await this.chatMemberService.getChatMembers(
+      payload.chatId,
+    );
+    chatMembers.forEach((member) => {
+      if (member.userId !== userId) {
+        const key = `${payload.chatId}:${member.userId}`;
+        this.websocketCallService.addPendingCall(key, response);
+      }
+    });
+
+    // Notify all online chat members except the caller
+    await this.websocketNotificationService.emitToChatMembers(
       payload.chatId,
       CallEvent.INCOMING_CALL,
       response,
       { senderId: userId, excludeSender: true },
     );
+  }
+
+  @SubscribeMessage(CallEvent.PENDING_CALLS)
+  async handleRequestPendingCalls(
+    @ConnectedSocket() client: AuthenticatedSocket,
+  ) {
+    const userId = client.data.userId;
+    const pendingCalls: IncomingCallResponse[] = [];
+    const now = Date.now();
+    const oneMinuteAgo = now - 60000;
+
+    const userChatsResult = await this.chatService.getUserChats(userId);
+    const userChats = userChatsResult.chats;
+
+    for (const chat of userChats) {
+      const key = `${chat.id}:${userId}`;
+      const call = this.websocketCallService.getAndRemovePendingCall(key);
+
+      // Check if call is still valid (within 1 minute)
+      if (call && call.timestamp >= oneMinuteAgo) {
+        pendingCalls.push(call);
+      }
+    }
+
+    client.emit(CallEvent.PENDING_CALLS, {
+      pendingCalls,
+    } as PendingCallsResponse);
   }
 
   @SubscribeMessage(CallEvent.UPDATE_CALL)
@@ -71,7 +129,7 @@ export class CallGateway {
       isGroupCall: payload.isGroupCall,
     };
 
-    await this.websocketService.emitToChatMembers(
+    await this.websocketNotificationService.emitToChatMembers(
       payload.chatId,
       CallEvent.UPDATE_CALL,
       response,
@@ -79,7 +137,6 @@ export class CallGateway {
     );
   }
 
-  // 2️⃣ Callee accepts
   @SubscribeMessage(CallEvent.ACCEPT_CALL)
   async handleCallAccept(
     @ConnectedSocket() client: AuthenticatedSocket,
@@ -98,7 +155,10 @@ export class CallGateway {
       isCallerCancel: payload.isCallerCancel,
     };
 
-    await this.websocketService.emitToChatMembers(
+    // Clear pending calls for all participants
+    await this.clearPendingCalls(payload.chatId, userId);
+
+    await this.websocketNotificationService.emitToChatMembers(
       payload.chatId,
       CallEvent.ACCEPT_CALL,
       response,
@@ -124,7 +184,10 @@ export class CallGateway {
       isCallerCancel: payload.isCallerCancel,
     };
 
-    await this.websocketService.emitToChatMembers(
+    // Clear pending calls for all participants
+    await this.clearPendingCalls(payload.chatId, userId);
+
+    await this.websocketNotificationService.emitToChatMembers(
       payload.chatId,
       CallEvent.REJECT_CALL,
       response,
@@ -132,7 +195,6 @@ export class CallGateway {
     );
   }
 
-  // 4️⃣ Call ends
   @SubscribeMessage(CallEvent.END_CALL)
   async handleCallEnd(
     @ConnectedSocket() client: AuthenticatedSocket,
@@ -150,15 +212,17 @@ export class CallGateway {
       timestamp: Date.now(),
     };
 
-    await this.websocketService.emitToChatMembers(
+    // Clear pending calls for all participants
+    await this.clearPendingCalls(payload.chatId, userId);
+
+    await this.websocketNotificationService.emitToChatMembers(
       payload.chatId,
       CallEvent.END_CALL,
       response,
-      { senderId: userId },
-    ); // Include sender for full cleanup
+      { senderId: userId, excludeSender: true },
+    );
   }
 
-  // 5️⃣ WebRTC Signaling: Offer (SFU-compatible)
   @SubscribeMessage(CallEvent.OFFER_SDP)
   async handleRtcOffer(
     @ConnectedSocket() client: AuthenticatedSocket,
@@ -174,10 +238,9 @@ export class CallGateway {
       chatId: payload.chatId,
       offer: payload.offer,
       fromMemberId,
-      // SFU will handle routing - no toMemberId needed
     };
 
-    await this.websocketService.emitToChatMembers(
+    await this.websocketNotificationService.emitToChatMembers(
       payload.chatId,
       CallEvent.OFFER_SDP,
       response,
@@ -185,7 +248,6 @@ export class CallGateway {
     );
   }
 
-  // 6️⃣ WebRTC Signaling: Answer (Directed)
   @SubscribeMessage(CallEvent.ANSWER_SDP)
   async handleRtcAnswer(
     @ConnectedSocket() client: AuthenticatedSocket,
@@ -197,23 +259,20 @@ export class CallGateway {
       userId,
     );
 
-    // In SFU mode, answers should go to the SFU server only
     const response: RtcAnswerResponse = {
       chatId: payload.chatId,
       answer: payload.answer,
       fromMemberId,
-      toMemberId: 'sfu', // Special ID for SFU server
+      toMemberId: 'sfu',
     };
 
-    await this.websocketService.emitToChatMembers(
+    await this.websocketNotificationService.emitToChatMembers(
       payload.chatId,
       CallEvent.ANSWER_SDP,
       response,
-      // { senderId: userId, targetId: 'sfu' }, // Direct to SFU
     );
   }
 
-  // 7️⃣ WebRTC Signaling: ICE Candidate (SFU-compatible)
   @SubscribeMessage(CallEvent.ICE_CANDIDATE)
   async handleRtcIceCandidate(
     @ConnectedSocket() client: AuthenticatedSocket,
@@ -229,18 +288,15 @@ export class CallGateway {
       chatId: payload.chatId,
       candidate: payload.candidate,
       fromMemberId,
-      // No toMemberId - SFU will handle broadcasting
     };
 
-    await this.websocketService.emitToChatMembers(
+    await this.websocketNotificationService.emitToChatMembers(
       payload.chatId,
       CallEvent.ICE_CANDIDATE,
       response,
       {
         senderId: userId,
-        // SFU mode: broadcast to all except sender
         excludeSender: true,
-        // For P2P: add targetId: payload.toMemberId
       },
     );
   }

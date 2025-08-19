@@ -57,7 +57,7 @@ export class WebSocketService {
   }
 
   // Helper method to emit events with proper typing
-  emit<T>(event: string, data: T, callback?: (response: unknown) => void) {
+  emit<T>(event: string, data?: T, callback?: (response: unknown) => void) {
     if (!this.socket) {
       console.warn("Socket not connected. Cannot emit event:", event);
       return;

@@ -16,6 +16,26 @@ import { handleError } from "@/utils/handleError";
 
 export function useCallSocketListeners() {
   useEffect(() => {
+    const handlePendingCalls = (data: {
+      pendingCalls: IncomingCallResponse[];
+    }) => {
+      if (data.pendingCalls && data.pendingCalls.length > 0) {
+        // Sort by timestamp to get the most recent call first
+        const sortedCalls = [...data.pendingCalls].sort(
+          (a, b) => b.timestamp - a.timestamp
+        );
+
+        // Handle the most recent call
+        const mostRecentCall = sortedCalls[0];
+        handleIncomingCall(mostRecentCall);
+
+        // Show notification for other missed calls
+        if (sortedCalls.length > 1) {
+          toast.info(`You have ${sortedCalls.length - 1} more missed calls`);
+        }
+      }
+    };
+
     const handleIncomingCall = (data: IncomingCallResponse) => {
       const myMemberId = getMyChatMemberId(data.chatId);
 
@@ -93,9 +113,21 @@ export function useCallSocketListeners() {
     };
 
     const handleCallEnded = (data: CallActionResponse) => {
-      console.log("Call ended", data);
-      useCallStore.getState().endCall();
-      toast.info("Call ended");
+      console.log("Call ended or member left", data);
+
+      // Check if this is a group call and the action is from another member
+      if (
+        useCallStore.getState().isGroupCall &&
+        data.fromMemberId !== getMyChatMemberId(data.chatId)
+      ) {
+        // Just remove this member's connection
+        useCallStore.getState().removeParticipantFromCall(data.fromMemberId);
+        toast.info(`${data.fromMemberId} has left the call`);
+      } else {
+        // It's either a direct call or our own leave action - end the full call
+        useCallStore.getState().endCall();
+        toast.info("Call ended");
+      }
     };
 
     // In useCallSocketListeners.ts - Modified handlers
@@ -187,6 +219,9 @@ export function useCallSocketListeners() {
     callWebSocketService.onOffer(handleOffer);
     callWebSocketService.onAnswer(handleAnswer);
     callWebSocketService.onIceCandidate(handleIceCandidate);
+    callWebSocketService.onPendingCalls(handlePendingCalls);
+    // Check for pending calls when the component mounts
+    callWebSocketService.requestPendingCalls();
 
     return () => {
       callWebSocketService.removeAllListeners();

@@ -29,6 +29,7 @@ interface CallState {
   callStartTime?: Date | null; // When the call started
   callEndTime?: Date | null; // When the call ended
   incomingCall: IncomingCallData | null; // Incoming call metadata (caller info, type, etc.)
+  callTimeoutRef: NodeJS.Timeout | null; // Add this line
 
   /* --------------------------------------------------
    * 2️⃣ WebRTC Signaling Data
@@ -74,7 +75,11 @@ interface CallState {
   ) => void;
   acceptCall: () => Promise<void>;
   rejectCall: (isCancel?: boolean) => void;
-  endCall: (isCancel?: boolean, isRejected?: boolean) => void;
+  endCall: (
+    isCancel?: boolean,
+    isRejected?: boolean,
+    memberId?: string
+  ) => void;
   setStatus: (status: CallStatus) => void;
   switchType: () => Promise<void>; // Switch between audio and video mid-call
   toggleMute: () => void;
@@ -86,6 +91,7 @@ interface CallState {
   setupLocalStream: () => Promise<void>; // Get local mic/camera
   cleanupStreams: () => void; // Stop all streams and cleanup
   createPeerConnection: (memberId: string) => RTCPeerConnection; // Create new WebRTC connection
+  removePeerConnection: (memberId: string) => void; // Remove a peer connection
   handleRemoteStream: (participantId: string, event: RTCTrackEvent) => void; // Handle track added by remote peer
   createSfuConnection: () => Promise<RTCSessionDescriptionInit>;
   disconnectFromSfu: () => void;
@@ -103,6 +109,7 @@ interface CallState {
    * -------------------------------------------------- */
   setCallStatus: (status: CallStatus) => void; // Set call status
   getCallDuration: () => number; // Returns call length in seconds
+  removeParticipantFromCall: (memberId: string) => void;
   closeCallModal: () => void; // Hide UI modal for call
 }
 
@@ -116,6 +123,7 @@ export const useCallStore = create<CallState>()(
     callEndTime: null,
     participants: [],
     incomingCall: null,
+    callTimeoutRef: null,
     iceCandidates: [],
     peerConnections: {},
     remoteStreams: {},
@@ -148,9 +156,19 @@ export const useCallStore = create<CallState>()(
 
         // 3. Use openCall to open the modal and set basic call state
         get().openCall(chatId, isVideo, isGroup, CallStatus.OUTGOING);
-        // get().openCall(chatId, isVideo, isGroup, CallStatus.CALLING);
 
-        // 4. Initiate WebRTC connection
+        // 4. Set timeout to automatically end call after 1 minute
+        const timeoutRef = setTimeout(() => {
+          const { callStatus } = get();
+          // Only end if still in outgoing state (not answered)
+          if (callStatus === CallStatus.OUTGOING) {
+            get().rejectCall(true);
+          }
+        }, 60000); // 60 seconds = 1 minute
+
+        set({ callTimeoutRef: timeoutRef });
+
+        // 5. Initiate WebRTC connection
         callWebSocketService.initiateCall({
           chatId,
           isVideoCall: isVideo,
@@ -269,13 +287,24 @@ export const useCallStore = create<CallState>()(
     },
 
     // 🛑 End Call with cleanup
-    endCall: (isCancel = false, isRejected = false) => {
+    endCall: (isCancel = false, isRejected = false, memberId?: string) => {
+      if (memberId) {
+        get().removeParticipantFromCall(memberId);
+        return;
+      }
+
       const {
         peerConnections,
         remoteStreams = {},
         localStream,
         callStatus,
+        callTimeoutRef,
       } = get();
+
+      // Clear the timeout if it exists
+      if (callTimeoutRef) {
+        clearTimeout(callTimeoutRef);
+      }
 
       if (
         callStatus === CallStatus.ENDED ||
@@ -289,7 +318,7 @@ export const useCallStore = create<CallState>()(
       const stopAllTracks = (stream: MediaStream | null) => {
         if (!stream) return;
         stream.getTracks().forEach((track) => {
-          track.stop(); // This is crucial to release the hardware
+          track.stop();
           track.enabled = false;
         });
       };
@@ -322,10 +351,11 @@ export const useCallStore = create<CallState>()(
         participants: [],
         incomingCall: null,
         iceCandidates: [],
-        localStream: null, // Clear the local stream reference
+        localStream: null,
         remoteStreams: {},
         peerConnections: {},
         isMuted: false,
+        callTimeoutRef: null, // Reset the timeout reference
       });
     },
 
@@ -341,6 +371,42 @@ export const useCallStore = create<CallState>()(
       return Math.floor(
         (endTime.getTime() - state.callStartTime.getTime()) / 1000
       );
+    },
+
+    removeParticipantFromCall: (memberId: string) => {
+      const { peerConnections, remoteStreams, participants, isGroupCall } =
+        get();
+
+      // Only proceed if this is a group call
+      if (!isGroupCall) return;
+
+      // 1. Close the peer connection for this member
+      if (peerConnections[memberId]) {
+        peerConnections[memberId].close();
+        set((state) => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { [memberId]: _, ...remainingConnections } =
+            state.peerConnections;
+          return { peerConnections: remainingConnections };
+        });
+      }
+
+      // 2. Clean up their remote stream
+      if (remoteStreams[memberId]) {
+        remoteStreams[memberId].getTracks().forEach((track) => track.stop());
+        set((state) => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { [memberId]: _, ...remainingStreams } = state.remoteStreams;
+          return { remoteStreams: remainingStreams };
+        });
+      }
+
+      // 3. Remove from participants list
+      set({
+        participants: participants.filter((p) => p.id !== memberId),
+      });
+
+      console.log(`Participant ${memberId} removed from call`);
     },
 
     // 🎤 Toggle audio mute
@@ -423,10 +489,20 @@ export const useCallStore = create<CallState>()(
       };
 
       // Connection Monitoring
-      pc.oniceconnectionstatechange = () => {
-        if (pc.iceConnectionState === "failed") {
-          console.error("ICE failed - attempting restart");
-          pc.restartIce();
+      pc.onconnectionstatechange = () => {
+        switch (pc.connectionState) {
+          case "connected":
+            console.log(`✅ Peer ${memberId} connected`);
+            break;
+          case "disconnected":
+            console.warn(`⚠️ Peer ${memberId} disconnected`);
+            break;
+          case "failed":
+            console.error(`❌ Peer ${memberId} failed`);
+            break;
+          case "closed":
+            console.log(`🔒 Peer ${memberId} closed`);
+            break;
         }
       };
 
@@ -445,6 +521,19 @@ export const useCallStore = create<CallState>()(
       }));
 
       return pc;
+    },
+
+    removePeerConnection: (memberId: string) => {
+      const pc = get().peerConnections[memberId];
+      if (pc) {
+        pc.getSenders().forEach((s) => s.track?.stop());
+        pc.close();
+        set((state) => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { [memberId]: _, ...rest } = state.peerConnections;
+          return { peerConnections: rest };
+        });
+      }
     },
 
     // 📺 Handle incoming remote stream

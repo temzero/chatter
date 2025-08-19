@@ -13,17 +13,23 @@ import { emitWsError } from '../utils/emitWsError';
 import type { AuthenticatedSocket } from '../constants/authenticatedSocket.type';
 import { PresenceInitEvent } from '../constants/presenceEvent.type';
 import { SystemEvent, PresenceEvent } from '../constants/websocket-events';
+import { WebsocketConnectionService } from '../services/websocket-connection.service';
 
 @WebSocketGateway({
   pingInterval: 10000,
   pingTimeout: 15000,
   cors: { origin: '*' },
 })
-export class GlobalGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class WebsocketGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server: Server;
 
-  constructor(private readonly websocketService: WebsocketService) {}
+  constructor(
+    private readonly websocketService: WebsocketService,
+    private readonly websocketConnectionService: WebsocketConnectionService,
+  ) {}
 
   afterInit(server: Server) {
     this.websocketService.setServer(server);
@@ -38,13 +44,13 @@ export class GlobalGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return;
       }
 
-      const isFirstConnection = this.websocketService.userConnected(
+      const isFirstConnection = this.websocketConnectionService.userConnected(
         userId,
         client.id,
       );
 
       if (isFirstConnection) {
-        this.websocketService.notifyPresenceSubscribers(userId, true);
+        this.websocketConnectionService.notifyPresenceSubscribers(userId, true);
       }
 
       // Updated to use SystemEvent enum
@@ -61,15 +67,18 @@ export class GlobalGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   handleDisconnect(client: AuthenticatedSocket) {
-    const result = this.websocketService.userDisconnected(client.id);
+    const result = this.websocketConnectionService.userDisconnected(client.id);
     if (!result) {
       console.warn(`[WS] No user found for disconnected socket ${client.id}`);
       return;
     }
 
     setTimeout(() => {
-      if (!this.websocketService.isUserOnline(result.userId)) {
-        this.websocketService.notifyPresenceSubscribers(result.userId, false);
+      if (!this.websocketConnectionService.isUserOnline(result.userId)) {
+        this.websocketConnectionService.notifyPresenceSubscribers(
+          result.userId,
+          false,
+        );
       }
     }, 5000);
   }
@@ -98,10 +107,13 @@ export class GlobalGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
 
       userIds.forEach((targetUserId) => {
-        this.websocketService.addPresenceSubscriber(client.id, targetUserId);
+        this.websocketConnectionService.addPresenceSubscriber(
+          client.id,
+          targetUserId,
+        );
       });
 
-      const statuses = this.websocketService.getUsersStatus(userIds);
+      const statuses = this.websocketConnectionService.getUsersStatus(userIds);
       const initEvent: PresenceInitEvent = {
         statuses,
         subscribedCount: userIds.length,
@@ -121,7 +133,10 @@ export class GlobalGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() userIds: string[],
   ) {
     userIds.forEach((userId) => {
-      this.websocketService.removePresenceSubscriber(client.id, userId);
+      this.websocketConnectionService.removePresenceSubscriber(
+        client.id,
+        userId,
+      );
     });
   }
 }

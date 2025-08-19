@@ -12,6 +12,7 @@ import {
   RtcOfferResponse,
   RtcAnswerRequest,
   updateCallPayload,
+  PendingCallsResponse,
 } from "@/types/callPayload";
 
 /**
@@ -29,6 +30,13 @@ export const callWebSocketService = {
     webSocketService.emit(CallEvent.INITIATE_CALL, payload);
   },
 
+  requestPendingCalls() {
+    webSocketService.emit(CallEvent.PENDING_CALLS);
+  },
+
+  onPendingCalls(callback: (data: PendingCallsResponse) => void): void {
+    webSocketService.on(CallEvent.PENDING_CALLS, callback);
+  },
   /**
    * Listen for incoming calls
    */

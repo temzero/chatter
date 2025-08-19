@@ -20,7 +20,7 @@ import { Friendship } from './entities/friendship.entity';
 import { UserService } from '../user/user.service';
 import { ErrorResponse } from 'src/common/api-response/errors';
 import { FriendshipUpdateNotificationDto } from './dto/responses/friendship-update-notification.dto';
-import { NotificationWsService } from '../websocket/notification.service';
+import { WebsocketNotificationService } from '../websocket/services/websocket-notification.service';
 import { ContactResponseDto } from './dto/responses/friend-contact-response.dto';
 import { mapToFriendContactResponseDto } from './mappers/friendContacts.mapper';
 
@@ -30,7 +30,7 @@ export class FriendshipController {
   constructor(
     private readonly friendshipService: FriendshipService,
     private readonly userService: UserService,
-    private readonly notificationWsService: NotificationWsService,
+    private readonly websocketNotificationService: WebsocketNotificationService,
   ) {}
 
   @Post('requests/:receiverId')
@@ -46,7 +46,10 @@ export class FriendshipController {
     );
 
     // Notify receiver
-    this.notificationWsService.notifyFriendRequest(receiverId, sentRequest);
+    this.websocketNotificationService.notifyFriendRequest(
+      receiverId,
+      sentRequest,
+    );
     return new SuccessResponse(sentRequest, 'Friend request sent successfully');
   }
 
@@ -81,7 +84,7 @@ export class FriendshipController {
 
     // 4. Notify if accepted
     if (body.status === FriendshipStatus.ACCEPTED) {
-      this.notificationWsService.notifyFriendshipUpdate(
+      this.websocketNotificationService.notifyFriendshipUpdate(
         (friendship as { senderId: string }).senderId,
         response, // Reuse the same DTO instance
       );
@@ -162,7 +165,7 @@ export class FriendshipController {
     );
 
     if (receiverId) {
-      this.notificationWsService.notifyCancelFriendRequest(
+      this.websocketNotificationService.notifyCancelFriendRequest(
         friendshipId,
         receiverId,
         currentUserId,

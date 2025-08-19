@@ -14,12 +14,12 @@ import { BlockService } from '../block/block.service';
 import { ChatType } from '../chat/constants/chat-types.constants';
 import { SystemEventType } from './constants/system-event-type.constants';
 import { MessageMapper } from './mappers/message.mapper';
-import { WebsocketService } from '../websocket/websocket.service';
 import { MessageResponseDto } from './dto/responses/message-response.dto';
 import { User } from '../user/entities/user.entity';
 import { ChatEvent } from '../websocket/constants/websocket-events';
 import { ChatMemberRole } from '../chat-member/constants/chat-member-roles.constants';
 import { PaginationQuery } from './dto/queries/pagination-query.dto';
+import { WebsocketNotificationService } from '../websocket/services/websocket-notification.service';
 
 @Injectable()
 export class MessageService {
@@ -40,7 +40,7 @@ export class MessageService {
     private readonly blockService: BlockService,
     private readonly supabaseService: SupabaseService,
     private readonly messageMapper: MessageMapper,
-    private readonly websocketService: WebsocketService,
+    private readonly websocketNotificationService: WebsocketNotificationService,
   ) {}
 
   // Updated createMessage method
@@ -264,7 +264,7 @@ export class MessageService {
     const messageResponse =
       this.messageMapper.toMessageResponseDto(fullMessage);
 
-    await this.websocketService.emitToChatMembers(
+    await this.websocketNotificationService.emitToChatMembers(
       chatId,
       ChatEvent.NEW_MESSAGE,
       messageResponse,
