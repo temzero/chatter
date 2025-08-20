@@ -19,7 +19,6 @@ import {
   IceCandidateRequest,
   IceCandidateResponse,
   updateCallPayload,
-  PendingCallsResponse,
 } from '../constants/callPayload.type';
 import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
 import { ChatService } from 'src/modules/chat/chat.service';
@@ -64,7 +63,6 @@ export class CallGateway {
     const response: IncomingCallResponse = {
       chatId: payload.chatId,
       isVideoCall: payload.isVideoCall,
-      isGroupCall: payload.isGroupCall,
       fromMemberId,
       timestamp: Date.now(),
     };
@@ -111,9 +109,7 @@ export class CallGateway {
       }
     }
 
-    client.emit(CallEvent.PENDING_CALLS, {
-      pendingCalls,
-    } as PendingCallsResponse);
+    client.emit(CallEvent.PENDING_CALLS, pendingCalls);
   }
 
   @SubscribeMessage(CallEvent.UPDATE_CALL)
@@ -126,7 +122,6 @@ export class CallGateway {
     const response: updateCallPayload = {
       chatId: payload.chatId,
       isVideoCall: payload.isVideoCall,
-      isGroupCall: payload.isGroupCall,
     };
 
     await this.websocketNotificationService.emitToChatMembers(
@@ -195,8 +190,8 @@ export class CallGateway {
     );
   }
 
-  @SubscribeMessage(CallEvent.END_CALL)
-  async handleCallEnd(
+  @SubscribeMessage(CallEvent.HANG_UP)
+  async handleHangup(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: CallActionRequest,
   ) {
@@ -217,7 +212,7 @@ export class CallGateway {
 
     await this.websocketNotificationService.emitToChatMembers(
       payload.chatId,
-      CallEvent.END_CALL,
+      CallEvent.HANG_UP,
       response,
       { senderId: userId, excludeSender: true },
     );

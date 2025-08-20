@@ -32,6 +32,7 @@ interface ChatStore {
 
   initialize: () => Promise<void>;
   getChatById: (id?: string) => ChatResponse | undefined;
+  getChatType: (chatId: string) => ChatType | undefined;
   fetchChats: () => Promise<void>;
   fetchMoreChats: (limit?: number) => Promise<number>;
   fetchChatById: (
@@ -177,6 +178,11 @@ export const useChatStore = create<ChatStore>()(
           if (!chatId) return undefined;
           const chat = get().chats.find((c) => c.id === chatId);
           return chat;
+        },
+
+        getChatType: (chatId) => {
+          const chat = get().getChatById(chatId);
+          return chat?.type;
         },
 
         fetchChats: async () => {

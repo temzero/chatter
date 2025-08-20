@@ -1,107 +1,143 @@
 // stores/callStore.ts
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { ModalType } from "@/types/enums/modalType";
-import { CallStatus } from "@/types/enums/CallStatus";
+import { CallStatus, ModalType } from "@/types/enums/modalType";
 import { useModalStore } from "@/stores/modalStore";
 import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
 import { toast } from "react-toastify";
 import { handleError } from "@/utils/handleError";
 import { getMyChatMemberId } from "./chatMemberStore";
-
-interface CallMember {
-  memberId: string; // memberId
-  isMuted: boolean;
-  isVideoEnable: boolean;
-  isSpeaking?: boolean; // useful for active speaker UI
+interface CallParticipant {
+  id: string;
+  name?: string;
+  avatar?: string;
 }
 
-interface CallStoreState {
+interface IncomingCallData {
+  fromMemberId: string;
+  callId: string;
+}
+
+interface CallState {
+  /* --------------------------------------------------
+   * 1️⃣ Basic Call Metadata
+   * -------------------------------------------------- */
   chatId: string | null; // The chat this call belongs to
-  callStatus: CallStatus | null; // ringing | connected | ended | etc.
-  startedAt?: Date;
-  endedAt?: Date;
-  callerMemberId?: string; // memberId of caller
-  timeoutRef?: NodeJS.Timeout; // internal only (not serializable)
-  isVideoCall: boolean;
+  isVideoCall: boolean; // Whether this is a video or audio call
+  isGroupCall: boolean; // Whether this call has more than 2 participants
+  callStatus: CallStatus | null; // Current call status (ringing, connected, etc.)
+  callStartTime?: Date | null; // When the call started
+  callEndTime?: Date | null; // When the call ended
+  incomingCall: IncomingCallData | null; // Incoming call metadata (caller info, type, etc.)
+  callTimeoutRef: NodeJS.Timeout | null; // Add this line
 
-  // myMember
-  isMuted: boolean;
-  isVideoEnable: boolean;
+  /* --------------------------------------------------
+   * 2️⃣ WebRTC Signaling Data
+   * -------------------------------------------------- */
+  iceCandidates: RTCIceCandidateInit[]; // Collected ICE candidates from remote peers
 
-  // other members
-  callMembers: CallMember[];
-  iceCandidates: RTCIceCandidateInit[];
+  /* --------------------------------------------------
+   * 3️⃣ WebRTC Connection & Streams
+   * -------------------------------------------------- */
+  peerConnections: Record<string, RTCPeerConnection>; // One connection per participant
+  remoteStreams: Record<string, MediaStream>; // Remote media per participant
+  participantStreams: Record<string, MediaStream>; // Alias or separate tracking of streams by participant ID
+  participants: CallParticipant[]; // List of all call participants
+  localStream: MediaStream | null; // This user's microphone/camera stream
+  activeSpeakers: string[]; // IDs of participants currently speaking
 
-  // media connections
-  localStream: MediaStream | null; // This user's mic/cam
-  peerConnections: Record<string, RTCPeerConnection>; // P2P connections
-  remoteStreams: Record<string, MediaStream>; // Per memberId
-  sfuConnection?: RTCPeerConnection | null; // If SFU is used
-  sfuStreams?: { audio?: MediaStream; video?: MediaStream };
+  /* --------------------------------------------------
+   * 4️⃣ Local User State
+   * -------------------------------------------------- */
+  isMuted: boolean; // Whether the microphone is muted
+  callError: "permission_denied" | "device_unavailable" | null; // Error type if media devices fail
 
-  error?: "permission_denied" | "device_unavailable" | null;
-}
+  sfuConnection: RTCPeerConnection | null;
+  sfuStreams: {
+    audio?: MediaStream;
+    video?: MediaStream;
+  };
 
-interface CallStoreActions {
-  // Core lifecycle
-  startCall: (chatId: string, isVideo: boolean) => Promise<void>;
+  /* --------------------------------------------------
+   * 5️⃣ Core Call Actions
+   * -------------------------------------------------- */
+  startCall: (
+    chatId: string,
+    isVideo: boolean,
+    isGroup: boolean,
+    currentUserId: string
+  ) => Promise<void>;
+  openCall: (
+    chatId: string,
+    isVideo: boolean,
+    isGroup: boolean,
+    callStatus: CallStatus
+  ) => void;
   acceptCall: () => Promise<void>;
   rejectCall: (isCancel?: boolean) => void;
-  addCallMember: (member: CallMember) => void;
-  removeCallMember: (memberId: string) => void;
-  endCall: (option?: { isCancel?: boolean; isRejected?: boolean }) => void;
-
-  // Status / Type
+  endCall: (
+    isCancel?: boolean,
+    isRejected?: boolean,
+    memberId?: string
+  ) => void;
   setStatus: (status: CallStatus) => void;
-  switchType: () => Promise<void>;
-
-  // Media toggles
+  switchType: () => Promise<void>; // Switch between audio and video mid-call
   toggleMute: () => void;
   toggleVideo: () => Promise<void>;
 
-  // Media setup/cleanup
-  setupLocalStream: () => Promise<void>;
-  cleanupStreams: () => void;
-  createPeerConnection: (memberId: string) => RTCPeerConnection;
-  removePeerConnection: (memberId: string) => void;
-  handleRemoteStream: (memberId: string, event: RTCTrackEvent) => void;
+  /* --------------------------------------------------
+   * 6️⃣ Media & Connection Handling
+   * -------------------------------------------------- */
+  setupLocalStream: () => Promise<void>; // Get local mic/camera
+  cleanupStreams: () => void; // Stop all streams and cleanup
+  createPeerConnection: (memberId: string) => RTCPeerConnection; // Create new WebRTC connection
+  removePeerConnection: (memberId: string) => void; // Remove a peer connection
+  handleRemoteStream: (participantId: string, event: RTCTrackEvent) => void; // Handle track added by remote peer
   createSfuConnection: () => Promise<RTCSessionDescriptionInit>;
   disconnectFromSfu: () => void;
 
-  // Socket handlers
-  sendOffer: (toMemberId: string) => Promise<void>;
+  /* --------------------------------------------------
+   * 7️⃣ Socket Event Handlers (Signaling)
+   * -------------------------------------------------- */
+  sendOffer: (targetUserId: string) => Promise<void>;
+  setIncomingCall: (data: IncomingCallData) => void;
+
   addIceCandidate: (candidate: RTCIceCandidateInit) => void;
 
-  // Utilities
-  getCallDuration: () => number;
-  closeCallModal: () => void;
+  /* --------------------------------------------------
+   * 8️⃣ Utility
+   * -------------------------------------------------- */
+  setCallStatus: (status: CallStatus) => void; // Set call status
+  getCallDuration: () => number; // Returns call length in seconds
+  removeParticipantFromCall: (memberId: string) => void;
+  closeCallModal: () => void; // Hide UI modal for call
 }
 
-export type CallStore = CallStoreState & CallStoreActions;
-
-export const useCallStore = create<CallStore>()(
+export const useCallStoreOLD = create<CallState>()(
   devtools((set, get) => ({
-    // Initial state
     chatId: null,
-    callStatus: null,
     isVideoCall: false,
-    isMuted: false,
-    isVideoEnable: false,
-    callMembers: [],
+    isGroupCall: false,
+    callStatus: null,
+    callStartTime: null,
+    callEndTime: null,
+    participants: [],
+    incomingCall: null,
+    callTimeoutRef: null,
     iceCandidates: [],
-
-    // Flattened media state
-    localStream: null,
-    remoteStreams: {},
     peerConnections: {},
+    remoteStreams: {},
+    participantStreams: {},
+    localStream: null,
+    activeSpeakers: [],
+    isMuted: false,
+    isLocalVideoDisabled: false,
+    callError: null,
     sfuConnection: null,
     sfuStreams: {},
 
-    error: null,
-
     // 📞 Start Call with media setup
-    startCall: async (chatId, isVideo) => {
+    startCall: async (chatId, isVideo, isGroup) => {
       try {
         // 1. Request media permissions
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -112,13 +148,14 @@ export const useCallStore = create<CallStore>()(
         // 2. Save stream to state
         set({
           localStream: stream,
+          isVideoCall: isVideo,
+          isGroupCall: isGroup,
           chatId,
           callStatus: CallStatus.OUTGOING,
-          isVideoCall: isVideo,
         });
 
         // 3. Use openCall to open the modal and set basic call state
-        useModalStore.getState().openModal(ModalType.CALL);
+        get().openCall(chatId, isVideo, isGroup, CallStatus.OUTGOING);
 
         // 4. Set timeout to automatically end call after 1 minute
         const timeoutRef = setTimeout(() => {
@@ -129,29 +166,37 @@ export const useCallStore = create<CallStore>()(
           }
         }, 60000); // 60 seconds = 1 minute
 
-        set({ timeoutRef });
+        set({ callTimeoutRef: timeoutRef });
 
         // 5. Initiate WebRTC connection
         callWebSocketService.initiateCall({
           chatId,
           isVideoCall: isVideo,
+          isGroupCall: isGroup,
         });
       } catch (error) {
         useModalStore.getState().closeModal();
         console.error("Permission denied:", error);
         get().cleanupStreams();
-        set({
-          error: "permission_denied",
-          callStatus: CallStatus.ERROR,
-        });
+        set({ callError: "permission_denied", callStatus: CallStatus.ERROR });
         toast.error(
           "Permission denied! Please allow camera and microphone access."
         );
       }
     },
 
+    openCall: (chatId, isVideo, isGroup, callStatus) => {
+      set({
+        chatId,
+        isVideoCall: isVideo,
+        isGroupCall: isGroup,
+        callStatus,
+      });
+      useModalStore.getState().openModal(ModalType.CALL);
+    },
+
     acceptCall: async () => {
-      const { isVideoCall, chatId, localStream } = get();
+      const { isVideoCall, localStream, chatId, incomingCall } = get();
 
       try {
         // 1. Clean up any existing stream first
@@ -192,9 +237,9 @@ export const useCallStore = create<CallStore>()(
         });
 
         // 4. Send acceptance via WebSocket
-        if (chatId) {
+        if (incomingCall) {
           callWebSocketService.acceptCall({
-            chatId,
+            chatId: chatId!,
             isCallerCancel: false,
           });
         }
@@ -204,21 +249,21 @@ export const useCallStore = create<CallStore>()(
         handleError(error, "Could not start media devices");
 
         // Send rejection if media setup fails
-        if (chatId) {
+        if (incomingCall) {
           callWebSocketService.rejectCall({
-            chatId,
+            chatId: chatId!,
           });
         }
 
         set({
-          error: "device_unavailable",
+          callError: "device_unavailable",
           callStatus: CallStatus.ERROR,
         });
       }
     },
 
-    rejectCall: (isCancel = false) => {
-      const { chatId } = get();
+    rejectCall: (isCancel: false) => {
+      const { chatId, endCall } = get();
 
       if (!chatId) {
         console.error("No chatId found for rejecting call");
@@ -230,119 +275,35 @@ export const useCallStore = create<CallStore>()(
         callWebSocketService.rejectCall({ chatId, isCallerCancel: isCancel });
 
         // Close modal and clean up
-        get().endCall({ isCancel, isRejected: true });
+        endCall(isCancel, true); // true → close modal without marking as ended
       } catch (error) {
         console.error("Error rejecting call:", error);
         toast.error("Failed to reject call. Please try again.");
         set({
-          error: "device_unavailable",
+          callError: "device_unavailable",
           callStatus: CallStatus.ERROR,
         });
       }
     },
 
-    addCallMember: (member: CallMember) => {
-      const { localStream, iceCandidates } = get();
-
-      // 1. Create peer connection for the new member
-      const pc = get().createPeerConnection(member.memberId);
-
-      // 2. Add any pending ICE candidates to the new connection
-      iceCandidates.forEach((candidate) => {
-        try {
-          pc.addIceCandidate(new RTCIceCandidate(candidate));
-        } catch (error) {
-          console.error("Error adding ICE candidate to new member:", error);
-        }
-      });
-
-      // 3. Add local stream tracks to the new connection
-      if (localStream) {
-        localStream.getTracks().forEach((track) => {
-          if (!pc.getSenders().some((s) => s.track === track)) {
-            pc.addTrack(track, localStream);
-          }
-        });
+    // 🛑 End Call with cleanup
+    endCall: (isCancel = false, isRejected = false, memberId?: string) => {
+      if (memberId) {
+        get().removeParticipantFromCall(memberId);
+        return;
       }
 
-      // 4. Initialize remote stream for the new member
-      set((state) => ({
-        callMembers: [...state.callMembers, member],
-        remoteStreams: {
-          ...state.remoteStreams,
-          [member.memberId]: new MediaStream(), // Initialize empty stream
-        },
-      }));
-
-      console.log(`Member ${member.memberId} added to call`);
-
-      // 5. If this is the first member joining, update call status
-      const currentMembers = get().callMembers;
-      if (
-        currentMembers.length === 1 &&
-        get().callStatus === CallStatus.CONNECTING
-      ) {
-        set({ callStatus: CallStatus.CONNECTED });
-      }
-    },
-
-    removeCallMember: (memberId: string) => {
-      const { peerConnections, remoteStreams } = get();
-
-      // 1. Close the peer connection for this member
-      if (peerConnections[memberId]) {
-        peerConnections[memberId].close();
-        set((state) => {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { [memberId]: _, ...remainingConnections } =
-            state.peerConnections;
-          return {
-            peerConnections: remainingConnections,
-          };
-        });
-      }
-
-      // 2. Clean up their remote stream
-      if (remoteStreams[memberId]) {
-        remoteStreams[memberId].getTracks().forEach((track) => track.stop());
-        set((state) => {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { [memberId]: _, ...remainingStreams } = state.remoteStreams;
-          return {
-            remoteStreams: remainingStreams,
-          };
-        });
-      }
-
-      // 3. Remove from members list
-      set({
-        callMembers: get().callMembers.filter((m) => m.memberId !== memberId),
-      });
-      console.log(`Member ${memberId} removed from call`);
-
-      // If no one left, end the call
-      const remaining = get().callMembers;
-      if (remaining.length === 0) {
-        get().endCall();
-      }
-    },
-
-    // 🛑 End Call: cleanup everything
-    endCall: (option) => {
-      const { isCancel = false, isRejected = false } = option ?? {};
       const {
-        localStream,
-        remoteStreams,
         peerConnections,
-        sfuConnection,
-        sfuStreams,
-        timeoutRef,
+        remoteStreams = {},
+        localStream,
         callStatus,
+        callTimeoutRef,
       } = get();
 
       // Clear the timeout if it exists
-      if (timeoutRef) {
-        clearTimeout(timeoutRef);
+      if (callTimeoutRef) {
+        clearTimeout(callTimeoutRef);
       }
 
       if (
@@ -353,8 +314,8 @@ export const useCallStore = create<CallStore>()(
         return;
       }
 
-      // Helper to stop tracks
-      const stopAllTracks = (stream: MediaStream | null | undefined) => {
+      // Helper function to stop all tracks in a stream
+      const stopAllTracks = (stream: MediaStream | null) => {
         if (!stream) return;
         stream.getTracks().forEach((track) => {
           track.stop();
@@ -362,23 +323,22 @@ export const useCallStore = create<CallStore>()(
         });
       };
 
+      // Stop local stream tracks
       stopAllTracks(localStream);
+
+      // Stop all remote streams
       Object.values(remoteStreams).forEach(stopAllTracks);
 
-      Object.values(peerConnections).forEach((pc) => {
-        pc.ontrack = null;
-        pc.onicecandidate = null;
-        pc.oniceconnectionstatechange = null;
-        if (pc.connectionState !== "closed") {
-          pc.close();
-        }
-      });
-
-      if (sfuConnection) {
-        sfuConnection.close();
-      }
-      if (sfuStreams) {
-        Object.values(sfuStreams).forEach(stopAllTracks);
+      // Close all peer connections
+      if (peerConnections) {
+        Object.values(peerConnections).forEach((pc) => {
+          pc.ontrack = null;
+          pc.onicecandidate = null;
+          pc.oniceconnectionstatechange = null;
+          if (pc.connectionState !== "closed") {
+            pc.close();
+          }
+        });
       }
 
       set({
@@ -387,20 +347,66 @@ export const useCallStore = create<CallStore>()(
           : isRejected
           ? CallStatus.REJECTED
           : CallStatus.ENDED,
-        endedAt: new Date(),
-        callMembers: [],
+        callEndTime: new Date(),
+        participants: [],
+        incomingCall: null,
         iceCandidates: [],
         localStream: null,
         remoteStreams: {},
         peerConnections: {},
-        sfuConnection: null,
-        sfuStreams: {},
-        error: null,
+        isMuted: false,
+        callTimeoutRef: null, // Reset the timeout reference
       });
     },
 
-    setStatus: (callStatus: CallStatus) => {
-      set({ callStatus });
+    setCallStatus: (status: CallStatus) => {
+      set({ callStatus: status });
+    },
+
+    getCallDuration: (): number => {
+      const state = get();
+      if (!state.callStartTime) return 0;
+
+      const endTime = state.callEndTime || new Date();
+      return Math.floor(
+        (endTime.getTime() - state.callStartTime.getTime()) / 1000
+      );
+    },
+
+    removeParticipantFromCall: (memberId: string) => {
+      const { peerConnections, remoteStreams, participants, isGroupCall } =
+        get();
+
+      // Only proceed if this is a group call
+      if (!isGroupCall) return;
+
+      // 1. Close the peer connection for this member
+      if (peerConnections[memberId]) {
+        peerConnections[memberId].close();
+        set((state) => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { [memberId]: _, ...remainingConnections } =
+            state.peerConnections;
+          return { peerConnections: remainingConnections };
+        });
+      }
+
+      // 2. Clean up their remote stream
+      if (remoteStreams[memberId]) {
+        remoteStreams[memberId].getTracks().forEach((track) => track.stop());
+        set((state) => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { [memberId]: _, ...remainingStreams } = state.remoteStreams;
+          return { remoteStreams: remainingStreams };
+        });
+      }
+
+      // 3. Remove from participants list
+      set({
+        participants: participants.filter((p) => p.id !== memberId),
+      });
+
+      console.log(`Participant ${memberId} removed from call`);
     },
 
     // 🎤 Toggle audio mute
@@ -408,59 +414,15 @@ export const useCallStore = create<CallStore>()(
       const { localStream, isMuted } = get();
       if (localStream) {
         localStream.getAudioTracks().forEach((track) => {
-          track.enabled = isMuted; // if muted=true → enable again
+          track.enabled = isMuted;
         });
-        set({ isMuted: !isMuted }); // toggle UI state
       }
-    },
-
-    // 🎥 Toggle video
-    toggleVideo: async () => {
-      const { localStream, peerConnections, isVideoCall } = get();
-
-      if (!localStream) return;
-
-      const videoTracks = localStream.getVideoTracks();
-
-      if (videoTracks.length > 0) {
-        // Toggle existing video tracks
-        videoTracks.forEach((track) => {
-          track.enabled = !track.enabled;
-        });
-      } else if (isVideoCall) {
-        // Add video if it's a video call but no video tracks exist
-        try {
-          const videoStream = await navigator.mediaDevices.getUserMedia({
-            video: {
-              width: { ideal: 1280 },
-              height: { ideal: 720 },
-              facingMode: "user",
-            },
-          });
-
-          videoStream.getVideoTracks().forEach((track) => {
-            localStream.addTrack(track);
-          });
-
-          // Update all peer connections
-          Object.values(peerConnections).forEach((pc) => {
-            if (pc) {
-              videoStream.getVideoTracks().forEach((track) => {
-                pc.addTrack(track, localStream);
-              });
-            }
-          });
-        } catch (error) {
-          console.error("Error enabling video:", error);
-          toast.error("Could not enable video");
-        }
-      }
+      set({ isMuted: !isMuted });
     },
 
     // 🎥 Setup local media stream
     setupLocalStream: async () => {
       const { isVideoCall } = get();
-
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: true,
@@ -496,7 +458,7 @@ export const useCallStore = create<CallStore>()(
       set({
         localStream: null,
         remoteStreams: {},
-        error: null,
+        callError: null,
       });
     },
 
@@ -513,9 +475,9 @@ export const useCallStore = create<CallStore>()(
 
       // ICE Candidate Handling
       pc.onicecandidate = (event) => {
-        if (event.candidate && chatId) {
+        if (event.candidate) {
           callWebSocketService.sendIceCandidate({
-            chatId,
+            chatId: chatId || "",
             candidate: event.candidate.toJSON(),
           });
         }
@@ -562,119 +524,103 @@ export const useCallStore = create<CallStore>()(
     },
 
     removePeerConnection: (memberId: string) => {
-      const { peerConnections } = get();
-      const pc = peerConnections[memberId];
-
+      const pc = get().peerConnections[memberId];
       if (pc) {
         pc.getSenders().forEach((s) => s.track?.stop());
         pc.close();
         set((state) => {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { [memberId]: _, ...rest } = state.peerConnections;
-          return {
-            peerConnections: rest,
-          };
+          return { peerConnections: rest };
         });
       }
     },
 
     // 📺 Handle incoming remote stream
-    handleRemoteStream: (memberId: string, event: RTCTrackEvent) => {
+    handleRemoteStream: (participantId: string, event: RTCTrackEvent) => {
       set((state) => {
+        // 1. Validate incoming track
         if (!event.track) {
           console.error("Received track event without track!", event);
           return state;
         }
 
-        // 1. Get or create stream
-        let stream = state.remoteStreams[memberId];
+        // 2. Get or create stream
+        let stream = state.remoteStreams[participantId];
         if (!stream) {
           stream = new MediaStream();
-          console.log(`Created new stream for ${memberId}`);
+          console.log(`Created new stream for ${participantId}`);
         }
 
-        // 2. Avoid duplicate tracks
+        // 3. Check for duplicate tracks
         const existingTrack = stream
           .getTracks()
           .find((t) => t.id === event.track.id);
         if (existingTrack) {
-          console.warn(`Duplicate ${event.track.kind} track from ${memberId}`);
+          console.warn(
+            `Duplicate ${event.track.kind} track from ${participantId}`
+          );
           return state;
         }
 
-        // 3. Add track
+        // 4. Add track with lifecycle handlers
         stream.addTrack(event.track);
-        console.log(`Added ${event.track.kind} track to ${memberId}'s stream`);
+        console.log(
+          `Added ${event.track.kind} track to ${participantId}'s stream`
+        );
 
-        // 4. Track lifecycle updates
-        const updateMemberFromStream = (s: typeof state, st: MediaStream) => {
-          const hasAudioTrack = st.getAudioTracks().some((t) => t.enabled);
-          const hasVideoTrack = st.getVideoTracks().some((t) => t.enabled);
-
-          return s.callMembers.map((m) =>
-            m.memberId === memberId
-              ? { ...m, isMuted: !hasAudioTrack, isVideoEnable: hasVideoTrack }
-              : m
-          );
-        };
-
+        // 5. Track state monitoring
         event.track.onmute = () => {
           console.log(`Track ${event.track.id} muted`);
-          set((s) => ({
-            callMembers: updateMemberFromStream(s, s.remoteStreams[memberId]),
-          }));
+          // Update UI if needed
         };
 
         event.track.onunmute = () => {
           console.log(`Track ${event.track.id} active`);
-          set((s) => ({
-            callMembers: updateMemberFromStream(s, s.remoteStreams[memberId]),
-          }));
+          // Update UI if needed
         };
 
         event.track.onended = () => {
           console.log(`Track ${event.track.id} ended`);
           set((s) => {
             const newStream = new MediaStream(
-              s.remoteStreams[memberId]
+              s.remoteStreams[participantId]
                 ?.getTracks()
                 .filter((t) => t.id !== event.track.id) || []
             );
             return {
               remoteStreams: {
                 ...s.remoteStreams,
-                [memberId]: newStream,
+                [participantId]: newStream,
               },
-              callMembers: updateMemberFromStream(s, newStream),
             };
           });
         };
 
-        // 5. Return updated state
+        // 6. Return updated state
         return {
           ...state,
           remoteStreams: {
             ...state.remoteStreams,
-            [memberId]: stream,
+            [participantId]: stream,
           },
-          callMembers: state.callMembers.some((m) => m.memberId === memberId)
-            ? updateMemberFromStream(state, stream)
-            : [
-                ...state.callMembers,
-                {
-                  memberId,
-                  isMuted: stream.getAudioTracks().length === 0,
-                  isVideoEnable: stream.getVideoTracks().length > 0,
-                  isSpeaking: false,
-                },
-              ],
+          // Update participants list if new
+          participants: state.participants.some((p) => p.id === participantId)
+            ? state.participants
+            : [...state.participants, { id: participantId }],
         };
       });
     },
 
     // 🔄 Switch between video/voice
     switchType: async () => {
-      const { chatId, localStream, peerConnections, isVideoCall } = get();
+      const {
+        isVideoCall,
+        chatId,
+        isGroupCall,
+        localStream,
+        peerConnections = {},
+      } = get();
       const newType = !isVideoCall;
 
       try {
@@ -734,11 +680,12 @@ export const useCallStore = create<CallStore>()(
           set({ isVideoCall: newType });
         }
 
-        // Notify other members
+        // Notify other participants
         if (chatId) {
           callWebSocketService.updateCallType({
             chatId,
             isVideoCall: newType,
+            isGroupCall,
           });
         }
       } catch (error) {
@@ -749,16 +696,16 @@ export const useCallStore = create<CallStore>()(
       }
     },
 
+    setStatus: (status) => set({ callStatus: status }),
+
     sendOffer: async (toMemberId) => {
       // 1. Verify member ID exists
-      const { chatId } = get();
-
-      const myMemberId = getMyChatMemberId(chatId!);
+      const myMemberId = getMyChatMemberId(get().chatId!);
       if (!myMemberId)
         throw new Error("Cannot send offer - no member ID found");
 
       // 2. Get current state
-      const { localStream, peerConnections } = get();
+      const { chatId, localStream, peerConnections } = get();
       console.log("Creating call offer..."); // First console.log to track flow
 
       if (!chatId)
@@ -804,31 +751,52 @@ export const useCallStore = create<CallStore>()(
       }
     },
 
-    addIceCandidate: (candidate: RTCIceCandidateInit) => {
+    setIncomingCall: (data) => {
+      set({ incomingCall: data, callStatus: CallStatus.INCOMING });
+      useModalStore.getState().openModal(ModalType.CALL);
+    },
+
+    addIceCandidate: (
+      participantId: string,
+      candidate: RTCIceCandidateInit
+    ) => {
       const { peerConnections, sfuConnection } = get();
 
-      // Add to iceCandidates array for later use when peer connections are established
-      set((state) => ({
-        iceCandidates: [...state.iceCandidates, candidate],
-      }));
-
-      // Try to add to all existing peer connections
-      Object.values(peerConnections).forEach((pc) => {
-        try {
-          pc.addIceCandidate(new RTCIceCandidate(candidate));
-        } catch (error) {
-          console.error("Error adding ICE candidate:", error);
-        }
-      });
-
-      // Try to add to SFU connection if exists
-      if (sfuConnection) {
-        try {
-          sfuConnection.addIceCandidate(new RTCIceCandidate(candidate));
-        } catch (error) {
-          console.error("Error adding ICE candidate to SFU:", error);
-        }
+      // Case 1: P2P call (participantId is the other user)
+      if (peerConnections[participantId]) {
+        peerConnections[participantId].addIceCandidate(
+          new RTCIceCandidate(candidate)
+        );
       }
+      // Case 2: SFU call (participantId === "sfu")
+      else if (participantId === "sfu" && sfuConnection) {
+        sfuConnection.addIceCandidate(new RTCIceCandidate(candidate));
+      }
+    },
+
+    addParticipant: (participant: CallParticipant) => {
+      set((state) => ({
+        participants: [...state.participants, participant],
+      }));
+    },
+
+    removeParticipant: (participantId: string) => {
+      const { peerConnections, remoteStreams } = get();
+
+      // Close their peer connection
+      if (peerConnections[participantId]) {
+        peerConnections[participantId].close();
+        delete peerConnections[participantId];
+      }
+
+      // Remove their stream
+      delete remoteStreams[participantId];
+
+      set((state) => ({
+        participants: state.participants.filter((p) => p.id !== participantId),
+        peerConnections: { ...peerConnections },
+        remoteStreams: { ...remoteStreams },
+      }));
     },
 
     createSfuConnection: async () => {
@@ -854,11 +822,7 @@ export const useCallStore = create<CallStore>()(
         if (localStream) {
           localStream.getTracks().forEach((track) => {
             // Prevent duplicate track addition
-            if (
-              !pc.getSenders().some((s) => s.track === track) &&
-              localStream
-            ) {
-              // Add the track with the local stream (not null)
+            if (!pc.getSenders().some((s) => s.track === track)) {
               pc.addTrack(track, localStream);
             }
           });
@@ -898,15 +862,12 @@ export const useCallStore = create<CallStore>()(
 
           // Add track if not already present
           if (
-            sfuStreams[kind] &&
             !sfuStreams[kind]!.getTracks().some((t) => t.id === event.track.id)
           ) {
             sfuStreams[kind]!.addTrack(event.track);
           }
 
-          return {
-            sfuStreams,
-          };
+          return { sfuStreams };
         });
       };
 
@@ -924,9 +885,7 @@ export const useCallStore = create<CallStore>()(
             get().disconnectFromSfu();
             break;
           case "closed":
-            set({
-              sfuConnection: null,
-            });
+            set({ sfuConnection: null });
             break;
         }
       };
@@ -956,6 +915,7 @@ export const useCallStore = create<CallStore>()(
         throw error;
       }
     },
+
     disconnectFromSfu: () => {
       const { sfuConnection, sfuStreams } = get();
 
@@ -964,28 +924,15 @@ export const useCallStore = create<CallStore>()(
       }
 
       // Clean up SFU streams
-      if (sfuStreams) {
-        Object.values(sfuStreams).forEach((stream) => {
-          stream?.getTracks().forEach((track) => track.stop());
-        });
-      }
+      Object.values(sfuStreams ?? {}).forEach((stream) => {
+        stream.getTracks().forEach((track) => track.stop());
+      });
 
-      set((state) => ({
+      set({
         sfuConnection: null,
         sfuStreams: {},
         // Remove from peerConnections if needed
-        peerConnections: Object.fromEntries(
-          Object.entries(state.peerConnections).filter(([key]) => key !== "sfu")
-        ),
-      }));
-    },
-
-    getCallDuration: (): number => {
-      const state = get();
-      if (!state.startedAt) return 0;
-
-      const endTime = state.endedAt || new Date();
-      return Math.floor((endTime.getTime() - state.startedAt.getTime()) / 1000);
+      });
     },
 
     closeCallModal: () => {
@@ -995,16 +942,19 @@ export const useCallStore = create<CallStore>()(
       // Additional cleanup if needed
       set({
         chatId: null,
-        callStatus: null,
         isVideoCall: false,
-        callMembers: [],
+        isGroupCall: false,
+        callStatus: null,
+        callStartTime: null,
+        callEndTime: null,
+        participants: [],
+        incomingCall: null,
         iceCandidates: [],
         localStream: null,
         remoteStreams: {},
         peerConnections: {},
-        sfuConnection: null,
-        sfuStreams: {},
-        error: null,
+        isMuted: false,
+        callError: null,
       });
     },
   }))

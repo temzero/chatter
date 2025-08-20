@@ -12,7 +12,6 @@ import {
   RtcOfferResponse,
   RtcAnswerRequest,
   updateCallPayload,
-  PendingCallsResponse,
 } from "@/types/callPayload";
 
 /**
@@ -34,7 +33,7 @@ export const callWebSocketService = {
     webSocketService.emit(CallEvent.PENDING_CALLS);
   },
 
-  onPendingCalls(callback: (data: PendingCallsResponse) => void): void {
+  onPendingCalls(callback: (data: IncomingCallResponse[]) => void): void {
     webSocketService.on(CallEvent.PENDING_CALLS, callback);
   },
   /**
@@ -122,24 +121,24 @@ export const callWebSocketService = {
   },
 
   /**
-   * End an ongoing call
+   * Hang up from an ongoing call (one user leaves)
    */
-  endCall(payload: CallActionRequest) {
-    webSocketService.emit(CallEvent.END_CALL, payload);
+  hangup(payload: CallActionRequest) {
+    webSocketService.emit(CallEvent.HANG_UP, payload);
   },
 
   /**
-   * Listen for call end events
+   * Listen for hangup events (when a participant leaves)
    */
-  onCallEnded(callback: (data: CallActionResponse) => void) {
-    webSocketService.on(CallEvent.END_CALL, callback);
+  onHangup(callback: (data: CallActionResponse) => void) {
+    webSocketService.on(CallEvent.HANG_UP, callback);
   },
 
   /**
-   * Remove call end listener
+   * Remove hangup listener
    */
-  offCallEnded(callback: (data: CallActionResponse) => void) {
-    webSocketService.off(CallEvent.END_CALL, callback);
+  offHangup(callback: (data: CallActionResponse) => void) {
+    webSocketService.off(CallEvent.HANG_UP, callback);
   },
 
   // ============================
@@ -265,7 +264,7 @@ export const callWebSocketService = {
     webSocketService.off(CallEvent.INCOMING_CALL);
     webSocketService.off(CallEvent.ACCEPT_CALL);
     webSocketService.off(CallEvent.REJECT_CALL);
-    webSocketService.off(CallEvent.END_CALL);
+    webSocketService.off(CallEvent.HANG_UP);
     webSocketService.off(CallEvent.OFFER_SDP);
     webSocketService.off(CallEvent.ANSWER_SDP);
     webSocketService.off(CallEvent.ICE_CANDIDATE);

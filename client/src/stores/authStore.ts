@@ -6,9 +6,10 @@ import { authService } from "@/services/authService";
 import { useChatStore } from "@/stores/chatStore";
 import { useSidebarStore } from "./sidebarStore";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
-import type { User } from "@/types/responses/user.response";
 import { SidebarMode } from "@/types/enums/sidebarMode";
 import { webSocketService } from "@/lib/websocket/services/websocket.service";
+import type { UserResponse } from "@/types/responses/user.response";
+import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
 
 type MessageType = "error" | "success" | "info";
 
@@ -18,14 +19,14 @@ type Message = {
 } | null;
 
 type AuthState = {
-  currentUser: User | null;
+  currentUser: UserResponse | null;
   isAuthenticated: boolean;
   loading: boolean;
   message: Message;
 };
 
 type AuthActions = {
-  setCurrentUser: (user: User | null) => void;
+  setCurrentUser: (user: UserResponse | null) => void;
   setMessage: (type: MessageType, content: string) => void;
   clearMessage: () => void;
   setLoading: (loading: boolean, clearMessages?: boolean) => void;
@@ -141,7 +142,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         webSocketService.disconnect();
         useChatStore.getState().clearChats();
         useSidebarStore.getState().setSidebar(SidebarMode.DEFAULT);
-        useSidebarInfoStore.getState().setSidebarInfo(SidebarMode.DEFAULT);
+        useSidebarInfoStore.getState().setSidebarInfo(SidebarInfoMode.DEFAULT);
         set({
           ...initialState,
           loading: false,

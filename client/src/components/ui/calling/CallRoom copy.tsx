@@ -10,24 +10,23 @@ import { VoiceVisualizerButton } from "../VoiceVisualizerBtn";
 
 export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
   const {
-    isMuted,
-    // isVideoEnable,
     isVideoCall,
     localStream,
     remoteStreams,
-    startedAt,
-    sfuStreams,
+    callStartTime,
+    isMuted,
     toggleMute,
     switchType,
-    endCall,
-    closeCallModal,
   } = useCallStore();
+
+  const endCall = useCallStore((state) => state.endCall);
+  const closeCallModal = useCallStore((state) => state.closeCallModal);
 
   if (!chat) return null;
 
-  const handleHangUp = () => {
-    callWebSocketService.hangup({ chatId: chat.id });
-    endCall();
+  const handleEndCall = () => {
+    callWebSocketService.endCall({ chatId: chat.id });
+    endCall(true);
     closeCallModal();
   };
 
@@ -43,17 +42,6 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
     }
   };
 
-  // Get all remote streams (from both peer connections and SFU)
-  const allRemoteStreams = { ...remoteStreams };
-
-  // Add SFU streams if they exist
-  if (sfuStreams?.audio) {
-    allRemoteStreams.sfu_audio = sfuStreams.audio;
-  }
-  if (sfuStreams?.video) {
-    allRemoteStreams.sfu_video = sfuStreams.video;
-  }
-
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center text-white">
       {isVideoCall ? (
@@ -61,20 +49,23 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
           {/* Remote video streams */}
           <div
             className={`w-full h-full grid gap-2 auto-rows-fr ${
-              Object.keys(allRemoteStreams).length === 1
+              Object.keys(remoteStreams).length === 1
                 ? "grid-cols-1"
                 : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
             }`}
           >
-            {Object.entries(allRemoteStreams).map(([streamId, stream]) => (
-              <div key={streamId} className="relative w-full overflow-hidden">
+            {Object.entries(remoteStreams).map(([participantId, stream]) => (
+              <div
+                key={participantId}
+                className="relative w-full overflow-hidden"
+              >
                 {/* Aspect-ratio wrapper to control height cleanly */}
                 <VideoStream
                   stream={stream}
                   className="absolute inset-0 w-full h-full object-cover"
                 />
 
-                {Object.keys(allRemoteStreams).length === 1 && (
+                {Object.keys(remoteStreams).length === 1 && (
                   <VoiceVisualizerBar
                     stream={stream}
                     isMuted={false}
@@ -110,7 +101,10 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
       <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10">
         <p className="text-sm truncate max-w-[200px]">{chat.name}</p>
         <div className="flex items-center gap-2">
-          <Timer startTime={startedAt} />
+          {isVideoCall && (
+            <span className="material-symbols-outlined">videocam</span>
+          )}
+          <Timer startTime={callStartTime} />
         </div>
       </div>
 
@@ -130,8 +124,8 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
           />
           <VoiceVisualizerButton
             variant="ghost"
-            isMuted={isMuted}
             stream={localStream}
+            isMuted={isMuted}
             onClick={handleToggleMic}
             className="w-14 h-14 custom-border rounded-full"
           />
@@ -139,7 +133,7 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
             variant="ghost"
             className="hover:bg-red-500/50 w-14 h-14"
             isRoundedFull
-            onClick={handleHangUp}
+            onClick={handleEndCall}
             icon="call_end"
           />
         </div>

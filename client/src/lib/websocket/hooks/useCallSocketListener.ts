@@ -1,8 +1,13 @@
+// hooks/useCallSocketListeners.ts
 import { useEffect } from "react";
 import { callWebSocketService } from "../services/call.websocket.service";
 import { toast } from "react-toastify";
 import { useCallStore } from "@/stores/callStore";
-import { CallStatus } from "@/types/enums/modalType";
+import { CallStatus } from "@/types/enums/CallStatus";
+import { handleError } from "@/utils/handleError";
+import { useChatStore } from "@/stores/chatStore";
+import { ChatType } from "@/types/enums/ChatType";
+import { ModalType, useModalStore } from "@/stores/modalStore";
 import {
   IncomingCallResponse,
   CallActionResponse,
@@ -11,25 +16,18 @@ import {
   IceCandidateResponse,
   updateCallPayload,
 } from "@/types/callPayload";
-import { getMyChatMemberId } from "@/stores/chatMemberStore";
-import { handleError } from "@/utils/handleError";
 
+// callEvents exclude sender
 export function useCallSocketListeners() {
   useEffect(() => {
-    const handlePendingCalls = (data: {
-      pendingCalls: IncomingCallResponse[];
-    }) => {
-      if (data.pendingCalls && data.pendingCalls.length > 0) {
-        // Sort by timestamp to get the most recent call first
-        const sortedCalls = [...data.pendingCalls].sort(
+    const handlePendingCalls = (calls: IncomingCallResponse[]) => {
+      if (calls?.length > 0) {
+        const sortedCalls = [...calls].sort(
           (a, b) => b.timestamp - a.timestamp
         );
-
-        // Handle the most recent call
         const mostRecentCall = sortedCalls[0];
         handleIncomingCall(mostRecentCall);
 
-        // Show notification for other missed calls
         if (sortedCalls.length > 1) {
           toast.info(`You have ${sortedCalls.length - 1} more missed calls`);
         }
@@ -37,171 +35,124 @@ export function useCallSocketListeners() {
     };
 
     const handleIncomingCall = (data: IncomingCallResponse) => {
-      const myMemberId = getMyChatMemberId(data.chatId);
-
-      if (data.fromMemberId === myMemberId) return;
-      useCallStore.getState().setIncomingCall({
-        fromMemberId: data.fromMemberId,
-        callId: data.chatId,
+      useCallStore.setState({
+        chatId: data.chatId,
+        callStatus: CallStatus.INCOMING,
+        isVideoCall: data.isVideoCall,
+        callerMemberId: data.fromMemberId,
       });
 
-      useCallStore
-        .getState()
-        .openCall(
-          data.chatId,
-          data.isVideoCall,
-          data.isGroupCall,
-          CallStatus.INCOMING
-        );
-
+      useModalStore.getState().openModal(ModalType.CALL);
       toast.info(`Incoming ${data.isVideoCall ? "video" : "voice"} call`);
     };
 
     const handleUpdateCall = (data: updateCallPayload) => {
-      const { chatId, isVideoCall, isGroupCall } = data;
-      const currentState = useCallStore.getState();
+      const { chatId, isVideoCall } = data;
+      const callStore = useCallStore.getState();
 
-      // Only update if it's for the current active call
-      if (currentState.chatId === chatId) {
-        useCallStore.setState({
-          isVideoCall,
-          isGroupCall,
-          // Update any other relevant state here
-        });
+      if (callStore.chatId === chatId) {
+        // switchType already does full logic, but here we directly update
+        useCallStore.setState({ isVideoCall });
 
-        // If switching to video, we might need to setup local stream
-        if (isVideoCall && !currentState.isVideoCall) {
-          currentState.setupLocalStream().catch((error) => {
-            console.error("Failed to setup video stream:", error);
-          });
+        if (isVideoCall && !callStore.isVideoCall) {
+          callStore
+            .setupLocalStream()
+            .catch((err) =>
+              console.error("Failed to setup video stream:", err)
+            );
         }
 
-        // If switching to audio, stop video tracks
-        if (!isVideoCall && currentState.isVideoCall) {
-          currentState.localStream
-            ?.getVideoTracks()
-            .forEach((track) => track.stop());
+        if (!isVideoCall && callStore.isVideoCall) {
+          callStore.localStream?.getVideoTracks().forEach((t) => t.stop());
         }
       }
     };
 
     const handleCallAccepted = async (data: CallActionResponse) => {
-      const myMemberId = getMyChatMemberId(data.chatId);
+      const callStore = useCallStore.getState();
+      callStore.setStatus(CallStatus.CONNECTING);
 
-      if (data.fromMemberId === myMemberId) return;
-
-      const store = useCallStore.getState();
-      store.setCallStatus(CallStatus.CONNECTING);
-
-      const currentStatus = store.callStatus;
-      if (currentStatus === CallStatus.OUTGOING) {
-        await store.sendOffer(data.fromMemberId);
+      if (callStore.callStatus === CallStatus.OUTGOING) {
+        await callStore.sendOffer(data.fromMemberId);
       }
     };
 
     const handleCallRejected = (data: CallActionResponse) => {
-      const myMemberId = getMyChatMemberId(data.chatId);
-
-      if (data.fromMemberId === myMemberId) return;
       if (data.isCallerCancel) {
-        useCallStore.getState().endCall(true);
+        useCallStore.getState().endCall({ isCancel: true });
         toast.info("Call canceled by caller");
       } else {
-        useCallStore.getState().endCall(false, true);
+        useCallStore.getState().endCall({ isRejected: true });
         toast.info("Call rejected");
       }
     };
 
-    const handleCallEnded = (data: CallActionResponse) => {
-      console.log("Call ended or member left", data);
-
-      // Check if this is a group call and the action is from another member
-      if (
-        useCallStore.getState().isGroupCall &&
-        data.fromMemberId !== getMyChatMemberId(data.chatId)
-      ) {
-        // Just remove this member's connection
-        useCallStore.getState().removeParticipantFromCall(data.fromMemberId);
-        toast.info(`${data.fromMemberId} has left the call`);
-      } else {
-        // It's either a direct call or our own leave action - end the full call
-        useCallStore.getState().endCall();
-        toast.info("Call ended");
-      }
+    const handleHangUp = (data: CallActionResponse) => {
+      useCallStore.getState().removeCallMember(data.fromMemberId);
+      toast.info(`${data.fromMemberId} has left the call`);
     };
 
-    // In useCallSocketListeners.ts - Modified handlers
     const handleOffer = async ({
       chatId,
       fromMemberId,
       offer,
     }: RtcOfferResponse) => {
-      const store = useCallStore.getState();
+      const callStore = useCallStore.getState();
+      const chatType = useChatStore.getState().getChatType(chatId);
 
       try {
-        if (!store.isGroupCall) {
-          // P2P Call
+        if (chatType === ChatType.DIRECT) {
           const pc =
-            store.peerConnections[fromMemberId] ||
-            store.createPeerConnection(fromMemberId);
+            callStore.peerConnections[fromMemberId] ||
+            callStore.createPeerConnection(fromMemberId);
 
-          if (pc.signalingState === "closed")
+          if (pc.signalingState === "closed") {
             throw new Error("PeerConnection closed");
+          }
 
           await pc.setRemoteDescription(new RTCSessionDescription(offer));
           const answer = await pc.createAnswer({
             offerToReceiveAudio: true,
-            offerToReceiveVideo: store.isVideoCall,
+            offerToReceiveVideo: callStore.isVideoCall,
           });
 
           await pc.setLocalDescription(answer);
-          callWebSocketService.sendAnswer({
-            chatId,
-            answer,
-          });
+          callWebSocketService.sendAnswer({ chatId, answer });
         } else {
-          // SFU Call
-          if (!store.sfuConnection) {
-            store.sfuConnection = new RTCPeerConnection({
-              iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-            });
-            store.sfuConnection.onicecandidate = (e) =>
-              e.candidate &&
-              callWebSocketService.sendIceCandidate({
-                chatId,
-                candidate: e.candidate.toJSON(),
-              });
+          if (!callStore.sfuConnection) {
+            await callStore.createSfuConnection();
           }
-
-          await store.sfuConnection.setRemoteDescription(offer);
+          await callStore.sfuConnection?.setRemoteDescription(offer);
         }
 
-        store.setCallStatus(CallStatus.CONNECTING);
+        callStore.setStatus(CallStatus.CONNECTING);
       } catch (err) {
         handleError(err, "Call offer handling failed");
-        store.endCall();
+        callStore.endCall();
       }
     };
 
     const handleAnswer = async (data: RtcAnswerResponse) => {
-      const store = useCallStore.getState();
+      const callStore = useCallStore.getState();
+      const chatType = useChatStore.getState().getChatType(data.chatId);
+
       try {
-        if (store.isGroupCall) {
-          await store.sfuConnection?.setRemoteDescription(
-            new RTCSessionDescription(data.answer)
-          );
-        } else {
-          const pc = store.peerConnections[data.fromMemberId];
+        if (chatType === ChatType.DIRECT) {
+          const pc = callStore.peerConnections[data.fromMemberId];
           if (pc) {
             await pc.setRemoteDescription(
               new RTCSessionDescription(data.answer)
             );
           }
+        } else {
+          await callStore.sfuConnection?.setRemoteDescription(
+            new RTCSessionDescription(data.answer)
+          );
         }
-        store.setCallStatus(CallStatus.CONNECTED);
-      } catch (error) {
-        console.error("Answer handling failed:", error);
-        store.endCall();
+        callStore.setStatus(CallStatus.CONNECTED);
+      } catch (err) {
+        console.error("Answer handling failed:", err);
+        callStore.endCall();
       }
     };
 
@@ -210,17 +161,17 @@ export function useCallSocketListeners() {
       useCallStore.getState().addIceCandidate(data.candidate);
     };
 
-    // Subscribe to call events
+    // Subscribe
+    callWebSocketService.onPendingCalls(handlePendingCalls);
     callWebSocketService.onIncomingCall(handleIncomingCall);
     callWebSocketService.onCallTypeUpdated(handleUpdateCall);
     callWebSocketService.onCallAccepted(handleCallAccepted);
     callWebSocketService.onCallRejected(handleCallRejected);
-    callWebSocketService.onCallEnded(handleCallEnded);
+    callWebSocketService.onHangup(handleHangUp);
     callWebSocketService.onOffer(handleOffer);
     callWebSocketService.onAnswer(handleAnswer);
     callWebSocketService.onIceCandidate(handleIceCandidate);
-    callWebSocketService.onPendingCalls(handlePendingCalls);
-    // Check for pending calls when the component mounts
+
     callWebSocketService.requestPendingCalls();
 
     return () => {

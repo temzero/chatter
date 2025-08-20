@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { childrenModalAnimation } from "@/animations/modalAnimations";
 import { useCallStore } from "@/stores/callStore";
-import { CallStatus } from "@/types/enums/modalType";
+import { CallStatus } from "@/types/enums/CallStatus";
 
 // Import UI components
 import { CallRoom } from "../ui/calling/CallRoom";

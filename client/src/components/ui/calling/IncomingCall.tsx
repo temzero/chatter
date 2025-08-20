@@ -10,10 +10,13 @@ export const IncomingCall = ({
   chat,
 }: {
   chat: ChatResponse;
-  isGroupCall?: boolean;
   participants?: Array<{ id: string; avatar: string; name: string }>;
 }) => {
-  const { isVideoCall, localStream, isLocalVideoDisabled } = useCallStore();
+  const { isVideoCall, localStream } = useCallStore();
+
+  const acceptCall = () => {
+    useCallStore.getState().acceptCall();
+  };
 
   const rejectCall = () => {
     useCallStore.getState().rejectCall();
@@ -23,7 +26,7 @@ export const IncomingCall = ({
   return (
     <div className="flex flex-col items-center w-full h-full">
       {/* Background - Avatar or Webcam */}
-      {isVideoCall && localStream && !isLocalVideoDisabled && (
+      {isVideoCall && localStream && (
         <div className="absolute inset-0 overflow-hidden z-0 opacity-70 w-full h-full">
           <VideoStream
             stream={localStream}
@@ -54,7 +57,7 @@ export const IncomingCall = ({
           <AnimatePresence mode="wait">
             <motion.span
               key={isVideoCall ? "videocam" : "call"}
-              onClick={() => useCallStore.getState().acceptCall()}
+              onClick={acceptCall}
               className="material-symbols-outlined text-6xl flex items-center justify-center"
               initial={{ opacity: 0, scale: 0.1 }}
               animate={{
@@ -86,7 +89,7 @@ export const IncomingCall = ({
       {/* Actions */}
       <div className="flex gap-4 w-full z-50">
         <Button
-          onClick={() => useCallStore.getState().acceptCall()}
+          onClick={acceptCall}
           variant="success"
           size="lg"
           isRoundedFull

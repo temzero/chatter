@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { useCallStore } from "@/stores/callStore";
 import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
-import { CallStatus } from "@/types/enums/modalType";
+import { CallStatus } from "@/types/enums/CallStatus";
 
 export const useCallCleanup = () => {
   const callStore = useCallStore();
@@ -15,7 +15,7 @@ export const useCallCleanup = () => {
         callStore.callStatus &&
         callStore.callStatus !== CallStatus.ENDED
       ) {
-        callWebSocketService.endCall({
+        callWebSocketService.hangup({
           chatId: callStore.chatId,
           // isCallerCancel: true,
         });

@@ -41,7 +41,8 @@ export const enum CallEvent {
   ACCEPT_CALL = "call:accept",
   REJECT_CALL = "call:reject",
   CANCEL_CALL = "call:cancel",
-  END_CALL = "call:end",
+  // END_CALL = "call:end",
+  HANG_UP = "call:hang-up",
   CALL_TIMEOUT = "call:timeout",
 
   // WebRTC signaling events

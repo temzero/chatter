@@ -4,13 +4,11 @@
 export interface InitiateCallRequest {
   chatId: string;
   isVideoCall: boolean;
-  isGroupCall: boolean;
 }
 
 export interface updateCallPayload {
   chatId: string;
   isVideoCall: boolean;
-  isGroupCall: boolean;
 }
 
 export interface CallActionRequest {
@@ -37,14 +35,9 @@ export interface IceCandidateRequest {
 // -------------------- Responses --------------------
 
 // Call control responses (server injects fromMemberId for context)
-export interface PendingCallsResponse {
-  pendingCalls: IncomingCallResponse[];
-}
-
 export interface IncomingCallResponse {
   chatId: string;
   isVideoCall: boolean;
-  isGroupCall: boolean;
   fromMemberId: string; // Caller (added by server)
   timestamp: number;
 }
