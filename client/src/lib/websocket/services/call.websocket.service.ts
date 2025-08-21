@@ -12,6 +12,7 @@ import {
   RtcOfferResponse,
   RtcAnswerRequest,
   updateCallPayload,
+  callMemberPayload,
 } from "@/types/callPayload";
 
 /**
@@ -51,16 +52,29 @@ export const callWebSocketService = {
   },
 
   // First, add to your callWebSocketService.ts
-  updateCallType(payload: updateCallPayload) {
+  updateCall(payload: updateCallPayload) {
     webSocketService.emit(CallEvent.UPDATE_CALL, payload);
   },
 
-  onCallTypeUpdated(callback: (data: updateCallPayload) => void) {
+  onCallUpdated(callback: (data: updateCallPayload) => void) {
     webSocketService.on(CallEvent.UPDATE_CALL, callback);
   },
 
-  offCallTypeUpdated(callback: (data: updateCallPayload) => void) {
+  offCallUpdated(callback: (data: updateCallPayload) => void) {
     webSocketService.off(CallEvent.UPDATE_CALL, callback);
+  },
+
+  // Update call member
+  updateCallMember(payload: callMemberPayload) {
+    webSocketService.emit(CallEvent.UPDATE_CALL_MEMBER, payload);
+  },
+
+  onCallMemberUpdated(callback: (data: callMemberPayload) => void) {
+    webSocketService.on(CallEvent.UPDATE_CALL_MEMBER, callback);
+  },
+
+  offCallMemberUpdated(callback: (data: callMemberPayload) => void) {
+    webSocketService.off(CallEvent.UPDATE_CALL_MEMBER, callback);
   },
 
   /**
@@ -82,6 +96,28 @@ export const callWebSocketService = {
    */
   offCallAccepted(callback: (data: CallActionResponse) => void) {
     webSocketService.off(CallEvent.ACCEPT_CALL, callback);
+  },
+
+  joinCall(payload: { chatId: string }) {
+    webSocketService.emit(CallEvent.JOIN_CALL, payload);
+  },
+
+  /**
+   * Listen for member join events
+   */
+  onMemberJoined(
+    callback: (data: { chatId: string; memberId: string }) => void
+  ) {
+    webSocketService.on(CallEvent.JOIN_CALL, callback);
+  },
+
+  /**
+   * Remove member join listener
+   */
+  offMemberJoined(
+    callback: (data: { chatId: string; memberId: string }) => void
+  ) {
+    webSocketService.off(CallEvent.JOIN_CALL, callback);
   },
 
   /**
@@ -261,12 +297,20 @@ export const callWebSocketService = {
    * Remove all call listeners
    */
   removeAllListeners() {
+    // Call lifecycle events
     webSocketService.off(CallEvent.INCOMING_CALL);
+    webSocketService.off(CallEvent.PENDING_CALLS);
+    webSocketService.off(CallEvent.UPDATE_CALL);
+    webSocketService.off(CallEvent.UPDATE_CALL_MEMBER);
     webSocketService.off(CallEvent.ACCEPT_CALL);
+    webSocketService.off(CallEvent.JOIN_CALL);
     webSocketService.off(CallEvent.REJECT_CALL);
     webSocketService.off(CallEvent.HANG_UP);
+
+    // WebRTC signaling events
     webSocketService.off(CallEvent.OFFER_SDP);
     webSocketService.off(CallEvent.ANSWER_SDP);
     webSocketService.off(CallEvent.ICE_CANDIDATE);
+    webSocketService.off(CallEvent.SFU_ICE_CANDIDATE);
   },
 };

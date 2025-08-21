@@ -8,57 +8,87 @@ import { callWebSocketService } from "@/lib/websocket/services/call.websocket.se
 import { toast } from "react-toastify";
 import { handleError } from "@/utils/handleError";
 import { getMyChatMemberId } from "./chatMemberStore";
+import { callMemberPayload } from "@/types/callPayload";
 
-interface CallMember {
-  memberId: string; // memberId
-  isMuted: boolean;
-  isVideoEnable: boolean;
-  isSpeaking?: boolean; // useful for active speaker UI
+export interface CallMember {
+  memberId: string;
+  displayName?: string;
+  avatarUrl?: string;
+
+  // Connections - only one type per call
+  peerConnection?: RTCPeerConnection | null; // for direct call
+  sfuConnection?: RTCPeerConnection | null; // for group call
+
+  // Streams - SEPARATE for optimal React performance
+  voiceStream?: MediaStream | null;
+  videoStream?: MediaStream | null;
+  screenStream?: MediaStream | null;
+
+  // State flags
+  isMuted?: boolean;
+  isVideoEnabled?: boolean;
+  isScreenSharing?: boolean;
+
+  isSpeaking?: boolean;
+  joinedAt?: number;
+  lastActivity?: number;
 }
 
 interface CallStoreState {
-  chatId: string | null; // The chat this call belongs to
-  callStatus: CallStatus | null; // ringing | connected | ended | etc.
+  chatId: string | null;
+  callerMemberId?: string;
+  callStatus: CallStatus | null;
   startedAt?: Date;
-  endedAt?: Date;
-  callerMemberId?: string; // memberId of caller
-  timeoutRef?: NodeJS.Timeout; // internal only (not serializable)
+  timeoutRef?: NodeJS.Timeout;
   isVideoCall: boolean;
+  isGroupCall: boolean;
+  endedAt?: Date;
 
-  // myMember
+  // my local streams - these contain the truth!
+  localVoiceStream: MediaStream | null;
+  localVideoStream: MediaStream | null;
+  localScreenStream: MediaStream | null;
+
   isMuted: boolean;
-  isVideoEnable: boolean;
+  isVideoEnabled: boolean;
+  isScreenSharing: boolean;
 
-  // other members
+  // members
   callMembers: CallMember[];
   iceCandidates: RTCIceCandidateInit[];
 
-  // media connections
-  localStream: MediaStream | null; // This user's mic/cam
-  peerConnections: Record<string, RTCPeerConnection>; // P2P connections
-  remoteStreams: Record<string, MediaStream>; // Per memberId
-  sfuConnection?: RTCPeerConnection | null; // If SFU is used
-  sfuStreams?: { audio?: MediaStream; video?: MediaStream };
-
-  error?: "permission_denied" | "device_unavailable" | null;
+  error?:
+    | "permission_denied"
+    | "device_unavailable"
+    | "connection_failed"
+    | null;
 }
 
 interface CallStoreActions {
   // Core lifecycle
-  startCall: (chatId: string, isVideo: boolean) => Promise<void>;
+  startCall: (
+    chatId: string,
+    isVideo: boolean,
+    isGroup: boolean
+  ) => Promise<void>;
   acceptCall: () => Promise<void>;
   rejectCall: (isCancel?: boolean) => void;
   addCallMember: (member: CallMember) => void;
   removeCallMember: (memberId: string) => void;
-  endCall: (option?: { isCancel?: boolean; isRejected?: boolean }) => void;
+  updateCallMember: (payload: callMemberPayload) => void;
+  endCall: (option?: {
+    isCancel?: boolean;
+    isRejected?: boolean;
+    isTimeout?: boolean;
+  }) => void;
 
   // Status / Type
   setStatus: (status: CallStatus) => void;
-  switchType: () => Promise<void>;
 
   // Media toggles
   toggleMute: () => void;
   toggleVideo: () => Promise<void>;
+  toggleScreenShare: () => Promise<void>;
 
   // Media setup/cleanup
   setupLocalStream: () => Promise<void>;
@@ -76,6 +106,8 @@ interface CallStoreActions {
   // Utilities
   getCallDuration: () => number;
   closeCallModal: () => void;
+  getCallMember: (memberId: string) => CallMember | undefined;
+  updateMemberActivity: (memberId: string) => void;
 }
 
 export type CallStore = CallStoreState & CallStoreActions;
@@ -86,22 +118,18 @@ export const useCallStore = create<CallStore>()(
     chatId: null,
     callStatus: null,
     isVideoCall: false,
+    isGroupCall: false,
     isMuted: false,
-    isVideoEnable: false,
+    isVideoEnabled: false,
+    localVoiceStream: null,
+    localVideoStream: null,
+    localScreenStream: null,
     callMembers: [],
     iceCandidates: [],
-
-    // Flattened media state
-    localStream: null,
-    remoteStreams: {},
-    peerConnections: {},
-    sfuConnection: null,
-    sfuStreams: {},
-
     error: null,
 
     // 📞 Start Call with media setup
-    startCall: async (chatId, isVideo) => {
+    startCall: async (chatId, isVideo, isGroup) => {
       try {
         // 1. Request media permissions
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -109,32 +137,43 @@ export const useCallStore = create<CallStore>()(
           video: isVideo,
         });
 
-        // 2. Save stream to state
+        // 2. Split streams into audio and video
+        const voiceStream = new MediaStream(stream.getAudioTracks());
+        const videoStream = isVideo
+          ? new MediaStream(stream.getVideoTracks())
+          : null;
+
+        // 3. Save streams to state
         set({
-          localStream: stream,
+          localVoiceStream: voiceStream,
+          localVideoStream: videoStream,
           chatId,
           callStatus: CallStatus.OUTGOING,
           isVideoCall: isVideo,
+          isGroupCall: isGroup,
+          isVideoEnabled: isVideo,
+          startedAt: new Date(),
         });
 
-        // 3. Use openCall to open the modal and set basic call state
+        // 4. Use openCall to open the modal and set basic call state
         useModalStore.getState().openModal(ModalType.CALL);
 
-        // 4. Set timeout to automatically end call after 1 minute
+        // 5. Set timeout to automatically end call after 1 minute
         const timeoutRef = setTimeout(() => {
           const { callStatus } = get();
           // Only end if still in outgoing state (not answered)
           if (callStatus === CallStatus.OUTGOING) {
-            get().rejectCall(true);
+            get().endCall({ isTimeout: true, isCancel: true });
           }
         }, 60000); // 60 seconds = 1 minute
 
         set({ timeoutRef });
 
-        // 5. Initiate WebRTC connection
+        // 6. Initiate WebRTC connection
         callWebSocketService.initiateCall({
           chatId,
           isVideoCall: isVideo,
+          isGroupCall: isGroup,
         });
       } catch (error) {
         useModalStore.getState().closeModal();
@@ -151,15 +190,24 @@ export const useCallStore = create<CallStore>()(
     },
 
     acceptCall: async () => {
-      const { isVideoCall, chatId, localStream } = get();
+      const {
+        isVideoCall,
+        chatId,
+        localVoiceStream,
+        localVideoStream,
+        isGroupCall,
+      } = get();
 
       try {
-        // 1. Clean up any existing stream first
-        if (localStream) {
-          localStream.getTracks().forEach((track) => track.stop());
+        // 1. Clean up any existing streams first
+        if (localVoiceStream) {
+          localVoiceStream.getTracks().forEach((track) => track.stop());
+        }
+        if (localVideoStream) {
+          localVideoStream.getTracks().forEach((track) => track.stop());
         }
 
-        // 2. Get fresh media stream
+        // 2. Get fresh media streams
         const stream = await navigator.mediaDevices
           .getUserMedia({
             audio: {
@@ -185,18 +233,32 @@ export const useCallStore = create<CallStore>()(
             throw error;
           });
 
-        // 3. Set stream in state
+        // 3. Split streams into audio and video
+        const voiceStream = new MediaStream(stream.getAudioTracks());
+        const videoStream = isVideoCall
+          ? new MediaStream(stream.getVideoTracks())
+          : null;
+
+        // 4. Set streams in state
         set({
-          localStream: stream,
+          localVoiceStream: voiceStream,
+          localVideoStream: videoStream,
           callStatus: CallStatus.CONNECTING,
+          isVideoEnabled: isVideoCall,
+          startedAt: new Date(),
         });
 
-        // 4. Send acceptance via WebSocket
+        // 5. Send acceptance via WebSocket
         if (chatId) {
           callWebSocketService.acceptCall({
             chatId,
             isCallerCancel: false,
           });
+        }
+
+        // 6. If group call, create SFU connection
+        if (isGroupCall) {
+          await get().createSfuConnection();
         }
 
         toast.success("Call accepted - waiting for connection...");
@@ -242,36 +304,57 @@ export const useCallStore = create<CallStore>()(
     },
 
     addCallMember: (member: CallMember) => {
-      const { localStream, iceCandidates } = get();
+      const { isGroupCall, localVoiceStream, localVideoStream, iceCandidates } =
+        get();
 
-      // 1. Create peer connection for the new member
-      const pc = get().createPeerConnection(member.memberId);
+      // For direct calls, create peer connection
+      if (!isGroupCall) {
+        // 1. Create peer connection for the new member
+        const pc = get().createPeerConnection(member.memberId);
 
-      // 2. Add any pending ICE candidates to the new connection
-      iceCandidates.forEach((candidate) => {
-        try {
-          pc.addIceCandidate(new RTCIceCandidate(candidate));
-        } catch (error) {
-          console.error("Error adding ICE candidate to new member:", error);
-        }
-      });
-
-      // 3. Add local stream tracks to the new connection
-      if (localStream) {
-        localStream.getTracks().forEach((track) => {
-          if (!pc.getSenders().some((s) => s.track === track)) {
-            pc.addTrack(track, localStream);
+        // 2. Add any pending ICE candidates to the new connection
+        iceCandidates.forEach((candidate) => {
+          try {
+            pc.addIceCandidate(new RTCIceCandidate(candidate));
+          } catch (error) {
+            console.error("Error adding ICE candidate to new member:", error);
           }
         });
+
+        // 3. Add local stream tracks to the new connection
+        if (localVoiceStream) {
+          localVoiceStream.getTracks().forEach((track) => {
+            if (!pc.getSenders().some((s) => s.track === track)) {
+              pc.addTrack(track, localVoiceStream);
+            }
+          });
+        }
+
+        if (localVideoStream) {
+          localVideoStream.getTracks().forEach((track) => {
+            if (!pc.getSenders().some((s) => s.track === track)) {
+              pc.addTrack(track, localVideoStream);
+            }
+          });
+        }
       }
 
-      // 4. Initialize remote stream for the new member
+      // 4. Initialize remote streams for the new member
       set((state) => ({
-        callMembers: [...state.callMembers, member],
-        remoteStreams: {
-          ...state.remoteStreams,
-          [member.memberId]: new MediaStream(), // Initialize empty stream
-        },
+        callMembers: [
+          ...state.callMembers,
+          {
+            ...member,
+            voiceStream: null,
+            videoStream: null,
+            screenStream: null,
+            isMuted: false,
+            isVideoEnabled: false,
+            isScreenSharing: false,
+            joinedAt: Date.now(),
+            lastActivity: Date.now(),
+          },
+        ],
       }));
 
       console.log(`Member ${member.memberId} added to call`);
@@ -287,36 +370,32 @@ export const useCallStore = create<CallStore>()(
     },
 
     removeCallMember: (memberId: string) => {
-      const { peerConnections, remoteStreams } = get();
+      const { callMembers, isGroupCall } = get();
+      const member = callMembers.find((m) => m.memberId === memberId);
 
-      // 1. Close the peer connection for this member
-      if (peerConnections[memberId]) {
-        peerConnections[memberId].close();
-        set((state) => {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { [memberId]: _, ...remainingConnections } =
-            state.peerConnections;
-          return {
-            peerConnections: remainingConnections,
-          };
-        });
+      if (!member) return;
+
+      // 1. Close connections based on call type
+      if (isGroupCall && member.sfuConnection) {
+        member.sfuConnection.close();
+      } else if (!isGroupCall && member.peerConnection) {
+        member.peerConnection.close();
       }
 
-      // 2. Clean up their remote stream
-      if (remoteStreams[memberId]) {
-        remoteStreams[memberId].getTracks().forEach((track) => track.stop());
-        set((state) => {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { [memberId]: _, ...remainingStreams } = state.remoteStreams;
-          return {
-            remoteStreams: remainingStreams,
-          };
-        });
+      // 2. Clean up streams
+      if (member.voiceStream) {
+        member.voiceStream.getTracks().forEach((track) => track.stop());
+      }
+      if (member.videoStream) {
+        member.videoStream.getTracks().forEach((track) => track.stop());
+      }
+      if (member.screenStream) {
+        member.screenStream.getTracks().forEach((track) => track.stop());
       }
 
       // 3. Remove from members list
       set({
-        callMembers: get().callMembers.filter((m) => m.memberId !== memberId),
+        callMembers: callMembers.filter((m) => m.memberId !== memberId),
       });
       console.log(`Member ${memberId} removed from call`);
 
@@ -327,17 +406,33 @@ export const useCallStore = create<CallStore>()(
       }
     },
 
+    updateCallMember: (payload: callMemberPayload) => {
+      set((state) => ({
+        callMembers: state.callMembers.map((member) =>
+          member.memberId === payload.memberId
+            ? {
+                ...member,
+                isMuted: payload.isMuted,
+                isVideoEnabled: payload.isVideoEnabled,
+                isScreenSharing: payload.isScreenSharing,
+                lastActivity: Date.now(),
+              }
+            : member
+        ),
+      }));
+    },
+
     // 🛑 End Call: cleanup everything
     endCall: (option) => {
       const { isCancel = false, isRejected = false } = option ?? {};
       const {
-        localStream,
-        remoteStreams,
-        peerConnections,
-        sfuConnection,
-        sfuStreams,
+        localVoiceStream,
+        localVideoStream,
+        localScreenStream,
+        callMembers,
         timeoutRef,
         callStatus,
+        isGroupCall,
       } = get();
 
       // Clear the timeout if it exists
@@ -362,41 +457,46 @@ export const useCallStore = create<CallStore>()(
         });
       };
 
-      stopAllTracks(localStream);
-      Object.values(remoteStreams).forEach(stopAllTracks);
+      // Clean up local streams
+      stopAllTracks(localVoiceStream);
+      stopAllTracks(localVideoStream);
+      stopAllTracks(localScreenStream);
 
-      Object.values(peerConnections).forEach((pc) => {
-        pc.ontrack = null;
-        pc.onicecandidate = null;
-        pc.oniceconnectionstatechange = null;
-        if (pc.connectionState !== "closed") {
-          pc.close();
+      // Clean up all member streams and connections
+      callMembers.forEach((member) => {
+        stopAllTracks(member.voiceStream);
+        stopAllTracks(member.videoStream);
+        stopAllTracks(member.screenStream);
+
+        if (isGroupCall && member.sfuConnection) {
+          member.sfuConnection.close();
+        } else if (!isGroupCall && member.peerConnection) {
+          member.peerConnection.close();
         }
       });
 
-      if (sfuConnection) {
-        sfuConnection.close();
-      }
-      if (sfuStreams) {
-        Object.values(sfuStreams).forEach(stopAllTracks);
-      }
+      let finalStatus = CallStatus.ENDED;
+      if (isCancel) finalStatus = CallStatus.CANCELED;
+      if (isRejected) finalStatus = CallStatus.REJECTED;
 
       set({
-        callStatus: isCancel
-          ? CallStatus.CANCELED
-          : isRejected
-          ? CallStatus.REJECTED
-          : CallStatus.ENDED,
+        callStatus: finalStatus,
         endedAt: new Date(),
         callMembers: [],
         iceCandidates: [],
-        localStream: null,
-        remoteStreams: {},
-        peerConnections: {},
-        sfuConnection: null,
-        sfuStreams: {},
+        localVoiceStream: null,
+        localVideoStream: null,
+        localScreenStream: null,
         error: null,
+        isMuted: false,
+        isVideoEnabled: false,
+        isScreenSharing: false,
       });
+
+      // Close modal after a brief delay to show call ended state
+      setTimeout(() => {
+        useModalStore.getState().closeModal();
+      }, 2000);
     },
 
     setStatus: (callStatus: CallStatus) => {
@@ -405,31 +505,52 @@ export const useCallStore = create<CallStore>()(
 
     // 🎤 Toggle audio mute
     toggleMute: () => {
-      const { localStream, isMuted } = get();
-      if (localStream) {
-        localStream.getAudioTracks().forEach((track) => {
-          track.enabled = isMuted; // if muted=true → enable again
+      const { localVoiceStream, isMuted, chatId } = get();
+      const myMemberId = getMyChatMemberId(chatId!);
+
+      if (localVoiceStream) {
+        localVoiceStream.getAudioTracks().forEach((track) => {
+          track.enabled = !isMuted; // toggle track enabled state
         });
+
         set({ isMuted: !isMuted }); // toggle UI state
+
+        // Notify other participants about mute state change
+        if (chatId && myMemberId) {
+          callWebSocketService.updateCallMember({
+            chatId,
+            memberId: myMemberId,
+            isMuted: !isMuted,
+          });
+        }
       }
     },
 
     // 🎥 Toggle video
     toggleVideo: async () => {
-      const { localStream, peerConnections, isVideoCall } = get();
+      const { localVideoStream, isVideoEnabled, chatId, isGroupCall } = get();
+      const myMemberId = getMyChatMemberId(chatId!);
 
-      if (!localStream) return;
+      if (!myMemberId) return;
 
-      const videoTracks = localStream.getVideoTracks();
+      try {
+        if (isVideoEnabled) {
+          // Disable video - stop all video tracks
+          if (localVideoStream) {
+            localVideoStream.getTracks().forEach((track) => track.stop());
+            set({ localVideoStream: null, isVideoEnabled: false });
+          }
 
-      if (videoTracks.length > 0) {
-        // Toggle existing video tracks
-        videoTracks.forEach((track) => {
-          track.enabled = !track.enabled;
-        });
-      } else if (isVideoCall) {
-        // Add video if it's a video call but no video tracks exist
-        try {
+          // Notify other participants about video state change
+          if (chatId) {
+            callWebSocketService.updateCallMember({
+              chatId,
+              memberId: myMemberId,
+              isVideoEnabled: false,
+            });
+          }
+        } else {
+          // Enable video - get new video stream
           const videoStream = await navigator.mediaDevices.getUserMedia({
             video: {
               width: { ideal: 1280 },
@@ -438,22 +559,103 @@ export const useCallStore = create<CallStore>()(
             },
           });
 
-          videoStream.getVideoTracks().forEach((track) => {
-            localStream.addTrack(track);
+          const newVideoStream = new MediaStream(videoStream.getVideoTracks());
+          set({ localVideoStream: newVideoStream, isVideoEnabled: true });
+
+          // Notify other participants about video state change
+          if (chatId) {
+            callWebSocketService.updateCallMember({
+              chatId,
+              memberId: myMemberId,
+              isVideoEnabled: true,
+            });
+          }
+
+          // For direct calls, re-negotiate peer connections with updated video tracks
+          if (!isGroupCall) {
+            const { callMembers } = get();
+            callMembers.forEach((member) => {
+              if (member.peerConnection) {
+                // Remove existing video tracks and add new ones
+                member.peerConnection.getSenders().forEach((sender) => {
+                  if (sender.track?.kind === "video") {
+                    member.peerConnection!.removeTrack(sender);
+                  }
+                });
+
+                newVideoStream.getTracks().forEach((track) => {
+                  member.peerConnection!.addTrack(track, newVideoStream);
+                });
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error toggling video:", error);
+        toast.error("Could not toggle video");
+      }
+    },
+
+    // Toggle screen sharing
+    toggleScreenShare: async () => {
+      const { localScreenStream, chatId, isGroupCall, callMembers } = get();
+      const myMemberId = getMyChatMemberId(chatId!);
+
+      if (!myMemberId) return;
+
+      try {
+        if (localScreenStream) {
+          // Stop screen sharing
+          localScreenStream.getTracks().forEach((track) => track.stop());
+          set({ localScreenStream: null, isScreenSharing: false });
+
+          // Notify other participants about screen share state change
+          if (chatId) {
+            callWebSocketService.updateCallMember({
+              chatId,
+              memberId: myMemberId,
+              isScreenSharing: false,
+            });
+          }
+        } else {
+          // Start screen sharing
+          const screenStream = await navigator.mediaDevices.getDisplayMedia({
+            video: true,
+            audio: true,
           });
 
-          // Update all peer connections
-          Object.values(peerConnections).forEach((pc) => {
-            if (pc) {
-              videoStream.getVideoTracks().forEach((track) => {
-                pc.addTrack(track, localStream);
-              });
-            }
+          set({ localScreenStream: screenStream, isScreenSharing: true });
+
+          // Notify other participants about screen share state change
+          if (chatId) {
+            callWebSocketService.updateCallMember({
+              chatId,
+              memberId: myMemberId,
+              isScreenSharing: true,
+            });
+          }
+
+          // Handle when user stops sharing via browser UI
+          screenStream.getTracks().forEach((track) => {
+            track.onended = () => {
+              get().toggleScreenShare();
+            };
           });
-        } catch (error) {
-          console.error("Error enabling video:", error);
-          toast.error("Could not enable video");
+
+          // For direct calls, add screen share to peer connections
+          if (!isGroupCall) {
+            callMembers.forEach((member) => {
+              if (member.peerConnection) {
+                screenStream.getTracks().forEach((track) => {
+                  member.peerConnection!.addTrack(track, screenStream);
+                });
+              }
+            });
+          }
         }
+      } catch (error) {
+        console.error("Error toggling screen share:", error);
+        toast.error("Could not toggle screen sharing");
       }
     },
 
@@ -473,8 +675,15 @@ export const useCallStore = create<CallStore>()(
             : false,
         });
 
+        const voiceStream = new MediaStream(stream.getAudioTracks());
+        const videoStream = isVideoCall
+          ? new MediaStream(stream.getVideoTracks())
+          : null;
+
         set({
-          localStream: stream,
+          localVoiceStream: voiceStream,
+          localVideoStream: videoStream,
+          isVideoEnabled: isVideoCall,
         });
       } catch (error) {
         console.error("Error accessing media devices:", error);
@@ -484,25 +693,47 @@ export const useCallStore = create<CallStore>()(
 
     // � Cleanup media streams
     cleanupStreams: () => {
-      const { localStream, remoteStreams } = get();
+      const {
+        localVoiceStream,
+        localVideoStream,
+        localScreenStream,
+        callMembers,
+      } = get();
 
-      [localStream, ...Object.values(remoteStreams)].forEach((stream) => {
-        stream?.getTracks().forEach((track) => {
-          track.stop();
-          track.enabled = false;
-        });
+      // Clean up local streams
+      [localVoiceStream, localVideoStream, localScreenStream].forEach(
+        (stream) => {
+          stream?.getTracks().forEach((track) => {
+            track.stop();
+            track.enabled = false;
+          });
+        }
+      );
+
+      // Clean up member streams
+      callMembers.forEach((member) => {
+        [member.voiceStream, member.videoStream, member.screenStream].forEach(
+          (stream) => {
+            stream?.getTracks().forEach((track) => {
+              track.stop();
+              track.enabled = false;
+            });
+          }
+        );
       });
 
       set({
-        localStream: null,
-        remoteStreams: {},
+        localVoiceStream: null,
+        localVideoStream: null,
+        localScreenStream: null,
         error: null,
       });
     },
 
-    // 🤝 Create WebRTC peer connection
+    // 🤝 Create WebRTC peer connection for direct calls
     createPeerConnection: (memberId: string) => {
-      const { chatId, localStream } = get();
+      const { chatId, localVoiceStream, localVideoStream, localScreenStream } =
+        get();
 
       const pc = new RTCPeerConnection({
         iceServers: [
@@ -545,256 +776,142 @@ export const useCallStore = create<CallStore>()(
       };
 
       // Add local media
-      if (localStream) {
-        localStream.getTracks().forEach((track) => {
+      if (localVoiceStream) {
+        localVoiceStream.getTracks().forEach((track) => {
           if (!pc.getSenders().some((s) => s.track === track)) {
-            pc.addTrack(track, localStream);
+            pc.addTrack(track, localVoiceStream);
           }
         });
       }
 
-      // Store connection
+      if (localVideoStream) {
+        localVideoStream.getTracks().forEach((track) => {
+          if (!pc.getSenders().some((s) => s.track === track)) {
+            pc.addTrack(track, localVideoStream);
+          }
+        });
+      }
+
+      if (localScreenStream) {
+        localScreenStream.getTracks().forEach((track) => {
+          if (!pc.getSenders().some((s) => s.track === track)) {
+            pc.addTrack(track, localScreenStream);
+          }
+        });
+      }
+
+      // Store connection in the member's peerConnection
       set((state) => ({
-        peerConnections: { ...state.peerConnections, [memberId]: pc },
+        callMembers: state.callMembers.map((member) =>
+          member.memberId === memberId
+            ? {
+                ...member,
+                peerConnection: pc,
+              }
+            : member
+        ),
       }));
 
       return pc;
     },
 
     removePeerConnection: (memberId: string) => {
-      const { peerConnections } = get();
-      const pc = peerConnections[memberId];
+      const { callMembers } = get();
+      const member = callMembers.find((m) => m.memberId === memberId);
 
-      if (pc) {
+      if (member && member.peerConnection) {
+        const pc = member.peerConnection;
         pc.getSenders().forEach((s) => s.track?.stop());
         pc.close();
-        set((state) => {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { [memberId]: _, ...rest } = state.peerConnections;
-          return {
-            peerConnections: rest,
-          };
-        });
+
+        set((state) => ({
+          callMembers: state.callMembers.map((m) =>
+            m.memberId === memberId
+              ? {
+                  ...m,
+                  peerConnection: null,
+                }
+              : m
+          ),
+        }));
       }
     },
 
     // 📺 Handle incoming remote stream
     handleRemoteStream: (memberId: string, event: RTCTrackEvent) => {
+      if (!event.track) {
+        console.error("Received track event without track!", event);
+        return;
+      }
+
+      const kind = event.track.kind as "audio" | "video";
+
       set((state) => {
-        if (!event.track) {
-          console.error("Received track event without track!", event);
-          return state;
-        }
+        const member = state.callMembers.find((m) => m.memberId === memberId);
+        if (!member) return state;
 
-        // 1. Get or create stream
-        let stream = state.remoteStreams[memberId];
-        if (!stream) {
-          stream = new MediaStream();
-          console.log(`Created new stream for ${memberId}`);
-        }
+        const stream =
+          kind === "audio" ? member.voiceStream : member.videoStream;
+        const newStream = stream || new MediaStream();
 
-        // 2. Avoid duplicate tracks
-        const existingTrack = stream
+        // Avoid duplicate tracks
+        const existingTrack = newStream
           .getTracks()
           .find((t) => t.id === event.track.id);
         if (existingTrack) {
-          console.warn(`Duplicate ${event.track.kind} track from ${memberId}`);
+          console.warn(`Duplicate ${kind} track from ${memberId}`);
           return state;
         }
 
-        // 3. Add track
-        stream.addTrack(event.track);
-        console.log(`Added ${event.track.kind} track to ${memberId}'s stream`);
+        // Add track
+        newStream.addTrack(event.track);
+        console.log(`Added ${kind} track to ${memberId}'s stream`);
 
-        // 4. Track lifecycle updates
-        const updateMemberFromStream = (s: typeof state, st: MediaStream) => {
-          const hasAudioTrack = st.getAudioTracks().some((t) => t.enabled);
-          const hasVideoTrack = st.getVideoTracks().some((t) => t.enabled);
-
-          return s.callMembers.map((m) =>
-            m.memberId === memberId
-              ? { ...m, isMuted: !hasAudioTrack, isVideoEnable: hasVideoTrack }
-              : m
-          );
+        // Update member with the new stream
+        const updatedMember = {
+          ...member,
+          [kind === "audio" ? "voiceStream" : "videoStream"]: newStream,
+          lastActivity: Date.now(),
         };
 
-        event.track.onmute = () => {
-          console.log(`Track ${event.track.id} muted`);
-          set((s) => ({
-            callMembers: updateMemberFromStream(s, s.remoteStreams[memberId]),
-          }));
-        };
-
-        event.track.onunmute = () => {
-          console.log(`Track ${event.track.id} active`);
-          set((s) => ({
-            callMembers: updateMemberFromStream(s, s.remoteStreams[memberId]),
-          }));
-        };
-
-        event.track.onended = () => {
-          console.log(`Track ${event.track.id} ended`);
-          set((s) => {
-            const newStream = new MediaStream(
-              s.remoteStreams[memberId]
-                ?.getTracks()
-                .filter((t) => t.id !== event.track.id) || []
-            );
-            return {
-              remoteStreams: {
-                ...s.remoteStreams,
-                [memberId]: newStream,
-              },
-              callMembers: updateMemberFromStream(s, newStream),
-            };
-          });
-        };
-
-        // 5. Return updated state
         return {
-          ...state,
-          remoteStreams: {
-            ...state.remoteStreams,
-            [memberId]: stream,
-          },
-          callMembers: state.callMembers.some((m) => m.memberId === memberId)
-            ? updateMemberFromStream(state, stream)
-            : [
-                ...state.callMembers,
-                {
-                  memberId,
-                  isMuted: stream.getAudioTracks().length === 0,
-                  isVideoEnable: stream.getVideoTracks().length > 0,
-                  isSpeaking: false,
-                },
-              ],
+          callMembers: state.callMembers.map((m) =>
+            m.memberId === memberId ? updatedMember : m
+          ),
         };
       });
     },
 
-    // 🔄 Switch between video/voice
-    switchType: async () => {
-      const { chatId, localStream, peerConnections, isVideoCall } = get();
-      const newType = !isVideoCall;
-
-      try {
-        // 1. Stop all existing video tracks if switching to audio
-        if (!newType && localStream) {
-          localStream.getVideoTracks().forEach((track) => track.stop());
-        }
-
-        // 2. For video calls, get new media stream
-        if (newType) {
-          const currentAudioTracks = localStream?.getAudioTracks() || [];
-
-          // Get new video stream
-          const videoStream = await navigator.mediaDevices
-            .getUserMedia({
-              video: {
-                width: { ideal: 1280 },
-                height: { ideal: 720 },
-                facingMode: "user",
-              },
-            })
-            .catch((error) => {
-              console.error("Camera access error:", error);
-              throw new Error("Could not access camera");
-            });
-
-          // Create new combined stream
-          const newStream = new MediaStream([
-            ...currentAudioTracks,
-            ...videoStream.getVideoTracks(),
-          ]);
-
-          // 3. Update all peer connections
-          Object.values(peerConnections).forEach((pc) => {
-            if (!pc) return;
-
-            // Remove all existing tracks
-            pc.getSenders().forEach((sender) => {
-              if (sender.track) {
-                pc.removeTrack(sender);
-              }
-            });
-
-            // Add new tracks
-            newStream.getTracks().forEach((track) => {
-              pc.addTrack(track, newStream);
-            });
-          });
-
-          // 4. Update state
-          set({
-            localStream: newStream,
-            isVideoCall: newType,
-          });
-        } else {
-          // Audio-only mode - just update state
-          set({ isVideoCall: newType });
-        }
-
-        // Notify other members
-        if (chatId) {
-          callWebSocketService.updateCallType({
-            chatId,
-            isVideoCall: newType,
-          });
-        }
-      } catch (error) {
-        console.error("Error switching call type:", error);
-        // Revert to previous state if error occurs
-        set({ isVideoCall });
-        throw error;
-      }
-    },
-
     sendOffer: async (toMemberId) => {
-      // 1. Verify member ID exists
-      const { chatId } = get();
-
+      const { chatId, isGroupCall } = get();
       const myMemberId = getMyChatMemberId(chatId!);
+
       if (!myMemberId)
         throw new Error("Cannot send offer - no member ID found");
-
-      // 2. Get current state
-      const { localStream, peerConnections } = get();
-      console.log("Creating call offer..."); // First console.log to track flow
-
       if (!chatId)
         throw new Error("Cannot send offer - no active chat session");
 
       try {
-        // 3. Create or reuse peer connection
-        const pc =
-          peerConnections[toMemberId] || get().createPeerConnection(toMemberId);
-        console.log("Peer connection created"); // Second console.log
+        // For direct calls, create peer connection and send offer
+        if (!isGroupCall) {
+          const pc = get().createPeerConnection(toMemberId);
+          console.log("Peer connection created");
 
-        // 4. Add local streams if they exist
-        if (localStream) {
-          localStream.getTracks().forEach((track) => {
-            if (!pc.getSenders().some((s) => s.track === track)) {
-              pc.addTrack(track, localStream);
-            }
+          const offer = await pc.createOffer({
+            offerToReceiveAudio: true,
+            offerToReceiveVideo: true,
           });
-          console.log("Local tracks added to peer connection"); // Third console.log
+          console.log("Offer created");
+
+          await pc.setLocalDescription(offer);
+          console.log("Local description set");
+
+          callWebSocketService.sendOffer({
+            chatId,
+            offer,
+          });
+          console.log("Offer sent successfully");
         }
-
-        // 5. Create and send offer
-        const offer = await pc.createOffer({
-          offerToReceiveAudio: true,
-          offerToReceiveVideo: true,
-        });
-        console.log("Offer created"); // Fourth console.log
-
-        await pc.setLocalDescription(offer);
-        console.log("Local description set"); // Fifth console.log
-
-        callWebSocketService.sendOffer({
-          chatId,
-          offer,
-        });
-        console.log("Offer sent successfully"); // Final toast
 
         set({ callStatus: CallStatus.CONNECTING });
       } catch (error) {
@@ -805,61 +922,73 @@ export const useCallStore = create<CallStore>()(
     },
 
     addIceCandidate: (candidate: RTCIceCandidateInit) => {
-      const { peerConnections, sfuConnection } = get();
+      const { callMembers, isGroupCall } = get();
 
-      // Add to iceCandidates array for later use when peer connections are established
+      // Add to iceCandidates array for later use
       set((state) => ({
         iceCandidates: [...state.iceCandidates, candidate],
       }));
 
-      // Try to add to all existing peer connections
-      Object.values(peerConnections).forEach((pc) => {
-        try {
-          pc.addIceCandidate(new RTCIceCandidate(candidate));
-        } catch (error) {
-          console.error("Error adding ICE candidate:", error);
+      // Try to add to all existing connections
+      callMembers.forEach((member) => {
+        if (isGroupCall && member.sfuConnection) {
+          try {
+            member.sfuConnection.addIceCandidate(
+              new RTCIceCandidate(candidate)
+            );
+          } catch (error) {
+            console.error("Error adding ICE candidate to SFU:", error);
+          }
+        } else if (!isGroupCall && member.peerConnection) {
+          try {
+            member.peerConnection.addIceCandidate(
+              new RTCIceCandidate(candidate)
+            );
+          } catch (error) {
+            console.error("Error adding ICE candidate to peer:", error);
+          }
         }
       });
-
-      // Try to add to SFU connection if exists
-      if (sfuConnection) {
-        try {
-          sfuConnection.addIceCandidate(new RTCIceCandidate(candidate));
-        } catch (error) {
-          console.error("Error adding ICE candidate to SFU:", error);
-        }
-      }
     },
 
     createSfuConnection: async () => {
-      const { localStream, chatId } = get();
+      const { localVoiceStream, localVideoStream, localScreenStream, chatId } =
+        get();
 
       if (!chatId) {
         throw new Error("No chatId available for SFU connection");
       }
 
-      // 1. Create peer connection with proper error handling
       const pc = new RTCPeerConnection({
-        iceServers: [
-          { urls: "stun:stun.l.google.com:19302" },
-          // Add TURN servers here if needed:
-          // { urls: "turn:your-turn-server.com", username: "user", credential: "pass" }
-        ],
+        iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
         bundlePolicy: "max-bundle",
         rtcpMuxPolicy: "require",
       });
 
-      // 2. Add local stream tracks with cleanup guard
       try {
-        if (localStream) {
-          localStream.getTracks().forEach((track) => {
-            // Prevent duplicate track addition
-            if (
-              !pc.getSenders().some((s) => s.track === track) &&
-              localStream
-            ) {
-              // Add the track with the local stream (not null)
-              pc.addTrack(track, localStream);
+        // Add local audio tracks
+        if (localVoiceStream) {
+          localVoiceStream.getTracks().forEach((track) => {
+            if (!pc.getSenders().some((s) => s.track === track)) {
+              pc.addTrack(track, localVoiceStream);
+            }
+          });
+        }
+
+        // Add local video tracks
+        if (localVideoStream) {
+          localVideoStream.getTracks().forEach((track) => {
+            if (!pc.getSenders().some((s) => s.track === track)) {
+              pc.addTrack(track, localVideoStream);
+            }
+          });
+        }
+
+        // Add local screen share tracks
+        if (localScreenStream) {
+          localScreenStream.getTracks().forEach((track) => {
+            if (!pc.getSenders().some((s) => s.track === track)) {
+              pc.addTrack(track, localScreenStream);
             }
           });
         }
@@ -869,7 +998,6 @@ export const useCallStore = create<CallStore>()(
         throw error;
       }
 
-      // 3. ICE candidate handling with null check
       pc.onicecandidate = (event) => {
         if (event.candidate) {
           try {
@@ -883,34 +1011,35 @@ export const useCallStore = create<CallStore>()(
         }
       };
 
-      // 4. Handle incoming tracks with stream management
       pc.ontrack = (event) => {
         if (!event.streams || event.streams.length === 0) return;
 
+        const stream = event.streams[0];
         const kind = event.track.kind as "audio" | "video";
-        set((state) => {
-          const sfuStreams = { ...state.sfuStreams };
+        const memberId = event.track.id.split("_")[0]; // Assuming track ID contains member ID
 
-          // Create stream if doesn't exist
-          if (!sfuStreams[kind]) {
-            sfuStreams[kind] = new MediaStream();
-          }
-
-          // Add track if not already present
-          if (
-            sfuStreams[kind] &&
-            !sfuStreams[kind]!.getTracks().some((t) => t.id === event.track.id)
-          ) {
-            sfuStreams[kind]!.addTrack(event.track);
-          }
-
-          return {
-            sfuStreams,
-          };
-        });
+        set((state) => ({
+          callMembers: state.callMembers.map((member) => {
+            if (member.memberId === memberId) {
+              if (kind === "audio") {
+                return {
+                  ...member,
+                  voiceStream: stream,
+                  lastActivity: Date.now(),
+                };
+              } else {
+                return {
+                  ...member,
+                  videoStream: stream,
+                  lastActivity: Date.now(),
+                };
+              }
+            }
+            return member;
+          }),
+        }));
       };
 
-      // 5. Enhanced connection state monitoring
       pc.onconnectionstatechange = () => {
         const connectionState = pc.connectionState;
         console.log("SFU connection state:", connectionState);
@@ -924,14 +1053,16 @@ export const useCallStore = create<CallStore>()(
             get().disconnectFromSfu();
             break;
           case "closed":
-            set({
-              sfuConnection: null,
-            });
+            set((state) => ({
+              callMembers: state.callMembers.map((member) => ({
+                ...member,
+                sfuConnection: null,
+              })),
+            }));
             break;
         }
       };
 
-      // 6. Offer creation with proper error handling
       try {
         const offer = await pc.createOffer({
           offerToReceiveAudio: true,
@@ -940,13 +1071,12 @@ export const useCallStore = create<CallStore>()(
 
         await pc.setLocalDescription(offer);
 
-        // Store connection with cleanup reference
+        // Store SFU connection in state
         set((state) => ({
-          sfuConnection: pc,
-          peerConnections: {
-            ...state.peerConnections,
-            sfu: pc,
-          },
+          callMembers: state.callMembers.map((member) => ({
+            ...member,
+            sfuConnection: pc,
+          })),
         }));
 
         return offer;
@@ -956,27 +1086,18 @@ export const useCallStore = create<CallStore>()(
         throw error;
       }
     },
+
     disconnectFromSfu: () => {
-      const { sfuConnection, sfuStreams } = get();
-
-      if (sfuConnection) {
-        sfuConnection.close();
-      }
-
-      // Clean up SFU streams
-      if (sfuStreams) {
-        Object.values(sfuStreams).forEach((stream) => {
-          stream?.getTracks().forEach((track) => track.stop());
-        });
-      }
-
       set((state) => ({
-        sfuConnection: null,
-        sfuStreams: {},
-        // Remove from peerConnections if needed
-        peerConnections: Object.fromEntries(
-          Object.entries(state.peerConnections).filter(([key]) => key !== "sfu")
-        ),
+        callMembers: state.callMembers.map((member) => {
+          if (member.sfuConnection) {
+            member.sfuConnection.close();
+          }
+          return {
+            ...member,
+            sfuConnection: null,
+          };
+        }),
       }));
     },
 
@@ -989,23 +1110,37 @@ export const useCallStore = create<CallStore>()(
     },
 
     closeCallModal: () => {
-      // Close the modal first to provide immediate feedback
       useModalStore.getState().closeModal();
 
-      // Additional cleanup if needed
       set({
         chatId: null,
         callStatus: null,
         isVideoCall: false,
+        isGroupCall: false,
         callMembers: [],
         iceCandidates: [],
-        localStream: null,
-        remoteStreams: {},
-        peerConnections: {},
-        sfuConnection: null,
-        sfuStreams: {},
+        localVoiceStream: null,
+        localVideoStream: null,
+        localScreenStream: null,
         error: null,
+        isMuted: false,
+        isVideoEnabled: false,
+        isScreenSharing: false,
       });
+    },
+
+    getCallMember: (memberId: string): CallMember | undefined => {
+      return get().callMembers.find((member) => member.memberId === memberId);
+    },
+
+    updateMemberActivity: (memberId: string) => {
+      set((state) => ({
+        callMembers: state.callMembers.map((member) =>
+          member.memberId === memberId
+            ? { ...member, lastActivity: Date.now() }
+            : member
+        ),
+      }));
     },
   }))
 );

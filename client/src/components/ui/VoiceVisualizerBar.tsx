@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 
 type VoiceVisualizerProps = {
   stream: MediaStream | null;
-  isMuted: boolean;
+  isMuted?: boolean;
   width?: number;
   height?: number;
   className?: string;
@@ -11,7 +11,7 @@ type VoiceVisualizerProps = {
 
 export const VoiceVisualizerBar = ({
   stream,
-  isMuted,
+  isMuted = false,
   width = 200,
   height = 30,
   className = "",

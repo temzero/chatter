@@ -12,7 +12,7 @@ export const IncomingCall = ({
   chat: ChatResponse;
   participants?: Array<{ id: string; avatar: string; name: string }>;
 }) => {
-  const { isVideoCall, localStream } = useCallStore();
+  const { isVideoCall, localVideoStream } = useCallStore();
 
   const acceptCall = () => {
     useCallStore.getState().acceptCall();
@@ -26,10 +26,10 @@ export const IncomingCall = ({
   return (
     <div className="flex flex-col items-center w-full h-full">
       {/* Background - Avatar or Webcam */}
-      {isVideoCall && localStream && (
+      {isVideoCall && localVideoStream && (
         <div className="absolute inset-0 overflow-hidden z-0 opacity-70 w-full h-full">
           <VideoStream
-            stream={localStream}
+            stream={localVideoStream}
             className="w-full h-full object-cover scale-125 blur-md select-none pointer-events-none"
             muted
           />

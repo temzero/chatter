@@ -14,29 +14,29 @@ interface CallCallingUIProps {
 }
 
 export const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
-  const { isVideoCall, switchType, localStream } = useCallStore();
+  const { isVideoCall, switchCallType, localVideoStream } = useCallStore();
   const [localIsVideoCall, setLocalIsVideoCall] = useState(isVideoCall);
   const rejectCall = useCallStore((state) => state.rejectCall);
   const closeModal = useModalStore.getState().closeModal;
   const cancelCall = () => {
     rejectCall(true);
     closeModal();
-  }
+  };
 
   if (!chat) return null;
 
   const handleSwitchCallType = () => {
     setLocalIsVideoCall((prev) => !prev);
-    switchType();
+    switchCallType();
   };
 
   return (
     <div className="flex flex-col items-center justify-between w-full h-full z-20">
       {/* Background - Avatar or Webcam */}
-      {localIsVideoCall && localStream ? (
+      {localIsVideoCall && localVideoStream ? (
         <div className="absolute inset-0 overflow-hidden z-0 opacity-70 w-full h-full">
           <VideoStream
-            stream={localStream}
+            stream={localVideoStream}
             className="w-full h-full object-cover scale-125 select-none pointer-events-none"
             muted
           />

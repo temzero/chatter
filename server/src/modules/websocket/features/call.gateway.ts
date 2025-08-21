@@ -19,6 +19,7 @@ import {
   IceCandidateRequest,
   IceCandidateResponse,
   updateCallPayload,
+  callMemberPayload,
 } from '../constants/callPayload.type';
 import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
 import { ChatService } from 'src/modules/chat/chat.service';
@@ -63,6 +64,7 @@ export class CallGateway {
     const response: IncomingCallResponse = {
       chatId: payload.chatId,
       isVideoCall: payload.isVideoCall,
+      isGroupCall: payload.isGroupCall,
       fromMemberId,
       timestamp: Date.now(),
     };
@@ -132,6 +134,32 @@ export class CallGateway {
     );
   }
 
+  // Add this method to your CallGateway class
+  @SubscribeMessage(CallEvent.UPDATE_CALL_MEMBER)
+  async handleCallMemberUpdate(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: callMemberPayload,
+  ) {
+    const userId = client.data.userId;
+
+    // Verify the member making the update is the same as the one in the payload
+    const userMemberId = await this.chatMemberService.getChatMemberId(
+      payload.chatId,
+      userId,
+    );
+
+    if (userMemberId !== payload.memberId) {
+      throw new Error('Unauthorized: Cannot update other members');
+    }
+
+    await this.websocketNotificationService.emitToChatMembers(
+      payload.chatId,
+      CallEvent.UPDATE_CALL_MEMBER,
+      payload,
+      { senderId: userId, excludeSender: false }, // Include sender so they get confirmation
+    );
+  }
+
   @SubscribeMessage(CallEvent.ACCEPT_CALL)
   async handleCallAccept(
     @ConnectedSocket() client: AuthenticatedSocket,
@@ -158,6 +186,36 @@ export class CallGateway {
       CallEvent.ACCEPT_CALL,
       response,
       { senderId: userId, excludeSender: true },
+    );
+  }
+
+  @SubscribeMessage(CallEvent.JOIN_CALL)
+  async handleJoinCall(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: { chatId: string },
+  ) {
+    const userId = client.data.userId;
+    const memberId = await this.chatMemberService.getChatMemberId(
+      payload.chatId,
+      userId,
+    );
+
+    if (!memberId) {
+      throw new Error('User is not a member of this chat');
+    }
+
+    const response = {
+      chatId: payload.chatId,
+      memberId,
+      timestamp: Date.now(),
+    };
+
+    // Notify all participants that a new member joined
+    await this.websocketNotificationService.emitToChatMembers(
+      payload.chatId,
+      CallEvent.JOIN_CALL,
+      response,
+      { senderId: userId, excludeSender: false }, // Include sender for confirmation
     );
   }
 

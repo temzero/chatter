@@ -5,23 +5,37 @@ import { useCallStore } from "@/stores/callStore";
 import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
 import { CallHeader } from "./components/CallHeader";
 import { Timer } from "../Timer";
-import { VoiceVisualizerBar } from "../VoiceVisualizerBar";
 import { VoiceVisualizerButton } from "../VoiceVisualizerBtn";
+import { useShallow } from "zustand/shallow";
+import { CallMember } from "./components/CallMember";
 
 export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
   const {
+    callMembers,
     isMuted,
-    // isVideoEnable,
-    isVideoCall,
-    localStream,
-    remoteStreams,
+    isVideoEnable,
+    localVoiceStream,
+    localVideoStream,
     startedAt,
-    sfuStreams,
     toggleMute,
-    switchType,
+    toggleVideo,
     endCall,
     closeCallModal,
-  } = useCallStore();
+  } = useCallStore(
+    useShallow((state) => ({
+      isMuted: state.isMuted,
+      callMembers: state.callMembers,
+      isVideoEnable: state.isVideoEnabled,
+      isVideoCall: state.isVideoCall,
+      localVoiceStream: state.localVoiceStream,
+      localVideoStream: state.localVideoStream,
+      startedAt: state.startedAt,
+      toggleMute: state.toggleMute,
+      toggleVideo: state.toggleVideo,
+      endCall: state.endCall,
+      closeCallModal: state.closeCallModal,
+    }))
+  );
 
   if (!chat) return null;
 
@@ -31,73 +45,24 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
     closeCallModal();
   };
 
-  const handleToggleMic = () => {
-    toggleMute();
-  };
-
-  const handleToggleVideo = async () => {
-    try {
-      await switchType();
-    } catch (error) {
-      console.error("Failed to toggle video:", error);
-    }
-  };
-
-  // Get all remote streams (from both peer connections and SFU)
-  const allRemoteStreams = { ...remoteStreams };
-
-  // Add SFU streams if they exist
-  if (sfuStreams?.audio) {
-    allRemoteStreams.sfu_audio = sfuStreams.audio;
-  }
-  if (sfuStreams?.video) {
-    allRemoteStreams.sfu_video = sfuStreams.video;
-  }
-
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center text-white">
-      {isVideoCall ? (
+      {callMembers.length > 0 ? (
         <div className="relative w-full h-full bg-black">
-          {/* Remote video streams */}
+          {/* Display all call members */}
           <div
             className={`w-full h-full grid gap-2 auto-rows-fr ${
-              Object.keys(allRemoteStreams).length === 1
+              callMembers.length === 1
                 ? "grid-cols-1"
+                : callMembers.length === 2
+                ? "grid-cols-1 sm:grid-cols-2"
                 : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
             }`}
           >
-            {Object.entries(allRemoteStreams).map(([streamId, stream]) => (
-              <div key={streamId} className="relative w-full overflow-hidden">
-                {/* Aspect-ratio wrapper to control height cleanly */}
-                <VideoStream
-                  stream={stream}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-
-                {Object.keys(allRemoteStreams).length === 1 && (
-                  <VoiceVisualizerBar
-                    stream={stream}
-                    isMuted={false}
-                    width={200}
-                    height={40}
-                    className="w-full h-10 opacity-20 absolute bottom-16 left-0"
-                    barColor="white"
-                  />
-                )}
-              </div>
+            {callMembers.map((member) => (
+              <CallMember key={member.memberId} member={member} />
             ))}
           </div>
-
-          {/* Local video overlay */}
-          {localStream && (
-            <div className="absolute bottom-4 right-4">
-              <VideoStream
-                stream={localStream}
-                className="w-52 h-52 rounded-md object-cover border-2 border-white"
-                muted
-              />
-            </div>
-          )}
         </div>
       ) : (
         <CallHeader
@@ -106,10 +71,29 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
         />
       )}
 
+      {/* Local video overlay */}
+      {localVideoStream && isVideoEnable && (
+        <div className="absolute bottom-4 right-4 z-20">
+          <VideoStream
+            stream={localVideoStream}
+            className="w-52 h-52 rounded-md object-cover border-2 border-white"
+            muted
+          />
+          <div className="absolute bottom-2 right-2 bg-black/50 px-2 py-1 rounded text-sm">
+            You {isMuted && "🔇"}
+          </div>
+        </div>
+      )}
+
       {/* Top overlay with timer & name */}
       <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10">
         <p className="text-sm truncate max-w-[200px]">{chat.name}</p>
         <div className="flex items-center gap-2">
+          {callMembers.length > 1 && (
+            <span className="text-xs text-gray-400">
+              {callMembers.length} participants
+            </span>
+          )}
           <Timer startTime={startedAt} />
         </div>
       </div>
@@ -120,19 +104,20 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
           <Button
             variant="ghost"
             className={`w-14 h-14 ${
-              isVideoCall
-                ? "bg-gray-700/50  text-green-500"
-                : " bg-red-500/50 opacity-60"
+              isVideoEnable
+                ? "bg-gray-700/50 text-green-500 filled"
+                : "bg-red-500/50 opacity-60"
             }`}
-            icon={isVideoCall ? "videocam" : "videocam_off"}
+            icon={isVideoEnable ? "videocam" : "videocam_off"}
+            isIconFilled={isVideoEnable}
             isRoundedFull
-            onClick={handleToggleVideo}
+            onClick={toggleVideo}
           />
           <VoiceVisualizerButton
             variant="ghost"
             isMuted={isMuted}
-            stream={localStream}
-            onClick={handleToggleMic}
+            stream={localVoiceStream || new MediaStream()}
+            onClick={toggleMute}
             className="w-14 h-14 custom-border rounded-full"
           />
           <Button

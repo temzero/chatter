@@ -99,7 +99,7 @@ export const VoiceVisualizerButton = ({
             height: buttonSize,
             backgroundColor: circleColor,
             transform: `scale(${scale})`,
-            opacity: 0.3,
+            opacity: 0.2,
             zIndex: 0,
           }}
         />
@@ -111,6 +111,7 @@ export const VoiceVisualizerButton = ({
         size={size}
         onClick={onClick}
         icon={isMuted ? "mic_off" : "mic"}
+        isIconFilled={!isMuted}
         isRoundedFull
         className={`w-full h-full z-10 ${
           isMuted ? "bg-red-500/50 opacity-60" : "text-green-500"

@@ -18,6 +18,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: ButtonSize;
   loading?: boolean;
   icon?: string; // Icon name from your icon library
+  isIconFilled?: boolean;
   iconPosition?: "left" | "right";
   fullWidth?: boolean;
   isRoundedFull?: boolean; // Optional prop for full rounded corners
@@ -49,6 +50,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       size = "md",
       loading = false,
       icon,
+      isIconFilled = false,
       iconPosition = "left",
       fullWidth = false,
       isRoundedFull = false,
@@ -78,16 +80,28 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {loading ? (
           <span className="animate-spin">
-            <Icon name="refresh" size={size === "sm" ? 20 : 28} />
+            <Icon
+              name="refresh"
+              isFilled={isIconFilled}
+              size={size === "sm" ? 20 : 28}
+            />
           </span>
         ) : (
           <>
             {icon && iconPosition === "left" && (
-              <Icon name={icon} size={size === "sm" ? 20 : 28} />
+              <Icon
+                name={icon}
+                isFilled={isIconFilled}
+                size={size === "sm" ? 20 : 28}
+              />
             )}
             {children}
             {icon && iconPosition === "right" && (
-              <Icon name={icon} size={size === "sm" ? 20 : 28} />
+              <Icon
+                name={icon}
+                isFilled={isIconFilled}
+                size={size === "sm" ? 20 : 28}
+              />
             )}
           </>
         )}

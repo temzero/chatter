@@ -16,7 +16,7 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
     callStartTime,
     isMuted,
     toggleMute,
-    switchType,
+    switchCallType,
   } = useCallStore();
 
   const endCall = useCallStore((state) => state.endCall);
@@ -36,7 +36,7 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
 
   const handleToggleVideo = async () => {
     try {
-      await switchType();
+      await switchCallType();
     } catch (error) {
       console.error("Failed to toggle video:", error);
     }

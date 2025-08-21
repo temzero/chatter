@@ -15,7 +15,6 @@ import MessageSearchBar from "../ui/MessageSearchBar";
 import { useUserLastSeen } from "@/stores/presenceStore";
 import { formatTimeAgo } from "@/utils/formatTimeAgo";
 import { useCallStore } from "@/stores/callStore";
-import { useCurrentUserId } from "@/stores/authStore";
 
 interface ChatHeaderProps {
   chat: ChatResponse;
@@ -29,8 +28,6 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   const toggleSidebarInfo = useSidebarInfoStore(
     (state) => state.toggleSidebarInfo
   );
-
-  const currentUserId = useCurrentUserId();
 
   const chatListMembers = useChatMemberStore.getState().chatMembers[chat.id];
   const isOnline = useChatStatus(chat?.id, chat.type);
@@ -115,7 +112,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                 {isDirect && canCall && (
                   <button
                     onClick={() =>
-                      startCall(chat.id, false, false, currentUserId)
+                      startCall(chat.id, false, false)
                     }
                   >
                     <i className="material-symbols-outlined text-3xl">
@@ -127,7 +124,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                 {isGroup && (
                   <button
                     onClick={() =>
-                      startCall(chat.id, true, true, currentUserId)
+                      startCall(chat.id, true, true)
                     }
                   >
                     <i className="material-symbols-outlined text-3xl">

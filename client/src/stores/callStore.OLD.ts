@@ -81,7 +81,7 @@ interface CallState {
     memberId?: string
   ) => void;
   setStatus: (status: CallStatus) => void;
-  switchType: () => Promise<void>; // Switch between audio and video mid-call
+  switchCallType: () => Promise<void>; // Switch between audio and video mid-call
   toggleMute: () => void;
   toggleVideo: () => Promise<void>;
 
@@ -613,7 +613,7 @@ export const useCallStoreOLD = create<CallState>()(
     },
 
     // 🔄 Switch between video/voice
-    switchType: async () => {
+    switchCallType: async () => {
       const {
         isVideoCall,
         chatId,
@@ -682,7 +682,7 @@ export const useCallStoreOLD = create<CallState>()(
 
         // Notify other participants
         if (chatId) {
-          callWebSocketService.updateCallType({
+          callWebSocketService.updateCall({
             chatId,
             isVideoCall: newType,
             isGroupCall,

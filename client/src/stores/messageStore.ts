@@ -354,7 +354,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
     const messages = get().messages[chatId] || [];
     const member = useChatMemberStore
       .getState()
-      .getChatMember(chatId, memberId);
+      .getChatMember(memberId, chatId);
 
     if (!member || !member.lastReadMessageId) return messages.length;
 
@@ -370,7 +370,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
   isMessageReadByMember: (message, memberId) => {
     const member = useChatMemberStore
       .getState()
-      .getChatMember(message.chatId, memberId);
+      .getChatMember(memberId, message.chatId);
     if (!member?.lastReadMessageId) return false;
 
     const messages = get().messages[message.chatId] || [];

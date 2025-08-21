@@ -1,6 +1,6 @@
 // src/components/ui/calling/ConnectingCall.tsx
 import { ChatResponse } from "@/types/responses/chat.response";
-import { BounceLoader } from "react-spinners";
+import { BeatLoader } from "react-spinners";
 import { CallHeader } from "./components/CallHeader";
 import { useCallStore } from "@/stores/callStore";
 
@@ -18,7 +18,8 @@ export const ConnectingCall = ({ chat }: { chat: ChatResponse }) => {
       </p>
 
       {/* Loader animation */}
-      <BounceLoader color="var(--primary-green)" size={100} />
+
+      <BeatLoader color="#808080" margin={6} size={10} />
 
       {/* Optional: hang up button */}
       <button

@@ -18,7 +18,7 @@ interface ChatMemberStore {
   error: string | null;
 
   fetchChatMembers: (chatId: string, type: ChatType) => Promise<ChatMember[]>;
-  getChatMember: (chatId: string, memberId: string) => ChatMember | undefined;
+  getChatMember: (memberId: string, chatId?: string) => ChatMember | undefined;
   getChatMemberUserIds: (chatId: string, type: ChatType) => string[];
   getDirectChatOtherMemberId: (
     chatId: string,
@@ -86,10 +86,16 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
     }
   },
 
-  getChatMember: (chatId, memberId) => {
+  getChatMember: (memberId, chatId) => {
     const { chatMembers } = get();
+    // Handle case when chatId is not provided
+    if (!chatId) {
+      const allMembers = Object.values(chatMembers).flat();
+      return allMembers.find((member) => member.id === memberId);
+    }
+
     const members = chatMembers[chatId] || [];
-    return members.find((member) => member.userId === memberId);
+    return members.find((member) => member.id === memberId);
   },
 
   getChatMemberUserIds: (chatId: string): string[] => {
@@ -325,7 +331,7 @@ export const useMyChatMember = (chatId: string): ChatMember | undefined => {
 };
 
 export const getMyChatMemberId = (chatId: string): string | undefined => {
-  const currentUserId = useAuthStore.getState().currentUser.id;
+  const currentUserId = useAuthStore.getState().currentUser?.id;
   const members = useChatMemberStore.getState().chatMembers[chatId] || [];
   return members.find((m) => m.userId === currentUserId)?.id;
 };
