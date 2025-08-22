@@ -20,7 +20,7 @@ import { toast } from "react-toastify";
 import { useNotificationSocketListeners } from "@/lib/websocket/hooks/useNotificationSocketListener";
 import { usePresenceSocketListeners } from "@/lib/websocket/hooks/usePresenceSocketListeners";
 import { useCallSocketListeners } from "@/lib/websocket/hooks/useCallSocketListener";
-import { useCallCleanup } from "@/hooks/useCallCleanUp";
+import { useCleanup } from "@/hooks/useCleanUp";
 
 export const ChatContent: React.FC = () => {
   const { id: chatId } = useParams();
@@ -106,7 +106,7 @@ const PrivateLayout: React.FC = () => {
   useChatSocketListeners();
   usePresenceSocketListeners();
   useCallSocketListeners();
-  useCallCleanup();
+  useCleanup();
 
   if (!isAuthenticated) {
     return <Navigate to={ROUTES.PUBLIC.LOGIN} replace />;

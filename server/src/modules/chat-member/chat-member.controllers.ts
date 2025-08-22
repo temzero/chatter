@@ -69,14 +69,31 @@ export class ChatMemberController {
     );
   }
 
-  @Get(':chatId/:userId')
-  async getMemberByChatIdAndUserId(
+  @Get(':memberId')
+  async fetchMemberById(
+    @Param('memberId') memberId: string,
+  ): Promise<
+    SuccessResponse<GroupChatMemberResponseDto | DirectChatMemberResponseDto>
+  > {
+    const member = await this.memberService.findById(memberId);
+
+    const chatType = await this.chatService.getChatType(member.chatId);
+    const memberResponse = mapChatMemberToResponseDto(member, chatType);
+
+    return new SuccessResponse(
+      memberResponse,
+      'Chat member retrieved successfully',
+    );
+  }
+
+  @Get('chat/:chatId/user/:userId')
+  async fetchMemberByChatIdAndUserId(
     @Param('chatId') chatId: string,
     @Param('userId') userId: string,
   ): Promise<
     SuccessResponse<GroupChatMemberResponseDto | DirectChatMemberResponseDto>
   > {
-    const member = await this.memberService.getMemberByChatIdAndUserId(
+    const member = await this.memberService.fetchMemberByChatIdAndUserId(
       chatId,
       userId,
     );

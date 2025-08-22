@@ -1,5 +1,5 @@
 // components/ui/calling/CallCallingUI.tsx
-import React, { useState } from "react";
+import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PulseLoader } from "react-spinners";
 import { useCallStore } from "@/stores/callStore";
@@ -8,14 +8,16 @@ import { Button } from "../Button";
 import { VideoStream } from "./components/VideoStream";
 import { ChatResponse } from "@/types/responses/chat.response";
 import { useModalStore } from "@/stores/modalStore";
+import { toast } from "react-toastify";
 
 interface CallCallingUIProps {
   chat: ChatResponse;
 }
 
 export const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
-  const { isVideoCall, switchCallType, localVideoStream } = useCallStore();
-  const [localIsVideoCall, setLocalIsVideoCall] = useState(isVideoCall);
+  const isVideoEnabled = useCallStore((state) => state.isVideoEnabled);
+  const localVideoStream = useCallStore((state) => state.localVideoStream);
+  const toggleVideo = useCallStore((state) => state.toggleVideo);
   const rejectCall = useCallStore((state) => state.rejectCall);
   const closeModal = useModalStore.getState().closeModal;
   const cancelCall = () => {
@@ -24,16 +26,12 @@ export const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
   };
 
   if (!chat) return null;
-
-  const handleSwitchCallType = () => {
-    setLocalIsVideoCall((prev) => !prev);
-    switchCallType();
-  };
+  toast.info(`localVideoStream ${!localVideoStream}`);
 
   return (
     <div className="flex flex-col items-center justify-between w-full h-full z-20">
       {/* Background - Avatar or Webcam */}
-      {localIsVideoCall && localVideoStream ? (
+      {localVideoStream ? (
         <div className="absolute inset-0 overflow-hidden z-0 opacity-70 w-full h-full">
           <VideoStream
             stream={localVideoStream}
@@ -55,26 +53,22 @@ export const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
       {/* Calling Content */}
       <div className="flex flex-col justify-center items-center gap-4 py-10 select-none">
         <motion.button
-          title={`Switch To ${localIsVideoCall ? "Voice" : "Video"} Call`}
-          onClick={handleSwitchCallType}
+          title={`Switch To ${isVideoEnabled ? "Voice" : "Video"} Call`}
+          onClick={toggleVideo}
           className="p-4 rounded-full hover:bg-[--primary-green] transition-colors relative hover:custom-border"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
         >
           <AnimatePresence mode="wait">
             <motion.span
-              key={localIsVideoCall ? "videocam" : "call"}
+              key={isVideoEnabled ? "videocam" : "call"}
               className="material-symbols-outlined text-6xl flex items-center justify-center"
               initial={{ opacity: 0, scale: 0.1 }}
               animate={{ opacity: 1, scale: 1 }}
             >
-              {localIsVideoCall ? "videocam" : "call"}
+              {isVideoEnabled ? "videocam" : "call"}
             </motion.span>
           </AnimatePresence>
-
-          {/* <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-10 z-0 pointer-events-none">
-            <BounceLoader color="#8b8b8b" size={500} />
-          </div> */}
         </motion.button>
         <PulseLoader color="#808080" margin={6} size={10} />
       </div>

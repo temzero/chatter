@@ -72,7 +72,7 @@ export const handleSystemEventMessage = (message: MessageResponse) => {
     [SystemEventType.MEMBER_ADDED]: async () => {
       if (!targetId) return;
       try {
-        const newMember = await chatMemberService.getMemberByChatIdAndUserId(
+        const newMember = await chatMemberService.fetchMemberByChatIdAndUserId(
           chatId,
           targetId
         );
@@ -84,7 +84,7 @@ export const handleSystemEventMessage = (message: MessageResponse) => {
     [SystemEventType.MEMBER_JOINED]: async () => {
       if (!sender?.id) return;
       try {
-        const newMember = await chatMemberService.getMemberByChatIdAndUserId(
+        const newMember = await chatMemberService.fetchMemberByChatIdAndUserId(
           chatId,
           sender.id
         );

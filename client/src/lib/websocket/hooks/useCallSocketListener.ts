@@ -44,6 +44,19 @@ export function useCallSocketListeners() {
         isGroupCall: data.isGroupCall || false,
       });
 
+      useCallStore.getState().addCallMember({
+        memberId: data.fromMemberId,
+        peerConnection: null,
+        sfuConnection: null,
+        voiceStream: null,
+        videoStream: null,
+        screenStream: null,
+        isMuted: false,
+        isVideoEnabled: false,
+        isScreenSharing: false,
+        joinedAt: Date.now(),
+      });
+
       useModalStore.getState().openModal(ModalType.CALL);
       toast.info(`Incoming ${data.isVideoCall ? "video" : "voice"} call`);
     };
@@ -107,6 +120,28 @@ export function useCallSocketListeners() {
       // Only proceed if this is for our current call
       if (callStore.chatId === data.chatId) {
         callStore.setStatus(CallStatus.CONNECTING);
+
+        // ✅ ADD THE MEMBER IMMEDIATELY - This is the key fix!
+        const existingMember = callStore.callMembers.find(
+          (m) => m.memberId === data.fromMemberId
+        );
+
+        if (!existingMember) {
+          callStore.addCallMember({
+            memberId: data.fromMemberId,
+            peerConnection: null,
+            sfuConnection: null,
+            voiceStream: null,
+            videoStream: null,
+            screenStream: null,
+            isMuted: false,
+            isVideoEnabled: false,
+            isScreenSharing: false,
+            joinedAt: Date.now(),
+          });
+
+          toast.info(`${data.fromMemberId} joined the call`);
+        }
 
         // For direct calls, send offer to the accepting member
         if (

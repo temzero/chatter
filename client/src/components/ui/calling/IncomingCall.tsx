@@ -5,14 +5,16 @@ import { BounceLoader } from "react-spinners";
 import { Button } from "../Button";
 import { useCallStore } from "@/stores/callStore";
 import { VideoStream } from "./components/VideoStream";
+import { toast } from "react-toastify";
 
-export const IncomingCall = ({
-  chat,
-}: {
-  chat: ChatResponse;
-  participants?: Array<{ id: string; avatar: string; name: string }>;
-}) => {
-  const { isVideoCall, localVideoStream } = useCallStore();
+export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
+  const isVideoCall = useCallStore((state) => state.isVideoCall);
+  const localVideoStream = useCallStore((state) => state.localScreenStream);
+  // const isVideoCall = useCallStore(
+  //   (state) => state.callMembers[0].isVideoEnabled
+  // );
+  toast.info(`isVideoCall ${isVideoCall}`);
+  console.log(`isVideoCall ${isVideoCall}`);
 
   const acceptCall = () => {
     useCallStore.getState().acceptCall();

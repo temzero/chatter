@@ -3,9 +3,11 @@ import { useEffect } from "react";
 import { useCallStore } from "@/stores/callStore";
 import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
 import { CallStatus } from "@/types/enums/CallStatus";
+import { useModalStore } from "@/stores/modalStore";
 
-export const useCallCleanup = () => {
+export const useCleanup = () => {
   const callStore = useCallStore();
+  const modalStore = useModalStore();
 
   useEffect(() => {
     const handleCleanup = () => {
@@ -22,6 +24,8 @@ export const useCallCleanup = () => {
 
         callStore.endCall();
       }
+
+      modalStore.closeModal();
     };
 
     // ✅ only run when window is closing / refreshing
@@ -30,5 +34,5 @@ export const useCallCleanup = () => {
     return () => {
       window.removeEventListener("beforeunload", handleCleanup);
     };
-  }, [callStore]);
+  }, [callStore, modalStore]);
 };

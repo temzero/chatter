@@ -44,11 +44,14 @@ export interface MessageStore {
   getDraftMessage: (chatId: string) => string;
   setChatMessages: (chatId: string, messages: MessageResponse[]) => void;
   clearChatMessages: (chatId: string) => void;
-  getUnreadMessagesCount: (chatId: string, memberId: string) => number;
+  getUnreadMessagesCount: (
+    chatId: string,
+    memberId: string
+  ) => number | Promise<number>;
   isMessageReadByMember: (
     message: MessageResponse,
     memberId: string
-  ) => boolean;
+  ) => boolean | Promise<boolean>;
   getUserReaction: (messageId: string, userId: string) => string | null;
   getReactionCount: (messageId: string, emoji: string) => number;
   updateMessageReactions: (
@@ -350,13 +353,11 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
     set({ messages: remainingMessages });
   },
 
-  getUnreadMessagesCount: (chatId, memberId) => {
+  getUnreadMessagesCount: async (chatId, memberId) => {
     const messages = get().messages[chatId] || [];
-    const member = useChatMemberStore
-      .getState()
-      .getChatMember(memberId, chatId);
+    const member = await useChatMemberStore.getState().getChatMember(memberId);
 
-    if (!member || !member.lastReadMessageId) return messages.length;
+    if (!member) return messages.length;
 
     const lastReadIndex = messages.findIndex(
       (msg) => msg.id === member.lastReadMessageId
@@ -367,11 +368,9 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
       : messages.length - (lastReadIndex + 1);
   },
 
-  isMessageReadByMember: (message, memberId) => {
-    const member = useChatMemberStore
-      .getState()
-      .getChatMember(memberId, message.chatId);
-    if (!member?.lastReadMessageId) return false;
+  isMessageReadByMember: async (message, memberId) => {
+    const member = await useChatMemberStore.getState().getChatMember(memberId);
+    if (!member) return false;
 
     const messages = get().messages[message.chatId] || [];
     const targetIndex = messages.findIndex((msg) => msg.id === message.id);

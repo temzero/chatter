@@ -191,10 +191,10 @@ export const useCallStore = create<CallStore>()(
 
     acceptCall: async () => {
       const {
-        isVideoCall,
         chatId,
         localVoiceStream,
         localVideoStream,
+        isVideoCall,
         isGroupCall,
       } = get();
 
@@ -407,19 +407,31 @@ export const useCallStore = create<CallStore>()(
     },
 
     updateCallMember: (payload: callMemberPayload) => {
-      set((state) => ({
-        callMembers: state.callMembers.map((member) =>
+      set((state) => {
+        const includeIfDefined = <T>(value: T | undefined, key: string) =>
+          value !== undefined ? { [key]: value } : {};
+
+        const updatedMembers = state.callMembers.map((member) =>
           member.memberId === payload.memberId
             ? {
                 ...member,
-                isMuted: payload.isMuted,
-                isVideoEnabled: payload.isVideoEnabled,
-                isScreenSharing: payload.isScreenSharing,
+                ...includeIfDefined(payload.isMuted, "isMuted"),
+                ...includeIfDefined(payload.isVideoEnabled, "isVideoEnabled"),
+                ...includeIfDefined(payload.isScreenSharing, "isScreenSharing"),
                 lastActivity: Date.now(),
               }
             : member
-        ),
-      }));
+        );
+
+        const hasVideoEnabled = updatedMembers.some(
+          (member) => member.isVideoEnabled
+        );
+
+        return {
+          callMembers: updatedMembers,
+          isVideoCall: hasVideoEnabled,
+        };
+      });
     },
 
     // 🛑 End Call: cleanup everything
@@ -528,7 +540,13 @@ export const useCallStore = create<CallStore>()(
 
     // 🎥 Toggle video
     toggleVideo: async () => {
-      const { localVideoStream, isVideoEnabled, chatId, isGroupCall } = get();
+      const {
+        localVideoStream,
+        isVideoEnabled,
+        chatId,
+        isGroupCall,
+        callMembers,
+      } = get();
       const myMemberId = getMyChatMemberId(chatId!);
 
       if (!myMemberId) return;
@@ -540,7 +558,6 @@ export const useCallStore = create<CallStore>()(
             localVideoStream.getTracks().forEach((track) => track.stop());
             set({ localVideoStream: null, isVideoEnabled: false });
           }
-
           // Notify other participants about video state change
           if (chatId) {
             callWebSocketService.updateCallMember({
@@ -562,7 +579,7 @@ export const useCallStore = create<CallStore>()(
           const newVideoStream = new MediaStream(videoStream.getVideoTracks());
           set({ localVideoStream: newVideoStream, isVideoEnabled: true });
 
-          // Notify other participants about video state change
+          // Notify other participants
           if (chatId) {
             callWebSocketService.updateCallMember({
               chatId,
@@ -571,23 +588,46 @@ export const useCallStore = create<CallStore>()(
             });
           }
 
-          // For direct calls, re-negotiate peer connections with updated video tracks
+          // CRITICAL: Re-negotiate connections for all members
           if (!isGroupCall) {
-            const { callMembers } = get();
-            callMembers.forEach((member) => {
+            for (const member of callMembers) {
               if (member.peerConnection) {
-                // Remove existing video tracks and add new ones
-                member.peerConnection.getSenders().forEach((sender) => {
+                const pc = member.peerConnection;
+
+                // Remove existing video tracks
+                const senders = pc.getSenders();
+                for (const sender of senders) {
                   if (sender.track?.kind === "video") {
-                    member.peerConnection!.removeTrack(sender);
+                    pc.removeTrack(sender);
                   }
+                }
+
+                // Add new video tracks
+                newVideoStream.getTracks().forEach((track) => {
+                  pc.addTrack(track, newVideoStream);
                 });
 
-                newVideoStream.getTracks().forEach((track) => {
-                  member.peerConnection!.addTrack(track, newVideoStream);
-                });
+                // Re-negotiate by creating new offer
+                try {
+                  const offer = await pc.createOffer({
+                    offerToReceiveAudio: true,
+                    offerToReceiveVideo: true,
+                  });
+
+                  await pc.setLocalDescription(offer);
+
+                  callWebSocketService.sendOffer({
+                    chatId: chatId!,
+                    offer,
+                  });
+                } catch (error) {
+                  console.error(
+                    "Error creating offer for renegotiation:",
+                    error
+                  );
+                }
               }
-            });
+            }
           }
         }
       } catch (error) {
@@ -595,6 +635,74 @@ export const useCallStore = create<CallStore>()(
         toast.error("Could not toggle video");
       }
     },
+    // toggleVideo: async () => {
+    //   const { localVideoStream, isVideoEnabled, chatId, isGroupCall } = get();
+    //   const myMemberId = getMyChatMemberId(chatId!);
+
+    //   if (!myMemberId) return;
+
+    //   try {
+    //     if (isVideoEnabled) {
+    //       // Disable video - stop all video tracks
+    //       if (localVideoStream) {
+    //         localVideoStream.getTracks().forEach((track) => track.stop());
+    //         set({ localVideoStream: null, isVideoEnabled: false });
+    //       }
+
+    //       // Notify other participants about video state change
+    //       if (chatId) {
+    //         callWebSocketService.updateCallMember({
+    //           chatId,
+    //           memberId: myMemberId,
+    //           isVideoEnabled: false,
+    //         });
+    //       }
+    //     } else {
+    //       // Enable video - get new video stream
+    //       const videoStream = await navigator.mediaDevices.getUserMedia({
+    //         video: {
+    //           width: { ideal: 1280 },
+    //           height: { ideal: 720 },
+    //           facingMode: "user",
+    //         },
+    //       });
+
+    //       const newVideoStream = new MediaStream(videoStream.getVideoTracks());
+    //       set({ localVideoStream: newVideoStream, isVideoEnabled: true });
+
+    //       // Notify other participants about video state change
+    //       if (chatId) {
+    //         callWebSocketService.updateCallMember({
+    //           chatId,
+    //           memberId: myMemberId,
+    //           isVideoEnabled: true,
+    //         });
+    //       }
+
+    //       // For direct calls, re-negotiate peer connections with updated video tracks
+    //       if (!isGroupCall) {
+    //         const { callMembers } = get();
+    //         callMembers.forEach((member) => {
+    //           if (member.peerConnection) {
+    //             // Remove existing video tracks and add new ones
+    //             member.peerConnection.getSenders().forEach((sender) => {
+    //               if (sender.track?.kind === "video") {
+    //                 member.peerConnection!.removeTrack(sender);
+    //               }
+    //             });
+
+    //             newVideoStream.getTracks().forEach((track) => {
+    //               member.peerConnection!.addTrack(track, newVideoStream);
+    //             });
+    //           }
+    //         });
+    //       }
+    //     }
+    //   } catch (error) {
+    //     console.error("Error toggling video:", error);
+    //     toast.error("Could not toggle video");
+    //   }
+    // },
 
     // Toggle screen sharing
     toggleScreenShare: async () => {
@@ -839,8 +947,8 @@ export const useCallStore = create<CallStore>()(
 
     // 📺 Handle incoming remote stream
     handleRemoteStream: (memberId: string, event: RTCTrackEvent) => {
-      if (!event.track) {
-        console.error("Received track event without track!", event);
+      if (!event.track || !event.streams || event.streams.length === 0) {
+        console.error("Received track event without stream!", event);
         return;
       }
 
@@ -850,27 +958,31 @@ export const useCallStore = create<CallStore>()(
         const member = state.callMembers.find((m) => m.memberId === memberId);
         if (!member) return state;
 
-        const stream =
-          kind === "audio" ? member.voiceStream : member.videoStream;
-        const newStream = stream || new MediaStream();
+        // Create or update the appropriate stream
+        let updatedStream: MediaStream;
 
-        // Avoid duplicate tracks
-        const existingTrack = newStream
-          .getTracks()
-          .find((t) => t.id === event.track.id);
-        if (existingTrack) {
-          console.warn(`Duplicate ${kind} track from ${memberId}`);
-          return state;
+        if (kind === "audio" && member.voiceStream) {
+          updatedStream = member.voiceStream;
+          // Add track to existing stream
+          if (!updatedStream.getTrackById(event.track.id)) {
+            updatedStream.addTrack(event.track);
+          }
+        } else if (kind === "video" && member.videoStream) {
+          updatedStream = member.videoStream;
+          // Replace video track (don't add multiple video tracks)
+          const existingVideoTracks = updatedStream.getVideoTracks();
+          existingVideoTracks.forEach((track) =>
+            updatedStream.removeTrack(track)
+          );
+          updatedStream.addTrack(event.track);
+        } else {
+          // Create new stream
+          updatedStream = new MediaStream([event.track]);
         }
 
-        // Add track
-        newStream.addTrack(event.track);
-        console.log(`Added ${kind} track to ${memberId}'s stream`);
-
-        // Update member with the new stream
         const updatedMember = {
           ...member,
-          [kind === "audio" ? "voiceStream" : "videoStream"]: newStream,
+          [kind === "audio" ? "voiceStream" : "videoStream"]: updatedStream,
           lastActivity: Date.now(),
         };
 

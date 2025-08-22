@@ -22,13 +22,20 @@ export const chatMemberService = {
     return response.data.payload;
   },
 
+  async fetchMemberById(memberId: string): Promise<ChatMember> {
+    const response = await API.get<ApiSuccessResponse<ChatMember>>(
+      `/chat-members/${memberId}`
+    );
+    return response.data.payload;
+  },
+
   // Get a specific member by chatId and userId
-  async getMemberByChatIdAndUserId(
+  async fetchMemberByChatIdAndUserId(
     chatId: string,
     userId: string
   ): Promise<ChatMember> {
     const response = await API.get<ApiSuccessResponse<ChatMember>>(
-      `/chat-members/${chatId}/${userId}`
+      `/chat-members/chat/${chatId}/user/${userId}` 
     );
     return response.data.payload;
   },

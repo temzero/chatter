@@ -7,7 +7,7 @@ import { CallHeader } from "./components/CallHeader";
 import { Timer } from "../Timer";
 import { VoiceVisualizerButton } from "../VoiceVisualizerBtn";
 import { useShallow } from "zustand/shallow";
-import { CallMember } from "./components/CallMember";
+import CallMember from "./components/CallMember";
 
 export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
   const {
@@ -91,7 +91,7 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
         <div className="flex items-center gap-2">
           {callMembers.length > 1 && (
             <span className="text-xs text-gray-400">
-              {callMembers.length} participants
+              {callMembers.length} members
             </span>
           )}
           <Timer startTime={startedAt} />
@@ -118,7 +118,7 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
             isMuted={isMuted}
             stream={localVoiceStream || new MediaStream()}
             onClick={toggleMute}
-            className="w-14 h-14 custom-border rounded-full"
+            className="w-14 h-14 rounded-full"
           />
           <Button
             variant="ghost"

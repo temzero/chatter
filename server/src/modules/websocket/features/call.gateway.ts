@@ -35,20 +35,15 @@ export class CallGateway {
     private readonly chatService: ChatService,
   ) {}
 
-  /**
-   * Clear pending calls for all participants in a chat
-   * @param chatId - The chat ID
-   * @param userId - The user ID initiating the action
-   */
-  private async clearPendingCalls(chatId: string, userId: string) {
-    const chatMembers = await this.chatMemberService.getChatMembers(chatId);
-    chatMembers.forEach((member) => {
-      if (member.userId !== userId) {
-        const key = `${chatId}:${member.userId}`;
-        this.websocketCallService.getAndRemovePendingCall(key);
-      }
-    });
-  }
+  // /**
+  //  * Clear pending calls for all participants in a chat
+  //  * @param chatId - The chat ID
+  //  * @param userId - The user ID initiating the action
+  //  */
+  // private async clearPendingCalls(chatId: string) {
+  //   // The new service handles cleanup automatically, so we just end the call
+  //   this.websocketCallService.endCall(chatId);
+  // }
 
   @SubscribeMessage(CallEvent.INITIATE_CALL)
   async handleCallInitiate(
@@ -69,16 +64,12 @@ export class CallGateway {
       timestamp: Date.now(),
     };
 
-    // Store the call for offline users using websocketService
-    const chatMembers = await this.chatMemberService.getChatMembers(
+    // Initialize call in the call service
+    this.websocketCallService.initiateCall(
       payload.chatId,
+      response,
+      fromMemberId,
     );
-    chatMembers.forEach((member) => {
-      if (member.userId !== userId) {
-        const key = `${payload.chatId}:${member.userId}`;
-        this.websocketCallService.addPendingCall(key, response);
-      }
-    });
 
     // Notify all online chat members except the caller
     await this.websocketNotificationService.emitToChatMembers(
@@ -94,24 +85,33 @@ export class CallGateway {
     @ConnectedSocket() client: AuthenticatedSocket,
   ) {
     const userId = client.data.userId;
-    const pendingCalls: IncomingCallResponse[] = [];
-    const now = Date.now();
-    const oneMinuteAgo = now - 60000;
 
+    // Get user's member IDs across all chats
     const userChatsResult = await this.chatService.getUserChats(userId);
-    const userChats = userChatsResult.chats;
+    const userMemberIds = await Promise.all(
+      userChatsResult.chats.map((chat) =>
+        this.chatMemberService.getChatMemberId(chat.id, userId),
+      ),
+    );
 
-    for (const chat of userChats) {
-      const key = `${chat.id}:${userId}`;
-      const call = this.websocketCallService.getAndRemovePendingCall(key);
+    // Get pending calls where user is not the initiator
+    const pendingCalls = this.websocketCallService.getPendingCallsForUser(
+      userId,
+      userMemberIds,
+    );
 
-      // Check if call is still valid (within 1 minute)
-      if (call && call.timestamp >= oneMinuteAgo) {
-        pendingCalls.push(call);
-      }
-    }
+    // Convert CallState to IncomingCallResponse format
+    const pendingCallResponses: IncomingCallResponse[] = pendingCalls.map(
+      (callState) => ({
+        chatId: callState.chatId,
+        isVideoCall: callState.isVideoCall,
+        isGroupCall: callState.isGroupCall,
+        fromMemberId: Array.from(callState.memberIds)[0], // Initiator is first member
+        timestamp: callState.callAt,
+      }),
+    );
 
-    client.emit(CallEvent.PENDING_CALLS, pendingCalls);
+    client.emit(CallEvent.PENDING_CALLS, pendingCallResponses);
   }
 
   @SubscribeMessage(CallEvent.UPDATE_CALL)
@@ -134,7 +134,6 @@ export class CallGateway {
     );
   }
 
-  // Add this method to your CallGateway class
   @SubscribeMessage(CallEvent.UPDATE_CALL_MEMBER)
   async handleCallMemberUpdate(
     @ConnectedSocket() client: AuthenticatedSocket,
@@ -156,7 +155,7 @@ export class CallGateway {
       payload.chatId,
       CallEvent.UPDATE_CALL_MEMBER,
       payload,
-      { senderId: userId, excludeSender: false }, // Include sender so they get confirmation
+      { senderId: userId, excludeSender: false },
     );
   }
 
@@ -178,8 +177,8 @@ export class CallGateway {
       isCallerCancel: payload.isCallerCancel,
     };
 
-    // Clear pending calls for all participants
-    await this.clearPendingCalls(payload.chatId, userId);
+    // Add user to the call participants
+    this.websocketCallService.addParticipant(payload.chatId, fromMemberId);
 
     await this.websocketNotificationService.emitToChatMembers(
       payload.chatId,
@@ -204,18 +203,20 @@ export class CallGateway {
       throw new Error('User is not a member of this chat');
     }
 
+    // Add user to the call participants
+    this.websocketCallService.addParticipant(payload.chatId, memberId);
+
     const response = {
       chatId: payload.chatId,
       memberId,
       timestamp: Date.now(),
     };
 
-    // Notify all participants that a new member joined
     await this.websocketNotificationService.emitToChatMembers(
       payload.chatId,
       CallEvent.JOIN_CALL,
       response,
-      { senderId: userId, excludeSender: false }, // Include sender for confirmation
+      { senderId: userId, excludeSender: false },
     );
   }
 
@@ -237,8 +238,11 @@ export class CallGateway {
       isCallerCancel: payload.isCallerCancel,
     };
 
-    // Clear pending calls for all participants
-    await this.clearPendingCalls(payload.chatId, userId);
+    // Clear the call if user was the only participant
+    const callState = this.websocketCallService.getCallState(payload.chatId);
+    if (callState && callState.memberIds.size === 1) {
+      this.websocketCallService.endCall(payload.chatId);
+    }
 
     await this.websocketNotificationService.emitToChatMembers(
       payload.chatId,
@@ -265,8 +269,21 @@ export class CallGateway {
       timestamp: Date.now(),
     };
 
-    // Clear pending calls for all participants
-    await this.clearPendingCalls(payload.chatId, userId);
+    // Remove user from call participants and check if call should end
+    const callEnded = this.websocketCallService.removeParticipant(
+      payload.chatId,
+      fromMemberId,
+    );
+
+    if (callEnded) {
+      // Call ended completely, emit additional event if needed
+      await this.websocketNotificationService.emitToChatMembers(
+        payload.chatId,
+        CallEvent.END_CALL,
+        { chatId: payload.chatId, endedBy: fromMemberId },
+        { senderId: userId, excludeSender: false },
+      );
+    }
 
     await this.websocketNotificationService.emitToChatMembers(
       payload.chatId,
