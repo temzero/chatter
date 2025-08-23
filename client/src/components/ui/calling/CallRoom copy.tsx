@@ -15,7 +15,7 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
     remoteStreams,
     callStartTime,
     isMuted,
-    toggleMute,
+    toggleLocalVoice,
     switchCallType,
   } = useCallStore();
 
@@ -31,7 +31,7 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
   };
 
   const handleToggleMic = () => {
-    toggleMute();
+    toggleLocalVoice();
   };
 
   const handleToggleVideo = async () => {

@@ -112,7 +112,7 @@ const CustomVideoPlayer = ({
     }
   };
 
-  const toggleMute = () => {
+  const toggleLocalVoice = () => {
     if (videoRef.current) {
       videoRef.current.muted = !videoRef.current.muted;
       setIsMuted(videoRef.current.muted);
@@ -219,7 +219,7 @@ const CustomVideoPlayer = ({
           className="absolute bottom-1 left-1 bg-black/50 text-white px-1 rounded hover:bg-black/70 transition"
           onClick={(e) => {
             e.stopPropagation();
-            toggleMute();
+            toggleLocalVoice();
           }}
           aria-label={isMuted ? "Mute" : "Unmute"}
         >

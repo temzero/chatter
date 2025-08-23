@@ -95,7 +95,6 @@ export function useCallSocketListeners() {
         // Update with all possible properties including screen sharing
         callStore.updateCallMember({
           ...data,
-          isScreenSharing: data.isScreenSharing || false,
         });
 
         // Optional: Show toast notification for state changes

@@ -17,8 +17,8 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
     localVoiceStream,
     localVideoStream,
     startedAt,
-    toggleMute,
-    toggleVideo,
+    toggleLocalVoice,
+    toggleLocalVideo,
     endCall,
     closeCallModal,
   } = useCallStore(
@@ -30,8 +30,8 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
       localVoiceStream: state.localVoiceStream,
       localVideoStream: state.localVideoStream,
       startedAt: state.startedAt,
-      toggleMute: state.toggleMute,
-      toggleVideo: state.toggleVideo,
+      toggleLocalVoice: state.toggleLocalVoice,
+      toggleLocalVideo: state.toggleLocalVideo,
       endCall: state.endCall,
       closeCallModal: state.closeCallModal,
     }))
@@ -111,13 +111,13 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
             icon={isVideoEnable ? "videocam" : "videocam_off"}
             isIconFilled={isVideoEnable}
             isRoundedFull
-            onClick={toggleVideo}
+            onClick={toggleLocalVideo}
           />
           <VoiceVisualizerButton
             variant="ghost"
             isMuted={isMuted}
             stream={localVoiceStream || new MediaStream()}
-            onClick={toggleMute}
+            onClick={toggleLocalVoice}
             className="w-14 h-14 rounded-full"
           />
           <Button

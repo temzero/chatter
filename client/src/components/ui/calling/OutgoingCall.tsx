@@ -8,7 +8,6 @@ import { Button } from "../Button";
 import { VideoStream } from "./components/VideoStream";
 import { ChatResponse } from "@/types/responses/chat.response";
 import { useModalStore } from "@/stores/modalStore";
-import { toast } from "react-toastify";
 
 interface CallCallingUIProps {
   chat: ChatResponse;
@@ -17,7 +16,7 @@ interface CallCallingUIProps {
 export const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
   const isVideoEnabled = useCallStore((state) => state.isVideoEnabled);
   const localVideoStream = useCallStore((state) => state.localVideoStream);
-  const toggleVideo = useCallStore((state) => state.toggleVideo);
+  const toggleLocalVideo = useCallStore((state) => state.toggleLocalVideo);
   const rejectCall = useCallStore((state) => state.rejectCall);
   const closeModal = useModalStore.getState().closeModal;
   const cancelCall = () => {
@@ -26,7 +25,6 @@ export const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
   };
 
   if (!chat) return null;
-  toast.info(`localVideoStream ${!localVideoStream}`);
 
   return (
     <div className="flex flex-col items-center justify-between w-full h-full z-20">
@@ -54,7 +52,7 @@ export const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
       <div className="flex flex-col justify-center items-center gap-4 py-10 select-none">
         <motion.button
           title={`Switch To ${isVideoEnabled ? "Voice" : "Video"} Call`}
-          onClick={toggleVideo}
+          onClick={toggleLocalVideo}
           className="p-4 rounded-full hover:bg-[--primary-green] transition-colors relative hover:custom-border"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}

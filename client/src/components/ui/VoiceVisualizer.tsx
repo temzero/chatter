@@ -14,7 +14,7 @@ export const VoiceVisualizer = ({
   stream,
   isMuted = false,
   size = 40,
-  circleColor = "#00ae8089",
+  circleColor = "gray",
   opacity = 0.2,
   className = "",
 }: VoiceVisualizerProps) => {
@@ -83,6 +83,7 @@ export const VoiceVisualizer = ({
         height: size,
         backgroundColor: circleColor,
         transform: `scale(${scale})`,
+        // transform: `scale(1)`,
         opacity: opacity,
         zIndex: 0,
       }}
