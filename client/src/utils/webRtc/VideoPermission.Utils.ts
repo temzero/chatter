@@ -1,12 +1,8 @@
+// utils/webRtc/videoPermission.Utils.ts
 import { CallMember } from "@/stores/callStore";
 
 /**
- * Toggles camera permission without disconnecting from the call
- * @param currentStream - The current video stream
- * @param isCurrentlyEnabled - Current video state
- * @param onDisable - Callback when disabling video
- * @param onEnable - Callback when enabling video
- * @param onError - Error handler callback
+ * Toggles video permission with proper stream management
  */
 export const toggleVideoPermission = async (
   currentStream: MediaStream | null,
@@ -18,30 +14,38 @@ export const toggleVideoPermission = async (
   const newVideoState = !isCurrentlyEnabled;
 
   try {
-    if (newVideoState) {
-      // Disabling video: Stop the video tracks to release camera permission
+    if (!newVideoState) {
+      // DISABLING VIDEO
       if (currentStream) {
         currentStream.getVideoTracks().forEach((track) => {
-          track.stop(); // This releases the camera permission
+          track.stop(); // Release camera
         });
       }
       onDisable();
       return true;
     } else {
-      // Enabling video: Request new camera permission
-      const newStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          facingMode: "user", // or "environment" for rear camera
-        },
-      });
+      // ENABLING VIDEO
+      const newStream = await navigator.mediaDevices
+        .getUserMedia({
+          video: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            facingMode: "user",
+          },
+        })
+        .catch(async () => {
+          // Fallback
+          return await navigator.mediaDevices.getUserMedia({
+            video: true,
+          });
+        });
 
       const newVideoStream = new MediaStream(newStream.getVideoTracks());
       onEnable(newVideoStream);
       return true;
     }
   } catch (error) {
+    console.error("toggleVideoPermission error:", error);
     onError(error as Error);
     return false;
   }
@@ -51,7 +55,7 @@ export const toggleVideoPermission = async (
  * Replaces video tracks in peer connections when toggling video
  */
 export const updateVideoInConnections = async (
-  newStream: MediaStream | null, // null when disabling video
+  newStream: MediaStream,
   callMembers: CallMember[],
   isGroupCall: boolean,
   chatId: string,
@@ -59,51 +63,46 @@ export const updateVideoInConnections = async (
 ): Promise<void> => {
   if (isGroupCall) return; // Group calls are handled by SFU
 
+  const videoTrack = newStream.getVideoTracks()[0];
+  if (!videoTrack) {
+    console.error("No video track found in new stream");
+    return;
+  }
+
   for (const member of callMembers) {
-    if (!member.peerConnection) continue;
+    if (member.peerConnection) {
+      const pc = member.peerConnection;
+      const senders = pc.getSenders();
 
-    const pc = member.peerConnection;
-    const senders = pc.getSenders();
-
-    if (newStream) {
-      // Enabling video - replace or add video track
+      // Find and replace the video sender
       const videoSender = senders.find(
         (s: RTCRtpSender) => s.track && s.track.kind === "video"
       );
 
-      if (videoSender) {
-        // Replace existing video track
-        await videoSender.replaceTrack(newStream.getVideoTracks()[0]);
-      } else {
-        // Add new video track
-        pc.addTrack(newStream.getVideoTracks()[0], newStream);
+      try {
+        if (videoSender) {
+          // Replace the track
+          await videoSender.replaceTrack(videoTrack);
+          console.log("Replaced video track in existing sender");
+        } else {
+          // Add new video track if none exists
+          pc.addTrack(videoTrack, newStream);
+          console.log("Added new video track");
 
-        // Renegotiate for new track
-        try {
-          const offer = await pc.createOffer();
-          await pc.setLocalDescription(offer);
-          sendOffer(chatId, offer);
-        } catch (err) {
-          console.error("Error renegotiating video:", err);
+          // Renegotiate if this is a new track
+          try {
+            const offer = await pc.createOffer({
+              offerToReceiveAudio: true,
+              offerToReceiveVideo: true,
+            });
+            await pc.setLocalDescription(offer);
+            sendOffer(chatId, offer);
+          } catch (err) {
+            console.error("Error renegotiating video:", err);
+          }
         }
-      }
-    } else {
-      // Disabling video - remove video track if it exists
-      const videoSender = senders.find(
-        (s: RTCRtpSender) => s.track && s.track.kind === "video"
-      );
-
-      if (videoSender) {
-        pc.removeTrack(videoSender);
-
-        // Renegotiate after removing video track
-        try {
-          const offer = await pc.createOffer();
-          await pc.setLocalDescription(offer);
-          sendOffer(chatId, offer);
-        } catch (err) {
-          console.error("Error renegotiating after removing video:", err);
-        }
+      } catch (error) {
+        console.error("Error updating video connection:", error);
       }
     }
   }

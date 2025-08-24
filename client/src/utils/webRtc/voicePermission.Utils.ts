@@ -29,18 +29,35 @@ export const toggleVoicePermission = async (
       return true;
     } else {
       // Unmuting: Request new microphone permission
-      const newStream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-        },
-      });
+      const newStream = await navigator.mediaDevices
+        .getUserMedia({
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            // Add these constraints to avoid Chrome issues:
+            autoGainControl: true,
+            channelCount: 1,
+          },
+        })
+        .catch(async (error) => {
+          // Fallback to simpler audio constraints if the first request fails
+          if (
+            error.name === "OverconstrainedError" ||
+            error.name === "ConstraintNotSatisfiedError"
+          ) {
+            return await navigator.mediaDevices.getUserMedia({
+              audio: true, // Simple audio constraints
+            });
+          }
+          throw error;
+        });
 
       const newVoiceStream = new MediaStream(newStream.getAudioTracks());
       onUnmute(newVoiceStream);
       return true;
     }
   } catch (error) {
+    console.error("toggleVoicePermission error:", error);
     onError(error as Error);
     return false;
   }
@@ -58,6 +75,12 @@ export const updateAudioInConnections = async (
 ): Promise<void> => {
   if (isGroupCall) return; // Group calls are handled by SFU
 
+  const audioTrack = newStream.getAudioTracks()[0];
+  if (!audioTrack) {
+    console.error("No audio track found in new stream");
+    return;
+  }
+
   for (const member of callMembers) {
     if (member.peerConnection) {
       const pc = member.peerConnection;
@@ -68,20 +91,30 @@ export const updateAudioInConnections = async (
         (s: RTCRtpSender) => s.track && s.track.kind === "audio"
       );
 
-      if (audioSender) {
-        await audioSender.replaceTrack(newStream.getAudioTracks()[0]);
-      } else {
-        // Add new audio track if none exists
-        pc.addTrack(newStream.getAudioTracks()[0], newStream);
+      try {
+        if (audioSender) {
+          // Replace the track
+          await audioSender.replaceTrack(audioTrack);
+          console.log("Replaced audio track in existing sender");
+        } else {
+          // Add new audio track if none exists
+          pc.addTrack(audioTrack, newStream);
+          console.log("Added new audio track");
 
-        // Renegotiate if this is a new track
-        try {
-          const offer = await pc.createOffer();
-          await pc.setLocalDescription(offer);
-          sendOffer(chatId, offer);
-        } catch (err) {
-          console.error("Error renegotiating audio:", err);
+          // Renegotiate if this is a new track
+          try {
+            const offer = await pc.createOffer({
+              offerToReceiveAudio: true,
+              offerToReceiveVideo: true,
+            });
+            await pc.setLocalDescription(offer);
+            sendOffer(chatId, offer);
+          } catch (err) {
+            console.error("Error renegotiating audio:", err);
+          }
         }
+      } catch (error) {
+        console.error("Error updating audio connection:", error);
       }
     }
   }

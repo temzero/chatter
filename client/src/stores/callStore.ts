@@ -13,10 +13,10 @@ import {
   toggleVoicePermission,
   updateAudioInConnections,
 } from "@/utils/webRtc/voicePermission.Utils";
-// import {
-//   toggleVideoPermission,
-//   updateVideoInConnections,
-// } from "@/utils/webRtc/VideoPermission.Utils";
+import {
+  toggleVideoPermission,
+  updateVideoInConnections,
+} from "@/utils/webRtc/VideoPermission.Utils";
 
 export interface CallMember {
   memberId: string;
@@ -656,59 +656,220 @@ export const useCallStore = create<CallStore>()(
 
       if (!myMemberId) return;
 
-      const success = await toggleVoicePermission(
-        localVoiceStream,
-        isMuted,
-        // onMute callback
-        () => {
-          set({ isMuted: true, localVoiceStream: null });
+      try {
+        // Immediately update UI for better responsiveness
+        set({ isMuted: !isMuted });
 
-          // Notify other participants about mute status change
-          callWebSocketService.updateCallMember({
-            chatId: chatId!,
-            memberId: myMemberId,
-            isMuted: true,
-          });
-        },
-        // onUnmute callback
-        (newVoiceStream) => {
-          // Update audio in peer connections
-          updateAudioInConnections(
-            newVoiceStream,
-            callMembers,
-            isGroupCall,
-            chatId!,
-            (chatId: string, offer: RTCSessionDescriptionInit) => {
-              callWebSocketService.sendOffer({ chatId, offer });
-            }
-          );
+        const success = await toggleVoicePermission(
+          localVoiceStream,
+          isMuted,
+          // onMute callback
+          () => {
+            // State already updated above, just notify others
+            callWebSocketService.updateCallMember({
+              chatId: chatId!,
+              memberId: myMemberId,
+              isMuted: true,
+            });
+          },
+          // onUnmute callback
+          (newVoiceStream) => {
+            // Update audio in peer connections
+            updateAudioInConnections(
+              newVoiceStream,
+              callMembers,
+              isGroupCall,
+              chatId!,
+              (chatId: string, offer: RTCSessionDescriptionInit) => {
+                callWebSocketService.sendOffer({ chatId, offer });
+              }
+            );
 
-          set({
-            isMuted: false,
-            localVoiceStream: newVoiceStream,
-          });
+            set({
+              isMuted: false,
+              localVoiceStream: newVoiceStream,
+            });
 
-          // Notify other participants about mute status change
-          callWebSocketService.updateCallMember({
-            chatId: chatId!,
-            memberId: myMemberId,
-            isMuted: false,
-          });
-        },
-        // onError callback
-        (error: unknown) => {
-          console.error("Error toggling microphone:", error);
-          // Revert state if there was an error
+            // Notify other participants
+            callWebSocketService.updateCallMember({
+              chatId: chatId!,
+              memberId: myMemberId,
+              isMuted: false,
+            });
+          },
+          // onError callback
+          (error: unknown) => {
+            console.error("Error toggling microphone:", error);
+            // Revert state if there was an error
+            set({ isMuted: isMuted });
+
+            // Also notify others of the error state
+            callWebSocketService.updateCallMember({
+              chatId: chatId!,
+              memberId: myMemberId,
+              isMuted: isMuted,
+            });
+          }
+        );
+
+        if (!success) {
+          // Revert the immediate UI change if unsuccessful
           set({ isMuted: isMuted });
         }
-      );
-
-      if (!success) {
-        // Error already handled in onError callback
-        return;
+      } catch (error) {
+        console.error("Error in toggleLocalVoice:", error);
+        set({ isMuted: isMuted }); // Revert on error
       }
     },
 
+    // toggleLocalVideo: async () => {
+    //   const {
+    //     localVideoStream,
+    //     isVideoEnabled,
+    //     chatId,
+    //     isGroupCall,
+    //     callMembers,
+    //     callStatus,
+    //   } = get();
+
+    //   const myMemberId = getMyChatMemberId(chatId!);
+    //   if (!myMemberId) return;
+
+    //   try {
+    //     if (isVideoEnabled) {
+    //       // 🔴 DISABLE VIDEO - Keep webcam access but disable track
+    //       if (localVideoStream) {
+    //         localVideoStream.getTracks().forEach((track) => {
+    //           track.enabled = false; // Disable track without stopping it
+    //         });
+    //       }
+
+    //       set({ isVideoEnabled: false });
+    //       // Keep localVideoStream in state to maintain track reference
+
+    //       // ✅ NOTIFY OTHER USERS IMMEDIATELY
+    //       callWebSocketService.updateCallMember({
+    //         chatId: chatId!,
+    //         memberId: myMemberId,
+    //         isVideoEnabled: false,
+    //       });
+
+    //       // ✅ UPDATE EXISTING TRACKS (no need to replace with null)
+    //       if (!isGroupCall && callStatus === CallStatus.CONNECTED) {
+    //         for (const member of callMembers) {
+    //           if (!member.peerConnection) continue;
+
+    //           const senders = member.peerConnection.getSenders();
+    //           const videoSender = senders.find(
+    //             (s) => s.track?.kind === "video"
+    //           );
+
+    //           if (videoSender && videoSender.track) {
+    //             // Simply disable the existing track
+    //             videoSender.track.enabled = false;
+
+    //             // No renegotiation needed since we're not changing tracks
+    //             // The connection remains active with disabled track
+    //           }
+    //         }
+    //       }
+    //     } else {
+    //       // 🟢 ENABLE VIDEO - Re-enable existing track
+    //       if (localVideoStream) {
+    //         localVideoStream.getTracks().forEach((track) => {
+    //           track.enabled = true; // Re-enable the existing track
+    //         });
+    //       } else {
+    //         // Fallback: Acquire webcam if no existing stream
+    //         const stream = await navigator.mediaDevices.getUserMedia({
+    //           video: {
+    //             width: { ideal: 1280 },
+    //             height: { ideal: 720 },
+    //             facingMode: "user",
+    //           },
+    //         });
+
+    //         const newVideoStream = new MediaStream(stream.getVideoTracks());
+    //         set({
+    //           localVideoStream: newVideoStream,
+    //           isVideoEnabled: true,
+    //         });
+
+    //         // Handle adding new track to connections (your original logic)
+    //         if (!isGroupCall && callStatus === CallStatus.CONNECTED) {
+    //           const videoTrack = newVideoStream.getVideoTracks()[0];
+    //           for (const member of callMembers) {
+    //             if (!member.peerConnection) continue;
+
+    //             const senders = member.peerConnection.getSenders();
+    //             const videoSender = senders.find(
+    //               (s) => s.track?.kind === "video"
+    //             );
+
+    //             if (videoSender) {
+    //               await videoSender.replaceTrack(videoTrack);
+    //             } else {
+    //               member.peerConnection.addTrack(videoTrack, newVideoStream);
+    //             }
+
+    //             // Renegotiation needed for new track
+    //             try {
+    //               const offer = await member.peerConnection.createOffer({
+    //                 offerToReceiveVideo: true,
+    //               });
+    //               await member.peerConnection.setLocalDescription(offer);
+
+    //               callWebSocketService.sendOffer({
+    //                 chatId: chatId!,
+    //                 offer,
+    //               });
+    //             } catch (error) {
+    //               console.error(
+    //                 "Error renegotiating after video enable:",
+    //                 error
+    //               );
+    //             }
+    //           }
+    //         }
+    //         return; // Early return for fallback case
+    //       }
+
+    //       // ✅ ENABLE EXISTING TRACK
+    //       set({ isVideoEnabled: true });
+
+    //       // ✅ NOTIFY OTHER USERS IMMEDIATELY
+    //       callWebSocketService.updateCallMember({
+    //         chatId: chatId!,
+    //         memberId: myMemberId,
+    //         isVideoEnabled: true,
+    //       });
+
+    //       // ✅ RE-ENABLE TRACKS IN EXISTING CONNECTIONS
+    //       if (!isGroupCall && callStatus === CallStatus.CONNECTED) {
+    //         for (const member of callMembers) {
+    //           if (!member.peerConnection) continue;
+
+    //           const senders = member.peerConnection.getSenders();
+    //           const videoSender = senders.find(
+    //             (s) => s.track?.kind === "video"
+    //           );
+
+    //           if (videoSender && videoSender.track) {
+    //             // Simply re-enable the existing track
+    //             videoSender.track.enabled = true;
+
+    //             // No renegotiation needed since track object remains the same
+    //           }
+    //         }
+    //       }
+    //     }
+    //   } catch (error) {
+    //     console.error("Error toggling video:", error);
+    //     toast.error("Could not toggle video");
+    //   }
+    // },
+
+    // In your callStore.ts
     toggleLocalVideo: async () => {
       const {
         localVideoStream,
@@ -716,143 +877,84 @@ export const useCallStore = create<CallStore>()(
         chatId,
         isGroupCall,
         callMembers,
-        callStatus,
       } = get();
 
       const myMemberId = getMyChatMemberId(chatId!);
       if (!myMemberId) return;
 
+      const targetVideoState = !isVideoEnabled; // Store the target state first
+
       try {
-        if (isVideoEnabled) {
-          // 🔴 DISABLE VIDEO - Keep webcam access but disable track
-          if (localVideoStream) {
-            localVideoStream.getTracks().forEach((track) => {
-              track.enabled = false; // Disable track without stopping it
-            });
-          }
+        const success = await toggleVideoPermission(
+          localVideoStream,
+          isVideoEnabled,
+          // onDisable callback (when turning video OFF)
+          () => {
+            // Only update state if we're actually disabling
+            if (!targetVideoState) {
+              set({
+                isVideoEnabled: false,
+                localVideoStream: null,
+              });
 
-          set({ isVideoEnabled: false });
-          // Keep localVideoStream in state to maintain track reference
-
-          // ✅ NOTIFY OTHER USERS IMMEDIATELY
-          callWebSocketService.updateCallMember({
-            chatId: chatId!,
-            memberId: myMemberId,
-            isVideoEnabled: false,
-          });
-
-          // ✅ UPDATE EXISTING TRACKS (no need to replace with null)
-          if (!isGroupCall && callStatus === CallStatus.CONNECTED) {
-            for (const member of callMembers) {
-              if (!member.peerConnection) continue;
-
-              const senders = member.peerConnection.getSenders();
-              const videoSender = senders.find(
-                (s) => s.track?.kind === "video"
+              // Notify other participants about video state change
+              callWebSocketService.updateCallMember({
+                chatId: chatId!,
+                memberId: myMemberId,
+                isVideoEnabled: false,
+              });
+            }
+          },
+          // onEnable callback (when turning video ON)
+          (newVideoStream) => {
+            // Only update state if we're actually enabling
+            if (targetVideoState) {
+              // Update video in peer connections
+              updateVideoInConnections(
+                newVideoStream,
+                callMembers,
+                isGroupCall,
+                chatId!,
+                (chatId: string, offer: RTCSessionDescriptionInit) => {
+                  callWebSocketService.sendOffer({ chatId, offer });
+                }
               );
 
-              if (videoSender && videoSender.track) {
-                // Simply disable the existing track
-                videoSender.track.enabled = false;
+              set({
+                isVideoEnabled: true,
+                localVideoStream: newVideoStream,
+              });
 
-                // No renegotiation needed since we're not changing tracks
-                // The connection remains active with disabled track
-              }
+              // Notify other participants
+              callWebSocketService.updateCallMember({
+                chatId: chatId!,
+                memberId: myMemberId,
+                isVideoEnabled: true,
+              });
             }
-          }
-        } else {
-          // 🟢 ENABLE VIDEO - Re-enable existing track
-          if (localVideoStream) {
-            localVideoStream.getTracks().forEach((track) => {
-              track.enabled = true; // Re-enable the existing track
+          },
+          // onError callback
+          (error: Error) => {
+            console.error("Error toggling video:", error);
+            // Revert to original state on error
+            set({ isVideoEnabled: isVideoEnabled });
+
+            // Notify others of the current actual state
+            callWebSocketService.updateCallMember({
+              chatId: chatId!,
+              memberId: myMemberId,
+              isVideoEnabled: isVideoEnabled,
             });
-          } else {
-            // Fallback: Acquire webcam if no existing stream
-            const stream = await navigator.mediaDevices.getUserMedia({
-              video: {
-                width: { ideal: 1280 },
-                height: { ideal: 720 },
-                facingMode: "user",
-              },
-            });
-
-            const newVideoStream = new MediaStream(stream.getVideoTracks());
-            set({
-              localVideoStream: newVideoStream,
-              isVideoEnabled: true,
-            });
-
-            // Handle adding new track to connections (your original logic)
-            if (!isGroupCall && callStatus === CallStatus.CONNECTED) {
-              const videoTrack = newVideoStream.getVideoTracks()[0];
-              for (const member of callMembers) {
-                if (!member.peerConnection) continue;
-
-                const senders = member.peerConnection.getSenders();
-                const videoSender = senders.find(
-                  (s) => s.track?.kind === "video"
-                );
-
-                if (videoSender) {
-                  await videoSender.replaceTrack(videoTrack);
-                } else {
-                  member.peerConnection.addTrack(videoTrack, newVideoStream);
-                }
-
-                // Renegotiation needed for new track
-                try {
-                  const offer = await member.peerConnection.createOffer({
-                    offerToReceiveVideo: true,
-                  });
-                  await member.peerConnection.setLocalDescription(offer);
-
-                  callWebSocketService.sendOffer({
-                    chatId: chatId!,
-                    offer,
-                  });
-                } catch (error) {
-                  console.error(
-                    "Error renegotiating after video enable:",
-                    error
-                  );
-                }
-              }
-            }
-            return; // Early return for fallback case
           }
+        );
 
-          // ✅ ENABLE EXISTING TRACK
-          set({ isVideoEnabled: true });
-
-          // ✅ NOTIFY OTHER USERS IMMEDIATELY
-          callWebSocketService.updateCallMember({
-            chatId: chatId!,
-            memberId: myMemberId,
-            isVideoEnabled: true,
-          });
-
-          // ✅ RE-ENABLE TRACKS IN EXISTING CONNECTIONS
-          if (!isGroupCall && callStatus === CallStatus.CONNECTED) {
-            for (const member of callMembers) {
-              if (!member.peerConnection) continue;
-
-              const senders = member.peerConnection.getSenders();
-              const videoSender = senders.find(
-                (s) => s.track?.kind === "video"
-              );
-
-              if (videoSender && videoSender.track) {
-                // Simply re-enable the existing track
-                videoSender.track.enabled = true;
-
-                // No renegotiation needed since track object remains the same
-              }
-            }
-          }
+        if (!success) {
+          // Revert if unsuccessful
+          set({ isVideoEnabled: isVideoEnabled });
         }
       } catch (error) {
-        console.error("Error toggling video:", error);
-        toast.error("Could not toggle video");
+        console.error("Error in toggleLocalVideo:", error);
+        set({ isVideoEnabled: isVideoEnabled }); // Revert on error
       }
     },
 
