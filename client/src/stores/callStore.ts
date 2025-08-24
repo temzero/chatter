@@ -9,6 +9,14 @@ import { toast } from "react-toastify";
 import { handleError } from "@/utils/handleError";
 import { getMyChatMemberId } from "./chatMemberStore";
 import { callMemberPayload } from "@/types/callPayload";
+import {
+  toggleVoicePermission,
+  updateAudioInConnections,
+} from "@/utils/webRtc/voicePermission.Utils";
+// import {
+//   toggleVideoPermission,
+//   updateVideoInConnections,
+// } from "@/utils/webRtc/VideoPermission.Utils";
 
 export interface CallMember {
   memberId: string;
@@ -75,7 +83,7 @@ interface CallStoreActions {
   rejectCall: (isCancel?: boolean) => void;
   addCallMember: (member: CallMember) => void;
   removeCallMember: (memberId: string) => void;
-  updateCallMember: (payload: callMemberPayload) => void;
+  updateCallMember: (payload: callMemberPayload | CallMember) => void;
   endCall: (option?: {
     isCancel?: boolean;
     isRejected?: boolean;
@@ -88,14 +96,31 @@ interface CallStoreActions {
   // Media toggles
   toggleLocalVoice: () => void;
   toggleLocalVideo: () => Promise<void>;
+  enableVideoCall: () => void;
   toggleLocalScreenShare: () => Promise<void>;
 
   // Media setup/cleanup
   setupLocalStream: () => Promise<void>;
   cleanupStreams: () => void;
   createPeerConnection: (memberId: string) => RTCPeerConnection;
+  updatePeerConnection: (
+    memberId: string,
+    offer: RTCSessionDescriptionInit
+  ) => Promise<void>;
   removePeerConnection: (memberId: string) => void;
-  handleRemoteStream: (memberId: string, event: RTCTrackEvent) => void;
+
+  getPeerConnection: (memberId: string) => RTCPeerConnection | null;
+  addTrackToPeerConnection: (
+    memberId: string,
+    track: MediaStreamTrack,
+    stream: MediaStream
+  ) => Promise<void>;
+  removeTrackFromPeerConnection: (
+    memberId: string,
+    trackKind: "audio" | "video"
+  ) => Promise<void>;
+
+  handleMemberRemoteStream: (memberId: string, event: RTCTrackEvent) => void;
   createSfuConnection: () => Promise<RTCSessionDescriptionInit>;
   disconnectFromSfu: () => void;
 
@@ -189,6 +214,95 @@ export const useCallStore = create<CallStore>()(
       }
     },
 
+    // acceptCall: async () => {
+    //   const {
+    //     chatId,
+    //     localVoiceStream,
+    //     localVideoStream,
+    //     isVideoCall,
+    //     isGroupCall,
+    //   } = get();
+
+    //   try {
+    //     // 1. Clean up any existing streams first
+    //     if (localVoiceStream) {
+    //       localVoiceStream.getTracks().forEach((track) => track.stop());
+    //     }
+    //     if (localVideoStream) {
+    //       localVideoStream.getTracks().forEach((track) => track.stop());
+    //     }
+
+    //     // 2. Get fresh media streams
+    //     const stream = await navigator.mediaDevices
+    //       .getUserMedia({
+    //         audio: {
+    //           echoCancellation: true,
+    //           noiseSuppression: true,
+    //         },
+    //         video: isVideoCall
+    //           ? {
+    //               width: { ideal: 1280 },
+    //               height: { ideal: 720 },
+    //               facingMode: "user",
+    //             }
+    //           : false,
+    //       })
+    //       .catch(async (error) => {
+    //         if (error.name === "NotReadableError") {
+    //           toast.warning("Device in use. Trying alternative settings...");
+    //           return await navigator.mediaDevices.getUserMedia({
+    //             audio: true,
+    //             video: isVideoCall ? true : false,
+    //           });
+    //         }
+    //         throw error;
+    //       });
+
+    //     // 3. Split streams into audio and video
+    //     const voiceStream = new MediaStream(stream.getAudioTracks());
+    //     const videoStream = isVideoCall
+    //       ? new MediaStream(stream.getVideoTracks())
+    //       : null;
+
+    //     // 4. Set streams in state
+    //     set({
+    //       localVoiceStream: voiceStream,
+    //       localVideoStream: videoStream,
+    //       callStatus: CallStatus.CONNECTING,
+    //       isVideoEnabled: isVideoCall,
+    //       startedAt: new Date(),
+    //     });
+
+    //     // 5. Send acceptance via WebSocket
+    //     if (chatId) {
+    //       callWebSocketService.acceptCall({
+    //         chatId,
+    //         isCallerCancel: false,
+    //       });
+    //     }
+
+    //     // 6. If group call, create SFU connection
+    //     if (isGroupCall) {
+    //       await get().createSfuConnection();
+    //     }
+
+    //     toast.success("Call accepted - waiting for connection...");
+    //   } catch (error) {
+    //     handleError(error, "Could not start media devices");
+
+    //     // Send rejection if media setup fails
+    //     if (chatId) {
+    //       callWebSocketService.rejectCall({
+    //         chatId,
+    //       });
+    //     }
+
+    //     set({
+    //       error: "device_unavailable",
+    //       callStatus: CallStatus.ERROR,
+    //     });
+    //   }
+    // },
     acceptCall: async () => {
       const {
         chatId,
@@ -199,7 +313,7 @@ export const useCallStore = create<CallStore>()(
       } = get();
 
       try {
-        // 1. Clean up any existing streams first
+        // Clean up existing streams
         if (localVoiceStream) {
           localVoiceStream.getTracks().forEach((track) => track.stop());
         }
@@ -207,7 +321,7 @@ export const useCallStore = create<CallStore>()(
           localVideoStream.getTracks().forEach((track) => track.stop());
         }
 
-        // 2. Get fresh media streams
+        // Get fresh media streams
         const stream = await navigator.mediaDevices
           .getUserMedia({
             audio: {
@@ -233,13 +347,13 @@ export const useCallStore = create<CallStore>()(
             throw error;
           });
 
-        // 3. Split streams into audio and video
+        // Split streams into audio and video
         const voiceStream = new MediaStream(stream.getAudioTracks());
         const videoStream = isVideoCall
           ? new MediaStream(stream.getVideoTracks())
           : null;
 
-        // 4. Set streams in state
+        // Set streams in state
         set({
           localVoiceStream: voiceStream,
           localVideoStream: videoStream,
@@ -248,7 +362,28 @@ export const useCallStore = create<CallStore>()(
           startedAt: new Date(),
         });
 
-        // 5. Send acceptance via WebSocket
+        // For direct calls, create peer connection for the caller
+        if (!isGroupCall) {
+          const callerMemberId = get().callerMemberId;
+          if (callerMemberId && !get().getCallMember(callerMemberId)) {
+            get().addCallMember({
+              memberId: callerMemberId,
+              peerConnection: null,
+              sfuConnection: null,
+              voiceStream: null,
+              videoStream: null,
+              screenStream: null,
+              isMuted: false,
+              isVideoEnabled: false,
+              isScreenSharing: false,
+              joinedAt: Date.now(),
+            });
+            get().createPeerConnection(callerMemberId);
+            console.log(`Created peer connection for caller ${callerMemberId}`);
+          }
+        }
+
+        // Send acceptance via WebSocket
         if (chatId) {
           callWebSocketService.acceptCall({
             chatId,
@@ -256,7 +391,7 @@ export const useCallStore = create<CallStore>()(
           });
         }
 
-        // 6. If group call, create SFU connection
+        // For group calls, create SFU connection
         if (isGroupCall) {
           await get().createSfuConnection();
         }
@@ -264,14 +399,9 @@ export const useCallStore = create<CallStore>()(
         toast.success("Call accepted - waiting for connection...");
       } catch (error) {
         handleError(error, "Could not start media devices");
-
-        // Send rejection if media setup fails
         if (chatId) {
-          callWebSocketService.rejectCall({
-            chatId,
-          });
+          callWebSocketService.rejectCall({ chatId });
         }
-
         set({
           error: "device_unavailable",
           callStatus: CallStatus.ERROR,
@@ -517,63 +647,67 @@ export const useCallStore = create<CallStore>()(
     },
 
     // 🎤 Toggle audio mute
-    toggleLocalVoice: () => {
-      const { localVoiceStream, isMuted, chatId } = get();
+
+    // In your toggleLocalVoice function in the store
+    toggleLocalVoice: async () => {
+      const { localVoiceStream, isMuted, chatId, callMembers, isGroupCall } =
+        get();
       const myMemberId = getMyChatMemberId(chatId!);
 
-      if (!myMemberId || !localVoiceStream) return;
+      if (!myMemberId) return;
 
-      const newMutedState = !isMuted;
+      const success = await toggleVoicePermission(
+        localVoiceStream,
+        isMuted,
+        // onMute callback
+        () => {
+          set({ isMuted: true, localVoiceStream: null });
 
-      try {
-        // 🎤 Toggle mic input without breaking the connection
-        localVoiceStream.getAudioTracks().forEach((track) => {
-          track.enabled = !newMutedState;
-          // false = muted (no audio sent)
-          // true  = unmuted (audio sent)
-        });
+          // Notify other participants about mute status change
+          callWebSocketService.updateCallMember({
+            chatId: chatId!,
+            memberId: myMemberId,
+            isMuted: true,
+          });
+        },
+        // onUnmute callback
+        (newVoiceStream) => {
+          // Update audio in peer connections
+          updateAudioInConnections(
+            newVoiceStream,
+            callMembers,
+            isGroupCall,
+            chatId!,
+            (chatId: string, offer: RTCSessionDescriptionInit) => {
+              callWebSocketService.sendOffer({ chatId, offer });
+            }
+          );
 
-        // Update local state
-        set({ isMuted: newMutedState });
+          set({
+            isMuted: false,
+            localVoiceStream: newVoiceStream,
+          });
 
-        // Sync mute status to other peers (for UI only)
-        callWebSocketService.updateCallMember({
-          chatId: chatId!,
-          memberId: myMemberId,
-          isMuted: newMutedState,
-        });
-      } catch (err) {
-        console.error("Error toggling mute:", err);
+          // Notify other participants about mute status change
+          callWebSocketService.updateCallMember({
+            chatId: chatId!,
+            memberId: myMemberId,
+            isMuted: false,
+          });
+        },
+        // onError callback
+        (error: unknown) => {
+          console.error("Error toggling microphone:", error);
+          // Revert state if there was an error
+          set({ isMuted: isMuted });
+        }
+      );
+
+      if (!success) {
+        // Error already handled in onError callback
+        return;
       }
     },
-
-    // toggleLocalVoice: () => {
-    //   const { localVoiceStream, isMuted, chatId } = get();
-    //   const myMemberId = getMyChatMemberId(chatId!);
-
-    //   if (!myMemberId || !localVoiceStream) return;
-
-    //   const newMutedState = !isMuted;
-
-    //   try {
-    //     // 🎤 Toggle mic input without stopping the stream
-    //     localVoiceStream.getAudioTracks().forEach((track) => {
-    //       track.enabled = !newMutedState; // false = muted, true = unmuted
-    //     });
-
-    //     // Update state
-    //     set({ isMuted: newMutedState });
-
-    //     // Let others know about the mute status (for UI)
-    //     callWebSocketService.updateCallMember({
-    //       chatId: chatId!,
-    //       memberId: myMemberId,
-    //       isMuted: newMutedState,
-    //     });
-    //   } catch (err) {
-    //     console.error("Error toggling mute:", err);
-    //   }
-    // },
 
     toggleLocalVideo: async () => {
       const {
@@ -590,96 +724,128 @@ export const useCallStore = create<CallStore>()(
 
       try {
         if (isVideoEnabled) {
-          // Disable video - stop all video tracks to release the webcam
+          // 🔴 DISABLE VIDEO - Keep webcam access but disable track
           if (localVideoStream) {
             localVideoStream.getTracks().forEach((track) => {
-              track.stop(); // This stops the track and releases the webcam
+              track.enabled = false; // Disable track without stopping it
             });
           }
 
-          set({ localVideoStream: null, isVideoEnabled: false });
+          set({ isVideoEnabled: false });
+          // Keep localVideoStream in state to maintain track reference
 
-          // Notify peers about video state change
+          // ✅ NOTIFY OTHER USERS IMMEDIATELY
           callWebSocketService.updateCallMember({
             chatId: chatId!,
             memberId: myMemberId,
             isVideoEnabled: false,
           });
 
-          // For direct calls, remove video tracks from peer connections
+          // ✅ UPDATE EXISTING TRACKS (no need to replace with null)
           if (!isGroupCall && callStatus === CallStatus.CONNECTED) {
             for (const member of callMembers) {
               if (!member.peerConnection) continue;
 
-              const pc = member.peerConnection;
-              const senders = pc.getSenders();
+              const senders = member.peerConnection.getSenders();
+              const videoSender = senders.find(
+                (s) => s.track?.kind === "video"
+              );
 
-              // Remove video tracks and renegotiate
-              let hasVideoTracks = false;
+              if (videoSender && videoSender.track) {
+                // Simply disable the existing track
+                videoSender.track.enabled = false;
 
-              for (const sender of senders) {
-                if (sender.track && sender.track.kind === "video") {
-                  pc.removeTrack(sender);
-                  hasVideoTracks = true;
-                }
-              }
-
-              // Renegotiate only if we removed video tracks
-              if (hasVideoTracks) {
-                try {
-                  const offer = await pc.createOffer();
-                  await pc.setLocalDescription(offer);
-                  callWebSocketService.sendOffer({ chatId: chatId!, offer });
-                } catch (err) {
-                  console.error(
-                    "Error renegotiating after removing video:",
-                    err
-                  );
-                }
+                // No renegotiation needed since we're not changing tracks
+                // The connection remains active with disabled track
               }
             }
           }
         } else {
-          // Enable video - get new video stream
-          const videoStream = await navigator.mediaDevices.getUserMedia({
-            video: {
-              width: { ideal: 1280 },
-              height: { ideal: 720 },
-              facingMode: "user",
-            },
-          });
+          // 🟢 ENABLE VIDEO - Re-enable existing track
+          if (localVideoStream) {
+            localVideoStream.getTracks().forEach((track) => {
+              track.enabled = true; // Re-enable the existing track
+            });
+          } else {
+            // Fallback: Acquire webcam if no existing stream
+            const stream = await navigator.mediaDevices.getUserMedia({
+              video: {
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+                facingMode: "user",
+              },
+            });
 
-          const newVideoStream = new MediaStream(videoStream.getVideoTracks());
+            const newVideoStream = new MediaStream(stream.getVideoTracks());
+            set({
+              localVideoStream: newVideoStream,
+              isVideoEnabled: true,
+            });
 
-          set({
-            localVideoStream: newVideoStream,
-            isVideoEnabled: true,
-          });
+            // Handle adding new track to connections (your original logic)
+            if (!isGroupCall && callStatus === CallStatus.CONNECTED) {
+              const videoTrack = newVideoStream.getVideoTracks()[0];
+              for (const member of callMembers) {
+                if (!member.peerConnection) continue;
 
-          // Notify peers about video state change
+                const senders = member.peerConnection.getSenders();
+                const videoSender = senders.find(
+                  (s) => s.track?.kind === "video"
+                );
+
+                if (videoSender) {
+                  await videoSender.replaceTrack(videoTrack);
+                } else {
+                  member.peerConnection.addTrack(videoTrack, newVideoStream);
+                }
+
+                // Renegotiation needed for new track
+                try {
+                  const offer = await member.peerConnection.createOffer({
+                    offerToReceiveVideo: true,
+                  });
+                  await member.peerConnection.setLocalDescription(offer);
+
+                  callWebSocketService.sendOffer({
+                    chatId: chatId!,
+                    offer,
+                  });
+                } catch (error) {
+                  console.error(
+                    "Error renegotiating after video enable:",
+                    error
+                  );
+                }
+              }
+            }
+            return; // Early return for fallback case
+          }
+
+          // ✅ ENABLE EXISTING TRACK
+          set({ isVideoEnabled: true });
+
+          // ✅ NOTIFY OTHER USERS IMMEDIATELY
           callWebSocketService.updateCallMember({
             chatId: chatId!,
             memberId: myMemberId,
             isVideoEnabled: true,
           });
 
-          // For direct calls, add video tracks to peer connections
+          // ✅ RE-ENABLE TRACKS IN EXISTING CONNECTIONS
           if (!isGroupCall && callStatus === CallStatus.CONNECTED) {
             for (const member of callMembers) {
               if (!member.peerConnection) continue;
 
-              const pc = member.peerConnection;
+              const senders = member.peerConnection.getSenders();
+              const videoSender = senders.find(
+                (s) => s.track?.kind === "video"
+              );
 
-              // Add video track
-              pc.addTrack(newVideoStream.getVideoTracks()[0], newVideoStream);
+              if (videoSender && videoSender.track) {
+                // Simply re-enable the existing track
+                videoSender.track.enabled = true;
 
-              // Renegotiate connection
-              try {
-                const offer = await pc.createOffer();
-                await pc.setLocalDescription(offer);
-                callWebSocketService.sendOffer({ chatId: chatId!, offer });
-              } catch (err) {
-                console.error("Error renegotiating video:", err);
+                // No renegotiation needed since track object remains the same
               }
             }
           }
@@ -704,129 +870,114 @@ export const useCallStore = create<CallStore>()(
     //   if (!myMemberId) return;
 
     //   try {
-    //     // If video is currently enabled, just disable it
     //     if (isVideoEnabled) {
+    //       // 🔴 DISABLE VIDEO - Release webcam but keep connection
     //       if (localVideoStream) {
-    //         localVideoStream.getVideoTracks().forEach((track) => {
-    //           track.enabled = false;
+    //         localVideoStream.getTracks().forEach((track) => {
+    //           track.stop(); // Release webcam hardware
+    //           // track.enabled = false;
     //         });
     //       }
 
-    //       set({ isVideoEnabled: false });
+    //       set({ isVideoEnabled: false, localVideoStream: null });
 
-    //       // Notify peers about video state change
+    //       // ✅ NOTIFY OTHER USERS IMMEDIATELY
     //       callWebSocketService.updateCallMember({
     //         chatId: chatId!,
     //         memberId: myMemberId,
     //         isVideoEnabled: false,
     //       });
 
-    //       // For direct calls, disable video tracks in peer connections
-    //       if (!isGroupCall) {
+    //       // ✅ REPLACE TRACKS WITH NULL + RENEGOTIATE
+    //       if (!isGroupCall && callStatus === CallStatus.CONNECTED) {
     //         for (const member of callMembers) {
     //           if (!member.peerConnection) continue;
-    //           member.peerConnection.getSenders().forEach((sender) => {
-    //             if (sender.track && sender.track.kind === "video") {
-    //               sender.track.enabled = false;
-    //             }
-    //           });
-    //         }
-    //       }
-    //     } else {
-    //       // If video is currently disabled
 
-    //       // Case 1: No video stream exists yet (first time enabling)
-    //       if (!localVideoStream) {
-    //         // Get new video stream
-    //         const videoStream = await navigator.mediaDevices.getUserMedia({
-    //           video: {
-    //             width: { ideal: 1280 },
-    //             height: { ideal: 720 },
-    //             facingMode: "user",
-    //           },
-    //         });
+    //           const senders = member.peerConnection.getSenders();
+    //           const videoSender = senders.find(
+    //             (s) => s.track?.kind === "video"
+    //           );
 
-    //         const newVideoStream = new MediaStream(
-    //           videoStream.getVideoTracks()
-    //         );
+    //           if (videoSender) {
+    //             // Replace with null track (keeps connection alive)
+    //             await videoSender.replaceTrack(null);
 
-    //         set({
-    //           localVideoStream: newVideoStream,
-    //           isVideoEnabled: true,
-    //         });
+    //             // ✅ CRITICAL: Renegotiate after track removal
+    //             try {
+    //               const offer = await member.peerConnection.createOffer({
+    //                 offerToReceiveVideo: true, // Still want to receive video
+    //               });
+    //               await member.peerConnection.setLocalDescription(offer);
 
-    //         // Notify peers about video state change
-    //         callWebSocketService.updateCallMember({
-    //           chatId: chatId!,
-    //           memberId: myMemberId,
-    //           isVideoEnabled: true,
-    //         });
-
-    //         // For direct calls, add video tracks to peer connections
-    //         if (!isGroupCall) {
-    //           for (const member of callMembers) {
-    //             if (!member.peerConnection) continue;
-
-    //             const pc = member.peerConnection;
-    //             const senders = pc.getSenders();
-
-    //             // Check if we already have a video sender
-    //             const videoSender = senders.find(
-    //               (s) => s.track && s.track.kind === "video"
-    //             );
-
-    //             if (videoSender) {
-    //               // Replace existing video track
-    //               await videoSender.replaceTrack(
-    //                 newVideoStream.getVideoTracks()[0]
+    //               callWebSocketService.sendOffer({
+    //                 chatId: chatId!,
+    //                 offer,
+    //               });
+    //             } catch (error) {
+    //               console.error(
+    //                 "Error renegotiating after video disable:",
+    //                 error
     //               );
-    //             } else {
-    //               // Add new video track and renegotiate
-    //               pc.addTrack(
-    //                 newVideoStream.getVideoTracks()[0],
-    //                 newVideoStream
-    //               );
-
-    //               // Only renegotiate if call is already connected
-    //               if (callStatus === CallStatus.CONNECTED) {
-    //                 try {
-    //                   const offer = await pc.createOffer();
-    //                   await pc.setLocalDescription(offer);
-    //                   callWebSocketService.sendOffer({
-    //                     chatId: chatId!,
-    //                     offer,
-    //                   });
-    //                 } catch (err) {
-    //                   console.error("Error renegotiating video:", err);
-    //                 }
-    //               }
     //             }
     //           }
     //         }
-    //       } else {
-    //         // Case 2: Video stream exists but is disabled - just enable it
-    //         localVideoStream.getVideoTracks().forEach((track) => {
-    //           track.enabled = true;
-    //         });
+    //       }
+    //     } else {
+    //       // 🟢 ENABLE VIDEO - Reacquire webcam
+    //       const stream = await navigator.mediaDevices.getUserMedia({
+    //         video: {
+    //           width: { ideal: 1280 },
+    //           height: { ideal: 720 },
+    //           facingMode: "user",
+    //         },
+    //       });
 
-    //         set({ isVideoEnabled: true });
+    //       const newVideoStream = new MediaStream(stream.getVideoTracks());
+    //       const videoTrack = newVideoStream.getVideoTracks()[0];
 
-    //         // Notify peers about video state change
-    //         callWebSocketService.updateCallMember({
-    //           chatId: chatId!,
-    //           memberId: myMemberId,
-    //           isVideoEnabled: true,
-    //         });
+    //       set({
+    //         localVideoStream: newVideoStream,
+    //         isVideoEnabled: true,
+    //       });
 
-    //         // For direct calls, enable video tracks in peer connections
-    //         if (!isGroupCall) {
-    //           for (const member of callMembers) {
-    //             if (!member.peerConnection) continue;
-    //             member.peerConnection.getSenders().forEach((sender) => {
-    //               if (sender.track && sender.track.kind === "video") {
-    //                 sender.track.enabled = true;
-    //               }
+    //       // ✅ NOTIFY OTHER USERS IMMEDIATELY
+    //       callWebSocketService.updateCallMember({
+    //         chatId: chatId!,
+    //         memberId: myMemberId,
+    //         isVideoEnabled: true,
+    //       });
+
+    //       // ✅ ADD VIDEO TRACK BACK TO CONNECTIONS
+    //       if (!isGroupCall && callStatus === CallStatus.CONNECTED) {
+    //         for (const member of callMembers) {
+    //           if (!member.peerConnection) continue;
+
+    //           const senders = member.peerConnection.getSenders();
+    //           const videoSender = senders.find(
+    //             (s) => s.track?.kind === "video"
+    //           );
+
+    //           if (videoSender) {
+    //             // Replace null track with actual video track
+    //             await videoSender.replaceTrack(videoTrack);
+    //           } else {
+    //             // Add new track if no video sender exists
+    //             member.peerConnection.addTrack(videoTrack, newVideoStream);
+    //           }
+
+    //           // ✅ RENEGOTIATE CONNECTION
+    //           try {
+    //             const offer = await member.peerConnection.createOffer({
+    //               offerToReceiveVideo: true,
     //             });
+    //             await member.peerConnection.setLocalDescription(offer);
+
+    //             callWebSocketService.sendOffer({
+    //               chatId: chatId!,
+    //               offer,
+    //             });
+    //           } catch (error) {
+    //             console.error("Error renegotiating after video enable:", error);
     //           }
     //         }
     //       }
@@ -1104,8 +1255,21 @@ export const useCallStore = create<CallStore>()(
       const pc = new RTCPeerConnection({
         iceServers: [
           { urls: "stun:stun.l.google.com:19302" },
-          // Add TURN servers here if needed
+          { urls: "stun:stun1.l.google.com:19302" },
+          // Add TURN servers (essential for NAT traversal)
+          {
+            urls: "turn:your-turn-server.com:3478",
+            username: "your-username",
+            credential: "your-credential",
+          },
+          // Or use free/public TURN servers (with caution)
+          {
+            urls: "turn:openrelay.metered.ca:80",
+            username: "openrelayproject",
+            credential: "openrelayproject",
+          },
         ],
+        iceTransportPolicy: "all", // Try both relay and host candidates
       });
 
       // ICE Candidate Handling
@@ -1127,7 +1291,7 @@ export const useCallStore = create<CallStore>()(
           trackKind: event.track?.kind,
           trackId: event.track?.id,
         });
-        get().handleRemoteStream(memberId, event);
+        get().handleMemberRemoteStream(memberId, event);
       };
 
       // Connection Monitoring
@@ -1188,6 +1352,43 @@ export const useCallStore = create<CallStore>()(
       return pc;
     },
 
+    updatePeerConnection: async (
+      memberId: string,
+      offer: RTCSessionDescriptionInit
+    ) => {
+      const { callMembers, chatId } = get();
+
+      // Find the member and their existing peer connection
+      const member = callMembers.find((m) => m.memberId === memberId);
+      if (!member?.peerConnection) {
+        throw new Error(`No peer connection found for member ${memberId}`);
+      }
+
+      const pc = member.peerConnection;
+
+      try {
+        // Set the remote description (the offer from the other peer)
+        await pc.setRemoteDescription(new RTCSessionDescription(offer));
+
+        // Create and set local answer
+        const answer = await pc.createAnswer({
+          offerToReceiveAudio: true,
+          offerToReceiveVideo: true,
+        });
+
+        await pc.setLocalDescription(answer);
+
+        // Send the answer back through WebSocket
+        callWebSocketService.sendAnswer({
+          chatId: chatId!,
+          answer,
+        });
+      } catch (error) {
+        console.error("Error updating peer connection:", error);
+        throw error;
+      }
+    },
+
     removePeerConnection: (memberId: string) => {
       const { callMembers } = get();
       const member = callMembers.find((m) => m.memberId === memberId);
@@ -1210,8 +1411,144 @@ export const useCallStore = create<CallStore>()(
       }
     },
 
+    getPeerConnection: (memberId: string) => {
+      const { callMembers } = get();
+      const member = callMembers.find((m) => m.memberId === memberId);
+      return member?.peerConnection || null;
+    },
+
+    addTrackToPeerConnection: async (
+      memberId: string,
+      track: MediaStreamTrack,
+      stream: MediaStream
+    ) => {
+      const { chatId, callMembers, isGroupCall } = get();
+      const member = callMembers.find((m) => m.memberId === memberId);
+
+      if (!member?.peerConnection) {
+        throw new Error(`No peer connection found for member ${memberId}`);
+      }
+
+      const pc = member.peerConnection;
+      const senders = pc.getSenders();
+
+      try {
+        // Check if track of this kind already exists
+        const existingSender = senders.find(
+          (sender) => sender.track && sender.track.kind === track.kind
+        );
+
+        if (existingSender) {
+          // Replace existing track
+          await existingSender.replaceTrack(track);
+          console.log(`✅ Replaced ${track.kind} track for member ${memberId}`);
+        } else {
+          // Add new track
+          pc.addTrack(track, stream);
+          console.log(
+            `✅ Added new ${track.kind} track for member ${memberId}`
+          );
+
+          // Renegotiate only when adding a new track (not when replacing)
+          if (!isGroupCall) {
+            try {
+              const offer = await pc.createOffer({
+                offerToReceiveAudio: true,
+                offerToReceiveVideo: true,
+              });
+              await pc.setLocalDescription(offer);
+
+              callWebSocketService.sendOffer({
+                chatId: chatId!,
+                offer,
+              });
+              console.log(
+                `✅ Sent renegotiation offer for new ${track.kind} track`
+              );
+            } catch (err) {
+              console.error(
+                `Error renegotiating after adding ${track.kind}:`,
+                err
+              );
+            }
+          }
+        }
+      } catch (error) {
+        console.error(
+          `Error adding ${track.kind} track to peer connection:`,
+          error
+        );
+        throw error;
+      }
+    },
+
+    removeTrackFromPeerConnection: async (
+      memberId: string,
+      trackKind: "audio" | "video"
+    ) => {
+      const { chatId, callMembers, isGroupCall } = get();
+      const member = callMembers.find((m) => m.memberId === memberId);
+
+      if (!member?.peerConnection) {
+        throw new Error(`No peer connection found for member ${memberId}`);
+      }
+
+      const pc = member.peerConnection;
+      const senders = pc.getSenders();
+      let trackRemoved = false;
+
+      try {
+        // Find and remove all senders of the specified track kind
+        for (const sender of senders) {
+          if (sender.track && sender.track.kind === trackKind) {
+            pc.removeTrack(sender);
+            trackRemoved = true;
+            console.log(
+              `✅ Removed ${trackKind} track from member ${memberId}`
+            );
+          }
+        }
+
+        // Renegotiate if tracks were actually removed
+        if (trackRemoved && !isGroupCall) {
+          try {
+            const offer = await pc.createOffer({
+              offerToReceiveAudio: trackKind !== "audio", // Keep receiving audio unless we're removing audio
+              offerToReceiveVideo: trackKind !== "video", // Keep receiving video unless we're removing video
+            });
+            await pc.setLocalDescription(offer);
+
+            callWebSocketService.sendOffer({
+              chatId: chatId!,
+              offer,
+            });
+            console.log(
+              `✅ Sent renegotiation offer after removing ${trackKind}`
+            );
+          } catch (err) {
+            console.error(
+              `Error renegotiating after removing ${trackKind}:`,
+              err
+            );
+          }
+        }
+
+        if (!trackRemoved) {
+          console.warn(
+            `No ${trackKind} tracks found to remove for member ${memberId}`
+          );
+        }
+      } catch (error) {
+        console.error(
+          `Error removing ${trackKind} track from peer connection:`,
+          error
+        );
+        throw error;
+      }
+    },
+
     // 📺 Handle incoming remote stream
-    handleRemoteStream: (memberId: string, event: RTCTrackEvent) => {
+    handleMemberRemoteStream: (memberId: string, event: RTCTrackEvent) => {
       if (!event.track || !event.streams || event.streams.length === 0) {
         console.error("Received track event without stream!", event);
         return;
@@ -1286,72 +1623,6 @@ export const useCallStore = create<CallStore>()(
       });
     },
 
-    // handleRemoteStream: (memberId: string, event: RTCTrackEvent) => {
-    //   toast.info('handleRemoteStream')
-    //   console.log('handleRemoteStream')
-    //   if (!event.track || !event.streams || event.streams.length === 0) {
-    //     console.error("Received track event without stream!", event);
-    //     return;
-    //   }
-
-    //   const kind = event.track.kind as "audio" | "video";
-    //   console.log(`📡 Received ${kind} track from ${memberId}`, event.track);
-
-    //   set((state) => {
-    //     const member = state.callMembers.find((m) => m.memberId === memberId);
-    //     if (!member) return state;
-
-    //     // Handle audio and video separately - CRITICAL FIX:
-    //     if (kind === "audio") {
-    //       let voiceStream = member.voiceStream;
-
-    //       if (!voiceStream) {
-    //         voiceStream = new MediaStream();
-    //       }
-
-    //       // DON'T remove existing tracks! Just add the new one
-    //       const existingTrack = voiceStream
-    //         .getTracks()
-    //         .find((t) => t.id === event.track.id);
-
-    //       if (!existingTrack) {
-    //         voiceStream.addTrack(event.track);
-    //       }
-
-    //       return {
-    //         callMembers: state.callMembers.map((m) =>
-    //           m.memberId === memberId
-    //             ? { ...m, voiceStream, lastActivity: Date.now() }
-    //             : m
-    //         ),
-    //       };
-    //     } else {
-    //       let videoStream = member.videoStream;
-
-    //       if (!videoStream) {
-    //         videoStream = new MediaStream();
-    //       }
-
-    //       // DON'T remove existing tracks!
-    //       const existingTrack = videoStream
-    //         .getTracks()
-    //         .find((t) => t.id === event.track.id);
-
-    //       if (!existingTrack) {
-    //         videoStream.addTrack(event.track);
-    //       }
-
-    //       return {
-    //         callMembers: state.callMembers.map((m) =>
-    //           m.memberId === memberId
-    //             ? { ...m, videoStream, lastActivity: Date.now() }
-    //             : m
-    //         ),
-    //       };
-    //     }
-    //   });
-    // },
-
     sendOffer: async (toMemberId) => {
       const { chatId, isGroupCall } = get();
       const myMemberId = getMyChatMemberId(chatId!);
@@ -1394,29 +1665,30 @@ export const useCallStore = create<CallStore>()(
     addIceCandidate: (candidate: RTCIceCandidateInit) => {
       const { callMembers, isGroupCall } = get();
 
-      // Add to iceCandidates array for later use
+      // Store candidate for later use
       set((state) => ({
         iceCandidates: [...state.iceCandidates, candidate],
       }));
 
-      // Try to add to all existing connections
+      // Add to existing connections only if remote description is set
       callMembers.forEach((member) => {
-        if (isGroupCall && member.sfuConnection) {
+        const connection = isGroupCall
+          ? member.sfuConnection
+          : member.peerConnection;
+        if (connection && connection.remoteDescription) {
           try {
-            member.sfuConnection.addIceCandidate(
-              new RTCIceCandidate(candidate)
-            );
+            connection.addIceCandidate(new RTCIceCandidate(candidate));
+            console.log(`Added ICE candidate to ${member.memberId}`);
           } catch (error) {
-            console.error("Error adding ICE candidate to SFU:", error);
-          }
-        } else if (!isGroupCall && member.peerConnection) {
-          try {
-            member.peerConnection.addIceCandidate(
-              new RTCIceCandidate(candidate)
+            console.error(
+              `Error adding ICE candidate to ${member.memberId}:`,
+              error
             );
-          } catch (error) {
-            console.error("Error adding ICE candidate to peer:", error);
           }
+        } else {
+          console.log(
+            `Skipping ICE candidate for ${member.memberId}: no remote description`
+          );
         }
       });
     },

@@ -116,11 +116,10 @@ export function useCallSocketListeners() {
     const handleCallAccepted = async (data: CallActionResponse) => {
       const callStore = useCallStore.getState();
 
-      // Only proceed if this is for our current call
       if (callStore.chatId === data.chatId) {
         callStore.setStatus(CallStatus.CONNECTING);
 
-        // ✅ ADD THE MEMBER IMMEDIATELY - This is the key fix!
+        // Add the member if not already present
         const existingMember = callStore.callMembers.find(
           (m) => m.memberId === data.fromMemberId
         );
@@ -139,6 +138,12 @@ export function useCallSocketListeners() {
             joinedAt: Date.now(),
           });
 
+          // Create peer connection for direct calls
+          if (!callStore.isGroupCall) {
+            callStore.createPeerConnection(data.fromMemberId);
+            console.log(`Created peer connection for ${data.fromMemberId}`);
+          }
+
           toast.info(`${data.fromMemberId} joined the call`);
         }
 
@@ -147,16 +152,19 @@ export function useCallSocketListeners() {
           callStore.callStatus === CallStatus.OUTGOING &&
           !callStore.isGroupCall
         ) {
+          const pc = callStore.getPeerConnection(data.fromMemberId);
+          if (!pc) {
+            console.error(`No peer connection for ${data.fromMemberId}`);
+            return;
+          }
           await callStore.sendOffer(data.fromMemberId);
         }
 
-        // For group calls, the SFU connection is handled in acceptCall
+        // For group calls, ensure SFU connection
         if (callStore.isGroupCall) {
-          // Check if any member has an SFU connection
           const hasSfuConnection = callStore.callMembers.some(
             (member) => member.sfuConnection
           );
-
           if (!hasSfuConnection) {
             await callStore.createSfuConnection();
           }
@@ -200,50 +208,41 @@ export function useCallSocketListeners() {
       const callStore = useCallStore.getState();
       const chatType = useChatStore.getState().getChatType(chatId);
 
-      // Only handle offers for the current call
       if (callStore.chatId !== chatId) return;
 
       try {
         if (chatType === ChatType.DIRECT && !callStore.isGroupCall) {
-          // Check if member already exists, if not add them
-          const existingMember = callStore.callMembers.find(
+          const member = callStore.callMembers.find(
             (m) => m.memberId === fromMemberId
           );
-          if (!existingMember) {
-            callStore.addCallMember({
-              memberId: fromMemberId,
-              peerConnection: null,
-              voiceStream: null,
-              videoStream: null,
-              screenStream: null,
-              isMuted: false,
-              isVideoEnabled: false,
-              isScreenSharing: false,
-            });
+
+          // ✅ If member doesn't exist OR has no connection, create one
+          if (!member || !member.peerConnection) {
+            const pc = callStore.createPeerConnection(fromMemberId);
+
+            if (!member) {
+              callStore.addCallMember({
+                memberId: fromMemberId,
+                peerConnection: pc,
+                sfuConnection: null,
+                voiceStream: null,
+                videoStream: null,
+                screenStream: null,
+                isMuted: false,
+                isVideoEnabled: false,
+                isScreenSharing: false,
+              });
+            } else {
+              // Update existing member with new connection
+              callStore.updateCallMember({
+                memberId: fromMemberId,
+                peerConnection: pc,
+              });
+            }
           }
 
-          const pc = callStore.createPeerConnection(fromMemberId);
-
-          if (pc.signalingState === "closed") {
-            throw new Error("PeerConnection closed");
-          }
-
-          await pc.setRemoteDescription(new RTCSessionDescription(offer));
-          const answer = await pc.createAnswer({
-            offerToReceiveAudio: true,
-            offerToReceiveVideo: callStore.isVideoCall,
-          });
-
-          await pc.setLocalDescription(answer);
-          callWebSocketService.sendAnswer({
-            chatId,
-            answer,
-          });
-        } else {
-          // Group call with SFU - should not receive offers in group calls
-          console.warn(
-            "Received offer in group call mode - this should not happen"
-          );
+          // ✅ Now update the connection with the offer
+          await callStore.updatePeerConnection(fromMemberId, offer);
         }
 
         callStore.setStatus(CallStatus.CONNECTING);
@@ -254,6 +253,7 @@ export function useCallSocketListeners() {
     };
 
     const handleAnswer = async (data: RtcAnswerResponse) => {
+      console.log("HandleAnswer");
       const callStore = useCallStore.getState();
 
       // Only handle answers for the current call

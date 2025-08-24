@@ -45,6 +45,32 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
     closeCallModal();
   };
 
+  // const toggleMicPermission = async () => {
+  //   try {
+  //     if (localVoiceStream) {
+  //       // If we have a stream, release the mic permission
+  //       localVoiceStream.getTracks().forEach((track) => track.stop());
+  //       // Update your state to reflect mic is released
+  //       console.log("Microphone permission released");
+  //       return true; // indicates mic is now off
+  //     } else {
+  //       // Request new microphone permission
+  //       const newStream = await navigator.mediaDevices.getUserMedia({
+  //         audio: true,
+  //         video: false,
+  //       });
+
+  //       // Update your state with the new stream
+  //       // useCallStore.getState().updateLocalVoiceStream(newStream);
+  //       console.log("Microphone permission granted");
+  //       return false; // indicates mic is now on
+  //     }
+  //   } catch (error) {
+  //     console.error("Error toggling microphone permission:", error);
+  //     return isMuted; // return current state on error
+  //   }
+  // };
+
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center text-white">
       {callMembers.length > 0 ? (
