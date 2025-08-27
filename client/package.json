@@ -20,6 +20,7 @@
     "daisyui": "^5.0.43",
     "dotenv": "^16.5.0",
     "framer-motion": "^12.7.3",
+    "livekit-client": "^2.15.6",
     "lodash": "^4.17.21",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
