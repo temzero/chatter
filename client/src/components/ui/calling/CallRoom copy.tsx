@@ -1,7 +1,7 @@
 import { ChatResponse } from "@/types/responses/chat.response";
 import { Button } from "../Button";
 import { VideoStream } from "./components/VideoStream";
-import { useCallStore } from "@/stores/callStore";
+import { useCallStore } from "@/stores/callStore/callStore";
 import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
 import { CallHeader } from "./components/CallHeader";
 import { Timer } from "../Timer";

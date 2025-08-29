@@ -14,7 +14,7 @@ import { useMessageStore } from "@/stores/messageStore";
 import MessageSearchBar from "../ui/MessageSearchBar";
 import { useUserLastSeen } from "@/stores/presenceStore";
 import { formatTimeAgo } from "@/utils/formatTimeAgo";
-import { useCallStore } from "@/stores/callStore";
+import { useCallStore } from "@/stores/callStore/callStore";
 
 interface ChatHeaderProps {
   chat: ChatResponse;
@@ -110,11 +110,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
             <div className="flex items-center gap-1">
               <div className="flex items-center cursor-pointer rounded-full opacity-60 hover:opacity-100 p-1">
                 {isDirect && canCall && (
-                  <button
-                    onClick={() =>
-                      startCall(chat.id, false, false)
-                    }
-                  >
+                  <button onClick={() => startCall(chat.id, false, false)}>
                     <i className="material-symbols-outlined text-3xl">
                       phone_enabled
                     </i>
@@ -122,11 +118,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                 )}
 
                 {isGroup && (
-                  <button
-                    onClick={() =>
-                      startCall(chat.id, true, true)
-                    }
-                  >
+                  <button onClick={() => startCall(chat.id, true, true)}>
                     <i className="material-symbols-outlined text-3xl">
                       videocam
                     </i>

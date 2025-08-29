@@ -20,11 +20,11 @@ import {
  */
 export const callWebSocketService = {
   // ========================
-  // 📞 Call Lifecycle Methods
+  // 📞 Call Lifecycle Methods (USED BY BOTH P2P & SFU)
   // ========================
 
   /**
-   * Initiate a new call
+   * Initiate a new call (BOTH)
    */
   initiateCall(payload: InitiateCallRequest) {
     webSocketService.emit(CallEvent.INITIATE_CALL, payload);
@@ -37,21 +37,22 @@ export const callWebSocketService = {
   onPendingCalls(callback: (data: IncomingCallResponse[]) => void): void {
     webSocketService.on(CallEvent.PENDING_CALLS, callback);
   },
+
   /**
-   * Listen for incoming calls
+   * Listen for incoming calls (BOTH)
    */
   onIncomingCall(callback: (data: IncomingCallResponse) => void) {
     webSocketService.on(CallEvent.INCOMING_CALL, callback);
   },
 
   /**
-   * Remove incoming call listener
+   * Remove incoming call listener (BOTH)
    */
   offIncomingCall(callback: (data: IncomingCallResponse) => void) {
     webSocketService.off(CallEvent.INCOMING_CALL, callback);
   },
 
-  // First, add to your callWebSocketService.ts
+  // Update call (BOTH)
   updateCall(payload: updateCallPayload) {
     webSocketService.emit(CallEvent.UPDATE_CALL, payload);
   },
@@ -64,7 +65,7 @@ export const callWebSocketService = {
     webSocketService.off(CallEvent.UPDATE_CALL, callback);
   },
 
-  // Update call member
+  // Update call member (BOTH)
   updateCallMember(payload: callMemberPayload) {
     webSocketService.emit(CallEvent.UPDATE_CALL_MEMBER, payload);
   },
@@ -78,32 +79,33 @@ export const callWebSocketService = {
   },
 
   /**
-   * Accept an incoming call
+   * Accept an incoming call (BOTH)
    */
   acceptCall(payload: CallActionRequest) {
     webSocketService.emit(CallEvent.ACCEPT_CALL, payload);
   },
 
   /**
-   * Listen for call accept events
+   * Listen for call accept events (BOTH)
    */
   onCallAccepted(callback: (data: CallActionResponse) => void) {
     webSocketService.on(CallEvent.ACCEPT_CALL, callback);
   },
 
   /**
-   * Remove call accept listener
+   * Remove call accept listener (BOTH)
    */
   offCallAccepted(callback: (data: CallActionResponse) => void) {
     webSocketService.off(CallEvent.ACCEPT_CALL, callback);
   },
 
+  // Join call (PRIMARILY SFU, but technically BOTH)
   joinCall(payload: { chatId: string }) {
     webSocketService.emit(CallEvent.JOIN_CALL, payload);
   },
 
   /**
-   * Listen for member join events
+   * Listen for member join events (PRIMARILY SFU)
    */
   onMemberJoined(
     callback: (data: { chatId: string; memberId: string }) => void
@@ -112,7 +114,7 @@ export const callWebSocketService = {
   },
 
   /**
-   * Remove member join listener
+   * Remove member join listener (PRIMARILY SFU)
    */
   offMemberJoined(
     callback: (data: { chatId: string; memberId: string }) => void
@@ -121,14 +123,14 @@ export const callWebSocketService = {
   },
 
   /**
-   * Reject an incoming call
+   * Reject an incoming call (BOTH)
    */
   rejectCall(payload: CallActionRequest) {
     webSocketService.emit(CallEvent.REJECT_CALL, payload);
   },
 
   /**
-   * Cancel an outgoing call before it's accepted
+   * Cancel an outgoing call before it's accepted (BOTH)
    * (sent as a reject event with `isCallerCancel: true`)
    */
   cancelCall(payload: CallActionRequest) {
@@ -139,7 +141,7 @@ export const callWebSocketService = {
   },
 
   /**
-   * Listen for call reject events
+   * Listen for call reject events (BOTH)
    */
   onCallRejected(
     callback: (data: CallActionResponse & { isCallerCancel?: boolean }) => void
@@ -148,7 +150,7 @@ export const callWebSocketService = {
   },
 
   /**
-   * Remove call reject listener
+   * Remove call reject listener (BOTH)
    */
   offCallRejected(
     callback: (data: CallActionResponse & { isCallerCancel?: boolean }) => void
@@ -157,95 +159,95 @@ export const callWebSocketService = {
   },
 
   /**
-   * Hang up from an ongoing call (one user leaves)
+   * Hang up from an ongoing call (BOTH)
    */
   hangup(payload: CallActionRequest) {
     webSocketService.emit(CallEvent.HANG_UP, payload);
   },
 
   /**
-   * Listen for hangup events (when a participant leaves)
+   * Listen for hangup events (BOTH)
    */
   onHangup(callback: (data: CallActionResponse) => void) {
     webSocketService.on(CallEvent.HANG_UP, callback);
   },
 
   /**
-   * Remove hangup listener
+   * Remove hangup listener (BOTH)
    */
   offHangup(callback: (data: CallActionResponse) => void) {
     webSocketService.off(CallEvent.HANG_UP, callback);
   },
 
   // ============================
-  // 📶 WebRTC Signaling Methods
+  // 📶 WebRTC Signaling Methods (PRIMARILY P2P)
   // ============================
 
   /**
-   * Send WebRTC offer
+   * Send WebRTC offer (P2P)
    */
   sendOffer(payload: RtcOfferRequest) {
     webSocketService.emit(CallEvent.OFFER_SDP, payload);
   },
 
   /**
-   * Listen for WebRTC offers
+   * Listen for WebRTC offers (P2P)
    */
   onOffer(callback: (data: RtcOfferResponse) => void) {
     webSocketService.on(CallEvent.OFFER_SDP, callback);
   },
 
   /**
-   * Remove offer listener
+   * Remove offer listener (P2P)
    */
   offOffer(callback: (data: RtcOfferResponse) => void) {
     webSocketService.off(CallEvent.OFFER_SDP, callback);
   },
 
   /**
-   * Send WebRTC answer
+   * Send WebRTC answer (P2P)
    */
   sendAnswer(payload: RtcAnswerRequest) {
     webSocketService.emit(CallEvent.ANSWER_SDP, payload);
   },
 
   /**
-   * Listen for WebRTC answers
+   * Listen for WebRTC answers (P2P)
    */
   onAnswer(callback: (data: RtcAnswerResponse) => void) {
     webSocketService.on(CallEvent.ANSWER_SDP, callback);
   },
 
   /**
-   * Remove answer listener
+   * Remove answer listener (P2P)
    */
   offAnswer(callback: (data: RtcAnswerResponse) => void) {
     webSocketService.off(CallEvent.ANSWER_SDP, callback);
   },
 
   /**
-   * Send ICE candidate
+   * Send ICE candidate (P2P)
    */
   sendIceCandidate(payload: IceCandidateRequest) {
     webSocketService.emit(CallEvent.ICE_CANDIDATE, payload);
   },
 
   /**
-   * Listen for ICE candidates
+   * Listen for ICE candidates (P2P)
    */
   onIceCandidate(callback: (data: IceCandidateResponse) => void) {
     webSocketService.on(CallEvent.ICE_CANDIDATE, callback);
   },
 
   /**
-   * Remove ICE candidate listener
+   * Remove ICE candidate listener (P2P)
    */
   offIceCandidate(callback: (data: IceCandidateResponse) => void) {
     webSocketService.off(CallEvent.ICE_CANDIDATE, callback);
   },
 
   /**
-   * @deprecated Use onOffer instead
+   * @deprecated Use onOffer instead (P2P)
    * Listen for WebRTC offers (legacy method)
    */
   onRtcOffer(callback: (data: RtcOfferResponse) => void) {
@@ -253,7 +255,7 @@ export const callWebSocketService = {
   },
 
   /**
-   * @deprecated Use offOffer instead
+   * @deprecated Use offOffer instead (P2P)
    * Remove RTC offer listener (legacy method)
    */
   offRtcOffer(callback: (data: RtcOfferResponse) => void) {
@@ -261,7 +263,7 @@ export const callWebSocketService = {
   },
 
   /**
-   * @deprecated Use onAnswer instead
+   * @deprecated Use onAnswer instead (P2P)
    * Listen for WebRTC answers (legacy method)
    */
   onRtcAnswer(callback: (data: RtcAnswerResponse) => void) {
@@ -269,14 +271,18 @@ export const callWebSocketService = {
   },
 
   /**
-   * @deprecated Use offAnswer instead
+   * @deprecated Use offAnswer instead (P2P)
    * Remove RTC answer listener (legacy method)
    */
   offRtcAnswer(callback: (data: RtcAnswerResponse) => void) {
     webSocketService.off(CallEvent.ANSWER_SDP, callback);
   },
 
-  // SFU ICE Candidate methods
+  // ============================
+  // 🎥 SFU-Specific Methods (SFU ONLY)
+  // ============================
+
+  // SFU ICE Candidate methods (SFU)
   sendSfuIceCandidate(payload: IceCandidateRequest) {
     webSocketService.emit(CallEvent.SFU_ICE_CANDIDATE, payload);
   },
@@ -297,7 +303,7 @@ export const callWebSocketService = {
    * Remove all call listeners
    */
   removeAllListeners() {
-    // Call lifecycle events
+    // Call lifecycle events (BOTH)
     webSocketService.off(CallEvent.INCOMING_CALL);
     webSocketService.off(CallEvent.PENDING_CALLS);
     webSocketService.off(CallEvent.UPDATE_CALL);
@@ -307,10 +313,10 @@ export const callWebSocketService = {
     webSocketService.off(CallEvent.REJECT_CALL);
     webSocketService.off(CallEvent.HANG_UP);
 
-    // WebRTC signaling events
-    webSocketService.off(CallEvent.OFFER_SDP);
-    webSocketService.off(CallEvent.ANSWER_SDP);
-    webSocketService.off(CallEvent.ICE_CANDIDATE);
-    webSocketService.off(CallEvent.SFU_ICE_CANDIDATE);
+    // WebRTC signaling events (P2P + SFU)
+    webSocketService.off(CallEvent.OFFER_SDP); // P2P
+    webSocketService.off(CallEvent.ANSWER_SDP); // P2P
+    webSocketService.off(CallEvent.ICE_CANDIDATE); // P2P
+    webSocketService.off(CallEvent.SFU_ICE_CANDIDATE); // SFU
   },
 };

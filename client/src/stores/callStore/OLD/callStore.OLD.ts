@@ -7,17 +7,16 @@ import { useModalStore } from "@/stores/modalStore";
 import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
 import { toast } from "react-toastify";
 import { handleError } from "@/utils/handleError";
-import { getMyChatMemberId } from "./chatMemberStore";
+import { getMyChatMemberId } from "../chatMemberStore";
 import { callMemberPayload } from "@/types/callPayload";
 import {
   toggleVoicePermission,
   updateAudioInConnections,
-} from "@/utils/webRtc/voicePermission.Utils";
+} from "@/utils/webRtc/P2PVoicePermission.Utils";
 import {
   toggleVideoPermission,
   updateVideoInConnections,
 } from "@/utils/webRtc/VideoPermission.Utils";
-import { LiveKitService } from "@/services/liveKitService";
 
 export interface CallMember {
   memberId: string;
@@ -66,11 +65,6 @@ interface CallStoreState {
   callMembers: CallMember[];
   iceCandidates: RTCIceCandidateInit[];
 
-  // LiveKit room instance
-  // liveKitRoom: Room | null;
-  // liveKitToken: string | null;
-  liveKitService: LiveKitService | null;
-
   error?:
     | "permission_denied"
     | "device_unavailable"
@@ -97,12 +91,11 @@ interface CallStoreActions {
   }) => void;
 
   // Status / Type
-  setStatus: (status: CallStatus) => void;
+  setCallStatus: (status: CallStatus) => void;
 
   // Media toggles
   toggleLocalVoice: () => void;
   toggleLocalVideo: () => Promise<void>;
-  enableVideoCall: () => void;
   toggleLocalScreenShare: () => Promise<void>;
 
   // Media setup/cleanup
@@ -138,7 +131,6 @@ interface CallStoreActions {
   getCallDuration: () => number;
   closeCallModal: () => void;
   getCallMember: (memberId: string) => CallMember | undefined;
-  updateMemberActivity: (memberId: string) => void;
 
   // liveKit server
   initializeSFUCall: (chatId: string, isVideo: boolean) => Promise<void>;
@@ -225,95 +217,6 @@ export const useCallStore = create<CallStore>()(
       }
     },
 
-    // acceptCall: async () => {
-    //   const {
-    //     chatId,
-    //     localVoiceStream,
-    //     localVideoStream,
-    //     isVideoCall,
-    //     isGroupCall,
-    //   } = get();
-
-    //   try {
-    //     // 1. Clean up any existing streams first
-    //     if (localVoiceStream) {
-    //       localVoiceStream.getTracks().forEach((track) => track.stop());
-    //     }
-    //     if (localVideoStream) {
-    //       localVideoStream.getTracks().forEach((track) => track.stop());
-    //     }
-
-    //     // 2. Get fresh media streams
-    //     const stream = await navigator.mediaDevices
-    //       .getUserMedia({
-    //         audio: {
-    //           echoCancellation: true,
-    //           noiseSuppression: true,
-    //         },
-    //         video: isVideoCall
-    //           ? {
-    //               width: { ideal: 1280 },
-    //               height: { ideal: 720 },
-    //               facingMode: "user",
-    //             }
-    //           : false,
-    //       })
-    //       .catch(async (error) => {
-    //         if (error.name === "NotReadableError") {
-    //           toast.warning("Device in use. Trying alternative settings...");
-    //           return await navigator.mediaDevices.getUserMedia({
-    //             audio: true,
-    //             video: isVideoCall ? true : false,
-    //           });
-    //         }
-    //         throw error;
-    //       });
-
-    //     // 3. Split streams into audio and video
-    //     const voiceStream = new MediaStream(stream.getAudioTracks());
-    //     const videoStream = isVideoCall
-    //       ? new MediaStream(stream.getVideoTracks())
-    //       : null;
-
-    //     // 4. Set streams in state
-    //     set({
-    //       localVoiceStream: voiceStream,
-    //       localVideoStream: videoStream,
-    //       callStatus: CallStatus.CONNECTING,
-    //       isVideoEnabled: isVideoCall,
-    //       startedAt: new Date(),
-    //     });
-
-    //     // 5. Send acceptance via WebSocket
-    //     if (chatId) {
-    //       callWebSocketService.acceptCall({
-    //         chatId,
-    //         isCallerCancel: false,
-    //       });
-    //     }
-
-    //     // 6. If group call, create SFU connection
-    //     if (isGroupCall) {
-    //       await get().createSfuConnection();
-    //     }
-
-    //     toast.success("Call accepted - waiting for connection...");
-    //   } catch (error) {
-    //     handleError(error, "Could not start media devices");
-
-    //     // Send rejection if media setup fails
-    //     if (chatId) {
-    //       callWebSocketService.rejectCall({
-    //         chatId,
-    //       });
-    //     }
-
-    //     set({
-    //       error: "device_unavailable",
-    //       callStatus: CallStatus.ERROR,
-    //     });
-    //   }
-    // },
     acceptCall: async () => {
       const {
         chatId,
@@ -653,7 +556,7 @@ export const useCallStore = create<CallStore>()(
       }, 2000);
     },
 
-    setStatus: (callStatus: CallStatus) => {
+    setCallStatus: (callStatus: CallStatus) => {
       set({ callStatus });
     },
 
@@ -684,7 +587,7 @@ export const useCallStore = create<CallStore>()(
             });
           },
           // onUnmute callback
-          (newVoiceStream) => {
+          (newVoiceStream: MediaStream) => {
             // Update audio in peer connections
             updateAudioInConnections(
               newVoiceStream,
@@ -733,153 +636,6 @@ export const useCallStore = create<CallStore>()(
       }
     },
 
-    // toggleLocalVideo: async () => {
-    //   const {
-    //     localVideoStream,
-    //     isVideoEnabled,
-    //     chatId,
-    //     isGroupCall,
-    //     callMembers,
-    //     callStatus,
-    //   } = get();
-
-    //   const myMemberId = getMyChatMemberId(chatId!);
-    //   if (!myMemberId) return;
-
-    //   try {
-    //     if (isVideoEnabled) {
-    //       // 🔴 DISABLE VIDEO - Keep webcam access but disable track
-    //       if (localVideoStream) {
-    //         localVideoStream.getTracks().forEach((track) => {
-    //           track.enabled = false; // Disable track without stopping it
-    //         });
-    //       }
-
-    //       set({ isVideoEnabled: false });
-    //       // Keep localVideoStream in state to maintain track reference
-
-    //       // ✅ NOTIFY OTHER USERS IMMEDIATELY
-    //       callWebSocketService.updateCallMember({
-    //         chatId: chatId!,
-    //         memberId: myMemberId,
-    //         isVideoEnabled: false,
-    //       });
-
-    //       // ✅ UPDATE EXISTING TRACKS (no need to replace with null)
-    //       if (!isGroupCall && callStatus === CallStatus.CONNECTED) {
-    //         for (const member of callMembers) {
-    //           if (!member.peerConnection) continue;
-
-    //           const senders = member.peerConnection.getSenders();
-    //           const videoSender = senders.find(
-    //             (s) => s.track?.kind === "video"
-    //           );
-
-    //           if (videoSender && videoSender.track) {
-    //             // Simply disable the existing track
-    //             videoSender.track.enabled = false;
-
-    //             // No renegotiation needed since we're not changing tracks
-    //             // The connection remains active with disabled track
-    //           }
-    //         }
-    //       }
-    //     } else {
-    //       // 🟢 ENABLE VIDEO - Re-enable existing track
-    //       if (localVideoStream) {
-    //         localVideoStream.getTracks().forEach((track) => {
-    //           track.enabled = true; // Re-enable the existing track
-    //         });
-    //       } else {
-    //         // Fallback: Acquire webcam if no existing stream
-    //         const stream = await navigator.mediaDevices.getUserMedia({
-    //           video: {
-    //             width: { ideal: 1280 },
-    //             height: { ideal: 720 },
-    //             facingMode: "user",
-    //           },
-    //         });
-
-    //         const newVideoStream = new MediaStream(stream.getVideoTracks());
-    //         set({
-    //           localVideoStream: newVideoStream,
-    //           isVideoEnabled: true,
-    //         });
-
-    //         // Handle adding new track to connections (your original logic)
-    //         if (!isGroupCall && callStatus === CallStatus.CONNECTED) {
-    //           const videoTrack = newVideoStream.getVideoTracks()[0];
-    //           for (const member of callMembers) {
-    //             if (!member.peerConnection) continue;
-
-    //             const senders = member.peerConnection.getSenders();
-    //             const videoSender = senders.find(
-    //               (s) => s.track?.kind === "video"
-    //             );
-
-    //             if (videoSender) {
-    //               await videoSender.replaceTrack(videoTrack);
-    //             } else {
-    //               member.peerConnection.addTrack(videoTrack, newVideoStream);
-    //             }
-
-    //             // Renegotiation needed for new track
-    //             try {
-    //               const offer = await member.peerConnection.createOffer({
-    //                 offerToReceiveVideo: true,
-    //               });
-    //               await member.peerConnection.setLocalDescription(offer);
-
-    //               callWebSocketService.sendOffer({
-    //                 chatId: chatId!,
-    //                 offer,
-    //               });
-    //             } catch (error) {
-    //               console.error(
-    //                 "Error renegotiating after video enable:",
-    //                 error
-    //               );
-    //             }
-    //           }
-    //         }
-    //         return; // Early return for fallback case
-    //       }
-
-    //       // ✅ ENABLE EXISTING TRACK
-    //       set({ isVideoEnabled: true });
-
-    //       // ✅ NOTIFY OTHER USERS IMMEDIATELY
-    //       callWebSocketService.updateCallMember({
-    //         chatId: chatId!,
-    //         memberId: myMemberId,
-    //         isVideoEnabled: true,
-    //       });
-
-    //       // ✅ RE-ENABLE TRACKS IN EXISTING CONNECTIONS
-    //       if (!isGroupCall && callStatus === CallStatus.CONNECTED) {
-    //         for (const member of callMembers) {
-    //           if (!member.peerConnection) continue;
-
-    //           const senders = member.peerConnection.getSenders();
-    //           const videoSender = senders.find(
-    //             (s) => s.track?.kind === "video"
-    //           );
-
-    //           if (videoSender && videoSender.track) {
-    //             // Simply re-enable the existing track
-    //             videoSender.track.enabled = true;
-
-    //             // No renegotiation needed since track object remains the same
-    //           }
-    //         }
-    //       }
-    //     }
-    //   } catch (error) {
-    //     console.error("Error toggling video:", error);
-    //     toast.error("Could not toggle video");
-    //   }
-    // },
-
     // In your callStore.ts
     toggleLocalVideo: async () => {
       const {
@@ -917,7 +673,7 @@ export const useCallStore = create<CallStore>()(
             }
           },
           // onEnable callback (when turning video ON)
-          (newVideoStream) => {
+          (newVideoStream: MediaStream) => {
             // Only update state if we're actually enabling
             if (targetVideoState) {
               // Update video in peer connections
@@ -969,138 +725,6 @@ export const useCallStore = create<CallStore>()(
       }
     },
 
-    // toggleLocalVideo: async () => {
-    //   const {
-    //     localVideoStream,
-    //     isVideoEnabled,
-    //     chatId,
-    //     isGroupCall,
-    //     callMembers,
-    //     callStatus,
-    //   } = get();
-
-    //   const myMemberId = getMyChatMemberId(chatId!);
-    //   if (!myMemberId) return;
-
-    //   try {
-    //     if (isVideoEnabled) {
-    //       // 🔴 DISABLE VIDEO - Release webcam but keep connection
-    //       if (localVideoStream) {
-    //         localVideoStream.getTracks().forEach((track) => {
-    //           track.stop(); // Release webcam hardware
-    //           // track.enabled = false;
-    //         });
-    //       }
-
-    //       set({ isVideoEnabled: false, localVideoStream: null });
-
-    //       // ✅ NOTIFY OTHER USERS IMMEDIATELY
-    //       callWebSocketService.updateCallMember({
-    //         chatId: chatId!,
-    //         memberId: myMemberId,
-    //         isVideoEnabled: false,
-    //       });
-
-    //       // ✅ REPLACE TRACKS WITH NULL + RENEGOTIATE
-    //       if (!isGroupCall && callStatus === CallStatus.CONNECTED) {
-    //         for (const member of callMembers) {
-    //           if (!member.peerConnection) continue;
-
-    //           const senders = member.peerConnection.getSenders();
-    //           const videoSender = senders.find(
-    //             (s) => s.track?.kind === "video"
-    //           );
-
-    //           if (videoSender) {
-    //             // Replace with null track (keeps connection alive)
-    //             await videoSender.replaceTrack(null);
-
-    //             // ✅ CRITICAL: Renegotiate after track removal
-    //             try {
-    //               const offer = await member.peerConnection.createOffer({
-    //                 offerToReceiveVideo: true, // Still want to receive video
-    //               });
-    //               await member.peerConnection.setLocalDescription(offer);
-
-    //               callWebSocketService.sendOffer({
-    //                 chatId: chatId!,
-    //                 offer,
-    //               });
-    //             } catch (error) {
-    //               console.error(
-    //                 "Error renegotiating after video disable:",
-    //                 error
-    //               );
-    //             }
-    //           }
-    //         }
-    //       }
-    //     } else {
-    //       // 🟢 ENABLE VIDEO - Reacquire webcam
-    //       const stream = await navigator.mediaDevices.getUserMedia({
-    //         video: {
-    //           width: { ideal: 1280 },
-    //           height: { ideal: 720 },
-    //           facingMode: "user",
-    //         },
-    //       });
-
-    //       const newVideoStream = new MediaStream(stream.getVideoTracks());
-    //       const videoTrack = newVideoStream.getVideoTracks()[0];
-
-    //       set({
-    //         localVideoStream: newVideoStream,
-    //         isVideoEnabled: true,
-    //       });
-
-    //       // ✅ NOTIFY OTHER USERS IMMEDIATELY
-    //       callWebSocketService.updateCallMember({
-    //         chatId: chatId!,
-    //         memberId: myMemberId,
-    //         isVideoEnabled: true,
-    //       });
-
-    //       // ✅ ADD VIDEO TRACK BACK TO CONNECTIONS
-    //       if (!isGroupCall && callStatus === CallStatus.CONNECTED) {
-    //         for (const member of callMembers) {
-    //           if (!member.peerConnection) continue;
-
-    //           const senders = member.peerConnection.getSenders();
-    //           const videoSender = senders.find(
-    //             (s) => s.track?.kind === "video"
-    //           );
-
-    //           if (videoSender) {
-    //             // Replace null track with actual video track
-    //             await videoSender.replaceTrack(videoTrack);
-    //           } else {
-    //             // Add new track if no video sender exists
-    //             member.peerConnection.addTrack(videoTrack, newVideoStream);
-    //           }
-
-    //           // ✅ RENEGOTIATE CONNECTION
-    //           try {
-    //             const offer = await member.peerConnection.createOffer({
-    //               offerToReceiveVideo: true,
-    //             });
-    //             await member.peerConnection.setLocalDescription(offer);
-
-    //             callWebSocketService.sendOffer({
-    //               chatId: chatId!,
-    //               offer,
-    //             });
-    //           } catch (error) {
-    //             console.error("Error renegotiating after video enable:", error);
-    //           }
-    //         }
-    //       }
-    //     }
-    //   } catch (error) {
-    //     console.error("Error toggling video:", error);
-    //     toast.error("Could not toggle video");
-    //   }
-    // },
-
     // 🖥️ Toggle screen sharing
     toggleLocalScreenShare: () => {
       const { localScreenStream, isScreenSharing, chatId } = get();
@@ -1127,167 +751,6 @@ export const useCallStore = create<CallStore>()(
         console.error("Error toggling screen share:", err);
       }
     },
-
-    // // 🎥 Toggle video
-    // toggleLocalVideo: async () => {
-    //   const {
-    //     localVideoStream,
-    //     isVideoEnabled,
-    //     chatId,
-    //     isGroupCall,
-    //     callMembers,
-    //   } = get();
-    //   const myMemberId = getMyChatMemberId(chatId!);
-
-    //   if (!myMemberId) return;
-
-    //   try {
-    //     if (isVideoEnabled) {
-    //       // Disable video - stop all video tracks
-    //       if (localVideoStream) {
-    //         localVideoStream.getTracks().forEach((track) => track.stop());
-    //         set({ localVideoStream: null, isVideoEnabled: false });
-    //       }
-    //       // Notify other participants about video state change
-    //       if (chatId) {
-    //         callWebSocketService.updateCallMember({
-    //           chatId,
-    //           memberId: myMemberId,
-    //           isVideoEnabled: false,
-    //         });
-    //       }
-    //     } else {
-    //       // Enable video - get new video stream
-    //       const videoStream = await navigator.mediaDevices.getUserMedia({
-    //         video: {
-    //           width: { ideal: 1280 },
-    //           height: { ideal: 720 },
-    //           facingMode: "user",
-    //         },
-    //       });
-
-    //       const newVideoStream = new MediaStream(videoStream.getVideoTracks());
-    //       set({ localVideoStream: newVideoStream, isVideoEnabled: true });
-
-    //       // Notify other participants
-    //       if (chatId) {
-    //         callWebSocketService.updateCallMember({
-    //           chatId,
-    //           memberId: myMemberId,
-    //           isVideoEnabled: true,
-    //         });
-    //       }
-
-    //       // CRITICAL: Re-negotiate connections for all members
-    //       if (!isGroupCall) {
-    //         for (const member of callMembers) {
-    //           if (member.peerConnection) {
-    //             const pc = member.peerConnection;
-
-    //             // Remove existing video tracks
-    //             const senders = pc.getSenders();
-    //             for (const sender of senders) {
-    //               if (sender.track?.kind === "video") {
-    //                 pc.removeTrack(sender);
-    //               }
-    //             }
-
-    //             // Add new video tracks
-    //             newVideoStream.getTracks().forEach((track) => {
-    //               pc.addTrack(track, newVideoStream);
-    //             });
-
-    //             // Re-negotiate by creating new offer
-    //             try {
-    //               const offer = await pc.createOffer({
-    //                 offerToReceiveAudio: true,
-    //                 offerToReceiveVideo: true,
-    //               });
-
-    //               await pc.setLocalDescription(offer);
-
-    //               callWebSocketService.sendOffer({
-    //                 chatId: chatId!,
-    //                 offer,
-    //               });
-    //             } catch (error) {
-    //               console.error(
-    //                 "Error creating offer for renegotiation:",
-    //                 error
-    //               );
-    //             }
-    //           }
-    //         }
-    //       }
-    //     }
-    //   } catch (error) {
-    //     console.error("Error toggling video:", error);
-    //     toast.error("Could not toggle video");
-    //   }
-    // },
-
-    // // Toggle screen sharing
-    // toggleLocalScreenShare: async () => {
-    //   const { localScreenStream, chatId, isGroupCall, callMembers } = get();
-    //   const myMemberId = getMyChatMemberId(chatId!);
-
-    //   if (!myMemberId) return;
-
-    //   try {
-    //     if (localScreenStream) {
-    //       // Stop screen sharing
-    //       localScreenStream.getTracks().forEach((track) => track.stop());
-    //       set({ localScreenStream: null, isScreenSharing: false });
-
-    //       // Notify other participants about screen share state change
-    //       if (chatId) {
-    //         callWebSocketService.updateCallMember({
-    //           chatId,
-    //           memberId: myMemberId,
-    //           isScreenSharing: false,
-    //         });
-    //       }
-    //     } else {
-    //       // Start screen sharing
-    //       const screenStream = await navigator.mediaDevices.getDisplayMedia({
-    //         video: true,
-    //         audio: true,
-    //       });
-
-    //       set({ localScreenStream: screenStream, isScreenSharing: true });
-
-    //       // Notify other participants about screen share state change
-    //       if (chatId) {
-    //         callWebSocketService.updateCallMember({
-    //           chatId,
-    //           memberId: myMemberId,
-    //           isScreenSharing: true,
-    //         });
-    //       }
-
-    //       // Handle when user stops sharing via browser UI
-    //       screenStream.getTracks().forEach((track) => {
-    //         track.onended = () => {
-    //           get().toggleLocalScreenShare();
-    //         };
-    //       });
-
-    //       // For direct calls, add screen share to peer connections
-    //       if (!isGroupCall) {
-    //         callMembers.forEach((member) => {
-    //           if (member.peerConnection) {
-    //             screenStream.getTracks().forEach((track) => {
-    //               member.peerConnection!.addTrack(track, screenStream);
-    //             });
-    //           }
-    //         });
-    //       }
-    //     }
-    //   } catch (error) {
-    //     console.error("Error toggling screen share:", error);
-    //     toast.error("Could not toggle screen sharing");
-    //   }
-    // },
 
     // 🎥 Setup local media stream
     setupLocalStream: async () => {
@@ -1986,16 +1449,6 @@ export const useCallStore = create<CallStore>()(
 
     getCallMember: (memberId: string): CallMember | undefined => {
       return get().callMembers.find((member) => member.memberId === memberId);
-    },
-
-    updateMemberActivity: (memberId: string) => {
-      set((state) => ({
-        callMembers: state.callMembers.map((member) =>
-          member.memberId === memberId
-            ? { ...member, lastActivity: Date.now() }
-            : member
-        ),
-      }));
     },
   }))
 );

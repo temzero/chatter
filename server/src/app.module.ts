@@ -21,16 +21,22 @@ import { FolderModule } from './modules/folder/folder.module';
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('POSTGRES_HOST') || 'postgres',
-        port: configService.get<number>('POSTGRES_PORT') || 5432,
-        username: configService.get('POSTGRES_USER') || 'chatteruser',
-        password: configService.get('POSTGRES_PASSWORD') || 'chatterpass',
-        database: configService.get('POSTGRES_DB') || 'chatterdb',
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: configService.get('NODE_ENV') !== 'production', // Only sync in development
-      }),
+      useFactory: (configService: ConfigService) => {
+        const isDocker = configService.get('IS_DOCKER') === 'true';
+
+        return {
+          type: 'postgres',
+          host: isDocker
+            ? 'postgres'
+            : configService.get('DB_HOST') || 'localhost',
+          port: configService.get<number>('DB_PORT') || 5432,
+          username: configService.get('POSTGRES_USER') || 'postgres',
+          password: configService.get('POSTGRES_PASSWORD') || 'password',
+          database: configService.get('POSTGRES_DB') || 'chatter',
+          entities: [__dirname + '/**/*.entity{.ts,.js}'],
+          synchronize: configService.get('NODE_ENV') !== 'production',
+        };
+      },
       inject: [ConfigService],
     }),
     AuthModule,

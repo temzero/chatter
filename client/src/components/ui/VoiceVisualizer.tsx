@@ -23,7 +23,12 @@ export const VoiceVisualizer = ({
   const [scale, setScale] = useState(0);
 
   useEffect(() => {
-    if (!stream || isMuted) {
+    if (
+      !stream ||
+      isMuted ||
+      !stream.getAudioTracks ||
+      !stream.getAudioTracks().length
+    ) {
       if (audioContextRef.current?.state !== "closed") {
         audioContextRef.current?.close();
       }

@@ -2,7 +2,7 @@ import { ChatResponse } from "@/types/responses/chat.response";
 import { Button } from "../Button";
 import { CallHeader } from "./components/CallHeader";
 import { formatDuration } from "@/utils/formatDuration";
-import { useCallStore } from "@/stores/callStore";
+import { useCallStore } from "@/stores/callStore/callStore";
 import { CallStatus } from "@/types/enums/CallStatus";
 import { useEffect } from "react";
 

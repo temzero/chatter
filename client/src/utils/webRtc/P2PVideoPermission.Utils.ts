@@ -1,51 +1,54 @@
 // utils/webRtc/videoPermission.Utils.ts
-import { CallMember } from "@/stores/callStore";
+import type { P2PCallMember } from "@/types/store/callMember.type";
 
 /**
  * Toggles video permission with proper stream management
  */
-export const toggleVideoPermission = async (
-  currentStream: MediaStream | null,
-  isCurrentlyEnabled: boolean,
-  onDisable: () => void,
+// 🎥 Enable camera
+export const enableVideo = async (
   onEnable: (newStream: MediaStream) => void,
   onError: (error: Error) => void
 ): Promise<boolean> => {
-  const newVideoState = !isCurrentlyEnabled;
-
   try {
-    if (!newVideoState) {
-      // DISABLING VIDEO
-      if (currentStream) {
-        currentStream.getVideoTracks().forEach((track) => {
-          track.stop(); // Release camera
-        });
-      }
-      onDisable();
-      return true;
-    } else {
-      // ENABLING VIDEO
-      const newStream = await navigator.mediaDevices
-        .getUserMedia({
-          video: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-            facingMode: "user",
-          },
-        })
-        .catch(async () => {
-          // Fallback
-          return await navigator.mediaDevices.getUserMedia({
-            video: true,
-          });
-        });
+    const newStream = await navigator.mediaDevices
+      .getUserMedia({
+        video: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: "user",
+        },
+      })
+      .catch(async () => {
+        // Fallback: simple video request
+        return await navigator.mediaDevices.getUserMedia({ video: true });
+      });
 
-      const newVideoStream = new MediaStream(newStream.getVideoTracks());
-      onEnable(newVideoStream);
-      return true;
-    }
+    const newVideoStream = new MediaStream(newStream.getVideoTracks());
+    onEnable(newVideoStream);
+    return true;
   } catch (error) {
-    console.error("toggleVideoPermission error:", error);
+    console.error("enableVideo error:", error);
+    onError(error as Error);
+    return false;
+  }
+};
+
+// 🎥 Disable camera
+export const disableVideo = async (
+  currentStream: MediaStream | null,
+  onDisable: () => void,
+  onError: (error: Error) => void
+): Promise<boolean> => {
+  try {
+    if (currentStream) {
+      currentStream.getVideoTracks().forEach((track) => {
+        track.stop(); // Release camera
+      });
+    }
+    onDisable();
+    return true;
+  } catch (error) {
+    console.error("disableVideo error:", error);
     onError(error as Error);
     return false;
   }
@@ -56,7 +59,7 @@ export const toggleVideoPermission = async (
  */
 export const updateVideoInConnections = async (
   newStream: MediaStream,
-  callMembers: CallMember[],
+  callMembers: P2PCallMember[],
   isGroupCall: boolean,
   chatId: string,
   sendOffer: (chatId: string, offer: RTCSessionDescriptionInit) => void

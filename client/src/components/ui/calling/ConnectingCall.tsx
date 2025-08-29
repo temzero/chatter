@@ -2,7 +2,7 @@
 import { ChatResponse } from "@/types/responses/chat.response";
 import { BeatLoader } from "react-spinners";
 import { CallHeader } from "./components/CallHeader";
-import { useCallStore } from "@/stores/callStore";
+import { useCallStore } from "@/stores/callStore/callStore";
 
 export const ConnectingCall = ({ chat }: { chat: ChatResponse }) => {
   const { isVideoCall } = useCallStore();

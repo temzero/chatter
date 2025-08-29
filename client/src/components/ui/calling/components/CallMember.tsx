@@ -7,14 +7,14 @@ import { Avatar } from "../../avatar/Avatar";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { ChatMember } from "@/types/responses/chatMember.response";
 import { VoiceVisualizer } from "../../VoiceVisualizer";
-import type { CallMember as CallMemberType } from "@/stores/callStore";
+import { callMember } from "@/types/store/callMember.type";
 
 const CallMember = ({
   member,
   showVoiceVisualizer = true,
   className = "",
 }: {
-  member: CallMemberType;
+  member: callMember;
   showVoiceVisualizer?: boolean;
   className?: string;
 }) => {
@@ -129,12 +129,12 @@ const CallMember = ({
                 />
               </div>
             )}
-            {showVoiceVisualizer &&
+            {/* {showVoiceVisualizer &&
               (!member.voiceStream || !member.voiceStream.active) && (
                 <div className="absolute inset-0 flex items-center justify-center z-0">
                   <div className="w-48 h-48 border-2 border-gray-400 rounded-full opacity-50" />
                 </div>
-              )}
+              )} */}
             <Avatar
               avatarUrl={chatMember?.avatarUrl}
               name={displayName}

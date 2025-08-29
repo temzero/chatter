@@ -1,41 +1,28 @@
 import { ChatResponse } from "@/types/responses/chat.response";
 import { Button } from "../Button";
 import { VideoStream } from "./components/VideoStream";
-import { useCallStore } from "@/stores/callStore";
 import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
 import { CallHeader } from "./components/CallHeader";
 import { Timer } from "../Timer";
 import { VoiceVisualizerButton } from "../VoiceVisualizerBtn";
-import { useShallow } from "zustand/shallow";
 import CallMember from "./components/CallMember";
+import { useCallStore } from "@/stores/callStore/callStore";
+import { useCallMembers } from "@/stores/callStore/hooks/useCallMember";
 
 export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
-  const {
-    callMembers,
-    isMuted,
-    isVideoEnable,
-    localVoiceStream,
-    localVideoStream,
-    startedAt,
-    toggleLocalVoice,
-    toggleLocalVideo,
-    endCall,
-    closeCallModal,
-  } = useCallStore(
-    useShallow((state) => ({
-      isMuted: state.isMuted,
-      callMembers: state.callMembers,
-      isVideoEnable: state.isVideoEnabled,
-      isVideoCall: state.isVideoCall,
-      localVoiceStream: state.localVoiceStream,
-      localVideoStream: state.localVideoStream,
-      startedAt: state.startedAt,
-      toggleLocalVoice: state.toggleLocalVoice,
-      toggleLocalVideo: state.toggleLocalVideo,
-      endCall: state.endCall,
-      closeCallModal: state.closeCallModal,
-    }))
-  );
+  const isMuted = useCallStore((state) => state.isMuted);
+  const isVideoEnabled = useCallStore((state) => state.isVideoEnabled);
+  const localVoiceStream = useCallStore((state) => state.localVoiceStream);
+  const localVideoStream = useCallStore((state) => state.localVideoStream);
+  const startedAt = useCallStore((state) => state.startedAt);
+  const toggleLocalVoice = useCallStore((state) => state.toggleLocalVoice);
+  const toggleLocalVideo = useCallStore((state) => state.toggleLocalVideo);
+  const endCall = useCallStore((state) => state.endCall);
+  const closeCallModal = useCallStore((state) => state.closeCallModal);
+
+  // In your component:
+  const callMembers = useCallMembers();
+  // Get call members based on architecture
 
   if (!chat) return null;
 
@@ -44,32 +31,6 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
     endCall();
     closeCallModal();
   };
-
-  // const toggleMicPermission = async () => {
-  //   try {
-  //     if (localVoiceStream) {
-  //       // If we have a stream, release the mic permission
-  //       localVoiceStream.getTracks().forEach((track) => track.stop());
-  //       // Update your state to reflect mic is released
-  //       console.log("Microphone permission released");
-  //       return true; // indicates mic is now off
-  //     } else {
-  //       // Request new microphone permission
-  //       const newStream = await navigator.mediaDevices.getUserMedia({
-  //         audio: true,
-  //         video: false,
-  //       });
-
-  //       // Update your state with the new stream
-  //       // useCallStore.getState().updateLocalVoiceStream(newStream);
-  //       console.log("Microphone permission granted");
-  //       return false; // indicates mic is now on
-  //     }
-  //   } catch (error) {
-  //     console.error("Error toggling microphone permission:", error);
-  //     return isMuted; // return current state on error
-  //   }
-  // };
 
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center text-white">
@@ -98,7 +59,7 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
       )}
 
       {/* Local video overlay */}
-      {localVideoStream && isVideoEnable && (
+      {localVideoStream && isVideoEnabled && (
         <div className="absolute bottom-4 right-4 z-20">
           <VideoStream
             stream={localVideoStream}
@@ -130,12 +91,12 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
           <Button
             variant="ghost"
             className={`w-14 h-14 ${
-              isVideoEnable
+              isVideoEnabled
                 ? "bg-gray-700/50 text-green-500 filled"
                 : "bg-red-500/50 opacity-60"
             }`}
-            icon={isVideoEnable ? "videocam" : "videocam_off"}
-            isIconFilled={isVideoEnable}
+            icon={isVideoEnabled ? "videocam" : "videocam_off"}
+            isIconFilled={isVideoEnabled}
             isRoundedFull
             onClick={toggleLocalVideo}
           />

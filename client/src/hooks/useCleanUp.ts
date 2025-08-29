@@ -1,6 +1,6 @@
 // src/lib/hooks/useCallCleanup.ts
 import { useEffect } from "react";
-import { useCallStore } from "@/stores/callStore";
+import { useCallStore } from "@/stores/callStore/callStore";
 import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
 import { CallStatus } from "@/types/enums/CallStatus";
 import { useModalStore } from "@/stores/modalStore";

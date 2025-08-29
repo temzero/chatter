@@ -26,6 +26,7 @@ export const VoiceVisualizerButton = ({
     md: 40,
     lg: 48,
   }[size];
+  console.log("VoiceVisualizerButton muted:", isMuted);
 
   return (
     <div
@@ -33,15 +34,15 @@ export const VoiceVisualizerButton = ({
         isMuted || "custom-border"
       } ${className}`}
     >
-      {/* Pulsing visualizer */}
-      <VoiceVisualizer
-        stream={stream}
-        isMuted={isMuted}
-        size={buttonSize}
-        circleColor={circleColor}
-      />
+      {!isMuted && (
+        <VoiceVisualizer
+          stream={stream}
+          isMuted={isMuted}
+          size={buttonSize}
+          circleColor={circleColor}
+        />
+      )}
 
-      {/* Mic button */}
       <Button
         variant={variant}
         size={size}

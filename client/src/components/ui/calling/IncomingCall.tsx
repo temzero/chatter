@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CallHeader } from "./components/CallHeader";
 import { BounceLoader } from "react-spinners";
 import { Button } from "../Button";
-import { useCallStore } from "@/stores/callStore";
 import { VideoStream } from "./components/VideoStream";
+import { useCallStore } from "@/stores/callStore/callStore";
 
 export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
   const isVideoCall = useCallStore((state) => state.isVideoCall);
