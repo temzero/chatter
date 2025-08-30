@@ -7,9 +7,9 @@ import {
   RemoteTrack,
   RemoteTrackPublication,
   Track,
-  TrackPublication,
-  ParticipantEvent,
   ConnectionState,
+  LocalTrackPublication,
+  createLocalScreenTracks,
 } from "livekit-client";
 
 export interface LiveKitServiceOptions {
@@ -45,35 +45,21 @@ export class LiveKitService {
   private localTracks: LocalTrack[] = [];
 
   constructor() {
-    this.room = new Room({
-      // Configure adaptive streaming and better performance
-      adaptiveStream: true,
-      dynacast: true,
-    });
+    this.room = new Room({ adaptiveStream: true, dynacast: true });
   }
 
-  async connect(
-    url: string,
-    token: string,
-    options: LiveKitServiceOptions
-  ): Promise<void> {
+  async connect(url: string, token: string, options: LiveKitServiceOptions) {
     this.options = options;
 
     try {
-      // Set up event listeners
       this.setupEventListeners();
 
-      // Connect to the room
-      await this.room.connect(url, token, {
-        autoSubscribe: true, // Automatically subscribe to other participants' tracks
-      });
+      await this.room.connect(url, token, { autoSubscribe: true });
 
-      // Publish local tracks if requested
       if (options.audio || options.video) {
         await this.publishLocalTracks(options.audio, options.video);
       }
 
-      // Process existing participants
       this.handleExistingParticipants();
     } catch (error) {
       this.options?.onError?.(error as Error);
@@ -81,275 +67,176 @@ export class LiveKitService {
     }
   }
 
-  async disconnect(): Promise<void> {
+  async disconnect() {
     try {
-      // Unpublish all local tracks first
       await this.unpublishAllLocalTracks();
-
-      // Disconnect from room
       this.room.disconnect();
-
-      // Remove all event listeners
       this.removeEventListeners();
     } catch (error) {
       this.options?.onError?.(error as Error);
     }
   }
 
-  async toggleAudio(enabled: boolean): Promise<void> {
-    try {
-      await this.room.localParticipant.setMicrophoneEnabled(enabled);
-    } catch (error) {
-      this.options?.onError?.(error as Error);
-      throw error;
+  async toggleAudio(enabled: boolean) {
+    await this.room.localParticipant.setMicrophoneEnabled(enabled);
+  }
+
+  async toggleVideo(enabled: boolean) {
+    await this.room.localParticipant.setCameraEnabled(enabled);
+  }
+
+  async toggleScreenShare(enabled: boolean) {
+    if (enabled) {
+      await this.startScreenShare();
+    } else {
+      await this.stopScreenShare();
     }
   }
 
-  async toggleVideo(enabled: boolean): Promise<void> {
-    try {
-      await this.room.localParticipant.setCameraEnabled(enabled);
-    } catch (error) {
-      this.options?.onError?.(error as Error);
-      throw error;
-    }
-  }
-
-  async toggleScreenShare(enabled: boolean): Promise<void> {
-    try {
-      if (enabled) {
-        await this.startScreenShare();
-      } else {
-        await this.stopScreenShare();
-      }
-    } catch (error) {
-      this.options?.onError?.(error as Error);
-      throw error;
-    }
-  }
-
-  getParticipants(): RemoteParticipant[] {
-    return Array.from(this.room.numParticipants.values());
+  getParticipants() {
+    return Array.from(this.room.remoteParticipants.values());
   }
 
   getLocalParticipant() {
     return this.room.localParticipant;
   }
 
-  getRoom(): Room {
+  getRoom() {
     return this.room;
   }
 
-  getConnectionState(): ConnectionState {
+  getConnectionState() {
     return this.room.state;
   }
 
-  // --- Private Methods ---
+  // --- Private methods ---
 
-  private setupEventListeners(): void {
-    // Room events
+  private setupEventListeners() {
     this.room
-      .on(
-        RoomEvent.ParticipantConnected,
-        this.handleParticipantConnected.bind(this)
+      .on(RoomEvent.ParticipantConnected, (p) =>
+        this.options?.onParticipantConnected?.(p)
       )
-      .on(
-        RoomEvent.ParticipantDisconnected,
-        this.handleParticipantDisconnected.bind(this)
+      .on(RoomEvent.ParticipantDisconnected, (p) =>
+        this.options?.onParticipantDisconnected?.(p)
       )
-      .on(RoomEvent.TrackSubscribed, this.handleTrackSubscribed.bind(this))
-      .on(RoomEvent.TrackUnsubscribed, this.handleTrackUnsubscribed.bind(this))
-      .on(
-        RoomEvent.ConnectionStateChanged,
-        this.handleConnectionStateChange.bind(this)
+      .on(RoomEvent.TrackSubscribed, (track, publication, participant) =>
+        this.handleTrackSubscribed(track, publication, participant)
       )
-      .on(
-        RoomEvent.LocalTrackPublished,
-        this.handleLocalTrackPublished.bind(this)
+      .on(RoomEvent.TrackUnsubscribed, (track, publication, participant) =>
+        this.handleTrackUnsubscribed(track, publication, participant)
       )
-      .on(
-        RoomEvent.LocalTrackUnpublished,
-        this.handleLocalTrackUnpublished.bind(this)
-      );
-
-    // Local participant events
-    this.room.localParticipant
-      .on(ParticipantEvent.TrackMuted, this.handleTrackMuted.bind(this))
-      .on(ParticipantEvent.TrackUnmuted, this.handleTrackUnmuted.bind(this));
-  }
-
-  private removeEventListeners(): void {
-    // Remove all room event listeners
-    this.room
-      .off(
-        RoomEvent.ParticipantConnected,
-        this.handleParticipantConnected.bind(this)
+      .on(RoomEvent.ConnectionStateChanged, (state) =>
+        this.options?.onConnectionStateChange?.(state)
       )
-      .off(
-        RoomEvent.ParticipantDisconnected,
-        this.handleParticipantDisconnected.bind(this)
+      .on(RoomEvent.LocalTrackPublished, (pub) =>
+        this.handleLocalTrackPublished(pub)
       )
-      .off(RoomEvent.TrackSubscribed, this.handleTrackSubscribed.bind(this))
-      .off(RoomEvent.TrackUnsubscribed, this.handleTrackUnsubscribed.bind(this))
-      .off(
-        RoomEvent.ConnectionStateChanged,
-        this.handleConnectionStateChange.bind(this)
-      )
-      .off(
-        RoomEvent.LocalTrackPublished,
-        this.handleLocalTrackPublished.bind(this)
-      )
-      .off(
-        RoomEvent.LocalTrackUnpublished,
-        this.handleLocalTrackUnpublished.bind(this)
+      .on(RoomEvent.LocalTrackUnpublished, (pub) =>
+        this.handleLocalTrackUnpublished(pub)
       );
   }
 
-  private async publishLocalTracks(
-    audio: boolean = false,
-    video: boolean = false
-  ): Promise<void> {
-    try {
-      const tracks = await createLocalTracks({
-        audio: audio
-          ? { echoCancellation: true, noiseSuppression: true }
-          : false,
-        video: video
-          ? {
-              width: 1280,
-              height: 720,
-              frameRate: 30,
-            }
-          : false,
-      });
+  private removeEventListeners() {
+    this.room.removeAllListeners();
+  }
 
-      this.localTracks = tracks;
+  private async publishLocalTracks(audio = false, video = false) {
+    const tracks = await createLocalTracks({
+      audio: audio ? { echoCancellation: true, noiseSuppression: true } : false,
+      video: video
+        ? { resolution: { width: 1280, height: 720 }, frameRate: 30 }
+        : false,
+    });
 
-      for (const track of tracks) {
-        await this.room.localParticipant.publishTrack(track);
-      }
-    } catch (error) {
-      this.options?.onError?.(error as Error);
-      throw error;
+    this.localTracks = tracks;
+
+    for (const track of tracks) {
+      await this.room.localParticipant.publishTrack(track);
     }
   }
 
-  private async unpublishAllLocalTracks(): Promise<void> {
-    try {
-      for (const track of this.localTracks) {
-        await this.room.localParticipant.unpublishTrack(track);
-      }
-      this.localTracks = [];
-    } catch (error) {
-      this.options?.onError?.(error as Error);
+  private async unpublishAllLocalTracks() {
+    for (const track of this.localTracks) {
+      await this.room.localParticipant.unpublishTrack(track);
+    }
+    this.localTracks = [];
+  }
+
+  private async startScreenShare() {
+    const screenTracks = await createLocalScreenTracks({
+      audio: true,
+      video: true,
+    });
+    for (const track of screenTracks) {
+      await this.room.localParticipant.publishTrack(track);
+      this.localTracks.push(track);
     }
   }
 
-  private async startScreenShare(): Promise<void> {
-    try {
-      const screenTracks = await createLocalTracks({
-        video: {
-          resolution: { width: 1920, height: 1080 },
-          source: "screen",
-        },
-        audio: true, // Capture system audio if available
-      });
-
-      for (const track of screenTracks) {
-        await this.room.localParticipant.publishTrack(track);
-        this.localTracks.push(track);
-      }
-    } catch (error) {
-      this.options?.onError?.(error as Error);
-      throw error;
+  private async stopScreenShare() {
+    const screenTracks = this.localTracks.filter(
+      (t) => t.source === Track.Source.ScreenShare
+    );
+    for (const track of screenTracks) {
+      await this.room.localParticipant.unpublishTrack(track);
+      this.localTracks = this.localTracks.filter((t) => t !== track);
+      track.stop();
     }
   }
 
-  private async stopScreenShare(): Promise<void> {
-    try {
-      const screenTracks = this.localTracks.filter(
-        (track) => track.source === Track.Source.ScreenShare
-      );
-
-      for (const track of screenTracks) {
-        await this.room.localParticipant.unpublishTrack(track);
-        this.localTracks = this.localTracks.filter((t) => t !== track);
-        track.stop();
-      }
-    } catch (error) {
-      this.options?.onError?.(error as Error);
-    }
-  }
-
-  private handleExistingParticipants(): void {
-    // Handle participants already in the room when we connect
+  private handleExistingParticipants() {
     for (const participant of this.getParticipants()) {
       this.options?.onParticipantConnected?.(participant);
 
-      // Handle their existing tracks
-      participant.tracks.forEach((publication) => {
-        if (publication.isSubscribed && publication.track) {
-          this.handleTrackSubscribed(
-            publication.track,
-            publication,
-            participant
-          );
+      participant.trackPublications.forEach((pub: RemoteTrackPublication) => {
+        if (pub.isSubscribed && pub.track) {
+          this.handleTrackSubscribed(pub.track, pub, participant);
         }
       });
     }
   }
 
-  private handleParticipantConnected(participant: RemoteParticipant): void {
-    this.options?.onParticipantConnected?.(participant);
-  }
-
-  private handleParticipantDisconnected(participant: RemoteParticipant): void {
-    this.options?.onParticipantDisconnected?.(participant);
-  }
-
   private handleTrackSubscribed(
     track: RemoteTrack,
-    publication: RemoteTrackPublication,
+    _publication: RemoteTrackPublication,
     participant: RemoteParticipant
-  ): void {
+  ) {
     if (track.kind === Track.Kind.Video || track.kind === Track.Kind.Audio) {
-      const mediaStreamTrack = track.mediaStreamTrack;
       const kind = track.kind === Track.Kind.Video ? "video" : "audio";
-      this.options?.onTrackSubscribed?.(mediaStreamTrack, participant, kind);
+      this.options?.onTrackSubscribed?.(
+        track.mediaStreamTrack,
+        participant,
+        kind
+      );
     }
   }
 
   private handleTrackUnsubscribed(
     track: RemoteTrack,
-    publication: RemoteTrackPublication,
+    _publication: RemoteTrackPublication,
     participant: RemoteParticipant
-  ): void {
+  ) {
     if (track.kind === Track.Kind.Video || track.kind === Track.Kind.Audio) {
-      const mediaStreamTrack = track.mediaStreamTrack;
       const kind = track.kind === Track.Kind.Video ? "video" : "audio";
-      this.options?.onTrackUnsubscribed?.(mediaStreamTrack, participant, kind);
+      this.options?.onTrackUnsubscribed?.(
+        track.mediaStreamTrack,
+        participant,
+        kind
+      );
     }
   }
 
-  private handleLocalTrackPublished(track: LocalTrack): void {
-    const kind = track.kind === Track.Kind.Video ? "video" : "audio";
-    this.options?.onLocalTrackPublished?.(track.mediaStreamTrack, kind);
+  private handleLocalTrackPublished(pub: LocalTrackPublication) {
+    if (!pub.track) return;
+    const kind = pub.track.kind === Track.Kind.Video ? "video" : "audio";
+    this.options?.onLocalTrackPublished?.(pub.track.mediaStreamTrack, kind);
   }
 
-  private handleLocalTrackUnpublished(track: LocalTrack): void {
-    const kind = track.kind === Track.Kind.Video ? "video" : "audio";
-    this.options?.onLocalTrackUnpublished?.(track.mediaStreamTrack, kind);
-  }
-
-  private handleConnectionStateChange(state: ConnectionState): void {
-    this.options?.onConnectionStateChange?.(state);
-  }
-
-  private handleTrackMuted(publication: TrackPublication): void {
-    // Handle local track muted events
-    // You might want to notify the call store about mute state changes
-  }
-
-  private handleTrackUnmuted(publication: TrackPublication): void {
-    // Handle local track unmuted events
+  private handleLocalTrackUnpublished(pub: LocalTrackPublication) {
+    if (!pub.track) return;
+    const kind = pub.track.kind === Track.Kind.Video ? "video" : "audio";
+    this.options?.onLocalTrackUnpublished?.(pub.track.mediaStreamTrack, kind);
   }
 }
+export { RoomEvent };
+

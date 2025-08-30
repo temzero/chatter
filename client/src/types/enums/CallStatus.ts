@@ -3,6 +3,7 @@ export enum CallStatus {
   CONNECTED = "connected",
   INCOMING = "incoming",
   OUTGOING = "outgoing",
+  ONGOING = "ongoing",
   CANCELED = "canceled",
   REJECTED = "rejected",
   ENDED = "ended",

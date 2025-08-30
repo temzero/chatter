@@ -12,6 +12,7 @@ import { ChatMemberModule } from './modules/chat-member/chat-member.module';
 import { SupabaseModule } from './modules/superbase/supabase.module';
 import { WebSocketModule } from './modules/websocket/websocket.module';
 import { FolderModule } from './modules/folder/folder.module';
+import { CallModule } from './modules/call/call.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { FolderModule } from './modules/folder/folder.module';
     FriendshipModule,
     MessageModule,
     UserModule,
+    CallModule,
     SupabaseModule,
     WebSocketModule,
   ],

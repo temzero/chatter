@@ -331,14 +331,13 @@ export const useMembersByChatId = (
   );
 };
 
-export const useMyChatMember = (chatId: string): ChatMember | undefined => {
-  const currentUserId = useCurrentUserId();
-  return useChatMemberStore(
-    useShallow((state) => {
-      const members = state.chatMembers[chatId];
-      return members.find((member) => member.userId === currentUserId);
-    })
-  );
+export const getMyChatMember = (
+  chatId?: string
+): ChatMember | undefined | null => {
+  if (!chatId) return null;
+  const currentUserId = useAuthStore.getState().currentUser?.id;
+  const members = useChatMemberStore.getState().chatMembers[chatId] || [];
+  return members.find((m) => m.userId === currentUserId);
 };
 
 export const getMyChatMemberId = (chatId: string): string | undefined => {
