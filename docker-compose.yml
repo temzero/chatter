@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   # React Frontend
   client:
@@ -10,19 +12,19 @@ services:
       - ./client:/app
       - /app/node_modules
     environment:
-      - NODE_ENV=development
-      - VITE_API_URL=http://localhost:3000
-      - VITE_SUPABASE_URL=https://azudonodpecsrtvzzxit.supabase.co
-      - VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6dWRvbm9kcGVjc3R0dnp6eGl0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjY3NjksImV4cCI6MjA2Mzc0Mjc2OX0.tKBGMo6vHITxkusgT1J2aT5VUe0z-HSi9iF8dykQ6vU
-      - VITE_SUPABASE_AVATAR_BUCKET=avatars
-      - VITE_SUPABASE_ATTACHMENTS_BUCKET=attachments
-      - VITE_LIVEKIT_URL=ws://localhost:7880 # Add LiveKit URL for client
+      - NODE_ENV=${NODE_ENV}
+      - VITE_API_URL=${VITE_API_URL}
+      - VITE_SUPABASE_URL=${SUPABASE_URL}
+      - VITE_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - VITE_SUPABASE_AVATAR_BUCKET=${SUPABASE_AVATAR_BUCKET}
+      - VITE_SUPABASE_ATTACHMENTS_BUCKET=${SUPABASE_ATTACHMENTS_BUCKET}
+      - VITE_LIVEKIT_URL=ws://localhost:7880
     command: npm run dev -- --host
     stdin_open: true
     tty: true
     depends_on:
       - server
-      - livekit # Add dependency
+      - livekit
 
   # NestJS Backend
   server:
@@ -35,45 +37,42 @@ services:
       - ./server:/app
       - /app/node_modules
     environment:
-      - NODE_ENV=development
-      - POSTGRES_HOST=host.docker.internal
-      - POSTGRES_PORT=5432
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=chatter
-      - CLIENT_URL=http://localhost:5173
-      - SERVER_URL=http://localhost:3000
-      - BCRYPT_SALT_ROUNDS=10
-      - JWT_ACCESS_EXPIRATION=30d
-      - JWT_REFRESH_EXPIRATION=30d
-      - REFRESH_TOKEN_EXPIRATION_MS=604800000
-      - JWT_ALGORITHM=HS256
-      - JWT_ACCESS_SECRET=access0e968b9284697cee58055f3c8a01ed725cfa5ea0b035bb95e4850c524774285554b2bba0256a3ca3663ba278bc3083f8d40a02d538af0bb3042806eec5
-      - JWT_REFRESH_SECRET=refresh1e968b9284697cee58055f3c8a01ed725cfa5ea0b035bb95e4850c524774285554b2bba0256a3ca3663ba278bc3083f8d40a02d538af0bb3042806eec5
-      - JWT_VERIFICATION_SECRET=verificationb9284697cee58055f3c8a01ed725cfa5ea0b035bb95e4850c524774285554b2bba0256a3ca3663ba278bc3083f8d40a02d538af0bb3042806eec5
-      - EMAIL_SERVICE=Gmail
-      - EMAIL_USER=nguyentrannhan.00@gmail.com
-      - EMAIL_PASS=ktvg mqbj puri qavo
-      - SUPABASE_AVATAR_BUCKET=avatars
-      - SUPABASE_ATTACHMENTS_BUCKET=attachments
-      - SUPABASE_URL=https://azudonodpecsrtvzzxit.supabase.co
-      - SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6dWRvbm9kcGVjc3R0dnp6eGl0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODE2Njc2OSwiZXhwIjoyMDYzNzQyNzY5fQ.IrBHxDUJVDkS_oHX0TaqR7YIJk6AoD9PjXexn7kWlbk
-      - LIVEKIT_URL=http://livekit:7880 # Add LiveKit URL for server (internal Docker network)
-      - LIVEKIT_API_KEY=ThisIsA32CharacterLongSecretKey12345
-      - LIVEKIT_API_SECRET=ThisIsA32CharacterLongSecretKey12345
+      - NODE_ENV=${NODE_ENV}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - CLIENT_URL=${CLIENT_URL}
+      - SERVER_URL=${SERVER_URL}
+      - BCRYPT_SALT_ROUNDS=${BCRYPT_SALT_ROUNDS}
+      - JWT_ACCESS_EXPIRATION=${JWT_ACCESS_EXPIRATION}
+      - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION}
+      - REFRESH_TOKEN_EXPIRATION_MS=${REFRESH_TOKEN_EXPIRATION_MS}
+      - JWT_ALGORITHM=${JWT_ALGORITHM}
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - JWT_VERIFICATION_SECRET=${JWT_VERIFICATION_SECRET}
+      - EMAIL_SERVICE=${EMAIL_SERVICE}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - SUPABASE_AVATAR_BUCKET=${SUPABASE_AVATAR_BUCKET}
+      - SUPABASE_ATTACHMENTS_BUCKET=${SUPABASE_ATTACHMENTS_BUCKET}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - LIVEKIT_URL=http://livekit:7880
+      - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
+      - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command: npm run start:dev
     stdin_open: true
     tty: true
     depends_on:
-      - livekit # Add dependency
+      - livekit
 
   # LiveKit Server
   livekit:
-    # build:
-    #   context: ./livekit-docker
-    #   dockerfile: Dockerfile # You might need to create this or use image directly
     image: livekit/livekit-server:latest
     ports:
       - "7880:7880"

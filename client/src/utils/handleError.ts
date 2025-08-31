@@ -1,6 +1,8 @@
+import { audioService } from "@/services/audio.service";
 import { toast } from "react-toastify";
 
 export function handleError(error: unknown, defaultMessage: string) {
+  audioService.stopAllSounds();
   // Handle Axios error structure
   if (typeof error === "object" && error !== null) {
     const axiosError = error as {

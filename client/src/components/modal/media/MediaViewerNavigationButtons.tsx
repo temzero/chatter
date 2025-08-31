@@ -1,8 +1,6 @@
-// components/MediaViewerNavigationButtons.tsx
 import { useCallback } from "react";
-import { useSoundEffect } from "@/hooks/useSoundEffect";
-import slideSound from "@/assets/sound/click.mp3";
-
+import { useAudioService } from "@/hooks/useAudioService";
+import { SoundType } from "@/services/audio.service";
 interface MediaViewerNavigationButtonsProps {
   currentIndex: number;
   attachmentLength: number;
@@ -16,12 +14,12 @@ export const MediaViewerNavigationButtons = ({
   onNext,
   onPrev,
 }: MediaViewerNavigationButtonsProps) => {
-  const [playSound] = useSoundEffect(slideSound);
+  const { playSound } = useAudioService();
 
   const handleNext = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      playSound();
+      playSound(SoundType.NOTIFICATION);
       onNext();
     },
     [onNext, playSound]
@@ -30,7 +28,7 @@ export const MediaViewerNavigationButtons = ({
   const handlePrev = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      playSound();
+      playSound(SoundType.NOTIFICATION); // ✅ same here
       onPrev();
     },
     [onPrev, playSound]

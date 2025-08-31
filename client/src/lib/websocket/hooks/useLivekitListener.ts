@@ -1,15 +1,18 @@
 import { useEffect, useMemo } from "react";
 import { LiveKitService } from "@/services/liveKitService";
 import { RemoteParticipant } from "livekit-client";
+import { callService } from "@/services/callService";
+import { useCallStore } from "@/stores/callStore/callStore";
+import { getMyChatMember } from "@/stores/chatMemberStore";
+import { CallStatus } from "@/types/enums/CallStatus";
 
-// Optionally, you can import URL/token from env or some store
-const LIVEKIT_URL =
-  process.env.REACT_APP_LIVEKIT_URL || "wss://your-livekit-server";
-const LIVEKIT_TOKEN = process.env.REACT_APP_LIVEKIT_TOKEN || "YOUR_TOKEN_HERE";
+const LIVEKIT_URL = import.meta.env.VITE_LIVEKIT_URL;
 
 let singletonService: LiveKitService | null = null;
 
 export function useLiveKitListeners() {
+  const { chatId, callStatus } = useCallStore();
+
   const liveKitService = useMemo(() => {
     if (!singletonService) {
       singletonService = new LiveKitService();
@@ -19,8 +22,22 @@ export function useLiveKitListeners() {
 
   useEffect(() => {
     async function init() {
+      if (!chatId || callStatus !== CallStatus.CONNECTED) return;
+
       try {
-        await liveKitService.connect(LIVEKIT_URL, LIVEKIT_TOKEN, {
+        const roomName = chatId; // Using chatId as room name
+        const myMember = getMyChatMember(chatId);
+        const participantName =
+          myMember?.nickname ?? `${myMember?.firstName} ${myMember?.lastName}`; // Generate participant name
+
+        // Use your existing callService to get the token
+        const token = await callService.getToken(
+          roomName,
+          myMember?.id ?? "unknown",
+          participantName
+        );
+
+        await liveKitService.connect(LIVEKIT_URL, token, {
           audio: true,
           video: true,
           onParticipantConnected: (participant: RemoteParticipant) => {
@@ -48,7 +65,7 @@ export function useLiveKitListeners() {
     return () => {
       liveKitService.disconnect();
     };
-  }, [liveKitService]);
+  }, [chatId, callStatus, liveKitService]);
 
-  return liveKitService; // optional: to allow toggleAudio/toggleVideo
+  return liveKitService;
 }

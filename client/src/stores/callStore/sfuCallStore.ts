@@ -14,6 +14,7 @@ import { callWebSocketService } from "@/lib/websocket/services/call.websocket.se
 import { callService } from "@/services/callService";
 
 import { getMyChatMember, getMyChatMemberId } from "../chatMemberStore";
+import { toast } from "react-toastify";
 export interface SFUState {
   liveKitService: LiveKitService | null;
   sfuMembers: SFUCallMember[];
@@ -51,10 +52,6 @@ export interface SFUActions {
   toggleVideo: (isEnable?: boolean) => Promise<void>;
   toggleScreenShare: (isEnable?: boolean) => Promise<void>;
 
-  // WebSocket Listeners
-  setupWebSocketListeners: () => void;
-  removeWebSocketListeners: () => void;
-
   // Clear state
   clearSFUState: () => void;
 }
@@ -67,18 +64,11 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
 
     // ========== SFU ACTIONS ==========
     initializeSFUCall: async (chatId: string, isVideoCall: boolean) => {
+      toast.info(`initializeSFUCall, isVideoCall: ${isVideoCall}`);
       const liveKitService = new LiveKitService();
       set({ liveKitService });
 
       try {
-        // Set up WebSocket listeners
-        get().setupWebSocketListeners();
-        callWebSocketService.initiateCall({
-          chatId,
-          isVideoCall,
-          isGroupCall: true,
-        });
-
         // Generate token for LiveKit room
         const myChatMember = getMyChatMember(chatId);
         const participantName =
@@ -92,17 +82,26 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
           myChatMember?.id ?? "anonymous",
           participantName
         );
-        const url = process.env.NEXT_PUBLIC_LIVEKIT_URL!;
+        console.log("sfuToken: ", token);
+        const url = import.meta.env.VITE_LIVEKIT_URL;
 
         await get().connectToSFURoom(token, url);
+
+        // 🔥 ONLY AFTER SUCCESSFUL CONNECTION: send the call signal
+        callWebSocketService.initiateCall({
+          chatId,
+          isVideoCall,
+          isGroupCall: true,
+        });
       } catch (error) {
         console.error("Failed to initialize SFU call:", error);
         useCallStore.getState().setCallStatus(CallStatus.ERROR);
+        get().rejectSFUCall(true);
       }
     },
 
     acceptSFUCall: async () => {
-      const { liveKitService, setupWebSocketListeners } = get();
+      const { liveKitService } = get();
       const { chatId } = useCallStore.getState();
       // Generate token for LiveKit room
 
@@ -111,7 +110,6 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
 
       try {
         // Set up WebSocket listeners
-        setupWebSocketListeners();
         const participantName =
           myChatMember?.nickname ||
           [myChatMember?.firstName, myChatMember?.lastName]
@@ -124,7 +122,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
           myChatMember?.id || "anonymous",
           participantName
         );
-        const url = process.env.NEXT_PUBLIC_LIVEKIT_URL!;
+        const url = import.meta.env.VITE_LIVEKIT_URL;
         await get().connectToSFURoom(token, url);
 
         // Notify others of acceptance
@@ -187,7 +185,6 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
         liveKitService.disconnect();
         set({ liveKitService: null, sfuMembers: [] });
       }
-      get().removeWebSocketListeners();
     },
 
     // ========== SFU MEMBER MANAGEMENT ==========
@@ -488,7 +485,6 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
         liveKitService: null,
         sfuMembers: [],
       });
-      get().removeWebSocketListeners();
     },
   }))
 );

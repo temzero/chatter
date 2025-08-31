@@ -1,8 +1,0 @@
-services:
-  livekit:
-    image: livekit/livekit-server:latest
-    ports:
-      - "7880:7880"
-    volumes:
-      - ./livekit.yaml:/livekit.yaml
-    command: --config /livekit.yaml

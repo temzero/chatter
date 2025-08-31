@@ -9,7 +9,7 @@ export const callService = {
     memberId: string,
     participantName?: string
   ): Promise<string> {
-    const { data } = await API.post("/call/token", {
+    const { data } = await API.post("/calls/token", {
       roomName,
       memberId,
       participantName,
@@ -19,17 +19,17 @@ export const callService = {
   },
 
   /**
-   * (Optional) Fetch call history
+   * (Optional) Fetch calls history
    */
   async getCallHistory(chatId: string) {
-    const { data } = await API.get(`/call/history/${chatId}`);
+    const { data } = await API.get(`/calls/history/${chatId}`);
     return data;
   },
 
   /**
-   * (Optional) End/leave a call
+   * (Optional) End/leave a calls
    */
   async endCall(callId: string) {
-    await API.post(`/call/${callId}/end`);
+    await API.post(`/calls/${callId}/end`);
   },
 };

@@ -3,13 +3,13 @@ import { motion, useAnimationControls } from "framer-motion";
 import { MediaViewerTopBar } from "./MediaViewerTopBar";
 import { MediaViewerNavigationButtons } from "./MediaViewerNavigationButtons";
 import { MediaViewerBottomInfo } from "./MediaViewerBottomInfo";
-import { useSoundEffect } from "@/hooks/useSoundEffect";
 import { useModalStore } from "@/stores/modalStore";
 import { useActiveChatAttachments } from "@/stores/messageStore";
 import { RenderModalAttachment } from "./RenderModalAttachment";
 import { useShallow } from "zustand/shallow";
 import { handleDownload } from "@/utils/handleDownload";
-import slidingSound from "@/assets/sound/click.mp3";
+import { useAudioService } from "@/hooks/useAudioService";
+import { SoundType } from "@/services/audio.service";
 
 export const MediaViewer = () => {
   const { currentAttachmentId, closeModal } = useModalStore(
@@ -34,10 +34,10 @@ export const MediaViewer = () => {
   const [rotation, setRotation] = useState(0);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const [isReady, setIsReady] = useState(false);
-  const [playSound] = useSoundEffect(slidingSound);
+
+  const { playSound } = useAudioService(); // ✅ central sound manager
   const controls = useAnimationControls();
 
-  // Effect to handle initial setup and `isReady` state
   useEffect(() => {
     if (
       currentAttachmentId &&
@@ -80,7 +80,7 @@ export const MediaViewer = () => {
       setCurrentIndex(newIndex);
       scrollToMedia(newIndex, true);
       setRotation(0);
-      playSound();
+      playSound(SoundType.NOTIFICATION); // ✅ pick a central sound type
     }
   }, [activeAttachments, currentIndex, playSound, scrollToMedia]);
 
@@ -90,7 +90,7 @@ export const MediaViewer = () => {
       setCurrentIndex(newIndex);
       scrollToMedia(newIndex, true);
       setRotation(0);
-      playSound();
+      playSound(SoundType.NOTIFICATION); // ✅ same sound for prev
     }
   }, [currentIndex, playSound, scrollToMedia]);
 
@@ -134,7 +134,7 @@ export const MediaViewer = () => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [currentAttachmentId, handleKeyDown, playSound]);
+  }, [currentAttachmentId, handleKeyDown]);
 
   useEffect(() => {
     const onResize = () => {
@@ -158,7 +158,7 @@ export const MediaViewer = () => {
     const resizeHandler = () => onResize();
     window.addEventListener("resize", resizeHandler);
     return () => window.removeEventListener("resize", resizeHandler);
-  }, [containerRef, currentIndex, controls, playSound]);
+  }, [containerRef, currentIndex, controls]);
 
   if (!isReady) return null;
 
@@ -194,24 +194,13 @@ export const MediaViewer = () => {
           <motion.div
             key={attachment.id}
             className="w-full h-full flex-shrink-0 flex items-center justify-center"
-            // Add initial and animate props for the zoom effect
-            initial={{
-              scale: 0.2,
-              opacity: 0,
-            }}
+            initial={{ scale: 0.2, opacity: 0 }}
             animate={{
               opacity: index === currentIndex ? 1 : 0.2,
               scale: index === currentIndex ? 1 : 0.2,
             }}
-            exit={{
-              scale: 0.2,
-              opacity: 0,
-            }}
-            transition={{
-              type: "spring",
-              stiffness: 280,
-              damping: 26,
-            }}
+            exit={{ scale: 0.2, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 280, damping: 26 }}
           >
             <RenderModalAttachment
               attachment={attachment}

@@ -6,6 +6,9 @@ import activeSound from "@/assets/sound/active.mp3";
 import endCallSound from "@/assets/sound/end-call.mp3";
 import reactionSound from "@/assets/sound/message-bubble.mp3";
 import messageSound from "@/assets/sound/message-bubble.mp3";
+import slidingSound from "@/assets/sound/click.mp3";
+import typingSound from "@/assets/sound/message-sent.mp3";
+import { handleError } from "@/utils/handleError";
 
 // Define the SoundType as an enum
 export enum SoundType {
@@ -16,14 +19,20 @@ export enum SoundType {
   CALL_END = "call-end",
   NEW_MESSAGE = "new-message",
   REACTION = "reaction",
+
+  SLIDE = "slide",
+  TYPING = "typing",
 }
 
 export interface AudioService {
   playSound: (type: SoundType) => Promise<void>;
   stopSound: (type: SoundType) => void;
+  stopAllSounds: () => void; // Add this to interface
   setVolume: (volume: number) => void;
   getVolume: () => number;
   preloadSounds: () => Promise<void>;
+  muteAll: () => void;
+  unmuteAll: () => void;
 }
 
 class AudioServiceImpl implements AudioService {
@@ -44,6 +53,8 @@ class AudioServiceImpl implements AudioService {
       [SoundType.CALL_END]: endCallSound,
       [SoundType.NEW_MESSAGE]: messageSound,
       [SoundType.REACTION]: reactionSound,
+      [SoundType.SLIDE]: slidingSound,
+      [SoundType.TYPING]: typingSound,
     };
 
     Object.entries(soundConfig).forEach(([type, src]) => {
@@ -65,10 +76,20 @@ class AudioServiceImpl implements AudioService {
     }
 
     try {
-      sound.currentTime = 0; // Reset to start
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      sound.currentTime = 0;
       await sound.play();
-    } catch (error) {
-      console.error(`Failed to play sound ${type}:`, error);
+    } catch (error: unknown) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        // expected if another play() interrupted
+        return;
+      }
+      if (error instanceof DOMException && error.name === "NotAllowedError") {
+        // User hasn’t interacted → just skip
+        console.log("Skipping sound: no user interaction yet");
+        return;
+      }
+      handleError(error, "Failed to play sound");
     }
   }
 
@@ -78,6 +99,13 @@ class AudioServiceImpl implements AudioService {
       sound.pause();
       sound.currentTime = 0;
     }
+  }
+
+  stopAllSounds(): void {
+    // CORRECTED: Pass the SoundType to stopSound
+    this.sounds.forEach((sound, type) => {
+      this.stopSound(type);
+    });
   }
 
   setVolume(volume: number): void {

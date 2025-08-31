@@ -2,9 +2,8 @@ import React from "react";
 import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
 import { handleReaction } from "@/utils/handleReaction";
-import { useSoundEffect } from "@/hooks/useSoundEffect";
-import addReactionSound from "@/assets/sound/message-pop.mp3";
-import removeReactionSound from "@/assets/sound/click.mp3";
+import { useAudioService } from "@/hooks/useAudioService"; // ✅ centralized audio
+import { SoundType } from "@/services/audio.service"; // ✅ enum
 import { useMessageReactions } from "@/stores/messageStore";
 
 interface MessageReactionDisplayProps {
@@ -24,8 +23,7 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
   messageId,
   chatId,
 }) => {
-  const [playAddSound] = useSoundEffect(addReactionSound);
-  const [playRemoveSound] = useSoundEffect(removeReactionSound);
+  const { playSound } = useAudioService(); // ✅ centralized audio
   const reactions = useMessageReactions(messageId);
 
   if (!reactions || Object.keys(reactions).length === 0) return null;
@@ -43,11 +41,12 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
   const handleClick = (emoji: string) => {
     const hasMyReaction =
       currentUserId && reactions[emoji]?.includes(currentUserId);
-    // Play sound before handling the reaction
+
+    // ✅ use SoundType for add/remove reaction
     if (hasMyReaction) {
-      playRemoveSound();
+      playSound(SoundType.REACTION); // remove sound
     } else {
-      playAddSound();
+      playSound(SoundType.NEW_MESSAGE); // add sound (or create SoundType.REACTION_ADD if needed)
     }
 
     handleReaction({

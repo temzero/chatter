@@ -10,6 +10,7 @@ import {
   SFUCallMember,
 } from "@/types/store/callMember.type";
 import { useModalStore } from "../modalStore";
+import { audioService } from "@/services/audio.service";
 
 export interface CallState {
   // Call metadata
@@ -117,6 +118,7 @@ export const useCallStore = create<CallState & CallActions>()(
       } catch (error) {
         console.error("Failed to start call:", error);
         set({ error: "connection_failed" });
+        audioService.stopAllSounds();
       }
     },
 

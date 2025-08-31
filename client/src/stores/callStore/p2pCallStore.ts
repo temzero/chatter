@@ -26,7 +26,7 @@ export interface P2PState {
 }
 
 export interface P2PActions {
-  initializeP2PCall: (chatId: string, isVideo: boolean) => Promise<void>;
+  initializeP2PCall: (chatId: string, isVideoCall: boolean) => Promise<void>;
   acceptP2PCall: () => Promise<void>;
   rejectP2PCall: (isCancel?: boolean) => void;
   cleanupP2PConnections: () => void;
@@ -76,17 +76,19 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
     iceCandidates: [],
 
     // ========== P2P ACTIONS ==========
-    initializeP2PCall: async (chatId: string, isVideo: boolean) => {
+    initializeP2PCall: async (chatId: string, isVideoCall: boolean) => {
+      toast.info(`initializeSFUCall, isVideoCall: ${isVideoCall}`);
+
       try {
         // 1. Request media permissions FIRST
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: true,
-          video: isVideo,
+          video: isVideoCall,
         });
 
         // 2. Split streams
         const voiceStream = new MediaStream(stream.getAudioTracks());
-        const videoStream = isVideo
+        const videoStream = isVideoCall
           ? new MediaStream(stream.getVideoTracks())
           : null;
 
@@ -94,10 +96,10 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         useCallStore.setState({
           localVoiceStream: voiceStream,
           localVideoStream: videoStream,
-          isVideoEnabled: isVideo,
+          isVideoEnabled: isVideoCall,
           startedAt: new Date(),
           chatId, // Reinforce these
-          isVideoCall: isVideo,
+          isVideoCall: isVideoCall,
           callStatus: CallStatus.OUTGOING,
         });
 
@@ -119,7 +121,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         // 6. Initiate signaling
         callWebSocketService.initiateCall({
           chatId,
-          isVideoCall: isVideo,
+          isVideoCall: isVideoCall,
           isGroupCall: false,
         });
       } catch (error) {
