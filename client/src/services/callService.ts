@@ -1,3 +1,4 @@
+import { handleError } from "@/utils/handleError";
 import API from "./api/api";
 
 export const callService = {
@@ -8,14 +9,23 @@ export const callService = {
     roomName: string,
     memberId: string,
     participantName?: string
-  ): Promise<string> {
-    const { data } = await API.post("/calls/token", {
-      roomName,
-      memberId,
-      participantName,
-    });
+  ): Promise<string | undefined> {
+    try {
+      const { data } = await API.post("/calls/token", {
+        roomName,
+        memberId,
+        participantName,
+      });
 
-    return data.token;
+      // Access token through data.payload.token instead of data.token
+      if (!data.payload?.token) {
+        throw new Error("No token returned from server");
+      }
+
+      return data.payload.token;
+    } catch (error) {
+      handleError(error, "Cannot get SFU liveKit token");
+    }
   },
 
   /**

@@ -38,7 +38,6 @@ export const ChannelAvatar: React.FC<ChannelAvatarProps> = ({
         <img
           src={chat.avatarUrl}
           alt={`${chat.name || "Channel"}'s avatar`}
-          loading="lazy"
           className={`h-full w-full object-cover ${childrenScaleClass} ${squircleShape}`}
         />
       ) : (

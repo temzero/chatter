@@ -5,12 +5,16 @@ import { BounceLoader } from "react-spinners";
 import { Button } from "../Button";
 import { VideoStream } from "./components/VideoStream";
 import { useCallStore } from "@/stores/callStore/callStore";
+import { useState } from "react";
 
 export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
   const isVideoCall = useCallStore((state) => state.isVideoCall);
-  const localVideoStream = useCallStore((state) => state.localScreenStream);
+  const localVideoStream = useCallStore((state) => state.localVideoStream);
+  const [cameraEnabled, setCameraEnabled] = useState(false);
 
   const acceptCall = () => {
+    // Set the camera state before accepting call
+    useCallStore.setState({ isVideoEnabled: cameraEnabled });
     useCallStore.getState().acceptCall();
   };
 
@@ -19,10 +23,34 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
     useCallStore.getState().closeCallModal();
   };
 
+  const toggleCamera = async () => {
+    const newCameraState = !cameraEnabled;
+    setCameraEnabled(newCameraState);
+
+    if (newCameraState) {
+      // Enable camera - get video stream
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+        });
+        useCallStore.getState().setLocalVideoStream(stream);
+      } catch (error) {
+        console.error("Failed to enable camera:", error);
+        setCameraEnabled(false);
+      }
+    } else {
+      // Disable camera - stop video stream
+      if (localVideoStream) {
+        localVideoStream.getTracks().forEach((track) => track.stop());
+        useCallStore.getState().setLocalVideoStream(null);
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col items-center w-full h-full">
       {/* Background - Avatar or Webcam */}
-      {isVideoCall && localVideoStream && (
+      {isVideoCall && localVideoStream && cameraEnabled && (
         <div className="absolute inset-0 overflow-hidden z-0 opacity-70 w-full h-full">
           <VideoStream
             stream={localVideoStream}
@@ -43,7 +71,7 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
       </div>
 
       {/* calling-content */}
-      <div className="flex flex-col justify-center items-center gap-4 py-10 select-none z-0">
+      <div className="flex flex-col justify-center items-center gap-4 py-6 select-none z-0">
         <motion.button
           title={`Incoming ${isVideoCall ? "Video" : "Voice"} Call`}
           className="p-4 rounded-full hover:bg-[--primary-green] transition-colors relative hover:custom-border"
@@ -52,7 +80,13 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
         >
           <AnimatePresence mode="wait">
             <motion.span
-              key={isVideoCall ? "videocam" : "call"}
+              key={
+                isVideoCall
+                  ? cameraEnabled
+                    ? "videocam"
+                    : "videocam_off"
+                  : "call"
+              }
               onClick={acceptCall}
               className="material-symbols-outlined text-6xl flex items-center justify-center"
               initial={{ opacity: 0, scale: 0.1 }}
@@ -71,7 +105,11 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
                 scale: { duration: 0.2 },
               }}
             >
-              {isVideoCall ? "videocam" : "call"}
+              {isVideoCall
+                ? cameraEnabled
+                  ? "videocam"
+                  : "videocam_off"
+                : "call"}
             </motion.span>
           </AnimatePresence>
 
@@ -90,7 +128,6 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
           size="lg"
           isRoundedFull
           fullWidth
-          icon={isVideoCall ? "videocam" : "call"}
           iconPosition="left"
           className="py-3"
         >
@@ -102,7 +139,6 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
           size="lg"
           isRoundedFull
           fullWidth
-          icon="call_end"
           iconPosition="left"
           className="py-3"
         >

@@ -1,7 +1,3 @@
-# port: 7880
-# log_level: debug
-# keys:
-#   APIKEY: ThisIsA32CharacterLongSecretKey12345
 port: 7880
 bind_addresses:
   - "0.0.0.0"
@@ -11,6 +7,9 @@ rtc:
   port_range_start: 50000
   port_range_end: 60000
 log_level: debug
+
 keys:
-  APIKEY: ThisIsA32CharacterLongSecretKey12345
-  SECRET: ThisIsA32CharacterLongSecretKey12345
+  dev-livekit-api: LiveKitServerAPISecretKey@september012025
+
+turn:
+  enabled: false

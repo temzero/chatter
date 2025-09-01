@@ -128,7 +128,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         // Handle error locally - modal never opened so no need to close it
         useCallStore.getState().cleanupStreams();
         useCallStore.setState({
-          error: "permission_denied",
+          error: "p2p_init_failed",
           callStatus: CallStatus.ERROR,
         });
         toast.error(

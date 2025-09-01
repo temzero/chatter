@@ -43,7 +43,6 @@ export const GroupAvatar: React.FC<GroupAvatarProps> = ({
           className={`h-full w-full object-cover ${childrenScaleClass} ${styles.rounded}`}
           src={chat.avatarUrl}
           alt={`${chat.name || "Group"}'s avatar`}
-          loading="lazy"
         />
       ) : (
         <div

@@ -38,6 +38,8 @@ export interface CallState {
     | "permission_denied"
     | "device_unavailable"
     | "connection_failed"
+    | "p2p_init_failed"
+    | "sfu_init_failed"
     | null;
 }
 

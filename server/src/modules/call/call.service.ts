@@ -8,28 +8,28 @@ import { UpdateCallDto } from './dto/update-call.dto';
 import { CallStatus } from './type/callStatus';
 import { ChatMember } from '../chat-member/entities/chat-member.entity';
 
-interface IAccessToken {
-  addGrant(grant: VideoGrant): void;
-  toJwt(): string;
-}
+// interface IAccessToken {
+//   addGrant(grant: VideoGrant): void;
+//   toJwt(): string;
+// }
 
-interface AccessTokenOptions {
-  identity: string;
-  name?: string;
-}
+// interface AccessTokenOptions {
+//   identity: string;
+//   name?: string;
+// }
 
-interface AccessTokenConstructor {
-  new (
-    apiKey?: string,
-    apiSecret?: string,
-    options?: AccessTokenOptions,
-  ): IAccessToken;
-}
+// interface AccessTokenConstructor {
+//   new (
+//     apiKey?: string,
+//     apiSecret?: string,
+//     options?: AccessTokenOptions,
+//   ): IAccessToken;
+// }
 
 @Injectable()
 export class CallService {
-  private readonly livekitApiKey: string;
-  private readonly livekitApiSecret: string;
+  private readonly livekitApiKeyName: string;
+  private readonly livekitApiKeySecret: string;
 
   constructor(
     @InjectRepository(Call)
@@ -37,12 +37,13 @@ export class CallService {
     @InjectRepository(ChatMember)
     private chatMemberRepository: Repository<ChatMember>,
   ) {
-    this.livekitApiKey = process.env.LIVEKIT_API_KEY ?? 'your_api_key';
-    this.livekitApiSecret = process.env.LIVEKIT_API_SECRET ?? 'your_api_secret';
+    this.livekitApiKeyName = process.env.LIVEKIT_API_KEY_NAME ?? 'your_api_key';
+    this.livekitApiKeySecret =
+      process.env.LIVEKIT_API_KEY_SECRET ?? 'your_api_secret';
 
     if (
-      this.livekitApiKey === 'your_api_key' ||
-      this.livekitApiSecret === 'your_api_secret'
+      this.livekitApiKeyName === 'your_api_key' ||
+      this.livekitApiKeySecret === 'your_api_secret'
     ) {
       console.warn(
         'Using default LiveKit credentials - replace with actual environment variables',
@@ -139,16 +140,15 @@ export class CallService {
     }
   }
 
-  generateLivekitToken(
+  async generateLivekitToken(
     roomName: string,
     memberId: string,
     participantName?: string,
-  ): string {
+  ): Promise<string> {
     try {
-      const TokenClass = AccessToken as unknown as AccessTokenConstructor;
-      const at: IAccessToken = new TokenClass(
-        this.livekitApiKey,
-        this.livekitApiSecret,
+      const at = new AccessToken(
+        this.livekitApiKeyName,
+        this.livekitApiKeySecret,
         {
           identity: memberId,
           name: participantName,
@@ -163,8 +163,11 @@ export class CallService {
       };
 
       at.addGrant(grant);
+      console.log('AccessToken instance:', at);
 
-      return at.toJwt();
+      const generatedToken = await at.toJwt();
+      console.log('SFU Token:', generatedToken);
+      return generatedToken;
     } catch (err) {
       if (err instanceof Error) {
         throw new Error(`Failed to generate LiveKit token: ${err.message}`);

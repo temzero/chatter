@@ -61,8 +61,8 @@ services:
       - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
       - LIVEKIT_URL=http://livekit:7880
-      - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
-      - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
+      - LIVEKIT_API_KEY_NAME=${LIVEKIT_API_KEY_NAME}
+      - LIVEKIT_API_KEY_SECRET=${LIVEKIT_API_KEY_SECRET}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command: npm run start:dev

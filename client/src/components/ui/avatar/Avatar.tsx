@@ -35,7 +35,6 @@ export const Avatar: React.FC<AvatarProps> = ({
         <img
           className="h-full w-full object-cover transform transition-transform duration-300 hover:scale-125"
           src={avatarUrl}
-          loading="lazy"
           alt="User avatar"
         />
       ) : nameInitial ? (
