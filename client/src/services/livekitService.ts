@@ -18,23 +18,17 @@ export interface LiveKitServiceOptions {
   onParticipantConnected?: (participant: RemoteParticipant) => void;
   onParticipantDisconnected?: (participant: RemoteParticipant) => void;
   onTrackSubscribed?: (
-    track: MediaStreamTrack,
-    participant: RemoteParticipant,
-    kind: "audio" | "video"
+    track: RemoteTrack,
+    publication: RemoteTrackPublication,
+    participant: RemoteParticipant
   ) => void;
   onTrackUnsubscribed?: (
-    track: MediaStreamTrack,
-    participant: RemoteParticipant,
-    kind: "audio" | "video"
+    track: RemoteTrack,
+    publication: RemoteTrackPublication,
+    participant: RemoteParticipant
   ) => void;
-  onLocalTrackPublished?: (
-    track: MediaStreamTrack,
-    kind: "audio" | "video"
-  ) => void;
-  onLocalTrackUnpublished?: (
-    track: MediaStreamTrack,
-    kind: "audio" | "video"
-  ) => void;
+  onLocalTrackPublished?: (publication: LocalTrackPublication) => void;
+  onLocalTrackUnpublished?: (publication: LocalTrackPublication) => void;
   onConnectionStateChange?: (state: ConnectionState) => void;
   onError?: (error: Error) => void;
 }
@@ -120,19 +114,19 @@ export class LiveKitService {
         this.options?.onParticipantDisconnected?.(p)
       )
       .on(RoomEvent.TrackSubscribed, (track, publication, participant) =>
-        this.handleTrackSubscribed(track, publication, participant)
+        this.options?.onTrackSubscribed?.(track, publication, participant)
       )
       .on(RoomEvent.TrackUnsubscribed, (track, publication, participant) =>
-        this.handleTrackUnsubscribed(track, publication, participant)
+        this.options?.onTrackUnsubscribed?.(track, publication, participant)
       )
       .on(RoomEvent.ConnectionStateChanged, (state) =>
         this.options?.onConnectionStateChange?.(state)
       )
       .on(RoomEvent.LocalTrackPublished, (pub) =>
-        this.handleLocalTrackPublished(pub)
+        this.options?.onLocalTrackPublished?.(pub)
       )
       .on(RoomEvent.LocalTrackUnpublished, (pub) =>
-        this.handleLocalTrackUnpublished(pub)
+        this.options?.onLocalTrackUnpublished?.(pub)
       );
   }
 
@@ -190,53 +184,11 @@ export class LiveKitService {
 
       participant.trackPublications.forEach((pub: RemoteTrackPublication) => {
         if (pub.isSubscribed && pub.track) {
-          this.handleTrackSubscribed(pub.track, pub, participant);
+          this.options?.onTrackSubscribed?.(pub.track, pub, participant);
         }
       });
     }
   }
-
-  private handleTrackSubscribed(
-    track: RemoteTrack,
-    _publication: RemoteTrackPublication,
-    participant: RemoteParticipant
-  ) {
-    if (track.kind === Track.Kind.Video || track.kind === Track.Kind.Audio) {
-      const kind = track.kind === Track.Kind.Video ? "video" : "audio";
-      this.options?.onTrackSubscribed?.(
-        track.mediaStreamTrack,
-        participant,
-        kind
-      );
-    }
-  }
-
-  private handleTrackUnsubscribed(
-    track: RemoteTrack,
-    _publication: RemoteTrackPublication,
-    participant: RemoteParticipant
-  ) {
-    if (track.kind === Track.Kind.Video || track.kind === Track.Kind.Audio) {
-      const kind = track.kind === Track.Kind.Video ? "video" : "audio";
-      this.options?.onTrackUnsubscribed?.(
-        track.mediaStreamTrack,
-        participant,
-        kind
-      );
-    }
-  }
-
-  private handleLocalTrackPublished(pub: LocalTrackPublication) {
-    if (!pub.track) return;
-    const kind = pub.track.kind === Track.Kind.Video ? "video" : "audio";
-    this.options?.onLocalTrackPublished?.(pub.track.mediaStreamTrack, kind);
-  }
-
-  private handleLocalTrackUnpublished(pub: LocalTrackPublication) {
-    if (!pub.track) return;
-    const kind = pub.track.kind === Track.Kind.Video ? "video" : "audio";
-    this.options?.onLocalTrackUnpublished?.(pub.track.mediaStreamTrack, kind);
-  }
 }
-export { RoomEvent };
 
+export { RoomEvent };

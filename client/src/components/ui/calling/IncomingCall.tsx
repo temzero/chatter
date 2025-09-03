@@ -5,16 +5,14 @@ import { BounceLoader } from "react-spinners";
 import { Button } from "../Button";
 import { VideoStream } from "./components/VideoStream";
 import { useCallStore } from "@/stores/callStore/callStore";
-import { useState } from "react";
 
 export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
   const isVideoCall = useCallStore((state) => state.isVideoCall);
+  const isVideoEnabled = useCallStore((state) => state.isVideoEnabled);
   const localVideoStream = useCallStore((state) => state.localVideoStream);
-  const [cameraEnabled, setCameraEnabled] = useState(false);
 
   const acceptCall = () => {
     // Set the camera state before accepting call
-    useCallStore.setState({ isVideoEnabled: cameraEnabled });
     useCallStore.getState().acceptCall();
   };
 
@@ -24,10 +22,10 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
   };
 
   const toggleCamera = async () => {
-    const newCameraState = !cameraEnabled;
-    setCameraEnabled(newCameraState);
+    const newVideoState = !isVideoEnabled;
+    useCallStore.setState({ isVideoEnabled: newVideoState });
 
-    if (newCameraState) {
+    if (newVideoState) {
       // Enable camera - get video stream
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -36,7 +34,7 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
         useCallStore.getState().setLocalVideoStream(stream);
       } catch (error) {
         console.error("Failed to enable camera:", error);
-        setCameraEnabled(false);
+        useCallStore.setState({ isVideoEnabled: false });
       }
     } else {
       // Disable camera - stop video stream
@@ -50,7 +48,7 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
   return (
     <div className="flex flex-col items-center w-full h-full">
       {/* Background - Avatar or Webcam */}
-      {isVideoCall && localVideoStream && cameraEnabled && (
+      {isVideoCall && localVideoStream && isVideoEnabled && (
         <div className="absolute inset-0 overflow-hidden z-0 opacity-70 w-full h-full">
           <VideoStream
             stream={localVideoStream}
@@ -82,12 +80,12 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
             <motion.span
               key={
                 isVideoCall
-                  ? cameraEnabled
+                  ? isVideoEnabled
                     ? "videocam"
                     : "videocam_off"
                   : "call"
               }
-              onClick={acceptCall}
+              onClick={toggleCamera}
               className="material-symbols-outlined text-6xl flex items-center justify-center"
               initial={{ opacity: 0, scale: 0.1 }}
               animate={{
@@ -106,7 +104,7 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
               }}
             >
               {isVideoCall
-                ? cameraEnabled
+                ? isVideoEnabled
                   ? "videocam"
                   : "videocam_off"
                 : "call"}

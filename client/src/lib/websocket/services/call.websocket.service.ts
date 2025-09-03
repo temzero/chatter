@@ -186,43 +186,43 @@ export const callWebSocketService = {
   /**
    * Send WebRTC offer (P2P)
    */
-  sendOffer(payload: RtcOfferRequest) {
-    webSocketService.emit(CallEvent.OFFER_SDP, payload);
+  sendP2POffer(payload: RtcOfferRequest) {
+    webSocketService.emit(CallEvent.P2P_OFFER_SDP, payload);
   },
 
   /**
    * Listen for WebRTC offers (P2P)
    */
-  onOffer(callback: (data: RtcOfferResponse) => void) {
-    webSocketService.on(CallEvent.OFFER_SDP, callback);
+  onP2POffer(callback: (data: RtcOfferResponse) => void) {
+    webSocketService.on(CallEvent.P2P_OFFER_SDP, callback);
   },
 
   /**
    * Remove offer listener (P2P)
    */
-  offOffer(callback: (data: RtcOfferResponse) => void) {
-    webSocketService.off(CallEvent.OFFER_SDP, callback);
+  offP2POffer(callback: (data: RtcOfferResponse) => void) {
+    webSocketService.off(CallEvent.P2P_OFFER_SDP, callback);
   },
 
   /**
    * Send WebRTC answer (P2P)
    */
-  sendAnswer(payload: RtcAnswerRequest) {
-    webSocketService.emit(CallEvent.ANSWER_SDP, payload);
+  sendP2PAnswer(payload: RtcAnswerRequest) {
+    webSocketService.emit(CallEvent.P2P_ANSWER_SDP, payload);
   },
 
   /**
    * Listen for WebRTC answers (P2P)
    */
-  onAnswer(callback: (data: RtcAnswerResponse) => void) {
-    webSocketService.on(CallEvent.ANSWER_SDP, callback);
+  onP2PAnswer(callback: (data: RtcAnswerResponse) => void) {
+    webSocketService.on(CallEvent.P2P_ANSWER_SDP, callback);
   },
 
   /**
    * Remove answer listener (P2P)
    */
-  offAnswer(callback: (data: RtcAnswerResponse) => void) {
-    webSocketService.off(CallEvent.ANSWER_SDP, callback);
+  offP2PAnswer(callback: (data: RtcAnswerResponse) => void) {
+    webSocketService.off(CallEvent.P2P_ANSWER_SDP, callback);
   },
 
   /**
@@ -246,55 +246,6 @@ export const callWebSocketService = {
     webSocketService.off(CallEvent.ICE_CANDIDATE, callback);
   },
 
-  /**
-   * @deprecated Use onOffer instead (P2P)
-   * Listen for WebRTC offers (legacy method)
-   */
-  onRtcOffer(callback: (data: RtcOfferResponse) => void) {
-    webSocketService.on(CallEvent.OFFER_SDP, callback);
-  },
-
-  /**
-   * @deprecated Use offOffer instead (P2P)
-   * Remove RTC offer listener (legacy method)
-   */
-  offRtcOffer(callback: (data: RtcOfferResponse) => void) {
-    webSocketService.off(CallEvent.OFFER_SDP, callback);
-  },
-
-  /**
-   * @deprecated Use onAnswer instead (P2P)
-   * Listen for WebRTC answers (legacy method)
-   */
-  onRtcAnswer(callback: (data: RtcAnswerResponse) => void) {
-    webSocketService.on(CallEvent.ANSWER_SDP, callback);
-  },
-
-  /**
-   * @deprecated Use offAnswer instead (P2P)
-   * Remove RTC answer listener (legacy method)
-   */
-  offRtcAnswer(callback: (data: RtcAnswerResponse) => void) {
-    webSocketService.off(CallEvent.ANSWER_SDP, callback);
-  },
-
-  // ============================
-  // 🎥 SFU-Specific Methods (SFU ONLY)
-  // ============================
-
-  // SFU ICE Candidate methods (SFU)
-  sendSfuIceCandidate(payload: IceCandidateRequest) {
-    webSocketService.emit(CallEvent.SFU_ICE_CANDIDATE, payload);
-  },
-
-  onSfuIceCandidate(callback: (data: IceCandidateResponse) => void) {
-    webSocketService.on(CallEvent.SFU_ICE_CANDIDATE, callback);
-  },
-
-  offSfuIceCandidate(callback: (data: IceCandidateResponse) => void) {
-    webSocketService.off(CallEvent.SFU_ICE_CANDIDATE, callback);
-  },
-
   // ========================
   // 🛠️ Utility Methods
   // ========================
@@ -314,8 +265,8 @@ export const callWebSocketService = {
     webSocketService.off(CallEvent.HANG_UP);
 
     // WebRTC signaling events (P2P + SFU)
-    webSocketService.off(CallEvent.OFFER_SDP); // P2P
-    webSocketService.off(CallEvent.ANSWER_SDP); // P2P
+    webSocketService.off(CallEvent.P2P_OFFER_SDP); // P2P
+    webSocketService.off(CallEvent.P2P_ANSWER_SDP); // P2P
     webSocketService.off(CallEvent.ICE_CANDIDATE); // P2P
     webSocketService.off(CallEvent.SFU_ICE_CANDIDATE); // SFU
   },

@@ -37,21 +37,26 @@ export function useLiveKitListeners() {
           participantName
         );
 
+        if (!token) {
+          console.log("No token generated");
+          return;
+        }
+
         await liveKitService.connect(LIVEKIT_URL, token, {
           audio: true,
           video: true,
           onParticipantConnected: (participant: RemoteParticipant) => {
             console.log("Participant joined", participant.identity);
           },
-          onTrackSubscribed: (track: MediaStreamTrack, participant, kind) => {
-            console.log("Track subscribed:", kind, participant.identity, track);
+          onTrackSubscribed: (track, participant, kind) => {
+            console.log("Track subscribed:", kind, participant, track);
             // attach track to video/audio element here
           },
           onParticipantDisconnected: (participant: RemoteParticipant) => {
             console.log("Participant left", participant.identity);
           },
-          onTrackUnsubscribed: (track: MediaStreamTrack, participant, kind) => {
-            console.log("Track unsubscribed:", kind, participant.identity);
+          onTrackUnsubscribed: (track, participant, kind) => {
+            console.log("Track unsubscribed:", track, kind, participant);
           },
           onError: (err) => console.error("LiveKit error:", err),
         });

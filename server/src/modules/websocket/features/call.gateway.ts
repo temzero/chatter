@@ -293,8 +293,8 @@ export class CallGateway {
     );
   }
 
-  @SubscribeMessage(CallEvent.OFFER_SDP)
-  async handleRtcOffer(
+  @SubscribeMessage(CallEvent.P2P_OFFER_SDP)
+  async handleP2PWebRtcOffer(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: RtcOfferRequest,
   ) {
@@ -312,13 +312,13 @@ export class CallGateway {
 
     await this.websocketNotificationService.emitToChatMembers(
       payload.chatId,
-      CallEvent.OFFER_SDP,
+      CallEvent.P2P_OFFER_SDP,
       response,
       { senderId: userId, excludeSender: true },
     );
   }
 
-  @SubscribeMessage(CallEvent.ANSWER_SDP)
+  @SubscribeMessage(CallEvent.P2P_ANSWER_SDP)
   async handleRtcAnswer(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: RtcAnswerRequest,
@@ -338,7 +338,7 @@ export class CallGateway {
 
     await this.websocketNotificationService.emitToChatMembers(
       payload.chatId,
-      CallEvent.ANSWER_SDP,
+      CallEvent.P2P_ANSWER_SDP,
       response,
     );
   }

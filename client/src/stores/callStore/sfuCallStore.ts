@@ -6,8 +6,8 @@ import { useCallStore } from "./callStore";
 import {
   RemoteParticipant,
   Track,
-  RemoteTrack,
   RemoteTrackPublication,
+  RemoteTrack,
 } from "livekit-client";
 import { CallStatus } from "@/types/enums/CallStatus";
 import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
@@ -16,6 +16,14 @@ import { getMyChatMember, getMyChatMemberId } from "../chatMemberStore";
 import { toast } from "react-toastify";
 import { ModalType, useModalStore } from "../modalStore";
 import { handleError } from "@/utils/handleError";
+import {
+  getMicStream,
+  stopMicStream,
+  getVideoStream,
+  stopVideoStream,
+  getScreenStream,
+  stopScreenStream,
+} from "@/utils/webRtc/localStream.Utils";
 
 export interface SFUState {
   liveKitService: LiveKitService | null;
@@ -71,19 +79,11 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
       toast.info(`initializeSFUCall, isVideoCall: ${isVideoCall}`);
 
       try {
-        // 1. Request media permissions FIRST
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-          video: isVideoCall,
-        });
+        // 1. Request media permissions FIRST: isVideoCall,
+        const voiceStream = await getMicStream();
+        const videoStream = isVideoCall ? await getVideoStream() : null;
 
-        // 2. Split streams
-        const voiceStream = new MediaStream(stream.getAudioTracks());
-        const videoStream = isVideoCall
-          ? new MediaStream(stream.getVideoTracks())
-          : null;
-
-        // 3. Update base store with ALL necessary state
+        // 2. Update base store with ALL necessary state
         useCallStore.setState({
           localVoiceStream: voiceStream,
           localVideoStream: videoStream,
@@ -94,10 +94,10 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
           callStatus: CallStatus.OUTGOING,
         });
 
-        // 4. OPEN MODAL ONLY AFTER SUCCESS
+        // 3. OPEN MODAL ONLY AFTER SUCCESS
         useModalStore.getState().openModal(ModalType.CALL);
 
-        // 5. Set timeout
+        // 4. Set timeout
         const timeoutRef = setTimeout(() => {
           const { callStatus } = useCallStore.getState();
           if (callStatus === CallStatus.OUTGOING) {
@@ -109,11 +109,11 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
 
         useCallStore.setState({ timeoutRef });
 
-        // 6. Initialize LiveKit service
+        // 5. Initialize LiveKit service
         const liveKitService = new LiveKitService();
         set({ liveKitService });
 
-        // 7. Generate token for LiveKit room
+        // 6. Generate token for LiveKit room
         const myChatMember = getMyChatMember(chatId);
         const participantName =
           myChatMember?.nickname ||
@@ -130,10 +130,10 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
 
         const url = import.meta.env.VITE_LIVEKIT_URL;
 
-        // 8. Connect to LiveKit SFU
+        // 7. Connect to LiveKit SFU
         await get().connectToSFURoom(token, url);
 
-        // 9. AFTER SUCCESSFUL CONNECTION: send the call signal
+        // 8. AFTER SUCCESSFUL CONNECTION: send the call signal
         callWebSocketService.initiateCall({
           chatId,
           isVideoCall: isVideoCall,
@@ -154,43 +154,40 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
     },
 
     acceptSFUCall: async () => {
-      const { chatId, isVideoCall } = useCallStore.getState();
+      const { chatId, isVideoCall, isVideoEnabled } = useCallStore.getState();
+      const isOpenVideoTrack = isVideoCall && isVideoEnabled;
 
       try {
         // Clean up existing streams
         useCallStore.getState().cleanupStreams();
 
-        // Get fresh media streams
-        const stream = await navigator.mediaDevices
-          .getUserMedia({
-            audio: {
-              echoCancellation: true,
-              noiseSuppression: true,
-            },
-            video: isVideoCall
-              ? {
-                  width: { ideal: 1280 },
-                  height: { ideal: 720 },
-                  facingMode: "user",
-                }
-              : false,
-          })
-          .catch(async (error) => {
+        // Get fresh media streams using utility functions
+        const voiceStream = await getMicStream().catch(async (error) => {
+          if (error.name === "NotReadableError") {
+            toast.warning("Microphone in use. Trying alternative settings...");
+            // Fallback to simpler audio constraints
+            const fallbackStream = await navigator.mediaDevices.getUserMedia({
+              audio: true,
+            });
+            return new MediaStream(fallbackStream.getAudioTracks());
+          }
+          throw error;
+        });
+
+        let videoStream: MediaStream | null = null;
+        if (isOpenVideoTrack) {
+          videoStream = await getVideoStream().catch(async (error) => {
             if (error.name === "NotReadableError") {
-              toast.warning("Device in use. Trying alternative settings...");
-              return await navigator.mediaDevices.getUserMedia({
-                audio: true,
-                video: isVideoCall,
+              toast.warning("Camera in use. Trying alternative settings...");
+              // Fallback to simpler video constraints
+              const fallbackStream = await navigator.mediaDevices.getUserMedia({
+                video: true,
               });
+              return new MediaStream(fallbackStream.getVideoTracks());
             }
             throw error;
           });
-
-        // Split streams into audio and video
-        const voiceStream = new MediaStream(stream.getAudioTracks());
-        const videoStream = isVideoCall
-          ? new MediaStream(stream.getVideoTracks())
-          : null;
+        }
 
         // Update base store
         useCallStore.getState().setLocalVoiceStream(voiceStream);
@@ -278,11 +275,11 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
           },
         });
 
-        useCallStore.getState().setCallStatus(CallStatus.CONNECTED);
+        // Setup local stream after connecting
+        await useCallStore.getState().setupLocalStream();
       } catch (error) {
         console.error("Failed to connect to SFU room:", error);
         useCallStore.getState().setCallStatus(CallStatus.ERROR);
-        throw error;
       }
     },
 
@@ -381,10 +378,10 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
 
       const mediaStream = new MediaStream([track.mediaStreamTrack]);
 
-      if (track.kind === "audio") {
+      if (track.kind === Track.Kind.Audio) {
         updates.voiceStream = mediaStream;
         updates.isMuted = false;
-      } else if (track.kind === "video") {
+      } else if (track.kind === Track.Kind.Video) {
         if (publication.source === Track.Source.ScreenShare) {
           updates.screenStream = mediaStream;
           updates.isScreenSharing = true;
@@ -417,10 +414,10 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
         memberId: participant.identity,
       } as Partial<SFUCallMember> & { memberId: string };
 
-      if (track.kind === "audio") {
+      if (track.kind === Track.Kind.Audio) {
         updates.voiceStream = null;
         updates.isMuted = true;
-      } else if (track.kind === "video") {
+      } else if (track.kind === Track.Kind.Video) {
         if (publication.source === Track.Source.ScreenShare) {
           updates.screenStream = null;
           updates.isScreenSharing = false;
@@ -444,8 +441,8 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
 
     // ========== MEDIA CONTROLS ==========
     toggleAudio: async () => {
-      const { liveKitService } = get();
       const { chatId, isMuted, localVoiceStream } = useCallStore.getState();
+      const { liveKitService } = get();
       const myMemberId = getMyChatMemberId(chatId!);
 
       if (!liveKitService || !chatId || !myMemberId) return;
@@ -453,14 +450,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
       try {
         if (isMuted) {
           // 🔊 OPEN mic
-          const stream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-              echoCancellation: true,
-              noiseSuppression: true,
-            },
-          });
-
-          const voiceStream = new MediaStream(stream.getAudioTracks());
+          const voiceStream = await getMicStream();
           await liveKitService.toggleAudio(true);
 
           useCallStore.setState({
@@ -469,7 +459,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
           });
 
           callWebSocketService.updateCallMember({
-            chatId: chatId!,
+            chatId,
             memberId: myMemberId,
             isMuted: false,
           });
@@ -477,9 +467,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
           // 🔇 CLOSE mic
           await liveKitService.toggleAudio(false);
 
-          if (localVoiceStream) {
-            localVoiceStream.getTracks().forEach((track) => track.stop());
-          }
+          stopMicStream(localVoiceStream);
 
           useCallStore.setState({
             isMuted: true,
@@ -487,7 +475,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
           });
 
           callWebSocketService.updateCallMember({
-            chatId: chatId!,
+            chatId,
             memberId: myMemberId,
             isMuted: true,
           });
@@ -496,17 +484,81 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
         console.error("Error in toggleAudio:", error);
         useCallStore.setState({ isMuted });
         callWebSocketService.updateCallMember({
-          chatId: chatId!,
+          chatId,
           memberId: myMemberId,
           isMuted,
         });
       }
     },
 
+    // toggleVideo: async () => {
+    //   const { liveKitService } = get();
+    //   const { chatId, isVideoEnabled, localVideoStream } =
+    //     useCallStore.getState();
+    //   const myMemberId = getMyChatMemberId(chatId!);
+
+    //   if (!liveKitService || !chatId || !myMemberId) return;
+
+    //   try {
+    //     if (!isVideoEnabled) {
+    //       // 🎥 TURN ON camera
+    //       const stream = await navigator.mediaDevices.getUserMedia({
+    //         video: {
+    //           width: { ideal: 1280 },
+    //           height: { ideal: 720 },
+    //           facingMode: "user",
+    //         },
+    //       });
+
+    //       const videoStream = new MediaStream(stream.getVideoTracks());
+    //       await liveKitService.toggleVideo(true);
+
+    //       useCallStore.setState({
+    //         isVideoEnabled: true,
+    //         localVideoStream: videoStream,
+    //       });
+
+    //       callWebSocketService.updateCallMember({
+    //         chatId: chatId!,
+    //         memberId: myMemberId,
+    //         isVideoEnabled: true,
+    //       });
+    //     } else {
+    //       // 📷 TURN OFF camera
+    //       await liveKitService.toggleVideo(false);
+
+    //       if (localVideoStream) {
+    //         localVideoStream.getTracks().forEach((track) => track.stop());
+    //       }
+
+    //       useCallStore.setState({
+    //         isVideoEnabled: false,
+    //         localVideoStream: null,
+    //       });
+
+    //       callWebSocketService.updateCallMember({
+    //         chatId: chatId!,
+    //         memberId: myMemberId,
+    //         isVideoEnabled: false,
+    //       });
+    //     }
+    //   } catch (error) {
+    //     console.error("Error in toggleVideo:", error);
+    //     useCallStore.setState({
+    //       isVideoEnabled,
+    //       localVideoStream,
+    //     });
+    //     callWebSocketService.updateCallMember({
+    //       chatId: chatId!,
+    //       memberId: myMemberId,
+    //       isVideoEnabled,
+    //     });
+    //   }
+    // },
     toggleVideo: async () => {
-      const { liveKitService } = get();
       const { chatId, isVideoEnabled, localVideoStream } =
         useCallStore.getState();
+      const { liveKitService } = get();
       const myMemberId = getMyChatMemberId(chatId!);
 
       if (!liveKitService || !chatId || !myMemberId) return;
@@ -514,15 +566,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
       try {
         if (!isVideoEnabled) {
           // 🎥 TURN ON camera
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-              width: { ideal: 1280 },
-              height: { ideal: 720 },
-              facingMode: "user",
-            },
-          });
-
-          const videoStream = new MediaStream(stream.getVideoTracks());
+          const videoStream = await getVideoStream();
           await liveKitService.toggleVideo(true);
 
           useCallStore.setState({
@@ -531,7 +575,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
           });
 
           callWebSocketService.updateCallMember({
-            chatId: chatId!,
+            chatId,
             memberId: myMemberId,
             isVideoEnabled: true,
           });
@@ -539,9 +583,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
           // 📷 TURN OFF camera
           await liveKitService.toggleVideo(false);
 
-          if (localVideoStream) {
-            localVideoStream.getTracks().forEach((track) => track.stop());
-          }
+          stopVideoStream(localVideoStream);
 
           useCallStore.setState({
             isVideoEnabled: false,
@@ -549,19 +591,16 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
           });
 
           callWebSocketService.updateCallMember({
-            chatId: chatId!,
+            chatId,
             memberId: myMemberId,
             isVideoEnabled: false,
           });
         }
       } catch (error) {
-        console.error("Error in toggleVideo:", error);
-        useCallStore.setState({
-          isVideoEnabled,
-          localVideoStream,
-        });
+        console.error("Error in toggleVideo (SFU):", error);
+        useCallStore.setState({ isVideoEnabled, localVideoStream });
         callWebSocketService.updateCallMember({
-          chatId: chatId!,
+          chatId,
           memberId: myMemberId,
           isVideoEnabled,
         });
@@ -579,10 +618,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
       try {
         if (!isScreenSharing) {
           // Start screen sharing
-          const screenStream = await navigator.mediaDevices.getDisplayMedia({
-            video: true,
-            audio: true,
-          });
+          const screenStream = await getScreenStream();
 
           await liveKitService.toggleScreenShare(true);
 
@@ -591,13 +627,13 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
             localScreenStream: screenStream,
           });
 
-          // Handle browser UI stop
+          // Handle browser UI stop (when user clicks "Stop Sharing")
           screenStream.getTracks().forEach((track) => {
             track.onended = () => get().toggleScreenShare();
           });
 
           callWebSocketService.updateCallMember({
-            chatId: chatId!,
+            chatId,
             memberId: myMemberId,
             isScreenSharing: true,
           });
@@ -605,9 +641,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
           // Stop screen sharing
           await liveKitService.toggleScreenShare(false);
 
-          if (localScreenStream) {
-            localScreenStream.getTracks().forEach((track) => track.stop());
-          }
+          stopScreenStream(localScreenStream);
 
           useCallStore.setState({
             isScreenSharing: false,
@@ -615,7 +649,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
           });
 
           callWebSocketService.updateCallMember({
-            chatId: chatId!,
+            chatId,
             memberId: myMemberId,
             isScreenSharing: false,
           });
@@ -623,11 +657,11 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
       } catch (error) {
         console.error("Error toggling screen share:", error);
         useCallStore.setState({
-          isScreenSharing: isScreenSharing,
-          localScreenStream: localScreenStream,
+          isScreenSharing,
+          localScreenStream,
         });
         callWebSocketService.updateCallMember({
-          chatId: chatId!,
+          chatId,
           memberId: myMemberId,
           isScreenSharing,
         });
@@ -640,25 +674,16 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
       const { localVoiceStream, localVideoStream, localScreenStream } =
         useCallStore.getState();
 
-      // Helper to stop tracks
-      const stopAllTracks = (stream: MediaStream | null | undefined) => {
-        if (!stream) return;
-        stream.getTracks().forEach((track) => {
-          track.stop();
-          track.enabled = false;
-        });
-      };
-
-      // Clean up local streams
-      stopAllTracks(localVoiceStream);
-      stopAllTracks(localVideoStream);
-      stopAllTracks(localScreenStream);
+      // Clean up local streams using utility functions
+      stopMicStream(localVoiceStream);
+      stopVideoStream(localVideoStream);
+      stopScreenStream(localScreenStream);
 
       // Clean up all member streams
       sfuMembers.forEach((member) => {
-        stopAllTracks(member.voiceStream);
-        stopAllTracks(member.videoStream);
-        stopAllTracks(member.screenStream);
+        stopMicStream(member.voiceStream);
+        stopVideoStream(member.videoStream);
+        stopScreenStream(member.screenStream);
       });
 
       // Disconnect from SFU

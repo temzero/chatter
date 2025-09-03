@@ -11,6 +11,7 @@ import {
 } from "@/types/store/callMember.type";
 import { useModalStore } from "../modalStore";
 import { audioService } from "@/services/audio.service";
+import { handleError } from "@/utils/handleError";
 
 export interface CallState {
   // Call metadata
@@ -65,15 +66,13 @@ export interface CallActions {
   toggleLocalVoice: () => void;
   toggleLocalVideo: () => Promise<void>;
   toggleLocalScreenShare: () => Promise<void>;
-
-  // Media setup/cleanup
-  setupLocalStream: () => Promise<void>;
-  cleanupStreams: () => void;
-
+  
   // Local stream management
+  setupLocalStream: () => Promise<void>;
   setLocalVoiceStream: (stream: MediaStream | null) => void;
   setLocalVideoStream: (stream: MediaStream | null) => void;
   setLocalScreenStream: (stream: MediaStream | null) => void;
+  cleanupStreams: () => void;
 
   setIsMuted: (isMuted: boolean) => void;
   setIsVideoEnable: (isMuted: boolean) => void;
@@ -195,17 +194,53 @@ export const useCallStore = create<CallState & CallActions>()(
       }
     },
 
+    // In your callStore.ts
     setupLocalStream: async () => {
       try {
+        // Stop any existing tracks first
+        const { localVoiceStream, localVideoStream, localScreenStream } = get();
+        localVoiceStream?.getTracks().forEach((track) => track.stop());
+        localVideoStream?.getTracks().forEach((track) => track.stop());
+        localScreenStream?.getTracks().forEach((track) => track.stop());
+
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: true,
           video: get().isVideoCall,
         });
-        set({ localVoiceStream: stream, localVideoStream: stream });
+
+        // Create separate streams for audio and video
+        const audioStream = new MediaStream();
+        const videoStream = new MediaStream();
+
+        // Separate audio and video tracks
+        stream.getAudioTracks().forEach((track) => audioStream.addTrack(track));
+        stream.getVideoTracks().forEach((track) => videoStream.addTrack(track));
+
+        set({
+          localVoiceStream: audioStream,
+          localVideoStream: get().isVideoCall ? videoStream : null,
+          isVideoEnabled:
+            get().isVideoCall && videoStream.getVideoTracks().length > 0,
+        });
       } catch (error) {
-        console.error("Failed to setup local stream:", error);
         set({ error: "permission_denied" });
+        handleError(
+          error,
+          "Audio/video device is busy. Please close other applications using your microphone/camera."
+        );
       }
+    },
+
+    setLocalVoiceStream: (stream: MediaStream | null) => {
+      set({ localVoiceStream: stream });
+    },
+
+    setLocalVideoStream: (stream: MediaStream | null) => {
+      set({ localVideoStream: stream });
+    },
+
+    setLocalScreenStream: (stream: MediaStream | null) => {
+      set({ localScreenStream: stream });
     },
 
     cleanupStreams: () => {
@@ -222,18 +257,6 @@ export const useCallStore = create<CallState & CallActions>()(
         isVideoEnabled: false,
         isScreenSharing: false,
       });
-    },
-
-    setLocalVoiceStream: (stream: MediaStream | null) => {
-      set({ localVoiceStream: stream });
-    },
-
-    setLocalVideoStream: (stream: MediaStream | null) => {
-      set({ localVideoStream: stream });
-    },
-
-    setLocalScreenStream: (stream: MediaStream | null) => {
-      set({ localScreenStream: stream });
     },
 
     setIsMuted: (isMuted: boolean) => set({ isMuted }),

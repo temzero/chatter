@@ -8,18 +8,16 @@ export const ConnectingCall = ({ chat }: { chat: ChatResponse }) => {
   const { isVideoCall } = useCallStore();
 
   return (
-    <div className="flex flex-col items-center justify-center w-full h-full gap-8">
+    <div className="flex flex-col items-center justify-center w-full h-full gap-4">
       {/* Header (avatar + chat name) */}
       <CallHeader chat={chat} />
-
-      {/* Status text */}
-      <p className="text-gray-400 text-sm">
-        Connecting {isVideoCall ? "video" : "voice"} call...
-      </p>
-
-      {/* Loader animation */}
-
-      <BeatLoader color="#808080" margin={6} size={10} />
+      <div className="flex flex-col items-center gap-2 mt-8">
+        <BeatLoader color="#808080" margin={6} size={10} />
+        {/* Status text */}
+        <p className="text-gray-400 text-sm">
+          Connecting {isVideoCall ? "video" : "voice"} call...
+        </p>
+      </div>
 
       {/* Optional: hang up button */}
       <button
