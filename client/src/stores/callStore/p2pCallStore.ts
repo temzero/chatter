@@ -133,6 +133,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
     acceptP2PCall: async () => {
       const { chatId, isVideoCall, isVideoEnabled } = useCallStore.getState();
       const isOpenVideoTrack = isVideoCall && isVideoEnabled;
+      console.log("accept P2P CALL");
 
       try {
         // Clean up existing streams
@@ -176,15 +177,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         if (callerMemberId && !get().getP2PMember(callerMemberId)) {
           get().addP2PMember({
             memberId: callerMemberId,
-            peerConnection: null,
-            voiceStream: null,
-            videoStream: null,
-            screenStream: null,
-            isMuted: false,
-            isVideoEnabled: false,
-            isScreenSharing: false,
           });
-          get().createPeerConnection(callerMemberId);
         }
 
         // Send acceptance via WebSocket
@@ -250,11 +243,17 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
       });
     },
 
+    getP2PMember: (memberId: string) => {
+      return get().p2pMembers.find((member) => member.memberId === memberId);
+    },
+
     addP2PMember: (member: P2PCallMember) => {
       const { localVoiceStream, localVideoStream } = useCallStore.getState();
+      console.log("addP2PMember");
 
-      // 1. Create peer connection for the new member
-      const pc = get().createPeerConnection(member.memberId);
+      // 1. Use given pc or create one
+      const pc =
+        member.peerConnection ?? get().createPeerConnection(member.memberId);
 
       // 2. Add any pending ICE candidates to the new connection
       get().iceCandidates.forEach((candidate) => {
@@ -289,17 +288,39 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
           {
             ...member,
             peerConnection: pc,
-            voiceStream: null,
-            videoStream: null,
-            screenStream: null,
-            isMuted: false,
-            isVideoEnabled: false,
-            isScreenSharing: false,
+            voiceStream: member.voiceStream ?? null,
+            videoStream: member.videoStream ?? null,
+            screenStream: member.screenStream ?? null,
+            isMuted: member.isMuted ?? false,
+            isVideoEnabled: member.isVideoEnabled ?? false,
+            isScreenSharing: member.isScreenSharing ?? false,
             joinedAt: Date.now(),
             lastActivity: Date.now(),
           },
         ],
       }));
+    },
+
+    updateP2PMember: (
+      member: Partial<P2PCallMember> & { memberId: string }
+    ) => {
+      set((state) => {
+        const updatedMembers = state.p2pMembers.map((m) =>
+          m.memberId === member.memberId
+            ? {
+                ...m,
+                ...Object.fromEntries(
+                  Object.entries(member).filter(
+                    ([, value]) => value !== undefined
+                  )
+                ),
+                lastActivity: Date.now(),
+              }
+            : m
+        );
+
+        return { p2pMembers: updatedMembers };
+      });
     },
 
     removeP2PMember: (memberId: string) => {
@@ -330,33 +351,6 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
       }
     },
 
-    updateP2PMember: (
-      member: Partial<P2PCallMember> & { memberId: string }
-    ) => {
-      set((state) => {
-        const includeIfDefined = <T>(value: T | undefined, key: string) =>
-          value !== undefined ? { [key]: value } : {};
-
-        const updatedMembers = state.p2pMembers.map((m) =>
-          m.memberId === member.memberId
-            ? {
-                ...m,
-                ...includeIfDefined(member.isMuted, "isMuted"),
-                ...includeIfDefined(member.isVideoEnabled, "isVideoEnabled"),
-                ...includeIfDefined(member.isScreenSharing, "isScreenSharing"),
-                lastActivity: Date.now(),
-              }
-            : m
-        );
-
-        return { p2pMembers: updatedMembers };
-      });
-    },
-
-    getP2PMember: (memberId: string) => {
-      return get().p2pMembers.find((member) => member.memberId === memberId);
-    },
-
     createPeerConnection: (memberId: string) => {
       const { chatId, localVoiceStream, localVideoStream, localScreenStream } =
         useCallStore.getState();
@@ -365,12 +359,12 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         iceServers: [
           { urls: "stun:stun.l.google.com:19302" },
           { urls: "stun:stun1.l.google.com:19302" },
-          // Add your TURN servers here
+          // TODO: add TURN for production
         ],
         iceTransportPolicy: "all",
       });
 
-      // ICE Candidate Handling
+      // === ICE Candidate Handling ===
       pc.onicecandidate = (event) => {
         if (event.candidate && chatId) {
           callWebSocketService.sendIceCandidate({
@@ -380,12 +374,17 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         }
       };
 
-      // Track Handling
+      // === Remote Tracks Handling ===
       pc.ontrack = (event) => {
+        console.log(`📥 ontrack for ${memberId}:`, {
+          track: event.track,
+          streams: event.streams,
+          kind: event.track.kind,
+        });
         get().handleMemberRemoteStream(memberId, event);
       };
 
-      // Connection Monitoring
+      // === Connection Monitoring ===
       pc.onconnectionstatechange = () => {
         switch (pc.connectionState) {
           case "connected":
@@ -403,10 +402,10 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         }
       };
 
-      // Add local media
+      // === Add Local Media Tracks ===
       if (localVoiceStream) {
         localVoiceStream.getAudioTracks().forEach((track) => {
-          if (!pc.getSenders().some((s) => s.track === track)) {
+          if (!pc.getSenders().some((s) => s.track?.id === track.id)) {
             pc.addTrack(track, localVoiceStream);
           }
         });
@@ -414,7 +413,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
 
       if (localVideoStream) {
         localVideoStream.getVideoTracks().forEach((track) => {
-          if (!pc.getSenders().some((s) => s.track === track)) {
+          if (!pc.getSenders().some((s) => s.track?.id === track.id)) {
             pc.addTrack(track, localVideoStream);
           }
         });
@@ -422,20 +421,17 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
 
       if (localScreenStream) {
         localScreenStream.getTracks().forEach((track) => {
-          if (!pc.getSenders().some((s) => s.track === track)) {
+          if (!pc.getSenders().some((s) => s.track?.id === track.id)) {
             pc.addTrack(track, localScreenStream);
           }
         });
       }
 
-      // Store connection in the member's peerConnection
+      // === Save connection in store ===
       set((state) => ({
         p2pMembers: state.p2pMembers.map((member) =>
           member.memberId === memberId
-            ? {
-                ...member,
-                peerConnection: pc,
-              }
+            ? { ...member, peerConnection: pc }
             : member
         ),
       }));
@@ -697,6 +693,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
     sendP2POffer: async (toMemberId: string) => {
       const { chatId } = useCallStore.getState();
       const myMemberId = getMyChatMemberId(chatId!);
+      console.log("sendP2POffer", toMemberId);
 
       if (!myMemberId)
         throw new Error("Cannot send offer - no member ID found");
@@ -704,14 +701,14 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         throw new Error("Cannot send offer - no active chat session");
 
       try {
+        // 1. Create peer connection (tracks already added inside)
         const pc = get().createPeerConnection(toMemberId);
-        const offer = await pc.createOffer({
-          offerToReceiveAudio: true,
-          offerToReceiveVideo: true,
-        });
 
+        // 2. Create offer
+        const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
 
+        // 3. Send offer to callee
         callWebSocketService.sendP2POffer({
           chatId,
           offer,

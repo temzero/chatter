@@ -92,7 +92,7 @@ const CallMember = ({
           <VoiceStream stream={member.voiceStream} muted={member.isMuted} />
 
           {/* Voice visualizer (bars) */}
-          {showVoiceVisualizer && member.voiceStream && (
+          {showVoiceVisualizer && member.voiceStream && !member.isMuted && (
             <VoiceVisualizerBar
               stream={member.voiceStream}
               isMuted={member.isMuted}

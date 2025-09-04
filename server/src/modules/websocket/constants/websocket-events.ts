@@ -55,8 +55,8 @@ export const enum CallEvent {
 
   // ============ PRIMARILY FOR P2P DIRECT CALLS ============
   // WebRTC signaling events (direct peer-to-peer connection)
-  P2P_OFFER_SDP = 'call:p2p_offer', // 🔗 P2P: WebRTC offer for direct connection
-  P2P_ANSWER_SDP = 'call:p2p_answer', // 🔗 P2P: WebRTC answer for direct connection
+  P2P_OFFER_SDP = 'call:p2p-offer', // 🔗 P2P: WebRTC offer for direct connection
+  P2P_ANSWER_SDP = 'call:p2p-answer', // 🔗 P2P: WebRTC answer for direct connection
   ICE_CANDIDATE = 'call:ice-candidate', // 🔗 P2P: ICE candidates for NAT traversal
 
   // ============ PRIMARILY FOR SFU GROUP CALLS ============

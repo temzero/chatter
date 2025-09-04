@@ -21,7 +21,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ chat, messages }) => {
   const currentUser = useCurrentUser();
   const rawMembers = useActiveMembers();
   const members = useMemo(() => rawMembers || [], [rawMembers]);
-  console.log("Messages: ", messages);
+  // console.log("Messages: ", messages);
   const myMember = useMemo(
     () => members.find((m) => m.id === chat.myMemberId),
     [members, chat.myMemberId]

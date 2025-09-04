@@ -66,7 +66,7 @@ export interface CallActions {
   toggleLocalVoice: () => void;
   toggleLocalVideo: () => Promise<void>;
   toggleLocalScreenShare: () => Promise<void>;
-  
+
   // Local stream management
   setupLocalStream: () => Promise<void>;
   setLocalVoiceStream: (stream: MediaStream | null) => void;
@@ -103,6 +103,7 @@ export const useCallStore = create<CallState & CallActions>()(
 
     // ========== CORE ACTIONS ==========
     startCall: async (chatId: string, isVideo: boolean, isGroup: boolean) => {
+      get().cleanupStreams();
       try {
         if (isGroup) {
           await useSFUCallStore.getState().initializeSFUCall(chatId, isVideo);

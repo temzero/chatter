@@ -6,7 +6,7 @@ export const useWebSocket = () => {
   useEffect(() => {
     // Connect to the server
     webSocketService.connect().then((socket) => {
-      console.log("[WS] 🔌 Connected? ", socket.connected);
+      // console.log("[WS] 🔌 Connected? ", socket.connected);
 
       // Listen to server-emitted errors
       // socket.on("error", (error) => {

@@ -116,19 +116,22 @@ export function useCallSocketListeners() {
       if (callStore.chatId !== data.chatId) return;
 
       try {
-        // Add the accepted member to the call
+        // Add the accepted member
         callStore.addCallMember({
           memberId: data.fromMemberId,
-          // You might want to fetch member details from your backend
         });
 
         toast.info(`${data.fromMemberId} joined the call`);
 
-        // If this is the first participant joining, update UI state
-        callStore.setCallStatus(CallStatus.CONNECTED);
+        // ✅ Caller should send the initial P2P offer now
+        if (!callStore.isGroupCall) {
+          const p2pStore = useP2PCallStore.getState();
+          await p2pStore.sendP2POffer(data.fromMemberId);
+        }
+
+        callStore.setCallStatus(CallStatus.CONNECTING);
       } catch (err) {
         console.error("Failed to handle call acceptance:", err);
-        // Don't end the call entirely for one member failure
         toast.error(`Failed to add ${data.fromMemberId} to call`);
       }
     };
@@ -176,6 +179,7 @@ export function useCallSocketListeners() {
     }: RtcOfferResponse) => {
       const callStore = useCallStore.getState();
       const chatType = useChatStore.getState().getChatType(chatId);
+      console.log("send P2PWebRtcOffer");
 
       if (callStore.chatId !== chatId) return;
 
@@ -189,14 +193,12 @@ export function useCallSocketListeners() {
           // ✅ If member doesn't exist OR has no connection, create one
           if (!member || !member.peerConnection) {
             const pc = p2pStore.createPeerConnection(fromMemberId);
-
             if (!member) {
               p2pStore.addP2PMember({
                 memberId: fromMemberId,
                 peerConnection: pc,
               });
             } else {
-              // Update existing member with new connection
               p2pStore.updateP2PMember({
                 memberId: fromMemberId,
                 peerConnection: pc,
@@ -216,7 +218,7 @@ export function useCallSocketListeners() {
     };
 
     const handleP2PWebRtcAnswer = async (data: RtcAnswerResponse) => {
-      console.log("HandleAnswer");
+      console.log("HandleP2PAnswer");
       const callStore = useCallStore.getState();
 
       // Only handle answers for the current call

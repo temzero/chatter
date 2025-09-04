@@ -11,7 +11,7 @@ const LIVEKIT_URL = import.meta.env.VITE_LIVEKIT_URL;
 let singletonService: LiveKitService | null = null;
 
 export function useLiveKitListeners() {
-  const { chatId, callStatus } = useCallStore();
+  const { chatId, callStatus, isGroupCall } = useCallStore();
 
   const liveKitService = useMemo(() => {
     if (!singletonService) {
@@ -22,7 +22,8 @@ export function useLiveKitListeners() {
 
   useEffect(() => {
     async function init() {
-      if (!chatId || callStatus !== CallStatus.CONNECTED) return;
+      if (!chatId || callStatus !== CallStatus.CONNECTED || !isGroupCall)
+        return;
 
       try {
         const roomName = chatId; // Using chatId as room name
@@ -70,7 +71,7 @@ export function useLiveKitListeners() {
     return () => {
       liveKitService.disconnect();
     };
-  }, [chatId, callStatus, liveKitService]);
+  }, [chatId, callStatus, liveKitService, isGroupCall]);
 
   return liveKitService;
 }
