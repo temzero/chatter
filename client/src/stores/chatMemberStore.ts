@@ -18,8 +18,13 @@ interface ChatMemberStore {
   error: string | null;
 
   fetchChatMembers: (chatId: string, type: ChatType) => Promise<ChatMember[]>;
-  getChatMember: (
+  getChatMemberById: (
     memberId: string,
+    fetchIfMissing?: boolean
+  ) => ChatMember | undefined | Promise<ChatMember | undefined>;
+  getChatMemberByUserIdAndChatId: (
+    chatId: string,
+    userId: string,
     fetchIfMissing?: boolean
   ) => ChatMember | undefined | Promise<ChatMember | undefined>;
   getChatMemberUserIds: (chatId: string, type: ChatType) => string[];
@@ -89,8 +94,10 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
     }
   },
 
-  // In your store
-  getChatMember: async (memberId: string, fetchIfMissing: boolean = false) => {
+  getChatMemberById: async (
+    memberId: string,
+    fetchIfMissing: boolean = false
+  ) => {
     const { chatMembers } = get();
     // Use a more efficient lookup
     const member = Object.values(chatMembers)
@@ -100,6 +107,39 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
     if (!member && fetchIfMissing) {
       try {
         return await chatMemberService.fetchMemberById(memberId);
+      } catch (error) {
+        console.error("Failed to fetch member:", error);
+        return undefined;
+      }
+    }
+
+    return member;
+  },
+
+  getChatMemberByUserIdAndChatId: async (
+    chatId: string,
+    userId: string,
+    fetchIfMissing: boolean = false
+  ) => {
+    const { chatMembers } = get();
+    const members = chatMembers[chatId] || [];
+    let member = members.find((m) => m.userId === userId);
+
+    if (!member && fetchIfMissing) {
+      try {
+        const fetchedMember =
+          await chatMemberService.fetchMemberByChatIdAndUserId(chatId, userId);
+
+        if (fetchedMember) {
+          set((state) => ({
+            chatMembers: {
+              ...state.chatMembers,
+              [chatId]: [...(state.chatMembers[chatId] || []), fetchedMember],
+            },
+          }));
+        }
+
+        member = fetchedMember;
       } catch (error) {
         console.error("Failed to fetch member:", error);
         return undefined;
@@ -331,19 +371,32 @@ export const useMembersByChatId = (
   );
 };
 
-export const getMyChatMember = (
-  chatId?: string
-): ChatMember | undefined | null => {
+export const getMyChatMember = async (
+  chatId?: string,
+  fetchIfMissing: boolean = true
+): Promise<ChatMember | undefined | null> => {
   if (!chatId) return null;
+
   const currentUserId = useAuthStore.getState().currentUser?.id;
-  const members = useChatMemberStore.getState().chatMembers[chatId] || [];
-  return members.find((m) => m.userId === currentUserId);
+  if (!currentUserId) return null;
+
+  return await useChatMemberStore
+    .getState()
+    .getChatMemberByUserIdAndChatId(chatId, currentUserId, fetchIfMissing);
 };
 
-export const getMyChatMemberId = (chatId: string): string | undefined => {
+export const getMyChatMemberId = async (
+  chatId: string,
+  fetchIfMissing: boolean = true
+): Promise<string | undefined> => {
   const currentUserId = useAuthStore.getState().currentUser?.id;
-  const members = useChatMemberStore.getState().chatMembers[chatId] || [];
-  return members.find((m) => m.userId === currentUserId)?.id;
+  if (!currentUserId) return undefined;
+
+  const member = await useChatMemberStore
+    .getState()
+    .getChatMemberByUserIdAndChatId(chatId, currentUserId, fetchIfMissing);
+
+  return member?.id;
 };
 
 export const useDirectChatPartner = (

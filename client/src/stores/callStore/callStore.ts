@@ -4,14 +4,19 @@ import { devtools } from "zustand/middleware";
 import { CallStatus } from "@/types/enums/CallStatus";
 import { useSFUCallStore } from "./sfuCallStore";
 import { useP2PCallStore } from "./p2pCallStore";
-import {
+import { useModalStore } from "../modalStore";
+import { audioService } from "@/services/audio.service";
+import { handleError } from "@/utils/handleError";
+import type {
   callMember,
   P2PCallMember,
   SFUCallMember,
 } from "@/types/store/callMember.type";
-import { useModalStore } from "../modalStore";
-import { audioService } from "@/services/audio.service";
-import { handleError } from "@/utils/handleError";
+import {
+  getMicStream,
+  getVideoStream,
+  stopMediaStreams,
+} from "@/utils/webRtc/localStream.Utils";
 
 export interface CallState {
   // Call metadata
@@ -48,8 +53,10 @@ export interface CallActions {
   // Core lifecycle
   startCall: (
     chatId: string,
-    isVideo: boolean,
-    isGroup: boolean
+    option?: {
+      isVideoCall?: boolean;
+      isGroupCall?: boolean;
+    }
   ) => Promise<void>;
   acceptCall: () => Promise<void>;
   rejectCall: (isCancel?: boolean) => void;
@@ -102,18 +109,30 @@ export const useCallStore = create<CallState & CallActions>()(
     error: null,
 
     // ========== CORE ACTIONS ==========
-    startCall: async (chatId: string, isVideo: boolean, isGroup: boolean) => {
+    startCall: async (
+      chatId: string,
+      option?: {
+        isVideoCall?: boolean;
+        isGroupCall?: boolean;
+      }
+    ) => {
+      const isVideoCall = option?.isVideoCall ?? false;
+      const isGroupCall = option?.isGroupCall ?? false;
       get().cleanupStreams();
       try {
-        if (isGroup) {
-          await useSFUCallStore.getState().initializeSFUCall(chatId, isVideo);
+        if (isGroupCall) {
+          await useSFUCallStore
+            .getState()
+            .initializeSFUCall(chatId, isVideoCall);
         } else {
-          await useP2PCallStore.getState().initializeP2PCall(chatId, isVideo);
+          await useP2PCallStore
+            .getState()
+            .initializeP2PCall(chatId, isVideoCall);
         }
         set({
           chatId,
-          isVideoCall: isVideo,
-          isGroupCall: isGroup,
+          isVideoCall: isVideoCall,
+          isGroupCall: isGroupCall,
           callStatus: CallStatus.OUTGOING,
           // startedAt and isVideoEnabled should be set in initializeP2PCall
         });
@@ -195,52 +214,59 @@ export const useCallStore = create<CallState & CallActions>()(
       }
     },
 
-    // In your callStore.ts
     setupLocalStream: async () => {
       try {
-        // Stop any existing tracks first
+        const { isVideoCall, isVideoEnabled } = get();
+        // Stop any existing tracks using utility functions
         const { localVoiceStream, localVideoStream, localScreenStream } = get();
-        localVoiceStream?.getTracks().forEach((track) => track.stop());
-        localVideoStream?.getTracks().forEach((track) => track.stop());
-        localScreenStream?.getTracks().forEach((track) => track.stop());
+        stopMediaStreams(localVoiceStream, localVideoStream, localScreenStream);
 
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-          video: get().isVideoCall,
-        });
+        // Always get audio stream
+        const audioStream = await getMicStream();
 
-        // Create separate streams for audio and video
-        const audioStream = new MediaStream();
-        const videoStream = new MediaStream();
-
-        // Separate audio and video tracks
-        stream.getAudioTracks().forEach((track) => audioStream.addTrack(track));
-        stream.getVideoTracks().forEach((track) => videoStream.addTrack(track));
+        // Only get video stream if both isVideoCall and isVideoEnabled are true
+        const videoStream =
+          isVideoCall && isVideoEnabled ? await getVideoStream() : null;
 
         set({
           localVoiceStream: audioStream,
-          localVideoStream: get().isVideoCall ? videoStream : null,
-          isVideoEnabled:
-            get().isVideoCall && videoStream.getVideoTracks().length > 0,
+          localVideoStream: videoStream,
+          isVideoEnabled: isVideoCall && isVideoEnabled && !!videoStream,
+          error: null,
         });
       } catch (error) {
-        set({ error: "permission_denied" });
+        const { isVideoCall, isVideoEnabled } = get();
+        set({ error: "device_unavailable" });
         handleError(
           error,
-          "Audio/video device is busy. Please close other applications using your microphone/camera."
+          isVideoCall && isVideoEnabled
+            ? "Cannot access microphone or camera. Please close other applications."
+            : "Cannot access microphone. Please close other applications."
         );
       }
     },
 
     setLocalVoiceStream: (stream: MediaStream | null) => {
+      const oldStream = get().localVoiceStream;
+      if (oldStream) {
+        oldStream.getTracks().forEach((t) => t.stop()); // cleanup old
+      }
       set({ localVoiceStream: stream });
     },
 
     setLocalVideoStream: (stream: MediaStream | null) => {
+      const oldStream = get().localVideoStream;
+      if (oldStream) {
+        oldStream.getTracks().forEach((t) => t.stop());
+      }
       set({ localVideoStream: stream });
     },
 
     setLocalScreenStream: (stream: MediaStream | null) => {
+      const oldStream = get().localScreenStream;
+      if (oldStream) {
+        oldStream.getTracks().forEach((t) => t.stop());
+      }
       set({ localScreenStream: stream });
     },
 

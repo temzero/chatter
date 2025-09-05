@@ -18,6 +18,7 @@ import {
   stopScreenStream,
   updateP2PAudioInConnections,
   updateVideoInConnections,
+  stopMediaStreams,
 } from "@/utils/webRtc/localStream.Utils";
 
 export interface P2PState {
@@ -143,11 +144,6 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         const voiceStream = await getMicStream().catch(async (error) => {
           if (error.name === "NotReadableError") {
             toast.warning("Microphone in use. Trying alternative settings...");
-            // Fallback to simpler audio constraints
-            const fallbackStream = await navigator.mediaDevices.getUserMedia({
-              audio: true,
-            });
-            return new MediaStream(fallbackStream.getAudioTracks());
           }
           throw error;
         });
@@ -157,11 +153,6 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
           videoStream = await getVideoStream().catch(async (error) => {
             if (error.name === "NotReadableError") {
               toast.warning("Camera in use. Trying alternative settings...");
-              // Fallback to simpler video constraints
-              const fallbackStream = await navigator.mediaDevices.getUserMedia({
-                video: true,
-              });
-              return new MediaStream(fallbackStream.getVideoTracks());
             }
             throw error;
           });
@@ -222,15 +213,15 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         useCallStore.getState();
 
       // Clean up local streams using utility functions
-      stopMicStream(localVoiceStream);
-      stopVideoStream(localVideoStream);
-      stopScreenStream(localScreenStream);
+      stopMediaStreams(localVoiceStream, localVideoStream, localScreenStream);
 
       // Clean up all member streams
       p2pMembers.forEach((member) => {
-        stopMicStream(member.voiceStream);
-        stopVideoStream(member.videoStream);
-        stopScreenStream(member.screenStream);
+        stopMediaStreams(
+          member.voiceStream,
+          member.videoStream,
+          member.screenStream
+        );
 
         if (member.peerConnection) {
           member.peerConnection.close();
@@ -335,9 +326,11 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
       }
 
       // 2. Clean up streams using utility functions
-      stopMicStream(member.voiceStream);
-      stopVideoStream(member.videoStream);
-      stopScreenStream(member.screenStream);
+      stopMediaStreams(
+        member.voiceStream,
+        member.videoStream,
+        member.screenStream
+      );
 
       // 3. Remove from members list
       set({
@@ -750,7 +743,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
     toggleAudio: async () => {
       const { chatId, isMuted, localVoiceStream } = useCallStore.getState();
       const { p2pMembers } = get();
-      const myMemberId = getMyChatMemberId(chatId!);
+      const myMemberId = await getMyChatMemberId(chatId!);
 
       if (!myMemberId) return;
 
@@ -811,7 +804,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
       const { chatId, localVideoStream, isVideoEnabled } =
         useCallStore.getState();
       const { p2pMembers } = get();
-      const myMemberId = getMyChatMemberId(chatId!);
+      const myMemberId = await getMyChatMemberId(chatId!);
 
       if (!myMemberId) return;
 
@@ -870,7 +863,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
       const { chatId, localScreenStream, isScreenSharing } =
         useCallStore.getState();
       const { p2pMembers } = get();
-      const myMemberId = getMyChatMemberId(chatId!);
+      const myMemberId = await getMyChatMemberId(chatId!);
 
       if (!myMemberId) return;
 
@@ -941,9 +934,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
       // Stop local streams using utility functions
       const { localVoiceStream, localVideoStream, localScreenStream } =
         useCallStore.getState();
-      stopMicStream(localVoiceStream);
-      stopVideoStream(localVideoStream);
-      stopScreenStream(localScreenStream);
+      stopMediaStreams(localVoiceStream, localVideoStream, localScreenStream);
 
       // Reset store state
       set({

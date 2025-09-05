@@ -11,7 +11,7 @@ const LIVEKIT_URL = import.meta.env.VITE_LIVEKIT_URL;
 let singletonService: LiveKitService | null = null;
 
 export function useLiveKitListeners() {
-  const { chatId, callStatus, isGroupCall } = useCallStore();
+  const { chatId, callStatus, isGroupCall, isVideoCall } = useCallStore();
 
   const liveKitService = useMemo(() => {
     if (!singletonService) {
@@ -27,42 +27,57 @@ export function useLiveKitListeners() {
 
       try {
         const roomName = chatId; // Using chatId as room name
-        const myMember = getMyChatMember(chatId);
+
+        // ✅ Await async version so it can fetch if missing
+        const myMember = await getMyChatMember(chatId);
+        const myMemberId = myMember?.id;
+
+        if (!myMemberId) {
+          console.error("❌ myMemberId is missing");
+          return;
+        }
+
         const participantName =
-          myMember?.nickname ?? `${myMember?.firstName} ${myMember?.lastName}`; // Generate participant name
+          myMember?.nickname ??
+          `${myMember?.firstName ?? ""} ${myMember?.lastName ?? ""}`.trim();
+
+        console.log("livekit-Token", {
+          roomName,
+          myMemberId,
+          participantName,
+        });
 
         // Use your existing callService to get the token
         const token = await callService.getToken(
           roomName,
-          myMember?.id ?? "unknown",
+          myMemberId,
           participantName
         );
 
         if (!token) {
-          console.log("No token generated");
+          console.log("❌ No token generated");
           return;
         }
 
         await liveKitService.connect(LIVEKIT_URL, token, {
           audio: true,
-          video: true,
+          video: isVideoCall,
           onParticipantConnected: (participant: RemoteParticipant) => {
-            console.log("Participant joined", participant.identity);
+            console.log("✅ Participant joined", participant.identity);
           },
           onTrackSubscribed: (track, participant, kind) => {
-            console.log("Track subscribed:", kind, participant, track);
-            // attach track to video/audio element here
+            console.log("🎥 Track subscribed:", kind, participant, track);
           },
           onParticipantDisconnected: (participant: RemoteParticipant) => {
-            console.log("Participant left", participant.identity);
+            console.log("👋 Participant left", participant.identity);
           },
           onTrackUnsubscribed: (track, participant, kind) => {
-            console.log("Track unsubscribed:", track, kind, participant);
+            console.log("📴 Track unsubscribed:", track, kind, participant);
           },
-          onError: (err) => console.error("LiveKit error:", err),
+          onError: (err) => console.error("🚨 LiveKit error:", err),
         });
       } catch (err) {
-        console.error("Failed to connect LiveKit:", err);
+        console.error("❌ Failed to connect LiveKit:", err);
       }
     }
 
@@ -71,7 +86,7 @@ export function useLiveKitListeners() {
     return () => {
       liveKitService.disconnect();
     };
-  }, [chatId, callStatus, liveKitService, isGroupCall]);
+  }, [chatId, callStatus, liveKitService, isGroupCall, isVideoCall]);
 
   return liveKitService;
 }

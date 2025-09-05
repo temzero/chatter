@@ -112,6 +112,7 @@ export function useCallSocketListeners() {
     // In your useCallSocketListeners - enhance member handling
     const handleCallAccepted = async (data: CallActionResponse) => {
       const callStore = useCallStore.getState();
+      callStore.setCallStatus(CallStatus.CONNECTING);
 
       if (callStore.chatId !== data.chatId) return;
 
@@ -127,9 +128,9 @@ export function useCallSocketListeners() {
         if (!callStore.isGroupCall) {
           const p2pStore = useP2PCallStore.getState();
           await p2pStore.sendP2POffer(data.fromMemberId);
+        } else if (callStore.isGroupCall) {
+          callStore.setCallStatus(CallStatus.CONNECTED);
         }
-
-        callStore.setCallStatus(CallStatus.CONNECTING);
       } catch (err) {
         console.error("Failed to handle call acceptance:", err);
         toast.error(`Failed to add ${data.fromMemberId} to call`);
@@ -268,7 +269,7 @@ export function useCallSocketListeners() {
       }
     };
 
-    const handleMemberJoined = (data: { chatId: string; memberId: string }) => {
+    const handleMemberJoined = async (data: { chatId: string; memberId: string }) => {
       const callStore = useCallStore.getState();
 
       if (callStore.chatId === data.chatId) {
@@ -293,7 +294,7 @@ export function useCallSocketListeners() {
         }
 
         // If this is the current user joining, set appropriate status
-        const currentMemberId = getMyChatMemberId(data.chatId);
+        const currentMemberId = await getMyChatMemberId(data.chatId);
         if (
           data.memberId === currentMemberId &&
           callStore.callStatus === CallStatus.CONNECTING

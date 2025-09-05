@@ -19,7 +19,10 @@ export const Avatar: React.FC<AvatarProps> = ({
   onClick,
   isBlocked = false,
 }) => {
-  const nameInitial = name?.charAt(0)?.toUpperCase();
+  const nameInitial =
+    name?.toLowerCase() === "unknown user"
+      ? "?"
+      : name?.charAt(0)?.toUpperCase();
 
   return (
     <div

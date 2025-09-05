@@ -355,7 +355,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
 
   getUnreadMessagesCount: async (chatId, memberId) => {
     const messages = get().messages[chatId] || [];
-    const member = await useChatMemberStore.getState().getChatMember(memberId);
+    const member = await useChatMemberStore.getState().getChatMemberById(memberId);
 
     if (!member) return messages.length;
 
@@ -369,7 +369,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
   },
 
   isMessageReadByMember: async (message, memberId) => {
-    const member = await useChatMemberStore.getState().getChatMember(memberId);
+    const member = await useChatMemberStore.getState().getChatMemberById(memberId);
     if (!member) return false;
 
     const messages = get().messages[message.chatId] || [];

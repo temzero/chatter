@@ -10,6 +10,7 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
   const isVideoCall = useCallStore((state) => state.isVideoCall);
   const isVideoEnabled = useCallStore((state) => state.isVideoEnabled);
   const localVideoStream = useCallStore((state) => state.localVideoStream);
+  const toggleLocalVideo = useCallStore((state) => state.toggleLocalVideo);
 
   const acceptCall = () => {
     // Set the camera state before accepting call
@@ -21,29 +22,30 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
     useCallStore.getState().closeCallModal();
   };
 
-  const toggleCamera = async () => {
-    const newVideoState = !isVideoEnabled;
-    useCallStore.setState({ isVideoEnabled: newVideoState });
+  // const toggleLocalCamera = async () => {
+  //   const newVideoState = !isVideoEnabled;
+  //   useCallStore.setState({ isVideoEnabled: newVideoState });
 
-    if (newVideoState) {
-      // Enable camera - get video stream
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-        });
-        useCallStore.getState().setLocalVideoStream(stream);
-      } catch (error) {
-        console.error("Failed to enable camera:", error);
-        useCallStore.setState({ isVideoEnabled: false });
-      }
-    } else {
-      // Disable camera - stop video stream
-      if (localVideoStream) {
-        localVideoStream.getTracks().forEach((track) => track.stop());
-        useCallStore.getState().setLocalVideoStream(null);
-      }
-    }
-  };
+  //   if (newVideoState) {
+  //     try {
+  //       const stream = await getVideoStream().catch((error) => {
+  //         if (error.name === "NotReadableError") {
+  //           toast.warning("Camera in use. Retrying with fallback...");
+  //         }
+  //         throw error;
+  //       });
+  //       useCallStore.getState().setLocalVideoStream(stream);
+  //     } catch (error) {
+  //       console.error("Failed to enable camera:", error);
+  //       useCallStore.setState({ isVideoEnabled: false });
+  //     }
+  //   } else {
+  //     if (localVideoStream) {
+  //       localVideoStream.getTracks().forEach((track) => track.stop());
+  //       useCallStore.getState().setLocalVideoStream(null);
+  //     }
+  //   }
+  // };
 
   return (
     <div className="flex flex-col items-center w-full h-full">
@@ -85,7 +87,7 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
                     : "videocam_off"
                   : "call"
               }
-              onClick={toggleCamera}
+              onClick={toggleLocalVideo}
               className="material-symbols-outlined text-6xl flex items-center justify-center"
               initial={{ opacity: 0, scale: 0.1 }}
               animate={{

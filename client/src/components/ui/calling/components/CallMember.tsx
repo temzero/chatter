@@ -19,7 +19,7 @@ const CallMember = ({
   className?: string;
 }) => {
   const [chatMember, setChatMember] = useState<ChatMember | null>(null);
-  const getChatMember = useChatMemberStore((state) => state.getChatMember);
+  const getChatMemberById = useChatMemberStore((state) => state.getChatMemberById);
 
   // Debug logs
   console.log(
@@ -46,7 +46,7 @@ const CallMember = ({
   useEffect(() => {
     const fetchMember = async () => {
       try {
-        const result = await getChatMember(member.memberId, true);
+        const result = await getChatMemberById(member.memberId, true);
         setChatMember(result || null);
       } catch (error) {
         console.error("Failed to fetch chat member:", error);
@@ -54,7 +54,7 @@ const CallMember = ({
       }
     };
     fetchMember();
-  }, [member.memberId, getChatMember]);
+  }, [member.memberId, getChatMemberById]);
 
   const displayName = useMemo(() => {
     return chatMember

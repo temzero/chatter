@@ -31,7 +31,6 @@ export const getMicStream = async (): Promise<MediaStream> => {
 
 export const getVideoStream = async (): Promise<MediaStream> => {
   try {
-    // Try with preferred constraints (works in Chrome/Firefox)
     const stream = await navigator.mediaDevices.getUserMedia({
       video: {
         width: { ideal: 1280 },
@@ -51,21 +50,8 @@ export const getVideoStream = async (): Promise<MediaStream> => {
     return new MediaStream(videoTracks);
   } catch (error) {
     console.error("getVideoStream error:", error);
-
-    // ✅ Fallback: simple request for any camera
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    const videoTracks = stream.getVideoTracks();
-    if (videoTracks.length === 0) {
-      console.error("getVideoStream fallback: No video tracks available");
-      toast.error("No camera found in fallback. Check your device.");
-      throw new Error("No video tracks in fallback");
-    }
-
-    console.log(
-      "getVideoStream fallback: Acquired stream with tracks:",
-      videoTracks
-    );
-    return new MediaStream(videoTracks);
+    toast.error("Unable to access camera. Check your permissions or device.");
+    throw error; // ❌ no fallback, just throw
   }
 };
 
@@ -110,6 +96,20 @@ export const stopScreenStream = (stream: MediaStream | null | undefined) => {
   if (stream) {
     stream.getTracks().forEach((t) => t.stop());
   }
+};
+
+export const stopMediaStreams = (
+  micStream?: MediaStream | null,
+  videoStream?: MediaStream | null,
+  screenStream?: MediaStream | null
+) => {
+  [micStream, videoStream, screenStream].forEach((stream) => {
+    if (stream) {
+      stream.getTracks().forEach((t) => {
+        t.stop();
+      });
+    }
+  });
 };
 
 /**

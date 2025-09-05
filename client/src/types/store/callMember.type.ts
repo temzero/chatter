@@ -3,8 +3,6 @@ import { RemoteParticipant } from "livekit-client";
 
 export interface BaseCallMember {
   memberId: string;
-  avatarUrl?: string;
-  displayName?: string;
 
   voiceStream?: MediaStream | null;
   videoStream?: MediaStream | null;
