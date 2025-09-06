@@ -297,10 +297,10 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
 
     // ========== SFU MEMBER MANAGEMENT ==========
     addSFUMember: (member: Partial<SFUCallMember>) => {
-      toast.info(`addSFUMember ${member.memberId}`);
-      console.log(`addSFUMember ${member.memberId}`);
       const participant = member.participant as RemoteParticipant;
       if (!participant) return;
+      toast.info(`addSFUMember ${member.memberId}`);
+      console.log(`addSFUMember ${member.memberId}`);
 
       set((state) => ({
         sfuMembers: [

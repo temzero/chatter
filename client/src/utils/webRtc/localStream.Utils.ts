@@ -177,7 +177,7 @@ export const updateVideoInConnections = async (
   chatId: string,
   sendOffer: (chatId: string, offer: RTCSessionDescriptionInit) => void
 ): Promise<void> => {
-  if (isGroupCall) return; // Group calls are handled by SFU
+  if (isGroupCall) return;
 
   const videoTrack = newStream.getVideoTracks()[0];
   if (!videoTrack) {
@@ -190,37 +190,25 @@ export const updateVideoInConnections = async (
 
     const pc = member.peerConnection;
     const senders = pc.getSenders();
-
-    // Find the video sender
     const videoSender = senders.find((s) => s.track?.kind === "video");
 
     try {
       if (videoSender) {
-        // ✅ Replace the track (preferred, no renegotiation needed)
         await videoSender.replaceTrack(videoTrack);
-        console.log("Replaced video track in existing sender");
+        console.log("Replaced video track");
       } else {
-        // 🚨 Remove any stale video senders before adding new
-        pc.getSenders()
-          .filter((s) => s.track?.kind === "video")
-          .forEach((s) => pc.removeTrack(s));
-
-        // ✅ Add new video track safely
+        // Add new track
         pc.addTrack(videoTrack, newStream);
         console.log("Added new video track");
-
-        // Renegotiate because we added a sender
-        try {
-          const offer = await pc.createOffer({
-            offerToReceiveAudio: true,
-            offerToReceiveVideo: true,
-          });
-          await pc.setLocalDescription(offer);
-          sendOffer(chatId, offer);
-        } catch (err) {
-          console.error("Error renegotiating video:", err);
-        }
       }
+
+      // ALWAYS renegotiate after video changes
+      const offer = await pc.createOffer({
+        offerToReceiveAudio: true,
+        offerToReceiveVideo: true,
+      });
+      await pc.setLocalDescription(offer);
+      sendOffer(chatId, offer);
     } catch (error) {
       console.error("Error updating video connection:", error);
     }

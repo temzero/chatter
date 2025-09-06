@@ -42,24 +42,26 @@ export function useCallSocketListeners() {
     };
 
     const handleIncomingCall = (data: IncomingCallResponse) => {
+      console.log("handleIncomingCall");
+
       useCallStore.setState({
         chatId: data.chatId,
         callStatus: CallStatus.INCOMING,
         isVideoCall: data.isVideoCall,
-        callerMemberId: data.fromMemberId,
+        callerMemberId: data.memberId,
         isGroupCall: data.isGroupCall || false,
       });
 
-      // Add the caller as a member using the abstracted method
-      useCallStore.getState().addCallMember({
-        memberId: data.fromMemberId,
-      });
+      // useCallStore.getState().addCallMember({
+      //   memberId: data.memberId,
+      // });
 
       useModalStore.getState().openModal(ModalType.CALL);
       toast.info(`Incoming ${data.isVideoCall ? "video" : "voice"} call`);
     };
 
     const handleUpdateCall = (data: updateCallPayload) => {
+      console.log("handleUpdateCall");
       const { chatId, isVideoCall } = data;
       const callStore = useCallStore.getState();
 
@@ -87,6 +89,7 @@ export function useCallSocketListeners() {
     };
 
     const handleCallMemberUpdated = (data: callMemberPayload) => {
+      console.log("handleCallMemberUpdated");
       const callStore = useCallStore.getState();
 
       if (callStore.chatId === data.chatId) {
@@ -109,35 +112,40 @@ export function useCallSocketListeners() {
       }
     };
 
-    // In your useCallSocketListeners - enhance member handling
+    // CALLEE -> CALLER
     const handleCallAccepted = async (data: CallActionResponse) => {
+      console.log("handleCallAccepted");
       const callStore = useCallStore.getState();
       callStore.setCallStatus(CallStatus.CONNECTING);
 
       if (callStore.chatId !== data.chatId) return;
+      if (callStore.isGroupCall) {
+        callStore.setCallStatus(CallStatus.CONNECTED);
+        return;
+      }
 
       try {
-        // Add the accepted member
-        callStore.addCallMember({
-          memberId: data.fromMemberId,
+        const p2pStore = useP2PCallStore.getState();
+        // create and register member
+        const member = p2pStore.addP2PMember({
+          memberId: data.memberId,
+          peerConnection: p2pStore.createPeerConnection(data.memberId),
         });
-
-        toast.info(`${data.fromMemberId} joined the call`);
-
-        // ✅ Caller should send the initial P2P offer now
-        if (!callStore.isGroupCall) {
-          const p2pStore = useP2PCallStore.getState();
-          await p2pStore.sendP2POffer(data.fromMemberId);
-        } else if (callStore.isGroupCall) {
-          callStore.setCallStatus(CallStatus.CONNECTED);
+        // if somehow failed, throw
+        if (!member) {
+          throw new Error("Failed to register p2p member before sending offer");
         }
+
+        // send offer directly
+        await p2pStore.sendP2POffer(member.memberId);
       } catch (err) {
         console.error("Failed to handle call acceptance:", err);
-        toast.error(`Failed to add ${data.fromMemberId} to call`);
+        toast.error(`Failed to add ${data.memberId} to call`);
       }
     };
 
     const handleCallRejected = (data: CallActionResponse) => {
+      console.log("handleCallRejected");
       const callStore = useCallStore.getState();
 
       if (callStore.chatId === data.chatId) {
@@ -156,8 +164,8 @@ export function useCallSocketListeners() {
       const callStore = useCallStore.getState();
 
       if (callStore.chatId === data.chatId) {
-        callStore.removeCallMember(data.fromMemberId);
-        toast.info(`${data.fromMemberId} has left the call`);
+        callStore.removeCallMember(data.memberId);
+        toast.info(`${data.memberId} has left the call`);
         // If no members left, end the call
         if (callStore.isGroupCall) {
           const sfuMembers = useSFUCallStore.getState().sfuMembers;
@@ -173,77 +181,76 @@ export function useCallSocketListeners() {
       }
     };
 
+    // CALLER -> CALLEE
     const handleP2PWebRtcOffer = async ({
       chatId,
-      fromMemberId,
+      memberId,
       offer,
     }: RtcOfferResponse) => {
+      console.log("CALLEE handleP2PWebRtcOffer");
+
       const callStore = useCallStore.getState();
       const chatType = useChatStore.getState().getChatType(chatId);
-      console.log("send P2PWebRtcOffer");
 
       if (callStore.chatId !== chatId) return;
 
       try {
         if (chatType === ChatType.DIRECT && !callStore.isGroupCall) {
           const p2pStore = useP2PCallStore.getState();
-          const member = p2pStore.p2pMembers.find(
-            (m: P2PCallMember) => m.memberId === fromMemberId
-          );
-
-          // ✅ If member doesn't exist OR has no connection, create one
-          if (!member || !member.peerConnection) {
-            const pc = p2pStore.createPeerConnection(fromMemberId);
-            if (!member) {
-              p2pStore.addP2PMember({
-                memberId: fromMemberId,
-                peerConnection: pc,
-              });
-            } else {
-              p2pStore.updateP2PMember({
-                memberId: fromMemberId,
-                peerConnection: pc,
-              });
-            }
-          }
+          const pc = p2pStore.createPeerConnection(memberId);
+          p2pStore.addP2PMember({
+            memberId: memberId,
+            peerConnection: pc,
+          });
 
           // ✅ Now update the connection with the offer
-          await p2pStore.updatePeerConnection(fromMemberId, offer);
+          await p2pStore.updatePeerConnection(memberId, offer);
         }
 
-        callStore.setCallStatus(CallStatus.CONNECTING);
+        callStore.setCallStatus(CallStatus.CONNECTED);
       } catch (err) {
         handleError(err, "Call offer handling failed");
         callStore.endCall();
       }
     };
 
+    // CALLEE -> CALLER
     const handleP2PWebRtcAnswer = async (data: RtcAnswerResponse) => {
-      console.log("HandleP2PAnswer");
+      console.log("CALLER handleP2PWebRtcAnswer");
+
       const callStore = useCallStore.getState();
 
-      // Only handle answers for the current call
       if (callStore.chatId !== data.chatId) return;
+      if (callStore.isGroupCall) {
+        console.error("Group call is handle via SFU-livekit");
+        return;
+      }
 
       try {
-        if (!callStore.isGroupCall) {
-          // Direct call - handle P2P answer
-          const p2pStore = useP2PCallStore.getState();
-          const member = p2pStore.p2pMembers.find(
-            (m: P2PCallMember) => m.memberId === data.fromMemberId
-          );
+        const p2pStore = useP2PCallStore.getState();
 
-          if (member?.peerConnection) {
-            await member.peerConnection.setRemoteDescription(
-              new RTCSessionDescription(data.answer)
-            );
-          }
-        } else {
-          // Group call - SFU should handle answers through its own signaling
-          console.warn(
-            "Received answer in group call mode - this should be handled by SFU"
+        // ✅ Member should already exist (added when offer/accept was processed)
+        const member = p2pStore.p2pMembers.find(
+          (m: P2PCallMember) => m.memberId === data.memberId
+        );
+
+        // ❌ CRITICAL: Member should already exist!
+        if (!member) {
+          throw new Error(
+            `No member found for ${data.memberId} - call flow broken!`
           );
         }
+
+        if (!member.peerConnection) {
+          throw new Error(
+            `No peer connection for ${data.memberId} - call flow broken!`
+          );
+        }
+
+        // ✅ USE EXISTING PEER CONNECTION (not a new one!)
+        await member.peerConnection.setRemoteDescription(
+          new RTCSessionDescription(data.answer)
+        );
 
         callStore.setCallStatus(CallStatus.CONNECTED);
       } catch (err) {
@@ -253,6 +260,8 @@ export function useCallSocketListeners() {
     };
 
     const handleIceCandidate = (data: IceCandidateResponse) => {
+      console.log("handleIceCandidate");
+
       const callStore = useCallStore.getState();
 
       // Only handle ICE candidates for the current call
@@ -269,7 +278,12 @@ export function useCallSocketListeners() {
       }
     };
 
-    const handleMemberJoined = async (data: { chatId: string; memberId: string }) => {
+    const handleMemberJoined = async (data: {
+      chatId: string;
+      memberId: string;
+    }) => {
+      console.log("handleMemberJoined");
+
       const callStore = useCallStore.getState();
 
       if (callStore.chatId === data.chatId) {

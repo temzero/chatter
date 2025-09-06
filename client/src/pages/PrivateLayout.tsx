@@ -21,7 +21,6 @@ import { useNotificationSocketListeners } from "@/lib/websocket/hooks/useNotific
 import { usePresenceSocketListeners } from "@/lib/websocket/hooks/usePresenceSocketListeners";
 import { useCallSocketListeners } from "@/lib/websocket/hooks/useCallSocketListener";
 import { useCleanup } from "@/hooks/useCleanUp";
-import { useLiveKitListeners } from "@/lib/websocket/hooks/useLivekitListener";
 
 export const ChatContent: React.FC = () => {
   const { id: chatId } = useParams();
@@ -107,7 +106,6 @@ const PrivateLayout: React.FC = () => {
   useChatSocketListeners();
   usePresenceSocketListeners();
   useCallSocketListeners();
-  useLiveKitListeners();
   useCleanup();
 
   if (!isAuthenticated) {

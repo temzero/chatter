@@ -43,40 +43,37 @@ export interface IceCandidateRequest {
 
 // -------------------- Responses --------------------
 
-// Call control responses (server injects fromMemberId for context)
+// Call control responses (server injects memberId for context)
 export interface IncomingCallResponse {
   chatId: string;
   isVideoCall: boolean;
   isGroupCall: boolean;
-  fromMemberId: string; // Caller (added by server)
+  memberId: string; // Caller (added by server)
   timestamp: number;
 }
 
 export interface CallActionResponse {
   chatId: string;
-  fromMemberId: string; // Who took the action
+  memberId: string; // Who took the action
   timestamp: number;
   isCallerCancel?: boolean;
 }
 
-// RTC / SFU signaling responses (always include fromMemberId)
+// RTC / SFU signaling responses (always include memberId)
 export interface RtcOfferResponse {
   chatId: string;
   offer: RTCSessionDescriptionInit;
-  fromMemberId: string;
-  toMemberId?: string; // Undefined means broadcast (SFU)
+  memberId: string;
 }
 
 export interface RtcAnswerResponse {
   chatId: string;
   answer: RTCSessionDescriptionInit;
-  fromMemberId: string;
-  toMemberId: string; // Always directed
+  memberId: string;
 }
 
 export interface IceCandidateResponse {
   chatId: string;
   candidate: RTCIceCandidateInit;
-  fromMemberId: string;
-  toMemberId?: string; // Empty = broadcast to all in chat
+  memberId: string;
 }

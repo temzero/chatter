@@ -34,7 +34,7 @@ export interface P2PActions {
 
   // P2P Member Management
   getP2PMember: (memberId: string) => P2PCallMember | undefined;
-  addP2PMember: (member: Partial<P2PCallMember>) => void;
+  addP2PMember: (member: Partial<P2PCallMember>) => P2PCallMember | undefined;
   updateP2PMember: (member: Partial<P2PCallMember>) => void;
   removeP2PMember: (memberId: string) => void;
 
@@ -238,15 +238,24 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
       return get().p2pMembers.find((member) => member.memberId === memberId);
     },
 
-    addP2PMember: (member: P2PCallMember) => {
+    addP2PMember: (member: P2PCallMember): P2PCallMember | undefined => {
       const { localVoiceStream, localVideoStream } = useCallStore.getState();
       console.log("addP2PMember");
 
-      // 1. Use given pc or create one
+      // 1. Prevent duplicates
+      const existing = get().p2pMembers.find(
+        (m) => m.memberId === member.memberId
+      );
+      if (existing) {
+        console.warn(`Member ${member.memberId} already exists`);
+        return existing; // return the already existing one
+      }
+
+      // 2. Use given pc or create one
       const pc =
         member.peerConnection ?? get().createPeerConnection(member.memberId);
 
-      // 2. Add any pending ICE candidates to the new connection
+      // 3. Add any pending ICE candidates
       get().iceCandidates.forEach((candidate) => {
         try {
           pc.addIceCandidate(new RTCIceCandidate(candidate));
@@ -255,7 +264,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         }
       });
 
-      // 3. Add local stream tracks to the new connection
+      // 4. Add local stream tracks
       if (localVoiceStream) {
         localVoiceStream.getAudioTracks().forEach((track) => {
           if (!pc.getSenders().some((s) => s.track === track)) {
@@ -272,24 +281,25 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         });
       }
 
-      // 4. Add member to state
+      // 5. Build full member object
+      const newMember: P2PCallMember = {
+        ...member,
+        peerConnection: pc,
+        voiceStream: member.voiceStream ?? null,
+        videoStream: member.videoStream ?? null,
+        screenStream: member.screenStream ?? null,
+        isMuted: member.isMuted ?? false,
+        isVideoEnabled: member.isVideoEnabled ?? false,
+        isScreenSharing: member.isScreenSharing ?? false,
+      };
+
+      // 6. Update state
       set((state) => ({
-        p2pMembers: [
-          ...state.p2pMembers,
-          {
-            ...member,
-            peerConnection: pc,
-            voiceStream: member.voiceStream ?? null,
-            videoStream: member.videoStream ?? null,
-            screenStream: member.screenStream ?? null,
-            isMuted: member.isMuted ?? false,
-            isVideoEnabled: member.isVideoEnabled ?? false,
-            isScreenSharing: member.isScreenSharing ?? false,
-            joinedAt: Date.now(),
-            lastActivity: Date.now(),
-          },
-        ],
+        p2pMembers: [...state.p2pMembers, newMember],
       }));
+
+      // 7. Return the member
+      return newMember;
     },
 
     updateP2PMember: (
@@ -616,24 +626,18 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
       }
 
       const kind = event.track.kind as "audio" | "video";
+      const stream = event.streams[0]; // ✅ Use the stream WebRTC provides
 
       set((state) => {
         const member = state.p2pMembers.find((m) => m.memberId === memberId);
         if (!member) return state;
 
-        // 🎤 AUDIO
+        // 🎤 AUDIO - Use the stream from the event
         if (kind === "audio") {
-          const voiceStream = member.voiceStream ?? new MediaStream();
-
-          // only add if not already present
-          if (!voiceStream.getTracks().some((t) => t.id === event.track.id)) {
-            voiceStream.addTrack(event.track);
-          }
-
           return {
             p2pMembers: state.p2pMembers.map((m) =>
               m.memberId === memberId
-                ? { ...m, voiceStream, lastActivity: Date.now() }
+                ? { ...m, voiceStream: stream, lastActivity: Date.now() }
                 : m
             ),
           };
@@ -641,38 +645,23 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
 
         // 📹 VIDEO or SCREEN
         if (kind === "video") {
-          // check if this is a screen-share track
           const isScreen =
             event.track.label.toLowerCase().includes("screen") ||
             event.track.label.toLowerCase().includes("display");
 
           if (isScreen) {
-            const screenStream = member.screenStream ?? new MediaStream();
-
-            if (
-              !screenStream.getTracks().some((t) => t.id === event.track.id)
-            ) {
-              screenStream.addTrack(event.track);
-            }
-
             return {
               p2pMembers: state.p2pMembers.map((m) =>
                 m.memberId === memberId
-                  ? { ...m, screenStream, lastActivity: Date.now() }
+                  ? { ...m, screenStream: stream, lastActivity: Date.now() }
                   : m
               ),
             };
           } else {
-            const videoStream = member.videoStream ?? new MediaStream();
-
-            if (!videoStream.getTracks().some((t) => t.id === event.track.id)) {
-              videoStream.addTrack(event.track);
-            }
-
             return {
               p2pMembers: state.p2pMembers.map((m) =>
                 m.memberId === memberId
-                  ? { ...m, videoStream, lastActivity: Date.now() }
+                  ? { ...m, videoStream: stream, lastActivity: Date.now() }
                   : m
               ),
             };
@@ -835,6 +824,16 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
           });
         } else {
           // 📷 TURN OFF camera
+          // Remove video tracks from ALL peer connections
+          for (const member of p2pMembers) {
+            if (member.peerConnection) {
+              await get().removeTrackFromPeerConnection(
+                member.memberId,
+                "video"
+              );
+            }
+          }
+
           stopVideoStream(localVideoStream);
 
           useCallStore.setState({

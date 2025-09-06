@@ -45,41 +45,6 @@ export class CallGateway {
   //   this.websocketCallService.endCall(chatId);
   // }
 
-  @SubscribeMessage(CallEvent.INITIATE_CALL)
-  async handleCallInitiate(
-    @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() payload: InitiateCallRequest,
-  ) {
-    const userId = client.data.userId;
-    const fromMemberId = await this.chatMemberService.getChatMemberId(
-      payload.chatId,
-      userId,
-    );
-
-    const response: IncomingCallResponse = {
-      chatId: payload.chatId,
-      isVideoCall: payload.isVideoCall,
-      isGroupCall: payload.isGroupCall,
-      fromMemberId,
-      timestamp: Date.now(),
-    };
-
-    // Initialize call in the call service
-    this.websocketCallService.initiateCall(
-      payload.chatId,
-      response,
-      fromMemberId,
-    );
-
-    // Notify all online chat members except the caller
-    await this.websocketNotificationService.emitToChatMembers(
-      payload.chatId,
-      CallEvent.INCOMING_CALL,
-      response,
-      { senderId: userId, excludeSender: true },
-    );
-  }
-
   @SubscribeMessage(CallEvent.PENDING_CALLS)
   async handleRequestPendingCalls(
     @ConnectedSocket() client: AuthenticatedSocket,
@@ -106,12 +71,43 @@ export class CallGateway {
         chatId: callState.chatId,
         isVideoCall: callState.isVideoCall,
         isGroupCall: callState.isGroupCall,
-        fromMemberId: Array.from(callState.memberIds)[0], // Initiator is first member
+        memberId: Array.from(callState.memberIds)[0], // Initiator is first member
         timestamp: callState.callAt,
       }),
     );
 
     client.emit(CallEvent.PENDING_CALLS, pendingCallResponses);
+  }
+
+  @SubscribeMessage(CallEvent.INITIATE_CALL)
+  async handleCallInitiate(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: InitiateCallRequest,
+  ) {
+    const userId = client.data.userId;
+    const memberId = await this.chatMemberService.getChatMemberId(
+      payload.chatId,
+      userId,
+    );
+
+    const response: IncomingCallResponse = {
+      chatId: payload.chatId,
+      isVideoCall: payload.isVideoCall,
+      isGroupCall: payload.isGroupCall,
+      memberId,
+      timestamp: Date.now(),
+    };
+
+    // Initialize call in the call service
+    this.websocketCallService.initiateCall(payload.chatId, response, memberId);
+
+    // Notify all online chat members except the caller
+    await this.websocketNotificationService.emitToChatMembers(
+      payload.chatId,
+      CallEvent.INCOMING_CALL,
+      response,
+      { senderId: userId, excludeSender: true },
+    );
   }
 
   @SubscribeMessage(CallEvent.UPDATE_CALL)
@@ -165,20 +161,21 @@ export class CallGateway {
     @MessageBody() payload: CallActionRequest,
   ) {
     const userId = client.data.userId;
-    const fromMemberId = await this.chatMemberService.getChatMemberId(
+    const memberId = await this.chatMemberService.getChatMemberId(
       payload.chatId,
       userId,
     );
+    console.log('memberId', memberId);
 
     const response: CallActionResponse = {
       chatId: payload.chatId,
-      fromMemberId,
+      memberId,
       timestamp: Date.now(),
       isCallerCancel: payload.isCallerCancel,
     };
 
     // Add user to the call participants
-    this.websocketCallService.addParticipant(payload.chatId, fromMemberId);
+    this.websocketCallService.addParticipant(payload.chatId, memberId);
 
     await this.websocketNotificationService.emitToChatMembers(
       payload.chatId,
@@ -226,14 +223,14 @@ export class CallGateway {
     @MessageBody() payload: CallActionRequest,
   ) {
     const userId = client.data.userId;
-    const fromMemberId = await this.chatMemberService.getChatMemberId(
+    const memberId = await this.chatMemberService.getChatMemberId(
       payload.chatId,
       userId,
     );
 
     const response: CallActionResponse = {
       chatId: payload.chatId,
-      fromMemberId,
+      memberId,
       timestamp: Date.now(),
       isCallerCancel: payload.isCallerCancel,
     };
@@ -258,21 +255,21 @@ export class CallGateway {
     @MessageBody() payload: CallActionRequest,
   ) {
     const userId = client.data.userId;
-    const fromMemberId = await this.chatMemberService.getChatMemberId(
+    const memberId = await this.chatMemberService.getChatMemberId(
       payload.chatId,
       userId,
     );
 
     const response: CallActionResponse = {
       chatId: payload.chatId,
-      fromMemberId,
+      memberId,
       timestamp: Date.now(),
     };
 
     // Remove user from call participants and check if call should end
     const callEnded = this.websocketCallService.removeParticipant(
       payload.chatId,
-      fromMemberId,
+      memberId,
     );
 
     if (callEnded) {
@@ -280,7 +277,7 @@ export class CallGateway {
       await this.websocketNotificationService.emitToChatMembers(
         payload.chatId,
         CallEvent.END_CALL,
-        { chatId: payload.chatId, endedBy: fromMemberId },
+        { chatId: payload.chatId, endedBy: memberId },
         { senderId: userId, excludeSender: false },
       );
     }
@@ -299,7 +296,7 @@ export class CallGateway {
     @MessageBody() payload: RtcOfferRequest,
   ) {
     const userId = client.data.userId;
-    const fromMemberId = await this.chatMemberService.getChatMemberId(
+    const memberId = await this.chatMemberService.getChatMemberId(
       payload.chatId,
       userId,
     );
@@ -307,7 +304,7 @@ export class CallGateway {
     const response: RtcOfferResponse = {
       chatId: payload.chatId,
       offer: payload.offer,
-      fromMemberId,
+      memberId,
     };
 
     await this.websocketNotificationService.emitToChatMembers(
@@ -324,7 +321,7 @@ export class CallGateway {
     @MessageBody() payload: RtcAnswerRequest,
   ) {
     const userId = client.data.userId;
-    const fromMemberId = await this.chatMemberService.getChatMemberId(
+    const memberId = await this.chatMemberService.getChatMemberId(
       payload.chatId,
       userId,
     );
@@ -332,14 +329,14 @@ export class CallGateway {
     const response: RtcAnswerResponse = {
       chatId: payload.chatId,
       answer: payload.answer,
-      fromMemberId,
-      toMemberId: 'sfu',
+      memberId,
     };
 
     await this.websocketNotificationService.emitToChatMembers(
       payload.chatId,
       CallEvent.P2P_ANSWER_SDP,
       response,
+      { senderId: userId, excludeSender: true },
     );
   }
 
@@ -349,7 +346,7 @@ export class CallGateway {
     @MessageBody() payload: IceCandidateRequest,
   ) {
     const userId = client.data.userId;
-    const fromMemberId = await this.chatMemberService.getChatMemberId(
+    const memberId = await this.chatMemberService.getChatMemberId(
       payload.chatId,
       userId,
     );
@@ -357,7 +354,7 @@ export class CallGateway {
     const response: IceCandidateResponse = {
       chatId: payload.chatId,
       candidate: payload.candidate,
-      fromMemberId,
+      memberId,
     };
 
     await this.websocketNotificationService.emitToChatMembers(
