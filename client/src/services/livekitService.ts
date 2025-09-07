@@ -2,14 +2,10 @@ import {
   Room,
   RoomEvent,
   RemoteParticipant,
-  createLocalTracks,
-  LocalTrack,
   RemoteTrack,
   RemoteTrackPublication,
-  Track,
   ConnectionState,
   LocalTrackPublication,
-  createLocalScreenTracks,
 } from "livekit-client";
 
 export interface LiveKitServiceOptions {
@@ -36,7 +32,6 @@ export interface LiveKitServiceOptions {
 export class LiveKitService {
   private room: Room;
   private options?: LiveKitServiceOptions;
-  private localTracks: LocalTrack[] = [];
 
   constructor() {
     this.room = new Room({ adaptiveStream: true, dynacast: true });
@@ -48,11 +43,11 @@ export class LiveKitService {
     try {
       this.setupEventListeners();
 
-      await this.room.connect(url, token, { autoSubscribe: true });
-
-      if (options.audio || options.video) {
-        await this.publishLocalTracks(options.audio, options.video);
-      }
+      // Let LiveKit handle all media acquisition
+      await this.room.connect(url, token, {
+        autoSubscribe: true,
+        // Media options are handled by LiveKit internally
+      });
 
       this.handleExistingParticipants();
     } catch (error) {
@@ -63,7 +58,6 @@ export class LiveKitService {
 
   async disconnect() {
     try {
-      await this.unpublishAllLocalTracks();
       this.room.disconnect();
       this.removeEventListeners();
     } catch (error) {
@@ -81,9 +75,9 @@ export class LiveKitService {
 
   async toggleScreenShare(enabled: boolean) {
     if (enabled) {
-      await this.startScreenShare();
+      await this.room.localParticipant.setScreenShareEnabled(true);
     } else {
-      await this.stopScreenShare();
+      await this.room.localParticipant.setScreenShareEnabled(false);
     }
   }
 
@@ -132,50 +126,6 @@ export class LiveKitService {
 
   private removeEventListeners() {
     this.room.removeAllListeners();
-  }
-
-  private async publishLocalTracks(audio = false, video = false) {
-    const tracks = await createLocalTracks({
-      audio: audio ? { echoCancellation: true, noiseSuppression: true } : false,
-      video: video
-        ? { resolution: { width: 1280, height: 720 }, frameRate: 30 }
-        : false,
-    });
-
-    this.localTracks = tracks;
-
-    for (const track of tracks) {
-      await this.room.localParticipant.publishTrack(track);
-    }
-  }
-
-  private async unpublishAllLocalTracks() {
-    for (const track of this.localTracks) {
-      await this.room.localParticipant.unpublishTrack(track);
-    }
-    this.localTracks = [];
-  }
-
-  private async startScreenShare() {
-    const screenTracks = await createLocalScreenTracks({
-      audio: true,
-      video: true,
-    });
-    for (const track of screenTracks) {
-      await this.room.localParticipant.publishTrack(track);
-      this.localTracks.push(track);
-    }
-  }
-
-  private async stopScreenShare() {
-    const screenTracks = this.localTracks.filter(
-      (t) => t.source === Track.Source.ScreenShare
-    );
-    for (const track of screenTracks) {
-      await this.room.localParticipant.unpublishTrack(track);
-      this.localTracks = this.localTracks.filter((t) => t !== track);
-      track.stop();
-    }
   }
 
   private handleExistingParticipants() {
