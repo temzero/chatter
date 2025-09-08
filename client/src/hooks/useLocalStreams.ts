@@ -1,10 +1,16 @@
 // hooks/useLocalStreams.ts
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { useSFUCallStore } from "@/stores/callStore/sfuCallStore";
 import { useP2PCallStore } from "@/stores/callStore/p2pCallStore";
+import { Track } from "livekit-client";
 
 export const useLocalStreams = () => {
+  const { isGroupCall } = useCallStore();
+  const { liveKitService } = useSFUCallStore();
+  const { localVoiceStream, localVideoStream: p2pLocalVideoStream } =
+    useP2PCallStore();
+
   const [localVideoStream, setLocalVideoStream] = useState<MediaStream | null>(
     null
   );
@@ -12,64 +18,61 @@ export const useLocalStreams = () => {
     null
   );
 
-  const { isGroupCall } = useCallStore();
-  const liveKitService = useSFUCallStore((state) => state.liveKitService);
-  const { localVoiceStream, localVideoStream: p2pLocalVideoStream } =
-    useP2PCallStore();
-
-  // Handle SFU streams (extract from LiveKit)
   useEffect(() => {
-    if (!isGroupCall || !liveKitService) return;
+    if (!isGroupCall || !liveKitService) {
+      setLocalVideoStream(null);
+      setLocalAudioStream(null);
+      return;
+    }
 
-    const localParticipant = liveKitService.getLocalParticipant();
+    const checkTracks = () => {
+      const localParticipant = liveKitService.getLocalParticipant();
+      if (!localParticipant) return;
 
-    const updateStreams = () => {
-      // Video streams (excluding screen share)
-      const videoTracks = Array.from(
-        localParticipant.trackPublications.values()
-      )
-        .filter(
-          (pub) =>
-            pub.kind === "video" && pub.track && pub.source !== "screen_share"
-        )
-        .map((pub) => pub.track!.mediaStreamTrack);
-
-      setLocalVideoStream(
-        videoTracks.length > 0 ? new MediaStream(videoTracks) : null
+      // Check for video track
+      const videoPublication = localParticipant.getTrackPublication(
+        Track.Source.Camera
       );
+      if (videoPublication?.track?.mediaStreamTrack) {
+        const videoStream = new MediaStream();
+        videoStream.addTrack(videoPublication.track.mediaStreamTrack);
+        setLocalVideoStream(videoStream);
+      } else {
+        setLocalVideoStream(null);
+      }
 
-      // Audio streams
-      const audioTracks = Array.from(
-        localParticipant.trackPublications.values()
-      )
-        .filter((pub) => pub.kind === "audio" && pub.track)
-        .map((pub) => pub.track!.mediaStreamTrack);
-
-      setLocalAudioStream(
-        audioTracks.length > 0 ? new MediaStream(audioTracks) : null
+      // Check for audio track
+      const audioPublication = localParticipant.getTrackPublication(
+        Track.Source.Microphone
       );
+      if (audioPublication?.track?.mediaStreamTrack) {
+        const audioStream = new MediaStream();
+        audioStream.addTrack(audioPublication.track.mediaStreamTrack);
+        setLocalAudioStream(audioStream);
+      } else {
+        setLocalAudioStream(null);
+      }
     };
 
-    updateStreams();
+    // Check initially
+    checkTracks();
 
-    // Listen for changes
-    const handleTrackChange = () => updateStreams();
-    localParticipant.on("localTrackPublished", handleTrackChange);
-    localParticipant.on("localTrackUnpublished", handleTrackChange);
+    // Set up interval to check for tracks (they might be published later)
+    const interval = setInterval(checkTracks, 1000);
 
-    return () => {
-      localParticipant.off("localTrackPublished", handleTrackChange);
-      localParticipant.off("localTrackUnpublished", handleTrackChange);
-    };
+    return () => clearInterval(interval);
   }, [isGroupCall, liveKitService]);
 
-  // Handle P2P streams (from P2P store)
-  useEffect(() => {
-    if (isGroupCall) return;
-
-    setLocalAudioStream(localVoiceStream);
-    setLocalVideoStream(p2pLocalVideoStream);
-  }, [isGroupCall, localVoiceStream, p2pLocalVideoStream]);
-
-  return { localVideoStream, localAudioStream };
+  // Return appropriate streams based on call type
+  if (isGroupCall) {
+    return {
+      localVideoStream,
+      localAudioStream,
+    };
+  } else {
+    return {
+      localVideoStream: p2pLocalVideoStream,
+      localAudioStream: localVoiceStream,
+    };
+  }
 };

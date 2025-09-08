@@ -1,7 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
+import { RemoteTrack } from "livekit-client";
 
 type VoiceVisualizerProps = {
-  stream: MediaStream | null;
+  stream: MediaStream | RemoteTrack | null;
   isMuted?: boolean;
   width?: number;
   height?: number;
@@ -22,8 +23,17 @@ export const VoiceVisualizerBar = ({
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyzerRef = useRef<AnalyserNode | null>(null);
 
+  // Convert RemoteTrack to MediaStream if needed
+  const mediaStream = useMemo(() => {
+    if (!stream) return null;
+    if (stream instanceof MediaStream) return stream;
+    if ("mediaStreamTrack" in stream)
+      return new MediaStream([stream.mediaStreamTrack]);
+    return null;
+  }, [stream]);
+
   useEffect(() => {
-    if (!stream || isMuted) {
+    if (!mediaStream || isMuted) {
       // Clean up if no stream or muted
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
@@ -44,7 +54,7 @@ export const VoiceVisualizerBar = ({
       analyzerRef.current = analyzer;
       analyzer.fftSize = 256;
 
-      const source = audioContext.createMediaStreamSource(stream);
+      const source = audioContext.createMediaStreamSource(mediaStream);
       source.connect(analyzer);
 
       const drawWaveform = () => {
@@ -101,7 +111,7 @@ export const VoiceVisualizerBar = ({
         audioContextRef.current?.close();
       }
     };
-  }, [stream, isMuted, barColor]);
+  }, [mediaStream, isMuted, barColor]);
 
   return (
     <canvas

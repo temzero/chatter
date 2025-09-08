@@ -1,8 +1,9 @@
 // components/VoiceVisualizer.tsx
 import { useEffect, useRef, useState } from "react";
+import { RemoteTrack } from "livekit-client";
 
 type VoiceVisualizerProps = {
-  stream: MediaStream | null;
+  stream: MediaStream | RemoteTrack | null;
   isMuted: boolean;
   size?: number; // circle size in px
   circleColor?: string;
@@ -22,13 +23,20 @@ export const VoiceVisualizer = ({
   const analyzerRef = useRef<AnalyserNode | null>(null);
   const [scale, setScale] = useState(0);
 
+  // Convert RemoteTrack to MediaStream if needed
+  const getMediaStream = (
+    s: MediaStream | RemoteTrack | null | undefined
+  ): MediaStream | null => {
+    if (!s) return null;
+    if (s instanceof MediaStream) return s;
+    if (s instanceof RemoteTrack) return new MediaStream([s.mediaStreamTrack]);
+    return null;
+  };
+
   useEffect(() => {
-    if (
-      !stream ||
-      isMuted ||
-      !stream.getAudioTracks ||
-      !stream.getAudioTracks().length
-    ) {
+    const mediaStream = getMediaStream(stream);
+
+    if (!mediaStream || isMuted || !mediaStream.getAudioTracks().length) {
       if (audioContextRef.current?.state !== "closed") {
         audioContextRef.current?.close();
       }
@@ -46,7 +54,7 @@ export const VoiceVisualizer = ({
     analyzer.fftSize = 256;
     analyzerRef.current = analyzer;
 
-    const source = audioContext.createMediaStreamSource(stream);
+    const source = audioContext.createMediaStreamSource(mediaStream);
     source.connect(analyzer);
 
     const dataArray = new Uint8Array(analyzer.frequencyBinCount);
@@ -65,7 +73,6 @@ export const VoiceVisualizer = ({
       const newScale = normalized * 5;
 
       setScale(newScale);
-
       requestAnimationFrame(update);
     };
 
@@ -88,7 +95,6 @@ export const VoiceVisualizer = ({
         height: size,
         backgroundColor: circleColor,
         transform: `scale(${scale})`,
-        // transform: `scale(1)`,
         opacity: opacity,
         zIndex: 0,
       }}

@@ -326,24 +326,33 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
         const updatedMembers = state.sfuMembers.map((m) => {
           if (m.memberId !== member.memberId) return m;
 
-          // Clean up old streams when replacing with new ones
+          // Detach old tracks if they are being replaced
           if (
             member.voiceStream !== undefined &&
             m.voiceStream !== member.voiceStream
           ) {
-            m.voiceStream?.getTracks().forEach((track) => track.stop());
+            get().stopMemberStreams({
+              ...m,
+              voiceStream: m.voiceStream,
+            } as SFUCallMember);
           }
           if (
             member.videoStream !== undefined &&
             m.videoStream !== member.videoStream
           ) {
-            m.videoStream?.getTracks().forEach((track) => track.stop());
+            get().stopMemberStreams({
+              ...m,
+              videoStream: m.videoStream,
+            } as SFUCallMember);
           }
           if (
             member.screenStream !== undefined &&
             m.screenStream !== member.screenStream
           ) {
-            m.screenStream?.getTracks().forEach((track) => track.stop());
+            get().stopMemberStreams({
+              ...m,
+              screenStream: m.screenStream,
+            } as SFUCallMember);
           }
 
           return {
@@ -432,26 +441,19 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
       const member = get().getSFUMember(participant.identity);
       if (!member) return;
 
-      // Clean up existing streams before creating new ones
-      if (track.kind === Track.Kind.Audio && member.voiceStream) {
-        member.voiceStream.getTracks().forEach((t) => t.stop());
-      }
-
       const updates: Partial<SFUCallMember> & { memberId: string } = {
         memberId: participant.identity,
       };
 
-      const mediaStream = new MediaStream([track.mediaStreamTrack]);
-
       if (track.kind === Track.Kind.Audio) {
-        updates.voiceStream = mediaStream;
+        updates.voiceStream = track; // store track directly
         updates.isMuted = false;
       } else if (track.kind === Track.Kind.Video) {
         if (publication.source === Track.Source.ScreenShare) {
-          updates.screenStream = mediaStream;
+          updates.screenStream = track; // store track directly
           updates.isScreenSharing = true;
         } else {
-          updates.videoStream = mediaStream;
+          updates.videoStream = track; // store track directly
           updates.isVideoEnabled = true;
         }
       }
@@ -620,25 +622,22 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
 
     // ========== CLEANUP METHODS ==========
     stopMemberStreams: (member: SFUCallMember) => {
-      // Stop all tracks safely
-      const streams = [
-        member.voiceStream,
-        member.videoStream,
-        member.screenStream,
-      ];
+      // For SFU tracks, detach them instead of stopping
+      const { voiceStream, videoStream, screenStream } = member;
 
-      streams.forEach((stream) => {
-        if (stream) {
-          try {
-            stream.getTracks().forEach((track) => {
-              track.stop();
-              track.enabled = false;
-            });
-          } catch (error) {
-            console.error("Error stopping stream tracks:", error);
-          }
+      try {
+        if (voiceStream) {
+          (voiceStream as import("livekit-client").AudioTrack).detach();
         }
-      });
+        if (videoStream) {
+          (videoStream as import("livekit-client").VideoTrack).detach();
+        }
+        if (screenStream) {
+          (screenStream as import("livekit-client").VideoTrack).detach();
+        }
+      } catch (error) {
+        console.error("Error detaching SFU streams:", error);
+      }
     },
 
     clearSFUState: () => {

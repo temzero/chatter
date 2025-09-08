@@ -19,28 +19,9 @@ const CallMember = ({
   className?: string;
 }) => {
   const [chatMember, setChatMember] = useState<ChatMember | null>(null);
-  const getChatMemberById = useChatMemberStore((state) => state.getChatMemberById);
-
-  // Debug logs
-  console.log(
-    `🎙️ Member isMuted: ${member.isMuted}, Member voiceStream:`,
-    member.voiceStream
+  const getChatMemberById = useChatMemberStore(
+    (state) => state.getChatMemberById
   );
-  console.log(
-    `🎥 Video enabled: ${member.isVideoEnabled}, 🎥 videoStream: ${member.videoStream}`
-  );
-
-  if (member.voiceStream) {
-    member.voiceStream.getTracks().forEach((track, index) => {
-      console.log(`🎙️ Track ${index}:`, {
-        kind: track.kind,
-        enabled: track.enabled,
-        readyState: track.readyState,
-        muted: track.muted,
-        id: track.id,
-      });
-    });
-  }
 
   // Fetch chat member info
   useEffect(() => {
@@ -67,31 +48,38 @@ const CallMember = ({
       : "Unknown User";
   }, [chatMember]);
 
+  // Determine which video to show: screen share takes priority over camera
+  const activeVideoTrack = member.screenStream || member.videoStream;
+  const isShowingScreen = !!member.screenStream;
+  const hasVideo = member.isVideoEnabled && activeVideoTrack;
+
   return (
     <div
       className={`relative w-full h-full overflow-hidden bg-black flex items-center justify-center ${className}`}
     >
-      {/* Background avatar image with opacity */}
-      {chatMember?.avatarUrl && (
+      {/* Background avatar image with opacity - only show if no video */}
+      {chatMember?.avatarUrl && !hasVideo && (
         <img
-          src={chatMember?.avatarUrl}
+          src={chatMember.avatarUrl}
           alt={displayName}
           className="absolute inset-0 w-full h-full object-cover opacity-20 z-0"
         />
       )}
 
-      {/* Video participant */}
-      {member.isVideoEnabled && member.videoStream ? (
+      {/* Video participant (camera or screen share) */}
+      {hasVideo ? (
         <>
           <VideoStream
-            stream={member.videoStream}
+            stream={activeVideoTrack}
             className="absolute inset-0 w-full h-full object-cover z-0"
           />
 
           {/* Voice stream (audio only) */}
-          <VoiceStream stream={member.voiceStream} muted={member.isMuted} />
+          {member.voiceStream && (
+            <VoiceStream stream={member.voiceStream} muted={member.isMuted} />
+          )}
 
-          {/* Voice visualizer (bars) */}
+          {/* Voice visualizer (bars) for video participants */}
           {showVoiceVisualizer && member.voiceStream && !member.isMuted && (
             <VoiceVisualizerBar
               stream={member.voiceStream}
@@ -103,22 +91,23 @@ const CallMember = ({
             />
           )}
 
-          {/* Fallback if no active voice stream */}
-          {showVoiceVisualizer &&
-            (!member.voiceStream || !member.voiceStream.active) && (
-              <div className="absolute inset-0 flex items-center justify-center z-0">
-                <div className="w-48 h-48 border-4 border-red-400 rounded-full opacity-50" />
-              </div>
-            )}
+          {/* Screen share indicator */}
+          {isShowingScreen && (
+            <div className="absolute top-2 left-2 bg-blue-600/80 px-2 py-1 rounded text-xs z-10">
+              🖥️ Screen Sharing
+            </div>
+          )}
         </>
       ) : (
         /* Audio-only participant (avatar + circle visualizer) */
         <div className="flex flex-col gap-2 items-center justify-center p-4 relative">
-          <VoiceStream stream={member.voiceStream} muted={member.isMuted} />
+          {member.voiceStream && (
+            <VoiceStream stream={member.voiceStream} muted={member.isMuted} />
+          )}
 
           {/* Voice visualizer around avatar */}
           <div className="relative flex items-center justify-center">
-            {showVoiceVisualizer && member.voiceStream && (
+            {showVoiceVisualizer && member.voiceStream && !member.isMuted && (
               <div className="absolute inset-0 flex items-center justify-center">
                 <VoiceVisualizer
                   stream={member.voiceStream}
@@ -129,12 +118,6 @@ const CallMember = ({
                 />
               </div>
             )}
-            {/* {showVoiceVisualizer &&
-              (!member.voiceStream || !member.voiceStream.active) && (
-                <div className="absolute inset-0 flex items-center justify-center z-0">
-                  <div className="w-48 h-48 border-2 border-gray-400 rounded-full opacity-50" />
-                </div>
-              )} */}
             <Avatar
               avatarUrl={chatMember?.avatarUrl}
               name={displayName}
@@ -150,9 +133,10 @@ const CallMember = ({
       )}
 
       {/* Overlay name (works for both video and audio) */}
-      <div className="absolute bottom-2 left-2 bg-black/50 px-2 py-1 rounded text-sm">
+      <div className="absolute bottom-2 left-2 bg-black/50 px-2 py-1 rounded text-sm z-10">
         {displayName}
         {member.isMuted && " 🔇"}
+        {isShowingScreen && " 🖥️"}
       </div>
     </div>
   );

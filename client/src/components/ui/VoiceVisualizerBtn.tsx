@@ -1,9 +1,10 @@
-// components/VoiceVisualizerButton.tsx
+import { useMemo } from "react";
+import { RemoteTrack } from "livekit-client";
 import { VoiceVisualizer } from "./VoiceVisualizer";
 import { Button } from "./Button";
 
 type VoiceVisualizerButtonProps = {
-  stream: MediaStream | null;
+  stream: MediaStream | RemoteTrack | null;
   isMuted: boolean;
   onClick: () => void;
   className?: string;
@@ -26,6 +27,16 @@ export const VoiceVisualizerButton = ({
     md: 40,
     lg: 48,
   }[size];
+
+  // Convert RemoteTrack to MediaStream if needed
+  const mediaStream = useMemo(() => {
+    if (!stream) return null;
+    if (stream instanceof MediaStream) return stream;
+    if ("mediaStreamTrack" in stream)
+      return new MediaStream([stream.mediaStreamTrack]);
+    return null;
+  }, [stream]);
+
   console.log("VoiceVisualizerButton muted:", isMuted);
 
   return (
@@ -34,9 +45,9 @@ export const VoiceVisualizerButton = ({
         isMuted || "custom-border"
       } ${className}`}
     >
-      {!isMuted && (
+      {!isMuted && mediaStream && (
         <VoiceVisualizer
-          stream={stream}
+          stream={mediaStream}
           isMuted={isMuted}
           size={buttonSize}
           circleColor={circleColor}

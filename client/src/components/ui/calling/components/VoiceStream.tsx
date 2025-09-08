@@ -1,22 +1,36 @@
 // components/call/VoiceStream.tsx
 import { useEffect, useRef } from "react";
+import { RemoteTrack } from "livekit-client";
+
+type VoiceStreamProps = {
+  stream?: MediaStream | RemoteTrack | null;
+  muted?: boolean;
+  className?: string;
+};
 
 export const VoiceStream = ({
   stream,
   muted = false,
   className = "",
-}: {
-  stream?: MediaStream | null;
-  muted?: boolean;
-  className?: string;
-}) => {
+}: VoiceStreamProps) => {
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  // Helper: convert RemoteTrack to MediaStream
+  const getMediaStream = (
+    s: MediaStream | RemoteTrack | null | undefined
+  ): MediaStream | null => {
+    if (!s) return null;
+    if (s instanceof MediaStream) return s;
+    if (s instanceof RemoteTrack) return new MediaStream([s.mediaStreamTrack]);
+    return null;
+  };
 
   useEffect(() => {
     const audioEl = audioRef.current;
-    if (!audioEl || !stream) return;
+    const mediaStream = getMediaStream(stream);
+    if (!audioEl || !mediaStream) return;
 
-    audioEl.srcObject = stream;
+    audioEl.srcObject = mediaStream;
     audioEl
       .play()
       .catch((err) =>
@@ -31,7 +45,8 @@ export const VoiceStream = ({
     };
   }, [stream]);
 
-  if (!stream) return null;
+  const mediaStream = getMediaStream(stream);
+  if (!mediaStream) return null;
 
   return (
     <audio

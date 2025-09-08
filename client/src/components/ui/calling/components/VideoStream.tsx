@@ -1,26 +1,35 @@
+// components/call/components/VideoStream.tsx
 import { useEffect, useRef } from "react";
+import { RemoteTrack } from "livekit-client";
 
 export const VideoStream = ({
   stream,
   className = "",
   muted = false,
 }: {
-  stream: MediaStream | null;
+  stream: MediaStream | RemoteTrack | null;
   className?: string;
   muted?: boolean;
-  showVisualizer?: boolean;
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (videoRef.current && stream) {
-      videoRef.current.srcObject = stream;
+    if (!videoRef.current) return;
+
+    // Detach previous track if needed
+    const videoEl = videoRef.current;
+    if (stream instanceof RemoteTrack) {
+      stream.attach(videoEl);
+      return () => {
+        stream.detach(videoEl);
+      };
+    } else if (stream instanceof MediaStream) {
+      videoEl.srcObject = stream;
     }
   }, [stream]);
 
   return (
     <div className={`${className} relative aspect-video overflow-hidden`}>
-      {/* Video as background */}
       <video
         ref={videoRef}
         className="absolute inset-0 w-full h-full object-cover z-0"
