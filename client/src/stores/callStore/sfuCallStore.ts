@@ -16,7 +16,6 @@ import {
   RemoteTrackPublication,
   RemoteTrack,
 } from "livekit-client";
-import { stopMediaStreams } from "@/utils/webRtc/localStream.Utils";
 
 export interface SFUState {
   liveKitService: LiveKitService | null;
@@ -53,11 +52,12 @@ export interface SFUActions {
   ) => void;
 
   // Media Controls
-  toggleAudio: () => Promise<void>;
-  toggleVideo: () => Promise<void>;
-  toggleScreenShare: () => Promise<void>;
+  toggleAudio: (enable?: boolean) => Promise<void>;
+  toggleVideo: (enable?: boolean) => Promise<void>;
+  toggleScreenShare: (enable?: boolean) => Promise<void>;
 
   // Clear state
+  stopMemberStreams: (member: SFUCallMember) => void;
   clearSFUState: () => void;
 }
 
@@ -135,6 +135,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
         // Handle error locally
         useCallStore.getState().cleanupStreams();
         useCallStore.setState({
+          timeoutRef: null,
           error: "sfu_init_failed",
           callStatus: CallStatus.ERROR,
         });
@@ -146,8 +147,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
     },
 
     acceptSFUCall: async () => {
-      const { chatId, isVideoCall } = useCallStore.getState();
-
+      const { chatId } = useCallStore.getState();
       try {
         // Clean up any existing streams
         useCallStore.getState().cleanupStreams();
@@ -226,12 +226,11 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
       const { isVideoCall } = useCallStore.getState();
 
       if (!liveKitService) return;
-      console.log("connectToSFURoom:", url, token);
 
       try {
         await liveKitService.connect(url, token, {
-          audio: true, // Let LiveKit handle audio
-          video: isVideoCall, // Let LiveKit handle video if needed
+          audio: true,
+          video: isVideoCall,
           onParticipantConnected: get().handleSFUParticipantConnected,
           onParticipantDisconnected: get().handleSFUParticipantDisconnected,
           onTrackSubscribed: (track, publication, participant) => {
@@ -248,6 +247,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
 
         // Update store with actual state from LiveKit
         const localParticipant = liveKitService.getLocalParticipant();
+
         useCallStore.setState({
           isMuted: !localParticipant.isMicrophoneEnabled,
           isVideoEnabled: localParticipant.isCameraEnabled,
@@ -262,10 +262,29 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
     },
 
     disconnectFromSFU: () => {
-      const { liveKitService } = get();
+      const { liveKitService, sfuMembers } = get();
+
+      // Clear timeout from call store
+      const { timeoutRef } = useCallStore.getState();
+      if (timeoutRef) {
+        clearTimeout(timeoutRef);
+        useCallStore.setState({ timeoutRef: null });
+      }
+
       if (liveKitService) {
-        liveKitService.disconnect();
-        set({ liveKitService: null, sfuMembers: [] });
+        try {
+          // Clean up all member streams first
+          sfuMembers.forEach((member) => {
+            get().stopMemberStreams(member);
+          });
+
+          // Disconnect from room
+          liveKitService.disconnect();
+        } catch (error) {
+          console.error("Error during SFU disconnect:", error);
+        } finally {
+          set({ liveKitService: null, sfuMembers: [] });
+        }
       }
     },
 
@@ -274,16 +293,11 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
       const participant = member.participant as RemoteParticipant;
       if (!participant) return;
 
-      console.log(`addSFUMember ${member.memberId}`);
-
       set((state) => {
-        // Check if member already exists to avoid duplicates
         const existingMember = state.sfuMembers.find(
           (m) => m.memberId === participant.identity
         );
-        if (existingMember) {
-          return state;
-        }
+        if (existingMember) return state;
 
         return {
           sfuMembers: [
@@ -309,29 +323,61 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
       member: Partial<SFUCallMember> & { memberId: string }
     ) => {
       set((state) => {
-        const includeIfDefined = <T>(value: T | undefined, key: string) =>
-          value !== undefined ? { [key]: value } : {};
+        const updatedMembers = state.sfuMembers.map((m) => {
+          if (m.memberId !== member.memberId) return m;
 
-        const updatedMembers = state.sfuMembers.map((m) =>
-          m.memberId === member.memberId
-            ? {
-                ...m,
-                ...includeIfDefined(member.isMuted, "isMuted"),
-                ...includeIfDefined(member.isVideoEnabled, "isVideoEnabled"),
-                ...includeIfDefined(member.isScreenSharing, "isScreenSharing"),
-                ...includeIfDefined(member.voiceStream, "voiceStream"),
-                ...includeIfDefined(member.videoStream, "videoStream"),
-                ...includeIfDefined(member.screenStream, "screenStream"),
-                lastActivity: Date.now(),
-              }
-            : m
-        );
+          // Clean up old streams when replacing with new ones
+          if (
+            member.voiceStream !== undefined &&
+            m.voiceStream !== member.voiceStream
+          ) {
+            m.voiceStream?.getTracks().forEach((track) => track.stop());
+          }
+          if (
+            member.videoStream !== undefined &&
+            m.videoStream !== member.videoStream
+          ) {
+            m.videoStream?.getTracks().forEach((track) => track.stop());
+          }
+          if (
+            member.screenStream !== undefined &&
+            m.screenStream !== member.screenStream
+          ) {
+            m.screenStream?.getTracks().forEach((track) => track.stop());
+          }
+
+          return {
+            ...m,
+            ...(member.isMuted !== undefined && { isMuted: member.isMuted }),
+            ...(member.isVideoEnabled !== undefined && {
+              isVideoEnabled: member.isVideoEnabled,
+            }),
+            ...(member.isScreenSharing !== undefined && {
+              isScreenSharing: member.isScreenSharing,
+            }),
+            ...(member.voiceStream !== undefined && {
+              voiceStream: member.voiceStream,
+            }),
+            ...(member.videoStream !== undefined && {
+              videoStream: member.videoStream,
+            }),
+            ...(member.screenStream !== undefined && {
+              screenStream: member.screenStream,
+            }),
+            lastActivity: Date.now(),
+          };
+        });
 
         return { sfuMembers: updatedMembers };
       });
     },
 
     removeSFUMember: (memberId: string) => {
+      const member = get().getSFUMember(memberId);
+      if (member) {
+        get().stopMemberStreams(member);
+      }
+
       set((state) => ({
         sfuMembers: state.sfuMembers.filter((m) => m.memberId !== memberId),
       }));
@@ -343,7 +389,8 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
 
     // ========== SFU EVENT HANDLERS ==========
     handleSFUParticipantConnected: async (participant: RemoteParticipant) => {
-      // Don't add yourself - you're already in the call as local participant
+      console.log("🔵 PARTICIPANT CONNECTED:", participant.identity);
+
       const myMemberId = await getMyChatMemberId(
         useCallStore.getState().chatId!
       );
@@ -355,30 +402,24 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
 
       console.log(`Remote participant connected: ${participant.identity}`);
 
-      // Add the remote participant to your store
       get().addSFUMember({
         memberId: participant.identity,
         isMuted: !participant.isMicrophoneEnabled,
         isVideoEnabled: participant.isCameraEnabled,
         isScreenSharing: participant.isScreenShareEnabled,
-        participant, // Store the LiveKit participant object
+        participant,
         voiceStream: null,
         videoStream: null,
         screenStream: null,
       });
-
-      // Optional: Notify via WebSocket for UI updates
-      callWebSocketService.updateCallMember({
-        chatId: useCallStore.getState().chatId!,
-        memberId: participant.identity,
-        isMuted: !participant.isMicrophoneEnabled,
-        isVideoEnabled: participant.isCameraEnabled,
-        isScreenSharing: participant.isScreenShareEnabled,
-      });
     },
 
     handleSFUParticipantDisconnected: (participant: RemoteParticipant) => {
-      get().removeSFUMember(participant.identity);
+      const member = get().getSFUMember(participant.identity);
+      if (member) {
+        get().stopMemberStreams(member);
+        get().removeSFUMember(participant.identity);
+      }
       toast.info(`${participant.name || participant.identity} left the call`);
     },
 
@@ -387,12 +428,18 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
       publication: RemoteTrackPublication,
       participant: RemoteParticipant
     ) => {
+      console.log("🔴 TRACK SUBSCRIBED:", participant.identity, track.kind);
       const member = get().getSFUMember(participant.identity);
       if (!member) return;
 
-      const updates = {
+      // Clean up existing streams before creating new ones
+      if (track.kind === Track.Kind.Audio && member.voiceStream) {
+        member.voiceStream.getTracks().forEach((t) => t.stop());
+      }
+
+      const updates: Partial<SFUCallMember> & { memberId: string } = {
         memberId: participant.identity,
-      } as Partial<SFUCallMember> & { memberId: string };
+      };
 
       const mediaStream = new MediaStream([track.mediaStreamTrack]);
 
@@ -428,9 +475,9 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
       const member = get().getSFUMember(participant.identity);
       if (!member) return;
 
-      const updates = {
+      const updates: Partial<SFUCallMember> & { memberId: string } = {
         memberId: participant.identity,
-      } as Partial<SFUCallMember> & { memberId: string };
+      };
 
       if (track.kind === Track.Kind.Audio) {
         updates.voiceStream = null;
@@ -447,7 +494,6 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
 
       get().updateSFUMember(updates);
 
-      // Notify WebSocket service
       callWebSocketService.updateCallMember({
         chatId: useCallStore.getState().chatId!,
         memberId: participant.identity,
@@ -458,31 +504,27 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
     },
 
     // ========== MEDIA CONTROLS ==========
-    toggleAudio: async () => {
+    toggleAudio: async (enable?: boolean) => {
       const { chatId, isMuted } = useCallStore.getState();
       const { liveKitService } = get();
       const myMemberId = await getMyChatMemberId(chatId!);
 
       if (!liveKitService || !chatId || !myMemberId) return;
 
+      const shouldUnmute = enable !== undefined ? enable : isMuted;
+
       try {
-        if (isMuted) {
-          // 🔊 OPEN mic - let LiveKit handle it
+        if (shouldUnmute) {
           await liveKitService.toggleAudio(true);
-
           useCallStore.setState({ isMuted: false });
-
           callWebSocketService.updateCallMember({
             chatId,
             memberId: myMemberId,
             isMuted: false,
           });
         } else {
-          // 🔇 CLOSE mic
           await liveKitService.toggleAudio(false);
-
           useCallStore.setState({ isMuted: true });
-
           callWebSocketService.updateCallMember({
             chatId,
             memberId: myMemberId,
@@ -500,31 +542,27 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
       }
     },
 
-    toggleVideo: async () => {
+    toggleVideo: async (enable?: boolean) => {
       const { chatId, isVideoEnabled } = useCallStore.getState();
       const { liveKitService } = get();
       const myMemberId = await getMyChatMemberId(chatId!);
 
       if (!liveKitService || !chatId || !myMemberId) return;
 
+      const shouldTurnOn = enable !== undefined ? enable : !isVideoEnabled;
+
       try {
-        if (!isVideoEnabled) {
-          // 🎥 TURN ON camera - let LiveKit handle it
+        if (shouldTurnOn) {
           await liveKitService.toggleVideo(true);
-
           useCallStore.setState({ isVideoEnabled: true });
-
           callWebSocketService.updateCallMember({
             chatId,
             memberId: myMemberId,
             isVideoEnabled: true,
           });
         } else {
-          // 📷 TURN OFF camera
           await liveKitService.toggleVideo(false);
-
           useCallStore.setState({ isVideoEnabled: false });
-
           callWebSocketService.updateCallMember({
             chatId,
             memberId: myMemberId,
@@ -542,31 +580,27 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
       }
     },
 
-    toggleScreenShare: async () => {
+    toggleScreenShare: async (enable?: boolean) => {
       const { liveKitService } = get();
       const { chatId, isScreenSharing } = useCallStore.getState();
       const myMemberId = await getMyChatMemberId(chatId!);
 
       if (!liveKitService || !chatId || !myMemberId) return;
 
+      const shouldStart = enable !== undefined ? enable : !isScreenSharing;
+
       try {
-        if (!isScreenSharing) {
-          // Start screen sharing - let LiveKit handle it
+        if (shouldStart) {
           await liveKitService.toggleScreenShare(true);
-
           useCallStore.setState({ isScreenSharing: true });
-
           callWebSocketService.updateCallMember({
             chatId,
             memberId: myMemberId,
             isScreenSharing: true,
           });
         } else {
-          // Stop screen sharing
           await liveKitService.toggleScreenShare(false);
-
           useCallStore.setState({ isScreenSharing: false });
-
           callWebSocketService.updateCallMember({
             chatId,
             memberId: myMemberId,
@@ -584,23 +618,35 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
       }
     },
 
-    // ========== CLEAR STATE ==========
+    // ========== CLEANUP METHODS ==========
+    stopMemberStreams: (member: SFUCallMember) => {
+      // Stop all tracks safely
+      const streams = [
+        member.voiceStream,
+        member.videoStream,
+        member.screenStream,
+      ];
+
+      streams.forEach((stream) => {
+        if (stream) {
+          try {
+            stream.getTracks().forEach((track) => {
+              track.stop();
+              track.enabled = false;
+            });
+          } catch (error) {
+            console.error("Error stopping stream tracks:", error);
+          }
+        }
+      });
+    },
+
     clearSFUState: () => {
       const { liveKitService, sfuMembers } = get();
-      const { localScreenStream } = useCallStore.getState();
-
-      // Clean up local streams (only screen share needs manual cleanup)
-      if (localScreenStream) {
-        localScreenStream.getTracks().forEach((t) => t.stop());
-      }
 
       // Clean up all member streams
       sfuMembers.forEach((member) => {
-        stopMediaStreams(
-          member.voiceStream,
-          member.videoStream,
-          member.screenStream
-        );
+        get().stopMemberStreams(member);
       });
 
       // Disconnect from SFU

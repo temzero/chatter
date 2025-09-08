@@ -86,7 +86,7 @@ class AudioServiceImpl implements AudioService {
       }
       if (error instanceof DOMException && error.name === "NotAllowedError") {
         // User hasn’t interacted → just skip
-        console.log("Skipping sound: no user interaction yet");
+        // console.log("Skipping sound: no user interaction yet");
         return;
       }
       handleError(error, "Failed to play sound");

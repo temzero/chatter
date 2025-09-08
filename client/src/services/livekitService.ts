@@ -1,3 +1,4 @@
+import { useCallStore } from "@/stores/callStore/callStore";
 import {
   Room,
   RoomEvent,
@@ -46,7 +47,6 @@ export class LiveKitService {
       // Let LiveKit handle all media acquisition
       await this.room.connect(url, token, {
         autoSubscribe: true,
-        // Media options are handled by LiveKit internally
       });
 
       this.handleExistingParticipants();
@@ -59,25 +59,50 @@ export class LiveKitService {
   async disconnect() {
     try {
       this.room.disconnect();
-      this.removeEventListeners();
     } catch (error) {
       this.options?.onError?.(error as Error);
+    } finally {
+      this.removeEventListeners(); // Ensure this always runs
     }
   }
 
   async toggleAudio(enabled: boolean) {
-    await this.room.localParticipant.setMicrophoneEnabled(enabled);
+    try {
+      await this.room.localParticipant.setMicrophoneEnabled(enabled);
+      useCallStore.setState({
+        isMuted: !enabled,
+      });
+      return true;
+    } catch (error) {
+      console.error("Failed to toggle audio:", error);
+      return false;
+    }
   }
 
   async toggleVideo(enabled: boolean) {
-    await this.room.localParticipant.setCameraEnabled(enabled);
+    try {
+      await this.room.localParticipant.setCameraEnabled(enabled);
+      useCallStore.setState({
+        isVideoEnabled: enabled,
+      });
+      return true;
+    } catch (error) {
+      console.error("Failed to toggle video:", error);
+      return false;
+    }
   }
 
   async toggleScreenShare(enabled: boolean) {
-    if (enabled) {
-      await this.room.localParticipant.setScreenShareEnabled(true);
-    } else {
-      await this.room.localParticipant.setScreenShareEnabled(false);
+    try {
+      await this.room.localParticipant.setScreenShareEnabled(enabled);
+
+      useCallStore.setState({
+        isScreenSharing: enabled,
+      });
+      return true;
+    } catch (error) {
+      console.error("Failed to screen share:", error);
+      return false;
     }
   }
 
@@ -101,27 +126,44 @@ export class LiveKitService {
 
   private setupEventListeners() {
     this.room
-      .on(RoomEvent.ParticipantConnected, (p) =>
-        this.options?.onParticipantConnected?.(p)
-      )
-      .on(RoomEvent.ParticipantDisconnected, (p) =>
-        this.options?.onParticipantDisconnected?.(p)
-      )
-      .on(RoomEvent.TrackSubscribed, (track, publication, participant) =>
-        this.options?.onTrackSubscribed?.(track, publication, participant)
-      )
-      .on(RoomEvent.TrackUnsubscribed, (track, publication, participant) =>
-        this.options?.onTrackUnsubscribed?.(track, publication, participant)
-      )
-      .on(RoomEvent.ConnectionStateChanged, (state) =>
-        this.options?.onConnectionStateChange?.(state)
-      )
-      .on(RoomEvent.LocalTrackPublished, (pub) =>
-        this.options?.onLocalTrackPublished?.(pub)
-      )
-      .on(RoomEvent.LocalTrackUnpublished, (pub) =>
-        this.options?.onLocalTrackUnpublished?.(pub)
-      );
+      .on(RoomEvent.Connected, async () => {
+        console.log("SFU ROOM CONNECTED");
+
+        // Handle existing participants and their already-subscribed tracks
+        this.handleExistingParticipants();
+
+        if (this.options?.audio) {
+          console.log("🔊 Enabling mic after connected");
+          await this.toggleAudio(true);
+        }
+        if (this.options?.video) {
+          console.log("🎥 Enabling camera after connected");
+          await this.toggleVideo(true);
+        }
+      })
+      .on(RoomEvent.ParticipantConnected, (participant) => {
+        this.options?.onParticipantConnected?.(participant);
+      })
+      .on(RoomEvent.ParticipantDisconnected, (participant) => {
+        this.options?.onParticipantDisconnected?.(participant);
+      })
+      .on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
+        this.options?.onTrackSubscribed?.(track, publication, participant);
+      })
+      .on(RoomEvent.TrackUnsubscribed, (track, publication, participant) => {
+        this.options?.onTrackUnsubscribed?.(track, publication, participant);
+      })
+      .on(RoomEvent.ConnectionStateChanged, (state) => {
+        console.log("Connection state changed:", state);
+        this.options?.onConnectionStateChange?.(state);
+      })
+      .on(RoomEvent.LocalTrackPublished, (publication) => {
+        console.log(`Local track published: ${publication.trackSid}`);
+        this.options?.onLocalTrackPublished?.(publication);
+      })
+      .on(RoomEvent.LocalTrackUnpublished, (publication) => {
+        this.options?.onLocalTrackUnpublished?.(publication);
+      });
   }
 
   private removeEventListeners() {
@@ -132,11 +174,18 @@ export class LiveKitService {
     for (const participant of this.getParticipants()) {
       this.options?.onParticipantConnected?.(participant);
 
-      participant.trackPublications.forEach((pub: RemoteTrackPublication) => {
-        if (pub.isSubscribed && pub.track) {
-          this.options?.onTrackSubscribed?.(pub.track, pub, participant);
+      // Only handle tracks that are already subscribed
+      participant.trackPublications.forEach(
+        (publication: RemoteTrackPublication) => {
+          if (publication.isSubscribed && publication.track) {
+            this.options?.onTrackSubscribed?.(
+              publication.track,
+              publication,
+              participant
+            );
+          }
         }
-      });
+      );
     }
   }
 }

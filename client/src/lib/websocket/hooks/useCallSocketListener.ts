@@ -8,6 +8,11 @@ import { useChatStore } from "@/stores/chatStore";
 import { ChatType } from "@/types/enums/ChatType";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { getMyChatMemberId } from "@/stores/chatMemberStore";
+import { useCallStore } from "@/stores/callStore/callStore";
+import { useP2PCallStore } from "@/stores/callStore/p2pCallStore";
+import { useSFUCallStore } from "@/stores/callStore/sfuCallStore";
+import { P2PCallMember, SFUCallMember } from "@/types/store/callMember.type";
+import { useCallSounds } from "@/hooks/useCallSound";
 import {
   IncomingCallResponse,
   CallActionResponse,
@@ -17,11 +22,6 @@ import {
   updateCallPayload,
   callMemberPayload,
 } from "@/types/callPayload";
-import { useCallStore } from "@/stores/callStore/callStore";
-import { useP2PCallStore } from "@/stores/callStore/p2pCallStore";
-import { useSFUCallStore } from "@/stores/callStore/sfuCallStore";
-import { P2PCallMember, SFUCallMember } from "@/types/store/callMember.type";
-import { useCallSounds } from "@/hooks/useCallSound";
 
 export function useCallSocketListeners() {
   useCallSounds();
@@ -42,8 +42,6 @@ export function useCallSocketListeners() {
     };
 
     const handleIncomingCall = (data: IncomingCallResponse) => {
-      console.log("handleIncomingCall");
-
       useCallStore.setState({
         chatId: data.chatId,
         callStatus: CallStatus.INCOMING,
@@ -51,10 +49,6 @@ export function useCallSocketListeners() {
         callerMemberId: data.memberId,
         isGroupCall: data.isGroupCall || false,
       });
-
-      // useCallStore.getState().addCallMember({
-      //   memberId: data.memberId,
-      // });
 
       useModalStore.getState().openModal(ModalType.CALL);
       toast.info(`Incoming ${data.isVideoCall ? "video" : "voice"} call`);
@@ -70,24 +64,47 @@ export function useCallSocketListeners() {
         useCallStore.setState({ isVideoCall });
 
         if (isVideoCall && !callStore.isVideoCall) {
-          callStore
-            .setupLocalStream()
-            .catch((err) =>
-              console.error("Failed to setup video stream:", err)
-            );
+          // Use P2P if not group call, SFU if group call
+          if (callStore.isGroupCall) {
+            // For SFU group calls, video is handled by LiveKit internally
+            console.log("SFU call - video will be handled by LiveKit");
+          } else {
+            // For P2P calls, setup local stream
+            callStore
+              .setupLocalStream()
+              .catch((err) =>
+                console.error("Failed to setup video stream:", err)
+              );
+          }
         }
 
         if (!isVideoCall && callStore.isVideoCall) {
           // Stop video tracks but keep audio
-          callStore.localVideoStream?.getVideoTracks().forEach((t) => t.stop());
-          useCallStore.setState({
-            localVideoStream: null,
-            isVideoEnabled: false,
-          });
+          if (callStore.isGroupCall) {
+            // For SFU calls, toggle video off through LiveKit
+            useSFUCallStore
+              .getState()
+              .toggleVideo()
+              .catch((err) =>
+                console.error("Failed to disable SFU video:", err)
+              );
+          } else {
+            // For P2P calls, stop video tracks
+            useP2PCallStore
+              .getState()
+              .localVideoStream?.getVideoTracks()
+              .forEach((t) => t.stop());
+            useP2PCallStore.setState({
+              localVideoStream: null,
+            });
+            useCallStore.setState({
+              isVideoEnabled: false,
+            });
+          }
         }
       }
     };
-
+    
     const handleCallMemberUpdated = (data: callMemberPayload) => {
       console.log("handleCallMemberUpdated");
       const callStore = useCallStore.getState();

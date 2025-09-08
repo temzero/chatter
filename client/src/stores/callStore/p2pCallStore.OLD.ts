@@ -22,7 +22,7 @@ import {
 } from "@/utils/webRtc/localStream.Utils";
 
 export interface P2PState {
-  // Local streams (moved from main call store)
+  // Local streams
   localVoiceStream: MediaStream | null;
   localVideoStream: MediaStream | null;
   localScreenStream: MediaStream | null;
@@ -32,13 +32,6 @@ export interface P2PState {
 }
 
 export interface P2PActions {
-  // Local stream management (moved from main call store)
-  setupLocalStream: () => Promise<void>;
-  setLocalVoiceStream: (stream: MediaStream | null) => void;
-  setLocalVideoStream: (stream: MediaStream | null) => void;
-  setLocalScreenStream: (stream: MediaStream | null) => void;
-  cleanupStreams: () => void;
-
   initializeP2PCall: (chatId: string, isVideoCall: boolean) => Promise<void>;
   acceptP2PCall: () => Promise<void>;
   rejectP2PCall: (isCancel?: boolean) => void;
@@ -85,85 +78,8 @@ export interface P2PActions {
 export const useP2PCallStore = create<P2PState & P2PActions>()(
   devtools((set, get) => ({
     // ========== P2P STATE ==========
-    localVoiceStream: null,
-    localVideoStream: null,
-    localScreenStream: null,
     p2pMembers: [],
     iceCandidates: [],
-
-    // ========== LOCAL STREAM MANAGEMENT ==========
-    setupLocalStream: async () => {
-      try {
-        const { isVideoCall, isVideoEnabled } = useCallStore.getState();
-        // Stop any existing tracks using utility functions
-        const { localVoiceStream, localVideoStream, localScreenStream } = get();
-        stopMediaStreams(localVoiceStream, localVideoStream, localScreenStream);
-
-        // Always get audio stream
-        const audioStream = await getMicStream();
-
-        // Only get video stream if both isVideoCall and isVideoEnabled are true
-        const videoStream =
-          isVideoCall && isVideoEnabled ? await getVideoStream() : null;
-
-        set({
-          localVoiceStream: audioStream,
-          localVideoStream: videoStream,
-        });
-
-        // Update UI state in main store
-        useCallStore.setState({
-          isVideoEnabled: isVideoCall && isVideoEnabled && !!videoStream,
-          error: null,
-        });
-      } catch (error) {
-        const { isVideoCall, isVideoEnabled } = useCallStore.getState();
-        useCallStore.setState({ error: "device_unavailable" });
-        handleError(
-          error,
-          isVideoCall && isVideoEnabled
-            ? "Cannot access microphone or camera. Please close other applications."
-            : "Cannot access microphone. Please close other applications."
-        );
-      }
-    },
-
-    setLocalVoiceStream: (stream: MediaStream | null) => {
-      const oldStream = get().localVoiceStream;
-      if (oldStream) {
-        oldStream.getTracks().forEach((t) => t.stop()); // cleanup old
-      }
-      set({ localVoiceStream: stream });
-    },
-
-    setLocalVideoStream: (stream: MediaStream | null) => {
-      const oldStream = get().localVideoStream;
-      if (oldStream) {
-        oldStream.getTracks().forEach((t) => t.stop());
-      }
-      set({ localVideoStream: stream });
-    },
-
-    setLocalScreenStream: (stream: MediaStream | null) => {
-      const oldStream = get().localScreenStream;
-      if (oldStream) {
-        oldStream.getTracks().forEach((t) => t.stop());
-      }
-      set({ localScreenStream: stream });
-    },
-
-    cleanupStreams: () => {
-      const { localVoiceStream, localVideoStream, localScreenStream } = get();
-      localVoiceStream?.getTracks().forEach((track) => track.stop());
-      localVideoStream?.getTracks().forEach((track) => track.stop());
-      localScreenStream?.getTracks().forEach((track) => track.stop());
-
-      set({
-        localVoiceStream: null,
-        localVideoStream: null,
-        localScreenStream: null,
-      });
-    },
 
     // ========== P2P ACTIONS ==========
     initializeP2PCall: async (chatId: string, isVideoCall: boolean) => {
@@ -174,14 +90,10 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         const voiceStream = await getMicStream();
         const videoStream = isVideoCall ? await getVideoStream() : null;
 
-        // 2. Update P2P store with streams
-        set({
+        // 2. Update base store with ALL necessary state
+        useCallStore.setState({
           localVoiceStream: voiceStream,
           localVideoStream: videoStream,
-        });
-
-        // 3. Update base store with UI state
-        useCallStore.setState({
           isVideoEnabled: isVideoCall,
           startedAt: new Date(),
           chatId,
@@ -189,10 +101,10 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
           callStatus: CallStatus.OUTGOING,
         });
 
-        // 4. OPEN MODAL ONLY AFTER SUCCESS
+        // 3. OPEN MODAL ONLY AFTER SUCCESS
         useModalStore.getState().openModal(ModalType.CALL);
 
-        // 5. Set timeout
+        // 4. Set timeout
         const timeoutRef = setTimeout(() => {
           const { callStatus } = useCallStore.getState();
           if (callStatus === CallStatus.OUTGOING) {
@@ -204,7 +116,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
 
         useCallStore.setState({ timeoutRef });
 
-        // 6. Initiate signaling
+        // 5. Initiate signaling
         callWebSocketService.initiateCall({
           chatId,
           isVideoCall: isVideoCall,
@@ -212,7 +124,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         });
       } catch (error) {
         // Handle error locally - modal never opened so no need to close it
-        get().cleanupStreams();
+        useCallStore.getState().cleanupStreams();
         useCallStore.setState({
           error: "p2p_init_failed",
           callStatus: CallStatus.ERROR,
@@ -231,7 +143,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
 
       try {
         // Clean up existing streams
-        get().cleanupStreams();
+        useCallStore.getState().cleanupStreams();
 
         // Get fresh media streams using utility functions
         const voiceStream = await getMicStream().catch(async (error) => {
@@ -251,13 +163,9 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
           });
         }
 
-        // Update P2P store
-        set({
-          localVoiceStream: voiceStream,
-          localVideoStream: videoStream,
-        });
-
         // Update base store
+        useCallStore.getState().setLocalVoiceStream(voiceStream);
+        useCallStore.getState().setLocalVideoStream(videoStream);
         useCallStore.getState().setCallStatus(CallStatus.CONNECTING);
 
         // Create peer connection for the caller
@@ -306,7 +214,8 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
 
     cleanupP2PConnections: () => {
       const { p2pMembers } = get();
-      const { localVoiceStream, localVideoStream, localScreenStream } = get();
+      const { localVoiceStream, localVideoStream, localScreenStream } =
+        useCallStore.getState();
 
       // Clean up local streams using utility functions
       stopMediaStreams(localVoiceStream, localVideoStream, localScreenStream);
@@ -335,7 +244,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
     },
 
     addP2PMember: (member: P2PCallMember): P2PCallMember | undefined => {
-      const { localVoiceStream, localVideoStream } = get();
+      const { localVoiceStream, localVideoStream } = useCallStore.getState();
       console.log("addP2PMember");
 
       // 1. Prevent duplicates
@@ -451,8 +360,8 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
     },
 
     createPeerConnection: (memberId: string) => {
-      const { chatId } = useCallStore.getState();
-      const { localVoiceStream, localVideoStream, localScreenStream } = get();
+      const { chatId, localVoiceStream, localVideoStream, localScreenStream } =
+        useCallStore.getState();
 
       const pc = new RTCPeerConnection({
         iceServers: [
@@ -826,8 +735,8 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
     },
 
     toggleAudio: async () => {
-      const { chatId, isMuted } = useCallStore.getState();
-      const { p2pMembers, localVoiceStream } = get();
+      const { chatId, isMuted, localVoiceStream } = useCallStore.getState();
+      const { p2pMembers } = get();
       const myMemberId = await getMyChatMemberId(chatId!);
 
       if (!myMemberId) return;
@@ -847,8 +756,10 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
             }
           );
 
-          set({ localVoiceStream: newVoiceStream });
-          useCallStore.setState({ isMuted: false });
+          useCallStore.setState({
+            isMuted: false,
+            localVoiceStream: newVoiceStream,
+          });
 
           callWebSocketService.updateCallMember({
             chatId: chatId!,
@@ -859,8 +770,10 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
           // 🔇 CLOSE mic
           stopMicStream(localVoiceStream);
 
-          set({ localVoiceStream: null });
-          useCallStore.setState({ isMuted: true });
+          useCallStore.setState({
+            isMuted: true,
+            localVoiceStream: null,
+          });
 
           callWebSocketService.updateCallMember({
             chatId: chatId!,
@@ -882,8 +795,9 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
     },
 
     toggleVideo: async () => {
-      const { chatId, isVideoEnabled } = useCallStore.getState();
-      const { p2pMembers, localVideoStream } = get();
+      const { chatId, localVideoStream, isVideoEnabled } =
+        useCallStore.getState();
+      const { p2pMembers } = get();
       const myMemberId = await getMyChatMemberId(chatId!);
 
       if (!myMemberId) return;
@@ -903,8 +817,10 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
             }
           );
 
-          set({ localVideoStream: newVideoStream });
-          useCallStore.setState({ isVideoEnabled: true });
+          useCallStore.setState({
+            isVideoEnabled: true,
+            localVideoStream: newVideoStream,
+          });
 
           callWebSocketService.updateCallMember({
             chatId: chatId!,
@@ -925,8 +841,10 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
 
           stopVideoStream(localVideoStream);
 
-          set({ localVideoStream: null });
-          useCallStore.setState({ isVideoEnabled: false });
+          useCallStore.setState({
+            isVideoEnabled: false,
+            localVideoStream: null,
+          });
 
           callWebSocketService.updateCallMember({
             chatId: chatId!,
@@ -936,7 +854,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         }
       } catch (error) {
         console.error("Error in toggleVideo (P2P):", error);
-        useCallStore.setState({ isVideoEnabled });
+        useCallStore.setState({ isVideoEnabled, localVideoStream });
         callWebSocketService.updateCallMember({
           chatId: chatId!,
           memberId: myMemberId,
@@ -946,8 +864,9 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
     },
 
     toggleScreenShare: async () => {
-      const { chatId, isScreenSharing } = useCallStore.getState();
-      const { p2pMembers, localScreenStream } = get();
+      const { chatId, localScreenStream, isScreenSharing } =
+        useCallStore.getState();
+      const { p2pMembers } = get();
       const myMemberId = await getMyChatMemberId(chatId!);
 
       if (!myMemberId) return;
@@ -957,10 +876,10 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
           // Start screen sharing
           const screenStream = await getScreenStream();
 
-          set({
+          useCallStore.setState({
+            isScreenSharing: true,
             localScreenStream: screenStream,
           });
-          useCallStore.setState({ isScreenSharing: true });
 
           // Add tracks to peer connections
           p2pMembers.forEach((member) => {
@@ -985,8 +904,10 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
           // Stop screen sharing
           stopScreenStream(localScreenStream);
 
-          set({ localScreenStream: null });
-          useCallStore.setState({ isScreenSharing: false });
+          useCallStore.setState({
+            isScreenSharing: false,
+            localScreenStream: null,
+          });
 
           callWebSocketService.updateCallMember({
             chatId: chatId!,
@@ -997,7 +918,10 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
       } catch (error) {
         console.error("Error toggling screen share:", error);
         // Revert state if something went wrong
-        useCallStore.setState({ isScreenSharing });
+        useCallStore.setState({
+          isScreenSharing,
+          localScreenStream,
+        });
       }
     },
 
@@ -1012,14 +936,12 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
       });
 
       // Stop local streams using utility functions
-      const { localVoiceStream, localVideoStream, localScreenStream } = get();
+      const { localVoiceStream, localVideoStream, localScreenStream } =
+        useCallStore.getState();
       stopMediaStreams(localVoiceStream, localVideoStream, localScreenStream);
 
       // Reset store state
       set({
-        localVoiceStream: null,
-        localVideoStream: null,
-        localScreenStream: null,
         p2pMembers: [],
         iceCandidates: [],
       });

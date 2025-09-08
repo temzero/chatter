@@ -6,11 +6,17 @@ import { useSFUCallStore } from "./sfuCallStore";
 import { useP2PCallStore } from "./p2pCallStore";
 import { useModalStore } from "../modalStore";
 import { audioService } from "@/services/audio.service";
+import { handleError } from "@/utils/handleError";
 import type {
   callMember,
   P2PCallMember,
   SFUCallMember,
 } from "@/types/store/callMember.type";
+import {
+  getMicStream,
+  getVideoStream,
+  stopMediaStreams,
+} from "@/utils/webRtc/localStream.Utils";
 
 export interface CallState {
   // Call metadata
@@ -19,9 +25,14 @@ export interface CallState {
   callStatus: CallStatus | null;
   isVideoCall: boolean;
   isGroupCall: boolean;
-  timeoutRef?: NodeJS.Timeout | null;
+  timeoutRef?: NodeJS.Timeout;
   startedAt?: Date;
   endedAt?: Date;
+
+  // Local streams
+  localVoiceStream: MediaStream | null;
+  localVideoStream: MediaStream | null;
+  localScreenStream: MediaStream | null;
 
   // Local device states
   isMuted: boolean;
@@ -63,13 +74,16 @@ export interface CallActions {
   toggleLocalVideo: () => Promise<void>;
   toggleLocalScreenShare: () => Promise<void>;
 
-  // Local stream management (delegated to P2P store for P2P calls)
+  // Local stream management
   setupLocalStream: () => Promise<void>;
+  setLocalVoiceStream: (stream: MediaStream | null) => void;
+  setLocalVideoStream: (stream: MediaStream | null) => void;
+  setLocalScreenStream: (stream: MediaStream | null) => void;
   cleanupStreams: () => void;
 
   setIsMuted: (isMuted: boolean) => void;
-  setIsVideoEnable: (isVideoEnabled: boolean) => void;
-  setIsScreenSharing: (isScreenSharing: boolean) => void;
+  setIsVideoEnable: (isMuted: boolean) => void;
+  setIsScreenSharing: (isMuted: boolean) => void;
 
   // Utilities
   addCallMember: (member: Partial<callMember>) => void;
@@ -86,6 +100,9 @@ export const useCallStore = create<CallState & CallActions>()(
     callStatus: null,
     isVideoCall: false,
     isGroupCall: false,
+    localVoiceStream: null,
+    localVideoStream: null,
+    localScreenStream: null,
     isMuted: false,
     isVideoEnabled: false,
     isScreenSharing: false,
@@ -117,6 +134,7 @@ export const useCallStore = create<CallState & CallActions>()(
           isVideoCall: isVideoCall,
           isGroupCall: isGroupCall,
           callStatus: CallStatus.OUTGOING,
+          // startedAt and isVideoEnabled should be set in initializeP2PCall
         });
       } catch (error) {
         console.error("Failed to start call:", error);
@@ -197,27 +215,71 @@ export const useCallStore = create<CallState & CallActions>()(
     },
 
     setupLocalStream: async () => {
-      const { isGroupCall } = get();
-      if (isGroupCall) {
-        // SFU calls handle media internally through LiveKit
-        return;
-      } else {
-        // P2P calls use the P2P store for stream management
-        await useP2PCallStore.getState().setupLocalStream();
+      try {
+        const { isVideoCall, isVideoEnabled } = get();
+        // Stop any existing tracks using utility functions
+        const { localVoiceStream, localVideoStream, localScreenStream } = get();
+        stopMediaStreams(localVoiceStream, localVideoStream, localScreenStream);
+
+        // Always get audio stream
+        const audioStream = await getMicStream();
+
+        // Only get video stream if both isVideoCall and isVideoEnabled are true
+        const videoStream =
+          isVideoCall && isVideoEnabled ? await getVideoStream() : null;
+
+        set({
+          localVoiceStream: audioStream,
+          localVideoStream: videoStream,
+          isVideoEnabled: isVideoCall && isVideoEnabled && !!videoStream,
+          error: null,
+        });
+      } catch (error) {
+        const { isVideoCall, isVideoEnabled } = get();
+        set({ error: "device_unavailable" });
+        handleError(
+          error,
+          isVideoCall && isVideoEnabled
+            ? "Cannot access microphone or camera. Please close other applications."
+            : "Cannot access microphone. Please close other applications."
+        );
       }
     },
 
-    cleanupStreams: () => {
-      const { isGroupCall } = get();
-      if (isGroupCall) {
-        // SFU cleanup is handled by LiveKit
-        return;
-      } else {
-        // P2P cleanup
-        useP2PCallStore.getState().cleanupStreams();
+    setLocalVoiceStream: (stream: MediaStream | null) => {
+      const oldStream = get().localVoiceStream;
+      if (oldStream) {
+        oldStream.getTracks().forEach((t) => t.stop()); // cleanup old
       }
+      set({ localVoiceStream: stream });
+    },
+
+    setLocalVideoStream: (stream: MediaStream | null) => {
+      const oldStream = get().localVideoStream;
+      if (oldStream) {
+        oldStream.getTracks().forEach((t) => t.stop());
+      }
+      set({ localVideoStream: stream });
+    },
+
+    setLocalScreenStream: (stream: MediaStream | null) => {
+      const oldStream = get().localScreenStream;
+      if (oldStream) {
+        oldStream.getTracks().forEach((t) => t.stop());
+      }
+      set({ localScreenStream: stream });
+    },
+
+    cleanupStreams: () => {
+      const { localVoiceStream, localVideoStream, localScreenStream } = get();
+      localVoiceStream?.getTracks().forEach((track) => track.stop());
+      localVideoStream?.getTracks().forEach((track) => track.stop());
+      localScreenStream?.getTracks().forEach((track) => track.stop());
 
       set({
+        localVoiceStream: null,
+        localVideoStream: null,
+        localScreenStream: null,
         isMuted: false,
         isVideoEnabled: false,
         isScreenSharing: false,
@@ -267,7 +329,7 @@ export const useCallStore = create<CallState & CallActions>()(
       const { clearSFUState } = useSFUCallStore.getState();
 
       useModalStore.getState().closeModal();
-      // Cleanup streams
+      // Cleanup shared/local streams
       get().cleanupStreams();
       // Cleanup call types
       clearP2PState();

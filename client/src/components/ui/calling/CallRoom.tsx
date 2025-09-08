@@ -8,21 +8,22 @@ import { VoiceVisualizerButton } from "../VoiceVisualizerBtn";
 import CallMember from "./components/CallMember";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { useCallMembers } from "@/stores/callStore/hooks/useCallMember";
+import { useLocalStreams } from "@/hooks/useLocalStreams";
 
 export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
   const isMuted = useCallStore((state) => state.isMuted);
   const isVideoEnabled = useCallStore((state) => state.isVideoEnabled);
-  const localVoiceStream = useCallStore((state) => state.localVoiceStream);
-  const localVideoStream = useCallStore((state) => state.localVideoStream);
   const startedAt = useCallStore((state) => state.startedAt);
   const toggleLocalVoice = useCallStore((state) => state.toggleLocalVoice);
   const toggleLocalVideo = useCallStore((state) => state.toggleLocalVideo);
   const endCall = useCallStore((state) => state.endCall);
   const closeCallModal = useCallStore((state) => state.closeCallModal);
 
-  // In your component:
-  const callMembers = useCallMembers();
+  // Use the new hook to get local streams
+  const { localVideoStream, localAudioStream } = useLocalStreams();
+
   // Get call members based on architecture
+  const callMembers = useCallMembers();
 
   if (!chat) return null;
 
@@ -103,7 +104,7 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
           <VoiceVisualizerButton
             variant="ghost"
             isMuted={isMuted}
-            stream={localVoiceStream || new MediaStream()}
+            stream={localAudioStream || new MediaStream()}
             onClick={toggleLocalVoice}
             className="w-14 h-14 rounded-full"
           />
