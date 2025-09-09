@@ -104,7 +104,7 @@ export function useCallSocketListeners() {
         }
       }
     };
-    
+
     const handleCallMemberUpdated = (data: callMemberPayload) => {
       console.log("handleCallMemberUpdated");
       const callStore = useCallStore.getState();
@@ -336,6 +336,7 @@ export function useCallSocketListeners() {
     };
 
     // Subscribe to all events
+    callWebSocketService.removeAllListeners();
     callWebSocketService.onPendingCalls(handlePendingCalls);
     callWebSocketService.onIncomingCall(handleIncomingCall);
     callWebSocketService.onCallUpdated(handleUpdateCall);

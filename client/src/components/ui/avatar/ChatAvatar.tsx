@@ -33,7 +33,9 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
             ? "h-32 w-32 rounded-[30px]"
             : type === "contact"
             ? "h-12 w-12 rounded-[30px]"
-            : "h-16 w-16 rounded-2xl"
+            : type === "call"
+            ? "h-12 w-12 rounded-[12px]"
+            : "h-16 w-16 rounded-xl"
         }`}
       >
         <i className="material-symbols-outlined text-2xl opacity-20">error</i>
@@ -76,7 +78,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
       case "call":
         return {
           size: "h-24 w-24",
-          rounded: "rounded-[32px]",
+          rounded: "rounded-[24px]",
           iconSize: "text-6xl",
           fallbackIconSize: "text-8xl",
           borderWidth: "6px",

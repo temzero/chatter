@@ -121,7 +121,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                   <button
                     onClick={() =>
                       startCall(chat.id, {
-                        isVideoCall: false,
+                        isVideoCall: true,
                         isGroupCall: true,
                       })
                     }

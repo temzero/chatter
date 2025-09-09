@@ -26,9 +26,14 @@ export const VoiceVisualizerBar = ({
   // Convert RemoteTrack to MediaStream if needed
   const mediaStream = useMemo(() => {
     if (!stream) return null;
+
     if (stream instanceof MediaStream) return stream;
-    if ("mediaStreamTrack" in stream)
+
+    // LiveKit RemoteTrack (audio)
+    if ("mediaStreamTrack" in stream) {
       return new MediaStream([stream.mediaStreamTrack]);
+    }
+
     return null;
   }, [stream]);
 
@@ -112,6 +117,9 @@ export const VoiceVisualizerBar = ({
       }
     };
   }, [mediaStream, isMuted, barColor]);
+
+  console.log("VoiceVisualizerBar muted:", isMuted);
+  console.log("VoiceVisualizerBar stream:", mediaStream);
 
   return (
     <canvas

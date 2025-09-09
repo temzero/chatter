@@ -49,9 +49,13 @@ const CallMember = ({
   }, [chatMember]);
 
   // Determine which video to show: screen share takes priority over camera
-  const activeVideoTrack = member.screenStream || member.videoStream;
+  const activeVideoTrack = member.videoStream || member.screenStream;
+  const activeVoiceTrack = member.voiceStream  || null;
   const isShowingScreen = !!member.screenStream;
   const hasVideo = member.isVideoEnabled && activeVideoTrack;
+
+  console.log("activeVoiceTrack", activeVoiceTrack);
+  console.log("activeVideoTrack", activeVideoTrack);
 
   return (
     <div
@@ -75,14 +79,14 @@ const CallMember = ({
           />
 
           {/* Voice stream (audio only) */}
-          {member.voiceStream && (
-            <VoiceStream stream={member.voiceStream} muted={member.isMuted} />
+          {activeVoiceTrack && (
+            <VoiceStream stream={activeVoiceTrack} muted={member.isMuted} />
           )}
 
           {/* Voice visualizer (bars) for video participants */}
-          {showVoiceVisualizer && member.voiceStream && !member.isMuted && (
+          {showVoiceVisualizer && activeVoiceTrack && !member.isMuted && (
             <VoiceVisualizerBar
-              stream={member.voiceStream}
+              stream={activeVoiceTrack}
               isMuted={member.isMuted}
               width={200}
               height={40}
@@ -101,16 +105,16 @@ const CallMember = ({
       ) : (
         /* Audio-only participant (avatar + circle visualizer) */
         <div className="flex flex-col gap-2 items-center justify-center p-4 relative">
-          {member.voiceStream && (
-            <VoiceStream stream={member.voiceStream} muted={member.isMuted} />
+          {activeVoiceTrack && (
+            <VoiceStream stream={activeVoiceTrack} muted={member.isMuted} />
           )}
 
           {/* Voice visualizer around avatar */}
           <div className="relative flex items-center justify-center">
-            {showVoiceVisualizer && member.voiceStream && !member.isMuted && (
+            {showVoiceVisualizer && activeVoiceTrack && !member.isMuted && (
               <div className="absolute inset-0 flex items-center justify-center">
                 <VoiceVisualizer
-                  stream={member.voiceStream}
+                  stream={activeVoiceTrack}
                   isMuted={member.isMuted ?? false}
                   size={101}
                   circleColor="grey"

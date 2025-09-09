@@ -8,6 +8,7 @@ import { Button } from "../Button";
 import { VideoStream } from "./components/VideoStream";
 import { ChatResponse } from "@/types/responses/chat.response";
 import { useModalStore } from "@/stores/modalStore";
+import { useLocalStreams } from "@/hooks/useLocalStreams";
 
 interface CallCallingUIProps {
   chat: ChatResponse;
@@ -15,10 +16,11 @@ interface CallCallingUIProps {
 
 export const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
   const isVideoEnabled = useCallStore((state) => state.isVideoEnabled);
-  const localVideoStream = useCallStore((state) => state.localVideoStream);
   const toggleLocalVideo = useCallStore((state) => state.toggleLocalVideo);
   const rejectCall = useCallStore((state) => state.rejectCall);
   const closeModal = useModalStore.getState().closeModal;
+  const { localVideoStream } = useLocalStreams();
+
   const cancelCall = () => {
     rejectCall(true);
     closeModal();

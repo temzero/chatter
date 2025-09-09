@@ -5,10 +5,10 @@ import { callWebSocketService } from "@/lib/websocket/services/call.websocket.se
 import { CallHeader } from "./components/CallHeader";
 import { Timer } from "../Timer";
 import { VoiceVisualizerButton } from "../VoiceVisualizerBtn";
-import CallMember from "./components/CallMember";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { useCallMembers } from "@/stores/callStore/hooks/useCallMember";
 import { useLocalStreams } from "@/hooks/useLocalStreams";
+import CallMember from "./components/CallMember";
 
 export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
   const isMuted = useCallStore((state) => state.isMuted);
@@ -104,7 +104,7 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
           <VoiceVisualizerButton
             variant="ghost"
             isMuted={isMuted}
-            stream={localAudioStream || new MediaStream()}
+            stream={localAudioStream}
             onClick={toggleLocalVoice}
             className="w-14 h-14 rounded-full"
           />

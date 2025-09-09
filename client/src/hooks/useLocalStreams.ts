@@ -1,12 +1,12 @@
 // hooks/useLocalStreams.ts
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { useSFUCallStore } from "@/stores/callStore/sfuCallStore";
 import { useP2PCallStore } from "@/stores/callStore/p2pCallStore";
-import { Track } from "livekit-client";
+import { Track, LocalTrackPublication, RoomEvent } from "livekit-client";
 
 export const useLocalStreams = () => {
-  const { isGroupCall } = useCallStore();
+  const { isGroupCall, isVideoEnabled } = useCallStore();
   const { liveKitService } = useSFUCallStore();
   const { localVoiceStream, localVideoStream: p2pLocalVideoStream } =
     useP2PCallStore();
@@ -18,6 +18,10 @@ export const useLocalStreams = () => {
     null
   );
 
+  // persistent refs to reuse the same MediaStream objects
+  const videoStreamRef = useRef<MediaStream>(new MediaStream());
+  const audioStreamRef = useRef<MediaStream>(new MediaStream());
+
   useEffect(() => {
     if (!isGroupCall || !liveKitService) {
       setLocalVideoStream(null);
@@ -25,43 +29,65 @@ export const useLocalStreams = () => {
       return;
     }
 
-    const checkTracks = () => {
-      const localParticipant = liveKitService.getLocalParticipant();
-      if (!localParticipant) return;
+    const localParticipant = liveKitService.getLocalParticipant();
+    if (!localParticipant) return;
 
-      // Check for video track
-      const videoPublication = localParticipant.getTrackPublication(
-        Track.Source.Camera
-      );
-      if (videoPublication?.track?.mediaStreamTrack) {
-        const videoStream = new MediaStream();
-        videoStream.addTrack(videoPublication.track.mediaStreamTrack);
-        setLocalVideoStream(videoStream);
-      } else {
-        setLocalVideoStream(null);
+    const attachTrack = (pub: LocalTrackPublication | undefined) => {
+      if (!pub?.track?.mediaStreamTrack) return;
+
+      const track = pub.track.mediaStreamTrack;
+
+      if (pub.source === Track.Source.Camera) {
+        videoStreamRef.current
+          .getVideoTracks()
+          .forEach((t) => videoStreamRef.current.removeTrack(t));
+        videoStreamRef.current.addTrack(track);
+        setLocalVideoStream(videoStreamRef.current); // same object
       }
 
-      // Check for audio track
-      const audioPublication = localParticipant.getTrackPublication(
-        Track.Source.Microphone
-      );
-      if (audioPublication?.track?.mediaStreamTrack) {
-        const audioStream = new MediaStream();
-        audioStream.addTrack(audioPublication.track.mediaStreamTrack);
-        setLocalAudioStream(audioStream);
-      } else {
-        setLocalAudioStream(null);
+      if (pub.source === Track.Source.Microphone) {
+        audioStreamRef.current
+          .getAudioTracks()
+          .forEach((t) => audioStreamRef.current.removeTrack(t));
+        audioStreamRef.current.addTrack(track);
+        setLocalAudioStream(audioStreamRef.current); // same object
       }
     };
 
-    // Check initially
-    checkTracks();
+    // attach initial tracks
+    attachTrack(localParticipant.getTrackPublication(Track.Source.Camera));
+    attachTrack(localParticipant.getTrackPublication(Track.Source.Microphone));
 
-    // Set up interval to check for tracks (they might be published later)
-    const interval = setInterval(checkTracks, 1000);
+    // subscribe to track events (LiveKit fires when toggling / publishing)
+    const handleTrackPublished = (pub: LocalTrackPublication) =>
+      attachTrack(pub);
+    const handleTrackUnpublished = (pub: LocalTrackPublication) => {
+      if (pub.source === Track.Source.Camera) {
+        videoStreamRef.current
+          .getVideoTracks()
+          .forEach((t) => videoStreamRef.current.removeTrack(t));
+      }
+      if (pub.source === Track.Source.Microphone) {
+        audioStreamRef.current
+          .getAudioTracks()
+          .forEach((t) => audioStreamRef.current.removeTrack(t));
+      }
+    };
 
-    return () => clearInterval(interval);
-  }, [isGroupCall, liveKitService]);
+    localParticipant.on(RoomEvent.LocalTrackPublished, handleTrackPublished);
+    localParticipant.on(
+      RoomEvent.LocalTrackUnpublished,
+      handleTrackUnpublished
+    );
+
+    return () => {
+      localParticipant.off(RoomEvent.LocalTrackPublished, handleTrackPublished);
+      localParticipant.off(
+        RoomEvent.LocalTrackUnpublished,
+        handleTrackUnpublished
+      );
+    };
+  }, [isGroupCall, liveKitService, isVideoEnabled]);
 
   // Return appropriate streams based on call type
   if (isGroupCall) {

@@ -872,11 +872,11 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         console.error("Error in toggleAudio (P2P):", error);
 
         // revert state if error
-        useCallStore.setState({ isMuted });
+        useCallStore.setState({ isMuted: true });
         callWebSocketService.updateCallMember({
           chatId: chatId!,
           memberId: myMemberId,
-          isMuted,
+          isMuted: true,
         });
       }
     },
@@ -936,11 +936,11 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         }
       } catch (error) {
         console.error("Error in toggleVideo (P2P):", error);
-        useCallStore.setState({ isVideoEnabled });
+        useCallStore.setState({ isVideoEnabled: false });
         callWebSocketService.updateCallMember({
           chatId: chatId!,
           memberId: myMemberId,
-          isVideoEnabled,
+          isVideoEnabled: false,
         });
       }
     },
@@ -996,8 +996,12 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         }
       } catch (error) {
         console.error("Error toggling screen share:", error);
-        // Revert state if something went wrong
-        useCallStore.setState({ isScreenSharing });
+        useCallStore.setState({ isScreenSharing: false });
+        callWebSocketService.updateCallMember({
+          chatId: chatId!,
+          memberId: myMemberId,
+          isScreenSharing: false,
+        });
       }
     },
 

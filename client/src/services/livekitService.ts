@@ -7,6 +7,8 @@ import {
   RemoteTrackPublication,
   ConnectionState,
   LocalTrackPublication,
+  createLocalAudioTrack,
+  createLocalVideoTrack,
 } from "livekit-client";
 
 export interface LiveKitServiceOptions {
@@ -66,12 +68,35 @@ export class LiveKitService {
     }
   }
 
+  // async toggleAudio(enabled: boolean) {
+  //   try {
+  //     await this.room.localParticipant.setMicrophoneEnabled(enabled);
+  //     useCallStore.setState({
+  //       isMuted: !enabled,
+  //     });
+  //     return true;
+  //   } catch (error) {
+  //     console.error("Failed to toggle audio:", error);
+  //     return false;
+  //   }
+  // }
+
   async toggleAudio(enabled: boolean) {
     try {
+      if (enabled) {
+        // Ensure there’s a mic track
+        if (
+          this.room.localParticipant
+            .getTrackPublications()
+            .find((p) => p.track?.kind === "audio") == null
+        ) {
+          const audioTrack = await createLocalAudioTrack();
+          await this.room.localParticipant.publishTrack(audioTrack);
+        }
+      }
+
       await this.room.localParticipant.setMicrophoneEnabled(enabled);
-      useCallStore.setState({
-        isMuted: !enabled,
-      });
+      useCallStore.setState({ isMuted: !enabled });
       return true;
     } catch (error) {
       console.error("Failed to toggle audio:", error);
@@ -81,10 +106,21 @@ export class LiveKitService {
 
   async toggleVideo(enabled: boolean) {
     try {
+      if (enabled) {
+        // Ensure there’s a camera track
+        const hasCam =
+          this.room.localParticipant
+            .getTrackPublications()
+            .find((p) => p.track?.kind === "video") != null;
+
+        if (!hasCam) {
+          const videoTrack = await createLocalVideoTrack();
+          await this.room.localParticipant.publishTrack(videoTrack);
+        }
+      }
+
       await this.room.localParticipant.setCameraEnabled(enabled);
-      useCallStore.setState({
-        isVideoEnabled: enabled,
-      });
+      useCallStore.setState({ isVideoEnabled: enabled });
       return true;
     } catch (error) {
       console.error("Failed to toggle video:", error);
@@ -128,8 +164,6 @@ export class LiveKitService {
     this.room
       .on(RoomEvent.Connected, async () => {
         console.log("SFU ROOM CONNECTED");
-
-        // Handle existing participants and their already-subscribed tracks
         this.handleExistingParticipants();
 
         if (this.options?.audio) {

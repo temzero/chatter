@@ -355,7 +355,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
             } as SFUCallMember);
           }
 
-          return {
+          const updatedMember = {
             ...m,
             ...(member.isMuted !== undefined && { isMuted: member.isMuted }),
             ...(member.isVideoEnabled !== undefined && {
@@ -375,6 +375,12 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
             }),
             lastActivity: Date.now(),
           };
+          console.log("🔄 MEMBER AFTER MERGE:", {
+            voice: !!updatedMember.voiceStream,
+            video: !!updatedMember.videoStream,
+            screen: !!updatedMember.screenStream,
+          });
+          return updatedMember;
         });
 
         return { sfuMembers: updatedMembers };
@@ -535,11 +541,11 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
         }
       } catch (error) {
         console.error("Error in toggleAudio:", error);
-        useCallStore.setState({ isMuted });
+        useCallStore.setState({ isMuted: true });
         callWebSocketService.updateCallMember({
           chatId,
           memberId: myMemberId,
-          isMuted,
+          isMuted: true,
         });
       }
     },
@@ -573,11 +579,11 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
         }
       } catch (error) {
         console.error("Error in toggleVideo (SFU):", error);
-        useCallStore.setState({ isVideoEnabled });
+        useCallStore.setState({ isVideoEnabled: false });
         callWebSocketService.updateCallMember({
           chatId,
           memberId: myMemberId,
-          isVideoEnabled,
+          isVideoEnabled: false,
         });
       }
     },
@@ -611,29 +617,30 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
         }
       } catch (error) {
         console.error("Error toggling screen share:", error);
-        useCallStore.setState({ isScreenSharing });
+        useCallStore.setState({ isScreenSharing: false });
         callWebSocketService.updateCallMember({
           chatId,
           memberId: myMemberId,
-          isScreenSharing,
+          isScreenSharing: false,
         });
       }
     },
 
     // ========== CLEANUP METHODS ==========
     stopMemberStreams: (member: SFUCallMember) => {
-      // For SFU tracks, detach them instead of stopping
       const { voiceStream, videoStream, screenStream } = member;
-
       try {
         if (voiceStream) {
           (voiceStream as import("livekit-client").AudioTrack).detach();
+          voiceStream.stop();
         }
         if (videoStream) {
           (videoStream as import("livekit-client").VideoTrack).detach();
+          videoStream.stop();
         }
         if (screenStream) {
           (screenStream as import("livekit-client").VideoTrack).detach();
+          screenStream.stop();
         }
       } catch (error) {
         console.error("Error detaching SFU streams:", error);
