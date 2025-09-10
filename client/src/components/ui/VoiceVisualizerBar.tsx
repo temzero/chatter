@@ -118,8 +118,11 @@ export const VoiceVisualizerBar = ({
     };
   }, [mediaStream, isMuted, barColor]);
 
-  console.log("VoiceVisualizerBar muted:", isMuted);
   console.log("VoiceVisualizerBar stream:", mediaStream);
+  console.log(
+    "VoiceVisualizerBar getAudioTracks",
+    mediaStream?.getAudioTracks()
+  );
 
   return (
     <canvas

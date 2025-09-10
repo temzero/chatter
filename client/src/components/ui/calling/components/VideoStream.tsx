@@ -36,6 +36,9 @@ export const VideoStream = ({
         autoPlay
         playsInline
         muted={muted}
+        style={{
+          transform: "scaleX(-1)",
+        }}
       />
     </div>
   );

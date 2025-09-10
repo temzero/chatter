@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { VideoStream } from "./VideoStream";
 import { VoiceStream } from "./VoiceStream";
-import { VoiceVisualizerBar } from "../../VoiceVisualizerBar";
+import { VoiceStreamWithVisualizer } from "./VoiceStreamWithVisualizer";
 import { Avatar } from "../../avatar/Avatar";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { ChatMember } from "@/types/responses/chatMember.response";
@@ -50,7 +50,7 @@ const CallMember = ({
 
   // Determine which video to show: screen share takes priority over camera
   const activeVideoTrack = member.videoStream || member.screenStream;
-  const activeVoiceTrack = member.voiceStream  || null;
+  const activeVoiceTrack = member.voiceStream || null;
   const isShowingScreen = !!member.screenStream;
   const hasVideo = member.isVideoEnabled && activeVideoTrack;
 
@@ -78,20 +78,14 @@ const CallMember = ({
             className="absolute inset-0 w-full h-full object-cover z-0"
           />
 
-          {/* Voice stream (audio only) */}
           {activeVoiceTrack && (
-            <VoiceStream stream={activeVoiceTrack} muted={member.isMuted} />
-          )}
-
-          {/* Voice visualizer (bars) for video participants */}
-          {showVoiceVisualizer && activeVoiceTrack && !member.isMuted && (
-            <VoiceVisualizerBar
+            <VoiceStreamWithVisualizer
               stream={activeVoiceTrack}
-              isMuted={member.isMuted}
-              width={200}
-              height={40}
-              className="w-full h-10 opacity-50 absolute bottom-16 left-0 z-10"
-              barColor="white"
+              muted={member.isMuted}
+              showVisualizer={showVoiceVisualizer}
+              visualizerWidth={200}
+              visualizerHeight={40}
+              visualizerColor="white"
             />
           )}
 
