@@ -1,11 +1,11 @@
 import React from "react";
 import clsx from "clsx";
 import { formatDateTime } from "@/utils/formatDate";
-import { Avatar } from "../ui/avatar/Avatar";
+import { Avatar } from "@/components/ui/avatar/Avatar";
 import type { MessageResponse } from "@/types/responses/message.response";
 import { useCurrentUserId } from "@/stores/authStore";
-import RenderMultipleAttachments from "../ui/RenderMultipleAttachments";
-import ForwardedMessagePreview from "../ui/ForwardMessagePreview";
+import RenderMultipleAttachments from "@/components/ui/RenderMultipleAttachments";
+import ForwardedMessagePreview from "@/components/ui/ForwardMessagePreview";
 
 interface MessagePreviewProps {
   message: MessageResponse;

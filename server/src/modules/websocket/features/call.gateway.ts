@@ -25,6 +25,9 @@ import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
 import { ChatService } from 'src/modules/chat/chat.service';
 import { WebsocketNotificationService } from '../services/websocket-notification.service';
 import { WebsocketCallService } from '../services/websocket-call.service';
+import { MessageService } from 'src/modules/message/message.service';
+import { CallService } from 'src/modules/call/call.service';
+import { CallStatus } from 'src/modules/call/type/callStatus';
 
 @WebSocketGateway()
 export class CallGateway {
@@ -33,6 +36,8 @@ export class CallGateway {
     private readonly websocketCallService: WebsocketCallService,
     private readonly chatMemberService: ChatMemberService,
     private readonly chatService: ChatService,
+    private readonly callService: CallService,
+    private readonly messageService: MessageService,
   ) {}
 
   // /**
@@ -117,16 +122,25 @@ export class CallGateway {
   ) {
     const userId = client.data.userId;
 
-    const response: updateCallPayload = {
-      chatId: payload.chatId,
-      isVideoCall: payload.isVideoCall,
-    };
+    // find active call for this chat
+    const activeCalls = await this.callService.getCallsByChatId(payload.chatId);
+    if (activeCalls.length === 0) {
+      throw new Error(`No active call found for chat ${payload.chatId}`);
+    }
+    const call = activeCalls[0];
 
+    // persist update in DB
+    const updatedCall = await this.callService.updateCall(call.id, {
+      isVideoCall: payload.isVideoCall,
+      status: payload.callStatus, // optional: allow frontend to send status updates
+    });
+
+    // broadcast updated call to all members
     await this.websocketNotificationService.emitToChatMembers(
       payload.chatId,
       CallEvent.UPDATE_CALL,
-      response,
-      { senderId: userId, excludeSender: true },
+      updatedCall,
+      { senderId: userId, excludeSender: false },
     );
   }
 
@@ -165,7 +179,6 @@ export class CallGateway {
       payload.chatId,
       userId,
     );
-    console.log('memberId', memberId);
 
     const response: CallActionResponse = {
       chatId: payload.chatId,
@@ -174,9 +187,20 @@ export class CallGateway {
       isCallerCancel: payload.isCallerCancel,
     };
 
-    // Add user to the call participants
+    // Add user to the call participants (in-memory state)
     this.websocketCallService.addParticipant(payload.chatId, memberId);
 
+    // Update DB call status to IN_PROGRESS
+    const activeCall = await this.callService.getActiveCallByChatId(
+      payload.chatId,
+    );
+    if (activeCall) {
+      await this.callService.updateCall(activeCall.id, {
+        status: CallStatus.IN_PROGRESS,
+      });
+    }
+
+    // Emit to other members
     await this.websocketNotificationService.emitToChatMembers(
       payload.chatId,
       CallEvent.ACCEPT_CALL,
@@ -200,8 +224,18 @@ export class CallGateway {
       throw new Error('User is not a member of this chat');
     }
 
-    // Add user to the call participants
+    // Add user to the call participants (in-memory state)
     this.websocketCallService.addParticipant(payload.chatId, memberId);
+
+    // Ensure DB call remains IN_PROGRESS
+    const activeCall = await this.callService.getActiveCallByChatId(
+      payload.chatId,
+    );
+    if (activeCall) {
+      await this.callService.updateCall(activeCall.id, {
+        status: CallStatus.IN_PROGRESS,
+      });
+    }
 
     const response = {
       chatId: payload.chatId,
@@ -235,7 +269,18 @@ export class CallGateway {
       isCallerCancel: payload.isCallerCancel,
     };
 
-    // Clear the call if user was the only participant
+    // Update DB call status to DECLINED
+    const activeCall = await this.callService.getActiveCallByChatId(
+      payload.chatId,
+    );
+    if (activeCall) {
+      await this.callService.updateCall(activeCall.id, {
+        status: CallStatus.DECLINED,
+        endedAt: new Date(),
+      });
+    }
+
+    // Clear call if only participant
     const callState = this.websocketCallService.getCallState(payload.chatId);
     if (callState && callState.memberIds.size === 1) {
       this.websocketCallService.endCall(payload.chatId);
@@ -266,14 +311,38 @@ export class CallGateway {
       timestamp: Date.now(),
     };
 
-    // Remove user from call participants and check if call should end
+    // If caller cancels, delete call + system messages
+    if (payload.isCallerCancel) {
+      try {
+        const activeCall = await this.callService.getActiveCallByChatId(
+          payload.chatId,
+        );
+        if (activeCall) {
+          await this.callService.deleteCallAndSystemMessage(activeCall.id);
+        }
+      } catch (err) {
+        console.error('Failed to delete call or system messages:', err);
+      }
+    } else {
+      // Otherwise update call to COMPLETED
+      const activeCall = await this.callService.getActiveCallByChatId(
+        payload.chatId,
+      );
+      if (activeCall) {
+        await this.callService.updateCall(activeCall.id, {
+          status: CallStatus.COMPLETED,
+          endedAt: new Date(),
+        });
+      }
+    }
+
+    // Remove from in-memory participants
     const callEnded = this.websocketCallService.removeParticipant(
       payload.chatId,
       memberId,
     );
 
     if (callEnded) {
-      // Call ended completely, emit additional event if needed
       await this.websocketNotificationService.emitToChatMembers(
         payload.chatId,
         CallEvent.END_CALL,

@@ -18,6 +18,7 @@ import { WebsocketConnectionService } from './services/websocket-connection.serv
 import { CallGateway } from './features/call.gateway';
 import { WebsocketCallService } from './services/websocket-call.service';
 import { WebsocketNotificationService } from './services/websocket-notification.service';
+import { CallModule } from '../call/call.module'; // Import CallModule
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { WebsocketNotificationService } from './services/websocket-notification.
     forwardRef(() => ChatMemberModule),
     forwardRef(() => BlockModule),
     forwardRef(() => SupabaseModule),
+    forwardRef(() => CallModule), // Add CallModule import
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({

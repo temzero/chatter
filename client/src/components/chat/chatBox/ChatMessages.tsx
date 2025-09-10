@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect } from "react";
-import Message from "../Message";
+import Message from "@/components/chat/message/Message";
 import { MessageResponse } from "@/types/responses/message.response";
 import { ChatResponse } from "@/types/responses/chat.response";
 import { useCurrentUser } from "@/stores/authStore";

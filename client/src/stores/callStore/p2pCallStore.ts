@@ -1,7 +1,7 @@
 // stores/call/useP2PCallStore.ts
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { CallStatus } from "@/types/enums/CallStatus";
+import { LocalCallStatus } from "@/types/enums/LocalCallStatus";
 import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
 import { toast } from "react-toastify";
 import { handleError } from "@/utils/handleError";
@@ -186,7 +186,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
           startedAt: new Date(),
           chatId,
           isVideoCall: isVideoCall,
-          callStatus: CallStatus.OUTGOING,
+          localCallStatus: LocalCallStatus.OUTGOING,
         });
 
         // 4. OPEN MODAL ONLY AFTER SUCCESS
@@ -194,8 +194,8 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
 
         // 5. Set timeout
         const timeoutRef = setTimeout(() => {
-          const { callStatus } = useCallStore.getState();
-          if (callStatus === CallStatus.OUTGOING) {
+          const { localCallStatus } = useCallStore.getState();
+          if (localCallStatus === LocalCallStatus.OUTGOING) {
             useCallStore
               .getState()
               .endCall({ isTimeout: true, isCancel: true });
@@ -215,7 +215,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         get().cleanupStreams();
         useCallStore.setState({
           error: "p2p_init_failed",
-          callStatus: CallStatus.ERROR,
+          localCallStatus: LocalCallStatus.ERROR,
         });
         toast.error(
           "Permission denied! Please allow camera and microphone access."
@@ -258,7 +258,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         });
 
         // Update base store
-        useCallStore.getState().setCallStatus(CallStatus.CONNECTING);
+        useCallStore.getState().setCallStatus(LocalCallStatus.CONNECTING);
 
         // Create peer connection for the caller
         const callerMemberId = useCallStore.getState().callerMemberId;
@@ -282,7 +282,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         if (chatId) {
           callWebSocketService.rejectCall({ chatId });
         }
-        useCallStore.getState().setCallStatus(CallStatus.ERROR);
+        useCallStore.getState().setCallStatus(LocalCallStatus.ERROR);
       }
     },
 
@@ -300,7 +300,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
       } catch (error) {
         console.error("Error rejecting call:", error);
         toast.error("Failed to reject call. Please try again.");
-        useCallStore.getState().setCallStatus(CallStatus.ERROR);
+        useCallStore.getState().setCallStatus(LocalCallStatus.ERROR);
       }
     },
 
@@ -792,7 +792,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
           offer,
         });
 
-        useCallStore.getState().setCallStatus(CallStatus.CONNECTING);
+        useCallStore.getState().setCallStatus(LocalCallStatus.CONNECTING);
       } catch (error) {
         handleError(error, "Failed to create/send offer");
         useCallStore.getState().endCall();

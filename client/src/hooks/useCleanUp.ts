@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
-import { CallStatus } from "@/types/enums/CallStatus";
+import { LocalCallStatus } from "@/types/enums/LocalCallStatus";
 import { useModalStore } from "@/stores/modalStore";
 
 export const useCleanup = () => {
@@ -14,8 +14,8 @@ export const useCleanup = () => {
       // Only cleanup if there's an active call that hasn't ended
       if (
         callStore.chatId &&
-        callStore.callStatus &&
-        callStore.callStatus !== CallStatus.ENDED
+        callStore.localCallStatus &&
+        callStore.localCallStatus !== LocalCallStatus.ENDED
       ) {
         callWebSocketService.hangup({
           chatId: callStore.chatId,

@@ -30,12 +30,12 @@ export class MessageService {
     private readonly chatRepo: Repository<Chat>,
     @InjectRepository(ChatMember)
     private readonly chatMemberRepo: Repository<ChatMember>,
-    @InjectRepository(Message)
-    private readonly messageRepo: Repository<Message>,
     @InjectRepository(Attachment)
     private readonly attachmentRepo: Repository<Attachment>,
     @InjectRepository(Reaction)
     private readonly reactionRepo: Repository<Reaction>,
+    @InjectRepository(Message)
+    public readonly messageRepo: Repository<Message>,
 
     private readonly blockService: BlockService,
     private readonly supabaseService: SupabaseService,

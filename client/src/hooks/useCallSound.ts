@@ -1,36 +1,36 @@
 // hooks/useCallSounds.ts
 import { useEffect } from "react";
 import { useCallStore } from "@/stores/callStore/callStore";
-import { CallStatus } from "@/types/enums/CallStatus";
+import { LocalCallStatus } from "@/types/enums/LocalCallStatus";
 import { audioService, SoundType } from "@/services/audio.service";
 
 export const useCallSounds = () => {
-  const callStatus = useCallStore((state) => state.callStatus);
+  const callStatus = useCallStore((state) => state.localCallStatus);
 
   useEffect(() => {
     // First: stop ALL possible call-related sounds before starting a new one
     audioService.stopAllSounds();
 
     switch (callStatus) {
-      case CallStatus.OUTGOING:
+      case LocalCallStatus.OUTGOING:
         audioService.playSound(SoundType.OUTGOING_CALL);
         break;
 
-      case CallStatus.INCOMING:
+      case LocalCallStatus.INCOMING:
         audioService.playSound(SoundType.INCOMING_CALL);
         break;
 
-      case CallStatus.CONNECTED:
+      case LocalCallStatus.CONNECTED:
         audioService.playSound(SoundType.CALL_CONNECTED);
         break;
 
-      case CallStatus.ENDED:
-      case CallStatus.REJECTED:
-      case CallStatus.CANCELED:
+      case LocalCallStatus.ENDED:
+      case LocalCallStatus.REJECTED:
+      case LocalCallStatus.CANCELED:
         audioService.playSound(SoundType.CALL_END);
         break;
 
-      case CallStatus.ERROR:
+      case LocalCallStatus.ERROR:
         // Stop all sounds immediately when error occurs
         audioService.stopAllSounds();
         break;

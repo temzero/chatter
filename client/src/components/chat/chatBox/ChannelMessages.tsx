@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect } from "react";
-import ChannelMessage from "../MessageChannel";
+import ChannelMessage from "../message/MessageChannel";
 import { MessageResponse } from "@/types/responses/message.response";
 import { ChatResponse } from "@/types/responses/chat.response";
 import { useCurrentUser } from "@/stores/authStore";

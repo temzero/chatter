@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { callWebSocketService } from "../services/call.websocket.service";
 import { toast } from "react-toastify";
-import { CallStatus } from "@/types/enums/CallStatus";
+import { LocalCallStatus } from "@/types/enums/LocalCallStatus";
 import { handleError } from "@/utils/handleError";
 import { useChatStore } from "@/stores/chatStore";
 import { ChatType } from "@/types/enums/ChatType";
@@ -44,7 +44,7 @@ export function useCallSocketListeners() {
     const handleIncomingCall = (data: IncomingCallResponse) => {
       useCallStore.setState({
         chatId: data.chatId,
-        callStatus: CallStatus.INCOMING,
+        localCallStatus: LocalCallStatus.INCOMING,
         isVideoCall: data.isVideoCall,
         callerMemberId: data.memberId,
         isGroupCall: data.isGroupCall || false,
@@ -133,11 +133,12 @@ export function useCallSocketListeners() {
     const handleCallAccepted = async (data: CallActionResponse) => {
       console.log("handleCallAccepted");
       const callStore = useCallStore.getState();
-      callStore.setCallStatus(CallStatus.CONNECTING);
+      callStore.setCallStatus(LocalCallStatus.CONNECTING);
 
       if (callStore.chatId !== data.chatId) return;
+
       if (callStore.isGroupCall) {
-        callStore.setCallStatus(CallStatus.CONNECTED);
+        callStore.setCallStatus(LocalCallStatus.CONNECTED);
         return;
       }
 
@@ -224,7 +225,7 @@ export function useCallSocketListeners() {
           await p2pStore.updatePeerConnection(memberId, offer);
         }
 
-        callStore.setCallStatus(CallStatus.CONNECTED);
+        callStore.setCallStatus(LocalCallStatus.CONNECTED);
       } catch (err) {
         handleError(err, "Call offer handling failed");
         callStore.endCall();
@@ -269,7 +270,7 @@ export function useCallSocketListeners() {
           new RTCSessionDescription(data.answer)
         );
 
-        callStore.setCallStatus(CallStatus.CONNECTED);
+        callStore.setCallStatus(LocalCallStatus.CONNECTED);
       } catch (err) {
         console.error("Answer handling failed:", err);
         callStore.endCall();
@@ -328,9 +329,9 @@ export function useCallSocketListeners() {
         const currentMemberId = await getMyChatMemberId(data.chatId);
         if (
           data.memberId === currentMemberId &&
-          callStore.callStatus === CallStatus.CONNECTING
+          callStore.localCallStatus === LocalCallStatus.CONNECTING
         ) {
-          callStore.setCallStatus(CallStatus.CONNECTED);
+          callStore.setCallStatus(LocalCallStatus.CONNECTED);
         }
       }
     };

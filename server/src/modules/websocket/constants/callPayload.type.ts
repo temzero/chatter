@@ -1,3 +1,4 @@
+import { CallStatus } from 'src/modules/call/type/callStatus';
 // -------------------- Requests --------------------
 
 // Call control (no from/to member IDs needed except optional toMemberId for 1:1)
@@ -9,7 +10,8 @@ export interface InitiateCallRequest {
 
 export interface updateCallPayload {
   chatId: string;
-  isVideoCall: boolean;
+  isVideoCall?: boolean;
+  callStatus?: CallStatus;
 }
 
 export interface callMemberPayload {
@@ -22,7 +24,7 @@ export interface callMemberPayload {
 
 export interface CallActionRequest {
   chatId: string;
-  isCallerCancel?: boolean; // Action flags
+  isCallerCancel?: boolean;
 }
 
 // RTC / SFU signaling (client only specifies recipient if needed)

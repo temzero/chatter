@@ -1,30 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial, Repository } from 'typeorm';
+import { DeepPartial, In, Repository } from 'typeorm';
 import { AccessToken, VideoGrant } from 'livekit-server-sdk';
-import { Call } from './entities/call.entities';
+import { Call } from './entities/call.entity';
 import { CreateCallDto } from './dto/create-call.dto';
 import { UpdateCallDto } from './dto/update-call.dto';
 import { CallStatus } from './type/callStatus';
 import { ChatMember } from '../chat-member/entities/chat-member.entity';
-
-// interface IAccessToken {
-//   addGrant(grant: VideoGrant): void;
-//   toJwt(): string;
-// }
-
-// interface AccessTokenOptions {
-//   identity: string;
-//   name?: string;
-// }
-
-// interface AccessTokenConstructor {
-//   new (
-//     apiKey?: string,
-//     apiSecret?: string,
-//     options?: AccessTokenOptions,
-//   ): IAccessToken;
-// }
+import { MessageService } from '../message/message.service';
+import { SystemEventType } from '../message/constants/system-event-type.constants';
 
 @Injectable()
 export class CallService {
@@ -36,6 +20,7 @@ export class CallService {
     private readonly callRepository: Repository<Call>,
     @InjectRepository(ChatMember)
     private chatMemberRepository: Repository<ChatMember>,
+    private readonly messageService: MessageService,
   ) {
     this.livekitApiKeyName = process.env.LIVEKIT_API_KEY_NAME ?? 'your_api_key';
     this.livekitApiKeySecret =
@@ -53,7 +38,12 @@ export class CallService {
 
   async createCall(createCallDto: CreateCallDto): Promise<Call> {
     const call = this.callRepository.create(createCallDto as DeepPartial<Call>);
-    return await this.callRepository.save(call);
+    const savedCall = await this.callRepository.save(call);
+
+    // Send system message about new call
+    await this.createCallSystemMessage(savedCall);
+
+    return savedCall;
   }
 
   async getCallById(id: string): Promise<Call> {
@@ -67,6 +57,17 @@ export class CallService {
     }
 
     return call;
+  }
+
+  async getActiveCallByChatId(chatId: string): Promise<Call | null> {
+    return await this.callRepository.findOne({
+      where: {
+        chat: { id: chatId },
+        status: In([CallStatus.DIALING, CallStatus.IN_PROGRESS]),
+      },
+      relations: ['chat', 'initiator', 'participants'],
+      order: { startedAt: 'DESC' }, // latest one if multiple
+    });
   }
 
   async getCallsByChatId(chatId: string): Promise<Call[]> {
@@ -113,8 +114,8 @@ export class CallService {
     }
 
     // Update status if needed
-    if (call.status !== CallStatus.ONGOING) {
-      await this.callRepository.update(id, { status: CallStatus.ONGOING });
+    if (call.status !== CallStatus.DIALING) {
+      await this.callRepository.update(id, { status: CallStatus.DIALING });
     }
 
     // Return the updated call with relations
@@ -127,7 +128,7 @@ export class CallService {
   async endCall(id: string): Promise<Call> {
     const call = await this.getCallById(id);
 
-    call.status = CallStatus.ENDED;
+    call.status = CallStatus.COMPLETED;
     call.endedAt = new Date();
 
     return await this.callRepository.save(call);
@@ -173,6 +174,54 @@ export class CallService {
         throw new Error(`Failed to generate LiveKit token: ${err.message}`);
       }
       throw new Error('Unknown error while generating LiveKit token');
+    }
+  }
+
+  async createCallSystemMessage(call: Call) {
+    if (!call?.chat?.id) return;
+
+    return this.messageService.createSystemEventMessage(
+      call.chat.id,
+      call.initiator.id,
+      SystemEventType.CALL,
+    );
+  }
+
+  /**
+   * Deletes a call and its associated system message.
+   * Used when a call is cancelled.
+   */
+  async deleteCallAndSystemMessage(callId: string): Promise<void> {
+    // 1. Find the call
+    const call = await this.callRepository.findOne({
+      where: { id: callId },
+      relations: ['chat', 'initiator'],
+    });
+
+    if (!call) {
+      throw new NotFoundException(`Call with ID ${callId} not found`);
+    }
+
+    // 2. Delete the system message(s) associated with this call
+    const systemMessages = await this.messageService.messageRepo.find({
+      where: {
+        call: { id: callId },
+        systemEvent: SystemEventType.CALL,
+      },
+    });
+
+    if (systemMessages.length > 0) {
+      const systemMessageIds = systemMessages.map((m) => m.id);
+      await this.messageService.messageRepo.delete(systemMessageIds);
+    }
+
+    // 3. Delete the call itself
+    const result = await this.callRepository.delete(callId);
+
+    if (result.affected === 0) {
+      throw new NotFoundException(
+        `Call with ID ${callId} could not be deleted`,
+      );
     }
   }
 }

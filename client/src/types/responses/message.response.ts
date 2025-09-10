@@ -3,6 +3,8 @@ import { MessageStatus } from "../enums/message";
 import { MessageType } from "../enums/message";
 import { AttachmentType } from "../enums/attachmentType";
 import { SystemEventType } from "../enums/systemEventType";
+import { CallStatus } from "../enums/CallStatus";
+import { ChatMember } from "./chatMember.response";
 
 export interface MessageResponse {
   id: string;
@@ -32,9 +34,23 @@ export interface MessageResponse {
   reactions?: Record<string, string[]>;
   attachments?: AttachmentResponse[];
 
+  call?: CallResponse | null;
+
   isMuted?: boolean;
 
   shouldAnimate?: boolean;
+}
+
+export interface CallResponse {
+  id: string;
+  status: CallStatus;
+  isVideoCall: boolean;
+  isGroupCall: boolean;
+  startedAt: string;
+  endedAt?: string | null;
+  updatedAt: string;
+  initiator: ChatMember;
+  participants: ChatMember[];
 }
 
 export interface LastMessageResponse {

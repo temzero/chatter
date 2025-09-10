@@ -1,7 +1,7 @@
 // stores/call/useCallStore.ts
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { CallStatus } from "@/types/enums/CallStatus";
+import { LocalCallStatus } from "@/types/enums/LocalCallStatus";
 import { useSFUCallStore } from "./sfuCallStore";
 import { useP2PCallStore } from "./p2pCallStore";
 import { useModalStore } from "../modalStore";
@@ -11,12 +11,15 @@ import type {
   P2PCallMember,
   SFUCallMember,
 } from "@/types/store/callMember.type";
+import { useMessageStore } from "../messageStore";
+import { CallStatus } from "@/types/enums/CallStatus";
 
 export interface CallState {
-  // Call metadata
+  callId: string | null;
   chatId: string | null;
+  // Call metadata
   callerMemberId?: string;
-  callStatus: CallStatus | null;
+  localCallStatus: LocalCallStatus | null;
   isVideoCall: boolean;
   isGroupCall: boolean;
   timeoutRef?: NodeJS.Timeout | null;
@@ -56,7 +59,7 @@ export interface CallActions {
   }) => void;
 
   // Status control
-  setCallStatus: (status: CallStatus) => void;
+  setCallStatus: (status: LocalCallStatus | null) => void;
 
   // Media toggles (delegated to architecture-specific stores)
   toggleLocalVoice: () => void;
@@ -116,7 +119,7 @@ export const useCallStore = create<CallState & CallActions>()(
           chatId,
           isVideoCall: isVideoCall,
           isGroupCall: isGroupCall,
-          callStatus: CallStatus.OUTGOING,
+          localCallStatus: LocalCallStatus.OUTGOING,
         });
       } catch (error) {
         console.error("Failed to start call:", error);
@@ -132,7 +135,10 @@ export const useCallStore = create<CallState & CallActions>()(
       } else {
         await useP2PCallStore.getState().acceptP2PCall();
       }
-      set({ callStatus: CallStatus.CONNECTED, startedAt: new Date() });
+      set({
+        localCallStatus: LocalCallStatus.CONNECTED,
+        startedAt: new Date(),
+      });
     },
 
     rejectCall: (isCancel = false) => {
@@ -146,27 +152,40 @@ export const useCallStore = create<CallState & CallActions>()(
     },
 
     endCall: (options = {}) => {
-      const { isGroupCall } = get();
+      const { isGroupCall, chatId, callId } = get();
+
+      // Disconnect streams
       if (isGroupCall) {
         useSFUCallStore.getState().disconnectFromSFU();
       } else {
         useP2PCallStore.getState().cleanupP2PConnections();
       }
 
+      const localStatus = options.isRejected
+        ? LocalCallStatus.REJECTED
+        : options.isCancel
+        ? LocalCallStatus.CANCELED
+        : LocalCallStatus.ENDED;
+
+      // Update local call state
       set({
-        callStatus: options.isRejected
-          ? CallStatus.REJECTED
-          : options.isCancel
-          ? CallStatus.CANCELED
-          : CallStatus.ENDED,
+        localCallStatus: localStatus,
         endedAt: new Date(),
       });
+
+      // ✅ Update the message store so the call bubble shows "Ended"
+      if (chatId && callId) {
+        useMessageStore.getState().updateCallMessage(chatId, callId, {
+          status: CallStatus.COMPLETED,
+          endedAt: new Date().toISOString(),
+        });
+      }
 
       console.log("call ended");
     },
 
-    setCallStatus: (status: CallStatus) => {
-      set({ callStatus: status });
+    setCallStatus: (status: LocalCallStatus | null) => {
+      set({ localCallStatus: status });
     },
 
     toggleLocalVoice: () => {
@@ -274,7 +293,7 @@ export const useCallStore = create<CallState & CallActions>()(
       clearSFUState();
       set({
         chatId: null,
-        callStatus: null,
+        localCallStatus: null,
         isGroupCall: false,
         error: null,
       });

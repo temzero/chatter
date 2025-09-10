@@ -1,14 +1,14 @@
 import React, { useState, useRef } from "react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import RenderMultipleAttachments from "../ui/RenderMultipleAttachments";
+import RenderMultipleAttachments from "@/components/ui/RenderMultipleAttachments";
 import { formatTime } from "@/utils/formatTime";
 import type { MessageResponse } from "@/types/responses/message.response";
 import SystemMessage from "./SystemMessage";
-import { SystemMessageJSONContent } from "../ui/SystemMessageContent";
+import { SystemMessageJSONContent } from "@/components/ui/SystemMessageContent";
 import { useCurrentUserId } from "@/stores/authStore";
-import { MessageReactionDisplay } from "../ui/MessageReactionsDisplay";
-import ForwardedMessagePreview from "../ui/ForwardMessagePreview";
+import { MessageReactionDisplay } from "@/components/ui/MessageReactionsDisplay";
+import ForwardedMessagePreview from "@/components/ui/ForwardMessagePreview";
 import { handleQuickReaction } from "@/utils/quickReaction";
 import { messageAnimations } from "@/animations/messageAnimations";
 import {

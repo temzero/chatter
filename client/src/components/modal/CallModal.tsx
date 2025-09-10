@@ -1,8 +1,9 @@
+import clsx from "clsx";
 import React from "react";
 import { motion } from "framer-motion";
 import { childrenModalAnimation } from "@/animations/modalAnimations";
 import { useCallStore } from "@/stores/callStore/callStore";
-import { CallStatus } from "@/types/enums/CallStatus";
+import { LocalCallStatus } from "@/types/enums/LocalCallStatus";
 
 // Import UI components
 import { CallRoom } from "../ui/calling/CallRoom";
@@ -10,11 +11,10 @@ import { IncomingCall } from "../ui/calling/IncomingCall";
 import { SummaryCall } from "../ui/calling/SummaryCall";
 import { OutgoingCall } from "../ui/calling/OutgoingCall";
 import { useChatStore } from "@/stores/chatStore";
-import clsx from "clsx";
 import { ConnectingCall } from "../ui/calling/ConnectingCall";
 
 const CallModal: React.FC = () => {
-  const { chatId, callStatus } = useCallStore();
+  const { chatId, localCallStatus } = useCallStore();
   const chat = useChatStore((state) => state.getChatById(chatId ?? ""));
   const fetchChatById = useChatStore((state) => state.fetchChatById);
 
@@ -24,24 +24,24 @@ const CallModal: React.FC = () => {
     }
   }, [chatId, chat, fetchChatById]);
 
-  if (!chatId || !chat || !callStatus) {
+  if (!chatId || !chat || !localCallStatus) {
     return null;
   }
 
   const renderCallUI = () => {
-    switch (callStatus) {
-      case CallStatus.OUTGOING:
+    switch (localCallStatus) {
+      case LocalCallStatus.OUTGOING:
         return <OutgoingCall chat={chat} />;
-      case CallStatus.INCOMING:
+      case LocalCallStatus.INCOMING:
         return <IncomingCall chat={chat} />;
-      case CallStatus.CONNECTING:
+      case LocalCallStatus.CONNECTING:
         return <ConnectingCall chat={chat} />;
-      case CallStatus.CONNECTED:
+      case LocalCallStatus.CONNECTED:
         return <CallRoom chat={chat} />;
-      case CallStatus.ENDED:
-      case CallStatus.ERROR:
-      case CallStatus.CANCELED:
-      case CallStatus.REJECTED:
+      case LocalCallStatus.ENDED:
+      case LocalCallStatus.ERROR:
+      case LocalCallStatus.CANCELED:
+      case LocalCallStatus.REJECTED:
         return <SummaryCall chat={chat} />;
       default:
         return null;
@@ -49,7 +49,7 @@ const CallModal: React.FC = () => {
   };
 
   const getSizeClasses = () => {
-    return callStatus === CallStatus.CONNECTED
+    return localCallStatus === LocalCallStatus.CONNECTED
       ? "w-full h-full custom-border"
       : "w-full max-w-[420px] p-6";
   };

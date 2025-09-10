@@ -2,6 +2,7 @@
 import { create } from "zustand";
 import type {
   AttachmentResponse,
+  CallResponse,
   MessageResponse,
   SenderResponse,
 } from "@/types/responses/message.response";
@@ -36,6 +37,11 @@ export interface MessageStore {
     chatId: string,
     messageId: string,
     updatedMessage: Partial<MessageResponse>
+  ) => void;
+  updateCallMessage: (
+    chatId: string,
+    callId: string,
+    patch: Partial<CallResponse>
   ) => void;
   deleteMessage: (chatId: string, messageId: string) => void;
   getChatMessages: (chatId: string) => MessageResponse[];
@@ -291,6 +297,35 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
     });
   },
 
+  updateCallMessage: (
+    chatId: string,
+    callId: string,
+    patch: Partial<CallResponse>
+  ) => {
+    if (!chatId || !callId) return;
+    set((state) => {
+      const msgs = state.messages[chatId] || [];
+      const updatedMsgs = msgs.map((m) => {
+        if (m.call?.id === callId) {
+          return {
+            ...m,
+            call: {
+              ...m.call,
+              ...patch,
+            },
+          };
+        }
+        return m;
+      });
+      return {
+        messages: {
+          ...state.messages,
+          [chatId]: updatedMsgs,
+        },
+      };
+    });
+  },
+
   deleteMessage: (chatId, messageId) => {
     const { messages } = get();
     if (!chatId) return;
@@ -355,7 +390,9 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
 
   getUnreadMessagesCount: async (chatId, memberId) => {
     const messages = get().messages[chatId] || [];
-    const member = await useChatMemberStore.getState().getChatMemberById(memberId);
+    const member = await useChatMemberStore
+      .getState()
+      .getChatMemberById(memberId);
 
     if (!member) return messages.length;
 
@@ -369,7 +406,9 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
   },
 
   isMessageReadByMember: async (message, memberId) => {
-    const member = await useChatMemberStore.getState().getChatMemberById(memberId);
+    const member = await useChatMemberStore
+      .getState()
+      .getChatMemberById(memberId);
     if (!member) return false;
 
     const messages = get().messages[message.chatId] || [];

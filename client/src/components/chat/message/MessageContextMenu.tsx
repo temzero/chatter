@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import clsx from "clsx";
-import { MessageActions } from "../ui/MessageActions";
-import { ReactionPicker } from "../ui/MessageReactionPicker";
+import { MessageActions } from "@/components/ui/MessageActions";
+import { ReactionPicker } from "@/components/ui/MessageReactionPicker";
 import { MessageResponse } from "@/types/responses/message.response";
 import { useEffect, useRef, useState } from "react";
 import {

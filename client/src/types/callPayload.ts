@@ -1,3 +1,4 @@
+import { CallStatus } from "./enums/CallStatus";
 // -------------------- Requests --------------------
 
 // Call control (no from/to member IDs needed except optional toMemberId for 1:1)
@@ -8,11 +9,14 @@ export interface InitiateCallRequest {
 }
 
 export interface updateCallPayload {
+  callId: string;
   chatId: string;
   isVideoCall: boolean;
+  callStatus: CallStatus;
 }
 
 export interface callMemberPayload {
+  callId?: string;
   chatId: string;
   memberId: string; // The member whose state changed
   isMuted?: boolean;
@@ -21,6 +25,7 @@ export interface callMemberPayload {
 }
 
 export interface CallActionRequest {
+  callId?: string;
   chatId: string;
   isCallerCancel?: boolean; // Action flags
 }
@@ -53,6 +58,7 @@ export interface IncomingCallResponse {
 }
 
 export interface CallActionResponse {
+  callId: string;
   chatId: string;
   memberId: string; // Who took the action
   timestamp: number;

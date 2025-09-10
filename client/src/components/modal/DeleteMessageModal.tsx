@@ -6,7 +6,7 @@ import { useCurrentUserId } from "@/stores/authStore";
 import { motion } from "framer-motion";
 import { childrenModalAnimation } from "@/animations/modalAnimations";
 import { useMessageStore } from "@/stores/messageStore";
-import { MessageHorizontalPreview } from "../chat/MessageHorizontalPreview";
+import { MessageHorizontalPreview } from "@/components/chat/message/MessageHorizontalPreview";
 import { MessageHorizontalPreviewTypes } from "@/types/enums/MessageHorizontalPreviewTypes";
 
 const DeleteMessageModal: React.FC = () => {

@@ -2,18 +2,16 @@ import React, { useState, useRef } from "react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import { useCurrentUserId } from "@/stores/authStore";
-import RenderMultipleAttachments from "../ui/RenderMultipleAttachments";
 import { formatTime } from "@/utils/formatTime";
-import { Avatar } from "../ui/avatar/Avatar";
+import { Avatar } from "@/components/ui/avatar/Avatar";
 import { ChatType } from "@/types/enums/ChatType";
-import { MessageReactionDisplay } from "../ui/MessageReactionsDisplay";
-import MessageReplyPreview from "../ui/MessageReplyPreview";
-import ForwardedMessagePreview from "../ui/ForwardMessagePreview";
+import { MessageReactionDisplay } from "@/components/ui/MessageReactionsDisplay";
+import MessageReplyPreview from "@/components/ui/MessageReplyPreview";
 import { handleQuickReaction } from "@/utils/quickReaction";
 import { messageAnimations } from "@/animations/messageAnimations";
 import { MessageStatus } from "@/types/enums/message";
 import { BeatLoader } from "react-spinners";
-import { SystemMessageJSONContent } from "../ui/SystemMessageContent";
+import { SystemMessageJSONContent } from "@/components/ui/SystemMessageContent";
 import SystemMessage from "./SystemMessage";
 import {
   useIsMessageFocus,
@@ -22,6 +20,10 @@ import {
 } from "@/stores/modalStore";
 import { MessageContextMenu } from "./MessageContextMenu";
 import type { MessageResponse } from "@/types/responses/message.response";
+
+// ✅ new
+import MessageBubble from "./MessageBubble";
+import CallMessageBubble from "./CallMessageBubble";
 
 interface MessageProps {
   message: MessageResponse;
@@ -71,12 +73,9 @@ const Message: React.FC<MessageProps> = ({
     : messageAnimations.none;
 
   const isGroupChat = chatType === "group";
-  const attachments = message.attachments || [];
 
-  // Check if the message is a system message
-  const isSystemMessage = !!message.systemEvent;
-
-  if (isSystemMessage) {
+  // system message
+  if (message.systemEvent) {
     return (
       <div className="w-full flex items-center justify-center">
         <SystemMessage
@@ -138,45 +137,25 @@ const Message: React.FC<MessageProps> = ({
           )}
 
           <div className="relative">
-            <div
-              className={clsx("message-bubble", {
-                "border-4 border-red-500/80": message.isImportant,
-                "self-message ml-auto": isMe,
-                "message-bubble-reply": isRelyToThisMessage,
-                "opacity-60": message.status === MessageStatus.SENDING,
-                "opacity-60 border-2 border-red-500":
-                  message.status === MessageStatus.FAILED,
-              })}
-              style={{
-                width:
-                  attachments.length === 1
-                    ? "var(--attachment-width)"
-                    : attachments.length > 1
-                    ? "var(--attachment-width-large)"
-                    : undefined,
-              }}
-            >
-              <RenderMultipleAttachments attachments={attachments} />
-              {message.content && (
-                <p className="break-words max-w-full cursor-pointer transition-all duration-200 shadow-xl rounded-b-xl">
-                  {message.content}
-                </p>
-              )}
-              {message.forwardedFromMessage && (
-                <ForwardedMessagePreview
-                  message={message}
-                  originalSender={message.forwardedFromMessage?.sender}
-                  currentUserId={currentUserId ?? undefined}
-                  isMe={isMe}
-                />
-              )}
-            </div>
+            {/* ✅ choose correct bubble */}
+            {message.call ? (
+              <CallMessageBubble message={message} isMe={isMe} />
+            ) : (
+              <MessageBubble
+                message={message}
+                isMe={isMe}
+                isRelyToThisMessage={isRelyToThisMessage}
+                currentUserId={currentUserId ?? ""}
+              />
+            )}
+
             <MessageReactionDisplay
               isMe={isMe}
               currentUserId={currentUserId}
               messageId={message.id}
               chatId={message.chatId}
             />
+
             {isFocus && !isRelyToThisMessage && (
               <MessageContextMenu
                 message={message}

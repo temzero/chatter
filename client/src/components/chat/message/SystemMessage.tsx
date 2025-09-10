@@ -1,14 +1,14 @@
 import clsx from "clsx";
+import { motion } from "framer-motion";
 import { useCurrentUserId } from "@/stores/authStore";
 import { SystemEventType } from "@/types/enums/systemEventType";
 import { MessageResponse } from "@/types/responses/message.response";
-import { MessageActions } from "../ui/MessageActions";
-import { ReactionPicker } from "../ui/MessageReactionPicker";
-import { MessageReactionDisplay } from "../ui/MessageReactionsDisplay";
-import { motion } from "framer-motion";
+import { MessageActions } from "@/components/ui/MessageActions";
+import { ReactionPicker } from "@/components/ui/MessageReactionPicker";
+import { MessageReactionDisplay } from "@/components/ui/MessageReactionsDisplay";
 import { messageAnimations } from "@/animations/messageAnimations";
-import { SystemMessageContent } from "../ui/SystemMessageContent";
-import { SystemMessageJSONContent } from "../ui/SystemMessageContent";
+import { SystemMessageContent } from "@/components/ui/SystemMessageContent";
+import { SystemMessageJSONContent } from "@/components/ui/SystemMessageContent";
 import {
   useIsMessageFocus,
   useIsReplyToThisMessage,
@@ -37,7 +37,7 @@ const SystemMessage = ({
   const isFocus = useIsMessageFocus(messageId);
   const openMessageModal = useModalStore((state) => state.openMessageModal);
 
-  if (!message) return null;
+  if (!message || !currentUserId) return;
 
   const getClass = () => {
     const classes = [];

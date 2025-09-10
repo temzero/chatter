@@ -14,4 +14,6 @@ export enum SystemEventType {
   MESSAGE_PINNED = "message_pinned",
   MESSAGE_UNPINNED = "message_unpinned",
   CHAT_DELETED = "chat_deleted",
+
+  CALL = "call",
 }

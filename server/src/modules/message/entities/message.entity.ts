@@ -18,6 +18,7 @@ import { Reaction } from './reaction.entity';
 import { Attachment } from './attachment.entity';
 import { MessageStatus } from '../constants/message-status.constants';
 import { SystemEventType } from '../constants/system-event-type.constants';
+import { Call } from 'src/modules/call/entities/call.entity';
 
 @Entity('message')
 @Index(['chatId']) // Index for faster chat message queries
@@ -105,6 +106,10 @@ export class Message {
 
   @Column({ type: 'enum', enum: SystemEventType, nullable: true })
   systemEvent: SystemEventType | null;
+
+  @ManyToOne(() => Call, { nullable: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'call_id' })
+  call?: Call;
 
   @Column({ name: 'is_deleted', default: false })
   isDeleted: boolean;

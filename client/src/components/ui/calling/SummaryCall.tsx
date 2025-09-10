@@ -3,7 +3,7 @@ import { Button } from "../Button";
 import { CallHeader } from "./components/CallHeader";
 import { formatDuration } from "@/utils/formatDuration";
 import { useCallStore } from "@/stores/callStore/callStore";
-import { CallStatus } from "@/types/enums/CallStatus";
+import { LocalCallStatus } from "@/types/enums/LocalCallStatus";
 import { useEffect } from "react";
 
 export const SummaryCall = ({
@@ -13,25 +13,25 @@ export const SummaryCall = ({
   duration?: number;
 }) => {
   const duration = useCallStore((state) => state.getCallDuration());
-  const callStatus = useCallStore((state) => state.callStatus);
+  const callStatus = useCallStore((state) => state.localCallStatus);
   const closeCallModal = useCallStore((state) => state.closeCallModal);
 
   // Auto-close when call is canceled
   useEffect(() => {
-    if (callStatus === CallStatus.CANCELED) {
+    if (callStatus === LocalCallStatus.CANCELED) {
       closeCallModal();
     }
   }, [callStatus, closeCallModal]);
 
   const getStatusMessage = () => {
     switch (callStatus) {
-      case CallStatus.CANCELED:
+      case LocalCallStatus.CANCELED:
         return "Call canceled";
-      case CallStatus.REJECTED:
+      case LocalCallStatus.REJECTED:
         return "Call rejected";
-      case CallStatus.ENDED:
+      case LocalCallStatus.ENDED:
         return duration > 0 ? formatDuration(duration) : "Call ended";
-      case CallStatus.ERROR:
+      case LocalCallStatus.ERROR:
         return "Something went wrong!";
       default:
         return null;
@@ -45,7 +45,7 @@ export const SummaryCall = ({
         {getStatusMessage() && (
           <div
             className={`mt-2 text-lg tabular-nums text-center ${
-              callStatus === CallStatus.ERROR ? "text-red-500" : "text-gray-400"
+              callStatus === LocalCallStatus.ERROR ? "text-red-500" : "text-gray-400"
             }`}
           >
             {getStatusMessage()}
@@ -56,14 +56,14 @@ export const SummaryCall = ({
       <div className="py-10 flex justify-center">
         <span
           className={`material-symbols-outlined text-6xl ${
-            callStatus === CallStatus.CANCELED
+            callStatus === LocalCallStatus.CANCELED
               ? "text-gray-400"
-              : callStatus === CallStatus.ERROR
+              : callStatus === LocalCallStatus.ERROR
               ? "text-red-500 animate-pulse"
               : "text-red-400"
           }`}
         >
-          {callStatus === CallStatus.ERROR ? "e911_avatar" : "call_end"}
+          {callStatus === LocalCallStatus.ERROR ? "e911_avatar" : "call_end"}
         </span>
       </div>
 

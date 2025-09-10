@@ -2,11 +2,12 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CallController } from './call.controller';
 import { CallService } from './call.service';
-import { Call } from './entities/call.entities';
+import { Call } from './entities/call.entity';
 import { ChatMember } from '../chat-member/entities/chat-member.entity';
+import { MessageModule } from '../message/message.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Call, ChatMember])],
+  imports: [TypeOrmModule.forFeature([Call, ChatMember]), MessageModule],
   controllers: [CallController],
   providers: [CallService],
   exports: [CallService],

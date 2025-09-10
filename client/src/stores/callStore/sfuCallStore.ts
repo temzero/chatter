@@ -3,7 +3,7 @@ import { devtools } from "zustand/middleware";
 import { LiveKitService } from "@/services/liveKitService";
 import { SFUCallMember } from "@/types/store/callMember.type";
 import { useCallStore } from "./callStore";
-import { CallStatus } from "@/types/enums/CallStatus";
+import { LocalCallStatus } from "@/types/enums/LocalCallStatus";
 import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
 import { callService } from "@/services/callService";
 import { getMyChatMember, getMyChatMemberId } from "../chatMemberStore";
@@ -78,7 +78,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
           startedAt: new Date(),
           chatId,
           isVideoCall: isVideoCall,
-          callStatus: CallStatus.OUTGOING,
+          localCallStatus: LocalCallStatus.OUTGOING,
         });
 
         // 2. OPEN MODAL
@@ -86,8 +86,8 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
 
         // 3. Set timeout
         const timeoutRef = setTimeout(() => {
-          const { callStatus } = useCallStore.getState();
-          if (callStatus === CallStatus.OUTGOING) {
+          const { localCallStatus } = useCallStore.getState();
+          if (localCallStatus === LocalCallStatus.OUTGOING) {
             useCallStore
               .getState()
               .endCall({ isTimeout: true, isCancel: true });
@@ -137,7 +137,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
         useCallStore.setState({
           timeoutRef: null,
           error: "sfu_init_failed",
-          callStatus: CallStatus.ERROR,
+          localCallStatus: LocalCallStatus.ERROR,
         });
         toast.error(
           "Permission denied! Please allow camera and microphone access."
@@ -153,7 +153,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
         useCallStore.getState().cleanupStreams();
 
         // Update base store
-        useCallStore.getState().setCallStatus(CallStatus.CONNECTING);
+        useCallStore.getState().setCallStatus(LocalCallStatus.CONNECTING);
 
         // Initialize LiveKit service
         const liveKitService = new LiveKitService();
@@ -198,7 +198,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
         if (chatId) {
           callWebSocketService.rejectCall({ chatId });
         }
-        useCallStore.getState().setCallStatus(CallStatus.ERROR);
+        useCallStore.getState().setCallStatus(LocalCallStatus.ERROR);
       }
     },
 
@@ -217,7 +217,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
       } catch (error) {
         console.error("Error rejecting call:", error);
         toast.error("Failed to reject call. Please try again.");
-        useCallStore.getState().setCallStatus(CallStatus.ERROR);
+        useCallStore.getState().setCallStatus(LocalCallStatus.ERROR);
       }
     },
 
@@ -240,7 +240,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
             get().handleSFUTrackUnsubscribed(track, publication, participant);
           },
           onError: (error) => {
-            useCallStore.getState().setCallStatus(CallStatus.ERROR);
+            useCallStore.getState().setCallStatus(LocalCallStatus.ERROR);
             console.error("LiveKit connection error:", error);
           },
         });
@@ -254,10 +254,10 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
         });
 
         // Set call as connected
-        useCallStore.getState().setCallStatus(CallStatus.CONNECTED);
+        useCallStore.getState().setCallStatus(LocalCallStatus.CONNECTED);
       } catch (error) {
         console.error("Failed to connect to SFU room:", error);
-        useCallStore.getState().setCallStatus(CallStatus.ERROR);
+        useCallStore.getState().setCallStatus(LocalCallStatus.ERROR);
       }
     },
 
