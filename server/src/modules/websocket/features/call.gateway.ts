@@ -89,6 +89,7 @@ export class CallGateway {
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: InitiateCallRequest,
   ) {
+    console.log('INITIATE_CALL');
     const userId = client.data.userId;
     const memberId = await this.chatMemberService.getChatMemberId(
       payload.chatId,
@@ -105,6 +106,14 @@ export class CallGateway {
 
     // Initialize call in the call service
     this.websocketCallService.initiateCall(payload.chatId, response, memberId);
+    await this.callService.createCall({
+      chatId: payload.chatId,
+      initiatorId: userId,
+      initiatorMemberId: memberId,
+      isVideoCall: payload.isVideoCall,
+      isGroupCall: payload.isGroupCall,
+      status: CallStatus.DIALING,
+    });
 
     // Notify all online chat members except the caller
     await this.websocketNotificationService.emitToChatMembers(
@@ -155,6 +164,13 @@ export class CallGateway {
     const userMemberId = await this.chatMemberService.getChatMemberId(
       payload.chatId,
       userId,
+    );
+
+    console.log(
+      'userMemberId',
+      userMemberId,
+      'payload.memberId',
+      payload.memberId,
     );
 
     if (userMemberId !== payload.memberId) {

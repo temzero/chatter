@@ -438,7 +438,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
       toast.info(`${participant.name || participant.identity} left the call`);
     },
 
-    handleSFUTrackSubscribed: (
+    handleSFUTrackSubscribed: async (
       track: RemoteTrack,
       publication: RemoteTrackPublication,
       participant: RemoteParticipant
@@ -466,16 +466,22 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
 
       get().updateSFUMember(updates);
 
-      callWebSocketService.updateCallMember({
-        chatId: useCallStore.getState().chatId!,
-        memberId: participant.identity,
-        isMuted: updates.isMuted,
-        isVideoEnabled: updates.isVideoEnabled,
-        isScreenSharing: updates.isScreenSharing,
-      });
+      // Only emit server update if it's **your own member**
+      const myMemberId = await getMyChatMemberId(
+        useCallStore.getState().chatId!
+      );
+      if (participant?.identity === myMemberId) {
+        callWebSocketService.updateCallMember({
+          chatId: useCallStore.getState().chatId!,
+          memberId: myMemberId,
+          isMuted: updates.isMuted,
+          isVideoEnabled: updates.isVideoEnabled,
+          isScreenSharing: updates.isScreenSharing,
+        });
+      }
     },
 
-    handleSFUTrackUnsubscribed: (
+    handleSFUTrackUnsubscribed: async (
       track: RemoteTrack,
       publication: RemoteTrackPublication,
       participant: RemoteParticipant
@@ -502,13 +508,19 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
 
       get().updateSFUMember(updates);
 
-      callWebSocketService.updateCallMember({
-        chatId: useCallStore.getState().chatId!,
-        memberId: participant.identity,
-        isMuted: updates.isMuted,
-        isVideoEnabled: updates.isVideoEnabled,
-        isScreenSharing: updates.isScreenSharing,
-      });
+      // Only emit server update if it's **your own member**
+      const myMemberId = await getMyChatMemberId(
+        useCallStore.getState().chatId!
+      );
+      if (participant?.identity === myMemberId) {
+        callWebSocketService.updateCallMember({
+          chatId: useCallStore.getState().chatId!,
+          memberId: myMemberId,
+          isMuted: updates.isMuted,
+          isVideoEnabled: updates.isVideoEnabled,
+          isScreenSharing: updates.isScreenSharing,
+        });
+      }
     },
 
     // ========== MEDIA CONTROLS ==========

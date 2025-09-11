@@ -148,7 +148,6 @@ export class CallController {
         memberId,
         participantName,
       );
-      console.log('SFU Token', token);
       return new SuccessResponse({ token }, 'LiveKit token generated');
     } catch (error: unknown) {
       ErrorResponse.throw(error, 'Failed to generate LiveKit token');

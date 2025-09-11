@@ -27,6 +27,7 @@ export const callWebSocketService = {
    * Initiate a new call (BOTH)
    */
   initiateCall(payload: InitiateCallRequest) {
+    console.log("initiateCall");
     webSocketService.emit(CallEvent.INITIATE_CALL, payload);
   },
 

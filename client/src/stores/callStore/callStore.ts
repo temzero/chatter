@@ -129,25 +129,52 @@ export const useCallStore = create<CallState & CallActions>()(
     },
 
     acceptCall: async () => {
-      const { isGroupCall } = get();
+      const { isGroupCall, chatId, callId } = get();
       if (isGroupCall) {
         await useSFUCallStore.getState().acceptSFUCall();
       } else {
         await useP2PCallStore.getState().acceptP2PCall();
       }
+
+      const startedAt = new Date();
+
       set({
         localCallStatus: LocalCallStatus.CONNECTED,
-        startedAt: new Date(),
+        startedAt,
       });
+
+      if (chatId && callId) {
+        useMessageStore.getState().updateCallMessage(chatId, callId, {
+          status: CallStatus.IN_PROGRESS,
+          startedAt: startedAt.toDateString(),
+        });
+      }
     },
 
     rejectCall: (isCancel = false) => {
-      const { isGroupCall } = get();
+      const { isGroupCall, chatId, callId } = get();
+
       if (isGroupCall) {
         useSFUCallStore.getState().rejectSFUCall(isCancel);
       } else {
         useP2PCallStore.getState().rejectP2PCall(isCancel);
       }
+
+      const endedAt = new Date().toISOString();
+
+      if (chatId && callId) {
+        if (isCancel) {
+          // Caller cancels → delete the system call message
+          useMessageStore.getState().deleteMessage(chatId, callId);
+        } else {
+          // Callee rejects → just update status
+          useMessageStore.getState().updateCallMessage(chatId, callId, {
+            status: CallStatus.DECLINED,
+            endedAt,
+          });
+        }
+      }
+
       get().endCall({ isCancel });
     },
 

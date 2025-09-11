@@ -9,6 +9,7 @@ import { CallStatus } from './type/callStatus';
 import { ChatMember } from '../chat-member/entities/chat-member.entity';
 import { MessageService } from '../message/message.service';
 import { SystemEventType } from '../message/constants/system-event-type.constants';
+import { Chat } from '../chat/entities/chat.entity';
 
 @Injectable()
 export class CallService {
@@ -18,6 +19,8 @@ export class CallService {
   constructor(
     @InjectRepository(Call)
     private readonly callRepository: Repository<Call>,
+    @InjectRepository(Chat)
+    private chatRepository: Repository<Chat>,
     @InjectRepository(ChatMember)
     private chatMemberRepository: Repository<ChatMember>,
     private readonly messageService: MessageService,
@@ -37,11 +40,44 @@ export class CallService {
   }
 
   async createCall(createCallDto: CreateCallDto): Promise<Call> {
-    const call = this.callRepository.create(createCallDto as DeepPartial<Call>);
-    const savedCall = await this.callRepository.save(call);
+    console.log('createCall data');
 
-    // Send system message about new call
-    await this.createCallSystemMessage(savedCall);
+    // ✅ Ensure chat exists
+    const chat = await this.chatRepository.findOneBy({
+      id: createCallDto.chatId,
+    });
+    if (!chat) {
+      throw new Error(`Chat not found: ${createCallDto.chatId}`);
+    }
+
+    // ✅ Ensure initiator exists
+    const initiator = await this.chatMemberRepository.findOneBy({
+      id: createCallDto.initiatorMemberId,
+    });
+    if (!initiator) {
+      throw new Error(
+        `ChatMember not found: ${createCallDto.initiatorMemberId}`,
+      );
+    }
+
+    // ✅ Create and link relations
+    const call = this.callRepository.create({
+      status: createCallDto.status,
+      isVideoCall: createCallDto.isVideoCall,
+      isGroupCall: createCallDto.isGroupCall,
+      chat,
+      initiator,
+    });
+
+    const savedCall = await this.callRepository.save(call);
+    console.log('savedCall', savedCall);
+
+    // ✅ Create system message (chat and initiator are now linked)
+    await this.createCallSystemMessage(
+      savedCall.chat.id,
+      savedCall.id,
+      createCallDto.initiatorId,
+    );
 
     return savedCall;
   }
@@ -164,10 +200,8 @@ export class CallService {
       };
 
       at.addGrant(grant);
-      console.log('AccessToken instance:', at);
 
       const generatedToken = await at.toJwt();
-      console.log('SFU Token:', generatedToken);
       return generatedToken;
     } catch (err) {
       if (err instanceof Error) {
@@ -177,13 +211,20 @@ export class CallService {
     }
   }
 
-  async createCallSystemMessage(call: Call) {
-    if (!call?.chat?.id) return;
+  async createCallSystemMessage(
+    chatId: string,
+    callId: string,
+    initiatorId: string,
+  ) {
+    console.log('createCallSystemMessage');
 
     return this.messageService.createSystemEventMessage(
-      call.chat.id,
-      call.initiator.id,
+      chatId,
+      initiatorId,
       SystemEventType.CALL,
+      {
+        callId,
+      },
     );
   }
 

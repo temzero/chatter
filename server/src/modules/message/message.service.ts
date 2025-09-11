@@ -238,8 +238,10 @@ export class MessageService {
       newValue?: string;
       targetId?: string;
       targetName?: string;
+      callId?: string;
     },
   ): Promise<MessageResponseDto> {
+    console.log('createSystemEventMessage');
     let targetName: string | undefined;
     if (options?.targetId && options.targetId !== senderId) {
       targetName =
@@ -256,6 +258,7 @@ export class MessageService {
         options?.targetId,
         targetName,
       ),
+      call: options?.callId ? { id: options.callId } : undefined,
     });
 
     const savedMessage = await this.messageRepo.save(message);
@@ -277,7 +280,7 @@ export class MessageService {
     try {
       const message = await this.messageRepo.findOne({
         where: { id },
-        relations: ['sender', 'chat'],
+        relations: ['sender', 'chat', 'call'],
       });
 
       if (!message) {
@@ -297,7 +300,7 @@ export class MessageService {
           chat: { id: chatId },
           content: Like(`%${searchTerm}%`),
         },
-        relations: ['sender', 'chat'],
+        relations: ['sender', 'chat', 'call'],
       });
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to search messages');
@@ -683,6 +686,11 @@ export class MessageService {
         .leftJoinAndSelect('message.reactions', 'reactions')
         .leftJoinAndSelect('message.attachments', 'attachments')
 
+        // ✅ Call relation
+        .leftJoinAndSelect('message.call', 'call')
+        .leftJoinAndSelect('call.initiator', 'callInitiator')
+        .leftJoinAndSelect('call.participants', 'callParticipants')
+
         // Direct reply message
         .leftJoinAndSelect('message.replyToMessage', 'replyToMessage')
         .leftJoinAndSelect('replyToMessage.sender', 'replySender')
@@ -724,6 +732,19 @@ export class MessageService {
           'member.nickname',
           'reactions',
           'attachments',
+
+          // ✅ Call fields
+          'call.id',
+          'call.status',
+          'call.isVideoCall',
+          'call.isGroupCall',
+          'call.startedAt',
+          'call.endedAt',
+          'call.updatedAt',
+          'callInitiator.id',
+          'callInitiator.userId',
+          'callInitiator.nickname',
+          'callParticipants',
 
           // Reply
           'replyToMessage.id',
