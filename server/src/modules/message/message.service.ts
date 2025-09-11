@@ -232,7 +232,7 @@ export class MessageService {
   async createSystemEventMessage(
     chatId: string,
     senderId: string,
-    eventType: SystemEventType,
+    eventType?: SystemEventType,
     options?: {
       oldValue?: string;
       newValue?: string;

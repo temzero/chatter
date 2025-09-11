@@ -24,6 +24,7 @@ import type { MessageResponse } from "@/types/responses/message.response";
 // ✅ new
 import MessageBubble from "./MessageBubble";
 import CallMessageBubble from "./CallMessageBubble";
+import { SystemEventType } from "@/types/enums/systemEventType";
 
 interface MessageProps {
   message: MessageResponse;
@@ -75,7 +76,7 @@ const Message: React.FC<MessageProps> = ({
   const isGroupChat = chatType === "group";
 
   // system message
-  if (message.systemEvent) {
+  if (message.systemEvent && message.systemEvent != SystemEventType.CALL) {
     return (
       <div className="w-full flex items-center justify-center">
         <SystemMessage
