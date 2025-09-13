@@ -4,8 +4,6 @@ export class CreateCallDto {
   chatId: string;
   isVideoCall: boolean;
   isGroupCall: boolean;
-  initiatorId: string;
-  initiatorMemberId?: string;
-  roomName?: string;
+  initiatorUserId: string;
   status: CallStatus;
 }

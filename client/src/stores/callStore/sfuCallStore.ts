@@ -147,7 +147,13 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
     },
 
     acceptSFUCall: async () => {
-      const { chatId } = useCallStore.getState();
+      const { callId, chatId } = useCallStore.getState();
+
+      if (!callId || !chatId) {
+        console.error("Missing callId or chatId");
+        return;
+      }
+
       try {
         // Clean up any existing streams
         useCallStore.getState().cleanupStreams();
@@ -185,34 +191,37 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
         await get().connectToSFURoom(url, token);
 
         // Send acceptance via WebSocket
-        if (chatId) {
-          callWebSocketService.acceptCall({
-            chatId,
-            isCallerCancel: false,
-          });
-        }
+        callWebSocketService.acceptCall({
+          callId,
+          chatId,
+          isCallerCancel: false,
+        });
 
         toast.success("Call accepted - connecting to SFU...");
       } catch (error) {
         handleError(error, "Could not connect to SFU");
         if (chatId) {
-          callWebSocketService.rejectCall({ chatId });
+          callWebSocketService.rejectCall({ callId, chatId });
         }
         useCallStore.getState().setCallStatus(LocalCallStatus.ERROR);
       }
     },
 
     rejectSFUCall: (isCancel = false) => {
-      const { chatId } = useCallStore.getState();
+      const { callId, chatId } = useCallStore.getState();
 
-      if (!chatId) {
+      if (!chatId || !callId) {
         console.error("No chatId found for rejecting call");
         return;
       }
 
       try {
         // Tell server we rejected the call
-        callWebSocketService.rejectCall({ chatId, isCallerCancel: isCancel });
+        callWebSocketService.rejectCall({
+          callId,
+          chatId,
+          isCallerCancel: isCancel,
+        });
         get().disconnectFromSFU();
       } catch (error) {
         console.error("Error rejecting call:", error);
@@ -466,13 +475,18 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
 
       get().updateSFUMember(updates);
 
-      // Only emit server update if it's **your own member**
-      const myMemberId = await getMyChatMemberId(
-        useCallStore.getState().chatId!
-      );
+      const callStore = useCallStore.getState();
+      const callId = callStore.callId;
+      const chatId = callStore.chatId;
+
+      // Only emit server update if it's your own member and IDs exist
+      if (!callId || !chatId) return;
+
+      const myMemberId = await getMyChatMemberId(chatId);
       if (participant?.identity === myMemberId) {
         callWebSocketService.updateCallMember({
-          chatId: useCallStore.getState().chatId!,
+          callId, // ✅ required
+          chatId,
           memberId: myMemberId,
           isMuted: updates.isMuted,
           isVideoEnabled: updates.isVideoEnabled,
@@ -508,13 +522,19 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
 
       get().updateSFUMember(updates);
 
-      // Only emit server update if it's **your own member**
-      const myMemberId = await getMyChatMemberId(
-        useCallStore.getState().chatId!
-      );
+      const callStore = useCallStore.getState();
+      const callId = callStore.callId;
+      const chatId = callStore.chatId;
+
+      // Only emit server update if IDs exist
+      if (!callId || !chatId) return;
+
+      // Only emit server update if it's your own member
+      const myMemberId = await getMyChatMemberId(chatId);
       if (participant?.identity === myMemberId) {
         callWebSocketService.updateCallMember({
-          chatId: useCallStore.getState().chatId!,
+          callId, // ✅ required
+          chatId,
           memberId: myMemberId,
           isMuted: updates.isMuted,
           isVideoEnabled: updates.isVideoEnabled,
@@ -525,11 +545,11 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
 
     // ========== MEDIA CONTROLS ==========
     toggleAudio: async (enable?: boolean) => {
-      const { chatId, isMuted } = useCallStore.getState();
+      const { callId, chatId, isMuted } = useCallStore.getState();
       const { liveKitService } = get();
       const myMemberId = await getMyChatMemberId(chatId!);
 
-      if (!liveKitService || !chatId || !myMemberId) return;
+      if (!liveKitService || !callId || !chatId || !myMemberId) return;
 
       const shouldUnmute = enable !== undefined ? enable : isMuted;
 
@@ -538,6 +558,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
           await liveKitService.toggleAudio(true);
           useCallStore.setState({ isMuted: false });
           callWebSocketService.updateCallMember({
+            callId,
             chatId,
             memberId: myMemberId,
             isMuted: false,
@@ -546,6 +567,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
           await liveKitService.toggleAudio(false);
           useCallStore.setState({ isMuted: true });
           callWebSocketService.updateCallMember({
+            callId,
             chatId,
             memberId: myMemberId,
             isMuted: true,
@@ -555,6 +577,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
         console.error("Error in toggleAudio:", error);
         useCallStore.setState({ isMuted: true });
         callWebSocketService.updateCallMember({
+          callId,
           chatId,
           memberId: myMemberId,
           isMuted: true,
@@ -563,11 +586,11 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
     },
 
     toggleVideo: async (enable?: boolean) => {
-      const { chatId, isVideoEnabled } = useCallStore.getState();
+      const { callId, chatId, isVideoEnabled } = useCallStore.getState();
       const { liveKitService } = get();
       const myMemberId = await getMyChatMemberId(chatId!);
 
-      if (!liveKitService || !chatId || !myMemberId) return;
+      if (!liveKitService || !callId || !chatId || !myMemberId) return;
 
       const shouldTurnOn = enable !== undefined ? enable : !isVideoEnabled;
 
@@ -576,6 +599,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
           await liveKitService.toggleVideo(true);
           useCallStore.setState({ isVideoEnabled: true });
           callWebSocketService.updateCallMember({
+            callId,
             chatId,
             memberId: myMemberId,
             isVideoEnabled: true,
@@ -584,6 +608,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
           await liveKitService.toggleVideo(false);
           useCallStore.setState({ isVideoEnabled: false });
           callWebSocketService.updateCallMember({
+            callId,
             chatId,
             memberId: myMemberId,
             isVideoEnabled: false,
@@ -593,6 +618,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
         console.error("Error in toggleVideo (SFU):", error);
         useCallStore.setState({ isVideoEnabled: false });
         callWebSocketService.updateCallMember({
+          callId,
           chatId,
           memberId: myMemberId,
           isVideoEnabled: false,
@@ -602,10 +628,10 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
 
     toggleScreenShare: async (enable?: boolean) => {
       const { liveKitService } = get();
-      const { chatId, isScreenSharing } = useCallStore.getState();
+      const { callId, chatId, isScreenSharing } = useCallStore.getState();
       const myMemberId = await getMyChatMemberId(chatId!);
 
-      if (!liveKitService || !chatId || !myMemberId) return;
+      if (!liveKitService || !callId || !chatId || !myMemberId) return;
 
       const shouldStart = enable !== undefined ? enable : !isScreenSharing;
 
@@ -614,6 +640,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
           await liveKitService.toggleScreenShare(true);
           useCallStore.setState({ isScreenSharing: true });
           callWebSocketService.updateCallMember({
+            callId,
             chatId,
             memberId: myMemberId,
             isScreenSharing: true,
@@ -622,6 +649,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
           await liveKitService.toggleScreenShare(false);
           useCallStore.setState({ isScreenSharing: false });
           callWebSocketService.updateCallMember({
+            callId,
             chatId,
             memberId: myMemberId,
             isScreenSharing: false,
@@ -631,6 +659,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
         console.error("Error toggling screen share:", error);
         useCallStore.setState({ isScreenSharing: false });
         callWebSocketService.updateCallMember({
+          callId,
           chatId,
           memberId: myMemberId,
           isScreenSharing: false,

@@ -1,14 +1,12 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { Server } from 'socket.io';
 import { WebsocketConnectionService } from './services/websocket-connection.service';
-import { WebsocketCallService } from './services/websocket-call.service';
 import { WebsocketNotificationService } from './services/websocket-notification.service';
 
 @Injectable()
 export class WebsocketService implements OnModuleDestroy {
   constructor(
     public readonly connection: WebsocketConnectionService,
-    public readonly call: WebsocketCallService,
     public readonly notification: WebsocketNotificationService,
   ) {}
 
@@ -19,7 +17,5 @@ export class WebsocketService implements OnModuleDestroy {
   }
 
   /** Cleanup on module destroy */
-  onModuleDestroy() {
-    this.call.onModuleDestroy();
-  }
+  onModuleDestroy() {}
 }

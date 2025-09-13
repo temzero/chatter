@@ -9,7 +9,7 @@ import { CallStatus } from './type/callStatus';
 import { ChatMember } from '../chat-member/entities/chat-member.entity';
 import { MessageService } from '../message/message.service';
 import { SystemEventType } from '../message/constants/system-event-type.constants';
-import { Chat } from '../chat/entities/chat.entity';
+import { ChatMemberService } from '../chat-member/chat-member.service';
 
 @Injectable()
 export class CallService {
@@ -19,11 +19,9 @@ export class CallService {
   constructor(
     @InjectRepository(Call)
     private readonly callRepository: Repository<Call>,
-    @InjectRepository(Chat)
-    private chatRepository: Repository<Chat>,
-    @InjectRepository(ChatMember)
-    private chatMemberRepository: Repository<ChatMember>,
+
     private readonly messageService: MessageService,
+    private readonly chatMemberService: ChatMemberService, // Assume this service exists
   ) {
     this.livekitApiKeyName = process.env.LIVEKIT_API_KEY_NAME ?? 'your_api_key';
     this.livekitApiKeySecret =
@@ -39,47 +37,49 @@ export class CallService {
     }
   }
 
+  async getPendingCalls(): Promise<Call[]> {
+    return await this.callRepository.find({
+      where: { status: In([CallStatus.DIALING, CallStatus.IN_PROGRESS]) },
+      relations: ['chat', 'initiator', 'participants'],
+      order: { startedAt: 'DESC' },
+    });
+  }
+
   async createCall(createCallDto: CreateCallDto): Promise<Call> {
-    console.log('createCall data');
-
-    // ✅ Ensure chat exists
-    const chat = await this.chatRepository.findOneBy({
-      id: createCallDto.chatId,
-    });
-    if (!chat) {
-      throw new Error(`Chat not found: ${createCallDto.chatId}`);
-    }
-
-    // ✅ Ensure initiator exists
-    const initiator = await this.chatMemberRepository.findOneBy({
-      id: createCallDto.initiatorMemberId,
-    });
-    if (!initiator) {
-      throw new Error(
-        `ChatMember not found: ${createCallDto.initiatorMemberId}`,
+    // Verify the member making the update is the same as the one in the payload
+    const initiatorMember =
+      await this.chatMemberService.getMemberByChatIdAndUserId(
+        createCallDto.chatId,
+        createCallDto.initiatorUserId,
       );
-    }
 
-    // ✅ Create and link relations
+    if (!initiatorMember) {
+      throw new Error('Unauthorized: Cannot update other members');
+    }
+    // save call first
     const call = this.callRepository.create({
       status: createCallDto.status,
       isVideoCall: createCallDto.isVideoCall,
       isGroupCall: createCallDto.isGroupCall,
-      chat,
-      initiator,
+      chat: { id: createCallDto.chatId },
+      initiator: initiatorMember,
+      participants: [initiatorMember],
     });
 
     const savedCall = await this.callRepository.save(call);
-    console.log('savedCall', savedCall);
 
-    // ✅ Create system message (chat and initiator are now linked)
-    await this.createCallSystemMessage(
-      savedCall.chat.id,
-      savedCall.id,
-      createCallDto.initiatorId,
+    // now system message will see it (because it's committed)
+    await this.messageService.createSystemEventMessage(
+      createCallDto.chatId,
+      createCallDto.initiatorUserId,
+      SystemEventType.CALL,
+      { callId: savedCall.id },
     );
 
-    return savedCall;
+    return this.callRepository.findOneOrFail({
+      where: { id: savedCall.id },
+      relations: ['chat', 'initiator'],
+    });
   }
 
   async getCallById(id: string): Promise<Call> {
@@ -127,10 +127,7 @@ export class CallService {
     const call = await this.getCallById(id);
 
     // Verify the chat member exists
-    const chatMember = await this.chatMemberRepository.findOne({
-      where: { id: memberId },
-    });
-
+    const chatMember = await this.chatMemberService.findById(memberId);
     if (!chatMember) {
       throw new NotFoundException(`ChatMember with ID ${memberId} not found`);
     }
@@ -159,6 +156,68 @@ export class CallService {
       where: { id },
       relations: ['participants', 'participants.user'], // Include user data if needed
     });
+  }
+
+  async getCallParticipants(callId: string): Promise<ChatMember[]> {
+    const call = await this.callRepository.findOne({
+      where: { id: callId },
+      relations: ['participants'],
+    });
+
+    if (!call) {
+      throw new NotFoundException(`Call with ID ${callId} not found`);
+    }
+
+    return call.participants;
+  }
+
+  async addParticipant(callId: string, member: ChatMember): Promise<Call> {
+    const call = await this.getCallById(callId);
+
+    // Check if participant is already in call
+    const alreadyParticipant = call.participants.some(
+      (p) => p.id === member.id,
+    );
+    if (alreadyParticipant) {
+      return call; // no-op, return current state
+    }
+
+    // Add participant via relation
+    await this.callRepository
+      .createQueryBuilder()
+      .relation(Call, 'participants')
+      .of(call)
+      .add(member.id);
+
+    // Refresh and return updated call with participants
+    const updatedCall = await this.callRepository.findOne({
+      where: { id: callId },
+      relations: ['chat', 'initiator', 'participants'],
+    });
+    if (!updatedCall) {
+      throw new NotFoundException(`Call with ID ${callId} not found`);
+    }
+    return updatedCall;
+  }
+
+  async removeParticipant(callId: string, memberId: string): Promise<boolean> {
+    const call = await this.getCallById(callId);
+
+    // Ensure the participant is actually in the call
+    const isParticipant = call.participants.some((p) => p.id === memberId);
+    if (!isParticipant) {
+      return false; // nothing to remove
+    }
+
+    // Remove relation
+    await this.callRepository
+      .createQueryBuilder()
+      .relation(Call, 'participants')
+      .of(call)
+      .remove(memberId);
+
+    // Refresh and return updated call
+    return true;
   }
 
   async endCall(id: string): Promise<Call> {
@@ -209,23 +268,6 @@ export class CallService {
       }
       throw new Error('Unknown error while generating LiveKit token');
     }
-  }
-
-  async createCallSystemMessage(
-    chatId: string,
-    callId: string,
-    initiatorId: string,
-  ) {
-    console.log('createCallSystemMessage');
-
-    return this.messageService.createSystemEventMessage(
-      chatId,
-      initiatorId,
-      SystemEventType.CALL,
-      {
-        callId,
-      },
-    );
   }
 
   /**

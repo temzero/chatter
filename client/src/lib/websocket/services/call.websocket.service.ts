@@ -4,15 +4,15 @@ import {
   InitiateCallRequest,
   CallActionRequest,
   RtcOfferRequest,
-  IncomingCallResponse,
+  CallResponse,
   CallActionResponse,
   RtcAnswerResponse,
   IceCandidateRequest,
   IceCandidateResponse,
   RtcOfferResponse,
   RtcAnswerRequest,
-  updateCallPayload,
-  callMemberPayload,
+  UpdateCallPayload,
+  CallMemberPayload,
 } from "@/types/callPayload";
 
 /**
@@ -31,51 +31,43 @@ export const callWebSocketService = {
     webSocketService.emit(CallEvent.INITIATE_CALL, payload);
   },
 
-  requestPendingCalls() {
-    webSocketService.emit(CallEvent.PENDING_CALLS);
-  },
-
-  onPendingCalls(callback: (data: IncomingCallResponse[]) => void): void {
-    webSocketService.on(CallEvent.PENDING_CALLS, callback);
-  },
-
   /**
    * Listen for incoming calls (BOTH)
    */
-  onIncomingCall(callback: (data: IncomingCallResponse) => void) {
+  onIncomingCall(callback: (data: CallResponse) => void) {
     webSocketService.on(CallEvent.INCOMING_CALL, callback);
   },
 
   /**
    * Remove incoming call listener (BOTH)
    */
-  offIncomingCall(callback: (data: IncomingCallResponse) => void) {
+  offIncomingCall(callback: (data: CallResponse) => void) {
     webSocketService.off(CallEvent.INCOMING_CALL, callback);
   },
 
   // Update call (BOTH)
-  updateCall(payload: updateCallPayload) {
+  updateCall(payload: UpdateCallPayload) {
     webSocketService.emit(CallEvent.UPDATE_CALL, payload);
   },
 
-  onCallUpdated(callback: (data: updateCallPayload) => void) {
+  onCallUpdated(callback: (data: UpdateCallPayload) => void) {
     webSocketService.on(CallEvent.UPDATE_CALL, callback);
   },
 
-  offCallUpdated(callback: (data: updateCallPayload) => void) {
+  offCallUpdated(callback: (data: UpdateCallPayload) => void) {
     webSocketService.off(CallEvent.UPDATE_CALL, callback);
   },
 
   // Update call member (BOTH)
-  updateCallMember(payload: callMemberPayload) {
+  updateCallMember(payload: CallMemberPayload) {
     webSocketService.emit(CallEvent.UPDATE_CALL_MEMBER, payload);
   },
 
-  onCallMemberUpdated(callback: (data: callMemberPayload) => void) {
+  onCallMemberUpdated(callback: (data: CallMemberPayload) => void) {
     webSocketService.on(CallEvent.UPDATE_CALL_MEMBER, callback);
   },
 
-  offCallMemberUpdated(callback: (data: callMemberPayload) => void) {
+  offCallMemberUpdated(callback: (data: CallMemberPayload) => void) {
     webSocketService.off(CallEvent.UPDATE_CALL_MEMBER, callback);
   },
 
@@ -89,14 +81,14 @@ export const callWebSocketService = {
   /**
    * Listen for call accept events (BOTH)
    */
-  onCallAccepted(callback: (data: CallActionResponse) => void) {
+  onCallAccepted(callback: (data: CallResponse) => void) {
     webSocketService.on(CallEvent.ACCEPT_CALL, callback);
   },
 
   /**
    * Remove call accept listener (BOTH)
    */
-  offCallAccepted(callback: (data: CallActionResponse) => void) {
+  offCallAccepted(callback: (data: CallResponse) => void) {
     webSocketService.off(CallEvent.ACCEPT_CALL, callback);
   },
 
@@ -257,7 +249,6 @@ export const callWebSocketService = {
   removeAllListeners() {
     // Call lifecycle events (BOTH)
     webSocketService.off(CallEvent.INCOMING_CALL);
-    webSocketService.off(CallEvent.PENDING_CALLS);
     webSocketService.off(CallEvent.UPDATE_CALL);
     webSocketService.off(CallEvent.UPDATE_CALL_MEMBER);
     webSocketService.off(CallEvent.ACCEPT_CALL);

@@ -40,6 +40,9 @@ export class Call {
   @Column({ nullable: true })
   endedAt?: Date;
 
+  @CreateDateColumn()
+  createdAt: Date;
+
   @UpdateDateColumn()
   updatedAt: Date;
 

@@ -85,8 +85,9 @@ export interface CallActions {
 export const useCallStore = create<CallState & CallActions>()(
   devtools((set, get) => ({
     // ========== CORE STATE ==========
+    callId: null,
     chatId: null,
-    callStatus: null,
+    localCallStatus: null,
     isVideoCall: false,
     isGroupCall: false,
     isMuted: false,
@@ -146,7 +147,7 @@ export const useCallStore = create<CallState & CallActions>()(
       if (chatId && callId) {
         useMessageStore.getState().updateCallMessage(chatId, callId, {
           status: CallStatus.IN_PROGRESS,
-          startedAt: startedAt.toDateString(),
+          startedAt: startedAt.toISOString(),
         });
       }
     },

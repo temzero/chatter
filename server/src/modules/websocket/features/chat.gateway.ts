@@ -81,11 +81,10 @@ export class ChatGateway {
 
       // Resolve memberId if not provided
       if (!payload.memberId) {
-        const member =
-          await this.chatMemberService.fetchMemberByChatIdAndUserId(
-            payload.chatId,
-            senderId,
-          );
+        const member = await this.chatMemberService.getMemberByChatIdAndUserId(
+          payload.chatId,
+          senderId,
+        );
         if (!member) {
           client.emit(ChatEvent.MESSAGE_ERROR, {
             messageId: payload.id,
@@ -173,7 +172,7 @@ export class ChatGateway {
       );
 
       // Get member of sender in target chat
-      const member = await this.chatMemberService.fetchMemberByChatIdAndUserId(
+      const member = await this.chatMemberService.getMemberByChatIdAndUserId(
         payload.chatId,
         senderId,
       );

@@ -18,12 +18,12 @@ const CallMessageBubble: React.FC<CallMessageBubbleProps> = ({
   isMe,
   isRelyToThisMessage,
   onJoinCall,
-  onCallAgain,
 }) => {
   const call = message.call;
   if (!call) return null;
+  // call.status = CallStatus.MISSED; // Default to FAILED if status is missing
 
-  // 🔹 Format duration from ms → "mm:ss" or "hh:mm:ss"
+  // 🔹 Format duration from ms → "Xs", "1m12s", "1h20m"
   const formatDuration = (ms: number) => {
     const totalSeconds = Math.floor(ms / 1000);
     const hours = Math.floor(totalSeconds / 3600);
@@ -31,11 +31,12 @@ const CallMessageBubble: React.FC<CallMessageBubbleProps> = ({
     const seconds = totalSeconds % 60;
 
     if (hours > 0) {
-      return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds
-        .toString()
-        .padStart(2, "0")}`;
+      return `${hours}h${minutes}m`; // e.g., "1h20m"
     }
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+    if (minutes > 0) {
+      return `${minutes}m${seconds}s`; // e.g., "1m12s"
+    }
+    return `${seconds}s`; // e.g., "8s"
   };
 
   const getCallText = () => {
@@ -49,12 +50,14 @@ const CallMessageBubble: React.FC<CallMessageBubbleProps> = ({
           const duration =
             new Date(call.endedAt).getTime() -
             new Date(call.startedAt).getTime();
-          return `Call ended • Duration: ${formatDuration(duration)}`;
+          return `Call ended • ${formatDuration(duration)}`;
         }
         return "Call ended";
       }
       case CallStatus.DECLINED:
         return "Call was declined";
+      case CallStatus.MISSED:
+        return "Call was missed";
       case CallStatus.FAILED:
         return "Call failed";
       default:
@@ -66,16 +69,38 @@ const CallMessageBubble: React.FC<CallMessageBubbleProps> = ({
     switch (call.status) {
       case CallStatus.DECLINED:
       case CallStatus.COMPLETED:
+        return "text-yellow-600";
+      case CallStatus.MISSED:
       case CallStatus.FAILED:
-        return "text-red-400"; // 🔴 red for ended/failed
+        return "text-red-700";
       default:
-        return "text-blue-500 dark:text-blue-200";
+        return "";
+    }
+  };
+
+  // 🔹 Map status → icons
+  const getCallIcon = () => {
+    switch (call.status) {
+      case CallStatus.DIALING:
+        return "ring_volume"; // ringing icon
+      case CallStatus.IN_PROGRESS:
+        return "phone_in_talk"; // active call icon
+      case CallStatus.COMPLETED:
+        return "call_end"; // ended
+      case CallStatus.DECLINED:
+        return "phone_disabled"; // missed call
+      case CallStatus.MISSED:
+        return "phone_missed"; // missed call
+      case CallStatus.FAILED:
+        return "e911_avatar"; // error icon
+      default:
+        return "call";
     }
   };
 
   return (
     <div
-      className={clsx("message-bubble flex flex-col items-center", {
+      className={clsx("message-bubble flex flex-col", {
         "border-4 border-red-500/80": message.isImportant,
         "self-message ml-auto": isMe,
         "message-bubble-reply": isRelyToThisMessage,
@@ -85,28 +110,26 @@ const CallMessageBubble: React.FC<CallMessageBubbleProps> = ({
       })}
       style={{ minWidth: "180px" }}
     >
-      {/* Call status text */}
-      <p className={clsx("text-sm font-medium text-center", getCallClass())}>
-        {getCallText()}
-      </p>
+      <div className="flex gap-1 items-center p-2 pl-3">
+        {/* Icon */}
+        <span
+          className={clsx("material-symbols-outlined text-3xl", getCallClass())}
+        >
+          {getCallIcon()}
+        </span>
+        {/* Call status text */}
+        <p className={clsx("text-sm font-medium text-center", getCallClass())}>
+          {getCallText()}
+        </p>
+      </div>
 
       {/* Join button (for other users while call is ongoing) */}
-      {!isMe && call.status === CallStatus.IN_PROGRESS && (
+      {call.status === CallStatus.IN_PROGRESS && (
         <div
           onClick={() => onJoinCall?.(call.id)}
-          className="text-center p-1 text-green-500 hover:text-green-600 w-full custom-border-t"
+          className="text-center p-1 text-blue-700 w-full custom-border-t cursor-pointer hover:text-white hover:bg-blue-600 transition-colors"
         >
           Join Call
-        </div>
-      )}
-
-      {/* Call again button (for me after call ends) */}
-      {isMe && call.status === CallStatus.COMPLETED && (
-        <div
-          onClick={() => onCallAgain?.(message.chatId)}
-          className="text-center p-1 text-blue-500 w-full custom-border-t"
-        >
-          Call Again
         </div>
       )}
     </div>

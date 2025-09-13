@@ -16,7 +16,6 @@ import { SupabaseModule } from '../superbase/supabase.module';
 import { BlockModule } from '../block/block.module';
 import { WebsocketConnectionService } from './services/websocket-connection.service';
 import { CallGateway } from './features/call.gateway';
-import { WebsocketCallService } from './services/websocket-call.service';
 import { WebsocketNotificationService } from './services/websocket-notification.service';
 import { CallModule } from '../call/call.module'; // Import CallModule
 
@@ -47,14 +46,12 @@ import { CallModule } from '../call/call.module'; // Import CallModule
     WsJwtGuard,
     MessageMapper,
     WebsocketConnectionService,
-    WebsocketCallService,
     WebsocketNotificationService,
   ],
   exports: [
     WebsocketGateway,
     WebsocketService,
     WebsocketConnectionService,
-    WebsocketCallService,
     WebsocketNotificationService,
   ],
 })

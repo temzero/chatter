@@ -1,85 +1,93 @@
 import { CallStatus } from "./enums/CallStatus";
 // -------------------- Requests --------------------
 
-// Call control (no from/to member IDs needed except optional toMemberId for 1:1)
 export interface InitiateCallRequest {
-  chatId: string;
+  chatId: string; // still needed: call always starts in a chat
   isVideoCall: boolean;
   isGroupCall: boolean;
 }
 
-export interface updateCallPayload {
-  callId: string;
+export interface UpdateCallPayload {
+  callId: string; // ✅ identify call session
   chatId: string;
-  isVideoCall: boolean;
-  callStatus: CallStatus;
+  isVideoCall?: boolean;
+  callStatus?: CallStatus;
 }
 
-export interface callMemberPayload {
-  callId?: string;
+export interface CallMemberPayload {
+  callId: string;
   chatId: string;
-  memberId: string; // The member whose state changed
-  isMuted?: boolean;
+  memberId: string;
   isVideoEnabled?: boolean;
+  isMuted?: boolean;
   isScreenSharing?: boolean;
 }
 
 export interface CallActionRequest {
-  callId?: string;
+  callId: string; // ✅ session-level action
   chatId: string;
-  isCallerCancel?: boolean; // Action flags
+  memberId?: string; // who performs the action
+  isCallerCancel?: boolean;
 }
 
-// RTC / SFU signaling (client only specifies recipient if needed)
+// RTC / SFU signaling
 export interface RtcOfferRequest {
+  callId: string; // ✅ scoped to call
   chatId: string;
   offer: RTCSessionDescriptionInit;
 }
 
 export interface RtcAnswerRequest {
+  callId: string; // ✅ scoped to call
   chatId: string;
   answer: RTCSessionDescriptionInit;
 }
 
 export interface IceCandidateRequest {
+  callId: string; // ✅ scoped to call
   chatId: string;
   candidate: RTCIceCandidateInit;
 }
 
 // -------------------- Responses --------------------
 
-// Call control responses (server injects memberId for context)
-export interface IncomingCallResponse {
-  chatId: string;
+export interface CallResponse {
+  callId: string;
+  chatId: string; // still useful to open chat UI
   isVideoCall: boolean;
   isGroupCall: boolean;
-  memberId: string; // Caller (added by server)
-  timestamp: number;
+  initiatorId: string;
+  status: CallStatus;
+  createdAt: string; // ISO string
+  startedAt?: string;
+  endedAt?: string;
 }
 
 export interface CallActionResponse {
-  callId: string;
-  chatId: string;
-  memberId: string; // Who took the action
-  timestamp: number;
+  callId: string; // ✅ main key
+  memberId: string;
+  status?: CallStatus;
+  createdAt?: string;
+  startedAt?: string;
+  endedAt?: string;
   isCallerCancel?: boolean;
 }
 
-// RTC / SFU signaling responses (always include memberId)
+// RTC / SFU signaling responses
 export interface RtcOfferResponse {
-  chatId: string;
+  callId: string; // ✅ main key
   offer: RTCSessionDescriptionInit;
   memberId: string;
 }
 
 export interface RtcAnswerResponse {
-  chatId: string;
+  callId: string; // ✅ main key
   answer: RTCSessionDescriptionInit;
   memberId: string;
 }
 
 export interface IceCandidateResponse {
-  chatId: string;
+  callId: string; // ✅ main key
   candidate: RTCIceCandidateInit;
   memberId: string;
 }

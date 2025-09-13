@@ -225,8 +225,15 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
     },
 
     acceptP2PCall: async () => {
-      const { chatId, isVideoCall, isVideoEnabled } = useCallStore.getState();
+      const { callId, chatId, isVideoCall, isVideoEnabled } =
+        useCallStore.getState();
       const isOpenVideoTrack = isVideoCall && isVideoEnabled;
+
+      if (!callId || !chatId) {
+        console.error("Missing callId or chatId");
+        return;
+      }
+
       console.log("accept P2P CALL");
 
       try {
@@ -269,34 +276,39 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         }
 
         // Send acceptance via WebSocket
-        if (chatId) {
-          callWebSocketService.acceptCall({
-            chatId,
-            isCallerCancel: false,
-          });
-        }
+        // if (chatId) {
+        callWebSocketService.acceptCall({
+          callId,
+          chatId,
+          isCallerCancel: false,
+        });
+        // }
 
         toast.success("Call accepted - waiting for connection...");
       } catch (error) {
         handleError(error, "Could not start media devices");
         if (chatId) {
-          callWebSocketService.rejectCall({ chatId });
+          callWebSocketService.rejectCall({ callId, chatId });
         }
         useCallStore.getState().setCallStatus(LocalCallStatus.ERROR);
       }
     },
 
     rejectP2PCall: (isCancel = false) => {
-      const { chatId } = useCallStore.getState();
+      const { callId, chatId } = useCallStore.getState();
 
-      if (!chatId) {
-        console.error("No chatId found for rejecting call");
+      if (!callId || !chatId) {
+        console.error("Missing callId or chatId");
         return;
       }
 
       try {
         // Tell server we rejected the call
-        callWebSocketService.rejectCall({ chatId, isCallerCancel: isCancel });
+        callWebSocketService.rejectCall({
+          callId,
+          chatId,
+          isCallerCancel: isCancel,
+        });
       } catch (error) {
         console.error("Error rejecting call:", error);
         toast.error("Failed to reject call. Please try again.");
@@ -451,8 +463,13 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
     },
 
     createPeerConnection: (memberId: string) => {
-      const { chatId } = useCallStore.getState();
+      const { callId, chatId } = useCallStore.getState();
       const { localVoiceStream, localVideoStream, localScreenStream } = get();
+
+      if (!callId || !chatId) {
+        console.error("Missing callId or chatId");
+        return;
+      }
 
       const pc = new RTCPeerConnection({
         iceServers: [
@@ -467,6 +484,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
       pc.onicecandidate = (event) => {
         if (event.candidate && chatId) {
           callWebSocketService.sendIceCandidate({
+            callId,
             chatId,
             candidate: event.candidate.toJSON(),
           });
@@ -543,7 +561,12 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
       offer: RTCSessionDescriptionInit
     ) => {
       const { p2pMembers } = get();
-      const { chatId } = useCallStore.getState();
+      const { callId, chatId } = useCallStore.getState();
+
+      if (!callId || !chatId) {
+        console.error("Missing callId or chatId");
+        return;
+      }
 
       // Find the member and their existing peer connection
       const member = p2pMembers.find((m) => m.memberId === memberId);
@@ -567,7 +590,8 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
 
         // Send the answer back through WebSocket
         callWebSocketService.sendP2PAnswer({
-          chatId: chatId!,
+          callId,
+          chatId,
           answer,
         });
       } catch (error) {
@@ -610,7 +634,12 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
       stream: MediaStream
     ) => {
       const { p2pMembers } = get();
-      const chatId = useCallStore.getState().chatId;
+      const { callId, chatId } = useCallStore.getState();
+
+      if (!callId || !chatId) {
+        console.error("Missing callId or chatId");
+        return;
+      }
       const member = p2pMembers.find((m) => m.memberId === memberId);
 
       if (!member?.peerConnection) {
@@ -642,7 +671,8 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
             await pc.setLocalDescription(offer);
 
             callWebSocketService.sendP2POffer({
-              chatId: chatId!,
+              callId,
+              chatId,
               offer,
             });
           } catch (err) {
@@ -666,7 +696,12 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
       trackKind: "audio" | "video"
     ) => {
       const { p2pMembers } = get();
-      const chatId = useCallStore.getState().chatId;
+      const { callId, chatId } = useCallStore.getState();
+
+      if (!callId || !chatId) {
+        console.error("Missing callId or chatId");
+        return;
+      }
       const member = p2pMembers.find((m) => m.memberId === memberId);
 
       if (!member?.peerConnection) {
@@ -696,7 +731,8 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
             await pc.setLocalDescription(offer);
 
             callWebSocketService.sendP2POffer({
-              chatId: chatId!,
+              callId,
+              chatId,
               offer,
             });
           } catch (err) {
@@ -769,7 +805,12 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
     },
 
     sendP2POffer: async (toMemberId: string) => {
-      const { chatId } = useCallStore.getState();
+      const { callId, chatId } = useCallStore.getState();
+
+      if (!callId || !chatId) {
+        console.error("Missing callId or chatId");
+        return;
+      }
       const myMemberId = getMyChatMemberId(chatId!);
       console.log("sendP2POffer", toMemberId);
 
@@ -788,6 +829,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
 
         // 3. Send offer to callee
         callWebSocketService.sendP2POffer({
+          callId,
           chatId,
           offer,
         });
@@ -826,7 +868,12 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
     },
 
     toggleAudio: async () => {
-      const { chatId, isMuted } = useCallStore.getState();
+      const { callId, chatId, isMuted } = useCallStore.getState();
+
+      if (!callId || !chatId) {
+        console.error("Missing callId or chatId");
+        return;
+      }
       const { p2pMembers, localVoiceStream } = get();
       const myMemberId = await getMyChatMemberId(chatId!);
 
@@ -843,7 +890,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
             false, // P2P mode
             chatId!,
             (chatId: string, offer: RTCSessionDescriptionInit) => {
-              callWebSocketService.sendP2POffer({ chatId, offer });
+              callWebSocketService.sendP2POffer({ callId, chatId, offer });
             }
           );
 
@@ -851,7 +898,8 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
           useCallStore.setState({ isMuted: false });
 
           callWebSocketService.updateCallMember({
-            chatId: chatId!,
+            callId,
+            chatId,
             memberId: myMemberId,
             isMuted: false,
           });
@@ -863,7 +911,8 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
           useCallStore.setState({ isMuted: true });
 
           callWebSocketService.updateCallMember({
-            chatId: chatId!,
+            callId,
+            chatId,
             memberId: myMemberId,
             isMuted: true,
           });
@@ -874,7 +923,8 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         // revert state if error
         useCallStore.setState({ isMuted: true });
         callWebSocketService.updateCallMember({
-          chatId: chatId!,
+          callId,
+          chatId,
           memberId: myMemberId,
           isMuted: true,
         });
@@ -882,7 +932,12 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
     },
 
     toggleVideo: async () => {
-      const { chatId, isVideoEnabled } = useCallStore.getState();
+      const { callId, chatId, isVideoEnabled } = useCallStore.getState();
+
+      if (!callId || !chatId) {
+        console.error("Missing callId or chatId");
+        return;
+      }
       const { p2pMembers, localVideoStream } = get();
       const myMemberId = await getMyChatMemberId(chatId!);
 
@@ -899,7 +954,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
             false, // P2P mode
             chatId!,
             (chatId: string, offer: RTCSessionDescriptionInit) => {
-              callWebSocketService.sendP2POffer({ chatId, offer });
+              callWebSocketService.sendP2POffer({ callId, chatId, offer });
             }
           );
 
@@ -907,7 +962,8 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
           useCallStore.setState({ isVideoEnabled: true });
 
           callWebSocketService.updateCallMember({
-            chatId: chatId!,
+            callId,
+            chatId,
             memberId: myMemberId,
             isVideoEnabled: true,
           });
@@ -929,7 +985,8 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
           useCallStore.setState({ isVideoEnabled: false });
 
           callWebSocketService.updateCallMember({
-            chatId: chatId!,
+            callId,
+            chatId,
             memberId: myMemberId,
             isVideoEnabled: false,
           });
@@ -938,7 +995,8 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         console.error("Error in toggleVideo (P2P):", error);
         useCallStore.setState({ isVideoEnabled: false });
         callWebSocketService.updateCallMember({
-          chatId: chatId!,
+          callId,
+          chatId,
           memberId: myMemberId,
           isVideoEnabled: false,
         });
@@ -946,7 +1004,12 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
     },
 
     toggleScreenShare: async () => {
-      const { chatId, isScreenSharing } = useCallStore.getState();
+      const { callId, chatId, isScreenSharing } = useCallStore.getState();
+
+      if (!callId || !chatId) {
+        console.error("Missing callId or chatId");
+        return;
+      }
       const { p2pMembers, localScreenStream } = get();
       const myMemberId = await getMyChatMemberId(chatId!);
 
@@ -977,7 +1040,8 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
           });
 
           callWebSocketService.updateCallMember({
-            chatId: chatId!,
+            callId,
+            chatId,
             memberId: myMemberId,
             isScreenSharing: true,
           });
@@ -989,7 +1053,8 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
           useCallStore.setState({ isScreenSharing: false });
 
           callWebSocketService.updateCallMember({
-            chatId: chatId!,
+            callId,
+            chatId,
             memberId: myMemberId,
             isScreenSharing: false,
           });
@@ -998,7 +1063,8 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         console.error("Error toggling screen share:", error);
         useCallStore.setState({ isScreenSharing: false });
         callWebSocketService.updateCallMember({
-          chatId: chatId!,
+          callId,
+          chatId,
           memberId: myMemberId,
           isScreenSharing: false,
         });

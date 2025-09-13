@@ -14,52 +14,70 @@ import { useSFUCallStore } from "@/stores/callStore/sfuCallStore";
 import { P2PCallMember, SFUCallMember } from "@/types/store/callMember.type";
 import { useCallSounds } from "@/hooks/useCallSound";
 import {
-  IncomingCallResponse,
+  CallResponse,
   CallActionResponse,
   RtcOfferResponse,
   RtcAnswerResponse,
   IceCandidateResponse,
-  updateCallPayload,
-  callMemberPayload,
+  UpdateCallPayload,
+  CallMemberPayload,
 } from "@/types/callPayload";
+import { callService } from "@/services/callService";
 
 export function useCallSocketListeners() {
   useCallSounds();
-
   useEffect(() => {
-    const handlePendingCalls = (calls: IncomingCallResponse[]) => {
-      if (calls?.length > 0) {
-        const sortedCalls = [...calls].sort(
-          (a, b) => b.timestamp - a.timestamp
-        );
-        const mostRecentCall = sortedCalls[0];
-        handleIncomingCall(mostRecentCall);
+    const fetchPendingCalls = async () => {
+      try {
+        const pendingCalls = await callService.getPendingCalls();
 
-        if (sortedCalls.length > 1) {
-          toast.info(`You have ${sortedCalls.length - 1} more missed calls`);
+        if (pendingCalls?.length > 0) {
+          // ✅ Sort using createdAt instead of old timestamp
+          const sortedCalls = [...pendingCalls].sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+
+          const mostRecentCall = sortedCalls[0];
+          handleIncomingCall(mostRecentCall);
+
+          if (sortedCalls.length > 1) {
+            toast.info(`You have ${sortedCalls.length - 1} more missed calls`);
+          }
         }
+      } catch (error) {
+        console.error("Failed to fetch pending calls:", error);
+        handleError(error, "Failed to load pending calls");
       }
     };
 
-    const handleIncomingCall = (data: IncomingCallResponse) => {
+    const handleIncomingCall = (data: CallResponse) => {
       useCallStore.setState({
+        callId: data.callId,
         chatId: data.chatId,
         localCallStatus: LocalCallStatus.INCOMING,
         isVideoCall: data.isVideoCall,
-        callerMemberId: data.memberId,
+        callerMemberId: data.initiatorId,
         isGroupCall: data.isGroupCall || false,
       });
 
       useModalStore.getState().openModal(ModalType.CALL);
-      toast.info(`Incoming ${data.isVideoCall ? "video" : "voice"} call`);
+
+      if (data.startedAt) {
+        toast.info(
+          `Incoming ${
+            data.isVideoCall ? "video" : "voice"
+          } call started at ${new Date(data.startedAt).toLocaleTimeString()}`
+        );
+      }
     };
 
-    const handleUpdateCall = (data: updateCallPayload) => {
+    const handleUpdateCall = (data: UpdateCallPayload) => {
       console.log("handleUpdateCall");
-      const { chatId, isVideoCall } = data;
+      const { callId, isVideoCall } = data;
       const callStore = useCallStore.getState();
 
-      if (callStore.chatId === chatId) {
+      if (callStore.callId === callId) {
         // Update call type and handle stream changes
         useCallStore.setState({ isVideoCall });
 
@@ -105,11 +123,11 @@ export function useCallSocketListeners() {
       }
     };
 
-    const handleCallMemberUpdated = (data: callMemberPayload) => {
+    const handleCallMemberUpdated = (data: CallMemberPayload) => {
       console.log("handleCallMemberUpdated");
       const callStore = useCallStore.getState();
 
-      if (callStore.chatId === data.chatId) {
+      if (callStore.callId === data.callId) {
         // Delegate to appropriate store based on call type
         callStore.updateCallMember(data);
 
@@ -130,43 +148,48 @@ export function useCallSocketListeners() {
     };
 
     // CALLEE -> CALLER
-    const handleCallAccepted = async (data: CallActionResponse) => {
+    const handleCallAccepted = async (data: CallResponse) => {
       console.log("handleCallAccepted");
+
       const callStore = useCallStore.getState();
       callStore.setCallStatus(LocalCallStatus.CONNECTING);
 
-      if (callStore.chatId !== data.chatId) return;
-
-      if (callStore.isGroupCall) {
-        callStore.setCallStatus(LocalCallStatus.CONNECTED);
+      if (callStore.chatId !== data.chatId) {
+        console.warn("Accepted call does not match current call");
         return;
       }
 
-      try {
-        const p2pStore = useP2PCallStore.getState();
-        // create and register member
-        const member = p2pStore.addP2PMember({
-          memberId: data.memberId,
-          peerConnection: p2pStore.createPeerConnection(data.memberId),
-        });
-        // if somehow failed, throw
-        if (!member) {
-          throw new Error("Failed to register p2p member before sending offer");
-        }
+      // Update call info in store
+      useCallStore.setState({
+        callId: data.callId,
+        chatId: data.chatId,
+        isVideoCall: data.isVideoCall,
+        isGroupCall: data.isGroupCall,
+        callerMemberId: data.initiatorId,
+        localCallStatus: LocalCallStatus.CONNECTED,
+      });
 
-        // send offer directly
-        await p2pStore.sendP2POffer(member.memberId);
-      } catch (err) {
-        console.error("Failed to handle call acceptance:", err);
-        toast.error(`Failed to add ${data.memberId} to call`);
+      if (!data.isGroupCall) {
+        try {
+          const p2pStore = useP2PCallStore.getState();
+          const member = p2pStore.addP2PMember({
+            memberId: data.initiatorId,
+            peerConnection: p2pStore.createPeerConnection(data.initiatorId),
+          });
+          if (!member) throw new Error("Failed to register P2P member");
+          await p2pStore.sendP2POffer(member.memberId);
+        } catch (err) {
+          console.error("Failed to handle call acceptance:", err);
+          toast.error(`Failed to add ${data.initiatorId} to call`);
+        }
       }
     };
 
-    const handleCallRejected = (data: CallActionResponse) => {
+    const handleCallRejected = async (data: CallActionResponse) => {
       console.log("handleCallRejected");
       const callStore = useCallStore.getState();
 
-      if (callStore.chatId === data.chatId) {
+      if (callStore.callId === data.callId) {
         if (data.isCallerCancel) {
           callStore.endCall({ isCancel: true });
           toast.info("Call canceled by caller");
@@ -177,11 +200,11 @@ export function useCallSocketListeners() {
       }
     };
 
-    const handleHangUp = (data: CallActionResponse) => {
+    const handleHangUp = async (data: CallActionResponse) => {
       console.log("User hangup", data);
       const callStore = useCallStore.getState();
 
-      if (callStore.chatId === data.chatId) {
+      if (callStore.callId === data.callId) {
         callStore.removeCallMember(data.memberId);
         toast.info(`${data.memberId} has left the call`);
         // If no members left, end the call
@@ -201,16 +224,16 @@ export function useCallSocketListeners() {
 
     // CALLER -> CALLEE
     const handleP2PWebRtcOffer = async ({
-      chatId,
+      callId,
       memberId,
       offer,
     }: RtcOfferResponse) => {
       console.log("CALLEE handleP2PWebRtcOffer");
 
       const callStore = useCallStore.getState();
-      const chatType = useChatStore.getState().getChatType(chatId);
+      const chatType = useChatStore.getState().getChatType(callId);
 
-      if (callStore.chatId !== chatId) return;
+      if (callStore.callId !== callId) return;
 
       try {
         if (chatType === ChatType.DIRECT && !callStore.isGroupCall) {
@@ -238,7 +261,7 @@ export function useCallSocketListeners() {
 
       const callStore = useCallStore.getState();
 
-      if (callStore.chatId !== data.chatId) return;
+      if (callStore.callId !== data.callId) return;
       if (callStore.isGroupCall) {
         console.error("Group call is handle via SFU-livekit");
         return;
@@ -283,7 +306,7 @@ export function useCallSocketListeners() {
       const callStore = useCallStore.getState();
 
       // Only handle ICE candidates for the current call
-      if (callStore.chatId === data.chatId) {
+      if (callStore.callId === data.callId) {
         console.log("ICE candidate received", data.candidate);
 
         if (callStore.isGroupCall) {
@@ -336,9 +359,8 @@ export function useCallSocketListeners() {
       }
     };
 
-    // Subscribe to all events
+    // Subscribe to all events (remove onPendingCalls)
     callWebSocketService.removeAllListeners();
-    callWebSocketService.onPendingCalls(handlePendingCalls);
     callWebSocketService.onIncomingCall(handleIncomingCall);
     callWebSocketService.onCallUpdated(handleUpdateCall);
     callWebSocketService.onCallMemberUpdated(handleCallMemberUpdated);
@@ -350,8 +372,8 @@ export function useCallSocketListeners() {
     callWebSocketService.onIceCandidate(handleIceCandidate);
     callWebSocketService.onMemberJoined(handleMemberJoined);
 
-    // Request pending calls on mount
-    callWebSocketService.requestPendingCalls();
+    // Fetch pending calls from database on mount
+    fetchPendingCalls();
 
     return () => {
       callWebSocketService.removeAllListeners();

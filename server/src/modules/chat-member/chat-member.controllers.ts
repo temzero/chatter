@@ -93,7 +93,7 @@ export class ChatMemberController {
   ): Promise<
     SuccessResponse<GroupChatMemberResponseDto | DirectChatMemberResponseDto>
   > {
-    const member = await this.memberService.fetchMemberByChatIdAndUserId(
+    const member = await this.memberService.getMemberByChatIdAndUserId(
       chatId,
       userId,
     );

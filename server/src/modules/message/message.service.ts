@@ -241,7 +241,6 @@ export class MessageService {
       callId?: string;
     },
   ): Promise<MessageResponseDto> {
-    console.log('createSystemEventMessage');
     let targetName: string | undefined;
     if (options?.targetId && options.targetId !== senderId) {
       targetName =

@@ -163,7 +163,7 @@ export class ChatMemberService {
     }
   }
 
-  async fetchMemberByChatIdAndUserId(
+  async getMemberByChatIdAndUserId(
     chatId: string,
     userId: string,
   ): Promise<ChatMember> {

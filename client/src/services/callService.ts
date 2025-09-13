@@ -1,4 +1,5 @@
 import { handleError } from "@/utils/handleError";
+import { IncomingCallResponse } from "@/types/callPayload";
 import API from "./api/api";
 
 export const callService = {
@@ -25,6 +26,16 @@ export const callService = {
       return data.payload.token;
     } catch (error) {
       handleError(error, "Cannot get SFU liveKit token");
+    }
+  },
+
+  async getPendingCalls(): Promise<IncomingCallResponse[]> {
+    try {
+      const { data } = await API.get(`/calls/pending`);
+      return data;
+    } catch (error) {
+      console.error("Failed to fetch pending calls:", error);
+      throw error;
     }
   },
 

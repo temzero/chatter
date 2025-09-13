@@ -21,6 +21,19 @@ import { CallResponseDto } from './dto/call-response.dto';
 export class CallController {
   constructor(private readonly callService: CallService) {}
 
+  @Get('pending')
+  async getPendingCalls(): Promise<SuccessResponse<CallResponseDto[]>> {
+    try {
+      const calls = await this.callService.getPendingCalls();
+      return new SuccessResponse(
+        plainToInstance(CallResponseDto, calls),
+        'Pending calls retrieved successfully',
+      );
+    } catch (error: unknown) {
+      ErrorResponse.throw(error, 'Failed to retrieve pending calls');
+    }
+  }
+
   // POST /api/calls
   @Post()
   @HttpCode(HttpStatus.CREATED)
