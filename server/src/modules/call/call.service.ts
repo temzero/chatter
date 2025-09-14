@@ -10,6 +10,7 @@ import { ChatMember } from '../chat-member/entities/chat-member.entity';
 import { MessageService } from '../message/message.service';
 import { SystemEventType } from '../message/constants/system-event-type.constants';
 import { ChatMemberService } from '../chat-member/chat-member.service';
+import { ChatType } from '../chat/constants/chat-types.constants';
 
 @Injectable()
 export class CallService {
@@ -37,10 +38,93 @@ export class CallService {
     }
   }
 
-  async getPendingCalls(): Promise<Call[]> {
+  async getCallHistory(userId: string): Promise<any[]> {
+    const calls = await this.callRepository
+      .createQueryBuilder('call')
+      .leftJoinAndSelect('call.chat', 'chat')
+      .leftJoinAndSelect('chat.members', 'chatMember') // Load ALL members
+      .leftJoinAndSelect('chatMember.user', 'chatMemberUser')
+      .leftJoinAndSelect('call.initiator', 'initiator')
+      .leftJoinAndSelect('initiator.user', 'initiatorUser')
+      .leftJoinAndSelect('call.participants', 'participants')
+      .leftJoinAndSelect('participants.user', 'participantUser')
+      // Remove the member filtering from here
+      .where((qb) => {
+        // Use subquery to find calls where the user is a member
+        const subQuery = qb
+          .subQuery()
+          .select('call.id')
+          .from(Call, 'call')
+          .innerJoin('call.chat', 'chat2')
+          .innerJoin('chat2.members', 'member')
+          .where('member.userId = :userId', { userId })
+          .andWhere('call.status IN (:...statuses)', {
+            statuses: [
+              CallStatus.COMPLETED,
+              CallStatus.DECLINED,
+              CallStatus.MISSED,
+              CallStatus.FAILED,
+            ],
+          })
+          .getQuery();
+        return `call.id IN ${subQuery}`;
+      })
+      .orderBy('call.startedAt', 'DESC')
+      .getMany();
+
+    return calls.map((call) => {
+      let chatName = call.chat.name;
+      let chatAvatar = call.chat.avatarUrl;
+
+      if (call.chat.type === ChatType.DIRECT) {
+        // Now all members are loaded, so we can find the other one
+        const otherMember = call.chat.members.find((m) => m.user.id !== userId);
+
+        if (otherMember) {
+          chatName =
+            otherMember.nickname ||
+            `${otherMember.user.firstName ?? ''} ${otherMember.user.lastName ?? ''}`.trim() ||
+            otherMember.user.username;
+
+          chatAvatar = otherMember.user.avatarUrl || chatAvatar;
+        }
+      } else {
+        // Group chat logic remains the same
+        if (!chatAvatar) {
+          if (call.initiator?.user?.avatarUrl) {
+            chatAvatar = call.initiator.user.avatarUrl;
+          } else if (call.chat.members.length > 0) {
+            const memberWithAvatar = call.chat.members.find(
+              (m) => m.user?.avatarUrl,
+            );
+            chatAvatar =
+              memberWithAvatar?.user?.avatarUrl ||
+              call.chat.members[0].user.avatarUrl;
+          }
+        }
+      }
+
+      return {
+        callId: call.id,
+        chatId: call.chat.id,
+        isVideoCall: call.isVideoCall,
+        isGroupCall: call.isGroupCall,
+        status: call.status,
+        startedAt: call.startedAt,
+        endedAt: call.endedAt,
+        chatName,
+        chatAvatar,
+      };
+    });
+  }
+
+  async getPendingCalls(userId: string): Promise<Call[]> {
     return await this.callRepository.find({
-      where: { status: In([CallStatus.DIALING, CallStatus.IN_PROGRESS]) },
-      relations: ['chat', 'initiator', 'participants'],
+      where: {
+        participants: { user: { id: userId } },
+        status: In([CallStatus.DIALING, CallStatus.IN_PROGRESS]),
+      },
+      relations: ['chat', 'initiator', 'participants', 'participants.user'],
       order: { startedAt: 'DESC' },
     });
   }
@@ -126,19 +210,10 @@ export class CallService {
   async joinCall(id: string, memberId: string): Promise<Call | null> {
     const call = await this.getCallById(id);
 
-    // Verify the chat member exists
-    const chatMember = await this.chatMemberService.findById(memberId);
-    if (!chatMember) {
-      throw new NotFoundException(`ChatMember with ID ${memberId} not found`);
-    }
-
     // Check if participant already exists
-    const existingParticipant = call.participants.some(
-      (participant) => participant.id === memberId,
-    );
+    const exists = call.participants.some((p) => p.id === memberId);
 
-    if (!existingParticipant) {
-      // Most efficient way - uses single query
+    if (!exists) {
       await this.callRepository
         .createQueryBuilder()
         .relation(Call, 'participants')
@@ -151,10 +226,10 @@ export class CallService {
       await this.callRepository.update(id, { status: CallStatus.DIALING });
     }
 
-    // Return the updated call with relations
+    // Return the updated call
     return await this.callRepository.findOne({
       where: { id },
-      relations: ['participants', 'participants.user'], // Include user data if needed
+      relations: ['participants', 'participants.user'],
     });
   }
 

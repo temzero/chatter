@@ -1,90 +1,111 @@
-// SidebarCalls.tsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import SidebarLayout from "@/pages/SidebarLayout";
-import { useChatStore } from "@/stores/chatStore";
+import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
+import { callService } from "@/services/callService";
+import { CallHistoryResponse } from "@/types/callPayload";
+import { getCallText, getCallClass, getCallIcon } from "@/utils/callHelpers";
+import { formatDateTime } from "@/utils/formatDate";
 import { ChatType } from "@/types/enums/ChatType";
-import { ChatResponse } from "@/types/responses/chat.response";
-import { Avatar } from "@/components/ui/avatar/Avatar";
+import { useCallStore } from "@/stores/callStore/callStore";
 
-interface SidebarCallsProps {
-  onVideoCall?: (phoneNumber: string) => void;
-  onAudioCall?: (phoneNumber: string) => void;
-}
+const SidebarCalls: React.FC = () => {
+  const [calls, setCalls] = useState<CallHistoryResponse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const startCall = useCallStore((state) => state.startCall);
 
-const SidebarCalls: React.FC<SidebarCallsProps> = ({
-  onVideoCall,
-  onAudioCall,
-}) => {
-  const chats = useChatStore((s) => s.chats);
-  const directChats = chats.filter(
-    (chat): chat is ChatResponse =>
-      chat.type === ChatType.DIRECT && !!chat.chatPartner?.phoneNumber
-  );
+  useEffect(() => {
+    const fetchCalls = async () => {
+      try {
+        const res = await callService.getCallHistory();
+        console.log("Fetched call history:", res);
+        setCalls(res); // ✅ already matches CallHistoryResponse[]
+      } catch (err) {
+        console.error("Failed to fetch call history", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCalls();
+  }, []);
 
-  const handleVideoCall = (chat: ChatResponse) => (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onVideoCall && chat.chatPartner?.phoneNumber) {
-      onVideoCall(chat.chatPartner.phoneNumber);
-    }
-  };
-
-  const handleAudioCall = (chat: ChatResponse) => (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onAudioCall && chat.chatPartner?.phoneNumber) {
-      onAudioCall(chat.chatPartner.phoneNumber);
-    }
-  };
+  function handleStartCall(call: CallHistoryResponse) {
+    console.log("Starting call with", call);
+    startCall(call.chatId, {
+      isVideoCall: call.isVideoCall,
+      isGroupCall: call.isGroupCall,
+    });
+  }
 
   return (
-    <SidebarLayout title="Calls">
-      {directChats.length > 0 ? (
-        directChats.map((chat) => {
-          const chatPartner = chat.chatPartner;
-
-          return (
+    <SidebarLayout title="Call History">
+      <div>
+        {loading ? (
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        ) : calls.length === 0 ? (
+          <div className="flex flex-col items-center justify-center mt-8 opacity-60">
+            <i className="material-symbols-outlined text-6xl mb-4 scale-x-[-1]">
+              phone_enabled
+            </i>
+            <p>No Call Yet!</p>
+          </div>
+        ) : (
+          calls.map((call) => (
             <div
-              key={chat.id}
-              className="flex gap-3 items-center justify-between custom-border-b p-3 hover:bg-[var(--hover-color)]  cursor-pointer"
+              key={call.callId}
+              className="flex items-center gap-3 p-2 py-3 hover:bg-muted/30 transition custom-border-b select-none"
             >
-              <div className="flex items-center gap-3">
-                <Avatar
-                  avatarUrl={chatPartner?.avatarUrl}
-                  name={chatPartner.firstName}
-                  size="10"
-                />
-                <h1 className="font-medium">{chat.name}</h1>
+              {/* 🔹 Chat Avatar (from normalized fields) */}
+              <ChatAvatar
+                chat={{
+                  id: call.chatId,
+                  name: call.chatName,
+                  avatarUrl: call.chatAvatar,
+                  type: call.isGroupCall ? ChatType.GROUP : ChatType.DIRECT,
+                  myMemberId: call.memberId,
+                }}
+                type="sidebar"
+              />
+
+              {/* 🔹 Info */}
+              <div className="flex-1">
+                <p className="font-medium">{call.chatName ?? "Unknown Chat"}</p>
+                <p className="text-sm flex items-center gap-1">
+                  <span className={getCallClass(call)}>
+                    {getCallText(call)}
+                  </span>
+                </p>
+                <p className="text-xs text-muted-foreground opacity-50">
+                  {formatDateTime(call.startedAt)}
+                </p>
               </div>
-              <div className="flex gap-2 items-center">
-                {chatPartner?.phoneNumber && (
-                  <>
-                    <button
-                      className="opacity-60 hover:opacity-100 hover:text-green-500"
-                      onClick={handleVideoCall(chat)}
-                      title="Video call"
-                    >
-                      <i className="material-symbols-outlined">videocam</i>
-                    </button>
-                    <button
-                      className="opacity-60 hover:opacity-100 hover:text-green-500"
-                      onClick={handleAudioCall(chat)}
-                      title="Audio call"
-                    >
-                      <i className="material-symbols-outlined">phone_enabled</i>
-                    </button>
-                  </>
-                )}
-              </div>
+
+              {/* 🔹 Action Button */}
+              <button
+                onClick={() => handleStartCall(call)}
+                className={`group overflow-hidden relative flex items-center justify-center rounded-full w-12 h-12 text-2xl hover:custom-border hover:bg-[--hover-color]`}
+              >
+                {/* Default icon */}
+                <span
+                  className={`material-symbols-outlined group-hover:hidden ${getCallClass(
+                    call
+                  )}`}
+                >
+                  {getCallIcon(call)}
+                </span>
+
+                {/* Hover content */}
+                <div className="hidden group-hover:flex items-center justify-center bg-[--primary-green] w-full h-full">
+                  {call.isVideoCall ? (
+                    <span className="material-symbols-outlined">videocam</span>
+                  ) : (
+                    <span className="material-symbols-outlined">phone</span>
+                  )}
+                </div>
+              </button>
             </div>
-          );
-        })
-      ) : (
-        <div className="flex flex-col items-center justify-center mt-8 opacity-60">
-          <i className="material-symbols-outlined text-6xl mb-4 scale-x-[-1]">
-            phone_enabled
-          </i>
-          <p>No contacts with phone numbers</p>
-        </div>
-      )}
+          ))
+        )}
+      </div>
     </SidebarLayout>
   );
 };

@@ -52,6 +52,25 @@ export class ChatMemberService {
     }
   }
 
+  async getMemberId(userId: string, chatId: string): Promise<string> {
+    try {
+      const member = await this.memberRepo.findOne({
+        where: { chatId, userId },
+        select: ['id'],
+      });
+
+      if (!member) {
+        ErrorResponse.notFound(
+          `Chat member not found for userId=${userId} in chatId=${chatId}`,
+        );
+      }
+
+      return member.id;
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to get member ID');
+    }
+  }
+
   async findByChatIdWithBlockFilter(
     chatId: string,
     currentUserId: string,

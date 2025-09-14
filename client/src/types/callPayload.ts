@@ -63,6 +63,23 @@ export interface CallResponse {
   endedAt?: string;
 }
 
+export interface CallHistoryResponse {
+  callId: string; // ✅ main key
+  chatId: string; // to open chat UI
+  memberId: string; // my ChatMemberId in this call
+  status: CallStatus;
+  createdAt: string; // ISO string
+  startedAt?: string;
+  endedAt?: string;
+
+  isVideoCall: boolean;
+  isGroupCall: boolean;
+
+  // Normalized display info
+  chatName: string;
+  chatAvatar: string | null;
+}
+
 export interface CallActionResponse {
   callId: string; // ✅ main key
   memberId: string;

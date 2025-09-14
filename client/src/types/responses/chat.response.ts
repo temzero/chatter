@@ -10,7 +10,7 @@ export interface ChatResponse {
   description?: string | null;
   myMemberId: string;
   myRole?: ChatMemberRole;
-  updatedAt: string;
+  updatedAt?: string;
   otherMemberUserIds?: string[];
   pinnedMessage?: MessageResponse | null;
   lastMessage?: LastMessageResponse | null;

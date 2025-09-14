@@ -8,6 +8,7 @@ import {
   Delete,
   HttpStatus,
   HttpCode,
+  UseGuards,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { CallService } from './call.service';
@@ -16,15 +17,40 @@ import { UpdateCallDto } from './dto/update-call.dto';
 import { SuccessResponse } from 'src/common/api-response/success';
 import { ErrorResponse } from 'src/common/api-response/errors';
 import { CallResponseDto } from './dto/call-response.dto';
+import { CurrentUser } from '../auth/decorators/user.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { ChatMemberService } from '../chat-member/chat-member.service';
+import { CallHistoryResponseDto } from './dto/call-history-response.dto';
 
 @Controller('calls')
+@UseGuards(JwtAuthGuard)
 export class CallController {
-  constructor(private readonly callService: CallService) {}
+  constructor(
+    private readonly callService: CallService,
+    private readonly chatMemberService: ChatMemberService,
+  ) {}
+
+  @Get('history')
+  async getCallHistory(
+    @CurrentUser('id') userId: string,
+  ): Promise<SuccessResponse<CallHistoryResponseDto[]>> {
+    try {
+      const calls = await this.callService.getCallHistory(userId);
+      return new SuccessResponse(
+        plainToInstance(CallHistoryResponseDto, calls),
+        'Call history retrieved successfully',
+      );
+    } catch (error: unknown) {
+      ErrorResponse.throw(error, 'Failed to retrieve call history');
+    }
+  }
 
   @Get('pending')
-  async getPendingCalls(): Promise<SuccessResponse<CallResponseDto[]>> {
+  async getPendingCalls(
+    @CurrentUser('id') userId: string,
+  ): Promise<SuccessResponse<CallResponseDto[]>> {
     try {
-      const calls = await this.callService.getPendingCalls();
+      const calls = await this.callService.getPendingCalls(userId);
       return new SuccessResponse(
         plainToInstance(CallResponseDto, calls),
         'Pending calls retrieved successfully',
@@ -34,7 +60,6 @@ export class CallController {
     }
   }
 
-  // POST /api/calls
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createCall(
@@ -51,7 +76,6 @@ export class CallController {
     }
   }
 
-  // GET /api/calls/:id
   @Get(':id')
   async getCall(
     @Param('id') id: string,
@@ -67,7 +91,6 @@ export class CallController {
     }
   }
 
-  // GET /api/calls/chat/:chatId
   @Get('chat/:chatId')
   async getCallsByChat(
     @Param('chatId') chatId: string,
@@ -83,7 +106,6 @@ export class CallController {
     }
   }
 
-  // PATCH /api/calls/:id
   @Patch(':id')
   async updateCall(
     @Param('id') id: string,
@@ -100,14 +122,16 @@ export class CallController {
     }
   }
 
-  // POST /api/calls/:id/join
-  @Post(':id/join')
+  @Post('join/:callId/:chatId')
   async joinCall(
-    @Param('id') id: string,
-    @Body('participantId') participantId: string,
+    @CurrentUser('id') userId: string,
+    @Param('callId') callId: string,
+    @Param('chatId') chatId: string,
   ): Promise<SuccessResponse<CallResponseDto>> {
+    const myMemberId = await this.chatMemberService.getMemberId(userId, chatId);
+
     try {
-      const updated = await this.callService.joinCall(id, participantId);
+      const updated = await this.callService.joinCall(callId, myMemberId);
       return new SuccessResponse(
         plainToInstance(CallResponseDto, updated),
         'Joined call successfully',
@@ -117,7 +141,6 @@ export class CallController {
     }
   }
 
-  // POST /api/calls/:id/end
   @Post(':id/end')
   async endCall(
     @Param('id') id: string,
@@ -133,7 +156,6 @@ export class CallController {
     }
   }
 
-  // DELETE /api/calls/:id
   @Delete(':id')
   async deleteCall(@Param('id') id: string): Promise<SuccessResponse<null>> {
     try {
@@ -144,21 +166,20 @@ export class CallController {
     }
   }
 
-  // POST /api/calls/token
   @Post('token')
   async getLivekitToken(
+    @CurrentUser('id') userId: string,
     @Body()
     body: {
       roomName: string;
-      memberId: string;
       participantName?: string;
     },
   ): Promise<SuccessResponse<{ token: string }>> {
     try {
-      const { roomName, memberId, participantName } = body;
+      const { roomName, participantName } = body;
       const token = await this.callService.generateLivekitToken(
         roomName,
-        memberId,
+        userId,
         participantName,
       );
       return new SuccessResponse({ token }, 'LiveKit token generated');

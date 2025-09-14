@@ -1,5 +1,5 @@
 import { handleError } from "@/utils/handleError";
-import { IncomingCallResponse } from "@/types/callPayload";
+import { CallHistoryResponse, CallResponse } from "@/types/callPayload";
 import API from "./api/api";
 
 export const callService = {
@@ -29,7 +29,7 @@ export const callService = {
     }
   },
 
-  async getPendingCalls(): Promise<IncomingCallResponse[]> {
+  async getPendingCalls(): Promise<CallResponse[]> {
     try {
       const { data } = await API.get(`/calls/pending`);
       return data;
@@ -40,11 +40,11 @@ export const callService = {
   },
 
   /**
-   * (Optional) Fetch calls history
+   * Fetch calls history
    */
-  async getCallHistory(chatId: string) {
-    const { data } = await API.get(`/calls/history/${chatId}`);
-    return data;
+  async getCallHistory(): Promise<CallHistoryResponse[]> {
+    const { data } = await API.get(`/calls/history/`);
+    return data.payload ?? data;
   },
 
   /**

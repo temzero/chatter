@@ -5,12 +5,13 @@ import { BounceLoader } from "react-spinners";
 import { Button } from "../Button";
 import { VideoStream } from "./components/VideoStream";
 import { useCallStore } from "@/stores/callStore/callStore";
+import { useLocalStreams } from "@/hooks/useLocalStreams";
 
 export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
   const isVideoCall = useCallStore((state) => state.isVideoCall);
   const isVideoEnabled = useCallStore((state) => state.isVideoEnabled);
-  const localVideoStream = useCallStore((state) => state.localVideoStream);
   const toggleLocalVideo = useCallStore((state) => state.toggleLocalVideo);
+  const { localVideoStream } = useLocalStreams();
 
   const acceptCall = () => {
     // Set the camera state before accepting call
