@@ -13,9 +13,10 @@ import type {
 } from "@/types/store/callMember.type";
 import { useMessageStore } from "../messageStore";
 import { CallStatus } from "@/types/enums/CallStatus";
+import { callService } from "@/services/callService";
 
 export interface CallState {
-  callId: string | null;
+  id: string | null;
   chatId: string | null;
   // Call metadata
   callerMemberId?: string;
@@ -59,7 +60,7 @@ export interface CallActions {
   }) => void;
 
   // Status control
-  setCallStatus: (status: LocalCallStatus | null) => void;
+  setLocalCallStatus: (status: LocalCallStatus | null) => void;
 
   // Media toggles (delegated to architecture-specific stores)
   toggleLocalVoice: () => void;
@@ -85,7 +86,7 @@ export interface CallActions {
 export const useCallStore = create<CallState & CallActions>()(
   devtools((set, get) => ({
     // ========== CORE STATE ==========
-    callId: null,
+    id: null,
     chatId: null,
     localCallStatus: null,
     isVideoCall: false,
@@ -126,34 +127,45 @@ export const useCallStore = create<CallState & CallActions>()(
         console.error("Failed to start call:", error);
         set({ error: "connection_failed" });
         audioService.stopAllSounds();
+
+        const { id } = get();
+        if (id) {
+          callService.markCallAsFailed(id);
+        }
       }
     },
 
     acceptCall: async () => {
-      const { isGroupCall, chatId, callId } = get();
-      if (isGroupCall) {
-        await useSFUCallStore.getState().acceptSFUCall();
-      } else {
-        await useP2PCallStore.getState().acceptP2PCall();
-      }
+      const { isGroupCall, chatId, id } = get();
 
-      const startedAt = new Date();
+      try {
+        if (isGroupCall) {
+          await useSFUCallStore.getState().acceptSFUCall();
+        } else {
+          await useP2PCallStore.getState().acceptP2PCall();
+        }
 
-      set({
-        localCallStatus: LocalCallStatus.CONNECTED,
-        startedAt,
-      });
+        const startedAt = new Date();
 
-      if (chatId && callId) {
-        useMessageStore.getState().updateCallMessage(chatId, callId, {
-          status: CallStatus.IN_PROGRESS,
-          startedAt: startedAt.toISOString(),
+        set({
+          localCallStatus: LocalCallStatus.CONNECTED,
+          startedAt,
         });
+
+        if (chatId && id) {
+          useMessageStore
+            .getState()
+            .updateMessageCallStatus(chatId, id, CallStatus.IN_PROGRESS);
+        }
+      } catch (err) {
+        console.error("Failed to accept call:", err);
+        set({ error: "device_unavailable" });
+        get().endCall({ isCancel: false });
       }
     },
 
     rejectCall: (isCancel = false) => {
-      const { isGroupCall, chatId, callId } = get();
+      const { isGroupCall, chatId, id } = get();
 
       if (isGroupCall) {
         useSFUCallStore.getState().rejectSFUCall(isCancel);
@@ -161,59 +173,79 @@ export const useCallStore = create<CallState & CallActions>()(
         useP2PCallStore.getState().rejectP2PCall(isCancel);
       }
 
-      const endedAt = new Date().toISOString();
-
-      if (chatId && callId) {
+      if (chatId && id) {
         if (isCancel) {
           // Caller cancels → delete the system call message
-          useMessageStore.getState().deleteMessage(chatId, callId);
+          useMessageStore.getState().deleteMessage(chatId, id);
         } else {
-          // Callee rejects → just update status
-          useMessageStore.getState().updateCallMessage(chatId, callId, {
-            status: CallStatus.DECLINED,
-            endedAt,
-          });
+          useMessageStore
+            .getState()
+            .updateMessageCallStatus(chatId, id, CallStatus.DECLINED);
+          callService.markCallAsDeclined(id); // ✅ update backend
         }
       }
 
       get().endCall({ isCancel });
     },
 
-    endCall: (options = {}) => {
-      const { isGroupCall, chatId, callId } = get();
+    endCall: async (
+      options = {
+        isCancel: false,
+        isRejected: false,
+        isTimeout: false,
+      }
+    ) => {
+      const { isGroupCall, chatId, id, error } = get();
 
-      // Disconnect streams
+      // 1. Determine the final status based on the reason
+      let finalStatus: CallStatus;
+      if (options.isRejected) finalStatus = CallStatus.DECLINED;
+      else if (options.isTimeout) finalStatus = CallStatus.MISSED;
+      else if (error) finalStatus = CallStatus.FAILED;
+      else finalStatus = CallStatus.COMPLETED;
+
+      const endedAt = new Date().toISOString();
+
+      // 2. Update backend via API
+      if (id) {
+        try {
+          await callService.updateCall(id, {
+            status: finalStatus,
+            endedAt,
+          });
+        } catch (err) {
+          console.error("Failed to update call on server:", err);
+          // continue anyway to keep UI responsive
+        }
+      }
+
+      // 3. Update local UI immediately
+      if (chatId && id) {
+        useMessageStore
+          .getState()
+          .updateMessageCallStatus(chatId, id, finalStatus);
+      }
+
+      // 4. Clean up connections
       if (isGroupCall) {
         useSFUCallStore.getState().disconnectFromSFU();
       } else {
         useP2PCallStore.getState().cleanupP2PConnections();
       }
 
+      // 5. Update local call state
       const localStatus = options.isRejected
         ? LocalCallStatus.REJECTED
         : options.isCancel
         ? LocalCallStatus.CANCELED
         : LocalCallStatus.ENDED;
 
-      // Update local call state
       set({
         localCallStatus: localStatus,
         endedAt: new Date(),
       });
 
-      // ✅ Update the message store so the call bubble shows "Ended"
-      if (chatId && callId) {
-        useMessageStore.getState().updateCallMessage(chatId, callId, {
-          status: CallStatus.COMPLETED,
-          endedAt: new Date().toISOString(),
-        });
-      }
-
-      console.log("call ended");
-    },
-
-    setCallStatus: (status: LocalCallStatus | null) => {
-      set({ localCallStatus: status });
+      console.log("call ended with status:", finalStatus);
     },
 
     toggleLocalVoice: () => {

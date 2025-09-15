@@ -60,6 +60,8 @@ export class CallGateway {
       createdAt: call.createdAt.toISOString(),
     };
 
+    console.log('Call initiated:', response);
+
     // Notify all online chat members except the caller
     await this.websocketNotificationService.emitToChatMembers(
       payload.chatId,

@@ -12,19 +12,39 @@ import { SummaryCall } from "../ui/calling/SummaryCall";
 import { OutgoingCall } from "../ui/calling/OutgoingCall";
 import { useChatStore } from "@/stores/chatStore";
 import { ConnectingCall } from "../ui/calling/ConnectingCall";
+import { ChatResponse } from "@/types/responses/chat.response";
 
 const CallModal: React.FC = () => {
   const { chatId, localCallStatus } = useCallStore();
-  const chat = useChatStore((state) => state.getChatById(chatId ?? ""));
-  const fetchChatById = useChatStore((state) => state.fetchChatById);
+  const getOrFetchChatById = useChatStore((state) => state.getOrFetchChatById);
+
+  const [chat, setChat] = React.useState<ChatResponse | null>(null);
 
   React.useEffect(() => {
-    if (chatId && !chat) {
-      fetchChatById(chatId).catch(console.error);
-    }
-  }, [chatId, chat, fetchChatById]);
+    if (!chatId) return;
+
+    let isMounted = true;
+
+    (async () => {
+      try {
+        const result = await getOrFetchChatById(chatId, {
+          fetchFullData: true,
+        });
+        if (isMounted) setChat(result);
+      } catch (err) {
+        console.error("Failed to load chat:", err);
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [chatId, getOrFetchChatById]);
 
   if (!chatId || !chat || !localCallStatus) {
+    console.log("chatId", chatId);
+    console.log("chat", chat);
+    console.log("localCallStatus", localCallStatus);
     return null;
   }
 
@@ -48,11 +68,10 @@ const CallModal: React.FC = () => {
     }
   };
 
-  const getSizeClasses = () => {
-    return localCallStatus === LocalCallStatus.CONNECTED
+  const getSizeClasses = () =>
+    localCallStatus === LocalCallStatus.CONNECTED
       ? "w-full h-full custom-border"
       : "w-full max-w-[420px] p-6";
-  };
 
   return (
     <motion.div

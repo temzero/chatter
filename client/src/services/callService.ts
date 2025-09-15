@@ -1,5 +1,6 @@
 import { handleError } from "@/utils/handleError";
-import { CallHistoryResponse, CallResponse } from "@/types/callPayload";
+import { CallResponse } from "@/types/callPayload";
+import { CallStatus } from "@/types/enums/CallStatus"; // Import the enum
 import API from "./api/api";
 
 export const callService = {
@@ -32,7 +33,8 @@ export const callService = {
   async getPendingCalls(): Promise<CallResponse[]> {
     try {
       const { data } = await API.get(`/calls/pending`);
-      return data;
+      // Adjust based on your API response structure
+      return data.payload ?? data;
     } catch (error) {
       console.error("Failed to fetch pending calls:", error);
       throw error;
@@ -42,15 +44,77 @@ export const callService = {
   /**
    * Fetch calls history
    */
-  async getCallHistory(): Promise<CallHistoryResponse[]> {
+  async getCallHistory(): Promise<CallResponse[]> {
     const { data } = await API.get(`/calls/history/`);
     return data.payload ?? data;
   },
 
   /**
-   * (Optional) End/leave a calls
+   * Get a specific call by ID
    */
-  async endCall(callId: string) {
-    await API.post(`/calls/${callId}/end`);
+  async getCallById(callId: string): Promise<CallResponse> {
+    const { data } = await API.get(`/calls/${callId}`);
+    return data.payload ?? data;
+  },
+
+  /**
+   * Generic call update - use for any status change
+   */
+  async updateCall(
+    callId: string,
+    updateData: {
+      status?: CallStatus;
+      endedAt?: string;
+      // Add other fields you might want to update
+    }
+  ): Promise<CallResponse> {
+    const { data } = await API.patch(`/calls/${callId}`, updateData);
+    return data.payload ?? data;
+  },
+
+  /**
+   * End a call (sets status to COMPLETED)
+   */
+  async endCall(callId: string): Promise<CallResponse> {
+    const { data } = await API.post(`/calls/${callId}/end`);
+    return data.payload ?? data;
+  },
+
+  /**
+   * Mark call as missed (sets status to MISSED)
+   */
+  async markCallAsMissed(callId: string): Promise<CallResponse> {
+    return this.updateCall(callId, {
+      status: CallStatus.MISSED,
+      endedAt: new Date().toISOString(),
+    });
+  },
+
+  /**
+   * Mark call as failed (sets status to FAILED)
+   */
+  async markCallAsFailed(callId: string): Promise<CallResponse> {
+    return this.updateCall(callId, {
+      status: CallStatus.FAILED,
+      endedAt: new Date().toISOString(),
+    });
+  },
+
+  /**
+   * Mark call as declined (sets status to DECLINED)
+   * Useful if you want to update status from caller's perspective after being rejected
+   */
+  async markCallAsDeclined(callId: string): Promise<CallResponse> {
+    return this.updateCall(callId, {
+      status: CallStatus.DECLINED,
+      endedAt: new Date().toISOString(),
+    });
+  },
+
+  /**
+   * Delete a call (e.g., when caller cancels before it's answered)
+   */
+  async deleteCall(callId: string): Promise<void> {
+    await API.delete(`/calls/${callId}`);
   },
 };

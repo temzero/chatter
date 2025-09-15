@@ -36,21 +36,8 @@ export interface MessageResponse {
   call?: CallResponse | null;
 
   isMuted?: boolean;
-
   shouldAnimate?: boolean;
 }
-
-// export interface CallResponse {
-//   id: string;
-//   status: CallStatus;
-//   isVideoCall: boolean;
-//   isGroupCall: boolean;
-//   startedAt: string;
-//   endedAt?: string | null;
-//   updatedAt: string;
-//   initiator: ChatMember;
-//   participants: ChatMember[];
-// }
 
 export interface LastMessageResponse {
   id: string;

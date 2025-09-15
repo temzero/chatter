@@ -32,6 +32,10 @@ interface ChatStore {
 
   initialize: () => Promise<void>;
   getChatById: (id?: string) => ChatResponse | undefined;
+  getOrFetchChatById: (
+    id: string,
+    options?: { fetchFullData?: boolean }
+  ) => Promise<ChatResponse>;
   getChatType: (chatId: string) => ChatType | undefined;
   fetchChats: () => Promise<void>;
   fetchMoreChats: (limit?: number) => Promise<number>;
@@ -178,6 +182,24 @@ export const useChatStore = create<ChatStore>()(
           if (!chatId) return undefined;
           const chat = get().chats.find((c) => c.id === chatId);
           return chat;
+        },
+
+        getOrFetchChatById: async (
+          chatId: string,
+          options = { fetchFullData: false }
+        ) => {
+          const { getChatById, fetchChatById } = get();
+
+          // 1. Try get from store
+          const existingChat = getChatById(chatId);
+          if (existingChat) {
+            // If already cached, just return it
+            return existingChat;
+          }
+
+          // 2. Otherwise, fetch from server
+          const fetchedChat = await fetchChatById(chatId, options);
+          return fetchedChat;
         },
 
         getChatType: (chatId) => {

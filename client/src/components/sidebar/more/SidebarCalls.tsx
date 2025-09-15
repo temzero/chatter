@@ -2,14 +2,14 @@ import React, { useEffect, useState } from "react";
 import SidebarLayout from "@/pages/SidebarLayout";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { callService } from "@/services/callService";
-import { CallHistoryResponse } from "@/types/callPayload";
+import { CallResponse } from "@/types/callPayload";
 import { getCallText, getCallClass, getCallIcon } from "@/utils/callHelpers";
 import { formatDateTime } from "@/utils/formatDate";
 import { ChatType } from "@/types/enums/ChatType";
 import { useCallStore } from "@/stores/callStore/callStore";
 
 const SidebarCalls: React.FC = () => {
-  const [calls, setCalls] = useState<CallHistoryResponse[]>([]);
+  const [calls, setCalls] = useState<CallResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const startCall = useCallStore((state) => state.startCall);
 
@@ -28,9 +28,9 @@ const SidebarCalls: React.FC = () => {
     fetchCalls();
   }, []);
 
-  function handleStartCall(call: CallHistoryResponse) {
+  function handleStartCall(call: CallResponse) {
     console.log("Starting call with", call);
-    startCall(call.chatId, {
+    startCall(call.chat.id, {
       isVideoCall: call.isVideoCall,
       isGroupCall: call.isGroupCall,
     });
@@ -51,24 +51,26 @@ const SidebarCalls: React.FC = () => {
         ) : (
           calls.map((call) => (
             <div
-              key={call.callId}
+              key={call.id}
               className="flex items-center gap-3 p-2 py-3 hover:bg-muted/30 transition custom-border-b select-none"
             >
               {/* 🔹 Chat Avatar (from normalized fields) */}
               <ChatAvatar
                 chat={{
-                  id: call.chatId,
-                  name: call.chatName,
-                  avatarUrl: call.chatAvatar,
+                  id: call.chat.id,
+                  name: call.chat.name,
+                  avatarUrl: call.chat.avatarUrl,
                   type: call.isGroupCall ? ChatType.GROUP : ChatType.DIRECT,
-                  myMemberId: call.memberId,
+                  myMemberId: call.chat.myMemberId,
                 }}
                 type="sidebar"
               />
 
               {/* 🔹 Info */}
               <div className="flex-1">
-                <p className="font-medium">{call.chatName ?? "Unknown Chat"}</p>
+                <p className="font-medium">
+                  {call.chat.name ?? "Unknown Chat"}
+                </p>
                 <p className="text-sm flex items-center gap-1">
                   <span className={getCallClass(call)}>
                     {getCallText(call)}

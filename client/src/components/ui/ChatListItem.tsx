@@ -24,6 +24,7 @@ interface ChatListItemProps {
 
 const ChatListItem: React.FC<ChatListItemProps> = React.memo(
   ({ chat, isCompact = false, currentUserId = "" }) => {
+    // console.log('ChatListItem', chat);
     const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
     const setActiveChatById = useChatStore.getState().setActiveChatById;
     const typingUsers = useTypingUsersByChatId(chat.id);
@@ -159,7 +160,10 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
 
               <div className="flex gap-1 absolute top-2 right-4 text-xs opacity-40">
                 <p className="">
-                  {formatTimeAgo(lastMessage?.createdAt ?? chat.updatedAt)}
+                  {formatTimeAgo(
+                    (lastMessage?.createdAt as string | Date | undefined) ??
+                      (chat.updatedAt as string | Date)
+                  )}
                 </p>
                 <AnimatePresence>
                   {chat.mutedUntil && (

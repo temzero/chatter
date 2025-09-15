@@ -11,6 +11,7 @@ import {
   Index,
   OneToMany,
   RelationId,
+  OneToOne,
 } from 'typeorm';
 import { Chat } from 'src/modules/chat/entities/chat.entity';
 import { User } from '../../user/entities/user.entity';
@@ -107,7 +108,8 @@ export class Message {
   @Column({ type: 'enum', enum: SystemEventType, nullable: true })
   systemEvent: SystemEventType | null;
 
-  @ManyToOne(() => Call, { nullable: true, onDelete: 'CASCADE' })
+  // bidirectional relationship
+  @OneToOne(() => Call, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'call_id' })
   call?: Call;
 
@@ -132,6 +134,7 @@ export class Message {
       this.deletedAt ||
       this.deletedForUserIds ||
       this.systemEvent ||
+      this.call ||
       (Object.keys(this).length === 2 &&
         'isPinned' in this &&
         'pinnedAt' in this)

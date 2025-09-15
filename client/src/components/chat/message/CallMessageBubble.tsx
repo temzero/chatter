@@ -43,8 +43,8 @@ const CallMessageBubble: React.FC<CallMessageBubbleProps> = ({
       onClick={() =>
         call.status === CallStatus.DIALING
           ? openModal(ModalType.CALL, {
+              id: call.id,
               chatId: message.chatId,
-              callId: call.callId,
             })
           : undefined
       }
@@ -92,7 +92,7 @@ const CallMessageBubble: React.FC<CallMessageBubbleProps> = ({
       {/* 🔹 Join button */}
       {call.status === CallStatus.IN_PROGRESS && (
         <div
-          onClick={() => onJoinCall?.(call.callId)}
+          onClick={() => onJoinCall?.(call.id)}
           className="text-center p-1 text-blue-700 w-full custom-border-t cursor-pointer hover:text-white hover:bg-blue-600 transition-colors"
         >
           Join Call

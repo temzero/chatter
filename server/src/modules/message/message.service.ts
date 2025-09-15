@@ -20,6 +20,7 @@ import { ChatEvent } from '../websocket/constants/websocket-events';
 import { ChatMemberRole } from '../chat-member/constants/chat-member-roles.constants';
 import { PaginationQuery } from './dto/queries/pagination-query.dto';
 import { WebsocketNotificationService } from '../websocket/services/websocket-notification.service';
+import { Call } from '../call/entities/call.entity';
 
 @Injectable()
 export class MessageService {
@@ -36,6 +37,8 @@ export class MessageService {
     private readonly reactionRepo: Repository<Reaction>,
     @InjectRepository(Message)
     public readonly messageRepo: Repository<Message>,
+    @InjectRepository(Call)
+    public readonly callRepo: Repository<Call>,
 
     private readonly blockService: BlockService,
     private readonly supabaseService: SupabaseService,
@@ -239,6 +242,7 @@ export class MessageService {
       targetId?: string;
       targetName?: string;
       callId?: string;
+      call?: Call;
     },
   ): Promise<MessageResponseDto> {
     let targetName: string | undefined;
@@ -257,10 +261,36 @@ export class MessageService {
         options?.targetId,
         targetName,
       ),
-      call: options?.callId ? { id: options.callId } : undefined,
+      call: options?.call
+        ? options.call
+        : options?.callId
+          ? { id: options.callId }
+          : undefined,
     });
 
     const savedMessage = await this.messageRepo.save(message);
+
+    // 🔁 Handle bidirectional linking if this is a call message
+    if (options?.call) {
+      // Link the call back to this message
+      options.call.message = savedMessage;
+      await this.callRepo.save(options.call);
+    } else if (options?.callId && !options.call) {
+      // Fetch the call and link it if only callId was provided
+      const call = await this.callRepo.findOne({
+        where: { id: options.callId },
+      });
+      if (call) {
+        call.message = savedMessage;
+        await this.callRepo.save(call);
+      }
+    }
+
+    // ✅ Update lastVisibleMessageId for all chat members
+    await this.chatMemberRepo.update(
+      { chatId },
+      { lastVisibleMessageId: savedMessage.id },
+    );
 
     const fullMessage = await this.getFullMessageById(savedMessage.id);
     const messageResponse =

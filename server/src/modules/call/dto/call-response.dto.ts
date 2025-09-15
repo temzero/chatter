@@ -21,7 +21,8 @@ export class CallResponseDto {
 
   @Expose() startedAt: Date;
   @Expose() endedAt?: Date | null;
-  @Expose() updatedAt: Date;
+  @Expose() updatedAt?: Date | null;
+  @Expose() createdAt: Date;
 
   @Expose()
   participants: ChatMemberResponseDto[];

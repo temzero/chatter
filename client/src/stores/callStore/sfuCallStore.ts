@@ -16,6 +16,8 @@ import {
   RemoteTrackPublication,
   RemoteTrack,
 } from "livekit-client";
+import { CallStatus } from "@/types/enums/CallStatus";
+import { useMessageStore } from "../messageStore";
 
 export interface SFUState {
   liveKitService: LiveKitService | null;
@@ -88,9 +90,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
         const timeoutRef = setTimeout(() => {
           const { localCallStatus } = useCallStore.getState();
           if (localCallStatus === LocalCallStatus.OUTGOING) {
-            useCallStore
-              .getState()
-              .endCall({ isTimeout: true, isCancel: true });
+            useCallStore.getState().endCall({ isTimeout: true });
           }
         }, 60000);
 
@@ -139,6 +139,23 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
           error: "sfu_init_failed",
           localCallStatus: LocalCallStatus.ERROR,
         });
+
+        // NEW: Update call status to FAILED if call was created
+        const { id: callId } = useCallStore.getState();
+        if (callId) {
+          try {
+            await callService.markCallAsFailed(callId);
+            if (chatId) {
+              useMessageStore.getState().updateCallMessage(chatId, callId, {
+                status: CallStatus.FAILED,
+                endedAt: new Date().toISOString(),
+              });
+            }
+          } catch (apiError) {
+            console.error("Failed to update call status to FAILED:", apiError);
+          }
+        }
+
         toast.error(
           "Permission denied! Please allow camera and microphone access."
         );
@@ -147,7 +164,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
     },
 
     acceptSFUCall: async () => {
-      const { callId, chatId } = useCallStore.getState();
+      const { id: callId, chatId } = useCallStore.getState();
 
       if (!callId || !chatId) {
         console.error("Missing callId or chatId");
@@ -159,7 +176,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
         useCallStore.getState().cleanupStreams();
 
         // Update base store
-        useCallStore.getState().setCallStatus(LocalCallStatus.CONNECTING);
+        useCallStore.getState().setLocalCallStatus(LocalCallStatus.CONNECTING);
 
         // Initialize LiveKit service
         const liveKitService = new LiveKitService();
@@ -203,12 +220,12 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
         if (chatId) {
           callWebSocketService.rejectCall({ callId, chatId });
         }
-        useCallStore.getState().setCallStatus(LocalCallStatus.ERROR);
+        useCallStore.getState().setLocalCallStatus(LocalCallStatus.ERROR);
       }
     },
 
     rejectSFUCall: (isCancel = false) => {
-      const { callId, chatId } = useCallStore.getState();
+      const { id: callId, chatId } = useCallStore.getState();
 
       if (!chatId || !callId) {
         console.error("No chatId found for rejecting call");
@@ -226,7 +243,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
       } catch (error) {
         console.error("Error rejecting call:", error);
         toast.error("Failed to reject call. Please try again.");
-        useCallStore.getState().setCallStatus(LocalCallStatus.ERROR);
+        useCallStore.getState().setLocalCallStatus(LocalCallStatus.ERROR);
       }
     },
 
@@ -249,7 +266,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
             get().handleSFUTrackUnsubscribed(track, publication, participant);
           },
           onError: (error) => {
-            useCallStore.getState().setCallStatus(LocalCallStatus.ERROR);
+            useCallStore.getState().setLocalCallStatus(LocalCallStatus.ERROR);
             console.error("LiveKit connection error:", error);
           },
         });
@@ -263,10 +280,10 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
         });
 
         // Set call as connected
-        useCallStore.getState().setCallStatus(LocalCallStatus.CONNECTED);
+        useCallStore.getState().setLocalCallStatus(LocalCallStatus.CONNECTED);
       } catch (error) {
         console.error("Failed to connect to SFU room:", error);
-        useCallStore.getState().setCallStatus(LocalCallStatus.ERROR);
+        useCallStore.getState().setLocalCallStatus(LocalCallStatus.ERROR);
       }
     },
 
@@ -476,7 +493,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
       get().updateSFUMember(updates);
 
       const callStore = useCallStore.getState();
-      const callId = callStore.callId;
+      const callId = callStore.id;
       const chatId = callStore.chatId;
 
       // Only emit server update if it's your own member and IDs exist
@@ -523,7 +540,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
       get().updateSFUMember(updates);
 
       const callStore = useCallStore.getState();
-      const callId = callStore.callId;
+      const callId = callStore.id;
       const chatId = callStore.chatId;
 
       // Only emit server update if IDs exist
@@ -545,7 +562,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
 
     // ========== MEDIA CONTROLS ==========
     toggleAudio: async (enable?: boolean) => {
-      const { callId, chatId, isMuted } = useCallStore.getState();
+      const { id: callId, chatId, isMuted } = useCallStore.getState();
       const { liveKitService } = get();
       const myMemberId = await getMyChatMemberId(chatId!);
 
@@ -586,7 +603,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
     },
 
     toggleVideo: async (enable?: boolean) => {
-      const { callId, chatId, isVideoEnabled } = useCallStore.getState();
+      const { id: callId, chatId, isVideoEnabled } = useCallStore.getState();
       const { liveKitService } = get();
       const myMemberId = await getMyChatMemberId(chatId!);
 
@@ -628,7 +645,7 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
 
     toggleScreenShare: async (enable?: boolean) => {
       const { liveKitService } = get();
-      const { callId, chatId, isScreenSharing } = useCallStore.getState();
+      const { id: callId, chatId, isScreenSharing } = useCallStore.getState();
       const myMemberId = await getMyChatMemberId(chatId!);
 
       if (!liveKitService || !callId || !chatId || !myMemberId) return;

@@ -38,7 +38,7 @@ export class CallService {
     }
   }
 
-  async getCallHistory(userId: string): Promise<any[]> {
+  async getCallHistory(userId: string): Promise<Call[]> {
     const calls = await this.callRepository
       .createQueryBuilder('call')
       .leftJoinAndSelect('call.chat', 'chat')
@@ -72,50 +72,39 @@ export class CallService {
       .orderBy('call.startedAt', 'DESC')
       .getMany();
 
-    return calls.map((call) => {
-      let chatName = call.chat.name;
-      let chatAvatar = call.chat.avatarUrl;
+    // Update chat.name and chat.avatarUrl in-place
+    calls.forEach((call) => {
+      const chat = call.chat;
 
-      if (call.chat.type === ChatType.DIRECT) {
-        // Now all members are loaded, so we can find the other one
-        const otherMember = call.chat.members.find((m) => m.user.id !== userId);
+      if (chat.type === ChatType.DIRECT) {
+        const otherMember = chat.members.find((m) => m.user.id !== userId);
 
         if (otherMember) {
-          chatName =
+          chat.name =
             otherMember.nickname ||
             `${otherMember.user.firstName ?? ''} ${otherMember.user.lastName ?? ''}`.trim() ||
             otherMember.user.username;
 
-          chatAvatar = otherMember.user.avatarUrl || chatAvatar;
+          chat.avatarUrl = otherMember.user.avatarUrl || chat.avatarUrl;
         }
       } else {
-        // Group chat logic remains the same
-        if (!chatAvatar) {
+        // Group chat logic
+        if (!chat.avatarUrl) {
           if (call.initiator?.user?.avatarUrl) {
-            chatAvatar = call.initiator.user.avatarUrl;
-          } else if (call.chat.members.length > 0) {
-            const memberWithAvatar = call.chat.members.find(
+            chat.avatarUrl = call.initiator.user.avatarUrl;
+          } else if (chat.members.length > 0) {
+            const memberWithAvatar = chat.members.find(
               (m) => m.user?.avatarUrl,
             );
-            chatAvatar =
+            chat.avatarUrl =
               memberWithAvatar?.user?.avatarUrl ||
-              call.chat.members[0].user.avatarUrl;
+              chat.members[0].user.avatarUrl;
           }
         }
       }
-
-      return {
-        callId: call.id,
-        chatId: call.chat.id,
-        isVideoCall: call.isVideoCall,
-        isGroupCall: call.isGroupCall,
-        status: call.status,
-        startedAt: call.startedAt,
-        endedAt: call.endedAt,
-        chatName,
-        chatAvatar,
-      };
     });
+
+    return calls;
   }
 
   async getPendingCalls(userId: string): Promise<Call[]> {
@@ -140,6 +129,19 @@ export class CallService {
     if (!initiatorMember) {
       throw new Error('Unauthorized: Cannot update other members');
     }
+
+    // 🔒 Check if there's already an active call in this chat
+    const existingCall = await this.callRepository.findOne({
+      where: {
+        chat: { id: createCallDto.chatId },
+        status: In([CallStatus.DIALING, CallStatus.IN_PROGRESS]),
+      },
+    });
+
+    if (existingCall) {
+      throw new Error('A call is already in progress or dialing in this chat');
+    }
+
     // save call first
     const call = this.callRepository.create({
       status: createCallDto.status,
@@ -157,7 +159,10 @@ export class CallService {
       createCallDto.chatId,
       createCallDto.initiatorUserId,
       SystemEventType.CALL,
-      { callId: savedCall.id },
+      {
+        call: savedCall,
+        callId: savedCall.id,
+      },
     );
 
     return this.callRepository.findOneOrFail({

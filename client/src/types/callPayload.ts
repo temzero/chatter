@@ -1,4 +1,6 @@
 import { CallStatus } from "./enums/CallStatus";
+import { ChatResponse } from "./responses/chat.response";
+import { ChatMember } from "./responses/chatMember.response";
 // -------------------- Requests --------------------
 
 export interface InitiateCallRequest {
@@ -52,32 +54,17 @@ export interface IceCandidateRequest {
 // -------------------- Responses --------------------
 
 export interface CallResponse {
-  callId: string;
-  chatId: string; // still useful to open chat UI
+  id: string; // server sends "id"
+  chat: ChatResponse;
+  status: CallStatus;
   isVideoCall: boolean;
   isGroupCall: boolean;
-  initiatorId: string;
-  status: CallStatus;
-  createdAt: string; // ISO string
-  startedAt?: string;
-  endedAt?: string;
-}
-
-export interface CallHistoryResponse {
-  callId: string; // ✅ main key
-  chatId: string; // to open chat UI
-  memberId: string; // my ChatMemberId in this call
-  status: CallStatus;
-  createdAt: string; // ISO string
-  startedAt?: string;
-  endedAt?: string;
-
-  isVideoCall: boolean;
-  isGroupCall: boolean;
-
-  // Normalized display info
-  chatName: string;
-  chatAvatar: string | null;
+  initiator: ChatMember;
+  startedAt: string; // ISO string
+  endedAt?: string | null;
+  updatedAt?: string;
+  createdAt: string;
+  participants: ChatMember[];
 }
 
 export interface CallActionResponse {

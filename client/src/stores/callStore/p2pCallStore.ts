@@ -196,9 +196,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         const timeoutRef = setTimeout(() => {
           const { localCallStatus } = useCallStore.getState();
           if (localCallStatus === LocalCallStatus.OUTGOING) {
-            useCallStore
-              .getState()
-              .endCall({ isTimeout: true, isCancel: true });
+            useCallStore.getState().endCall({ isTimeout: true });
           }
         }, 60000);
 
@@ -225,8 +223,12 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
     },
 
     acceptP2PCall: async () => {
-      const { callId, chatId, isVideoCall, isVideoEnabled } =
-        useCallStore.getState();
+      const {
+        id: callId,
+        chatId,
+        isVideoCall,
+        isVideoEnabled,
+      } = useCallStore.getState();
       const isOpenVideoTrack = isVideoCall && isVideoEnabled;
 
       if (!callId || !chatId) {
@@ -265,7 +267,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         });
 
         // Update base store
-        useCallStore.getState().setCallStatus(LocalCallStatus.CONNECTING);
+        useCallStore.getState().setLocalCallStatus(LocalCallStatus.CONNECTING);
 
         // Create peer connection for the caller
         const callerMemberId = useCallStore.getState().callerMemberId;
@@ -290,12 +292,12 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
         if (chatId) {
           callWebSocketService.rejectCall({ callId, chatId });
         }
-        useCallStore.getState().setCallStatus(LocalCallStatus.ERROR);
+        useCallStore.getState().setLocalCallStatus(LocalCallStatus.ERROR);
       }
     },
 
     rejectP2PCall: (isCancel = false) => {
-      const { callId, chatId } = useCallStore.getState();
+      const { id: callId, chatId } = useCallStore.getState();
 
       if (!callId || !chatId) {
         console.error("Missing callId or chatId");
@@ -312,7 +314,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
       } catch (error) {
         console.error("Error rejecting call:", error);
         toast.error("Failed to reject call. Please try again.");
-        useCallStore.getState().setCallStatus(LocalCallStatus.ERROR);
+        useCallStore.getState().setLocalCallStatus(LocalCallStatus.ERROR);
       }
     },
 
@@ -463,7 +465,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
     },
 
     createPeerConnection: (memberId: string) => {
-      const { callId, chatId } = useCallStore.getState();
+      const { id: callId, chatId } = useCallStore.getState();
       const { localVoiceStream, localVideoStream, localScreenStream } = get();
 
       if (!callId || !chatId) {
@@ -561,7 +563,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
       offer: RTCSessionDescriptionInit
     ) => {
       const { p2pMembers } = get();
-      const { callId, chatId } = useCallStore.getState();
+      const { id: callId, chatId } = useCallStore.getState();
 
       if (!callId || !chatId) {
         console.error("Missing callId or chatId");
@@ -634,7 +636,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
       stream: MediaStream
     ) => {
       const { p2pMembers } = get();
-      const { callId, chatId } = useCallStore.getState();
+      const { id: callId, chatId } = useCallStore.getState();
 
       if (!callId || !chatId) {
         console.error("Missing callId or chatId");
@@ -696,7 +698,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
       trackKind: "audio" | "video"
     ) => {
       const { p2pMembers } = get();
-      const { callId, chatId } = useCallStore.getState();
+      const { id: callId, chatId } = useCallStore.getState();
 
       if (!callId || !chatId) {
         console.error("Missing callId or chatId");
@@ -805,7 +807,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
     },
 
     sendP2POffer: async (toMemberId: string) => {
-      const { callId, chatId } = useCallStore.getState();
+      const { id: callId, chatId } = useCallStore.getState();
 
       if (!callId || !chatId) {
         console.error("Missing callId or chatId");
@@ -834,7 +836,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
           offer,
         });
 
-        useCallStore.getState().setCallStatus(LocalCallStatus.CONNECTING);
+        useCallStore.getState().setLocalCallStatus(LocalCallStatus.CONNECTING);
       } catch (error) {
         handleError(error, "Failed to create/send offer");
         useCallStore.getState().endCall();
@@ -868,7 +870,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
     },
 
     toggleAudio: async () => {
-      const { callId, chatId, isMuted } = useCallStore.getState();
+      const { id: callId, chatId, isMuted } = useCallStore.getState();
 
       if (!callId || !chatId) {
         console.error("Missing callId or chatId");
@@ -932,7 +934,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
     },
 
     toggleVideo: async () => {
-      const { callId, chatId, isVideoEnabled } = useCallStore.getState();
+      const { id: callId, chatId, isVideoEnabled } = useCallStore.getState();
 
       if (!callId || !chatId) {
         console.error("Missing callId or chatId");
@@ -1004,7 +1006,7 @@ export const useP2PCallStore = create<P2PState & P2PActions>()(
     },
 
     toggleScreenShare: async () => {
-      const { callId, chatId, isScreenSharing } = useCallStore.getState();
+      const { id: callId, chatId, isScreenSharing } = useCallStore.getState();
 
       if (!callId || !chatId) {
         console.error("Missing callId or chatId");

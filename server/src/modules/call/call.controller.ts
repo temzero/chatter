@@ -20,7 +20,6 @@ import { CallResponseDto } from './dto/call-response.dto';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { ChatMemberService } from '../chat-member/chat-member.service';
-import { CallHistoryResponseDto } from './dto/call-history-response.dto';
 
 @Controller('calls')
 @UseGuards(JwtAuthGuard)
@@ -33,11 +32,11 @@ export class CallController {
   @Get('history')
   async getCallHistory(
     @CurrentUser('id') userId: string,
-  ): Promise<SuccessResponse<CallHistoryResponseDto[]>> {
+  ): Promise<SuccessResponse<CallResponseDto[]>> {
     try {
       const calls = await this.callService.getCallHistory(userId);
       return new SuccessResponse(
-        plainToInstance(CallHistoryResponseDto, calls),
+        plainToInstance(CallResponseDto, calls),
         'Call history retrieved successfully',
       );
     } catch (error: unknown) {

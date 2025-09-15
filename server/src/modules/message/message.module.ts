@@ -12,6 +12,7 @@ import { Attachment } from './entities/attachment.entity';
 import { SupabaseModule } from '../superbase/supabase.module';
 import { BlockModule } from '../block/block.module';
 import { WebSocketModule } from '../websocket/websocket.module';
+import { Call } from '../call/entities/call.entity';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { WebSocketModule } from '../websocket/websocket.module';
       ChatMember,
       User,
       Reaction,
+      Call,
     ]),
     forwardRef(() => BlockModule),
     forwardRef(() => SupabaseModule),

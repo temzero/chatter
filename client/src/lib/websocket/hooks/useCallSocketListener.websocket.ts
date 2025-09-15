@@ -134,12 +134,12 @@
 //     const handleCallAccepted = async (data: CallActionResponse) => {
 //       console.log("handleCallAccepted");
 //       const callStore = useCallStore.getState();
-//       callStore.setCallStatus(LocalCallStatus.CONNECTING);
+//       callStore.setLocalCallStatus(LocalCallStatus.CONNECTING);
 
 //       if (callStore.chatId !== data.chatId) return;
 
 //       if (callStore.isGroupCall) {
-//         callStore.setCallStatus(LocalCallStatus.CONNECTED);
+//         callStore.setLocalCallStatus(LocalCallStatus.CONNECTED);
 //         return;
 //       }
 
@@ -226,7 +226,7 @@
 //           await p2pStore.updatePeerConnection(memberId, offer);
 //         }
 
-//         callStore.setCallStatus(LocalCallStatus.CONNECTED);
+//         callStore.setLocalCallStatus(LocalCallStatus.CONNECTED);
 //       } catch (err) {
 //         handleError(err, "Call offer handling failed");
 //         callStore.endCall();
@@ -271,7 +271,7 @@
 //           new RTCSessionDescription(data.answer)
 //         );
 
-//         callStore.setCallStatus(LocalCallStatus.CONNECTED);
+//         callStore.setLocalCallStatus(LocalCallStatus.CONNECTED);
 //       } catch (err) {
 //         console.error("Answer handling failed:", err);
 //         callStore.endCall();
@@ -332,7 +332,7 @@
 //           data.memberId === currentMemberId &&
 //           callStore.localCallStatus === LocalCallStatus.CONNECTING
 //         ) {
-//           callStore.setCallStatus(LocalCallStatus.CONNECTED);
+//           callStore.setLocalCallStatus(LocalCallStatus.CONNECTED);
 //         }
 //       }
 //     };
