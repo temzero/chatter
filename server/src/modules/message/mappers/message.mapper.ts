@@ -119,11 +119,6 @@ export class MessageMapper {
             nickname: call.initiator.nickname,
           }
         : null,
-      participants: call.participants?.map((p) => ({
-        id: p.id,
-        userId: p.userId,
-        nickname: p.nickname,
-      })),
     });
   }
 

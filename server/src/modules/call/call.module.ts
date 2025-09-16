@@ -7,6 +7,7 @@ import { ChatMember } from '../chat-member/entities/chat-member.entity';
 import { MessageModule } from '../message/message.module';
 import { Chat } from '../chat/entities/chat.entity';
 import { ChatMemberModule } from '../chat-member/chat-member.module';
+import { LivekitService } from './liveKit.service';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { ChatMemberModule } from '../chat-member/chat-member.module';
     ChatMemberModule,
   ],
   controllers: [CallController],
-  providers: [CallService],
+  providers: [CallService, LivekitService],
   exports: [CallService],
 })
 export class CallModule {}

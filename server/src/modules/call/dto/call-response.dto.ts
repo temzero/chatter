@@ -1,5 +1,5 @@
 import { Exclude, Expose, Type } from 'class-transformer';
-import { CallStatus } from '../type/callStatus';
+import { CallStatus, PendingCallStatus } from '../type/callStatus';
 import { ChatResponseDto } from '../../chat/dto/responses/chat-response.dto';
 import { ChatMemberResponseDto } from '../../chat-member/dto/responses/chat-member-response.dto';
 
@@ -11,7 +11,7 @@ export class CallResponseDto {
   @Type(() => ChatResponseDto)
   chat: ChatResponseDto;
 
-  @Expose() status: CallStatus;
+  @Expose() status: CallStatus | PendingCallStatus;
 
   @Expose() isVideoCall: boolean;
   @Expose() isGroupCall: boolean;

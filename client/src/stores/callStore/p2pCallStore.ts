@@ -1,7 +1,7 @@
 // stores/call/useP2PCallStore.ts
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { LocalCallStatus } from "@/types/enums/LocalCallStatus";
+import { LocalCallStatus } from "@/types/enums/CallStatus";
 import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
 import { toast } from "react-toastify";
 import { handleError } from "@/utils/handleError";

@@ -2,14 +2,14 @@ import React, { useEffect, useState } from "react";
 import SidebarLayout from "@/pages/SidebarLayout";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { callService } from "@/services/callService";
-import { CallResponse } from "@/types/callPayload";
+import { CallActionResponse } from "@/types/callPayload";
 import { getCallText, getCallClass, getCallIcon } from "@/utils/callHelpers";
 import { formatDateTime } from "@/utils/formatDate";
 import { ChatType } from "@/types/enums/ChatType";
 import { useCallStore } from "@/stores/callStore/callStore";
 
 const SidebarCalls: React.FC = () => {
-  const [calls, setCalls] = useState<CallResponse[]>([]);
+  const [calls, setCalls] = useState<CallActionResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const startCall = useCallStore((state) => state.startCall);
 
@@ -28,7 +28,7 @@ const SidebarCalls: React.FC = () => {
     fetchCalls();
   }, []);
 
-  function handleStartCall(call: CallResponse) {
+  function handleStartCall(call: CallActionResponse) {
     console.log("Starting call with", call);
     startCall(call.chat.id, {
       isVideoCall: call.isVideoCall,

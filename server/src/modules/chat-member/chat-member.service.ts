@@ -71,6 +71,23 @@ export class ChatMemberService {
     }
   }
 
+  async getChatIdsByUserId(userId: string): Promise<string[]> {
+    try {
+      const memberships = await this.memberRepo.find({
+        where: { userId, deletedAt: IsNull() }, // only active memberships
+        select: ['chatId'],
+      });
+
+      if (!memberships || memberships.length === 0) {
+        return []; // no chats instead of throwing, so caller can handle gracefully
+      }
+
+      return memberships.map((m) => m.chatId);
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to retrieve chat IDs by user');
+    }
+  }
+
   async findByChatIdWithBlockFilter(
     chatId: string,
     currentUserId: string,
@@ -286,23 +303,6 @@ export class ChatMemberService {
         error,
         'Failed to retrieve chat member IDs and mute statuses',
       );
-    }
-  }
-
-  async getChatIdsByUserId(userId: string): Promise<string[]> {
-    try {
-      const chatMemberships = await this.memberRepo.find({
-        where: { userId },
-        select: ['chatId'],
-      });
-
-      if (!chatMemberships || chatMemberships.length === 0) {
-        ErrorResponse.notFound('User is not a member of any chats');
-      }
-
-      return chatMemberships.map((member) => member.chatId);
-    } catch (error) {
-      ErrorResponse.throw(error, 'Failed to retrieve chat IDs by user ID');
     }
   }
 

@@ -275,6 +275,18 @@ export class ChatService {
     return { chats: resultChats, hasMore };
   }
 
+  async getChatById(chatId: string): Promise<Chat> {
+    const chat = await this.chatRepo.findOne({
+      where: { id: chatId },
+    });
+
+    if (!chat) {
+      ErrorResponse.notFound('Chat not found');
+    }
+
+    return chat;
+  }
+
   async getUserChat(chatId: string, userId: string): Promise<ChatResponseDto> {
     // First try to get chat with user membership
     const chat = await this.buildFullChatQueryForUser(userId)

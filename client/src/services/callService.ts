@@ -1,7 +1,8 @@
-import { handleError } from "@/utils/handleError";
-import { CallResponse } from "@/types/callPayload";
-import { CallStatus } from "@/types/enums/CallStatus"; // Import the enum
 import API from "./api/api";
+import { handleError } from "@/utils/handleError";
+import { CallStatus } from "@/types/enums/CallStatus"; // Import the enum
+import { CallResponseDto } from "@/types/responses/call.response";
+import { IncomingCallResponse } from "@/types/callPayload";
 
 export const callService = {
   /**
@@ -30,7 +31,7 @@ export const callService = {
     }
   },
 
-  async getPendingCalls(): Promise<CallResponse[]> {
+  async getPendingCalls(): Promise<IncomingCallResponse[]> {
     try {
       const { data } = await API.get(`/calls/pending`);
       // Adjust based on your API response structure
@@ -44,7 +45,7 @@ export const callService = {
   /**
    * Fetch calls history
    */
-  async getCallHistory(): Promise<CallResponse[]> {
+  async getCallHistory(): Promise<CallResponseDto[]> {
     const { data } = await API.get(`/calls/history/`);
     return data.payload ?? data;
   },
@@ -52,7 +53,7 @@ export const callService = {
   /**
    * Get a specific call by ID
    */
-  async getCallById(callId: string): Promise<CallResponse> {
+  async getCallById(callId: string): Promise<CallResponseDto> {
     const { data } = await API.get(`/calls/${callId}`);
     return data.payload ?? data;
   },
@@ -67,7 +68,7 @@ export const callService = {
       endedAt?: string;
       // Add other fields you might want to update
     }
-  ): Promise<CallResponse> {
+  ): Promise<CallResponseDto> {
     const { data } = await API.patch(`/calls/${callId}`, updateData);
     return data.payload ?? data;
   },
@@ -75,7 +76,7 @@ export const callService = {
   /**
    * End a call (sets status to COMPLETED)
    */
-  async endCall(callId: string): Promise<CallResponse> {
+  async endCall(callId: string): Promise<CallResponseDto> {
     const { data } = await API.post(`/calls/${callId}/end`);
     return data.payload ?? data;
   },
@@ -83,7 +84,7 @@ export const callService = {
   /**
    * Mark call as missed (sets status to MISSED)
    */
-  async markCallAsMissed(callId: string): Promise<CallResponse> {
+  async markCallAsMissed(callId: string): Promise<CallResponseDto> {
     return this.updateCall(callId, {
       status: CallStatus.MISSED,
       endedAt: new Date().toISOString(),
@@ -93,7 +94,7 @@ export const callService = {
   /**
    * Mark call as failed (sets status to FAILED)
    */
-  async markCallAsFailed(callId: string): Promise<CallResponse> {
+  async markCallAsFailed(callId: string): Promise<CallResponseDto> {
     return this.updateCall(callId, {
       status: CallStatus.FAILED,
       endedAt: new Date().toISOString(),
@@ -104,7 +105,7 @@ export const callService = {
    * Mark call as declined (sets status to DECLINED)
    * Useful if you want to update status from caller's perspective after being rejected
    */
-  async markCallAsDeclined(callId: string): Promise<CallResponse> {
+  async markCallAsDeclined(callId: string): Promise<CallResponseDto> {
     return this.updateCall(callId, {
       status: CallStatus.DECLINED,
       endedAt: new Date().toISOString(),

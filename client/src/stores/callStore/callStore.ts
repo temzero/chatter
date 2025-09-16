@@ -1,7 +1,6 @@
 // stores/call/useCallStore.ts
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { LocalCallStatus } from "@/types/enums/LocalCallStatus";
 import { useSFUCallStore } from "./sfuCallStore";
 import { useP2PCallStore } from "./p2pCallStore";
 import { useModalStore } from "../modalStore";
@@ -12,14 +11,14 @@ import type {
   SFUCallMember,
 } from "@/types/store/callMember.type";
 import { useMessageStore } from "../messageStore";
-import { CallStatus } from "@/types/enums/CallStatus";
+import { CallStatus, LocalCallStatus } from "@/types/enums/CallStatus";
 import { callService } from "@/services/callService";
 
 export interface CallState {
   id: string | null;
   chatId: string | null;
   // Call metadata
-  callerMemberId?: string;
+  initiatorMemberId?: string;
   localCallStatus: LocalCallStatus | null;
   isVideoCall: boolean;
   isGroupCall: boolean;
@@ -136,7 +135,7 @@ export const useCallStore = create<CallState & CallActions>()(
     },
 
     acceptCall: async () => {
-      const { isGroupCall, chatId, id } = get();
+      const { isGroupCall } = get();
 
       try {
         if (isGroupCall) {
@@ -151,12 +150,6 @@ export const useCallStore = create<CallState & CallActions>()(
           localCallStatus: LocalCallStatus.CONNECTED,
           startedAt,
         });
-
-        if (chatId && id) {
-          useMessageStore
-            .getState()
-            .updateMessageCallStatus(chatId, id, CallStatus.IN_PROGRESS);
-        }
       } catch (err) {
         console.error("Failed to accept call:", err);
         set({ error: "device_unavailable" });

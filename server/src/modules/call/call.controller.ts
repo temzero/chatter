@@ -20,12 +20,19 @@ import { CallResponseDto } from './dto/call-response.dto';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { ChatMemberService } from '../chat-member/chat-member.service';
+import { LivekitService } from './liveKit.service';
+import { PendingCallStatus } from './type/callStatus';
+import { IncomingCallResponse } from '../websocket/constants/callPayload.type';
+import { ChatService } from '../chat/chat.service';
+import { ChatType } from '../chat/constants/chat-types.constants';
 
 @Controller('calls')
 @UseGuards(JwtAuthGuard)
 export class CallController {
   constructor(
+    private readonly liveKitService: LivekitService,
     private readonly callService: CallService,
+    private readonly chatService: ChatService,
     private readonly chatMemberService: ChatMemberService,
   ) {}
 
@@ -47,11 +54,48 @@ export class CallController {
   @Get('pending')
   async getPendingCalls(
     @CurrentUser('id') userId: string,
-  ): Promise<SuccessResponse<CallResponseDto[]>> {
+  ): Promise<SuccessResponse<IncomingCallResponse[]>> {
     try {
-      const calls = await this.callService.getPendingCalls(userId);
+      // 1. Get all chatIds this user belongs to
+      const chatIds = await this.chatMemberService.getChatIdsByUserId(userId);
+
+      // 2. Get active rooms from LiveKit that match those chatIds
+      const activeRooms = await this.liveKitService.getActiveRoomsForUser(
+        userId,
+        chatIds,
+      );
+
+      // 3. Map active rooms into IncomingCallResponse shape
+      const pendingCalls: IncomingCallResponse[] = await Promise.all(
+        activeRooms.map(async (room) => {
+          // 1. Fetch chat data for this room/chatId
+          const chat = await this.chatService.getChatById(room.name); // or getChatFromData(room.name)
+
+          // 2. Determine call type
+          const isGroupCall = chat.type !== ChatType.DIRECT;
+          const isVideoCall = isGroupCall ? true : false; // or derive from your rules
+
+          const status =
+            room.numParticipants <= 1
+              ? PendingCallStatus.DIALING
+              : PendingCallStatus.IN_PROGRESS;
+
+          return {
+            callId: room.name, // optional, match your call entity if exists
+            chatId: room.name, // roomName = chatId
+            status,
+            participantsCount: room.numParticipants,
+            isVideoCall,
+            isGroupCall,
+            startedAt: room.creationTime
+              ? new Date(Number(room.creationTime) * 1000)
+              : undefined,
+          };
+        }),
+      );
+
       return new SuccessResponse(
-        plainToInstance(CallResponseDto, calls),
+        pendingCalls,
         'Pending calls retrieved successfully',
       );
     } catch (error: unknown) {
@@ -121,25 +165,6 @@ export class CallController {
     }
   }
 
-  @Post('join/:callId/:chatId')
-  async joinCall(
-    @CurrentUser('id') userId: string,
-    @Param('callId') callId: string,
-    @Param('chatId') chatId: string,
-  ): Promise<SuccessResponse<CallResponseDto>> {
-    const myMemberId = await this.chatMemberService.getMemberId(userId, chatId);
-
-    try {
-      const updated = await this.callService.joinCall(callId, myMemberId);
-      return new SuccessResponse(
-        plainToInstance(CallResponseDto, updated),
-        'Joined call successfully',
-      );
-    } catch (error: unknown) {
-      ErrorResponse.throw(error, 'Failed to join call');
-    }
-  }
-
   @Post(':id/end')
   async endCall(
     @Param('id') id: string,
@@ -176,7 +201,7 @@ export class CallController {
   ): Promise<SuccessResponse<{ token: string }>> {
     try {
       const { roomName, participantName } = body;
-      const token = await this.callService.generateLivekitToken(
+      const token = await this.liveKitService.generateLivekitToken(
         roomName,
         userId,
         participantName,

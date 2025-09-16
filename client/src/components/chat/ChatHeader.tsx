@@ -34,6 +34,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   const isSearchMessages = useMessageStore((state) => state.isSearchMessages);
 
   const startCall = useCallStore((state) => state.startCall);
+  // const joinCall = useCallStore((state) => state.joinCall);
 
   const isChannel = chat.type === ChatType.CHANNEL;
   const isDirect = chat.type === ChatType.DIRECT;
@@ -118,6 +119,18 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                 )}
 
                 {isGroup && (
+                  // <button
+                  //   onClick={() =>
+                  //     startCall(chat.id, {
+                  //       isVideoCall: true,
+                  //       isGroupCall: true,
+                  //     })
+                  //   }
+                  // >
+                  //   <i className="material-symbols-outlined text-3xl">
+                  //     videocam
+                  //   </i>
+                  // </button>
                   <button
                     onClick={() =>
                       startCall(chat.id, {
@@ -126,6 +139,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                       })
                     }
                   >
+                    Join Call
                     <i className="material-symbols-outlined text-3xl">
                       videocam
                     </i>

@@ -46,10 +46,7 @@ export class LiveKitService {
     try {
       this.setupEventListeners();
 
-      // Let LiveKit handle all media acquisition
-      await this.room.connect(url, token, {
-        autoSubscribe: true,
-      });
+      await this.room.connect(url, token, { autoSubscribe: true });
 
       this.handleExistingParticipants();
     } catch (error) {
@@ -60,36 +57,22 @@ export class LiveKitService {
 
   async disconnect() {
     try {
-      this.room.disconnect();
+      await this.room.disconnect();
     } catch (error) {
       this.options?.onError?.(error as Error);
     } finally {
-      this.removeEventListeners(); // Ensure this always runs
+      this.removeEventListeners();
     }
   }
-
-  // async toggleAudio(enabled: boolean) {
-  //   try {
-  //     await this.room.localParticipant.setMicrophoneEnabled(enabled);
-  //     useCallStore.setState({
-  //       isMuted: !enabled,
-  //     });
-  //     return true;
-  //   } catch (error) {
-  //     console.error("Failed to toggle audio:", error);
-  //     return false;
-  //   }
-  // }
 
   async toggleAudio(enabled: boolean) {
     try {
       if (enabled) {
-        // Ensure there’s a mic track
-        if (
-          this.room.localParticipant
-            .getTrackPublications()
-            .find((p) => p.track?.kind === "audio") == null
-        ) {
+        const hasMic = this.room.localParticipant
+          .getTrackPublications()
+          .find((p) => p.track?.kind === "audio");
+
+        if (!hasMic) {
           const audioTrack = await createLocalAudioTrack();
           await this.room.localParticipant.publishTrack(audioTrack);
         }
@@ -107,11 +90,9 @@ export class LiveKitService {
   async toggleVideo(enabled: boolean) {
     try {
       if (enabled) {
-        // Ensure there’s a camera track
-        const hasCam =
-          this.room.localParticipant
-            .getTrackPublications()
-            .find((p) => p.track?.kind === "video") != null;
+        const hasCam = this.room.localParticipant
+          .getTrackPublications()
+          .find((p) => p.track?.kind === "video");
 
         if (!hasCam) {
           const videoTrack = await createLocalVideoTrack();
@@ -131,13 +112,10 @@ export class LiveKitService {
   async toggleScreenShare(enabled: boolean) {
     try {
       await this.room.localParticipant.setScreenShareEnabled(enabled);
-
-      useCallStore.setState({
-        isScreenSharing: enabled,
-      });
+      useCallStore.setState({ isScreenSharing: enabled });
       return true;
     } catch (error) {
-      console.error("Failed to screen share:", error);
+      console.error("Failed to toggle screen share:", error);
       return false;
     }
   }
@@ -163,15 +141,13 @@ export class LiveKitService {
   private setupEventListeners() {
     this.room
       .on(RoomEvent.Connected, async () => {
-        console.log("SFU ROOM CONNECTED");
+        console.log("✅ Connected to LiveKit room");
         this.handleExistingParticipants();
 
         if (this.options?.audio) {
-          console.log("🔊 Enabling mic after connected");
           await this.toggleAudio(true);
         }
         if (this.options?.video) {
-          console.log("🎥 Enabling camera after connected");
           await this.toggleVideo(true);
         }
       })
@@ -188,11 +164,10 @@ export class LiveKitService {
         this.options?.onTrackUnsubscribed?.(track, publication, participant);
       })
       .on(RoomEvent.ConnectionStateChanged, (state) => {
-        console.log("Connection state changed:", state);
+        console.log("🔄 Connection state:", state);
         this.options?.onConnectionStateChange?.(state);
       })
       .on(RoomEvent.LocalTrackPublished, (publication) => {
-        console.log(`Local track published: ${publication.trackSid}`);
         this.options?.onLocalTrackPublished?.(publication);
       })
       .on(RoomEvent.LocalTrackUnpublished, (publication) => {
@@ -208,7 +183,6 @@ export class LiveKitService {
     for (const participant of this.getParticipants()) {
       this.options?.onParticipantConnected?.(participant);
 
-      // Only handle tracks that are already subscribed
       participant.trackPublications.forEach(
         (publication: RemoteTrackPublication) => {
           if (publication.isSubscribed && publication.track) {

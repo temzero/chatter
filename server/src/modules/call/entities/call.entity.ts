@@ -3,8 +3,6 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  ManyToMany,
-  JoinTable,
   CreateDateColumn,
   UpdateDateColumn,
   JoinColumn,
@@ -54,12 +52,4 @@ export class Call {
 
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @ManyToMany(() => ChatMember, { eager: true })
-  @JoinTable({
-    name: 'call_members', // join table
-    joinColumn: { name: 'call_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'chat_member_id', referencedColumnName: 'id' },
-  })
-  participants: ChatMember[];
 }

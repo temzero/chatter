@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { callWebSocketService } from "../services/call.websocket.service";
 import { toast } from "react-toastify";
-import { LocalCallStatus } from "@/types/enums/LocalCallStatus";
+import { LocalCallStatus } from "@/types/enums/CallStatus";
 import { handleError } from "@/utils/handleError";
 import { useChatStore } from "@/stores/chatStore";
 import { ChatType } from "@/types/enums/ChatType";
@@ -13,37 +13,32 @@ import { useP2PCallStore } from "@/stores/callStore/p2pCallStore";
 import { useSFUCallStore } from "@/stores/callStore/sfuCallStore";
 import { P2PCallMember, SFUCallMember } from "@/types/store/callMember.type";
 import { useCallSounds } from "@/hooks/useCallSound";
+import { callService } from "@/services/callService";
 import {
-  CallResponse,
   CallActionResponse,
   RtcOfferResponse,
   RtcAnswerResponse,
   IceCandidateResponse,
   UpdateCallPayload,
-  CallMemberPayload,
+  IncomingCallResponse,
 } from "@/types/callPayload";
-import { callService } from "@/services/callService";
 
 export function useCallSocketListeners() {
   useCallSounds();
   useEffect(() => {
     const fetchPendingCalls = async () => {
       try {
-        const pendingCalls = await callService.getPendingCalls();
+        const pendingCalls: IncomingCallResponse[] =
+          await callService.getPendingCalls();
         console.log("Pending calls:", pendingCalls);
 
         if (pendingCalls?.length > 0) {
-          // ✅ Sort using createdAt instead of old timestamp
-          const sortedCalls = [...pendingCalls].sort(
-            (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
-
-          const mostRecentCall = sortedCalls[0];
+          // The server already returns newest first, so just take the first
+          const mostRecentCall = pendingCalls[0];
           handleIncomingCall(mostRecentCall);
 
-          if (sortedCalls.length > 1) {
-            toast.info(`You have ${sortedCalls.length - 1} more missed calls`);
+          if (pendingCalls.length > 1) {
+            toast.info(`You have ${pendingCalls.length - 1} more missed calls`);
           }
         }
       } catch (error) {
@@ -52,15 +47,14 @@ export function useCallSocketListeners() {
       }
     };
 
-    const handleIncomingCall = (callResponse: CallResponse) => {
+    const handleIncomingCall = (callResponse: IncomingCallResponse) => {
       console.log("handleIncomingCall", callResponse);
       useCallStore.setState({
-        id: callResponse.id,
-        chatId: callResponse.chat.id,
-        localCallStatus: LocalCallStatus.INCOMING,
+        chatId: callResponse.chatId,
         isVideoCall: callResponse.isVideoCall,
-        callerMemberId: callResponse.initiator.id,
         isGroupCall: callResponse.isGroupCall || false,
+        initiatorMemberId: callResponse.initiatorMemberId,
+        localCallStatus: LocalCallStatus.INCOMING,
       });
 
       useModalStore.getState().openModal(ModalType.CALL);
@@ -127,49 +121,21 @@ export function useCallSocketListeners() {
       }
     };
 
-    const handleCallMemberUpdated = (data: CallMemberPayload) => {
-      console.log("handleCallMemberUpdated");
-      const callStore = useCallStore.getState();
-
-      if (callStore.id === data.callId) {
-        // Delegate to appropriate store based on call type
-        callStore.updateCallMember(data);
-
-        // Optional: Show toast notification for state changes
-        if (data.isVideoEnabled !== undefined) {
-          const action = data.isVideoEnabled ? "enabled" : "disabled";
-          toast.info(`Member ${data.memberId} ${action} video`);
-        }
-        if (data.isMuted !== undefined) {
-          const action = data.isMuted ? "muted" : "unmuted";
-          toast.info(`Member ${data.memberId} ${action} microphone`);
-        }
-        if (data.isScreenSharing !== undefined) {
-          const action = data.isScreenSharing ? "started" : "stopped";
-          toast.info(`Member ${data.memberId} ${action} screen sharing`);
-        }
-      }
-    };
-
     // CALLEE -> CALLER
-    const handleCallAccepted = async (callResponse: CallResponse) => {
+    const handleCallAccepted = async (callResponse: CallActionResponse) => {
       console.log("handleCallAccepted");
 
       const callStore = useCallStore.getState();
       callStore.setLocalCallStatus(LocalCallStatus.CONNECTING);
 
-      if (callStore.chatId !== callResponse.chat.id) {
+      if (callStore.chatId !== callResponse.chatId) {
         console.warn("Accepted call does not match current call");
         return;
       }
 
       // Update call info in store
       useCallStore.setState({
-        id: callResponse.id,
-        chatId: callResponse.chat.id,
-        isVideoCall: callResponse.isVideoCall,
-        isGroupCall: callResponse.isGroupCall,
-        callerMemberId: callResponse.initiator.id,
+        chatId: callResponse.chatId,
         localCallStatus: LocalCallStatus.CONNECTED,
       });
 
@@ -186,7 +152,7 @@ export function useCallSocketListeners() {
           await p2pStore.sendP2POffer(member.memberId);
         } catch (err) {
           console.error("Failed to handle call acceptance:", err);
-          toast.error(`Failed to add ${callResponse.initiator.id} to call`);
+          toast.error(`Failed to add ${callResponse.memberId} to call`);
         }
       }
     };
@@ -369,7 +335,6 @@ export function useCallSocketListeners() {
     callWebSocketService.removeAllListeners();
     callWebSocketService.onIncomingCall(handleIncomingCall);
     callWebSocketService.onCallUpdated(handleUpdateCall);
-    callWebSocketService.onCallMemberUpdated(handleCallMemberUpdated);
     callWebSocketService.onCallAccepted(handleCallAccepted);
     callWebSocketService.onCallRejected(handleCallRejected);
     callWebSocketService.onHangup(handleHangUp);

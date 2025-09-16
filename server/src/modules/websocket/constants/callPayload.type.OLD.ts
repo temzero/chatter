@@ -1,9 +1,14 @@
-import {
-  CallStatus,
-  PendingCallStatus,
-} from 'src/modules/call/type/callStatus';
+import { CallStatus } from 'src/modules/call/type/callStatus';
 
 // -------------------- Shared --------------------
+
+// Used for both request and response when initiating a call
+export interface InitiateCallPayload {
+  chatId: string;
+  isVideoCall: boolean;
+  isGroupCall: boolean;
+  initiatorMemberId?: string;
+}
 
 // Update call session
 export interface UpdateCallPayload {
@@ -13,13 +18,17 @@ export interface UpdateCallPayload {
   callStatus?: CallStatus;
 }
 
-// -------------------- Requests --------------------
-
-export interface InitiateCallRequest {
+// Update call member info
+export interface CallMemberPayload {
+  memberId: string;
+  callId: string;
   chatId: string;
-  isVideoCall: boolean;
-  isGroupCall: boolean;
+  isVideoEnabled?: boolean;
+  isMuted?: boolean;
+  isScreenSharing?: boolean;
 }
+
+// -------------------- Requests --------------------
 
 // Action-level requests (accept, reject, hang up, etc.)
 export interface CallActionRequest {
@@ -59,17 +68,6 @@ export interface CallActionResponse {
   startedAt?: string;
   endedAt?: string;
   isCallerCancel?: boolean;
-}
-
-export interface IncomingCallResponse {
-  callId?: string; // optional, if no call entity exists yet
-  chatId: string; // room/chat identifier
-  status: PendingCallStatus; // DIALING or IN_PROGRESS
-  participantsCount: number; // number of participants in the room
-  initiatorMemberId?: string; // optional if known
-  isVideoCall?: boolean; // optional if known
-  isGroupCall?: boolean; // optional if known
-  startedAt?: Date; // optional if known
 }
 
 // RTC / SFU signaling responses

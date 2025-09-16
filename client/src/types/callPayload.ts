@@ -1,74 +1,57 @@
-import { CallStatus } from "./enums/CallStatus";
-import { ChatResponse } from "./responses/chat.response";
-import { ChatMember } from "./responses/chatMember.response";
-// -------------------- Requests --------------------
+import { CallStatus, PendingCallStatus } from "./enums/CallStatus";
 
-export interface InitiateCallRequest {
-  chatId: string; // still needed: call always starts in a chat
+// -------------------- Shared --------------------
+
+// Used for both request and response when initiating a call
+export interface InitiateCallPayload {
+  chatId: string;
   isVideoCall: boolean;
   isGroupCall: boolean;
+  initiatorMemberId?: string;
 }
 
+// Update call session
 export interface UpdateCallPayload {
-  callId: string; // ✅ identify call session
+  callId: string;
   chatId: string;
   isVideoCall?: boolean;
   callStatus?: CallStatus;
 }
 
-export interface CallMemberPayload {
+// -------------------- Requests --------------------
+
+// Action-level requests (accept, reject, hang up, etc.)
+export interface CallActionRequest {
   callId: string;
   chatId: string;
-  memberId: string;
-  isVideoEnabled?: boolean;
-  isMuted?: boolean;
-  isScreenSharing?: boolean;
-}
-
-export interface CallActionRequest {
-  callId: string; // ✅ session-level action
-  chatId: string;
-  memberId?: string; // who performs the action
   isCallerCancel?: boolean;
 }
 
-// RTC / SFU signaling
+// RTC / SFU signaling requests
 export interface RtcOfferRequest {
-  callId: string; // ✅ scoped to call
+  callId: string;
   chatId: string;
   offer: RTCSessionDescriptionInit;
 }
 
 export interface RtcAnswerRequest {
-  callId: string; // ✅ scoped to call
+  callId: string;
   chatId: string;
   answer: RTCSessionDescriptionInit;
 }
 
 export interface IceCandidateRequest {
-  callId: string; // ✅ scoped to call
+  callId: string;
   chatId: string;
   candidate: RTCIceCandidateInit;
 }
 
 // -------------------- Responses --------------------
 
-export interface CallResponse {
-  id: string; // server sends "id"
-  chat: ChatResponse;
-  status: CallStatus;
-  isVideoCall: boolean;
-  isGroupCall: boolean;
-  initiator: ChatMember;
-  startedAt: string; // ISO string
-  endedAt?: string | null;
-  updatedAt?: string;
-  createdAt: string;
-  participants: ChatMember[];
-}
-
+// General per-member call action response
 export interface CallActionResponse {
-  callId: string; // ✅ main key
+  callId?: string;
+  chatId: string;
   memberId: string;
   status?: CallStatus;
   createdAt?: string;
@@ -77,21 +60,32 @@ export interface CallActionResponse {
   isCallerCancel?: boolean;
 }
 
+export interface IncomingCallResponse {
+  callId?: string; // optional, if no call entity exists yet
+  chatId: string; // room/chat identifier
+  status: PendingCallStatus; // DIALING or IN_PROGRESS
+  participantsCount: number; // number of participants in the room
+  initiatorMemberId?: string; // optional if known
+  isVideoCall?: boolean; // optional if known
+  isGroupCall?: boolean; // optional if known
+  startedAt?: Date; // optional if known
+}
+
 // RTC / SFU signaling responses
 export interface RtcOfferResponse {
-  callId: string; // ✅ main key
+  callId: string;
   offer: RTCSessionDescriptionInit;
   memberId: string;
 }
 
 export interface RtcAnswerResponse {
-  callId: string; // ✅ main key
+  callId: string;
   answer: RTCSessionDescriptionInit;
   memberId: string;
 }
 
 export interface IceCandidateResponse {
-  callId: string; // ✅ main key
+  callId: string;
   candidate: RTCIceCandidateInit;
   memberId: string;
 }

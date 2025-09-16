@@ -3,7 +3,7 @@ import { devtools } from "zustand/middleware";
 import { LiveKitService } from "@/services/liveKitService";
 import { SFUCallMember } from "@/types/store/callMember.type";
 import { useCallStore } from "./callStore";
-import { LocalCallStatus } from "@/types/enums/LocalCallStatus";
+import { LocalCallStatus } from "@/types/enums/CallStatus";
 import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
 import { callService } from "@/services/callService";
 import { getMyChatMember, getMyChatMemberId } from "../chatMemberStore";
@@ -492,24 +492,24 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
 
       get().updateSFUMember(updates);
 
-      const callStore = useCallStore.getState();
-      const callId = callStore.id;
-      const chatId = callStore.chatId;
+      // const callStore = useCallStore.getState();
+      // const callId = callStore.id;
+      // const chatId = callStore.chatId;
 
-      // Only emit server update if it's your own member and IDs exist
-      if (!callId || !chatId) return;
+      // // Only emit server update if it's your own member and IDs exist
+      // if (!callId || !chatId) return;
 
-      const myMemberId = await getMyChatMemberId(chatId);
-      if (participant?.identity === myMemberId) {
-        callWebSocketService.updateCallMember({
-          callId, // ✅ required
-          chatId,
-          memberId: myMemberId,
-          isMuted: updates.isMuted,
-          isVideoEnabled: updates.isVideoEnabled,
-          isScreenSharing: updates.isScreenSharing,
-        });
-      }
+      // const myMemberId = await getMyChatMemberId(chatId);
+      // if (participant?.identity === myMemberId) {
+      //   callWebSocketService.updateCallMember({
+      //     callId, // ✅ required
+      //     chatId,
+      //     memberId: myMemberId,
+      //     isMuted: updates.isMuted,
+      //     isVideoEnabled: updates.isVideoEnabled,
+      //     isScreenSharing: updates.isScreenSharing,
+      //   });
+      // }
     },
 
     handleSFUTrackUnsubscribed: async (
@@ -539,25 +539,25 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
 
       get().updateSFUMember(updates);
 
-      const callStore = useCallStore.getState();
-      const callId = callStore.id;
-      const chatId = callStore.chatId;
+      // const callStore = useCallStore.getState();
+      // const callId = callStore.id;
+      // const chatId = callStore.chatId;
 
-      // Only emit server update if IDs exist
-      if (!callId || !chatId) return;
+      // // Only emit server update if IDs exist
+      // if (!callId || !chatId) return;
 
-      // Only emit server update if it's your own member
-      const myMemberId = await getMyChatMemberId(chatId);
-      if (participant?.identity === myMemberId) {
-        callWebSocketService.updateCallMember({
-          callId, // ✅ required
-          chatId,
-          memberId: myMemberId,
-          isMuted: updates.isMuted,
-          isVideoEnabled: updates.isVideoEnabled,
-          isScreenSharing: updates.isScreenSharing,
-        });
-      }
+      // // Only emit server update if it's your own member
+      // const myMemberId = await getMyChatMemberId(chatId);
+      // if (participant?.identity === myMemberId) {
+      //   callWebSocketService.updateCallMember({
+      //     callId, // ✅ required
+      //     chatId,
+      //     memberId: myMemberId,
+      //     isMuted: updates.isMuted,
+      //     isVideoEnabled: updates.isVideoEnabled,
+      //     isScreenSharing: updates.isScreenSharing,
+      //   });
+      // }
     },
 
     // ========== MEDIA CONTROLS ==========
@@ -574,31 +574,31 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
         if (shouldUnmute) {
           await liveKitService.toggleAudio(true);
           useCallStore.setState({ isMuted: false });
-          callWebSocketService.updateCallMember({
-            callId,
-            chatId,
-            memberId: myMemberId,
-            isMuted: false,
-          });
+          // callWebSocketService.updateCallMember({
+          //   callId,
+          //   chatId,
+          //   memberId: myMemberId,
+          //   isMuted: false,
+          // });
         } else {
           await liveKitService.toggleAudio(false);
           useCallStore.setState({ isMuted: true });
-          callWebSocketService.updateCallMember({
-            callId,
-            chatId,
-            memberId: myMemberId,
-            isMuted: true,
-          });
+          // callWebSocketService.updateCallMember({
+          //   callId,
+          //   chatId,
+          //   memberId: myMemberId,
+          //   isMuted: true,
+          // });
         }
       } catch (error) {
         console.error("Error in toggleAudio:", error);
         useCallStore.setState({ isMuted: true });
-        callWebSocketService.updateCallMember({
-          callId,
-          chatId,
-          memberId: myMemberId,
-          isMuted: true,
-        });
+        // callWebSocketService.updateCallMember({
+        //   callId,
+        //   chatId,
+        //   memberId: myMemberId,
+        //   isMuted: true,
+        // });
       }
     },
 
@@ -615,31 +615,31 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
         if (shouldTurnOn) {
           await liveKitService.toggleVideo(true);
           useCallStore.setState({ isVideoEnabled: true });
-          callWebSocketService.updateCallMember({
-            callId,
-            chatId,
-            memberId: myMemberId,
-            isVideoEnabled: true,
-          });
+          // callWebSocketService.updateCallMember({
+          //   callId,
+          //   chatId,
+          //   memberId: myMemberId,
+          //   isVideoEnabled: true,
+          // });
         } else {
           await liveKitService.toggleVideo(false);
           useCallStore.setState({ isVideoEnabled: false });
-          callWebSocketService.updateCallMember({
-            callId,
-            chatId,
-            memberId: myMemberId,
-            isVideoEnabled: false,
-          });
+          // callWebSocketService.updateCallMember({
+          //   callId,
+          //   chatId,
+          //   memberId: myMemberId,
+          //   isVideoEnabled: false,
+          // });
         }
       } catch (error) {
         console.error("Error in toggleVideo (SFU):", error);
         useCallStore.setState({ isVideoEnabled: false });
-        callWebSocketService.updateCallMember({
-          callId,
-          chatId,
-          memberId: myMemberId,
-          isVideoEnabled: false,
-        });
+        // callWebSocketService.updateCallMember({
+        //   callId,
+        //   chatId,
+        //   memberId: myMemberId,
+        //   isVideoEnabled: false,
+        // });
       }
     },
 
@@ -656,31 +656,31 @@ export const useSFUCallStore = create<SFUState & SFUActions>()(
         if (shouldStart) {
           await liveKitService.toggleScreenShare(true);
           useCallStore.setState({ isScreenSharing: true });
-          callWebSocketService.updateCallMember({
-            callId,
-            chatId,
-            memberId: myMemberId,
-            isScreenSharing: true,
-          });
+          // callWebSocketService.updateCallMember({
+          //   callId,
+          //   chatId,
+          //   memberId: myMemberId,
+          //   isScreenSharing: true,
+          // });
         } else {
           await liveKitService.toggleScreenShare(false);
           useCallStore.setState({ isScreenSharing: false });
-          callWebSocketService.updateCallMember({
-            callId,
-            chatId,
-            memberId: myMemberId,
-            isScreenSharing: false,
-          });
+          // callWebSocketService.updateCallMember({
+          //   callId,
+          //   chatId,
+          //   memberId: myMemberId,
+          //   isScreenSharing: false,
+          // });
         }
       } catch (error) {
         console.error("Error toggling screen share:", error);
         useCallStore.setState({ isScreenSharing: false });
-        callWebSocketService.updateCallMember({
-          callId,
-          chatId,
-          memberId: myMemberId,
-          isScreenSharing: false,
-        });
+        // callWebSocketService.updateCallMember({
+        //   callId,
+        //   chatId,
+        //   memberId: myMemberId,
+        //   isScreenSharing: false,
+        // });
       }
     },
 

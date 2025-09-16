@@ -1,9 +1,22 @@
 export enum CallStatus {
-  DIALING = "dialing", // Caller initiated, waiting for answer
-  IN_PROGRESS = "in_progress", // Call is active / ongoing
-  COMPLETED = "completed", // Call ended normally
-
-  DECLINED = "declined", // Callee rejected the call
+  COMPLETED = "completed",
+  DECLINED = "declined",
   MISSED = "missed",
-  FAILED = "failed", // Call failed due to error/network
+  FAILED = "failed",
+}
+
+export enum PendingCallStatus {
+  DIALING = "dialing",
+  IN_PROGRESS = "in_progress",
+}
+
+export enum LocalCallStatus {
+  CONNECTING = "connecting",
+  CONNECTED = "connected",
+  INCOMING = "incoming",
+  OUTGOING = "outgoing",
+  CANCELED = "canceled",
+  REJECTED = "rejected",
+  ENDED = "ended",
+  ERROR = "error",
 }
