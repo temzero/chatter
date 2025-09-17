@@ -1,11 +1,10 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { VideoStream } from "./VideoStream";
 import { VoiceStream } from "./VoiceStream";
 import { VoiceStreamWithVisualizer } from "./VoiceStreamWithVisualizer";
 import { Avatar } from "../../avatar/Avatar";
 import { VoiceVisualizer } from "../../VoiceVisualizer";
-import { Participant } from "livekit-client";
-import { useRemoteTracks } from "@/hooks/mediaStreams/useRemoteTracks";
+import { Participant, RemoteTrack, Track } from "livekit-client";
 
 interface CallMemberProps {
   participant: Participant;
@@ -18,12 +17,8 @@ const CallMember = ({
   showVoiceVisualizer = true,
   className = "",
 }: CallMemberProps) => {
-  // Use the custom hook for streams
-  const { videoStream, audioStream, screenStream } =
-    useRemoteTracks(participant);
-
   // Parse metadata from participant
-  const participantMetadata = React.useMemo(() => {
+  const participantMetadata = useMemo(() => {
     try {
       return participant.metadata ? JSON.parse(participant.metadata) : {};
     } catch (error) {
@@ -32,15 +27,43 @@ const CallMember = ({
     }
   }, [participant.metadata]);
 
-  // Get avatarUrl and name
+  // Get avatarUrl and name directly from metadata
   const avatarUrl = participantMetadata.avatarUrl;
-  const displayName =
-    participant.name || participant.identity || "Unknown User";
+  const displayName = useMemo(() => {
+    // Use the name from LiveKit participant (which comes from token)
+    return participant.name || participant.identity || "Unknown User";
+  }, [participant.name, participant.identity]);
+
+  function getRemoteTrack(
+    participant: Participant,
+    source: Track.Source
+  ): RemoteTrack | null {
+    const pub = Array.from(participant.trackPublications.values()).find(
+      (p) => p.source === source
+    );
+    return pub?.track instanceof RemoteTrack ? pub.track : null;
+  }
+
+  // Extract tracks from participant
+  const audioTrack = useMemo(
+    () => getRemoteTrack(participant, Track.Source.Microphone),
+    [participant]
+  );
+
+  const videoTrack = useMemo(
+    () => getRemoteTrack(participant, Track.Source.Camera),
+    [participant]
+  );
+
+  const screenTrack = useMemo(
+    () => getRemoteTrack(participant, Track.Source.ScreenShare),
+    [participant]
+  );
 
   // Derived states
-  const hasVideo = !!(videoStream || screenStream);
-  const isMuted = !audioStream;
-  const isShowingScreen = !!screenStream;
+  const hasVideo = !!(videoTrack || screenTrack);
+  const isMuted = !audioTrack;
+  const isShowingScreen = !!screenTrack;
 
   return (
     <div
@@ -59,14 +82,14 @@ const CallMember = ({
         <>
           {/* Video or screen share */}
           <VideoStream
-            stream={screenStream || videoStream!}
+            stream={screenTrack || videoTrack!}
             className="absolute inset-0 w-full h-full object-cover z-0"
           />
 
           {/* Audio with visualizer */}
-          {audioStream && (
+          {audioTrack && (
             <VoiceStreamWithVisualizer
-              stream={audioStream}
+              stream={audioTrack}
               muted={isMuted}
               showVisualizer={showVoiceVisualizer}
               visualizerWidth={200}
@@ -85,13 +108,13 @@ const CallMember = ({
       ) : (
         // Audio-only participant
         <div className="flex flex-col gap-2 items-center justify-center p-4 relative">
-          {audioStream && <VoiceStream stream={audioStream} muted={isMuted} />}
+          {audioTrack && <VoiceStream stream={audioTrack} muted={isMuted} />}
 
           <div className="relative flex items-center justify-center">
-            {showVoiceVisualizer && audioStream && !isMuted && (
+            {showVoiceVisualizer && audioTrack && !isMuted && (
               <div className="absolute inset-0 flex items-center justify-center">
                 <VoiceVisualizer
-                  stream={audioStream}
+                  stream={audioTrack}
                   isMuted={isMuted}
                   size={101}
                   circleColor="grey"
@@ -100,8 +123,8 @@ const CallMember = ({
               </div>
             )}
             <Avatar
-              avatarUrl={avatarUrl}
-              name={displayName}
+              avatarUrl={avatarUrl} // Use from metadata
+              name={displayName} // Use from participant
               size="24"
               className="z-10 relative"
             />

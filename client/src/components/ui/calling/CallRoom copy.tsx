@@ -6,40 +6,28 @@ import { CallHeader } from "./components/CallHeader";
 import { Timer } from "../Timer";
 import { VoiceVisualizerButton } from "../VoiceVisualizerBtn";
 import { useCallStore } from "@/stores/callStore/callStore";
+import { useCallMembers } from "@/stores/callStore/helpers/useCallMember";
+import { useLocalStreams } from "@/hooks/mediaStreams/useLocalStreams";
 import CallMember from "./components/CallMember";
-import { useLocalTracks } from "@/hooks/mediaStreams/useLocalTracks";
 
 export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
+  const isMuted = useCallStore((state) => state.isMuted);
+  const isVideoEnabled = useCallStore((state) => state.isVideoEnabled);
   const startedAt = useCallStore((state) => state.startedAt);
   const toggleLocalVoice = useCallStore((state) => state.toggleLocalVoice);
   const toggleLocalVideo = useCallStore((state) => state.toggleLocalVideo);
   const endCall = useCallStore((state) => state.endCall);
   const closeCallModal = useCallStore((state) => state.closeCallModal);
-  const room = useCallStore((state) => state.getLiveKitRoom());
 
-  const { localVideoStream, localAudioStream } = useLocalTracks();
+  // Use the new hook to get local streams
+  const { localVideoStream, localAudioStream } = useLocalStreams();
 
-  if (!room) {
-    console.warn("LiveKit room is not available");
-    return null;
-  }
+  // Get call members based on architecture
+  const callMembers = useCallMembers();
 
-  const callParticipants = Array.from(room.remoteParticipants.values());
-  const memberCount = callParticipants.length;
+  if (!chat) return null;
 
-  const localParticipant = room.localParticipant;
-  const isMuted = !localParticipant?.isMicrophoneEnabled;
-  const isVideoEnabled = !!localParticipant?.isCameraEnabled;
-
-  const handleHangUp = async () => {
-    if (localParticipant) {
-      localParticipant.getTrackPublications().forEach((pub) => {
-        pub.track?.mediaStreamTrack?.stop();
-      });
-    }
-
-    await room.disconnect();
-
+  const handleHangUp = () => {
     callWebSocketService.hangup({ chatId: chat.id });
     endCall();
     closeCallModal();
@@ -47,22 +35,20 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
 
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center text-white">
-      {memberCount > 0 ? (
+      {callMembers.length > 0 ? (
         <div className="relative w-full h-full bg-black">
+          {/* Display all call members */}
           <div
             className={`w-full h-full grid gap-2 auto-rows-fr ${
-              memberCount === 1
+              callMembers.length === 1
                 ? "grid-cols-1"
-                : memberCount === 2
+                : callMembers.length === 2
                 ? "grid-cols-1 sm:grid-cols-2"
                 : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
             }`}
           >
-            {callParticipants.map((participant) => (
-              <CallMember
-                key={participant.identity}
-                participant={participant}
-              />
+            {callMembers.map((member) => (
+              <CallMember key={member.memberId} member={member} />
             ))}
           </div>
         </div>
@@ -73,6 +59,7 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
         />
       )}
 
+      {/* Local video overlay */}
       {localVideoStream && isVideoEnabled && (
         <div className="absolute bottom-4 right-4 z-20">
           <VideoStream
@@ -86,16 +73,20 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
         </div>
       )}
 
+      {/* Top overlay with timer & name */}
       <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10">
         <p className="text-sm truncate max-w-[200px]">{chat.name}</p>
         <div className="flex items-center gap-2">
-          {memberCount > 1 && (
-            <span className="text-xs text-gray-400">{memberCount} members</span>
+          {callMembers.length > 1 && (
+            <span className="text-xs text-gray-400">
+              {callMembers.length} members
+            </span>
           )}
           <Timer startTime={startedAt} />
         </div>
       </div>
 
+      {/* Bottom controls */}
       <div className="absolute bottom-4 left-0 right-0 z-10">
         <div className="flex justify-center gap-6">
           <Button
@@ -108,7 +99,7 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
             icon={isVideoEnabled ? "videocam" : "videocam_off"}
             isIconFilled={isVideoEnabled}
             isRoundedFull
-            onClick={() => toggleLocalVideo()}
+            onClick={toggleLocalVideo}
           />
           <VoiceVisualizerButton
             variant="ghost"

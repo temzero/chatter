@@ -11,6 +11,7 @@ import {
   RtcOfferResponse,
   RtcAnswerRequest,
   UpdateCallPayload,
+  IncomingCallResponse,
 } from "@/types/callPayload";
 
 /**
@@ -32,7 +33,7 @@ export const callWebSocketService = {
   /**
    * Listen for incoming calls (BOTH)
    */
-  onIncomingCall(callback: (data: InitiateCallPayload) => void) {
+  onIncomingCall(callback: (data: IncomingCallResponse) => void) {
     webSocketService.on(CallEvent.INCOMING_CALL, callback);
   },
 

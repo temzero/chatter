@@ -1,4 +1,3 @@
-import { useCallStore } from "@/stores/callStore/callStore";
 import {
   Room,
   RoomEvent,
@@ -7,8 +6,6 @@ import {
   RemoteTrackPublication,
   ConnectionState,
   LocalTrackPublication,
-  createLocalAudioTrack,
-  createLocalVideoTrack,
 } from "livekit-client";
 
 export interface LiveKitServiceOptions {
@@ -65,61 +62,37 @@ export class LiveKitService {
     }
   }
 
-  async toggleAudio(enabled: boolean) {
+  async setMicrophoneEnabled(enabled: boolean): Promise<boolean> {
     try {
-      if (enabled) {
-        const hasMic = this.room.localParticipant
-          .getTrackPublications()
-          .find((p) => p.track?.kind === "audio");
-
-        if (!hasMic) {
-          const audioTrack = await createLocalAudioTrack();
-          await this.room.localParticipant.publishTrack(audioTrack);
-        }
-      }
-
       await this.room.localParticipant.setMicrophoneEnabled(enabled);
-      useCallStore.setState({ isMuted: !enabled });
       return true;
     } catch (error) {
-      console.error("Failed to toggle audio:", error);
+      console.error("Failed to set microphone:", error);
       return false;
     }
   }
 
-  async toggleVideo(enabled: boolean) {
+  async setCameraEnabled(enabled: boolean): Promise<boolean> {
     try {
-      if (enabled) {
-        const hasCam = this.room.localParticipant
-          .getTrackPublications()
-          .find((p) => p.track?.kind === "video");
-
-        if (!hasCam) {
-          const videoTrack = await createLocalVideoTrack();
-          await this.room.localParticipant.publishTrack(videoTrack);
-        }
-      }
-
       await this.room.localParticipant.setCameraEnabled(enabled);
-      useCallStore.setState({ isVideoEnabled: enabled });
       return true;
     } catch (error) {
-      console.error("Failed to toggle video:", error);
+      console.error("Failed to set camera:", error);
       return false;
     }
   }
 
-  async toggleScreenShare(enabled: boolean) {
+  async setScreenShareEnabled(enabled: boolean): Promise<boolean> {
     try {
       await this.room.localParticipant.setScreenShareEnabled(enabled);
-      useCallStore.setState({ isScreenSharing: enabled });
       return true;
     } catch (error) {
-      console.error("Failed to toggle screen share:", error);
+      console.error("Failed to set screen share:", error);
       return false;
     }
   }
 
+  // --- Getters ---
   getParticipants() {
     return Array.from(this.room.remoteParticipants.values());
   }
@@ -145,10 +118,10 @@ export class LiveKitService {
         this.handleExistingParticipants();
 
         if (this.options?.audio) {
-          await this.toggleAudio(true);
+          await this.setMicrophoneEnabled(true);
         }
         if (this.options?.video) {
-          await this.toggleVideo(true);
+          await this.setCameraEnabled(true);
         }
       })
       .on(RoomEvent.ParticipantConnected, (participant) => {

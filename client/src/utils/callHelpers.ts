@@ -1,5 +1,5 @@
-import { CallResponse, CallHistoryResponse } from "@/types/callPayload";
-import { CallStatus } from "@/types/enums/CallStatus";
+import { CallActionResponse, IncomingCallResponse } from "@/types/callPayload";
+import { CallStatus, PendingCallStatus } from "@/types/enums/CallStatus";
 
 // 🔹 Format duration from ms → "Xs", "1m12s", "1h20m"
 export const formatDuration = (ms: number) => {
@@ -13,11 +13,13 @@ export const formatDuration = (ms: number) => {
   return `${seconds}s`;
 };
 
-export const getCallText = (call: CallResponse | CallHistoryResponse) => {
+export const getCallText = (
+  call: CallActionResponse | IncomingCallResponse
+) => {
   switch (call.status) {
-    case CallStatus.DIALING:
+    case PendingCallStatus.DIALING:
       return "Calling...";
-    case CallStatus.IN_PROGRESS:
+    case PendingCallStatus.IN_PROGRESS:
       return "Call in progress";
     case CallStatus.COMPLETED: {
       if (call.startedAt && call.endedAt) {
@@ -38,7 +40,9 @@ export const getCallText = (call: CallResponse | CallHistoryResponse) => {
   }
 };
 
-export const getCallClass = (call: CallResponse | CallHistoryResponse) => {
+export const getCallClass = (
+  call: CallActionResponse | IncomingCallResponse
+) => {
   switch (call.status) {
     case CallStatus.COMPLETED:
       return "text-yellow-600";
@@ -51,11 +55,13 @@ export const getCallClass = (call: CallResponse | CallHistoryResponse) => {
   }
 };
 
-export const getCallIcon = (call: CallResponse | CallHistoryResponse) => {
+export const getCallIcon = (
+  call: CallActionResponse | IncomingCallResponse
+) => {
   switch (call.status) {
-    case CallStatus.DIALING:
+    case PendingCallStatus.DIALING:
       return "ring_volume";
-    case CallStatus.IN_PROGRESS:
+    case PendingCallStatus.IN_PROGRESS:
       return "phone_in_talk";
     case CallStatus.COMPLETED:
       return "call_end";

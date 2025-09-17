@@ -22,7 +22,7 @@ export interface UpdateCallPayload {
 
 // Action-level requests (accept, reject, hang up, etc.)
 export interface CallActionRequest {
-  callId: string;
+  callId?: string;
   chatId: string;
   isCallerCancel?: boolean;
 }

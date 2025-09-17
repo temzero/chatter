@@ -8,19 +8,19 @@ export const callService = {
   /**
    * Request a LiveKit token from backend
    */
+  // Frontend
   async getToken(
     roomName: string,
-    memberId: string,
-    participantName?: string
+    participantName?: string,
+    avatarUrl?: string
   ): Promise<string | undefined> {
     try {
       const { data } = await API.post("/calls/token", {
         roomName,
-        memberId,
         participantName,
+        avatarUrl,
       });
 
-      // Access token through data.payload.token instead of data.token
       if (!data.payload?.token) {
         throw new Error("No token returned from server");
       }

@@ -5,16 +5,23 @@ import { BounceLoader } from "react-spinners";
 import { Button } from "../Button";
 import { VideoStream } from "./components/VideoStream";
 import { useCallStore } from "@/stores/callStore/callStore";
-import { useLocalStreams } from "@/hooks/useLocalStreams";
+import { useLocalPreviewVideoTrack } from "@/hooks/mediaStreams/useLocalPreviewVideoTrack";
 
 export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
   const isVideoCall = useCallStore((state) => state.isVideoCall);
   const isVideoEnabled = useCallStore((state) => state.isVideoEnabled);
-  const toggleLocalVideo = useCallStore((state) => state.toggleLocalVideo);
-  const { localVideoStream } = useLocalStreams();
+
+  // Only initialize local preview video if it is a video call
+  const {
+    videoStream: localVideoStream,
+    isVideoEnabled: isPreviewEnabled,
+    toggleVideo,
+  } = isVideoCall
+    ? // eslint-disable-next-line react-hooks/rules-of-hooks
+      useLocalPreviewVideoTrack()
+    : { videoStream: null, isVideoEnabled: false, toggleVideo: () => {} };
 
   const acceptCall = () => {
-    // Set the camera state before accepting call
     useCallStore.getState().acceptCall();
   };
 
@@ -23,35 +30,10 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
     useCallStore.getState().closeCallModal();
   };
 
-  // const toggleLocalCamera = async () => {
-  //   const newVideoState = !isVideoEnabled;
-  //   useCallStore.setState({ isVideoEnabled: newVideoState });
-
-  //   if (newVideoState) {
-  //     try {
-  //       const stream = await getVideoStream().catch((error) => {
-  //         if (error.name === "NotReadableError") {
-  //           toast.warning("Camera in use. Retrying with fallback...");
-  //         }
-  //         throw error;
-  //       });
-  //       useCallStore.getState().setLocalVideoStream(stream);
-  //     } catch (error) {
-  //       console.error("Failed to enable camera:", error);
-  //       useCallStore.setState({ isVideoEnabled: false });
-  //     }
-  //   } else {
-  //     if (localVideoStream) {
-  //       localVideoStream.getTracks().forEach((track) => track.stop());
-  //       useCallStore.getState().setLocalVideoStream(null);
-  //     }
-  //   }
-  // };
-
   return (
     <div className="flex flex-col items-center w-full h-full">
       {/* Background - Avatar or Webcam */}
-      {isVideoCall && localVideoStream && isVideoEnabled && (
+      {isVideoCall && localVideoStream && isPreviewEnabled && (
         <div className="absolute inset-0 overflow-hidden z-0 opacity-70 w-full h-full">
           <VideoStream
             stream={localVideoStream}
@@ -63,9 +45,7 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
 
       {/* Header with avatar */}
       <div id="calling-title" className="flex flex-col items-center z-50">
-        {/* Avatar Section */}
         <CallHeader chat={chat} />
-        {/* Title */}
         <p className="text-sm text-gray-400 mt-1">
           Incoming {isVideoCall ? "video" : "voice"} call
         </p>
@@ -88,20 +68,16 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
                     : "videocam_off"
                   : "call"
               }
-              onClick={toggleLocalVideo}
+              onClick={toggleVideo}
               className="material-symbols-outlined text-6xl flex items-center justify-center"
               initial={{ opacity: 0, scale: 0.1 }}
               animate={{
                 opacity: 1,
                 scale: 1,
-                x: [0, -5, 5, -5, 5, 0], // vibration only
+                x: [0, -5, 5, -5, 5, 0],
               }}
               transition={{
-                x: {
-                  duration: 0.5,
-                  repeat: Infinity,
-                  repeatDelay: 1,
-                },
+                x: { duration: 0.5, repeat: Infinity, repeatDelay: 1 },
                 opacity: { duration: 0.2 },
                 scale: { duration: 0.2 },
               }}

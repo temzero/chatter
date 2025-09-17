@@ -21,29 +21,17 @@ export class LivekitService {
     this.roomService = new RoomServiceClient(url, this.apiKey, this.apiSecret);
   }
 
-  // async createRoom(roomName: string, metadata?: Record<string, any>) {
-  //   try {
-  //     const room = await this.roomService.createRoom({
-  //       name: roomName,
-  //       metadata: metadata ? JSON.stringify(metadata) : undefined,
-  //     });
-  //     return room;
-  //   } catch (err) {
-  //     throw new InternalServerErrorException(
-  //       err instanceof Error ? err.message : 'Failed to create LiveKit room',
-  //     );
-  //   }
-  // }
-
   async generateLivekitToken(
     roomName: string,
     userId: string,
     participantName?: string,
+    avatarUrl?: string,
   ): Promise<string> {
     try {
       const at = new AccessToken(this.apiKey, this.apiSecret, {
         identity: userId,
         name: participantName,
+        metadata: avatarUrl ? JSON.stringify({ avatarUrl }) : undefined,
       });
 
       at.addGrant(<VideoGrant>{

@@ -197,14 +197,16 @@ export class CallController {
     body: {
       roomName: string;
       participantName?: string;
+      avatarUrl?: string;
     },
   ): Promise<SuccessResponse<{ token: string }>> {
     try {
-      const { roomName, participantName } = body;
+      const { roomName, participantName, avatarUrl } = body;
       const token = await this.liveKitService.generateLivekitToken(
         roomName,
         userId,
         participantName,
+        avatarUrl,
       );
       return new SuccessResponse({ token }, 'LiveKit token generated');
     } catch (error: unknown) {
