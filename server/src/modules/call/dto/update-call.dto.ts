@@ -2,8 +2,9 @@ import { CallStatus } from '../type/callStatus';
 
 export class UpdateCallDto {
   isVideoCall?: boolean;
-  isGroupCall?: boolean;
   status?: CallStatus;
+  startedAt?: Date;
   endedAt?: Date;
   duration?: number;
+  maxParticipants?: number;
 }

@@ -1,5 +1,4 @@
 // src/calls/call.gateway.ts
-import { NotFoundException } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -23,17 +22,15 @@ import {
 } from '../constants/callPayload.type';
 import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
 import { WebsocketNotificationService } from '../services/websocket-notification.service';
-import { CallService } from 'src/modules/call/call.service';
-import { PendingCallStatus } from 'src/modules/call/type/callStatus';
-import { LivekitService } from 'src/modules/call/liveKit.service';
+import { CallStatus } from 'src/modules/call/type/callStatus';
+// import { CallService } from 'src/modules/call/call.service';
 
 @WebSocketGateway()
 export class CallGateway {
   constructor(
     private readonly websocketNotificationService: WebsocketNotificationService,
     private readonly chatMemberService: ChatMemberService,
-    private readonly callService: CallService,
-    private readonly liveKitService: LivekitService,
+    // private readonly callService: CallService,
   ) {}
 
   @SubscribeMessage(CallEvent.INITIATE_CALL)
@@ -50,14 +47,13 @@ export class CallGateway {
       );
 
     if (!initiatorMember) throw new Error('Initiator not found');
-
     // Instead of saving in DB, just create a lightweight response
     const response: IncomingCallResponse = {
+      // callId: call.id,
       chatId: payload.chatId,
-      isVideoCall: payload.isVideoCall,
-      isGroupCall: payload.isGroupCall,
-      status: PendingCallStatus.DIALING,
+      status: CallStatus.DIALING,
       initiatorMemberId: initiatorMember.id,
+      isVideoCall: payload.isVideoCall,
       participantsCount: 1,
     };
 
@@ -81,27 +77,15 @@ export class CallGateway {
   ) {
     const userId = client.data.userId;
 
-    const call = await this.callService.getLastCallByChatId(payload.chatId);
-    if (!call) {
-      throw new NotFoundException(
-        `No active call found for chat ${payload.chatId}`,
-      );
-    }
-
-    // persist update in DB
-    const updatedCall = await this.callService.updateCall(call.id, {
-      isVideoCall: payload.isVideoCall,
-      status: payload.callStatus, // optional: allow frontend to send status updates
-    });
+    // 🚫 No DB update here — this is ephemeral state only
 
     const responsePayload: UpdateCallPayload = {
-      callId: updatedCall.id,
+      callId: payload.callId, // rely on payload or generate from context
       chatId: payload.chatId,
-      isVideoCall: updatedCall.isVideoCall,
-      callStatus: updatedCall.status,
+      callStatus: payload.callStatus,
     };
 
-    // broadcast updated call to all members
+    // ✅ Broadcast updated call state to all chat members
     await this.websocketNotificationService.emitToChatMembers(
       payload.chatId,
       CallEvent.UPDATE_CALL,
@@ -167,7 +151,7 @@ export class CallGateway {
     );
   }
 
-  @SubscribeMessage(CallEvent.REJECT_CALL)
+  @SubscribeMessage(CallEvent.DECLINE_CALL)
   async handleCallReject(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: CallActionRequest,
@@ -183,8 +167,6 @@ export class CallGateway {
       throw new Error('User is not a member of this chat');
     }
 
-    // ✅ No DB call status update (since no call data exists yet)
-
     const response: CallActionResponse = {
       chatId: payload.chatId,
       memberId: member.id || userId,
@@ -193,7 +175,7 @@ export class CallGateway {
 
     await this.websocketNotificationService.emitToChatMembers(
       payload.chatId,
-      CallEvent.REJECT_CALL,
+      CallEvent.DECLINE_CALL,
       response,
       { senderId: userId, excludeSender: true },
     );

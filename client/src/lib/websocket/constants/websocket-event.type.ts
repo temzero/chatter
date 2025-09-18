@@ -42,7 +42,7 @@ export const enum CallEvent {
   UPDATE_CALL_MEMBER = "call:update-member", // 📞 BOTH: Update participant status
   ACCEPT_CALL = "call:accept", // 📞 BOTH: Accept an incoming call
   JOIN_CALL = "call:join", // 📞 BOTH: Join a call (P2P: rarely used, SFU: essential)
-  REJECT_CALL = "call:reject", // 📞 BOTH: Reject an incoming call
+  DECLINE_CALL = "call:declined", // 📞 BOTH: Reject an incoming call
   CANCEL_CALL = "call:cancel", // 📞 BOTH: Cancel outgoing call
   HANG_UP = "call:hang-up", // 📞 BOTH: Hang up from ongoing call
   END_CALL = "call:end", // 📞 BOTH: End call completely

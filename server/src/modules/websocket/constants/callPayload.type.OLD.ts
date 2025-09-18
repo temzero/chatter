@@ -6,7 +6,6 @@ import { CallStatus } from 'src/modules/call/type/callStatus';
 export interface InitiateCallPayload {
   chatId: string;
   isVideoCall: boolean;
-  isGroupCall: boolean;
   initiatorMemberId?: string;
 }
 

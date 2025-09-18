@@ -32,19 +32,16 @@ export class Call {
   @Column({ type: 'enum', enum: CallStatus, default: null })
   status: CallStatus;
 
-  @Column({ type: 'boolean', default: false })
-  isVideoCall: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  isGroupCall: boolean;
+  @Column({ type: 'int', default: 0 })
+  maxParticipants: number;
 
   @ManyToOne(() => ChatMember, { eager: true })
   initiator: ChatMember;
 
-  @CreateDateColumn()
-  startedAt: Date;
+  @Column({ type: 'timestamp', nullable: true })
+  startedAt?: Date;
 
-  @Column({ nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   endedAt?: Date;
 
   @CreateDateColumn()

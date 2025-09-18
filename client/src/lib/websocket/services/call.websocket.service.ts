@@ -105,7 +105,7 @@ export const callWebSocketService = {
    * Reject an incoming call (BOTH)
    */
   rejectCall(payload: CallActionRequest) {
-    webSocketService.emit(CallEvent.REJECT_CALL, payload);
+    webSocketService.emit(CallEvent.DECLINE_CALL, payload);
   },
 
   /**
@@ -113,7 +113,7 @@ export const callWebSocketService = {
    * (sent as a reject event with `isCallerCancel: true`)
    */
   cancelCall(payload: CallActionRequest) {
-    webSocketService.emit(CallEvent.REJECT_CALL, {
+    webSocketService.emit(CallEvent.DECLINE_CALL, {
       ...payload,
       isCallerCancel: true,
     });
@@ -125,7 +125,7 @@ export const callWebSocketService = {
   onCallRejected(
     callback: (data: CallActionResponse & { isCallerCancel?: boolean }) => void
   ) {
-    webSocketService.on(CallEvent.REJECT_CALL, callback);
+    webSocketService.on(CallEvent.DECLINE_CALL, callback);
   },
 
   /**
@@ -134,7 +134,7 @@ export const callWebSocketService = {
   offCallRejected(
     callback: (data: CallActionResponse & { isCallerCancel?: boolean }) => void
   ) {
-    webSocketService.off(CallEvent.REJECT_CALL, callback);
+    webSocketService.off(CallEvent.DECLINE_CALL, callback);
   },
 
   /**
@@ -239,7 +239,7 @@ export const callWebSocketService = {
     webSocketService.off(CallEvent.UPDATE_CALL_MEMBER);
     webSocketService.off(CallEvent.ACCEPT_CALL);
     webSocketService.off(CallEvent.JOIN_CALL);
-    webSocketService.off(CallEvent.REJECT_CALL);
+    webSocketService.off(CallEvent.DECLINE_CALL);
     webSocketService.off(CallEvent.HANG_UP);
 
     // WebRTC signaling events (P2P + SFU)

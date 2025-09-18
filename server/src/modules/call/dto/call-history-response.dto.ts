@@ -13,9 +13,6 @@ export class CallHistoryResponseDto {
   isVideoCall: boolean;
 
   @Expose()
-  isGroupCall: boolean;
-
-  @Expose()
   status: CallStatus;
 
   @Expose()

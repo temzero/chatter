@@ -1,4 +1,4 @@
-import { CallStatus, PendingCallStatus } from "./enums/CallStatus";
+import { CallStatus } from "./enums/CallStatus";
 
 // -------------------- Shared --------------------
 
@@ -6,7 +6,6 @@ import { CallStatus, PendingCallStatus } from "./enums/CallStatus";
 export interface InitiateCallPayload {
   chatId: string;
   isVideoCall: boolean;
-  isGroupCall: boolean;
   initiatorMemberId?: string;
 }
 
@@ -63,11 +62,10 @@ export interface CallActionResponse {
 export interface IncomingCallResponse {
   callId?: string; // optional, if no call entity exists yet
   chatId: string; // room/chat identifier
-  status: PendingCallStatus; // DIALING or IN_PROGRESS
+  status: CallStatus; // DIALING or IN_PROGRESS
   participantsCount: number; // number of participants in the room
   initiatorMemberId?: string; // optional if known
   isVideoCall?: boolean; // optional if known
-  isGroupCall?: boolean; // optional if known
   startedAt?: Date; // optional if known
 }
 

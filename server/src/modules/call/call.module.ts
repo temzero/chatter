@@ -8,6 +8,7 @@ import { MessageModule } from '../message/message.module';
 import { Chat } from '../chat/entities/chat.entity';
 import { ChatMemberModule } from '../chat-member/chat-member.module';
 import { LivekitService } from './liveKit.service';
+import { LivekitWebhookController } from './livekit.webhook.controller';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { LivekitService } from './liveKit.service';
     MessageModule,
     ChatMemberModule,
   ],
-  controllers: [CallController],
+  controllers: [CallController, LivekitWebhookController],
   providers: [CallService, LivekitService],
   exports: [CallService],
 })

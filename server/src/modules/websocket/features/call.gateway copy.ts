@@ -269,7 +269,7 @@
 //     );
 //   }
 
-//   @SubscribeMessage(CallEvent.REJECT_CALL)
+//   @SubscribeMessage(CallEvent.DECLINE_CALL)
 //   async handleCallReject(
 //     @ConnectedSocket() client: AuthenticatedSocket,
 //     @MessageBody() payload: CallActionRequest,
@@ -306,7 +306,7 @@
 
 //     await this.websocketNotificationService.emitToChatMembers(
 //       payload.chatId,
-//       CallEvent.REJECT_CALL,
+//       CallEvent.DECLINE_CALL,
 //       response,
 //       { senderId: userId, excludeSender: true },
 //     );

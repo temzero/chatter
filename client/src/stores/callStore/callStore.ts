@@ -15,12 +15,11 @@ import { Room } from "livekit-client";
 export interface CallState {
   liveKitService: LiveKitService | null;
 
-  id: string | null;
+  callId: string | null;
   chatId: string | null;
   initiatorMemberId?: string;
   localCallStatus: LocalCallStatus | null;
   isVideoCall: boolean;
-  isGroupCall: boolean;
   timeoutRef?: NodeJS.Timeout | null;
   startedAt?: Date;
   endedAt?: Date;
@@ -35,11 +34,11 @@ export interface CallState {
 
 export interface CallActions {
   // lifecycle
-  startCall: (
-    chatId: string,
-    opt?: { isVideoCall?: boolean; isGroupCall?: boolean }
-  ) => Promise<void>;
-  acceptCall: () => Promise<void>;
+  startCall: (chatId: string, opt?: { isVideoCall?: boolean }) => Promise<void>;
+  acceptCall: (options: {
+    isVoiceEnabled?: boolean;
+    isVideoEnabled?: boolean;
+  }) => Promise<void>;
   rejectCall: (isCancel?: boolean) => void;
   endCall: (opt?: {
     isCancel?: boolean;
@@ -57,35 +56,42 @@ export interface CallActions {
   getCallDuration: () => number;
   closeCallModal: () => void;
 
-  // SFU
-  connectToSFURoom: (url: string, token: string) => Promise<void>;
-  disconnectFromSFU: () => void;
+  // LiveKit
+  connectToLiveKitRoom: (
+    url: string,
+    token: string,
+    options: {
+      audio?: boolean;
+      video?: boolean;
+    }
+  ) => Promise<void>;
+  disconnectFromLiveKit: () => void;
   getLiveKitRoom: () => Room | null;
-  clearSFUState: () => void;
+  clearLiveKitState: () => void;
 }
 
 export const useCallStore = create<CallState & CallActions>()(
   devtools((set, get) => ({
     // ========== BASE STATE ==========
-    id: null,
+    liveKitService: null,
+    callId: null,
     chatId: null,
     localCallStatus: null,
     isVideoCall: false,
-    isGroupCall: false,
+    timeoutRef: null,
+    startedAt: undefined,
+    endedAt: undefined,
     error: null,
-    liveKitService: null,
 
     // ========== LIFECYCLE ==========
     startCall: async (chatId, opt) => {
       const isVideoCall = opt?.isVideoCall ?? false;
-      const isGroupCall = opt?.isGroupCall ?? false;
 
       try {
         // update base state
         set({
           chatId,
           isVideoCall,
-          isGroupCall,
           localCallStatus: LocalCallStatus.OUTGOING,
           startedAt: new Date(),
         });
@@ -104,14 +110,24 @@ export const useCallStore = create<CallState & CallActions>()(
         set({ liveKitService });
 
         const token = await getMyToken(chatId);
-        if (!token) return;
+        if (!token) {
+          console.warn("No token available for LiveKit");
+          set({
+            localCallStatus: LocalCallStatus.ERROR,
+            error: "permission_denied",
+          });
+          return;
+        }
 
-        await get().connectToSFURoom(import.meta.env.VITE_LIVEKIT_URL, token);
+        await get().connectToLiveKitRoom(
+          import.meta.env.VITE_LIVEKIT_URL,
+          token,
+          { audio: true, video: isVideoCall }
+        );
 
         callWebSocketService.initiateCall({
           chatId,
           isVideoCall,
-          isGroupCall: true,
         });
       } catch (err) {
         console.error("startCall error", err);
@@ -123,22 +139,41 @@ export const useCallStore = create<CallState & CallActions>()(
       }
     },
 
-    acceptCall: async () => {
-      const { chatId, id } = get();
-      if (!chatId || !id) return;
+    acceptCall: async (options?: {
+      isVoiceEnabled?: boolean;
+      isVideoEnabled?: boolean;
+    }) => {
+      const { callId, chatId } = get();
+      if (!callId || !chatId) return;
 
       try {
         set({ localCallStatus: LocalCallStatus.CONNECTING });
+
         const liveKitService = new LiveKitService();
         set({ liveKitService });
 
         const token = await getMyToken(chatId);
-        if (!token) return;
+        if (!token) {
+          console.warn("No token available for LiveKit");
+          set({
+            localCallStatus: LocalCallStatus.ERROR,
+            error: "permission_denied",
+          });
+          return;
+        }
 
-        await get().connectToSFURoom(import.meta.env.VITE_LIVEKIT_URL, token);
+        await get().connectToLiveKitRoom(
+          import.meta.env.VITE_LIVEKIT_URL,
+          token,
+          {
+            audio: options?.isVoiceEnabled ?? true,
+            video: options?.isVideoEnabled ?? get().isVideoCall,
+          }
+        );
+
         callWebSocketService.acceptCall({
           chatId,
-          callId: id,
+          callId,
           isCallerCancel: false,
         });
       } catch (err) {
@@ -148,31 +183,30 @@ export const useCallStore = create<CallState & CallActions>()(
     },
 
     rejectCall: (isCancel = false) => {
-      const { chatId, id } = get();
-      if (!chatId || !id) return;
+      const { chatId, callId } = get();
+      if (!chatId || !callId) return;
 
       callWebSocketService.rejectCall({
         chatId,
-        callId: id,
+        callId: callId,
         isCallerCancel: isCancel,
       });
-      get().disconnectFromSFU();
+      get().disconnectFromLiveKit();
 
       get().endCall({ isCancel });
     },
 
     endCall: async (opt = {}) => {
-      const { chatId, id, error } = get();
+      const { chatId, callId, error } = get();
 
       let status: CallStatus;
-      if (opt.isRejected) status = CallStatus.DECLINED;
-      else if (opt.isTimeout) status = CallStatus.MISSED;
+      if (opt.isRejected || opt.isTimeout) status = CallStatus.MISSED;
       else if (error) status = CallStatus.FAILED;
       else status = CallStatus.COMPLETED;
 
-      if (id) {
+      if (callId) {
         try {
-          await callService.updateCall(id, {
+          await callService.updateCall(callId, {
             status,
             endedAt: new Date().toISOString(),
           });
@@ -181,11 +215,13 @@ export const useCallStore = create<CallState & CallActions>()(
         }
       }
 
-      if (chatId && id) {
-        useMessageStore.getState().updateMessageCallStatus(chatId, id, status);
+      if (chatId && callId) {
+        useMessageStore
+          .getState()
+          .updateMessageCallStatus(chatId, callId, status);
       }
 
-      get().disconnectFromSFU();
+      get().disconnectFromLiveKit();
 
       set({
         localCallStatus: opt.isRejected
@@ -243,22 +279,26 @@ export const useCallStore = create<CallState & CallActions>()(
 
     closeCallModal: () => {
       useModalStore.getState().closeModal();
-      get().clearSFUState();
+      get().clearLiveKitState();
       set({
         chatId: null,
         localCallStatus: null,
-        isGroupCall: false,
         error: null,
       });
     },
 
-    // ========== SFU ==========
-    connectToSFURoom: async (url, token) => {
-      const { liveKitService, isVideoCall } = get();
+    // ========== LiveKit ==========
+    connectToLiveKitRoom: async (
+      url: string,
+      token: string,
+      options?: { audio?: boolean; video?: boolean }
+    ) => {
+      const { liveKitService } = get();
       if (!liveKitService) return;
+
       await liveKitService.connect(url, token, {
-        audio: true,
-        video: isVideoCall,
+        audio: options?.audio ?? true,
+        video: options?.video ?? get().isVideoCall,
         onError: (err) => {
           set({ localCallStatus: LocalCallStatus.ERROR });
           console.error("LiveKit error:", err);
@@ -268,7 +308,7 @@ export const useCallStore = create<CallState & CallActions>()(
       set({ localCallStatus: LocalCallStatus.CONNECTED });
     },
 
-    disconnectFromSFU: () => {
+    disconnectFromLiveKit: () => {
       const { liveKitService, timeoutRef } = get();
       if (timeoutRef) clearTimeout(timeoutRef);
       if (liveKitService) {
@@ -279,7 +319,7 @@ export const useCallStore = create<CallState & CallActions>()(
 
     getLiveKitRoom: () => get().liveKitService?.getRoom() || null,
 
-    clearSFUState: () => {
+    clearLiveKitState: () => {
       const { liveKitService } = get();
       if (liveKitService) liveKitService.disconnect();
       set({ liveKitService: null });

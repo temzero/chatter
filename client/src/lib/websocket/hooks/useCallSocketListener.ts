@@ -42,10 +42,9 @@ export function useCallSocketListeners() {
     const handleIncomingCall = (callResponse: IncomingCallResponse) => {
       console.log("handleIncomingCall", callResponse);
       useCallStore.setState({
-        id: callResponse.callId,
+        callId: callResponse.callId,
         chatId: callResponse.chatId,
         isVideoCall: callResponse.isVideoCall,
-        isGroupCall: callResponse.isGroupCall || false,
         initiatorMemberId: callResponse.initiatorMemberId,
         localCallStatus: LocalCallStatus.INCOMING,
       });
@@ -68,7 +67,7 @@ export function useCallSocketListeners() {
       const { callId, isVideoCall } = updatedCall;
       const callStore = useCallStore.getState();
 
-      if (callStore.id === callId) {
+      if (callStore.callId === callId) {
         // Update call type and handle stream changes
         useCallStore.setState({ isVideoCall });
 
@@ -109,7 +108,7 @@ export function useCallSocketListeners() {
       console.log("handleCallRejected");
       const callStore = useCallStore.getState();
 
-      if (callStore.id === data.callId) {
+      if (callStore.callId === data.callId) {
         if (data.isCallerCancel) {
           callStore.endCall({ isCancel: true });
           toast.info("Call canceled by caller");
@@ -124,7 +123,7 @@ export function useCallSocketListeners() {
       console.log("User hangup", data);
       const callStore = useCallStore.getState();
 
-      if (callStore.id === data.callId) {
+      if (callStore.callId === data.callId) {
         toast.info(`${data.memberId} has left the call`);
         const room = callStore.getLiveKitRoom();
         if (room && room.remoteParticipants.size === 0) {

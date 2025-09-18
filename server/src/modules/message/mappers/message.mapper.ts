@@ -107,8 +107,6 @@ export class MessageMapper {
     return plainToInstance(CallResponseDto, {
       id: call.id,
       status: call.status,
-      isVideoCall: call.isVideoCall,
-      isGroupCall: call.isGroupCall,
       startedAt: call.startedAt,
       endedAt: call.endedAt,
       updatedAt: call.updatedAt,

@@ -15,7 +15,6 @@ export class CallService {
   constructor(
     @InjectRepository(Call)
     private readonly callRepository: Repository<Call>,
-
     private readonly messageService: MessageService,
     private readonly chatMemberService: ChatMemberService, // Assume this service exists
   ) {}
@@ -43,7 +42,6 @@ export class CallService {
           .andWhere('call.status IN (:...statuses)', {
             statuses: [
               CallStatus.COMPLETED,
-              CallStatus.DECLINED,
               CallStatus.MISSED,
               CallStatus.FAILED,
             ],
@@ -89,46 +87,6 @@ export class CallService {
     return calls;
   }
 
-  async createCall(createCallDto: CreateCallDto): Promise<Call> {
-    // Verify the member making the update is the same as the one in the payload
-    const initiatorMember =
-      await this.chatMemberService.getMemberByChatIdAndUserId(
-        createCallDto.chatId,
-        createCallDto.initiatorUserId,
-      );
-
-    if (!initiatorMember) {
-      throw new Error('Unauthorized: Cannot update other members');
-    }
-
-    // save call first
-    const call = this.callRepository.create({
-      status: createCallDto.status,
-      isVideoCall: createCallDto.isVideoCall,
-      isGroupCall: createCallDto.isGroupCall,
-      chat: { id: createCallDto.chatId },
-      initiator: initiatorMember,
-    });
-
-    const savedCall = await this.callRepository.save(call);
-
-    // now system message will see it (because it's committed)
-    await this.messageService.createSystemEventMessage(
-      createCallDto.chatId,
-      createCallDto.initiatorUserId,
-      SystemEventType.CALL,
-      {
-        call: savedCall,
-        callId: savedCall.id,
-      },
-    );
-
-    return this.callRepository.findOneOrFail({
-      where: { id: savedCall.id },
-      relations: ['chat', 'initiator'],
-    });
-  }
-
   async getCallById(id: string): Promise<Call> {
     const call = await this.callRepository.findOne({
       where: { id },
@@ -158,21 +116,66 @@ export class CallService {
     });
   }
 
+  async createCall(createCallDto: CreateCallDto): Promise<Call> {
+    const initiatorMember =
+      await this.chatMemberService.getMemberByChatIdAndUserId(
+        createCallDto.chatId,
+        createCallDto.initiatorUserId,
+      );
+
+    if (!initiatorMember) {
+      throw new Error('Unauthorized: Cannot update other members');
+    }
+
+    // save call first
+    const call = this.callRepository.create({
+      status: createCallDto.status,
+      chat: { id: createCallDto.chatId },
+      initiator: initiatorMember,
+      maxParticipants: createCallDto.maxParticipants,
+    });
+
+    const savedCall = await this.callRepository.save(call);
+
+    // now system message will see it (because it's committed)
+    await this.messageService.createSystemEventMessage(
+      createCallDto.chatId,
+      createCallDto.initiatorUserId,
+      SystemEventType.CALL,
+      {
+        call: savedCall,
+        callId: savedCall.id,
+      },
+    );
+
+    return this.callRepository.findOneOrFail({
+      where: { id: savedCall.id },
+      relations: ['chat', 'initiator'],
+    });
+  }
+
   async updateCall(id: string, updateCallDto: UpdateCallDto): Promise<Call> {
     const call = await this.getCallById(id);
+
+    // Ensure maxParticipants only increases
+    if (
+      updateCallDto.maxParticipants !== undefined &&
+      updateCallDto.maxParticipants < call.maxParticipants
+    ) {
+      updateCallDto.maxParticipants = call.maxParticipants;
+    }
+
     const updatedCall = this.callRepository.merge(
       call,
       updateCallDto as DeepPartial<Call>,
     );
+
     return await this.callRepository.save(updatedCall);
   }
 
-  async endCall(id: string): Promise<Call> {
+  async updateCallStatus(id: string, status: CallStatus): Promise<Call> {
     const call = await this.getCallById(id);
-
-    call.status = CallStatus.COMPLETED;
-    call.endedAt = new Date();
-
+    call.status = status;
     return await this.callRepository.save(call);
   }
 
@@ -180,44 +183,6 @@ export class CallService {
     const result = await this.callRepository.delete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Call with ID ${id} not found`);
-    }
-  }
-
-  /**
-   * Deletes a call and its associated system message.
-   * Used when a call is cancelled.
-   */
-  async deleteCallAndSystemMessage(callId: string): Promise<void> {
-    // 1. Find the call
-    const call = await this.callRepository.findOne({
-      where: { id: callId },
-      relations: ['chat', 'initiator'],
-    });
-
-    if (!call) {
-      throw new NotFoundException(`Call with ID ${callId} not found`);
-    }
-
-    // 2. Delete the system message(s) associated with this call
-    const systemMessages = await this.messageService.messageRepo.find({
-      where: {
-        call: { id: callId },
-        systemEvent: SystemEventType.CALL,
-      },
-    });
-
-    if (systemMessages.length > 0) {
-      const systemMessageIds = systemMessages.map((m) => m.id);
-      await this.messageService.messageRepo.delete(systemMessageIds);
-    }
-
-    // 3. Delete the call itself
-    const result = await this.callRepository.delete(callId);
-
-    if (result.affected === 0) {
-      throw new NotFoundException(
-        `Call with ID ${callId} could not be deleted`,
-      );
     }
   }
 }

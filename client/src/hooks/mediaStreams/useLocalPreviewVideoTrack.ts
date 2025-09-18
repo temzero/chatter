@@ -2,20 +2,25 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
 interface LocalPreviewVideoStream {
-  videoStream: MediaStream | null;
+  localVideoStream: MediaStream | null;
   toggleVideo: () => void;
   isVideoEnabled: boolean;
 }
 
-export const useLocalPreviewVideoTrack = (): LocalPreviewVideoStream => {
-  const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
+export const useLocalPreviewVideoTrack = (
+  isVideoCall: boolean
+): LocalPreviewVideoStream => {
+  const [localVideoStream, setLocalVideoStream] = useState<MediaStream | null>(
+    null
+  );
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
 
   const videoTrackRef = useRef<MediaStreamTrack | null>(null);
 
   useEffect(() => {
-    let mounted = true;
+    if (!isVideoCall) return;
 
+    let mounted = true;
     const initVideo = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -29,7 +34,7 @@ export const useLocalPreviewVideoTrack = (): LocalPreviewVideoStream => {
 
         const videoTrack = stream.getVideoTracks()[0];
         videoTrackRef.current = videoTrack;
-        setVideoStream(new MediaStream(videoTrack ? [videoTrack] : []));
+        setLocalVideoStream(new MediaStream(videoTrack ? [videoTrack] : []));
       } catch (err) {
         console.error("Failed to get local video stream:", err);
       }
@@ -41,7 +46,7 @@ export const useLocalPreviewVideoTrack = (): LocalPreviewVideoStream => {
       mounted = false;
       if (videoTrackRef.current) videoTrackRef.current.stop();
     };
-  }, []);
+  }, [isVideoCall]);
 
   const toggleVideo = useCallback(() => {
     if (videoTrackRef.current) {
@@ -52,7 +57,7 @@ export const useLocalPreviewVideoTrack = (): LocalPreviewVideoStream => {
   }, []);
 
   return {
-    videoStream,
+    localVideoStream,
     toggleVideo,
     isVideoEnabled,
   };

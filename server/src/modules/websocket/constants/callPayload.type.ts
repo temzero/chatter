@@ -1,7 +1,4 @@
-import {
-  CallStatus,
-  PendingCallStatus,
-} from 'src/modules/call/type/callStatus';
+import { CallStatus } from 'src/modules/call/type/callStatus';
 
 // -------------------- Shared --------------------
 
@@ -18,7 +15,6 @@ export interface UpdateCallPayload {
 export interface InitiateCallRequest {
   chatId: string;
   isVideoCall: boolean;
-  isGroupCall: boolean;
 }
 
 // Action-level requests (accept, reject, hang up, etc.)
@@ -64,11 +60,10 @@ export interface CallActionResponse {
 export interface IncomingCallResponse {
   callId?: string; // optional, if no call entity exists yet
   chatId: string; // room/chat identifier
-  status: PendingCallStatus; // DIALING or IN_PROGRESS
+  status: CallStatus; // DIALING or IN_PROGRESS
   participantsCount: number; // number of participants in the room
   initiatorMemberId?: string; // optional if known
   isVideoCall?: boolean; // optional if known
-  isGroupCall?: boolean; // optional if known
   startedAt?: Date; // optional if known
 }
 

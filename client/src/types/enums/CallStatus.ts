@@ -1,13 +1,10 @@
 export enum CallStatus {
-  COMPLETED = "completed",
-  DECLINED = "declined",
-  MISSED = "missed",
-  FAILED = "failed",
-}
-
-export enum PendingCallStatus {
   DIALING = "dialing",
   IN_PROGRESS = "in_progress",
+
+  COMPLETED = "completed",
+  MISSED = "missed",
+  FAILED = "failed",
 }
 
 export enum LocalCallStatus {

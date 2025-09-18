@@ -1,4 +1,4 @@
-import { CallStatus, PendingCallStatus } from "../enums/CallStatus";
+import { CallStatus } from "../enums/CallStatus";
 import { ChatResponse } from "./chat.response";
 import { ChatMember } from "./chatMember.response";
 
@@ -7,10 +7,9 @@ export interface CallResponseDto {
 
   chat: ChatResponse;
 
-  status: CallStatus | PendingCallStatus;
+  status: CallStatus;
 
   isVideoCall: boolean;
-  isGroupCall: boolean;
 
   initiator: ChatMember;
 

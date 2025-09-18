@@ -765,14 +765,14 @@ export class MessageService {
           // ✅ Call fields
           'call.id',
           'call.status',
-          'call.isVideoCall',
-          'call.isGroupCall',
+          'call.maxParticipants',
           'call.startedAt',
           'call.endedAt',
+          'call.createdAt',
           'call.updatedAt',
-          'callInitiator.id',
-          'callInitiator.userId',
-          'callInitiator.nickname',
+          'call.initiator.id',
+          'call.initiator.userId',
+          'call.initiator.nickname',
           'callParticipants',
 
           // Reply

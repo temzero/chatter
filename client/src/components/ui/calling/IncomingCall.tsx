@@ -9,20 +9,16 @@ import { useLocalPreviewVideoTrack } from "@/hooks/mediaStreams/useLocalPreviewV
 
 export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
   const isVideoCall = useCallStore((state) => state.isVideoCall);
-  const isVideoEnabled = useCallStore((state) => state.isVideoEnabled);
 
-  // Only initialize local preview video if it is a video call
-  const {
-    videoStream: localVideoStream,
-    isVideoEnabled: isPreviewEnabled,
-    toggleVideo,
-  } = isVideoCall
-    ? // eslint-disable-next-line react-hooks/rules-of-hooks
-      useLocalPreviewVideoTrack()
-    : { videoStream: null, isVideoEnabled: false, toggleVideo: () => {} };
+  // Always call the hook
+  const { localVideoStream, isVideoEnabled, toggleVideo } =
+    useLocalPreviewVideoTrack(isVideoCall);
 
   const acceptCall = () => {
-    useCallStore.getState().acceptCall();
+    useCallStore.getState().acceptCall({
+      isVideoEnabled: isVideoCall ? isVideoEnabled : false, // respect video call
+      isVoiceEnabled: true,
+    });
   };
 
   const rejectCall = () => {
@@ -30,10 +26,12 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
     useCallStore.getState().closeCallModal();
   };
 
+  const showVideoPreview = isVideoCall && localVideoStream && isVideoEnabled;
+
   return (
     <div className="flex flex-col items-center w-full h-full">
       {/* Background - Avatar or Webcam */}
-      {isVideoCall && localVideoStream && isPreviewEnabled && (
+      {showVideoPreview && (
         <div className="absolute inset-0 overflow-hidden z-0 opacity-70 w-full h-full">
           <VideoStream
             stream={localVideoStream}
@@ -68,7 +66,7 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
                     : "videocam_off"
                   : "call"
               }
-              onClick={toggleVideo}
+              onClick={isVideoCall ? toggleVideo : undefined}
               className="material-symbols-outlined text-6xl flex items-center justify-center"
               initial={{ opacity: 0, scale: 0.1 }}
               animate={{

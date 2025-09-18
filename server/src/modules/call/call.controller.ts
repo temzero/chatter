@@ -4,16 +4,11 @@ import {
   Body,
   Get,
   Param,
-  Patch,
   Delete,
-  HttpStatus,
-  HttpCode,
   UseGuards,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { CallService } from './call.service';
-import { CreateCallDto } from './dto/create-call.dto';
-import { UpdateCallDto } from './dto/update-call.dto';
 import { SuccessResponse } from 'src/common/api-response/success';
 import { ErrorResponse } from 'src/common/api-response/errors';
 import { CallResponseDto } from './dto/call-response.dto';
@@ -21,10 +16,12 @@ import { CurrentUser } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { ChatMemberService } from '../chat-member/chat-member.service';
 import { LivekitService } from './liveKit.service';
-import { PendingCallStatus } from './type/callStatus';
+import { CallStatus } from './type/callStatus';
 import { IncomingCallResponse } from '../websocket/constants/callPayload.type';
 import { ChatService } from '../chat/chat.service';
 import { ChatType } from '../chat/constants/chat-types.constants';
+import { CreateCallDto } from './dto/create-call.dto';
+import { UpdateCallDto } from './dto/update-call.dto';
 
 @Controller('calls')
 @UseGuards(JwtAuthGuard)
@@ -72,13 +69,12 @@ export class CallController {
           const chat = await this.chatService.getChatById(room.name); // or getChatFromData(room.name)
 
           // 2. Determine call type
-          const isGroupCall = chat.type !== ChatType.DIRECT;
-          const isVideoCall = isGroupCall ? true : false; // or derive from your rules
+          const isVideoCall = chat.type !== ChatType.DIRECT ? true : false; // or derive from your rules
 
           const status =
             room.numParticipants <= 1
-              ? PendingCallStatus.DIALING
-              : PendingCallStatus.IN_PROGRESS;
+              ? CallStatus.DIALING
+              : CallStatus.IN_PROGRESS;
 
           return {
             callId: room.name, // optional, match your call entity if exists
@@ -86,7 +82,6 @@ export class CallController {
             status,
             participantsCount: room.numParticipants,
             isVideoCall,
-            isGroupCall,
             startedAt: room.creationTime
               ? new Date(Number(room.creationTime) * 1000)
               : undefined,
@@ -100,22 +95,6 @@ export class CallController {
       );
     } catch (error: unknown) {
       ErrorResponse.throw(error, 'Failed to retrieve pending calls');
-    }
-  }
-
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  async createCall(
-    @Body() createCallDto: CreateCallDto,
-  ): Promise<SuccessResponse<CallResponseDto>> {
-    try {
-      const call = await this.callService.createCall(createCallDto);
-      return new SuccessResponse(
-        plainToInstance(CallResponseDto, call),
-        'Call created successfully',
-      );
-    } catch (error: unknown) {
-      ErrorResponse.throw(error, 'Failed to create call');
     }
   }
 
@@ -149,15 +128,37 @@ export class CallController {
     }
   }
 
-  @Patch(':id')
-  async updateCall(
-    @Param('id') id: string,
-    @Body() updateCallDto: UpdateCallDto,
+  @Post()
+  async createCall(
+    @CurrentUser('id') userId: string,
+    @Body()
+    body: CreateCallDto,
   ): Promise<SuccessResponse<CallResponseDto>> {
     try {
-      const updated = await this.callService.updateCall(id, updateCallDto);
+      const newCall = await this.callService.createCall({
+        chatId: body.chatId,
+        initiatorUserId: userId,
+        status: CallStatus.DIALING, // or PENDING, depending on your flow
+      });
+
       return new SuccessResponse(
-        plainToInstance(CallResponseDto, updated),
+        plainToInstance(CallResponseDto, newCall),
+        'Call created successfully',
+      );
+    } catch (error: unknown) {
+      ErrorResponse.throw(error, 'Failed to create call');
+    }
+  }
+
+  @Post(':id')
+  async updateCall(
+    @Param('id') id: string,
+    @Body() body: UpdateCallDto,
+  ): Promise<SuccessResponse<CallResponseDto>> {
+    try {
+      const updatedCall = await this.callService.updateCall(id, body);
+      return new SuccessResponse(
+        plainToInstance(CallResponseDto, updatedCall),
         'Call updated successfully',
       );
     } catch (error: unknown) {
@@ -165,18 +166,22 @@ export class CallController {
     }
   }
 
-  @Post(':id/end')
-  async endCall(
+  @Post(':id/status')
+  async updateCallStatus(
     @Param('id') id: string,
+    @Body() body: { status: CallStatus },
   ): Promise<SuccessResponse<CallResponseDto>> {
     try {
-      const ended = await this.callService.endCall(id);
+      const updatedCall = await this.callService.updateCallStatus(
+        id,
+        body.status,
+      );
       return new SuccessResponse(
-        plainToInstance(CallResponseDto, ended),
-        'Call ended successfully',
+        plainToInstance(CallResponseDto, updatedCall),
+        'Call status updated successfully',
       );
     } catch (error: unknown) {
-      ErrorResponse.throw(error, 'Failed to end call');
+      ErrorResponse.throw(error, 'Failed to update call status');
     }
   }
 
