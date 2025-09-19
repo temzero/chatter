@@ -2,13 +2,6 @@ import { CallStatus } from "./enums/CallStatus";
 
 // -------------------- Shared --------------------
 
-// Used for both request and response when initiating a call
-export interface InitiateCallPayload {
-  chatId: string;
-  isVideoCall: boolean;
-  initiatorMemberId?: string;
-}
-
 // Update call session
 export interface UpdateCallPayload {
   callId: string;
@@ -19,30 +12,17 @@ export interface UpdateCallPayload {
 
 // -------------------- Requests --------------------
 
+// Starting a call
+export interface InitiateCallRequest {
+  chatId: string;
+  isVideoCall: boolean;
+}
+
 // Action-level requests (accept, reject, hang up, etc.)
 export interface CallActionRequest {
-  callId?: string;
+  callId: string;
   chatId: string;
   isCallerCancel?: boolean;
-}
-
-// RTC / SFU signaling requests
-export interface RtcOfferRequest {
-  callId: string;
-  chatId: string;
-  offer: RTCSessionDescriptionInit;
-}
-
-export interface RtcAnswerRequest {
-  callId: string;
-  chatId: string;
-  answer: RTCSessionDescriptionInit;
-}
-
-export interface IceCandidateRequest {
-  callId: string;
-  chatId: string;
-  candidate: RTCIceCandidateInit;
 }
 
 // -------------------- Responses --------------------
@@ -69,21 +49,17 @@ export interface IncomingCallResponse {
   startedAt?: Date; // optional if known
 }
 
-// RTC / SFU signaling responses
-export interface RtcOfferResponse {
-  callId: string;
-  offer: RTCSessionDescriptionInit;
-  memberId: string;
+export interface CallWebsocketResponse {
+  success: boolean;
+  reason?: CallError;
+  chatId?: string;
 }
 
-export interface RtcAnswerResponse {
-  callId: string;
-  answer: RTCSessionDescriptionInit;
-  memberId: string;
-}
-
-export interface IceCandidateResponse {
-  callId: string;
-  candidate: RTCIceCandidateInit;
-  memberId: string;
+export enum CallError {
+  PERMISSION_DENIED = "permission_denied",
+  DEVICE_UNAVAILABLE = "device_unavailable",
+  CONNECTION_FAILED = "connection_failed",
+  INITIATION_FAILED = "initiation_failed",
+  LINE_BUSY = "line_busy",
+  CALL_FAILED = "call_failed",
 }

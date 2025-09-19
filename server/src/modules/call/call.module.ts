@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CallController } from './call.controller';
 import { CallService } from './call.service';
@@ -9,15 +9,18 @@ import { Chat } from '../chat/entities/chat.entity';
 import { ChatMemberModule } from '../chat-member/chat-member.module';
 import { LivekitService } from './liveKit.service';
 import { LivekitWebhookController } from './livekit.webhook.controller';
+import { CallStoreService } from '../websocket/services/call-store.service ';
+import { ChatModule } from '../chat/chat.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Call, Chat, ChatMember]),
+    forwardRef(() => ChatModule),
     MessageModule,
     ChatMemberModule,
   ],
   controllers: [CallController, LivekitWebhookController],
-  providers: [CallService, LivekitService],
-  exports: [CallService],
+  providers: [CallService, LivekitService, CallStoreService],
+  exports: [CallService, CallStoreService],
 })
 export class CallModule {}

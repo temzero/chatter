@@ -241,7 +241,6 @@ export class MessageService {
       newValue?: string;
       targetId?: string;
       targetName?: string;
-      callId?: string;
       call?: Call;
     },
   ): Promise<MessageResponseDto> {
@@ -261,29 +260,15 @@ export class MessageService {
         options?.targetId,
         targetName,
       ),
-      call: options?.call
-        ? options.call
-        : options?.callId
-          ? { id: options.callId }
-          : undefined,
+      call: options?.call,
     });
 
     const savedMessage = await this.messageRepo.save(message);
 
-    // 🔁 Handle bidirectional linking if this is a call message
+    // 🔁 Link the call back to this message if provided
     if (options?.call) {
-      // Link the call back to this message
       options.call.message = savedMessage;
       await this.callRepo.save(options.call);
-    } else if (options?.callId && !options.call) {
-      // Fetch the call and link it if only callId was provided
-      const call = await this.callRepo.findOne({
-        where: { id: options.callId },
-      });
-      if (call) {
-        call.message = savedMessage;
-        await this.callRepo.save(call);
-      }
     }
 
     // ✅ Update lastVisibleMessageId for all chat members
@@ -715,10 +700,9 @@ export class MessageService {
         .leftJoinAndSelect('message.reactions', 'reactions')
         .leftJoinAndSelect('message.attachments', 'attachments')
 
-        // ✅ Call relation
+        // ✅ Call relation (only fields that exist in Call entity)
         .leftJoinAndSelect('message.call', 'call')
         .leftJoinAndSelect('call.initiator', 'callInitiator')
-        .leftJoinAndSelect('call.participants', 'callParticipants')
 
         // Direct reply message
         .leftJoinAndSelect('message.replyToMessage', 'replyToMessage')
@@ -765,15 +749,14 @@ export class MessageService {
           // ✅ Call fields
           'call.id',
           'call.status',
-          'call.maxParticipants',
           'call.startedAt',
           'call.endedAt',
           'call.createdAt',
           'call.updatedAt',
-          'call.initiator.id',
-          'call.initiator.userId',
-          'call.initiator.nickname',
-          'callParticipants',
+          'callInitiator.id',
+          'callInitiator.userId',
+          'callInitiator.nickname',
+          'call.attendedUserIds',
 
           // Reply
           'replyToMessage.id',

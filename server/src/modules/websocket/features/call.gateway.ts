@@ -10,27 +10,22 @@ import { CallEvent } from '../constants/websocket-events';
 import {
   CallActionRequest,
   CallActionResponse,
-  RtcOfferRequest,
-  RtcOfferResponse,
-  RtcAnswerRequest,
-  RtcAnswerResponse,
-  IceCandidateRequest,
-  IceCandidateResponse,
   UpdateCallPayload,
   InitiateCallRequest,
   IncomingCallResponse,
+  CallError,
 } from '../constants/callPayload.type';
 import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
 import { WebsocketNotificationService } from '../services/websocket-notification.service';
 import { CallStatus } from 'src/modules/call/type/callStatus';
-// import { CallService } from 'src/modules/call/call.service';
+import { CallStoreService } from '../services/call-store.service ';
 
 @WebSocketGateway()
 export class CallGateway {
   constructor(
     private readonly websocketNotificationService: WebsocketNotificationService,
     private readonly chatMemberService: ChatMemberService,
-    // private readonly callService: CallService,
+    private readonly callStore: CallStoreService,
   ) {}
 
   @SubscribeMessage(CallEvent.INITIATE_CALL)
@@ -40,16 +35,42 @@ export class CallGateway {
   ) {
     const userId = client.data.userId;
 
+    // 1️⃣ Block if caller is already in another call
+    if (this.callStore.isUserInCall(userId)) {
+      return { success: false, reason: CallError.CALL_FAILED };
+    }
+
+    // 2️⃣ Get chat members (exclude caller)
+    const chatMembers = await this.chatMemberService.getChatMembers(
+      payload.chatId,
+    );
+    const otherMembers = chatMembers.filter((m) => m.userId !== userId);
+    if (otherMembers.length === 0) {
+      return { success: false, reason: CallError.INITIATION_FAILED };
+    }
+
+    // 3️⃣ Filter only free members (not in another call)
+    const freeMembers = otherMembers.filter(
+      (m) => !this.callStore.isUserInCall(m.userId),
+    );
+
+    // 4️⃣ If no free members → notify caller line busy
+    if (freeMembers.length === 0) {
+      return { success: false, reason: CallError.LINE_BUSY };
+    }
+
+    // 5️⃣ Get initiator chat member
     const initiatorMember =
       await this.chatMemberService.getMemberByChatIdAndUserId(
         payload.chatId,
         userId,
       );
+    if (!initiatorMember) {
+      return { success: false, reason: CallError.INITIATION_FAILED };
+    }
 
-    if (!initiatorMember) throw new Error('Initiator not found');
-    // Instead of saving in DB, just create a lightweight response
+    // 6️⃣ Build call response
     const response: IncomingCallResponse = {
-      // callId: call.id,
       chatId: payload.chatId,
       status: CallStatus.DIALING,
       initiatorMemberId: initiatorMember.id,
@@ -57,15 +78,16 @@ export class CallGateway {
       participantsCount: 1,
     };
 
-    console.log('Call initiated (signaling only):', response);
+    console.log('Call initiated:', response);
 
-    // Notify other members
-    await this.websocketNotificationService.emitToChatMembers(
-      payload.chatId,
-      CallEvent.INCOMING_CALL,
-      response,
-      { senderId: userId, excludeSender: true },
-    );
+    // 7️⃣ Notify only free members
+    for (const member of freeMembers) {
+      this.websocketNotificationService.emitToUser(
+        member.userId,
+        CallEvent.INCOMING_CALL,
+        response,
+      );
+    }
 
     return { success: true, chatId: payload.chatId };
   }
@@ -210,96 +232,6 @@ export class CallGateway {
       CallEvent.HANG_UP,
       response,
       { senderId: userId, excludeSender: true },
-    );
-  }
-
-  @SubscribeMessage(CallEvent.P2P_OFFER_SDP)
-  async handleP2PWebRtcOffer(
-    @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() payload: RtcOfferRequest,
-  ) {
-    const userId = client.data.userId;
-    const member = await this.chatMemberService.getMemberByChatIdAndUserId(
-      payload.chatId,
-      userId,
-    );
-
-    if (!member) {
-      throw new Error('User is not a member of this chat');
-    }
-
-    const response: RtcOfferResponse = {
-      callId: payload.callId,
-      offer: payload.offer,
-      memberId: member.id,
-    };
-
-    await this.websocketNotificationService.emitToChatMembers(
-      payload.chatId,
-      CallEvent.P2P_OFFER_SDP,
-      response,
-      { senderId: userId, excludeSender: true },
-    );
-  }
-
-  @SubscribeMessage(CallEvent.P2P_ANSWER_SDP)
-  async handleRtcAnswer(
-    @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() payload: RtcAnswerRequest,
-  ) {
-    const userId = client.data.userId;
-    const member = await this.chatMemberService.getMemberByChatIdAndUserId(
-      payload.chatId,
-      userId,
-    );
-
-    if (!member) {
-      throw new Error('User is not a member of this chat');
-    }
-
-    const response: RtcAnswerResponse = {
-      callId: payload.callId,
-      answer: payload.answer,
-      memberId: member.id,
-    };
-
-    await this.websocketNotificationService.emitToChatMembers(
-      payload.chatId,
-      CallEvent.P2P_ANSWER_SDP,
-      response,
-      { senderId: userId, excludeSender: true },
-    );
-  }
-
-  @SubscribeMessage(CallEvent.ICE_CANDIDATE)
-  async handleRtcIceCandidate(
-    @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() payload: IceCandidateRequest,
-  ) {
-    const userId = client.data.userId;
-    const member = await this.chatMemberService.getMemberByChatIdAndUserId(
-      payload.chatId,
-      userId,
-    );
-
-    if (!member) {
-      throw new Error('User is not a member of this chat');
-    }
-
-    const response: IceCandidateResponse = {
-      callId: payload.callId,
-      candidate: payload.candidate,
-      memberId: member.id,
-    };
-
-    await this.websocketNotificationService.emitToChatMembers(
-      payload.chatId,
-      CallEvent.ICE_CANDIDATE,
-      response,
-      {
-        senderId: userId,
-        excludeSender: true,
-      },
     );
   }
 }

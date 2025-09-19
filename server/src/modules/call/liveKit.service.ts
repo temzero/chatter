@@ -52,25 +52,42 @@ export class LivekitService {
   }
 
   async getActiveRoomsForUser(userId: string, chatIds: string[]) {
+    console.log('LiveKitService.getActiveRoomsForUser called', {
+      userId,
+      chatIds,
+    });
+
     const rooms = await this.roomService.listRooms();
+    console.log('All rooms from LiveKit listRooms:', rooms);
 
-    // Only consider rooms that match chatIds
+    if (!rooms || rooms.length === 0) return [];
+
     const matchingRooms = rooms.filter((room) => chatIds.includes(room.name));
+    console.log('Matching rooms:', matchingRooms);
 
-    // Keep rooms where the user has NOT joined yet
     const pendingRooms = await Promise.all(
       matchingRooms.map(async (room) => {
-        const participants = await this.roomService.listParticipants(room.name);
-        return participants.some((p) => p.identity === userId) ? null : room;
+        try {
+          const participants = await this.roomService.listParticipants(
+            room.name,
+          );
+          return participants.some((p) => p.identity === userId) ? null : room;
+        } catch (err) {
+          console.error(
+            `Failed to get participants for room ${room.name}:`,
+            err,
+          );
+          return null; // skip this room if it fails
+        }
       }),
     );
 
-    // Filter out null values
     const filteredRooms = pendingRooms.filter(
       (r): r is NonNullable<typeof r> => r !== null,
     );
 
-    // Sort newest first (descending)
+    console.log('Filtered pending rooms:', filteredRooms);
+
     return filteredRooms.sort(
       (a, b) => Number(b.creationTime) - Number(a.creationTime),
     );

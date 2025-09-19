@@ -18,5 +18,5 @@ export interface CallResponseDto {
   updatedAt?: Date | null;
   createdAt: Date;
 
-  participants: ChatMember[];
+  attendedUserIds: string[];
 }

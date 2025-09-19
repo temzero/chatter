@@ -5,6 +5,7 @@ import { formatDuration } from "@/utils/formatDuration";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { LocalCallStatus } from "@/types/enums/CallStatus";
 import { useEffect } from "react";
+import { CallError } from "@/types/callPayload";
 
 export const SummaryCall = ({
   chat,
@@ -14,6 +15,7 @@ export const SummaryCall = ({
 }) => {
   const duration = useCallStore((state) => state.getCallDuration());
   const callStatus = useCallStore((state) => state.localCallStatus);
+  const error = useCallStore((state) => state.error);
   const closeCallModal = useCallStore((state) => state.closeCallModal);
 
   // Auto-close when call is canceled
@@ -32,6 +34,12 @@ export const SummaryCall = ({
       case LocalCallStatus.ENDED:
         return duration > 0 ? formatDuration(duration) : "Call ended";
       case LocalCallStatus.ERROR:
+        if (error === CallError.LINE_BUSY) return "Line is busy";
+        if (error === CallError.PERMISSION_DENIED) return "Permission denied";
+        if (error === CallError.DEVICE_UNAVAILABLE) return "Device unavailable";
+        if (error === CallError.CONNECTION_FAILED) return "Connection failed";
+        if (error === CallError.INITIATION_FAILED)
+          return "Call initiation failed";
         return "Something went wrong!";
       default:
         return null;
@@ -45,7 +53,9 @@ export const SummaryCall = ({
         {getStatusMessage() && (
           <div
             className={`mt-2 text-lg tabular-nums text-center ${
-              callStatus === LocalCallStatus.ERROR ? "text-red-500" : "text-gray-400"
+              callStatus === LocalCallStatus.ERROR
+                ? "text-red-500"
+                : "text-gray-400"
             }`}
           >
             {getStatusMessage()}

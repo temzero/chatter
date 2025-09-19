@@ -109,9 +109,12 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
             <MessageSearchBar />
           ) : (
             <div className="flex items-center gap-1">
-              <div className="flex items-center cursor-pointer rounded-full opacity-60 hover:opacity-100 p-1">
+              <div className="flex items-center cursor-pointer rounded-full p-1">
                 {isDirect && canCall && (
-                  <button onClick={() => startCall(chat.id)}>
+                  <button
+                    onClick={() => startCall(chat.id)}
+                    className="opacity-60 hover:opacity-100 transition"
+                  >
                     <i className="material-symbols-outlined text-3xl">
                       phone_enabled
                     </i>
@@ -121,23 +124,17 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                 {isGroup && (
                   // <button
                   //   onClick={() =>
-                  //     startCall(chat.id, {
-                  //       isVideoCall: true,
-                  //       isGroupCall: true,
-                  //     })
+                  //     startCall(chat.id, true)
                   //   }
+                  //   className="opacity-60 hover:opacity-100 transition"
                   // >
                   //   <i className="material-symbols-outlined text-3xl">
                   //     videocam
                   //   </i>
                   // </button>
                   <button
-                    onClick={() =>
-                      startCall(chat.id, {
-                        isVideoCall: true,
-                        isGroupCall: true,
-                      })
-                    }
+                    onClick={() => startCall(chat.id, true)}
+                    className="font-semibold flex items-center gap-1 custom-border rounded-full px-3 bg-[--primary-green] opacity-100 transition"
                   >
                     Join Call
                     <i className="material-symbols-outlined text-3xl">

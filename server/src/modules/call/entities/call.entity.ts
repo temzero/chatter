@@ -32,11 +32,11 @@ export class Call {
   @Column({ type: 'enum', enum: CallStatus, default: null })
   status: CallStatus;
 
-  @Column({ type: 'int', default: 0 })
-  maxParticipants: number;
-
   @ManyToOne(() => ChatMember, { eager: true })
   initiator: ChatMember;
+
+  @Column({ type: 'simple-array', default: '' })
+  attendedUserIds: string[];
 
   @Column({ type: 'timestamp', nullable: true })
   startedAt?: Date;

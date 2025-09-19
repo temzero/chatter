@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { motion } from "framer-motion";
 import { MessageStatus } from "@/types/enums/message";
 import { MessageResponse } from "@/types/responses/message.response";
-import { PendingCallStatus } from "@/types/enums/CallStatus";
+import { CallStatus } from "@/types/enums/CallStatus";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { getCallClass, getCallIcon, getCallText } from "@/utils/callHelpers";
 
@@ -41,7 +41,7 @@ const CallMessageBubble: React.FC<CallMessageBubbleProps> = ({
       })}
       style={{ minWidth: "180px" }}
       onClick={() =>
-        call.status === PendingCallStatus.DIALING
+        call.status === CallStatus.DIALING
           ? openModal(ModalType.CALL, {
               id: call.id,
               chatId: message.chatId,
@@ -55,42 +55,42 @@ const CallMessageBubble: React.FC<CallMessageBubbleProps> = ({
         <motion.span
           className={clsx(
             "material-symbols-outlined text-3xl",
-            getCallClass(call)
+            getCallClass(call.status)
           )}
           animate={
-            call.status === PendingCallStatus.DIALING
+            call.status === CallStatus.DIALING
               ? { x: [-2, 2, -2, 2, 0], scale: [1, 1.05, 1] } // shake + bounce
-              : call.status === PendingCallStatus.IN_PROGRESS
+              : call.status === CallStatus.IN_PROGRESS
               ? { opacity: [1, 0.4, 1] } // pulse
               : { x: 0, scale: 1, opacity: 1 }
           }
           transition={
-            call.status === PendingCallStatus.DIALING
+            call.status === CallStatus.DIALING
               ? {
                   x: { duration: 0.4, repeat: Infinity, repeatDelay: 0.4 },
                   scale: { duration: 0.2, repeat: Infinity, repeatDelay: 0.4 },
                 }
-              : call.status === PendingCallStatus.IN_PROGRESS
+              : call.status === CallStatus.IN_PROGRESS
               ? { duration: 1.2, repeat: Infinity }
               : { duration: 0 }
           }
         >
-          {getCallIcon(call)}
+          {getCallIcon(call.status)}
         </motion.span>
 
         {/* 🔹 Text (static) */}
         <p
           className={clsx(
             "text-sm font-medium text-center",
-            getCallClass(call)
+            getCallClass(call.status)
           )}
         >
-          {getCallText(call)}
+          {getCallText(call.status, call.startedAt, call.endedAt)}
         </p>
       </div>
 
       {/* 🔹 Join button */}
-      {call.status === PendingCallStatus.IN_PROGRESS && (
+      {call.status === CallStatus.IN_PROGRESS && (
         <div
           onClick={() => onJoinCall?.(call.id)}
           className="text-center p-1 text-blue-700 w-full custom-border-t cursor-pointer hover:text-white hover:bg-blue-600 transition-colors"

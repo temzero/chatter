@@ -5,8 +5,6 @@ import { Call } from './entities/call.entity';
 import { CreateCallDto } from './dto/create-call.dto';
 import { UpdateCallDto } from './dto/update-call.dto';
 import { CallStatus } from './type/callStatus';
-import { MessageService } from '../message/message.service';
-import { SystemEventType } from '../message/constants/system-event-type.constants';
 import { ChatMemberService } from '../chat-member/chat-member.service';
 import { ChatType } from '../chat/constants/chat-types.constants';
 
@@ -15,23 +13,18 @@ export class CallService {
   constructor(
     @InjectRepository(Call)
     private readonly callRepository: Repository<Call>,
-    private readonly messageService: MessageService,
-    private readonly chatMemberService: ChatMemberService, // Assume this service exists
+    private readonly chatMemberService: ChatMemberService,
   ) {}
 
   async getCallHistory(userId: string): Promise<Call[]> {
     const calls = await this.callRepository
       .createQueryBuilder('call')
       .leftJoinAndSelect('call.chat', 'chat')
-      .leftJoinAndSelect('chat.members', 'chatMember') // Load ALL members
+      .leftJoinAndSelect('chat.members', 'chatMember')
       .leftJoinAndSelect('chatMember.user', 'chatMemberUser')
       .leftJoinAndSelect('call.initiator', 'initiator')
       .leftJoinAndSelect('initiator.user', 'initiatorUser')
-      .leftJoinAndSelect('call.participants', 'participants')
-      .leftJoinAndSelect('participants.user', 'participantUser')
-      // Remove the member filtering from here
       .where((qb) => {
-        // Use subquery to find calls where the user is a member
         const subQuery = qb
           .subQuery()
           .select('call.id')
@@ -52,23 +45,19 @@ export class CallService {
       .orderBy('call.startedAt', 'DESC')
       .getMany();
 
-    // Update chat.name and chat.avatarUrl in-place
     calls.forEach((call) => {
       const chat = call.chat;
 
       if (chat.type === ChatType.DIRECT) {
         const otherMember = chat.members.find((m) => m.user.id !== userId);
-
         if (otherMember) {
           chat.name =
             otherMember.nickname ||
             `${otherMember.user.firstName ?? ''} ${otherMember.user.lastName ?? ''}`.trim() ||
             otherMember.user.username;
-
           chat.avatarUrl = otherMember.user.avatarUrl || chat.avatarUrl;
         }
       } else {
-        // Group chat logic
         if (!chat.avatarUrl) {
           if (call.initiator?.user?.avatarUrl) {
             chat.avatarUrl = call.initiator.user.avatarUrl;
@@ -90,7 +79,7 @@ export class CallService {
   async getCallById(id: string): Promise<Call> {
     const call = await this.callRepository.findOne({
       where: { id },
-      relations: ['chat', 'initiator', 'participants'],
+      relations: ['chat', 'initiator'],
     });
 
     if (!call) {
@@ -103,7 +92,7 @@ export class CallService {
   async getCallsByChatId(chatId: string): Promise<Call[]> {
     return await this.callRepository.find({
       where: { chat: { id: chatId } },
-      relations: ['initiator', 'participants'],
+      relations: ['initiator'],
       order: { startedAt: 'DESC' },
     });
   }
@@ -111,7 +100,7 @@ export class CallService {
   async getLastCallByChatId(chatId: string): Promise<Call | null> {
     return await this.callRepository.findOne({
       where: { chat: { id: chatId } },
-      relations: ['initiator', 'participants'],
+      relations: ['initiator'],
       order: { startedAt: 'DESC' },
     });
   }
@@ -127,26 +116,39 @@ export class CallService {
       throw new Error('Unauthorized: Cannot update other members');
     }
 
-    // save call first
     const call = this.callRepository.create({
       status: createCallDto.status,
       chat: { id: createCallDto.chatId },
       initiator: initiatorMember,
-      maxParticipants: createCallDto.maxParticipants,
+      attendedUserIds: createCallDto.attendedUserIds || [],
     });
 
     const savedCall = await this.callRepository.save(call);
 
-    // now system message will see it (because it's committed)
-    await this.messageService.createSystemEventMessage(
-      createCallDto.chatId,
-      createCallDto.initiatorUserId,
-      SystemEventType.CALL,
-      {
-        call: savedCall,
-        callId: savedCall.id,
-      },
-    );
+    if (createCallDto.status === CallStatus.DIALING) {
+      const TIMEOUT_MS = 60_000;
+      setTimeout(() => {
+        void (async () => {
+          try {
+            const latestCall = await this.callRepository.findOne({
+              where: { id: savedCall.id },
+            });
+            if (latestCall && latestCall.status === CallStatus.DIALING) {
+              await this.callRepository.save({
+                ...latestCall,
+                status: CallStatus.MISSED,
+                endedAt: new Date(),
+              });
+              console.log(
+                `Call ${latestCall.id} marked as MISSED due to timeout`,
+              );
+            }
+          } catch (err) {
+            console.error('Failed to mark call as MISSED:', err);
+          }
+        })();
+      }, TIMEOUT_MS);
+    }
 
     return this.callRepository.findOneOrFail({
       where: { id: savedCall.id },
@@ -157,12 +159,10 @@ export class CallService {
   async updateCall(id: string, updateCallDto: UpdateCallDto): Promise<Call> {
     const call = await this.getCallById(id);
 
-    // Ensure maxParticipants only increases
-    if (
-      updateCallDto.maxParticipants !== undefined &&
-      updateCallDto.maxParticipants < call.maxParticipants
-    ) {
-      updateCallDto.maxParticipants = call.maxParticipants;
+    if (updateCallDto.attendedUserIds) {
+      const existingAttendees = new Set(call.attendedUserIds || []);
+      updateCallDto.attendedUserIds.forEach((id) => existingAttendees.add(id));
+      updateCallDto.attendedUserIds = Array.from(existingAttendees);
     }
 
     const updatedCall = this.callRepository.merge(

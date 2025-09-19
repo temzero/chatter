@@ -1,17 +1,12 @@
 import { webSocketService } from "./websocket.service";
 import { CallEvent } from "../constants/websocket-event.type";
 import {
-  InitiateCallPayload,
+  InitiateCallRequest,
   CallActionRequest,
-  RtcOfferRequest,
   CallActionResponse,
-  RtcAnswerResponse,
-  IceCandidateRequest,
-  IceCandidateResponse,
-  RtcOfferResponse,
-  RtcAnswerRequest,
   UpdateCallPayload,
   IncomingCallResponse,
+  CallWebsocketResponse,
 } from "@/types/callPayload";
 
 /**
@@ -25,9 +20,21 @@ export const callWebSocketService = {
   /**
    * Initiate a new call (BOTH)
    */
-  initiateCall(payload: InitiateCallPayload) {
-    console.log("initiateCall");
-    webSocketService.emit(CallEvent.INITIATE_CALL, payload);
+  // initiateCall(payload: InitiateCallRequest) {
+  //   console.log("initiateCall");
+  //   webSocketService.emit(CallEvent.INITIATE_CALL, payload);
+  // },
+
+  initiateCall(payload: InitiateCallRequest): Promise<CallWebsocketResponse> {
+    return new Promise((resolve) => {
+      webSocketService.emit(
+        CallEvent.INITIATE_CALL,
+        payload,
+        (response: unknown) => {
+          resolve(response as CallWebsocketResponse);
+        }
+      );
+    });
   },
 
   /**
@@ -81,24 +88,6 @@ export const callWebSocketService = {
   // Join call (PRIMARILY SFU, but technically BOTH)
   joinCall(payload: { chatId: string }) {
     webSocketService.emit(CallEvent.JOIN_CALL, payload);
-  },
-
-  /**
-   * Listen for member join events (PRIMARILY SFU)
-   */
-  onMemberJoined(
-    callback: (data: { chatId: string; memberId: string }) => void
-  ) {
-    webSocketService.on(CallEvent.JOIN_CALL, callback);
-  },
-
-  /**
-   * Remove member join listener (PRIMARILY SFU)
-   */
-  offMemberJoined(
-    callback: (data: { chatId: string; memberId: string }) => void
-  ) {
-    webSocketService.off(CallEvent.JOIN_CALL, callback);
   },
 
   /**
@@ -158,73 +147,6 @@ export const callWebSocketService = {
     webSocketService.off(CallEvent.HANG_UP, callback);
   },
 
-  // ============================
-  // 📶 WebRTC Signaling Methods (PRIMARILY P2P)
-  // ============================
-
-  /**
-   * Send WebRTC offer (P2P)
-   */
-  sendP2POffer(payload: RtcOfferRequest) {
-    webSocketService.emit(CallEvent.P2P_OFFER_SDP, payload);
-  },
-
-  /**
-   * Listen for WebRTC offers (P2P)
-   */
-  onP2POffer(callback: (data: RtcOfferResponse) => void) {
-    webSocketService.on(CallEvent.P2P_OFFER_SDP, callback);
-  },
-
-  /**
-   * Remove offer listener (P2P)
-   */
-  offP2POffer(callback: (data: RtcOfferResponse) => void) {
-    webSocketService.off(CallEvent.P2P_OFFER_SDP, callback);
-  },
-
-  /**
-   * Send WebRTC answer (P2P)
-   */
-  sendP2PAnswer(payload: RtcAnswerRequest) {
-    webSocketService.emit(CallEvent.P2P_ANSWER_SDP, payload);
-  },
-
-  /**
-   * Listen for WebRTC answers (P2P)
-   */
-  onP2PAnswer(callback: (data: RtcAnswerResponse) => void) {
-    webSocketService.on(CallEvent.P2P_ANSWER_SDP, callback);
-  },
-
-  /**
-   * Remove answer listener (P2P)
-   */
-  offP2PAnswer(callback: (data: RtcAnswerResponse) => void) {
-    webSocketService.off(CallEvent.P2P_ANSWER_SDP, callback);
-  },
-
-  /**
-   * Send ICE candidate (P2P)
-   */
-  sendIceCandidate(payload: IceCandidateRequest) {
-    webSocketService.emit(CallEvent.ICE_CANDIDATE, payload);
-  },
-
-  /**
-   * Listen for ICE candidates (P2P)
-   */
-  onIceCandidate(callback: (data: IceCandidateResponse) => void) {
-    webSocketService.on(CallEvent.ICE_CANDIDATE, callback);
-  },
-
-  /**
-   * Remove ICE candidate listener (P2P)
-   */
-  offIceCandidate(callback: (data: IceCandidateResponse) => void) {
-    webSocketService.off(CallEvent.ICE_CANDIDATE, callback);
-  },
-
   // ========================
   // 🛠️ Utility Methods
   // ========================
@@ -236,16 +158,9 @@ export const callWebSocketService = {
     // Call lifecycle events (BOTH)
     webSocketService.off(CallEvent.INCOMING_CALL);
     webSocketService.off(CallEvent.UPDATE_CALL);
-    webSocketService.off(CallEvent.UPDATE_CALL_MEMBER);
     webSocketService.off(CallEvent.ACCEPT_CALL);
     webSocketService.off(CallEvent.JOIN_CALL);
     webSocketService.off(CallEvent.DECLINE_CALL);
     webSocketService.off(CallEvent.HANG_UP);
-
-    // WebRTC signaling events (P2P + SFU)
-    webSocketService.off(CallEvent.P2P_OFFER_SDP); // P2P
-    webSocketService.off(CallEvent.P2P_ANSWER_SDP); // P2P
-    webSocketService.off(CallEvent.ICE_CANDIDATE); // P2P
-    webSocketService.off(CallEvent.SFU_ICE_CANDIDATE); // SFU
   },
 };

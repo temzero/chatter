@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import SidebarLayout from "@/pages/SidebarLayout";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { callService } from "@/services/callService";
-// import { CallActionResponse } from "@/types/callPayload";
 import { getCallText, getCallClass, getCallIcon } from "@/utils/callHelpers";
 import { formatDateTime } from "@/utils/formatDate";
 import { ChatType } from "@/types/enums/ChatType";
@@ -31,10 +30,7 @@ const SidebarCalls: React.FC = () => {
 
   function handleStartCall(call: CallResponseDto) {
     console.log("Starting call with", call);
-    startCall(call.chat.id, {
-      isVideoCall: call.isVideoCall,
-      isGroupCall: call.isGroupCall,
-    });
+    startCall(call.chat.id, call.isVideoCall);
   }
 
   return (
@@ -61,7 +57,7 @@ const SidebarCalls: React.FC = () => {
                   id: call.chat.id,
                   name: call.chat.name,
                   avatarUrl: call.chat.avatarUrl,
-                  type: call.isGroupCall ? ChatType.GROUP : ChatType.DIRECT,
+                  type: call.chat.type ? ChatType.GROUP : ChatType.DIRECT,
                   myMemberId: call.chat.myMemberId,
                 }}
                 type="sidebar"
@@ -73,8 +69,8 @@ const SidebarCalls: React.FC = () => {
                   {call.chat.name ?? "Unknown Chat"}
                 </p>
                 <p className="text-sm flex items-center gap-1">
-                  <span className={getCallClass(call)}>
-                    {getCallText(call)}
+                  <span className={getCallClass(call.status)}>
+                    {getCallText(call.status)}
                   </span>
                 </p>
                 <p className="text-xs text-muted-foreground opacity-50">
@@ -90,10 +86,10 @@ const SidebarCalls: React.FC = () => {
                 {/* Default icon */}
                 <span
                   className={`material-symbols-outlined group-hover:hidden ${getCallClass(
-                    call
+                    call.status
                   )}`}
                 >
-                  {getCallIcon(call)}
+                  {getCallIcon(call.status)}
                 </span>
 
                 {/* Hover content */}

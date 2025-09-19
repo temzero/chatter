@@ -33,31 +33,13 @@ export const enum ChatEvent {
 }
 
 export const enum CallEvent {
-  // ============ USED BY BOTH P2P & SFU ============
-  // Call lifecycle events (common to both architectures)
-  PENDING_CALLS = "call:pending", // 📞 BOTH: Check for pending calls
   INITIATE_CALL = "call:initiate", // 📞 BOTH: Start a new call
   INCOMING_CALL = "call:incoming", // 📞 BOTH: Receive incoming call notification
   UPDATE_CALL = "call:update", // 📞 BOTH: Update call state/metadata
-  UPDATE_CALL_MEMBER = "call:update-member", // 📞 BOTH: Update participant status
   ACCEPT_CALL = "call:accept", // 📞 BOTH: Accept an incoming call
   JOIN_CALL = "call:join", // 📞 BOTH: Join a call (P2P: rarely used, SFU: essential)
   DECLINE_CALL = "call:declined", // 📞 BOTH: Reject an incoming call
-  CANCEL_CALL = "call:cancel", // 📞 BOTH: Cancel outgoing call
   HANG_UP = "call:hang-up", // 📞 BOTH: Hang up from ongoing call
-  END_CALL = "call:end", // 📞 BOTH: End call completely
-  CALL_TIMEOUT = "call:timeout", // 📞 BOTH: Call timeout notification
-  CALL_STATE_CHANGE = "call:state-change", // 📞 BOTH: General call state changes
-
-  // ============ PRIMARILY FOR P2P DIRECT CALLS ============
-  // WebRTC signaling events (direct peer-to-peer connection)
-  P2P_OFFER_SDP = "call:p2p-offer", // 🔗 P2P: WebRTC offer for direct connection
-  P2P_ANSWER_SDP = "call:p2p-answer", // 🔗 P2P: WebRTC answer for direct connection
-  ICE_CANDIDATE = "call:ice-candidate", // 🔗 P2P: ICE candidates for NAT traversal
-
-  // ============ PRIMARILY FOR SFU GROUP CALLS ============
-  PARTICIPANTS_CHANGED = "call:participants-changed", // 🎥 SFU: Participants list changed (more critical for groups)
-  SFU_ICE_CANDIDATE = "call:sfu-ice-candidate", // 🎥 SFU: ICE candidates for SFU connection
 }
 
 export const enum PresenceEvent {

@@ -1,5 +1,4 @@
-import { CallActionResponse, IncomingCallResponse } from "@/types/callPayload";
-import { CallStatus, PendingCallStatus } from "@/types/enums/CallStatus";
+import { CallStatus } from "@/types/enums/CallStatus";
 
 // 🔹 Format duration from ms → "Xs", "1m12s", "1h20m"
 export const formatDuration = (ms: number) => {
@@ -14,23 +13,22 @@ export const formatDuration = (ms: number) => {
 };
 
 export const getCallText = (
-  call: CallActionResponse | IncomingCallResponse
+  status: CallStatus,
+  startedAt?: string | Date,
+  endedAt?: string | Date
 ) => {
-  switch (call.status) {
-    case PendingCallStatus.DIALING:
+  switch (status) {
+    case CallStatus.DIALING:
       return "Calling...";
-    case PendingCallStatus.IN_PROGRESS:
+    case CallStatus.IN_PROGRESS:
       return "Call in progress";
-    case CallStatus.COMPLETED: {
-      if (call.startedAt && call.endedAt) {
+    case CallStatus.COMPLETED:
+      if (startedAt && endedAt) {
         const duration =
-          new Date(call.endedAt).getTime() - new Date(call.startedAt).getTime();
+          new Date(endedAt).getTime() - new Date(startedAt).getTime();
         return `Call ended • ${formatDuration(duration)}`;
       }
       return "Call ended";
-    }
-    case CallStatus.DECLINED:
-      return "Call was declined";
     case CallStatus.MISSED:
       return "Call was missed";
     case CallStatus.FAILED:
@@ -40,13 +38,10 @@ export const getCallText = (
   }
 };
 
-export const getCallClass = (
-  call: CallActionResponse | IncomingCallResponse
-) => {
-  switch (call.status) {
+export const getCallClass = (status: CallStatus) => {
+  switch (status) {
     case CallStatus.COMPLETED:
       return "text-yellow-600";
-    case CallStatus.DECLINED:
     case CallStatus.MISSED:
     case CallStatus.FAILED:
       return "text-red-600";
@@ -55,18 +50,14 @@ export const getCallClass = (
   }
 };
 
-export const getCallIcon = (
-  call: CallActionResponse | IncomingCallResponse
-) => {
-  switch (call.status) {
-    case PendingCallStatus.DIALING:
+export const getCallIcon = (status: CallStatus) => {
+  switch (status) {
+    case CallStatus.DIALING:
       return "ring_volume";
-    case PendingCallStatus.IN_PROGRESS:
+    case CallStatus.IN_PROGRESS:
       return "phone_in_talk";
     case CallStatus.COMPLETED:
       return "call_end";
-    case CallStatus.DECLINED:
-      return "phone_disabled";
     case CallStatus.MISSED:
       return "phone_missed";
     case CallStatus.FAILED:

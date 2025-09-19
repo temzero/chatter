@@ -9,37 +9,57 @@ export const messageService = {
     chatId: string,
     options: PaginationQuery = { limit: 10 }
   ): Promise<{ messages: MessageResponse[]; hasMore: boolean }> {
-    const { offset, beforeId, limit } = options;
+    try {
+      const { offset, beforeId, limit } = options;
 
-    const { data } = await API.get(`/messages/chat/${chatId}`, {
-      params: {
-        ...(offset !== undefined ? { offset } : {}),
-        ...(beforeId ? { beforeId } : {}),
-        limit,
-      },
-    });
+      const { data } = await API.get(`/messages/chat/${chatId}`, {
+        params: {
+          ...(offset !== undefined ? { offset } : {}),
+          ...(beforeId ? { beforeId } : {}),
+          limit,
+        },
+      });
 
-    const { messages, hasMore } = data.payload;
-    return { messages, hasMore };
+      const { messages, hasMore } = data.payload;
+      return { messages, hasMore };
+    } catch (error) {
+      console.error("Error fetching chat messages:", error);
+      throw new Error("Failed to fetch chat messages");
+    }
   },
 
   async sendMessage(payload: SendMessageRequest): Promise<MessageResponse> {
-    if (!payload.content && !payload.attachments) {
-      throw new Error("Message must have content or attachments");
+    try {
+      if (!payload.content && !payload.attachments) {
+        throw new Error("Message must have content or attachments");
+      }
+      const { data } = await API.post("/messages", payload);
+      return data;
+    } catch (error) {
+      console.error("Error sending message:", error);
+      throw new Error("Failed to send message");
     }
-    const { data } = await API.post("/messages", payload);
-    return data;
   },
 
   async editMessage(
     messageId: string,
     updateData: UpdateMessageRequest
   ): Promise<MessageResponse> {
-    const { data } = await API.put(`/messages/${messageId}`, updateData);
-    return data;
+    try {
+      const { data } = await API.put(`/messages/${messageId}`, updateData);
+      return data;
+    } catch (error) {
+      console.error("Error editing message:", error);
+      throw new Error("Failed to edit message");
+    }
   },
 
   async deleteMessage(messageId: string): Promise<void> {
-    await API.delete(`/messages/${messageId}`);
+    try {
+      await API.delete(`/messages/${messageId}`);
+    } catch (error) {
+      console.error("Error deleting message:", error);
+      throw new Error("Failed to delete message");
+    }
   },
 };

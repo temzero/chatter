@@ -4,5 +4,5 @@ export class CreateCallDto {
   chatId: string;
   initiatorUserId: string;
   status: CallStatus;
-  maxParticipants?: number;
+  attendedUserIds?: string[];
 }

@@ -117,6 +117,7 @@ export class MessageMapper {
             nickname: call.initiator.nickname,
           }
         : null,
+      attendedUserIds: call.attendedUserIds || [],
     });
   }
 

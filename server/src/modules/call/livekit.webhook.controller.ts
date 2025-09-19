@@ -2,7 +2,9 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { CallService } from './call.service';
 import { CallStatus } from './type/callStatus';
-import { ChatService } from '../chat/chat.service';
+import { MessageService } from '../message/message.service';
+import { SystemEventType } from '../message/constants/system-event-type.constants';
+import { CallStoreService } from '../websocket/services/call-store.service ';
 
 interface LivekitWebhookPayload {
   event: string;
@@ -23,57 +25,84 @@ interface LivekitWebhookPayload {
 export class LivekitWebhookController {
   constructor(
     private readonly callService: CallService,
-    private readonly chatService: ChatService,
+    private readonly callStore: CallStoreService,
+    private readonly messageService: MessageService,
   ) {}
 
   @Post()
   async handleWebhook(@Body() payload: LivekitWebhookPayload) {
-    console.log('📡 LiveKit event:', payload.event);
+    const userId = payload.participant?.identity;
+    const roomName = payload.room.name;
 
     switch (payload.event) {
-      case 'room_started':
+      case 'room_started': {
+        // Create call with initial attendee if participant exists
         await this.callService.createCall({
-          chatId: payload.room.name,
+          chatId: roomName,
           status: CallStatus.DIALING,
-          initiatorUserId: payload.participant?.identity || 'system',
-          maxParticipants: 1,
+          initiatorUserId: userId || 'system',
+          attendedUserIds: userId ? [userId] : [],
         });
         break;
+      }
 
-      case 'participant_connected':
-        // Each time someone joins, bump maxParticipants if needed
-        if (payload.room.numParticipants && payload.room.numParticipants > 1) {
-          await this.callService.updateCall(payload.room.name, {
-            status: CallStatus.IN_PROGRESS,
-            startedAt: new Date(payload.room.creationTime ?? Date.now()),
-            maxParticipants: payload.room.numParticipants, // track highest
-          });
-        } else {
-          await this.callService.updateCall(payload.room.name, {
-            maxParticipants: payload.room.numParticipants,
-          });
-        }
-        break;
+      case 'participant_connected': {
+        if (!userId) break;
 
-      case 'room_finished': {
-        const call = await this.callService.getCallById(payload.room.name);
+        // Track user in ephemeral store
+        this.callStore.addUserToCall(userId, roomName);
 
-        if (!call) return;
+        // Update call in DB
+        const call = await this.callService.getCallById(roomName);
+        if (!call) break;
 
-        if ((call.maxParticipants ?? 1) <= 1) {
-          // nobody else ever joined
-          await this.callService.updateCall(payload.room.name, {
-            status: CallStatus.MISSED,
-            endedAt: new Date(),
-          });
-        } else {
-          await this.callService.updateCall(payload.room.name, {
-            status: CallStatus.COMPLETED,
-            endedAt: new Date(),
-          });
-        }
+        const updatedAttendees = new Set(call.attendedUserIds || []);
+        updatedAttendees.add(userId);
+
+        await this.callService.updateCall(roomName, {
+          status: CallStatus.IN_PROGRESS,
+          startedAt:
+            call.startedAt || new Date(payload.room.creationTime ?? Date.now()),
+          attendedUserIds: Array.from(updatedAttendees),
+        });
         break;
       }
+
+      case 'participant_disconnected': {
+        if (!userId) break;
+        this.callStore.removeUserFromCall(userId);
+        break;
+      }
+
+      case 'room_finished': {
+        this.callStore.removeAllUsersFromCall(roomName);
+
+        const call = await this.callService.getCallById(roomName);
+        if (!call) break;
+
+        const status =
+          (call.attendedUserIds?.length ?? 1) <= 1
+            ? CallStatus.MISSED
+            : CallStatus.COMPLETED;
+
+        const endedAt = new Date();
+        const updatedCall = await this.callService.updateCall(roomName, {
+          status,
+          endedAt,
+        });
+
+        await this.messageService.createSystemEventMessage(
+          call.chat.id,
+          call.initiator.user.id,
+          SystemEventType.CALL,
+          { call: updatedCall },
+        );
+
+        break;
+      }
+
+      default:
+        break;
     }
   }
 }

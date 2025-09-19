@@ -5,12 +5,12 @@ import { audioService } from "@/services/audio.service";
 import { useModalStore, ModalType } from "../modalStore";
 import { useMessageStore } from "../messageStore";
 import { CallStatus, LocalCallStatus } from "@/types/enums/CallStatus";
-import { callService } from "@/services/callService";
 import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
 import { LiveKitService } from "@/services/liveKitService";
 import { getMyToken } from "./helpers/call.helper";
 import { handleError } from "@/utils/handleError";
 import { Room } from "livekit-client";
+import { CallError, CallWebsocketResponse } from "@/types/callPayload";
 
 export interface CallState {
   liveKitService: LiveKitService | null;
@@ -24,17 +24,12 @@ export interface CallState {
   startedAt?: Date;
   endedAt?: Date;
 
-  error?:
-    | "permission_denied"
-    | "device_unavailable"
-    | "connection_failed"
-    | "sfu_init_failed"
-    | null;
+  error?: CallError | null;
 }
 
 export interface CallActions {
   // lifecycle
-  startCall: (chatId: string, opt?: { isVideoCall?: boolean }) => Promise<void>;
+  startCall: (chatId: string, isVideoCall?: boolean) => Promise<void>;
   acceptCall: (options: {
     isVoiceEnabled?: boolean;
     isVideoEnabled?: boolean;
@@ -84,9 +79,7 @@ export const useCallStore = create<CallState & CallActions>()(
     error: null,
 
     // ========== LIFECYCLE ==========
-    startCall: async (chatId, opt) => {
-      const isVideoCall = opt?.isVideoCall ?? false;
-
+    startCall: async (chatId, isVideoCall: false) => {
       try {
         // update base state
         set({
@@ -114,7 +107,7 @@ export const useCallStore = create<CallState & CallActions>()(
           console.warn("No token available for LiveKit");
           set({
             localCallStatus: LocalCallStatus.ERROR,
-            error: "permission_denied",
+            error: CallError.PERMISSION_DENIED,
           });
           return;
         }
@@ -125,14 +118,24 @@ export const useCallStore = create<CallState & CallActions>()(
           { audio: true, video: isVideoCall }
         );
 
-        callWebSocketService.initiateCall({
-          chatId,
-          isVideoCall,
-        });
+        const response: CallWebsocketResponse =
+          await callWebSocketService.initiateCall({
+            chatId,
+            isVideoCall,
+          });
+
+        if (!response.success) {
+          set({
+            localCallStatus: LocalCallStatus.ERROR,
+            error: response.reason ?? CallError.LINE_BUSY,
+          });
+          audioService.stopAllSounds();
+          return;
+        }
       } catch (err) {
         console.error("startCall error", err);
         set({
-          error: "sfu_init_failed",
+          error: CallError.INITIATION_FAILED,
           localCallStatus: LocalCallStatus.ERROR,
         });
         audioService.stopAllSounds();
@@ -157,7 +160,7 @@ export const useCallStore = create<CallState & CallActions>()(
           console.warn("No token available for LiveKit");
           set({
             localCallStatus: LocalCallStatus.ERROR,
-            error: "permission_denied",
+            error: CallError.PERMISSION_DENIED,
           });
           return;
         }
@@ -197,40 +200,30 @@ export const useCallStore = create<CallState & CallActions>()(
     },
 
     endCall: async (opt = {}) => {
-      const { chatId, callId, error } = get();
+      const { chatId, callId } = get();
 
-      let status: CallStatus;
-      if (opt.isRejected || opt.isTimeout) status = CallStatus.MISSED;
-      else if (error) status = CallStatus.FAILED;
-      else status = CallStatus.COMPLETED;
-
-      if (callId) {
-        try {
-          await callService.updateCall(callId, {
-            status,
-            endedAt: new Date().toISOString(),
-          });
-        } catch (err) {
-          console.error("Failed to update call on server:", err);
-        }
-      }
-
-      if (chatId && callId) {
-        useMessageStore
-          .getState()
-          .updateMessageCallStatus(chatId, callId, status);
-      }
-
+      // 🔹 Just disconnect from LiveKit
       get().disconnectFromLiveKit();
 
+      // 🔹 Update local state only (UI purposes)
       set({
         localCallStatus: opt.isRejected
           ? LocalCallStatus.REJECTED
           : opt.isCancel
           ? LocalCallStatus.CANCELED
+          : opt.isTimeout
+          ? LocalCallStatus.ENDED // missed will be handled by server
           : LocalCallStatus.ENDED,
         endedAt: new Date(),
       });
+
+      // 🔹 Let server handle DB + system message creation
+      // If you want UI to reflect instantly, you could still optimistically update message store:
+      if (chatId && callId) {
+        useMessageStore
+          .getState()
+          .updateMessageCallStatus(chatId, callId, CallStatus.COMPLETED);
+      }
     },
 
     // ========== MEDIA ==========

@@ -52,15 +52,23 @@ export class CallController {
   async getPendingCalls(
     @CurrentUser('id') userId: string,
   ): Promise<SuccessResponse<IncomingCallResponse[]>> {
+    console.log('getPendingCalls for userId:', userId);
     try {
       // 1. Get all chatIds this user belongs to
       const chatIds = await this.chatMemberService.getChatIdsByUserId(userId);
+      console.log('User chatIds:', chatIds);
+
+      if (chatIds.length === 0) {
+        return new SuccessResponse([], 'No chats found for user');
+      }
 
       // 2. Get active rooms from LiveKit that match those chatIds
       const activeRooms = await this.liveKitService.getActiveRoomsForUser(
         userId,
         chatIds,
       );
+
+      console.log('Rooms from LiveKit:', activeRooms);
 
       // 3. Map active rooms into IncomingCallResponse shape
       const pendingCalls: IncomingCallResponse[] = await Promise.all(
@@ -200,15 +208,15 @@ export class CallController {
     @CurrentUser('id') userId: string,
     @Body()
     body: {
-      roomName: string;
+      chatId: string;
       participantName?: string;
       avatarUrl?: string;
     },
   ): Promise<SuccessResponse<{ token: string }>> {
     try {
-      const { roomName, participantName, avatarUrl } = body;
+      const { chatId, participantName, avatarUrl } = body;
       const token = await this.liveKitService.generateLivekitToken(
-        roomName,
+        chatId,
         userId,
         participantName,
         avatarUrl,

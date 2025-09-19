@@ -24,5 +24,5 @@ export class CallResponseDto {
   @Expose() createdAt: Date;
 
   @Expose()
-  participants: ChatMemberResponseDto[];
+  attendedUserIds: string[];
 }
