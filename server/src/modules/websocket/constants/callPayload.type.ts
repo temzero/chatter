@@ -8,6 +8,7 @@ export interface UpdateCallPayload {
   chatId: string;
   isVideoCall?: boolean;
   callStatus?: CallStatus;
+  endedAt?: string;
 }
 
 // -------------------- Requests --------------------
@@ -40,13 +41,19 @@ export interface CallActionResponse {
 }
 
 export interface IncomingCallResponse {
-  callId?: string; // optional, if no call entity exists yet
+  callId: string; // optional, if no call entity exists yet
   chatId: string; // room/chat identifier
   status: CallStatus; // DIALING or IN_PROGRESS
   participantsCount: number; // number of participants in the room
   initiatorMemberId?: string; // optional if known
   isVideoCall?: boolean; // optional if known
   startedAt?: Date; // optional if known
+}
+
+export interface CallErrorResponse {
+  reason: CallError;
+  callId?: string;
+  chatId?: string;
 }
 
 export enum CallError {

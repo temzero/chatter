@@ -5,8 +5,6 @@ import { CallStatus } from './type/callStatus';
 import { MessageService } from '../message/message.service';
 import { SystemEventType } from '../message/constants/system-event-type.constants';
 import { CallStoreService } from '../websocket/services/call-store.service ';
-import { WebsocketCallService } from '../websocket/services/websocket-call.service';
-import { ChatType } from '../chat/constants/chat-types.constants';
 
 interface LivekitWebhookPayload {
   event: string;
@@ -29,7 +27,6 @@ export class LivekitWebhookController {
     private readonly callService: CallService,
     private readonly callStore: CallStoreService,
     private readonly messageService: MessageService,
-    private readonly websocketCallService: WebsocketCallService,
   ) {}
 
   @Post()
@@ -39,24 +36,12 @@ export class LivekitWebhookController {
 
     switch (payload.event) {
       case 'room_started': {
-        const call = await this.callService.createCall({
+        await this.callService.createCall({
           chatId: roomName,
           status: CallStatus.DIALING,
           initiatorUserId: userId || 'system',
           attendedUserIds: userId ? [userId] : [],
         });
-
-        // 🔔 INCOMING_CALL
-        if (userId) {
-          const isVideoCall = call.chat.type === ChatType.GROUP;
-          await this.websocketCallService.emitIncomingCall(
-            call.id,
-            roomName,
-            userId,
-            isVideoCall,
-          );
-        }
-
         break;
       }
 
@@ -65,7 +50,7 @@ export class LivekitWebhookController {
         // Track user in ephemeral store
         this.callStore.addUserToCall(userId, roomName);
         // Update call in DB
-        const call = await this.callService.getActiveCallByChatId(roomName);
+        const call = await this.callService.getCallById(roomName);
         if (!call) break;
 
         const updatedAttendees = new Set(call.attendedUserIds || []);
@@ -77,15 +62,6 @@ export class LivekitWebhookController {
             call.startedAt || new Date(payload.room.creationTime ?? Date.now()),
           attendedUserIds: Array.from(updatedAttendees),
         });
-
-        // 🔔 emit IN_PROGRESS
-        await this.websocketCallService.emitUpdateCall(
-          call.id, // using roomName as callId if you don't have DB ID
-          roomName,
-          CallStatus.IN_PROGRESS,
-          userId,
-        );
-
         break;
       }
 
@@ -98,7 +74,7 @@ export class LivekitWebhookController {
       case 'room_finished': {
         this.callStore.removeAllUsersFromCall(roomName);
 
-        const call = await this.callService.getActiveCallByChatId(roomName);
+        const call = await this.callService.getCallById(roomName);
         if (!call) break;
 
         const status =
@@ -111,14 +87,6 @@ export class LivekitWebhookController {
           status,
           endedAt,
         });
-
-        // 🔔 emit MISSED / COMPLETED
-        await this.websocketCallService.emitEndedCall(
-          call.id, // callId
-          roomName,
-          status,
-          endedAt,
-        );
 
         await this.messageService.createSystemEventMessage(
           call.chat.id,

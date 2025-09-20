@@ -1,4 +1,5 @@
 // stores/call/useCallStore.ts
+import { Room } from "livekit-client";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { audioService } from "@/services/audio.service";
@@ -9,8 +10,12 @@ import { callWebSocketService } from "@/lib/websocket/services/call.websocket.se
 import { LiveKitService } from "@/services/liveKitService";
 import { getMyToken } from "./helpers/call.helper";
 import { handleError } from "@/utils/handleError";
-import { Room } from "livekit-client";
-import { CallError, CallWebsocketResponse } from "@/types/callPayload";
+import {
+  CallError,
+  // CallErrorResponse,
+  IncomingCallResponse,
+} from "@/types/callPayload";
+import { callService } from "@/services/callService";
 
 export interface CallState {
   liveKitService: LiveKitService | null;
@@ -18,6 +23,8 @@ export interface CallState {
   callId: string | null;
   chatId: string | null;
   initiatorMemberId?: string;
+
+  callStatus: CallStatus | null;
   localCallStatus: LocalCallStatus | null;
   isVideoCall: boolean;
   timeoutRef?: NodeJS.Timeout | null;
@@ -30,7 +37,7 @@ export interface CallState {
 export interface CallActions {
   // lifecycle
   startCall: (chatId: string, isVideoCall?: boolean) => Promise<void>;
-  acceptCall: (options: {
+  joinCall: (options: {
     isVoiceEnabled?: boolean;
     isVideoEnabled?: boolean;
   }) => Promise<void>;
@@ -47,6 +54,12 @@ export interface CallActions {
   toggleLocalScreenShare: (enable?: boolean) => Promise<void>;
 
   // utils
+  isChatInCall: (chatId: string) => {
+    isInCall: boolean;
+    isVideoCall: boolean;
+    callStatus: LocalCallStatus | null;
+  };
+  getActiveCall: (chatId: string) => Promise<IncomingCallResponse | null>;
   setLocalCallStatus: (s: LocalCallStatus) => void;
   getCallDuration: () => number;
   closeCallModal: () => void;
@@ -118,20 +131,20 @@ export const useCallStore = create<CallState & CallActions>()(
           { audio: true, video: isVideoCall }
         );
 
-        const response: CallWebsocketResponse =
-          await callWebSocketService.initiateCall({
-            chatId,
-            isVideoCall,
-          });
+        // const response: CallErrorResponse =
+        //   await callWebSocketService.initiateCall({
+        //     chatId,
+        //     isVideoCall,
+        //   });
 
-        if (!response.success) {
-          set({
-            localCallStatus: LocalCallStatus.ERROR,
-            error: response.reason ?? CallError.LINE_BUSY,
-          });
-          audioService.stopAllSounds();
-          return;
-        }
+        // if (!response.success) {
+        //   set({
+        //     localCallStatus: LocalCallStatus.ERROR,
+        //     error: response.reason ?? CallError.LINE_BUSY,
+        //   });
+        //   audioService.stopAllSounds();
+        //   return;
+        // }
       } catch (err) {
         console.error("startCall error", err);
         set({
@@ -142,7 +155,7 @@ export const useCallStore = create<CallState & CallActions>()(
       }
     },
 
-    acceptCall: async (options?: {
+    joinCall: async (options?: {
       isVoiceEnabled?: boolean;
       isVideoEnabled?: boolean;
     }) => {
@@ -174,11 +187,11 @@ export const useCallStore = create<CallState & CallActions>()(
           }
         );
 
-        callWebSocketService.acceptCall({
-          chatId,
-          callId,
-          isCallerCancel: false,
-        });
+        // callWebSocketService.joinCall({
+        //   chatId,
+        //   callId,
+        //   isCallerCancel: false,
+        // });
       } catch (err) {
         handleError(err, "Could not connect to SFU");
         set({ localCallStatus: LocalCallStatus.ERROR });
@@ -261,6 +274,39 @@ export const useCallStore = create<CallState & CallActions>()(
     },
 
     // ========== UTILS ==========
+    isChatInCall: (chatId: string) => {
+      const state = get();
+      return {
+        isInCall:
+          state.chatId === chatId &&
+          state.localCallStatus !== LocalCallStatus.ENDED,
+        isVideoCall: state.isVideoCall,
+        callStatus: state.localCallStatus,
+      };
+    },
+
+    getActiveCall: async (chatId: string) => {
+      try {
+        const call = await callService.fetchActiveCall(chatId); // call service directly
+        if (call) {
+          set({
+            callId: call.callId,
+            chatId: call.chatId,
+            isVideoCall: call.isVideoCall,
+            localCallStatus:
+              call.status === CallStatus.IN_PROGRESS
+                ? LocalCallStatus.CONNECTED
+                : LocalCallStatus.INCOMING,
+            startedAt: call.startedAt ? new Date(call.startedAt) : undefined,
+          });
+        }
+        return call;
+      } catch (error) {
+        console.error("Failed to fetch active call:", error);
+        return null;
+      }
+    },
+
     setLocalCallStatus: (s) => set({ localCallStatus: s }),
 
     getCallDuration: () => {

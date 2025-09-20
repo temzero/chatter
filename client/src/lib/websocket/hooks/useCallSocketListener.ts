@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { callWebSocketService } from "../services/call.websocket.service";
 import { toast } from "react-toastify";
-import { LocalCallStatus } from "@/types/enums/CallStatus";
+import { LocalCallStatus, CallStatus } from "@/types/enums/CallStatus";
 import { handleError } from "@/utils/handleError";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { useCallStore } from "@/stores/callStore/callStore";
@@ -12,6 +12,8 @@ import {
   CallActionResponse,
   UpdateCallPayload,
   IncomingCallResponse,
+  CallError,
+  CallErrorResponse,
 } from "@/types/callPayload";
 
 export function useCallSocketListeners() {
@@ -21,11 +23,9 @@ export function useCallSocketListeners() {
     const fetchPendingCalls = async () => {
       try {
         const pendingCalls: IncomingCallResponse[] =
-          await callService.getPendingCalls();
-        console.log("Pending calls:", pendingCalls);
+          await callService.fetchPendingCalls();
 
         if (pendingCalls?.length > 0) {
-          // The server already returns newest first, so just take the first
           const mostRecentCall = pendingCalls[0];
           handleIncomingCall(mostRecentCall);
 
@@ -40,13 +40,13 @@ export function useCallSocketListeners() {
     };
 
     const handleIncomingCall = (callResponse: IncomingCallResponse) => {
-      console.log("handleIncomingCall", callResponse);
       useCallStore.setState({
         callId: callResponse.callId,
         chatId: callResponse.chatId,
-        isVideoCall: callResponse.isVideoCall,
+        isVideoCall: callResponse.isVideoCall ?? false,
         initiatorMemberId: callResponse.initiatorMemberId,
         localCallStatus: LocalCallStatus.INCOMING,
+        callStatus: callResponse.status, // 🔹 sync server status
       });
 
       useModalStore.getState().openModal(ModalType.CALL);
@@ -64,43 +64,39 @@ export function useCallSocketListeners() {
 
     const handleUpdateCall = (updatedCall: UpdateCallPayload) => {
       console.log("handleUpdateCall");
-      const { callId, isVideoCall } = updatedCall;
+      const { callId, isVideoCall, callStatus } = updatedCall;
       const callStore = useCallStore.getState();
 
       if (callStore.callId === callId) {
-        // Update call type and handle stream changes
-        useCallStore.setState({ isVideoCall });
+        useCallStore.setState({
+          isVideoCall: isVideoCall ?? callStore.isVideoCall,
+          callStatus: callStatus ?? callStore.callStatus, // 🔹 sync server status
+        });
 
         if (isVideoCall && !callStore.isVideoCall) {
-          // For SFU calls, video is handled by LiveKit internally
           console.log("SFU call - video will be handled by LiveKit");
         }
 
         if (!isVideoCall && callStore.isVideoCall) {
-          // For SFU calls, toggle video off through LiveKit
-          useCallStore
-            .getState()
+          callStore
             .toggleLocalVideo()
             .catch((err) => console.error("Failed to disable SFU video:", err));
         }
       }
     };
 
-    const handleCallAccepted = async (callResponse: CallActionResponse) => {
-      console.log("handleCallAccepted");
-
+    const handleJoinCall = async (callResponse: CallActionResponse) => {
+      console.log("handleJoinCall");
       const callStore = useCallStore.getState();
-      callStore.setLocalCallStatus(LocalCallStatus.CONNECTING);
 
-      if (callStore.chatId !== callResponse.chatId) {
+      if (callStore.callId !== callResponse.callId) {
         console.warn("Accepted call does not match current call");
         return;
       }
 
-      // Update call info in store
       useCallStore.setState({
-        chatId: callResponse.chatId,
         localCallStatus: LocalCallStatus.CONNECTED,
+        callStatus: callResponse.status ?? CallStatus.IN_PROGRESS, // 🔹 sync server status
       });
     };
 
@@ -111,9 +107,11 @@ export function useCallSocketListeners() {
       if (callStore.callId === data.callId) {
         if (data.isCallerCancel) {
           callStore.endCall({ isCancel: true });
+          useCallStore.setState({ callStatus: CallStatus.FAILED }); // 🔹 sync server
           toast.info("Call canceled by caller");
         } else {
           callStore.endCall({ isRejected: true });
+          useCallStore.setState({ callStatus: CallStatus.FAILED }); // 🔹 sync server
           toast.info("Call rejected");
         }
       }
@@ -128,6 +126,38 @@ export function useCallSocketListeners() {
         const room = callStore.getLiveKitRoom();
         if (room && room.remoteParticipants.size === 0) {
           callStore.endCall();
+          useCallStore.setState({
+            callStatus: data.status ?? CallStatus.COMPLETED, // 🔹 sync server
+          });
+        }
+      }
+    };
+
+    const handleCallEnded = (data: UpdateCallPayload) => {
+      const callStore = useCallStore.getState();
+
+      if (callStore.callId === data.callId) {
+        toast.info("Call ended");
+        callStore.endCall();
+        useCallStore.setState({
+          callStatus: data.callStatus ?? CallStatus.COMPLETED,
+        });
+      }
+    };
+
+    const handleCallError = (data: CallErrorResponse) => {
+      console.warn("Call error:", data);
+
+      if (data.reason === CallError.LINE_BUSY) {
+        toast.error("Cannot start call: line is busy");
+        const callStore = useCallStore.getState();
+        if (callStore.callId === data.callId) {
+          callStore.endCall();
+          useCallStore.setState({
+            callStatus: CallStatus.FAILED,
+            localCallStatus: LocalCallStatus.ERROR,
+            error: CallError.LINE_BUSY,
+          });
         }
       }
     };
@@ -136,11 +166,12 @@ export function useCallSocketListeners() {
     callWebSocketService.removeAllListeners();
     callWebSocketService.onIncomingCall(handleIncomingCall);
     callWebSocketService.onCallUpdated(handleUpdateCall);
-    callWebSocketService.onCallAccepted(handleCallAccepted);
+    callWebSocketService.onJoinCall(handleJoinCall);
     callWebSocketService.onCallRejected(handleCallRejected);
     callWebSocketService.onHangup(handleHangUp);
+    callWebSocketService.onCallEnded(handleCallEnded);
+    callWebSocketService.onCallError(handleCallError);
 
-    // Fetch pending calls from database on mount
     fetchPendingCalls();
 
     return () => {

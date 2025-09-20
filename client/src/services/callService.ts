@@ -8,7 +8,7 @@ export const callService = {
    * Request a LiveKit token from backend
    */
   // Frontend
-  async getLiveKitToken(
+  async fetchLiveKitToken(
     chatId: string,
     participantName?: string,
     avatarUrl?: string
@@ -30,7 +30,17 @@ export const callService = {
     }
   },
 
-  async getPendingCalls(): Promise<IncomingCallResponse[]> {
+  async fetchActiveCall(chatId: string): Promise<IncomingCallResponse> {
+    try {
+      const { data } = await API.get(`/calls/active/${chatId}`);
+      return data.payload ?? data;
+    } catch (error) {
+      console.error("Failed to fetch pending calls:", error);
+      throw error;
+    }
+  },
+
+  async fetchPendingCalls(): Promise<IncomingCallResponse[]> {
     try {
       const { data } = await API.get(`/calls/pending`);
       // Adjust based on your API response structure
@@ -44,16 +54,8 @@ export const callService = {
   /**
    * Fetch calls history
    */
-  async getCallHistory(): Promise<CallResponseDto[]> {
+  async fetchCallHistory(): Promise<CallResponseDto[]> {
     const { data } = await API.get(`/calls/history/`);
-    return data.payload ?? data;
-  },
-
-  /**
-   * Get a specific call by ID
-   */
-  async getCallById(callId: string): Promise<CallResponseDto> {
-    const { data } = await API.get(`/calls/${callId}`);
     return data.payload ?? data;
   },
 };

@@ -16,7 +16,7 @@ const SidebarCalls: React.FC = () => {
   useEffect(() => {
     const fetchCalls = async () => {
       try {
-        const res = await callService.getCallHistory();
+        const res = await callService.fetchCallHistory();
         console.log("Fetched call history:", res);
         setCalls(res); // ✅ already matches CallHistoryResponse[]
       } catch (err) {

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial, Repository } from 'typeorm';
+import { DeepPartial, In, Repository } from 'typeorm';
 import { Call } from './entities/call.entity';
 import { CreateCallDto } from './dto/create-call.dto';
 import { UpdateCallDto } from './dto/update-call.dto';
@@ -102,6 +102,17 @@ export class CallService {
       where: { chat: { id: chatId } },
       relations: ['initiator'],
       order: { startedAt: 'DESC' },
+    });
+  }
+
+  async getActiveCallByChatId(chatId: string): Promise<Call | null> {
+    return this.callRepository.findOne({
+      where: {
+        chat: { id: chatId },
+        status: In([CallStatus.DIALING, CallStatus.IN_PROGRESS]),
+      },
+      relations: ['chat', 'initiator'],
+      order: { createdAt: 'DESC' }, // get the latest active call
     });
   }
 

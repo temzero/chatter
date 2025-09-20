@@ -43,8 +43,6 @@ export class MessageController {
     );
 
     const messageResponse = this.messageMapper.toMessageResponseDto(message);
-    // console.log('messageResponse: ', messageResponse);
-
     return new SuccessResponse(messageResponse, 'Message created successfully');
   }
 

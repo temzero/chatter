@@ -52,12 +52,9 @@ export class CallController {
   async getPendingCalls(
     @CurrentUser('id') userId: string,
   ): Promise<SuccessResponse<IncomingCallResponse[]>> {
-    console.log('getPendingCalls for userId:', userId);
     try {
       // 1. Get all chatIds this user belongs to
       const chatIds = await this.chatMemberService.getChatIdsByUserId(userId);
-      console.log('User chatIds:', chatIds);
-
       if (chatIds.length === 0) {
         return new SuccessResponse([], 'No chats found for user');
       }
@@ -68,16 +65,14 @@ export class CallController {
         chatIds,
       );
 
-      console.log('Rooms from LiveKit:', activeRooms);
-
       // 3. Map active rooms into IncomingCallResponse shape
       const pendingCalls: IncomingCallResponse[] = await Promise.all(
         activeRooms.map(async (room) => {
           // 1. Fetch chat data for this room/chatId
-          const chat = await this.chatService.getChatById(room.name); // or getChatFromData(room.name)
+          const chat = await this.chatService.getChatById(room.name);
 
           // 2. Determine call type
-          const isVideoCall = chat.type !== ChatType.DIRECT ? true : false; // or derive from your rules
+          const isVideoCall = chat.type !== ChatType.DIRECT;
 
           const status =
             room.numParticipants <= 1
@@ -85,7 +80,6 @@ export class CallController {
               : CallStatus.IN_PROGRESS;
 
           return {
-            callId: room.name, // optional, match your call entity if exists
             chatId: room.name, // roomName = chatId
             status,
             participantsCount: room.numParticipants,
@@ -102,22 +96,53 @@ export class CallController {
         'Pending calls retrieved successfully',
       );
     } catch (error: unknown) {
+      console.error('[getPendingCalls] Error:', error);
       ErrorResponse.throw(error, 'Failed to retrieve pending calls');
     }
   }
 
-  @Get(':id')
-  async getCall(
-    @Param('id') id: string,
-  ): Promise<SuccessResponse<CallResponseDto>> {
+  @Get('active/:chatId')
+  async getActiveCall(
+    @Param('chatId') chatId: string,
+    @CurrentUser('id') userId: string,
+  ): Promise<SuccessResponse<IncomingCallResponse | null>> {
     try {
-      const call = await this.callService.getCallById(id);
+      // 1. Get active room from LiveKit for this specific chat
+      const room = await this.liveKitService.getActiveRoomForChat(
+        userId,
+        chatId,
+      );
+
+      if (!room) {
+        return new SuccessResponse(null, 'No active call found');
+      }
+
+      // 2. Fetch chat data for this room/chatId
+      const chat = await this.chatService.getChatById(room.name);
+
+      // 3. Determine call type
+      const isVideoCall = chat.type !== ChatType.DIRECT;
+
+      const status =
+        room.numParticipants <= 1 ? CallStatus.DIALING : CallStatus.IN_PROGRESS;
+
+      const activeCall: IncomingCallResponse = {
+        chatId: room.name,
+        status,
+        participantsCount: room.numParticipants,
+        isVideoCall,
+        startedAt: room.creationTime
+          ? new Date(Number(room.creationTime) * 1000)
+          : undefined,
+      };
+
       return new SuccessResponse(
-        plainToInstance(CallResponseDto, call),
-        'Call retrieved successfully',
+        activeCall,
+        'Active call retrieved successfully',
       );
     } catch (error: unknown) {
-      ErrorResponse.throw(error, 'Failed to retrieve call');
+      console.error('[getActiveCall] Error:', error);
+      ErrorResponse.throw(error, 'Failed to retrieve active call');
     }
   }
 
@@ -146,7 +171,7 @@ export class CallController {
       const newCall = await this.callService.createCall({
         chatId: body.chatId,
         initiatorUserId: userId,
-        status: CallStatus.DIALING, // or PENDING, depending on your flow
+        status: CallStatus.DIALING,
       });
 
       return new SuccessResponse(

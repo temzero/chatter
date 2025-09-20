@@ -1,7 +1,12 @@
 // livekit.service.ts
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AccessToken, RoomServiceClient, VideoGrant } from 'livekit-server-sdk';
+import {
+  AccessToken,
+  Room,
+  RoomServiceClient,
+  VideoGrant,
+} from 'livekit-server-sdk';
 
 @Injectable()
 export class LivekitService {
@@ -51,19 +56,43 @@ export class LivekitService {
     }
   }
 
-  async getActiveRoomsForUser(userId: string, chatIds: string[]) {
-    console.log('LiveKitService.getActiveRoomsForUser called', {
-      userId,
-      chatIds,
-    });
+  async getActiveRoomForChat(
+    userId: string,
+    chatId: string,
+  ): Promise<Room | null> {
+    try {
+      const rooms = await this.roomService.listRooms();
 
+      if (!rooms || rooms.length === 0) return null;
+
+      // Find the room with the exact chatId
+      const room = rooms.find((r) => r.name === chatId);
+
+      if (!room) return null;
+
+      // Check if user is already in this room
+      try {
+        const participants = await this.roomService.listParticipants(room.name);
+        const isUserInRoom = participants.some((p) => p.identity === userId);
+
+        // Return null if user is already in the room
+        return isUserInRoom ? null : room;
+      } catch (err) {
+        console.error(`Failed to get participants for room ${room.name}:`, err);
+        return null; // skip this room if participant check fails
+      }
+    } catch (error) {
+      console.error('Failed to get active room for chat:', error);
+      return null;
+    }
+  }
+
+  async getActiveRoomsForUser(userId: string, chatIds: string[]) {
     const rooms = await this.roomService.listRooms();
-    console.log('All rooms from LiveKit listRooms:', rooms);
 
     if (!rooms || rooms.length === 0) return [];
 
     const matchingRooms = rooms.filter((room) => chatIds.includes(room.name));
-    console.log('Matching rooms:', matchingRooms);
 
     const pendingRooms = await Promise.all(
       matchingRooms.map(async (room) => {
@@ -85,8 +114,6 @@ export class LivekitService {
     const filteredRooms = pendingRooms.filter(
       (r): r is NonNullable<typeof r> => r !== null,
     );
-
-    console.log('Filtered pending rooms:', filteredRooms);
 
     return filteredRooms.sort(
       (a, b) => Number(b.creationTime) - Number(a.creationTime),

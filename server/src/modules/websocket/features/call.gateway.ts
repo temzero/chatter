@@ -14,6 +14,7 @@ import {
   InitiateCallRequest,
   IncomingCallResponse,
   CallError,
+  CallErrorResponse,
 } from '../constants/callPayload.type';
 import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
 import { WebsocketNotificationService } from '../services/websocket-notification.service';
@@ -37,7 +38,10 @@ export class CallGateway {
 
     // 1️⃣ Block if caller is already in another call
     if (this.callStore.isUserInCall(userId)) {
-      return { success: false, reason: CallError.CALL_FAILED };
+      const errorResponse: CallErrorResponse = {
+        reason: CallError.CALL_FAILED,
+      };
+      return errorResponse;
     }
 
     // 2️⃣ Get chat members (exclude caller)
@@ -46,7 +50,10 @@ export class CallGateway {
     );
     const otherMembers = chatMembers.filter((m) => m.userId !== userId);
     if (otherMembers.length === 0) {
-      return { success: false, reason: CallError.INITIATION_FAILED };
+      const errorResponse: CallErrorResponse = {
+        reason: CallError.INITIATION_FAILED,
+      };
+      return errorResponse;
     }
 
     // 3️⃣ Filter only free members (not in another call)
@@ -56,7 +63,10 @@ export class CallGateway {
 
     // 4️⃣ If no free members → notify caller line busy
     if (freeMembers.length === 0) {
-      return { success: false, reason: CallError.LINE_BUSY };
+      const errorResponse: CallErrorResponse = {
+        reason: CallError.LINE_BUSY,
+      };
+      return errorResponse;
     }
 
     // 5️⃣ Get initiator chat member
@@ -66,11 +76,15 @@ export class CallGateway {
         userId,
       );
     if (!initiatorMember) {
-      return { success: false, reason: CallError.INITIATION_FAILED };
+      const errorResponse: CallErrorResponse = {
+        reason: CallError.INITIATION_FAILED,
+      };
+      return errorResponse;
     }
 
     // 6️⃣ Build call response
     const response: IncomingCallResponse = {
+      callId: 'callId',
       chatId: payload.chatId,
       status: CallStatus.DIALING,
       initiatorMemberId: initiatorMember.id,
@@ -116,46 +130,16 @@ export class CallGateway {
     );
   }
 
-  @SubscribeMessage(CallEvent.ACCEPT_CALL)
+  @SubscribeMessage(CallEvent.JOIN_CALL)
   async handleCallAccept(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: CallActionRequest,
   ) {
     const userId = client.data.userId;
-
     const member = await this.chatMemberService.getMemberByChatIdAndUserId(
       payload.chatId,
       userId,
     );
-
-    if (!member) {
-      throw new Error('User is not a member of this chat');
-    }
-
-    const response: CallActionResponse = {
-      chatId: payload.chatId,
-      memberId: member.id,
-    };
-
-    await this.websocketNotificationService.emitToChatMembers(
-      payload.chatId,
-      CallEvent.ACCEPT_CALL,
-      response,
-      { senderId: userId, excludeSender: true },
-    );
-  }
-
-  @SubscribeMessage(CallEvent.JOIN_CALL)
-  async handleJoinCall(
-    @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() payload: { chatId: string; callId?: string },
-  ) {
-    const userId = client.data.userId;
-    const member = await this.chatMemberService.getMemberByChatIdAndUserId(
-      payload.chatId,
-      userId,
-    );
-
     if (!member) {
       throw new Error('User is not a member of this chat');
     }
@@ -169,7 +153,7 @@ export class CallGateway {
       payload.chatId,
       CallEvent.JOIN_CALL,
       response,
-      { senderId: userId, excludeSender: false },
+      { senderId: userId, excludeSender: true },
     );
   }
 

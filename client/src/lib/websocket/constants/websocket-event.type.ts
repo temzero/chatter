@@ -36,10 +36,11 @@ export const enum CallEvent {
   INITIATE_CALL = "call:initiate", // 📞 BOTH: Start a new call
   INCOMING_CALL = "call:incoming", // 📞 BOTH: Receive incoming call notification
   UPDATE_CALL = "call:update", // 📞 BOTH: Update call state/metadata
-  ACCEPT_CALL = "call:accept", // 📞 BOTH: Accept an incoming call
   JOIN_CALL = "call:join", // 📞 BOTH: Join a call (P2P: rarely used, SFU: essential)
   DECLINE_CALL = "call:declined", // 📞 BOTH: Reject an incoming call
   HANG_UP = "call:hang-up", // 📞 BOTH: Hang up from ongoing call
+  CALL_ENDED = "call:ended",
+  CALL_ERROR = "call:error",
 }
 
 export const enum PresenceEvent {

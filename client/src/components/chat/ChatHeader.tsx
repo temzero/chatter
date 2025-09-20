@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
@@ -15,6 +15,8 @@ import MessageSearchBar from "../ui/MessageSearchBar";
 import { useUserLastSeen } from "@/stores/presenceStore";
 import { formatTimeAgo } from "@/utils/formatTimeAgo";
 import { useCallStore } from "@/stores/callStore/callStore";
+import { LocalCallStatus } from "@/types/enums/CallStatus";
+import { IncomingCallResponse } from "@/types/callPayload";
 
 interface ChatHeaderProps {
   chat: ChatResponse;
@@ -28,13 +30,31 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   const toggleSidebarInfo = useSidebarInfoStore(
     (state) => state.toggleSidebarInfo
   );
+  const localCallStatus = useCallStore((state) => state.localCallStatus);
+  const getActiveCall = useCallStore((state) => state.getActiveCall);
+  const startCall = useCallStore((state) => state.startCall);
+  const joinCall = useCallStore((state) => state.joinCall);
 
   const chatListMembers = useChatMemberStore.getState().chatMembers[chat.id];
   const isOnline = useChatStatus(chat?.id, chat.type);
   const isSearchMessages = useMessageStore((state) => state.isSearchMessages);
 
-  const startCall = useCallStore((state) => state.startCall);
-  // const joinCall = useCallStore((state) => state.joinCall);
+  const [activeCall, setActiveCall] = useState<IncomingCallResponse | null>(
+    null
+  ); // store active call info
+
+  // Fetch active call from server whenever chat changes
+  useEffect(() => {
+    let mounted = true;
+    const fetchCall = async () => {
+      const call = await getActiveCall(chat.id);
+      if (mounted) setActiveCall(call);
+    };
+    fetchCall();
+    return () => {
+      mounted = false;
+    };
+  }, [chat.id, getActiveCall]);
 
   const isChannel = chat.type === ChatType.CHANNEL;
   const isDirect = chat.type === ChatType.DIRECT;
@@ -44,13 +64,11 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
     isDirect && chat.otherMemberUserIds?.length
       ? chat.otherMemberUserIds[0]
       : undefined;
-
   const lastSeen = useUserLastSeen(partnerId);
 
   // Get chat partner's friendship status if DIRECT chat
   let canCall = false;
   if (isDirect && chat.otherMemberUserIds && chatListMembers) {
-    const partnerId = chat.otherMemberUserIds[0];
     const partnerMember = chatListMembers.find(
       (member) => member.userId === partnerId
     ) as DirectChatMember;
@@ -58,6 +76,19 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
       canCall = true;
     }
   }
+
+  // Check if user can join the call (call is active and not outgoing)
+  const canJoinCall =
+    activeCall && localCallStatus !== LocalCallStatus.OUTGOING;
+
+  const handleJoinCall = () => {
+    if (activeCall) {
+      joinCall({
+        isVoiceEnabled: true,
+        isVideoEnabled: activeCall.isVideoCall,
+      });
+    }
+  };
 
   if (!chat) return null;
 
@@ -110,45 +141,48 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
           ) : (
             <div className="flex items-center gap-1">
               <div className="flex items-center cursor-pointer rounded-full p-1">
-                {isDirect && canCall && (
+                {canJoinCall ? (
                   <button
-                    onClick={() => startCall(chat.id)}
-                    className="opacity-60 hover:opacity-100 transition"
-                  >
-                    <i className="material-symbols-outlined text-3xl">
-                      phone_enabled
-                    </i>
-                  </button>
-                )}
-
-                {isGroup && (
-                  // <button
-                  //   onClick={() =>
-                  //     startCall(chat.id, true)
-                  //   }
-                  //   className="opacity-60 hover:opacity-100 transition"
-                  // >
-                  //   <i className="material-symbols-outlined text-3xl">
-                  //     videocam
-                  //   </i>
-                  // </button>
-                  <button
-                    onClick={() => startCall(chat.id, true)}
+                    onClick={handleJoinCall}
                     className="font-semibold flex items-center gap-1 custom-border rounded-full px-3 bg-[--primary-green] opacity-100 transition"
                   >
                     Join Call
                     <i className="material-symbols-outlined text-3xl">
-                      videocam
+                      {activeCall?.isVideoCall ? "videocam" : "call"}
                     </i>
                   </button>
-                )}
+                ) : (
+                  <>
+                    {isDirect && canCall && (
+                      <button
+                        onClick={() => startCall(chat.id)}
+                        className="opacity-60 hover:opacity-100 transition"
+                      >
+                        <i className="material-symbols-outlined text-3xl">
+                          phone_enabled
+                        </i>
+                      </button>
+                    )}
 
-                {isChannel && (
-                  <button>
-                    <i className="material-symbols-outlined text-3xl">
-                      connected_tv
-                    </i>
-                  </button>
+                    {isGroup && (
+                      <button
+                        onClick={() => startCall(chat.id, true)}
+                        className="opacity-60 hover:opacity-100 transition"
+                      >
+                        <i className="material-symbols-outlined text-3xl">
+                          videocam
+                        </i>
+                      </button>
+                    )}
+
+                    {isChannel && (
+                      <button className="opacity-60 hover:opacity-100 transition">
+                        <i className="material-symbols-outlined text-3xl">
+                          connected_tv
+                        </i>
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
               {!chat.isDeleted && <OnlineDot isOnline={isOnline} />}

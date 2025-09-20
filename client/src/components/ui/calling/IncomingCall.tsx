@@ -15,7 +15,7 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
     useLocalPreviewVideoTrack(isVideoCall);
 
   const acceptCall = () => {
-    useCallStore.getState().acceptCall({
+    useCallStore.getState().joinCall({
       isVideoEnabled: isVideoCall ? isVideoEnabled : false, // respect video call
       isVoiceEnabled: true,
     });

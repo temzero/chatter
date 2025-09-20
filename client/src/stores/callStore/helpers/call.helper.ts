@@ -9,7 +9,7 @@ export async function getMyToken(chatId: string): Promise<string | undefined> {
     myChatMember.nickname ||
     [myChatMember.firstName, myChatMember.lastName].filter(Boolean).join(" ");
 
-  return callService.getLiveKitToken(
+  return callService.fetchLiveKitToken(
     chatId,
     participantName,
     myChatMember.avatarUrl || undefined

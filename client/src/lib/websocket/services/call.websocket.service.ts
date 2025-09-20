@@ -1,106 +1,56 @@
 import { webSocketService } from "./websocket.service";
 import { CallEvent } from "../constants/websocket-event.type";
 import {
-  InitiateCallRequest,
+  // InitiateCallRequest,
   CallActionRequest,
   CallActionResponse,
   UpdateCallPayload,
   IncomingCallResponse,
-  CallWebsocketResponse,
+  CallErrorResponse,
 } from "@/types/callPayload";
 
-/**
- * Service for handling call-related WebSocket communications
- */
 export const callWebSocketService = {
-  // ========================
-  // 📞 Call Lifecycle Methods (USED BY BOTH P2P & SFU)
-  // ========================
-
-  /**
-   * Initiate a new call (BOTH)
-   */
-  // initiateCall(payload: InitiateCallRequest) {
-  //   console.log("initiateCall");
-  //   webSocketService.emit(CallEvent.INITIATE_CALL, payload);
+  // INITIATE NEW CALL
+  // initiateCall(payload: InitiateCallRequest): Promise<CallErrorResponse> {
+  //   return new Promise((resolve) => {
+  //     webSocketService.emit(
+  //       CallEvent.INITIATE_CALL,
+  //       payload,
+  //       (response: unknown) => {
+  //         resolve(response as CallErrorResponse);
+  //       }
+  //     );
+  //   });
   // },
 
-  initiateCall(payload: InitiateCallRequest): Promise<CallWebsocketResponse> {
-    return new Promise((resolve) => {
-      webSocketService.emit(
-        CallEvent.INITIATE_CALL,
-        payload,
-        (response: unknown) => {
-          resolve(response as CallWebsocketResponse);
-        }
-      );
-    });
-  },
-
-  /**
-   * Listen for incoming calls (BOTH)
-   */
+  // INCOMING CALL
   onIncomingCall(callback: (data: IncomingCallResponse) => void) {
     webSocketService.on(CallEvent.INCOMING_CALL, callback);
   },
-
-  /**
-   * Remove incoming call listener (BOTH)
-   */
   offIncomingCall(callback: (data: CallActionResponse) => void) {
     webSocketService.off(CallEvent.INCOMING_CALL, callback);
   },
 
-  // Update call (BOTH)
-  updateCall(payload: UpdateCallPayload) {
-    webSocketService.emit(CallEvent.UPDATE_CALL, payload);
-  },
-
+  // UPDATE CALL
   onCallUpdated(callback: (data: UpdateCallPayload) => void) {
     webSocketService.on(CallEvent.UPDATE_CALL, callback);
   },
-
   offCallUpdated(callback: (data: UpdateCallPayload) => void) {
     webSocketService.off(CallEvent.UPDATE_CALL, callback);
   },
 
-  /**
-   * Accept an incoming call (BOTH)
-   */
-  acceptCall(payload: CallActionRequest) {
-    webSocketService.emit(CallEvent.ACCEPT_CALL, payload);
-  },
-
-  /**
-   * Listen for call accept events (BOTH)
-   */
-  onCallAccepted(callback: (data: CallActionResponse) => void) {
-    webSocketService.on(CallEvent.ACCEPT_CALL, callback);
-  },
-
-  /**
-   * Remove call accept listener (BOTH)
-   */
-  offCallAccepted(callback: (data: CallActionResponse) => void) {
-    webSocketService.off(CallEvent.ACCEPT_CALL, callback);
-  },
-
-  // Join call (PRIMARILY SFU, but technically BOTH)
-  joinCall(payload: { chatId: string }) {
+  // JOIN CALL
+  joinCall(payload: CallActionRequest) {
     webSocketService.emit(CallEvent.JOIN_CALL, payload);
   },
-
-  /**
-   * Reject an incoming call (BOTH)
-   */
-  rejectCall(payload: CallActionRequest) {
-    webSocketService.emit(CallEvent.DECLINE_CALL, payload);
+  onJoinCall(callback: (data: CallActionResponse) => void) {
+    webSocketService.on(CallEvent.JOIN_CALL, callback);
+  },
+  offJoinCall(callback: (data: CallActionResponse) => void) {
+    webSocketService.off(CallEvent.JOIN_CALL, callback);
   },
 
-  /**
-   * Cancel an outgoing call before it's accepted (BOTH)
-   * (sent as a reject event with `isCallerCancel: true`)
-   */
+  // CANCEL CALL
   cancelCall(payload: CallActionRequest) {
     webSocketService.emit(CallEvent.DECLINE_CALL, {
       ...payload,
@@ -108,59 +58,56 @@ export const callWebSocketService = {
     });
   },
 
-  /**
-   * Listen for call reject events (BOTH)
-   */
+  // REJECT CALL
+  rejectCall(payload: CallActionRequest) {
+    webSocketService.emit(CallEvent.DECLINE_CALL, payload);
+  },
   onCallRejected(
     callback: (data: CallActionResponse & { isCallerCancel?: boolean }) => void
   ) {
     webSocketService.on(CallEvent.DECLINE_CALL, callback);
   },
-
-  /**
-   * Remove call reject listener (BOTH)
-   */
   offCallRejected(
     callback: (data: CallActionResponse & { isCallerCancel?: boolean }) => void
   ) {
     webSocketService.off(CallEvent.DECLINE_CALL, callback);
   },
 
-  /**
-   * Hang up from an ongoing call (BOTH)
-   */
-  hangup(payload: CallActionRequest) {
-    webSocketService.emit(CallEvent.HANG_UP, payload);
-  },
-
-  /**
-   * Listen for hangup events (BOTH)
-   */
+  // HANGUP
+  // hangup(payload: CallActionRequest) {
+  //   webSocketService.emit(CallEvent.HANG_UP, payload);
+  // },
   onHangup(callback: (data: CallActionResponse) => void) {
     webSocketService.on(CallEvent.HANG_UP, callback);
   },
-
-  /**
-   * Remove hangup listener (BOTH)
-   */
   offHangup(callback: (data: CallActionResponse) => void) {
     webSocketService.off(CallEvent.HANG_UP, callback);
   },
 
-  // ========================
-  // 🛠️ Utility Methods
-  // ========================
+  // END CALL
+  onCallEnded(callback: (data: UpdateCallPayload) => void) {
+    webSocketService.on(CallEvent.CALL_ENDED, callback);
+  },
+  offCallEnded(callback: (data: UpdateCallPayload) => void) {
+    webSocketService.off(CallEvent.CALL_ENDED, callback);
+  },
 
-  /**
-   * Remove all call listeners
-   */
+  // ERROR
+  onCallError(callback: (data: CallErrorResponse) => void) {
+    webSocketService.on(CallEvent.CALL_ERROR, callback);
+  },
+  offCallError(callback: (data: CallErrorResponse) => void) {
+    webSocketService.off(CallEvent.CALL_ERROR, callback);
+  },
+
   removeAllListeners() {
-    // Call lifecycle events (BOTH)
     webSocketService.off(CallEvent.INCOMING_CALL);
     webSocketService.off(CallEvent.UPDATE_CALL);
-    webSocketService.off(CallEvent.ACCEPT_CALL);
+    webSocketService.off(CallEvent.JOIN_CALL);
     webSocketService.off(CallEvent.JOIN_CALL);
     webSocketService.off(CallEvent.DECLINE_CALL);
     webSocketService.off(CallEvent.HANG_UP);
+    webSocketService.off(CallEvent.CALL_ENDED);
+    webSocketService.off(CallEvent.CALL_ERROR);
   },
 };

@@ -11,6 +11,7 @@ import { LivekitService } from './liveKit.service';
 import { LivekitWebhookController } from './livekit.webhook.controller';
 import { CallStoreService } from '../websocket/services/call-store.service ';
 import { ChatModule } from '../chat/chat.module';
+import { WebsocketCallService } from '../websocket/services/websocket-call.service';
 
 @Module({
   imports: [
@@ -20,7 +21,12 @@ import { ChatModule } from '../chat/chat.module';
     ChatMemberModule,
   ],
   controllers: [CallController, LivekitWebhookController],
-  providers: [CallService, LivekitService, CallStoreService],
+  providers: [
+    CallService,
+    LivekitService,
+    CallStoreService,
+    WebsocketCallService,
+  ],
   exports: [CallService, CallStoreService],
 })
 export class CallModule {}
