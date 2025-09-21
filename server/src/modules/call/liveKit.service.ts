@@ -29,13 +29,14 @@ export class LivekitService {
   async generateLivekitToken(
     roomName: string,
     userId: string,
-    participantName?: string,
-    avatarUrl?: string,
+    participantName: string | null,
+    avatarUrl: string | null,
   ): Promise<string> {
+    console.log('generateLivekitToken');
     try {
       const at = new AccessToken(this.apiKey, this.apiSecret, {
         identity: userId,
-        name: participantName,
+        name: participantName ?? undefined,
         metadata: avatarUrl ? JSON.stringify({ avatarUrl }) : undefined,
       });
 

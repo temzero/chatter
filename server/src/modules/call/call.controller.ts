@@ -22,6 +22,7 @@ import { ChatService } from '../chat/chat.service';
 import { ChatType } from '../chat/constants/chat-types.constants';
 import { CreateCallDto } from './dto/create-call.dto';
 import { UpdateCallDto } from './dto/update-call.dto';
+import { GenerateLiveKitTokenDto } from './dto/generate-livekit-token.dto';
 
 @Controller('calls')
 @UseGuards(JwtAuthGuard)
@@ -70,6 +71,9 @@ export class CallController {
         activeRooms.map(async (room) => {
           // 1. Fetch chat data for this room/chatId
           const chat = await this.chatService.getChatById(room.name);
+          const callId = await this.callService.getActiveCallIdByChatId(
+            room.name,
+          );
 
           // 2. Determine call type
           const isVideoCall = chat.type !== ChatType.DIRECT;
@@ -80,6 +84,7 @@ export class CallController {
               : CallStatus.IN_PROGRESS;
 
           return {
+            callId: callId ?? 'empty',
             chatId: room.name, // roomName = chatId
             status,
             participantsCount: room.numParticipants,
@@ -119,6 +124,7 @@ export class CallController {
 
       // 2. Fetch chat data for this room/chatId
       const chat = await this.chatService.getChatById(room.name);
+      const callId = await this.callService.getActiveCallIdByChatId(room.name);
 
       // 3. Determine call type
       const isVideoCall = chat.type !== ChatType.DIRECT;
@@ -127,6 +133,7 @@ export class CallController {
         room.numParticipants <= 1 ? CallStatus.DIALING : CallStatus.IN_PROGRESS;
 
       const activeCall: IncomingCallResponse = {
+        callId: callId ?? 'empty',
         chatId: room.name,
         status,
         participantsCount: room.numParticipants,
@@ -158,6 +165,28 @@ export class CallController {
       );
     } catch (error: unknown) {
       ErrorResponse.throw(error, 'Failed to retrieve calls by chat');
+    }
+  }
+
+  @Post('token')
+  async getLivekitToken(
+    @CurrentUser('id') userId: string,
+    @Body() body: GenerateLiveKitTokenDto,
+  ): Promise<SuccessResponse<{ token: string }>> {
+    console.log('🟢 getLivekitToken');
+    console.log('🟢 User ID:', userId);
+    console.log('🟢 Parsed body:', body);
+    try {
+      const { chatId, participantName, avatarUrl } = body;
+      const token = await this.liveKitService.generateLivekitToken(
+        chatId,
+        userId,
+        participantName ?? null,
+        avatarUrl ?? null,
+      );
+      return new SuccessResponse({ token }, 'LiveKit token generated');
+    } catch (error: unknown) {
+      ErrorResponse.throw(error, 'Failed to generate LiveKit token');
     }
   }
 
@@ -225,30 +254,6 @@ export class CallController {
       return new SuccessResponse(null, 'Call deleted successfully');
     } catch (error: unknown) {
       ErrorResponse.throw(error, 'Failed to delete call');
-    }
-  }
-
-  @Post('token')
-  async getLivekitToken(
-    @CurrentUser('id') userId: string,
-    @Body()
-    body: {
-      chatId: string;
-      participantName?: string;
-      avatarUrl?: string;
-    },
-  ): Promise<SuccessResponse<{ token: string }>> {
-    try {
-      const { chatId, participantName, avatarUrl } = body;
-      const token = await this.liveKitService.generateLivekitToken(
-        chatId,
-        userId,
-        participantName,
-        avatarUrl,
-      );
-      return new SuccessResponse({ token }, 'LiveKit token generated');
-    } catch (error: unknown) {
-      ErrorResponse.throw(error, 'Failed to generate LiveKit token');
     }
   }
 }

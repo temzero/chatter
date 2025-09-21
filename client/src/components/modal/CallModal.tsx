@@ -17,7 +17,6 @@ import { ChatResponse } from "@/types/responses/chat.response";
 const CallModal: React.FC = () => {
   const { chatId, localCallStatus } = useCallStore();
   const getOrFetchChatById = useChatStore((state) => state.getOrFetchChatById);
-
   const [chat, setChat] = React.useState<ChatResponse | null>(null);
 
   React.useEffect(() => {
@@ -42,9 +41,13 @@ const CallModal: React.FC = () => {
   }, [chatId, getOrFetchChatById]);
 
   if (!chatId || !chat || !localCallStatus) {
-    console.log("chatId", chatId);
-    console.log("chat", chat);
-    console.log("localCallStatus", localCallStatus);
+    // if (!chatId) {
+    //   console.log("No chatId", chatId);
+    // } else if (!chat) {
+    //   console.log("No chat", chat);
+    // } else if (!localCallStatus) {
+    //   console.log("No localCallStatus", localCallStatus);
+    // }
     return null;
   }
 

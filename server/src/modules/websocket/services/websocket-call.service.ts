@@ -71,6 +71,7 @@ export class WebsocketCallService {
       participantsCount: 1,
     };
 
+    console.log('🔔 Emit INCOMING CALL');
     // 5. Emit to free members
     for (const member of freeMembers) {
       this.websocketNotificationService.emitToUser(
@@ -95,6 +96,8 @@ export class WebsocketCallService {
       callStatus,
     };
 
+    console.log('🔔 Emit UPDATE CALL');
+
     await this.websocketNotificationService.emitToChatMembers(
       chatId,
       CallEvent.UPDATE_CALL,
@@ -115,6 +118,7 @@ export class WebsocketCallService {
       callStatus,
       endedAt: endedAt.toISOString(),
     };
+    console.log('🔔 Emit END CALL');
     await this.websocketNotificationService.emitToChatMembers(
       chatId,
       CallEvent.UPDATE_CALL,

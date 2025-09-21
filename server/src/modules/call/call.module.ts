@@ -12,11 +12,13 @@ import { LivekitWebhookController } from './livekit.webhook.controller';
 import { CallStoreService } from '../websocket/services/call-store.service ';
 import { ChatModule } from '../chat/chat.module';
 import { WebsocketCallService } from '../websocket/services/websocket-call.service';
+import { WebSocketModule } from '../websocket/websocket.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Call, Chat, ChatMember]),
     forwardRef(() => ChatModule),
+    forwardRef(() => WebSocketModule),
     MessageModule,
     ChatMemberModule,
   ],

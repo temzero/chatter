@@ -116,6 +116,19 @@ export class CallService {
     });
   }
 
+  async getActiveCallIdByChatId(chatId: string): Promise<string | null> {
+    const call = await this.callRepository.findOne({
+      where: {
+        chat: { id: chatId },
+        status: In([CallStatus.DIALING, CallStatus.IN_PROGRESS]),
+      },
+      order: { createdAt: 'DESC' }, // latest active call
+      select: ['id'], // ✅ only fetch id
+    });
+
+    return call?.id ?? null;
+  }
+
   async createCall(createCallDto: CreateCallDto): Promise<Call> {
     const initiatorMember =
       await this.chatMemberService.getMemberByChatIdAndUserId(

@@ -32,18 +32,19 @@ export interface LiveKitServiceOptions {
 export class LiveKitService {
   private room: Room;
   private options?: LiveKitServiceOptions;
+  private url: string = import.meta.env.VITE_LIVEKIT_URL;
 
   constructor() {
     this.room = new Room({ adaptiveStream: true, dynacast: true });
   }
 
-  async connect(url: string, token: string, options: LiveKitServiceOptions) {
+  async connect(token: string, options: LiveKitServiceOptions) {
     this.options = options;
 
     try {
       this.setupEventListeners();
 
-      await this.room.connect(url, token, { autoSubscribe: true });
+      await this.room.connect(this.url, token, { autoSubscribe: true });
 
       this.handleExistingParticipants();
     } catch (error) {

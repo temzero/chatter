@@ -15,8 +15,8 @@ import { ChatModule } from '../chat/chat.module';
 import { SupabaseModule } from '../superbase/supabase.module';
 import { BlockModule } from '../block/block.module';
 import { WebsocketConnectionService } from './services/websocket-connection.service';
-import { CallGateway } from './features/call.gateway';
 import { WebsocketNotificationService } from './services/websocket-notification.service';
+import { CallGateway } from './features/call.gateway';
 import { CallModule } from '../call/call.module'; // Import CallModule
 
 @Module({

@@ -8,6 +8,7 @@ import reactionSound from "@/assets/sound/message-bubble.mp3";
 import messageSound from "@/assets/sound/message-bubble.mp3";
 import slidingSound from "@/assets/sound/click.mp3";
 import typingSound from "@/assets/sound/message-sent.mp3";
+import errorSound from "@/assets/sound/error2.mp3";
 import { handleError } from "@/utils/handleError";
 
 // Define the SoundType as an enum
@@ -22,6 +23,8 @@ export enum SoundType {
 
   SLIDE = "slide",
   TYPING = "typing",
+
+  ERROR = "error",
 }
 
 export interface AudioService {
@@ -55,6 +58,7 @@ class AudioServiceImpl implements AudioService {
       [SoundType.REACTION]: reactionSound,
       [SoundType.SLIDE]: slidingSound,
       [SoundType.TYPING]: typingSound,
+      [SoundType.ERROR]: errorSound,
     };
 
     Object.entries(soundConfig).forEach(([type, src]) => {
@@ -103,7 +107,7 @@ class AudioServiceImpl implements AudioService {
 
   stopAllSounds(): void {
     // CORRECTED: Pass the SoundType to stopSound
-    this.sounds.forEach((sound, type) => {
+    this.sounds.forEach((_sound, type) => {
       this.stopSound(type);
     });
   }

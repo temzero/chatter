@@ -15,8 +15,8 @@ import MessageSearchBar from "../ui/MessageSearchBar";
 import { useUserLastSeen } from "@/stores/presenceStore";
 import { formatTimeAgo } from "@/utils/formatTimeAgo";
 import { useCallStore } from "@/stores/callStore/callStore";
-import { LocalCallStatus } from "@/types/enums/CallStatus";
 import { IncomingCallResponse } from "@/types/callPayload";
+import { CallStatus } from "@/types/enums/CallStatus";
 
 interface ChatHeaderProps {
   chat: ChatResponse;
@@ -30,10 +30,10 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   const toggleSidebarInfo = useSidebarInfoStore(
     (state) => state.toggleSidebarInfo
   );
-  const localCallStatus = useCallStore((state) => state.localCallStatus);
-  const getActiveCall = useCallStore((state) => state.getActiveCall);
+  const callStatus = useCallStore((state) => state.callStatus);
   const startCall = useCallStore((state) => state.startCall);
   const joinCall = useCallStore((state) => state.joinCall);
+  const getActiveCall = useCallStore((state) => state.getActiveCall);
 
   const chatListMembers = useChatMemberStore.getState().chatMembers[chat.id];
   const isOnline = useChatStatus(chat?.id, chat.type);
@@ -41,7 +41,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 
   const [activeCall, setActiveCall] = useState<IncomingCallResponse | null>(
     null
-  ); // store active call info
+  );
 
   // Fetch active call from server whenever chat changes
   useEffect(() => {
@@ -78,8 +78,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   }
 
   // Check if user can join the call (call is active and not outgoing)
-  const canJoinCall =
-    activeCall && localCallStatus !== LocalCallStatus.OUTGOING;
+  const canJoinCall = activeCall && callStatus === CallStatus.IN_PROGRESS;
 
   const handleJoinCall = () => {
     if (activeCall) {
@@ -144,7 +143,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                 {canJoinCall ? (
                   <button
                     onClick={handleJoinCall}
-                    className="font-semibold flex items-center gap-1 custom-border rounded-full px-3 bg-[--primary-green] opacity-100 transition"
+                    className="hover:shadow-xl hover:border-4 hover:border-[--primary-green] hover:bg-white hover:text-[--primary-green] font-semibold flex items-center gap-1 custom-border rounded-full px-3 bg-[--primary-green] opacity-100 transition"
                   >
                     Join Call
                     <i className="material-symbols-outlined text-3xl">

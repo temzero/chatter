@@ -1,7 +1,6 @@
 import { ChatResponse } from "@/types/responses/chat.response";
 import { Button } from "../Button";
 import { VideoStream } from "./components/VideoStream";
-import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
 import { CallHeader } from "./components/CallHeader";
 import { Timer } from "../Timer";
 import { VoiceVisualizerButton } from "../VoiceVisualizerBtn";
@@ -11,11 +10,10 @@ import { useLocalTracks } from "@/hooks/mediaStreams/useLocalTracks";
 
 export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
   const startedAt = useCallStore((state) => state.startedAt);
+  const room = useCallStore((state) => state.getLiveKitRoom());
   const toggleLocalVoice = useCallStore((state) => state.toggleLocalVoice);
   const toggleLocalVideo = useCallStore((state) => state.toggleLocalVideo);
-  const endCall = useCallStore((state) => state.endCall);
-  const closeCallModal = useCallStore((state) => state.closeCallModal);
-  const room = useCallStore((state) => state.getLiveKitRoom());
+  const leaveCall = useCallStore((state) => state.leaveCall);
 
   const { localVideoStream, localAudioStream } = useLocalTracks();
 
@@ -31,18 +29,13 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
   const isMuted = !localParticipant?.isMicrophoneEnabled;
   const isVideoEnabled = !!localParticipant?.isCameraEnabled;
 
-  const handleHangUp = async () => {
+  const handleLeaveCall = async () => {
     if (localParticipant) {
       localParticipant.getTrackPublications().forEach((pub) => {
         pub.track?.mediaStreamTrack?.stop();
       });
     }
-
-    await room.disconnect();
-
-    callWebSocketService.hangup({ chatId: chat.id });
-    endCall();
-    closeCallModal();
+    leaveCall();
   };
 
   return (
@@ -121,7 +114,7 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
             variant="ghost"
             className="hover:bg-red-500/50 w-14 h-14"
             isRoundedFull
-            onClick={handleHangUp}
+            onClick={handleLeaveCall}
             icon="call_end"
           />
         </div>

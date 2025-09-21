@@ -37,6 +37,15 @@ export class LivekitWebhookController {
     const userId = payload.participant?.identity;
     const roomName = payload.room.name;
 
+    console.log(
+      '[Webhook] Event received:',
+      payload.event,
+      'Room:',
+      roomName,
+      'User:',
+      userId,
+    );
+
     switch (payload.event) {
       case 'room_started': {
         const call = await this.callService.createCall({
@@ -46,9 +55,21 @@ export class LivekitWebhookController {
           attendedUserIds: userId ? [userId] : [],
         });
 
-        // 🔔 INCOMING_CALL
+        console.log(
+          '[room_started] Call created:',
+          call.id,
+          'Chat type:',
+          call.chat.type,
+        );
+
         if (userId) {
           const isVideoCall = call.chat.type === ChatType.GROUP;
+          console.log(
+            '[room_started] Emitting INCOMING_CALL to user:',
+            userId,
+            'Video call:',
+            isVideoCall,
+          );
           await this.websocketCallService.emitIncomingCall(
             call.id,
             roomName,
@@ -56,31 +77,43 @@ export class LivekitWebhookController {
             isVideoCall,
           );
         }
-
         break;
       }
 
       case 'participant_connected': {
         if (!userId) break;
-        // Track user in ephemeral store
+
+        console.log('[participant_connected] User connected:', userId);
         this.callStore.addUserToCall(userId, roomName);
-        // Update call in DB
+
         const call = await this.callService.getActiveCallByChatId(roomName);
-        if (!call) break;
+        if (!call) {
+          console.log(
+            '[participant_connected] No active call found for room:',
+            roomName,
+          );
+          break;
+        }
 
         const updatedAttendees = new Set(call.attendedUserIds || []);
         updatedAttendees.add(userId);
 
+        const startedAt =
+          call.startedAt || new Date(payload.room.creationTime ?? Date.now());
+
         await this.callService.updateCall(roomName, {
           status: CallStatus.IN_PROGRESS,
-          startedAt:
-            call.startedAt || new Date(payload.room.creationTime ?? Date.now()),
+          startedAt,
           attendedUserIds: Array.from(updatedAttendees),
         });
 
-        // 🔔 emit IN_PROGRESS
+        console.log(
+          '[participant_connected] Updated call status to IN_PROGRESS for call:',
+          call.id,
+        );
+
         await this.websocketCallService.emitUpdateCall(
-          call.id, // using roomName as callId if you don't have DB ID
+          call.id,
           roomName,
           CallStatus.IN_PROGRESS,
           userId,
@@ -91,15 +124,23 @@ export class LivekitWebhookController {
 
       case 'participant_disconnected': {
         if (!userId) break;
+        console.log('[participant_disconnected] User disconnected:', userId);
         this.callStore.removeUserFromCall(userId);
         break;
       }
 
       case 'room_finished': {
+        console.log('[room_finished] Room finished:', roomName);
         this.callStore.removeAllUsersFromCall(roomName);
 
         const call = await this.callService.getActiveCallByChatId(roomName);
-        if (!call) break;
+        if (!call) {
+          console.log(
+            '[room_finished] No active call found for room:',
+            roomName,
+          );
+          break;
+        }
 
         const status =
           (call.attendedUserIds?.length ?? 1) <= 1
@@ -112,9 +153,10 @@ export class LivekitWebhookController {
           endedAt,
         });
 
-        // 🔔 emit MISSED / COMPLETED
+        console.log('[room_finished] Call ended:', call.id, 'Status:', status);
+
         await this.websocketCallService.emitEndedCall(
-          call.id, // callId
+          call.id,
           roomName,
           status,
           endedAt,
@@ -131,6 +173,7 @@ export class LivekitWebhookController {
       }
 
       default:
+        console.log('[Webhook] Unknown event:', payload.event);
         break;
     }
   }

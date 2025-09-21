@@ -2,23 +2,26 @@ import API from "./api/api";
 import { handleError } from "@/utils/handleError";
 import { CallResponseDto } from "@/types/responses/call.response";
 import { IncomingCallResponse } from "@/types/callPayload";
+import { generateLiveKitTokenRequest } from "@/types/requests/generate-livekit-token.request";
 
 export const callService = {
-  /**
-   * Request a LiveKit token from backend
-   */
-  // Frontend
-  async fetchLiveKitToken(
+  async generateAndFetchLiveKitToken(
     chatId: string,
     participantName?: string,
     avatarUrl?: string
   ): Promise<string | undefined> {
     try {
-      const { data } = await API.post("/calls/token", {
+      const payload: generateLiveKitTokenRequest = {
         chatId,
-        participantName,
-        avatarUrl,
-      });
+        participantName: participantName ?? null,
+        avatarUrl: avatarUrl ?? null,
+      };
+
+      console.log("[generateAndFetchLiveKitToken] sending payload:", payload);
+
+      const { data } = await API.post("/calls/token", payload);
+
+      console.log("[generateAndFetchLiveKitToken] server response:", data);
 
       if (!data.payload?.token) {
         throw new Error("No token returned from server");
@@ -26,7 +29,9 @@ export const callService = {
 
       return data.payload.token;
     } catch (error) {
+      console.error("[generateAndFetchLiveKitToken] error:", error);
       handleError(error, "Cannot get SFU liveKit token");
+      return undefined;
     }
   },
 
@@ -51,9 +56,6 @@ export const callService = {
     }
   },
 
-  /**
-   * Fetch calls history
-   */
   async fetchCallHistory(): Promise<CallResponseDto[]> {
     const { data } = await API.get(`/calls/history/`);
     return data.payload ?? data;

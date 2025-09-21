@@ -5,44 +5,40 @@ import { LocalCallStatus } from "@/types/enums/CallStatus";
 import { audioService, SoundType } from "@/services/audio.service";
 
 export const useCallSounds = () => {
-  const callStatus = useCallStore((state) => state.localCallStatus);
+  const localCallStatus = useCallStore((state) => state.localCallStatus);
 
   useEffect(() => {
-    // First: stop ALL possible call-related sounds before starting a new one
+    // Stop all previous sounds first
     audioService.stopAllSounds();
 
-    switch (callStatus) {
-      case LocalCallStatus.OUTGOING:
-        audioService.playSound(SoundType.OUTGOING_CALL);
-        break;
-
-      case LocalCallStatus.INCOMING:
-        audioService.playSound(SoundType.INCOMING_CALL);
-        break;
-
-      case LocalCallStatus.CONNECTED:
-        audioService.playSound(SoundType.CALL_CONNECTED);
-        break;
-
-      case LocalCallStatus.ENDED:
-      case LocalCallStatus.REJECTED:
-      case LocalCallStatus.CANCELED:
-        audioService.playSound(SoundType.CALL_END);
-        break;
-
-      case LocalCallStatus.ERROR:
-        // Stop all sounds immediately when error occurs
-        audioService.stopAllSounds();
-        break;
-
-      default:
-        // nothing to play
-        break;
-    }
+    // Delay a tick to let browser reset audio state
+    const timer = setTimeout(() => {
+      switch (localCallStatus) {
+        case LocalCallStatus.OUTGOING:
+          audioService.playSound(SoundType.OUTGOING_CALL);
+          break;
+        case LocalCallStatus.INCOMING:
+          audioService.playSound(SoundType.INCOMING_CALL);
+          break;
+        case LocalCallStatus.CONNECTED:
+          audioService.playSound(SoundType.CALL_CONNECTED);
+          break;
+        case LocalCallStatus.ENDED:
+        case LocalCallStatus.REJECTED:
+        case LocalCallStatus.CANCELED:
+          audioService.playSound(SoundType.CALL_END);
+          break;
+        case LocalCallStatus.ERROR:
+          audioService.playSound(SoundType.ERROR);
+          break;
+        default:
+          break;
+      }
+    }, 50); // 50ms is usually enough
 
     return () => {
-      // Cleanup on unmount: stop all sounds
+      clearTimeout(timer);
       audioService.stopAllSounds();
     };
-  }, [callStatus]);
+  }, [localCallStatus]);
 };

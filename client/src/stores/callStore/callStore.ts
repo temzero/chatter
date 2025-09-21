@@ -36,12 +36,13 @@ export interface CallState {
 
 export interface CallActions {
   // lifecycle
-  startCall: (chatId: string, isVideoCall?: boolean) => Promise<void>;
+  startCall: (chatId: string, videoCall?: boolean) => Promise<void>;
   joinCall: (options: {
     isVoiceEnabled?: boolean;
     isVideoEnabled?: boolean;
   }) => Promise<void>;
   rejectCall: (isCancel?: boolean) => void;
+  leaveCall: () => void;
   endCall: (opt?: {
     isCancel?: boolean;
     isRejected?: boolean;
@@ -54,19 +55,14 @@ export interface CallActions {
   toggleLocalScreenShare: (enable?: boolean) => Promise<void>;
 
   // utils
-  isChatInCall: (chatId: string) => {
-    isInCall: boolean;
-    isVideoCall: boolean;
-    callStatus: LocalCallStatus | null;
-  };
   getActiveCall: (chatId: string) => Promise<IncomingCallResponse | null>;
   setLocalCallStatus: (s: LocalCallStatus) => void;
   getCallDuration: () => number;
+  clearCallData: () => void;
   closeCallModal: () => void;
 
   // LiveKit
   connectToLiveKitRoom: (
-    url: string,
     token: string,
     options: {
       audio?: boolean;
@@ -92,7 +88,9 @@ export const useCallStore = create<CallState & CallActions>()(
     error: null,
 
     // ========== LIFECYCLE ==========
-    startCall: async (chatId, isVideoCall: false) => {
+    startCall: async (chatId: string, videoCall?: boolean) => {
+      get().clearCallData();
+      const isVideoCall = !!videoCall;
       try {
         // update base state
         set({
@@ -101,23 +99,28 @@ export const useCallStore = create<CallState & CallActions>()(
           localCallStatus: LocalCallStatus.OUTGOING,
           startedAt: new Date(),
         });
+        console.log("[startCall] Base state set -> OUTGOING");
 
         useModalStore.getState().openModal(ModalType.CALL);
+        console.log("[startCall] Opened Call Modal");
 
         const timeoutRef = setTimeout(() => {
           if (get().localCallStatus === LocalCallStatus.OUTGOING) {
+            console.warn("[startCall] Timeout reached (60s), ending call");
             get().endCall({ isTimeout: true });
           }
         }, 60000);
         set({ timeoutRef });
+        console.log("[startCall] Timeout scheduled (60s)");
 
         // init LiveKit
         const liveKitService = new LiveKitService();
         set({ liveKitService });
+        console.log("[startCall] LiveKitService initialized");
 
         const token = await getMyToken(chatId);
         if (!token) {
-          console.warn("No token available for LiveKit");
+          console.warn("[startCall] No token available for LiveKit");
           set({
             localCallStatus: LocalCallStatus.ERROR,
             error: CallError.PERMISSION_DENIED,
@@ -125,28 +128,14 @@ export const useCallStore = create<CallState & CallActions>()(
           return;
         }
 
-        await get().connectToLiveKitRoom(
-          import.meta.env.VITE_LIVEKIT_URL,
-          token,
-          { audio: true, video: isVideoCall }
-        );
-
-        // const response: CallErrorResponse =
-        //   await callWebSocketService.initiateCall({
-        //     chatId,
-        //     isVideoCall,
-        //   });
-
-        // if (!response.success) {
-        //   set({
-        //     localCallStatus: LocalCallStatus.ERROR,
-        //     error: response.reason ?? CallError.LINE_BUSY,
-        //   });
-        //   audioService.stopAllSounds();
-        //   return;
-        // }
+        console.log("[startCall] Connecting to LiveKit room...");
+        await get().connectToLiveKitRoom(token, {
+          audio: true,
+          video: isVideoCall,
+        });
+        console.log("[startCall] Successfully connected to LiveKit");
       } catch (err) {
-        console.error("startCall error", err);
+        console.error("[startCall] error:", err);
         set({
           error: CallError.INITIATION_FAILED,
           localCallStatus: LocalCallStatus.ERROR,
@@ -178,14 +167,10 @@ export const useCallStore = create<CallState & CallActions>()(
           return;
         }
 
-        await get().connectToLiveKitRoom(
-          import.meta.env.VITE_LIVEKIT_URL,
-          token,
-          {
-            audio: options?.isVoiceEnabled ?? true,
-            video: options?.isVideoEnabled ?? get().isVideoCall,
-          }
-        );
+        await get().connectToLiveKitRoom(token, {
+          audio: options?.isVoiceEnabled ?? true,
+          video: options?.isVideoEnabled ?? get().isVideoCall,
+        });
 
         // callWebSocketService.joinCall({
         //   chatId,
@@ -207,9 +192,13 @@ export const useCallStore = create<CallState & CallActions>()(
         callId: callId,
         isCallerCancel: isCancel,
       });
-      get().disconnectFromLiveKit();
-
       get().endCall({ isCancel });
+    },
+
+    leaveCall: () => {
+      get().disconnectFromLiveKit();
+      get().endCall();
+      get().closeCallModal();
     },
 
     endCall: async (opt = {}) => {
@@ -217,7 +206,6 @@ export const useCallStore = create<CallState & CallActions>()(
 
       // 🔹 Just disconnect from LiveKit
       get().disconnectFromLiveKit();
-
       // 🔹 Update local state only (UI purposes)
       set({
         localCallStatus: opt.isRejected
@@ -274,25 +262,15 @@ export const useCallStore = create<CallState & CallActions>()(
     },
 
     // ========== UTILS ==========
-    isChatInCall: (chatId: string) => {
-      const state = get();
-      return {
-        isInCall:
-          state.chatId === chatId &&
-          state.localCallStatus !== LocalCallStatus.ENDED,
-        isVideoCall: state.isVideoCall,
-        callStatus: state.localCallStatus,
-      };
-    },
-
     getActiveCall: async (chatId: string) => {
       try {
-        const call = await callService.fetchActiveCall(chatId); // call service directly
+        const call = await callService.fetchActiveCall(chatId);
         if (call) {
           set({
             callId: call.callId,
             chatId: call.chatId,
             isVideoCall: call.isVideoCall,
+            callStatus: call.status,
             localCallStatus:
               call.status === CallStatus.IN_PROGRESS
                 ? LocalCallStatus.CONNECTED
@@ -316,28 +294,37 @@ export const useCallStore = create<CallState & CallActions>()(
       return Math.floor((end - startedAt.getTime()) / 1000);
     },
 
+    clearCallData: () => {
+      set({
+        callId: null,
+        chatId: null,
+        initiatorMemberId: undefined,
+        isVideoCall: false,
+        localCallStatus: null,
+        startedAt: undefined,
+        endedAt: undefined,
+        error: null,
+        timeoutRef: null,
+      });
+    },
+
     closeCallModal: () => {
       useModalStore.getState().closeModal();
       get().clearLiveKitState();
-      set({
-        chatId: null,
-        localCallStatus: null,
-        error: null,
-      });
+      get().clearCallData();
     },
 
     // ========== LiveKit ==========
     connectToLiveKitRoom: async (
-      url: string,
       token: string,
       options?: { audio?: boolean; video?: boolean }
     ) => {
-      const { liveKitService } = get();
+      const { liveKitService, isVideoCall } = get();
       if (!liveKitService) return;
 
-      await liveKitService.connect(url, token, {
+      await liveKitService.connect(token, {
         audio: options?.audio ?? true,
-        video: options?.video ?? get().isVideoCall,
+        video: options?.video ?? isVideoCall,
         onError: (err) => {
           set({ localCallStatus: LocalCallStatus.ERROR });
           console.error("LiveKit error:", err);

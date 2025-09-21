@@ -15,7 +15,7 @@ interface CallCallingUIProps {
 }
 
 export const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
-  const isVideoEnabled = useCallStore((state) => state.isVideoEnabled);
+  const isVideoCall = useCallStore((state) => state.isVideoCall);
   const toggleLocalVideo = useCallStore((state) => state.toggleLocalVideo);
   const rejectCall = useCallStore((state) => state.rejectCall);
   const closeModal = useModalStore.getState().closeModal;
@@ -53,20 +53,20 @@ export const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
       {/* Calling Content */}
       <div className="flex flex-col justify-center items-center gap-4 py-10 select-none">
         <motion.button
-          title={`Switch To ${isVideoEnabled ? "Voice" : "Video"} Call`}
-          onClick={toggleLocalVideo}
+          title={`Switch To ${isVideoCall ? "Voice" : "Video"} Call`}
+          onClick={() => toggleLocalVideo()}
           className="p-4 rounded-full hover:bg-[--primary-green] transition-colors relative hover:custom-border"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
         >
           <AnimatePresence mode="wait">
             <motion.span
-              key={isVideoEnabled ? "videocam" : "call"}
+              key={isVideoCall ? "videocam" : "call"}
               className="material-symbols-outlined text-6xl flex items-center justify-center"
               initial={{ opacity: 0, scale: 0.1 }}
               animate={{ opacity: 1, scale: 1 }}
             >
-              {isVideoEnabled ? "videocam" : "call"}
+              {isVideoCall ? "videocam" : "call"}
             </motion.span>
           </AnimatePresence>
         </motion.button>
