@@ -34,7 +34,7 @@ export const useCallSounds = () => {
         default:
           break;
       }
-    }, 50); // 50ms is usually enough
+    }, 100); // 50ms is usually enough
 
     return () => {
       clearTimeout(timer);

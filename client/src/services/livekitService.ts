@@ -32,7 +32,7 @@ export interface LiveKitServiceOptions {
 export class LiveKitService {
   private room: Room;
   private options?: LiveKitServiceOptions;
-  private url: string = import.meta.env.VITE_LIVEKIT_URL;
+  private url: string = import.meta.env.VITE_LIVEKIT_WS_URL;
 
   constructor() {
     this.room = new Room({ adaptiveStream: true, dynacast: true });

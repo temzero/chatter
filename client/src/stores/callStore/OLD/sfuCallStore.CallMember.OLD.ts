@@ -113,7 +113,7 @@
 //         const token = await getMyToken(chatId);
 //         if (!token) return;
 
-//         const url = import.meta.env.VITE_LIVEKIT_URL;
+//         const url = import.meta.env.VITE_LIVEKIT_WS_URL;
 
 //         // 6. Connect to LiveKit SFU (LiveKit will handle media)
 //         await get().connectToSFURoom(url, token);
@@ -179,7 +179,7 @@
 //         const token = await getMyToken(chatId);
 //         if (!token) return;
 
-//         const url = import.meta.env.VITE_LIVEKIT_URL;
+//         const url = import.meta.env.VITE_LIVEKIT_WS_URL;
 
 //         // Connect to SFU (LiveKit will handle media acquisition)
 //         await get().connectToSFURoom(url, token);

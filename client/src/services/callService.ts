@@ -17,12 +17,7 @@ export const callService = {
         avatarUrl: avatarUrl ?? null,
       };
 
-      console.log("[generateAndFetchLiveKitToken] sending payload:", payload);
-
       const { data } = await API.post("/calls/token", payload);
-
-      console.log("[generateAndFetchLiveKitToken] server response:", data);
-
       if (!data.payload?.token) {
         throw new Error("No token returned from server");
       }

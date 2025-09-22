@@ -173,9 +173,6 @@ export class CallController {
     @CurrentUser('id') userId: string,
     @Body() body: GenerateLiveKitTokenDto,
   ): Promise<SuccessResponse<{ token: string }>> {
-    console.log('🟢 getLivekitToken');
-    console.log('🟢 User ID:', userId);
-    console.log('🟢 Parsed body:', body);
     try {
       const { chatId, participantName, avatarUrl } = body;
       const token = await this.liveKitService.generateLivekitToken(
@@ -225,25 +222,6 @@ export class CallController {
       );
     } catch (error: unknown) {
       ErrorResponse.throw(error, 'Failed to update call');
-    }
-  }
-
-  @Post(':id/status')
-  async updateCallStatus(
-    @Param('id') id: string,
-    @Body() body: { status: CallStatus },
-  ): Promise<SuccessResponse<CallResponseDto>> {
-    try {
-      const updatedCall = await this.callService.updateCallStatus(
-        id,
-        body.status,
-      );
-      return new SuccessResponse(
-        plainToInstance(CallResponseDto, updatedCall),
-        'Call status updated successfully',
-      );
-    } catch (error: unknown) {
-      ErrorResponse.throw(error, 'Failed to update call status');
     }
   }
 

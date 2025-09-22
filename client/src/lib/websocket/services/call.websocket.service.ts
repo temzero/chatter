@@ -104,7 +104,6 @@ export const callWebSocketService = {
     webSocketService.off(CallEvent.INCOMING_CALL);
     webSocketService.off(CallEvent.UPDATE_CALL);
     webSocketService.off(CallEvent.JOIN_CALL);
-    webSocketService.off(CallEvent.JOIN_CALL);
     webSocketService.off(CallEvent.DECLINE_CALL);
     webSocketService.off(CallEvent.HANG_UP);
     webSocketService.off(CallEvent.CALL_ENDED);

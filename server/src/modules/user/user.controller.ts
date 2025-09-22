@@ -20,7 +20,6 @@ import { JwtPayload } from '../auth/types/jwt-payload.type';
 import { UpdateProfileDto } from './dto/requests/update-profile.dto';
 import { ChangePasswordDto } from './dto/requests/change-password.dto';
 import { VerifyUsernameDto } from './dto/requests/verify-username.dto';
-// import { VerifyPhoneDto } from './dto/requests/verify-phone.dto';
 import { VerifyEmailDto } from './dto/requests/verify-email.dto';
 import { VerifyEmailCodeDto } from './dto/requests/verify-email.dto';
 import { MailService } from '../auth/mail/mail.service';

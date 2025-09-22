@@ -18,7 +18,19 @@ async function bootstrap() {
   });
 
   // Middleware
-  app.use(json({ limit: BODY_PARSER_LIMIT }));
+  // app.use(json({ limit: BODY_PARSER_LIMIT }));
+  // app.use(
+  //   json({
+  //     limit: BODY_PARSER_LIMIT,
+  //     type: ['application/json', 'application/*+json'],
+  //   }),
+  // );
+  app.use(
+    json({
+      limit: BODY_PARSER_LIMIT,
+      type: ['application/json', 'application/*+json'], // include LiveKit type
+    }),
+  );
   app.use(urlencoded({ limit: BODY_PARSER_LIMIT, extended: true }));
   app.use(cookieParser());
 

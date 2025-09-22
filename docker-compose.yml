@@ -13,12 +13,12 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=${NODE_ENV}
-      - VITE_API_URL=${VITE_API_URL}
+      - VITE_API_URL=http://localhost:3000
       - VITE_SUPABASE_URL=${SUPABASE_URL}
       - VITE_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
       - VITE_SUPABASE_AVATAR_BUCKET=${SUPABASE_AVATAR_BUCKET}
       - VITE_SUPABASE_ATTACHMENTS_BUCKET=${SUPABASE_ATTACHMENTS_BUCKET}
-      - VITE_LIVEKIT_URL=ws://localhost:7880
+      - VITE_LIVEKIT_WS_URL=ws://localhost:7880
     command: npm run dev -- --host
     stdin_open: true
     tty: true
@@ -60,7 +60,7 @@ services:
       - SUPABASE_ATTACHMENTS_BUCKET=${SUPABASE_ATTACHMENTS_BUCKET}
       - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
-      - LIVEKIT_URL=http://livekit:7880
+      - LIVEKIT_URL=http://livekit:7880 # Internal Docker network
       - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
       - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
     extra_hosts:
@@ -75,12 +75,16 @@ services:
   livekit:
     image: livekit/livekit-server:latest
     ports:
-      - "7880:7880"
+      - "7880:7880" # HTTP/WebSocket
+      - "7881:7881" # TCP
+      - "7882:7882/udp" # UDP
+      - "50000-60000:50000-60000/udp" # UDP port range for WebRTC
     volumes:
-      - ./livekit-docker/livekit.yaml:/livekit.yaml
-    command: --config /livekit.yaml
+      - ./livekit.yaml:/livekit.yaml
+    command: --config /livekit.yaml --bind-all
     environment:
       - LIVEKIT_HOST=0.0.0.0
+    restart: unless-stopped
 
 networks:
   default:

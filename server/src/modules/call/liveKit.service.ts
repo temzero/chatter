@@ -32,7 +32,6 @@ export class LivekitService {
     participantName: string | null,
     avatarUrl: string | null,
   ): Promise<string> {
-    console.log('generateLivekitToken');
     try {
       const at = new AccessToken(this.apiKey, this.apiSecret, {
         identity: userId,

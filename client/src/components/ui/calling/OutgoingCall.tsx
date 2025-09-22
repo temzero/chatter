@@ -17,12 +17,14 @@ interface CallCallingUIProps {
 export const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
   const isVideoCall = useCallStore((state) => state.isVideoCall);
   const toggleLocalVideo = useCallStore((state) => state.toggleLocalVideo);
-  const rejectCall = useCallStore((state) => state.rejectCall);
+  const endCall = useCallStore((state) => state.endCall);
   const closeModal = useModalStore.getState().closeModal;
   const { localVideoStream } = useLocalTracks();
 
   const cancelCall = () => {
-    rejectCall(true);
+    endCall({
+      isRejected: true,
+    });
     closeModal();
   };
 

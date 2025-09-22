@@ -6,7 +6,6 @@ import { audioService } from "@/services/audio.service";
 import { useModalStore, ModalType } from "../modalStore";
 import { useMessageStore } from "../messageStore";
 import { CallStatus, LocalCallStatus } from "@/types/enums/CallStatus";
-import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
 import { LiveKitService } from "@/services/liveKitService";
 import { getMyToken } from "./helpers/call.helper";
 import { handleError } from "@/utils/handleError";
@@ -41,7 +40,6 @@ export interface CallActions {
     isVoiceEnabled?: boolean;
     isVideoEnabled?: boolean;
   }) => Promise<void>;
-  rejectCall: (isCancel?: boolean) => void;
   leaveCall: () => void;
   endCall: (opt?: {
     isCancel?: boolean;
@@ -99,24 +97,19 @@ export const useCallStore = create<CallState & CallActions>()(
           localCallStatus: LocalCallStatus.OUTGOING,
           startedAt: new Date(),
         });
-        console.log("[startCall] Base state set -> OUTGOING");
 
         useModalStore.getState().openModal(ModalType.CALL);
-        console.log("[startCall] Opened Call Modal");
 
         const timeoutRef = setTimeout(() => {
           if (get().localCallStatus === LocalCallStatus.OUTGOING) {
-            console.warn("[startCall] Timeout reached (60s), ending call");
             get().endCall({ isTimeout: true });
           }
         }, 60000);
         set({ timeoutRef });
-        console.log("[startCall] Timeout scheduled (60s)");
 
         // init LiveKit
         const liveKitService = new LiveKitService();
         set({ liveKitService });
-        console.log("[startCall] LiveKitService initialized");
 
         const token = await getMyToken(chatId);
         if (!token) {
@@ -128,12 +121,10 @@ export const useCallStore = create<CallState & CallActions>()(
           return;
         }
 
-        console.log("[startCall] Connecting to LiveKit room...");
         await get().connectToLiveKitRoom(token, {
           audio: true,
           video: isVideoCall,
         });
-        console.log("[startCall] Successfully connected to LiveKit");
       } catch (err) {
         console.error("[startCall] error:", err);
         set({
@@ -182,19 +173,7 @@ export const useCallStore = create<CallState & CallActions>()(
         set({ localCallStatus: LocalCallStatus.ERROR });
       }
     },
-
-    rejectCall: (isCancel = false) => {
-      const { chatId, callId } = get();
-      if (!chatId || !callId) return;
-
-      callWebSocketService.rejectCall({
-        chatId,
-        callId: callId,
-        isCallerCancel: isCancel,
-      });
-      get().endCall({ isCancel });
-    },
-
+  
     leaveCall: () => {
       get().disconnectFromLiveKit();
       get().endCall();
@@ -330,8 +309,6 @@ export const useCallStore = create<CallState & CallActions>()(
           console.error("LiveKit error:", err);
         },
       });
-
-      set({ localCallStatus: LocalCallStatus.CONNECTED });
     },
 
     disconnectFromLiveKit: () => {

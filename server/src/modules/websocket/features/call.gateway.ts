@@ -135,6 +135,7 @@ export class CallGateway {
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: CallActionRequest,
   ) {
+    console.log('JOIN_CALL', payload);
     const userId = client.data.userId;
     const member = await this.chatMemberService.getMemberByChatIdAndUserId(
       payload.chatId,

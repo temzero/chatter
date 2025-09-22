@@ -18,7 +18,7 @@ const CallModal: React.FC = () => {
   const { chatId, localCallStatus } = useCallStore();
   const getOrFetchChatById = useChatStore((state) => state.getOrFetchChatById);
   const [chat, setChat] = React.useState<ChatResponse | null>(null);
-
+  console.log("localCallStatus", localCallStatus);
   React.useEffect(() => {
     if (!chatId) return;
 

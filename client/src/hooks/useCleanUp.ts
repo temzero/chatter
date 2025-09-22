@@ -18,7 +18,7 @@ export const useCleanup = () => {
         callStore.localCallStatus !== LocalCallStatus.ENDED
       ) {
         callWebSocketService.hangup({
-          callId: callStore.id!,
+          callId: callStore.callId!,
           chatId: callStore.chatId,
           // isCallerCancel: true,
         });
