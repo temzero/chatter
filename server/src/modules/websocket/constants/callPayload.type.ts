@@ -46,6 +46,7 @@ export interface IncomingCallResponse {
   status: CallStatus; // DIALING or IN_PROGRESS
   participantsCount: number; // number of participants in the room
   initiatorMemberId?: string; // optional if known
+  initiatorUserId?: string; // optional if known
   isVideoCall?: boolean; // optional if known
   startedAt?: Date; // optional if known
 }

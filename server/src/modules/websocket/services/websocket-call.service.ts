@@ -93,43 +93,22 @@ export class WebsocketCallService {
     initiatorUserId: string,
     isVideoCall: boolean,
   ) {
-    console.log('🔹 emitIncomingCall called', {
-      callId,
-      chatId,
-      initiatorUserId,
-      isVideoCall,
-    });
-
     // 1. Get chat members
     const chatMembers = await this.chatMemberService.getChatMembers(chatId);
-    console.log(
-      '🔹 Chat members:',
-      chatMembers.map((m) => m.userId),
-    );
-
-    const otherMembers = chatMembers.filter(
-      (m) => m.userId !== initiatorUserId,
-    );
-    console.log(
-      '🔹 Other members (excluding initiator):',
-      otherMembers.map((m) => m.userId),
-    );
+    // const otherMembers = chatMembers.filter(
+    //   (m) => m.userId !== initiatorUserId,
+    // );
 
     // 2. Filter only free members (not in any active call)
     const freeMembers: ChatMember[] = [];
-    for (const member of otherMembers) {
+    for (const member of chatMembers) {
       const isInCall = await this.callService.isUserInAnyActiveCall(
         member.userId,
       );
-      console.log(`🔹 Checking if ${member.userId} is in a call:`, isInCall);
       if (!isInCall) {
         freeMembers.push(member);
       }
     }
-    console.log(
-      '🔹 Free members eligible for call:',
-      freeMembers.map((m) => m.userId),
-    );
 
     if (freeMembers.length === 0) {
       console.log(
@@ -165,11 +144,13 @@ export class WebsocketCallService {
       chatId,
       status: CallStatus.DIALING,
       initiatorMemberId: initiatorMember.id,
+      initiatorUserId,
       isVideoCall,
       participantsCount: 1,
     };
 
     console.log('🔔 Emit INCOMING CALL to free members');
+
     // 5. Emit to free members
     for (const member of freeMembers) {
       console.log(`🔹 Emitting INCOMING_CALL to ${member.userId}`);
@@ -179,6 +160,13 @@ export class WebsocketCallService {
         response,
       );
     }
+
+    // Emit to caller to sync call info
+    this.websocketNotificationService.emitToUser(
+      initiatorUserId,
+      CallEvent.INCOMING_CALL,
+      response,
+    );
 
     return { success: true, chatId };
   }

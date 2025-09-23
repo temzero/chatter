@@ -15,6 +15,7 @@ import {
   CallError,
   CallErrorResponse,
 } from "@/types/callPayload";
+import { useAuthStore, useCurrentUserId } from "@/stores/authStore";
 
 export function useCallSocketListeners() {
   useCallSounds();
@@ -40,18 +41,26 @@ export function useCallSocketListeners() {
     };
 
     const handleIncomingCall = (callResponse: IncomingCallResponse) => {
+      console.log("[INCOMING_CALL]", callResponse);
+      const currentUserId = useAuthStore.getState().currentUser?.id;
+      const isCaller = callResponse.initiatorUserId === currentUserId;
+
       useCallStore.setState({
         callId: callResponse.callId,
         chatId: callResponse.chatId,
         isVideoCall: callResponse.isVideoCall ?? false,
         initiatorMemberId: callResponse.initiatorMemberId,
-        localCallStatus: LocalCallStatus.INCOMING,
+        localCallStatus: isCaller
+          ? LocalCallStatus.OUTGOING // Caller stays in "dialing..."
+          : LocalCallStatus.INCOMING, // Callee sees "incoming..."
         callStatus: callResponse.status, // 🔹 sync server status
       });
+      if (!isCaller) {
+        useModalStore.getState().openModal(ModalType.CALL);
+      }
 
-      useModalStore.getState().openModal(ModalType.CALL);
-
-      if (callResponse.startedAt) {
+      // Only show toast for callees
+      if (!isCaller && callResponse.startedAt) {
         toast.info(
           `Incoming ${
             callResponse.isVideoCall ? "video" : "voice"
@@ -65,6 +74,10 @@ export function useCallSocketListeners() {
     const handleStartCall = (data: UpdateCallPayload) => {
       console.log("[CALL_START]");
       const callStore = useCallStore.getState();
+
+      if (callStore.callId !== data.callId) {
+        console.log("callId miss match");
+      }
 
       if (callStore.callId === data.callId) {
         toast.info("Call started");

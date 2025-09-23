@@ -128,10 +128,18 @@ export class LiveKitService {
       })
       .on(RoomEvent.ParticipantConnected, (participant) => {
         this.options?.onParticipantConnected?.(participant);
-        useCallStore.setState({
-          callStatus: CallStatus.IN_PROGRESS,
-          localCallStatus: LocalCallStatus.CONNECTED,
-        });
+        console.log('[ParticipantConnected]', participant.name)
+
+        // const { callStatus, localCallStatus } = useCallStore.getState();
+        // if (
+        //   callStatus !== CallStatus.IN_PROGRESS &&
+        //   localCallStatus !== LocalCallStatus.CONNECTED
+        // ) {
+        //   useCallStore.setState({
+        //     callStatus: CallStatus.IN_PROGRESS,
+        //     localCallStatus: LocalCallStatus.CONNECTED,
+        //   });
+        // }
       })
       .on(RoomEvent.ParticipantDisconnected, (participant) => {
         this.options?.onParticipantDisconnected?.(participant);

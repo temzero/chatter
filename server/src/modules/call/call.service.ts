@@ -156,9 +156,16 @@ export class CallService {
     });
   }
 
-  async updateCall(id: string, updateCallDto: UpdateCallDto): Promise<Call> {
+  async updateCall(
+    id: string,
+    updateCallDto: UpdateCallDto,
+  ): Promise<Call | undefined> {
+    console.log('Update call');
     const call = await this.getCallById(id);
-
+    if (!call) {
+      console.log('No call to Update');
+      return;
+    }
     if (updateCallDto.attendedUserIds) {
       const existingAttendees = new Set(call.attendedUserIds || []);
       updateCallDto.attendedUserIds.forEach((id) => existingAttendees.add(id));

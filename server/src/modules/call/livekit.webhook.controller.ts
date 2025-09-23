@@ -72,33 +72,20 @@ export class LivekitWebhookController {
           // ------------------------------
           // 1) FIRST PARTICIPANT (initiator)
           // ------------------------------
-          console.log(
-            '[participant_joined] First participant detected. Creating call...',
-          );
+          console.log('[participant_joined] 1st participant');
           call = await this.callService.createCall({
             chatId: roomName,
             status: CallStatus.DIALING,
             initiatorUserId: userId,
           });
 
-          console.log('[participant_joined] Call created:', call.id);
-          console.log('[participant_joined] Call chat info:', call.chat);
-
           const isVideoCall = call.chat?.type === ChatType.GROUP;
-          console.log('[participant_joined] isVideoCall:', isVideoCall);
 
-          console.log(
-            '[participant_joined] Emitting INCOMING_CALL to other members...',
-          );
           await this.websocketCallService.emitIncomingCall(
             call.id,
             roomName,
             userId,
             isVideoCall,
-          );
-          console.log(
-            '[participant_joined] INCOMING_CALL emitted for call:',
-            call.id,
           );
         } else if (
           call.attendedUserIds.length === 1 &&
@@ -107,15 +94,13 @@ export class LivekitWebhookController {
           // ------------------------------
           // 2) SECOND PARTICIPANT (callee answers)
           // ------------------------------
-          console.log(
-            '[participant_joined] Second participant detected. Updating call...',
-          );
+          console.log('[participant_joined] 2th participant');
           const updatedAttendees = new Set(call.attendedUserIds || []);
           const updatedCurrent = new Set(call.currentUserIds || []);
           updatedAttendees.add(userId);
           updatedCurrent.add(userId);
 
-          call = await this.callService.updateCall(roomName, {
+          await this.callService.updateCall(call.id, {
             status: CallStatus.IN_PROGRESS,
             startedAt: new Date(),
             attendedUserIds: Array.from(updatedAttendees),
@@ -145,7 +130,7 @@ export class LivekitWebhookController {
             updatedAttendees.add(userId);
             updatedCurrent.add(userId);
 
-            call = await this.callService.updateCall(roomName, {
+            await this.callService.updateCall(call.id, {
               attendedUserIds: Array.from(updatedAttendees),
               currentUserIds: Array.from(updatedCurrent),
             });
@@ -237,16 +222,16 @@ export class LivekitWebhookController {
 
       case 'track_published': {
         const userId = payload.participant?.identity;
-        const participantName = payload.participant?.name;
-        console.log('[track_published] Participant:', participantName);
+        // const participantName = payload.participant?.name;
+        // console.log('[track_published] Participant:', participantName);
         if (!userId) return;
         break;
       }
 
       case 'track_unpublished': {
         const userId = payload.participant?.identity;
-        const participantName = payload.participant?.name;
-        console.log('[track_unpublished] Participant:', participantName);
+        // const participantName = payload.participant?.name;
+        // console.log('[track_unpublished] Participant:', participantName);
         if (!userId) return;
         break;
       }
