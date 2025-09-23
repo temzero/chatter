@@ -16,8 +16,3 @@ webhook:
   urls:
     - "http://host.docker.internal:3000/livekit/webhook"
   api_key: dev-livekit-api
-  events:
-    - room_started
-    - room_finished
-    - participant_connected
-    - participant_disconnected

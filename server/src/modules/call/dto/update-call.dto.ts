@@ -7,4 +7,5 @@ export class UpdateCallDto {
   endedAt?: Date;
   duration?: number;
   attendedUserIds?: string[];
+  currentUserIds?: string[];
 }

@@ -22,8 +22,8 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
   };
 
   const rejectCall = () => {
-    useCallStore.getState().rejectCall();
-    useCallStore.getState().closeCallModal();
+    useCallStore.getState().endCall();
+    // useCallStore.getState().closeCallModal();
   };
 
   const showVideoPreview = isVideoCall && localVideoStream && isVideoEnabled;

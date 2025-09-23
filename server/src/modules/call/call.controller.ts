@@ -4,7 +4,7 @@ import {
   Body,
   Get,
   Param,
-  Delete,
+  // Delete,
   UseGuards,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
@@ -20,9 +20,9 @@ import { CallStatus } from './type/callStatus';
 import { IncomingCallResponse } from '../websocket/constants/callPayload.type';
 import { ChatService } from '../chat/chat.service';
 import { ChatType } from '../chat/constants/chat-types.constants';
-import { CreateCallDto } from './dto/create-call.dto';
-import { UpdateCallDto } from './dto/update-call.dto';
 import { GenerateLiveKitTokenDto } from './dto/generate-livekit-token.dto';
+// import { CreateCallDto } from './dto/create-call.dto';
+// import { UpdateCallDto } from './dto/update-call.dto';
 
 @Controller('calls')
 @UseGuards(JwtAuthGuard)
@@ -187,51 +187,51 @@ export class CallController {
     }
   }
 
-  @Post()
-  async createCall(
-    @CurrentUser('id') userId: string,
-    @Body()
-    body: CreateCallDto,
-  ): Promise<SuccessResponse<CallResponseDto>> {
-    try {
-      const newCall = await this.callService.createCall({
-        chatId: body.chatId,
-        initiatorUserId: userId,
-        status: CallStatus.DIALING,
-      });
+  // @Post()
+  // async createCall(
+  //   @CurrentUser('id') userId: string,
+  //   @Body()
+  //   body: CreateCallDto,
+  // ): Promise<SuccessResponse<CallResponseDto>> {
+  //   try {
+  //     const newCall = await this.callService.createCall({
+  //       chatId: body.chatId,
+  //       initiatorUserId: userId,
+  //       status: CallStatus.DIALING,
+  //     });
 
-      return new SuccessResponse(
-        plainToInstance(CallResponseDto, newCall),
-        'Call created successfully',
-      );
-    } catch (error: unknown) {
-      ErrorResponse.throw(error, 'Failed to create call');
-    }
-  }
+  //     return new SuccessResponse(
+  //       plainToInstance(CallResponseDto, newCall),
+  //       'Call created successfully',
+  //     );
+  //   } catch (error: unknown) {
+  //     ErrorResponse.throw(error, 'Failed to create call');
+  //   }
+  // }
 
-  @Post(':id')
-  async updateCall(
-    @Param('id') id: string,
-    @Body() body: UpdateCallDto,
-  ): Promise<SuccessResponse<CallResponseDto>> {
-    try {
-      const updatedCall = await this.callService.updateCall(id, body);
-      return new SuccessResponse(
-        plainToInstance(CallResponseDto, updatedCall),
-        'Call updated successfully',
-      );
-    } catch (error: unknown) {
-      ErrorResponse.throw(error, 'Failed to update call');
-    }
-  }
+  // @Post(':id')
+  // async updateCall(
+  //   @Param('id') id: string,
+  //   @Body() body: UpdateCallDto,
+  // ): Promise<SuccessResponse<CallResponseDto>> {
+  //   try {
+  //     const updatedCall = await this.callService.updateCall(id, body);
+  //     return new SuccessResponse(
+  //       plainToInstance(CallResponseDto, updatedCall),
+  //       'Call updated successfully',
+  //     );
+  //   } catch (error: unknown) {
+  //     ErrorResponse.throw(error, 'Failed to update call');
+  //   }
+  // }
 
-  @Delete(':id')
-  async deleteCall(@Param('id') id: string): Promise<SuccessResponse<null>> {
-    try {
-      await this.callService.deleteCall(id);
-      return new SuccessResponse(null, 'Call deleted successfully');
-    } catch (error: unknown) {
-      ErrorResponse.throw(error, 'Failed to delete call');
-    }
-  }
+  // @Delete(':id')
+  // async deleteCall(@Param('id') id: string): Promise<SuccessResponse<null>> {
+  //   try {
+  //     await this.callService.deleteCall(id);
+  //     return new SuccessResponse(null, 'Call deleted successfully');
+  //   } catch (error: unknown) {
+  //     ErrorResponse.throw(error, 'Failed to delete call');
+  //   }
+  // }
 }

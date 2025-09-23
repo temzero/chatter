@@ -1,3 +1,5 @@
+import { CallStatus, LocalCallStatus } from "@/types/enums/CallStatus";
+import { useCallStore } from "@/stores/callStore/callStore";
 import {
   Room,
   RoomEvent,
@@ -109,7 +111,6 @@ export class LiveKitService {
   getConnectionState() {
     return this.room.state;
   }
-
   // --- Private methods ---
 
   private setupEventListeners() {
@@ -127,6 +128,10 @@ export class LiveKitService {
       })
       .on(RoomEvent.ParticipantConnected, (participant) => {
         this.options?.onParticipantConnected?.(participant);
+        useCallStore.setState({
+          callStatus: CallStatus.IN_PROGRESS,
+          localCallStatus: LocalCallStatus.CONNECTED,
+        });
       })
       .on(RoomEvent.ParticipantDisconnected, (participant) => {
         this.options?.onParticipantDisconnected?.(participant);

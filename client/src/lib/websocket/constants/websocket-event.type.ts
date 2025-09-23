@@ -35,6 +35,7 @@ export const enum ChatEvent {
 export const enum CallEvent {
   INITIATE_CALL = "call:initiate", // 📞 BOTH: Start a new call
   INCOMING_CALL = "call:incoming", // 📞 BOTH: Receive incoming call notification
+  START_CALL = "call:start",
   UPDATE_CALL = "call:update", // 📞 BOTH: Update call state/metadata
   JOIN_CALL = "call:join", // 📞 BOTH: Join a call (P2P: rarely used, SFU: essential)
   DECLINE_CALL = "call:declined", // 📞 BOTH: Reject an incoming call

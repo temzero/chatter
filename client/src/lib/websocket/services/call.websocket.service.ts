@@ -31,6 +31,14 @@ export const callWebSocketService = {
     webSocketService.off(CallEvent.INCOMING_CALL, callback);
   },
 
+  // START CALL
+  onStartCall(callback: (data: UpdateCallPayload) => void) {
+    webSocketService.on(CallEvent.START_CALL, callback);
+  },
+  offStartCall(callback: (data: UpdateCallPayload) => void) {
+    webSocketService.off(CallEvent.START_CALL, callback);
+  },
+
   // UPDATE CALL
   onCallUpdated(callback: (data: UpdateCallPayload) => void) {
     webSocketService.on(CallEvent.UPDATE_CALL, callback);
@@ -102,6 +110,7 @@ export const callWebSocketService = {
 
   removeAllListeners() {
     webSocketService.off(CallEvent.INCOMING_CALL);
+    webSocketService.off(CallEvent.START_CALL);
     webSocketService.off(CallEvent.UPDATE_CALL);
     webSocketService.off(CallEvent.JOIN_CALL);
     webSocketService.off(CallEvent.DECLINE_CALL);

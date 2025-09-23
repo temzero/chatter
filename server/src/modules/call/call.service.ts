@@ -144,35 +144,11 @@ export class CallService {
       status: createCallDto.status,
       chat: { id: createCallDto.chatId },
       initiator: initiatorMember,
-      attendedUserIds: createCallDto.attendedUserIds || [],
+      attendedUserIds: [createCallDto.initiatorUserId],
+      currentUserIds: [createCallDto.initiatorUserId],
     });
 
     const savedCall = await this.callRepository.save(call);
-
-    if (createCallDto.status === CallStatus.DIALING) {
-      const TIMEOUT_MS = 60_000;
-      setTimeout(() => {
-        void (async () => {
-          try {
-            const latestCall = await this.callRepository.findOne({
-              where: { id: savedCall.id },
-            });
-            if (latestCall && latestCall.status === CallStatus.DIALING) {
-              await this.callRepository.save({
-                ...latestCall,
-                status: CallStatus.MISSED,
-                endedAt: new Date(),
-              });
-              console.log(
-                `Call ${latestCall.id} marked as MISSED due to timeout`,
-              );
-            }
-          } catch (err) {
-            console.error('Failed to mark call as MISSED:', err);
-          }
-        })();
-      }, TIMEOUT_MS);
-    }
 
     return this.callRepository.findOneOrFail({
       where: { id: savedCall.id },
@@ -201,6 +177,73 @@ export class CallService {
     const call = await this.getCallById(id);
     call.status = status;
     return await this.callRepository.save(call);
+  }
+
+  async removeCurrentUserId(chatId: string, userId: string): Promise<Call> {
+    // 1. Get active call by ID or roomName
+    const call = await this.getActiveCallByChatId(chatId);
+
+    if (!call) {
+      throw new NotFoundException(`Active call not found for ${chatId}`);
+    }
+
+    // 2. Remove user from currentUserIds
+    const updatedCurrent = new Set(call.currentUserIds || []);
+    if (!updatedCurrent.has(userId)) {
+      // User not in call, nothing to do
+      return call;
+    }
+    updatedCurrent.delete(userId);
+
+    // 3. Update the call entity
+    call.currentUserIds = Array.from(updatedCurrent);
+    return await this.callRepository.save(call);
+  }
+
+  async isUserInCall(chatId: string, userId: string): Promise<boolean> {
+    const call = await this.callRepository
+      .createQueryBuilder('call')
+      .where('call.chat_id = :chatId', { chatId })
+      .andWhere('call.status IN (:...statuses)', {
+        statuses: [CallStatus.DIALING, CallStatus.IN_PROGRESS],
+      })
+      .andWhere(':userId = ANY(call.currentUserIds)', { userId })
+      .getOne();
+
+    return !!call;
+  }
+
+  async isUserInAnyActiveCall(userId: string): Promise<boolean> {
+    const call = await this.callRepository
+      .createQueryBuilder('call')
+      .where('call.status IN (:...statuses)', {
+        statuses: [CallStatus.DIALING, CallStatus.IN_PROGRESS],
+      })
+      .andWhere(':userId = ANY(call.currentUserIds)', { userId })
+      .getOne();
+
+    return !!call;
+  }
+
+  async cleanUpPendingCalls(chatId: string): Promise<void> {
+    const activeCalls = await this.callRepository.find({
+      where: {
+        chat: { id: chatId },
+        status: In([CallStatus.DIALING, CallStatus.IN_PROGRESS]),
+      },
+    });
+
+    if (!activeCalls) {
+      console.log(`[cleanUpPendingCalls] No pending calls`);
+      return;
+    }
+
+    for (const call of activeCalls) {
+      await this.deleteCall(call.id);
+      console.log(
+        `[cleanUpPendingCalls] Deleted stuck call ${call.id} for chat ${chatId}`,
+      );
+    }
   }
 
   async deleteCall(id: string): Promise<void> {

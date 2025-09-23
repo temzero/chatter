@@ -62,6 +62,19 @@ export function useCallSocketListeners() {
       }
     };
 
+    const handleStartCall = (data: UpdateCallPayload) => {
+      console.log("[CALL_START]");
+      const callStore = useCallStore.getState();
+
+      if (callStore.callId === data.callId) {
+        toast.info("Call started");
+        useCallStore.setState({
+          localCallStatus: LocalCallStatus.CONNECTED,
+          callStatus: CallStatus.IN_PROGRESS,
+        });
+      }
+    };
+
     const handleUpdateCall = (updatedCall: UpdateCallPayload) => {
       console.log("handleUpdateCall");
       const { callId, isVideoCall, callStatus } = updatedCall;
@@ -141,6 +154,7 @@ export function useCallSocketListeners() {
         callStore.endCall();
         useCallStore.setState({
           callStatus: data.callStatus ?? CallStatus.COMPLETED,
+          localCallStatus: LocalCallStatus.ENDED,
         });
       }
     };
@@ -165,6 +179,7 @@ export function useCallSocketListeners() {
     // Subscribe to events
     callWebSocketService.removeAllListeners();
     callWebSocketService.onIncomingCall(handleIncomingCall);
+    callWebSocketService.onStartCall(handleStartCall);
     callWebSocketService.onCallUpdated(handleUpdateCall);
     callWebSocketService.onJoinCall(handleJoinCall);
     callWebSocketService.onCallRejected(handleCallRejected);

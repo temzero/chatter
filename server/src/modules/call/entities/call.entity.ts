@@ -38,6 +38,9 @@ export class Call {
   @Column({ type: 'simple-array', default: '' })
   attendedUserIds: string[];
 
+  @Column('text', { array: true, default: [] })
+  currentUserIds: string[];
+
   @Column({ type: 'timestamp', nullable: true })
   startedAt?: Date;
 

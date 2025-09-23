@@ -29,82 +29,82 @@ export class CallGateway {
     private readonly callStore: CallStoreService,
   ) {}
 
-  @SubscribeMessage(CallEvent.INITIATE_CALL)
-  async handleCallInitiate(
-    @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() payload: InitiateCallRequest,
-  ) {
-    const userId = client.data.userId;
+  // @SubscribeMessage(CallEvent.INITIATE_CALL)
+  // async handleCallInitiate(
+  //   @ConnectedSocket() client: AuthenticatedSocket,
+  //   @MessageBody() payload: InitiateCallRequest,
+  // ) {
+  //   const userId = client.data.userId;
 
-    // 1️⃣ Block if caller is already in another call
-    if (this.callStore.isUserInCall(userId)) {
-      const errorResponse: CallErrorResponse = {
-        reason: CallError.CALL_FAILED,
-      };
-      return errorResponse;
-    }
+  //   // 1️⃣ Block if caller is already in another call
+  //   if (this.callStore.isUserInCall(userId)) {
+  //     const errorResponse: CallErrorResponse = {
+  //       reason: CallError.CALL_FAILED,
+  //     };
+  //     return errorResponse;
+  //   }
 
-    // 2️⃣ Get chat members (exclude caller)
-    const chatMembers = await this.chatMemberService.getChatMembers(
-      payload.chatId,
-    );
-    const otherMembers = chatMembers.filter((m) => m.userId !== userId);
-    if (otherMembers.length === 0) {
-      const errorResponse: CallErrorResponse = {
-        reason: CallError.INITIATION_FAILED,
-      };
-      return errorResponse;
-    }
+  //   // 2️⃣ Get chat members (exclude caller)
+  //   const chatMembers = await this.chatMemberService.getChatMembers(
+  //     payload.chatId,
+  //   );
+  //   const otherMembers = chatMembers.filter((m) => m.userId !== userId);
+  //   if (otherMembers.length === 0) {
+  //     const errorResponse: CallErrorResponse = {
+  //       reason: CallError.INITIATION_FAILED,
+  //     };
+  //     return errorResponse;
+  //   }
 
-    // 3️⃣ Filter only free members (not in another call)
-    const freeMembers = otherMembers.filter(
-      (m) => !this.callStore.isUserInCall(m.userId),
-    );
+  //   // 3️⃣ Filter only free members (not in another call)
+  //   const freeMembers = otherMembers.filter(
+  //     (m) => !this.callStore.isUserInCall(m.userId),
+  //   );
 
-    // 4️⃣ If no free members → notify caller line busy
-    if (freeMembers.length === 0) {
-      const errorResponse: CallErrorResponse = {
-        reason: CallError.LINE_BUSY,
-      };
-      return errorResponse;
-    }
+  //   // 4️⃣ If no free members → notify caller line busy
+  //   if (freeMembers.length === 0) {
+  //     const errorResponse: CallErrorResponse = {
+  //       reason: CallError.LINE_BUSY,
+  //     };
+  //     return errorResponse;
+  //   }
 
-    // 5️⃣ Get initiator chat member
-    const initiatorMember =
-      await this.chatMemberService.getMemberByChatIdAndUserId(
-        payload.chatId,
-        userId,
-      );
-    if (!initiatorMember) {
-      const errorResponse: CallErrorResponse = {
-        reason: CallError.INITIATION_FAILED,
-      };
-      return errorResponse;
-    }
+  //   // 5️⃣ Get initiator chat member
+  //   const initiatorMember =
+  //     await this.chatMemberService.getMemberByChatIdAndUserId(
+  //       payload.chatId,
+  //       userId,
+  //     );
+  //   if (!initiatorMember) {
+  //     const errorResponse: CallErrorResponse = {
+  //       reason: CallError.INITIATION_FAILED,
+  //     };
+  //     return errorResponse;
+  //   }
 
-    // 6️⃣ Build call response
-    const response: IncomingCallResponse = {
-      callId: 'callId',
-      chatId: payload.chatId,
-      status: CallStatus.DIALING,
-      initiatorMemberId: initiatorMember.id,
-      isVideoCall: payload.isVideoCall,
-      participantsCount: 1,
-    };
+  //   // 6️⃣ Build call response
+  //   const response: IncomingCallResponse = {
+  //     callId: 'callId',
+  //     chatId: payload.chatId,
+  //     status: CallStatus.DIALING,
+  //     initiatorMemberId: initiatorMember.id,
+  //     isVideoCall: payload.isVideoCall,
+  //     participantsCount: 1,
+  //   };
 
-    console.log('Call initiated:', response);
+  //   console.log('Call initiated:', response);
 
-    // 7️⃣ Notify only free members
-    for (const member of freeMembers) {
-      this.websocketNotificationService.emitToUser(
-        member.userId,
-        CallEvent.INCOMING_CALL,
-        response,
-      );
-    }
+  //   // 7️⃣ Notify only free members
+  //   for (const member of freeMembers) {
+  //     this.websocketNotificationService.emitToUser(
+  //       member.userId,
+  //       CallEvent.INCOMING_CALL,
+  //       response,
+  //     );
+  //   }
 
-    return { success: true, chatId: payload.chatId };
-  }
+  //   return { success: true, chatId: payload.chatId };
+  // }
 
   @SubscribeMessage(CallEvent.UPDATE_CALL)
   async handleUpdate(

@@ -9,11 +9,7 @@ import { CallStatus, LocalCallStatus } from "@/types/enums/CallStatus";
 import { LiveKitService } from "@/services/liveKitService";
 import { getMyToken } from "./helpers/call.helper";
 import { handleError } from "@/utils/handleError";
-import {
-  CallError,
-  // CallErrorResponse,
-  IncomingCallResponse,
-} from "@/types/callPayload";
+import { CallError, IncomingCallResponse } from "@/types/callPayload";
 import { callService } from "@/services/callService";
 
 export interface CallState {
@@ -142,17 +138,22 @@ export const useCallStore = create<CallState & CallActions>()(
       const { callId, chatId } = get();
       if (!callId || !chatId) return;
 
-      try {
-        set({ localCallStatus: LocalCallStatus.CONNECTING });
+      // Optimistically set local state to connected
+      set({
+        localCallStatus: LocalCallStatus.CONNECTED,
+        callStatus: CallStatus.IN_PROGRESS,
+      });
 
+      try {
         const liveKitService = new LiveKitService();
         set({ liveKitService });
 
         const token = await getMyToken(chatId);
         if (!token) {
-          console.warn("No token available for LiveKit");
+          console.warn("[joinCall] No token available for LiveKit");
           set({
             localCallStatus: LocalCallStatus.ERROR,
+            callStatus: CallStatus.FAILED,
             error: CallError.PERMISSION_DENIED,
           });
           return;
@@ -163,17 +164,19 @@ export const useCallStore = create<CallState & CallActions>()(
           video: options?.isVideoEnabled ?? get().isVideoCall,
         });
 
-        // callWebSocketService.joinCall({
-        //   chatId,
-        //   callId,
-        //   isCallerCancel: false,
-        // });
+        console.log("[joinCall] Successfully connected to LiveKit");
       } catch (err) {
+        console.error("[joinCall] LiveKit connection failed:", err);
         handleError(err, "Could not connect to SFU");
-        set({ localCallStatus: LocalCallStatus.ERROR });
+
+        // Rollback state on failure
+        set({
+          localCallStatus: LocalCallStatus.ERROR,
+          callStatus: CallStatus.FAILED,
+          liveKitService: null,
+        });
       }
     },
-  
     leaveCall: () => {
       get().disconnectFromLiveKit();
       get().endCall();
