@@ -4,7 +4,6 @@ import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { callService } from "@/services/callService";
 import { getCallText, getCallClass, getCallIcon } from "@/utils/callHelpers";
 import { formatDateTime } from "@/utils/formatDate";
-import { ChatType } from "@/types/enums/ChatType";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { CallResponseDto } from "@/types/responses/call.response";
 
@@ -12,6 +11,8 @@ const SidebarCalls: React.FC = () => {
   const [calls, setCalls] = useState<CallResponseDto[]>([]);
   const [loading, setLoading] = useState(true);
   const startCall = useCallStore((state) => state.startCall);
+
+  console.log("calls", calls);
 
   useEffect(() => {
     const fetchCalls = async () => {
@@ -57,7 +58,7 @@ const SidebarCalls: React.FC = () => {
                   id: call.chat.id,
                   name: call.chat.name,
                   avatarUrl: call.chat.avatarUrl,
-                  type: call.chat.type ? ChatType.GROUP : ChatType.DIRECT,
+                  type: call.chat.type,
                   myMemberId: call.chat.myMemberId,
                 }}
                 type="sidebar"
@@ -70,7 +71,7 @@ const SidebarCalls: React.FC = () => {
                 </p>
                 <p className="text-sm flex items-center gap-1">
                   <span className={getCallClass(call.status)}>
-                    {getCallText(call.status)}
+                    {getCallText(call.status, call.startedAt, call.endedAt)}
                   </span>
                 </p>
                 <p className="text-xs text-muted-foreground opacity-50">

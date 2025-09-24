@@ -15,7 +15,7 @@ import {
   CallError,
   CallErrorResponse,
 } from "@/types/callPayload";
-import { useAuthStore, useCurrentUserId } from "@/stores/authStore";
+import { useAuthStore } from "@/stores/authStore";
 
 export function useCallSocketListeners() {
   useCallSounds();
@@ -42,50 +42,58 @@ export function useCallSocketListeners() {
 
     const handleIncomingCall = (callResponse: IncomingCallResponse) => {
       console.log("[INCOMING_CALL]", callResponse);
+
+      const {
+        callId,
+        chatId,
+        isVideoCall,
+        initiatorUserId,
+        initiatorMemberId,
+        status,
+        startedAt,
+      } = callResponse;
+
       const currentUserId = useAuthStore.getState().currentUser?.id;
-      const isCaller = callResponse.initiatorUserId === currentUserId;
+      const isCaller = initiatorUserId === currentUserId;
 
       useCallStore.setState({
-        callId: callResponse.callId,
-        chatId: callResponse.chatId,
-        isVideoCall: callResponse.isVideoCall ?? false,
-        initiatorMemberId: callResponse.initiatorMemberId,
+        callId,
+        chatId,
+        isVideoCall: isVideoCall ?? false,
+        initiatorMemberId,
         localCallStatus: isCaller
-          ? LocalCallStatus.OUTGOING // Caller stays in "dialing..."
-          : LocalCallStatus.INCOMING, // Callee sees "incoming..."
-        callStatus: callResponse.status, // 🔹 sync server status
+          ? LocalCallStatus.OUTGOING
+          : LocalCallStatus.INCOMING,
+        callStatus: status,
       });
+
       if (!isCaller) {
         useModalStore.getState().openModal(ModalType.CALL);
       }
 
-      // Only show toast for callees
-      if (!isCaller && callResponse.startedAt) {
+      if (!isCaller && startedAt) {
         toast.info(
           `Incoming ${
-            callResponse.isVideoCall ? "video" : "voice"
-          } call started at ${new Date(
-            callResponse.startedAt
-          ).toLocaleTimeString()}`
+            isVideoCall ? "video" : "voice"
+          } call started at ${new Date(startedAt).toLocaleTimeString()}`
         );
       }
     };
 
     const handleStartCall = (data: UpdateCallPayload) => {
       console.log("[CALL_START]");
+      const { callId } = data;
       const callStore = useCallStore.getState();
 
-      if (callStore.callId !== data.callId) {
+      if (callStore.callId !== callId) {
         console.log("callId miss match");
+        return;
       }
 
-      if (callStore.callId === data.callId) {
-        toast.info("Call started");
-        useCallStore.setState({
-          localCallStatus: LocalCallStatus.CONNECTED,
-          callStatus: CallStatus.IN_PROGRESS,
-        });
-      }
+      useCallStore.setState({
+        localCallStatus: LocalCallStatus.CONNECTED,
+        callStatus: CallStatus.IN_PROGRESS,
+      });
     };
 
     const handleUpdateCall = (updatedCall: UpdateCallPayload) => {
@@ -93,99 +101,81 @@ export function useCallSocketListeners() {
       const { callId, isVideoCall, callStatus } = updatedCall;
       const callStore = useCallStore.getState();
 
-      if (callStore.callId === callId) {
-        useCallStore.setState({
-          isVideoCall: isVideoCall ?? callStore.isVideoCall,
-          callStatus: callStatus ?? callStore.callStatus, // 🔹 sync server status
-        });
-
-        if (isVideoCall && !callStore.isVideoCall) {
-          console.log("SFU call - video will be handled by LiveKit");
-        }
-
-        if (!isVideoCall && callStore.isVideoCall) {
-          callStore
-            .toggleLocalVideo()
-            .catch((err) => console.error("Failed to disable SFU video:", err));
-        }
-      }
-    };
-
-    const handleJoinCall = async (callResponse: CallActionResponse) => {
-      console.log("handleJoinCall");
-      const callStore = useCallStore.getState();
-
-      if (callStore.callId !== callResponse.callId) {
-        console.warn("Accepted call does not match current call");
+      if (callStore.callId !== callId) {
+        console.error("callId miss match");
         return;
       }
 
       useCallStore.setState({
-        localCallStatus: LocalCallStatus.CONNECTED,
-        callStatus: callResponse.status ?? CallStatus.IN_PROGRESS, // 🔹 sync server status
+        isVideoCall: isVideoCall ?? callStore.isVideoCall,
+        callStatus: callStatus ?? callStore.callStatus,
       });
-    };
 
-    const handleCallRejected = async (data: CallActionResponse) => {
-      console.log("handleCallRejected");
-      const callStore = useCallStore.getState();
+      if (isVideoCall && !callStore.isVideoCall) {
+        console.log("SFU call - video will be handled by LiveKit");
+      }
 
-      if (callStore.callId === data.callId) {
-        if (data.isCallerCancel) {
-          callStore.endCall({ isCancel: true });
-          useCallStore.setState({ callStatus: CallStatus.FAILED }); // 🔹 sync server
-          toast.info("Call canceled by caller");
-        } else {
-          callStore.endCall({ isRejected: true });
-          useCallStore.setState({ callStatus: CallStatus.FAILED }); // 🔹 sync server
-          toast.info("Call rejected");
-        }
+      if (!isVideoCall && callStore.isVideoCall) {
+        callStore
+          .toggleLocalVideo()
+          .catch((err) => console.error("Failed to disable SFU video:", err));
       }
     };
 
-    const handleHangUp = async (data: CallActionResponse) => {
-      console.log("User hangup", data);
+    const handleCallDeclined = (data: CallActionResponse) => {
+      console.log("[CALL_DECLINED]", data);
+      const { callId, isCallerCancel } = data;
       const callStore = useCallStore.getState();
 
-      if (callStore.callId === data.callId) {
-        toast.info(`${data.memberId} has left the call`);
-        const room = callStore.getLiveKitRoom();
-        if (room && room.remoteParticipants.size === 0) {
-          callStore.endCall();
-          useCallStore.setState({
-            callStatus: data.status ?? CallStatus.COMPLETED, // 🔹 sync server
-          });
-        }
+      if (callStore.callId !== callId) {
+        console.error("callId mismatch");
+        return;
+      }
+
+      if (isCallerCancel) {
+        callStore.endCall({ isCancel: true });
+      } else {
+        console.log("callStore.endCall({ isDeclined: true });");
+        callStore.endCall({ isDeclined: true });
       }
     };
 
     const handleCallEnded = (data: UpdateCallPayload) => {
+      console.log("CALL_ENDED", data);
+      const { callId, callStatus } = data;
       const callStore = useCallStore.getState();
 
-      if (callStore.callId === data.callId) {
-        toast.info("Call ended");
-        callStore.endCall();
-        useCallStore.setState({
-          callStatus: data.callStatus ?? CallStatus.COMPLETED,
-          localCallStatus: LocalCallStatus.ENDED,
-        });
+      if (callStore.callId !== callId) {
+        console.error("callId miss match");
+        return;
       }
+
+      callStore.endCall();
+      useCallStore.setState({
+        callStatus: callStatus ?? CallStatus.COMPLETED,
+        localCallStatus: LocalCallStatus.ENDED,
+      });
     };
 
     const handleCallError = (data: CallErrorResponse) => {
       console.warn("Call error:", data);
+      const { reason, callId } = data;
 
-      if (data.reason === CallError.LINE_BUSY) {
+      if (reason === CallError.LINE_BUSY) {
         toast.error("Cannot start call: line is busy");
         const callStore = useCallStore.getState();
-        if (callStore.callId === data.callId) {
-          callStore.endCall();
-          useCallStore.setState({
-            callStatus: CallStatus.FAILED,
-            localCallStatus: LocalCallStatus.ERROR,
-            error: CallError.LINE_BUSY,
-          });
+
+        if (callStore.callId !== callId) {
+          console.error("callId miss match");
+          return;
         }
+
+        callStore.endCall();
+        useCallStore.setState({
+          callStatus: CallStatus.FAILED,
+          localCallStatus: LocalCallStatus.ERROR,
+          error: CallError.LINE_BUSY,
+        });
       }
     };
 
@@ -194,9 +184,7 @@ export function useCallSocketListeners() {
     callWebSocketService.onIncomingCall(handleIncomingCall);
     callWebSocketService.onStartCall(handleStartCall);
     callWebSocketService.onCallUpdated(handleUpdateCall);
-    callWebSocketService.onJoinCall(handleJoinCall);
-    callWebSocketService.onCallRejected(handleCallRejected);
-    callWebSocketService.onHangup(handleHangUp);
+    callWebSocketService.onCallDeclined(handleCallDeclined);
     callWebSocketService.onCallEnded(handleCallEnded);
     callWebSocketService.onCallError(handleCallError);
 

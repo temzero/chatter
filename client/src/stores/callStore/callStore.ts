@@ -39,7 +39,7 @@ export interface CallActions {
   leaveCall: () => void;
   endCall: (opt?: {
     isCancel?: boolean;
-    isRejected?: boolean;
+    isDeclined?: boolean;
     isTimeout?: boolean;
   }) => void;
 
@@ -51,7 +51,7 @@ export interface CallActions {
   // utils
   getActiveCall: (chatId: string) => Promise<IncomingCallResponse | null>;
   setLocalCallStatus: (s: LocalCallStatus) => void;
-  getCallDuration: () => number;
+  getCallDuration: () => number | null;
   clearCallData: () => void;
   closeCallModal: () => void;
 
@@ -177,36 +177,39 @@ export const useCallStore = create<CallState & CallActions>()(
         });
       }
     },
+
     leaveCall: () => {
       get().disconnectFromLiveKit();
       get().endCall();
       get().closeCallModal();
     },
 
-    endCall: async (opt = {}) => {
-      const { chatId, callId } = get();
-
-      // 🔹 Just disconnect from LiveKit
+    endCall: async (
+      opt: {
+        isDeclined?: boolean;
+        isCancel?: boolean;
+        isTimeout?: boolean;
+      } = {}
+    ) => {
+      console.log("(endCall)", opt);
+      // Disconnect from LiveKit
       get().disconnectFromLiveKit();
-      // 🔹 Update local state only (UI purposes)
-      set({
-        localCallStatus: opt.isRejected
-          ? LocalCallStatus.REJECTED
-          : opt.isCancel
-          ? LocalCallStatus.CANCELED
-          : opt.isTimeout
-          ? LocalCallStatus.ENDED // missed will be handled by server
-          : LocalCallStatus.ENDED,
-        endedAt: new Date(),
-      });
+      // Determine local call status
+      let localCallStatus: LocalCallStatus;
+      let endedAt: Date | undefined;
 
-      // 🔹 Let server handle DB + system message creation
-      // If you want UI to reflect instantly, you could still optimistically update message store:
-      if (chatId && callId) {
-        useMessageStore
-          .getState()
-          .updateMessageCallStatus(chatId, callId, CallStatus.COMPLETED);
+      if (opt.isDeclined) {
+        localCallStatus = LocalCallStatus.DECLINED;
+        // Don't set endedAt for declined
+      } else if (opt.isCancel) {
+        localCallStatus = LocalCallStatus.CANCELED;
+        // Don't set endedAt for canceled
+      } else {
+        localCallStatus = LocalCallStatus.ENDED;
+        endedAt = new Date(); // Only set endedAt for normal ended calls
       }
+      // Update local state
+      set({ localCallStatus, endedAt });
     },
 
     // ========== MEDIA ==========
@@ -271,9 +274,8 @@ export const useCallStore = create<CallState & CallActions>()(
 
     getCallDuration: () => {
       const { startedAt, endedAt } = get();
-      if (!startedAt) return 0;
-      const end = endedAt ? endedAt.getTime() : Date.now();
-      return Math.floor((end - startedAt.getTime()) / 1000);
+      if (!startedAt || !endedAt) return null;
+      return Math.floor((endedAt.getTime() - startedAt.getTime()) / 1000);
     },
 
     clearCallData: () => {

@@ -10,19 +10,6 @@ import {
 } from "@/types/callPayload";
 
 export const callWebSocketService = {
-  // INITIATE NEW CALL
-  // initiateCall(payload: InitiateCallRequest): Promise<CallErrorResponse> {
-  //   return new Promise((resolve) => {
-  //     webSocketService.emit(
-  //       CallEvent.INITIATE_CALL,
-  //       payload,
-  //       (response: unknown) => {
-  //         resolve(response as CallErrorResponse);
-  //       }
-  //     );
-  //   });
-  // },
-
   // INCOMING CALL
   onIncomingCall(callback: (data: IncomingCallResponse) => void) {
     webSocketService.on(CallEvent.INCOMING_CALL, callback);
@@ -47,17 +34,6 @@ export const callWebSocketService = {
     webSocketService.off(CallEvent.UPDATE_CALL, callback);
   },
 
-  // JOIN CALL
-  joinCall(payload: CallActionRequest) {
-    webSocketService.emit(CallEvent.JOIN_CALL, payload);
-  },
-  onJoinCall(callback: (data: CallActionResponse) => void) {
-    webSocketService.on(CallEvent.JOIN_CALL, callback);
-  },
-  offJoinCall(callback: (data: CallActionResponse) => void) {
-    webSocketService.off(CallEvent.JOIN_CALL, callback);
-  },
-
   // CANCEL CALL
   cancelCall(payload: CallActionRequest) {
     webSocketService.emit(CallEvent.DECLINE_CALL, {
@@ -67,29 +43,18 @@ export const callWebSocketService = {
   },
 
   // REJECT CALL
-  rejectCall(payload: CallActionRequest) {
+  declineCall(payload: CallActionRequest) {
     webSocketService.emit(CallEvent.DECLINE_CALL, payload);
   },
-  onCallRejected(
+  onCallDeclined(
     callback: (data: CallActionResponse & { isCallerCancel?: boolean }) => void
   ) {
     webSocketService.on(CallEvent.DECLINE_CALL, callback);
   },
-  offCallRejected(
+  offCallDeclined(
     callback: (data: CallActionResponse & { isCallerCancel?: boolean }) => void
   ) {
     webSocketService.off(CallEvent.DECLINE_CALL, callback);
-  },
-
-  // HANGUP
-  // hangup(payload: CallActionRequest) {
-  //   webSocketService.emit(CallEvent.HANG_UP, payload);
-  // },
-  onHangup(callback: (data: CallActionResponse) => void) {
-    webSocketService.on(CallEvent.HANG_UP, callback);
-  },
-  offHangup(callback: (data: CallActionResponse) => void) {
-    webSocketService.off(CallEvent.HANG_UP, callback);
   },
 
   // END CALL

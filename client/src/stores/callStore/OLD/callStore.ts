@@ -183,7 +183,7 @@
 //       useSFUCallStore.getState().disconnectFromSFU();
 
 //       const localStatus = options.isRejected
-//         ? LocalCallStatus.REJECTED
+//         ? LocalCallStatus.DECLINED
 //         : options.isCancel
 //         ? LocalCallStatus.CANCELED
 //         : LocalCallStatus.ENDED;

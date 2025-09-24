@@ -228,7 +228,7 @@
 
 //       // 5. Update local call state
 //       const localStatus = options.isRejected
-//         ? LocalCallStatus.REJECTED
+//         ? LocalCallStatus.DECLINED
 //         : options.isCancel
 //         ? LocalCallStatus.CANCELED
 //         : LocalCallStatus.ENDED;

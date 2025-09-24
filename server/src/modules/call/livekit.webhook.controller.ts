@@ -147,20 +147,6 @@ export class LivekitWebhookController {
 
         break;
       }
-
-      // case 'participant_left': {
-      //   const userId = payload.participant?.identity;
-      //   if (!userId) return;
-      //   console.log(
-      //     '[participant_disconnected] Room:',
-      //     roomName,
-      //     'User:',
-      //     userId,
-      //   );
-      //   await this.callService.removeCurrentUserId(roomName, userId);
-      //   break;
-      // }
-
       case 'participant_left': {
         const userId = payload.participant?.identity;
         const participantName = payload.participant?.name;
@@ -177,42 +163,50 @@ export class LivekitWebhookController {
         const remainingUsers =
           call.currentUserIds?.filter((id) => id !== userId) ?? [];
 
-        if (remainingUsers.length === 0) {
-          // Last user left → end the call
+        if (remainingUsers.length <= 1) {
+          console.log(
+            '[participant_disconnected] 1 members left, END CALL',
+            participantName,
+          );
+
+          // Determine call status based on whether anyone actually attended
+          // If only the initiator was ever in the call (attendedUserIds.length = 1), it's a missed call
+          // If more than one person attended at any point, it's a completed call
           const status =
-            (call.attendedUserIds?.length ?? 0) <= 1
+            call.attendedUserIds?.length <= 1
               ? CallStatus.MISSED
               : CallStatus.COMPLETED;
 
           const endedAt = new Date();
-          const updatedCall = await this.callService.updateCall(roomName, {
+          const updatedCall = await this.callService.updateCall(call.id, {
             status,
             endedAt,
             currentUserIds: [],
           });
 
           console.log(
-            `[participant_left] Call ${call.id} ended. Status: ${status}`,
+            `[participant_left] Call ${call.id} ended. Status: ${status}, Attendees: ${call.attendedUserIds?.length}`,
           );
 
           await this.websocketCallService.emitEndedCall(
             call.id,
             roomName,
             status,
+            userId,
           );
 
-          await this.messageService.createSystemEventMessage(
-            call.chat.id,
-            call.initiator.user.id,
-            SystemEventType.CALL,
-            { call: updatedCall },
-          );
+          const senderId = call.attendedUserIds?.[0]; // first attendee, usually the caller
 
-          // Optionally delete zero-attendee calls
-          if ((call.attendedUserIds?.length ?? 0) === 0) {
-            await this.callService.deleteCall(call.id);
-            console.log(
-              `[participant_left] Deleted call ${call.id} (zero attendees)`,
+          if (!senderId) {
+            console.warn(
+              '[participant_left] No attended users found, skipping system message',
+            );
+          } else {
+            await this.messageService.createSystemEventMessage(
+              call.chat.id,
+              senderId,
+              SystemEventType.CALL,
+              { call: updatedCall },
             );
           }
         }
@@ -235,63 +229,6 @@ export class LivekitWebhookController {
         if (!userId) return;
         break;
       }
-
-      // case 'room_finished': {
-      //   console.log('[room_finished] Room:', roomName);
-
-      //   const call = await this.callService.getActiveCallByChatId(roomName);
-      //   if (!call) {
-      //     console.log(
-      //       '[room_finished] No active call found for room:',
-      //       roomName,
-      //     );
-      //     break;
-      //   }
-
-      //   const numAttendees = call.attendedUserIds?.length ?? 0;
-
-      //   if (numAttendees === 0) {
-      //     // --------------------------------
-      //     // Zero attendees → delete the call
-      //     // --------------------------------
-      //     await this.callService.deleteCall(call.id);
-      //     console.log(
-      //       `[room_finished] Deleted call ${call.id} (zero attendees)`,
-      //     );
-      //     break;
-      //   }
-      //   // --------------------------------
-      //   // Normal handling (missed vs completed)
-      //   // --------------------------------
-      //   const status =
-      //     numAttendees <= 1 ? CallStatus.MISSED : CallStatus.COMPLETED;
-
-      //   const endedAt = new Date();
-      //   const updatedCall = await this.callService.updateCall(roomName, {
-      //     status,
-      //     endedAt,
-      //     currentUserIds: [],
-      //   });
-
-      //   console.log(
-      //     `[room_finished] Call ${call.id} ended. Status: ${status}, Attendees: ${numAttendees}`,
-      //   );
-
-      //   await this.websocketCallService.emitEndedCall(
-      //     call.id,
-      //     roomName,
-      //     status,
-      //     endedAt,
-      //   );
-
-      //   await this.messageService.createSystemEventMessage(
-      //     call.chat.id,
-      //     call.initiator.user.id,
-      //     SystemEventType.CALL,
-      //     { call: updatedCall },
-      //   );
-      //   break;
-      // }
 
       case 'room_finished': {
         console.log('[room_finished] Room:', roomName);

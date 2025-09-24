@@ -5,7 +5,7 @@ import type {
   MessageResponse,
   SenderResponse,
 } from "@/types/responses/message.response";
-import { CallResponse } from "@/types/callPayload";
+import { CallActionResponse } from "@/types/callPayload";
 import { useActiveChatId, useChatStore } from "./chatStore";
 import { messageService } from "@/services/messageService";
 import { useMemo } from "react";
@@ -42,7 +42,7 @@ export interface MessageStore {
   updateCallMessage: (
     chatId: string,
     callId: string,
-    patch: Partial<CallResponse>
+    patch: Partial<CallActionResponse>
   ) => void;
   updateMessageCallStatus: (
     chatId: string,
@@ -306,7 +306,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
   updateCallMessage: (
     chatId: string,
     callId: string,
-    patch: Partial<CallResponse>
+    patch: Partial<CallActionResponse>
   ) => {
     if (!chatId || !callId) return;
     set((state) => {
@@ -338,7 +338,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
       const msgs = state.messages[chatId] || [];
       const updatedMsgs = msgs.map((m) => {
         if (m.call?.id === callId) {
-          const patch: Partial<CallResponse> = { status };
+          const patch: Partial<CallActionResponse> = { status };
 
           if (status === CallStatus.IN_PROGRESS && !m.call.startedAt) {
             patch.startedAt = new Date().toISOString();

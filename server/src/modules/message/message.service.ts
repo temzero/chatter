@@ -244,6 +244,7 @@ export class MessageService {
       call?: Call;
     },
   ): Promise<MessageResponseDto> {
+    console.log('(createSystemEventMessage)');
     let targetName: string | undefined;
     if (options?.targetId && options.targetId !== senderId) {
       targetName =
@@ -281,6 +282,7 @@ export class MessageService {
     const messageResponse =
       this.messageMapper.toMessageResponseDto(fullMessage);
 
+    console.log('🔔 Emit SYSTEM EVENT MESSAGE');
     await this.websocketNotificationService.emitToChatMembers(
       chatId,
       ChatEvent.NEW_MESSAGE,

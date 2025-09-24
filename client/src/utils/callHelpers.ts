@@ -1,21 +1,10 @@
 import { CallStatus } from "@/types/enums/CallStatus";
-
-// 🔹 Format duration from ms → "Xs", "1m12s", "1h20m"
-export const formatDuration = (ms: number) => {
-  const totalSeconds = Math.floor(ms / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-
-  if (hours > 0) return `${hours}h${minutes}m`;
-  if (minutes > 0) return `${minutes}m${seconds}s`;
-  return `${seconds}s`;
-};
+import { formatDurationByStartAndEnd } from "./formatDuration";
 
 export const getCallText = (
   status: CallStatus,
   startedAt?: string | Date,
-  endedAt?: string | Date
+  endedAt?: string | Date | null,
 ) => {
   switch (status) {
     case CallStatus.DIALING:
@@ -24,9 +13,10 @@ export const getCallText = (
       return "Call in progress";
     case CallStatus.COMPLETED:
       if (startedAt && endedAt) {
-        const duration =
-          new Date(endedAt).getTime() - new Date(startedAt).getTime();
-        return `Call ended • ${formatDuration(duration)}`;
+        return `Call ended • ${formatDurationByStartAndEnd(
+          startedAt,
+          endedAt
+        )}`;
       }
       return "Call ended";
     case CallStatus.MISSED:

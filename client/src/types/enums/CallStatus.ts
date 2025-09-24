@@ -13,7 +13,7 @@ export enum LocalCallStatus {
   INCOMING = "incoming",
   OUTGOING = "outgoing",
   CANCELED = "canceled",
-  REJECTED = "rejected",
+  DECLINED = "declined",
   ENDED = "ended",
   ERROR = "error",
 }

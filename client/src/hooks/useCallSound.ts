@@ -24,7 +24,7 @@ export const useCallSounds = () => {
           audioService.playSound(SoundType.CALL_CONNECTED);
           break;
         case LocalCallStatus.ENDED:
-        case LocalCallStatus.REJECTED:
+        case LocalCallStatus.DECLINED:
         case LocalCallStatus.CANCELED:
           audioService.playSound(SoundType.CALL_END);
           break;

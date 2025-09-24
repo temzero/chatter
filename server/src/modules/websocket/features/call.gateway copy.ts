@@ -1,457 +1,222 @@
-// // src/calls/call.gateway.ts
-// import {
-//   ConnectedSocket,
-//   MessageBody,
-//   SubscribeMessage,
-//   WebSocketGateway,
-// } from '@nestjs/websockets';
-// import { AuthenticatedSocket } from '../constants/authenticatedSocket.type';
-// import { CallEvent } from '../constants/websocket-events';
-// import {
-//   InitiateCallRequest,
-//   IncomingCallResponse,
-//   CallActionRequest,
-//   CallActionResponse,
-//   RtcOfferRequest,
-//   RtcOfferResponse,
-//   RtcAnswerRequest,
-//   RtcAnswerResponse,
-//   IceCandidateRequest,
-//   IceCandidateResponse,
-//   UpdateCallPayload,
-//   CallMemberPayload,
-// } from '../constants/callPayload.type';
-// import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
-// import { ChatService } from 'src/modules/chat/chat.service';
-// import { WebsocketNotificationService } from '../services/websocket-notification.service';
-// import { WebsocketCallService } from '../services/websocket-call.service';
-// import { MessageService } from 'src/modules/message/message.service';
-// import { CallService } from 'src/modules/call/call.service';
-// import { CallStatus } from 'src/modules/call/type/callStatus';
+// src/calls/call.gateway.ts
+import {
+  ConnectedSocket,
+  MessageBody,
+  SubscribeMessage,
+  WebSocketGateway,
+} from '@nestjs/websockets';
+import { AuthenticatedSocket } from '../constants/authenticatedSocket.type';
+import { CallEvent } from '../constants/websocket-events';
+import {
+  CallActionRequest,
+  CallActionResponse,
+  UpdateCallPayload,
+  InitiateCallRequest,
+  IncomingCallResponse,
+  CallError,
+  CallErrorResponse,
+} from '../constants/callPayload.type';
+import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
+import { WebsocketNotificationService } from '../services/websocket-notification.service';
+import { CallStatus } from 'src/modules/call/type/callStatus';
+import { CallStoreService } from '../services/call-store.service ';
 
-// @WebSocketGateway()
-// export class CallGateway {
-//   constructor(
-//     private readonly websocketNotificationService: WebsocketNotificationService,
-//     private readonly websocketCallService: WebsocketCallService,
-//     private readonly chatMemberService: ChatMemberService,
-//     private readonly chatService: ChatService,
-//     private readonly callService: CallService,
-//     private readonly messageService: MessageService,
-//   ) {}
+@WebSocketGateway()
+export class CallGateway {
+  constructor(
+    private readonly websocketNotificationService: WebsocketNotificationService,
+    private readonly chatMemberService: ChatMemberService,
+    private readonly callStore: CallStoreService,
+  ) {}
 
-//   // /**
-//   //  * Clear pending calls for all participants in a chat
-//   //  * @param chatId - The chat ID
-//   //  * @param userId - The user ID initiating the action
-//   //  */
-//   // private async clearPendingCalls(chatId: string) {
-//   //   // The new service handles cleanup automatically, so we just end the call
-//   //   this.websocketCallService.endCall(chatId);
-//   // }
+  @SubscribeMessage(CallEvent.INITIATE_CALL)
+  async handleCallInitiate(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: InitiateCallRequest,
+  ) {
+    const userId = client.data.userId;
 
-//   // @SubscribeMessage(CallEvent.PENDING_CALLS)
-//   // async handleRequestPendingCalls(
-//   //   @ConnectedSocket() client: AuthenticatedSocket,
-//   // ) {
-//   //   const userId = client.data.userId;
+    // 1️⃣ Block if caller is already in another call
+    if (this.callStore.isUserInCall(userId)) {
+      const errorResponse: CallErrorResponse = {
+        reason: CallError.CALL_FAILED,
+      };
+      return errorResponse;
+    }
 
-//   //   // Get user's member IDs across all chats
-//   //   const userChatsResult = await this.chatService.getUserChats(userId);
-//   //   const userMemberIds = await Promise.all(
-//   //     userChatsResult.chats.map((chat) =>
-//   //       this.chatMemberService.getChatMemberId(chat.id, userId),
-//   //     ),
-//   //   );
+    // 2️⃣ Get chat members (exclude caller)
+    const chatMembers = await this.chatMemberService.getChatMembers(
+      payload.chatId,
+    );
+    const otherMembers = chatMembers.filter((m) => m.userId !== userId);
+    if (otherMembers.length === 0) {
+      const errorResponse: CallErrorResponse = {
+        reason: CallError.INITIATION_FAILED,
+      };
+      return errorResponse;
+    }
 
-//   //   // Get pending calls where user is not the initiator
-//   //   const pendingCalls = this.websocketCallService.getPendingCallsForUser(
-//   //     userId,
-//   //     userMemberIds,
-//   //   );
+    // 3️⃣ Filter only free members (not in another call)
+    const freeMembers = otherMembers.filter(
+      (m) => !this.callStore.isUserInCall(m.userId),
+    );
 
-//   //   // Convert CallState to IncomingCallResponse format
-//   //   const pendingCallResponses: IncomingCallResponse[] = pendingCalls.map(
-//   //     (callState) => ({
-//   //       id: callState.id,
-//   //       chatId: callState.chatId,
-//   //       isVideoCall: callState.isVideoCall,
-//   //       isGroupCall: callState.isGroupCall,
-//   //       memberId: Array.from(callState.memberIds)[0], // Initiator is first member
-//   //       timestamp: callState.callAt,
-//   //     }),
-//   //   );
+    // 4️⃣ If no free members → notify caller line busy
+    if (freeMembers.length === 0) {
+      const errorResponse: CallErrorResponse = {
+        reason: CallError.LINE_BUSY,
+      };
+      return errorResponse;
+    }
 
-//   //   client.emit(CallEvent.PENDING_CALLS, pendingCallResponses);
-//   // }
+    // 5️⃣ Get initiator chat member
+    const initiatorMember =
+      await this.chatMemberService.getMemberByChatIdAndUserId(
+        payload.chatId,
+        userId,
+      );
+    if (!initiatorMember) {
+      const errorResponse: CallErrorResponse = {
+        reason: CallError.INITIATION_FAILED,
+      };
+      return errorResponse;
+    }
 
-//   @SubscribeMessage(CallEvent.INITIATE_CALL)
-//   async handleCallInitiate(
-//     @ConnectedSocket() client: AuthenticatedSocket,
-//     @MessageBody() payload: InitiateCallRequest,
-//   ) {
-//     console.log('INITIATE_CALL');
-//     const userId = client.data.userId;
-//     const memberId = await this.chatMemberService.getChatMemberId(
-//       payload.chatId,
-//       userId,
-//     );
+    // 6️⃣ Build call response
+    const response: IncomingCallResponse = {
+      callId: 'callId',
+      chatId: payload.chatId,
+      status: CallStatus.DIALING,
+      initiatorMemberId: initiatorMember.id,
+      isVideoCall: payload.isVideoCall,
+      participantsCount: 1,
+    };
 
-//     const response: IncomingCallResponse = {
-//       chatId: payload.chatId,
-//       isVideoCall: payload.isVideoCall,
-//       isGroupCall: payload.isGroupCall,
-//       memberId,
-//       timestamp: Date.now(),
-//     };
+    console.log('Call initiated:', response);
 
-//     // Initialize call in the call service
-//     this.websocketCallService.initiateCall(payload.chatId, response, memberId);
+    // 7️⃣ Notify only free members
+    for (const member of freeMembers) {
+      this.websocketNotificationService.emitToUser(
+        member.userId,
+        CallEvent.INCOMING_CALL,
+        response,
+      );
+    }
 
-//     await this.callService.createCall({
-//       chatId: payload.chatId,
-//       initiatorId: userId,
-//       initiatorMemberId: memberId,
-//       isVideoCall: payload.isVideoCall,
-//       isGroupCall: payload.isGroupCall,
-//       status: CallStatus.DIALING,
-//     });
+    return { success: true, chatId: payload.chatId };
+  }
 
-//     // Notify all online chat members except the caller
-//     await this.websocketNotificationService.emitToChatMembers(
-//       payload.chatId,
-//       CallEvent.INCOMING_CALL,
-//       response,
-//       { senderId: userId, excludeSender: true },
-//     );
-//   }
+  @SubscribeMessage(CallEvent.UPDATE_CALL)
+  async handleUpdate(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: UpdateCallPayload,
+  ) {
+    const userId = client.data.userId;
 
-//   @SubscribeMessage(CallEvent.UPDATE_CALL)
-//   async handleUpdate(
-//     @ConnectedSocket() client: AuthenticatedSocket,
-//     @MessageBody() payload: UpdateCallPayload,
-//   ) {
-//     const userId = client.data.userId;
+    // 🚫 No DB update here — this is ephemeral state only
 
-//     // find active call for this chat
-//     const activeCalls = await this.callService.getCallsByChatId(payload.chatId);
-//     if (activeCalls.length === 0) {
-//       throw new Error(`No active call found for chat ${payload.chatId}`);
-//     }
-//     const call = activeCalls[0];
+    const responsePayload: UpdateCallPayload = {
+      callId: payload.callId, // rely on payload or generate from context
+      chatId: payload.chatId,
+      callStatus: payload.callStatus,
+    };
 
-//     // persist update in DB
-//     const updatedCall = await this.callService.updateCall(call.id, {
-//       isVideoCall: payload.isVideoCall,
-//       status: payload.callStatus, // optional: allow frontend to send status updates
-//     });
+    // ✅ Broadcast updated call state to all chat members
+    await this.websocketNotificationService.emitToChatMembers(
+      payload.chatId,
+      CallEvent.UPDATE_CALL,
+      responsePayload,
+      { senderId: userId, excludeSender: false },
+    );
+  }
 
-//     // broadcast updated call to all members
-//     await this.websocketNotificationService.emitToChatMembers(
-//       payload.chatId,
-//       CallEvent.UPDATE_CALL,
-//       updatedCall,
-//       { senderId: userId, excludeSender: false },
-//     );
-//   }
+  @SubscribeMessage(CallEvent.JOIN_CALL)
+  async handleCallAccept(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: CallActionRequest,
+  ) {
+    console.log('JOIN_CALL', payload);
+    const userId = client.data.userId;
+    const member = await this.chatMemberService.getMemberByChatIdAndUserId(
+      payload.chatId,
+      userId,
+    );
+    if (!member) {
+      throw new Error('User is not a member of this chat');
+    }
 
-//   @SubscribeMessage(CallEvent.UPDATE_CALL_MEMBER)
-//   async handleCallMemberUpdate(
-//     @ConnectedSocket() client: AuthenticatedSocket,
-//     @MessageBody() payload: CallMemberPayload,
-//   ) {
-//     const userId = client.data.userId;
+    const response: CallActionResponse = {
+      chatId: payload.chatId,
+      memberId: member.id,
+    };
 
-//     // Verify the member making the update is the same as the one in the payload
-//     const userMemberId = await this.chatMemberService.getChatMemberId(
-//       payload.chatId,
-//       userId,
-//     );
+    await this.websocketNotificationService.emitToChatMembers(
+      payload.chatId,
+      CallEvent.JOIN_CALL,
+      response,
+      { senderId: userId, excludeSender: true },
+    );
+  }
 
-//     console.log(
-//       'userMemberId',
-//       userMemberId,
-//       'payload.memberId',
-//       payload.memberId,
-//     );
+  @SubscribeMessage(CallEvent.DECLINE_CALL)
+  async handleCallReject(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: CallActionRequest,
+  ) {
+    const userId = client.data.userId;
 
-//     if (userMemberId !== payload.memberId) {
-//       throw new Error('Unauthorized: Cannot update other members');
-//     }
+    const member = await this.chatMemberService.getMemberByChatIdAndUserId(
+      payload.chatId,
+      userId,
+    );
 
-//     await this.websocketNotificationService.emitToChatMembers(
-//       payload.chatId,
-//       CallEvent.UPDATE_CALL_MEMBER,
-//       payload,
-//       { senderId: userId, excludeSender: false },
-//     );
-//   }
+    if (!member) {
+      throw new Error('User is not a member of this chat');
+    }
 
-//   @SubscribeMessage(CallEvent.ACCEPT_CALL)
-//   async handleCallAccept(
-//     @ConnectedSocket() client: AuthenticatedSocket,
-//     @MessageBody() payload: CallActionRequest,
-//   ) {
-//     const userId = client.data.userId;
-//     const memberId = await this.chatMemberService.getChatMemberId(
-//       payload.chatId,
-//       userId,
-//     );
+    const response: CallActionResponse = {
+      chatId: payload.chatId,
+      memberId: member.id || userId,
+      isCallerCancel: payload.isCallerCancel,
+    };
 
-//     const response: CallActionResponse = {
-//       chatId: payload.chatId,
-//       memberId,
-//       timestamp: Date.now(),
-//       isCallerCancel: payload.isCallerCancel,
-//     };
+    await this.websocketNotificationService.emitToChatMembers(
+      payload.chatId,
+      CallEvent.DECLINE_CALL,
+      response,
+      { senderId: userId, excludeSender: true },
+    );
+  }
 
-//     // Add user to the call participants (in-memory state)
-//     this.websocketCallService.addParticipant(payload.chatId, memberId);
+  @SubscribeMessage(CallEvent.HANG_UP)
+  async handleHangup(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: CallActionRequest,
+  ) {
+    const userId = client.data.userId;
+    const member = await this.chatMemberService.getMemberByChatIdAndUserId(
+      payload.chatId,
+      userId,
+    );
 
-//     // Update DB call status to IN_PROGRESS
-//     const activeCall = await this.callService.getActiveCallByChatId(
-//       payload.chatId,
-//     );
-//     if (activeCall) {
-//       await this.callService.updateCall(activeCall.id, {
-//         status: CallStatus.IN_PROGRESS,
-//       });
-//     }
+    if (!member) {
+      throw new Error('User is not a member of this chat');
+    }
 
-//     // Emit to other members
-//     await this.websocketNotificationService.emitToChatMembers(
-//       payload.chatId,
-//       CallEvent.ACCEPT_CALL,
-//       response,
-//       { senderId: userId, excludeSender: true },
-//     );
-//   }
+    // ✅ No DB call lookup/update here
 
-//   @SubscribeMessage(CallEvent.JOIN_CALL)
-//   async handleJoinCall(
-//     @ConnectedSocket() client: AuthenticatedSocket,
-//     @MessageBody() payload: { chatId: string },
-//   ) {
-//     const userId = client.data.userId;
-//     const memberId = await this.chatMemberService.getChatMemberId(
-//       payload.chatId,
-//       userId,
-//     );
+    // Just broadcast that this user hung up
+    const response: CallActionResponse = {
+      chatId: payload.chatId,
+      memberId: member.id,
+      isCallerCancel: payload.isCallerCancel,
+    };
 
-//     if (!memberId) {
-//       throw new Error('User is not a member of this chat');
-//     }
-
-//     // Add user to the call participants (in-memory state)
-//     this.websocketCallService.addParticipant(payload.chatId, memberId);
-
-//     // Ensure DB call remains IN_PROGRESS
-//     const activeCall = await this.callService.getActiveCallByChatId(
-//       payload.chatId,
-//     );
-//     if (activeCall) {
-//       await this.callService.updateCall(activeCall.id, {
-//         status: CallStatus.IN_PROGRESS,
-//       });
-//     }
-
-//     const response = {
-//       chatId: payload.chatId,
-//       memberId,
-//       timestamp: Date.now(),
-//     };
-
-//     await this.websocketNotificationService.emitToChatMembers(
-//       payload.chatId,
-//       CallEvent.JOIN_CALL,
-//       response,
-//       { senderId: userId, excludeSender: false },
-//     );
-//   }
-
-//   @SubscribeMessage(CallEvent.DECLINE_CALL)
-//   async handleCallReject(
-//     @ConnectedSocket() client: AuthenticatedSocket,
-//     @MessageBody() payload: CallActionRequest,
-//   ) {
-//     const userId = client.data.userId;
-//     const memberId = await this.chatMemberService.getChatMemberId(
-//       payload.chatId,
-//       userId,
-//     );
-
-//     const response: CallActionResponse = {
-//       chatId: payload.chatId,
-//       memberId,
-//       timestamp: Date.now(),
-//       isCallerCancel: payload.isCallerCancel,
-//     };
-
-//     // Update DB call status to DECLINED
-//     const activeCall = await this.callService.getActiveCallByChatId(
-//       payload.chatId,
-//     );
-//     if (activeCall) {
-//       await this.callService.updateCall(activeCall.id, {
-//         status: CallStatus.DECLINED,
-//         endedAt: new Date(),
-//       });
-//     }
-
-//     // Clear call if only participant
-//     const callState = this.websocketCallService.getCallState(payload.chatId);
-//     if (callState && callState.memberIds.size === 1) {
-//       this.websocketCallService.endCall(payload.chatId);
-//     }
-
-//     await this.websocketNotificationService.emitToChatMembers(
-//       payload.chatId,
-//       CallEvent.DECLINE_CALL,
-//       response,
-//       { senderId: userId, excludeSender: true },
-//     );
-//   }
-
-//   @SubscribeMessage(CallEvent.HANG_UP)
-//   async handleHangup(
-//     @ConnectedSocket() client: AuthenticatedSocket,
-//     @MessageBody() payload: CallActionRequest,
-//   ) {
-//     const userId = client.data.userId;
-//     const memberId = await this.chatMemberService.getChatMemberId(
-//       payload.chatId,
-//       userId,
-//     );
-
-//     const response: CallActionResponse = {
-//       chatId: payload.chatId,
-//       memberId,
-//       timestamp: Date.now(),
-//     };
-
-//     // If caller cancels, delete call + system messages
-//     if (payload.isCallerCancel) {
-//       try {
-//         const activeCall = await this.callService.getActiveCallByChatId(
-//           payload.chatId,
-//         );
-//         if (activeCall) {
-//           await this.callService.deleteCallAndSystemMessage(activeCall.id);
-//         }
-//       } catch (err) {
-//         console.error('Failed to delete call or system messages:', err);
-//       }
-//     } else {
-//       // Otherwise update call to COMPLETED
-//       const activeCall = await this.callService.getActiveCallByChatId(
-//         payload.chatId,
-//       );
-//       if (activeCall) {
-//         await this.callService.updateCall(activeCall.id, {
-//           status: CallStatus.COMPLETED,
-//           endedAt: new Date(),
-//         });
-//       }
-//     }
-
-//     // Remove from in-memory participants
-//     const callEnded = this.websocketCallService.removeParticipant(
-//       payload.chatId,
-//       memberId,
-//     );
-
-//     if (callEnded) {
-//       await this.websocketNotificationService.emitToChatMembers(
-//         payload.chatId,
-//         CallEvent.END_CALL,
-//         { chatId: payload.chatId, endedBy: memberId },
-//         { senderId: userId, excludeSender: false },
-//       );
-//     }
-
-//     await this.websocketNotificationService.emitToChatMembers(
-//       payload.chatId,
-//       CallEvent.HANG_UP,
-//       response,
-//       { senderId: userId, excludeSender: true },
-//     );
-//   }
-
-//   @SubscribeMessage(CallEvent.P2P_OFFER_SDP)
-//   async handleP2PWebRtcOffer(
-//     @ConnectedSocket() client: AuthenticatedSocket,
-//     @MessageBody() payload: RtcOfferRequest,
-//   ) {
-//     const userId = client.data.userId;
-//     const memberId = await this.chatMemberService.getChatMemberId(
-//       payload.chatId,
-//       userId,
-//     );
-
-//     const response: RtcOfferResponse = {
-//       chatId: payload.chatId,
-//       offer: payload.offer,
-//       memberId,
-//     };
-
-//     await this.websocketNotificationService.emitToChatMembers(
-//       payload.chatId,
-//       CallEvent.P2P_OFFER_SDP,
-//       response,
-//       { senderId: userId, excludeSender: true },
-//     );
-//   }
-
-//   @SubscribeMessage(CallEvent.P2P_ANSWER_SDP)
-//   async handleRtcAnswer(
-//     @ConnectedSocket() client: AuthenticatedSocket,
-//     @MessageBody() payload: RtcAnswerRequest,
-//   ) {
-//     const userId = client.data.userId;
-//     const memberId = await this.chatMemberService.getChatMemberId(
-//       payload.chatId,
-//       userId,
-//     );
-
-//     const response: RtcAnswerResponse = {
-//       chatId: payload.chatId,
-//       answer: payload.answer,
-//       memberId,
-//     };
-
-//     await this.websocketNotificationService.emitToChatMembers(
-//       payload.chatId,
-//       CallEvent.P2P_ANSWER_SDP,
-//       response,
-//       { senderId: userId, excludeSender: true },
-//     );
-//   }
-
-//   @SubscribeMessage(CallEvent.ICE_CANDIDATE)
-//   async handleRtcIceCandidate(
-//     @ConnectedSocket() client: AuthenticatedSocket,
-//     @MessageBody() payload: IceCandidateRequest,
-//   ) {
-//     const userId = client.data.userId;
-//     const memberId = await this.chatMemberService.getChatMemberId(
-//       payload.chatId,
-//       userId,
-//     );
-
-//     const response: IceCandidateResponse = {
-//       chatId: payload.chatId,
-//       candidate: payload.candidate,
-//       memberId,
-//     };
-
-//     await this.websocketNotificationService.emitToChatMembers(
-//       payload.chatId,
-//       CallEvent.ICE_CANDIDATE,
-//       response,
-//       {
-//         senderId: userId,
-//         excludeSender: true,
-//       },
-//     );
-//   }
-// }
+    await this.websocketNotificationService.emitToChatMembers(
+      payload.chatId,
+      CallEvent.HANG_UP,
+      response,
+      { senderId: userId, excludeSender: true },
+    );
+  }
+}

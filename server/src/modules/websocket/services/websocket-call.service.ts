@@ -207,7 +207,12 @@ export class WebsocketCallService {
     );
   }
 
-  async emitEndedCall(callId: string, chatId: string, callStatus: CallStatus) {
+  async emitEndedCall(
+    callId: string,
+    chatId: string,
+    callStatus: CallStatus,
+    senderId: string,
+  ) {
     const endCallResponse: UpdateCallPayload = {
       callId,
       chatId,
@@ -216,8 +221,9 @@ export class WebsocketCallService {
     console.log('🔔 Emit END CALL');
     await this.websocketNotificationService.emitToChatMembers(
       chatId,
-      CallEvent.UPDATE_CALL,
+      CallEvent.CALL_ENDED,
       endCallResponse,
+      { senderId, excludeSender: true },
     );
   }
 }

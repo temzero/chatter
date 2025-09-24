@@ -1,10 +1,10 @@
 import React from "react";
-import InfiniteScroller from "@/components/ui/infiniteScroller";
 import ChatListItem from "./ChatListItem";
-import type { ChatResponse } from "@/types/responses/chat.response";
+import InfiniteScroller from "@/components/ui/infiniteScroller";
 import { useAuthStore } from "@/stores/authStore";
 import { useChatStore } from "@/stores/chatStore";
 import { useShallow } from "zustand/shallow";
+import type { ChatResponse } from "@/types/responses/chat.response";
 
 interface ChatListProps {
   chats: ChatResponse[];

@@ -1,20 +1,26 @@
+import { CallStatus } from "@/types/enums/CallStatus";
 import { SystemEventType } from "@/types/enums/systemEventType";
 
 // Component that renders the icon, now accepting className prop
 export const SystemEventIcon = ({
   systemEvent,
+  callStatus,
   className = "",
 }: {
   systemEvent: SystemEventType;
+  callStatus?: CallStatus | null;
   className?: string;
 }) => (
   <span className={`material-symbols-outlined text-sm ${className}`}>
-    {getSystemEventIconName(systemEvent)}
+    {getSystemEventIconName(systemEvent, callStatus)}
   </span>
 );
 
 // Function that returns the icon name string
-const getSystemEventIconName = (systemEvent: SystemEventType): string => {
+const getSystemEventIconName = (
+  systemEvent: SystemEventType,
+  callStatus?: CallStatus | null
+): string => {
   switch (systemEvent) {
     case SystemEventType.MEMBER_JOINED:
     case SystemEventType.MEMBER_ADDED:
@@ -43,6 +49,22 @@ const getSystemEventIconName = (systemEvent: SystemEventType): string => {
       return "unpin";
     case SystemEventType.CHAT_DELETED:
       return "delete";
+
+    case SystemEventType.CALL:
+      switch (callStatus) {
+        case CallStatus.DIALING:
+          return "call"; // maybe add "call_made" for outgoing
+        case CallStatus.IN_PROGRESS:
+          return "call"; // could use "call_end" with color/style
+        case CallStatus.COMPLETED:
+          return "call_end";
+        case CallStatus.MISSED:
+          return "call_missed";
+        case CallStatus.FAILED:
+          return "call_missed_outgoing";
+        default:
+          return "call";
+      }
     default:
       return "info";
   }

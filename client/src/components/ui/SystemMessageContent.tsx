@@ -3,6 +3,8 @@ import { SystemEventIcon } from "./SystemEventIcon";
 import { JSX } from "react";
 import { parseJsonContent } from "@/utils/parseJsonContent";
 import { ChatMemberRole } from "@/types/enums/chatMemberRole";
+import { CallStatus } from "@/types/enums/CallStatus";
+import { getCallMessageContent } from "./SystemCallMessageContent";
 
 export type SystemMessageJSONContent = {
   oldValue?: string;
@@ -13,6 +15,7 @@ export type SystemMessageJSONContent = {
 
 type SystemMessageContentProps = {
   systemEvent?: SystemEventType | null;
+  callStatus?: CallStatus | null;
   currentUserId: string;
   senderId: string;
   senderDisplayName: string;
@@ -22,6 +25,7 @@ type SystemMessageContentProps = {
 
 export const SystemMessageContent = ({
   systemEvent,
+  callStatus,
   currentUserId,
   senderId,
   senderDisplayName,
@@ -29,9 +33,9 @@ export const SystemMessageContent = ({
   ClassName = "",
 }: SystemMessageContentProps): JSX.Element | null => {
   if (!systemEvent) return null;
-
   const text = getSystemMessageText({
     systemEvent,
+    callStatus,
     currentUserId,
     senderId,
     senderDisplayName,
@@ -42,7 +46,7 @@ export const SystemMessageContent = ({
     <div
       className={`flex gap-1 items-center text-muted-foreground text-sm ${ClassName}`}
     >
-      <SystemEventIcon systemEvent={systemEvent} />
+      <SystemEventIcon systemEvent={systemEvent} callStatus={callStatus} />
       <span className="truncate">{text}</span>
     </div>
   );
@@ -50,6 +54,7 @@ export const SystemMessageContent = ({
 
 type GetSystemMessageContentProps = {
   systemEvent?: SystemEventType | null;
+  callStatus?: CallStatus | null;
   currentUserId: string;
   senderId: string;
   senderDisplayName: string;
@@ -58,12 +63,14 @@ type GetSystemMessageContentProps = {
 
 function getSystemMessageText({
   systemEvent,
+  callStatus,
   currentUserId,
   senderId,
   senderDisplayName,
   JSONcontent,
 }: GetSystemMessageContentProps): string {
   if (!systemEvent) return "System event occurred.";
+  console.log("callStatus", callStatus);
 
   const isMe = currentUserId === senderId;
   const displayName = isMe ? "You" : senderDisplayName;
@@ -147,6 +154,10 @@ function getSystemMessageText({
       return `${displayName} unpinned a message`;
     case SystemEventType.CHAT_DELETED:
       return `${displayName} deleted the chat`;
+
+    case SystemEventType.CALL:
+      return getCallMessageContent({ callStatus, isMe, displayName });
+
     default:
       return `System event occurred.`;
   }

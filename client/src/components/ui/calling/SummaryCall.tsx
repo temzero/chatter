@@ -14,23 +14,23 @@ export const SummaryCall = ({
   duration?: number;
 }) => {
   const duration = useCallStore((state) => state.getCallDuration());
-  const callStatus = useCallStore((state) => state.localCallStatus);
+  const localCallStatus = useCallStore((state) => state.localCallStatus);
   const error = useCallStore((state) => state.error);
   const closeCallModal = useCallStore((state) => state.closeCallModal);
-
+  console.log("localCallStatus", localCallStatus);
   // Auto-close when call is canceled
   useEffect(() => {
-    if (callStatus === LocalCallStatus.CANCELED) {
+    if (localCallStatus === LocalCallStatus.CANCELED) {
       closeCallModal();
     }
-  }, [callStatus, closeCallModal]);
+  }, [localCallStatus, closeCallModal]);
 
   const getStatusMessage = () => {
-    switch (callStatus) {
+    switch (localCallStatus) {
       case LocalCallStatus.CANCELED:
         return "Call canceled";
-      case LocalCallStatus.REJECTED:
-        return "Call rejected";
+      case LocalCallStatus.DECLINED:
+        return "Call declined";
       case LocalCallStatus.ENDED:
         return duration > 0 ? formatDuration(duration) : "Call ended";
       case LocalCallStatus.ERROR:
@@ -53,7 +53,7 @@ export const SummaryCall = ({
         {getStatusMessage() && (
           <div
             className={`mt-2 text-lg tabular-nums text-center ${
-              callStatus === LocalCallStatus.ERROR
+              localCallStatus === LocalCallStatus.ERROR
                 ? "text-red-500"
                 : "text-gray-400"
             }`}
@@ -66,14 +66,16 @@ export const SummaryCall = ({
       <div className="py-10 flex justify-center">
         <span
           className={`material-symbols-outlined text-6xl ${
-            callStatus === LocalCallStatus.CANCELED
+            localCallStatus === LocalCallStatus.CANCELED
               ? "text-gray-400"
-              : callStatus === LocalCallStatus.ERROR
+              : localCallStatus === LocalCallStatus.ERROR
               ? "text-red-500 animate-pulse"
               : "text-red-400"
           }`}
         >
-          {callStatus === LocalCallStatus.ERROR ? "e911_avatar" : "call_end"}
+          {localCallStatus === LocalCallStatus.ERROR
+            ? "e911_avatar"
+            : "call_end"}
         </span>
       </div>
 

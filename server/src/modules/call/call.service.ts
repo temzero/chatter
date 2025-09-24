@@ -240,16 +240,26 @@ export class CallService {
       },
     });
 
-    if (!activeCalls) {
-      console.log(`[cleanUpPendingCalls] No pending calls`);
+    if (!activeCalls || activeCalls.length === 0) {
+      console.log(`[cleanUpPendingCalls] No pending calls for chat ${chatId}`);
       return;
     }
 
     for (const call of activeCalls) {
-      await this.deleteCall(call.id);
-      console.log(
-        `[cleanUpPendingCalls] Deleted stuck call ${call.id} for chat ${chatId}`,
-      );
+      // Delete if call is in pending status OR has no attendees
+      const hasNoAttendees =
+        !call.attendedUserIds || call.attendedUserIds.length === 0;
+
+      if (hasNoAttendees) {
+        await this.deleteCall(call.id);
+        console.log(
+          `[cleanUpPendingCalls] Deleted call ${call.id} for chat ${chatId} (no attendees)`,
+        );
+      } else {
+        console.log(
+          `[cleanUpPendingCalls] Keeping call ${call.id} for chat ${chatId} (has ${call.attendedUserIds.length} attendees)`,
+        );
+      }
     }
   }
 

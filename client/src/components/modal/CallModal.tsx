@@ -64,7 +64,7 @@ const CallModal: React.FC = () => {
       case LocalCallStatus.ENDED:
       case LocalCallStatus.ERROR:
       case LocalCallStatus.CANCELED:
-      case LocalCallStatus.REJECTED:
+      case LocalCallStatus.DECLINED:
         return <SummaryCall chat={chat} />;
       default:
         return null;
