@@ -208,6 +208,7 @@ export class ChatMapper {
       senderDisplayName,
       content,
       icons,
+      callStatus: message.call?.status,
       isForwarded,
       systemEvent: message.systemEvent,
       createdAt: message.createdAt,

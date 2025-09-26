@@ -23,7 +23,7 @@ export const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
 
   const cancelCall = () => {
     endCall({
-      isRejected: true,
+      isDeclined: true,
     });
     closeModal();
   };

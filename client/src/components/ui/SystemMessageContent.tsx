@@ -44,7 +44,10 @@ export const SystemMessageContent = ({
 
   return (
     <div
-      className={`flex gap-1 items-center text-muted-foreground text-sm ${ClassName}`}
+      className={`flex gap-1 items-center text-muted-foreground text-sm  ${getSystemMessageColor(
+        systemEvent,
+        callStatus
+      )} ${ClassName}`}
     >
       <SystemEventIcon systemEvent={systemEvent} callStatus={callStatus} />
       <span className="truncate">{text}</span>
@@ -52,14 +55,50 @@ export const SystemMessageContent = ({
   );
 };
 
-type GetSystemMessageContentProps = {
-  systemEvent?: SystemEventType | null;
-  callStatus?: CallStatus | null;
-  currentUserId: string;
-  senderId: string;
-  senderDisplayName: string;
-  JSONcontent?: SystemMessageJSONContent | null;
-};
+function getSystemMessageColor(
+  systemEvent?: SystemEventType | null,
+  callStatus?: CallStatus | null
+): string {
+  if (!systemEvent) return "";
+
+  switch (systemEvent) {
+    case SystemEventType.CALL:
+      if (!callStatus) return "";
+      switch (callStatus) {
+        case CallStatus.COMPLETED:
+          return "text-yellow-500";
+        case CallStatus.FAILED:
+          return "text-red-500";
+        case CallStatus.DIALING:
+        case CallStatus.IN_PROGRESS:
+          return "text-green-500";
+        default:
+          return "text-muted-foreground";
+      }
+
+    case SystemEventType.MEMBER_JOINED:
+    case SystemEventType.MEMBER_ADDED:
+      return "text-green-500";
+
+    case SystemEventType.MEMBER_LEFT:
+    case SystemEventType.MEMBER_KICKED:
+    case SystemEventType.MEMBER_BANNED:
+      return "text-red-500";
+
+    case SystemEventType.CHAT_RENAMED:
+      return "text-blue-500";
+
+    case SystemEventType.CHAT_DELETED:
+      return "text-red-600 font-semibold";
+
+    case SystemEventType.MESSAGE_PINNED:
+    case SystemEventType.MESSAGE_UNPINNED:
+      return "text-purple-500";
+
+    default:
+      return "text-muted-foreground";
+  }
+}
 
 function getSystemMessageText({
   systemEvent,
@@ -68,9 +107,15 @@ function getSystemMessageText({
   senderId,
   senderDisplayName,
   JSONcontent,
-}: GetSystemMessageContentProps): string {
+}: {
+  systemEvent?: SystemEventType | null;
+  callStatus?: CallStatus | null;
+  currentUserId: string;
+  senderId: string;
+  senderDisplayName: string;
+  JSONcontent?: SystemMessageJSONContent | null;
+}): string {
   if (!systemEvent) return "System event occurred.";
-  console.log("callStatus", callStatus);
 
   const isMe = currentUserId === senderId;
   const displayName = isMe ? "You" : senderDisplayName;

@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { CallResponseDto } from 'src/modules/call/dto/call-response.dto';
+import { CallStatus } from 'src/modules/call/type/callStatus';
 import { SystemEventType } from 'src/modules/message/constants/system-event-type.constants';
 
 @Exclude()
@@ -20,7 +20,7 @@ export class LastMessageResponseDto {
   icons?: string[];
 
   @Expose()
-  call?: CallResponseDto[];
+  callStatus?: CallStatus;
 
   @Expose()
   isForwarded?: boolean;

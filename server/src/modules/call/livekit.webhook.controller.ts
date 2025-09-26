@@ -9,7 +9,7 @@ import { WebsocketCallService } from '../websocket/services/websocket-call.servi
 import { ValidateWebhookPipe } from 'src/common/pipes/validate-webhook.pipe';
 import { ChatType } from '../chat/constants/chat-types.constants';
 
-export interface LivekitWebhookPayload {
+export interface LiveKitWebhookPayload {
   event: string;
   room: {
     name: string;
@@ -24,8 +24,8 @@ export interface LivekitWebhookPayload {
   [key: string]: unknown;
 }
 
-@Controller('livekit/webhook')
-export class LivekitWebhookController {
+@Controller('liveKit/webhook')
+export class LiveKitWebhookController {
   constructor(
     private readonly callService: CallService,
     private readonly callStore: CallStoreService,
@@ -35,7 +35,7 @@ export class LivekitWebhookController {
 
   @Post()
   async handleWebhook(
-    @Body(ValidateWebhookPipe) payload: LivekitWebhookPayload,
+    @Body(ValidateWebhookPipe) payload: LiveKitWebhookPayload,
   ) {
     const roomName = payload.room?.name;
     if (!roomName) {
@@ -51,7 +51,6 @@ export class LivekitWebhookController {
 
       case 'participant_joined': {
         const userId = payload.participant?.identity;
-        const participantName = payload.participant?.name;
         if (!userId) {
           console.log(
             '[participant_joined] No participant identity found in payload',
@@ -59,7 +58,7 @@ export class LivekitWebhookController {
           return;
         }
 
-        console.log('[participant_joined]', participantName);
+        // console.log('[participant_joined]', payload.participant?.name);
 
         // Try to find an active call by roomName
         let call = await this.callService.getActiveCallByChatId(roomName);
@@ -72,7 +71,7 @@ export class LivekitWebhookController {
           // ------------------------------
           // 1) FIRST PARTICIPANT (initiator)
           // ------------------------------
-          console.log('[participant_joined] 1st participant');
+          // console.log('[participant_joined] 1st participant');
           call = await this.callService.createCall({
             chatId: roomName,
             status: CallStatus.DIALING,
@@ -94,7 +93,7 @@ export class LivekitWebhookController {
           // ------------------------------
           // 2) SECOND PARTICIPANT (callee answers)
           // ------------------------------
-          console.log('[participant_joined] 2th participant');
+          // console.log('[participant_joined] 2th participant');
           const updatedAttendees = new Set(call.attendedUserIds || []);
           const updatedCurrent = new Set(call.currentUserIds || []);
           updatedAttendees.add(userId);
@@ -107,22 +106,21 @@ export class LivekitWebhookController {
             currentUserIds: Array.from(updatedCurrent),
           });
 
-          console.log(
-            '[participant_joined] Call updated to IN_PROGRESS:',
-            call.id,
-          );
+          // console.log(
+          //   '[participant_joined] Call updated to IN_PROGRESS:',
+          //   call.id,
+          // );
 
-          console.log('[participant_joined] Emitting START_CALL...');
-          await this.websocketCallService.emitStartCall(call.id, roomName);
-          console.log(
-            '[participant_joined] START_CALL emitted for call:',
+          await this.websocketCallService.emitStartCall(
             call.id,
+            roomName,
+            call.currentUserIds[0],
           );
         } else {
           // ------------------------------
           // 3) THIRD+ PARTICIPANTS (group call)
           // ------------------------------
-          console.log('[participant_joined] Extra participant joining...');
+          // console.log('[participant_joined] Extra participant joining...');
           const updatedAttendees = new Set(call.attendedUserIds || []);
           const updatedCurrent = new Set(call.currentUserIds || []);
 
@@ -135,9 +133,9 @@ export class LivekitWebhookController {
               currentUserIds: Array.from(updatedCurrent),
             });
 
-            console.log(
-              `[participant_joined] Extra participant ${userId} joined call ${call.id}`,
-            );
+            // console.log(
+            //   `[participant_joined] Extra participant ${userId} joined call ${call.id}`,
+            // );
           } else {
             console.log(
               `[participant_joined] Participant ${userId} already in call ${call.id}`,
@@ -149,10 +147,9 @@ export class LivekitWebhookController {
       }
       case 'participant_left': {
         const userId = payload.participant?.identity;
-        const participantName = payload.participant?.name;
         if (!userId) return;
 
-        console.log('[participant_disconnected]', participantName);
+        // console.log('[participant_disconnected]', payload.participant?.name);
 
         const call = await this.callService.getActiveCallByChatId(roomName);
         if (!call) return;
@@ -164,10 +161,10 @@ export class LivekitWebhookController {
           call.currentUserIds?.filter((id) => id !== userId) ?? [];
 
         if (remainingUsers.length <= 1) {
-          console.log(
-            '[participant_disconnected] 1 members left, END CALL',
-            participantName,
-          );
+          // console.log(
+          //   '[participant_disconnected] 1 members left, END CALL',
+          //   payload.participant?.name,
+          // );
 
           // Determine call status based on whether anyone actually attended
           // If only the initiator was ever in the call (attendedUserIds.length = 1), it's a missed call
@@ -184,9 +181,7 @@ export class LivekitWebhookController {
             currentUserIds: [],
           });
 
-          console.log(
-            `[participant_left] Call ${call.id} ended. Status: ${status}, Attendees: ${call.attendedUserIds?.length}`,
-          );
+          await this.callService.cleanUpPendingCalls(roomName);
 
           await this.websocketCallService.emitEndedCall(
             call.id,
@@ -232,7 +227,7 @@ export class LivekitWebhookController {
 
       case 'room_finished': {
         console.log('[room_finished] Room:', roomName);
-        await this.callService.cleanUpPendingCalls(roomName);
+        // await this.callService.cleanUpPendingCalls(roomName);
         break;
       }
 

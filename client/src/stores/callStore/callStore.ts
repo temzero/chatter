@@ -4,13 +4,13 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { audioService } from "@/services/audio.service";
 import { useModalStore, ModalType } from "../modalStore";
-import { useMessageStore } from "../messageStore";
 import { CallStatus, LocalCallStatus } from "@/types/enums/CallStatus";
 import { LiveKitService } from "@/services/liveKitService";
 import { getMyToken } from "./helpers/call.helper";
 import { handleError } from "@/utils/handleError";
 import { CallError, IncomingCallResponse } from "@/types/callPayload";
 import { callService } from "@/services/callService";
+import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
 
 export interface CallState {
   liveKitService: LiveKitService | null;
@@ -36,6 +36,7 @@ export interface CallActions {
     isVoiceEnabled?: boolean;
     isVideoEnabled?: boolean;
   }) => Promise<void>;
+  declineCall: () => void;
   leaveCall: () => void;
   endCall: (opt?: {
     isCancel?: boolean;
@@ -53,7 +54,7 @@ export interface CallActions {
   setLocalCallStatus: (s: LocalCallStatus) => void;
   getCallDuration: () => number | null;
   clearCallData: () => void;
-  closeCallModal: () => void;
+  closeCallModal: (opt?: { keepCallData: boolean }) => void;
 
   // LiveKit
   connectToLiveKitRoom: (
@@ -100,7 +101,8 @@ export const useCallStore = create<CallState & CallActions>()(
           if (get().localCallStatus === LocalCallStatus.OUTGOING) {
             get().endCall({ isTimeout: true });
           }
-        }, 60000);
+        }, 45000);
+        // }, 5000);
         set({ timeoutRef });
 
         // init LiveKit
@@ -138,10 +140,8 @@ export const useCallStore = create<CallState & CallActions>()(
       const { callId, chatId } = get();
       if (!callId || !chatId) return;
 
-      // Optimistically set local state to connected
       set({
-        localCallStatus: LocalCallStatus.CONNECTED,
-        callStatus: CallStatus.IN_PROGRESS,
+        localCallStatus: LocalCallStatus.CONNECTING,
       });
 
       try {
@@ -164,6 +164,14 @@ export const useCallStore = create<CallState & CallActions>()(
           video: options?.isVideoEnabled ?? get().isVideoCall,
         });
 
+        set({
+          localCallStatus: LocalCallStatus.CONNECTED,
+          callStatus: CallStatus.IN_PROGRESS,
+        });
+
+        const { openModal } = useModalStore.getState();
+        openModal(ModalType.CALL, { callId, chatId });
+
         console.log("[joinCall] Successfully connected to LiveKit");
       } catch (err) {
         console.error("[joinCall] LiveKit connection failed:", err);
@@ -176,6 +184,27 @@ export const useCallStore = create<CallState & CallActions>()(
           liveKitService: null,
         });
       }
+    },
+
+    declineCall: () => {
+      const { chatId, callId, callStatus, endCall, closeCallModal } = get();
+      if (!chatId || !callId) {
+        console.error("Missing CallId or ChatId");
+        return;
+      }
+
+      // Notify server
+      try {
+        callWebSocketService.declineCall({ chatId, callId });
+      } catch (err) {
+        console.error("Failed to send decline call:", err);
+      }
+
+      // Update local state
+      endCall({ isDeclined: true });
+
+      // Close modal but keep call data if call is still in progress
+      closeCallModal({ keepCallData: callStatus === CallStatus.IN_PROGRESS });
     },
 
     leaveCall: () => {
@@ -191,22 +220,22 @@ export const useCallStore = create<CallState & CallActions>()(
         isTimeout?: boolean;
       } = {}
     ) => {
-      console.log("(endCall)", opt);
       // Disconnect from LiveKit
       get().disconnectFromLiveKit();
-      // Determine local call status
+
+      //Determine local call status
       let localCallStatus: LocalCallStatus;
       let endedAt: Date | undefined;
 
       if (opt.isDeclined) {
         localCallStatus = LocalCallStatus.DECLINED;
-        // Don't set endedAt for declined
       } else if (opt.isCancel) {
         localCallStatus = LocalCallStatus.CANCELED;
-        // Don't set endedAt for canceled
+      } else if (opt.isTimeout) {
+        localCallStatus = LocalCallStatus.TIMEOUT;
       } else {
         localCallStatus = LocalCallStatus.ENDED;
-        endedAt = new Date(); // Only set endedAt for normal ended calls
+        endedAt = new Date();
       }
       // Update local state
       set({ localCallStatus, endedAt });
@@ -221,7 +250,7 @@ export const useCallStore = create<CallState & CallActions>()(
       const shouldEnable =
         enable !== undefined ? enable : !local.isMicrophoneEnabled;
 
-      await liveKitService.setMicrophoneEnabled(shouldEnable);
+      await liveKitService.toggleMicrophone(shouldEnable);
     },
 
     toggleLocalVideo: async (enable?: boolean) => {
@@ -232,7 +261,7 @@ export const useCallStore = create<CallState & CallActions>()(
       const shouldEnable =
         enable !== undefined ? enable : !local.isCameraEnabled;
 
-      await liveKitService.setCameraEnabled(shouldEnable);
+      await liveKitService.toggleCamera(shouldEnable);
     },
 
     toggleLocalScreenShare: async (enable?: boolean) => {
@@ -243,7 +272,7 @@ export const useCallStore = create<CallState & CallActions>()(
       const shouldEnable =
         enable !== undefined ? enable : !local.isScreenShareEnabled;
 
-      await liveKitService.setScreenShareEnabled(shouldEnable);
+      await liveKitService.toggleScreenShare(shouldEnable);
     },
 
     // ========== UTILS ==========
@@ -292,10 +321,12 @@ export const useCallStore = create<CallState & CallActions>()(
       });
     },
 
-    closeCallModal: () => {
+    closeCallModal: (opts?: { keepCallData?: boolean }) => {
       useModalStore.getState().closeModal();
       get().clearLiveKitState();
-      get().clearCallData();
+      if (!opts?.keepCallData) {
+        get().clearCallData();
+      }
     },
 
     // ========== LiveKit ==========

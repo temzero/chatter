@@ -17,11 +17,18 @@ const UnblockUserModal: React.FC = () => {
   // Extract user data from modal props
   const blockedUser = modalContent?.props?.blockedUser as DirectChatMember;
   if (!blockedUser) return null;
+  const onUnblockSuccess = modalContent?.props?.onUnblockSuccess as
+    | (() => void)
+    | undefined;
 
   const handleUnblock = async () => {
     try {
-      await blockService.unblockUser(blockedUser.userId);
-      updateMemberLocally(blockedUser.chatId, blockedUser.id, { isBlockedByMe: false });
+      console.log("handleUnblock, blockedUser", blockedUser);
+      await blockService.unblockUser(blockedUser.id);
+      updateMemberLocally(blockedUser.chatId, blockedUser.id, {
+        isBlockedByMe: false,
+      });
+      onUnblockSuccess?.();
       toast.success(
         `${blockedUser.username || blockedUser.firstName} has been unblocked`
       );

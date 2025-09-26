@@ -6,6 +6,7 @@ import { CallStatus } from "./enums/CallStatus";
 export interface UpdateCallPayload {
   callId: string;
   chatId: string;
+  initiatorUserId?: string;
   isVideoCall?: boolean;
   callStatus?: CallStatus;
   endedAt?: string;

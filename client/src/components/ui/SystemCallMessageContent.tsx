@@ -11,25 +11,22 @@ export function getCallMessageContent({
   isMe,
   displayName,
 }: GetCallMessageProps): string {
-  // if (!callStatus) return isMe ? "You had a call" : `${displayName} had a call`;
-  if (!callStatus) return isMe ? "No CallStatus" : `${displayName} No CallStatus`;
+  if (!callStatus) {
+    console.warn("callStatus is missing", callStatus);
+  }
 
   switch (callStatus) {
     case CallStatus.DIALING:
-      return isMe ? "You are calling..." : `${displayName} is calling you...`;
+      return isMe ? "You are calling..." : `${displayName} is calling`;
     case CallStatus.IN_PROGRESS:
       return isMe ? "You are on a call" : `On a call with ${displayName}`;
     case CallStatus.COMPLETED:
-      return isMe ? "You ended the call" : `${displayName} ended the call`;
+      return "Call ended";
     case CallStatus.MISSED:
-      return isMe
-        ? `Call you made to ${displayName} was missed`
-        : `Missed call from ${displayName}`;
+      return isMe ? `Call missed` : `Missed call from ${displayName}`;
     case CallStatus.FAILED:
-      return isMe
-        ? `Your call to ${displayName} failed`
-        : `Call with ${displayName} failed`;
+      return `Call failed`;
     default:
-      return isMe ? "You had a call" : `${displayName} had a call`;
+      return "";
   }
 }

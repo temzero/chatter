@@ -6,6 +6,7 @@ import { CallStatus } from 'src/modules/call/type/callStatus';
 export interface UpdateCallPayload {
   callId: string;
   chatId: string;
+  initiatorUserId?: string;
   isVideoCall?: boolean;
   callStatus?: CallStatus;
   endedAt?: string;

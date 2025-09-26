@@ -1,5 +1,3 @@
-import { CallStatus, LocalCallStatus } from "@/types/enums/CallStatus";
-import { useCallStore } from "@/stores/callStore/callStore";
 import {
   Room,
   RoomEvent,
@@ -8,6 +6,7 @@ import {
   RemoteTrackPublication,
   ConnectionState,
   LocalTrackPublication,
+  Track,
 } from "livekit-client";
 
 export interface LiveKitServiceOptions {
@@ -65,32 +64,59 @@ export class LiveKitService {
     }
   }
 
-  async setMicrophoneEnabled(enabled: boolean): Promise<boolean> {
+  async toggleMicrophone(enabled: boolean): Promise<boolean> {
     try {
-      await this.room.localParticipant.setMicrophoneEnabled(enabled);
+      if (enabled) {
+        await this.room.localParticipant.setMicrophoneEnabled(enabled);
+      } else {
+        const pub = this.room.localParticipant.getTrackPublication(
+          Track.Source.Microphone
+        );
+        if (pub?.track) {
+          this.room.localParticipant.unpublishTrack(pub.track);
+        }
+      }
       return true;
     } catch (error) {
-      console.error("Failed to set microphone:", error);
+      console.error("Failed to toggle microphone:", error);
       return false;
     }
   }
 
-  async setCameraEnabled(enabled: boolean): Promise<boolean> {
+  async toggleCamera(enabled: boolean): Promise<boolean> {
     try {
-      await this.room.localParticipant.setCameraEnabled(enabled);
+      if (enabled) {
+        await this.room.localParticipant.setCameraEnabled(true);
+      } else {
+        const pub = this.room.localParticipant.getTrackPublication(
+          Track.Source.Camera
+        );
+        if (pub?.track) {
+          this.room.localParticipant.unpublishTrack(pub.track);
+        }
+      }
       return true;
     } catch (error) {
-      console.error("Failed to set camera:", error);
+      console.error("Failed to toggle camera:", error);
       return false;
     }
   }
 
-  async setScreenShareEnabled(enabled: boolean): Promise<boolean> {
+  async toggleScreenShare(enabled: boolean): Promise<boolean> {
     try {
-      await this.room.localParticipant.setScreenShareEnabled(enabled);
+      if (enabled) {
+        await this.room.localParticipant.setScreenShareEnabled(true);
+      } else {
+        const pub = this.room.localParticipant.getTrackPublication(
+          Track.Source.ScreenShare
+        );
+        if (pub?.track) {
+          this.room.localParticipant.unpublishTrack(pub.track);
+        }
+      }
       return true;
     } catch (error) {
-      console.error("Failed to set screen share:", error);
+      console.error("Failed to toggle screen share:", error);
       return false;
     }
   }
@@ -117,18 +143,45 @@ export class LiveKitService {
     this.room
       .on(RoomEvent.Connected, async () => {
         console.log("✅ Connected to LiveKit room");
+        console.log("Local participant:", this.room.localParticipant.identity);
+
+        // log remote participants
+        console.log(
+          "Remote participants:",
+          Array.from(this.room.remoteParticipants.values()).map((p) => ({
+            id: p.identity,
+            name: p.name,
+            tracks: Array.from(p.trackPublications.values()).map((pub) => ({
+              source: pub.source,
+              kind: pub.kind,
+              isSubscribed: pub.isSubscribed,
+            })),
+          }))
+        );
+
         this.handleExistingParticipants();
 
         if (this.options?.audio) {
-          await this.setMicrophoneEnabled(true);
+          await this.toggleMicrophone(true);
         }
         if (this.options?.video) {
-          await this.setCameraEnabled(true);
+          await this.toggleCamera(true);
         }
       })
       .on(RoomEvent.ParticipantConnected, (participant) => {
         this.options?.onParticipantConnected?.(participant);
-        console.log('[ParticipantConnected]', participant.name)
+        // console.log("[ParticipantConnected]", participant.name);
+        console.log("[ParticipantConnected]", {
+          id: participant.identity,
+          name: participant.name,
+          tracks: Array.from(participant.trackPublications.values()).map(
+            (pub) => ({
+              source: pub.source,
+              kind: pub.kind,
+              isSubscribed: pub.isSubscribed,
+            })
+          ),
+        });
 
         // const { callStatus, localCallStatus } = useCallStore.getState();
         // if (
@@ -143,12 +196,22 @@ export class LiveKitService {
       })
       .on(RoomEvent.ParticipantDisconnected, (participant) => {
         this.options?.onParticipantDisconnected?.(participant);
+        console.log("[ParticipantDisconnected]", participant.name);
       })
       .on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
         this.options?.onTrackSubscribed?.(track, publication, participant);
+        console.log("[TrackSubscribed]", {
+          participant: participant.name,
+          source: publication.source,
+          kind: track.kind,
+        });
       })
       .on(RoomEvent.TrackUnsubscribed, (track, publication, participant) => {
         this.options?.onTrackUnsubscribed?.(track, publication, participant);
+        console.log("[TrackUnsubscribed]", {
+          participant: participant.name,
+          source: publication.source,
+        });
       })
       .on(RoomEvent.ConnectionStateChanged, (state) => {
         console.log("🔄 Connection state:", state);
@@ -156,9 +219,15 @@ export class LiveKitService {
       })
       .on(RoomEvent.LocalTrackPublished, (publication) => {
         this.options?.onLocalTrackPublished?.(publication);
+        console.log(
+          "[LocalTrackPublished]",
+          publication.source,
+          publication.kind
+        );
       })
       .on(RoomEvent.LocalTrackUnpublished, (publication) => {
         this.options?.onLocalTrackUnpublished?.(publication);
+        console.log("[LocalTrackUnpublished]", publication.source);
       });
   }
 

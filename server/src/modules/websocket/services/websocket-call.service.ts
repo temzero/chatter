@@ -171,10 +171,11 @@ export class WebsocketCallService {
     return { success: true, chatId };
   }
 
-  async emitStartCall(callId: string, chatId: string) {
+  async emitStartCall(callId: string, chatId: string, initiatorUserId: string) {
     const response: UpdateCallPayload = {
       callId,
       chatId,
+      initiatorUserId,
     };
 
     console.log('🔔 Emit START CALL');

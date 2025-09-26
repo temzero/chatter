@@ -26,6 +26,10 @@ const SidebarBlockedUsers: React.FC = () => {
     fetchBlockedUsers();
   }, []);
 
+  const removeBlockedUserFromList = (id: string) => {
+    setBlockedUsers((prev) => prev.filter((u) => u.id !== id));
+  };
+
   return (
     <SidebarLayout title="Blocked Users">
       {loading ? (
@@ -71,6 +75,8 @@ const SidebarBlockedUsers: React.FC = () => {
                   onClick={() =>
                     openModal(ModalType.UNBLOCK_USER, {
                       blockedUser: blocked,
+                      onUnblockSuccess: () =>
+                        removeBlockedUserFromList(blocked.id),
                     })
                   }
                   className="opacity-0 custom-border p-1.5 rounded-full hover:bg-[--primary-green] hover:text-[--sidebar-color] group-hover:opacity-100 text-[--primary-green] text-sm font-semibold"

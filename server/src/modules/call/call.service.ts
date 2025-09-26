@@ -123,7 +123,7 @@ export class CallService {
         status: In([CallStatus.DIALING, CallStatus.IN_PROGRESS]),
       },
       order: { createdAt: 'DESC' }, // latest active call
-      select: ['id'], // ✅ only fetch id
+      select: ['id', 'createdAt'],
     });
 
     return call?.id ?? null;
@@ -247,10 +247,10 @@ export class CallService {
 
     for (const call of activeCalls) {
       // Delete if call is in pending status OR has no attendees
-      const hasNoAttendees =
-        !call.attendedUserIds || call.attendedUserIds.length === 0;
+      const shouldDelete =
+        !call.attendedUserIds || call.attendedUserIds.length <= 1;
 
-      if (hasNoAttendees) {
+      if (shouldDelete) {
         await this.deleteCall(call.id);
         console.log(
           `[cleanUpPendingCalls] Deleted call ${call.id} for chat ${chatId} (no attendees)`,

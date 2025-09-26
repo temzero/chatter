@@ -6,10 +6,10 @@ import { Button } from "../Button";
 import { VideoStream } from "./components/VideoStream";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { useLocalPreviewVideoTrack } from "@/hooks/mediaStreams/useLocalPreviewVideoTrack";
-import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
 
 export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
   const isVideoCall = useCallStore((state) => state.isVideoCall);
+  const declineCall = useCallStore((state) => state.declineCall);
 
   // Always call the hook
   const { localVideoStream, isVideoEnabled, toggleVideo } =
@@ -20,20 +20,6 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
       isVideoEnabled: isVideoCall ? isVideoEnabled : false, // respect video call
       isVoiceEnabled: true,
     });
-  };
-
-  const declineCall = () => {
-    const { chatId, callId, endCall, closeCallModal } = useCallStore.getState();
-    if (!chatId || !callId) {
-      console.error("Missing CallId or ChatId");
-      return;
-    }
-    callWebSocketService.declineCall({
-      callId,
-      chatId,
-    });
-    endCall();
-    closeCallModal();
   };
 
   const showVideoPreview = isVideoCall && localVideoStream && isVideoEnabled;
@@ -119,7 +105,7 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
           Accept
         </Button>
         <Button
-          onClick={declineCall}
+          onClick={() => declineCall()}
           variant="danger"
           size="lg"
           isRoundedFull

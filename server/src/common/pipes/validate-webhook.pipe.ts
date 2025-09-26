@@ -1,9 +1,9 @@
 import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
-import { LivekitWebhookPayload } from 'src/modules/call/livekit.webhook.controller';
+import { LiveKitWebhookPayload } from 'src/modules/call/livekit.webhook.controller';
 
 @Injectable()
 export class ValidateWebhookPipe implements PipeTransform {
-  transform(value: LivekitWebhookPayload): LivekitWebhookPayload {
+  transform(value: LiveKitWebhookPayload): LiveKitWebhookPayload {
     if (!value || typeof value !== 'object') {
       throw new BadRequestException('Invalid payload');
     }

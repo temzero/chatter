@@ -18,7 +18,6 @@ const CallModal: React.FC = () => {
   const { chatId, localCallStatus } = useCallStore();
   const getOrFetchChatById = useChatStore((state) => state.getOrFetchChatById);
   const [chat, setChat] = React.useState<ChatResponse | null>(null);
-  console.log("localCallStatus", localCallStatus);
   React.useEffect(() => {
     if (!chatId) return;
 
@@ -64,6 +63,7 @@ const CallModal: React.FC = () => {
       case LocalCallStatus.ENDED:
       case LocalCallStatus.ERROR:
       case LocalCallStatus.CANCELED:
+      case LocalCallStatus.TIMEOUT:
       case LocalCallStatus.DECLINED:
         return <SummaryCall chat={chat} />;
       default:

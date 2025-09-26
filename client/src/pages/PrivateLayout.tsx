@@ -100,6 +100,7 @@ export const ChatContent: React.FC = () => {
 
 const PrivateLayout: React.FC = () => {
   const isAuthenticated = useIsAuthenticated();
+  // console.log("isAuthenticated", isAuthenticated);
 
   useWebSocket();
   useNotificationSocketListeners();

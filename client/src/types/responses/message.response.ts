@@ -4,6 +4,7 @@ import { MessageType } from "../enums/message";
 import { AttachmentType } from "../enums/attachmentType";
 import { SystemEventType } from "../enums/systemEventType";
 import { CallResponseDto } from "./call.response";
+import { CallStatus } from "../enums/CallStatus";
 
 export interface MessageResponse {
   id: string;
@@ -33,7 +34,7 @@ export interface MessageResponse {
   reactions?: Record<string, string[]>;
   attachments?: AttachmentResponse[];
 
-  call?: CallResponseDto | null;
+  call?: CallResponseDto;
 
   isMuted?: boolean;
   shouldAnimate?: boolean;
@@ -45,7 +46,7 @@ export interface LastMessageResponse {
   senderDisplayName: string;
   content?: string;
   icons?: string[];
-  call?: CallResponseDto | null;
+  callStatus?: CallStatus;
   isForwarded?: boolean;
   systemEvent?: SystemEventType | null;
   createdAt: string;

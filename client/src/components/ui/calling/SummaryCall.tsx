@@ -29,10 +29,12 @@ export const SummaryCall = ({
     switch (localCallStatus) {
       case LocalCallStatus.CANCELED:
         return "Call canceled";
+      case LocalCallStatus.TIMEOUT:
+        return "No one answered"; // more user-friendly
       case LocalCallStatus.DECLINED:
         return "Call declined";
       case LocalCallStatus.ENDED:
-        return duration > 0 ? formatDuration(duration) : "Call ended";
+        return duration ? formatDuration(duration) : "Call ended";
       case LocalCallStatus.ERROR:
         if (error === CallError.LINE_BUSY) return "Line is busy";
         if (error === CallError.PERMISSION_DENIED) return "Permission denied";
@@ -79,7 +81,11 @@ export const SummaryCall = ({
         </span>
       </div>
 
-      <Button variant="danger" className="w-full" onClick={closeCallModal}>
+      <Button
+        variant="danger"
+        className="w-full"
+        onClick={() => closeCallModal}
+      >
         Close
       </Button>
     </>

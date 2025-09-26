@@ -18,9 +18,11 @@ import {
 import { useAuthStore } from "@/stores/authStore";
 
 export function useCallSocketListeners() {
+  const currentUserId = useAuthStore((state) => state.currentUser?.id);
   useCallSounds();
 
   useEffect(() => {
+    if (!currentUserId) return; // guard inside
     const fetchPendingCalls = async () => {
       try {
         const pendingCalls: IncomingCallResponse[] =
@@ -90,10 +92,19 @@ export function useCallSocketListeners() {
         return;
       }
 
-      useCallStore.setState({
-        localCallStatus: LocalCallStatus.CONNECTED,
-        callStatus: CallStatus.IN_PROGRESS,
-      });
+      // if i'm the caller who start the call
+      if (data.initiatorUserId === currentUserId) {
+        useCallStore.setState({
+          localCallStatus: LocalCallStatus.CONNECTED,
+          callStatus: CallStatus.IN_PROGRESS,
+          startedAt: new Date(),
+        });
+      } else {
+        useCallStore.setState({
+          callStatus: CallStatus.IN_PROGRESS,
+          startedAt: new Date(),
+        });
+      }
     };
 
     const handleUpdateCall = (updatedCall: UpdateCallPayload) => {
@@ -142,7 +153,7 @@ export function useCallSocketListeners() {
 
     const handleCallEnded = (data: UpdateCallPayload) => {
       console.log("CALL_ENDED", data);
-      const { callId, callStatus } = data;
+      const { callId } = data;
       const callStore = useCallStore.getState();
 
       if (callStore.callId !== callId) {
@@ -152,8 +163,7 @@ export function useCallSocketListeners() {
 
       callStore.endCall();
       useCallStore.setState({
-        callStatus: callStatus ?? CallStatus.COMPLETED,
-        localCallStatus: LocalCallStatus.ENDED,
+        callStatus: CallStatus.COMPLETED,
       });
     };
 

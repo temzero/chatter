@@ -1,60 +1,53 @@
-// hooks/useRemoteTracks.ts
 import { useEffect, useState } from "react";
-import { Participant, Track } from "livekit-client";
+import {
+  Participant,
+  RemoteVideoTrack,
+  RemoteAudioTrack,
+  Track,
+} from "livekit-client";
 
 export const useRemoteTracks = (participant: Participant) => {
-  const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
-  const [audioStream, setAudioStream] = useState<MediaStream | null>(null);
-  const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
+  const [videoTrack, setVideoTrack] = useState<RemoteVideoTrack | null>(null);
+  const [audioTrack, setAudioTrack] = useState<RemoteAudioTrack | null>(null);
+  const [screenTrack, setScreenTrack] = useState<RemoteVideoTrack | null>(null);
 
   useEffect(() => {
-    const updateStreams = () => {
-      // Video tracks (camera)
-      const videoTracks = Array.from(participant.trackPublications.values())
-        .filter(
-          (pub) =>
-            pub.kind === "video" &&
-            pub.track &&
-            pub.source === Track.Source.Camera
-        )
-        .map((pub) => pub.track!.mediaStreamTrack);
+    const updateTracks = () => {
+      // Camera video
+      const cameraTrack = Array.from(
+        participant.trackPublications.values()
+      ).find(
+        (pub) =>
+          pub.kind === "video" &&
+          pub.track instanceof RemoteVideoTrack &&
+          pub.source === Track.Source.Camera
+      )?.track as RemoteVideoTrack | undefined;
 
-      setVideoStream(
-        videoTracks.length > 0 ? new MediaStream(videoTracks) : null
-      );
+      setVideoTrack(cameraTrack || null);
 
-      // Audio tracks
-      const audioTracks = Array.from(participant.trackPublications.values())
-        .filter(
-          (pub) =>
-            pub.kind === "audio" &&
-            pub.track &&
-            pub.source === Track.Source.Microphone
-        )
-        .map((pub) => pub.track!.mediaStreamTrack);
+      // Microphone audio
+      const micTrack = Array.from(participant.trackPublications.values()).find(
+        (pub) =>
+          pub.kind === "audio" &&
+          pub.track instanceof RemoteAudioTrack &&
+          pub.source === Track.Source.Microphone
+      )?.track as RemoteAudioTrack | undefined;
 
-      setAudioStream(
-        audioTracks.length > 0 ? new MediaStream(audioTracks) : null
-      );
+      setAudioTrack(micTrack || null);
 
-      // Screen share tracks
-      const screenTracks = Array.from(participant.trackPublications.values())
-        .filter(
-          (pub) =>
-            pub.kind === "video" &&
-            pub.track &&
-            pub.source === Track.Source.ScreenShare
-        )
-        .map((pub) => pub.track!.mediaStreamTrack);
+      // Screen share
+      const screen = Array.from(participant.trackPublications.values()).find(
+        (pub) =>
+          pub.kind === "video" &&
+          pub.track instanceof RemoteVideoTrack &&
+          pub.source === Track.Source.ScreenShare
+      )?.track as RemoteVideoTrack | undefined;
 
-      setScreenStream(
-        screenTracks.length > 0 ? new MediaStream(screenTracks) : null
-      );
+      setScreenTrack(screen || null);
     };
 
-    updateStreams();
+    updateTracks();
 
-    // Listen for track changes from this remote participant
     const events = [
       "trackPublished",
       "trackUnpublished",
@@ -62,16 +55,12 @@ export const useRemoteTracks = (participant: Participant) => {
       "trackUnsubscribed",
     ] as const;
 
-    events.forEach((event) => {
-      participant.on(event, updateStreams);
-    });
+    events.forEach((event) => participant.on(event, updateTracks));
 
     return () => {
-      events.forEach((event) => {
-        participant.off(event, updateStreams);
-      });
+      events.forEach((event) => participant.off(event, updateTracks));
     };
   }, [participant]);
 
-  return { videoStream, audioStream, screenStream };
+  return { videoTrack, audioTrack, screenTrack };
 };

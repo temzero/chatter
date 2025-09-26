@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
@@ -15,8 +15,8 @@ import MessageSearchBar from "../ui/MessageSearchBar";
 import { useUserLastSeen } from "@/stores/presenceStore";
 import { formatTimeAgo } from "@/utils/formatTimeAgo";
 import { useCallStore } from "@/stores/callStore/callStore";
+import { IncomingCallResponse } from "@/types/callPayload";
 import { CallStatus } from "@/types/enums/CallStatus";
-import { useShallow } from "zustand/shallow";
 
 interface ChatHeaderProps {
   chat: ChatResponse;
@@ -30,24 +30,27 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   const toggleSidebarInfo = useSidebarInfoStore(
     (state) => state.toggleSidebarInfo
   );
+  const callStatus = useCallStore((state) => state.callStatus);
+  const startCall = useCallStore((state) => state.startCall);
+  const joinCall = useCallStore((state) => state.joinCall);
+  const getActiveCall = useCallStore((state) => state.getActiveCall);
 
-  const {
-    callId,
-    chatId: callChatId,
-    isVideoCall,
-    callStatus,
-    startCall,
-    joinCall,
-  } = useCallStore(
-    useShallow((state) => ({
-      callId: state.callId,
-      chatId: state.chatId,
-      isVideoCall: state.isVideoCall,
-      callStatus: state.callStatus,
-      startCall: state.startCall,
-      joinCall: state.joinCall,
-    }))
+  const [activeCall, setActiveCall] = useState<IncomingCallResponse | null>(
+    null
   );
+
+  // Fetch active call from server whenever chat changes
+  useEffect(() => {
+    let mounted = true;
+    const fetchCall = async () => {
+      const call = await getActiveCall(chat.id);
+      if (mounted) setActiveCall(call);
+    };
+    fetchCall();
+    return () => {
+      mounted = false;
+    };
+  }, [chat.id, getActiveCall]);
 
   const chatListMembers = useChatMemberStore.getState().chatMembers[chat.id];
   const isOnline = useChatStatus(chat?.id, chat.type);
@@ -74,16 +77,14 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
     }
   }
 
-  // Check if user can join the call (call is active and in progress for this chat)
-  const isCalling =
-    callChatId === chat.id && callId && callStatus === CallStatus.IN_PROGRESS;
+  // Check if user can join the call (call is active and not outgoing)
+  const isCalling = activeCall && callStatus === CallStatus.IN_PROGRESS;
 
   const handleJoinCall = () => {
-    if (callId) {
+    if (activeCall) {
       joinCall({
         isVoiceEnabled: true,
-        // isVideoEnabled: isVideoCall,
-        isVideoEnabled: false,
+        isVideoEnabled: activeCall.isVideoCall,
       });
     }
   };
@@ -146,7 +147,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                   >
                     Join Call
                     <i className="material-symbols-outlined text-3xl">
-                      {isVideoCall ? "videocam" : "call"}
+                      {activeCall?.isVideoCall ? "videocam" : "call"}
                     </i>
                   </button>
                 ) : (

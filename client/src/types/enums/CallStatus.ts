@@ -12,6 +12,7 @@ export enum LocalCallStatus {
   CONNECTED = "connected",
   INCOMING = "incoming",
   OUTGOING = "outgoing",
+  TIMEOUT = "timeout",
   CANCELED = "canceled",
   DECLINED = "declined",
   ENDED = "ended",

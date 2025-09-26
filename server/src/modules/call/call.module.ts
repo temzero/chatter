@@ -8,7 +8,7 @@ import { MessageModule } from '../message/message.module';
 import { Chat } from '../chat/entities/chat.entity';
 import { ChatMemberModule } from '../chat-member/chat-member.module';
 import { LivekitService } from './liveKit.service';
-import { LivekitWebhookController } from './livekit.webhook.controller';
+import { LiveKitWebhookController } from './livekit.webhook.controller';
 import { CallStoreService } from '../websocket/services/call-store.service ';
 import { ChatModule } from '../chat/chat.module';
 import { WebsocketCallService } from '../websocket/services/websocket-call.service';
@@ -22,7 +22,7 @@ import { WebSocketModule } from '../websocket/websocket.module';
     MessageModule,
     ChatMemberModule,
   ],
-  controllers: [CallController, LivekitWebhookController],
+  controllers: [CallController, LiveKitWebhookController],
   providers: [
     CallService,
     LivekitService,

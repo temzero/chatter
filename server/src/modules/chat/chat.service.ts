@@ -441,6 +441,7 @@ export class ChatService {
       .leftJoinAndSelect('member.lastVisibleMessage', 'lastMessage')
       .leftJoinAndSelect('lastMessage.sender', 'sender')
       .leftJoinAndSelect('lastMessage.attachments', 'attachments')
+      .leftJoinAndSelect('lastMessage.call', 'lastMessageCall')
       .leftJoinAndSelect(
         'lastMessage.forwardedFromMessage',
         'forwardedFromMessage',

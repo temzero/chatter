@@ -6,6 +6,7 @@ import { Avatar } from "../../avatar/Avatar";
 import { VoiceVisualizer } from "../../VoiceVisualizer";
 import { Participant } from "livekit-client";
 import { useRemoteTracks } from "@/hooks/mediaStreams/useRemoteTracks";
+import callManImage from "@/assets/image/call-man.png";
 
 interface CallMemberProps {
   participant: Participant;
@@ -19,8 +20,7 @@ const CallMember = ({
   className = "",
 }: CallMemberProps) => {
   // Use the custom hook for streams
-  const { videoStream, audioStream, screenStream } =
-    useRemoteTracks(participant);
+  const { videoTrack, audioTrack, screenTrack } = useRemoteTracks(participant);
 
   // Parse metadata from participant
   const participantMetadata = React.useMemo(() => {
@@ -38,35 +38,52 @@ const CallMember = ({
     participant.name || participant.identity || "Unknown User";
 
   // Derived states
-  const hasVideo = !!(videoStream || screenStream);
-  const isMuted = !audioStream;
-  const isShowingScreen = !!screenStream;
+  const hasVideo = !!(videoTrack || screenTrack);
+  const isMuted = !audioTrack;
+  const isShowingScreen = !!screenTrack;
 
   return (
     <div
-      className={`relative w-full h-full overflow-hidden bg-black flex items-center justify-center ${className}`}
+      className={`relative w-full h-full overflow-hidden bg-[--border-color] flex items-center justify-center ${className}`}
     >
       {/* Background avatar if no video */}
-      {avatarUrl && !hasVideo && (
+      {/* {avatarUrl && !hasVideo && (
         <img
           src={avatarUrl}
           alt={displayName}
           className="absolute inset-0 w-full h-full object-cover opacity-20 z-0"
         />
-      )}
+      )} */}
+      {/* Background avatar or fallback icon if no video */}
+      <div className="absolute inset-0 w-full h-full flex items-center justify-center z-0 bg-[--border-color]">
+        {avatarUrl && !hasVideo ? (
+          <img
+            src={avatarUrl}
+            alt={displayName}
+            className="absolute inset-0 w-full h-full object-cover opacity-20"
+          />
+        ) : !hasVideo ? (
+          <img
+            src={callManImage}
+            alt={displayName}
+            className="absolute inset-0 w-full h-full object-cover opacity-80 blur"
+          />
+        ) : null}
+      </div>
 
       {hasVideo ? (
         <>
           {/* Video or screen share */}
           <VideoStream
-            stream={screenStream || videoStream!}
+            stream={screenTrack || videoTrack!}
             className="absolute inset-0 w-full h-full object-cover z-0"
+            mirror={true}
           />
 
           {/* Audio with visualizer */}
-          {audioStream && (
+          {audioTrack && (
             <VoiceStreamWithVisualizer
-              stream={audioStream}
+              stream={audioTrack}
               muted={isMuted}
               showVisualizer={showVoiceVisualizer}
               visualizerWidth={200}
@@ -85,13 +102,13 @@ const CallMember = ({
       ) : (
         // Audio-only participant
         <div className="flex flex-col gap-2 items-center justify-center p-4 relative">
-          {audioStream && <VoiceStream stream={audioStream} muted={isMuted} />}
+          {audioTrack && <VoiceStream stream={audioTrack} muted={isMuted} />}
 
           <div className="relative flex items-center justify-center">
-            {showVoiceVisualizer && audioStream && !isMuted && (
+            {showVoiceVisualizer && audioTrack && !isMuted && (
               <div className="absolute inset-0 flex items-center justify-center">
                 <VoiceVisualizer
-                  stream={audioStream}
+                  stream={audioTrack}
                   isMuted={isMuted}
                   size={101}
                   circleColor="grey"

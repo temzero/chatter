@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { ChatResponse } from "@/types/responses/chat.response";
 import { Button } from "../Button";
 import { VideoStream } from "./components/VideoStream";
@@ -7,6 +8,8 @@ import { VoiceVisualizerButton } from "../VoiceVisualizerBtn";
 import { useCallStore } from "@/stores/callStore/callStore";
 import CallMember from "./components/CallMember";
 import { useLocalTracks } from "@/hooks/mediaStreams/useLocalTracks";
+import { RemoteParticipant, RoomEvent } from "livekit-client";
+import { useEffect, useState } from "react";
 
 export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
   const startedAt = useCallStore((state) => state.startedAt);
@@ -16,15 +19,37 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
   const leaveCall = useCallStore((state) => state.leaveCall);
 
   const { localVideoStream, localAudioStream } = useLocalTracks();
+  const [participants, setParticipants] = useState<RemoteParticipant[]>([]);
+
+  useEffect(() => {
+    if (!room) return;
+
+    // initialize with current participants
+    setParticipants(Array.from(room.remoteParticipants.values()));
+
+    const handleConnected = (p: RemoteParticipant) =>
+      setParticipants((prev) => [...prev, p]);
+
+    const handleDisconnected = (p: RemoteParticipant) =>
+      setParticipants((prev) => prev.filter((x) => x.sid !== p.sid));
+
+    room
+      .on(RoomEvent.ParticipantConnected, handleConnected)
+      .on(RoomEvent.ParticipantDisconnected, handleDisconnected);
+
+    return () => {
+      room
+        .off(RoomEvent.ParticipantConnected, handleConnected)
+        .off(RoomEvent.ParticipantDisconnected, handleDisconnected);
+    };
+  }, [room]);
 
   if (!room) {
     console.warn("LiveKit room is not available");
     return null;
   }
 
-  const callParticipants = Array.from(room.remoteParticipants.values());
-  const memberCount = callParticipants.length;
-
+  const memberCount = participants.length;
   const localParticipant = room.localParticipant;
   const isMuted = !localParticipant?.isMicrophoneEnabled;
   const isVideoEnabled = !!localParticipant?.isCameraEnabled;
@@ -43,7 +68,7 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
       {memberCount > 0 ? (
         <div className="relative w-full h-full bg-black">
           <div
-            className={`w-full h-full grid gap-2 auto-rows-fr ${
+            className={`w-full h-full grid auto-rows-fr ${
               memberCount === 1
                 ? "grid-cols-1"
                 : memberCount === 2
@@ -51,7 +76,7 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
                 : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
             }`}
           >
-            {callParticipants.map((participant) => (
+            {participants.map((participant) => (
               <CallMember
                 key={participant.identity}
                 participant={participant}
@@ -66,7 +91,7 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
         />
       )}
 
-      {localVideoStream && isVideoEnabled && (
+      {/* {localVideoStream && isVideoEnabled && (
         <div className="absolute bottom-4 right-4 z-20">
           <VideoStream
             stream={localVideoStream}
@@ -77,6 +102,23 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
             You {isMuted && "🔇"}
           </div>
         </div>
+      )} */}
+      {localVideoStream && isVideoEnabled && (
+        <motion.div
+          className="absolute bottom-4 right-4 z-20 cursor-grab active:cursor-grabbing"
+          drag
+          dragElastic={0.2}
+          dragMomentum={false}
+        >
+          <VideoStream
+            stream={localVideoStream}
+            className="w-52 h-52 rounded-md object-cover border-2 border-white"
+            muted
+          />
+          <div className="absolute bottom-2 right-2 bg-black/50 px-2 py-1 rounded text-sm">
+            You {isMuted && "🔇"}
+          </div>
+        </motion.div>
       )}
 
       <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10">
@@ -107,7 +149,7 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
             variant="ghost"
             isMuted={isMuted}
             stream={localAudioStream}
-            onClick={toggleLocalVoice}
+            onClick={() => toggleLocalVoice()}
             className="w-14 h-14 rounded-full"
           />
           <Button
