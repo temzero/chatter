@@ -98,6 +98,7 @@ export class User {
 
   @DeleteDateColumn({ name: 'deleted_at', nullable: true })
   deletedAt: Date | null;
+  user: any;
 
   @BeforeInsert()
   @BeforeUpdate()

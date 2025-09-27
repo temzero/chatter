@@ -16,45 +16,33 @@ export function useChatSocketListeners() {
   useEffect(() => {
     const handleNewMessage = async (WsMessageResponse: WsMessageResponse) => {
       const { meta, ...message } = WsMessageResponse as MessageResponse & {
-        meta?: {
-          isMuted?: boolean;
-          isOwnMessage?: boolean;
-        };
+        meta?: { isMuted?: boolean; isOwnMessage?: boolean };
       };
-      console.log("newMessage", WsMessageResponse);
+
+      const chatStore = useChatStore.getState();
+      const messageStore = useMessageStore.getState();
 
       const isMuted = meta?.isMuted ?? false;
       const isOwnMessage = meta?.isOwnMessage ?? false;
 
-      const chatExists = useChatStore
-        .getState()
-        .chats.some((chat) => chat.id === message.chatId);
-
-      if (!chatExists) {
-        try {
-          // Fetch both chat info and messages in one call
-          await useChatStore.getState().fetchChatById(message.chatId, {
-            fetchFullData: true,
-          });
-        } catch (error) {
-          console.error("Failed to fetch chat for incoming message:", error);
-          toast.error("New message received but chat not found!");
-          return;
-        }
+      try {
+        await chatStore.getOrFetchChatById(message.chatId, {
+          fetchFullData: true,
+        });
+      } catch (error) {
+        console.error("Failed to fetch chat for incoming message:", error);
+        toast.error("New message received but chat not found!");
+        return;
       }
 
       handleSystemEventMessage(message);
 
-      if (
-        isOwnMessage &&
-        useMessageStore.getState().getMessageById(message.id)
-      ) {
-        useMessageStore
-          .getState()
-          .updateMessageById(message.chatId, message.id, message);
+      if (isOwnMessage && messageStore.getMessageById(message.id)) {
+        messageStore.updateMessageById(message.chatId, message.id, message);
       } else {
-        useMessageStore.getState().addMessage(message);
-        const activeChatId = useChatStore.getState().activeChat?.id;
+        messageStore.addMessage(message);
+
+        const activeChatId = chatStore.activeChat?.id;
         if (!isMuted && activeChatId !== message.chatId) {
           playSoundEffect(newMessageSound);
         }

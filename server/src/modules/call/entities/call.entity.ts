@@ -7,11 +7,14 @@ import {
   UpdateDateColumn,
   JoinColumn,
   OneToOne,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { ChatMember } from 'src/modules/chat-member/entities/chat-member.entity';
 import { Chat } from 'src/modules/chat/entities/chat.entity';
 import { CallStatus } from '../type/callStatus';
 import { Message } from 'src/modules/message/entities/message.entity';
+import { User } from 'src/modules/user/entities/user.entity';
 
 @Entity('calls')
 export class Call {
@@ -35,8 +38,9 @@ export class Call {
   @ManyToOne(() => ChatMember, { eager: true })
   initiator: ChatMember;
 
-  @Column({ type: 'simple-array', default: '' })
-  attendedUserIds: string[];
+  @ManyToMany(() => User)
+  @JoinTable()
+  attendedUsers: User[];
 
   @Column('text', { array: true, default: [] })
   currentUserIds: string[];

@@ -42,7 +42,7 @@ export const Avatar: React.FC<AvatarProps> = ({
         />
       ) : nameInitial ? (
         <h1
-          className={`h-full w-full font-light flex items-center justify-center bg-[var(--border-color)] select-none ${textSize}`}
+          className={`h-full w-full font-light flex items-center justify-center bg-[--input-color] select-none ${textSize}`}
         >
           {nameInitial}
         </h1>

@@ -84,7 +84,7 @@ export const SummaryCall = ({
       <Button
         variant="danger"
         className="w-full"
-        onClick={() => closeCallModal}
+        onClick={() => closeCallModal()}
       >
         Close
       </Button>

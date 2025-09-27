@@ -758,7 +758,6 @@ export class MessageService {
           'callInitiator.id',
           'callInitiator.userId',
           'callInitiator.nickname',
-          'call.attendedUserIds',
 
           // Reply
           'replyToMessage.id',

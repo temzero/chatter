@@ -20,10 +20,10 @@ export const useCallSounds = () => {
         case LocalCallStatus.INCOMING:
           audioService.playSound(SoundType.INCOMING_CALL);
           break;
-        case LocalCallStatus.CONNECTED:
-          audioService.playSound(SoundType.CALL_CONNECTED);
-          break;
-        case LocalCallStatus.ENDED:
+        // case LocalCallStatus.CONNECTED:
+        //   audioService.playSound(SoundType.CALL_CONNECTED);
+        //   break;
+        // case LocalCallStatus.ENDED:
         case LocalCallStatus.DECLINED:
         case LocalCallStatus.CANCELED:
           audioService.playSound(SoundType.CALL_END);

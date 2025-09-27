@@ -7,10 +7,9 @@ export const handleCallMessage = (message: MessageResponse) => {
     return;
   }
 
-  const { chatId, call } = message;
-  const { attendedUserIds, status, startedAt, endedAt, initiator } = call;
+  const callStatus = message.call.status;
 
-  switch (status) {
+  switch (callStatus) {
     case CallStatus.DIALING:
       console.log("[Call Message] DIALING");
       break;

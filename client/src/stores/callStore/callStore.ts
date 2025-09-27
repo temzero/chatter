@@ -54,7 +54,7 @@ export interface CallActions {
   setLocalCallStatus: (s: LocalCallStatus) => void;
   getCallDuration: () => number | null;
   clearCallData: () => void;
-  closeCallModal: (opt?: { keepCallData: boolean }) => void;
+  closeCallModal: () => void;
 
   // LiveKit
   connectToLiveKitRoom: (
@@ -187,7 +187,7 @@ export const useCallStore = create<CallState & CallActions>()(
     },
 
     declineCall: () => {
-      const { chatId, callId, callStatus, endCall, closeCallModal } = get();
+      const { chatId, callId, endCall, closeCallModal } = get();
       if (!chatId || !callId) {
         console.error("Missing CallId or ChatId");
         return;
@@ -204,13 +204,13 @@ export const useCallStore = create<CallState & CallActions>()(
       endCall({ isDeclined: true });
 
       // Close modal but keep call data if call is still in progress
-      closeCallModal({ keepCallData: callStatus === CallStatus.IN_PROGRESS });
+      closeCallModal();
     },
 
     leaveCall: () => {
-      get().disconnectFromLiveKit();
-      get().endCall();
-      get().closeCallModal();
+      const { disconnectFromLiveKit, closeCallModal } = get();
+      disconnectFromLiveKit();
+      closeCallModal();
     },
 
     endCall: async (
@@ -321,10 +321,17 @@ export const useCallStore = create<CallState & CallActions>()(
       });
     },
 
-    closeCallModal: (opts?: { keepCallData?: boolean }) => {
+    closeCallModal: () => {
       useModalStore.getState().closeModal();
       get().clearLiveKitState();
-      if (!opts?.keepCallData) {
+      set({ localCallStatus: null });
+
+      const { callStatus } = get();
+      if (
+        callStatus === CallStatus.COMPLETED ||
+        callStatus === CallStatus.MISSED ||
+        callStatus === CallStatus.FAILED
+      ) {
         get().clearCallData();
       }
     },

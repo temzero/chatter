@@ -8,6 +8,7 @@ import {
   LocalTrackPublication,
   Track,
 } from "livekit-client";
+import { audioService, SoundType } from "./audio.service";
 
 export interface LiveKitServiceOptions {
   audio?: boolean;
@@ -169,19 +170,9 @@ export class LiveKitService {
         }
       })
       .on(RoomEvent.ParticipantConnected, (participant) => {
+        audioService.playSound(SoundType.USER_CONNECTED); // join sound
         this.options?.onParticipantConnected?.(participant);
-        // console.log("[ParticipantConnected]", participant.name);
-        console.log("[ParticipantConnected]", {
-          id: participant.identity,
-          name: participant.name,
-          tracks: Array.from(participant.trackPublications.values()).map(
-            (pub) => ({
-              source: pub.source,
-              kind: pub.kind,
-              isSubscribed: pub.isSubscribed,
-            })
-          ),
-        });
+        console.log("[ParticipantConnected]", participant.name);
 
         // const { callStatus, localCallStatus } = useCallStore.getState();
         // if (
@@ -195,6 +186,7 @@ export class LiveKitService {
         // }
       })
       .on(RoomEvent.ParticipantDisconnected, (participant) => {
+        audioService.playSound(SoundType.USER_DISCONNECTED); // leave sound
         this.options?.onParticipantDisconnected?.(participant);
         console.log("[ParticipantDisconnected]", participant.name);
       })

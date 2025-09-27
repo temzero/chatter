@@ -6,7 +6,9 @@ import { CreateCallDto } from './dto/create-call.dto';
 import { UpdateCallDto } from './dto/update-call.dto';
 import { CallStatus } from './type/callStatus';
 import { ChatMemberService } from '../chat-member/chat-member.service';
-import { ChatType } from '../chat/constants/chat-types.constants';
+import { CallResponseDto } from './dto/call-response.dto';
+import { mapChatMemberToResponseDto } from '../chat-member/mappers/chat-member.mapper';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class CallService {
@@ -14,66 +16,158 @@ export class CallService {
     @InjectRepository(Call)
     private readonly callRepository: Repository<Call>,
     private readonly chatMemberService: ChatMemberService,
+    private readonly userService: UserService,
   ) {}
 
-  async getCallHistory(userId: string): Promise<Call[]> {
-    const calls = await this.callRepository
+  // async getCallHistory(userId: string): Promise<Call[]> {
+  //   const calls = await this.callRepository
+  //     .createQueryBuilder('call')
+  //     .leftJoinAndSelect('call.chat', 'chat')
+  //     .leftJoinAndSelect('chat.members', 'chatMember')
+  //     .leftJoinAndSelect('chatMember.user', 'chatMemberUser')
+  //     .leftJoinAndSelect('call.initiator', 'initiator')
+  //     .leftJoinAndSelect('initiator.user', 'initiatorUser')
+  //     .where((qb) => {
+  //       const subQuery = qb
+  //         .subQuery()
+  //         .select('call.id')
+  //         .from(Call, 'call')
+  //         .innerJoin('call.chat', 'chat2')
+  //         .innerJoin('chat2.members', 'member')
+  //         .where('member.userId = :userId', { userId })
+  //         .andWhere('call.status IN (:...statuses)', {
+  //           statuses: [
+  //             CallStatus.COMPLETED,
+  //             CallStatus.MISSED,
+  //             CallStatus.FAILED,
+  //           ],
+  //         })
+  //         .getQuery();
+  //       return `call.id IN ${subQuery}`;
+  //     })
+  //     .orderBy('call.startedAt', 'DESC')
+  //     .getMany();
+
+  //   calls.forEach((call) => {
+  //     const chat = call.chat;
+
+  //     if (chat.type === ChatType.DIRECT) {
+  //       const otherMember = chat.members.find((m) => m.user.id !== userId);
+  //       if (otherMember) {
+  //         chat.name =
+  //           otherMember.nickname ||
+  //           `${otherMember.user.firstName ?? ''} ${otherMember.user.lastName ?? ''}`.trim() ||
+  //           otherMember.user.username;
+  //         chat.avatarUrl = otherMember.user.avatarUrl || chat.avatarUrl;
+  //       }
+  //     } else {
+  //       if (!chat.avatarUrl) {
+  //         if (call.initiator?.user?.avatarUrl) {
+  //           chat.avatarUrl = call.initiator.user.avatarUrl;
+  //         } else if (chat.members.length > 0) {
+  //           const memberWithAvatar = chat.members.find(
+  //             (m) => m.user?.avatarUrl,
+  //           );
+  //           chat.avatarUrl =
+  //             memberWithAvatar?.user?.avatarUrl ||
+  //             chat.members[0].user.avatarUrl;
+  //         }
+  //       }
+  //     }
+  //   });
+
+  //   return calls;
+  // }
+
+  // async getCallHistory(
+  //   userId: string,
+  //   options: { limit?: number; offset?: number } = { limit: 20, offset: 0 },
+  // ): Promise<{ calls: Call[]; hasMore: boolean }> {
+  //   const { limit = 20, offset = 0 } = options;
+
+  //   // Query calls where user participated
+  //   const query = this.callRepository
+  //     .createQueryBuilder('call')
+  //     .leftJoinAndSelect('call.chat', 'chat') // include chat relation
+  //     .leftJoinAndSelect('call.initiator', 'initiator') // include initiator
+  //     .leftJoinAndSelect('initiator.user', 'initiatorUser')
+  //     .where(":userId = ANY(string_to_array(call.attendedUserIds, ','))", {
+  //       userId,
+  //     })
+  //     .andWhere('call.status IN (:...statuses)', {
+  //       statuses: [CallStatus.COMPLETED, CallStatus.MISSED, CallStatus.FAILED],
+  //     })
+  //     .orderBy('call.startedAt', 'DESC')
+  //     .skip(offset)
+  //     .take(limit + 1); // fetch one extra to determine hasMore
+
+  //   const calls = await query.getMany();
+
+  //   let hasMore = false;
+  //   if (calls.length > limit) {
+  //     hasMore = true;
+  //     calls.pop(); // remove the extra one
+  //   }
+
+  //   return { calls, hasMore };
+  // }
+
+  async getCallHistory(
+    userId: string,
+    options: { limit?: number; offset?: number } = { limit: 20, offset: 0 },
+  ): Promise<{ calls: CallResponseDto[]; hasMore: boolean }> {
+    const { limit = 20, offset = 0 } = options;
+
+    console.log('limit-offset', limit, offset);
+
+    const query = this.callRepository
       .createQueryBuilder('call')
       .leftJoinAndSelect('call.chat', 'chat')
-      .leftJoinAndSelect('chat.members', 'chatMember')
-      .leftJoinAndSelect('chatMember.user', 'chatMemberUser')
       .leftJoinAndSelect('call.initiator', 'initiator')
       .leftJoinAndSelect('initiator.user', 'initiatorUser')
-      .where((qb) => {
-        const subQuery = qb
-          .subQuery()
-          .select('call.id')
-          .from(Call, 'call')
-          .innerJoin('call.chat', 'chat2')
-          .innerJoin('chat2.members', 'member')
-          .where('member.userId = :userId', { userId })
-          .andWhere('call.status IN (:...statuses)', {
-            statuses: [
-              CallStatus.COMPLETED,
-              CallStatus.MISSED,
-              CallStatus.FAILED,
-            ],
-          })
-          .getQuery();
-        return `call.id IN ${subQuery}`;
+      .leftJoinAndSelect('call.attendedUsers', 'attendedUser')
+      .where('attendedUser.id = :userId', { userId })
+      .andWhere('call.status IN (:...statuses)', {
+        statuses: [CallStatus.COMPLETED, CallStatus.MISSED, CallStatus.FAILED],
       })
-      .orderBy('call.startedAt', 'DESC')
-      .getMany();
+      .orderBy('call.createdAt', 'DESC')
+      // Pagination
+      .skip(offset)
+      .take(limit + 1);
 
-    calls.forEach((call) => {
-      const chat = call.chat;
+    const calls = await query.getMany();
+    console.log('calls', calls.length);
 
-      if (chat.type === ChatType.DIRECT) {
-        const otherMember = chat.members.find((m) => m.user.id !== userId);
-        if (otherMember) {
-          chat.name =
-            otherMember.nickname ||
-            `${otherMember.user.firstName ?? ''} ${otherMember.user.lastName ?? ''}`.trim() ||
-            otherMember.user.username;
-          chat.avatarUrl = otherMember.user.avatarUrl || chat.avatarUrl;
-        }
-      } else {
-        if (!chat.avatarUrl) {
-          if (call.initiator?.user?.avatarUrl) {
-            chat.avatarUrl = call.initiator.user.avatarUrl;
-          } else if (chat.members.length > 0) {
-            const memberWithAvatar = chat.members.find(
-              (m) => m.user?.avatarUrl,
-            );
-            chat.avatarUrl =
-              memberWithAvatar?.user?.avatarUrl ||
-              chat.members[0].user.avatarUrl;
-          }
-        }
+    let hasMore = false;
+    if (calls.length > limit) {
+      hasMore = true;
+      calls.pop();
+    }
+
+    // Map to DTOs
+    const callDtos: CallResponseDto[] = calls.map((call) => {
+      const dto = new CallResponseDto();
+      dto.id = call.id;
+      dto.chat = call.chat;
+      dto.status = call.status;
+      dto.isVideoCall = false;
+      dto.startedAt = call.startedAt ?? null;
+      dto.endedAt = call.endedAt ?? null;
+      dto.updatedAt = call.updatedAt ?? null;
+      dto.createdAt = call.createdAt;
+      dto.initiator = mapChatMemberToResponseDto(
+        call.initiator,
+        call.chat.type,
+      );
+
+      if (!dto.chat.avatarUrl) {
+        dto.chat.avatarUrl = call.initiator?.user?.avatarUrl || null;
       }
+
+      return dto;
     });
 
-    return calls;
+    return { calls: callDtos, hasMore };
   }
 
   async getCallById(id: string): Promise<Call> {
@@ -111,7 +205,7 @@ export class CallService {
         chat: { id: chatId },
         status: In([CallStatus.DIALING, CallStatus.IN_PROGRESS]),
       },
-      relations: ['chat', 'initiator'],
+      relations: ['chat', 'initiator', 'attendedUsers'],
       order: { createdAt: 'DESC' }, // get the latest active call
     });
   }
@@ -133,26 +227,26 @@ export class CallService {
     const initiatorMember =
       await this.chatMemberService.getMemberByChatIdAndUserId(
         createCallDto.chatId,
-        createCallDto.initiatorUserId,
+        createCallDto.initiatorUser.id,
       );
 
     if (!initiatorMember) {
-      throw new Error('Unauthorized: Cannot update other members');
+      throw new Error('Unauthorized: Cannot create call for other members');
     }
 
     const call = this.callRepository.create({
       status: createCallDto.status,
       chat: { id: createCallDto.chatId },
       initiator: initiatorMember,
-      attendedUserIds: [createCallDto.initiatorUserId],
-      currentUserIds: [createCallDto.initiatorUserId],
+      attendedUsers: [createCallDto.initiatorUser], // Link to User entity
+      currentUserIds: [createCallDto.initiatorUser.id],
     });
 
     const savedCall = await this.callRepository.save(call);
 
     return this.callRepository.findOneOrFail({
       where: { id: savedCall.id },
-      relations: ['chat', 'initiator'],
+      relations: ['chat', 'initiator', 'attendedUsers'],
     });
   }
 
@@ -163,19 +257,33 @@ export class CallService {
     console.log('Update call');
     const call = await this.getCallById(id);
     if (!call) {
-      console.log('No call to Update');
+      console.log('No call to update');
       return;
     }
-    if (updateCallDto.attendedUserIds) {
-      const existingAttendees = new Set(call.attendedUserIds || []);
-      updateCallDto.attendedUserIds.forEach((id) => existingAttendees.add(id));
-      updateCallDto.attendedUserIds = Array.from(existingAttendees);
+
+    // Handle attendedUserIds -> attendedUsers
+    if (updateCallDto.attendedUserIds?.length) {
+      // Fetch User entities for each ID
+      const users = await Promise.all(
+        updateCallDto.attendedUserIds.map((id) =>
+          this.userService.getUserById(id),
+        ),
+      );
+
+      // Merge with existing attendedUsers
+      const existing = new Map(call.attendedUsers.map((u) => [u.id, u]));
+      users.forEach((u) => existing.set(u.id, u));
+      call.attendedUsers = Array.from(existing.values());
     }
 
-    const updatedCall = this.callRepository.merge(
-      call,
-      updateCallDto as DeepPartial<Call>,
-    );
+    // Merge other fields from DTO
+    const updatedCall = this.callRepository.merge(call, {
+      status: updateCallDto.status,
+      startedAt: updateCallDto.startedAt,
+      endedAt: updateCallDto.endedAt,
+      currentUserIds: updateCallDto.currentUserIds ?? call.currentUserIds,
+      // keep isVideoCall or duration if you use them in entity
+    } as DeepPartial<Call>);
 
     return await this.callRepository.save(updatedCall);
   }
@@ -238,6 +346,7 @@ export class CallService {
         chat: { id: chatId },
         status: In([CallStatus.DIALING, CallStatus.IN_PROGRESS]),
       },
+      relations: ['attendedUsers'], // ensure users are loaded
     });
 
     if (!activeCalls || activeCalls.length === 0) {
@@ -246,21 +355,25 @@ export class CallService {
     }
 
     for (const call of activeCalls) {
-      // Delete if call is in pending status OR has no attendees
-      const shouldDelete =
-        !call.attendedUserIds || call.attendedUserIds.length <= 1;
+      // Delete if call has no attendees or just initiator
+      const attendeeCount = call.attendedUsers?.length ?? 0;
+      const shouldDelete = attendeeCount <= 1;
 
       if (shouldDelete) {
         await this.deleteCall(call.id);
         console.log(
-          `[cleanUpPendingCalls] Deleted call ${call.id} for chat ${chatId} (no attendees)`,
+          `[cleanUpPendingCalls] Deleted call ${call.id} for chat ${chatId} (attendees: ${attendeeCount})`,
         );
       } else {
         console.log(
-          `[cleanUpPendingCalls] Keeping call ${call.id} for chat ${chatId} (has ${call.attendedUserIds.length} attendees)`,
+          `[cleanUpPendingCalls] Keeping call ${call.id} for chat ${chatId} (attendees: ${attendeeCount})`,
         );
       }
     }
+  }
+
+  async saveCall(call: Call): Promise<Call> {
+    return await this.callRepository.save(call);
   }
 
   async deleteCall(id: string): Promise<void> {

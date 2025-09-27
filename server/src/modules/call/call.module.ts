@@ -7,16 +7,18 @@ import { ChatMember } from '../chat-member/entities/chat-member.entity';
 import { MessageModule } from '../message/message.module';
 import { Chat } from '../chat/entities/chat.entity';
 import { ChatMemberModule } from '../chat-member/chat-member.module';
-import { LivekitService } from './liveKit.service';
+import { LiveKitService } from './liveKit.service';
 import { LiveKitWebhookController } from './livekit.webhook.controller';
 import { CallStoreService } from '../websocket/services/call-store.service ';
 import { ChatModule } from '../chat/chat.module';
 import { WebsocketCallService } from '../websocket/services/websocket-call.service';
 import { WebSocketModule } from '../websocket/websocket.module';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Call, Chat, ChatMember]),
+    forwardRef(() => UserModule),
     forwardRef(() => ChatModule),
     forwardRef(() => WebSocketModule),
     MessageModule,
@@ -25,7 +27,7 @@ import { WebSocketModule } from '../websocket/websocket.module';
   controllers: [CallController, LiveKitWebhookController],
   providers: [
     CallService,
-    LivekitService,
+    LiveKitService,
     CallStoreService,
     WebsocketCallService,
   ],

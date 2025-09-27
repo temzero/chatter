@@ -9,7 +9,7 @@ import {
 } from 'livekit-server-sdk';
 
 @Injectable()
-export class LivekitService {
+export class LiveKitService {
   private readonly roomService: RoomServiceClient;
   private readonly apiKey: string;
   private readonly apiSecret: string;
@@ -118,5 +118,19 @@ export class LivekitService {
     return filteredRooms.sort(
       (a, b) => Number(b.creationTime) - Number(a.creationTime),
     );
+  }
+
+  async deleteRoom(roomName: string): Promise<void> {
+    try {
+      await this.roomService.deleteRoom(roomName);
+      console.log(`[LiveKitService] Room deleted: ${roomName}`);
+    } catch (err) {
+      console.error(`[LiveKitService] Failed to delete room ${roomName}:`, err);
+      throw new InternalServerErrorException(
+        err instanceof Error
+          ? err.message
+          : 'Unknown error while deleting room',
+      );
+    }
   }
 }

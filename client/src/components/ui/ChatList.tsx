@@ -1,6 +1,6 @@
 import React from "react";
 import ChatListItem from "./ChatListItem";
-import InfiniteScroller from "@/components/ui/infiniteScroller";
+import InfiniteScroller from "@/components/ui/InfiniteScroller";
 import { useAuthStore } from "@/stores/authStore";
 import { useChatStore } from "@/stores/chatStore";
 import { useShallow } from "zustand/shallow";
@@ -21,6 +21,7 @@ const ChatList: React.FC<ChatListProps> = React.memo(
         // isLoading: state.isLoading,
       }))
     );
+    console.log('chats', chats)
 
     return (
       <InfiniteScroller

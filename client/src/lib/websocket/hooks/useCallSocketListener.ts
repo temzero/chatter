@@ -146,7 +146,6 @@ export function useCallSocketListeners() {
       if (isCallerCancel) {
         callStore.endCall({ isCancel: true });
       } else {
-        console.log("callStore.endCall({ isDeclined: true });");
         callStore.endCall({ isDeclined: true });
       }
     };

@@ -1,63 +1,81 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-type Theme = "light" | "dark" | "auto";
-type ResolvedTheme = "light" | "dark";
+export enum ThemeOption {
+  Light = "light",
+  Dark = "dark",
+  Auto = "auto",
+}
+
+export enum Theme {
+  Light = "light",
+  Dark = "dark",
+}
 
 interface ThemeState {
+  themeOption: ThemeOption;
   theme: Theme;
-  resolvedTheme: ResolvedTheme;
 }
 
 interface ThemeActions {
-  setTheme: (theme: Theme) => void;
-  detectSystemTheme: () => ResolvedTheme;
+  setTheme: (themeOption: ThemeOption) => void;
+  detectSystemTheme: () => Theme;
   initialize: () => void;
 }
 
 export const useThemeStore = create<ThemeState & ThemeActions>()(
   persist(
     (set, get) => ({
-      theme: "auto",
-      resolvedTheme: "light",
+      themeOption: ThemeOption.Auto,
+      theme: Theme.Light,
 
       detectSystemTheme: () => {
         return window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light";
+          ? Theme.Dark
+          : Theme.Light;
       },
 
       initialize: () => {
-        const { theme, detectSystemTheme } = get();
-        const resolved = theme === "auto" ? detectSystemTheme() : theme;
+        const { themeOption, detectSystemTheme } = get();
+        const resolved: Theme =
+          themeOption === ThemeOption.Auto
+            ? detectSystemTheme()
+            : themeOption === ThemeOption.Light
+            ? Theme.Light
+            : Theme.Dark;
 
         document.documentElement.setAttribute("data-theme", resolved);
-        set({ resolvedTheme: resolved });
+        set({ theme: resolved });
       },
 
       setTheme: (newTheme) => {
         const { detectSystemTheme } = get();
-        const resolved = newTheme === "auto" ? detectSystemTheme() : newTheme;
+        const resolved: Theme =
+          newTheme === ThemeOption.Auto
+            ? detectSystemTheme()
+            : newTheme === ThemeOption.Light
+            ? Theme.Light
+            : Theme.Dark;
 
         document.documentElement.setAttribute("data-theme", resolved);
-        set({ theme: newTheme, resolvedTheme: resolved });
+        set({ themeOption: newTheme, theme: resolved });
 
-        if (newTheme === "auto") {
+        if (newTheme === ThemeOption.Auto) {
           const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
           const handler = (e: MediaQueryListEvent) => {
-            const resolvedTheme = e.matches ? "dark" : "light";
-            document.documentElement.setAttribute("data-theme", resolvedTheme);
-            set({ resolvedTheme });
+            const theme: Theme = e.matches ? Theme.Dark : Theme.Light; // <- use enum
+            document.documentElement.setAttribute("data-theme", theme);
+            set({ theme });
           };
           mediaQuery.addEventListener("change", handler);
         }
       },
     }),
     {
-      name: "theme-storage",
+      name: "themeOption-storage",
       partialize: (state) => ({
+        themeOption: state.themeOption,
         theme: state.theme,
-        resolvedTheme: state.resolvedTheme,
       }),
       onRehydrateStorage: () => (state) => {
         state?.initialize();
@@ -67,9 +85,7 @@ export const useThemeStore = create<ThemeState & ThemeActions>()(
 );
 
 // Selector hooks for themes
-export const useCurrentTheme = () => useThemeStore((state) => state.theme);
-export const useResolvedTheme = () =>
-  useThemeStore((state) => state.resolvedTheme);
+export const useTheme = () => useThemeStore((state) => state.theme);
 export const useThemeActions = () =>
   useThemeStore((state) => ({
     setTheme: state.setTheme,

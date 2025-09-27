@@ -17,6 +17,4 @@ export interface CallResponseDto {
   endedAt?: Date | null;
   updatedAt?: Date | null;
   createdAt: Date;
-
-  attendedUserIds: string[];
 }

@@ -6,6 +6,8 @@ import {
   Param,
   // Delete,
   UseGuards,
+  Query,
+  Delete,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { CallService } from './call.service';
@@ -15,12 +17,13 @@ import { CallResponseDto } from './dto/call-response.dto';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { ChatMemberService } from '../chat-member/chat-member.service';
-import { LivekitService } from './liveKit.service';
+import { LiveKitService } from './liveKit.service';
 import { CallStatus } from './type/callStatus';
 import { IncomingCallResponse } from '../websocket/constants/callPayload.type';
 import { ChatService } from '../chat/chat.service';
 import { ChatType } from '../chat/constants/chat-types.constants';
 import { GenerateLiveKitTokenDto } from './dto/generate-livekit-token.dto';
+import { UpdateCallDto } from './dto/update-call.dto';
 // import { CreateCallDto } from './dto/create-call.dto';
 // import { UpdateCallDto } from './dto/update-call.dto';
 
@@ -28,20 +31,44 @@ import { GenerateLiveKitTokenDto } from './dto/generate-livekit-token.dto';
 @UseGuards(JwtAuthGuard)
 export class CallController {
   constructor(
-    private readonly liveKitService: LivekitService,
+    private readonly liveKitService: LiveKitService,
     private readonly callService: CallService,
     private readonly chatService: ChatService,
     private readonly chatMemberService: ChatMemberService,
   ) {}
 
+  // @Get('history')
+  // async getCallHistory(
+  //   @CurrentUser('id') userId: string,
+  // ): Promise<SuccessResponse<CallResponseDto[]>> {
+  //   try {
+  //     const calls = await this.callService.getCallHistory(userId);
+  //     return new SuccessResponse(
+  //       plainToInstance(CallResponseDto, calls),
+  //       'Call history retrieved successfully',
+  //     );
+  //   } catch (error: unknown) {
+  //     ErrorResponse.throw(error, 'Failed to retrieve call history');
+  //   }
+  // }
+
   @Get('history')
   async getCallHistory(
     @CurrentUser('id') userId: string,
-  ): Promise<SuccessResponse<CallResponseDto[]>> {
+    @Query('limit') limit = 20,
+    @Query('offset') offset = 0,
+  ): Promise<SuccessResponse<{ calls: CallResponseDto[]; hasMore: boolean }>> {
     try {
-      const calls = await this.callService.getCallHistory(userId);
+      const { calls, hasMore } = await this.callService.getCallHistory(userId, {
+        limit,
+        offset,
+      });
+
       return new SuccessResponse(
-        plainToInstance(CallResponseDto, calls),
+        {
+          calls, // already mapped to CallResponseDto in service
+          hasMore,
+        },
         'Call history retrieved successfully',
       );
     } catch (error: unknown) {
@@ -187,51 +214,29 @@ export class CallController {
     }
   }
 
-  // @Post()
-  // async createCall(
-  //   @CurrentUser('id') userId: string,
-  //   @Body()
-  //   body: CreateCallDto,
-  // ): Promise<SuccessResponse<CallResponseDto>> {
-  //   try {
-  //     const newCall = await this.callService.createCall({
-  //       chatId: body.chatId,
-  //       initiatorUserId: userId,
-  //       status: CallStatus.DIALING,
-  //     });
+  @Post(':id')
+  async updateCall(
+    @Param('id') id: string,
+    @Body() body: UpdateCallDto,
+  ): Promise<SuccessResponse<CallResponseDto>> {
+    try {
+      const updatedCall = await this.callService.updateCall(id, body);
+      return new SuccessResponse(
+        plainToInstance(CallResponseDto, updatedCall),
+        'Call updated successfully',
+      );
+    } catch (error: unknown) {
+      ErrorResponse.throw(error, 'Failed to update call');
+    }
+  }
 
-  //     return new SuccessResponse(
-  //       plainToInstance(CallResponseDto, newCall),
-  //       'Call created successfully',
-  //     );
-  //   } catch (error: unknown) {
-  //     ErrorResponse.throw(error, 'Failed to create call');
-  //   }
-  // }
-
-  // @Post(':id')
-  // async updateCall(
-  //   @Param('id') id: string,
-  //   @Body() body: UpdateCallDto,
-  // ): Promise<SuccessResponse<CallResponseDto>> {
-  //   try {
-  //     const updatedCall = await this.callService.updateCall(id, body);
-  //     return new SuccessResponse(
-  //       plainToInstance(CallResponseDto, updatedCall),
-  //       'Call updated successfully',
-  //     );
-  //   } catch (error: unknown) {
-  //     ErrorResponse.throw(error, 'Failed to update call');
-  //   }
-  // }
-
-  // @Delete(':id')
-  // async deleteCall(@Param('id') id: string): Promise<SuccessResponse<null>> {
-  //   try {
-  //     await this.callService.deleteCall(id);
-  //     return new SuccessResponse(null, 'Call deleted successfully');
-  //   } catch (error: unknown) {
-  //     ErrorResponse.throw(error, 'Failed to delete call');
-  //   }
-  // }
+  @Delete(':id')
+  async deleteCall(@Param('id') id: string): Promise<SuccessResponse<null>> {
+    try {
+      await this.callService.deleteCall(id);
+      return new SuccessResponse(null, 'Call deleted successfully');
+    } catch (error: unknown) {
+      ErrorResponse.throw(error, 'Failed to delete call');
+    }
+  }
 }

@@ -40,6 +40,7 @@
 
   /* light theme defaults */
   --text-color: black;
+  --avatar-background: rgb(200, 200, 200);
   --background-color: #ffffff;
   --sidebar-color: #eee;
   --active-chat-color: #00cf98d2; /* or any color you prefer */
@@ -60,6 +61,7 @@ html[data-theme="dark"] {
   color-scheme: dark;
 
   --text-color: white;
+  --avatar-background: rgb(60, 60, 60);
   --background-color: #121212;
   --sidebar-color: #222;
   --border-color: rgba(255, 255, 255, 0.1);

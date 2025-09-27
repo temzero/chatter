@@ -4,6 +4,8 @@ import ringSound from "@/assets/sound/click.mp3";
 import dialSound from "@/assets/sound/telephone-dialing-2.mp3";
 import activeSound from "@/assets/sound/active.mp3";
 import endCallSound from "@/assets/sound/end-call.mp3";
+import connectSound from "@/assets/sound/connect.mp3";
+import disconnectSound from "@/assets/sound/disconnect.mp3";
 import reactionSound from "@/assets/sound/message-bubble.mp3";
 import messageSound from "@/assets/sound/message-bubble.mp3";
 import slidingSound from "@/assets/sound/click.mp3";
@@ -18,6 +20,8 @@ export enum SoundType {
   OUTGOING_CALL = "call-outgoing",
   CALL_CONNECTED = "call-connected",
   CALL_END = "call-end",
+  USER_CONNECTED = "user-connected",
+  USER_DISCONNECTED = "user-disconnected",
   NEW_MESSAGE = "new-message",
   REACTION = "reaction",
 
@@ -54,6 +58,8 @@ class AudioServiceImpl implements AudioService {
       [SoundType.OUTGOING_CALL]: dialSound,
       [SoundType.CALL_CONNECTED]: activeSound,
       [SoundType.CALL_END]: endCallSound,
+      [SoundType.USER_CONNECTED]: connectSound,
+      [SoundType.USER_DISCONNECTED]: disconnectSound,
       [SoundType.NEW_MESSAGE]: messageSound,
       [SoundType.REACTION]: reactionSound,
       [SoundType.SLIDE]: slidingSound,

@@ -1,13 +1,13 @@
-import { useThemeStore } from "@/stores/themeStore";
+import { ThemeOption, useThemeStore } from "@/stores/themeStore";
 
 const ThemeSelector = () => {
-  const theme = useThemeStore((state) => state.theme);
+  const themeOption = useThemeStore((state) => state.themeOption);
   const setTheme = useThemeStore((state) => state.setTheme);
 
   const getOptionClass = (value: string) =>
     `flex items-center gap-4 px-4 py-2 w-full cursor-pointer transition-colors custom-border-b
      ${
-       theme === value
+       themeOption === value
          ? "bg-[var(--primary-green)]/20"
          : "hover:bg-[var(--primary-green)]/10"
      }`;
@@ -15,18 +15,18 @@ const ThemeSelector = () => {
   return (
     <div id="theme-switcher" className="flex flex-col gap-1">
       <div
-        className={getOptionClass("light")}
-        onClick={() => setTheme("light")}
+        className={getOptionClass(ThemeOption.Light)}
+        onClick={() => setTheme(ThemeOption.Light)}
       >
         <div
           className={`w-4 h-4 rounded-full border-2 flex items-center justify-center 
           ${
-            theme === "light"
+            themeOption === ThemeOption.Light
               ? "border-[var(--primary-green)]"
               : "border-gray-400"
           }`}
         >
-          {theme === "light" && (
+          {themeOption === ThemeOption.Light && (
             <div className="w-2 h-2 rounded-full bg-[var(--primary-green)]"></div>
           )}
         </div>
@@ -34,16 +34,19 @@ const ThemeSelector = () => {
         {/* <i className="material-symbols-outlined ml-auto">light_mode</i> */}
       </div>
 
-      <div className={getOptionClass("dark")} onClick={() => setTheme("dark")}>
+      <div
+        className={getOptionClass(ThemeOption.Dark)}
+        onClick={() => setTheme(ThemeOption.Dark)}
+      >
         <div
           className={`w-4 h-4 rounded-full border-2 flex items-center justify-center 
           ${
-            theme === "dark"
+            themeOption === ThemeOption.Dark
               ? "border-[var(--primary-green)]"
               : "border-gray-400"
           }`}
         >
-          {theme === "dark" && (
+          {themeOption === ThemeOption.Dark && (
             <div className="w-2 h-2 rounded-full bg-[var(--primary-green)]"></div>
           )}
         </div>
@@ -51,16 +54,19 @@ const ThemeSelector = () => {
         {/* <i className="material-symbols-outlined ml-auto">dark_mode</i> */}
       </div>
 
-      <div className={getOptionClass("auto")} onClick={() => setTheme("auto")}>
+      <div
+        className={getOptionClass(ThemeOption.Auto)}
+        onClick={() => setTheme(ThemeOption.Auto)}
+      >
         <div
           className={`w-4 h-4 rounded-full border-2 flex items-center justify-center 
           ${
-            theme === "auto"
+            themeOption === ThemeOption.Auto
               ? "border-[var(--primary-green)]"
               : "border-gray-400"
           }`}
         >
-          {theme === "auto" && (
+          {themeOption === ThemeOption.Auto && (
             <div className="w-2 h-2 rounded-full bg-[var(--primary-green)]"></div>
           )}
         </div>

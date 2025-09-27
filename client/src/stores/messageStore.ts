@@ -1,11 +1,5 @@
 // store/messageStore.ts
 import { create } from "zustand";
-import type {
-  AttachmentResponse,
-  MessageResponse,
-  SenderResponse,
-} from "@/types/responses/message.response";
-import { CallActionResponse } from "@/types/callPayload";
 import { useActiveChatId, useChatStore } from "./chatStore";
 import { messageService } from "@/services/messageService";
 import { useMemo } from "react";
@@ -15,7 +9,11 @@ import { useChatMemberStore } from "./chatMemberStore";
 import { useAuthStore } from "./authStore";
 import { createLastMessage } from "@/utils/createLastMessage";
 import { useMembersByChatId } from "./chatMemberStore";
-import { CallStatus } from "@/types/enums/CallStatus";
+import type {
+  AttachmentResponse,
+  MessageResponse,
+  SenderResponse,
+} from "@/types/responses/message.response";
 
 interface ChatMessages {
   [chatId: string]: MessageResponse[];
@@ -38,16 +36,6 @@ export interface MessageStore {
     chatId: string,
     messageId: string,
     updatedMessage: Partial<MessageResponse>
-  ) => void;
-  updateCallMessage: (
-    chatId: string,
-    callId: string,
-    patch: Partial<CallActionResponse>
-  ) => void;
-  updateMessageCallStatus: (
-    chatId: string,
-    callId: string,
-    callStatus: CallStatus
   ) => void;
   deleteMessage: (chatId: string, messageId: string) => void;
   getChatMessages: (chatId: string) => MessageResponse[];
@@ -298,70 +286,6 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         messages: {
           ...state.messages,
           [chatId]: updatedMessages,
-        },
-      };
-    });
-  },
-
-  updateCallMessage: (
-    chatId: string,
-    callId: string,
-    patch: Partial<CallActionResponse>
-  ) => {
-    if (!chatId || !callId) return;
-    set((state) => {
-      const msgs = state.messages[chatId] || [];
-      const updatedMsgs = msgs.map((m) => {
-        if (m.call?.id === callId) {
-          return {
-            ...m,
-            call: {
-              ...m.call,
-              ...patch,
-            },
-          };
-        }
-        return m;
-      });
-      return {
-        messages: {
-          ...state.messages,
-          [chatId]: updatedMsgs,
-        },
-      };
-    });
-  },
-
-  updateMessageCallStatus: (chatId: string, callId: string, status: CallStatus) => {
-    if (!chatId || !callId) return;
-    set((state) => {
-      const msgs = state.messages[chatId] || [];
-      const updatedMsgs = msgs.map((m) => {
-        if (m.call?.id === callId) {
-          const patch: Partial<CallActionResponse> = { status };
-
-          if (status === CallStatus.IN_PROGRESS && !m.call.startedAt) {
-            patch.startedAt = new Date().toISOString();
-          }
-
-          if (status === CallStatus.COMPLETED) {
-            patch.endedAt = new Date().toISOString();
-          }
-
-          return {
-            ...m,
-            call: {
-              ...m.call,
-              ...patch,
-            },
-          };
-        }
-        return m;
-      });
-      return {
-        messages: {
-          ...state.messages,
-          [chatId]: updatedMsgs,
         },
       };
     });

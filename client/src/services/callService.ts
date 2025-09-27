@@ -5,29 +5,14 @@ import { IncomingCallResponse } from "@/types/callPayload";
 import { generateLiveKitTokenRequest } from "@/types/requests/generate-livekit-token.request";
 
 export const callService = {
-  async generateAndFetchLiveKitToken(
-    chatId: string,
-    participantName?: string,
-    avatarUrl?: string
-  ): Promise<string | undefined> {
-    try {
-      const payload: generateLiveKitTokenRequest = {
-        chatId,
-        participantName: participantName ?? null,
-        avatarUrl: avatarUrl ?? null,
-      };
-
-      const { data } = await API.post("/calls/token", payload);
-      if (!data.payload?.token) {
-        throw new Error("No token returned from server");
-      }
-
-      return data.payload.token;
-    } catch (error) {
-      console.error("[generateAndFetchLiveKitToken] error:", error);
-      handleError(error, "Cannot get SFU liveKit token");
-      return undefined;
-    }
+  async fetchCallHistory(
+    limit = 20,
+    offset = 0
+  ): Promise<{ calls: CallResponseDto[]; hasMore: boolean }> {
+    const { data } = await API.get(
+      `/calls/history?limit=${limit}&offset=${offset}`
+    );
+    return data.payload ?? { calls: [], hasMore: false };
   },
 
   async fetchActiveCall(chatId: string): Promise<IncomingCallResponse> {
@@ -51,8 +36,28 @@ export const callService = {
     }
   },
 
-  async fetchCallHistory(): Promise<CallResponseDto[]> {
-    const { data } = await API.get(`/calls/history/`);
-    return data.payload ?? data;
+  async generateAndFetchLiveKitToken(
+    chatId: string,
+    participantName?: string,
+    avatarUrl?: string
+  ): Promise<string | undefined> {
+    try {
+      const payload: generateLiveKitTokenRequest = {
+        chatId,
+        participantName: participantName ?? null,
+        avatarUrl: avatarUrl ?? null,
+      };
+
+      const { data } = await API.post("/calls/token", payload);
+      if (!data.payload?.token) {
+        throw new Error("No token returned from server");
+      }
+
+      return data.payload.token;
+    } catch (error) {
+      console.error("[generateAndFetchLiveKitToken] error:", error);
+      handleError(error, "Cannot get SFU liveKit token");
+      return undefined;
+    }
   },
 };

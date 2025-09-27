@@ -15,11 +15,11 @@ import {
 } from 'typeorm';
 import { Chat } from 'src/modules/chat/entities/chat.entity';
 import { User } from '../../user/entities/user.entity';
+import { Call } from 'src/modules/call/entities/call.entity';
 import { Reaction } from './reaction.entity';
 import { Attachment } from './attachment.entity';
 import { MessageStatus } from '../constants/message-status.constants';
 import { SystemEventType } from '../constants/system-event-type.constants';
-import { Call } from 'src/modules/call/entities/call.entity';
 
 @Entity('message')
 @Index(['chatId']) // Index for faster chat message queries

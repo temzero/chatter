@@ -6,7 +6,9 @@ import { Avatar } from "../../avatar/Avatar";
 import { VoiceVisualizer } from "../../VoiceVisualizer";
 import { Participant } from "livekit-client";
 import { useRemoteTracks } from "@/hooks/mediaStreams/useRemoteTracks";
-import callManImage from "@/assets/image/call-man.png";
+import callManDarkImage from "@/assets/image/call-man-dark.png";
+import callManLightImage from "@/assets/image/call-man-light.png";
+import { Theme, useTheme } from "@/stores/themeStore";
 
 interface CallMemberProps {
   participant: Participant;
@@ -21,6 +23,7 @@ const CallMember = ({
 }: CallMemberProps) => {
   // Use the custom hook for streams
   const { videoTrack, audioTrack, screenTrack } = useRemoteTracks(participant);
+  const theme = useTheme();
 
   // Parse metadata from participant
   const participantMetadata = React.useMemo(() => {
@@ -41,6 +44,9 @@ const CallMember = ({
   const hasVideo = !!(videoTrack || screenTrack);
   const isMuted = !audioTrack;
   const isShowingScreen = !!screenTrack;
+
+  const callManImage =
+    theme === Theme.Dark ? callManDarkImage : callManLightImage;
 
   return (
     <div
@@ -106,11 +112,11 @@ const CallMember = ({
 
           <div className="relative flex items-center justify-center">
             {showVoiceVisualizer && audioTrack && !isMuted && (
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center z-0">
                 <VoiceVisualizer
                   stream={audioTrack}
                   isMuted={isMuted}
-                  size={101}
+                  size={100}
                   circleColor="grey"
                   className="custom-border"
                 />

@@ -1,3 +1,9 @@
+import { JSX } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useCurrentSidebar } from "@/stores/sidebarStore";
+import { SidebarMode } from "@/types/enums/sidebarMode";
+import { sidebarAnimations } from "@/animations/sidebarAnimations";
+
 import SidebarDefault from "@/components/sidebar/SidebarDefault";
 import SidebarSearch from "@/components/sidebar/SidebarSearch";
 import SidebarNewChat from "@/components/sidebar/SidebarNewChat";
@@ -22,11 +28,6 @@ import SidebarContacts from "./more/SidebarContacts";
 import SidebarFolders from "./more/SidebarFolders";
 import SidebarBlockedUsers from "./more/SidebarBlockedUsers";
 import SidebarPrivateChats from "./more/SidebarPrivateChats";
-import { motion, AnimatePresence } from "framer-motion";
-import { useCurrentSidebar } from "@/stores/sidebarStore";
-import { SidebarMode } from "@/types/enums/sidebarMode";
-import { JSX } from "react";
-import { sidebarAnimations } from "@/animations/sidebarAnimations";
 import SidebarSettingsEmail from "./settings/account/sidebarSettingsEmail";
 import SidebarSettingsUsername from "./settings/account/sidebarSettingsUsername";
 import SidebarSettingsPhoneNumber from "./settings/account/sidebarSettingsPhoneNumber";
@@ -84,11 +85,7 @@ const Sidebar = () => {
   return (
     <div className="bg-[var(--sidebar-color)] h-full flex flex-col shadow border-[var(--border-color)] border-r-2 transition-all duration-300 ease-in-out z-50">
       <AnimatePresence mode="wait">
-        <motion.div
-          key={currentSidebar}
-          {...animation}
-          className="h-full"
-        >
+        <motion.div key={currentSidebar} {...animation} className="h-full">
           {CurrentComponent}
         </motion.div>
       </AnimatePresence>

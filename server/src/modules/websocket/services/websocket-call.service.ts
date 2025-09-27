@@ -224,7 +224,7 @@ export class WebsocketCallService {
       chatId,
       CallEvent.CALL_ENDED,
       endCallResponse,
-      { senderId, excludeSender: true },
+      { senderId },
     );
   }
 }
