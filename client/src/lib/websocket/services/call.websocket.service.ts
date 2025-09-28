@@ -74,13 +74,17 @@ export const callWebSocketService = {
   },
 
   removeAllListeners() {
-    webSocketService.off(CallEvent.INCOMING_CALL);
-    webSocketService.off(CallEvent.START_CALL);
-    webSocketService.off(CallEvent.UPDATE_CALL);
-    webSocketService.off(CallEvent.JOIN_CALL);
-    webSocketService.off(CallEvent.DECLINE_CALL);
-    webSocketService.off(CallEvent.HANG_UP);
-    webSocketService.off(CallEvent.CALL_ENDED);
-    webSocketService.off(CallEvent.CALL_ERROR);
+    const events = [
+      CallEvent.INCOMING_CALL,
+      CallEvent.START_CALL,
+      CallEvent.UPDATE_CALL,
+      CallEvent.JOIN_CALL,
+      CallEvent.DECLINE_CALL,
+      CallEvent.HANG_UP,
+      CallEvent.CALL_ENDED,
+      CallEvent.CALL_ERROR,
+    ];
+
+    events.forEach((event) => webSocketService.off(event));
   },
 };

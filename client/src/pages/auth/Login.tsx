@@ -20,7 +20,7 @@ const Login = () => {
     if (!formRef.current) return;
 
     const formData = new FormData(formRef.current);
-    const identifier = formData.get("identifier") as string;
+    const identifier = formData.get("username") as string;
     const password = formData.get("password") as string;
 
     await login(identifier, password);
@@ -46,8 +46,9 @@ const Login = () => {
           <h2 className="text-4xl font-semibold mb-4">Login</h2>
 
           <input
+            id="username"
+            name="username"
             type="text"
-            name="identifier"
             placeholder="Username, Email, or Phone Number"
             required
             className="input"
@@ -56,6 +57,7 @@ const Login = () => {
           />
 
           <input
+            id="password"
             type="password"
             name="password"
             placeholder="Password"

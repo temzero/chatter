@@ -2,15 +2,17 @@
 import { useEffect, useRef, useMemo } from "react";
 import { RemoteTrack } from "livekit-client";
 import { VoiceVisualizerBar } from "../../VoiceVisualizerBar";
+import { VoiceVisualizerBorder } from "../../VoiceVisualizerBorder"; // import the border visualizer
 
 type VoiceStreamProps = {
   stream?: MediaStream | RemoteTrack | null;
   muted?: boolean;
   className?: string;
   showVisualizer?: boolean;
+  isBorder?: boolean; // <-- new prop
   visualizerWidth?: number;
   visualizerHeight?: number;
-  visualizerColor?: string;
+  color?: string;
 };
 
 export const VoiceStreamWithVisualizer = ({
@@ -18,9 +20,10 @@ export const VoiceStreamWithVisualizer = ({
   muted = false,
   className = "",
   showVisualizer = true,
+  isBorder = false, // default: false
   visualizerWidth = 200,
   visualizerHeight = 40,
-  visualizerColor = "white",
+  color = "white",
 }: VoiceStreamProps) => {
   const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -35,7 +38,6 @@ export const VoiceStreamWithVisualizer = ({
       mediaStream = stream;
       hasVideoTrack = stream.getVideoTracks().length > 0;
     } else if ("mediaStreamTrack" in stream) {
-      // LiveKit RemoteTrack
       mediaStream = new MediaStream([stream.mediaStreamTrack]);
       hasVideoTrack = stream.kind === "video";
     }
@@ -44,30 +46,9 @@ export const VoiceStreamWithVisualizer = ({
   }, [stream]);
 
   // Attach MediaStream to <audio>
-  // useEffect(() => {
-  //   if (!audioRef.current || !mediaStream) return;
-
-  //   const audioEl = audioRef.current;
-  //   audioEl.srcObject = mediaStream;
-  //   audioEl.muted = muted;
-
-  //   audioEl
-  //     .play()
-  //     .catch((err) =>
-  //       console.warn("Audio play failed (needs user interaction):", err)
-  //     );
-
-  //   return () => {
-  //     audioEl.pause();
-  //     audioEl.srcObject = null;
-  //   };
-  // }, [mediaStream, muted]);
-
-  // Attach MediaStream to <audio>
   useEffect(() => {
     if (!audioRef.current || !mediaStream) return;
 
-    // ✅ Enable all audio tracks
     mediaStream.getAudioTracks().forEach((track) => {
       track.enabled = true;
     });
@@ -91,18 +72,27 @@ export const VoiceStreamWithVisualizer = ({
   if (!mediaStream) return null;
 
   return (
-    <div className={`absolute bottom-[74px] left-0 w-full ${className}`}>
+    <div className={`absolute left-0 w-full h-full ${className}`}>
       <audio ref={audioRef} autoPlay playsInline className="hidden" />
-      {showVisualizer && !muted && !hasVideoTrack && (
-        <VoiceVisualizerBar
-          stream={mediaStream}
-          isMuted={muted}
-          width={visualizerWidth}
-          height={visualizerHeight}
-          barColor={visualizerColor}
-          className="w-full h-[32px] opacity-40"
-        />
-      )}
+      {showVisualizer &&
+        !muted &&
+        !hasVideoTrack &&
+        (isBorder ? (
+          <VoiceVisualizerBorder
+            stream={mediaStream}
+            isMuted={muted}
+            className="w-full h-full"
+          />
+        ) : (
+          <VoiceVisualizerBar
+            stream={mediaStream}
+            isMuted={muted}
+            width={visualizerWidth}
+            height={visualizerHeight}
+            barColor={color}
+            className="w-full h-[32px] opacity-40"
+          />
+        ))}
     </div>
   );
 };

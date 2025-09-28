@@ -32,4 +32,14 @@ export const notificationWebSocketService = {
   ) {
     webSocketService.off(NotificationEvent.CANCEL_FRIEND_REQUEST, callback);
   },
+
+  removeAllListeners() {
+    const events = [
+      NotificationEvent.FRIENDSHIP_UPDATE,
+      NotificationEvent.FRIEND_REQUEST,
+      NotificationEvent.CANCEL_FRIEND_REQUEST,
+    ];
+
+    events.forEach((event) => webSocketService.off(event));
+  },
 };

@@ -16,6 +16,7 @@ import {
   CallErrorResponse,
 } from "@/types/callPayload";
 import { useAuthStore } from "@/stores/authStore";
+import { webSocketService } from "../services/websocket.service";
 
 export function useCallSocketListeners() {
   const currentUserId = useAuthStore((state) => state.currentUser?.id);
@@ -160,10 +161,13 @@ export function useCallSocketListeners() {
         return;
       }
 
-      callStore.endCall();
+      callStore.disconnectFromLiveKit();
       useCallStore.setState({
         callStatus: CallStatus.COMPLETED,
+        localCallStatus: LocalCallStatus.ENDED,
+        endedAt: new Date(),
       });
+      callStore.closeCallModal();
     };
 
     const handleCallError = (data: CallErrorResponse) => {
@@ -188,6 +192,8 @@ export function useCallSocketListeners() {
       }
     };
 
+    const socket = webSocketService.getSocket();
+    if (!socket) return;
     // Subscribe to events
     callWebSocketService.removeAllListeners();
     callWebSocketService.onIncomingCall(handleIncomingCall);
@@ -200,7 +206,9 @@ export function useCallSocketListeners() {
     fetchPendingCalls();
 
     return () => {
+      const socket = webSocketService.getSocket();
+      if (!socket) return;
       callWebSocketService.removeAllListeners();
     };
-  }, []);
+  }, [currentUserId]);
 }

@@ -21,7 +21,6 @@ const ChatList: React.FC<ChatListProps> = React.memo(
         // isLoading: state.isLoading,
       }))
     );
-    console.log('chats', chats)
 
     return (
       <InfiniteScroller

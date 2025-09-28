@@ -41,9 +41,7 @@ export const VoiceVisualizerButton = ({
 
   return (
     <div
-      className={`relative inline-flex items-center justify-center overflow-hidden ${
-        isMuted || "custom-border"
-      } ${className}`}
+      className={`relative inline-flex items-center justify-center overflow-hidden aspect-square ${className}`}
     >
       {!isMuted && mediaStream && (
         <VoiceVisualizer
@@ -62,7 +60,7 @@ export const VoiceVisualizerButton = ({
         isIconFilled={!isMuted}
         isRoundedFull
         className={`w-full h-full z-10 ${
-          isMuted ? "bg-red-500/50 opacity-60" : "text-green-500"
+          isMuted ? "bg-red-500/50" : "!text-[--primary-green]"
         }`}
       />
     </div>

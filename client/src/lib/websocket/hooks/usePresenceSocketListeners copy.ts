@@ -2,14 +2,17 @@ import { useEffect } from "react";
 import { usePresenceStore } from "@/stores/presenceStore";
 import { useChatStore } from "@/stores/chatStore";
 import { presenceWebSocketService } from "../services/presence.service";
-import { webSocketService } from "../services/websocket.service";
 import {
   PresenceInitEvent,
   PresenceUpdateEvent,
 } from "../constants/present-payload.type";
+import { webSocketService } from "../services/websocket.service";
 
 export function usePresenceSocketListeners() {
   useEffect(() => {
+    const userIds = useChatStore.getState().getAllUserIdsInChats();
+    presenceWebSocketService.subscribe(userIds);
+
     const handleInit = (event: PresenceInitEvent) => {
       usePresenceStore.getState().setMultipleStatuses(event.statuses);
     };
@@ -21,22 +24,14 @@ export function usePresenceSocketListeners() {
       }
     };
 
-    const socket = webSocketService.getSocket();
-    if (!socket) return; // skip if not connected
-
-    // Subscribe to user IDs first
-    const userIds = useChatStore.getState().getAllUserIdsInChats();
-    presenceWebSocketService.subscribe(userIds);
-
-    // Set up listeners
-    presenceWebSocketService.onInit(handleInit);
-    presenceWebSocketService.onUpdate(handleUpdate);
+    const cleanupInit = presenceWebSocketService.onInit(handleInit);
+    const cleanupUpdate = presenceWebSocketService.onUpdate(handleUpdate);
 
     return () => {
       const socket = webSocketService.getSocket();
-      if (!socket) return;
-      // Clean up listeners
-      presenceWebSocketService.removeAllListeners();
+      if (!socket) return; // skip if not connected
+      cleanupInit();
+      cleanupUpdate();
       presenceWebSocketService.unsubscribe(userIds);
     };
   }, []);

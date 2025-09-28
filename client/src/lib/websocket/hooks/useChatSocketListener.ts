@@ -11,6 +11,7 @@ import newMessageSound from "@/assets/sound/message-pop.mp3";
 import { WsMessageResponse } from "@/types/websocket/websocketMessageRes";
 import { toast } from "react-toastify";
 import { handleSystemEventMessage } from "@/utils/handleSystemEventMessage";
+import { webSocketService } from "../services/websocket.service";
 
 export function useChatSocketListeners() {
   useEffect(() => {
@@ -132,6 +133,8 @@ export function useChatSocketListeners() {
       // toast.error(`Message failed: ${error.error}`);
     };
 
+    const socket = webSocketService.getSocket();
+    if (!socket) return;
     // Subscribe to events
     chatWebSocketService.onNewMessage(handleNewMessage);
     chatWebSocketService.onSaveMessage(handleMessageSaved);
@@ -144,6 +147,8 @@ export function useChatSocketListeners() {
     chatWebSocketService.onMessageError(handleMessageError);
 
     return () => {
+      const socket = webSocketService.getSocket();
+      if (!socket) return;
       // Clean up listeners
       chatWebSocketService.removeAllListeners();
     };

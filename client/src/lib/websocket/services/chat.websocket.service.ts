@@ -241,16 +241,19 @@ export const chatWebSocketService = {
   },
 
   removeAllListeners() {
-    // Remove all chat-related event listeners
-    webSocketService.off(ChatEvent.STATUS_CHANGED);
-    webSocketService.off(ChatEvent.NEW_MESSAGE);
-    webSocketService.off(ChatEvent.USER_TYPING);
-    webSocketService.off(ChatEvent.MESSAGE_READ);
-    webSocketService.off(ChatEvent.MESSAGE_REACTION);
-    webSocketService.off(ChatEvent.PIN_UPDATED);
-    webSocketService.off(ChatEvent.SAVE_MESSAGE);
-    webSocketService.off(ChatEvent.MESSAGE_IMPORTANT_TOGGLED);
-    webSocketService.off(ChatEvent.MESSAGE_DELETED);
-    webSocketService.off(ChatEvent.MESSAGE_ERROR);
+    const events = [
+      ChatEvent.STATUS_CHANGED,
+      ChatEvent.NEW_MESSAGE,
+      ChatEvent.USER_TYPING,
+      ChatEvent.MESSAGE_READ,
+      ChatEvent.MESSAGE_REACTION,
+      ChatEvent.PIN_UPDATED,
+      ChatEvent.SAVE_MESSAGE,
+      ChatEvent.MESSAGE_IMPORTANT_TOGGLED,
+      ChatEvent.MESSAGE_DELETED,
+      ChatEvent.MESSAGE_ERROR,
+    ];
+
+    events.forEach((event) => webSocketService.off(event));
   },
 };

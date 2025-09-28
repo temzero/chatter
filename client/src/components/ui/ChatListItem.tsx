@@ -27,18 +27,12 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
     // console.log('ChatListItem', chat);
     const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
     const setActiveChatById = useChatStore.getState().setActiveChatById;
+    const isActive = useIsActiveChat(chat.id);
     const typingUsers = useTypingUsersByChatId(chat.id);
     const isOnline = useChatStatus(chat?.id, chat.type);
-    const isActive = useIsActiveChat(chat.id);
     const unreadCount = chat.unreadCount || 0;
     const lastMessage = chat.lastMessage;
     const { isBlockedByMe } = useBlockStatus(chat.id, chat.myMemberId);
-
-    const handleClick = () => {
-      if (!isActive) {
-        setActiveChatById(chat.id);
-      }
-    };
 
     const getUserItemClass = () => {
       const baseClasses =
@@ -108,7 +102,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
 
     return (
       <>
-        <div className={getUserItemClass()} onClick={handleClick}>
+        <div className={getUserItemClass()} onClick={() => setActiveChatById(chat.id)}>
           {!chat.isDeleted && (
             <OnlineDot
               isOnline={isOnline}

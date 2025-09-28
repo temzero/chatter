@@ -27,4 +27,9 @@ export const presenceWebSocketService = {
     webSocketService.on(PresenceEvent.UPDATE, handler);
     return () => webSocketService.off(PresenceEvent.UPDATE, handler);
   },
+
+  removeAllListeners() {
+    const events = [PresenceEvent.INIT, PresenceEvent.UPDATE];
+    events.forEach((event) => webSocketService.off(event));
+  },
 };

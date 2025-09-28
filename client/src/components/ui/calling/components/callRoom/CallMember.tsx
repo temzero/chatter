@@ -1,9 +1,9 @@
 import React from "react";
-import { VideoStream } from "./VideoStream";
-import { VoiceStream } from "./VoiceStream";
-import { VoiceStreamWithVisualizer } from "./VoiceStreamWithVisualizer";
-import { Avatar } from "../../avatar/Avatar";
-import { VoiceVisualizer } from "../../VoiceVisualizer";
+import { VideoStream } from "../VideoStream";
+import { VoiceStream } from "../VoiceStream";
+import { VoiceStreamWithVisualizer } from "../VoiceStreamWithVisualizer";
+import { Avatar } from "../../../avatar/Avatar";
+import { VoiceVisualizer } from "../../../VoiceVisualizer";
 import { Participant } from "livekit-client";
 import { useRemoteTracks } from "@/hooks/mediaStreams/useRemoteTracks";
 import callManDarkImage from "@/assets/image/call-man-dark.png";
@@ -50,17 +50,8 @@ const CallMember = ({
 
   return (
     <div
-      className={`relative w-full h-full overflow-hidden bg-[--border-color] flex items-center justify-center ${className}`}
+      className={`relative w-full h-full overflow-hidden bg-[--border-color] text-[--text-color] flex items-center justify-center ${className}`}
     >
-      {/* Background avatar if no video */}
-      {/* {avatarUrl && !hasVideo && (
-        <img
-          src={avatarUrl}
-          alt={displayName}
-          className="absolute inset-0 w-full h-full object-cover opacity-20 z-0"
-        />
-      )} */}
-      {/* Background avatar or fallback icon if no video */}
       <div className="absolute inset-0 w-full h-full flex items-center justify-center z-0 bg-[--border-color]">
         {avatarUrl && !hasVideo ? (
           <img
@@ -94,7 +85,7 @@ const CallMember = ({
               showVisualizer={showVoiceVisualizer}
               visualizerWidth={200}
               visualizerHeight={40}
-              visualizerColor="white"
+              isBorder={true}
             />
           )}
 
@@ -109,8 +100,16 @@ const CallMember = ({
         // Audio-only participant
         <div className="flex flex-col gap-2 items-center justify-center p-4 relative">
           {audioTrack && <VoiceStream stream={audioTrack} muted={isMuted} />}
-
-          <div className="relative flex items-center justify-center">
+          {/* <VoiceStreamWithVisualizer
+            stream={audioTrack}
+            muted={isMuted}
+            showVisualizer={showVoiceVisualizer}
+            visualizerWidth={200}
+            visualizerHeight={40}
+            isBorder={true}
+            className="h-full w-full"
+          /> */}
+          <div className="relative flex items-center justify-center rounded-full">
             {showVoiceVisualizer && audioTrack && !isMuted && (
               <div className="absolute inset-0 flex items-center justify-center z-0">
                 <VoiceVisualizer
@@ -126,7 +125,7 @@ const CallMember = ({
               avatarUrl={avatarUrl}
               name={displayName}
               size="24"
-              className="z-10 relative"
+              className="z-10 relative bg-[--message-color]"
             />
           </div>
 
@@ -137,7 +136,7 @@ const CallMember = ({
       )}
 
       {/* Overlay name */}
-      <div className="absolute bottom-2 left-2 bg-black/50 px-2 py-1 rounded text-sm z-10">
+      <div className="absolute bottom-2 left-2 bg-black/50 text-white px-2 py-1 rounded text-sm z-10">
         {displayName}
         {isMuted && " 🔇"}
         {isShowingScreen && " 🖥️"}

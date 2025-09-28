@@ -87,7 +87,7 @@ const Modal = () => {
       {modalContent && (
         <motion.div
           {...modalAnimation}
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[96] flex items-center justify-center text-white"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[96] flex items-center justify-center"
           onClick={handleCloseModal}
         >
           {renderModalContent}

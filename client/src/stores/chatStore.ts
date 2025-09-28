@@ -390,6 +390,8 @@ export const useChatStore = create<ChatStore>()(
         },
 
         setActiveChatById: async (chatId) => {
+          const currentActive = get().activeChat;
+          if (currentActive?.id === chatId) return;
           if (!chatId) {
             await get().setActiveChat(null);
             return;

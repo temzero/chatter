@@ -6,7 +6,7 @@ import { useCallStore } from "@/stores/callStore/callStore";
 import { LocalCallStatus } from "@/types/enums/CallStatus";
 
 // Import UI components
-import { CallRoom } from "../ui/calling/CallRoom";
+import { CallRoom } from "../ui/calling/components/callRoom/CallRoom";
 import { IncomingCall } from "../ui/calling/IncomingCall";
 import { SummaryCall } from "../ui/calling/SummaryCall";
 import { OutgoingCall } from "../ui/calling/OutgoingCall";

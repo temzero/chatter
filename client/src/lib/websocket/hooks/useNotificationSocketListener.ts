@@ -10,6 +10,7 @@ import {
   FriendRequestResponse,
   FriendshipUpdateNotification,
 } from "@/types/responses/friendship.response";
+import { webSocketService } from "../services/websocket.service";
 
 export function useNotificationSocketListeners() {
   const currentUserId = useCurrentUserId();
@@ -30,7 +31,9 @@ export function useNotificationSocketListeners() {
       }
 
       // 3. Only process if we're the affected party
-      useChatMemberStore.getState().updateFriendshipStatus(data.userId, data.status);
+      useChatMemberStore
+        .getState()
+        .updateFriendshipStatus(data.userId, data.status);
       useFriendshipStore.getState().removeRequestLocally(data.friendshipId);
 
       // 4. Show notification with correct context
@@ -48,9 +51,13 @@ export function useNotificationSocketListeners() {
       friendshipId: string;
       senderId: string;
     }) => {
-      useFriendshipStore.getState().removeRequestLocally(friendshipId, senderId);
+      useFriendshipStore
+        .getState()
+        .removeRequestLocally(friendshipId, senderId);
     };
 
+    const socket = webSocketService.getSocket();
+    if (!socket) return; // skip if not connected
     // Subscribe to events
     notificationWebSocketService.onNewFriendRequest(handleNewFriendRequest);
     notificationWebSocketService.onFriendshipUpdate(handleFriendshipUpdate);
@@ -59,12 +66,10 @@ export function useNotificationSocketListeners() {
     );
 
     return () => {
+      const socket = webSocketService.getSocket();
+      if (!socket) return; // skip cleanup if socket gone
       // Clean up listeners
-      notificationWebSocketService.offNewFriendRequest(handleNewFriendRequest);
-      notificationWebSocketService.offFriendshipUpdate(handleFriendshipUpdate);
-      notificationWebSocketService.offFriendshipCancelRequest(
-        handleCancelFriendRequest
-      );
+      notificationWebSocketService.removeAllListeners();
     };
   }, [currentUserId]);
 }
