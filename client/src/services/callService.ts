@@ -12,7 +12,6 @@ export const callService = {
     const { data } = await API.get(
       `/calls/history?limit=${limit}&offset=${offset}`
     );
-    console.log("fetched calls", data);
     return data.payload ?? { calls: [], hasMore: false };
   },
 
@@ -59,6 +58,15 @@ export const callService = {
       console.error("[generateAndFetchLiveKitToken] error:", error);
       handleError(error, "Cannot get SFU liveKit token");
       return undefined;
+    }
+  },
+
+  async deleteCall(callId: string): Promise<void> {
+    try {
+      await API.delete(`/calls/${callId}`);
+    } catch (error) {
+      console.error("[deleteCall] Error:", error);
+      throw error;
     }
   },
 };

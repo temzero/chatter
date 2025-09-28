@@ -17,4 +17,5 @@ export enum ModalType {
   SET_NICKNAME = "set-nickname",
   LEAVE_CHAT = "leave-chat",
   CALL = "call",
+  DELETE_CALL = "DELETE_CALL",
 }

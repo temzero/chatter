@@ -277,6 +277,24 @@ export const useCallStore = create<CallState & CallActions>()(
 
     // ========== UTILS ==========
     getActiveCall: async (chatId: string) => {
+      const {
+        callId: currentCallId,
+        chatId: currentChatId,
+        callStatus,
+      } = get();
+
+      // Stop if current chat is already in a call
+      if (
+        currentCallId &&
+        currentChatId === chatId &&
+        callStatus === CallStatus.IN_PROGRESS
+      ) {
+        console.log(
+          `[getActiveCall] Already in call for chat ${chatId}, skipping fetch`
+        );
+        return null;
+      }
+
       try {
         const call = await callService.fetchActiveCall(chatId);
         if (call) {

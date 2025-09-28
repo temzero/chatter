@@ -4,7 +4,7 @@ import { formatDurationByStartAndEnd } from "./formatDuration";
 export const getCallText = (
   status: CallStatus,
   startedAt?: string | Date,
-  endedAt?: string | Date | null,
+  endedAt?: string | Date | null
 ) => {
   switch (status) {
     case CallStatus.DIALING:
@@ -13,10 +13,7 @@ export const getCallText = (
       return "Call in progress";
     case CallStatus.COMPLETED:
       if (startedAt && endedAt) {
-        return `Call ended • ${formatDurationByStartAndEnd(
-          startedAt,
-          endedAt
-        )}`;
+        return `${formatDurationByStartAndEnd(startedAt, endedAt)}`;
       }
       return "Call ended";
     case CallStatus.MISSED:
@@ -28,15 +25,13 @@ export const getCallText = (
   }
 };
 
-export const getCallClass = (status: CallStatus) => {
+export const getCallColor = (status: CallStatus) => {
   switch (status) {
-    case CallStatus.COMPLETED:
-      return "text-yellow-600";
     case CallStatus.MISSED:
     case CallStatus.FAILED:
       return "text-red-600";
     default:
-      return "";
+      return "opacity-80";
   }
 };
 

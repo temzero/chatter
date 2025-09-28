@@ -23,14 +23,6 @@ export const CallControls = ({
   const toggleLocalVoice = useCallStore((state) => state.toggleLocalVoice);
 
   return (
-    // <motion.div
-    //   id="button-container"
-    //   className="flex justify-center gap-4 p-3 absolute bottom-3 left-1/2 -translate-x-1/2 z-30 bg-black/10 shadow-2xl border-4 border-white/5 backdrop-blur-lg rounded-full cursor-grab active:cursor-grabbing"
-    //   drag
-    //   dragConstraints={containerRef}
-    //   dragElastic={0.8}
-    //   dragMomentum={false}
-    // >
     <motion.div
       initial={{ x: "-50%" }}
       className="flex justify-center gap-4 p-3 absolute bottom-3 left-1/2 

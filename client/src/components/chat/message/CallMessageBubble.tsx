@@ -5,7 +5,7 @@ import { MessageStatus } from "@/types/enums/message";
 import { MessageResponse } from "@/types/responses/message.response";
 import { CallStatus } from "@/types/enums/CallStatus";
 import { ModalType, useModalStore } from "@/stores/modalStore";
-import { getCallClass, getCallIcon, getCallText } from "@/utils/callHelpers";
+import { getCallColor, getCallIcon, getCallText } from "@/utils/callHelpers";
 
 interface CallMessageBubbleProps {
   message: MessageResponse;
@@ -55,7 +55,7 @@ const CallMessageBubble: React.FC<CallMessageBubbleProps> = ({
         <motion.span
           className={clsx(
             "material-symbols-outlined text-3xl",
-            getCallClass(call.status)
+            getCallColor(call.status)
           )}
           animate={
             call.status === CallStatus.DIALING
@@ -82,7 +82,7 @@ const CallMessageBubble: React.FC<CallMessageBubbleProps> = ({
         <p
           className={clsx(
             "text-sm font-medium text-center",
-            getCallClass(call.status)
+            getCallColor(call.status)
           )}
         >
           {getCallText(call.status, call.startedAt, call.endedAt)}

@@ -37,21 +37,6 @@ export class CallController {
     private readonly chatMemberService: ChatMemberService,
   ) {}
 
-  // @Get('history')
-  // async getCallHistory(
-  //   @CurrentUser('id') userId: string,
-  // ): Promise<SuccessResponse<CallResponseDto[]>> {
-  //   try {
-  //     const calls = await this.callService.getCallHistory(userId);
-  //     return new SuccessResponse(
-  //       plainToInstance(CallResponseDto, calls),
-  //       'Call history retrieved successfully',
-  //     );
-  //   } catch (error: unknown) {
-  //     ErrorResponse.throw(error, 'Failed to retrieve call history');
-  //   }
-  // }
-
   @Get('history')
   async getCallHistory(
     @CurrentUser('id') userId: string,

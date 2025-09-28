@@ -18,6 +18,7 @@ import LeaveChatModal from "./LeaveChatModal";
 import AddMemberModal from "./AddMemberModal";
 import SetNicknameModal from "./SetNicknameModal";
 import CallModal from "./CallModal";
+import DeleteCallModal from "./DeleteCallModal";
 
 const Modal = () => {
   const { modalContent, closeModal } = useModalStore(
@@ -77,6 +78,10 @@ const Modal = () => {
         return <AddMemberModal />;
       case ModalType.SET_NICKNAME:
         return <SetNicknameModal />;
+
+      case ModalType.DELETE_CALL:
+        return <DeleteCallModal />;
+
       default:
         return null;
     }

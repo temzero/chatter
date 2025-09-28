@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
@@ -38,6 +38,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
     callStatus,
     startCall,
     joinCall,
+    getActiveCall,
   } = useCallStore(
     useShallow((state) => ({
       callId: state.callId,
@@ -46,8 +47,15 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
       callStatus: state.callStatus,
       startCall: state.startCall,
       joinCall: state.joinCall,
+      getActiveCall: state.getActiveCall,
     }))
   );
+
+  useEffect(() => {
+    if (chat?.id) {
+      getActiveCall(chat.id); // sync store with any ongoing call for this chat
+    }
+  }, [chat?.id, getActiveCall]);
 
   const chatListMembers = useChatMemberStore.getState().chatMembers[chat.id];
   const isOnline = useChatStatus(chat?.id, chat.type);
