@@ -13,6 +13,9 @@ import { OutgoingCall } from "../ui/calling/OutgoingCall";
 import { useChatStore } from "@/stores/chatStore";
 import { ConnectingCall } from "../ui/calling/ConnectingCall";
 import { ChatResponse } from "@/types/responses/chat.response";
+import { CheckBroadcast } from "../ui/calling/CheckBroadcast";
+import { ChatType } from "@/types/enums/ChatType";
+import { BroadcastRoom } from "../ui/calling/components/callRoom/BroadcastRoom";
 
 const CallModal: React.FC = () => {
   const { chatId, localCallStatus } = useCallStore();
@@ -59,22 +62,34 @@ const CallModal: React.FC = () => {
       case LocalCallStatus.CONNECTING:
         return <ConnectingCall chat={chat} />;
       case LocalCallStatus.CONNECTED:
-        return <CallRoom chat={chat} />;
+        return chat.type === ChatType.CHANNEL ? (
+          <BroadcastRoom chat={chat} />
+        ) : (
+          <CallRoom chat={chat} />
+        );
       case LocalCallStatus.ENDED:
       case LocalCallStatus.ERROR:
       case LocalCallStatus.CANCELED:
       case LocalCallStatus.TIMEOUT:
       case LocalCallStatus.DECLINED:
         return <SummaryCall chat={chat} />;
+      case LocalCallStatus.CHECK_BROADCAST:
+        return <CheckBroadcast chat={chat} />;
       default:
         return null;
     }
   };
 
-  const getSizeClasses = () =>
-    localCallStatus === LocalCallStatus.CONNECTED
-      ? "w-full h-full custom-border"
-      : "w-full max-w-[420px] p-6";
+  const getSizeClasses = () => {
+    switch (localCallStatus) {
+      case LocalCallStatus.CONNECTED:
+        return "w-full h-full custom-border";
+      case LocalCallStatus.CHECK_BROADCAST:
+        return "min-w-[420px] custom-border p-6";
+      default:
+        return "w-full max-w-[420px] p-6";
+    }
+  };
 
   return (
     <motion.div

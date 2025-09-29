@@ -92,6 +92,7 @@ export class WebsocketCallService {
     chatId: string,
     initiatorUserId: string,
     isVideoCall: boolean,
+    isBroadcast?: boolean,
   ) {
     // 1. Get chat members
     const chatMembers = await this.chatMemberService.getChatMembers(chatId);
@@ -146,6 +147,7 @@ export class WebsocketCallService {
       initiatorMemberId: initiatorMember.id,
       initiatorUserId,
       isVideoCall,
+      isBroadcast,
       participantsCount: 1,
     };
 

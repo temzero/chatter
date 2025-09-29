@@ -34,18 +34,21 @@ export const LocalVideoPreview = ({
       <VideoStream
         stream={videoStream}
         className={`${
-          isLarge ? "w-80 h-80" : "w-52 h-52"
+          isLarge ? "w-[420px] h-[420px]" : "w-52 h-52"
         } rounded-full object-cover border-4 border-[--input-border-color] shadow-xl transition-all duration-300`}
         muted
+        mirror
       />
 
-      <VoiceVisualizerBorder
-        stream={audioStream}
-        isMuted={isMuted}
-        color="lightgreen"
-        isCircle={true}
-        className="rounded-full"
-      />
+      {audioStream && !isMuted && (
+        <VoiceVisualizerBorder
+          stream={audioStream}
+          isMuted={isMuted}
+          color="lightgreen"
+          isCircle={true}
+          className="rounded-full"
+        />
+      )}
 
       <button
         onClick={() => setIsLarge((prev) => !prev)}

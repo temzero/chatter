@@ -36,7 +36,7 @@ const CallIcon: React.FC<CallIconProps> = ({
   }
 
   return (
-    <span className={`material-symbols-outlined ${iconClasses} ${className}`}>
+    <span className={`material-symbols-outlined select-none ${iconClasses} ${className}`}>
       {icon}
     </span>
   );

@@ -43,9 +43,12 @@ const CallItem: React.FC<CallItemProps> = ({ call, isCaller, onDelete }) => {
     startCall(chat.id, call.isVideoCall);
   };
 
+  const roundedClass =
+    call.chat.type === ChatType.DIRECT ? "rounded-full" : "rounded-2xl";
+
   return (
     <div
-      className={`flex items-center gap-3 p-2 py-3 transition custom-border-b select-none cursor-pointer relative ${
+      className={`flex items-center gap-2 p-2 py-3 transition custom-border-b select-none cursor-pointer relative ${
         isHovered ? "bg-[--hover-color]" : ""
       }`}
       key={call.id}
@@ -53,26 +56,13 @@ const CallItem: React.FC<CallItemProps> = ({ call, isCaller, onDelete }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Avatar with delete button overlay */}
+      {isCaller && (
+        <div className="bg-[--primary-green] w-[3px] h-full absolute left-0 top-0" />
+      )}
       <div
-        className={`relative overflow-hidden ${
-          call.chat.type === ChatType.DIRECT ? "rounded-full" : "rounded-2xl"
-        }`}
+        className={`relative overflow-hidden ${roundedClass}`}
       >
         <ChatAvatar chat={chat} type="sidebar" />
-
-        {isCaller && isHovered && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete?.();
-            }}
-            className="absolute inset-0 flex items-center justify-center bg-red-900/50 backdrop-blur opacity-60 hover:backdrop-blur-sm shadow-md z-10"
-            title="Delete Call"
-          >
-            <span className="material-symbols-outlined text-2xl">delete</span>
-          </button>
-        )}
       </div>
 
       <div className="flex-1">
@@ -85,16 +75,32 @@ const CallItem: React.FC<CallItemProps> = ({ call, isCaller, onDelete }) => {
         </p>
       </div>
 
+      {isCaller && isHovered && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete?.();
+          }}
+          className={`w-8 h-8 flex items-center justify-center bg-[--sidebar-color] opacity-60 hover:opacity-100 hover:bg-red-500 rounded-full custom-border`}
+          title="Delete Call"
+        >
+          <span className="material-symbols-outlined text-2xl">delete</span>
+        </button>
+      )}
+
       <button
         onClick={handleStartCall}
-        className="group overflow-hidden relative flex items-center justify-center rounded-full w-12 h-12 text-2xl hover:custom-border hover:bg-[--hover-color]"
+        className="group overflow-hidden relative flex items-center justify-center rounded-full w-12 h-12 text-2xl hover:custom-border hover:bg-[--hover-color] hover:opacity-100"
       >
         <CallIcon
           status={call.status}
           isCaller={isCaller}
           className="group-hover:hidden"
         />
-        <div className="hidden group-hover:flex items-center justify-center bg-[--primary-green] w-full h-full">
+        <div
+          title={isCaller ? "Call again" : "Call back"}
+          className="hidden group-hover:flex items-center justify-center bg-[--primary-green] w-full h-full"
+        >
           {call.isVideoCall ? (
             <span className="material-symbols-outlined">videocam</span>
           ) : (

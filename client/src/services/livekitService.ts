@@ -13,6 +13,7 @@ import { audioService, SoundType } from "./audio.service";
 export interface LiveKitServiceOptions {
   audio?: boolean;
   video?: boolean;
+  screen?: boolean;
   onParticipantConnected?: (participant: RemoteParticipant) => void;
   onParticipantDisconnected?: (participant: RemoteParticipant) => void;
   onTrackSubscribed?: (
@@ -87,7 +88,19 @@ export class LiveKitService {
   async toggleCamera(enabled: boolean): Promise<boolean> {
     try {
       if (enabled) {
-        await this.room.localParticipant.setCameraEnabled(true);
+        await this.room.localParticipant.setCameraEnabled(
+          true,
+          {
+            resolution: { width: 1920, height: 1080 },
+            frameRate: 30,
+          },
+          {
+            videoEncoding: {
+              maxBitrate: 2500_000, // ~2.5 Mbps
+              maxFramerate: 30,
+            },
+          }
+        );
       } else {
         const pub = this.room.localParticipant.getTrackPublication(
           Track.Source.Camera
@@ -167,6 +180,9 @@ export class LiveKitService {
         }
         if (this.options?.video) {
           await this.toggleCamera(true);
+        }
+        if (this.options?.screen) {
+          await this.toggleScreenShare(true);
         }
       })
       .on(RoomEvent.ParticipantConnected, (participant) => {

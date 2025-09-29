@@ -22,6 +22,8 @@ import { MessageContextMenu } from "./MessageContextMenu";
 import { MessageHorizontalPreview } from "./MessageHorizontalPreview";
 import { scrollToMessageById } from "@/utils/scrollToMessageById";
 import { MessageHorizontalPreviewTypes } from "@/types/enums/MessageHorizontalPreviewTypes";
+import { BroadcastMessage } from "./BroadcastMessage";
+import { SystemEventType } from "@/types/enums/systemEventType";
 
 interface ChannelMessageProps {
   message: MessageResponse;
@@ -63,7 +65,7 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ message }) => {
 
   // Check system message
   const isSystemMessage = !!message.systemEvent;
-  if (isSystemMessage) {
+  if (isSystemMessage && message.systemEvent != SystemEventType.CALL) {
     return (
       <SystemMessage
         message={message}
@@ -107,6 +109,7 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ message }) => {
           message.isImportant ? "border-4 border-red-500/80" : "custom-border"
         }`}
       >
+        {message.call && <BroadcastMessage call={message.call} />}
         {attachments.length > 0 && (
           <div className="rounded overflow-hidden shadow-lg">
             <RenderMultipleAttachments attachments={attachments} />

@@ -9,6 +9,7 @@ import { ChatType } from '../chat/constants/chat-types.constants';
 import { LiveKitService } from './liveKit.service';
 import { LiveKitWebhookPayload } from '../websocket/constants/LiveKitWebhookPayload.type';
 import { UserService } from '../user/user.service';
+import { ChatService } from '../chat/chat.service';
 
 @Controller('liveKit/webhook')
 export class LiveKitWebhookController {
@@ -18,6 +19,7 @@ export class LiveKitWebhookController {
     private readonly messageService: MessageService,
     private readonly websocketCallService: WebsocketCallService,
     private readonly userService: UserService,
+    private readonly chatService: ChatService,
   ) {}
 
   @Post()
@@ -75,6 +77,7 @@ export class LiveKitWebhookController {
     }
 
     let call = await this.callService.getActiveCallByChatId(roomName);
+    const chat = call?.chat ?? (await this.chatService.getChatById(roomName));
     console.log('[participant_joined] Existing call:', call ? call.id : 'None');
 
     const user = await this.userService.getUserById(userId); // fetch User entity
@@ -83,20 +86,35 @@ export class LiveKitWebhookController {
       return;
     }
 
+    const isBroadcast = chat.type === ChatType.CHANNEL;
+    console.log('isBroadcast', isBroadcast);
+
     if (!call) {
       call = await this.callService.createCall({
         chatId: roomName,
-        status: CallStatus.DIALING,
+        status: isBroadcast ? CallStatus.IN_PROGRESS : CallStatus.DIALING,
         initiatorUser: user,
+        startedAt: isBroadcast ? new Date() : undefined,
       });
 
+      // normal call -> emit incoming call
       const isVideoCall = call.chat?.type === ChatType.GROUP;
       await this.websocketCallService.emitIncomingCall(
         call.id,
         roomName,
         userId,
         isVideoCall,
+        isBroadcast,
       );
+
+      if (isBroadcast) {
+        await this.websocketCallService.emitStartCall(
+          call.id,
+          roomName,
+          userId,
+        );
+      }
+      // broadcast -> directly start call
     } else {
       const existingAttendees = new Set(call.attendedUsers.map((u) => u.id));
       const isNewUser = !existingAttendees.has(userId);
@@ -104,7 +122,7 @@ export class LiveKitWebhookController {
       if (isNewUser) {
         call.attendedUsers.push(user);
 
-        if (call.attendedUsers.length === 2) {
+        if (call.attendedUsers.length === 2 && !isBroadcast) {
           // first other participant joined
           call.status = CallStatus.IN_PROGRESS;
           call.startedAt = new Date();
@@ -137,17 +155,30 @@ export class LiveKitWebhookController {
     const call = await this.callService.getActiveCallByChatId(roomName);
     if (!call) return;
 
+    const chat = call.chat ?? (await this.chatService.getChatById(roomName));
+    const isChannel = chat.type === ChatType.CHANNEL;
+
     // remove the user from the "currently in room" list
     await this.callService.removeCurrentUserId(roomName, userId);
 
     const remainingUsers =
       call.currentUserIds?.filter((id) => id !== userId) ?? [];
 
-    if (remainingUsers.length <= 1) {
-      const attendeeCount = call.attendedUsers?.length ?? 0;
-      const status =
-        attendeeCount <= 1 ? CallStatus.MISSED : CallStatus.COMPLETED;
+    let shouldEndCall = false;
+    let status: CallStatus = CallStatus.COMPLETED;
 
+    if (isChannel && call.attendedUsers[0].id === userId) {
+      // channel + initiator left -> end immediately
+      shouldEndCall = true;
+      status = CallStatus.COMPLETED;
+    } else if (remainingUsers.length <= 1) {
+      // normal end conditions
+      const attendeeCount = call.attendedUsers?.length ?? 0;
+      shouldEndCall = true;
+      status = attendeeCount <= 1 ? CallStatus.MISSED : CallStatus.COMPLETED;
+    }
+
+    if (shouldEndCall) {
       const endedAt = new Date();
       const updatedCall = await this.callService.updateCall(call.id, {
         status,
@@ -162,7 +193,6 @@ export class LiveKitWebhookController {
         userId,
       );
 
-      // ✅ pick a sender from attendedUsers[0] if available
       const sender = call.attendedUsers?.[0];
       if (sender) {
         await this.messageService.createSystemEventMessage(
@@ -171,8 +201,6 @@ export class LiveKitWebhookController {
           SystemEventType.CALL,
           { call: updatedCall },
         );
-      } else {
-        console.warn('[participant_left] No attended users found');
       }
 
       await this.liveKitService.deleteRoom(roomName);

@@ -16,6 +16,7 @@ export type SystemMessageJSONContent = {
 type SystemMessageContentProps = {
   systemEvent?: SystemEventType | null;
   callStatus?: CallStatus | null;
+  isBroadcast?: boolean;
   currentUserId: string;
   senderId: string;
   senderDisplayName: string;
@@ -26,6 +27,7 @@ type SystemMessageContentProps = {
 export const SystemMessageContent = ({
   systemEvent,
   callStatus,
+  isBroadcast = false,
   currentUserId,
   senderId,
   senderDisplayName,
@@ -49,7 +51,12 @@ export const SystemMessageContent = ({
         callStatus
       )} ${ClassName}`}
     >
-      <SystemEventIcon systemEvent={systemEvent} callStatus={callStatus} />
+      {isBroadcast ? (
+        <span className="material-symbols-outlined text-[20px]">connected_tv</span>
+      ) : (
+        <SystemEventIcon systemEvent={systemEvent} callStatus={callStatus} />
+      )}
+
       <span className="truncate">{text}</span>
     </div>
   );
@@ -65,9 +72,10 @@ function getSystemMessageColor(
     case SystemEventType.CALL:
       if (!callStatus) return "";
       switch (callStatus) {
-        case CallStatus.COMPLETED:
-          return "text-yellow-500";
+        // case CallStatus.COMPLETED:
+        //   return "text-yellow-500";
         case CallStatus.FAILED:
+        case CallStatus.MISSED:
           return "text-red-500";
         case CallStatus.DIALING:
         case CallStatus.IN_PROGRESS:
@@ -201,7 +209,11 @@ function getSystemMessageText({
       return `${displayName} deleted the chat`;
 
     case SystemEventType.CALL:
-      return getCallMessageContent({ callStatus, isMe, displayName });
+      return getCallMessageContent({
+        callStatus,
+        isMe,
+        displayName,
+      });
 
     default:
       return `System event occurred.`;

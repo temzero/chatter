@@ -13,7 +13,7 @@ export const VideoStream = ({
   stream,
   className = "",
   muted = false,
-  mirror = true,
+  mirror = false,
 }: VideoStreamProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 

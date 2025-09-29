@@ -59,9 +59,9 @@ const getSystemEventIconName = (
         case CallStatus.COMPLETED:
           return "call_end";
         case CallStatus.MISSED:
-          return "call_missed";
+          return "phone_missed";
         case CallStatus.FAILED:
-          return "call_missed_outgoing";
+          return "e911_avatar";
         default:
           return "call";
       }

@@ -32,23 +32,6 @@ const SidebarCalls: React.FC = () => {
   }, [offset, hasMore]);
   console.log("calls", calls);
 
-  // const handleDeleteCall = async (callId: string) => {
-  //   if (
-  //     !confirm(
-  //       "Deleting this call will remove the call and all its related messages. Are you sure you want to delete it?"
-  //     )
-  //   )
-  //     return;
-  //   try {
-  //     await callService.deleteCall(callId);
-  //     setCalls((prev) => prev.filter((c) => c.id !== callId));
-  //     alert("Call deleted successfully");
-  //   } catch (error) {
-  //     console.error(error);
-  //     alert("Failed to delete call");
-  //   }
-  // };
-
   const handleDeleteCall = (call: CallResponseDto) => {
     openModal(ModalType.DELETE_CALL, {
       call,

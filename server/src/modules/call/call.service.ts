@@ -37,6 +37,7 @@ export class CallService {
       .andWhere('call.status IN (:...statuses)', {
         statuses: [CallStatus.COMPLETED, CallStatus.MISSED, CallStatus.FAILED],
       })
+      .andWhere('chat.type != :channelType', { channelType: 'channel' })
       .orderBy('call.createdAt', 'DESC')
       // Pagination
       .skip(offset)
@@ -131,10 +132,12 @@ export class CallService {
   }
 
   async createCall(createCallDto: CreateCallDto): Promise<Call> {
+    const { chatId, status, initiatorUser, startedAt } = createCallDto;
+
     const initiatorMember =
       await this.chatMemberService.getMemberByChatIdAndUserId(
-        createCallDto.chatId,
-        createCallDto.initiatorUser.id,
+        chatId,
+        initiatorUser.id,
       );
 
     if (!initiatorMember) {
@@ -142,11 +145,12 @@ export class CallService {
     }
 
     const call = this.callRepository.create({
-      status: createCallDto.status,
-      chat: { id: createCallDto.chatId },
+      status,
+      chat: { id: chatId },
       initiator: initiatorMember,
-      attendedUsers: [createCallDto.initiatorUser], // Link to User entity
-      currentUserIds: [createCallDto.initiatorUser.id],
+      attendedUsers: [initiatorUser],
+      currentUserIds: [initiatorUser.id],
+      startedAt,
     });
 
     const savedCall = await this.callRepository.save(call);
@@ -168,16 +172,15 @@ export class CallService {
       return;
     }
 
+    const { attendedUserIds, status, startedAt, endedAt, currentUserIds } =
+      updateCallDto;
+
     // Handle attendedUserIds -> attendedUsers
-    if (updateCallDto.attendedUserIds?.length) {
-      // Fetch User entities for each ID
+    if (attendedUserIds?.length) {
       const users = await Promise.all(
-        updateCallDto.attendedUserIds.map((id) =>
-          this.userService.getUserById(id),
-        ),
+        attendedUserIds.map((id) => this.userService.getUserById(id)),
       );
 
-      // Merge with existing attendedUsers
       const existing = new Map(call.attendedUsers.map((u) => [u.id, u]));
       users.forEach((u) => existing.set(u.id, u));
       call.attendedUsers = Array.from(existing.values());
@@ -185,11 +188,10 @@ export class CallService {
 
     // Merge other fields from DTO
     const updatedCall = this.callRepository.merge(call, {
-      status: updateCallDto.status,
-      startedAt: updateCallDto.startedAt,
-      endedAt: updateCallDto.endedAt,
-      currentUserIds: updateCallDto.currentUserIds ?? call.currentUserIds,
-      // keep isVideoCall or duration if you use them in entity
+      status,
+      startedAt,
+      endedAt,
+      currentUserIds: currentUserIds ?? call.currentUserIds,
     } as DeepPartial<Call>);
 
     return await this.callRepository.save(updatedCall);

@@ -53,7 +53,7 @@ export function useCallSocketListeners() {
         initiatorUserId,
         initiatorMemberId,
         status,
-        startedAt,
+        isBroadcast,
       } = callResponse;
 
       const currentUserId = useAuthStore.getState().currentUser?.id;
@@ -62,24 +62,22 @@ export function useCallSocketListeners() {
       useCallStore.setState({
         callId,
         chatId,
+        isCaller,
         isVideoCall: isVideoCall ?? false,
+        initiatorUserId,
         initiatorMemberId,
-        localCallStatus: isCaller
-          ? LocalCallStatus.OUTGOING
-          : LocalCallStatus.INCOMING,
+        ...(isBroadcast
+          ? {}
+          : {
+              localCallStatus: isCaller
+                ? LocalCallStatus.OUTGOING
+                : LocalCallStatus.INCOMING,
+            }),
         callStatus: status,
       });
 
-      if (!isCaller) {
+      if (!isCaller && !isBroadcast) {
         useModalStore.getState().openModal(ModalType.CALL);
-      }
-
-      if (!isCaller && startedAt) {
-        toast.info(
-          `Incoming ${
-            isVideoCall ? "video" : "voice"
-          } call started at ${new Date(startedAt).toLocaleTimeString()}`
-        );
       }
     };
 
@@ -109,7 +107,7 @@ export function useCallSocketListeners() {
     };
 
     const handleUpdateCall = (updatedCall: UpdateCallPayload) => {
-      console.log("handleUpdateCall");
+      console.log("[UPDATE_CALL]");
       const { callId, isVideoCall, callStatus } = updatedCall;
       const callStore = useCallStore.getState();
 

@@ -19,13 +19,13 @@ export function getCallMessageContent({
     case CallStatus.DIALING:
       return isMe ? "You are calling..." : `${displayName} is calling`;
     case CallStatus.IN_PROGRESS:
-      return isMe ? "You are on a call" : `On a call with ${displayName}`;
+      return "In progress";
     case CallStatus.COMPLETED:
-      return "Call ended";
+      return "Ended";
     case CallStatus.MISSED:
-      return isMe ? `Call missed` : `Missed call from ${displayName}`;
+      return isMe ? `Missed` : `Missed call from ${displayName}`;
     case CallStatus.FAILED:
-      return `Call failed`;
+      return `Failed`;
     default:
       return "";
   }

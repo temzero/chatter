@@ -7,20 +7,27 @@ import { useCallStore } from "@/stores/callStore/callStore";
 interface CallControlsProps {
   isVideoEnabled: boolean;
   isMuted: boolean;
+  isScreenshare?: boolean;
+  isEnableScreenshare?: boolean;
   audioStream: MediaStream | null;
   onLeaveCall: () => void;
   containerRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export const CallControls = ({
-  isVideoEnabled,
-  isMuted,
+  isVideoEnabled = false,
+  isMuted = false,
+  isScreenshare = false,
+  isEnableScreenshare = false,
   audioStream,
   onLeaveCall,
   containerRef,
 }: CallControlsProps) => {
   const toggleLocalVideo = useCallStore((state) => state.toggleLocalVideo);
   const toggleLocalVoice = useCallStore((state) => state.toggleLocalVoice);
+  const toggleLocalScreenShare = useCallStore(
+    (state) => state.toggleLocalScreenShare
+  );
 
   return (
     <motion.div
@@ -33,6 +40,19 @@ export const CallControls = ({
       dragElastic={0.8}
       dragMomentum={false}
     >
+      {isEnableScreenshare && (
+        <Button
+          variant="ghost"
+          className={`w-12 h-12 bg-black/20 ${
+            isScreenshare ? "!bg-[--primary-green]" : ""
+          }`}
+          icon={isScreenshare ? "screen_share" : "stop_screen_share"}
+          isIconFilled={isScreenshare}
+          isRoundedFull
+          onClick={() => toggleLocalScreenShare()}
+        />
+      )}
+
       <Button
         variant="ghost"
         className={`w-12 h-12 bg-black/20 ${
@@ -50,7 +70,7 @@ export const CallControls = ({
         stream={audioStream}
         onClick={() => toggleLocalVoice()}
         circleColor="var(--primary-green)"
-        className="w-12 h-12 rounded-full bg-black/20"
+        className={`w-12 h-12 rounded-full ${!isMuted && "bg-black/20"} `}
       />
 
       <Button

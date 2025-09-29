@@ -56,6 +56,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
         <SystemMessageContent
           systemEvent={lastMessage.systemEvent}
           callStatus={lastMessage.callStatus}
+          isBroadcast={chat.type === ChatType.CHANNEL}
           currentUserId={currentUserId}
           senderId={lastMessage.senderId}
           senderDisplayName={lastMessage.senderDisplayName}
@@ -102,7 +103,10 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
 
     return (
       <>
-        <div className={getUserItemClass()} onClick={() => setActiveChatById(chat.id)}>
+        <div
+          className={getUserItemClass()}
+          onClick={() => setActiveChatById(chat.id)}
+        >
           {!chat.isDeleted && (
             <OnlineDot
               isOnline={isOnline}

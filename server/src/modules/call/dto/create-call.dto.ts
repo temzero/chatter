@@ -5,4 +5,5 @@ export class CreateCallDto {
   chatId: string;
   status: CallStatus;
   initiatorUser: User;
+  startedAt?: Date;
 }

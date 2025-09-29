@@ -10,16 +10,16 @@ export const getCallText = (
     case CallStatus.DIALING:
       return "Calling...";
     case CallStatus.IN_PROGRESS:
-      return "Call in progress";
+      return "In progress";
     case CallStatus.COMPLETED:
       if (startedAt && endedAt) {
         return `${formatDurationByStartAndEnd(startedAt, endedAt)}`;
       }
-      return "Call ended";
+      return "Completed";
     case CallStatus.MISSED:
-      return "Call was missed";
+      return "Missed";
     case CallStatus.FAILED:
-      return "Call failed";
+      return "Failed";
     default:
       return "Call";
   }

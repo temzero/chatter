@@ -49,6 +49,7 @@ export interface IncomingCallResponse {
   initiatorMemberId?: string; // optional if known
   initiatorUserId?: string;
   isVideoCall?: boolean; // optional if known
+  isBroadcast?: boolean; // optional if known
   startedAt?: Date; // optional if known
 }
 

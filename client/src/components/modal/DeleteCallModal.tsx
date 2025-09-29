@@ -4,7 +4,7 @@ import { callService } from "@/services/callService";
 import { motion } from "framer-motion";
 import { childrenModalAnimation } from "@/animations/modalAnimations";
 import { CallResponseDto } from "@/types/responses/call.response";
-import { ChatAvatar } from "../ui/avatar/ChatAvatar"; // optional, if you want avatar style
+import { ChatAvatar } from "../ui/avatar/ChatAvatar";
 import { getCallColor, getCallText } from "@/utils/callHelpers";
 import { formatDateTime } from "@/utils/formatDate";
 import { useCurrentUserId } from "@/stores/authStore";
@@ -45,7 +45,7 @@ const DeleteCallModal: React.FC = () => {
           <span className="material-symbols-outlined text-3xl font-bold">
             delete
           </span>
-          <h2 className="text-2xl">Delete Call</h2>
+          <h2 className="text-2xl">Delete Your Call History</h2>
         </div>
 
         <div className="flex items-center gap-3 mb-6">

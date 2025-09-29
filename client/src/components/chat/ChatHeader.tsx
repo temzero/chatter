@@ -37,6 +37,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
     isVideoCall,
     callStatus,
     startCall,
+    startBroadcast,
     joinCall,
     getActiveCall,
   } = useCallStore(
@@ -46,6 +47,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
       isVideoCall: state.isVideoCall,
       callStatus: state.callStatus,
       startCall: state.startCall,
+      startBroadcast: state.startBroadcast,
       joinCall: state.joinCall,
       getActiveCall: state.getActiveCall,
     }))
@@ -182,7 +184,10 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                     )}
 
                     {isChannel && (
-                      <button className="opacity-60 hover:opacity-100 transition">
+                      <button
+                        onClick={() => startBroadcast(chat.id)}
+                        className="opacity-60 hover:opacity-100 transition"
+                      >
                         <i className="material-symbols-outlined text-3xl">
                           connected_tv
                         </i>
