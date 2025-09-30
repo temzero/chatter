@@ -100,15 +100,6 @@ const CallMember = ({
         // Audio-only participant
         <div className="flex flex-col gap-2 items-center justify-center p-4 relative">
           {audioTrack && <VoiceStream stream={audioTrack} muted={isMuted} />}
-          {/* <VoiceStreamWithVisualizer
-            stream={audioTrack}
-            muted={isMuted}
-            showVisualizer={showVoiceVisualizer}
-            visualizerWidth={200}
-            visualizerHeight={40}
-            isBorder={true}
-            className="h-full w-full"
-          /> */}
           <div className="relative flex items-center justify-center rounded-full">
             {showVoiceVisualizer && audioTrack && !isMuted && (
               <div className="absolute inset-0 flex items-center justify-center z-0">

@@ -89,11 +89,16 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
     callChatId === chat.id && callId && callStatus === CallStatus.IN_PROGRESS;
 
   const handleJoinCall = () => {
-    if (callId) {
+    if (isChannel) {
+      // no send when watching broadcast
+      joinCall({
+        isVoiceEnabled: false,
+        isVideoEnabled: false,
+      });
+    } else {
       joinCall({
         isVoiceEnabled: true,
-        // isVideoEnabled: isVideoCall,
-        isVideoEnabled: false,
+        isVideoEnabled: isVideoCall,
       });
     }
   };
@@ -154,9 +159,11 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                     onClick={handleJoinCall}
                     className="hover:shadow-xl hover:border-4 hover:border-[--primary-green] hover:bg-white hover:text-[--primary-green] font-semibold flex items-center gap-1 custom-border rounded-full px-3 bg-[--primary-green] opacity-100 transition"
                   >
-                    Join Call
+                    {isChannel ? "Join Broadcast" : "Join Call"}
                     <i className="material-symbols-outlined text-3xl">
-                      {isVideoCall ? "videocam" : "call"}
+                      {isVideoCall && "videocam"}
+                      {isChannel && "connected_tv"}
+                      {isDirect && "phone"}
                     </i>
                   </button>
                 ) : (

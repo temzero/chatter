@@ -2,7 +2,7 @@ import React from "react";
 import { CallResponseDto } from "@/types/responses/call.response";
 import { CallStatus } from "@/types/enums/CallStatus";
 import { formatDurationByStartAndEnd } from "@/utils/formatDuration";
-import { formatDateTime } from "@/utils/formatDate";
+import { formatTime } from "@/utils/formatTime";
 interface BroadcastMessageProps {
   call: CallResponseDto;
 }
@@ -23,11 +23,6 @@ export const BroadcastMessage: React.FC<BroadcastMessageProps> = ({ call }) => {
         {isError && <span className="material-symbols-outlined">error</span>}
         <span className="material-symbols-outlined">connected_tv</span>
         Broadcasted {isError && "Failed"}
-        {startedAt && endedAt && (
-          <span className="">
-            ⏱️{formatDurationByStartAndEnd(startedAt, endedAt)}
-          </span>
-        )}
       </div>
 
       {/* Text */}
@@ -41,9 +36,15 @@ export const BroadcastMessage: React.FC<BroadcastMessageProps> = ({ call }) => {
           </span>
         ) : (
           <>
-            {startedAt ? formatDateTime(startedAt) : "???"}
+            {startedAt && endedAt && (
+              <span className="">
+                ⏱️{formatDurationByStartAndEnd(startedAt, endedAt)}
+                <span className="ml-2 mr-1">|</span>
+              </span>
+            )}
+            {startedAt ? formatTime(startedAt) : "???"}
             <span className="">-</span>
-            {endedAt ? formatDateTime(endedAt) : "???"}
+            {endedAt ? formatTime(endedAt) : "???"}
           </>
         )}
       </div>
