@@ -4,7 +4,7 @@ import { Friendship } from '../entities/friendship.entity';
 import { ContactResponseDto } from '../dto/responses/friend-contact-response.dto';
 import { plainToInstance } from 'class-transformer';
 
-export function mapToFriendContactResponseDto(
+export function mapFriendshipToContactResDto(
   friendships: Friendship[],
   currentUserId: string,
 ): ContactResponseDto[] {

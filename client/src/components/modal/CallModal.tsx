@@ -15,7 +15,7 @@ import { ConnectingCall } from "../ui/calling/ConnectingCall";
 import { ChatResponse } from "@/types/responses/chat.response";
 import { CheckBroadcast } from "../ui/calling/CheckBroadcast";
 import { ChatType } from "@/types/enums/ChatType";
-import { BroadcastRoom } from "../ui/calling/components/callRoom/BroadcastRoom";
+import { BroadcastRoom } from "../ui/calling/components/broadcastRoom/BroadcastRoom";
 
 const CallModal: React.FC = () => {
   const { chatId, localCallStatus } = useCallStore();

@@ -102,7 +102,8 @@ export class ChatGateway {
         ? await this.messageService.createReplyMessage(senderId, payload)
         : await this.messageService.createMessage(senderId, payload);
 
-      const messageResponse = this.messageMapper.toMessageResponseDto(message);
+      const messageResponse =
+        this.messageMapper.mapMessageToMessageResDto(message);
 
       // Update last read position
       const updatedMember = await this.chatMemberService.updateLastRead(
@@ -189,7 +190,7 @@ export class ChatGateway {
 
       // Convert to DTO
       const messageResponse =
-        this.messageMapper.toMessageResponseDto(forwardedMessage);
+        this.messageMapper.mapMessageToMessageResDto(forwardedMessage);
 
       // Emit new message to all chat members (including sender)
       await this.websocketNotificationService.emitToChatMembers(
@@ -347,7 +348,8 @@ export class ChatGateway {
       );
 
       // Step 3: Format and emit to client
-      const response = this.messageMapper.toMessageResponseDto(savedMessage);
+      const response =
+        this.messageMapper.mapMessageToMessageResDto(savedMessage);
       this.websocketNotificationService.emitToUser(
         userId,
         ChatEvent.SAVE_MESSAGE,

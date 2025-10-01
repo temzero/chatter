@@ -81,6 +81,8 @@ const GroupChatEdit = () => {
           ChatType.GROUP
         );
 
+        console.log("Uploaded newAvatarUrl", newAvatarUrl);
+
         // Update form data with new avatar URL
         setFormData((prev) => ({ ...prev, avatarUrl: newAvatarUrl }));
       }

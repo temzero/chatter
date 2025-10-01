@@ -1,5 +1,4 @@
 // components/call-room/CallControls.tsx
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { VoiceVisualizerButton } from "@/components/ui/VoiceVisualizerBtn";
 import { useCallStore } from "@/stores/callStore/callStore";
@@ -11,7 +10,6 @@ interface CallControlsProps {
   isEnableScreenshare?: boolean;
   audioStream: MediaStream | null;
   onLeaveCall: () => void;
-  containerRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export const CallControls = ({
@@ -21,7 +19,6 @@ export const CallControls = ({
   isEnableScreenshare = false,
   audioStream,
   onLeaveCall,
-  containerRef,
 }: CallControlsProps) => {
   const toggleLocalVideo = useCallStore((state) => state.toggleLocalVideo);
   const toggleLocalVoice = useCallStore((state) => state.toggleLocalVoice);
@@ -30,15 +27,10 @@ export const CallControls = ({
   );
 
   return (
-    <motion.div
-      initial={{ x: "-50%" }}
-      className="flex justify-center gap-4 p-3 absolute bottom-3 left-1/2 
-             z-30 bg-black/10 shadow-2xl border-4 border-white/5 backdrop-blur-lg 
-             rounded-full cursor-grab active:cursor-grabbing"
-      drag
-      dragConstraints={containerRef}
-      dragElastic={0.8}
-      dragMomentum={false}
+    <div
+      className="flex justify-center gap-4 p-2 
+             bg-black/10 shadow-2xl border-4 border-white/5 backdrop-blur-lg 
+             rounded-full"
     >
       {isEnableScreenshare && (
         <Button
@@ -81,6 +73,6 @@ export const CallControls = ({
         onClick={onLeaveCall}
         icon="call_end"
       />
-    </motion.div>
+    </div>
   );
 };

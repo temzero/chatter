@@ -89,7 +89,7 @@ const SystemMessage = ({
       <div className="relative">
         <SystemMessageContent
           systemEvent={systemEvent}
-          callStatus={message.call?.status}
+          call={message.call}
           currentUserId={currentUserId}
           senderId={senderId}
           senderDisplayName={senderDisplayName}

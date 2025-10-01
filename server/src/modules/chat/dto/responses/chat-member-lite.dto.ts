@@ -1,7 +1,7 @@
 import { Exclude, Expose } from 'class-transformer';
 
 @Exclude()
-export class ChatMemberPreviewDto {
+export class ChatMemberLiteDto {
   @Expose() id: string;
   @Expose() userId: string;
   @Expose() avatarUrl?: string | null;

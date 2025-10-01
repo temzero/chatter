@@ -18,16 +18,26 @@ const ChatList: React.FC<ChatListProps> = React.memo(
       useShallow((state) => ({
         fetchMoreChats: state.fetchMoreChats,
         hasMoreChats: state.hasMoreChats,
-        // isLoading: state.isLoading,
       }))
     );
+
+    // const ids = chats.map((c) => c.id);
+    // console.log("chatIds", ids);
+    // console.log(
+    //   "Duplicate chat IDs:",
+    //   ids.filter((v, i, a) => a.indexOf(v) !== i)
+    // );
 
     return (
       <InfiniteScroller
         onLoadMore={fetchMoreChats}
         hasMore={hasMoreChats}
         threshold={10}
-        loader={<div className="p-4 text-center opacity-40">Loading more chats...</div>}
+        loader={
+          <div className="p-4 text-center opacity-40">
+            Loading more chats...
+          </div>
+        }
         className="flex-1 relative"
       >
         {chats.map((chat) => (
@@ -38,9 +48,9 @@ const ChatList: React.FC<ChatListProps> = React.memo(
             currentUserId={currentUserId}
           />
         ))}
-        {/* {!hasMoreChats && chats.length > 0 && (
+        {!hasMoreChats && chats.length > 0 && (
           <div className="p-2 text-center opacity-40">No more chats</div>
-        )} */}
+        )}
       </InfiniteScroller>
     );
   }

@@ -1,7 +1,8 @@
 // components/call-room/LocalStreamPreview.tsx
 import React from "react";
-import { LocalVideoPreview } from "./LocalVideoPreview";
+import { UserCamera } from "../callRoom/UserCamera";
 import { VideoStream } from "../VideoStream";
+import { DraggableContainer } from "../callRoom/DraggableContainer";
 
 interface LocalStreamPreviewProps {
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -24,13 +25,12 @@ export const LocalStreamPreview = ({
           stream={localScreenStream}
           className="w-full h-full object-cover z-0"
         />
-        <LocalVideoPreview
-          videoStream={localVideoStream}
-          audioStream={localAudioStream}
-          isVideoEnabled={true}
-          isMuted={true}
-          containerRef={containerRef}
-        />
+        <DraggableContainer containerRef={containerRef} position="bottom-right">
+          <UserCamera
+            videoStream={localVideoStream}
+            audioStream={localAudioStream}
+          />
+        </DraggableContainer>
       </div>
     );
   }
@@ -50,6 +50,7 @@ export const LocalStreamPreview = ({
       <VideoStream
         stream={localVideoStream}
         className="w-full h-full object-cover z-0"
+        mirror
       />
     );
   }

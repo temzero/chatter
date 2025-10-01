@@ -3,7 +3,7 @@ import { Exclude, Expose, Type } from 'class-transformer';
 import { LastMessageResponseDto } from './last-message-response.dto';
 import { ChatMemberRole } from 'src/modules/chat-member/constants/chat-member-roles.constants';
 import { MessageResponseDto } from 'src/modules/message/dto/responses/message-response.dto';
-import { ChatMemberPreviewDto } from './chat-member-preview.dto';
+import { ChatMemberLiteDto } from './chat-member-lite.dto';
 
 @Exclude()
 export class ChatResponseDto {
@@ -37,8 +37,8 @@ export class ChatResponseDto {
   @Expose() myRole?: ChatMemberRole | null;
 
   @Expose()
-  @Type(() => ChatMemberPreviewDto)
-  previewMembers?: ChatMemberPreviewDto[];
+  @Type(() => ChatMemberLiteDto)
+  previewMembers?: ChatMemberLiteDto[];
 
   @Expose()
   @Type(() => MessageResponseDto)

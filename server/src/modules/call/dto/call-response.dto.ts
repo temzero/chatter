@@ -1,8 +1,7 @@
 import { Exclude, Expose, Type } from 'class-transformer';
 import { CallStatus } from '../type/callStatus';
-// import { ChatResponseDto } from '../../chat/dto/responses/chat-response.dto';
-import { ChatMemberResponseDto } from '../../chat-member/dto/responses/chat-member-response.dto';
 import { Chat } from 'src/modules/chat/entities/chat.entity';
+import { ChatMember } from 'src/modules/chat-member/entities/chat-member.entity';
 
 @Exclude()
 export class CallResponseDto {
@@ -17,7 +16,7 @@ export class CallResponseDto {
   @Expose() isVideoCall: boolean;
 
   @Expose()
-  initiator: ChatMemberResponseDto;
+  initiator: ChatMember | null;
 
   @Expose() startedAt: Date | null;
   @Expose() endedAt?: Date | null;

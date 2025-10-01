@@ -23,12 +23,6 @@ const CallMessageBubble: React.FC<CallMessageBubbleProps> = ({
   const call = message.call;
   if (!call) return null;
 
-  function onJoinCall(callId: string) {
-    console.log("Joining call:", callId);
-  }
-
-  // call.status = CallStatus.DIALING; // Default to IN_PROGRESS if status is missing
-
   return (
     <div
       className={clsx("message-bubble flex flex-col", {
@@ -88,16 +82,6 @@ const CallMessageBubble: React.FC<CallMessageBubbleProps> = ({
           {getCallText(call.status, call.startedAt, call.endedAt)}
         </p>
       </div>
-
-      {/* 🔹 Join button */}
-      {call.status === CallStatus.IN_PROGRESS && (
-        <div
-          onClick={() => onJoinCall?.(call.id)}
-          className="text-center p-1 text-blue-700 w-full custom-border-t cursor-pointer hover:text-white hover:bg-blue-600 transition-colors"
-        >
-          Join Call
-        </div>
-      )}
     </div>
   );
 };

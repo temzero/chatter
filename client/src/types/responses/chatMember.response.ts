@@ -16,7 +16,6 @@ export interface GroupChatMember {
   role: ChatMemberRole;
   status: ChatMemberStatus;
   customTitle: string | null;
-  // mutedUntil: string | Date | null;
   lastReadMessageId: string | null;
 
   // block status fields:

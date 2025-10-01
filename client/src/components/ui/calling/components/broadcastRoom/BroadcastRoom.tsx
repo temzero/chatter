@@ -3,11 +3,12 @@ import { useCallStore } from "@/stores/callStore/callStore";
 import { useLocalTracks } from "@/hooks/mediaStreams/useLocalTracks";
 import { RemoteParticipant, RoomEvent } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
-import { CallControls } from "./CallControls";
+import { CallControls } from "../callRoom/CallControls";
 import { BroadcastInfo } from "./BroadCastInfo";
 import { Button } from "@/components/ui/Button";
 import BroadcastStream from "./BroadcastStream";
 import { LocalStreamPreview } from "./LocalStreamPreview";
+import { DraggableContainer } from "../callRoom/DraggableContainer";
 
 export const BroadcastRoom = ({ chat }: { chat: ChatResponse }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -62,10 +63,9 @@ export const BroadcastRoom = ({ chat }: { chat: ChatResponse }) => {
   };
 
   const localParticipant = room.localParticipant;
-  const isMuted = !localParticipant?.isMicrophoneEnabled;
-  const isVideoEnabled = !!localParticipant?.isCameraEnabled;
-  const isScreenshare = !!localParticipant?.isScreenShareEnabled;
-  const participantCount = participants.length;
+  const participantCount = isCaller
+    ? participants.length
+    : participants.length + 1;
 
   return (
     <div
@@ -93,15 +93,19 @@ export const BroadcastRoom = ({ chat }: { chat: ChatResponse }) => {
 
       {/* Controls */}
       {isCaller ? (
-        <CallControls
-          isVideoEnabled={isVideoEnabled}
-          isMuted={isMuted}
-          isScreenshare={isScreenshare}
-          isEnableScreenshare={true}
-          audioStream={null}
-          onLeaveCall={handleLeaveCall}
+        <DraggableContainer
           containerRef={containerRef}
-        />
+          position="bottom-middle"
+        >
+          <CallControls
+            isVideoEnabled={!!localVideoStream}
+            isMuted={!localAudioStream}
+            isScreenshare={!!localScreenStream}
+            isEnableScreenshare={true}
+            audioStream={localAudioStream}
+            onLeaveCall={handleLeaveCall}
+          />
+        </DraggableContainer>
       ) : (
         <Button
           variant="ghost"

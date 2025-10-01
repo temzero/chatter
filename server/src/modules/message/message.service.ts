@@ -280,7 +280,7 @@ export class MessageService {
 
     const fullMessage = await this.getFullMessageById(savedMessage.id);
     const messageResponse =
-      this.messageMapper.toMessageResponseDto(fullMessage);
+      this.messageMapper.mapMessageToMessageResDto(fullMessage);
 
     console.log('🔔 Emit SYSTEM EVENT MESSAGE');
     await this.websocketNotificationService.emitToChatMembers(

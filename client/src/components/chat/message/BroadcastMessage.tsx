@@ -39,12 +39,14 @@ export const BroadcastMessage: React.FC<BroadcastMessageProps> = ({ call }) => {
             {startedAt && endedAt && (
               <span className="">
                 ⏱️{formatDurationByStartAndEnd(startedAt, endedAt)}
-                <span className="ml-2 mr-1">|</span>
+                <span className="ml-2">|</span>
               </span>
             )}
-            {startedAt ? formatTime(startedAt) : "???"}
-            <span className="">-</span>
-            {endedAt ? formatTime(endedAt) : "???"}
+            <p className="flex gap-1">
+              {endedAt ? formatTime(endedAt) : "???"}
+              <span>-</span>
+              {startedAt ? formatTime(startedAt) : "???"}
+            </p>
           </>
         )}
       </div>

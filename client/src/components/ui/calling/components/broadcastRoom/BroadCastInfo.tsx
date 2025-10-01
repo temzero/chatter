@@ -27,7 +27,7 @@ export const BroadcastInfo: React.FC<BroadcastInfoProps> = ({
       </div>
 
       {/* Right bottom: timer */}
-      <div className="flex gap-2 opacity-60 hover:opacity-100 items-center z-20 absolute bottom-2 right-2">
+      <div className="flex gap-2 opacity-60 hover:opacity-100 items-center z-20 absolute bottom-1 right-2.5">
         {startedAt && <Timer startTime={startedAt} />}
       </div>
     </>

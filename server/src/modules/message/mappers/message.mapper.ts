@@ -3,12 +3,11 @@ import { Message } from '../entities/message.entity';
 import { MessageResponseDto } from '../dto/responses/message-response.dto';
 import { plainToInstance } from 'class-transformer';
 import { AttachmentResponseDto } from '../dto/responses/attachment-response.dto';
-import { CallResponseDto } from 'src/modules/call/dto/call-response.dto';
-import { Call } from 'src/modules/call/entities/call.entity';
+import { mapCallToCallLiteResponse } from 'src/modules/call/mappers/callLite.mapper';
 
 @Injectable()
 export class MessageMapper {
-  toMessageResponseDto(message: Message): MessageResponseDto {
+  mapMessageToMessageResDto(message: Message): MessageResponseDto {
     const senderMember = message.chat?.members?.[0];
     const groupedReactions = this.groupReactions(message.reactions || []);
 
@@ -40,7 +39,8 @@ export class MessageMapper {
       ),
 
       // ✅ Call
-      call: message.call ? this.mapCall(message.call) : undefined,
+      // call: message.call,
+      call: message.call ? mapCallToCallLiteResponse(message.call) : undefined,
 
       replyToMessage: this.mapNestedMessage(message.replyToMessage),
       forwardedFromMessage: this.mapNestedMessage(message.forwardedFromMessage),
@@ -52,36 +52,40 @@ export class MessageMapper {
   }
 
   private mapNestedMessage(
-    msg: Message | null | undefined,
+    nestedMessage: Message | null | undefined,
     depth = 0,
     maxDepth = 3,
   ): MessageResponseDto | null {
-    if (!msg || depth > maxDepth) return null;
+    if (!nestedMessage || depth > maxDepth) return null;
 
-    const senderId = msg.senderId || msg.sender?.id || '';
-    const sender = this.mapSender(senderId, msg.sender);
+    const senderId = nestedMessage.senderId || nestedMessage.sender?.id || '';
+    const sender = this.mapSender(senderId, nestedMessage.sender);
 
     return {
-      id: msg.id,
-      content: msg.content,
-      createdAt: msg.createdAt,
+      id: nestedMessage.id,
+      content: nestedMessage.content,
+      createdAt: nestedMessage.createdAt,
       attachments: plainToInstance(
         AttachmentResponseDto,
-        msg.attachments || [],
+        nestedMessage.attachments || [],
       ),
       sender,
-      systemEvent: msg.systemEvent,
+      systemEvent: nestedMessage.systemEvent,
 
       // ✅ Map nested call if present
-      call: msg.call ? this.mapCall(msg.call) : undefined,
+      call: nestedMessage.call
+        ? mapCallToCallLiteResponse(nestedMessage.call)
+        : undefined,
+
+      // call: nestedMessage.call,
 
       replyToMessage: this.mapNestedMessage(
-        msg.replyToMessage,
+        nestedMessage.replyToMessage,
         depth + 1,
         maxDepth,
       ),
       forwardedFromMessage: this.mapNestedMessage(
-        msg.forwardedFromMessage,
+        nestedMessage.forwardedFromMessage,
         depth + 1,
         maxDepth,
       ),
@@ -101,23 +105,6 @@ export class MessageMapper {
         `${sender?.firstName ?? ''} ${sender?.lastName ?? ''}`.trim() ||
         'Unknown',
     };
-  }
-
-  private mapCall(call: Call): CallResponseDto {
-    return plainToInstance(CallResponseDto, {
-      id: call.id,
-      status: call.status,
-      startedAt: call.startedAt,
-      endedAt: call.endedAt,
-      updatedAt: call.updatedAt,
-      initiator: call.initiator
-        ? {
-            id: call.initiator.id,
-            userId: call.initiator.userId,
-            nickname: call.initiator.nickname,
-          }
-        : null,
-    });
   }
 
   private groupReactions(

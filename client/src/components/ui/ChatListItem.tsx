@@ -55,7 +55,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
       lastMessage.systemEvent ? (
         <SystemMessageContent
           systemEvent={lastMessage.systemEvent}
-          callStatus={lastMessage.callStatus}
+          call={lastMessage.call}
           isBroadcast={chat.type === ChatType.CHANNEL}
           currentUserId={currentUserId}
           senderId={lastMessage.senderId}

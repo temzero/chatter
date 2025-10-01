@@ -45,7 +45,7 @@ export class ChatController {
   async getInitialData(
     @CurrentUser('id') userId: string,
     @Query('chatLimit') chatLimit: number = 20,
-    @Query('messageLimit') messageLimit: number = 10,
+    @Query('messageLimit') messageLimit: number = 20,
   ): Promise<SuccessResponse<InitialDataResponse>> {
     try {
       const result = await this.chatService.getInitialChatsWithMessages(

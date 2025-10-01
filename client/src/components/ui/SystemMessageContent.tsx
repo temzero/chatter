@@ -4,7 +4,8 @@ import { JSX } from "react";
 import { parseJsonContent } from "@/utils/parseJsonContent";
 import { ChatMemberRole } from "@/types/enums/chatMemberRole";
 import { CallStatus } from "@/types/enums/CallStatus";
-import { getCallMessageContent } from "./SystemCallMessageContent";
+import { CallResponseDto } from "@/types/responses/call.response";
+import { getCallText } from "@/utils/callHelpers";
 
 export type SystemMessageJSONContent = {
   oldValue?: string;
@@ -15,7 +16,7 @@ export type SystemMessageJSONContent = {
 
 type SystemMessageContentProps = {
   systemEvent?: SystemEventType | null;
-  callStatus?: CallStatus | null;
+  call?: CallResponseDto;
   isBroadcast?: boolean;
   currentUserId: string;
   senderId: string;
@@ -26,7 +27,7 @@ type SystemMessageContentProps = {
 
 export const SystemMessageContent = ({
   systemEvent,
-  callStatus,
+  call,
   isBroadcast = false,
   currentUserId,
   senderId,
@@ -35,14 +36,20 @@ export const SystemMessageContent = ({
   ClassName = "",
 }: SystemMessageContentProps): JSX.Element | null => {
   if (!systemEvent) return null;
-  const text = getSystemMessageText({
-    systemEvent,
-    callStatus,
-    currentUserId,
-    senderId,
-    senderDisplayName,
-    JSONcontent,
-  });
+  const callStatus = call?.status;
+  let text = "";
+  if (callStatus) {
+    text = getCallText(call.status, call.startedAt, call.endedAt);
+  } else {
+    text = getSystemMessageText({
+      systemEvent,
+      currentUserId,
+      call,
+      senderId,
+      senderDisplayName,
+      JSONcontent,
+    });
+  }
 
   return (
     <div
@@ -51,12 +58,7 @@ export const SystemMessageContent = ({
         callStatus
       )} ${ClassName}`}
     >
-      {isBroadcast ? (
-        <span className="material-symbols-outlined text-[20px]">connected_tv</span>
-      ) : (
-        <SystemEventIcon systemEvent={systemEvent} callStatus={callStatus} />
-      )}
-
+      <SystemEventIcon systemEvent={systemEvent} callStatus={callStatus} isBroadcast={isBroadcast} />
       <span className="truncate">{text}</span>
     </div>
   );
@@ -110,14 +112,13 @@ function getSystemMessageColor(
 
 function getSystemMessageText({
   systemEvent,
-  callStatus,
   currentUserId,
   senderId,
   senderDisplayName,
   JSONcontent,
 }: {
   systemEvent?: SystemEventType | null;
-  callStatus?: CallStatus | null;
+  call?: CallResponseDto | null;
   currentUserId: string;
   senderId: string;
   senderDisplayName: string;
@@ -207,13 +208,6 @@ function getSystemMessageText({
       return `${displayName} unpinned a message`;
     case SystemEventType.CHAT_DELETED:
       return `${displayName} deleted the chat`;
-
-    case SystemEventType.CALL:
-      return getCallMessageContent({
-        callStatus,
-        isMe,
-        displayName,
-      });
 
     default:
       return `System event occurred.`;

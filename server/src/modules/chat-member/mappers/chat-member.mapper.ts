@@ -8,7 +8,7 @@ import {
 import { ChatType } from '../../chat/constants/chat-types.constants';
 import { FriendshipStatus } from 'src/modules/friendship/constants/friendship-status.constants';
 
-export function mapChatMemberToResponseDto(
+export function mapChatMemberToChatMemberResDto(
   member: ChatMember,
   chatType?: ChatType,
   isBlockedByMe?: boolean,

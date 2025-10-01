@@ -4,8 +4,7 @@ import { MessageType } from '../../constants/message-type.constants';
 import { AttachmentResponseDto } from './attachment-response.dto';
 import { SenderResponseDto } from './sender-response.dto';
 import { SystemEventType } from '../../constants/system-event-type.constants';
-import { CallResponseDto } from 'src/modules/call/dto/call-response.dto';
-// import { NestedMessageDto } from './message-nested.dto';
+import { CallLiteResponseDto } from 'src/modules/call/dto/call-lite-response.dto';
 
 @Exclude()
 export class MessageResponseDto {
@@ -34,9 +33,9 @@ export class MessageResponseDto {
   @Type(() => MessageResponseDto)
   forwardedFromMessage?: MessageResponseDto | null;
 
-  @Type(() => CallResponseDto)
+  @Type(() => CallLiteResponseDto)
   @Expose()
-  call?: CallResponseDto | null;
+  call?: CallLiteResponseDto | null;
 
   @Expose() isImportant?: boolean;
   @Expose() systemEvent?: SystemEventType | null;

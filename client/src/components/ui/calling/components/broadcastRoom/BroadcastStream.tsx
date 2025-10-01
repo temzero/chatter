@@ -3,7 +3,8 @@ import { VideoStream } from "../VideoStream";
 import { VoiceStream } from "../VoiceStream";
 import { Participant } from "livekit-client";
 import { useRemoteTracks } from "@/hooks/mediaStreams/useRemoteTracks";
-import { DraggableContainer } from "./DraggableContainer";
+import { DraggableContainer } from "../callRoom/DraggableContainer";
+import { UserCamera } from "../callRoom/UserCamera";
 
 interface BroadcastStreamProps {
   participant: Participant;
@@ -27,12 +28,8 @@ export const BroadcastStream = ({
           className="w-full h-full object-cover z-0"
         />
         <DraggableContainer containerRef={containerRef} position="bottom-right">
-          <VideoStream
-            stream={videoTrack}
-            className="absolute bottom-4 right-4 w-52 h-52 rounded-full border-2 border-white/50 z-10 object-cover"
-          />
+          <UserCamera videoStream={videoTrack} audioStream={audioTrack} />
         </DraggableContainer>
-        {audioTrack && <VoiceStream stream={audioTrack} />}
       </div>
     );
   }
@@ -57,6 +54,7 @@ export const BroadcastStream = ({
         <VideoStream
           stream={videoTrack}
           className="w-full h-full object-cover z-0"
+          mirror
         />
         {audioTrack && <VoiceStream stream={audioTrack} />}
       </div>

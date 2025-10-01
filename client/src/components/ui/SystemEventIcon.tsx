@@ -5,21 +5,24 @@ import { SystemEventType } from "@/types/enums/systemEventType";
 export const SystemEventIcon = ({
   systemEvent,
   callStatus,
+  isBroadcast = false,
   className = "",
 }: {
   systemEvent: SystemEventType;
   callStatus?: CallStatus | null;
+  isBroadcast?: boolean;
   className?: string;
 }) => (
   <span className={`material-symbols-outlined text-sm ${className}`}>
-    {getSystemEventIconName(systemEvent, callStatus)}
+    {getSystemEventIconName(systemEvent, callStatus, isBroadcast)}
   </span>
 );
 
 // Function that returns the icon name string
 const getSystemEventIconName = (
   systemEvent: SystemEventType,
-  callStatus?: CallStatus | null
+  callStatus?: CallStatus | null,
+  isBroadcast?: boolean
 ): string => {
   switch (systemEvent) {
     case SystemEventType.MEMBER_JOINED:
@@ -53,15 +56,14 @@ const getSystemEventIconName = (
     case SystemEventType.CALL:
       switch (callStatus) {
         case CallStatus.DIALING:
-          return "call"; // maybe add "call_made" for outgoing
         case CallStatus.IN_PROGRESS:
-          return "call"; // could use "call_end" with color/style
+          return isBroadcast ? "connected_tv" : "call";
         case CallStatus.COMPLETED:
-          return "call_end";
+          return isBroadcast ? "connected_tv" : "call_end";
         case CallStatus.MISSED:
-          return "phone_missed";
+          return isBroadcast ? "tv_off" : "phone_missed";
         case CallStatus.FAILED:
-          return "e911_avatar";
+          return isBroadcast ? "tv_off" : "e911_avatar";
         default:
           return "call";
       }

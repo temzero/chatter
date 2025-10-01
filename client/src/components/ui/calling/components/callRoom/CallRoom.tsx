@@ -4,10 +4,11 @@ import { useLocalTracks } from "@/hooks/mediaStreams/useLocalTracks";
 import { RemoteParticipant, RoomEvent } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
 import { ParticipantsGrid } from "./ParticipantsGrid";
-import { LocalVideoPreview } from "./LocalVideoPreview";
 import { CallHeaderInfo } from "./CallHeaderInfo";
 import { CallControls } from "./CallControls";
 import { CallHeader } from "../CallHeader";
+import { DraggableContainer } from "./DraggableContainer";
+import { UserCamera } from "./UserCamera";
 
 export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -47,8 +48,6 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
 
   const memberCount = participants.length;
   const localParticipant = room.localParticipant;
-  const isMuted = !localParticipant?.isMicrophoneEnabled;
-  const isVideoEnabled = !!localParticipant?.isCameraEnabled;
 
   const handleLeaveCall = async () => {
     if (localParticipant) {
@@ -81,22 +80,29 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
       )}
 
       {/* Local video preview */}
-      <LocalVideoPreview
+      {/* <LocalVideoPreview
         videoStream={localVideoStream}
         audioStream={localAudioStream}
         isVideoEnabled={isVideoEnabled}
         isMuted={isMuted}
         containerRef={containerRef}
-      />
+      /> */}
+      <DraggableContainer containerRef={containerRef} position="bottom-right">
+        <UserCamera
+          videoStream={localVideoStream}
+          audioStream={localAudioStream}
+        />
+      </DraggableContainer>
 
       {/* Controls */}
-      <CallControls
-        isVideoEnabled={isVideoEnabled}
-        isMuted={isMuted}
-        audioStream={localAudioStream}
-        onLeaveCall={handleLeaveCall}
-        containerRef={containerRef}
-      />
+      <DraggableContainer containerRef={containerRef} position="bottom-middle">
+        <CallControls
+          isVideoEnabled={!!localVideoStream}
+          isMuted={!localAudioStream}
+          audioStream={localAudioStream}
+          onLeaveCall={handleLeaveCall}
+        />
+      </DraggableContainer>
     </div>
   );
 };

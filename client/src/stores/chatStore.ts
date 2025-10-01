@@ -110,19 +110,6 @@ export const useChatStore = create<ChatStore>()(
         isLoading: false,
         error: null,
 
-        // initialize: async () => {
-        //   try {
-        //     set({ isLoading: true, error: null });
-        //     await get().fetchChats();
-        //   } catch (error) {
-        //     console.error("Initialization failed:", error);
-        //     set({ error: "Failed to initialize chat data" });
-        //     throw error;
-        //   } finally {
-        //     set({ isLoading: false });
-        //   }
-        // },
-
         initialize: async () => {
           try {
             set({ isLoading: true, error: null });
@@ -224,8 +211,7 @@ export const useChatStore = create<ChatStore>()(
               filteredChats: otherChats,
               hasMoreChats: hasMore,
             });
-            // console.log("Chats fetched:", otherChats);
-            // console.log("Saved chat:", savedChat);
+            console.log("Chats fetched:", otherChats);
           } catch (error) {
             console.error("Failed to fetch chats:", error);
             set({ error: "Failed to load chats" });
@@ -236,6 +222,7 @@ export const useChatStore = create<ChatStore>()(
         },
 
         fetchMoreChats: async (limit = 5): Promise<number> => {
+          console.log("fetchMore Chat", limit);
           const { chats, hasMoreChats, isLoading } = get();
           if (isLoading || !hasMoreChats) return 0; // return 0 if no load
 
@@ -390,17 +377,22 @@ export const useChatStore = create<ChatStore>()(
         },
 
         setActiveChatById: async (chatId) => {
-          const currentActive = get().activeChat;
-          if (currentActive?.id === chatId) return;
           if (!chatId) {
             await get().setActiveChat(null);
             return;
           }
 
+          // const currentActive = get().activeChat;
+          // if (currentActive?.id === chatId) {
+          //   console.log("Already active", currentActive);
+          //   return;
+          // }
+
           const existingChat = get().chats.find((chat) => chat.id === chatId);
           if (existingChat) {
             await get().setActiveChat(existingChat);
           } else {
+            console.log("fetchChatById");
             await get().fetchChatById(chatId);
             const fetchedChat = get().chats.find((chat) => chat.id === chatId);
             if (fetchedChat) await get().setActiveChat(fetchedChat);

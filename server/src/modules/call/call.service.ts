@@ -7,8 +7,8 @@ import { UpdateCallDto } from './dto/update-call.dto';
 import { CallStatus } from './type/callStatus';
 import { ChatMemberService } from '../chat-member/chat-member.service';
 import { CallResponseDto } from './dto/call-response.dto';
-import { mapChatMemberToResponseDto } from '../chat-member/mappers/chat-member.mapper';
 import { UserService } from '../user/user.service';
+import { mapCallToCallResDto } from './mappers/call.mapper';
 
 @Injectable()
 export class CallService {
@@ -24,9 +24,6 @@ export class CallService {
     options: { limit?: number; offset?: number } = { limit: 20, offset: 0 },
   ): Promise<{ calls: CallResponseDto[]; hasMore: boolean }> {
     const { limit = 20, offset = 0 } = options;
-
-    console.log('limit-offset', limit, offset);
-
     const query = this.callRepository
       .createQueryBuilder('call')
       .leftJoinAndSelect('call.chat', 'chat')
@@ -44,38 +41,16 @@ export class CallService {
       .take(limit + 1);
 
     const calls = await query.getMany();
-    console.log('calls', calls.length);
 
     let hasMore = false;
     if (calls.length > limit) {
       hasMore = true;
       calls.pop();
     }
-
-    // Map to DTOs
-    const callDtos: CallResponseDto[] = calls.map((call) => {
-      const dto = new CallResponseDto();
-      dto.id = call.id;
-      dto.chat = call.chat;
-      dto.status = call.status;
-      dto.isVideoCall = false;
-      dto.startedAt = call.startedAt ?? null;
-      dto.endedAt = call.endedAt ?? null;
-      dto.updatedAt = call.updatedAt ?? null;
-      dto.createdAt = call.createdAt;
-      dto.initiator = mapChatMemberToResponseDto(
-        call.initiator,
-        call.chat.type,
-      );
-
-      if (!dto.chat.avatarUrl) {
-        dto.chat.avatarUrl = call.initiator?.user?.avatarUrl || null;
-      }
-
-      return dto;
-    });
-
-    return { calls: callDtos, hasMore };
+    return {
+      calls: calls.map(mapCallToCallResDto),
+      hasMore,
+    };
   }
 
   async getCallById(id: string): Promise<Call> {

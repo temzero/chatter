@@ -8,7 +8,7 @@ import { UpdateChatMemberDto } from './dto/requests/update-chat-member.dto';
 import { User } from '../user/entities/user.entity';
 import { Chat } from '../chat/entities/chat.entity';
 import { ChatMemberResponseDto } from './dto/responses/chat-member-response.dto';
-import { mapChatMemberToResponseDto } from './mappers/chat-member.mapper';
+import { mapChatMemberToChatMemberResDto } from './mappers/chat-member.mapper';
 import { ChatType } from '../chat/constants/chat-types.constants';
 import { FriendshipStatus } from '../friendship/constants/friendship-status.constants';
 import { ChatMemberStatus } from './constants/chat-member-status.constants';
@@ -178,7 +178,7 @@ export class ChatMemberService {
         }
       }
 
-      return mapChatMemberToResponseDto(
+      return mapChatMemberToChatMemberResDto(
         member,
         chatType,
         isBlockedByMe,

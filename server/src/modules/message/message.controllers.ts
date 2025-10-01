@@ -42,7 +42,8 @@ export class MessageController {
       createMessageDto,
     );
 
-    const messageResponse = this.messageMapper.toMessageResponseDto(message);
+    const messageResponse =
+      this.messageMapper.mapMessageToMessageResDto(message);
     return new SuccessResponse(messageResponse, 'Message created successfully');
   }
 
@@ -74,7 +75,7 @@ export class MessageController {
     );
 
     const messagesResponse = messages.map((message) =>
-      this.messageMapper.toMessageResponseDto(message),
+      this.messageMapper.mapMessageToMessageResDto(message),
     );
 
     return new SuccessResponse(

@@ -17,7 +17,7 @@ import {
   DirectChatMemberResponseDto,
 } from './dto/responses/chat-member-response.dto';
 import { UpdateChatMemberDto } from './dto/requests/update-chat-member.dto';
-import { mapChatMemberToResponseDto } from './mappers/chat-member.mapper';
+import { mapChatMemberToChatMemberResDto } from './mappers/chat-member.mapper';
 import { ChatService } from '../chat/chat.service';
 import { ChatType } from '../chat/constants/chat-types.constants';
 import { CurrentUser } from '../auth/decorators/user.decorator';
@@ -78,7 +78,7 @@ export class ChatMemberController {
     const member = await this.memberService.findById(memberId);
 
     const chatType = await this.chatService.getChatType(member.chatId);
-    const memberResponse = mapChatMemberToResponseDto(member, chatType);
+    const memberResponse = mapChatMemberToChatMemberResDto(member, chatType);
 
     return new SuccessResponse(
       memberResponse,
@@ -98,7 +98,7 @@ export class ChatMemberController {
       userId,
     );
     const chatType = await this.chatService.getChatType(chatId);
-    const memberResponse = mapChatMemberToResponseDto(member, chatType);
+    const memberResponse = mapChatMemberToChatMemberResDto(member, chatType);
     return new SuccessResponse(
       memberResponse,
       'Chat member retrieved successfully',
@@ -145,7 +145,7 @@ export class ChatMemberController {
     }
 
     return new SuccessResponse(
-      members.map((m) => mapChatMemberToResponseDto(m)),
+      members.map((m) => mapChatMemberToChatMemberResDto(m)),
       'Members added successfully',
     );
   }
@@ -224,7 +224,7 @@ export class ChatMemberController {
         await Promise.all(createSystemMessages);
       }
 
-      const memberResponse = mapChatMemberToResponseDto(updatedMember);
+      const memberResponse = mapChatMemberToChatMemberResDto(updatedMember);
       return new SuccessResponse(
         plainToInstance(GroupChatMemberResponseDto, memberResponse),
         'Member updated successfully',

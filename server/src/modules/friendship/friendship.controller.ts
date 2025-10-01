@@ -22,7 +22,7 @@ import { ErrorResponse } from 'src/common/api-response/errors';
 import { FriendshipUpdateNotificationDto } from './dto/responses/friendship-update-notification.dto';
 import { WebsocketNotificationService } from '../websocket/services/websocket-notification.service';
 import { ContactResponseDto } from './dto/responses/friend-contact-response.dto';
-import { mapToFriendContactResponseDto } from './mappers/friendContacts.mapper';
+import { mapFriendshipToContactResDto } from './mappers/contact.mapper';
 
 @Controller('friendships')
 @UseGuards(JwtAuthGuard)
@@ -104,7 +104,7 @@ export class FriendshipController {
     @CurrentUser('id') userId: string,
   ): Promise<SuccessResponse<ContactResponseDto[]>> {
     const friendships = await this.friendshipService.getFriends(userId);
-    const contacts = mapToFriendContactResponseDto(friendships, userId);
+    const contacts = mapFriendshipToContactResDto(friendships, userId);
     return new SuccessResponse(contacts, 'Friends retrieved successfully');
   }
 
