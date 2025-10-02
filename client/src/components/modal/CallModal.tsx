@@ -5,7 +5,6 @@ import { childrenModalAnimation } from "@/animations/modalAnimations";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { LocalCallStatus } from "@/types/enums/CallStatus";
 
-// Import UI components
 import { CallRoom } from "../ui/calling/components/callRoom/CallRoom";
 import { IncomingCall } from "../ui/calling/IncomingCall";
 import { SummaryCall } from "../ui/calling/SummaryCall";
@@ -13,7 +12,7 @@ import { OutgoingCall } from "../ui/calling/OutgoingCall";
 import { useChatStore } from "@/stores/chatStore";
 import { ConnectingCall } from "../ui/calling/ConnectingCall";
 import { ChatResponse } from "@/types/responses/chat.response";
-import { CheckBroadcast } from "../ui/calling/CheckBroadcast";
+import { BroadcastPreviewModal } from "../ui/calling/BroadcastPreviewModal";
 import { ChatType } from "@/types/enums/ChatType";
 import { BroadcastRoom } from "../ui/calling/components/broadcastRoom/BroadcastRoom";
 
@@ -21,6 +20,15 @@ const CallModal: React.FC = () => {
   const { chatId, localCallStatus } = useCallStore();
   const getOrFetchChatById = useChatStore((state) => state.getOrFetchChatById);
   const [chat, setChat] = React.useState<ChatResponse | null>(null);
+  const isBroadcast: boolean = chat?.type === ChatType.CHANNEL;
+  const [isExpanded, setIsExpanded] = React.useState(isBroadcast);
+
+  React.useEffect(() => {
+    if (chat?.type === ChatType.CHANNEL) {
+      setIsExpanded(true);
+    }
+  }, [chat?.type]);
+
   React.useEffect(() => {
     if (!chatId) return;
 
@@ -43,13 +51,6 @@ const CallModal: React.FC = () => {
   }, [chatId, getOrFetchChatById]);
 
   if (!chatId || !chat || !localCallStatus) {
-    // if (!chatId) {
-    //   console.log("No chatId", chatId);
-    // } else if (!chat) {
-    //   console.log("No chat", chat);
-    // } else if (!localCallStatus) {
-    //   console.log("No localCallStatus", localCallStatus);
-    // }
     return null;
   }
 
@@ -62,10 +63,18 @@ const CallModal: React.FC = () => {
       case LocalCallStatus.CONNECTING:
         return <ConnectingCall chat={chat} />;
       case LocalCallStatus.CONNECTED:
-        return chat.type === ChatType.CHANNEL ? (
-          <BroadcastRoom chat={chat} />
+        return isBroadcast ? (
+          <BroadcastRoom
+            chat={chat}
+            isExpanded={isExpanded}
+            onToggleExpand={() => setIsExpanded((p) => !p)}
+          />
         ) : (
-          <CallRoom chat={chat} />
+          <CallRoom
+            chat={chat}
+            isExpanded={isExpanded}
+            onToggleExpand={() => setIsExpanded((p) => !p)}
+          />
         );
       case LocalCallStatus.ENDED:
       case LocalCallStatus.ERROR:
@@ -74,7 +83,7 @@ const CallModal: React.FC = () => {
       case LocalCallStatus.DECLINED:
         return <SummaryCall chat={chat} />;
       case LocalCallStatus.CHECK_BROADCAST:
-        return <CheckBroadcast chat={chat} />;
+        return <BroadcastPreviewModal chat={chat} />;
       default:
         return null;
     }
@@ -91,10 +100,12 @@ const CallModal: React.FC = () => {
     }
   };
 
+  const modalSize = isExpanded ? "w-full h-full" : "w-[80%] h-[80%]";
+
   return (
     <motion.div
       {...childrenModalAnimation}
-      className="p-8 w-full h-full flex items-center justify-center select-none"
+      className={`${modalSize} transition-all flex items-center justify-center select-none`}
     >
       <div
         className={clsx(

@@ -83,15 +83,20 @@ export function useCallSocketListeners() {
 
     const handleStartCall = (data: UpdateCallPayload) => {
       console.log("[CALL_START]");
-      const { callId } = data;
+      const { callId, chatId } = data;
       const callStore = useCallStore.getState();
 
-      if (callStore.callId !== callId) {
-        console.log("callId miss match");
+      // ✅ Match on chatId instead of callId
+      if (callStore.chatId !== chatId) {
+        console.log("chatId mismatch");
         return;
       }
 
-      // if i'm the caller who start the call
+      // Save callId if missing (broadcast scenario)
+      if (!callStore.callId) {
+        useCallStore.setState({ callId });
+      }
+
       if (data.initiatorUserId === currentUserId) {
         useCallStore.setState({
           localCallStatus: LocalCallStatus.CONNECTED,

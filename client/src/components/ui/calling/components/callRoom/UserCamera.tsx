@@ -12,17 +12,18 @@ interface UserCameraProps {
 export const UserCamera = ({ videoStream, audioStream }: UserCameraProps) => {
   const [isLarge, setIsLarge] = useState(false);
 
-  if (!videoStream || !audioStream) return null;
+  if (!videoStream) return null;
 
   return (
     <div
-      className={`relative group transition-all duration-300 ${
+      className={`relative group transition-all ${
         isLarge ? "w-[360px] h-[360px]" : "w-40 h-40"
       } rounded-full overflow-hidden border-4 border-[--input-border-color] shadow-xl`}
     >
       <VideoStream
         stream={videoStream}
-        className="w-full h-full rounded-full object-cover"
+        className="rounded-full"
+        objectCover
         muted
         mirror
       />
@@ -45,9 +46,9 @@ export const UserCamera = ({ videoStream, audioStream }: UserCameraProps) => {
         </span>
       </button>
 
-      <div className="absolute left-1/2 -translate-x-1/2 bottom-2">
-        You {!audioStream && "🔇"}
-      </div>
+      {!audioStream && (
+        <h1 className="absolute left-1/2 -translate-x-1/2 bottom-0">🔇</h1>
+      )}
     </div>
   );
 };

@@ -1,66 +1,79 @@
-// hooks/useLocalPreviewScreenTrack.ts
 import { useState, useEffect, useRef, useCallback } from "react";
 
 interface LocalPreviewScreenStream {
   localScreenStream: MediaStream | null;
   toggleScreen: () => void;
+  stopScreen: () => void;
   isScreenEnabled: boolean;
 }
 
 export const useLocalPreviewScreenTrack = (
-  startEnabled: boolean = false
+  startEnabled: boolean = false,
+  opts: { stopOnUnmount: boolean } = { stopOnUnmount: true }
 ): LocalPreviewScreenStream => {
   const [localScreenStream, setLocalScreenStream] =
     useState<MediaStream | null>(null);
   const [isScreenEnabled, setIsScreenEnabled] = useState(startEnabled);
+  const streamRef = useRef<MediaStream | null>(null);
 
-  const screenTrackRef = useRef<MediaStreamTrack | null>(null);
+  const cleanupStream = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => {
+        track.stop();
+        track.onended = null;
+      });
+      streamRef.current = null;
+    }
+    setLocalScreenStream(null);
+    setIsScreenEnabled(false);
+  }, []);
 
-  // Start screen capture
   const startScreen = useCallback(async () => {
     try {
+      cleanupStream(); // stop previous if any
+
       const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
-        audio: false, // optional: set true if you want system audio
+        video: { displaySurface: "window" },
+        audio: false,
       });
-      const screenTrack = stream.getVideoTracks()[0];
-      screenTrackRef.current = screenTrack;
-      setLocalScreenStream(new MediaStream(screenTrack ? [screenTrack] : []));
+
+      streamRef.current = stream;
+      setLocalScreenStream(stream);
       setIsScreenEnabled(true);
 
-      // Stop stream when track ends (user clicks "stop sharing")
-      screenTrack.onended = () => {
-        setLocalScreenStream(null);
-        setIsScreenEnabled(false);
-      };
+      // Handle browser stop
+      stream.getVideoTracks().forEach((track) => {
+        track.onended = cleanupStream;
+      });
     } catch (err) {
       console.error("Failed to get screen stream:", err);
-      setLocalScreenStream(null);
-      setIsScreenEnabled(false);
+      cleanupStream();
     }
-  }, []);
+  }, [cleanupStream]);
 
-  // Toggle screen on/off
-  const toggleScreen = useCallback(() => {
-    if (!screenTrackRef.current) {
-      startScreen();
+  const stopScreen = useCallback(() => {
+    cleanupStream();
+  }, [cleanupStream]);
+
+  const toggleScreen = useCallback(async () => {
+    if (isScreenEnabled) {
+      stopScreen();
     } else {
-      const enabled = !screenTrackRef.current.enabled;
-      screenTrackRef.current.enabled = enabled;
-      setIsScreenEnabled(enabled);
+      await startScreen();
     }
-  }, [startScreen]);
+  }, [isScreenEnabled, startScreen, stopScreen]);
 
-  // Cleanup on unmount
   useEffect(() => {
+    if (startEnabled) startScreen();
     return () => {
-      if (screenTrackRef.current) screenTrackRef.current.stop();
+      if (opts.stopOnUnmount) cleanupStream();
     };
-  }, []);
+  }, [startEnabled, opts.stopOnUnmount, startScreen, cleanupStream]);
 
   return {
     localScreenStream,
     toggleScreen,
+    stopScreen,
     isScreenEnabled,
   };
 };

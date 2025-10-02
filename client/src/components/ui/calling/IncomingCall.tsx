@@ -31,8 +31,8 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
         <div className="absolute inset-0 overflow-hidden z-0 opacity-70 w-full h-full">
           <VideoStream
             stream={localVideoStream}
-            className="w-full h-full object-cover scale-125 blur-md select-none pointer-events-none"
-            muted
+            className="scale-125 blur-md"
+            objectCover
           />
         </div>
       )}

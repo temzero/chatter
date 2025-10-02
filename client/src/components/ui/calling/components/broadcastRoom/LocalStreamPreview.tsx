@@ -21,10 +21,7 @@ export const LocalStreamPreview = ({
     // Screen + camera
     return (
       <div className="w-full h-full flex-1 relative">
-        <VideoStream
-          stream={localScreenStream}
-          className="w-full h-full object-cover z-0"
-        />
+        <VideoStream stream={localScreenStream} className="z-0" objectCover />
         <DraggableContainer containerRef={containerRef} position="bottom-right">
           <UserCamera
             videoStream={localVideoStream}
@@ -37,22 +34,12 @@ export const LocalStreamPreview = ({
 
   if (localScreenStream) {
     // Only screen
-    return (
-      <VideoStream
-        stream={localScreenStream}
-        className="w-full h-full object-cover z-0"
-      />
-    );
+    return <VideoStream stream={localScreenStream} objectCover />;
   }
 
   if (localVideoStream) {
-    return (
-      <VideoStream
-        stream={localVideoStream}
-        className="w-full h-full object-cover z-0"
-        mirror
-      />
-    );
+    // Only Camera
+    return <VideoStream stream={localVideoStream} objectCover mirror />;
   }
 
   return null;

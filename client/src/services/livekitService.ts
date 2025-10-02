@@ -85,30 +85,76 @@ export class LiveKitService {
     }
   }
 
-  async toggleCamera(enabled: boolean): Promise<boolean> {
+  // async toggleCamera(enabled: boolean, stream?: MediaStream): Promise<boolean> {
+  //   try {
+  //     if (enabled) {
+  //       await this.room.localParticipant.setCameraEnabled(
+  //         true,
+  //         {
+  //           resolution: { width: 1920, height: 1080 },
+  //           frameRate: 30,
+  //         },
+  //         {
+  //           videoEncoding: {
+  //             maxBitrate: 2500_000,
+  //             maxFramerate: 30,
+  //           },
+  //         }
+  //       );
+  //     } else {
+  //       const pub = this.room.localParticipant.getTrackPublication(
+  //         Track.Source.Camera
+  //       );
+  //       if (pub?.track) {
+  //         this.room.localParticipant.unpublishTrack(pub.track);
+  //       }
+  //     }
+  //     return true;
+  //   } catch (error) {
+  //     console.error("Failed to toggle camera:", error);
+  //     return false;
+  //   }
+  // }
+
+  async toggleCamera(enabled: boolean, stream?: MediaStream): Promise<boolean> {
     try {
+      const local = this.room.localParticipant;
+
       if (enabled) {
-        await this.room.localParticipant.setCameraEnabled(
-          true,
-          {
-            resolution: { width: 1920, height: 1080 },
-            frameRate: 30,
-          },
-          {
+        if (stream) {
+          const videoTrack = stream.getVideoTracks()[0];
+          console.log("cameraTrack", videoTrack);
+
+          await local.publishTrack(videoTrack, {
+            name: "camera",
+            source: Track.Source.Camera,
             videoEncoding: {
-              maxBitrate: 2500_000, // ~2.5 Mbps
+              maxBitrate: 2500_000,
               maxFramerate: 30,
             },
-          }
-        );
+          });
+        } else {
+          await local.setCameraEnabled(
+            true,
+            {
+              resolution: { width: 1920, height: 1080 },
+              frameRate: 30,
+            },
+            {
+              videoEncoding: {
+                maxBitrate: 2500_000,
+                maxFramerate: 30,
+              },
+            }
+          );
+        }
       } else {
-        const pub = this.room.localParticipant.getTrackPublication(
-          Track.Source.Camera
-        );
+        const pub = local.getTrackPublication(Track.Source.Camera);
         if (pub?.track) {
-          this.room.localParticipant.unpublishTrack(pub.track);
+          local.unpublishTrack(pub.track);
         }
       }
+
       return true;
     } catch (error) {
       console.error("Failed to toggle camera:", error);
@@ -116,21 +162,34 @@ export class LiveKitService {
     }
   }
 
-  async toggleScreenShare(enabled: boolean): Promise<boolean> {
+  async toggleScreenShare(
+    enabled: boolean,
+    stream?: MediaStream
+  ): Promise<boolean> {
     try {
+      const local = this.room.localParticipant;
+
       if (enabled) {
-        await this.room.localParticipant.setScreenShareEnabled(true);
+        if (stream) {
+          const screenTrack = stream.getVideoTracks()[0];
+          console.log("screenTrack", screenTrack);
+          await local.publishTrack(screenTrack, {
+            name: "screen-share",
+            source: Track.Source.ScreenShare,
+          });
+        } else {
+          await local.setScreenShareEnabled(true); // fallback to default prompt
+        }
       } else {
-        const pub = this.room.localParticipant.getTrackPublication(
-          Track.Source.ScreenShare
-        );
+        const pub = local.getTrackPublication(Track.Source.ScreenShare);
         if (pub?.track) {
-          this.room.localParticipant.unpublishTrack(pub.track);
+          local.unpublishTrack(pub.track);
         }
       }
+
       return true;
-    } catch (error) {
-      console.error("Failed to toggle screen share:", error);
+    } catch (err) {
+      console.error("Failed to toggle screen share:", err);
       return false;
     }
   }

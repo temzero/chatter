@@ -113,6 +113,13 @@ export const handleSystemEventMessage = (message: MessageResponse) => {
         });
       }
     },
+    [SystemEventType.CALL]: () => {
+      if (targetId) {
+        memberStore.updateMemberLocally?.(chatId, targetId, {
+          status: ChatMemberStatus.BANNED,
+        });
+      }
+    },
   };
 
   updateMap[systemEvent]?.();

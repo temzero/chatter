@@ -1,64 +1,82 @@
-// hooks/useLocalPreviewVoiceTrack.ts
 import { useState, useEffect, useRef, useCallback } from "react";
 
 interface LocalPreviewAudioStream {
   localVoiceStream: MediaStream | null;
   toggleVoice: () => void;
+  stopVoice: () => void;
   isVoiceEnabled: boolean;
 }
 
 export const useLocalPreviewVoiceTrack = (
-  shouldEnable: boolean = true
+  startEnabled: boolean = true,
+  opts: { stopOnUnmount: boolean } = { stopOnUnmount: true }
 ): LocalPreviewAudioStream => {
   const [localVoiceStream, setLocalVoiceStream] = useState<MediaStream | null>(
     null
   );
-  const [isVoiceEnabled, setIsVoiceEnabled] = useState(true);
+  const [isVoiceEnabled, setIsVoiceEnabled] = useState(startEnabled);
+  const streamRef = useRef<MediaStream | null>(null);
 
-  const audioTrackRef = useRef<MediaStreamTrack | null>(null);
+  // Stop all tracks and clear references
+  const cleanupStream = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => {
+        track.stop();
+      });
+      streamRef.current = null;
+    }
+    setLocalVoiceStream(null);
+    setIsVoiceEnabled(false);
+  }, []);
 
-  useEffect(() => {
-    if (!shouldEnable) return;
+  const startVoice = useCallback(async () => {
+    try {
+      cleanupStream(); // stop any existing stream
 
-    let mounted = true;
-    const initAudio = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-        });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      });
 
-        if (!mounted) {
-          stream.getTracks().forEach((track) => track.stop());
-          return;
-        }
-
-        const audioTrack = stream.getAudioTracks()[0];
-        audioTrackRef.current = audioTrack;
-        setLocalVoiceStream(new MediaStream(audioTrack ? [audioTrack] : []));
-      } catch (err) {
-        console.error("Failed to get local audio stream:", err);
-      }
-    };
-
-    initAudio();
-
-    return () => {
-      mounted = false;
-      if (audioTrackRef.current) audioTrackRef.current.stop();
-    };
-  }, [shouldEnable]);
+      streamRef.current = stream;
+      setLocalVoiceStream(stream);
+      setIsVoiceEnabled(true);
+    } catch (err) {
+      console.error("Failed to get audio stream:", err);
+      cleanupStream();
+    }
+  }, [cleanupStream]);
 
   const toggleVoice = useCallback(() => {
-    if (audioTrackRef.current) {
-      const enabled = !audioTrackRef.current.enabled;
-      audioTrackRef.current.enabled = enabled;
-      setIsVoiceEnabled(enabled);
+    if (streamRef.current) {
+      const audioTrack = streamRef.current.getAudioTracks()[0];
+      if (audioTrack) {
+        audioTrack.enabled = !audioTrack.enabled;
+        setIsVoiceEnabled(audioTrack.enabled);
+      }
     }
   }, []);
+
+  const stopVoice = useCallback(() => {
+    cleanupStream();
+  }, [cleanupStream]);
+
+  // Initialize if startEnabled is true
+  useEffect(() => {
+    if (startEnabled) startVoice();
+
+    return () => {
+      if (opts.stopOnUnmount) cleanupStream();
+    };
+  }, [startEnabled, opts.stopOnUnmount, startVoice, cleanupStream]);
 
   return {
     localVoiceStream,
     toggleVoice,
+    stopVoice,
     isVoiceEnabled,
   };
 };

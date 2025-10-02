@@ -37,8 +37,8 @@ export const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
         <div className="absolute inset-0 overflow-hidden z-0 opacity-70 w-full h-full">
           <VideoStream
             stream={localVideoStream}
-            className="w-full h-full object-cover scale-125 select-none pointer-events-none"
-            muted
+            className="scale-125 pointer-events-none"
+            objectCover
           />
         </div>
       ) : (

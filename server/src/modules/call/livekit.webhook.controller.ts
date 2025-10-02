@@ -12,6 +12,7 @@ import { UserService } from '../user/user.service';
 import { ChatService } from '../chat/chat.service';
 import { Call } from './entities/call.entity';
 import { Chat } from '../chat/entities/chat.entity';
+import { User } from '../user/entities/user.entity';
 
 @Controller('liveKit/webhook')
 export class LiveKitWebhookController {
@@ -55,7 +56,6 @@ export class LiveKitWebhookController {
 
       case 'track_published':
       case 'track_unpublished':
-        // Optional: handle track events if needed
         break;
 
       case 'room_finished':
@@ -80,91 +80,80 @@ export class LiveKitWebhookController {
     const call = await this.callService.getActiveCallByChatId(roomName);
     const chat = call?.chat ?? (await this.chatService.getChatById(roomName));
     const isBroadcast = chat.type === ChatType.CHANNEL;
-
-    if (isBroadcast) {
-      await this.handleBroadcastParticipantJoined(roomName, userId, call);
-    } else {
-      await this.handleNormalParticipantJoined(roomName, userId, call, chat);
-    }
-  }
-
-  private async handleBroadcastParticipantJoined(
-    roomName: string,
-    userId: string,
-    call: Call | null,
-  ) {
     const user = await this.userService.getUserById(userId);
+
     if (!user) return;
 
+    // Common logic: Handle call creation and participant addition
     if (!call) {
-      // Create broadcast call
-      call = await this.callService.createCall({
-        chatId: roomName,
-        status: CallStatus.IN_PROGRESS,
-        initiatorUser: user,
-        startedAt: new Date(),
-      });
-
-      // Directly start broadcast
-      await this.websocketCallService.emitStartCall(call.id, roomName, userId);
+      await this.handleNewCall(roomName, user, chat, isBroadcast);
     } else {
-      // Add new participant if not already in call
-      const existingUserIds = new Set(call.currentUserIds);
-      if (!existingUserIds.has(userId)) {
-        call.attendedUsers.push(user);
-        call.currentUserIds.push(userId);
-        await this.callService.saveCall(call);
-      }
+      await this.handleExistingCall(call, user, roomName, isBroadcast);
     }
   }
 
-  private async handleNormalParticipantJoined(
+  private async handleNewCall(
     roomName: string,
-    userId: string,
-    call: Call | null,
+    user: User,
     chat: Chat,
+    isBroadcast: boolean,
   ) {
-    const user = await this.userService.getUserById(userId);
-    if (!user) return;
+    const call = await this.callService.createCall({
+      chatId: roomName,
+      status: isBroadcast ? CallStatus.IN_PROGRESS : CallStatus.DIALING,
+      initiatorUser: user,
+      ...(isBroadcast && { startedAt: new Date() }),
+    });
 
-    if (!call) {
-      // Create normal/group call
-      call = await this.callService.createCall({
-        chatId: roomName,
-        status: CallStatus.DIALING,
-        initiatorUser: user,
-      });
+    // Always emit incoming call first
+    await this.websocketCallService.emitIncomingCall(
+      call.id,
+      roomName,
+      user.id,
+      chat.type === ChatType.GROUP,
+      isBroadcast,
+    );
 
-      await this.websocketCallService.emitIncomingCall(
-        call.id,
-        roomName,
-        userId,
-        chat.type === ChatType.GROUP,
-        false,
-      );
-    } else {
-      const existingUserIds = new Set(call.currentUserIds);
-      if (!existingUserIds.has(userId)) {
-        call.attendedUsers.push(user);
-        call.currentUserIds.push(userId);
+    // Start call immediately for broadcast, otherwise wait for participants
+    if (isBroadcast) {
+      await this.websocketCallService.emitStartCall(call.id, roomName, user.id);
+    }
+  }
 
-        // If first other participant joins -> start call
+  private async handleExistingCall(
+    call: Call,
+    user: User,
+    roomName: string,
+    isBroadcast: boolean,
+  ) {
+    const existingUserIds = new Set(call.currentUserIds);
+
+    // Common logic: Add participant if not already in call
+    if (!existingUserIds.has(user.id)) {
+      call.attendedUsers.push(user);
+      call.currentUserIds.push(user.id);
+
+      if (isBroadcast) {
+        // For broadcast, just save the call with new participant
+        await this.callService.saveCall(call);
+      } else {
+        // For normal calls, start when second participant joins
         if (call.attendedUsers.length === 2) {
           call.status = CallStatus.IN_PROGRESS;
           call.startedAt = new Date();
+
           await this.websocketCallService.emitStartCall(
             call.id,
             roomName,
             call.currentUserIds[0],
           );
         }
-
         await this.callService.saveCall(call);
-      } else {
-        console.log(
-          `[participant_joined] Participant ${userId} already in call ${call.id}`,
-        );
       }
+    } else {
+      console.log(
+        `[participant_joined] Participant ${user.id} already in call ${call.id}`,
+      );
     }
   }
 
@@ -180,56 +169,76 @@ export class LiveKitWebhookController {
     const chat = call.chat ?? (await this.chatService.getChatById(roomName));
     const isBroadcast = chat.type === ChatType.CHANNEL;
 
-    // Remove the user from "currently in room" list
+    // Remove user from current participants
     await this.callService.removeCurrentUserId(roomName, userId);
+
+    if (isBroadcast) {
+      await this.handleBroadcastParticipantLeft(call, userId, roomName);
+    } else {
+      await this.handleNormalCallParticipantLeft(call, userId, roomName);
+    }
+  }
+
+  private async handleBroadcastParticipantLeft(
+    call: Call,
+    userId: string,
+    roomName: string,
+  ) {
+    // End broadcast only if initiator leaves
+    if (call.attendedUsers[0]?.id === userId) {
+      await this.endCall(call, roomName, CallStatus.COMPLETED, userId);
+    }
+  }
+
+  private async handleNormalCallParticipantLeft(
+    call: Call,
+    userId: string,
+    roomName: string,
+  ) {
     const remainingUsers =
       call.currentUserIds?.filter((id) => id !== userId) ?? [];
 
-    let shouldEndCall = false;
-    let status: CallStatus = CallStatus.COMPLETED;
-
-    if (isBroadcast) {
-      // End broadcast only if initiator leaves
-      if (call.attendedUsers[0].id === userId) {
-        shouldEndCall = true;
-        status = CallStatus.COMPLETED;
-      }
-    } else {
-      // Normal/group call: end if 1 or 0 left
+    // End call if 1 or fewer participants remain
+    if (remainingUsers.length <= 1) {
       const attendeeCount = call.attendedUsers?.length ?? 0;
-      if (remainingUsers.length <= 1) {
-        shouldEndCall = true;
-        status = attendeeCount <= 1 ? CallStatus.MISSED : CallStatus.COMPLETED;
-      }
+      const status =
+        attendeeCount <= 1 ? CallStatus.MISSED : CallStatus.COMPLETED;
+
+      await this.endCall(call, roomName, status, userId);
     }
+  }
 
-    if (shouldEndCall) {
-      const endedAt = new Date();
-      const updatedCall = await this.callService.updateCall(call.id, {
-        status,
-        endedAt,
-        currentUserIds: [],
-      });
+  private async endCall(
+    call: Call,
+    roomName: string,
+    status: CallStatus,
+    userId: string,
+  ) {
+    const endedAt = new Date();
+    const updatedCall = await this.callService.updateCall(call.id, {
+      status,
+      endedAt,
+      currentUserIds: [],
+    });
 
-      await this.websocketCallService.emitEndedCall(
-        call.id,
-        roomName,
-        status,
-        userId,
+    await this.websocketCallService.emitEndedCall(
+      call.id,
+      roomName,
+      status,
+      userId,
+    );
+
+    const sender = call.attendedUsers?.[0];
+    if (sender) {
+      await this.messageService.createSystemEventMessage(
+        call.chat.id,
+        sender.id,
+        SystemEventType.CALL,
+        { call: updatedCall },
       );
-
-      const sender = call.attendedUsers?.[0];
-      if (sender) {
-        await this.messageService.createSystemEventMessage(
-          call.chat.id,
-          sender.id,
-          SystemEventType.CALL,
-          { call: updatedCall },
-        );
-      }
-
-      await this.liveKitService.deleteRoom(roomName);
     }
+
+    await this.liveKitService.deleteRoom(roomName);
   }
 
   // ----------------------

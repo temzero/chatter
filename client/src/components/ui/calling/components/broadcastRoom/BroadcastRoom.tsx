@@ -10,13 +10,26 @@ import BroadcastStream from "./BroadcastStream";
 import { LocalStreamPreview } from "./LocalStreamPreview";
 import { DraggableContainer } from "../callRoom/DraggableContainer";
 
-export const BroadcastRoom = ({ chat }: { chat: ChatResponse }) => {
+export const BroadcastRoom = ({
+  chat,
+  isExpanded,
+  onToggleExpand,
+}: {
+  chat: ChatResponse;
+  isExpanded: boolean;
+  onToggleExpand?: () => void;
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const isCaller = useCallStore((state) => state.isCaller);
   const room = useCallStore((state) => state.getLiveKitRoom());
   const initiatorUserId = useCallStore((state) => state.initiatorUserId);
   const leaveCall = useCallStore((state) => state.leaveCall);
   const startedAt = useCallStore((state) => state.startedAt);
+
+  const toggleLocalVideo = useCallStore((state) => state.toggleLocalVideo);
+  const toggleLocalScreenShare = useCallStore(
+    (state) => state.toggleLocalScreenShare
+  );
 
   const { localVideoStream, localAudioStream, localScreenStream } =
     useLocalTracks();
@@ -70,7 +83,9 @@ export const BroadcastRoom = ({ chat }: { chat: ChatResponse }) => {
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full flex flex-col items-center text-white"
+      className={`relative w-full h-full flex flex-col items-center rounded-lg overflow-hidden text-white border-4 ${
+        isCaller ? "border-[--primary-green]" : "border-[--border-color]"
+      }`}
     >
       {/* For Caller (Broadcaster): Show local stream preview */}
       {isCaller ? (
@@ -91,8 +106,61 @@ export const BroadcastRoom = ({ chat }: { chat: ChatResponse }) => {
         )
       )}
 
-      {/* Controls */}
-      {isCaller ? (
+      {isCaller && !localVideoStream && !localScreenStream && (
+        <div className="w-full h-full flex flex-col items-center justify-center gap-6">
+          <Button
+            variant="transparent"
+            className="w-64 text-white hover:text-black"
+            size="lg"
+            onClick={() => toggleLocalScreenShare()}
+            icon="screen_share"
+          >
+            Sharing Screen
+          </Button>
+          <Button
+            variant="transparent"
+            className="w-64 text-white hover:text-black"
+            size="lg"
+            onClick={() => toggleLocalVideo()}
+            icon="video_camera_front"
+          >
+            Camera
+          </Button>
+        </div>
+      )}
+
+      {/* <Button
+        variant="primary"
+        className="absolute bottom-2 right-2 text-white hover:text-black"
+        size="lg"
+        onClick={() => toggleLocalVideo()}
+        icon="play_circle"
+      >
+        Start Broadcasting
+      </Button> */}
+
+      <div className="flex gap-2 absolute top-2 right-2">
+        <Button
+          variant="ghost"
+          className="w-8 h-8 opacity-70"
+          isIconFilled={true}
+          isRoundedFull
+          onClick={onToggleExpand}
+          icon={isExpanded ? "collapse_content" : "expand_content"}
+        />
+        {!isCaller && (
+          <Button
+            variant="ghost"
+            className="w-8 h-8 opacity-70 hover:text-white/90 hover:bg-red-500"
+            isIconFilled={true}
+            isRoundedFull
+            onClick={handleLeaveCall}
+            icon="close"
+          />
+        )}
+      </div>
+
+      {isCaller && (
         <DraggableContainer
           containerRef={containerRef}
           position="bottom-middle"
@@ -106,15 +174,6 @@ export const BroadcastRoom = ({ chat }: { chat: ChatResponse }) => {
             onLeaveCall={handleLeaveCall}
           />
         </DraggableContainer>
-      ) : (
-        <Button
-          variant="ghost"
-          className="w-8 h-8 absolute top-2 right-2 opacity-70 hover:text-white/90 hover:bg-red-500"
-          isIconFilled={true}
-          isRoundedFull
-          onClick={handleLeaveCall}
-          icon="close"
-        />
       )}
 
       {/* Broadcast info */}

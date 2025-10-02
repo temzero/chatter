@@ -3,7 +3,6 @@ import { MessageStatus } from "../enums/message";
 import { MessageType } from "../enums/message";
 import { AttachmentType } from "../enums/attachmentType";
 import { SystemEventType } from "../enums/systemEventType";
-import { CallResponseDto } from "./call.response";
 import { CallLiteResponse } from "./callLite.response";
 
 export interface MessageResponse {
@@ -45,7 +44,7 @@ export interface LastMessageResponse {
   senderDisplayName: string;
   content?: string;
   icons?: string[];
-  call?: CallResponseDto;
+  call?: CallLiteResponse;
   isForwarded?: boolean;
   systemEvent?: SystemEventType | null;
   createdAt: string;

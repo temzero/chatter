@@ -5,13 +5,14 @@ import { Icon } from "./Icon";
 type ButtonVariant =
   | "primary"
   | "secondary"
+  | "transparent"
   | "success"
   | "danger"
   | "ghost"
   | "link"
   | "outline";
 
-type ButtonSize = "sm" | "md" | "lg";
+type ButtonSize = "sm" | "md" | "lg" | "xl";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -26,8 +27,9 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: "bg-blue-600 hover:bg-blue-700 text-white",
+  primary: "bg-[--primary-green] hover:bg-[--primary-green-glow] text-white",
   secondary: "bg-gray-200 hover:bg-gray-300 text-gray-800",
+  transparent: "bg-[--input-border-color] hover:bg-gray-300 text-gray-800",
   success: "bg-[--primary-green] hover:bg-[--primary-green-50] text-white",
   danger: "bg-red-500 hover:bg-red-600 text-white",
   ghost: "bg-transparent hover:bg-gray-100/10 text-current",
@@ -38,8 +40,16 @@ const variantClasses: Record<ButtonVariant, string> = {
 
 const sizeClasses: Record<ButtonSize, string> = {
   sm: "py-1 px-3 text-sm",
-  md: "py-2 px-4 text-base",
-  lg: "py-3 px-6 text-lg",
+  md: "py-2 px-4 text-md",
+  lg: "py-2 px-4 text-lg",
+  xl: "py-3 px-6 text-xl",
+};
+
+const iconSizeMap: Record<ButtonSize, number> = {
+  sm: 20,
+  md: 24,
+  lg: 32,
+  xl: 40,
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -65,11 +75,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const widthClass = fullWidth ? "w-full" : "";
     const iconOnly = icon && !children;
     const roundedClass = isRoundedFull ? "rounded-full" : "rounded-md";
+    const iconSize = iconSizeMap[size];
 
     return (
       <motion.button
         ref={ref}
-        className={`flex items-center justify-center gap-2 ${baseClasses} ${roundedClass} ${
+        className={`flex items-center justify-center gap-2 select-none ${baseClasses} ${roundedClass} ${
           variantClasses[variant]
         } ${sizeClasses[size]} ${widthClass} ${
           iconOnly ? "p-2" : ""
@@ -80,28 +91,16 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {loading ? (
           <span className="animate-spin">
-            <Icon
-              name="refresh"
-              isFilled={isIconFilled}
-              size={size === "sm" ? 20 : 28}
-            />
+            <Icon name="refresh" isFilled={isIconFilled} size={iconSize} />
           </span>
         ) : (
           <>
             {icon && iconPosition === "left" && (
-              <Icon
-                name={icon}
-                isFilled={isIconFilled}
-                size={size === "sm" ? 20 : 28}
-              />
+              <Icon name={icon} isFilled={isIconFilled} size={iconSize} />
             )}
             {children}
             {icon && iconPosition === "right" && (
-              <Icon
-                name={icon}
-                isFilled={isIconFilled}
-                size={size === "sm" ? 20 : 28}
-              />
+              <Icon name={icon} isFilled={isIconFilled} size={iconSize} />
             )}
           </>
         )}

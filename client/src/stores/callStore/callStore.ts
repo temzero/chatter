@@ -36,9 +36,12 @@ export interface CallActions {
   startCall: (
     chatId: string,
     videoCall?: boolean,
-    screenShare?: boolean
+    opts?: {
+      videoStream?: MediaStream | null;
+      screenStream?: MediaStream | null;
+    }
   ) => Promise<void>;
-  startBroadcast: (chatId: string) => Promise<void>;
+  openBroadCastPreview: (chatId: string) => Promise<void>;
   joinCall: (options: {
     isVoiceEnabled?: boolean;
     isVideoEnabled?: boolean;
@@ -90,17 +93,19 @@ export const useCallStore = create<CallState & CallActions>()(
     endedAt: undefined,
     error: null,
 
-    // ========== LIFECYCLE ==========
     startCall: async (
       chatId: string,
       videoCall?: boolean,
-      screenShare?: boolean
+      opts?: {
+        videoStream?: MediaStream;
+        screenStream?: MediaStream;
+      }
     ) => {
       get().clearCallData();
       const isVideoCall = !!videoCall;
-      const isScreenShare = !!screenShare;
+      // const isScreenShare = !!screenShare;
+
       try {
-        // update base state
         set({
           chatId,
           isVideoCall,
@@ -130,11 +135,19 @@ export const useCallStore = create<CallState & CallActions>()(
           return;
         }
 
+        // connect with requested options
         await get().connectToLiveKitRoom(token, {
           audio: true,
-          video: isVideoCall,
-          screen: isScreenShare,
+          video: opts?.videoStream ? false : isVideoCall,
         });
+
+        // 👇 if screenShare is enabled and user already picked a screen in preview
+        if (opts?.videoStream) {
+          await liveKitService.toggleCamera(true, opts.screenStream);
+        }
+        if (opts?.screenStream) {
+          await liveKitService.toggleScreenShare(true, opts.screenStream);
+        }
       } catch (err) {
         console.error("[startCall] error:", err);
         set({
@@ -145,7 +158,7 @@ export const useCallStore = create<CallState & CallActions>()(
       }
     },
 
-    startBroadcast: async (chatId: string) => {
+    openBroadCastPreview: async (chatId: string) => {
       get().clearCallData();
       // update base state
       set({

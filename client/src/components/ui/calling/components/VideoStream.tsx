@@ -6,16 +6,19 @@ interface VideoStreamProps {
   stream: MediaStream | RemoteTrack | null;
   className?: string;
   muted?: boolean;
-  mirror?: boolean; // optional mirror for self-view
+  objectCover?: boolean;
+  mirror?: boolean;
 }
 
 export const VideoStream = ({
   stream,
   className = "",
+  objectCover = false,
   muted = false,
   mirror = false,
 }: VideoStreamProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  console.log("Video Stream", stream);
 
   useEffect(() => {
     const videoEl = videoRef.current;
@@ -34,22 +37,26 @@ export const VideoStream = ({
 
     if (stream instanceof MediaStream) {
       videoEl.srcObject = stream;
-      videoEl.play().catch((err) => console.warn("Video play failed:", err));
+      videoEl.onloadedmetadata = () => {
+        videoEl.play().catch((err) => console.warn("Video play failed:", err));
+      };
     }
   }, [stream]);
 
+  console.log("videoRef", videoRef);
+
   return (
-    <div className={`${className} relative aspect-video overflow-hidden`}>
-      <video
-        ref={videoRef}
-        className="absolute inset-0 w-full h-full object-cover z-0"
-        autoPlay
-        playsInline
-        muted={muted}
-        style={{
-          transform: mirror ? "scaleX(-1)" : "none",
-        }}
-      />
-    </div>
+    <video
+      ref={videoRef}
+      className={`h-full w-full select-none ${className} ${
+        objectCover && "object-cover"
+      }`}
+      autoPlay
+      playsInline
+      muted={muted}
+      style={{
+        transform: mirror ? "scaleX(-1)" : "none",
+      }}
+    />
   );
 };

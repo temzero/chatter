@@ -17,6 +17,7 @@ import { formatTimeAgo } from "@/utils/formatTimeAgo";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { CallStatus } from "@/types/enums/CallStatus";
 import { useShallow } from "zustand/shallow";
+import { ChatMemberRole } from "@/types/enums/chatMemberRole";
 
 interface ChatHeaderProps {
   chat: ChatResponse;
@@ -37,7 +38,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
     isVideoCall,
     callStatus,
     startCall,
-    startBroadcast,
+    openBroadCastPreview,
     joinCall,
     getActiveCall,
   } = useCallStore(
@@ -47,7 +48,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
       isVideoCall: state.isVideoCall,
       callStatus: state.callStatus,
       startCall: state.startCall,
-      startBroadcast: state.startBroadcast,
+      openBroadCastPreview: state.openBroadCastPreview,
       joinCall: state.joinCall,
       getActiveCall: state.getActiveCall,
     }))
@@ -152,7 +153,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
           {isSearchMessages ? (
             <MessageSearchBar />
           ) : (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 select-none">
               <div className="flex items-center cursor-pointer rounded-full p-1">
                 {isCalling ? (
                   <button
@@ -161,9 +162,9 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                   >
                     {isChannel ? "Join Broadcast" : "Join Call"}
                     <i className="material-symbols-outlined text-3xl">
+                      {isDirect && "phone"}
                       {isVideoCall && "videocam"}
                       {isChannel && "connected_tv"}
-                      {isDirect && "phone"}
                     </i>
                   </button>
                 ) : (
@@ -190,16 +191,18 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                       </button>
                     )}
 
-                    {isChannel && (
-                      <button
-                        onClick={() => startBroadcast(chat.id)}
-                        className="opacity-60 hover:opacity-100 transition"
-                      >
-                        <i className="material-symbols-outlined text-3xl">
-                          connected_tv
-                        </i>
-                      </button>
-                    )}
+                    {isChannel &&
+                      (chat.myRole === ChatMemberRole.ADMIN ||
+                        chat.myRole === ChatMemberRole.OWNER) && (
+                        <button
+                          onClick={() => openBroadCastPreview(chat.id)}
+                          className="opacity-60 hover:opacity-100 transition"
+                        >
+                          <i className="material-symbols-outlined text-3xl">
+                            connected_tv
+                          </i>
+                        </button>
+                      )}
                   </>
                 )}
               </div>

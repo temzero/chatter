@@ -73,8 +73,10 @@ const CallMember = ({
           {/* Video or screen share */}
           <VideoStream
             stream={screenTrack || videoTrack!}
-            className="absolute inset-0 w-full h-full object-cover z-0"
-            mirror={true}
+            // className="absolute inset-0 z-0"
+            className="z-0"
+            objectCover
+            mirror
           />
 
           {/* Audio with visualizer */}

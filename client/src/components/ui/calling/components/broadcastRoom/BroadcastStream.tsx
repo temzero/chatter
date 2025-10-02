@@ -17,56 +17,30 @@ export const BroadcastStream = ({
   containerRef,
   className = "",
 }: BroadcastStreamProps) => {
-  const { videoTrack, audioTrack, screenTrack } = useRemoteTracks(participant);
+  const { audioTrack, videoTrack, screenTrack } = useRemoteTracks(participant);
 
-  // Screen + Camera
-  if (screenTrack && videoTrack) {
-    return (
-      <div className={`relative w-full h-full ${className}`}>
-        <VideoStream
-          stream={screenTrack}
-          className="w-full h-full object-cover z-0"
-        />
+  if (!audioTrack && !videoTrack && !screenTrack) return null;
+
+  return (
+    <div className={`relative w-full h-full ${className}`}>
+      {/* Screen or Camera */}
+      {screenTrack ? (
+        <VideoStream stream={screenTrack} />
+      ) : videoTrack ? (
+        <VideoStream stream={videoTrack} mirror />
+      ) : null}
+
+      {/* Draggable Camera overlay */}
+      {screenTrack && videoTrack && (
         <DraggableContainer containerRef={containerRef} position="bottom-right">
           <UserCamera videoStream={videoTrack} audioStream={audioTrack} />
         </DraggableContainer>
-      </div>
-    );
-  }
+      )}
 
-  // Only Screen
-  if (screenTrack) {
-    return (
-      <div className={`relative w-full h-full ${className}`}>
-        <VideoStream
-          stream={screenTrack}
-          className="w-full h-full object-cover z-0"
-        />
-        {audioTrack && <VoiceStream stream={audioTrack} />}
-      </div>
-    );
-  }
-
-  // Only Camera
-  if (videoTrack) {
-    return (
-      <div className={`relative w-full h-full ${className}`}>
-        <VideoStream
-          stream={videoTrack}
-          className="w-full h-full object-cover z-0"
-          mirror
-        />
-        {audioTrack && <VoiceStream stream={audioTrack} />}
-      </div>
-    );
-  }
-
-  // Only Audio or nothing
-  if (audioTrack) {
-    return <VoiceStream stream={audioTrack} />;
-  }
-
-  return null;
+      {/* Always render audio */}
+      {audioTrack && <VoiceStream stream={audioTrack} />}
+    </div>
+  );
 };
 
 export default React.memo(BroadcastStream);

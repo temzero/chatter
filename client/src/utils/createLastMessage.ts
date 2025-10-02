@@ -27,7 +27,7 @@ export function createLastMessage(
     icons,
     isForwarded,
     systemEvent: message.systemEvent,
-    callStatus: message.call?.status,
+    call: message.call,
     createdAt: message.createdAt,
   };
 }

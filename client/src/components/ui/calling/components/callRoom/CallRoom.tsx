@@ -4,13 +4,22 @@ import { useLocalTracks } from "@/hooks/mediaStreams/useLocalTracks";
 import { RemoteParticipant, RoomEvent } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
 import { ParticipantsGrid } from "./ParticipantsGrid";
-import { CallHeaderInfo } from "./CallHeaderInfo";
 import { CallControls } from "./CallControls";
 import { CallHeader } from "../CallHeader";
 import { DraggableContainer } from "./DraggableContainer";
 import { UserCamera } from "./UserCamera";
+import { Button } from "@/components/ui/Button";
+import { Timer } from "@/components/ui/Timer";
 
-export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
+export const CallRoom = ({
+  chat,
+  isExpanded,
+  onToggleExpand,
+}: {
+  chat: ChatResponse;
+  isExpanded: boolean;
+  onToggleExpand?: () => void;
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const startedAt = useCallStore((state) => state.startedAt);
   const room = useCallStore((state) => state.getLiveKitRoom());
@@ -64,11 +73,19 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
       className="relative w-full h-full flex flex-col items-center justify-center text-white"
     >
       {/* Header info */}
-      <CallHeaderInfo
-        chat={chat}
-        memberCount={memberCount}
-        startedAt={startedAt}
-      />
+      {/* <CallInfo chat={chat} memberCount={memberCount} startedAt={startedAt} /> */}
+      <div className="absolute left-2 top-1 z-20">
+        {chat.name}
+        {memberCount > 1 && (
+          <span>
+            🔸
+            <span className="opacity-60">{memberCount + 1}</span>
+          </span>
+        )}
+      </div>
+      <div className="absolute bottom-1 right-2 z-20">
+        {startedAt && <Timer startTime={startedAt} />}
+      </div>
 
       {memberCount > 0 ? (
         <ParticipantsGrid participants={participants} />
@@ -80,19 +97,23 @@ export const CallRoom = ({ chat }: { chat: ChatResponse }) => {
       )}
 
       {/* Local video preview */}
-      {/* <LocalVideoPreview
-        videoStream={localVideoStream}
-        audioStream={localAudioStream}
-        isVideoEnabled={isVideoEnabled}
-        isMuted={isMuted}
-        containerRef={containerRef}
-      /> */}
       <DraggableContainer containerRef={containerRef} position="bottom-right">
         <UserCamera
           videoStream={localVideoStream}
           audioStream={localAudioStream}
         />
       </DraggableContainer>
+
+      <div className="flex gap-2 absolute top-1 right-1">
+        <Button
+          variant="ghost"
+          className="w-8 h-8 opacity-70"
+          isIconFilled={true}
+          isRoundedFull
+          onClick={onToggleExpand}
+          icon={isExpanded ? "collapse_content" : "expand_content"}
+        />
+      </div>
 
       {/* Controls */}
       <DraggableContainer containerRef={containerRef} position="bottom-middle">
