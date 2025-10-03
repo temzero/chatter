@@ -5,8 +5,6 @@ import { getFileIcon } from "@/utils/getFileIcon";
 import { useModalStore } from "@/stores/modalStore";
 import { AttachmentResponse } from "@/types/responses/message.response";
 import { AttachmentType } from "@/types/enums/attachmentType";
-import { playSoundEffect } from "@/utils/playSoundEffect";
-import flipSwitchSound from "@/assets/sound/flip-switch.mp3";
 import CustomVideoPlayer from "./CustomVideoPlayer";
 
 // Helper function to calculate greatest common divisor (GCD)
@@ -97,7 +95,6 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
   const handleOpenModal = () => {
     closeModal();
     openMediaModal(attachment.id);
-    playSoundEffect(flipSwitchSound);
   };
 
   // Get appropriate source URL based on preview mode

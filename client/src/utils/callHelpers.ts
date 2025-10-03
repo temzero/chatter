@@ -1,4 +1,4 @@
-import { CallStatus } from "@/types/enums/CallStatus";
+import { CallStatus, LocalCallStatus } from "@/types/enums/CallStatus";
 import { formatDurationByStartAndEnd } from "./formatDuration";
 
 export const getCallText = (
@@ -51,3 +51,21 @@ export const getCallIcon = (status: CallStatus) => {
       return "call";
   }
 };
+
+// ========== HELPERS ==========
+export function getLocalCallStatus(
+  callStatus: CallStatus
+): LocalCallStatus | undefined {
+  switch (callStatus) {
+    case CallStatus.IN_PROGRESS:
+      return LocalCallStatus.CONNECTED;
+    case CallStatus.DIALING:
+      return LocalCallStatus.INCOMING;
+    case CallStatus.COMPLETED:
+    case CallStatus.MISSED:
+    case CallStatus.FAILED:
+      return LocalCallStatus.ENDED;
+    default:
+      return undefined;
+  }
+}

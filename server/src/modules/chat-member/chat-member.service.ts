@@ -74,12 +74,12 @@ export class ChatMemberService {
   async getChatIdsByUserId(userId: string): Promise<string[]> {
     try {
       const memberships = await this.memberRepo.find({
-        where: { userId, deletedAt: IsNull() }, // only active memberships
+        where: { userId, deletedAt: IsNull() },
         select: ['chatId'],
       });
 
       if (!memberships || memberships.length === 0) {
-        return []; // no chats instead of throwing, so caller can handle gracefully
+        return [];
       }
 
       return memberships.map((m) => m.chatId);

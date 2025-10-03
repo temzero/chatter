@@ -1,35 +1,33 @@
+import { useRef } from "react";
+import { Button } from "../Button";
 import { ChatResponse } from "@/types/responses/chat.response";
 import { CallHeader } from "./components/CallHeader";
-import { Button } from "../Button";
 import { VideoStream } from "./components/VideoStream";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { useModalStore } from "@/stores/modalStore";
-import { useRef } from "react";
 import { VoiceVisualizerButton } from "../VoiceVisualizerBtn";
 import { useLocalPreviewVoiceTrack } from "@/hooks/mediaStreams/useLocalPreviewVoiceTrack";
 import { useLocalPreviewVideoTrack } from "@/hooks/mediaStreams/useLocalPreviewVideoTrack";
 import { useLocalPreviewScreenTrack } from "@/hooks/mediaStreams/useLocalPreviewScreenTrack";
 
 export const BroadcastPreviewModal = ({ chat }: { chat: ChatResponse }) => {
+  const startCall = useCallStore((state) => state.startCall);
   const endCall = useCallStore((state) => state.endCall);
   const closeModal = useModalStore.getState().closeModal;
 
   const { localVoiceStream, isVoiceEnabled, toggleVoice, stopVoice } =
     useLocalPreviewVoiceTrack(true);
   const { localVideoStream, isVideoEnabled, toggleVideo, stopVideo } =
-    useLocalPreviewVideoTrack(true, { stopOnUnmount: false });
+    useLocalPreviewVideoTrack(true);
   const { localScreenStream, isScreenEnabled, toggleScreen, stopScreen } =
     useLocalPreviewScreenTrack(false, { stopOnUnmount: false });
 
   // ref for draggable constraints
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  console.log("localVideoStream", localVideoStream);
-  console.log("localScreenStream", localScreenStream);
-
   const startBroadcast = async () => {
     try {
-      await useCallStore.getState().startCall(chat.id, isVideoEnabled, {
+      await startCall(chat.id, isVideoEnabled, {
         screenStream: localScreenStream,
       });
     } catch (err) {
@@ -38,7 +36,6 @@ export const BroadcastPreviewModal = ({ chat }: { chat: ChatResponse }) => {
   };
 
   const cancelCall = () => {
-    // Stop all local tracks explicitly
     stopVoice();
     stopVideo();
     stopScreen();
@@ -73,12 +70,6 @@ export const BroadcastPreviewModal = ({ chat }: { chat: ChatResponse }) => {
           <div className="h-full aspect-square rounded-full overflow-hidden custom-border">
             <VideoStream stream={localVideoStream} objectCover mirror />
           </div>
-        )}
-
-        {!localVideoStream && !localScreenStream && (
-          <span className="material-symbols-outlined opacity-50 text-6xl">
-            close
-          </span>
         )}
       </div>
 

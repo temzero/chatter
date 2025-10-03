@@ -17,7 +17,7 @@ export const SummaryCall = ({
   const localCallStatus = useCallStore((state) => state.localCallStatus);
   const error = useCallStore((state) => state.error);
   const closeCallModal = useCallStore((state) => state.closeCallModal);
-  console.log("localCallStatus", localCallStatus);
+  // console.log("localCallStatus", localCallStatus);
   // Auto-close when call is canceled
   useEffect(() => {
     if (localCallStatus === LocalCallStatus.CANCELED) {

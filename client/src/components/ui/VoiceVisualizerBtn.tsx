@@ -37,8 +37,6 @@ export const VoiceVisualizerButton = ({
     return null;
   }, [stream]);
 
-  console.log("VoiceVisualizerButton muted:", isMuted);
-
   return (
     <div
       className={`relative inline-flex items-center justify-center overflow-hidden aspect-square ${className}`}

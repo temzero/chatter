@@ -43,11 +43,11 @@ const InfiniteScroller = forwardRef<HTMLDivElement, InfiniteScrollerProps>(
 
         if (isScrollUp) {
           shouldLoad = el.scrollTop < threshold;
-        //   if (shouldLoad) toast.info("Scrolled near top - loading more...");
+          //   if (shouldLoad) toast.info("Scrolled near top - loading more...");
         } else {
           shouldLoad =
             el.scrollTop + el.clientHeight >= el.scrollHeight - threshold;
-        //   if (shouldLoad) toast.info("Scrolled near bottom - loading more...");
+          //   if (shouldLoad) toast.info("Scrolled near bottom - loading more...");
         }
 
         if (shouldLoad) {
@@ -65,40 +65,40 @@ const InfiniteScroller = forwardRef<HTMLDivElement, InfiniteScrollerProps>(
       [hasMore, onLoadMore, threshold, isScrollUp]
     );
 
-    // useEffect(() => {
-    //   // Delay check to next tick so layout is ready
-    //   const el = containerRef.current;
-    //   if (!el) return;
+    useEffect(() => {
+      // Delay check to next tick so layout is ready
+      const el = containerRef.current;
+      if (!el) return;
 
-    //   if (hasAutoLoadedRef.current) return;
+      if (hasAutoLoadedRef.current) return;
 
-    //   const checkNoScrollbar = () => {
-    //     const noScroll = el.scrollHeight <= el.clientHeight;
-    //     // console.log("[InfiniteScroller] checkNoScrollbar:", {
-    //     //   scrollHeight: el.scrollHeight,
-    //     //   clientHeight: el.clientHeight,
-    //     //   noScroll,
-    //     // });
+      const checkNoScrollbar = () => {
+        const noScroll = el.scrollHeight <= el.clientHeight;
+        // console.log("[InfiniteScroller] checkNoScrollbar:", {
+        //   scrollHeight: el.scrollHeight,
+        //   clientHeight: el.clientHeight,
+        //   noScroll,
+        // });
 
-    //     if (hasMore && noScroll) {
-    //       hasAutoLoadedRef.current = true;
-    //     //   toast.info("No scrollbar detected - loading more...");
-    //       isFetchingRef.current = true;
-    //       setIsLoading(true);
-    //       onLoadMore()
-    //         .catch(() => {}) // ignore errors here or handle them
-    //         .finally(() => {
-    //           isFetchingRef.current = false;
-    //           setIsLoading(false);
-    //         });
-    //     }
-    //   };
+        if (hasMore && noScroll) {
+          hasAutoLoadedRef.current = true;
+          //   toast.info("No scrollbar detected - loading more...");
+          isFetchingRef.current = true;
+          setIsLoading(true);
+          onLoadMore()
+            .catch(() => {}) // ignore errors here or handle them
+            .finally(() => {
+              isFetchingRef.current = false;
+              setIsLoading(false);
+            });
+        }
+      };
 
-    //   // Use requestAnimationFrame or setTimeout for safety
-    //   const id = window.requestAnimationFrame(checkNoScrollbar);
+      // Use requestAnimationFrame or setTimeout for safety
+      const id = window.requestAnimationFrame(checkNoScrollbar);
 
-    //   return () => window.cancelAnimationFrame(id);
-    // }, [children, hasMore, onLoadMore]);
+      return () => window.cancelAnimationFrame(id);
+    }, [children, hasMore, onLoadMore]);
 
     return (
       <div

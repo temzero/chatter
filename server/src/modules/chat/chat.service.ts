@@ -229,6 +229,18 @@ export class ChatService {
     return plainToInstance(ChatResponseDto, updatedChat);
   }
 
+  async getChatById(chatId: string): Promise<Chat> {
+    const chat = await this.chatRepo.findOne({
+      where: { id: chatId },
+    });
+
+    if (!chat) {
+      ErrorResponse.notFound('Chat not found');
+    }
+
+    return chat;
+  }
+
   async getUserChats(
     userId: string,
     options: PaginationQuery = { offset: 0, limit: 20 },
@@ -264,40 +276,19 @@ export class ChatService {
       await Promise.all(
         chats.map(async (chat) => {
           try {
-            return chat.type === ChatType.DIRECT
-              ? await this.chatMapper.mapDirectChatToChatResDto(
-                  chat,
-                  userId,
-                  this.messageService,
-                )
-              : await this.chatMapper.mapGroupChatToChatResDto(
-                  chat,
-                  userId,
-                  this.messageService,
-                );
+            // ✅ Use the unified mapper for all chat types
+            return await this.chatMapper.mapChatToChatResDto(chat, userId);
           } catch (err) {
             console.error('❌ Failed to transform chat:', chat.id, err);
             return null;
           }
         }),
       )
-    ).filter((dto): dto is ChatResponseDto => dto !== null); // 👈 Type guard
+    ).filter((dto): dto is ChatResponseDto => dto !== null);
 
     const resultChats = savedChat ? [savedChat, ...chatDtos] : chatDtos;
 
     return { chats: resultChats, hasMore };
-  }
-
-  async getChatById(chatId: string): Promise<Chat> {
-    const chat = await this.chatRepo.findOne({
-      where: { id: chatId },
-    });
-
-    if (!chat) {
-      ErrorResponse.notFound('Chat not found');
-    }
-
-    return chat;
   }
 
   async getUserChat(chatId: string, userId: string): Promise<ChatResponseDto> {
@@ -307,17 +298,12 @@ export class ChatService {
       .getOne();
 
     if (chat) {
-      return chat.type === ChatType.DIRECT
-        ? this.chatMapper.mapDirectChatToChatResDto(
-            chat,
-            userId,
-            this.messageService,
-          )
-        : this.chatMapper.mapGroupChatToChatResDto(
-            chat,
-            userId,
-            this.messageService,
-          );
+      // ✅ Use unified mapper
+      const chatDto = await this.chatMapper.mapChatToChatResDto(chat, userId);
+      if (!chatDto) {
+        ErrorResponse.notFound('Failed to map chat to response DTO');
+      }
+      return chatDto;
     }
 
     // If not a member, allow access only if it's a public channel
@@ -337,7 +323,11 @@ export class ChatService {
       ErrorResponse.notFound('Chat not found or not accessible');
     }
 
-    return this.chatMapper.mapPublicChatToChatResDto(channel);
+    const chatDto = await this.chatMapper.mapChatToChatResDto(channel, userId);
+    if (!chatDto) {
+      ErrorResponse.notFound('Failed to map chat to response DTO');
+    }
+    return chatDto;
   }
 
   async pinMessage(

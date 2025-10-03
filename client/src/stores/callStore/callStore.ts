@@ -11,6 +11,7 @@ import { handleError } from "@/utils/handleError";
 import { CallError, IncomingCallResponse } from "@/types/callPayload";
 import { callService } from "@/services/callService";
 import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
+import { getLocalCallStatus } from "@/utils/callHelpers";
 
 export interface CallState {
   liveKitService: LiveKitService | null;
@@ -250,8 +251,32 @@ export const useCallStore = create<CallState & CallActions>()(
       closeCallModal();
     },
 
+    // leaveCall: () => {
+    //   const { disconnectFromLiveKit, closeCallModal } = get();
+    //   disconnectFromLiveKit();
+    //   closeCallModal();
+    // },
+
     leaveCall: () => {
-      const { disconnectFromLiveKit, closeCallModal } = get();
+      const { disconnectFromLiveKit, closeCallModal, liveKitService } = get();
+
+      // const { localVideoStream, localAudioStream, localScreenStream } =
+      //   useLocalTracks(); // call the hook directly to get the state
+      // [localVideoStream, localAudioStream, localScreenStream].forEach(
+      //   (stream) => stream?.getTracks().forEach((track) => track.stop())
+      // );
+
+      // Stop all local tracks (video, audio, screen)
+      if (liveKitService) {
+        const local = liveKitService.getLocalParticipant();
+        if (local) {
+          local.getTrackPublications().forEach((pub) => {
+            pub.track?.stop();
+            pub.track?.mediaStreamTrack?.stop();
+          });
+        }
+      }
+
       disconnectFromLiveKit();
       closeCallModal();
     },
@@ -347,10 +372,7 @@ export const useCallStore = create<CallState & CallActions>()(
             chatId: call.chatId,
             isVideoCall: call.isVideoCall,
             callStatus: call.status,
-            localCallStatus:
-              call.status === CallStatus.IN_PROGRESS
-                ? LocalCallStatus.CONNECTED
-                : LocalCallStatus.INCOMING,
+            localCallStatus: getLocalCallStatus(call.status),
             startedAt: call.startedAt ? new Date(call.startedAt) : undefined,
           });
         }

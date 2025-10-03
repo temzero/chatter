@@ -1,25 +1,43 @@
-// mappers/call.mapper.ts
+// src/modules/call/mappers/call.mapper.ts
+import { Injectable } from '@nestjs/common';
 import { Call } from '../entities/call.entity';
 import { CallResponseDto } from '../dto/call-response.dto';
-// import { mapChatMemberToChatMemberLiteDto } from 'src/modules/chat-member/mappers/chat-member-lite.mapper';
+import { ChatMapper } from 'src/modules/chat/mappers/chat.mapper';
+import { mapChatMemberToChatMemberResDto } from 'src/modules/chat-member/mappers/chat-member.mapper';
+import { ChatType } from 'src/modules/chat/constants/chat-types.constants';
 
-export function mapCallToCallResDto(call: Call): CallResponseDto {
-  const dto = new CallResponseDto();
+@Injectable()
+export class CallMapper {
+  constructor(private readonly chatMapper: ChatMapper) {}
 
-  dto.id = call.id;
-  dto.chat = call.chat;
-  dto.status = call.status;
-  dto.startedAt = call.startedAt ?? null;
-  dto.endedAt = call.endedAt ?? null;
-  dto.updatedAt = call.updatedAt ?? null;
-  dto.createdAt = call.createdAt;
-  // dto.initiator = mapChatMemberToChatMemberLiteDto(call.initiator);
-  dto.initiator = call.initiator;
+  async map(call: Call, currentUserId: string): Promise<CallResponseDto> {
+    const dto = new CallResponseDto();
 
-  // fallback avatar if chat has no avatar
-  if (!dto.chat?.avatarUrl) {
-    dto.chat.avatarUrl = call.initiator?.user?.avatarUrl ?? null;
+    dto.id = call.id;
+    dto.status = call.status;
+    dto.startedAt = call.startedAt ?? null;
+    dto.endedAt = call.endedAt ?? null;
+    dto.updatedAt = call.updatedAt ?? null;
+    dto.createdAt = call.createdAt;
+
+    // Map initiator properly
+    if (call.initiator) {
+      dto.initiator = mapChatMemberToChatMemberResDto(
+        call.initiator,
+        call.chat?.type ?? ChatType.DIRECT,
+        false, // isBlockedByMe (optional)
+        false, // isBlockedMe (optional)
+      );
+    }
+
+    // Map chat using the unified ChatMapper
+    if (call.chat) {
+      dto.chat = await this.chatMapper.mapChatToChatResDto(
+        call.chat,
+        currentUserId,
+      );
+    }
+
+    return dto;
   }
-
-  return dto;
 }

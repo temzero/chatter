@@ -19,14 +19,14 @@ const TypingIndicator = ({ chatId }: TypingIndicatorProps) => {
   // Play sound when someone starts typing
   useEffect(() => {
     if (previousTypingCount.current === 0 && isTyping) {
-      playSound(SoundType.NEW_MESSAGE);
+      playSound(SoundType.TYPING, 0.9);
     }
     previousTypingCount.current = typingMembers.length;
   }, [isTyping, playSound, typingMembers.length]);
 
   // Stop sound on unmount
   useEffect(() => {
-    return () => stopSound(SoundType.NEW_MESSAGE);
+    return () => stopSound(SoundType.TYPING);
   }, [stopSound]);
 
   const displayAvatars = useMemo(() => {

@@ -48,9 +48,9 @@ const ChatList: React.FC<ChatListProps> = React.memo(
             currentUserId={currentUserId}
           />
         ))}
-        {!hasMoreChats && chats.length > 0 && (
+        {/* {!hasMoreChats && chats.length > 0 && (
           <div className="p-2 text-center opacity-40">No more chats</div>
-        )}
+        )} */}
       </InfiniteScroller>
     );
   }

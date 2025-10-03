@@ -14,6 +14,7 @@ import { ChatModule } from '../chat/chat.module';
 import { WebsocketCallService } from '../websocket/services/websocket-call.service';
 import { WebSocketModule } from '../websocket/websocket.module';
 import { UserModule } from '../user/user.module';
+import { CallMapper } from './mappers/call.mapper';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { UserModule } from '../user/user.module';
   ],
   controllers: [CallController, LiveKitWebhookController],
   providers: [
+    CallMapper,
     CallService,
     LiveKitService,
     CallStoreService,

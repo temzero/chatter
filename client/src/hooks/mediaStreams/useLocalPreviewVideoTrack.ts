@@ -17,7 +17,7 @@ export const useLocalPreviewVideoTrack = (
   const [isVideoEnabled, setIsVideoEnabled] = useState(startEnabled);
   const streamRef = useRef<MediaStream | null>(null);
 
-  // Stop all tracks safely
+  // Stop all tracks and release camera
   const cleanupStream = useCallback(() => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
@@ -27,51 +27,40 @@ export const useLocalPreviewVideoTrack = (
     setIsVideoEnabled(false);
   }, []);
 
-  // Initialize video
-  useEffect(() => {
-    let mounted = true;
-
-    const initVideo = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-        });
-
-        if (!mounted) {
-          // Stop immediately if component unmounted
-          stream.getTracks().forEach((track) => track.stop());
-          return;
-        }
-
-        streamRef.current = stream;
-        setLocalVideoStream(stream);
-        setIsVideoEnabled(true);
-      } catch (err) {
-        console.error("Failed to get video stream:", err);
-        setIsVideoEnabled(false);
-      }
-    };
-
-    if (startEnabled) {
-      initVideo();
-    }
-
-    return () => {
-      mounted = false;
-      if (opts.stopOnUnmount) cleanupStream();
-    };
-  }, [startEnabled, opts.stopOnUnmount, cleanupStream]);
-
-  const toggleVideo = useCallback(() => {
-    if (streamRef.current) {
-      const videoTrack = streamRef.current.getVideoTracks()[0];
-      if (videoTrack) {
-        videoTrack.enabled = !videoTrack.enabled;
-        setIsVideoEnabled(videoTrack.enabled);
-      }
+  // Start video and request camera
+  const startVideo = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      streamRef.current = stream;
+      setLocalVideoStream(stream);
+      setIsVideoEnabled(true);
+    } catch (err) {
+      console.error("Failed to access camera:", err);
+      setIsVideoEnabled(false);
     }
   }, []);
 
+  useEffect(() => {
+    if (startEnabled) {
+      startVideo();
+    }
+    return () => {
+      if (opts.stopOnUnmount) cleanupStream();
+    };
+  }, [startEnabled, startVideo, cleanupStream, opts.stopOnUnmount]);
+
+  // Toggle video: stop or start camera
+  const toggleVideo = useCallback(() => {
+    if (isVideoEnabled) {
+      // Stop the camera entirely
+      cleanupStream();
+    } else {
+      // Request camera again
+      startVideo();
+    }
+  }, [isVideoEnabled, cleanupStream, startVideo]);
+
+  // Stop video permanently
   const stopVideo = useCallback(() => {
     cleanupStream();
   }, [cleanupStream]);

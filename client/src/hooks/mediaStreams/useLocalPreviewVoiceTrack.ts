@@ -17,22 +17,19 @@ export const useLocalPreviewVoiceTrack = (
   const [isVoiceEnabled, setIsVoiceEnabled] = useState(startEnabled);
   const streamRef = useRef<MediaStream | null>(null);
 
-  // Stop all tracks and clear references
+  // Stop all tracks and release mic
   const cleanupStream = useCallback(() => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => {
-        track.stop();
-      });
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
     setLocalVoiceStream(null);
     setIsVoiceEnabled(false);
   }, []);
 
+  // Request microphone access
   const startVoice = useCallback(async () => {
     try {
-      cleanupStream(); // stop any existing stream
-
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -45,33 +42,34 @@ export const useLocalPreviewVoiceTrack = (
       setLocalVoiceStream(stream);
       setIsVoiceEnabled(true);
     } catch (err) {
-      console.error("Failed to get audio stream:", err);
+      console.error("Failed to access microphone:", err);
       cleanupStream();
     }
   }, [cleanupStream]);
 
-  const toggleVoice = useCallback(() => {
-    if (streamRef.current) {
-      const audioTrack = streamRef.current.getAudioTracks()[0];
-      if (audioTrack) {
-        audioTrack.enabled = !audioTrack.enabled;
-        setIsVoiceEnabled(audioTrack.enabled);
-      }
-    }
-  }, []);
-
-  const stopVoice = useCallback(() => {
-    cleanupStream();
-  }, [cleanupStream]);
-
-  // Initialize if startEnabled is true
   useEffect(() => {
     if (startEnabled) startVoice();
 
     return () => {
       if (opts.stopOnUnmount) cleanupStream();
     };
-  }, [startEnabled, opts.stopOnUnmount, startVoice, cleanupStream]);
+  }, [startEnabled, startVoice, cleanupStream, opts.stopOnUnmount]);
+
+  // Toggle microphone: stop or start
+  const toggleVoice = useCallback(() => {
+    if (isVoiceEnabled) {
+      // Stop mic entirely
+      cleanupStream();
+    } else {
+      // Request mic again
+      startVoice();
+    }
+  }, [isVoiceEnabled, cleanupStream, startVoice]);
+
+  // Fully stop microphone
+  const stopVoice = useCallback(() => {
+    cleanupStream();
+  }, [cleanupStream]);
 
   return {
     localVoiceStream,

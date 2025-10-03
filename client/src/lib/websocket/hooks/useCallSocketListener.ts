@@ -8,6 +8,8 @@ import { ModalType, useModalStore } from "@/stores/modalStore";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { useCallSounds } from "@/hooks/useCallSound";
 import { callService } from "@/services/callService";
+import { useAuthStore } from "@/stores/authStore";
+import { webSocketService } from "../services/websocket.service";
 import {
   CallActionResponse,
   UpdateCallPayload,
@@ -15,8 +17,6 @@ import {
   CallError,
   CallErrorResponse,
 } from "@/types/callPayload";
-import { useAuthStore } from "@/stores/authStore";
-import { webSocketService } from "../services/websocket.service";
 
 export function useCallSocketListeners() {
   const currentUserId = useAuthStore((state) => state.currentUser?.id);
@@ -44,7 +44,7 @@ export function useCallSocketListeners() {
     };
 
     const handleIncomingCall = (callResponse: IncomingCallResponse) => {
-      console.log("[INCOMING_CALL]", callResponse);
+      console.log("[INCOMING_CALL]" );
 
       const {
         callId,
@@ -63,7 +63,7 @@ export function useCallSocketListeners() {
         callId,
         chatId,
         isCaller,
-        isVideoCall: isVideoCall ?? false,
+        isVideoCall: isBroadcast ? false : isVideoCall,
         initiatorUserId,
         initiatorMemberId,
         ...(isBroadcast
@@ -73,7 +73,7 @@ export function useCallSocketListeners() {
                 ? LocalCallStatus.OUTGOING
                 : LocalCallStatus.INCOMING,
             }),
-        callStatus: status,
+        callStatus: isBroadcast ? CallStatus.IN_PROGRESS : status,
       });
 
       if (!isCaller && !isBroadcast) {
@@ -138,7 +138,7 @@ export function useCallSocketListeners() {
     };
 
     const handleCallDeclined = (data: CallActionResponse) => {
-      console.log("[CALL_DECLINED]", data);
+      console.log("[CALL_DECLINED]");
       const { callId, isCallerCancel } = data;
       const callStore = useCallStore.getState();
 
@@ -155,7 +155,7 @@ export function useCallSocketListeners() {
     };
 
     const handleCallEnded = (data: UpdateCallPayload) => {
-      console.log("CALL_ENDED", data);
+      console.log("CALL_ENDED");
       const { callId } = data;
       const callStore = useCallStore.getState();
 

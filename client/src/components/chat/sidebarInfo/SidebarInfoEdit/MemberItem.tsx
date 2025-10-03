@@ -37,26 +37,24 @@ const MemberItem: React.FC<MemberItemProps> = ({ member }) => {
       }`}
       onClick={handleClick}
     >
-      <div className="flex gap-2 items-center">
-        <div className="relative flex items-center justify-center select-none">
-          <Avatar
-            avatarUrl={member.avatarUrl}
-            name={showBlockedContent ? undefined : member.firstName}
-            size="8"
-            textSize="sm"
-            isBlocked={isBlocked}
-            className={`transform transition-transform duration-300 ${
-              !isBlocked && "hover:scale-125"
-            }`}
-          />
+      <div className="flex relative gap-2 items-center">
+        <Avatar
+          avatarUrl={member.avatarUrl}
+          name={showBlockedContent ? undefined : member.firstName}
+          size="8"
+          textSize="sm"
+          isBlocked={isBlocked}
+          className={`transform transition-transform duration-300 ${
+            !isBlocked && "hover:scale-125"
+          }`}
+        />
 
-          {!isBlocked && isMemberOnline && (
-            <OnlineDot
-              isOnline={isMemberOnline}
-              className="absolute bottom-[2px] right-[2px]"
-            />
-          )}
-        </div>
+        {!isBlocked && isMemberOnline && (
+          <OnlineDot
+            isOnline={isMemberOnline}
+            className="absolute -left-1.5 top-1/2 -translate-y-1/2"
+          />
+        )}
         <h1
           className={`text-sm ${
             isCurrentUser ? "text-green-500" : isBlocked ? "text-red-400" : ""

@@ -33,6 +33,9 @@ export interface LiveKitServiceOptions {
 }
 
 export class LiveKitService {
+  static getLocalParticipant() {
+    throw new Error("Method not implemented.");
+  }
   private room: Room;
   private options?: LiveKitServiceOptions;
   private url: string = import.meta.env.VITE_LIVEKIT_WS_URL;
@@ -84,37 +87,6 @@ export class LiveKitService {
       return false;
     }
   }
-
-  // async toggleCamera(enabled: boolean, stream?: MediaStream): Promise<boolean> {
-  //   try {
-  //     if (enabled) {
-  //       await this.room.localParticipant.setCameraEnabled(
-  //         true,
-  //         {
-  //           resolution: { width: 1920, height: 1080 },
-  //           frameRate: 30,
-  //         },
-  //         {
-  //           videoEncoding: {
-  //             maxBitrate: 2500_000,
-  //             maxFramerate: 30,
-  //           },
-  //         }
-  //       );
-  //     } else {
-  //       const pub = this.room.localParticipant.getTrackPublication(
-  //         Track.Source.Camera
-  //       );
-  //       if (pub?.track) {
-  //         this.room.localParticipant.unpublishTrack(pub.track);
-  //       }
-  //     }
-  //     return true;
-  //   } catch (error) {
-  //     console.error("Failed to toggle camera:", error);
-  //     return false;
-  //   }
-  // }
 
   async toggleCamera(enabled: boolean, stream?: MediaStream): Promise<boolean> {
     try {
@@ -170,21 +142,43 @@ export class LiveKitService {
       const local = this.room.localParticipant;
 
       if (enabled) {
-        if (stream) {
-          const screenTrack = stream.getVideoTracks()[0];
-          console.log("screenTrack", screenTrack);
-          await local.publishTrack(screenTrack, {
+        // If no stream was provided, request from browser with audio
+        if (!stream) {
+          stream = await navigator.mediaDevices.getDisplayMedia({
+            video: true,
+            audio: true, // request system audio too
+          });
+        }
+
+        // ✅ publish video track
+        const videoTrack = stream.getVideoTracks()[0];
+        if (videoTrack) {
+          await local.publishTrack(videoTrack, {
             name: "screen-share",
             source: Track.Source.ScreenShare,
           });
+        }
+
+        // ✅ publish audio track if available
+        const audioTrack = stream.getAudioTracks()[0];
+        if (audioTrack) {
+          console.log("Screen share includes audio 🎤");
+          await local.publishTrack(audioTrack, {
+            name: "screen-audio",
+            source: Track.Source.ScreenShareAudio,
+          });
         } else {
-          await local.setScreenShareEnabled(true); // fallback to default prompt
+          console.log("No screen audio available ❌");
         }
       } else {
-        const pub = local.getTrackPublication(Track.Source.ScreenShare);
-        if (pub?.track) {
-          local.unpublishTrack(pub.track);
-        }
+        // Unpublish both video & audio tracks when stopping
+        const videoPub = local.getTrackPublication(Track.Source.ScreenShare);
+        if (videoPub?.track) local.unpublishTrack(videoPub.track);
+
+        const audioPub = local.getTrackPublication(
+          Track.Source.ScreenShareAudio
+        );
+        if (audioPub?.track) local.unpublishTrack(audioPub.track);
       }
 
       return true;
@@ -234,9 +228,9 @@ export class LiveKitService {
 
         this.handleExistingParticipants();
 
-        if (this.options?.audio) {
-          await this.toggleMicrophone(true);
-        }
+        // if (this.options?.audio) {
+        await this.toggleMicrophone(true);
+        // }
         if (this.options?.video) {
           await this.toggleCamera(true);
         }
@@ -248,17 +242,6 @@ export class LiveKitService {
         audioService.playSound(SoundType.USER_CONNECTED); // join sound
         this.options?.onParticipantConnected?.(participant);
         console.log("[ParticipantConnected]", participant.name);
-
-        // const { callStatus, localCallStatus } = useCallStore.getState();
-        // if (
-        //   callStatus !== CallStatus.IN_PROGRESS &&
-        //   localCallStatus !== LocalCallStatus.CONNECTED
-        // ) {
-        //   useCallStore.setState({
-        //     callStatus: CallStatus.IN_PROGRESS,
-        //     localCallStatus: LocalCallStatus.CONNECTED,
-        //   });
-        // }
       })
       .on(RoomEvent.ParticipantDisconnected, (participant) => {
         audioService.playSound(SoundType.USER_DISCONNECTED); // leave sound

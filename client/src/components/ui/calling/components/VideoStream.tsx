@@ -18,7 +18,6 @@ export const VideoStream = ({
   mirror = false,
 }: VideoStreamProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  console.log("Video Stream", stream);
 
   useEffect(() => {
     const videoEl = videoRef.current;
@@ -43,12 +42,10 @@ export const VideoStream = ({
     }
   }, [stream]);
 
-  console.log("videoRef", videoRef);
-
   return (
     <video
       ref={videoRef}
-      className={`h-full w-full select-none ${className} ${
+      className={`h-full w-full select-none transition-all ${className} ${
         objectCover && "object-cover"
       }`}
       autoPlay

@@ -43,20 +43,21 @@ const MuteChatModal: React.FC = () => {
       closeModal();
     }
   };
-  
+
   return (
     <motion.div
       {...childrenModalAnimation}
       className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border z-[99]"
     >
-      <div className="p-4">
-        <h2 className="text-2xl font-semibold mb-4 text-yellow-500">
+      <div className="p-4 flex flex-col items-center justify-center">
+        <h2 className="text-2xl flex items-center justify-center gap-2 font-semibold mb-4 text-yellow-500">
+          <span className="material-symbols-outlined text-3xl">notifications_off</span>
           Mute Chat
         </h2>
         <p className="mb-4 text-sm opacity-70">
           Choose how long to mute notifications:
         </p>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 w-full">
           {MUTE_OPTIONS.map((option) => (
             <button
               key={option.label}

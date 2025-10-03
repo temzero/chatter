@@ -12,6 +12,13 @@ import { MessageModule } from '../message/message.module';
 import { ChatMapper } from './mappers/chat.mapper';
 import { BlockModule } from '../block/block.module';
 import { InviteLinkModule } from '../invite-link/invite-link.module';
+import { DirectChatMapper } from './mappers/direct-chat.mapper';
+import { PublicChatMapper } from './mappers/public-chat.mapper';
+import { GroupChatMapper } from './mappers/group-chat.mapper';
+import { MessageMapper } from '../message/mappers/message.mapper';
+import { ChatMemberService } from '../chat-member/chat-member.service';
+import { MessageService } from '../message/message.service';
+import { SupabaseModule } from '../superbase/supabase.module';
 
 @Module({
   imports: [
@@ -22,9 +29,19 @@ import { InviteLinkModule } from '../invite-link/invite-link.module';
     forwardRef(() => BlockModule),
     forwardRef(() => WebSocketModule),
     forwardRef(() => InviteLinkModule),
+    forwardRef(() => SupabaseModule),
   ],
   controllers: [ChatController],
-  providers: [ChatService, ChatMapper],
-  exports: [ChatService, TypeOrmModule],
+  providers: [
+    ChatService,
+    ChatMapper,
+    DirectChatMapper,
+    GroupChatMapper,
+    PublicChatMapper,
+    MessageMapper,
+    ChatMemberService,
+    MessageService,
+  ],
+  exports: [ChatService, ChatMapper, TypeOrmModule],
 })
 export class ChatModule {}

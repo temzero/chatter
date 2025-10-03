@@ -26,7 +26,7 @@ export class LiveKitService {
     this.roomService = new RoomServiceClient(url, this.apiKey, this.apiSecret);
   }
 
-  async generateLivekitToken(
+  async generateLiveKitToken(
     roomName: string,
     userId: string,
     participantName: string | null,

@@ -1,7 +1,6 @@
 import React from "react";
 import { handleReaction } from "@/utils/handleReaction";
-import addReactionSound from "@/assets/sound/message-pop.mp3";
-import { playSoundEffect } from "@/utils/playSoundEffect";
+import { audioService, SoundType } from "@/services/audio.service";
 import { useModalStore } from "@/stores/modalStore";
 
 const emojis = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
@@ -29,7 +28,7 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = ({
           key={emoji}
           className="text-xl hover:scale-150 transition-transform duration-150"
           onClick={() => {
-            playSoundEffect(addReactionSound, 1);
+            audioService.playSound(SoundType.REACTION)
             handleReaction({
               emoji,
               messageId,

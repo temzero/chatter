@@ -8,7 +8,7 @@ import { CallStatus } from './type/callStatus';
 import { ChatMemberService } from '../chat-member/chat-member.service';
 import { CallResponseDto } from './dto/call-response.dto';
 import { UserService } from '../user/user.service';
-import { mapCallToCallResDto } from './mappers/call.mapper';
+import { CallMapper } from './mappers/call.mapper';
 
 @Injectable()
 export class CallService {
@@ -17,6 +17,7 @@ export class CallService {
     private readonly callRepository: Repository<Call>,
     private readonly chatMemberService: ChatMemberService,
     private readonly userService: UserService,
+    private readonly callMapper: CallMapper,
   ) {}
 
   async getCallHistory(
@@ -27,6 +28,8 @@ export class CallService {
     const query = this.callRepository
       .createQueryBuilder('call')
       .leftJoinAndSelect('call.chat', 'chat')
+      .leftJoinAndSelect('chat.members', 'chatMember') // always join members
+      .leftJoinAndSelect('chatMember.user', 'user') // join user of each member
       .leftJoinAndSelect('call.initiator', 'initiator')
       .leftJoinAndSelect('initiator.user', 'initiatorUser')
       .leftJoinAndSelect('call.attendedUsers', 'attendedUser')
@@ -36,7 +39,6 @@ export class CallService {
       })
       .andWhere('chat.type != :channelType', { channelType: 'channel' })
       .orderBy('call.createdAt', 'DESC')
-      // Pagination
       .skip(offset)
       .take(limit + 1);
 
@@ -47,8 +49,13 @@ export class CallService {
       hasMore = true;
       calls.pop();
     }
+    // ✅ use the injected CallMapper instead of a static function
+    const mappedCalls = await Promise.all(
+      calls.map((call) => this.callMapper.map(call, userId)),
+    );
+
     return {
-      calls: calls.map(mapCallToCallResDto),
+      calls: mappedCalls,
       hasMore,
     };
   }

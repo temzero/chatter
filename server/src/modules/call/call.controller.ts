@@ -4,7 +4,6 @@ import {
   Body,
   Get,
   Param,
-  // Delete,
   UseGuards,
   Query,
   Delete,
@@ -24,8 +23,6 @@ import { ChatService } from '../chat/chat.service';
 import { ChatType } from '../chat/constants/chat-types.constants';
 import { GenerateLiveKitTokenDto } from './dto/generate-livekit-token.dto';
 import { UpdateCallDto } from './dto/update-call.dto';
-// import { CreateCallDto } from './dto/create-call.dto';
-// import { UpdateCallDto } from './dto/update-call.dto';
 
 @Controller('calls')
 @UseGuards(JwtAuthGuard)
@@ -89,6 +86,7 @@ export class CallController {
 
           // 2. Determine call type
           const isVideoCall = chat.type !== ChatType.DIRECT;
+          const isBroadcast = chat.type === ChatType.CHANNEL;
 
           const status =
             room.numParticipants <= 1
@@ -101,6 +99,7 @@ export class CallController {
             status,
             participantsCount: room.numParticipants,
             isVideoCall,
+            isBroadcast,
             startedAt: room.creationTime
               ? new Date(Number(room.creationTime) * 1000)
               : undefined,
@@ -181,13 +180,13 @@ export class CallController {
   }
 
   @Post('token')
-  async getLivekitToken(
+  async getLiveKitToken(
     @CurrentUser('id') userId: string,
     @Body() body: GenerateLiveKitTokenDto,
   ): Promise<SuccessResponse<{ token: string }>> {
     try {
       const { chatId, participantName, avatarUrl } = body;
-      const token = await this.liveKitService.generateLivekitToken(
+      const token = await this.liveKitService.generateLiveKitToken(
         chatId,
         userId,
         participantName ?? null,

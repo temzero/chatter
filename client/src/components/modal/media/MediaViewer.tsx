@@ -80,7 +80,7 @@ export const MediaViewer = () => {
       setCurrentIndex(newIndex);
       scrollToMedia(newIndex, true);
       setRotation(0);
-      playSound(SoundType.NOTIFICATION); // ✅ pick a central sound type
+      playSound(SoundType.PAGE, 0.9); // ✅ pick a central sound type
     }
   }, [activeAttachments, currentIndex, playSound, scrollToMedia]);
 
@@ -90,7 +90,7 @@ export const MediaViewer = () => {
       setCurrentIndex(newIndex);
       scrollToMedia(newIndex, true);
       setRotation(0);
-      playSound(SoundType.NOTIFICATION); // ✅ same sound for prev
+      playSound(SoundType.PAGE, 0.9); // ✅ same sound for prev
     }
   }, [currentIndex, playSound, scrollToMedia]);
 

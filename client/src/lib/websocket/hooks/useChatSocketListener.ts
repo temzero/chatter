@@ -6,8 +6,7 @@ import { useTypingStore } from "@/stores/typingStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useChatStore } from "@/stores/chatStore";
 import { MessageStatus } from "@/types/enums/message";
-import { playSoundEffect } from "@/utils/playSoundEffect";
-import newMessageSound from "@/assets/sound/message-pop.mp3";
+import { audioService, SoundType } from "@/services/audio.service";
 import { WsMessageResponse } from "@/types/websocket/websocketMessageRes";
 import { toast } from "react-toastify";
 import { handleSystemEventMessage } from "@/utils/handleSystemEventMessage";
@@ -45,7 +44,7 @@ export function useChatSocketListeners() {
 
         const activeChatId = chatStore.activeChat?.id;
         if (!isMuted && activeChatId !== message.chatId) {
-          playSoundEffect(newMessageSound);
+          audioService.playSound(SoundType.NEW_MESSAGE);
         }
       }
     };

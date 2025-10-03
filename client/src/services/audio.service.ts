@@ -1,17 +1,19 @@
 // services/audio.service.ts
-import notificationSound from "@/assets/sound/bell2.mp3";
-import ringSound from "@/assets/sound/click.mp3";
-import dialSound from "@/assets/sound/telephone-dialing-2.mp3";
-import activeSound from "@/assets/sound/active.mp3";
-import endCallSound from "@/assets/sound/end-call.mp3";
-import connectSound from "@/assets/sound/connect.mp3";
-import disconnectSound from "@/assets/sound/disconnect.mp3";
-import reactionSound from "@/assets/sound/message-bubble.mp3";
-import messageSound from "@/assets/sound/message-bubble.mp3";
-import slidingSound from "@/assets/sound/click.mp3";
-import typingSound from "@/assets/sound/message-sent.mp3";
-import errorSound from "@/assets/sound/error2.mp3";
 import { handleError } from "@/utils/handleError";
+import activeSound from "@/assets/sound/active.mp3";
+import cardSound from "@/assets/sound/card.mp3";
+import connectSound from "@/assets/sound/connect.mp3";
+import dialSound from "@/assets/sound/telephone-dialing.mp3";
+import disconnectSound from "@/assets/sound/disconnect.mp3";
+import endCallSound from "@/assets/sound/end-call.mp3";
+import errorSound from "@/assets/sound/error.mp3";
+import messageSound from "@/assets/sound/message-bubble.mp3";
+import notificationSound from "@/assets/sound/bell.mp3";
+import pageSound from "@/assets/sound/paper.mp3";
+import reactionSound from "@/assets/sound/reaction.mp3";
+import reactionRemoveSound from "@/assets/sound/reaction-remove.mp3";
+import ringSound from "@/assets/sound/old-telephone-ringing.mp3";
+import typingSound from "@/assets/sound/typing.mp3";
 
 // Define the SoundType as an enum
 export enum SoundType {
@@ -24,10 +26,10 @@ export enum SoundType {
   USER_DISCONNECTED = "user-disconnected",
   NEW_MESSAGE = "new-message",
   REACTION = "reaction",
-
-  SLIDE = "slide",
+  REACTION_REMOVE = "reaction-remove",
+  CARD = "card",
+  PAGE = "page",
   TYPING = "typing",
-
   ERROR = "error",
 }
 
@@ -44,7 +46,7 @@ export interface AudioService {
 
 class AudioServiceImpl implements AudioService {
   private sounds: Map<SoundType, HTMLAudioElement> = new Map();
-  private volume = 0.7;
+  private volume = 0.75;
   private isMuted = false;
 
   constructor() {
@@ -62,7 +64,9 @@ class AudioServiceImpl implements AudioService {
       [SoundType.USER_DISCONNECTED]: disconnectSound,
       [SoundType.NEW_MESSAGE]: messageSound,
       [SoundType.REACTION]: reactionSound,
-      [SoundType.SLIDE]: slidingSound,
+      [SoundType.REACTION_REMOVE]: reactionRemoveSound,
+      [SoundType.CARD]: cardSound,
+      [SoundType.PAGE]: pageSound,
       [SoundType.TYPING]: typingSound,
       [SoundType.ERROR]: errorSound,
     };
@@ -76,29 +80,20 @@ class AudioServiceImpl implements AudioService {
     });
   }
 
-  async playSound(type: SoundType): Promise<void> {
+  async playSound(type: SoundType, volume?: number): Promise<void> {
     if (this.isMuted) return;
 
     const sound = this.sounds.get(type);
-    if (!sound) {
-      console.warn(`Sound ${type} not found`);
-      return;
-    }
+    if (!sound) return;
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 50));
       sound.currentTime = 0;
+
+      sound.volume = volume !== undefined ? volume : this.volume;
+
       await sound.play();
-    } catch (error: unknown) {
-      if (error instanceof DOMException && error.name === "AbortError") {
-        // expected if another play() interrupted
-        return;
-      }
-      if (error instanceof DOMException && error.name === "NotAllowedError") {
-        // User hasn’t interacted → just skip
-        // console.log("Skipping sound: no user interaction yet");
-        return;
-      }
+    } catch (error) {
       handleError(error, "Failed to play sound");
     }
   }

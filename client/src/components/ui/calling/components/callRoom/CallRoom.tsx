@@ -56,14 +56,8 @@ export const CallRoom = ({
   }
 
   const memberCount = participants.length;
-  const localParticipant = room.localParticipant;
 
   const handleLeaveCall = async () => {
-    if (localParticipant) {
-      localParticipant.getTrackPublications().forEach((pub) => {
-        pub.track?.mediaStreamTrack?.stop();
-      });
-    }
     leaveCall();
   };
 

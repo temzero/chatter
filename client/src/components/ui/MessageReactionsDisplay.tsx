@@ -42,11 +42,10 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
     const hasMyReaction =
       currentUserId && reactions[emoji]?.includes(currentUserId);
 
-    // ✅ use SoundType for add/remove reaction
     if (hasMyReaction) {
-      playSound(SoundType.REACTION); // remove sound
+      playSound(SoundType.REACTION_REMOVE);
     } else {
-      playSound(SoundType.NEW_MESSAGE); // add sound (or create SoundType.REACTION_ADD if needed)
+      playSound(SoundType.REACTION);
     }
 
     handleReaction({

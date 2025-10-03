@@ -35,6 +35,7 @@ export const BroadcastRoom = ({
     useLocalTracks();
   const [initiator, setInitiator] = useState<RemoteParticipant | null>(null);
   const [participants, setParticipants] = useState<RemoteParticipant[]>([]);
+  const [isObjectCover, setObjectCover] = useState<boolean>(false);
 
   useEffect(() => {
     if (!room) return;
@@ -66,16 +67,18 @@ export const BroadcastRoom = ({
 
   if (!room) return null;
 
-  const handleLeaveCall = async () => {
-    if (localParticipant) {
-      localParticipant.getTrackPublications().forEach((pub) => {
-        pub.track?.mediaStreamTrack?.stop();
-      });
-    }
+  const handleLeaveCall = () => {
+    [localVideoStream, localAudioStream, localScreenStream].forEach(
+      (stream) => {
+        console.log(stream?.getTracks());
+        stream?.getTracks().forEach((track) => track.stop());
+      }
+    );
+
+    // Leave the call (LiveKit disconnect + modal cleanup)
     leaveCall();
   };
 
-  const localParticipant = room.localParticipant;
   const participantCount = isCaller
     ? participants.length
     : participants.length + 1;
@@ -87,20 +90,22 @@ export const BroadcastRoom = ({
         isCaller ? "border-[--primary-green]" : "border-[--border-color]"
       }`}
     >
-      {/* For Caller (Broadcaster): Show local stream preview */}
       {isCaller ? (
+        // CALLER
         <LocalStreamPreview
           containerRef={containerRef}
           localVideoStream={localVideoStream}
           localAudioStream={localAudioStream}
           localScreenStream={localScreenStream}
+          isObjectCover={isObjectCover}
         />
       ) : (
-        /* For Viewers: Show initiator's broadcast stream */
+        // VIEWER
         initiator && (
           <BroadcastStream
             participant={initiator}
             containerRef={containerRef}
+            isObjectCover={isObjectCover}
             className="w-full h-full flex-1"
           />
         )
@@ -129,20 +134,18 @@ export const BroadcastRoom = ({
         </div>
       )}
 
-      {/* <Button
-        variant="primary"
-        className="absolute bottom-2 right-2 text-white hover:text-black"
-        size="lg"
-        onClick={() => toggleLocalVideo()}
-        icon="play_circle"
-      >
-        Start Broadcasting
-      </Button> */}
-
       <div className="flex gap-2 absolute top-2 right-2">
         <Button
-          variant="ghost"
-          className="w-8 h-8 opacity-70"
+          variant="transparent"
+          className="w-8 h-8 opacity-70 text-white"
+          // isIconFilled={true}
+          isRoundedFull
+          onClick={() => setObjectCover((prev) => !prev)}
+          icon={isObjectCover ? "picture_in_picture_center" : "aspect_ratio"}
+        />
+        <Button
+          variant="transparent"
+          className="w-8 h-8 opacity-70 text-white"
           isIconFilled={true}
           isRoundedFull
           onClick={onToggleExpand}
@@ -150,8 +153,8 @@ export const BroadcastRoom = ({
         />
         {!isCaller && (
           <Button
-            variant="ghost"
-            className="w-8 h-8 opacity-70 hover:text-white/90 hover:bg-red-500"
+            variant="transparent"
+            className="w-8 h-8 opacity-70 text-white hover:bg-red-500"
             isIconFilled={true}
             isRoundedFull
             onClick={handleLeaveCall}

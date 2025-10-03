@@ -9,6 +9,7 @@ interface LocalStreamPreviewProps {
   localVideoStream: MediaStream | null;
   localAudioStream: MediaStream | null;
   localScreenStream: MediaStream | null;
+  isObjectCover: boolean;
 }
 
 export const LocalStreamPreview = ({
@@ -16,12 +17,17 @@ export const LocalStreamPreview = ({
   localVideoStream,
   localAudioStream,
   localScreenStream,
+  isObjectCover = false,
 }: LocalStreamPreviewProps) => {
   if (localScreenStream && localVideoStream) {
     // Screen + camera
     return (
       <div className="w-full h-full flex-1 relative">
-        <VideoStream stream={localScreenStream} className="z-0" objectCover />
+        <VideoStream
+          stream={localScreenStream}
+          className="z-0"
+          objectCover={isObjectCover}
+        />
         <DraggableContainer containerRef={containerRef} position="bottom-right">
           <UserCamera
             videoStream={localVideoStream}
@@ -34,7 +40,9 @@ export const LocalStreamPreview = ({
 
   if (localScreenStream) {
     // Only screen
-    return <VideoStream stream={localScreenStream} objectCover />;
+    return (
+      <VideoStream stream={localScreenStream} objectCover={isObjectCover} />
+    );
   }
 
   if (localVideoStream) {
