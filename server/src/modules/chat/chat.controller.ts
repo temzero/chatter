@@ -81,6 +81,21 @@ export class ChatController {
     }
   }
 
+  @Get('saved')
+  async getSavedChat(
+    @CurrentUser('id') userId: string,
+  ): Promise<SuccessResponse<ChatResponseDto>> {
+    try {
+      const savedChat = await this.chatService.getSavedChat(userId);
+      return new SuccessResponse(
+        savedChat,
+        'Saved chat retrieved successfully',
+      );
+    } catch (error: unknown) {
+      ErrorResponse.throw(error, 'Failed to retrieve saved chat');
+    }
+  }
+
   @Get(':chatId')
   async findOne(
     @Param('chatId') id: string,
@@ -95,21 +110,6 @@ export class ChatController {
       );
     } catch (error: unknown) {
       ErrorResponse.throw(error, 'Failed to retrieve chat');
-    }
-  }
-
-  @Get('saved')
-  async getSavedChat(
-    @CurrentUser('id') userId: string,
-  ): Promise<SuccessResponse<ChatResponseDto>> {
-    try {
-      const savedChat = await this.chatService.getSavedChat(userId);
-      return new SuccessResponse(
-        savedChat,
-        'Saved chat retrieved successfully',
-      );
-    } catch (error: unknown) {
-      ErrorResponse.throw(error, 'Failed to retrieve saved chat');
     }
   }
 
@@ -261,38 +261,6 @@ export class ChatController {
       return new SuccessResponse(responseData, 'Chat updated successfully');
     } catch (error: unknown) {
       ErrorResponse.throw(error, 'Failed to update chat');
-    }
-  }
-
-  @Put(':chatId/pin/:messageId')
-  async pinMessage(
-    @Param('chatId') chatId: string,
-    @Param('chatId') messageId: string,
-    @CurrentUser('id') userId: string,
-  ): Promise<SuccessResponse<ChatResponseDto>> {
-    const updatedChat = await this.chatService.pinMessage(
-      chatId,
-      messageId,
-      userId,
-    );
-
-    return new SuccessResponse(updatedChat, 'Message pinned successfully');
-  }
-
-  @Put(':chatId/unpin')
-  async unpinMessage(
-    @Param('chatId') chatId: string,
-    @CurrentUser('id') userId: string,
-  ): Promise<SuccessResponse<ChatResponseDto>> {
-    try {
-      const updatedChat = await this.chatService.unpinMessage(chatId, userId);
-
-      return new SuccessResponse(
-        plainToInstance(ChatResponseDto, updatedChat),
-        'Message unpinned successfully',
-      );
-    } catch (error: unknown) {
-      ErrorResponse.throw(error, 'Failed to unpin message');
     }
   }
 

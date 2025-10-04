@@ -14,7 +14,6 @@ export enum SidebarMode {
   FOLDERS = "folders",
   FOLDER = "folder",
   NEW_FOLDER = "newFolder",
-  PRIVATE_CHATS = "privateChats",
   BLOCKED_USERS = "blockedUsers",
 
   // Settings

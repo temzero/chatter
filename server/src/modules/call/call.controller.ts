@@ -37,18 +37,20 @@ export class CallController {
   @Get('history')
   async getCallHistory(
     @CurrentUser('id') userId: string,
-    @Query('limit') limit = 20,
     @Query('offset') offset = 0,
+    @Query('limit') limit = 20,
   ): Promise<SuccessResponse<{ calls: CallResponseDto[]; hasMore: boolean }>> {
+    console.log('getCallHistory, Limit', limit, 'Offset', offset);
     try {
       const { calls, hasMore } = await this.callService.getCallHistory(userId, {
         limit,
         offset,
       });
+      console.log('calls:', calls.length, 'hasMore:', hasMore);
 
       return new SuccessResponse(
         {
-          calls, // already mapped to CallResponseDto in service
+          calls,
           hasMore,
         },
         'Call history retrieved successfully',

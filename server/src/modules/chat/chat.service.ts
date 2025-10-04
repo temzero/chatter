@@ -21,6 +21,7 @@ import {
   ChatResponseDto,
   ChatWithMessagesResponseDto,
 } from './dto/responses/chat-response.dto';
+import { PublicChatMapper } from './mappers/public-chat.mapper';
 
 @Injectable()
 export class ChatService {
@@ -33,6 +34,7 @@ export class ChatService {
     private readonly messageRepo: Repository<Message>,
     private readonly messageService: MessageService,
     private readonly chatMapper: ChatMapper,
+    private readonly publicChatMapper: PublicChatMapper,
     private readonly messageMapper: MessageMapper,
   ) {}
 
@@ -199,7 +201,7 @@ export class ChatService {
   }
 
   async getSavedChat(userId: string): Promise<ChatResponseDto> {
-    const chat = await this.chatRepo.findOne({
+    const savedChat = await this.chatRepo.findOne({
       where: { type: ChatType.SAVED, members: { user: { id: userId } } },
       relations: [
         'members',
@@ -211,8 +213,15 @@ export class ChatService {
       ],
     });
 
-    if (!chat) ErrorResponse.notFound('Saved chat not found');
-    return this.getUserChat(chat.id, userId);
+    if (!savedChat) ErrorResponse.notFound('Saved savedChat not found');
+    const savedChatDto = await this.chatMapper.mapChatToChatResDto(
+      savedChat,
+      userId,
+    );
+    if (!savedChatDto) {
+      ErrorResponse.notFound('Failed to map chat to response DTO');
+    }
+    return savedChatDto;
   }
 
   async updateChat(
@@ -323,7 +332,7 @@ export class ChatService {
       ErrorResponse.notFound('Chat not found or not accessible');
     }
 
-    const chatDto = await this.chatMapper.mapChatToChatResDto(channel, userId);
+    const chatDto = this.publicChatMapper.map(channel);
     if (!chatDto) {
       ErrorResponse.notFound('Failed to map chat to response DTO');
     }
@@ -428,44 +437,6 @@ export class ChatService {
     await this.chatRepo.delete(chatId);
     return plainToInstance(ChatResponseDto, chat);
   }
-
-  // private buildFullChatQueryForUser(userId: string) {
-  //   return this.chatRepo
-  //     .createQueryBuilder('chat')
-  //     .innerJoin(
-  //       'chat.members',
-  //       'myMember',
-  //       'myMember.user_id = :userId AND myMember.deleted_at IS NULL',
-  //       { userId },
-  //     )
-  //     .addSelect('myMember.muted_until', 'myMember_muted_until')
-  //     .leftJoinAndSelect('chat.members', 'member', 'member.deleted_at IS NULL')
-  //     .leftJoinAndSelect('member.user', 'memberUser')
-  //     .leftJoinAndSelect('member.lastVisibleMessage', 'lastMessage')
-  //     .leftJoinAndSelect('lastMessage.sender', 'sender')
-  //     .leftJoinAndSelect('lastMessage.attachments', 'attachments')
-  //     .leftJoinAndSelect('lastMessage.call', 'lastMessageCall')
-  //     .leftJoinAndSelect(
-  //       'lastMessage.forwardedFromMessage',
-  //       'forwardedFromMessage',
-  //     )
-  //     .leftJoinAndSelect(
-  //       'forwardedFromMessage.sender',
-  //       'forwardedFromMessageSender',
-  //     ) // Add this
-  //     .leftJoinAndSelect('chat.pinnedMessage', 'pinnedMessage')
-  //     .leftJoinAndSelect('pinnedMessage.sender', 'pinnedSender')
-  //     .leftJoinAndSelect('pinnedMessage.attachments', 'pinnedAttachments')
-  //     .leftJoinAndSelect(
-  //       'pinnedMessage.forwardedFromMessage',
-  //       'pinnedForwardedFromMessage',
-  //     )
-  //     .leftJoinAndSelect(
-  //       'pinnedForwardedFromMessage.sender',
-  //       'pinnedForwardedFromMessageSender',
-  //     )
-  //     .leftJoinAndSelect('chat.inviteLinks', 'inviteLinks');
-  // }
 
   private buildFullChatQueryForUser(userId: string) {
     return (

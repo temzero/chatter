@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import SidebarLayout from "@/pages/SidebarLayout";
 import { callService } from "@/services/callService";
 import { CallResponseDto } from "@/types/responses/call.response";
@@ -8,7 +8,7 @@ import { useCurrentUserId } from "@/stores/authStore";
 import { AnimatePresence, motion } from "framer-motion";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 
-const PAGE_LIMIT = 20;
+const PAGE_LIMIT = 10;
 
 const SidebarCalls: React.FC = () => {
   const currentUserId = useCurrentUserId();
@@ -16,21 +16,37 @@ const SidebarCalls: React.FC = () => {
   const [hasMore, setHasMore] = useState(true);
   const [offset, setOffset] = useState(0);
   const openModal = useModalStore((s) => s.openModal);
+
+  console.log("hasMoreCall", hasMore);
   // Load more calls
-  const loadMoreCalls = useCallback(async (): Promise<number> => {
+  const loadCallData = async (): Promise<number> => {
+    console.log("loadCallData", "hasMore", hasMore, "offset", offset);
     if (!hasMore) return 0;
 
     try {
       const res = await callService.fetchCallHistory(PAGE_LIMIT, offset);
-      setCalls((prev) => [...prev, ...res.calls]);
       setHasMore(res.hasMore);
       setOffset((prev) => prev + PAGE_LIMIT);
+      setCalls((prev) => [...prev, ...res.calls]);
+      // setCalls((prev) => {
+      //   const allCalls = [...prev, ...res.calls];
+      //   const uniqueCalls = Array.from(
+      //     new Map(allCalls.map((c) => [c.id, c])).values()
+      //   );
+      //   return uniqueCalls;
+      // });
       return res.calls.length;
     } catch {
+      setHasMore(false);
       return 0;
     }
-  }, [offset, hasMore]);
+  };
   console.log("calls", calls);
+
+  useEffect(() => {
+    loadCallData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUserId]); // empty dependency array ensures it runs only once
 
   const handleDeleteCall = (call: CallResponseDto) => {
     openModal(ModalType.DELETE_CALL, {
@@ -42,7 +58,7 @@ const SidebarCalls: React.FC = () => {
   return (
     <SidebarLayout title="Call History">
       <InfiniteScroller
-        onLoadMore={loadMoreCalls}
+        onLoadMore={() => loadCallData()}
         hasMore={hasMore}
         loader={
           <p className="text-sm text-muted-foreground text-center py-2">

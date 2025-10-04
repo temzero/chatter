@@ -37,7 +37,7 @@ interface ChatStore {
     options?: { fetchFullData?: boolean }
   ) => Promise<ChatResponse>;
   getChatType: (chatId: string) => ChatType | undefined;
-  fetchChats: () => Promise<void>;
+  // fetchChats: () => Promise<void>;
   fetchMoreChats: (limit?: number) => Promise<number>;
   fetchChatById: (
     chatId?: string,
@@ -117,7 +117,7 @@ export const useChatStore = create<ChatStore>()(
             // Fetch initial data (chats + messages)
             const initialData = await chatService.fetchInitialData();
             if (!initialData) {
-              await get().fetchChats(); // Fallback to regular fetch if initial fails
+              console.warn("get initialData failed, No Chats and messages");
               return;
             }
 
@@ -194,34 +194,34 @@ export const useChatStore = create<ChatStore>()(
           return chat?.type;
         },
 
-        fetchChats: async () => {
-          set({ isLoading: true, error: null });
-          try {
-            const { chats, hasMore } = await chatService.fetchChats();
+        // fetchChats: async () => {
+        //   set({ isLoading: true, error: null });
+        //   try {
+        //     const { chats, hasMore } = await chatService.fetchChats();
 
-            const savedChat =
-              chats.find((chat) => chat.type === ChatType.SAVED) || null;
-            const otherChats = chats.filter(
-              (chat) => chat.type !== ChatType.SAVED
-            );
+        //     const savedChat =
+        //       chats.find((chat) => chat.type === ChatType.SAVED) || null;
+        //     const otherChats = chats.filter(
+        //       (chat) => chat.type !== ChatType.SAVED
+        //     );
 
-            set({
-              savedChat,
-              chats: otherChats,
-              filteredChats: otherChats,
-              hasMoreChats: hasMore,
-            });
-            console.log("Chats fetched:", otherChats);
-          } catch (error) {
-            console.error("Failed to fetch chats:", error);
-            set({ error: "Failed to load chats" });
-            handleError(error, "Failed to load chats");
-          } finally {
-            set({ isLoading: false });
-          }
-        },
+        //     set({
+        //       savedChat,
+        //       chats: otherChats,
+        //       filteredChats: otherChats,
+        //       hasMoreChats: hasMore,
+        //     });
+        //     console.log("Chats fetched:", otherChats);
+        //   } catch (error) {
+        //     console.error("Failed to fetch chats:", error);
+        //     set({ error: "Failed to load chats" });
+        //     handleError(error, "Failed to load chats");
+        //   } finally {
+        //     set({ isLoading: false });
+        //   }
+        // },
 
-        fetchMoreChats: async (limit = 5): Promise<number> => {
+        fetchMoreChats: async (limit): Promise<number> => {
           console.log("fetchMore Chat", limit);
           const { chats, hasMoreChats, isLoading } = get();
           if (isLoading || !hasMoreChats) return 0; // return 0 if no load

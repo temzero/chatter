@@ -10,7 +10,7 @@ import {
 import ChannelMessages from "./ChannelMessages";
 import TypingIndicator from "../../ui/typingIndicator/TypingIndicator";
 import ChatMessages from "./ChatMessages";
-import InfiniteScroller from "@/components/ui/infiniteScroller";
+import InfiniteScroller from "@/components/ui/InfiniteScroller";
 
 interface ChatBoxProps {
   chat?: ChatResponse;

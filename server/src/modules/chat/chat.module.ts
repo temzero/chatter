@@ -19,6 +19,7 @@ import { MessageMapper } from '../message/mappers/message.mapper';
 import { ChatMemberService } from '../chat-member/chat-member.service';
 import { MessageService } from '../message/message.service';
 import { SupabaseModule } from '../superbase/supabase.module';
+import { SavedChatMapper } from './mappers/saved-chat.mapper';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { SupabaseModule } from '../superbase/supabase.module';
     DirectChatMapper,
     GroupChatMapper,
     PublicChatMapper,
+    SavedChatMapper,
     MessageMapper,
     ChatMemberService,
     MessageService,

@@ -33,7 +33,7 @@ export const chatService = {
   },
 
   async fetchChats(
-    options: PaginationQuery = { limit: 4 }
+    options: PaginationQuery = { limit: 5 }
   ): Promise<{ chats: ChatResponse[]; hasMore: boolean }> {
     try {
       const { offset, beforeId, limit } = options;

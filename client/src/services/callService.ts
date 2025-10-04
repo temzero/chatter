@@ -12,7 +12,7 @@ export const callService = {
     const { data } = await API.get(
       `/calls/history?limit=${limit}&offset=${offset}`
     );
-    console.log('Fetch Call history', data.payload)
+    console.log("fetchCallHistory", data.payload);
     return data.payload ?? { calls: [], hasMore: false };
   },
 

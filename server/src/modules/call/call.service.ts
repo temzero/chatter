@@ -25,31 +25,29 @@ export class CallService {
     options: { limit?: number; offset?: number } = { limit: 20, offset: 0 },
   ): Promise<{ calls: CallResponseDto[]; hasMore: boolean }> {
     const { limit = 20, offset = 0 } = options;
+    console.log('limit-offset', limit, offset);
     const query = this.callRepository
       .createQueryBuilder('call')
       .leftJoinAndSelect('call.chat', 'chat')
-      .leftJoinAndSelect('chat.members', 'chatMember') // always join members
-      .leftJoinAndSelect('chatMember.user', 'user') // join user of each member
+      .leftJoinAndSelect('chat.members', 'chatMember')
+      .leftJoinAndSelect('chatMember.user', 'user')
       .leftJoinAndSelect('call.initiator', 'initiator')
       .leftJoinAndSelect('initiator.user', 'initiatorUser')
       .leftJoinAndSelect('call.attendedUsers', 'attendedUser')
       .where('attendedUser.id = :userId', { userId })
-      .andWhere('call.status IN (:...statuses)', {
-        statuses: [CallStatus.COMPLETED, CallStatus.MISSED, CallStatus.FAILED],
-      })
       .andWhere('chat.type != :channelType', { channelType: 'channel' })
-      .orderBy('call.createdAt', 'DESC')
-      .skip(offset)
-      .take(limit + 1);
+      .orderBy('call.createdAt', 'DESC');
+    // .skip(offset)
+    // .take(limit + 1);
 
-    const calls = await query.getMany();
+    const allCalls = await query.getMany();
 
-    let hasMore = false;
-    if (calls.length > limit) {
-      hasMore = true;
-      calls.pop();
-    }
-    // ✅ use the injected CallMapper instead of a static function
+    // Manual pagination
+    const start = offset;
+    const end = offset + limit;
+    const calls = allCalls.slice(start, end);
+    const hasMore = allCalls.length > end;
+
     const mappedCalls = await Promise.all(
       calls.map((call) => this.callMapper.map(call, userId)),
     );

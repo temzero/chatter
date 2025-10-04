@@ -27,7 +27,6 @@ import SidebarCalls from "./more/SidebarCalls";
 import SidebarContacts from "./more/SidebarContacts";
 import SidebarFolders from "./more/SidebarFolders";
 import SidebarBlockedUsers from "./more/SidebarBlockedUsers";
-import SidebarPrivateChats from "./more/SidebarPrivateChats";
 import SidebarSettingsEmail from "./settings/account/sidebarSettingsEmail";
 import SidebarSettingsUsername from "./settings/account/sidebarSettingsUsername";
 import SidebarSettingsPhoneNumber from "./settings/account/sidebarSettingsPhoneNumber";
@@ -52,7 +51,6 @@ const Sidebar = () => {
     [SidebarMode.FOLDERS]: <SidebarFolders />,
     [SidebarMode.FOLDER]: <SidebarFolder />,
     [SidebarMode.NEW_FOLDER]: <SidebarNewFolder />,
-    [SidebarMode.PRIVATE_CHATS]: <SidebarPrivateChats />,
     [SidebarMode.BLOCKED_USERS]: <SidebarBlockedUsers />,
 
     // Settings
