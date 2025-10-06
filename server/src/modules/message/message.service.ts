@@ -501,10 +501,10 @@ export class MessageService {
           { userIdJson: JSON.stringify([currentUserId]) },
         );
 
-      // Apply beforeId for pagination
-      if (queryParams.beforeId) {
+      // Apply lastId for pagination
+      if (queryParams.lastId) {
         const beforeMessage = await this.messageRepo.findOne({
-          where: { id: queryParams.beforeId },
+          where: { id: queryParams.lastId },
           select: ['createdAt'],
         });
 

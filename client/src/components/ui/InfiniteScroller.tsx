@@ -2,7 +2,7 @@ import React, { useState, useCallback, forwardRef, useRef } from "react";
 
 interface InfiniteScrollerProps {
   children: React.ReactNode;
-  onLoadMore: () => Promise<number>;
+  onLoadMore: () => Promise<number | null>;
   hasMore: boolean;
   threshold?: number; // px from bottom or top
   loader?: React.ReactNode;

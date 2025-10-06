@@ -5,10 +5,12 @@ import CreateNewGroupChat from "../ui/CreateNewGroupChat";
 import { SlidingContainer } from "../ui/SlidingContainer";
 import { ChatType } from "@/types/enums/ChatType";
 import { SidebarMode } from "@/types/enums/sidebarMode";
+import { useTranslation } from "react-i18next";
 
 const sidebarChatTypes = [ChatType.DIRECT, ChatType.GROUP, ChatType.CHANNEL];
 
 const SidebarNewChat: React.FC = () => {
+  const { t } = useTranslation();
   const setSidebar = useSidebarStore((state) => state.setSidebar);
   const [selectedType, setSelectedType] = useState<ChatType>(ChatType.DIRECT);
   const [direction, setDirection] = useState<number>(1);
@@ -31,9 +33,9 @@ const SidebarNewChat: React.FC = () => {
   const getTypeLabel = (type: ChatType) => {
     switch (type) {
       case ChatType.GROUP:
-        return "Group Chat";
+        return t("chat.group")
       case ChatType.CHANNEL:
-        return "Channel";
+        return t("chat.channel")
       case ChatType.DIRECT:
       default:
         return "Chat";
@@ -69,7 +71,9 @@ const SidebarNewChat: React.FC = () => {
     <aside className="w-[var(--sidebar-width)] h-full flex flex-col transition-all duration-300 ease-in-out">
       <header className="flex w-full items-center h-[var(--header-height)] p-2 pr-0 justify-between">
         <h1 className="font-semibold text-xl pl-1">
-          New {getTypeLabel(selectedType)}
+          {t("sidebar_new_chat.title", {
+            type: t(getTypeLabel(selectedType)),
+          })}
         </h1>
         <i
           className="material-symbols-outlined text-2xl opacity-60 hover:opacity-100 p-1 cursor-pointer"

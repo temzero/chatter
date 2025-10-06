@@ -194,33 +194,6 @@ export const useChatStore = create<ChatStore>()(
           return chat?.type;
         },
 
-        // fetchChats: async () => {
-        //   set({ isLoading: true, error: null });
-        //   try {
-        //     const { chats, hasMore } = await chatService.fetchChats();
-
-        //     const savedChat =
-        //       chats.find((chat) => chat.type === ChatType.SAVED) || null;
-        //     const otherChats = chats.filter(
-        //       (chat) => chat.type !== ChatType.SAVED
-        //     );
-
-        //     set({
-        //       savedChat,
-        //       chats: otherChats,
-        //       filteredChats: otherChats,
-        //       hasMoreChats: hasMore,
-        //     });
-        //     console.log("Chats fetched:", otherChats);
-        //   } catch (error) {
-        //     console.error("Failed to fetch chats:", error);
-        //     set({ error: "Failed to load chats" });
-        //     handleError(error, "Failed to load chats");
-        //   } finally {
-        //     set({ isLoading: false });
-        //   }
-        // },
-
         fetchMoreChats: async (limit): Promise<number> => {
           console.log("fetchMore Chat", limit);
           const { chats, hasMoreChats, isLoading } = get();
@@ -234,7 +207,7 @@ export const useChatStore = create<ChatStore>()(
             const { chats: newChats, hasMore } = await chatService.fetchChats({
               offset: chats.length,
               limit,
-              beforeId: lastChat.id,
+              lastId: lastChat.id,
             });
 
             if (newChats.length > 0) {

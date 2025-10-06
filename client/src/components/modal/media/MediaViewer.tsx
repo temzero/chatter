@@ -8,8 +8,7 @@ import { useActiveChatAttachments } from "@/stores/messageStore";
 import { RenderModalAttachment } from "./RenderModalAttachment";
 import { useShallow } from "zustand/shallow";
 import { handleDownload } from "@/utils/handleDownload";
-import { useAudioService } from "@/hooks/useAudioService";
-import { SoundType } from "@/services/audio.service";
+import { audioService, SoundType } from "@/services/audio.service";
 
 export const MediaViewer = () => {
   const { currentAttachmentId, closeModal } = useModalStore(
@@ -34,8 +33,6 @@ export const MediaViewer = () => {
   const [rotation, setRotation] = useState(0);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const [isReady, setIsReady] = useState(false);
-
-  const { playSound } = useAudioService(); // ✅ central sound manager
   const controls = useAnimationControls();
 
   useEffect(() => {
@@ -80,9 +77,12 @@ export const MediaViewer = () => {
       setCurrentIndex(newIndex);
       scrollToMedia(newIndex, true);
       setRotation(0);
-      playSound(SoundType.PAGE, 0.9); // ✅ pick a central sound type
+      audioService.playRandomSound(
+        [SoundType.CARD1, SoundType.CARD2, SoundType.CARD3, SoundType.CARD4],
+        0.9
+      );
     }
-  }, [activeAttachments, currentIndex, playSound, scrollToMedia]);
+  }, [activeAttachments, currentIndex, scrollToMedia]);
 
   const goPrev = useCallback(() => {
     if (currentIndex > 0) {
@@ -90,9 +90,14 @@ export const MediaViewer = () => {
       setCurrentIndex(newIndex);
       scrollToMedia(newIndex, true);
       setRotation(0);
-      playSound(SoundType.PAGE, 0.9); // ✅ same sound for prev
+      audioService.playRandomSound([
+        SoundType.CARD1,
+        SoundType.CARD2,
+        SoundType.CARD3,
+        SoundType.CARD4,
+      ]);
     }
-  }, [currentIndex, playSound, scrollToMedia]);
+  }, [currentIndex, scrollToMedia]);
 
   const handleRotate = useCallback(() => {
     setRotation((prev) => prev + 90);

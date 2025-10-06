@@ -3,12 +3,16 @@ import React from "react";
 import SidebarLayout from "@/pages/SidebarLayout";
 import { SidebarMode } from "@/types/enums/sidebarMode";
 import ThemeSelector from "@/components/ui/ThemeSelector";
+import { useTranslation } from "react-i18next";
 
 const SidebarSettingsTheme: React.FC = () => {
+  const { t } = useTranslation();
   return (
-    <SidebarLayout title="Theme" backLocation={SidebarMode.SETTINGS}>
-      {/* Blocked users list goes here */}
-      <ThemeSelector/>
+    <SidebarLayout
+      title={t("settings.theme")}
+      backLocation={SidebarMode.SETTINGS}
+    >
+      <ThemeSelector />
     </SidebarLayout>
   );
 };

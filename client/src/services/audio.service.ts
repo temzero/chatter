@@ -1,7 +1,10 @@
 // services/audio.service.ts
 import { handleError } from "@/utils/handleError";
 import activeSound from "@/assets/sound/active.mp3";
-import cardSound from "@/assets/sound/card.mp3";
+import card1Sound from "@/assets/sound/card1.mp3";
+import card2Sound from "@/assets/sound/card2.mp3";
+import card3Sound from "@/assets/sound/card3.mp3";
+import card4Sound from "@/assets/sound/card4.mp3";
 import connectSound from "@/assets/sound/connect.mp3";
 import dialSound from "@/assets/sound/telephone-dialing.mp3";
 import disconnectSound from "@/assets/sound/disconnect.mp3";
@@ -27,14 +30,18 @@ export enum SoundType {
   NEW_MESSAGE = "new-message",
   REACTION = "reaction",
   REACTION_REMOVE = "reaction-remove",
-  CARD = "card",
+  CARD1 = "card1",
+  CARD2 = "card2",
+  CARD3 = "card3",
+  CARD4 = "card4",
   PAGE = "page",
   TYPING = "typing",
   ERROR = "error",
 }
 
 export interface AudioService {
-  playSound: (type: SoundType) => Promise<void>;
+  playSound: (type: SoundType, volume?: number) => Promise<void>;
+  playRandomSound: (types: SoundType[], volume?: number) => Promise<void>;
   stopSound: (type: SoundType) => void;
   stopAllSounds: () => void; // Add this to interface
   setVolume: (volume: number) => void;
@@ -65,7 +72,10 @@ class AudioServiceImpl implements AudioService {
       [SoundType.NEW_MESSAGE]: messageSound,
       [SoundType.REACTION]: reactionSound,
       [SoundType.REACTION_REMOVE]: reactionRemoveSound,
-      [SoundType.CARD]: cardSound,
+      [SoundType.CARD1]: card1Sound,
+      [SoundType.CARD2]: card2Sound,
+      [SoundType.CARD3]: card3Sound,
+      [SoundType.CARD4]: card4Sound,
       [SoundType.PAGE]: pageSound,
       [SoundType.TYPING]: typingSound,
       [SoundType.ERROR]: errorSound,
@@ -96,6 +106,13 @@ class AudioServiceImpl implements AudioService {
     } catch (error) {
       handleError(error, "Failed to play sound");
     }
+  }
+
+  async playRandomSound(types: SoundType[], volume?: number): Promise<void> {
+    if (!types || types.length === 0) return;
+    const randomIndex = Math.floor(Math.random() * types.length);
+    const randomType = types[randomIndex];
+    await this.playSound(randomType, volume);
   }
 
   stopSound(type: SoundType): void {

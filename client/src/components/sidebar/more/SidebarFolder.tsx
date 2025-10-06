@@ -8,10 +8,12 @@ import { useChatStore } from "@/stores/chatStore";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { ChatType } from "@/types/enums/ChatType";
 import { ModalType, useModalStore } from "@/stores/modalStore";
+import { useTranslation } from "react-i18next";
 
 type SidebarData = { folderId?: string } | undefined;
 
 const SidebarFolder: React.FC = () => {
+  const { t } = useTranslation();
   const chats = useChatStore((state) => state.chats);
   const currentSidebar = useSidebarStore((state) => state.currentSidebar);
   const sidebarData = useSidebarStore(
@@ -20,14 +22,13 @@ const SidebarFolder: React.FC = () => {
   const setSidebar = useSidebarStore((state) => state.setSidebar);
   const folders = useFolderStore((state) => state.folders);
   const folder = folders.find((f) => f.id === sidebarData?.folderId);
-  // const deleteFolder = useFolderStore((state) => state.deleteFolder);
   const openModal = useModalStore((state) => state.openModal);
 
   if (!folder) {
     return (
       <div className="p-4 opacity-70 flex flex-col gap-4 items-center justify-center w-[var(--sidebar-width)]">
         <span className="material-symbols-outlined">folder_open</span>
-        <h1>Folder not found</h1>
+        <h1>{t("sidebar_folders.detail.folder_not_found")}</h1>
       </div>
     );
   }
@@ -44,7 +45,10 @@ const SidebarFolder: React.FC = () => {
   };
 
   return (
-    <SidebarLayout title="Folder Details" backLocation={SidebarMode.FOLDERS}>
+    <SidebarLayout
+      title={t("sidebar_folders.detail.title")}
+      backLocation={SidebarMode.FOLDERS}
+    >
       <div
         style={{
           borderColor: folder.color || "",
@@ -98,7 +102,7 @@ const SidebarFolder: React.FC = () => {
             {/* <h1>Chats:</h1> */}
             {folderChats.length === 0 && (
               <p className="text-gray-500 text-center py-4">
-                No chats in this folder
+                {t("sidebar_folders.detail.no_chats")}
               </p>
             )}
             {folderChats.map((chat) => (
@@ -117,7 +121,7 @@ const SidebarFolder: React.FC = () => {
             }
           >
             <span className="material-symbols-outlined">delete</span>
-            Delete Folder
+            {t("sidebar_folders.detail.delete_folder")}
           </button>
         </div>
       </div>

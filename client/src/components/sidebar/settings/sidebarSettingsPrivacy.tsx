@@ -5,8 +5,10 @@ import { useAuthStore } from "@/stores/authStore";
 import { useCurrentUser } from "@/stores/authStore";
 import { userService } from "@/services/userService";
 import SwitchBtn from "@/components/ui/SwitchBtn";
+import { useTranslation } from "react-i18next";
 
 const SidebarSettingsPrivacy: React.FC = () => {
+  const { t } = useTranslation();
   const currentUser = useCurrentUser();
   const setCurrentUser = useAuthStore((state) => state.setCurrentUser);
   const setMessage = useAuthStore((state) => state.setMessage);
@@ -19,7 +21,7 @@ const SidebarSettingsPrivacy: React.FC = () => {
     isPrivateAccount: currentUser?.isPrivateAccount || false,
     readReceipts: currentUser?.readReceipts || true,
     showOnlineStatus: currentUser?.showOnlineStatus || true,
-    allowMessagesFrom: currentUser?.allowMessagesFrom || "everyone", // 'everyone', 'friends', 'none'
+    allowMessagesFrom: currentUser?.allowMessagesFrom || "everyone",
   });
 
   const [isChanged, setIsChanged] = useState(false);
@@ -77,94 +79,100 @@ const SidebarSettingsPrivacy: React.FC = () => {
 
   return (
     <SidebarLayout
-      title="Privacy & Security"
+      title={t("privacy_settings.title")}
       backLocation={SidebarMode.SETTINGS}
     >
-      <form onSubmit={handleSubmit} className="p-2 flex flex-col gap-4">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-3 rounded-lg bg-[var(--hover-color)]">
-            <div>
-              <h3 className="font-medium">Private Account</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {privacySettings.isPrivateAccount
-                  ? "Only approved followers can see your content"
-                  : "Anyone can see your content"}
-              </p>
-            </div>
-            <SwitchBtn
-              checked={privacySettings.isPrivateAccount}
-              onCheckedChange={(val) =>
-                handleSettingChange("isPrivateAccount", val)
-              }
-            />
+      <form onSubmit={handleSubmit} className="flex flex-col">
+        <div className="flex items-center justify-between p-4 custom-border-b">
+          <div>
+            <h3 className="font-medium">
+              {t("privacy_settings.private_account.label")}
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {privacySettings.isPrivateAccount
+                ? t("privacy_settings.private_account.desc_private")
+                : t("privacy_settings.private_account.desc_public")}
+            </p>
           </div>
+          <SwitchBtn
+            checked={privacySettings.isPrivateAccount}
+            onCheckedChange={(val) =>
+              handleSettingChange("isPrivateAccount", val)
+            }
+          />
+        </div>
 
-          <div className="flex items-center justify-between p-3 rounded-lg bg-[var(--hover-color)]">
-            <div>
-              <h3 className="font-medium">Read Receipts</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {privacySettings.readReceipts
-                  ? "People will see when you've read their messages"
-                  : "People won't see when you've read their messages"}
-              </p>
-            </div>
-            <SwitchBtn
-              checked={privacySettings.readReceipts}
-              onCheckedChange={(val) =>
-                handleSettingChange("readReceipts", val)
-              }
-            />
+        <div className="flex items-center justify-between p-4 custom-border-b">
+          <div>
+            <h3 className="font-medium">
+              {t("privacy_settings.read_receipts.label")}
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {privacySettings.readReceipts
+                ? t("privacy_settings.read_receipts.desc_on")
+                : t("privacy_settings.read_receipts.desc_off")}
+            </p>
           </div>
+          <SwitchBtn
+            checked={privacySettings.readReceipts}
+            onCheckedChange={(val) => handleSettingChange("readReceipts", val)}
+          />
+        </div>
 
-          <div className="flex items-center justify-between p-3 rounded-lg bg-[var(--hover-color)]">
-            <div>
-              <h3 className="font-medium">Online Status</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {privacySettings.showOnlineStatus
-                  ? "People will see when you're online"
-                  : "People won't see when you're online"}
-              </p>
-            </div>
-            <SwitchBtn
-              checked={privacySettings.showOnlineStatus}
-              onCheckedChange={(val) =>
-                handleSettingChange("showOnlineStatus", val)
-              }
-            />
+        <div className="flex items-center justify-between p-4 custom-border-b">
+          <div>
+            <h3 className="font-medium">
+              {t("privacy_settings.online_status.label")}
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {privacySettings.showOnlineStatus
+                ? t("privacy_settings.online_status.desc_on")
+                : t("privacy_settings.online_status.desc_off")}
+            </p>
           </div>
+          <SwitchBtn
+            checked={privacySettings.showOnlineStatus}
+            onCheckedChange={(val) =>
+              handleSettingChange("showOnlineStatus", val)
+            }
+          />
+        </div>
 
-          <div className="p-3 rounded-lg bg-[var(--hover-color)]">
-            <h3 className="font-medium mb-2">Who Can Message You</h3>
-            <div className="space-y-2">
-              {["everyone", "friends", "none"].map((option) => (
-                <div key={option} className="flex items-center">
-                  <input
-                    type="radio"
-                    id={`message-${option}`}
-                    name="allowMessagesFrom"
-                    checked={privacySettings.allowMessagesFrom === option}
-                    onChange={() =>
-                      handleSettingChange("allowMessagesFrom", option)
-                    }
-                    className="mr-2"
-                  />
-                  <label htmlFor={`message-${option}`} className="capitalize">
-                    {option === "everyone" && "Everyone"}
-                    {option === "friends" && "Friends Only"}
-                    {option === "none" && "No One"}
-                  </label>
-                </div>
-              ))}
-            </div>
+        <div className="p-3 custom-border-b">
+          <h3 className="font-medium mb-2">
+            {t("privacy_settings.allow_messages_from.label")}
+          </h3>
+          <div className="space-y-2">
+            {["everyone", "friends", "none"].map((option) => (
+              <div key={option} className="flex items-center">
+                <input
+                  type="radio"
+                  id={`message-${option}`}
+                  name="allowMessagesFrom"
+                  checked={privacySettings.allowMessagesFrom === option}
+                  onChange={() =>
+                    handleSettingChange("allowMessagesFrom", option)
+                  }
+                  className="mr-2"
+                />
+                <label htmlFor={`message-${option}`} className="capitalize">
+                  {t(`privacy_settings.allow_messages_from.options.${option}`)}
+                </label>
+              </div>
+            ))}
           </div>
         </div>
 
         <button
           type="submit"
-          className={`${!isChanged ? "" : "primary"} p-1 w-full`}
+          className={`${
+            !isChanged ? "" : "primary"
+          } absolute bottom-0 left-0 p-1 w-full`}
           disabled={!isChanged || loading}
         >
-          {loading ? "Saving..." : "Save Changes"}
+          {loading
+            ? t("privacy_settings.buttons.saving")
+            : t("privacy_settings.buttons.save_changes")}
         </button>
 
         {message && (
@@ -177,7 +185,11 @@ const SidebarSettingsPrivacy: React.FC = () => {
                 : "text-blue-600"
             }`}
           >
-            {message.content}
+            {message.type === "error" && t("privacy_settings.messages.error")}
+            {message.type === "success" &&
+              t("privacy_settings.messages.success")}
+            {message.type === "info" &&
+              t("privacy_settings.messages.no_changes")}
           </div>
         )}
       </form>

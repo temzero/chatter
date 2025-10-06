@@ -17,5 +17,5 @@ export class PaginationQuery {
 
   @IsOptional()
   @IsString()
-  beforeId?: string; // Generic ID parameter
+  lastId?: string; // Generic ID parameter
 }

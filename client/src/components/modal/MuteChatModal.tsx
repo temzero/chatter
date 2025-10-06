@@ -5,6 +5,7 @@ import { childrenModalAnimation } from "@/animations/modalAnimations";
 import { toast } from "react-toastify";
 import { formatDateTime } from "@/utils/formatDate";
 import { useChatStore } from "@/stores/chatStore";
+import { useTranslation } from "react-i18next";
 
 interface MuteChatModalProps {
   chatId: string;
@@ -21,6 +22,7 @@ const MUTE_OPTIONS = [
 ];
 
 const MuteChatModal: React.FC = () => {
+  const { t } = useTranslation();
   const closeModal = useModalStore((state) => state.closeModal);
   const modalContent = useModalStore((state) => state.modalContent);
   const setMute = useChatStore((state) => state.setMute);
@@ -35,10 +37,12 @@ const MuteChatModal: React.FC = () => {
     try {
       const mutedUntil = new Date(Date.now() + duration * 1000);
       await setMute(chatId, myMemberId, mutedUntil);
-      toast.success(`Muted until ${formatDateTime(mutedUntil)}`);
+      toast.success(
+        t("modal.mute_chat.muted_until", { time: formatDateTime(mutedUntil) })
+      );
     } catch (error) {
       console.error("Failed to mute chat member:", error);
-      toast.error("Failed to mute chat member");
+      toast.error(t("modal.mute_chat.mute_failed"));
     } finally {
       closeModal();
     }
@@ -51,11 +55,13 @@ const MuteChatModal: React.FC = () => {
     >
       <div className="p-4 flex flex-col items-center justify-center">
         <h2 className="text-2xl flex items-center justify-center gap-2 font-semibold mb-4 text-yellow-500">
-          <span className="material-symbols-outlined text-3xl">notifications_off</span>
-          Mute Chat
+          <span className="material-symbols-outlined text-3xl">
+            notifications_off
+          </span>
+          {t("modal.mute_chat.title")}
         </h2>
         <p className="mb-4 text-sm opacity-70">
-          Choose how long to mute notifications:
+          {t("modal.mute_chat.description")}
         </p>
         <div className="flex flex-col gap-2 w-full">
           {MUTE_OPTIONS.map((option) => (
@@ -64,7 +70,11 @@ const MuteChatModal: React.FC = () => {
               className="p-1 rounded custom-border w-full hover:bg-[--hover-color]"
               onClick={() => handleMute(option.value)}
             >
-              {option.label}
+              {t(
+                `modal.mute_chat.options.${option.label
+                  .replace(" ", "_")
+                  .toLowerCase()}`
+              )}
             </button>
           ))}
         </div>

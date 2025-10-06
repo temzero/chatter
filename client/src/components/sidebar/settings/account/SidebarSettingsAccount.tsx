@@ -2,46 +2,43 @@ import { useCurrentUser } from "@/stores/authStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/types/enums/sidebarMode";
 import SidebarLayout from "@/pages/SidebarLayout";
+import { useTranslation } from "react-i18next";
 
 const SidebarSettingsAccount: React.FC = () => {
+  const { t } = useTranslation();
   const currentUser = useCurrentUser();
   const { setSidebar } = useSidebarStore();
 
   const accountSettingsItems = [
     {
-      title: "Change Username",
-      subtitle: `@${currentUser?.username || "username"}`,
-      onClick: () => setSidebar(SidebarMode.SETTINGS_USERNAME), // Replace with a dedicated mode if needed (e.g., SETTINGS_ACCOUNT_USERNAME)
+      title: t("account_settings.change_username.title"),
+      subtitle: currentUser?.username ? `@${currentUser.username}` : "",
+      onClick: () => setSidebar(SidebarMode.SETTINGS_USERNAME),
     },
     {
-      title: "Change Email",
-      subtitle: currentUser?.email || "email@example.com",
-      onClick: () => setSidebar(SidebarMode.SETTINGS_EMAIL), // Replace with SETTINGS_ACCOUNT_EMAIL if needed
+      title: t("account_settings.change_email.title"),
+      subtitle: currentUser?.email ? currentUser.email : "",
+      onClick: () => setSidebar(SidebarMode.SETTINGS_EMAIL),
     },
     {
-      title: "Change Phone Number",
-      subtitle: currentUser?.phoneNumber || "+1234567890",
-      onClick: () => setSidebar(SidebarMode.SETTINGS_PHONE), // Replace with SETTINGS_ACCOUNT_PHONE if needed
+      title: t("account_settings.change_phone.title"),
+      subtitle: currentUser?.phoneNumber ? currentUser.phoneNumber : "",
+      onClick: () => setSidebar(SidebarMode.SETTINGS_PHONE),
     },
     {
-      title: "Change Password",
-      onClick: () => setSidebar(SidebarMode.SETTINGS_PASSWORD), // Replace with a dedicated mode if needed
+      title: t("account_settings.change_password.title"),
+      onClick: () => setSidebar(SidebarMode.SETTINGS_PASSWORD),
     },
   ];
 
   return (
-    <SidebarLayout
-      title="Account Settings"
-      backLocation={SidebarMode.SETTINGS}
-    >
+    <SidebarLayout title={t("settings.account")} backLocation={SidebarMode.SETTINGS}>
       {accountSettingsItems.map((item, index) => (
-        <div
-          key={index}
-          className="flex flex-col gap-1 justify-center p-4 custom-border-b h-20 cursor-pointer hover:bg-[var(--hover-color)]"
-          onClick={item.onClick}
-        >
-          <h1>{item.title}</h1>
-          {item.subtitle && <h1 className="opacity-60">{item.subtitle}</h1>}
+        <div key={index} className="settings-item" onClick={item.onClick}>
+          <div>
+            <h1>{item.title}</h1>
+            {item.subtitle && <h1 className="opacity-60">{item.subtitle}</h1>}
+          </div>
         </div>
       ))}
     </SidebarLayout>

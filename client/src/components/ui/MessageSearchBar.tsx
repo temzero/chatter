@@ -2,8 +2,10 @@ import React, { useRef, useMemo } from "react";
 import { useMessageStore } from "@/stores/messageStore";
 import { useShallow } from "zustand/shallow";
 import { debounce } from "lodash";
+import { useTranslation } from "react-i18next";
 
 const MessageSearchBar: React.FC = () => {
+  const { t } = useTranslation();
   const searchMessageInputRef = useRef<HTMLInputElement>(null);
 
   const {
@@ -58,7 +60,7 @@ const MessageSearchBar: React.FC = () => {
         ref={searchMessageInputRef}
         className="w-full"
         type="text"
-        placeholder="Search for messages"
+        placeholder={t("messages.search_bar.placeholder")}
         defaultValue={searchQuery}
         onChange={handleChange}
         autoFocus
@@ -68,7 +70,7 @@ const MessageSearchBar: React.FC = () => {
       <button
         onClick={toggleImportantFilter}
         className="flex items-center justify-center"
-        title="Filter Important"
+        title={t("messages.search_bar.filter_important")}
       >
         <span
           className={`material-symbols-outlined mr-1 opacity-60 hover:opacity-90 ${

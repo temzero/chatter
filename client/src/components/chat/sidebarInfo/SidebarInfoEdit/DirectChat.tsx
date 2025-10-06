@@ -13,8 +13,10 @@ import { useMessageStore } from "@/stores/messageStore";
 import { useMuteControl } from "@/hooks/useMuteControl";
 import { SidebarInfoHeaderIcons } from "@/components/ui/SidebarInfoHeaderIcons";
 import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
+import { useTranslation } from "react-i18next";
 
 const DirectChat: React.FC = () => {
+  const { t } = useTranslation();
   const activeChat = useActiveChat() as ChatResponse;
   const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
   const chatMembers = useActiveMembers();
@@ -43,7 +45,7 @@ const DirectChat: React.FC = () => {
   if (chatPartner.isBlockedByMe) {
     headerIcons.push({
       icon: "lock_open_right",
-      title: "Unblock User",
+      title: t("common.actions.unblock"),
       action: () =>
         openModal(ModalType.UNBLOCK_USER, { blockedUser: chatPartner }),
       className: "text-[--primary-green]",
@@ -51,7 +53,7 @@ const DirectChat: React.FC = () => {
   } else if (chatPartner.isBlockedMe) {
     headerIcons.push({
       icon: "block",
-      title: "Blocked by User",
+      title: t("common.actions.blocked_by_user"),
       action: () =>
         openModal(ModalType.BLOCK_USER, { userToBlock: chatPartner }),
     });
@@ -59,13 +61,13 @@ const DirectChat: React.FC = () => {
     if (activeChat.mutedUntil) {
       headerIcons.push({
         icon: "notifications_off",
-        title: "Unmute",
+        title: t("common.actions.unmute"),
         action: unmute,
       });
     } else {
       headerIcons.push({
         icon: "notifications",
-        title: "Mute",
+        title: t("common.actions.mute"),
         action: mute,
       });
     }
@@ -73,20 +75,18 @@ const DirectChat: React.FC = () => {
     headerIcons.push(
       {
         icon: "search",
-        title: "Search",
-        action: () => {
-          setDisplaySearchMessage(true);
-        },
+        title: t("common.actions.search"),
+        action: () => setDisplaySearchMessage(true),
       },
       {
         icon: "block",
-        title: "Block User",
+        title: t("common.actions.block"),
         action: () =>
           openModal(ModalType.BLOCK_USER, { userToBlock: chatPartner }),
       },
       {
         icon: "edit",
-        title: "Edit",
+        title: t("common.actions.edit"),
         action: () => setSidebarInfo(SidebarInfoMode.DIRECT_EDIT),
       }
     );
@@ -115,14 +115,18 @@ const DirectChat: React.FC = () => {
         )}
 
         {chatPartner.isBlockedMe && (
-          <h1 className="text-red-500">Blocked Me</h1>
+          <h1 className="text-red-500">
+            {t("common.actions.blocked_me")}
+          </h1>
         )}
         {chatPartner.isBlockedByMe ? (
           <h1 className="text-red-500">
-            You've blocked this{" "}
-            {chatPartner.friendshipStatus === FriendshipStatus.ACCEPTED
-              ? "friend"
-              : "user"}
+            {t("common.actions.you_blocked", {
+              type:
+                chatPartner.friendshipStatus === FriendshipStatus.ACCEPTED
+                  ? t("common.actions.friend")
+                  : t("common.actions.user"),
+            })}
           </h1>
         ) : (
           <FriendshipBtn
@@ -142,7 +146,7 @@ const DirectChat: React.FC = () => {
               icon="alternate_email"
               value={chatPartner.username}
               copyType="username"
-              defaultText="No username"
+              defaultText={t("common.actions.no_username")}
             />
             <ContactInfoItem
               icon="call"

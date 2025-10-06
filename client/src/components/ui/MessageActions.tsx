@@ -8,6 +8,7 @@ import {
 } from "@/stores/modalStore";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
 import { scrollToMessageById } from "@/utils/scrollToMessageById";
+import { useTranslation } from "react-i18next";
 
 interface MessageActionsProps {
   message: MessageResponse;
@@ -26,6 +27,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   isSystemMessage = false,
   onClose,
 }) => {
+  const { t } = useTranslation();
   const openModal = useModalStore((state) => state.openModal);
   const closeModal = useModalStore((state) => state.closeModal);
   const setReplyToMessageId = useSetReplyToMessageId();
@@ -36,7 +38,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   const actions = {
     reply: {
       icon: "reply",
-      label: "Reply",
+      label: t("common.actions.reply"),
       action: () => {
         setReplyToMessageId(message.id);
         scrollToMessageById(message.id, { animate: false });
@@ -44,7 +46,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
     },
     forward: {
       icon: "arrow_warm_up",
-      label: "Forward",
+      label: t("common.actions.forward"),
       action: () => {
         if (onClose) onClose();
         openModal(ModalType.FORWARD_MESSAGE, { message });
@@ -52,7 +54,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
     },
     pin: {
       icon: isPinned ? "remove" : "keep",
-      label: isPinned ? "Unpin" : "Pin",
+      label: isPinned ? t("common.actions.unpin") : t("common.actions.pin"),
       action: () => {
         chatWebSocketService.togglePinMessage({
           chatId: message.chatId,
@@ -64,7 +66,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
     },
     save: {
       icon: "bookmark",
-      label: "Save",
+      label: t("common.actions.save"),
       action: () => {
         if (onClose) onClose();
         chatWebSocketService.saveMessage({ messageId: message.id });
@@ -73,7 +75,9 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
     },
     important: {
       icon: "star",
-      label: message.isImportant ? "Unmark Important" : "Mark Important",
+      label: message.isImportant
+        ? t("common.actions.unmark_important")
+        : t("common.actions.mark_important"),
       action: () => {
         if (onClose) onClose();
         chatWebSocketService.toggleImportantMessage({
@@ -86,7 +90,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
     },
     delete: {
       icon: "delete",
-      label: "Delete",
+      label: t("common.actions.delete"),
       action: () => {
         if (onClose) onClose();
         openModal(ModalType.DELETE_MESSAGE, { messageId: message.id });
@@ -142,9 +146,9 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
           <i
             className={clsx(
               "material-symbols-outlined text-2xl",
-              action.label === "Reply" && "rotate-180",
-              action.label === "Forward" && "rotate-90",
-              action.label === "Delete" && "text-red-400",
+              action.label === t("common.actions.reply") && "rotate-180",
+              action.label === t("common.actions.forward") && "rotate-90",
+              action.label === t("common.actions.delete") && "text-red-400",
               action.label.includes("Important") &&
                 message.isImportant &&
                 "filled text-red-500 font-bold"

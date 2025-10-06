@@ -5,8 +5,10 @@ import { useAuthStore, useCurrentUser } from "@/stores/authStore";
 import { userService } from "@/services/userService";
 import { handleError } from "@/utils/handleError";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 const SidebarSettingsPhoneNumber: React.FC = () => {
+  const { t } = useTranslation();
   const currentUser = useCurrentUser();
 
   const setCurrentUser = useAuthStore((state) => state.setCurrentUser);
@@ -20,6 +22,8 @@ const SidebarSettingsPhoneNumber: React.FC = () => {
   const [validationError, setValidationError] = useState("");
   const isUnchanged = phoneNumber === currentUser?.phoneNumber;
   const isDisabled = loading || !isValid || isUnchanged;
+
+  const invalidMessage = t("account_settings.change_phone.messages.invalid");
 
   // Validate phone number whenever it changes
   useEffect(() => {
@@ -35,31 +39,31 @@ const SidebarSettingsPhoneNumber: React.FC = () => {
     // Check length (adjust based on your requirements)
     if (cleanedPhoneNumber.length < 10) {
       setIsValid(false);
-      setValidationError("Phone number must be at least 10 digits");
+      setValidationError(invalidMessage);
       return;
     }
 
     if (cleanedPhoneNumber.length > 15) {
       setIsValid(false);
-      setValidationError("Phone number must be no more than 15 digits");
+      setValidationError(invalidMessage);
       return;
     }
 
     // If all checks pass
     setIsValid(true);
     setValidationError("");
-  }, [phoneNumber]);
+  }, [phoneNumber, invalidMessage]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!phoneNumber.trim()) {
-      toast.error("Phone number cannot be empty");
+      toast.error(invalidMessage);
       return;
     }
 
     if (!isValid) {
-      toast.error(validationError || "Invalid phone number format");
+      toast.error(invalidMessage);
       return;
     }
 
@@ -68,7 +72,7 @@ const SidebarSettingsPhoneNumber: React.FC = () => {
 
       // Check if phone number is the same as current
       if (phoneNumber === currentUser?.phoneNumber) {
-        toast("This is already your current phone number");
+        toast.info(t("account_settings.change_phone.messages.already_current"));
         return;
       }
 
@@ -78,9 +82,16 @@ const SidebarSettingsPhoneNumber: React.FC = () => {
         cleanedPhoneNumber
       );
       setCurrentUser(updatedUser);
-      toast.success("Phone number updated successfully");
+      toast.success(
+        t("account_settings.change_phone.messages.sent", {
+          phone: cleanedPhoneNumber,
+        })
+      );
     } catch (error) {
-      handleError(error, "Failed to update phone number");
+      handleError(
+        error,
+        t("account_settings.change_phone.messages.failed_send")
+      );
     } finally {
       setLoading(false);
     }
@@ -88,17 +99,19 @@ const SidebarSettingsPhoneNumber: React.FC = () => {
 
   return (
     <SidebarLayout
-      title="Change Phone Number"
+      title={t("account_settings.change_phone.title")}
       backLocation={SidebarMode.SETTINGS_ACCOUNT}
     >
       <form onSubmit={handleSubmit} className="p-2 flex flex-col gap-2">
         <div className="w-full p-4 rounded-lg bg-[var(--hover-color)]">
-          <h3 className="font-semibold mb-2">Phone Number Requirements:</h3>
           <ul className="space-y-1 dark:text-gray-300">
-            <li>• Must be a valid phone number</li>
-            <li>• 10-15 digits (country code optional)</li>
-            <li>• Must be unique (not used by another account)</li>
-            <li>• You may need to verify the new phone number</li>
+            {(
+              t("account_settings.change_phone.requirements", {
+                returnObjects: true,
+              }) as string[]
+            ).map((requirement: string, index: number) => (
+              <li key={index}>• {requirement}</li>
+            ))}
           </ul>
         </div>
 
@@ -111,7 +124,7 @@ const SidebarSettingsPhoneNumber: React.FC = () => {
           }}
           disabled={loading}
           name="phoneNumber"
-          placeholder="Set New Phone Number"
+          placeholder={t("account_settings.change_phone.placeholder")}
           className="input"
           autoComplete="tel"
           autoFocus
@@ -124,7 +137,9 @@ const SidebarSettingsPhoneNumber: React.FC = () => {
           className={`${isDisabled ? "" : "primary"} p-1 w-full`}
           disabled={isDisabled}
         >
-          {loading ? "Sending..." : "Send OTP"}
+          {loading
+            ? t("common.actions.send_verification")
+            : t("common.actions.send_verification")}
         </button>
 
         {validationError && (

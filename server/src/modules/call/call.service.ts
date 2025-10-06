@@ -22,10 +22,11 @@ export class CallService {
 
   async getCallHistory(
     userId: string,
-    options: { limit?: number; offset?: number } = { limit: 20, offset: 0 },
+    options: { limit?: number; lastCallId?: string } = { limit: 20 },
   ): Promise<{ calls: CallResponseDto[]; hasMore: boolean }> {
-    const { limit = 20, offset = 0 } = options;
-    console.log('limit-offset', limit, offset);
+    const { limit = 20, lastCallId } = options;
+
+    // Get all calls with relations
     const query = this.callRepository
       .createQueryBuilder('call')
       .leftJoinAndSelect('call.chat', 'chat')
@@ -42,14 +43,25 @@ export class CallService {
 
     const allCalls = await query.getMany();
 
-    // Manual pagination
-    const start = offset;
-    const end = offset + limit;
-    const calls = allCalls.slice(start, end);
-    const hasMore = allCalls.length > end;
+    // Handle pagination
+    let startIndex = 0;
+    if (lastCallId) {
+      const lastCallIndex = allCalls.findIndex(
+        (call) => call.id === lastCallId,
+      );
+      if (lastCallIndex !== -1) {
+        startIndex = lastCallIndex + 1;
+      }
+    }
+
+    const paginatedCalls = allCalls.slice(startIndex, startIndex + limit + 1);
+    const hasMore = paginatedCalls.length > limit;
+    const slicedCalls = hasMore
+      ? paginatedCalls.slice(0, limit)
+      : paginatedCalls;
 
     const mappedCalls = await Promise.all(
-      calls.map((call) => this.callMapper.map(call, userId)),
+      slicedCalls.map((call) => this.callMapper.map(call, userId)),
     );
 
     return {

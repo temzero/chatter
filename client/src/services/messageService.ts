@@ -10,12 +10,12 @@ export const messageService = {
     options: PaginationQuery = { limit: 10 }
   ): Promise<{ messages: MessageResponse[]; hasMore: boolean }> {
     try {
-      const { offset, beforeId, limit } = options;
+      const { offset, lastId, limit } = options;
 
       const { data } = await API.get(`/messages/chat/${chatId}`, {
         params: {
           ...(offset !== undefined ? { offset } : {}),
-          ...(beforeId ? { beforeId } : {}),
+          ...(lastId ? { lastId } : {}),
           limit,
         },
       });

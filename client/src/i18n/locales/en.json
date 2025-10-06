@@ -1,0 +1,557 @@
+{
+  "common": {
+    "you": "You",
+    "actions": {
+      "accept": "Accept",
+      "back": "Back",
+      "block": "Block",
+      "blocked_by_user": "Blocked by User",
+      "cancel": "Cancel",
+      "cancel_request": "Cancel Request",
+      "clear_selection": "Clear Selection",
+      "close": "Close",
+      "delete": "Delete",
+      "decline": "Decline",
+      "edit": "Edit",
+      "forward": "Forward",
+      "leave": "Leave",
+      "mark_important": "Mark Important",
+      "mute": "Mute",
+      "pin": "Pin",
+      "reply": "Reply",
+      "remove": "Remove",
+      "requests": "Requests",
+      "resend_code": "Resend Code",
+      "save": "Save",
+      "save_changes": "Save Changes",
+      "search": "Search",
+      "send_verification": "Send Verification",
+      "unfriend": "Unfriend",
+      "unmark_important": "Unmark Important",
+      "unmute": "Unmute",
+      "unpin": "Unpin",
+      "unblock": "Unblock",
+      "update": "Update",
+      "verify": "Verify",
+      "verify_code": "Verify Code",
+      "sent": "Sent"
+    },
+    "messages": {
+      "success": "Success!",
+      "failed": "Failed",
+      "unknown": "Unknown",
+      "empty": "Empty",
+      "error": "An error occurred",
+      "required": "This field is required",
+      "invalid_code": "Please enter a 6-digit code"
+    },
+    "loading": {
+      "loading": "Loading...",
+      "searching": "Searching...",
+      "creating": "Creating...",
+      "saving": "Saving..."
+    }
+  },
+
+  "chat": {
+    "all": "All Chats",
+    "all_with_type": "All Chats with type:",
+    "label": "Chat Types",
+    "direct": "Direct",
+    "group": "Group",
+    "channel": "Channel"
+  },
+
+  "chat_bar": {
+    "placeholder": "Message...",
+    "attach_file": "Attach file"
+  },
+
+  "emoji": {
+    "recently": "Recently",
+    "smileys_emotion": "Smileys & Emotion",
+    "people_body": "People & Body",
+    "animals_nature": "Animals & Nature",
+    "food_drink": "Food & Drink",
+    "activities": "Activities",
+    "objects": "Objects",
+    "flags": "Flags"
+  },
+
+  "sidebar": {
+    "saved_messages": "Saved Messages",
+    "calls": "Calls",
+    "contacts": "Contacts",
+    "friend_requests": "Friend requests {count, plural, =0 {Friend requests} other {Friend requests #}}",
+    "friend_requests_none": "Friend requests",
+    "folders": "Chat Folders",
+    "blocked": "Blocked",
+    "settings": "Settings"
+  },
+
+  "sidebar_new_chat": {
+    "title": "New {{type}} Chat",
+    "direct": {
+      "placeholder": "@username/email/phoneNumber",
+      "find_user": "Find User",
+      "user_not_found": "User not found!",
+      "blocked_by_user_message": "This user has blocked you. You cannot view their profile or interact with them.",
+      "friend": "Friend",
+      "friend_but_blocked": "Friend but blocked",
+      "no_username": "No username",
+      "start_chat": "Start Chat"
+    },
+
+    "group": {
+      "search_placeholder": "Search for members...",
+      "no_contacts_found": "No contacts found",
+      "enter_name": "Enter name",
+      "create_group": "Create Group",
+      "create_channel": "Create Channel",
+      "user_not_authenticated": "User not authenticated",
+      "failed_create": "Failed to create {{type}}"
+    }
+  },
+  "sidebar_search": {
+    "placeholder": "Search chats...",
+    "no_result": "No Result!"
+  },
+
+  "sidebar_calls": {
+    "title": "Call History",
+    "no_calls": "No Call Yet!"
+  },
+
+  "sidebar_contacts": {
+    "title": "Contacts",
+    "no_contacts": "No contacts with phone numbers",
+    "video_call": "Video call",
+    "audio_call": "Audio call"
+  },
+
+  "sidebar_friend_requests": {
+    "title": "Friend Requests",
+    "messages": {
+      "no_friend_requests": "No friend requests",
+      "no_sent_requests": "No sent requests",
+      "mutual_friends_one": "{{count}} mutual friend",
+      "mutual_friends_other": "{{count}} mutual friends"
+    }
+  },
+
+  "sidebar_folders": {
+    "title": "Chat Folders",
+    "messages": {
+      "no_folders": "No folders yet"
+    },
+    "buttons": {
+      "add_folder": "Add Folder"
+    },
+
+    "detail": {
+      "title": "Folder Details",
+      "folder_not_found": "Folder not found",
+      "no_chats": "No chats in this folder",
+      "delete_folder": "Delete Folder"
+    },
+
+    "new_folder": {
+      "create_title": "Create New Folder",
+      "edit_title": "Edit Folder",
+      "folder_name_placeholder": "Folder Name",
+      "folder_name_empty_error": "Folder name cannot be empty",
+      "chat_selection": {
+        "selected_count": "{count} Chats Included",
+        "search_placeholder": "Search chats..."
+      },
+      "buttons": {
+        "create": "Create Folder"
+      }
+    }
+  },
+
+  "sidebar_blocked": {
+    "title": "Blocked Users",
+    "empty": {
+      "title": "No blocked users found",
+      "subtitle": "Blocked users will appear here. You can block someone from their profile or chat screen."
+    }
+  },
+
+  "settings": {
+    "account": "Account Settings",
+    "privacy_security": "Privacy & Security",
+    "display": "Display",
+    "keyboard": "Keyboard",
+    "messages": "Messages",
+    "folders": "Chat Folders",
+    "notifications": "Notifications",
+    "data_storage": "Data & Storage",
+    "language": "Language",
+    "theme": "Theme",
+    "theme_options": {
+      "light": "Light",
+      "dark": "Dark",
+      "auto": "Auto"
+    }
+  },
+
+  "account_settings": {
+    "title": "Account Settings",
+    "change_username": {
+      "title": "Change Username",
+      "placeholder": "Set New Username",
+      "button": "Update Username",
+      "requirements": [
+        "Maximum 24 characters",
+        "Letters (A-Z), numbers (0-9), periods (.) or underscores (_)",
+        "No spaces or special characters",
+        "Cannot end with a period (.)",
+        "Cannot contain consecutive periods (..)",
+        "Must be unique"
+      ],
+      "messages": {
+        "already_current": "This is already your current username",
+        "available": "Username is available!",
+        "taken": "Username is already taken",
+        "success": "Username updated successfully!",
+        "verify_first": "Please verify username availability first"
+      }
+    },
+
+    "change_email": {
+      "title": "Change Email",
+      "placeholder": "Set New Email",
+      "requirements": [
+        "Must be a valid email address",
+        "Maximum 254 characters",
+        "Must be unique (not used by another account)",
+        "You need to verify the new email address"
+      ],
+      "resend_in": "Resend in {time}",
+      "messages": {
+        "already_current": "This is already your current email",
+        "sent": "Verification code sent to your email: {email}",
+        "success": "Email verified and updated successfully",
+        "verify_first": "Please verify the new email first",
+        "invalid": "Please enter a valid email address",
+        "failed_send": "Failed to send verification code",
+        "failed_verify": "Email verification failed",
+        "failed_resend": "Failed to resend verification code"
+      }
+    },
+
+    "change_phone": {
+      "title": "Change Phone Number",
+      "placeholder": "Set New Phone Number",
+      "requirements": [
+        "Must be a valid phone number",
+        "10-15 digits (country code optional)",
+        "Must be unique (not used by another account)",
+        "You may need to verify the new phone number"
+      ],
+      "resend_in": "Resend in {time}",
+      "messages": {
+        "already_current": "This is already your current phone number",
+        "sent": "Verification code sent to your phone: {phone}",
+        "success": "Phone number verified and updated successfully",
+        "verify_first": "Please verify the new phone number first",
+        "invalid": "Please enter a valid phone number",
+        "failed_send": "Failed to send verification code",
+        "failed_verify": "Phone number verification failed",
+        "failed_resend": "Failed to resend verification code"
+      }
+    },
+    "change_password": {
+      "title": "Change Password",
+      "placeholder": {
+        "current": "Current Password",
+        "new": "New Password",
+        "confirm": "Confirm New Password"
+      },
+      "requirements": [
+        "At least 8 characters",
+        "At least one uppercase letter",
+        "At least one lowercase letter",
+        "At least one number"
+      ],
+      "messages": {
+        "all_required": "All fields are required",
+        "invalid_format": "Invalid password format",
+        "success": "Password changed successfully",
+        "failed": "Failed to change password"
+      },
+      "buttons": {
+        "change": "Change Password",
+        "changing": "Changing..."
+      }
+    }
+  },
+
+  "privacy_settings": {
+    "title": "Privacy & Security",
+    "private_account": {
+      "label": "Private Account",
+      "desc_private": "Only approved followers can see your content",
+      "desc_public": "Anyone can see your content"
+    },
+    "read_receipts": {
+      "label": "Read Receipts",
+      "desc_on": "People will see when you've read their messages",
+      "desc_off": "People won't see when you've read their messages"
+    },
+    "online_status": {
+      "label": "Online Status",
+      "desc_on": "People will see when you're online",
+      "desc_off": "People won't see when you're online"
+    },
+    "allow_messages_from": {
+      "label": "Who Can Message You",
+      "options": {
+        "everyone": "Everyone",
+        "friends": "Friends Only",
+        "none": "No One"
+      }
+    },
+    "buttons": {
+      "save_changes": "Save Changes",
+      "saving": "Saving..."
+    },
+    "messages": {
+      "no_changes": "No changes detected",
+      "success": "Privacy settings updated successfully",
+      "error": "Failed to update privacy settings"
+    }
+  },
+
+  "display_settings": {
+    "title": "Display",
+    "options": {
+      "animations": "Enable Animations",
+      "reduce_motion": "Reduce Motion",
+      "high_contrast": "High Contrast Mode",
+      "text_size_large": "Large Text Size"
+    }
+  },
+
+  "keyboard_settings": {
+    "title": "Keyboard",
+    "options": {
+      "enter_send": "Enter sends message",
+      "ctrl_enter_send": "Ctrl + Enter sends message",
+      "vim_mode": "Enable Vim Mode",
+      "emacs_mode": "Enable Emacs Mode"
+    }
+  },
+
+  "message_settings": {
+    "title": "Messages",
+    "options": {
+      "read_receipts": "Read Receipts",
+      "typing_indicators": "Show Typing Indicators",
+      "auto_download_media": "Auto-download Media",
+      "desktop_notifications": "Desktop Notifications"
+    }
+  },
+
+  "folder_settings": {
+    "title": "Folders",
+    "options": {
+      "show_unread_count": "Show Unread Count",
+      "auto_archive": "Auto-archive Old Messages",
+      "sort_by_date": "Sort Folders by Date",
+      "sort_by_name": "Sort Folders by Name",
+      "hide_empty": "Hide Empty Folders"
+    }
+  },
+
+  "notification_settings": {
+    "title": "Notifications",
+    "options": {
+      "message_sounds": "Message Sounds",
+      "desktop_banners": "Desktop Banners",
+      "mentions_only": "Mentions Only",
+      "email_notifications": "Email Notifications",
+      "vibrate": "Vibrate on Mobile"
+    }
+  },
+
+  "data_settings": {
+    "title": "Data & Storage",
+    "options": {
+      "auto_download_media": "Auto-download Media",
+      "limit_storage": "Limit Storage Usage",
+      "clear_cache": "Clear Cache",
+      "low_data_mode": "Low Data Mode",
+      "backup_messages": "Backup Messages"
+    }
+  },
+
+  "sidebar_info": {
+    "edit": {
+      "title": "Edit Chat",
+      "set_partner_nickname": "Set {{name}}'s Nickname",
+      "set_my_nickname": "Set My Nickname",
+      "unfriend": "Unfriend",
+      "leave_chat": "Leave Chat",
+      "delete_chat": "Delete Chat",
+      "update_success": "Update successfully"
+    },
+    "group_edit": {
+      "title": "Edit {{type}}",
+      "group_name": "Group Name",
+      "description": "Description",
+      "members": "Members",
+      "leave_chat": "Leave {{type}}",
+      "delete_chat": "Delete {{type}}",
+      "update_success": "Update successfully"
+    },
+    "members_edit": {
+      "title": "Members",
+      "you_role": "You, the {{role}}",
+      "owner": "Owner",
+      "admin": "Admin",
+      "guest": "Guest",
+      "member": "Member",
+      "status_left": "Left",
+      "status_banned": "Banned",
+      "set_nickname": "Set Nickname",
+      "promote_owner": "Promote to Owner",
+      "set_admin": "Set as Admin",
+      "add_member": "Add Member",
+      "set_member": "Set as Member"
+    },
+    "media_files": {
+      "title": "Media & Files",
+      "images": "Images",
+      "videos": "Videos",
+      "files": "Files"
+    }
+  },
+
+  "modal": {
+    "friend_request": {
+      "title": "Send Friend Request to",
+      "optional_message": "Optional message...",
+      "send_request": "Send Friend Request"
+    },
+    "forward_message": {
+      "title_message": "Forward Message To...",
+      "title_attachment": "Send This {{type}} To...",
+      "search_placeholder": "Search for chat to forward to"
+    },
+    "delete_message": {
+      "title": "Delete Message",
+      "description": "Are you sure you want to delete this message? This action cannot be undone.",
+      "delete_for_me": "Delete for me",
+      "delete_for_everyone": "Delete for everyone"
+    },
+    "delete_folder": {
+      "title": "Delete Folder",
+      "description": "Deleting this folder would remove it from your workspace. All chats currently in this folder will remain in your chat list but will no longer be organized in this folder."
+    },
+    "mute_chat": {
+      "title": "Mute Chat",
+      "description": "Choose how long to mute notifications:",
+      "options": {
+        "1_hour": "1 Hour",
+        "8_hours": "8 Hours",
+        "1_day": "1 Day",
+        "1_week": "1 Week",
+        "1_month": "1 Month",
+        "forever": "Forever"
+      },
+      "muted_until": "Muted until {{time}}",
+      "mute_failed": "Failed to mute chat member"
+    },
+    "block_user": {
+      "title": "Block User",
+      "description": "Blocking will prevent this user from sending you messages or seeing your online status.",
+      "success": "{{username}} has been blocked",
+      "error": "Failed to block user"
+    },
+    "unblock_user": {
+      "title": "Unblock User",
+      "description": "Unblocking will allow this user to send you messages and see your online status.",
+      "toast_success": "{{username}} has been unblocked",
+      "toast_error": "Failed to unblock user"
+    },
+    "delete_chat": {
+      "title_direct": "Delete Chat",
+      "title_group": "Delete {{type}}",
+      "chat_type": "{{type}} chat",
+      "description_direct": "Are you sure you want to delete this chat?\nThis action is permanent — you and {{name}} won’t be able to access it again.",
+      "description_group": "Are you sure you want to delete this {{type}}?\nThis will permanently remove the conversation for all members."
+    },
+    "leave_chat": {
+      "title_direct": "Leave Chat",
+      "title_group": "Leave {{type}}",
+      "chat_type": "{{type}} chat",
+      "description_direct": "Are you sure you want to leave this chat?\nYou won’t be able to access it again.",
+      "description_group": "Are you sure you want to leave this {{type}}?\nYou’ll no longer receive messages from it."
+    },
+    "add_member": {
+      "title": "Invite Members",
+      "search_placeholder": "Search for people...",
+      "loading": "Loading contacts...",
+      "no_contacts": "No contacts found",
+      "copy_success": "Invitation Link copied!",
+      "copy_failed": "Failed to copy link.",
+      "link_copied": "Copied ✓",
+      "link_copy_title": "Copy invite link",
+      "link_copied_title": "Link copied!",
+      "refresh_title": "Refresh",
+      "generate_invite": "Generate Invite Link",
+      "add_single": "Add Member",
+      "add_multiple": "Add {{count}} Members",
+      "failed_add": "Failed to add members"
+    },
+    "set_nickname": {
+      "title": "Set Nickname",
+      "placeholder": "Enter nickname",
+      "failed": "Failed to update nickname"
+    },
+    "delete_call": {
+      "title": "Delete Your Call History",
+      "description": "Are you sure you want to delete this call?\nThis action is permanent and all related messages will be removed.",
+      "failed": "Failed to delete call"
+    }
+  },
+
+  "system": {
+    "another_member": "another member",
+    "unknown_event": "System event occurred.",
+    "member_joined": "{{displayName}} joined the chat",
+    "member_added": "{{displayName}} added {{targetName}} to the chat",
+    "member_left": "{{displayName}} left the chat",
+    "member_kicked": "{{displayName}} removed {{targetName}} from the chat",
+    "member_banned": "{{displayName}} banned {{targetName}} from the chat",
+    "chat_renamed": "{{displayName}} renamed the chat",
+    "chat_renamed_with_values": "{{displayName}} renamed chat from \"{{oldVal}}\" to \"{{newVal}}\"",
+    "chat_update_avatar": "{{displayName}} updated the chat avatar",
+    "chat_update_description": "{{displayName}} updated the chat description",
+    "chat_update_description_with_values": "{{displayName}} changed description from \"{{oldVal}}\" to \"{{newVal}}\"",
+    "chat_set_description": "{{displayName}} set description to \"{{newVal}}\"",
+    "member_update_nickname": "{{displayName}} updated {{targetName}}'s nickname",
+    "member_update_nickname_with_values": "{{displayName}} changed {{targetName}}'s nickname from \"{{oldVal}}\" to \"{{newVal}}\"",
+    "member_set_nickname": "{{displayName}} set {{targetName}}'s nickname to \"{{newVal}}\"",
+    "member_promote_owner": "{{displayName}} promoted {{targetName}} to owner",
+    "member_update_role": "{{displayName}} changed {{targetName}}'s role to {{newVal}}",
+    "member_update_status": "{{displayName}} changed {{targetName}}'s status to {{newVal}}",
+    "message_pinned": "{{displayName}} pinned a message \"{{newVal}}\"",
+    "message_unpinned": "{{displayName}} unpinned a message",
+    "chat_deleted": "{{displayName}} deleted the chat",
+    "broadcast_message": {
+      "broadcasted": "Broadcasted",
+      "live_now": "Live now",
+      "started_at": "Started {{time}}"
+    }
+  },
+
+  "messages": {
+    "search_bar": {
+      "placeholder": "Search for messages",
+      "filter_important": "Filter Important"
+    }
+  }
+}

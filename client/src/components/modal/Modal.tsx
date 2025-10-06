@@ -1,13 +1,12 @@
+import { useEffect, useMemo } from "react";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useMemo } from "react";
+import { useShallow } from "zustand/shallow";
+import { modalAnimation } from "@/animations/modalAnimations";
 import MediaViewer from "./media/MediaViewer";
 import FriendRequestModal from "./FriendRequestModal";
 import ForwardMessageModal from "./ForwardMessageModal";
 import DeleteMessageModal from "./DeleteMessageModal";
-import { useShallow } from "zustand/shallow";
-import { modalAnimation } from "@/animations/modalAnimations";
-import AddFolderModal from "./AddFolderModal";
 import DeleteFolderModal from "./DeleteFolderModal";
 import BlockUserModal from "./BlockUserModal";
 import UnblockUserModal from "./UnblockUserModal";
@@ -55,11 +54,6 @@ const Modal = () => {
         return <DeleteMessageModal />;
       case ModalType.DELETE_FOLDER:
         return <DeleteFolderModal />;
-      case ModalType.ADD_FOLDER:
-        return <AddFolderModal />;
-
-      case ModalType.CALL:
-        return <CallModal />;
 
       case ModalType.MUTE:
         return <MuteChatModal />;
@@ -79,6 +73,9 @@ const Modal = () => {
       case ModalType.SET_NICKNAME:
         return <SetNicknameModal />;
 
+      case ModalType.CALL:
+        return <CallModal />;
+        
       case ModalType.DELETE_CALL:
         return <DeleteCallModal />;
 

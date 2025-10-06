@@ -13,8 +13,10 @@ import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
 import { FriendContactResponse } from "@/types/responses/friendContact.response";
 import { useFriendContacts } from "@/hooks/useFriendContacts";
 import { useAllUniqueMembers } from "@/hooks/useAllUniqueMembers";
+import { useTranslation } from "react-i18next";
 
 const AddMemberModal: React.FC = () => {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const [refreshed, setRefreshed] = useState(false);
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
@@ -64,8 +66,8 @@ const AddMemberModal: React.FC = () => {
       await useChatStore.getState().addMembersToChat(chat.id, selectedContacts);
       setSidebarInfo(SidebarInfoMode.DEFAULT);
     } catch (error) {
-      handleError(error, "Failed to add members");
-      console.error("Failed to add members:", error);
+      handleError(error, t("modal.add_member.failed_add"));
+      console.error(t("modal.add_member.failed_add"), error);
     }
   };
 
@@ -88,32 +90,32 @@ const AddMemberModal: React.FC = () => {
   const handleCopy = async () => {
     const success = await copyToClipboard(primaryInviteLink);
     if (success) {
-      toast.success("Invitation Link copied!");
+      toast.success(t("modal.add_member.copy_success"));
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } else {
-      toast.error("Failed to copy link.");
+      toast.error(t("modal.add_member.copy_failed"));
     }
   };
 
   return (
     <motion.div
       {...childrenModalAnimation}
-      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded p-4 max-w-xl w-[400px] custom-border z-[99]"
+      className="bg-[var(--modal-color)] text-[var(--text-color)] rounded p-4 max-w-xl w-[400px] custom-border z-[99]"
     >
       <h1 className="font-bold text-center text-xl mb-4 flex items-center justify-center gap-2">
         <span className="material-symbols-outlined font-bold text-3xl">
           person_add
         </span>
-        Invite Members
+        {t("modal.add_member.title")}
       </h1>
 
-      <SearchBar placeholder="Search for people..." />
+      <SearchBar placeholder={t("modal.add_member.search_placeholder")} />
 
       <div className="flex flex-col items-start h-[50vh] overflow-y-auto mt-2 select-none">
         {loading ? (
           <p className="text-center w-full text-gray-500">
-            Loading contacts...
+            {t("modal.add_member.loading")}
           </p>
         ) : combinedContacts.length > 0 ? (
           combinedContacts.map((contact) => (
@@ -149,7 +151,7 @@ const AddMemberModal: React.FC = () => {
         ) : (
           <div className="flex flex-col items-center justify-center my-auto opacity-40 w-full">
             <i className="material-symbols-outlined text-6xl">search_off</i>
-            <p>No contacts found</p>
+            <p>{t("modal.add_member.no_contacts")}</p>
           </div>
         )}
       </div>
@@ -195,8 +197,10 @@ const AddMemberModal: React.FC = () => {
             onClick={handleAddMembers}
           >
             {selectedContacts.length === 1
-              ? "Add Member"
-              : `Add ${selectedContacts.length} Members`}
+              ? t("modal.add_member.add_single")
+              : t("modal.add_member.add_multiple", {
+                  count: selectedContacts.length,
+                })}
           </button>
         ) : (
           <div className="flex items-center bg-[var(--input-bg)] rounded w-full border-2 border-[--border-color]">
@@ -207,13 +211,19 @@ const AddMemberModal: React.FC = () => {
                   className={`h-full w-full text-sm p-1 px-2 whitespace-nowrap overflow-auto scrollbar-hide cursor-pointer hover:bg-[--hover-color] ${
                     copied ? "text-green-500 font-semibold" : ""
                   }`}
-                  title={copied ? "Link copied!" : "Copy invite link"}
+                  title={
+                    copied
+                      ? t("modal.add_member.link_copied_title")
+                      : t("modal.add_member.link_copy_title")
+                  }
                 >
-                  {copied ? "Copied ✓" : primaryInviteLink}
+                  {copied
+                    ? t("modal.add_member.link_copied")
+                    : primaryInviteLink}
                 </p>
                 {!refreshed && (
                   <button
-                    title="Refresh"
+                    title={t("modal.add_member.refresh_title")}
                     className={`border-l-2 border-[--border-color] p-1 px-2 opacity-60 hover:opacity-100 select-none ${
                       refreshed
                         ? "cursor-not-allowed"
@@ -240,7 +250,7 @@ const AddMemberModal: React.FC = () => {
                 <span className="material-symbols-outlined mr-1">
                   wand_stars
                 </span>
-                Generate Invite Link
+                {t("modal.add_member.generate_invite")}
               </button>
             )}
           </div>

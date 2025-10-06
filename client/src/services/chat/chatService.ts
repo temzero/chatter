@@ -33,15 +33,15 @@ export const chatService = {
   },
 
   async fetchChats(
-    options: PaginationQuery = { limit: 5 }
+    options: PaginationQuery = { limit: 10 }
   ): Promise<{ chats: ChatResponse[]; hasMore: boolean }> {
     try {
-      const { offset, beforeId, limit } = options;
+      const { offset, lastId, limit } = options;
 
       const { data } = await API.get(`/chat`, {
         params: {
           ...(offset !== undefined ? { offset } : {}),
-          ...(beforeId ? { beforeId } : {}),
+          ...(lastId ? { lastId } : {}),
           limit,
         },
       });

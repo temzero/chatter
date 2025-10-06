@@ -1,6 +1,5 @@
 import { useCallback } from "react";
-import { useAudioService } from "@/hooks/useAudioService";
-import { SoundType } from "@/services/audio.service";
+import { audioService, SoundType } from "@/services/audio.service";
 interface MediaViewerNavigationButtonsProps {
   currentIndex: number;
   attachmentLength: number;
@@ -14,24 +13,22 @@ export const MediaViewerNavigationButtons = ({
   onNext,
   onPrev,
 }: MediaViewerNavigationButtonsProps) => {
-  const { playSound } = useAudioService();
-
   const handleNext = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      playSound(SoundType.NOTIFICATION);
+      audioService.playSound(SoundType.NOTIFICATION);
       onNext();
     },
-    [onNext, playSound]
+    [onNext]
   );
 
   const handlePrev = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      playSound(SoundType.NOTIFICATION); // ✅ same here
+      audioService.playSound(SoundType.NOTIFICATION); // ✅ same here
       onPrev();
     },
-    [onPrev, playSound]
+    [onPrev]
   );
 
   return (

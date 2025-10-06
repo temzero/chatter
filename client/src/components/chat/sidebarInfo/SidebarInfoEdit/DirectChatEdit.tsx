@@ -14,8 +14,10 @@ import {
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
 import { DirectChatMember } from "@/types/responses/chatMember.response";
+import { useTranslation } from "react-i18next";
 
 const DirectChatEdit = () => {
+  const { t } = useTranslation();
   const activeChat = useChatStore((state) => state.activeChat) as ChatResponse;
   const updateMemberNickname = useChatMemberStore(
     (state) => state.updateMemberNickname
@@ -100,7 +102,9 @@ const DirectChatEdit = () => {
   return (
     <aside className="relative w-full h-full overflow-hidden flex flex-col">
       <header className="flex w-full justify-between px-2 items-center min-h-[var(--header-height)] custom-border-b">
-        <h1 className="text-xl font-semibold ml-2">Edit Chat</h1>
+        <h1 className="text-xl font-semibold ml-2">
+          {t("sidebar_info.edit.title")}
+        </h1>
         <div className="flex gap-1">
           {hasChanges && (
             <button
@@ -143,7 +147,9 @@ const DirectChatEdit = () => {
           <div className="w-full space-y-4">
             <div className="flex flex-col gap-1">
               <label className="text-sm opacity-70">
-                Set {chatPartner.firstName}'s Nickname
+                {t("sidebar_info.edit.set_partner_nickname", {
+                  name: chatPartner.firstName,
+                })}
               </label>
               <input
                 type="text"
@@ -155,7 +161,9 @@ const DirectChatEdit = () => {
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-sm opacity-70">Set My Nickname</label>
+              <label className="text-sm opacity-70">
+                {t("sidebar_info.edit.set_my_nickname")}
+              </label>
               <input
                 type="text"
                 name="myNickname"
@@ -167,16 +175,14 @@ const DirectChatEdit = () => {
           </div>
         </form>
 
-        <div
-          className="custom-border border-b-0 absolute bottom-0 w-full overflow-hidden shadow-xl rounded-t-xl"
-        >
+        <div className="custom-border border-b-0 absolute bottom-0 w-full overflow-hidden shadow-xl rounded-t-xl">
           {chatPartner.friendshipStatus === FriendshipStatus.ACCEPTED && (
             <button
               className="flex gap-2 justify-center items-center p-2 text-orange-500 w-full font-medium rounded-none custom-border-t"
               onClick={handleOpenUnfriendModal}
             >
               <span className="material-symbols-outlined">person_cancel</span>
-              Unfriend
+              {t("sidebar_info.edit.unfriend")}
             </button>
           )}
 
@@ -190,7 +196,7 @@ const DirectChatEdit = () => {
             }
           >
             <span className="material-symbols-outlined">logout</span>
-            Leave Chat
+            {t("sidebar_info.edit.leave_chat")}
           </button>
 
           <button
@@ -198,7 +204,7 @@ const DirectChatEdit = () => {
             onClick={handleOpenDeleteChatModal}
           >
             <i className="material-symbols-outlined">delete</i>
-            Delete Chat
+            {t("sidebar_info.edit.delete_chat")}
           </button>
         </div>
       </div>

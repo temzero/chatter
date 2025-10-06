@@ -6,6 +6,7 @@ import { useFriendshipStore } from "@/stores/friendshipStore";
 import { motion } from "framer-motion";
 import { childrenModalAnimation } from "@/animations/modalAnimations";
 import { useCurrentUserId } from "@/stores/authStore";
+import { useTranslation } from "react-i18next";
 
 interface FriendRequestModalProps {
   receiver: {
@@ -18,6 +19,7 @@ interface FriendRequestModalProps {
 }
 
 const FriendRequestModal: React.FC = () => {
+  const { t } = useTranslation();
   const modalContent = useModalStore((state) => state.modalContent);
   const props = modalContent?.props as FriendRequestModalProps | undefined;
   const currentUserId = useCurrentUserId();
@@ -36,9 +38,9 @@ const FriendRequestModal: React.FC = () => {
     e.preventDefault();
     closeModal();
     await sendFriendRequest(
-      currentUserId,
       receiver.id,
       receiver.firstName,
+      currentUserId,
       requestMessage
     );
   };
@@ -53,7 +55,9 @@ const FriendRequestModal: React.FC = () => {
       {...childrenModalAnimation}
       className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded p-4 max-w-xl w-[400px] custom-border z-[99]"
     >
-      <h1 className="font-bold text-center text-xl">Send Friend Request to</h1>
+      <h1 className="font-bold text-center text-xl">
+        {t("modal.friend_request.title")}
+      </h1>
       <div className="flex items-center gap-4 custom-border p-2 my-4 rounded-lg">
         <Avatar
           avatarUrl={receiver.avatarUrl}
@@ -75,7 +79,7 @@ const FriendRequestModal: React.FC = () => {
         <textarea
           id="friend-request-message"
           ref={textareaRef}
-          placeholder="Optional message..."
+          placeholder={t("modal.friend_request.optional_message")}
           className="w-full min-h-28 px-2"
           maxLength={maxChar}
           onChange={handleTextChange}
@@ -91,7 +95,7 @@ const FriendRequestModal: React.FC = () => {
           type="submit"
           className="bg-[var(--primary-green)] text-white w-full py-1 flex gap-2 justify-center"
         >
-          Send Friend Request
+          {t("modal.friend_request.send_request")}
         </button>
       </form>
     </motion.div>

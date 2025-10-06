@@ -34,25 +34,46 @@ export class CallController {
     private readonly chatMemberService: ChatMemberService,
   ) {}
 
+  // @Get('history')
+  // async getCallHistory(
+  //   @CurrentUser('id') userId: string,
+  //   @Query('offset') offset = 0,
+  //   @Query('limit') limit = 20,
+  // ): Promise<SuccessResponse<{ calls: CallResponseDto[]; hasMore: boolean }>> {
+  //   console.log('getCallHistory, Limit', limit, 'Offset', offset);
+  //   try {
+  //     const { calls, hasMore } = await this.callService.getCallHistory(userId, {
+  //       limit,
+  //       offset,
+  //     });
+  //     console.log('calls:', calls.length, 'hasMore:', hasMore);
+
+  //     return new SuccessResponse(
+  //       {
+  //         calls,
+  //         hasMore,
+  //       },
+  //       'Call history retrieved successfully',
+  //     );
+  //   } catch (error: unknown) {
+  //     ErrorResponse.throw(error, 'Failed to retrieve call history');
+  //   }
+  // }
+
   @Get('history')
   async getCallHistory(
     @CurrentUser('id') userId: string,
-    @Query('offset') offset = 0,
     @Query('limit') limit = 20,
+    @Query('lastCallId') lastCallId?: string,
   ): Promise<SuccessResponse<{ calls: CallResponseDto[]; hasMore: boolean }>> {
-    console.log('getCallHistory, Limit', limit, 'Offset', offset);
     try {
       const { calls, hasMore } = await this.callService.getCallHistory(userId, {
         limit,
-        offset,
+        lastCallId,
       });
-      console.log('calls:', calls.length, 'hasMore:', hasMore);
 
       return new SuccessResponse(
-        {
-          calls,
-          hasMore,
-        },
+        { calls, hasMore },
         'Call history retrieved successfully',
       );
     } catch (error: unknown) {

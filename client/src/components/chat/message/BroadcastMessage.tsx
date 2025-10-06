@@ -3,11 +3,13 @@ import { CallResponseDto } from "@/types/responses/call.response";
 import { CallStatus } from "@/types/enums/CallStatus";
 import { formatDurationByStartAndEnd } from "@/utils/formatDuration";
 import { formatTime } from "@/utils/formatTime";
+import { useTranslation } from "react-i18next";
 interface BroadcastMessageProps {
   call: CallResponseDto;
 }
 
 export const BroadcastMessage: React.FC<BroadcastMessageProps> = ({ call }) => {
+  const { t } = useTranslation();
   const { status, startedAt, endedAt } = call;
   const isActive = status === CallStatus.IN_PROGRESS;
   const isError = status === CallStatus.FAILED;
@@ -22,16 +24,20 @@ export const BroadcastMessage: React.FC<BroadcastMessageProps> = ({ call }) => {
       <div className="flex gap-2 items-center opacity-70">
         {isError && <span className="material-symbols-outlined">error</span>}
         <span className="material-symbols-outlined">connected_tv</span>
-        Broadcasted {isError && "Failed"}
+        {t("system.broadcast_message.broadcasted")}{" "}
+        {isError && t("common.messages.failed")}
       </div>
 
       {/* Text */}
       <div className="flex items-center text-sm opacity-70 gap-2">
         {isActive ? (
           <span className="font-medium text-red-600">
-            🔴 Live now
+            🔴 {t("system.broadcast_message.live_now")}
             <span className="ml-1">
-              • Started {new Date(startedAt).toLocaleTimeString()}
+              •{" "}
+              {t("system.broadcast_message.started_at", {
+                time: new Date(startedAt).toLocaleTimeString(),
+              })}
             </span>
           </span>
         ) : (

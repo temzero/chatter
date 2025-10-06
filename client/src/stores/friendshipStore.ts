@@ -16,11 +16,11 @@ type FriendshipState = {
 
 type FriendshipActions = {
   sendFriendRequest: (
-    currentUserId: string,
     receiverId: string,
     receiverName: string,
+    currentUserId?: string,
     message?: string
-  ) => Promise<FriendRequestResponse>;
+  ) => Promise<FriendRequestResponse | undefined>;
   fetchPendingRequests: () => Promise<void>;
   respondToRequest: (
     friendshipId: string,
@@ -40,12 +40,13 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
     isLoading: false,
 
     sendFriendRequest: async (
-      currentUserId,
       receiverId,
       receiverName,
+      currentUserId,
       message
     ) => {
       set({ isLoading: true });
+      if (!currentUserId) return;
       try {
         useChatMemberStore
           .getState()

@@ -12,41 +12,19 @@ import {
   calculateContextMenuPosition,
   useClickOutside,
 } from "@/utils/contextMenuUtils";
+import { useTranslation } from "react-i18next";
 
 interface ChatMemberItemsProps {
   members: GroupChatMember[];
   chatId: string;
-  currentUserId: string;
+  currentUserId?: string;
 }
-
-const getRoleDisplayName = (role: ChatMemberRole) => {
-  switch (role) {
-    case ChatMemberRole.OWNER:
-      return "Owner";
-    case ChatMemberRole.ADMIN:
-      return "Admin";
-    case ChatMemberRole.GUEST:
-      return "Guest";
-    default:
-      return "Member";
-  }
-};
-
-const getStatusDisplayName = (status: ChatMemberStatus) => {
-  switch (status) {
-    case ChatMemberStatus.LEFT:
-      return "Left";
-    case ChatMemberStatus.BANNED:
-      return "Banned";
-    default:
-      return null;
-  }
-};
 
 export const ChatMemberItems = ({
   members,
   currentUserId,
 }: ChatMemberItemsProps) => {
+  const { t } = useTranslation();
   const [contextMenu, setContextMenu] = useState<{
     position: { x: number; y: number };
     transformOrigin: string;
@@ -54,11 +32,34 @@ export const ChatMemberItems = ({
   } | null>(null);
 
   const menuRef = useRef<HTMLDivElement>(null);
-
   useClickOutside(menuRef, () => setContextMenu(null));
 
   const myMember = members.find((m) => m.userId === currentUserId);
   const myRole = myMember?.role;
+
+  const getRoleDisplayName = (role: ChatMemberRole) => {
+    switch (role) {
+      case ChatMemberRole.OWNER:
+        return t("sidebar_info.members_edit.owner");
+      case ChatMemberRole.ADMIN:
+        return t("sidebar_info.members_edit.admin");
+      case ChatMemberRole.GUEST:
+        return t("sidebar_info.members_edit.guest");
+      default:
+        return t("sidebar_info.members_edit.member");
+    }
+  };
+
+  const getStatusDisplayName = (status: ChatMemberStatus) => {
+    switch (status) {
+      case ChatMemberStatus.LEFT:
+        return t("sidebar_info.members_edit.status_left");
+      case ChatMemberStatus.BANNED:
+        return t("sidebar_info.members_edit.status_banned");
+      default:
+        return null;
+    }
+  };
 
   const handleRightClick = (e: React.MouseEvent, member: GroupChatMember) => {
     e.preventDefault();
@@ -112,7 +113,9 @@ export const ChatMemberItems = ({
       {myMember && (
         <div className="custom-border rounded">
           <div className="p-2 bg-[--hover-color] text-sm font-medium text-[--primary-green]">
-            You, the {getRoleDisplayName(myMember.role)}
+            {t("sidebar_info.members_edit.you_role", {
+              role: getRoleDisplayName(myMember.role),
+            })}
           </div>
           <div
             className={itemClasses}
@@ -145,7 +148,7 @@ export const ChatMemberItems = ({
       {sortedGroups.map(([role, groupMembers]) => (
         <div key={role} className="custom-border rounded">
           <div className="flex items-center justify-between p-2 bg-[--hover-color] text-sm font-medium">
-            <h1>{getRoleDisplayName(role as ChatMemberRole)}s</h1>
+            <h1>{getRoleDisplayName(role as ChatMemberRole)}</h1>
             <p>{groupMembers.length}</p>
           </div>
           {groupMembers.map((member) => (
@@ -203,6 +206,8 @@ interface ContextMenuProps {
 
 const MemberContextMenu = React.forwardRef<HTMLDivElement, ContextMenuProps>(
   ({ x, y, member, currentRole, onClose }, ref) => {
+    const { t } = useTranslation();
+
     const openModal = useModalStore((s) => s.openModal);
     const updateMember = useChatMemberStore.getState().updateMember;
     const removeMember = useChatMemberStore.getState().removeChatMember;
@@ -243,7 +248,7 @@ const MemberContextMenu = React.forwardRef<HTMLDivElement, ContextMenuProps>(
       >
         {(isMyself || canManageOthers) && (
           <div className={classes} onClick={handleOpenNicknameModal}>
-            Set Nickname
+            {t("sidebar_info.members_edit.set_nickname")}
           </div>
         )}
 
@@ -255,30 +260,29 @@ const MemberContextMenu = React.forwardRef<HTMLDivElement, ContextMenuProps>(
                   className={classes}
                   onClick={() => handleChangeRole(ChatMemberRole.OWNER)}
                 >
-                  Promote to Owner
+                  {t("sidebar_info.members_edit.promote_owner")}
                 </div>
                 <div
                   className={classes}
                   onClick={() => handleChangeRole(ChatMemberRole.ADMIN)}
                 >
-                  Set as Admin
+                  {t("sidebar_info.members_edit.set_admin")}
                 </div>
                 {member.role !== ChatMemberRole.MEMBER && (
                   <div
                     className={classes}
                     onClick={() => handleChangeRole(ChatMemberRole.MEMBER)}
                   >
-                    Set as Member
+                    {t("sidebar_info.members_edit.set_member")}
                   </div>
                 )}
               </>
             )}
-
             <div
               className={`${classes} text-red-500`}
               onClick={handleRemoveMember}
             >
-              Remove
+              {t("common.actions.remove")}
             </div>
           </>
         )}

@@ -5,8 +5,10 @@ import { childrenModalAnimation } from "@/animations/modalAnimations";
 import { DirectChatMember } from "@/types/responses/chatMember.response";
 import { Avatar } from "../ui/avatar/Avatar";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
+import { useTranslation } from "react-i18next";
 
 const SetNicknameModal: React.FC = () => {
+  const { t } = useTranslation();
   const closeModal = useModalStore((state) => state.closeModal);
   const modalContent = useModalStore((state) => state.modalContent);
   const member = modalContent?.props?.member as DirectChatMember;
@@ -25,7 +27,7 @@ const SetNicknameModal: React.FC = () => {
       await updateMemberNickname(member.chatId, member.id, nickname.trim());
       closeModal();
     } catch (err) {
-      console.error("Failed to update nickname", err);
+      console.error(t("modal.set_nickname.failed"), err);
     } finally {
       setLoading(false);
     }
@@ -41,7 +43,7 @@ const SetNicknameModal: React.FC = () => {
           <span className="material-symbols-outlined text-3xl font-bold">
             edit
           </span>
-          <h2 className="text-2xl">Set Nickname</h2>
+          <h2 className="text-2xl">{t("modal.set_nickname.title")}</h2>
         </div>
 
         <div className="flex items-center gap-3 mb-6">
@@ -60,7 +62,7 @@ const SetNicknameModal: React.FC = () => {
           value={nickname}
           onChange={(e) => setNickname(e.target.value)}
           className="input"
-          placeholder="Enter nickname"
+          placeholder={t("modal.set_nickname.placeholder")}
           maxLength={32}
           autoFocus
         />
@@ -72,13 +74,15 @@ const SetNicknameModal: React.FC = () => {
           onClick={handleSave}
           disabled={loading}
         >
-          {loading ? "Saving..." : "Save"}
+          {loading
+            ? t("common.loading.saving")
+            : t("common.actions.save")}
         </button>
         <button
           className="p-3 hover:bg-[var(--background-secondary)] font-semibold hover:font-bold opacity-80 hover:opacity-100 flex-1"
           onClick={closeModal}
         >
-          Cancel
+          {t("common.actions.cancel")}
         </button>
       </div>
     </motion.div>

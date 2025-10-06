@@ -6,8 +6,10 @@ import { useCurrentUserId } from "@/stores/authStore";
 import { motion } from "framer-motion";
 import { childrenModalAnimation } from "@/animations/modalAnimations";
 import { useMessageStore } from "@/stores/messageStore";
+import { useTranslation } from "react-i18next";
 
 const DeleteMessageModal: React.FC = () => {
+  const { t } = useTranslation();
   const closeModal = useModalStore((state) => state.closeModal);
   const modalContent = useModalStore((state) => state.modalContent);
   const messageId = modalContent?.props?.messageId as string;
@@ -34,11 +36,12 @@ const DeleteMessageModal: React.FC = () => {
       <div className="p-4">
         <div className="flex gap-2 items-center mb-3">
           <span className="material-symbols-outlined text-3xl">chat_error</span>
-          <h2 className="text-2xl font-semibold">Delete Message</h2>
+          <h1 className="text-2xl font-semibold">
+            {t("modal.delete_message.title")}
+          </h1>
         </div>
         <p className="mb-6 text-sm text-gray-400">
-          Are you sure you want to delete this message? <br />
-          This action cannot be undone.
+          {t("modal.delete_message.description")}
         </p>
         {/* <MessagePreview message={message} /> */}
       </div>
@@ -47,14 +50,14 @@ const DeleteMessageModal: React.FC = () => {
           className="p-3 hover:text-yellow-500 opacity-60 hover:opacity-100 flex-1"
           onClick={() => handleDelete(false)}
         >
-          Delete for me
+          {t("modal.delete_message.delete_for_me")}
         </button>
         {isMe && (
           <button
             className="p-3 hover:text-red-500 opacity-60 hover:opacity-100 flex-1"
             onClick={() => handleDelete(true)}
           >
-            Delete for everyone
+            {t("modal.delete_message.delete_for_everyone")}
           </button>
         )}
       </div>

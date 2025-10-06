@@ -8,8 +8,10 @@ import { Avatar } from "../ui/avatar/Avatar";
 import { blockService } from "@/services/blockService";
 import { toast } from "react-toastify";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
+import { useTranslation } from "react-i18next";
 
 const UnblockUserModal: React.FC = () => {
+  const { t } = useTranslation();
   const closeModal = useModalStore((state) => state.closeModal);
   const modalContent = useModalStore((state) => state.modalContent);
   const updateMemberLocally = useChatMemberStore.getState().updateMemberLocally;
@@ -30,11 +32,13 @@ const UnblockUserModal: React.FC = () => {
       });
       onUnblockSuccess?.();
       toast.success(
-        `${blockedUser.username || blockedUser.firstName} has been unblocked`
+        t("modals.unblock_user.toast_success", {
+          username: blockedUser.username || blockedUser.firstName,
+        })
       );
     } catch (error) {
       console.error("Error unblocking user:", error);
-      toast.error("Failed to unblock user");
+      toast.error(t("modals.unblock_user.toast_error"));
     } finally {
       closeModal();
     }
@@ -51,7 +55,7 @@ const UnblockUserModal: React.FC = () => {
           <span className="material-symbols-outlined text-3xl font-bold">
             lock_open_right
           </span>
-          <h2 className="text-2xl">Unblock User</h2>
+          <h2 className="text-2xl">{t("modals.unblock_user.title")}</h2>
         </div>
 
         <div className="flex items-center gap-3 mb-6">
@@ -68,8 +72,7 @@ const UnblockUserModal: React.FC = () => {
 
         {/* Updated description text */}
         <p className="mb-6 text-sm opacity-70">
-          Unblocking will allow this user to send you messages and see your
-          online status.
+          {t("modals.unblock_user.description")}
         </p>
       </div>
       <div className="flex custom-border-t">
@@ -78,13 +81,13 @@ const UnblockUserModal: React.FC = () => {
           className="p-3 text-[--primary-green] hover:bg-[var(--background-secondary)] font-semibold hover:font-bold opacity-80 hover:opacity-100 flex-1"
           onClick={handleUnblock}
         >
-          Unblock
+          {t("common.actions.unblock")}
         </button>
         <button
           className="p-3 hover:bg-[var(--background-secondary)] font-semibold hover:font-bold opacity-80 hover:opacity-100 flex-1"
           onClick={closeModal}
         >
-          Cancel
+          {t("common.actions.cancel")}
         </button>
       </div>
     </motion.div>

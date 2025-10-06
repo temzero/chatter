@@ -6,8 +6,10 @@ import { userService } from "@/services/userService";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { handleError } from "@/utils/handleError";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 const SidebarSettingsEmail: React.FC = () => {
+  const { t } = useTranslation();
   const { setSidebar } = useSidebarStore();
   const currentUser = useCurrentUser();
 
@@ -34,19 +36,19 @@ const SidebarSettingsEmail: React.FC = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setIsValid(false);
-      setValidationError("Please enter a valid email address");
+      setValidationError(t("account_settings.change_email.messages.invalid"));
       return;
     }
 
     if (email.length > 254) {
       setIsValid(false);
-      setValidationError("Email must be no more than 254 characters");
+      setValidationError(t("account_settings.change_email.requirements.1"));
       return;
     }
 
     setIsValid(true);
     setValidationError("");
-  }, [email]);
+  }, [email, t]);
 
   // Handle countdown timer
   useEffect(() => {
@@ -63,12 +65,14 @@ const SidebarSettingsEmail: React.FC = () => {
     e.preventDefault();
 
     if (!email.trim()) {
-      toast.error("Email cannot be empty");
+      toast.error(t("common.messages.required"));
       return;
     }
 
     if (!isValid) {
-      toast.error(validationError || "Invalid email format");
+      toast.error(
+        validationError || t("account_settings.change_email.messages.invalid")
+      );
       return;
     }
 
@@ -76,22 +80,25 @@ const SidebarSettingsEmail: React.FC = () => {
       setLoading(true);
 
       if (email === currentUser?.email) {
-        toast.info("This is already your current email");
+        toast.info(t("account_settings.change_email.messages.already_current"));
         return;
       }
 
       await userService.sendEmailVerificationCode(email);
       setShowCodeInput(true);
       setCodeCountdown(120); // 2 minutes countdown
-      toast.info(`Verification code sent to your email: ${email}`);
+      toast.info(t("account_settings.change_email.messages.sent", { email }));
     } catch (error) {
       console.error(error);
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "Failed to send verification code";
+          : t("account_settings.change_email.messages.failed_send");
       toast.error(errorMessage);
-      handleError(error, "Failed to send verification code");
+      handleError(
+        error,
+        t("account_settings.change_email.messages.failed_send")
+      );
     } finally {
       setLoading(false);
     }
@@ -99,7 +106,7 @@ const SidebarSettingsEmail: React.FC = () => {
 
   const handleVerifyCode = async () => {
     if (verificationCode.length !== 6) {
-      toast.error("Please enter a 6-digit code");
+      toast.error(t("common.messages.invalid_code"));
       return;
     }
 
@@ -111,12 +118,15 @@ const SidebarSettingsEmail: React.FC = () => {
         verificationCode
       );
       setCurrentUser(updatedUser);
-      toast.success("Email verified and updated successfully");
+      toast.success(t("account_settings.change_email.messages.success"));
       setShowCodeInput(false);
       setVerificationCode("");
       setSidebar(SidebarMode.PROFILE);
     } catch (error) {
-      handleError(error, "Email verification failed");
+      handleError(
+        error,
+        t("account_settings.change_email.messages.failed_verify")
+      );
     } finally {
       setLoading(false);
     }
@@ -130,12 +140,17 @@ const SidebarSettingsEmail: React.FC = () => {
 
       await userService.sendEmailVerificationCode(email);
       setCodeCountdown(120); // Reset to 2 minutes
-      toast.info("Verification code resent to your email");
+      toast.info(t("account_settings.change_email.messages.sent", { email }));
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to resend code";
+        error instanceof Error
+          ? error.message
+          : t("account_settings.change_email.messages.failed_resend");
       toast.error(errorMessage);
-      handleError(error, "Failed to resend code");
+      handleError(
+        error,
+        t("account_settings.change_email.messages.failed_resend")
+      );
     } finally {
       setLoading(false);
     }
@@ -149,17 +164,19 @@ const SidebarSettingsEmail: React.FC = () => {
 
   return (
     <SidebarLayout
-      title="Change Email"
+      title={t("account_settings.change_email.title")}
       backLocation={SidebarMode.SETTINGS_ACCOUNT}
     >
       <form onSubmit={handleSubmit} className="p-2 flex flex-col gap-2">
         <div className="w-full p-4 rounded-lg bg-[var(--hover-color)]">
-          <h3 className="font-semibold mb-2">Email Requirements:</h3>
           <ul className="space-y-1 dark:text-gray-300">
-            <li>• Must be a valid email address</li>
-            <li>• Maximum 254 characters</li>
-            <li>• Must be unique (not used by another account)</li>
-            <li>• You need to verify the new email address</li>
+            {(
+              t("account_settings.change_email.requirements", {
+                returnObjects: true,
+              }) as string[]
+            ).map((requirement: string, index: number) => (
+              <li key={index}>• {requirement}</li>
+            ))}
           </ul>
         </div>
 
@@ -169,7 +186,7 @@ const SidebarSettingsEmail: React.FC = () => {
           onChange={(e) => setEmail(e.target.value.trim())}
           disabled={loading || showCodeInput}
           name="email"
-          placeholder="Set New Email"
+          placeholder={t("account_settings.change_email.placeholder")}
           className="input"
           autoComplete="email"
           autoFocus
@@ -187,7 +204,9 @@ const SidebarSettingsEmail: React.FC = () => {
             } p-1 w-full`}
             disabled={isDisabled}
           >
-            {loading ? "Sending..." : "Send Email Verification"}
+            {loading
+              ? t("common.actions.sending")
+              : t("common.actions.send_verification")}
           </button>
         ) : (
           <div className="flex flex-col gap-2">
@@ -200,7 +219,7 @@ const SidebarSettingsEmail: React.FC = () => {
                     e.target.value.replace(/\D/g, "").slice(0, 6)
                   )
                 }
-                placeholder="Enter code"
+                placeholder={t("common.actions.enter_code")}
                 className="border-4 border-bottom text-3xl"
                 inputMode="numeric"
                 pattern="\d{6}"
@@ -215,11 +234,15 @@ const SidebarSettingsEmail: React.FC = () => {
                 onClick={handleVerifyCode}
                 disabled={loading || verificationCode.length !== 6}
               >
-                {loading ? "Verifying..." : "Verify Code"}
+                {loading
+                  ? t("common.actions.verifying")
+                  : t("common.actions.verify_code")}
               </button>
               {codeCountdown > 0 ? (
                 <button type="button" className="secondary p-1 flex-1" disabled>
-                  Resend in {formatCountdown(codeCountdown)}
+                  {t("account_settings.change_email.resend_in", {
+                    time: formatCountdown(codeCountdown),
+                  })}
                 </button>
               ) : (
                 <button
@@ -228,7 +251,7 @@ const SidebarSettingsEmail: React.FC = () => {
                   onClick={handleResendCode}
                   disabled={loading}
                 >
-                  Resend Code
+                  {t("common.actions.resend_code")}
                 </button>
               )}
             </div>

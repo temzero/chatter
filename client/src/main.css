@@ -345,3 +345,25 @@ select:focus {
   overflow-wrap: break-word;
   word-break: break-word;
 }
+
+.settings-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1rem; /* same as Tailwind's p-4 */
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s ease, background-color 0.2s ease;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.settings-item:hover {
+  color: var(--primary-green);
+  background-color: var(--hover-color);
+}
+
+.settings-item.selected {
+  background-color: var(--primary-green);
+  color: white;
+}

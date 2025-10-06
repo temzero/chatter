@@ -8,6 +8,7 @@ import { useFolderStore } from "@/stores/folderStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import ChatListItemSelection from "@/components/ui/ChatListItemSelection";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 const COLORS = [
   null,
@@ -30,6 +31,7 @@ interface folderToEdit {
 }
 
 const SidebarNewFolder: React.FC = () => {
+  const { t } = useTranslation();
   const chats = useChatStore((state) => state.chats);
   const createFolder = useFolderStore((state) => state.createFolder);
   const updateFolder = useFolderStore((state) => state.updateFolder);
@@ -73,9 +75,9 @@ const SidebarNewFolder: React.FC = () => {
   const handleSubmit = async () => {
     const folderName = folderNameRef.current?.value.trim();
     if (!folderName) {
-      toast.error("Folder name cannot be empty");
-      return
-    };
+      toast.error(t("sidebar_folders.new_folder.folder_name_empty_error"));
+      return;
+    }
 
     const payload = {
       name: folderName,
@@ -107,7 +109,11 @@ const SidebarNewFolder: React.FC = () => {
 
   return (
     <SidebarLayout
-      title={isEditMode ? "Edit Folder" : "Create New Folder"}
+      title={
+        isEditMode
+          ? t("sidebar_folders.new_folder.edit_title")
+          : t("sidebar_folders.new_folder.create_title")
+      }
       backLocation={
         isEditMode
           ? { mode: SidebarMode.FOLDER, data: { folderId: folderToEdit.id } }
@@ -143,10 +149,10 @@ const SidebarNewFolder: React.FC = () => {
           <div>
             <h2 className="mb-2 font-bold">
               {folderTypes.length === 3
-                ? "All Chats"
+                ? t("chat.all")
                 : folderTypes.length > 0
-                ? "All Chats with type:"
-                : "Chat Types"}
+                ? t("chat.all_with_type")
+                : t("chat.label")}
             </h2>
             <div className="flex gap-1">
               {[ChatType.DIRECT, ChatType.GROUP, ChatType.CHANNEL].map(
@@ -168,7 +174,7 @@ const SidebarNewFolder: React.FC = () => {
                         isSelected ? "bg-[--primary-green] font-semibold" : ""
                       }`}
                     >
-                      {type}
+                      {t(`chat.${type.toLowerCase()}`)}
                       <span className="material-symbols-outlined opacity-50 ml-1">
                         {type === ChatType.DIRECT
                           ? "person"
@@ -187,8 +193,13 @@ const SidebarNewFolder: React.FC = () => {
           <div>
             <div className="flex justify-between items-center mb-2">
               <h2 className="font-bold">
-                {selectedChats.length > 0 && selectedChats.length} Chats{" "}
-                {selectedChats.length > 0 && "Included"}
+                {selectedChats.length > 0 &&
+                  t(
+                    "sidebar_folders.new_folder.chat_selection.selected_count",
+                    {
+                      count: selectedChats.length,
+                    }
+                  )}
               </h2>
               {selectedChats.length > 0 && (
                 <button
@@ -205,7 +216,9 @@ const SidebarNewFolder: React.FC = () => {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search chats..."
+                placeholder={t(
+                  "sidebar_folders.new_folder.chat_selection.search_placeholder"
+                )}
                 className="w-full p-2 text-sm rounded border border-[var(--border-color)] bg-transparent"
               />
             </div>
@@ -254,7 +267,9 @@ const SidebarNewFolder: React.FC = () => {
                   ref={folderNameRef}
                   defaultValue={folderToEdit?.name || ""}
                   onKeyDown={handleKeyDown}
-                  placeholder="Folder Name"
+                  placeholder={t(
+                    "sidebar_folders.new_folder.folder_name_placeholder"
+                  )}
                   className="flex-1 outline-none text-2xl w-full font-semibold"
                   autoFocus
                   maxLength={24}
@@ -267,7 +282,9 @@ const SidebarNewFolder: React.FC = () => {
               onClick={handleSubmit}
               className="border-t-2 border-l-2 border-black/30 w-full py-2 rounded flex items-center justify-center gap-2 shadow-xl bg-[--primary-green] hover:bg-[--primary-green-dark)]"
             >
-              {isEditMode ? "Save Changes" : "Create Folder"}
+              {isEditMode
+                ? t("common.actions.save_changes")
+                : t("sidebar_folders.new_folder.buttons.create")}
             </button>
           </div>
         </div>

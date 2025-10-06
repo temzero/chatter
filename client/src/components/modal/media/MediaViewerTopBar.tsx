@@ -1,11 +1,10 @@
 import { useCallback } from "react";
-import { useAudioService } from "@/hooks/useAudioService"; // ✅ new centralized hook
-import { SoundType } from "@/services/audio.service"; // ✅ enum
 import { AttachmentResponse } from "@/types/responses/message.response";
 import { handleDownload } from "@/utils/handleDownload";
 import { useSenderByMessageId } from "@/stores/messageStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { ModalType, useModalStore } from "@/stores/modalStore";
+import { audioService, SoundType } from "@/services/audio.service";
 
 interface MediaViewerTopBarProps {
   attachment: AttachmentResponse;
@@ -19,13 +18,12 @@ export const MediaViewerTopBar = ({
   onClose,
 }: MediaViewerTopBarProps) => {
   const openModal = useModalStore((state) => state.openModal);
-  const { playSound } = useAudioService(); // ✅ centralized audio
   const sender = useSenderByMessageId(attachment.messageId);
 
   const handleDownloadClick = useCallback(() => {
-    playSound(SoundType.NOTIFICATION); // ✅ play centralized sound
+    audioService.playSound(SoundType.NOTIFICATION); // ✅ play centralized sound
     handleDownload(attachment);
-  }, [attachment, playSound]);
+  }, [attachment]);
 
   const handleForwardAttachment = () => {
     openModal(ModalType.FORWARD_MESSAGE, { attachment });

@@ -1,16 +1,18 @@
-import React, { useRef } from 'react';
+import React, { useRef } from "react";
+import { useTranslation } from "react-i18next";
 
 interface AttachFileProps {
   onFileSelect: (files: FileList) => void;
 }
 
 const AttachFile: React.FC<AttachFileProps> = ({ onFileSelect }) => {
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleRightClick = (event: React.MouseEvent) => {
     event.preventDefault(); // Prevent default right-click menu
     if (fileInputRef.current) {
-      fileInputRef.current.accept = 'image/*, video/*'; // Restrict to image and video
+      fileInputRef.current.accept = "image/*, video/*"; // Restrict to image and video
       fileInputRef.current.click();
     }
   };
@@ -19,19 +21,19 @@ const AttachFile: React.FC<AttachFileProps> = ({ onFileSelect }) => {
     const files = event.target.files;
     if (files && files.length > 0) {
       onFileSelect(files);
-      event.target.value = ''; // allow re-selecting the same file
+      event.target.value = ""; // allow re-selecting the same file
     }
   };
 
   const handleNormalClick = () => {
     if (fileInputRef.current) {
-      fileInputRef.current.accept = '*'; // Allow all files
+      fileInputRef.current.accept = "*"; // Allow all files
       fileInputRef.current.click();
     }
   };
 
   return (
-    <>
+    <div title={t("chat_bar.attach_file")} className="flex items-center">
       <span
         className="material-symbols-outlined opacity-50 hover:opacity-90 cursor-pointer rounded select-none"
         aria-label="Attach file"
@@ -47,9 +49,9 @@ const AttachFile: React.FC<AttachFileProps> = ({ onFileSelect }) => {
         multiple
         ref={fileInputRef}
         onChange={handleChange}
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
       />
-    </>
+    </div>
   );
 };
 

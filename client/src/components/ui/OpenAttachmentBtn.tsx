@@ -1,8 +1,11 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
+import { useTranslation } from "react-i18next";
+import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
 
 const OpenAttachmentBtn: React.FC = () => {
+  const { t } = useTranslation();
   const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
 
   return (
@@ -28,14 +31,16 @@ const OpenAttachmentBtn: React.FC = () => {
     >
       <div
         className="flex flex-col p-1 pb-10 items-center justify-between w-full cursor-pointer shadow-xl hover:bg-gradient-to-b from-[--hover-color] to-transparent"
-        onClick={() => setSidebarInfo("media")}
+        onClick={() => setSidebarInfo(SidebarInfoMode.MEDIA)}
       >
-        <span className="material-symbols-outlined -mb-1">keyboard_control_key</span>
+        <span className="material-symbols-outlined -mb-1">
+          keyboard_control_key
+        </span>
         <div className="flex gap-2">
           {/* <span className="flex flex-col justify-center items-center cursor-pointer">
             <i className="material-symbols-outlined">attach_file</i>
           </span> */}
-          <h1>Media & Files</h1>
+          <h1>{t("sidebar_info.media_files.title")}</h1>
         </div>
       </div>
     </motion.div>

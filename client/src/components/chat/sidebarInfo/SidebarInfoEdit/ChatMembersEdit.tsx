@@ -8,8 +8,10 @@ import { GroupChatMember } from "@/types/responses/chatMember.response";
 import { useCurrentUserId } from "@/stores/authStore";
 import { ChatMemberRole } from "@/types/enums/chatMemberRole";
 import { ChatMemberItems } from "./ChatMemberItems";
+import { useTranslation } from "react-i18next";
 
 const ChatMembersEdit = () => {
+  const { t } = useTranslation();
   const currentUserId = useCurrentUserId();
   const activeChat = useChatStore((state) => state.activeChat) as ChatResponse;
   const activeMembers = useActiveMembers();
@@ -32,7 +34,7 @@ const ChatMembersEdit = () => {
     <aside className="relative w-full h-full overflow-hidden flex flex-col">
       <header className="flex w-full justify-between px-2 items-center min-h-[var(--header-height)] custom-border-b">
         <h1 className="text-xl font-semibold ml-2">
-          Members ({activeMembers.length})
+          {t("sidebar_info.group_edit.members")} ({activeMembers.length})
         </h1>
         <button
           className="flex items-center rounded-full p-2 cursor-pointer opacity-70 hover:opacity-80 h-10 w-10 hover:bg-[var(--hover-color)]"
@@ -60,7 +62,7 @@ const ChatMembersEdit = () => {
               onClick={handleOpenAddMemberModal}
             >
               <span className="material-symbols-outlined">person_add</span>
-              Add Member
+              {t("sidebar_info.members_edit.add_member")}
             </button>
           )}
         </div>

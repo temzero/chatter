@@ -4,8 +4,10 @@ import { JSX } from "react";
 import { parseJsonContent } from "@/utils/parseJsonContent";
 import { ChatMemberRole } from "@/types/enums/chatMemberRole";
 import { CallStatus } from "@/types/enums/CallStatus";
-import { CallResponseDto } from "@/types/responses/call.response";
 import { getCallText } from "@/utils/callHelpers";
+import { CallLiteResponse } from "@/types/responses/callLite.response";
+import { useTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 
 export type SystemMessageJSONContent = {
   oldValue?: string;
@@ -16,7 +18,7 @@ export type SystemMessageJSONContent = {
 
 type SystemMessageContentProps = {
   systemEvent?: SystemEventType | null;
-  call?: CallResponseDto;
+  call?: CallLiteResponse;
   isBroadcast?: boolean;
   currentUserId: string;
   senderId: string;
@@ -35,6 +37,7 @@ export const SystemMessageContent = ({
   JSONcontent,
   ClassName = "",
 }: SystemMessageContentProps): JSX.Element | null => {
+  const { t } = useTranslation();
   if (!systemEvent) return null;
   const callStatus = call?.status;
   let text = "";
@@ -42,6 +45,7 @@ export const SystemMessageContent = ({
     text = getCallText(call.status, call.startedAt, call.endedAt);
   } else {
     text = getSystemMessageText({
+      t,
       systemEvent,
       currentUserId,
       call,
@@ -58,7 +62,11 @@ export const SystemMessageContent = ({
         callStatus
       )} ${ClassName}`}
     >
-      <SystemEventIcon systemEvent={systemEvent} callStatus={callStatus} isBroadcast={isBroadcast} />
+      <SystemEventIcon
+        systemEvent={systemEvent}
+        callStatus={callStatus}
+        isBroadcast={isBroadcast}
+      />
       <span className="truncate">{text}</span>
     </div>
   );
@@ -111,105 +119,100 @@ function getSystemMessageColor(
 }
 
 function getSystemMessageText({
+  t,
   systemEvent,
   currentUserId,
   senderId,
   senderDisplayName,
   JSONcontent,
 }: {
+  t: TFunction;
   systemEvent?: SystemEventType | null;
-  call?: CallResponseDto | null;
+  call?: CallLiteResponse | null;
   currentUserId: string;
   senderId: string;
   senderDisplayName: string;
   JSONcontent?: SystemMessageJSONContent | null;
 }): string {
-  if (!systemEvent) return "System event occurred.";
+  if (!systemEvent) return t("system.unknown_event");
 
   const isMe = currentUserId === senderId;
-  const displayName = isMe ? "You" : senderDisplayName;
+  const displayName = isMe ? t("common.you") : senderDisplayName;
   const parsedContent = parseJsonContent<SystemMessageJSONContent>(JSONcontent);
 
   const newVal = parsedContent?.newValue;
   const oldVal = parsedContent?.oldValue;
   const isTargetMe = parsedContent?.targetId === currentUserId;
   const targetName = isTargetMe
-    ? "you"
-    : parsedContent?.targetName || "another member";
+    ? t("common.you")
+    : parsedContent?.targetName || t("system.another_member");
 
   switch (systemEvent) {
     case SystemEventType.MEMBER_JOINED:
-      return `${displayName} joined the chat`;
+      return t("system.member_joined", { displayName });
     case SystemEventType.MEMBER_ADDED:
-      return `${displayName} added ${targetName} to the chat`;
+      return t("system.member_added", { displayName, targetName });
     case SystemEventType.MEMBER_LEFT:
-      return `${displayName} left the chat`;
+      return t("system.member_left", { displayName });
     case SystemEventType.MEMBER_KICKED:
-      return `${displayName} removed ${targetName} from the chat`;
+      return t("system.member_kicked", { displayName, targetName });
     case SystemEventType.MEMBER_BANNED:
-      return `${displayName} banned ${targetName} from the chat`;
+      return t("system.member_banned", { displayName, targetName });
     case SystemEventType.CHAT_RENAMED:
-      if (newVal) {
-        return `${displayName} renamed chat ${
-          oldVal ? `from "${oldVal}" ` : ""
-        }to "${newVal}"`;
-      }
-      return `${displayName} renamed the chat`;
+      return newVal
+        ? t("system.chat_renamed_with_values", { displayName, oldVal, newVal })
+        : t("system.chat_renamed", { displayName });
     case SystemEventType.CHAT_UPDATE_AVATAR:
-      return `${displayName} updated the chat avatar`;
+      return t("system.chat_update_avatar", { displayName });
     case SystemEventType.CHAT_UPDATE_DESCRIPTION:
-      if (oldVal && newVal) {
-        return `${displayName} changed description from "${oldVal}" to "${newVal}"`;
-      }
-      if (newVal) {
-        return `${displayName} set description to "${newVal}"`;
-      }
-      return `${displayName} updated the chat description`;
+      if (oldVal && newVal)
+        return t("system.chat_update_description_with_values", {
+          displayName,
+          oldVal,
+          newVal,
+        });
+      if (newVal)
+        return t("system.chat_set_description", { displayName, newVal });
+      return t("system.chat_update_description", { displayName });
     case SystemEventType.MEMBER_UPDATE_NICKNAME:
-      if (oldVal && newVal) {
-        return `${displayName} changed ${
-          isTargetMe ? "your" : `${targetName}'s`
-        } nickname from "${oldVal}" to "${newVal}"`;
-      }
-      if (newVal) {
-        return `${displayName} set ${
-          isTargetMe ? "your" : `${targetName}'s`
-        } nickname to "${newVal}"`;
-      }
-      return `${displayName} updated ${
-        isTargetMe ? "your" : `${targetName}'s`
-      } nickname`;
+      if (oldVal && newVal)
+        return t("system.member_update_nickname_with_values", {
+          displayName,
+          targetName,
+          oldVal,
+          newVal,
+        });
+      if (newVal)
+        return t("system.member_set_nickname", {
+          displayName,
+          targetName,
+          newVal,
+        });
+      return t("system.member_update_nickname", { displayName, targetName });
     case SystemEventType.MEMBER_UPDATE_ROLE:
-      if (newVal === ChatMemberRole.OWNER) {
-        return `${displayName} promoted ${
-          isTargetMe ? "you" : targetName
-        } to owner`;
-      }
-      return newVal
-        ? `${displayName} changed ${
-            isTargetMe ? "your" : `${targetName}'s`
-          } role to ${newVal}`
-        : `${displayName} updated ${
-            isTargetMe ? "your" : `${targetName}'s`
-          } role`;
+      if (newVal === ChatMemberRole.OWNER)
+        return t("system.member_promote_owner", {
+          displayName,
+          targetName,
+        });
+      return t("system.member_update_role", {
+        displayName,
+        targetName,
+        newVal,
+      });
     case SystemEventType.MEMBER_UPDATE_STATUS:
-      return newVal
-        ? `${displayName} changed ${
-            isTargetMe ? "your" : `${targetName}'s`
-          } status to ${newVal}`
-        : `${displayName} updated ${
-            isTargetMe ? "your" : `${targetName}'s`
-          } status`;
+      return t("system.member_update_status", {
+        displayName,
+        targetName,
+        newVal,
+      });
     case SystemEventType.MESSAGE_PINNED:
-      return newVal
-        ? `${displayName} pinned a message "${newVal}"`
-        : `${displayName} pinned a message`;
+      return t("system.message_pinned", { displayName, newVal });
     case SystemEventType.MESSAGE_UNPINNED:
-      return `${displayName} unpinned a message`;
+      return t("system.message_unpinned", { displayName });
     case SystemEventType.CHAT_DELETED:
-      return `${displayName} deleted the chat`;
-
+      return t("system.chat_deleted", { displayName });
     default:
-      return `System event occurred.`;
+      return t("system.unknown_event");
   }
 }

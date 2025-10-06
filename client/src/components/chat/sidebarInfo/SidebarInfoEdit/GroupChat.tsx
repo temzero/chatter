@@ -12,8 +12,10 @@ import { SidebarInfoHeaderIcons } from "@/components/ui/SidebarInfoHeaderIcons";
 import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
 import { rolePriority } from "@/types/enums/chatMemberRole";
 import { ModalType, useModalStore } from "@/stores/modalStore";
+import { useTranslation } from "react-i18next";
 
 const GroupChat: React.FC = () => {
+  const { t } = useTranslation();
   const activeChat = useActiveChat() as ChatResponse;
   const activeMembers = useActiveMembers() || [];
   const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
@@ -36,7 +38,7 @@ const GroupChat: React.FC = () => {
   }[] = [
     {
       icon: "search",
-      title: "Search",
+      title: t("common.actions.search"),
       action: () => {
         setDisplaySearchMessage(true);
       },
@@ -45,14 +47,14 @@ const GroupChat: React.FC = () => {
       ? [
           {
             icon: "edit",
-            title: "Edit",
+            title: t("common.actions.edit"),
             action: () => setSidebarInfo(SidebarInfoMode.GROUP_EDIT),
           },
         ]
       : [
           {
             icon: "logout",
-            title: "Leave",
+            title: t("common.actions.leave"),
             action: () => openModal(ModalType.LEAVE_CHAT, { chat: activeChat }),
           },
         ]),
@@ -62,14 +64,14 @@ const GroupChat: React.FC = () => {
   if (activeChat.mutedUntil) {
     headerIcons.unshift({
       icon: "notifications_off",
-      title: "Unmute",
+      title: t("common.actions.unmute"),
       action: unmute,
       className: "",
     });
   } else {
     headerIcons.unshift({
       icon: "notifications",
-      title: "Mute",
+      title: t("common.actions.mute"),
       action: mute,
       className: "",
     });

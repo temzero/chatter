@@ -9,8 +9,10 @@ import { getCallColor, getCallText } from "@/utils/callHelpers";
 import { formatDateTime } from "@/utils/formatDate";
 import { useCurrentUserId } from "@/stores/authStore";
 import CallIcon from "../ui/CallIcon";
+import { useTranslation } from "react-i18next";
 
 const DeleteCallModal: React.FC = () => {
+  const { t } = useTranslation();
   const currentUserId = useCurrentUserId();
   const { modalContent, closeModal } = useModalStore();
 
@@ -31,7 +33,7 @@ const DeleteCallModal: React.FC = () => {
       closeModal();
     } catch (err) {
       console.error(err);
-      alert("Failed to delete call");
+      alert(t("modal.delete_call.descripfailed"));
     }
   };
 
@@ -45,13 +47,15 @@ const DeleteCallModal: React.FC = () => {
           <span className="material-symbols-outlined text-3xl font-bold">
             delete
           </span>
-          <h2 className="text-2xl">Delete Your Call History</h2>
+          <h2 className="text-2xl">{t("modal.delete_call.title")}</h2>
         </div>
 
         <div className="flex items-center gap-3 mb-6">
           <ChatAvatar chat={call.chat} />
           <div className="flex-1">
-            <p className="font-medium">{call.chat.name || "Unknown"}</p>
+            <p className="font-medium">
+              {call.chat.name || t("common.message.unknown")}
+            </p>
             <p className={`${getCallColor(call.status)}`}>
               {getCallText(call.status, call.startedAt, call.endedAt)}
             </p>
@@ -66,10 +70,7 @@ const DeleteCallModal: React.FC = () => {
           />
         </div>
 
-        <p className="mb-6 text-sm opacity-70">
-          Are you sure you want to delete this call? <br />
-          This action is permanent and all related messages will be removed.
-        </p>
+        <p className="mb-6 text-sm opacity-70">{t("modal.delete_call.description")}</p>
       </div>
 
       <div className="flex custom-border-t">
@@ -77,13 +78,13 @@ const DeleteCallModal: React.FC = () => {
           className="p-3 text-red-500 hover:bg-[var(--background-secondary)] font-semibold hover:font-bold opacity-80 hover:opacity-100 flex-1"
           onClick={handleDelete}
         >
-          Delete
+          {t("common.actions.delete")}
         </button>
         <button
           className="p-3 hover:bg-[var(--background-secondary)] font-semibold hover:font-bold opacity-80 hover:opacity-100 flex-1"
           onClick={closeModal}
         >
-          Cancel
+          {t("common.actions.cancel")}
         </button>
       </div>
     </motion.div>

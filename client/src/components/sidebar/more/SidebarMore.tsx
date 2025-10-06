@@ -6,8 +6,10 @@ import { useFriendshipStore } from "@/stores/friendshipStore";
 import ThemeSwitcher from "../../ui/ThemeSwitcher";
 import { SidebarMode } from "@/types/enums/sidebarMode";
 import { useSetActiveSavedChat } from "@/stores/chatStore";
+import { useTranslation } from "react-i18next";
 
 const SidebarMore: React.FC = () => {
+  const { t } = useTranslation();
   const currentUser = useCurrentUser();
   const { setSidebar, isCompact, toggleCompact } = useSidebarStore();
   const { pendingRequests } = useFriendshipStore();
@@ -29,34 +31,37 @@ const SidebarMore: React.FC = () => {
   const sidebarButtons = [
     {
       icon: "bookmark",
-      text: "Saved Messages",
+      text: t("sidebar.saved_messages"),
       onClick: () => setActiveSavedChat(),
     },
-    { type: "divider" }, // This will render the border divider
+    { type: "divider" },
     {
       icon: "call",
-      text: "Calls",
+      text: t("sidebar.calls"),
       onClick: () => setSidebar(SidebarMode.CALLS),
     },
     {
       icon: "contacts",
-      text: "Contacts",
+      text: t("sidebar.contacts"),
       onClick: () => setSidebar(SidebarMode.CONTACTS),
     },
     {
       icon: "person_add",
-      text: `Friend requests ${requestsCount > 0 ? requestsCount : ""}`,
+      text:
+        requestsCount > 0
+          ? t("sidebar.friend_requests", { count: requestsCount }) // show number if >0
+          : t("sidebar.friend_requests_none"), // fallback text when 0
       onClick: () => setSidebar(SidebarMode.FRIEND_REQUESTS),
     },
-    { type: "divider" }, // Another divider
+    { type: "divider" },
     {
       icon: "folder",
-      text: "Chat Folders",
+      text: t("sidebar.folders"),
       onClick: () => setSidebar(SidebarMode.FOLDERS),
     },
     {
       icon: "block",
-      text: "Blocked",
+      text: t("sidebar.blocked"),
       onClick: () => setSidebar(SidebarMode.BLOCKED_USERS),
     },
   ];
@@ -151,7 +156,7 @@ const SidebarMore: React.FC = () => {
             <i className="material-symbols-outlined text-3xl">settings</i>
           </div>
           {!isCompact && (
-            <p className="whitespace-nowrap text-ellipsis">Settings</p>
+            <p className="whitespace-nowrap text-ellipsis">{t("sidebar.settings")}</p>
           )}
         </div>
 

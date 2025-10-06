@@ -13,8 +13,10 @@ import { GroupChatMember } from "@/types/responses/chatMember.response";
 import { useCurrentUserId } from "@/stores/authStore";
 import { ChatMemberRole } from "@/types/enums/chatMemberRole";
 import { ChatType } from "@/types/enums/ChatType";
+import { useTranslation } from "react-i18next";
 
 const GroupChatEdit = () => {
+  const { t } = useTranslation();
   const currentUserId = useCurrentUserId();
   const activeChat = useChatStore((state) => state.activeChat) as ChatResponse;
   console.log("activeChat", activeChat);
@@ -129,7 +131,9 @@ const GroupChatEdit = () => {
   return (
     <aside className="relative w-full h-full overflow-hidden flex flex-col">
       <header className="flex w-full justify-between px-2 items-center min-h-[var(--header-height)] custom-border-b">
-        <h1 className="text-xl font-semibold ml-2">Edit {activeChat.type}</h1>
+        <h1 className="text-xl font-semibold ml-2">
+          {t("sidebar_info.group_edit.title", { type: chatTypeDisplay })}
+        </h1>
         <div className="flex gap-1">
           {hasChanges && (
             <button
@@ -176,7 +180,10 @@ const GroupChatEdit = () => {
 
           <div className="w-full space-y-4">
             <div className="flex flex-col gap-1">
-              <label className="text-sm opacity-70">Group Name</label>
+              <label className="text-sm opacity-70">
+                {" "}
+                {t("sidebar_info.group_edit.group_name")}
+              </label>
               <input
                 type="text"
                 name="name"
@@ -186,7 +193,9 @@ const GroupChatEdit = () => {
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm opacity-70">Description</label>
+              <label className="text-sm opacity-70">
+                {t("sidebar_info.group_edit.description")}
+              </label>
               <textarea
                 name="description"
                 value={formData.description}
@@ -204,7 +213,7 @@ const GroupChatEdit = () => {
           className="mt-4 border-2 border-[--border-color] text-lg px-3 py-2 rounded flex justify-start items-center gap-2 w-full hover:bg-[--hover-color]"
         >
           <span className="material-symbols-outlined text-3xl">groups</span>
-          <h1>Members</h1>
+          <h1>{t("sidebar_info.group_edit.members")}</h1>
           <h1 className="ml-auto">{activeMembers.length}</h1>
         </button>
 
@@ -215,7 +224,9 @@ const GroupChatEdit = () => {
               onClick={handleOpenLeaveChatModal}
             >
               <span className="material-symbols-outlined">logout</span>
-              Leave {chatTypeDisplay}
+              {t("sidebar_info.group_edit.leave_chat", {
+                type: chatTypeDisplay,
+              })}
             </button>
           )}
           {myMember.role === ChatMemberRole.OWNER && (
@@ -224,7 +235,9 @@ const GroupChatEdit = () => {
               onClick={handleOpenDeleteChatModal}
             >
               <i className="material-symbols-outlined">delete</i>
-              Delete {chatTypeDisplay}
+              {t("sidebar_info.group_edit.delete_chat", {
+                type: chatTypeDisplay,
+              })}
             </button>
           )}
         </div>

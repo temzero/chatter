@@ -8,8 +8,10 @@ import { useChatStore } from "@/stores/chatStore";
 import { ChatAvatar } from "../ui/avatar/ChatAvatar";
 import { Avatar } from "../ui/avatar/Avatar";
 import { ChatType } from "@/types/enums/ChatType";
+import { useTranslation } from "react-i18next";
 
 const LeaveChatModal: React.FC = () => {
+  const { t } = useTranslation();
   const closeModal = useModalStore((state) => state.closeModal);
   const modalContent = useModalStore((state) => state.modalContent);
   const leaveChat = useChatStore((state) => state.leaveChat);
@@ -39,7 +41,9 @@ const LeaveChatModal: React.FC = () => {
             logout
           </span>
           <h2 className="text-2xl">
-            {isDirectChat ? "Leave Chat" : `Leave ${capitalizedChatType}`}
+            {isDirectChat
+              ? t("common.leave_chat")
+              : t("common.leave_chat_type", { type: capitalizedChatType })}
           </h2>
         </div>
 
@@ -60,7 +64,9 @@ const LeaveChatModal: React.FC = () => {
               <ChatAvatar chat={chat} />
               <div>
                 <h3 className="font-medium">{chat.name}</h3>
-                <p className="text-sm opacity-70">{capitalizedChatType} chat</p>
+                <p className="text-sm opacity-70">
+                  {t("common.chat_type_label", { type: capitalizedChatType })}
+                </p>
               </div>
             </>
           )}
@@ -68,8 +74,8 @@ const LeaveChatModal: React.FC = () => {
 
         <p className="mb-6 text-sm opacity-70">
           {isDirectChat
-            ? "Are you sure you want to leave this chat? You won’t be able to access it again."
-            : `Are you sure you want to leave this ${chat.type}? You’ll no longer receive messages from it.`}
+            ? t("common.leave_chat_confirm")
+            : t("common.leave_chat_type_confirm", { type: chat.type })}
         </p>
       </div>
 
@@ -78,13 +84,13 @@ const LeaveChatModal: React.FC = () => {
           className="p-3 text-yellow-500 hover:bg-[var(--background-secondary)] font-semibold hover:font-bold opacity-80 hover:opacity-100 flex-1"
           onClick={handleLeaveChat}
         >
-          Leave
+          {t("common.action.leave")}
         </button>
         <button
           className="p-3 hover:bg-[var(--background-secondary)] font-semibold hover:font-bold opacity-80 hover:opacity-100 flex-1"
           onClick={closeModal}
         >
-          Cancel
+          {t("common.action.cancel")}
         </button>
       </div>
     </motion.div>

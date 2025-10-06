@@ -246,9 +246,7 @@ export const useAuthActions = () =>
 // Individual selectors (only for frequently used isolated values)
 export const useCurrentUser = () => useAuthStore((state) => state.currentUser);
 export const useCurrentUserId = () =>
-  useAuthStore((state) =>
-    state.currentUser ? state.currentUser.id : undefined
-  );
+  useAuthStore((state) => state.currentUser?.id);
 
 export const useIsMe = (userId: string): boolean => {
   const currentUser = useCurrentUser();

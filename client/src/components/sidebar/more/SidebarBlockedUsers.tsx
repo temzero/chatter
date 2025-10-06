@@ -5,8 +5,10 @@ import { BlockResponseDto } from "@/types/responses/block.response";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { FadeLoader } from "react-spinners";
 import { ModalType, useModalStore } from "@/stores/modalStore";
+import { useTranslation } from "react-i18next";
 
 const SidebarBlockedUsers: React.FC = () => {
+  const { t } = useTranslation();
   const [blockedUsers, setBlockedUsers] = useState<BlockResponseDto[]>([]);
   const openModal = useModalStore((state) => state.openModal);
   const [loading, setLoading] = useState(true);
@@ -31,20 +33,22 @@ const SidebarBlockedUsers: React.FC = () => {
   };
 
   return (
-    <SidebarLayout title="Blocked Users">
+    <SidebarLayout title={t("sidebar_blocked.title")}>
       {loading ? (
         <div className="flex flex-col items-center justify-center w-full pt-6">
           <FadeLoader color="#737373" height={8} width={3} margin={2} />
+          <p className="text-sm text-gray-500 mt-4">{t("common.loading.loading")}</p>
         </div>
       ) : blockedUsers.length === 0 ? (
         <div className="flex flex-col items-center justify-center w-full p-10 opacity-70 text-center space-y-4">
           <span className="material-symbols-outlined text-6xl text-gray-400">
             folder_off
           </span>
-          <p className="text-base text-gray-500">No blocked users found</p>
+          <p className="text-base text-gray-500">
+            {t("sidebar_blocked.empty.title")}
+          </p>
           <p className="text-sm text-gray-400">
-            Blocked users will appear here. You can block someone from their
-            profile or chat screen.
+            {t("sidebar_blocked.empty.subtitle")}
           </p>
         </div>
       ) : (
@@ -56,14 +60,11 @@ const SidebarBlockedUsers: React.FC = () => {
                 className="w-full flex items-center justify-between p-3"
               >
                 <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <Avatar
-                      avatarUrl={blocked.avatarUrl}
-                      name={blocked.username || blocked.firstName}
-                      isBlocked={true} // Always true in this component
-                    />
-                  </div>
-
+                  <Avatar
+                    avatarUrl={blocked.avatarUrl}
+                    name={blocked.username || blocked.firstName}
+                    isBlocked={true}
+                  />
                   <div className="flex flex-col items-start">
                     <p className="font-medium">
                       {blocked.firstName} {blocked.lastName}

@@ -1,0 +1,557 @@
+{
+  "common": {
+    "you": "Bạn",
+    "actions": {
+      "accept": "Chấp nhận",
+      "back": "Quay lại",
+      "block": "Chặn",
+      "blocked_by_user": "Bị người dùng chặn",
+      "cancel": "Hủy",
+      "cancel_request": "Hủy yêu cầu",
+      "clear_selection": "Xóa lựa chọn",
+      "close": "Đóng",
+      "delete": "Xoá",
+      "decline": "Từ chối",
+      "edit": "Chỉnh sửa",
+      "forward": "Chuyển tiếp",
+      "leave": "Rời",
+      "mark_important": "Đánh dấu quan trọng",
+      "mute": "Tắt thông báo",
+      "pin": "Ghim",
+      "reply": "Trả lời",
+      "remove": "Loại bỏ",
+      "requests": "Yêu cầu",
+      "resend_code": "Gửi lại mã",
+      "save": "Lưu",
+      "save_changes": "Lưu thay đổi",
+      "search": "Tìm kiếm",
+      "send_verification": "Gửi mã xác minh",
+      "unfriend": "Huỷ bạn bè",
+      "unmark_important": "Bỏ đánh dấu quan trọng",
+      "unmute": "Bật thông báo",
+      "unpin": "Bỏ ghim",
+      "unblock": "Bỏ chặn",
+      "update": "Cập nhật",
+      "verify": "Xác minh",
+      "verify_code": "Xác minh mã",
+      "sent": "Đã gửi"
+    },
+    "messages": {
+      "success": "Thành công!",
+      "failed": "Thất bại",
+      "unknown": "Không xác định",
+      "error": "Đã xảy ra lỗi",
+      "empty": "Trống",
+      "required": "Trường này là bắt buộc",
+      "invalid_code": "Vui lòng nhập mã 6 chữ số"
+    },
+    "loading": {
+      "loading": "Đang tải...",
+      "searching": "Đang tìm...",
+      "creating": "Đang tạo...",
+      "saving": "Đang lưu...",
+      "empty": "Trống"
+    }
+  },
+
+  "chat": {
+    "all": "Tất cả cuộc trò chuyện",
+    "all_with_type": "Tất cả cuộc trò chuyện với loại:",
+    "label": "Loại cuộc trò chuyện",
+    "direct": "Trực tiếp",
+    "group": "Nhóm",
+    "channel": "Kênh"
+  },
+
+  "chat_bar": {
+    "placeholder": "Nhắn tin...",
+    "attach_file": "Đính kèm"
+  },
+
+  "emoji": {
+    "recently": "Gần đây",
+    "smileys_emotion": "Biểu tượng cảm xúc",
+    "people_body": "Con người & Cơ thể",
+    "animals_nature": "Động vật & Thiên nhiên",
+    "food_drink": "Thức ăn & Đồ uống",
+    "activities": "Hoạt động",
+    "objects": "Đồ vật",
+    "flags": "Quốc kỳ"
+  },
+
+  "sidebar": {
+    "saved_messages": "Tin nhắn đã lưu",
+    "calls": "Cuộc gọi",
+    "contacts": "Danh bạ",
+    "friend_requests": "Lời mời kết bạn {count, plural, =0 {Lời mời kết bạn} other {Lời mời kết bạn #}}",
+    "friend_requests_none": "Lời mời kết bạn",
+    "folders": "Thư mục chat",
+    "blocked": "Đã chặn",
+    "settings": "Cài đặt"
+  },
+
+  "sidebar_new_chat": {
+    "direct": {
+      "title": "Tạo {{type}} mới",
+      "placeholder": "@username/email/ĐT",
+      "find_user": "Tìm kiếm",
+      "user_not_found": "Không tìm thấy người dùng!",
+      "blocked_by_user_message": "Người dùng này đã chặn bạn. Bạn không thể xem trang cá nhân hoặc tương tác với họ.",
+      "friend": "Bạn bè",
+      "friend_but_blocked": "Bạn bè nhưng đã chặn",
+      "no_username": "Chưa có tên người dùng",
+      "start_chat": "Bắt đầu trò chuyện"
+    },
+    "group": {
+      "search_placeholder": "Tìm kiếm thành viên...",
+      "no_contacts_found": "Không tìm thấy liên hệ nào",
+      "enter_name": "Nhập tên",
+      "create_group": "Tạo nhóm",
+      "create_channel": "Tạo kênh",
+      "user_not_authenticated": "Người dùng chưa xác thực",
+      "failed_create": "Tạo {{type}} thất bại"
+    }
+  },
+
+  "sidebar_search": {},
+
+  "sidebar_calls": {
+    "title": "Lịch sử cuộc gọi",
+    "no_calls": "Chưa có cuộc gọi nào!"
+  },
+
+  "sidebar_contacts": {
+    "title": "Danh bạ",
+    "no_contacts": "Không có liên hệ nào có số điện thoại",
+    "video_call": "Cuộc gọi video",
+    "audio_call": "Cuộc gọi thoại"
+  },
+
+  "sidebar_friend_requests": {
+    "title": "Lời mời kết bạn",
+    "messages": {
+      "no_friend_requests": "Không có lời mời kết bạn nào",
+      "no_sent_requests": "Không có lời mời đã gửi",
+      "mutual_friends_one": "{{count}} bạn chung",
+      "mutual_friends_other": "{{count}} bạn chung"
+    }
+  },
+
+  "sidebar_folders": {
+    "title": "Thư mục trò chuyện",
+    "messages": {
+      "no_folders": "Chưa có thư mục nào"
+    },
+    "buttons": {
+      "add_folder": "Thêm thư mục"
+    },
+    "detail": {
+      "title": "Chi tiết thư mục",
+      "folder_not_found": "Không tìm thấy thư mục",
+      "no_chats": "Không có cuộc trò chuyện trong thư mục này",
+      "delete_folder": "Xóa thư mục"
+    },
+
+    "new_folder": {
+      "create_title": "Tạo thư mục mới",
+      "edit_title": "Chỉnh sửa thư mục",
+      "folder_name_placeholder": "Tên thư mục",
+      "folder_name_empty_error": "Tên thư mục không được để trống",
+      "chat_selection": {
+        "selected_count": "{count} cuộc trò chuyện đã chọn",
+        "search_placeholder": "Tìm kiếm cuộc trò chuyện..."
+      },
+      "buttons": {
+        "create": "Tạo thư mục"
+      }
+    }
+  },
+  "sidebar_blocked": {
+    "title": "Người dùng bị chặn",
+    "empty": {
+      "title": "Không tìm thấy người dùng bị chặn",
+      "subtitle": "Những người bạn chặn sẽ hiển thị tại đây. Bạn có thể chặn ai đó từ trang cá nhân hoặc trong cuộc trò chuyện."
+    }
+  },
+
+  "settings": {
+    "account": "Cài đặt tài khoản",
+    "privacy_security": "Quyền riêng tư & Bảo mật",
+    "display": "Hiển thị",
+    "keyboard": "Bàn phím",
+    "messages": "Tin nhắn",
+    "folders": "Thư mục chat",
+    "notifications": "Thông báo",
+    "data_storage": "Dữ liệu & Lưu trữ",
+    "language": "Ngôn ngữ",
+    "theme": "Giao diện",
+    "theme_options": {
+      "light": "Sáng",
+      "dark": "Tối",
+      "auto": "Tự động"
+    }
+  },
+
+  "account_settings": {
+    "title": "Cài đặt tài khoản",
+    "change_username": {
+      "title": "Đổi tên người dùng",
+      "placeholder": "Đặt tên người dùng mới",
+      "button": "Cập nhật tên người dùng",
+      "requirements": [
+        "Tối đa 24 ký tự",
+        "Chữ cái (A-Z), số (0-9), dấu chấm (.) hoặc dấu gạch dưới (_)",
+        "Không có khoảng trắng hoặc ký tự đặc biệt",
+        "Không kết thúc bằng dấu chấm (.)",
+        "Không chứa hai dấu chấm liên tiếp (..)",
+        "Phải là duy nhất"
+      ],
+      "messages": {
+        "already_current": "Đây là tên người dùng hiện tại của bạn",
+        "available": "Tên người dùng khả dụng!",
+        "taken": "Tên người dùng đã được sử dụng",
+        "success": "Cập nhật tên người dùng thành công!",
+        "verify_first": "Vui lòng xác minh tên người dùng trước"
+      }
+    },
+
+    "change_email": {
+      "title": "Đổi Email",
+      "placeholder": "Đặt Email mới",
+      "requirements": [
+        "Phải là địa chỉ email hợp lệ",
+        "Tối đa 254 ký tự",
+        "Phải là duy nhất (không được sử dụng bởi tài khoản khác)",
+        "Cần xác minh email mới"
+      ],
+      "resend_in": "Gửi lại trong {time}",
+      "messages": {
+        "already_current": "Đây là email hiện tại của bạn",
+        "sent": "Mã xác minh đã gửi đến email: {email}",
+        "success": "Email đã được xác minh và cập nhật thành công",
+        "verify_first": "Vui lòng xác minh email mới trước",
+        "invalid": "Vui lòng nhập email hợp lệ",
+        "failed_send": "Gửi mã xác minh thất bại",
+        "failed_verify": "Xác minh email thất bại",
+        "failed_resend": "Gửi lại mã xác minh thất bại"
+      }
+    },
+
+    "change_phone": {
+      "title": "Đổi số điện thoại",
+      "placeholder": "Đặt số điện thoại mới",
+      "requirements": [
+        "Phải là số điện thoại hợp lệ",
+        "10-15 chữ số (có thể có mã quốc gia)",
+        "Phải là duy nhất (không được sử dụng bởi tài khoản khác)",
+        "Có thể cần xác minh số điện thoại mới"
+      ],
+      "resend_in": "Gửi lại trong {time}",
+      "messages": {
+        "already_current": "Đây là số điện thoại hiện tại của bạn",
+        "sent": "Mã xác minh đã gửi đến số điện thoại: {phone}",
+        "success": "Số điện thoại đã được xác minh và cập nhật thành công",
+        "verify_first": "Vui lòng xác minh số điện thoại mới trước",
+        "invalid": "Vui lòng nhập số điện thoại hợp lệ",
+        "failed_send": "Gửi mã xác minh thất bại",
+        "failed_verify": "Xác minh số điện thoại thất bại",
+        "failed_resend": "Gửi lại mã xác minh thất bại"
+      }
+    },
+
+    "change_password": {
+      "title": "Đổi mật khẩu",
+      "placeholder": {
+        "current": "Mật khẩu hiện tại",
+        "new": "Mật khẩu mới",
+        "confirm": "Xác nhận mật khẩu mới"
+      },
+      "requirements": [
+        "Ít nhất 8 ký tự",
+        "Ít nhất một chữ cái viết hoa",
+        "Ít nhất một chữ cái viết thường",
+        "Ít nhất một số"
+      ],
+      "messages": {
+        "all_required": "Tất cả các trường là bắt buộc",
+        "invalid_format": "Định dạng mật khẩu không hợp lệ",
+        "success": "Đổi mật khẩu thành công",
+        "failed": "Đổi mật khẩu thất bại"
+      },
+      "buttons": {
+        "change": "Đổi mật khẩu",
+        "changing": "Đang đổi..."
+      }
+    }
+  },
+
+  "privacy_settings": {
+    "title": "Quyền riêng tư & Bảo mật",
+    "private_account": {
+      "label": "Tài khoản riêng tư",
+      "desc_private": "Chỉ những người theo dõi được chấp thuận mới thấy nội dung của bạn",
+      "desc_public": "Bất kỳ ai cũng có thể thấy nội dung của bạn"
+    },
+    "read_receipts": {
+      "label": "Thông báo đã đọc",
+      "desc_on": "Mọi người sẽ thấy khi bạn đã đọc tin nhắn của họ",
+      "desc_off": "Mọi người sẽ không thấy khi bạn đã đọc tin nhắn của họ"
+    },
+    "online_status": {
+      "label": "Trạng thái trực tuyến",
+      "desc_on": "Mọi người sẽ thấy khi bạn đang trực tuyến",
+      "desc_off": "Mọi người sẽ không thấy khi bạn đang trực tuyến"
+    },
+    "allow_messages_from": {
+      "label": "Ai có thể nhắn tin cho bạn",
+      "options": {
+        "everyone": "Tất cả mọi người",
+        "friends": "Chỉ bạn bè",
+        "none": "Không ai"
+      }
+    },
+    "buttons": {
+      "save_changes": "Lưu thay đổi",
+      "saving": "Đang lưu..."
+    },
+    "messages": {
+      "no_changes": "Không có thay đổi nào được phát hiện",
+      "success": "Cài đặt quyền riêng tư đã được cập nhật",
+      "error": "Cập nhật cài đặt quyền riêng tư thất bại"
+    }
+  },
+
+  "display_settings": {
+    "title": "Hiển thị",
+    "options": {
+      "animations": "Bật hiệu ứng động",
+      "reduce_motion": "Giảm chuyển động",
+      "high_contrast": "Chế độ tương phản cao",
+      "text_size_large": "Kích thước chữ lớn"
+    }
+  },
+
+  "keyboard_settings": {
+    "title": "Bàn phím",
+    "options": {
+      "enter_send": "Nhấn Enter để gửi tin nhắn",
+      "ctrl_enter_send": "Nhấn Ctrl + Enter để gửi tin nhắn",
+      "vim_mode": "Bật chế độ Vim",
+      "emacs_mode": "Bật chế độ Emacs"
+    }
+  },
+
+  "message_settings": {
+    "title": "Tin nhắn",
+    "options": {
+      "read_receipts": "Biên nhận đã đọc",
+      "typing_indicators": "Hiển thị đang nhập",
+      "auto_download_media": "Tự động tải media",
+      "desktop_notifications": "Thông báo trên máy tính"
+    }
+  },
+
+  "folder_settings": {
+    "title": "Thư mục",
+    "options": {
+      "show_unread_count": "Hiển thị số tin nhắn chưa đọc",
+      "auto_archive": "Tự động lưu trữ tin nhắn cũ",
+      "sort_by_date": "Sắp xếp thư mục theo ngày",
+      "sort_by_name": "Sắp xếp thư mục theo tên",
+      "hide_empty": "Ẩn thư mục trống"
+    }
+  },
+
+  "notification_settings": {
+    "title": "Thông báo",
+    "options": {
+      "message_sounds": "Âm thanh tin nhắn",
+      "desktop_banners": "Hiển thị banner trên máy tính",
+      "mentions_only": "Chỉ khi được nhắc",
+      "email_notifications": "Thông báo qua email",
+      "vibrate": "Rung trên điện thoại"
+    }
+  },
+
+  "data_settings": {
+    "title": "Dữ liệu & Lưu trữ",
+    "options": {
+      "auto_download_media": "Tự động tải media",
+      "limit_storage": "Giới hạn dung lượng lưu trữ",
+      "clear_cache": "Xóa bộ nhớ đệm",
+      "low_data_mode": "Chế độ tiết kiệm dữ liệu",
+      "backup_messages": "Sao lưu tin nhắn"
+    }
+  },
+
+  "sidebar_info": {
+    "edit": {
+      "title": "Chỉnh sửa trò chuyện",
+      "set_partner_nickname": "Đặt biệt danh cho {{name}}",
+      "set_my_nickname": "Đặt biệt danh của tôi",
+      "unfriend": "Hủy kết bạn",
+      "leave_chat": "Rời trò chuyện",
+      "delete_chat": "Xóa trò chuyện",
+      "update_success": "Cập nhật thành công"
+    },
+    "group_edit": {
+      "title": "Chỉnh sửa {{type}}",
+      "group_name": "Tên nhóm",
+      "description": "Mô tả",
+      "members": "Thành viên",
+      "leave_chat": "Rời {{type}}",
+      "delete_chat": "Xóa {{type}}",
+      "update_success": "Cập nhật thành công"
+    },
+    "members_edit": {
+      "title": "Thành viên",
+      "you_role": "Tôi, {{role}}",
+      "owner": "Chủ sở hữu",
+      "admin": "Quản trị viên",
+      "guest": "Khách",
+      "member": "Thành viên",
+      "status_left": "Rời",
+      "status_banned": "Bị cấm",
+      "set_nickname": "Đặt biệt danh",
+      "promote_owner": "Thăng chức thành Chủ sở hữu",
+      "set_admin": "Đặt làm Quản trị viên",
+      "add_member": "Thêm thành viên",
+      "set_member": "Đặt làm Thành viên",
+      "remove": "Xóa"
+    },
+    "media_files": {
+      "title": "Phương tiện & Tệp tin",
+      "images": "Ảnh",
+      "videos": "Video",
+      "audio": "Âm thanh",
+      "files": "Tệp tin",
+      "no_media": "Không có {{type}} nào"
+    }
+  },
+
+  "modal": {
+    "friend_request": {
+      "title": "Gửi Lời mời Kết bạn tới",
+      "optional_message": "Lời nhắn tùy chọn...",
+      "send_request": "Gửi Lời mời Kết bạn"
+    },
+    "forward_message": {
+      "title_message": "Chuyển tiếp Tin nhắn Tới...",
+      "title_attachment": "Gửi {{type}} Này Tới...",
+      "search_placeholder": "Tìm cuộc trò chuyện để chuyển tiếp đến"
+    },
+    "delete_message": {
+      "title": "Xóa Tin nhắn",
+      "description": "Bạn có chắc chắn muốn xóa tin nhắn này? Hành động này không thể hoàn tác.",
+      "delete_for_me": "Chỉ xóa với tôi",
+      "delete_for_everyone": "Xóa với mọi người"
+    },
+    "delete_folder": {
+      "title": "Xóa Thư mục",
+      "description": "Xóa thư mục này sẽ loại bỏ nó khỏi không gian làm việc của bạn. Tất cả các cuộc trò chuyện hiện có trong thư mục này sẽ vẫn còn trong danh sách chat của bạn nhưng sẽ không còn được sắp xếp trong thư mục này nữa."
+    },
+    "mute_chat": {
+      "title": "Tắt Thông báo Chat",
+      "description": "Chọn thời gian tắt thông báo:",
+      "options": {
+        "1_hour": "1 Giờ",
+        "8_hours": "8 Giờ",
+        "1_day": "1 Ngày",
+        "1_week": "1 Tuần",
+        "1_month": "1 Tháng",
+        "forever": "Vĩnh viễn"
+      },
+      "muted_until": "Đã tắt thông báo đến {{time}}",
+      "mute_failed": "Không thể tắt thông báo thành viên chat"
+    },
+    "block_user": {
+      "title": "Chặn Người dùng",
+      "description": "Hành động chặn sẽ ngăn người dùng này gửi tin nhắn cho bạn hoặc xem trạng thái trực tuyến của bạn.",
+      "success": "Đã chặn {{username}}",
+      "error": "Không thể chặn người dùng"
+    },
+    "unblock_user": {
+      "title": "Bỏ chặn Người dùng",
+      "description": "Bỏ chặn sẽ cho phép người dùng này gửi tin nhắn cho bạn và xem trạng thái trực tuyến của bạn.",
+      "toast_success": "Đã bỏ chặn {{username}}",
+      "toast_error": "Không thể bỏ chặn người dùng"
+    },
+    "delete_chat": {
+      "title_direct": "Xóa Chat",
+      "title_group": "Xóa {{type}}",
+      "chat_type": "Chat {{type}}",
+      "description_direct": "Bạn có chắc chắn muốn xóa cuộc trò chuyện này?\nHành động này là vĩnh viễn - bạn và {{name}} sẽ không thể truy cập lại nó.",
+      "description_group": "Bạn có chắc chắn muốn xóa {{type}} này?\nHành động này sẽ xóa vĩnh viễn cuộc trò chuyện cho tất cả thành viên."
+    },
+    "leave_chat": {
+      "title_direct": "Rời Chat",
+      "title_group": "Rời {{type}}",
+      "chat_type": "Chat {{type}}",
+      "description_direct": "Bạn có chắc chắn muốn rời cuộc trò chuyện này?\nBạn sẽ không thể truy cập lại nó.",
+      "description_group": "Bạn có chắc chắn muốn rời {{type}} này?\nBạn sẽ không còn nhận được tin nhắn từ đây nữa."
+    },
+    "add_member": {
+      "title": "Mời Thành viên",
+      "search_placeholder": "Tìm kiếm người...",
+      "loading": "Đang tải danh bạ...",
+      "no_contacts": "Không tìm thấy danh bạ nào",
+      "copy_success": "Đã sao chép Liên kết Mời!",
+      "copy_failed": "Không thể sao chép liên kết.",
+      "link_copied": "Đã sao chép ✓",
+      "link_copy_title": "Sao chép liên kết mời",
+      "link_copied_title": "Đã sao chép liên kết!",
+      "refresh_title": "Làm mới",
+      "generate_invite": "Tạo Liên kết Mời",
+      "add_single": "Thêm Thành viên",
+      "add_multiple": "Thêm {{count}} Thành viên",
+      "failed_add": "Không thể thêm thành viên"
+    },
+    "set_nickname": {
+      "title": "Đặt Biệt danh",
+      "placeholder": "Nhập biệt danh",
+      "failed": "Không thể cập nhật biệt danh"
+    },
+    "delete_call": {
+      "title": "Xóa Lịch sử Cuộc gọi của Bạn",
+      "description": "Bạn có chắc chắn muốn xóa cuộc gọi này?\nHành động này là vĩnh viễn và tất cả tin nhắn liên quan sẽ bị xóa.",
+      "failed": "Không thể xóa cuộc gọi"
+    }
+  },
+
+  "system": {
+    "another_member": "thành viên khác",
+    "unknown_event": "Đã xảy ra sự kiện hệ thống.",
+    "member_joined": "{{displayName}} đã tham gia cuộc trò chuyện",
+    "member_added": "{{displayName}} đã thêm {{targetName}} vào cuộc trò chuyện",
+    "member_left": "{{displayName}} đã rời khỏi cuộc trò chuyện",
+    "member_kicked": "{{displayName}} đã xóa {{targetName}} khỏi cuộc trò chuyện",
+    "member_banned": "{{displayName}} đã cấm {{targetName}} khỏi cuộc trò chuyện",
+    "chat_renamed": "{{displayName}} đã đổi tên cuộc trò chuyện",
+    "chat_renamed_with_values": "{{displayName}} đã đổi tên cuộc trò chuyện từ \"{{oldVal}}\" thành \"{{newVal}}\"",
+    "chat_update_avatar": "{{displayName}} đã cập nhật ảnh đại diện cuộc trò chuyện",
+    "chat_update_description": "{{displayName}} đã cập nhật mô tả cuộc trò chuyện",
+    "chat_update_description_with_values": "{{displayName}} đã thay đổi mô tả từ \"{{oldVal}}\" thành \"{{newVal}}\"",
+    "chat_set_description": "{{displayName}} đã đặt mô tả là \"{{newVal}}\"",
+    "member_update_nickname": "{{displayName}} đã cập nhật biệt danh của {{targetName}}",
+    "member_update_nickname_with_values": "{{displayName}} đã thay đổi biệt danh của {{targetName}} từ \"{{oldVal}}\" thành \"{{newVal}}\"",
+    "member_set_nickname": "{{displayName}} đã đặt biệt danh của {{targetName}} là \"{{newVal}}\"",
+    "member_promote_owner": "{{displayName}} đã thăng chức {{targetName}} thành chủ sở hữu",
+    "member_update_role": "{{displayName}} đã thay đổi vai trò của {{targetName}} thành {{newVal}}",
+    "member_update_status": "{{displayName}} đã thay đổi trạng thái của {{targetName}} thành {{newVal}}",
+    "message_pinned": "{{displayName}} đã ghim tin nhắn \"{{newVal}}\"",
+    "message_unpinned": "{{displayName}} đã bỏ ghim tin nhắn",
+    "chat_deleted": "{{displayName}} đã xóa cuộc trò chuyện",
+    "broadcast_message": {
+      "broadcasted": "Đã phát sóng",
+      "live_now": "Đang phát trực tiếp",
+      "started_at": "Đã bắt đầu {{time}}"
+    }
+  },
+
+  "messages": {
+    "search_bar": {
+      "placeholder": "Tìm kiếm tin nhắn",
+      "filter_important": "Lọc tin nhắn quan trọng"
+    }
+  }
+}

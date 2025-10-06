@@ -1,8 +1,7 @@
 import { useEffect, useRef, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Avatar } from "../avatar/Avatar";
-import { useAudioService } from "@/hooks/useAudioService";
-import { SoundType } from "@/services/audio.service";
+import { audioService, SoundType } from "@/services/audio.service";
 import { useTypingMembers } from "@/hooks/useTypingMembers";
 import "./TypingIndicator.css";
 import React from "react";
@@ -13,21 +12,24 @@ interface TypingIndicatorProps {
 
 const TypingIndicator = ({ chatId }: TypingIndicatorProps) => {
   const { typingMembers, isTyping } = useTypingMembers(chatId);
-  const { playSound, stopSound } = useAudioService();
   const previousTypingCount = useRef(0);
 
-  // Play sound when someone starts typing
   useEffect(() => {
+    // Play typing sound when someone starts typing
     if (previousTypingCount.current === 0 && isTyping) {
-      playSound(SoundType.TYPING, 0.9);
+      audioService.playSound(SoundType.TYPING, 0.9);
+    }
+    // Stop typing sound when nobody is typing
+    if (!isTyping) {
+      audioService.stopSound(SoundType.TYPING);
     }
     previousTypingCount.current = typingMembers.length;
-  }, [isTyping, playSound, typingMembers.length]);
+  }, [isTyping, typingMembers.length]);
 
   // Stop sound on unmount
   useEffect(() => {
-    return () => stopSound(SoundType.TYPING);
-  }, [stopSound]);
+    return () => audioService.stopSound(SoundType.TYPING);
+  }, []);
 
   const displayAvatars = useMemo(() => {
     return typingMembers.map((member) => (

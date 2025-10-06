@@ -2,9 +2,8 @@ import React from "react";
 import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
 import { handleReaction } from "@/utils/handleReaction";
-import { useAudioService } from "@/hooks/useAudioService"; // ✅ centralized audio
-import { SoundType } from "@/services/audio.service"; // ✅ enum
 import { useMessageReactions } from "@/stores/messageStore";
+import { audioService, SoundType } from "@/services/audio.service"; // ✅ enum
 
 interface MessageReactionDisplayProps {
   isMe?: boolean;
@@ -23,7 +22,6 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
   messageId,
   chatId,
 }) => {
-  const { playSound } = useAudioService(); // ✅ centralized audio
   const reactions = useMessageReactions(messageId);
 
   if (!reactions || Object.keys(reactions).length === 0) return null;
@@ -43,9 +41,9 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
       currentUserId && reactions[emoji]?.includes(currentUserId);
 
     if (hasMyReaction) {
-      playSound(SoundType.REACTION_REMOVE);
+      audioService.playSound(SoundType.REACTION_REMOVE);
     } else {
-      playSound(SoundType.REACTION);
+      audioService.playSound(SoundType.REACTION);
     }
 
     handleReaction({

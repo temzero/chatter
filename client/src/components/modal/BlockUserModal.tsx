@@ -8,8 +8,11 @@ import { Avatar } from "../ui/avatar/Avatar";
 import { toast } from "react-toastify";
 import { blockService } from "@/services/blockService";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
+import { useTranslation } from "react-i18next";
 
 const BlockUserModal: React.FC = () => {
+  const { t } = useTranslation();
+
   const closeModal = useModalStore((state) => state.closeModal);
   const modalContent = useModalStore((state) => state.modalContent);
   const updateMemberLocally = useChatMemberStore.getState().updateMemberLocally;
@@ -41,7 +44,9 @@ const BlockUserModal: React.FC = () => {
       className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border z-[99]"
     >
       <div className="p-4">
-        <h2 className="text-2xl font-semibold mb-4 text-red-500">Block User</h2>
+        <h2 className="text-2xl font-semibold mb-4 text-red-500">
+          {t("modal.block_user.title")}
+        </h2>
 
         <div className="flex items-center gap-3 mb-6">
           <div className="relative select-none">
@@ -63,8 +68,7 @@ const BlockUserModal: React.FC = () => {
         </div>
 
         <p className="mb-6 text-sm opacity-70">
-          Blocking will prevent this user from sending you messages or seeing
-          your online status.
+          {t("modal.block_user.description")}
         </p>
       </div>
       <div className="flex custom-border-t">
@@ -72,13 +76,13 @@ const BlockUserModal: React.FC = () => {
           className="p-3 text-red-500 hover:bg-[var(--background-secondary)] opacity-80 hover:opacity-100 flex-1"
           onClick={handleBlock}
         >
-          Block
+          {t("common.actions.block")}
         </button>
         <button
           className="p-3 hover:bg-[var(--background-secondary)] opacity-80 hover:opacity-100 flex-1"
           onClick={closeModal}
         >
-          Cancel
+          {t("common.actions.cancel")}
         </button>
       </div>
     </motion.div>

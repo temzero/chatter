@@ -15,8 +15,10 @@ import { childrenModalAnimation } from "@/animations/modalAnimations";
 import { AttachmentType } from "@/types/enums/attachmentType";
 import { AttachmentUploadRequest } from "@/types/requests/sendMessage.request";
 import { ChatType } from "@/types/enums/ChatType";
+import { useTranslation } from "react-i18next";
 
 const ForwardMessageModal: React.FC = () => {
+  const { t } = useTranslation();
   const modalContent = useModalStore((state) => state.modalContent);
   const message = modalContent?.props?.message as MessageResponse | undefined;
   const attachment = modalContent?.props?.attachment as
@@ -80,16 +82,16 @@ const ForwardMessageModal: React.FC = () => {
     >
       <h1 className="font-bold text-center text-xl mb-4 flex items-center justify-center gap-2">
         {message
-          ? "Forward Message To..."
-          : `Send This ${
-              attachment?.type
+          ? t("modal.forward_message.title_message")
+          : t("modal.forward_message.title_attachment", {
+              type: attachment?.type
                 ? attachment.type.charAt(0).toUpperCase() +
                   attachment.type.slice(1).toLowerCase()
-                : "Attachment"
-            } To...`}
+                : "Attachment",
+            })}
       </h1>
 
-      <SearchBar placeholder="Search for chat to forward to" />
+      <SearchBar placeholder={t("modal.forward_message.search_placeholder")} />
 
       <div className="flex flex-col items-start h-[50vh] overflow-y-auto mt-2">
         {forwardChats.map((chat) => (
@@ -102,7 +104,7 @@ const ForwardMessageModal: React.FC = () => {
             <button
               className="ml-auto w-10 h-8 opacity-60 hover:opacity-100 rounded hover:bg-[var(--primary-green)] hover:border-2 hover:border-green-400 flex items-center justify-center text-white transition-all duration-300"
               onClick={() => handleForward(chat.id)}
-              aria-label="Send"
+              title={t("common.actions.send")}
             >
               <span className="material-symbols-outlined text-3xl">send</span>
             </button>

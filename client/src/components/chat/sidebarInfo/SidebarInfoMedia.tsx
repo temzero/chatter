@@ -6,10 +6,12 @@ import { AttachmentType } from "@/types/enums/attachmentType";
 import RenderAttachment from "@/components/ui/RenderAttachment";
 import clsx from "clsx";
 import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
+import { useTranslation } from "react-i18next";
 
 const mediaTypes = ["images", "videos", "audio", "files"];
 
 const ChatInfoMedia: React.FC = () => {
+  const { t } = useTranslation();
   const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
   const activeAttachments = useActiveChatAttachments();
 
@@ -58,7 +60,7 @@ const ChatInfoMedia: React.FC = () => {
     if (filteredMedia.length === 0) {
       return (
         <div className="flex justify-center items-center h-32 opacity-50">
-          No {selectedType} available
+          {t("common.messages.empty")}
         </div>
       );
     }
@@ -99,7 +101,7 @@ const ChatInfoMedia: React.FC = () => {
   return (
     <aside className="relative w-full h-full overflow-hidden flex flex-col">
       <header className="flex p-4 w-full items-center min-h-[var(--header-height)] custom-border-b">
-        <h1 className="text-xl font-semibold">Media & Files</h1>
+        <h1 className="text-xl font-semibold">{t("sidebar_info.media_files.title")}</h1>
         <a
           className="flex items-center rounded-full cursor-pointer opacity-50 hover:opacity-100 ml-auto"
           onClick={() => setSidebarInfo(SidebarInfoMode.DEFAULT)}
@@ -115,7 +117,7 @@ const ChatInfoMedia: React.FC = () => {
             className={getTypeClass(type)}
             onClick={() => handleTypeChange(type)}
           >
-            {type.charAt(0).toUpperCase() + type.slice(1)}
+            {t(`sidebar_info.media_files.${type}`)}
           </a>
         ))}
       </div>

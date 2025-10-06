@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useMessageStore } from "@/stores/messageStore";
 import { AnimatePresence, motion } from "framer-motion";
@@ -7,8 +8,8 @@ import AttachmentImportedPreview from "../ui/AttachmentImportedPreview";
 import useTypingIndicator from "@/hooks/useTypingIndicator";
 import { handleSendMessage } from "@/utils/sendMessageHandler";
 import { useModalStore, useReplyToMessageId } from "@/stores/modalStore";
-import clsx from "clsx";
 import { useCurrentUserId } from "@/stores/authStore";
+import { useTranslation } from "react-i18next";
 
 interface ChatBarProps {
   chatId: string;
@@ -16,6 +17,7 @@ interface ChatBarProps {
 }
 
 const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
+  const { t } = useTranslation();
   const currentUserId = useCurrentUserId();
 
   const setDraftMessage = useMessageStore((state) => state.setDraftMessage);
@@ -300,9 +302,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
                   isMessageSent,
               }
             )}
-            placeholder={
-              chatId ? "Message..." : "Select a chat to start messaging"
-            }
+            placeholder={t("chat_bar.placeholder")}
             aria-label="Message"
             rows={1}
             disabled={!chatId}

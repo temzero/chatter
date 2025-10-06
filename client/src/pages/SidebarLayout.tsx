@@ -38,7 +38,7 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({
           <button className="nav-btn" onClick={handleBackClick}>
             <i className="material-symbols-outlined">arrow_back</i>
           </button>
-          <h1 className="font-semibold text-lg">{title}</h1>
+          <h1 className="font-semibold text-lg truncate">{title}</h1>
         </div>
         {rightButton ? (
           rightButton

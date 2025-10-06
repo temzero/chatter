@@ -1,5 +1,6 @@
-import { emojiCategories } from "@/data/emoji";
+import { useEmojiCategories } from "@/hooks/useEmojiCategories";
 import { useState, useRef, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 interface EmojiCategory {
   name: string;
@@ -13,6 +14,8 @@ interface CustomEmojiPickerProps {
 }
 
 const CustomEmojiPicker = ({ onSelect }: CustomEmojiPickerProps) => {
+  const { t } = useTranslation();
+  const emojiCategories = useEmojiCategories();
   const [isOpen, setIsOpen] = useState(false);
   const [recentEmojis, setRecentEmojis] = useState<string[]>(() => {
     const saved = localStorage.getItem("recentEmojis");
@@ -21,20 +24,22 @@ const CustomEmojiPicker = ({ onSelect }: CustomEmojiPickerProps) => {
 
   const pickerRef = useRef<HTMLDivElement>(null);
   const [currentCategory, setCurrentCategory] = useState(
-    recentEmojis.length > 0 ? "Recently" : emojiCategories[0]?.name || ""
+    recentEmojis.length > 0
+      ? t("emoji.recently")
+      : emojiCategories[0]?.name || ""
   );
 
   const combinedCategories: EmojiCategory[] = useMemo(
     () => [
       ...(recentEmojis.length > 0
-        ? [{ name: "Recently", emojis: recentEmojis }]
+        ? [{ name: t("emoji.recently"), emojis: recentEmojis }]
         : []),
       ...emojiCategories.map((cat) => ({
         ...cat,
         id: cat.id?.toString(), // Ensure id is string
       })),
     ],
-    [recentEmojis]
+    [emojiCategories, recentEmojis, t]
   );
 
   useEffect(() => {
@@ -116,10 +121,12 @@ const CustomEmojiPicker = ({ onSelect }: CustomEmojiPickerProps) => {
   }, []);
 
   return (
-    <div className="" ref={pickerRef}>
+    <div title="Emoji" ref={pickerRef}>
       <a
         onClick={() => setIsOpen(!isOpen)}
-        className={` hover:opacity-90 rounded-full cursor-pointer flex items-center select-none ${isOpen ? "bg-[--border-color] opacity-100" : "opacity-50"}`}
+        className={` hover:opacity-90 rounded-full cursor-pointer flex items-center select-none ${
+          isOpen ? "bg-[--border-color] opacity-100" : "opacity-50"
+        }`}
         aria-label="Open emoji picker"
       >
         <i className="material-symbols-outlined">sentiment_satisfied</i>
@@ -174,12 +181,13 @@ const CustomEmojiPicker = ({ onSelect }: CustomEmojiPickerProps) => {
 
             <button
               className={`opacity-50 hover:opacity-100 ${
-                currentCategory.toLowerCase() === "recently"
+                currentCategory.toLowerCase() ===
+                t("emoji.recently").toLowerCase()
                   ? "opacity-100"
                   : ""
               }`}
               onClick={() =>
-                recentEmojis.length > 0 && scrollToCategory("Recently")
+                recentEmojis.length > 0 && scrollToCategory(t("emoji.recently"))
               }
             >
               <i className="material-symbols-outlined">note_stack</i>

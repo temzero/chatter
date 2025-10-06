@@ -7,8 +7,10 @@ import { useAuthStore, useCurrentUser } from "@/stores/authStore";
 import { userService } from "@/services/userService";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { handleError } from "@/utils/handleError";
+import { useTranslation } from "react-i18next";
 
 const SidebarSettingsUsername: React.FC = () => {
+  const { t } = useTranslation();
   const currentUser = useCurrentUser();
 
   const setCurrentUser = useAuthStore((state) => state.setCurrentUser);
@@ -23,6 +25,7 @@ const SidebarSettingsUsername: React.FC = () => {
   const isUnchanged = username === currentUser?.username;
   const isDisabled = loading || !isValid || isUnchanged;
 
+  const invalidMessage = t("account_settings.change_username.messages.invalid");
   // Validate username whenever it changes
   useEffect(() => {
     if (!username) {
@@ -33,51 +36,49 @@ const SidebarSettingsUsername: React.FC = () => {
 
     if (username.length > 30) {
       setIsValid(false);
-      setErrorMessage("Username must be no more than 30 characters");
+      setErrorMessage(invalidMessage);
       return;
     }
 
     const validChars = /^[a-zA-Z0-9._]+$/;
     if (!validChars.test(username)) {
       setIsValid(false);
-      setErrorMessage(
-        "Only letters, numbers, periods (.) and underscores (_) are allowed"
-      );
+      setErrorMessage(invalidMessage);
       return;
     }
 
     if (/\s/.test(username)) {
       setIsValid(false);
-      setErrorMessage("Spaces are not allowed");
+      setErrorMessage(invalidMessage);
       return;
     }
 
     if (username.endsWith(".")) {
       setIsValid(false);
-      setErrorMessage("Username cannot end with a period");
+      setErrorMessage(invalidMessage);
       return;
     }
 
     if (/\.{2,}/.test(username)) {
       setIsValid(false);
-      setErrorMessage("Username cannot contain consecutive periods");
+      setErrorMessage(invalidMessage);
       return;
     }
 
     setIsValid(true);
     setErrorMessage("");
-  }, [username]);
+  }, [invalidMessage, t, username]);
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!username.trim()) {
-      toast.error("Please enter a username");
+      toast.error(invalidMessage);
       return;
     }
 
     if (!isValid) {
-      toast.error("Please fix validation errors first");
+      toast.error(invalidMessage);
       return;
     }
 
@@ -87,7 +88,9 @@ const SidebarSettingsUsername: React.FC = () => {
 
       if (username === currentUser?.username) {
         setIsVerified(false);
-        toast.info("This is already your current username");
+        toast.info(
+          t("account_settings.change_username.messages.already_current")
+        );
         return;
       }
 
@@ -95,15 +98,15 @@ const SidebarSettingsUsername: React.FC = () => {
 
       if (data.payload) {
         setIsAvailable(true);
-        toast.success("Username is available!");
+        toast.success(t("account_settings.change_username.messages.available"));
       } else {
-        toast.error("Username is already taken");
+        toast.error(t("account_settings.change_username.messages.taken"));
       }
       setIsVerified(true);
     } catch (error) {
       setIsVerified(false);
       setIsAvailable(false);
-      handleError(error, "Failed to update username");
+      handleError(error, t("account_settings.change_username.messages.failed"));
     } finally {
       setLoading(false);
     }
@@ -113,7 +116,7 @@ const SidebarSettingsUsername: React.FC = () => {
     e.preventDefault();
 
     if (!isVerified || !isAvailable) {
-      toast.error("Please verify username availability first");
+      toast.error(t("account_settings.change_username.messages.verify_first"));
       return;
     }
 
@@ -124,10 +127,10 @@ const SidebarSettingsUsername: React.FC = () => {
       setCurrentUser(updatedUser);
       setIsVerified(false);
       setIsAvailable(false);
-      toast.success("Username updated successfully!");
+      toast.success(t("account_settings.change_username.messages.available"));
       setSidebar(SidebarMode.SETTINGS_ACCOUNT);
     } catch (error) {
-      handleError(error, "Failed to update username");
+      handleError(error, t("account_settings.change_username.messages.failed"));
     } finally {
       setLoading(false);
     }
@@ -135,21 +138,19 @@ const SidebarSettingsUsername: React.FC = () => {
 
   return (
     <SidebarLayout
-      title="Change Username"
+      title={t("account_settings.change_username.title")}
       backLocation={SidebarMode.SETTINGS_ACCOUNT}
     >
       <form onSubmit={handleVerify} className="p-2 flex flex-col gap-2">
         <div className="w-full p-4 rounded-lg bg-[var(--hover-color)]">
-          <h3 className="font-semibold mb-2">Username Requirements:</h3>
           <ul className="space-y-1 dark:text-gray-300">
-            <li>• Maximum 24 characters</li>
-            <li>
-              • Letters (A-Z), numbers (0-9), periods (.) or underscores (_)
-            </li>
-            <li>• No spaces or special characters</li>
-            <li>• Cannot end with a period (.)</li>
-            <li>• Cannot contain consecutive periods (..)</li>
-            <li>• Must be unique</li>
+            {(
+              t("account_settings.change_username.requirements", {
+                returnObjects: true,
+              }) as string[]
+            ).map((requirement: string, index: number) => (
+              <li key={index}>• {requirement}</li>
+            ))}
           </ul>
         </div>
 
@@ -166,7 +167,7 @@ const SidebarSettingsUsername: React.FC = () => {
             }}
             disabled={loading}
             name="identifier"
-            placeholder="Set New Username"
+            placeholder={t("account_settings.change_username.placeholder")}
             className="flex-1"
             autoComplete="username"
             autoFocus
@@ -194,7 +195,9 @@ const SidebarSettingsUsername: React.FC = () => {
           } p-1 w-full`}
           disabled={isDisabled}
         >
-          {loading && !isVerified ? "Verifying..." : "Verify"}
+          {loading && !isVerified
+            ? t("common.actions.verify")
+            : t("common.actions.verify")}
         </button>
 
         {isVerified && isAvailable && (
@@ -204,7 +207,9 @@ const SidebarSettingsUsername: React.FC = () => {
             className="primary p-1 w-full"
             disabled={loading}
           >
-            {loading ? "Updating..." : "Update Username"}
+            {loading
+              ? t("common.actions.update")
+              : t("account_settings.change_username.button")}
           </button>
         )}
       </form>

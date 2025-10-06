@@ -6,10 +6,12 @@ import ChatList from "@/components/ui/ChatList";
 import { useChatStore } from "@/stores/chatStore";
 import { filterChatsByType } from "@/utils/filterChatsByType";
 import { SidebarMode } from "@/types/enums/sidebarMode";
+import { useTranslation } from "react-i18next";
 
 const chatTypes = ["all", "direct", "group", "channel"];
 
 const SidebarSearch: React.FC = () => {
+  const { t } = useTranslation();
   const filteredChats = useChatStore((state) => state.filteredChats);
   const { setSidebar } = useSidebarStore();
 
@@ -48,7 +50,7 @@ const SidebarSearch: React.FC = () => {
         className="flex w-full items-center h-[var(--header-height)] justify-between"
       >
         <div className="flex items-center w-full px-2">
-          <SearchBar placeholder="Search chats..." />
+          <SearchBar placeholder={t("sidebar_search.placeholder")} />
           <span
             className="material-symbols-outlined text-2xl opacity-60 hover:opacity-100 p-1 cursor-pointer ml-2"
             onClick={() => setSidebar(SidebarMode.DEFAULT)}
@@ -66,7 +68,7 @@ const SidebarSearch: React.FC = () => {
             className={getTypeClass(type)}
             onClick={() => handleChatTypeChange(type)}
           >
-            {type.charAt(0).toUpperCase() + type.slice(1)}
+            {t(`chat.${type}`)}
           </a>
         ))}
       </div>
@@ -78,7 +80,7 @@ const SidebarSearch: React.FC = () => {
         ) : (
           <div className="flex flex-col items-center justify-center my-auto opacity-40 py-10">
             <i className="material-symbols-outlined text-6xl">search_off</i>
-            <p>No Result!</p>
+            <p>{t("sidebar_search.no_result")}</p>
           </div>
         )}
       </SlidingContainer>

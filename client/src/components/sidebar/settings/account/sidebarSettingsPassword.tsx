@@ -7,8 +7,10 @@ import { userService } from "@/services/userService";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { toast } from "react-toastify";
 import { handleError } from "@/utils/handleError";
+import { useTranslation } from "react-i18next";
 
 const SidebarSettingsPassword: React.FC = () => {
+  const { t } = useTranslation();
   const setLoading = useAuthStore((state) => state.setLoading);
   const loading = useAuthStore((state) => state.loading);
   const { setSidebar } = useSidebarStore();
@@ -62,12 +64,14 @@ const SidebarSettingsPassword: React.FC = () => {
     e.preventDefault();
 
     if (!currentPassword || !newPassword || !confirmPassword) {
-      toast.error("All fields are required");
+      toast.error(t("account_settings.change_password.messages.all_required"));
       return;
     }
 
     if (!isValid) {
-      toast.error("Invalid password format");
+      toast.error(
+        t("account_settings.change_password.messages.invalid_format")
+      );
       return;
     }
 
@@ -80,17 +84,20 @@ const SidebarSettingsPassword: React.FC = () => {
       );
 
       if (response.payload) {
-        toast.success("Password changed successfully");
+        toast.success(t("account_settings.change_password.messages.success"));
         // Clear form after successful change
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
         setSidebar(SidebarMode.SETTINGS_ACCOUNT);
       } else {
-        toast.error(response.message || "Failed to change password");
+        toast.error(
+          response.message ||
+            t("account_settings.change_password.messages.failed")
+        );
       }
     } catch (error) {
-      handleError(error, 'Failed to change password')
+      handleError(error, t("account_settings.change_password.messages.failed"));
     } finally {
       setLoading(false);
     }
@@ -98,17 +105,19 @@ const SidebarSettingsPassword: React.FC = () => {
 
   return (
     <SidebarLayout
-      title="Change Password"
+      title={t("account_settings.change_password.title")}
       backLocation={SidebarMode.SETTINGS_ACCOUNT}
     >
       <form onSubmit={handleSubmit} className="p-2 flex flex-col gap-2">
         <div className="w-full p-4 rounded-lg bg-[var(--hover-color)]">
-          <h3 className="font-semibold mb-2">Password Requirements:</h3>
           <ul className="space-y-1 dark:text-gray-300">
-            <li>• At least 8 characters</li>
-            <li>• At least one uppercase letter</li>
-            <li>• At least one lowercase letter</li>
-            <li>• At least one number</li>
+            {(
+              t("account_settings.change_password.requirements", {
+                returnObjects: true,
+              }) as string[]
+            ).map((requirement: string, index: number) => (
+              <li key={index}>• {requirement}</li>
+            ))}
           </ul>
         </div>
 
@@ -118,7 +127,9 @@ const SidebarSettingsPassword: React.FC = () => {
           onChange={(e) => setCurrentPassword(e.target.value)}
           disabled={loading}
           name="currentPassword"
-          placeholder="Current Password"
+          placeholder={t(
+            "account_settings.change_password.placeholder.current"
+          )}
           className="input"
           autoComplete="current-password"
           autoFocus
@@ -130,7 +141,7 @@ const SidebarSettingsPassword: React.FC = () => {
           onChange={(e) => setNewPassword(e.target.value)}
           disabled={loading}
           name="newPassword"
-          placeholder="New Password"
+          placeholder={t("account_settings.change_password.placeholder.new")}
           className="input"
           autoComplete="new-password"
         />
@@ -141,7 +152,9 @@ const SidebarSettingsPassword: React.FC = () => {
           onChange={(e) => setConfirmPassword(e.target.value)}
           disabled={loading}
           name="confirmPassword"
-          placeholder="Confirm New Password"
+          placeholder={t(
+            "account_settings.change_password.placeholder.confirm"
+          )}
           className="input"
           autoComplete="new-password"
         />
@@ -151,7 +164,9 @@ const SidebarSettingsPassword: React.FC = () => {
           className={`${isDisabled ? "" : "primary"} p-1 w-full`}
           disabled={isDisabled}
         >
-          {loading ? "Changing..." : "Change Password"}
+          {loading
+            ? t("account_settings.change_password.buttons.changing")
+            : t("account_settings.change_password.buttons.change")}
         </button>
       </form>
     </SidebarLayout>

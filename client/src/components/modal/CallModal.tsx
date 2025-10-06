@@ -100,7 +100,11 @@ const CallModal: React.FC = () => {
     }
   };
 
-  const modalSize = isExpanded ? "w-full h-full" : "w-[80%] h-[80%]";
+  const modalSize = isExpanded
+    ? "w-full h-full"
+    : chat.type === ChatType.DIRECT
+    ? "aspect-[1/1] h-[80%]"
+    : "w-[80%] h-[80%]";
 
   return (
     <motion.div

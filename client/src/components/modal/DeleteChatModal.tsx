@@ -10,8 +10,10 @@ import { ChatAvatar } from "../ui/avatar/ChatAvatar";
 import { ChatType } from "@/types/enums/ChatType";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
+import { useTranslation } from "react-i18next";
 
 const DeleteChatModal: React.FC = () => {
+  const { t } = useTranslation();
   const closeModal = useModalStore((state) => state.closeModal);
   const modalContent = useModalStore((state) => state.modalContent);
   const deleteChat = useChatStore((state) => state.deleteChat);
@@ -43,7 +45,11 @@ const DeleteChatModal: React.FC = () => {
             delete
           </span>
           <h2 className="text-2xl">
-            {isDirectChat ? "Delete Chat" : `Delete ${capitalizedChatType}`}
+            {isDirectChat
+              ? t("modals.delete_chat.title_direct")
+              : t("modals.delete_chat.title_group", {
+                  type: capitalizedChatType,
+                })}
           </h2>
         </div>
 
@@ -64,26 +70,24 @@ const DeleteChatModal: React.FC = () => {
               <ChatAvatar chat={chat} />
               <div>
                 <h3 className="font-medium">{chat.name}</h3>
-                <p className="text-sm opacity-70">{capitalizedChatType} chat</p>
+                <p className="text-sm opacity-70">
+                  {t("modals.delete_chat.chat_type", {
+                    type: capitalizedChatType,
+                  })}
+                </p>
               </div>
             </>
           )}
         </div>
 
         <p className="mb-6 text-sm opacity-70">
-          {isDirectChat ? (
-            <>
-              Are you sure you want to delete this chat? <br />
-              This action is permanent, you and{" "}
-              {chatPartner.nickname || chatPartner.firstName} won’t be able to
-              access it again.
-            </>
-          ) : (
-            <>
-              Are you sure you want to delete this {chat.type}? <br />
-              This will permanently remove the conversation for all members.
-            </>
-          )}
+          {isDirectChat
+            ? t("modals.delete_chat.description_direct", {
+                name: chatPartner.nickname || chatPartner.firstName,
+              })
+            : t("modals.delete_chat.description_group", {
+                type: chat.type.toLowerCase(),
+              })}
         </p>
       </div>
 
@@ -92,13 +96,13 @@ const DeleteChatModal: React.FC = () => {
           className="p-3 text-red-500 hover:bg-[var(--background-secondary)] font-semibold hover:font-bold opacity-80 hover:opacity-100 flex-1"
           onClick={handleDeleteChat}
         >
-          Delete
+          {t("common.actions.delete")}
         </button>
         <button
           className="p-3 hover:bg-[var(--background-secondary)] font-semibold hover:font-bold opacity-80 hover:opacity-100 flex-1"
           onClick={closeModal}
         >
-          Cancel
+          {t("common.actions.cancel")}
         </button>
       </div>
     </motion.div>

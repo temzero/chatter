@@ -8,12 +8,14 @@ import { useSidebarStore } from "@/stores/sidebarStore";
 import type { ChatResponse } from "@/types/responses/chat.response";
 import type { ChatType } from "@/types/enums/ChatType";
 import { SidebarMode } from "@/types/enums/sidebarMode";
+import { useTranslation } from "react-i18next";
 
 interface CreateChatProps {
   type: ChatType.GROUP | ChatType.CHANNEL;
 }
 
 const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
+  const { t } = useTranslation();
   const createGroupChat = useChatStore((state) => state.createGroupChat);
   const isLoading = useChatStore((state) => state.isLoading);
   const currentUser = useCurrentUser();
@@ -46,7 +48,7 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
   const CreateNewGroup = async () => {
     try {
       if (!currentUser) {
-        console.error("User not authenticated");
+        console.error(t("sidebar_new_chat.group.user_not_authenticated"));
         return;
       }
 
@@ -82,7 +84,9 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
   return (
     <div className="flex flex-col h-full">
       <div className="p-2">
-        <SearchBar placeholder="Search for members..." />
+        <SearchBar
+          placeholder={t("sidebar_new_chat.group.search_placeholder")}
+        />
       </div>
 
       {privateChats.length > 0 ? (
@@ -96,7 +100,7 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
       ) : (
         <div className="flex flex-col items-center justify-center my-auto opacity-40">
           <i className="material-symbols-outlined text-6xl">search_off</i>
-          <p>No contacts found</p>
+          <p>{t("sidebar_new_chat.group.no_contacts_found")}</p>
         </div>
       )}
 
@@ -134,7 +138,7 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="w-full p-1 text-lg"
-          placeholder={`Enter ${type} name`}
+          placeholder={t("sidebar_new_chat.group.enter_name")}
           maxLength={50}
           required
         />
@@ -153,11 +157,13 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
               : "bg-gray-300 cursor-not-allowed"
           }`}
         >
-          {isLoading ? (
-            <span>Creating...</span>
-          ) : (
-            <span>Create {type === "group" ? "Group" : "Channel"}</span>
-          )}
+          {isLoading
+            ? t("common.loading.creating")
+            : t(
+                type === "group"
+                  ? "sidebar_new_chat.group.create_group"
+                  : "sidebar_new_chat.group.create_channel"
+              )}
         </button>
       </form>
     </div>

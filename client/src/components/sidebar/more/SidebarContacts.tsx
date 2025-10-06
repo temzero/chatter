@@ -4,6 +4,7 @@ import SidebarLayout from "@/pages/SidebarLayout";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useFriendContacts } from "@/hooks/useFriendContacts";
 import { FriendContactResponse } from "@/types/responses/friendContact.response";
+import { useTranslation } from "react-i18next";
 
 interface SidebarContactsProps {
   onVideoCall?: (phoneNumber: string) => void;
@@ -21,6 +22,7 @@ const ContactItem: React.FC<ContactItemProps> = ({
   onVideoCall,
   onAudioCall,
 }) => {
+  const { t } = useTranslation();
   const handleVideoCall = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (contact?.phoneNumber) {
@@ -53,14 +55,14 @@ const ContactItem: React.FC<ContactItemProps> = ({
             <button
               className="opacity-60 hover:opacity-100 hover:text-green-500"
               onClick={handleVideoCall}
-              title="Video call"
+              title={t("sidebar_contacts.video_call")}
             >
               <i className="material-symbols-outlined">videocam</i>
             </button>
             <button
               className="opacity-60 hover:opacity-100 hover:text-green-500"
               onClick={handleAudioCall}
-              title="Audio call"
+              title={t("sidebar_contacts.audio_call")}
             >
               <i className="material-symbols-outlined">phone_enabled</i>
             </button>
@@ -75,13 +77,14 @@ const SidebarContacts: React.FC<SidebarContactsProps> = ({
   onVideoCall,
   onAudioCall,
 }) => {
+  const { t } = useTranslation();
   const { contacts: friendContacts, loading } = useFriendContacts();
 
   return (
-    <SidebarLayout title="Contacts">
+    <SidebarLayout title={t("sidebar_contacts.title")}>
       {loading ? (
         <div className="text-center py-4 text-gray-400">
-          Loading contacts...
+          {t("common.loading.loading")}
         </div>
       ) : friendContacts.length > 0 ? (
         friendContacts.map((contact) => (
@@ -95,7 +98,7 @@ const SidebarContacts: React.FC<SidebarContactsProps> = ({
       ) : (
         <div className="flex flex-col items-center justify-center mt-8 opacity-60">
           <i className="material-symbols-outlined text-6xl mb-4">contacts</i>
-          <p>No contacts with phone numbers</p>
+          <p>{t("sidebar_contacts.no_contacts")}</p>
         </div>
       )}
     </SidebarLayout>

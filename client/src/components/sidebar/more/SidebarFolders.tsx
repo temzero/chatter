@@ -7,6 +7,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useTranslation } from "react-i18next";
 
 import SidebarLayout from "@/pages/SidebarLayout";
 import { useSidebarStore } from "@/stores/sidebarStore";
@@ -16,6 +17,7 @@ import FolderCard from "@/components/ui/FolderCard";
 import type FolderResponse from "@/types/responses/folder.response";
 
 const SidebarFolders: React.FC = () => {
+  const { t } = useTranslation();
   const setSidebar = useSidebarStore((state) => state.setSidebar);
   const folders = useFolderStore((state) => state.folders) || [];
   const reorderFolders = useFolderStore((state) => state.reorderFolders);
@@ -27,7 +29,6 @@ const SidebarFolders: React.FC = () => {
     const oldIndex = folders.findIndex((f) => f.id === active.id);
     const newIndex = folders.findIndex((f) => f.id === over.id);
 
-    // Get just the IDs in new order
     const newOrderIds = arrayMove(
       folders.map((f) => f.id),
       oldIndex,
@@ -37,9 +38,8 @@ const SidebarFolders: React.FC = () => {
     reorderFolders(newOrderIds);
   };
 
-
   return (
-    <SidebarLayout title="Chat Folders">
+    <SidebarLayout title={t("sidebar_folders.title")}>
       <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext
           items={folders.map((f) => f.id)}
@@ -48,7 +48,7 @@ const SidebarFolders: React.FC = () => {
           <div className="p-2 space-y-1 overflow-hidden h-full">
             {folders.length === 0 ? (
               <div className="text-center text-gray-400 py-4">
-                No folders yet
+                {t("sidebar_folders.messages.no_folders")}
               </div>
             ) : (
               folders.map((folder) => (
@@ -67,8 +67,9 @@ const SidebarFolders: React.FC = () => {
           <span className="material-symbols-outlined text-3xl">
             create_new_folder
           </span>
-          <h2 className="flex items-center">Add Folder</h2>
-          <span className="material-symbols-outlined">arrow_forward</span>
+          <h2 className="flex items-center">
+            {t("sidebar_folders.buttons.add_folder")}
+          </h2>
         </button>
       </div>
     </SidebarLayout>
@@ -93,7 +94,7 @@ const SortableFolderCard = ({ folder }: { folder: FolderResponse }) => {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    zIndex: isDragging ? 999 : "auto", // 👈 Raise z-index when dragging
+    zIndex: isDragging ? 999 : "auto",
     position: isDragging ? ("relative" as const) : ("static" as const),
   };
 

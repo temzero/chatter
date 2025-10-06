@@ -12,8 +12,10 @@ import FriendshipBtn from "./FriendshipBtn";
 import type { UserResponse } from "@/types/responses/user.response";
 import { OnlineDot } from "./OnlineDot";
 import { useUserStatus } from "@/stores/presenceStore";
+import { useTranslation } from "react-i18next";
 
 const CreateNewChat: React.FC = () => {
+  const { t } = useTranslation();
   const currentUser = useCurrentUser();
   const createOrGetDirectChat = useChatStore((s) => s.createOrGetDirectChat);
 
@@ -73,7 +75,7 @@ const CreateNewChat: React.FC = () => {
           <input
             type="text"
             name="userInput"
-            placeholder="@username/email/phoneNumber"
+            placeholder={t("sidebar_new_chat.direct.placeholder")}
             required
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -86,12 +88,16 @@ const CreateNewChat: React.FC = () => {
           className="bg-[var(--primary-green)] py-1 w-full flex gap-2 items-center justify-center text-white rounded"
           disabled={loading}
         >
-          {loading ? "Searching..." : "Find User"}
+          {loading ? t("common.loading.searching") : t("sidebar_new_chat.direct.find_user")}
           <span className="material-symbols-outlined">person_search</span>
         </button>
       </form>
 
-      {error && <p className="text-red-400 text-center">{error}</p>}
+      {error && (
+        <p className="text-red-400 text-center">
+          {t("sidebar_new_chat.direct.user_not_found")}
+        </p>
+      )}
 
       <AnimatePresence mode="wait">
         {user && (
@@ -112,10 +118,7 @@ const CreateNewChat: React.FC = () => {
                 <i className="material-symbols-outlined text-8xl rotate-90 opacity-60 select-none">
                   block
                 </i>
-                <p>
-                  This user has blocked you. You cannot view their profile or
-                  interact with them.
-                </p>
+                <p>{t("sidebar_new_chat.direct.blocked_by_user_message")}</p>
               </div>
             ) : (
               <>
@@ -150,7 +153,9 @@ const CreateNewChat: React.FC = () => {
                           : "text-[var(--primary-green)]"
                       }`}
                     >
-                      {user.isBlockedByMe ? "Friend but blocked" : "Friend"}
+                      {user.isBlockedByMe
+                        ? t("sidebar_new_chat.direct.friend_but_blocked")
+                        : t("sidebar_new_chat.direct.friend")}
                     </h1>
                   )}
 
@@ -161,7 +166,7 @@ const CreateNewChat: React.FC = () => {
                       icon="alternate_email"
                       value={user.username}
                       copyType="username"
-                      defaultText="No username"
+                      defaultText={t("sidebar_new_chat.direct.no_username")}
                     />
                     <ContactInfoItem
                       icon="call"
@@ -192,7 +197,7 @@ const CreateNewChat: React.FC = () => {
                         <span className="material-symbols-outlined">
                           replay
                         </span>
-                        Unblock
+                        {t("common.actions.unblock")}
                       </button>
                     ) : (
                       <>
@@ -211,7 +216,7 @@ const CreateNewChat: React.FC = () => {
                             className="w-full py-1 flex gap-1 items-center justify-center hover:bg-[var(--primary-green)]"
                             onClick={() => createOrGetDirectChat(user.id)}
                           >
-                            Start Chat
+                            {t("sidebar_new_chat.direct.start_chat")}
                             <span className="material-symbols-outlined">
                               arrow_right_alt
                             </span>

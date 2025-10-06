@@ -3,17 +3,29 @@ import { handleError } from "@/utils/handleError";
 import { CallResponseDto } from "@/types/responses/call.response";
 import { IncomingCallResponse } from "@/types/callPayload";
 import { generateLiveKitTokenRequest } from "@/types/requests/generate-livekit-token.request";
+import { PaginationQuery } from "@/types/query/paginationQuery";
 
 export const callService = {
   async fetchCallHistory(
-    limit = 20,
-    offset = 0
+    options: PaginationQuery = { limit: 20 }
   ): Promise<{ calls: CallResponseDto[]; hasMore: boolean }> {
-    const { data } = await API.get(
-      `/calls/history?limit=${limit}&offset=${offset}`
-    );
-    console.log("fetchCallHistory", data.payload);
-    return data.payload ?? { calls: [], hasMore: false };
+    try {
+      const { offset, lastId, limit } = options;
+
+      const { data } = await API.get(`/calls/history`, {
+        params: {
+          ...(offset !== undefined ? { offset } : {}),
+          ...(lastId ? { lastCallId: lastId } : {}), // maps `lastId` to API param
+          limit,
+        },
+      });
+
+      const { calls, hasMore } = data.payload;
+      return { calls, hasMore };
+    } catch (error) {
+      console.error("Failed to fetch call history:", error);
+      return { calls: [], hasMore: false };
+    }
   },
 
   async fetchActiveCall(chatId: string): Promise<IncomingCallResponse> {

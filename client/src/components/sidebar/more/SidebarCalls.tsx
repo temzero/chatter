@@ -7,46 +7,60 @@ import CallItem from "@/components/ui/CallItem";
 import { useCurrentUserId } from "@/stores/authStore";
 import { AnimatePresence, motion } from "framer-motion";
 import { ModalType, useModalStore } from "@/stores/modalStore";
+import { useTranslation } from "react-i18next";
 
 const PAGE_LIMIT = 10;
 
 const SidebarCalls: React.FC = () => {
+  const { t } = useTranslation();
   const currentUserId = useCurrentUserId();
   const [calls, setCalls] = useState<CallResponseDto[]>([]);
   const [hasMore, setHasMore] = useState(true);
-  const [offset, setOffset] = useState(0);
+  const [lastCallId, setLastCallId] = useState<string | null>(null);
   const openModal = useModalStore((s) => s.openModal);
 
-  console.log("hasMoreCall", hasMore);
-  // Load more calls
-  const loadCallData = async (): Promise<number> => {
-    console.log("loadCallData", "hasMore", hasMore, "offset", offset);
-    if (!hasMore) return 0;
+  // ✅ Load more calls (cursor-based)
+  const loadCallData = async (): Promise<number | null> => {
+    if (!hasMore) return null;
 
     try {
-      const res = await callService.fetchCallHistory(PAGE_LIMIT, offset);
+      const res = await callService.fetchCallHistory({
+        limit: PAGE_LIMIT,
+        lastId: lastCallId ?? undefined,
+      });
+      const newCalls = res.calls;
+
+      // ✅ Merge and ensure unique calls (avoid duplicates if API overlaps)
+      setCalls((prev) => {
+        const allCalls = [...prev, ...newCalls];
+        const uniqueCalls = Array.from(
+          new Map(allCalls.map((c) => [c.id, c])).values()
+        );
+        return uniqueCalls;
+      });
+
+      // ✅ Update cursor for next page
+      if (newCalls.length > 0) {
+        const nextCursor = newCalls[newCalls.length - 1].id;
+        setLastCallId(nextCursor);
+      }
+
       setHasMore(res.hasMore);
-      setOffset((prev) => prev + PAGE_LIMIT);
-      setCalls((prev) => [...prev, ...res.calls]);
-      // setCalls((prev) => {
-      //   const allCalls = [...prev, ...res.calls];
-      //   const uniqueCalls = Array.from(
-      //     new Map(allCalls.map((c) => [c.id, c])).values()
-      //   );
-      //   return uniqueCalls;
-      // });
-      return res.calls.length;
-    } catch {
+      return newCalls.length;
+    } catch (error) {
+      console.error("Error fetching call history:", error);
       setHasMore(false);
       return 0;
     }
   };
-  console.log("calls", calls);
 
   useEffect(() => {
+    setCalls([]);
+    setHasMore(true);
+    setLastCallId(null);
     loadCallData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUserId]); // empty dependency array ensures it runs only once
+  }, [currentUserId]); // run when user changes
 
   const handleDeleteCall = (call: CallResponseDto) => {
     openModal(ModalType.DELETE_CALL, {
@@ -56,13 +70,13 @@ const SidebarCalls: React.FC = () => {
   };
 
   return (
-    <SidebarLayout title="Call History">
+    <SidebarLayout title={t("sidebar_calls.title")}>
       <InfiniteScroller
         onLoadMore={() => loadCallData()}
         hasMore={hasMore}
         loader={
           <p className="text-sm text-muted-foreground text-center py-2">
-            Loading...
+            {t("common.loading.loading")}
           </p>
         }
         className="max-h-[calc(100vh-64px)]"
@@ -73,7 +87,7 @@ const SidebarCalls: React.FC = () => {
               <i className="material-symbols-outlined text-6xl mb-4 scale-x-[-1]">
                 phone_enabled
               </i>
-              <p>No Call Yet!</p>
+              <p>{t("sidebar_calls.no_calls")}</p>
             </div>
           ) : (
             calls.map((call) => (
