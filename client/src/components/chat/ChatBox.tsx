@@ -1,17 +1,15 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useActiveChat } from "@/stores/chatStore";
-import SidebarInfo from "./sidebarInfo/SidebarInfo";
-import ChatHeader from "./ChatHeader";
-import ChatBar from "./ChatBar";
-import ChatBox from "./chatBox/ChatBox";
-import { useSidebarInfoVisibility } from "@/stores/sidebarInfoStore";
+import Header from "./Header";
+import ChatBar from "./components/ChatBar";
+import MessagesContainer from "./messagesContainer/MessagesContainer";
 import { ChatMemberRole } from "@/types/enums/chatMemberRole";
 import { useBlockStatus } from "@/hooks/useBlockStatus";
 import { ChatType } from "@/types/enums/ChatType";
 import { chatMemberService } from "@/services/chat/chatMemberService";
 
-const ChatContent = React.memo(() => {
+const ChatBox = React.memo(() => {
   const activeChat = useActiveChat();
   const { isBlockedByMe, isBlockedMe } = useBlockStatus(
     activeChat?.id ?? "",
@@ -26,9 +24,8 @@ const ChatContent = React.memo(() => {
 
   return (
     <section className="relative flex-1 flex flex-col justify-between h-full overflow-hidden">
-      <ChatHeader chat={activeChat} isBlockedByMe={isBlockedByMe} />
-      <ChatBox chat={activeChat} />
-
+      <Header chat={activeChat} isBlockedByMe={isBlockedByMe} />
+      <MessagesContainer chat={activeChat} />
       {!activeChat.isDeleted && (
         <AnimatePresence>
           {!isBlocked ? (
@@ -86,23 +83,4 @@ const ChatContent = React.memo(() => {
   );
 });
 
-const ChatSidebar = React.memo(() => {
-  const isChatInfoVisible = useSidebarInfoVisibility();
-
-  return isChatInfoVisible ? (
-    <div className="w-[var(--sidebar-width)]">
-      <SidebarInfo />
-    </div>
-  ) : null;
-});
-
-const Chat: React.FC = () => {
-  return (
-    <section className="flex-1 flex h-full">
-      <ChatContent />
-      <ChatSidebar />
-    </section>
-  );
-};
-
-export default React.memo(Chat);
+export default React.memo(ChatBox);

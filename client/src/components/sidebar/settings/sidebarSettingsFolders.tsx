@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 import SidebarLayout from "@/pages/SidebarLayout";
 import { SidebarMode } from "@/types/enums/sidebarMode";
+import SwitchBtn from "@/components/ui/SwitchBtn";
 
 interface FolderOption {
   code: string;
@@ -21,12 +22,22 @@ const folderOptions: FolderOption[] = [
 
 const SidebarSettingsFolders: React.FC = () => {
   const { t } = useTranslation();
-  const [enabledOptions, setEnabledOptions] = useState<string[]>([]);
+
+  // State to track which options are enabled
+  const [settings, setSettings] = React.useState<Record<string, boolean>>(
+    () => {
+      const initialState: Record<string, boolean> = {};
+      folderOptions.forEach((opt) => (initialState[opt.code] = false));
+      return initialState;
+    }
+  );
 
   const handleToggle = (code: string) => {
-    setEnabledOptions((prev) =>
-      prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]
-    );
+    setSettings((prev) => ({
+      ...prev,
+      [code]: !prev[code],
+    }));
+    console.log("Toggled:", code, !settings[code]);
     // TODO: save to user settings / context
   };
 
@@ -39,15 +50,13 @@ const SidebarSettingsFolders: React.FC = () => {
         {folderOptions.map((option) => (
           <div
             key={option.code}
-            onClick={() => handleToggle(option.code)}
-            className={`settings-item ${
-              enabledOptions.includes(option.code) ? "selected" : ""
-            }`}
+            className="settings-option"
           >
             <span>{t(option.labelKey)}</span>
-            {enabledOptions.includes(option.code) && (
-              <span className="font-bold">✓</span>
-            )}
+            <SwitchBtn
+              checked={settings[option.code]}
+              onCheckedChange={() => handleToggle(option.code)}
+            />
           </div>
         ))}
       </div>

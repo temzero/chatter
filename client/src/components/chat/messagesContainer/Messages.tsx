@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect } from "react";
-import Message from "@/components/chat/message/Message";
+import Message from "@/components/chat/components/message/Message";
 import { MessageResponse } from "@/types/responses/message.response";
 import { ChatResponse } from "@/types/responses/chat.response";
 import { useCurrentUser } from "@/stores/authStore";
@@ -16,7 +16,7 @@ interface ChatMessagesProps {
   messages: MessageResponse[];
 }
 
-const ChatMessages: React.FC<ChatMessagesProps> = ({ chat, messages }) => {
+const Messages: React.FC<ChatMessagesProps> = ({ chat, messages }) => {
   const chatId = chat?.id;
   const currentUser = useCurrentUser();
   const rawMembers = useActiveMembers();
@@ -113,4 +113,4 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ chat, messages }) => {
   );
 };
 
-export default React.memo(ChatMessages);
+export default React.memo(Messages);

@@ -1,0 +1,578 @@
+{
+  "common": {
+    "you": "你",
+    "actions": {
+      "accept": "接受",
+      "back": "返回",
+      "block": "屏蔽",
+      "blocked_by_user": "被用户屏蔽",
+      "cancel": "取消",
+      "cancel_request": "取消请求",
+      "clear_selection": "清除选择",
+      "close": "关闭",
+      "delete": "删除",
+      "decline": "拒绝",
+      "edit": "编辑",
+      "forward": "转发",
+      "leave": "离开",
+      "logout": "登出",
+      "mark_important": "标记为重要",
+      "mute": "静音",
+      "pin": "置顶",
+      "reply": "回复",
+      "remove": "移除",
+      "requests": "请求",
+      "resend_code": "重新发送验证码",
+      "save": "保存",
+      "save_changes": "保存更改",
+      "search": "搜索",
+      "send_verification": "发送验证",
+      "unfriend": "取消好友",
+      "unmark_important": "取消重要标记",
+      "unmute": "取消静音",
+      "unpin": "取消置顶",
+      "unblock": "取消屏蔽",
+      "update": "更新",
+      "verify": "验证",
+      "verify_code": "验证代码",
+      "sent": "已发送"
+    },
+    "messages": {
+      "success": "成功！",
+      "failed": "失败",
+      "unknown": "未知",
+      "empty": "为空",
+      "error": "发生错误",
+      "required": "此字段为必填",
+      "invalid_code": "请输入6位验证码"
+    },
+    "loading": {
+      "loading": "加载中...",
+      "searching": "搜索中...",
+      "creating": "创建中...",
+      "saving": "保存中..."
+    }
+  },
+
+  "account": {
+    "first_name": "名字",
+    "last_name": "姓氏"
+  },
+
+  "chat": {
+    "all": "所有聊天",
+    "all_with_type": "按类型的所有聊天：",
+    "label": "聊天类型",
+    "direct": "直接",
+    "group": "群组",
+    "channel": "频道"
+  },
+
+  "chat_bar": {
+    "placeholder": "消息...",
+    "attach_file": "附件"
+  },
+
+  "emoji": {
+    "recently": "最近",
+    "smileys_emotion": "笑脸与情感",
+    "people_body": "人物与身体",
+    "animals_nature": "动物与自然",
+    "food_drink": "食物与饮料",
+    "activities": "活动",
+    "objects": "物品",
+    "flags": "旗帜"
+  },
+
+  "sidebar": {
+    "saved_messages": "已保存的消息",
+    "calls": "通话",
+    "contacts": "联系人",
+    "friend_requests": "好友请求 {count, plural, =0 {好友请求} other {好友请求 #}}",
+    "friend_requests_none": "好友请求",
+    "folders": "聊天文件夹",
+    "blocked": "已屏蔽",
+    "settings": "设置"
+  },
+
+  "sidebar_profile": {
+    "title": "我的个人资料",
+    "no_username": "无用户名",
+    "edit_tooltip": "编辑个人资料",
+    "edit": {
+      "title": "编辑个人资料",
+      "birthday": "生日（月/日/年）",
+      "bio": "简介",
+      "bio_placeholder": "描述一下你自己",
+      "account_settings": "账户设置",
+      "update_success": "个人资料更新成功",
+      "update_error": "个人资料更新失败！"
+    }
+  },
+
+  "sidebar_new_chat": {
+    "title": "新建{{type}}聊天",
+    "direct": {
+      "placeholder": "@用户名/邮箱/电话号码",
+      "find_user": "查找用户",
+      "user_not_found": "未找到用户！",
+      "blocked_by_user_message": "此用户已屏蔽你。你无法查看他们的个人资料或与其互动。",
+      "friend": "好友",
+      "friend_but_blocked": "好友但被屏蔽",
+      "no_username": "无用户名",
+      "start_chat": "开始聊天"
+    },
+
+    "group": {
+      "search_placeholder": "搜索成员...",
+      "no_contacts_found": "未找到联系人",
+      "enter_name": "输入名称",
+      "create_group": "创建群组",
+      "create_channel": "创建频道",
+      "user_not_authenticated": "用户未认证",
+      "failed_create": "创建{{type}}失败"
+    }
+  },
+  "sidebar_search": {
+    "placeholder": "搜索聊天...",
+    "no_result": "无结果！"
+  },
+
+  "sidebar_calls": {
+    "title": "通话记录",
+    "no_calls": "暂无通话！"
+  },
+
+  "sidebar_contacts": {
+    "title": "联系人",
+    "no_contacts": "没有带电话号码的联系人",
+    "video_call": "视频通话",
+    "audio_call": "语音通话"
+  },
+
+  "sidebar_friend_requests": {
+    "title": "好友请求",
+    "messages": {
+      "no_friend_requests": "没有好友请求",
+      "no_sent_requests": "没有发送的请求",
+      "mutual_friends_one": "{{count}}个共同好友",
+      "mutual_friends_other": "{{count}}个共同好友"
+    }
+  },
+
+  "sidebar_folders": {
+    "title": "聊天文件夹",
+    "messages": {
+      "no_folders": "暂无文件夹"
+    },
+    "buttons": {
+      "add_folder": "添加文件夹"
+    },
+
+    "detail": {
+      "title": "文件夹详情",
+      "folder_not_found": "未找到文件夹",
+      "no_chats": "此文件夹中没有聊天",
+      "delete_folder": "删除文件夹"
+    },
+
+    "new_folder": {
+      "create_title": "创建新文件夹",
+      "edit_title": "编辑文件夹",
+      "folder_name_placeholder": "文件夹名称",
+      "folder_name_empty_error": "文件夹名称不能为空",
+      "chat_selection": {
+        "selected_count": "包含{count}个聊天",
+        "search_placeholder": "搜索聊天..."
+      },
+      "buttons": {
+        "create": "创建文件夹"
+      }
+    }
+  },
+
+  "sidebar_blocked": {
+    "title": "已屏蔽的用户",
+    "empty": {
+      "title": "未找到已屏蔽的用户",
+      "subtitle": "被屏蔽的用户将显示在此处。你可以从他们的个人资料或聊天界面屏蔽某人。"
+    }
+  },
+
+  "settings": {
+    "account": "账户设置",
+    "privacy_security": "隐私与安全",
+    "display": "显示",
+    "keyboard": "键盘",
+    "messages": "消息",
+    "folders": "聊天文件夹",
+    "notifications": "通知",
+    "data_storage": "数据与存储",
+    "language": "语言",
+    "theme": "主题",
+    "theme_options": {
+      "light": "浅色",
+      "dark": "深色",
+      "auto": "自动"
+    }
+  },
+
+  "account_settings": {
+    "title": "账户设置",
+    "change_username": {
+      "title": "更改用户名",
+      "placeholder": "设置新用户名",
+      "button": "更新用户名",
+      "requirements": [
+        "最多24个字符",
+        "字母(A-Z)、数字(0-9)、点号(.)或下划线(_)",
+        "不能包含空格或特殊字符",
+        "不能以点号(.)结尾",
+        "不能包含连续的点号(..)",
+        "必须唯一"
+      ],
+      "messages": {
+        "already_current": "这已经是你的当前用户名",
+        "available": "用户名可用！",
+        "taken": "用户名已被占用",
+        "success": "用户名更新成功！",
+        "verify_first": "请先验证用户名是否可用"
+      }
+    },
+
+    "change_email": {
+      "title": "更改邮箱",
+      "placeholder": "设置新邮箱",
+      "requirements": [
+        "必须是有效的邮箱地址",
+        "最多254个字符",
+        "必须唯一（未被其他账户使用）",
+        "需要验证新邮箱地址"
+      ],
+      "resend_in": "{time}后重发",
+      "messages": {
+        "already_current": "这已经是你的当前邮箱",
+        "sent": "验证码已发送至你的邮箱：{email}",
+        "success": "邮箱验证并更新成功",
+        "verify_first": "请先验证新邮箱",
+        "invalid": "请输入有效的邮箱地址",
+        "failed_send": "发送验证码失败",
+        "failed_verify": "邮箱验证失败",
+        "failed_resend": "重新发送验证码失败"
+      }
+    },
+
+    "change_phone": {
+      "title": "更改电话号码",
+      "placeholder": "设置新电话号码",
+      "requirements": [
+        "必须是有效的电话号码",
+        "10-15位数字（国家代码可选）",
+        "必须唯一（未被其他账户使用）",
+        "可能需要验证新电话号码"
+      ],
+      "resend_in": "{time}后重发",
+      "messages": {
+        "already_current": "这已经是你的当前电话号码",
+        "sent": "验证码已发送至你的电话：{phone}",
+        "success": "电话号码验证并更新成功",
+        "verify_first": "请先验证新电话号码",
+        "invalid": "请输入有效的电话号码",
+        "failed_send": "发送验证码失败",
+        "failed_verify": "电话号码验证失败",
+        "failed_resend": "重新发送验证码失败"
+      }
+    },
+    "change_password": {
+      "title": "更改密码",
+      "placeholder": {
+        "current": "当前密码",
+        "new": "新密码",
+        "confirm": "确认新密码"
+      },
+      "requirements": [
+        "至少8个字符",
+        "至少一个大写字母",
+        "至少一个小写字母",
+        "至少一个数字"
+      ],
+      "messages": {
+        "all_required": "所有字段均为必填",
+        "invalid_format": "密码格式无效",
+        "success": "密码更改成功",
+        "failed": "密码更改失败"
+      },
+      "buttons": {
+        "change": "更改密码",
+        "changing": "更改中..."
+      }
+    }
+  },
+
+  "privacy_settings": {
+    "title": "隐私与安全",
+    "private_account": {
+      "label": "私人账户",
+      "desc_private": "只有被批准的关注者可以看到你的内容",
+      "desc_public": "任何人都可以看到你的内容"
+    },
+    "read_receipts": {
+      "label": "已读回执",
+      "desc_on": "他人可以看到你已读他们的消息",
+      "desc_off": "他人无法看到你已读他们的消息"
+    },
+    "online_status": {
+      "label": "在线状态",
+      "desc_on": "他人可以看到你在线",
+      "desc_off": "他人无法看到你在线"
+    },
+    "allow_messages_from": {
+      "label": "谁可以给你发消息",
+      "options": {
+        "everyone": "所有人",
+        "friends": "仅好友",
+        "none": "无人"
+      }
+    },
+    "buttons": {
+      "save_changes": "保存更改",
+      "saving": "保存中..."
+    },
+    "messages": {
+      "no_changes": "未检测到更改",
+      "success": "隐私设置更新成功",
+      "error": "隐私设置更新失败"
+    }
+  },
+
+  "display_settings": {
+    "title": "显示",
+    "options": {
+      "animations": "启用动画",
+      "reduce_motion": "减少动态效果",
+      "high_contrast": "高对比度模式",
+      "text_size_large": "大文本尺寸"
+    }
+  },
+
+  "keyboard_settings": {
+    "title": "键盘",
+    "options": {
+      "enter_send": "Enter发送消息",
+      "ctrl_enter_send": "Ctrl + Enter发送消息",
+      "vim_mode": "启用Vim模式",
+      "emacs_mode": "启用Emacs模式"
+    }
+  },
+
+  "message_settings": {
+    "title": "消息",
+    "options": {
+      "read_receipts": "已读回执",
+      "typing_indicators": "显示输入指示",
+      "auto_download_media": "自动下载媒体",
+      "desktop_notifications": "桌面通知"
+    }
+  },
+
+  "folder_settings": {
+    "title": "文件夹",
+    "options": {
+      "show_unread_count": "显示未读计数",
+      "auto_archive": "自动归档旧消息",
+      "sort_by_date": "按日期排序文件夹",
+      "sort_by_name": "按名称排序文件夹",
+      "hide_empty": "隐藏空文件夹"
+    }
+  },
+
+  "notification_settings": {
+    "title": "通知",
+    "options": {
+      "message_sounds": "消息声音",
+      "desktop_banners": "桌面横幅",
+      "mentions_only": "仅提及",
+      "email_notifications": "电子邮件通知",
+      "vibrate": "手机振动"
+    }
+  },
+
+  "data_settings": {
+    "title": "数据与存储",
+    "options": {
+      "auto_download_media": "自动下载媒体",
+      "limit_storage": "限制存储使用",
+      "clear_cache": "清除缓存",
+      "low_data_mode": "低数据模式",
+      "backup_messages": "备份消息"
+    }
+  },
+
+  "sidebar_info": {
+    "edit": {
+      "title": "编辑聊天",
+      "set_partner_nickname": "设置{{name}}的昵称",
+      "set_my_nickname": "设置我的昵称",
+      "unfriend": "取消好友",
+      "leave_chat": "离开聊天",
+      "delete_chat": "删除聊天",
+      "update_success": "更新成功"
+    },
+    "group_edit": {
+      "title": "编辑{{type}}",
+      "group_name": "群组名称",
+      "description": "描述",
+      "members": "成员",
+      "leave_chat": "离开{{type}}",
+      "delete_chat": "删除{{type}}",
+      "update_success": "更新成功"
+    },
+    "members_edit": {
+      "title": "成员",
+      "you_role": "你，{{role}}",
+      "owner": "所有者",
+      "admin": "管理员",
+      "guest": "访客",
+      "member": "成员",
+      "status_left": "已离开",
+      "status_banned": "已封禁",
+      "set_nickname": "设置昵称",
+      "promote_owner": "提升为所有者",
+      "set_admin": "设置为管理员",
+      "add_member": "添加成员",
+      "set_member": "设置为成员"
+    },
+    "media_files": {
+      "title": "媒体与文件",
+      "images": "图片",
+      "videos": "视频",
+      "files": "文件"
+    }
+  },
+
+  "modal": {
+    "friend_request": {
+      "title": "发送好友请求",
+      "optional_message": "可选消息...",
+      "send_request": "发送好友请求"
+    },
+    "forward_message": {
+      "title_message": "转发消息至...",
+      "title_attachment": "发送此{{type}}至...",
+      "search_placeholder": "搜索要转发的聊天"
+    },
+    "delete_message": {
+      "title": "删除消息",
+      "description": "你确定要删除此消息吗？此操作无法撤销。",
+      "delete_for_me": "仅为我删除",
+      "delete_for_everyone": "为所有人删除"
+    },
+    "delete_folder": {
+      "title": "删除文件夹",
+      "description": "删除此文件夹将从你的工作空间中移除。当前在此文件夹中的所有聊天仍将保留在你的聊天列表中，但不再在此文件夹中组织。"
+    },
+    "mute_chat": {
+      "title": "静音聊天",
+      "description": "选择静音通知的时长：",
+      "options": {
+        "1_hour": "1小时",
+        "8_hours": "8小时",
+        "1_day": "1天",
+        "1_week": "1周",
+        "1_month": "1个月",
+        "forever": "永久"
+      },
+      "muted_until": "静音至{{time}}",
+      "mute_failed": "静音聊天成员失败"
+    },
+    "block_user": {
+      "title": "屏蔽用户",
+      "description": "屏蔽将阻止此用户向你发送消息或查看你的在线状态。",
+      "success": "{{username}}已被屏蔽",
+      "error": "屏蔽用户失败"
+    },
+    "unblock_user": {
+      "title": "取消屏蔽用户",
+      "description": "取消屏蔽将允许此用户向你发送消息并查看你的在线状态。",
+      "toast_success": "{{username}}已取消屏蔽",
+      "toast_error": "取消屏蔽用户失败"
+    },
+    "delete_chat": {
+      "title_direct": "删除聊天",
+      "title_group": "删除{{type}}",
+      "chat_type": "{{type}}聊天",
+      "description_direct": "你确定要删除此聊天吗？\n此操作是永久的，你和{{name}}将无法再次访问。",
+      "description_group": "你确定要删除此{{type}}吗？\n这将为所有成员永久删除对话。"
+    },
+    "leave_chat": {
+      "title_direct": "离开聊天",
+      "title_group": "离开{{type}}",
+      "chat_type": "{{type}}聊天",
+      "description_direct": "你确定要离开此聊天吗？\n你将无法再次访问。",
+      "description_group": "你确定要离开此{{type}}吗？\n你将不再收到消息。"
+    },
+    "add_member": {
+      "title": "邀请成员",
+      "search_placeholder": "搜索人员...",
+      "loading": "加载联系人...",
+      "no_contacts": "未找到联系人",
+      "copy_success": "邀请链接已复制！",
+      "copy_failed": "复制链接失败。",
+      "link_copied": "已复制 ✓",
+      "link_copy_title": "复制邀请链接",
+      "link_copied_title": "链接已复制！",
+      "refresh_title": "刷新",
+      "generate_invite": "生成邀请链接",
+      "add_single": "添加成员",
+      "add_multiple": "添加{{count}}个成员",
+      "failed_add": "添加成员失败"
+    },
+    "set_nickname": {
+      "title": "设置昵称",
+      "placeholder": "输入昵称",
+      "failed": "更新昵称失败"
+    },
+    "delete_call": {
+      "title": "删除通话记录",
+      "description": "你确定要删除此通话吗？\n此操作是永久的，所有相关消息将被移除。",
+      "failed": "删除通话失败"
+    }
+  },
+
+  "system": {
+    "another_member": "另一位成员",
+    "unknown_event": "发生系统事件。",
+    "member_joined": "{{displayName}}加入了聊天",
+    "member_added": "{{displayName}}将{{targetName}}添加到聊天",
+    "member_left": "{{displayName}}离开了聊天",
+    "member_kicked": "{{displayName}}将{{targetName}}从聊天中移除",
+    "member_banned": "{{displayName}}将{{targetName}}从聊天中封禁",
+    "chat_renamed": "{{displayName}}重命名了聊天",
+    "chat_renamed_with_values": "{{displayName}}将聊天从“{{oldVal}}”重命名为“{{newVal}}”",
+    "chat_update_avatar": "{{displayName}}更新了聊天头像",
+    "chat_update_description": "{{displayName}}更新了聊天描述",
+    "chat_update_description_with_values": "{{displayName}}将描述从“{{oldVal}}”更改为“{{newVal}}”",
+    "chat_set_description": "{{displayName}}将描述设置为“{{newVal}}”",
+    "member_update_nickname": "{{displayName}}更新了{{targetName}}的昵称",
+    "member_update_nickname_with_values": "{{displayName}}将{{targetName}}的昵称从“{{oldVal}}”更改为“{{newVal}}”",
+    "member_set_nickname": "{{displayName}}将{{targetName}}的昵称设置为“{{newVal}}”",
+    "member_promote_owner": "{{displayName}}将{{targetName}}提升为所有者",
+    "member_update_role": "{{displayName}}将{{targetName}}的角色更改为{{newVal}}",
+    "member_update_status": "{{displayName}}将{{targetName}}的状态更改为{{newVal}}",
+    "message_pinned": "{{displayName}}置顶了消息“{{newVal}}”",
+    "message_unpinned": "{{displayName}}取消了消息置顶",
+    "chat_deleted": "{{displayName}}删除了聊天",
+    "broadcast_message": {
+      "broadcasted": "已广播",
+      "live_now": "正在直播",
+      "started_at": "开始于{{time}}"
+    }
+  },
+
+  "messages": {
+    "search_bar": {
+      "placeholder": "搜索消息",
+      "filter_important": "过滤重要"
+    }
+  }
+}

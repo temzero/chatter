@@ -15,12 +15,12 @@ import type {
   SenderResponse,
 } from "@/types/responses/message.response";
 
-interface ChatMessages {
+interface Messages {
   [chatId: string]: MessageResponse[];
 }
 
 export interface MessageStore {
-  messages: ChatMessages;
+  messages: Messages;
   hasMoreMessages: Record<string, boolean>;
   drafts: Record<string, string>;
   searchQuery: string;

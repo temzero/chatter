@@ -1,15 +1,16 @@
 import React from "react";
-import type { Chat } from "@/types/responses/chat.response";
+import type { ChatResponse } from "@/types/responses/chat.response";
 import { ChatAvatar } from "./avatar/ChatAvatar";
 
 interface ChatListProps {
-  chats: Chat[];
+  chats: ChatResponse[];
   isCompact?: boolean;
   isCheckbox?: boolean;
 }
 
 const ContactList: React.FC<ChatListProps> = ({ chats, isCompact = false }) => {
-  function handleContactSelect(chat: Chat) {
+  function handleContactSelect(chat: ChatResponse) {
+    console.log("chat", chat);
     return null;
   }
 

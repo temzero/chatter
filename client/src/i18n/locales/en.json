@@ -15,6 +15,7 @@
       "edit": "Edit",
       "forward": "Forward",
       "leave": "Leave",
+      "logout": "Logout",
       "mark_important": "Mark Important",
       "mute": "Mute",
       "pin": "Pin",
@@ -53,6 +54,11 @@
     }
   },
 
+  "account": {
+    "first_name": "First Name",
+    "last_name": "Last Name"
+  },
+
   "chat": {
     "all": "All Chats",
     "all_with_type": "All Chats with type:",
@@ -87,6 +93,21 @@
     "folders": "Chat Folders",
     "blocked": "Blocked",
     "settings": "Settings"
+  },
+
+  "sidebar_profile": {
+    "title": "My Profile",
+    "no_username": "No username",
+    "edit_tooltip": "Edit profile",
+    "edit": {
+      "title": "Edit Profile",
+      "birthday": "Birthday (Month/Date/Year)",
+      "bio": "Bio",
+      "bio_placeholder": "Describe something about yourself",
+      "account_settings": "Account Settings",
+      "update_success": "Profile updated successfully",
+      "update_error": "Failed to update profile!"
+    }
   },
 
   "sidebar_new_chat": {

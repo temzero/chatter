@@ -1,0 +1,578 @@
+{
+  "common": {
+    "you": "Tú",
+    "actions": {
+      "accept": "Aceptar",
+      "back": "Volver",
+      "block": "Bloquear",
+      "blocked_by_user": "Bloqueado por el usuario",
+      "cancel": "Cancelar",
+      "cancel_request": "Cancelar solicitud",
+      "clear_selection": "Borrar selección",
+      "close": "Cerrar",
+      "delete": "Eliminar",
+      "decline": "Rechazar",
+      "edit": "Editar",
+      "forward": "Reenviar",
+      "leave": "Salir",
+      "logout": "Cerrar sesión",
+      "mark_important": "Marcar como importante",
+      "mute": "Silenciar",
+      "pin": "Fijar",
+      "reply": "Responder",
+      "remove": "Eliminar",
+      "requests": "Solicitudes",
+      "resend_code": "Reenviar código",
+      "save": "Guardar",
+      "save_changes": "Guardar cambios",
+      "search": "Buscar",
+      "send_verification": "Enviar verificación",
+      "unfriend": "Eliminar amigo",
+      "unmark_important": "Desmarcar como importante",
+      "unmute": "Desactivar silencio",
+      "unpin": "Desfijar",
+      "unblock": "Desbloquear",
+      "update": "Actualizar",
+      "verify": "Verificar",
+      "verify_code": "Verificar código",
+      "sent": "Enviado"
+    },
+    "messages": {
+      "success": "¡Éxito!",
+      "failed": "Fallido",
+      "unknown": "Desconocido",
+      "empty": "Vacío",
+      "error": "Ocurrió un error",
+      "required": "Este campo es obligatorio",
+      "invalid_code": "Por favor, introduce un código de 6 dígitos"
+    },
+    "loading": {
+      "loading": "Cargando...",
+      "searching": "Buscando...",
+      "creating": "Creando...",
+      "saving": "Guardando..."
+    }
+  },
+
+  "account": {
+    "first_name": "Nombre",
+    "last_name": "Apellido"
+  },
+
+  "chat": {
+    "all": "Todos los chats",
+    "all_with_type": "Todos los chats con tipo:",
+    "label": "Tipos de chat",
+    "direct": "Directo",
+    "group": "Grupo",
+    "channel": "Canal"
+  },
+
+  "chat_bar": {
+    "placeholder": "Mensaje...",
+    "attach_file": "Adjuntar archivo"
+  },
+
+  "emoji": {
+    "recently": "Reciente",
+    "smileys_emotion": "Emoticonos y emociones",
+    "people_body": "Personas y cuerpo",
+    "animals_nature": "Animales y naturaleza",
+    "food_drink": "Comida y bebida",
+    "activities": "Actividades",
+    "objects": "Objetos",
+    "flags": "Banderas"
+  },
+
+  "sidebar": {
+    "saved_messages": "Mensajes guardados",
+    "calls": "Llamadas",
+    "contacts": "Contactos",
+    "friend_requests": "Solicitudes de amistad {count, plural, =0 {Solicitudes de amistad} other {Solicitudes de amistad #}}",
+    "friend_requests_none": "Solicitudes de amistad",
+    "folders": "Carpetas de chat",
+    "blocked": "Bloqueados",
+    "settings": "Configuración"
+  },
+
+  "sidebar_profile": {
+    "title": "Mi perfil",
+    "no_username": "Sin nombre de usuario",
+    "edit_tooltip": "Editar perfil",
+    "edit": {
+      "title": "Editar perfil",
+      "birthday": "Cumpleaños (Mes/Día/Año)",
+      "bio": "Biografía",
+      "bio_placeholder": "Describe algo sobre ti",
+      "account_settings": "Configuración de la cuenta",
+      "update_success": "Perfil actualizado con éxito",
+      "update_error": "¡Error al actualizar el perfil!"
+    }
+  },
+
+  "sidebar_new_chat": {
+    "title": "Nuevo chat {{type}}",
+    "direct": {
+      "placeholder": "@nombredeusuario/correo/teléfono",
+      "find_user": "Buscar usuario",
+      "user_not_found": "¡Usuario no encontrado!",
+      "blocked_by_user_message": "Este usuario te ha bloqueado. No puedes ver su perfil ni interactuar con él.",
+      "friend": "Amigo",
+      "friend_but_blocked": "Amigo pero bloqueado",
+      "no_username": "Sin nombre de usuario",
+      "start_chat": "Iniciar chat"
+    },
+
+    "group": {
+      "search_placeholder": "Buscar miembros...",
+      "no_contacts_found": "No se encontraron contactos",
+      "enter_name": "Introducir nombre",
+      "create_group": "Crear grupo",
+      "create_channel": "Crear canal",
+      "user_not_authenticated": "Usuario no autenticado",
+      "failed_create": "Error al crear {{type}}"
+    }
+  },
+  "sidebar_search": {
+    "placeholder": "Buscar chats...",
+    "no_result": "¡Sin resultados!"
+  },
+
+  "sidebar_calls": {
+    "title": "Historial de llamadas",
+    "no_calls": "¡Aún no hay llamadas!"
+  },
+
+  "sidebar_contacts": {
+    "title": "Contactos",
+    "no_contacts": "No hay contactos con números de teléfono",
+    "video_call": "Videollamada",
+    "audio_call": "Llamada de audio"
+  },
+
+  "sidebar_friend_requests": {
+    "title": "Solicitudes de amistad",
+    "messages": {
+      "no_friend_requests": "No hay solicitudes de amistad",
+      "no_sent_requests": "No hay solicitudes enviadas",
+      "mutual_friends_one": "{{count}} amigo en común",
+      "mutual_friends_other": "{{count}} amigos en común"
+    }
+  },
+
+  "sidebar_folders": {
+    "title": "Carpetas de chat",
+    "messages": {
+      "no_folders": "Aún no hay carpetas"
+    },
+    "buttons": {
+      "add_folder": "Añadir carpeta"
+    },
+
+    "detail": {
+      "title": "Detalles de la carpeta",
+      "folder_not_found": "Carpeta no encontrada",
+      "no_chats": "No hay chats en esta carpeta",
+      "delete_folder": "Eliminar carpeta"
+    },
+
+    "new_folder": {
+      "create_title": "Crear nueva carpeta",
+      "edit_title": "Editar carpeta",
+      "folder_name_placeholder": "Nombre de la carpeta",
+      "folder_name_empty_error": "El nombre de la carpeta no puede estar vacío",
+      "chat_selection": {
+        "selected_count": "{count} Chats incluidos",
+        "search_placeholder": "Buscar chats..."
+      },
+      "buttons": {
+        "create": "Crear carpeta"
+      }
+    }
+  },
+
+  "sidebar_blocked": {
+    "title": "Usuarios bloqueados",
+    "empty": {
+      "title": "No se encontraron usuarios bloqueados",
+      "subtitle": "Los usuarios bloqueados aparecerán aquí. Puedes bloquear a alguien desde su perfil o pantalla de chat."
+    }
+  },
+
+  "settings": {
+    "account": "Configuración de la cuenta",
+    "privacy_security": "Privacidad y seguridad",
+    "display": "Pantalla",
+    "keyboard": "Teclado",
+    "messages": "Mensajes",
+    "folders": "Carpetas de chat",
+    "notifications": "Notificaciones",
+    "data_storage": "Datos y almacenamiento",
+    "language": "Idioma",
+    "theme": "Tema",
+    "theme_options": {
+      "light": "Claro",
+      "dark": "Oscuro",
+      "auto": "Automático"
+    }
+  },
+
+  "account_settings": {
+    "title": "Configuración de la cuenta",
+    "change_username": {
+      "title": "Cambiar nombre de usuario",
+      "placeholder": "Establecer nuevo nombre de usuario",
+      "button": "Actualizar nombre de usuario",
+      "requirements": [
+        "Máximo 24 caracteres",
+        "Letras (A-Z), números (0-9), puntos (.) o guiones bajos (_)",
+        "Sin espacios ni caracteres especiales",
+        "No puede terminar con un punto (.)",
+        "No puede contener puntos consecutivos (..)",
+        "Debe ser único"
+      ],
+      "messages": {
+        "already_current": "Este ya es tu nombre de usuario actual",
+        "available": "¡El nombre de usuario está disponible!",
+        "taken": "El nombre de usuario ya está en uso",
+        "success": "¡Nombre de usuario actualizado con éxito!",
+        "verify_first": "Por favor, verifica primero la disponibilidad del nombre de usuario"
+      }
+    },
+
+    "change_email": {
+      "title": "Cambiar correo electrónico",
+      "placeholder": "Establecer nuevo correo electrónico",
+      "requirements": [
+        "Debe ser una dirección de correo válida",
+        "Máximo 254 caracteres",
+        "Debe ser único (no usado por otra cuenta)",
+        "Necesitas verificar la nueva dirección de correo"
+      ],
+      "resend_in": "Reenviar en {time}",
+      "messages": {
+        "already_current": "Este ya es tu correo electrónico actual",
+        "sent": "Código de verificación enviado a tu correo: {email}",
+        "success": "Correo verificado y actualizado con éxito",
+        "verify_first": "Por favor, verifica primero el nuevo correo",
+        "invalid": "Por favor, introduce una dirección de correo válida",
+        "failed_send": "Error al enviar el código de verificación",
+        "failed_verify": "Fallo en la verificación del correo",
+        "failed_resend": "Error al reenviar el código de verificación"
+      }
+    },
+
+    "change_phone": {
+      "title": "Cambiar número de teléfono",
+      "placeholder": "Establecer nuevo número de teléfono",
+      "requirements": [
+        "Debe ser un número de teléfono válido",
+        "10-15 dígitos (código de país opcional)",
+        "Debe ser único (no usado por otra cuenta)",
+        "Es posible que necesites verificar el nuevo número de teléfono"
+      ],
+      "resend_in": "Reenviar en {time}",
+      "messages": {
+        "already_current": "Este ya es tu número de teléfono actual",
+        "sent": "Código de verificación enviado a tu teléfono: {phone}",
+        "success": "Número de teléfono verificado y actualizado con éxito",
+        "verify_first": "Por favor, verifica primero el nuevo número de teléfono",
+        "invalid": "Por favor, introduce un número de teléfono válido",
+        "failed_send": "Error al enviar el código de verificación",
+        "failed_verify": "Fallo en la verificación del número de teléfono",
+        "failed_resend": "Error al reenviar el código de verificación"
+      }
+    },
+    "change_password": {
+      "title": "Cambiar contraseña",
+      "placeholder": {
+        "current": "Contraseña actual",
+        "new": "Nueva contraseña",
+        "confirm": "Confirmar nueva contraseña"
+      },
+      "requirements": [
+        "Al menos 8 caracteres",
+        "Al menos una letra mayúscula",
+        "Al menos una letra minúscula",
+        "Al menos un número"
+      ],
+      "messages": {
+        "all_required": "Todos los campos son obligatorios",
+        "invalid_format": "Formato de contraseña inválido",
+        "success": "Contraseña cambiada con éxito",
+        "failed": "Error al cambiar la contraseña"
+      },
+      "buttons": {
+        "change": "Cambiar contraseña",
+        "changing": "Cambiando..."
+      }
+    }
+  },
+
+  "privacy_settings": {
+    "title": "Privacidad y seguridad",
+    "private_account": {
+      "label": "Cuenta privada",
+      "desc_private": "Solo los seguidores aprobados pueden ver tu contenido",
+      "desc_public": "Cualquiera puede ver tu contenido"
+    },
+    "read_receipts": {
+      "label": "Confirmaciones de lectura",
+      "desc_on": "Las personas verán cuando hayas leído sus mensajes",
+      "desc_off": "Las personas no verán cuando hayas leído sus mensajes"
+    },
+    "online_status": {
+      "label": "Estado en línea",
+      "desc_on": "Las personas verán cuando estés en línea",
+      "desc_off": "Las personas no verán cuando estés en línea"
+    },
+    "allow_messages_from": {
+      "label": "Quién puede enviarte mensajes",
+      "options": {
+        "everyone": "Todos",
+        "friends": "Solo amigos",
+        "none": "Nadie"
+      }
+    },
+    "buttons": {
+      "save_changes": "Guardar cambios",
+      "saving": "Guardando..."
+    },
+    "messages": {
+      "no_changes": "No se detectaron cambios",
+      "success": "Configuración de privacidad actualizada con éxito",
+      "error": "Error al actualizar la configuración de privacidad"
+    }
+  },
+
+  "display_settings": {
+    "title": "Pantalla",
+    "options": {
+      "animations": "Habilitar animaciones",
+      "reduce_motion": "Reducir movimiento",
+      "high_contrast": "Modo de alto contraste",
+      "text_size_large": "Tamaño de texto grande"
+    }
+  },
+
+  "keyboard_settings": {
+    "title": "Teclado",
+    "options": {
+      "enter_send": "Enter envía el mensaje",
+      "ctrl_enter_send": "Ctrl + Enter envía el mensaje",
+      "vim_mode": "Habilitar modo Vim",
+      "emacs_mode": "Habilitar modo Emacs"
+    }
+  },
+
+  "message_settings": {
+    "title": "Mensajes",
+    "options": {
+      "read_receipts": "Confirmaciones de lectura",
+      "typing_indicators": "Mostrar indicadores de escritura",
+      "auto_download_media": "Descarga automática de medios",
+      "desktop_notifications": "Notificaciones de escritorio"
+    }
+  },
+
+  "folder_settings": {
+    "title": "Carpetas",
+    "options": {
+      "show_unread_count": "Mostrar conteo de no leídos",
+      "auto_archive": "Archivar automáticamente mensajes antiguos",
+      "sort_by_date": "Ordenar carpetas por fecha",
+      "sort_by_name": "Ordenar carpetas por nombre",
+      "hide_empty": "Ocultar carpetas vacías"
+    }
+  },
+
+  "notification_settings": {
+    "title": "Notificaciones",
+    "options": {
+      "message_sounds": "Sonidos de mensajes",
+      "desktop_banners": "Banners de escritorio",
+      "mentions_only": "Solo menciones",
+      "email_notifications": "Notificaciones por correo",
+      "vibrate": "Vibrar en móvil"
+    }
+  },
+
+  "data_settings": {
+    "title": "Datos y almacenamiento",
+    "options": {
+      "auto_download_media": "Descarga automática de medios",
+      "limit_storage": "Limitar uso de almacenamiento",
+      "clear_cache": "Borrar caché",
+      "low_data_mode": "Modo de datos bajos",
+      "backup_messages": "Respaldar mensajes"
+    }
+  },
+
+  "sidebar_info": {
+    "edit": {
+      "title": "Editar chat",
+      "set_partner_nickname": "Establecer apodo de {{name}}",
+      "set_my_nickname": "Establecer mi apodo",
+      "unfriend": "Eliminar amigo",
+      "leave_chat": "Salir del chat",
+      "delete_chat": "Eliminar chat",
+      "update_success": "Actualización exitosa"
+    },
+    "group_edit": {
+      "title": "Editar {{type}}",
+      "group_name": "Nombre del grupo",
+      "description": "Descripción",
+      "members": "Miembros",
+      "leave_chat": "Salir de {{type}}",
+      "delete_chat": "Eliminar {{type}}",
+      "update_success": "Actualización exitosa"
+    },
+    "members_edit": {
+      "title": "Miembros",
+      "you_role": "Tú, {{role}}",
+      "owner": "Propietario",
+      "admin": "Administrador",
+      "guest": "Invitado",
+      "member": "Miembro",
+      "status_left": "Salió",
+      "status_banned": "Baneado",
+      "set_nickname": "Establecer apodo",
+      "promote_owner": "Promover a propietario",
+      "set_admin": "Establecer como administrador",
+      "add_member": "Añadir miembro",
+      "set_member": "Establecer como miembro"
+    },
+    "media_files": {
+      "title": "Medios y archivos",
+      "images": "Imágenes",
+      "videos": "Videos",
+      "files": "Archivos"
+    }
+  },
+
+  "modal": {
+    "friend_request": {
+      "title": "Enviar solicitud de amistad a",
+      "optional_message": "Mensaje opcional...",
+      "send_request": "Enviar solicitud de amistad"
+    },
+    "forward_message": {
+      "title_message": "Reenviar mensaje a...",
+      "title_attachment": "Enviar este {{type}} a...",
+      "search_placeholder": "Buscar chat para reenviar"
+    },
+    "delete_message": {
+      "title": "Eliminar mensaje",
+      "description": "¿Estás seguro de que quieres eliminar este mensaje? Esta acción no se puede deshacer.",
+      "delete_for_me": "Eliminar para mí",
+      "delete_for_everyone": "Eliminar para todos"
+    },
+    "delete_folder": {
+      "title": "Eliminar carpeta",
+      "description": "Eliminar esta carpeta la removerá de tu espacio de trabajo. Todos los chats actualmente en esta carpeta permanecerán en tu lista de chats, pero ya no estarán organizados en esta carpeta."
+    },
+    "mute_chat": {
+      "title": "Silenciar chat",
+      "description": "Elige cuánto tiempo silenciar las notificaciones:",
+      "options": {
+        "1_hour": "1 hora",
+        "8_hours": "8 horas",
+        "1_day": "1 día",
+        "1_week": "1 semana",
+        "1_month": "1 mes",
+        "forever": "Para siempre"
+      },
+      "muted_until": "Silenciado hasta {{time}}",
+      "mute_failed": "Error al silenciar el miembro del chat"
+    },
+    "block_user": {
+      "title": "Bloquear usuario",
+      "description": "Bloquear impedirá que este usuario te envíe mensajes o vea tu estado en línea.",
+      "success": "{{username}} ha sido bloqueado",
+      "error": "Error al bloquear al usuario"
+    },
+    "unblock_user": {
+      "title": "Desbloquear usuario",
+      "description": "Desbloquear permitirá que este usuario te envíe mensajes y vea tu estado en línea.",
+      "toast_success": "{{username}} ha sido desbloqueado",
+      "toast_error": "Error al desbloquear al usuario"
+    },
+    "delete_chat": {
+      "title_direct": "Eliminar chat",
+      "title_group": "Eliminar {{type}}",
+      "chat_type": "Chat {{type}}",
+      "description_direct": "¿Estás seguro de que quieres eliminar este chat?\nEsta acción es permanente: tú y {{name}} no podrán acceder a él nuevamente.",
+      "description_group": "¿Estás seguro de que quieres eliminar este {{type}}?\nEsto eliminará permanentemente la conversación para todos los miembros."
+    },
+    "leave_chat": {
+      "title_direct": "Salir del chat",
+      "title_group": "Salir de {{type}}",
+      "chat_type": "Chat {{type}}",
+      "description_direct": "¿Estás seguro de que quieres salir de este chat?\nNo podrás acceder a él nuevamente.",
+      "description_group": "¿Estás seguro de que quieres salir de este {{type}}?\nYa no recibirás mensajes de él."
+    },
+    "add_member": {
+      "title": "Invitar miembros",
+      "search_placeholder": "Buscar personas...",
+      "loading": "Cargando contactos...",
+      "no_contacts": "No se encontraron contactos",
+      "copy_success": "¡Enlace de invitación copiado!",
+      "copy_failed": "Error al copiar el enlace.",
+      "link_copied": "Copiado ✓",
+      "link_copy_title": "Copiar enlace de invitación",
+      "link_copied_title": "¡Enlace copiado!",
+      "refresh_title": "Actualizar",
+      "generate_invite": "Generar enlace de invitación",
+      "add_single": "Añadir miembro",
+      "add_multiple": "Añadir {{count}} miembros",
+      "failed_add": "Error al añadir miembros"
+    },
+    "set_nickname": {
+      "title": "Establecer apodo",
+      "placeholder": "Introducir apodo",
+      "failed": "Error al actualizar el apodo"
+    },
+    "delete_call": {
+      "title": "Eliminar historial de llamadas",
+      "description": "¿Estás seguro de que quieres eliminar esta llamada?\nEsta acción es permanente y todos los mensajes relacionados serán eliminados.",
+      "failed": "Error al eliminar la llamada"
+    }
+  },
+
+  "system": {
+    "another_member": "otro miembro",
+    "unknown_event": "Ocurrió un evento del sistema.",
+    "member_joined": "{{displayName}} se unió al chat",
+    "member_added": "{{displayName}} añadió a {{targetName}} al chat",
+    "member_left": "{{displayName}} salió del chat",
+    "member_kicked": "{{displayName}} eliminó a {{targetName}} del chat",
+    "member_banned": "{{displayName}} baneó a {{targetName}} del chat",
+    "chat_renamed": "{{displayName}} renombró el chat",
+    "chat_renamed_with_values": "{{displayName}} renombró el chat de \"{{oldVal}}\" a \"{{newVal}}\"",
+    "chat_update_avatar": "{{displayName}} actualizó el avatar del chat",
+    "chat_update_description": "{{displayName}} actualizó la descripción del chat",
+    "chat_update_description_with_values": "{{displayName}} cambió la descripción de \"{{oldVal}}\" a \"{{newVal}}\"",
+    "chat_set_description": "{{displayName}} estableció la descripción como \"{{newVal}}\"",
+    "member_update_nickname": "{{displayName}} actualizó el apodo de {{targetName}}",
+    "member_update_nickname_with_values": "{{displayName}} cambió el apodo de {{targetName}} de \"{{oldVal}}\" a \"{{newVal}}\"",
+    "member_set_nickname": "{{displayName}} estableció el apodo de {{targetName}} como \"{{newVal}}\"",
+    "member_promote_owner": "{{displayName}} promovió a {{targetName}} a propietario",
+    "member_update_role": "{{displayName}} cambió el rol de {{targetName}} a {{newVal}}",
+    "member_update_status": "{{displayName}} cambió el estado de {{targetName}} a {{newVal}}",
+    "message_pinned": "{{displayName}} fijó un mensaje \"{{newVal}}\"",
+    "message_unpinned": "{{displayName}} desfijó un mensaje",
+    "chat_deleted": "{{displayName}} eliminó el chat",
+    "broadcast_message": {
+      "broadcasted": "Transmitido",
+      "live_now": "Ahora en vivo",
+      "started_at": "Comenzó a las {{time}}"
+    }
+  },
+
+  "messages": {
+    "search_bar": {
+      "placeholder": "Buscar mensajes",
+      "filter_important": "Filtrar importantes"
+    }
+  }
+}

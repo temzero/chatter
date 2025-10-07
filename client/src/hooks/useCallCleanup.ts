@@ -1,11 +1,10 @@
 // src/lib/hooks/useCallCleanup.ts
 import { useEffect } from "react";
 import { useCallStore } from "@/stores/callStore/callStore";
-import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
-import { LocalCallStatus } from "@/types/enums/CallStatus";
 import { useModalStore } from "@/stores/modalStore";
+import { LocalCallStatus } from "@/types/enums/CallStatus";
 
-export const useCleanup = () => {
+export const useCallCleanup = () => {
   const callStore = useCallStore();
   const modalStore = useModalStore();
 
@@ -17,12 +16,6 @@ export const useCleanup = () => {
         callStore.localCallStatus &&
         callStore.localCallStatus !== LocalCallStatus.ENDED
       ) {
-        callWebSocketService.hangup({
-          callId: callStore.callId!,
-          chatId: callStore.chatId,
-          // isCallerCancel: true,
-        });
-
         callStore.endCall();
       }
 

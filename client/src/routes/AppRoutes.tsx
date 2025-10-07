@@ -1,11 +1,12 @@
 // src/routes/AppRoutes.tsx
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
-import PublicRoutes from "./PublicRoutes";
-import PrivateLayout, { ChatContent } from "../pages/PrivateLayout";
-import { useIsAuthenticated, useAuthStore } from "@/stores/authStore";
 import { useEffect } from "react";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useIsAuthenticated, useAuthStore } from "@/stores/authStore";
+import PublicRoutes from "./PublicRoutes";
+import PrivateLayout from "../pages/PrivateLayout";
 import InvitePage from "@/components/ui/InvitePage";
+// import Chat from "@/components/chat/Chat";
 
 const RouteMessageCleaner = () => {
   const location = useLocation();
@@ -51,10 +52,10 @@ const AppRoutes: React.FC = () => {
 
         {/* Private Routes */}
         <Route path={ROUTES.PRIVATE.HOME} element={<PrivateLayout />}>
-          <Route path={ROUTES.PRIVATE.CHAT} element={<ChatContent />} />
           <Route index element={null} />
         </Route>
 
+        {/* <Route path={ROUTES.PRIVATE.CHAT} element={<Chat />} /> */}
         {/* Catch-all Route */}
         <Route
           path="*"

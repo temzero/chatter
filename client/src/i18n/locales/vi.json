@@ -15,6 +15,7 @@
       "edit": "Chỉnh sửa",
       "forward": "Chuyển tiếp",
       "leave": "Rời",
+      "logout": "Đăng xuất",
       "mark_important": "Đánh dấu quan trọng",
       "mute": "Tắt thông báo",
       "pin": "Ghim",
@@ -54,6 +55,11 @@
     }
   },
 
+  "account": {
+    "first_name": "Tên",
+    "last_name": "Họ"
+  },
+
   "chat": {
     "all": "Tất cả cuộc trò chuyện",
     "all_with_type": "Tất cả cuộc trò chuyện với loại:",
@@ -90,7 +96,24 @@
     "settings": "Cài đặt"
   },
 
+  "sidebar_profile": {
+    "title": "Hồ sơ của tôi",
+    "no_username": "Chưa có tên người dùng",
+    "logout": "Đăng xuất",
+    "edit_tooltip": "Chỉnh sửa hồ sơ",
+    "edit": {
+      "title": "Chỉnh sửa hồ sơ",
+      "birthday": "Ngày sinh (Tháng/Ngày/Năm)",
+      "bio": "Giới thiệu",
+      "bio_placeholder": "Hãy mô tả đôi điều về bản thân bạn",
+      "account_settings": "Cài đặt tài khoản",
+      "update_success": "Cập nhật hồ sơ thành công",
+      "update_error": "Cập nhật hồ sơ thất bại!"
+    }
+  },
+
   "sidebar_new_chat": {
+    "title": "Chat {{type}} mới",
     "direct": {
       "title": "Tạo {{type}} mới",
       "placeholder": "@username/email/ĐT",
@@ -113,7 +136,10 @@
     }
   },
 
-  "sidebar_search": {},
+  "sidebar_search": {
+    "placeholder": "Tìm kiếm cuộc trò chuyện...",
+    "no_result": "Không có kết quả!"
+  },
 
   "sidebar_calls": {
     "title": "Lịch sử cuộc gọi",
@@ -417,7 +443,9 @@
       "set_admin": "Đặt làm Quản trị viên",
       "add_member": "Thêm thành viên",
       "set_member": "Đặt làm Thành viên",
-      "remove": "Xóa"
+      "remove_admin": "Gỡ quyền quản trị viên",
+      "remove_member": "Xóa thành viên",
+      "ban_member": "Cấm thành viên"
     },
     "media_files": {
       "title": "Phương tiện & Tệp tin",

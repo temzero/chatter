@@ -359,11 +359,19 @@ select:focus {
 }
 
 .settings-item:hover {
-  color: var(--primary-green);
   background-color: var(--hover-color);
 }
 
 .settings-item.selected {
   background-color: var(--primary-green);
   color: white;
+}
+
+.settings-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1rem; /* same as Tailwind's p-4 */
+  border-bottom: 1px solid var(--border-color);
 }

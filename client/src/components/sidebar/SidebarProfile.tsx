@@ -1,20 +1,23 @@
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useCurrentUser, useAuthStore } from "@/stores/authStore";
-import ContactInfoItem from "../ui/contactInfoItem";
 import { Avatar } from "../ui/avatar/Avatar";
 import { SidebarMode } from "@/types/enums/sidebarMode";
+import { useTranslation } from "react-i18next";
+import ContactInfoItem from "../ui/contactInfoItem";
 import SidebarLayout from "@/pages/SidebarLayout";
 
 const SidebarProfile: React.FC = () => {
+  const { t } = useTranslation();
   const currentUser = useCurrentUser();
   const { setSidebar } = useSidebarStore();
   const logout = useAuthStore((state) => state.logout);
 
   return (
     <SidebarLayout
-      title="My Profile"
+      title={t("sidebar_profile.title")}
       rightButton={
         <i
+          title={t("sidebar_profile.edit_tooltip")}
           className="material-symbols-outlined nav-btn"
           onClick={() => setSidebar(SidebarMode.PROFILE_EDIT)}
         >
@@ -47,7 +50,7 @@ const SidebarProfile: React.FC = () => {
                 icon="alternate_email"
                 value={currentUser?.username}
                 copyType="username"
-                defaultText="No username"
+                defaultText={t("sidebar_profile.no_username")}
               />
 
               <ContactInfoItem
@@ -75,7 +78,7 @@ const SidebarProfile: React.FC = () => {
           className="absolute bottom-0 flex items-center justify-center custom-border-t hover:bg-[var(--hover-color)] gap-2 p-2 cursor-pointer w-full text-red-400"
           onClick={logout}
         >
-          <h1 className="text-xl">Logout</h1>
+          <h1 className="text-xl">{t("common.actions.logout")}</h1>
           <i className="material-symbols-outlined cursor-pointer">logout</i>
         </div>
       </div>

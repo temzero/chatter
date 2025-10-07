@@ -1,15 +1,15 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 import { AlertMessage } from "@/components/ui/AlertMessage";
 import { AuthenticationLayout } from "../PublicLayout";
 import { motion } from "framer-motion";
-import { QRCode } from "@/components/ui/QRCode";
-import qrCode from "@/assets/icon/qr-code.svg";
+// import { QRCode } from "@/components/ui/QRCode";
+// import qrCode from "@/assets/icon/qr-code.svg";
 
 const Login = () => {
   const formRef = useRef<HTMLFormElement>(null);
-  const [showQrCode, setShowQrCode] = useState(false);
+  // const [showQrCode, setShowQrCode] = useState(false);
   const login = useAuthStore((state) => state.login);
   const loading = useAuthStore((state) => state.loading);
   const navigate = useNavigate();
@@ -27,9 +27,9 @@ const Login = () => {
     navigate("/");
   };
 
-  const toggleQrCode = () => {
-    setShowQrCode(!showQrCode);
-  };
+  // const toggleQrCode = () => {
+  //   setShowQrCode(!showQrCode);
+  // };
 
   return (
     <AuthenticationLayout loading={loading}>
@@ -92,7 +92,7 @@ const Login = () => {
             </Link>
           </div>
         </form>
-
+{/* 
         <motion.div
           className="h-full p-6 flex flex-1 flex-col gap-3 justify-end custom-border-l cursor-pointer select-none"
           onClick={toggleQrCode}
@@ -111,7 +111,7 @@ const Login = () => {
           ) : (
             <QRCode className="w-[200px]" />
           )}
-        </motion.div>
+        </motion.div> */}
       </motion.div>
     </AuthenticationLayout>
   );

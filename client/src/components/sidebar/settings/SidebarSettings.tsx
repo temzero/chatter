@@ -7,7 +7,7 @@
 
   const SidebarSettings: React.FC = () => {
     const { setSidebar } = useSidebarStore();
-    const theme = useThemeStore((state) => state.theme);
+    const themeOption = useThemeStore((state) => state.themeOption);
     const { t, i18n } = useTranslation();
     const currentLanguage =
       languages.find((lang) => lang.code === i18n.language)?.label ||
@@ -28,7 +28,7 @@
         icon: "contrast",
         title: t("settings.theme"),
         onClick: () => setSidebar(SidebarMode.SETTINGS_THEME),
-        value: t(`settings.theme_options.${theme}`),
+        value: t(`settings.theme_options.${themeOption}`),
       },
       {
         icon: "visibility",

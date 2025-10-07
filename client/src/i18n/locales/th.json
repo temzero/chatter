@@ -1,0 +1,578 @@
+{
+  "common": {
+    "you": "คุณ",
+    "actions": {
+      "accept": "ยอมรับ",
+      "back": "กลับ",
+      "block": "บล็อก",
+      "blocked_by_user": "ถูกบล็อกโดยผู้ใช้",
+      "cancel": "ยกเลิก",
+      "cancel_request": "ยกเลิกคำขอ",
+      "clear_selection": "ล้างการเลือก",
+      "close": "ปิด",
+      "delete": "ลบ",
+      "decline": "ปฏิเสธ",
+      "edit": "แก้ไข",
+      "forward": "ส่งต่อ",
+      "leave": "ออก",
+      "logout": "ออกจากระบบ",
+      "mark_important": "ทำเครื่องหมายสำคัญ",
+      "mute": "ปิดเสียง",
+      "pin": "ปักหมุด",
+      "reply": "ตอบกลับ",
+      "remove": "ลบ",
+      "requests": "คำขอ",
+      "resend_code": "ส่งรหัสใหม่",
+      "save": "บันทึก",
+      "save_changes": "บันทึกการเปลี่ยนแปลง",
+      "search": "ค้นหา",
+      "send_verification": "ส่งการยืนยัน",
+      "unfriend": "เลิกเป็นเพื่อน",
+      "unmark_important": "ยกเลิกเครื่องหมายสำคัญ",
+      "unmute": "เปิดเสียง",
+      "unpin": "ยกเลิกการปักหมุด",
+      "unblock": "ยกเลิกการบล็อก",
+      "update": "อัปเดต",
+      "verify": "ยืนยัน",
+      "verify_code": "ยืนยันรหัส",
+      "sent": "ส่งแล้ว"
+    },
+    "messages": {
+      "success": "สำเร็จ!",
+      "failed": "ล้มเหลว",
+      "unknown": "ไม่ทราบ",
+      "empty": "ว่างเปล่า",
+      "error": "เกิดข้อผิดพลาด",
+      "required": "ช่องนี้จำเป็นต้องกรอก",
+      "invalid_code": "กรุณากรอกรหัส 6 หลัก"
+    },
+    "loading": {
+      "loading": "กำลังโหลด...",
+      "searching": "กำลังค้นหา...",
+      "creating": "กำลังสร้าง...",
+      "saving": "กำลังบันทึก..."
+    }
+  },
+
+  "account": {
+    "first_name": "ชื่อ",
+    "last_name": "นามสกุล"
+  },
+
+  "chat": {
+    "all": "แชททั้งหมด",
+    "all_with_type": "แชททั้งหมดตามประเภท:",
+    "label": "ประเภทแชท",
+    "direct": "ส่วนตัว",
+    "group": "กลุ่ม",
+    "channel": "ช่อง"
+  },
+
+  "chat_bar": {
+    "placeholder": "ข้อความ...",
+    "attach_file": "แนบไฟล์"
+  },
+
+  "emoji": {
+    "recently": "ล่าสุด",
+    "smileys_emotion": "รอยยิ้มและอารมณ์",
+    "people_body": "คนและร่างกาย",
+    "animals_nature": "สัตว์และธรรมชาติ",
+    "food_drink": "อาหารและเครื่องดื่ม",
+    "activities": "กิจกรรม",
+    "objects": "วัตถุ",
+    "flags": "ธง"
+  },
+
+  "sidebar": {
+    "saved_messages": "ข้อความที่บันทึก",
+    "calls": "การโทร",
+    "contacts": "รายชื่อติดต่อ",
+    "friend_requests": "คำขอเป็นเพื่อน {count, plural, =0 {คำขอเป็นเพื่อน} other {คำขอเป็นเพื่อน #}}",
+    "friend_requests_none": "คำขอเป็นเพื่อน",
+    "folders": "โฟลเดอร์แชท",
+    "blocked": "ถูกบล็อก",
+    "settings": "การตั้งค่า"
+  },
+
+  "sidebar_profile": {
+    "title": "โปรไฟล์ของฉัน",
+    "no_username": "ไม่มีชื่อผู้ใช้",
+    "edit_tooltip": "แก้ไขโปรไฟล์",
+    "edit": {
+      "title": "แก้ไขโปรไฟล์",
+      "birthday": "วันเกิด (เดือน/วัน/ปี)",
+      "bio": "ประวัติ",
+      "bio_placeholder": "บอกเล่าเกี่ยวกับตัวคุณ",
+      "account_settings": "การตั้งค่าบัญชี",
+      "update_success": "อัปเดตโปรไฟล์สำเร็จ",
+      "update_error": "อัปเดตโปรไฟล์ล้มเหลว!"
+    }
+  },
+
+  "sidebar_new_chat": {
+    "title": "แชท{{type}}ใหม่",
+    "direct": {
+      "placeholder": "@ชื่อผู้ใช้/อีเมล/หมายเลขโทรศัพท์",
+      "find_user": "ค้นหาผู้ใช้",
+      "user_not_found": "ไม่พบผู้ใช้!",
+      "blocked_by_user_message": "ผู้ใช้รายนี้บล็อกคุณ คุณไม่สามารถดูโปรไฟล์หรือโต้ตอบกับพวกเขาได้",
+      "friend": "เพื่อน",
+      "friend_but_blocked": "เพื่อนแต่ถูกบล็อก",
+      "no_username": "ไม่มีชื่อผู้ใช้",
+      "start_chat": "เริ่มแชท"
+    },
+
+    "group": {
+      "search_placeholder": "ค้นหาสมาชิก...",
+      "no_contacts_found": "ไม่พบรายชื่อติดต่อ",
+      "enter_name": "ป้อนชื่อ",
+      "create_group": "สร้างกลุ่ม",
+      "create_channel": "สร้างช่อง",
+      "user_not_authenticated": "ผู้ใช้ยังไม่ได้รับการยืนยัน",
+      "failed_create": "สร้าง{{type}}ล้มเหลว"
+    }
+  },
+  "sidebar_search": {
+    "placeholder": "ค้นหาแชท...",
+    "no_result": "ไม่มีผลลัพธ์!"
+  },
+
+  "sidebar_calls": {
+    "title": "ประวัติการโทร",
+    "no_calls": "ยังไม่มีการโทร!"
+  },
+
+  "sidebar_contacts": {
+    "title": "รายชื่อติดต่อ",
+    "no_contacts": "ไม่มีรายชื่อติดต่อที่มีหมายเลขโทรศัพท์",
+    "video_call": "วิดีโอคอล",
+    "audio_call": "การโทรด้วยเสียง"
+  },
+
+  "sidebar_friend_requests": {
+    "title": "คำขอเป็นเพื่อน",
+    "messages": {
+      "no_friend_requests": "ไม่มีคำขอเป็นเพื่อน",
+      "no_sent_requests": "ไม่มีคำขอที่ส่งไป",
+      "mutual_friends_one": "{{count}} เพื่อนที่รู้จักร่วมกัน",
+      "mutual_friends_other": "{{count}} เพื่อนที่รู้จักร่วมกัน"
+    }
+  },
+
+  "sidebar_folders": {
+    "title": "โฟลเดอร์แชท",
+    "messages": {
+      "no_folders": "ยังไม่มีโฟลเดอร์"
+    },
+    "buttons": {
+      "add_folder": "เพิ่มโฟลเดอร์"
+    },
+
+    "detail": {
+      "title": "รายละเอียดโฟลเดอร์",
+      "folder_not_found": "ไม่พบโฟลเดอร์",
+      "no_chats": "ไม่มีแชทในโฟลเดอร์นี้",
+      "delete_folder": "ลบโฟลเดอร์"
+    },
+
+    "new_folder": {
+      "create_title": "สร้างโฟลเดอร์ใหม่",
+      "edit_title": "แก้ไขโฟลเดอร์",
+      "folder_name_placeholder": "ชื่อโฟลเดอร์",
+      "folder_name_empty_error": "ชื่อโฟลเดอร์ต้องไม่ว่างเปล่า",
+      "chat_selection": {
+        "selected_count": "รวม {count} แชท",
+        "search_placeholder": "ค้นหาแชท..."
+      },
+      "buttons": {
+        "create": "สร้างโฟลเดอร์"
+      }
+    }
+  },
+
+  "sidebar_blocked": {
+    "title": "ผู้ใช้ที่ถูกบล็อก",
+    "empty": {
+      "title": "ไม่พบผู้ใช้ที่ถูกบล็อก",
+      "subtitle": "ผู้ใช้ที่ถูกบล็อกจะปรากฏที่นี่ คุณสามารถบล็อกใครบางคนได้จากโปรไฟล์หรือหน้าจอแชทของพวกเขา"
+    }
+  },
+
+  "settings": {
+    "account": "การตั้งค่าบัญชี",
+    "privacy_security": "ความเป็นส่วนตัวและความปลอดภัย",
+    "display": "การแสดงผล",
+    "keyboard": "คีย์บอร์ด",
+    "messages": "ข้อความ",
+    "folders": "โฟลเดอร์แชท",
+    "notifications": "การแจ้งเตือน",
+    "data_storage": "ข้อมูลและที่เก็บข้อมูล",
+    "language": "ภาษา",
+    "theme": "ธีม",
+    "theme_options": {
+      "light": "สว่าง",
+      "dark": "มืด",
+      "auto": "อัตโนมัติ"
+    }
+  },
+
+  "account_settings": {
+    "title": "การตั้งค่าบัญชี",
+    "change_username": {
+      "title": "เปลี่ยนชื่อผู้ใช้",
+      "placeholder": "ตั้งชื่อผู้ใช้ใหม่",
+      "button": "อัปเดตชื่อผู้ใช้",
+      "requirements": [
+        "สูงสุด 24 ตัวอักษร",
+        "ตัวอักษร (A-Z), ตัวเลข (0-9), จุด (.) หรือขีดล่าง (_)",
+        "ไม่มีช่องว่างหรืออักขระพิเศษ",
+        "ต้องไม่ลงท้ายด้วยจุด (.)",
+        "ต้องไม่มีจุดต่อเนื่อง (..)",
+        "ต้องไม่ซ้ำกับผู้อื่น"
+      ],
+      "messages": {
+        "already_current": "นี่คือชื่อผู้ใช้ปัจจุบันของคุณแล้ว",
+        "available": "ชื่อผู้ใช้พร้อมใช้งาน!",
+        "taken": "ชื่อผู้ใช้ถูกใช้งานแล้ว",
+        "success": "อัปเดตชื่อผู้ใช้สำเร็จ!",
+        "verify_first": "กรุณายืนยันความพร้อมใช้งานของชื่อผู้ใช้ก่อน"
+      }
+    },
+
+    "change_email": {
+      "title": "เปลี่ยนอีเมล",
+      "placeholder": "ตั้งค่าอีเมลใหม่",
+      "requirements": [
+        "ต้องเป็นที่อยู่อีเมลที่ถูกต้อง",
+        "สูงสุด 254 ตัวอักษร",
+        "ต้องไม่ซ้ำ (ไม่ได้ใช้โดยบัญชีอื่น)",
+        "ต้องยืนยันที่อยู่อีเมลใหม่"
+      ],
+      "resend_in": "ส่งใหม่ใน {time}",
+      "messages": {
+        "already_current": "นี่คืออีเมลปัจจุบันของคุณแล้ว",
+        "sent": "รหัสยืนยันถูกส่งไปยังอีเมลของคุณ: {email}",
+        "success": "อีเมลได้รับการยืนยันและอัปเดตเรียบร้อย",
+        "verify_first": "กรุณายืนยันอีเมลใหม่ก่อน",
+        "invalid": "กรุณากรอกที่อยู่อีเมลที่ถูกต้อง",
+        "failed_send": "ส่งรหัสยืนยันล้มเหลว",
+        "failed_verify": "การยืนยันอีเมลล้มเหลว",
+        "failed_resend": "การส่งรหัสยืนยันใหม่ล้มเหลว"
+      }
+    },
+
+    "change_phone": {
+      "title": "เปลี่ยนหมายเลขโทรศัพท์",
+      "placeholder": "ตั้งค่าหมายเลขโทรศัพท์ใหม่",
+      "requirements": [
+        "ต้องเป็นหมายเลขโทรศัพท์ที่ถูกต้อง",
+        "10-15 หลัก (รหัสประเทศเป็นตัวเลือก)",
+        "ต้องไม่ซ้ำ (ไม่ได้ใช้โดยบัญชีอื่น)",
+        "อาจต้องยืนยันหมายเลขโทรศัพท์ใหม่"
+      ],
+      "resend_in": "ส่งใหม่ใน {time}",
+      "messages": {
+        "already_current": "นี่คือหมายเลขโทรศัพท์ปัจจุบันของคุณแล้ว",
+        "sent": "รหัสยืนยันถูกส่งไปยังโทรศัพท์ของคุณ: {phone}",
+        "success": "หมายเลขโทรศัพท์ได้รับการยืนยันและอัปเดตเรียบร้อย",
+        "verify_first": "กรุณายืนยันหมายเลขโทรศัพท์ใหม่ก่อน",
+        "invalid": "กรุณากรอกหมายเลขโทรศัพท์ที่ถูกต้อง",
+        "failed_send": "ส่งรหัสยืนยันล้มเหลว",
+        "failed_verify": "การยืนยันหมายเลขโทรศัพท์ล้มเหลว",
+        "failed_resend": "การส่งรหัสยืนยันใหม่ล้มเหลว"
+      }
+    },
+    "change_password": {
+      "title": "เปลี่ยนรหัสผ่าน",
+      "placeholder": {
+        "current": "รหัสผ่านปัจจุบัน",
+        "new": "รหัสผ่านใหม่",
+        "confirm": "ยืนยันรหัสผ่านใหม่"
+      },
+      "requirements": [
+        "อย่างน้อย 8 ตัวอักษร",
+        "อย่างน้อยหนึ่งตัวอักษรพิมพ์ใหญ่",
+        "อย่างน้อยหนึ่งตัวอักษรพิมพ์เล็ก",
+        "อย่างน้อยหนึ่งตัวเลข"
+      ],
+      "messages": {
+        "all_required": "ต้องกรอกทุกช่อง",
+        "invalid_format": "รูปแบบรหัสผ่านไม่ถูกต้อง",
+        "success": "เปลี่ยนรหัสผ่านสำเร็จ",
+        "failed": "เปลี่ยนรหัสผ่านล้มเหลว"
+      },
+      "buttons": {
+        "change": "เปลี่ยนรหัสผ่าน",
+        "changing": "กำลังเปลี่ยน..."
+      }
+    }
+  },
+
+  "privacy_settings": {
+    "title": "ความเป็นส่วนตัวและความปลอดภัย",
+    "private_account": {
+      "label": "บัญชีส่วนตัว",
+      "desc_private": "เฉพาะผู้ติดตามที่ได้รับอนุญาตเท่านั้นที่สามารถเห็นเนื้อหาของคุณ",
+      "desc_public": "ทุกคนสามารถเห็นเนื้อหาของคุณ"
+    },
+    "read_receipts": {
+      "label": "ใบรับการอ่าน",
+      "desc_on": "ผู้คนจะเห็นเมื่อคุณอ่านข้อความของพวกเขา",
+      "desc_off": "ผู้คนจะไม่เห็นเมื่อคุณอ่านข้อความของพวกเขา"
+    },
+    "online_status": {
+      "label": "สถานะออนไลน์",
+      "desc_on": "ผู้คนจะเห็นเมื่อคุณออนไลน์",
+      "desc_off": "ผู้คนจะไม่เห็นเมื่อคุณออนไลน์"
+    },
+    "allow_messages_from": {
+      "label": "ใครสามารถส่งข้อความถึงคุณ",
+      "options": {
+        "everyone": "ทุกคน",
+        "friends": "เพื่อนเท่านั้น",
+        "none": "ไม่มีใคร"
+      }
+    },
+    "buttons": {
+      "save_changes": "บันทึกการเปลี่ยนแปลง",
+      "saving": "กำลังบันทึก..."
+    },
+    "messages": {
+      "no_changes": "ไม่พบการเปลี่ยนแปลง",
+      "success": "อัปเดตการตั้งค่าความเป็นส่วนตัวสำเร็จ",
+      "error": "อัปเดตการตั้งค่าความเป็นส่วนตัวล้มเหลว"
+    }
+  },
+
+  "display_settings": {
+    "title": "การแสดงผล",
+    "options": {
+      "animations": "เปิดใช้งานแอนิเมชัน",
+      "reduce_motion": "ลดการเคลื่อนไหว",
+      "high_contrast": "โหมดคอนทราสต์สูง",
+      "text_size_large": "ขนาดตัวอักษรใหญ่"
+    }
+  },
+
+  "keyboard_settings": {
+    "title": "คีย์บอร์ด",
+    "options": {
+      "enter_send": "กด Enter เพื่อส่งข้อความ",
+      "ctrl_enter_send": "กด Ctrl + Enter เพื่อส่งข้อความ",
+      "vim_mode": "เปิดใช้งานโหมด Vim",
+      "emacs_mode": "เปิดใช้งานโหมด Emacs"
+    }
+  },
+
+  "message_settings": {
+    "title": "ข้อความ",
+    "options": {
+      "read_receipts": "ใบรับการอ่าน",
+      "typing_indicators": "แสดงตัวบ่งชี้การพิมพ์",
+      "auto_download_media": "ดาวน์โหลดสื่ออัตโนมัติ",
+      "desktop_notifications": "การแจ้งเตือนบนเดสก์ท็อป"
+    }
+  },
+
+  "folder_settings": {
+    "title": "โฟลเดอร์",
+    "options": {
+      "show_unread_count": "แสดงจำนวนข้อความที่ยังไม่ได้อ่าน",
+      "auto_archive": "เก็บถาวรข้อความเก่าอัตโนมัติ",
+      "sort_by_date": "เรียงโฟลเดอร์ตามวันที่",
+      "sort_by_name": "เรียงโฟลเดอร์ตามชื่อ",
+      "hide_empty": "ซ่อนโฟลเดอร์ว่าง"
+    }
+  },
+
+  "notification_settings": {
+    "title": "การแจ้งเตือน",
+    "options": {
+      "message_sounds": "เสียงข้อความ",
+      "desktop_banners": "แบนเนอร์เดสก์ท็อป",
+      "mentions_only": "เฉพาะการกล่าวถึง",
+      "email_notifications": "การแจ้งเตือนทางอีเมล",
+      "vibrate": "สั่นบนมือถือ"
+    }
+  },
+
+  "data_settings": {
+    "title": "ข้อมูลและที่เก็บข้อมูล",
+    "options": {
+      "auto_download_media": "ดาวน์โหลดสื่ออัตโนมัติ",
+      "limit_storage": "จำกัดการใช้ที่เก็บข้อมูล",
+      "clear_cache": "ล้างแคช",
+      "low_data_mode": "โหมดข้อมูลต่ำ",
+      "backup_messages": "สำรองข้อความ"
+    }
+  },
+
+  "sidebar_info": {
+    "edit": {
+      "title": "แก้ไขแชท",
+      "set_partner_nickname": "ตั้งชื่อเล่นให้ {{name}}",
+      "set_my_nickname": "ตั้งชื่อเล่นของฉัน",
+      "unfriend": "เลิกเป็นเพื่อน",
+      "leave_chat": "ออกจากแชท",
+      "delete_chat": "ลบแชท",
+      "update_success": "อัปเดตสำเร็จ"
+    },
+    "group_edit": {
+      "title": "แก้ไข{{type}}",
+      "group_name": "ชื่อกลุ่ม",
+      "description": "คำอธิบาย",
+      "members": "สมาชิก",
+      "leave_chat": "ออกจาก{{type}}",
+      "delete_chat": "ลบ{{type}}",
+      "update_success": "อัปเดตสำเร็จ"
+    },
+    "members_edit": {
+      "title": "สมาชิก",
+      "you_role": "คุณ, {{role}}",
+      "owner": "เจ้าของ",
+      "admin": "ผู้ดูแล",
+      "guest": "แขก",
+      "member": "สมาชิก",
+      "status_left": "ออกแล้ว",
+      "status_banned": "ถูกแบน",
+      "set_nickname": "ตั้งชื่อเล่น",
+      "promote_owner": "เลื่อนขั้นเป็นเจ้าของ",
+      "set_admin": "ตั้งเป็นผู้ดูแล",
+      "add_member": "เพิ่มสมาชิก",
+      "set_member": "ตั้งเป็นสมาชิก"
+    },
+    "media_files": {
+      "title": "สื่อและไฟล์",
+      "images": "รูปภาพ",
+      "videos": "วิดีโอ",
+      "files": "ไฟล์"
+    }
+  },
+
+  "modal": {
+    "friend_request": {
+      "title": "ส่งคำขอเป็นเพื่อน",
+      "optional_message": "ข้อความเสริม...",
+      "send_request": "ส่งคำขอเป็นเพื่อน"
+    },
+    "forward_message": {
+      "title_message": "ส่งต่อข้อความไปยัง...",
+      "title_attachment": "ส่ง{{type}}นี้ไปยัง...",
+      "search_placeholder": "ค้นหาแชทเพื่อส่งต่อ"
+    },
+    "delete_message": {
+      "title": "ลบข้อความ",
+      "description": "คุณแน่ใจหรือว่าต้องการลบข้อความนี้ การกระทำนี้ไม่สามารถย้อนกลับได้",
+      "delete_for_me": "ลบสำหรับฉัน",
+      "delete_for_everyone": "ลบสำหรับทุกคน"
+    },
+    "delete_folder": {
+      "title": "ลบโฟลเดอร์",
+      "description": "การลบโฟลเดอร์นี้จะลบออกจากพื้นที่ทำงานของคุณ แชททั้งหมดที่อยู่ในโฟลเดอร์นี้จะยังคงอยู่ในรายการแชทของคุณ แต่จะไม่ถูกจัดระเบียบในโฟลเดอร์นี้อีกต่อไป"
+    },
+    "mute_chat": {
+      "title": "ปิดเสียงแชท",
+      "description": "เลือกระยะเวลาที่จะปิดการแจ้งเตือน:",
+      "options": {
+        "1_hour": "1 ชั่วโมง",
+        "8_hours": "8 ชั่วโมง",
+        "1_day": "1 วัน",
+        "1_week": "1 สัปดาห์",
+        "1_month": "1 เดือน",
+        "forever": "ตลอดไป"
+      },
+      "muted_until": "ปิดเสียงจนถึง {{time}}",
+      "mute_failed": "ปิดเสียงสมาชิกแชทล้มเหลว"
+    },
+    "block_user": {
+      "title": "บล็อกผู้ใช้",
+      "description": "การบล็อกจะป้องกันไม่ให้ผู้ใช้รายนี้ส่งข้อความถึงคุณหรือเห็นสถานะออนไลน์ของคุณ",
+      "success": "{{username}} ถูกบล็อก",
+      "error": "บล็อกผู้ใช้ล้มเหลว"
+    },
+    "unblock_user": {
+      "title": "ยกเลิกการบล็อกผู้ใช้",
+      "description": "การยกเลิกบล็อกจะอนุญาตให้ผู้ใช้รายนี้ส่งข้อความถึงคุณและเห็นสถานะออนไลน์ของคุณ",
+      "toast_success": "{{username}} ถูกยกเลิกการบล็อก",
+      "toast_error": "ยกเลิกการบล็อกผู้ใช้ล้มเหลว"
+    },
+    "delete_chat": {
+      "title_direct": "ลบแชท",
+      "title_group": "ลบ{{type}}",
+      "chat_type": "แชท{{type}}",
+      "description_direct": "คุณแน่ใจหรือว่าต้องการลบแชทนี้ การกระทำนี้ถาวร คุณและ{{name}}จะไม่สามารถเข้าถึงได้อีก",
+      "description_group": "คุณแน่ใจหรือว่าต้องการลบ{{type}}นี้ การสนทนาจะถูกลบอย่างถาวรสำหรับสมาชิกทุกคน"
+    },
+    "leave_chat": {
+      "title_direct": "ออกจากแชท",
+      "title_group": "ออกจาก{{type}}",
+      "chat_type": "แชท{{type}}",
+      "description_direct": "คุณแน่ใจหรือว่าต้องการออกจากแชทนี้ คุณจะไม่สามารถเข้าถึงได้อีก",
+      "description_group": "คุณแน่ใจหรือว่าต้องการออกจาก{{type}}นี้ คุณจะไม่ได้รับข้อความอีกต่อไป"
+    },
+    "add_member": {
+      "title": "เชิญสมาชิก",
+      "search_placeholder": "ค้นหาคน...",
+      "loading": "กำลังโหลดรายชื่อติดต่อ...",
+      "no_contacts": "ไม่พบรายชื่อติดต่อ",
+      "copy_success": "คัดลอกลิงก์คำเชิญสำเร็จ!",
+      "copy_failed": "คัดลอกลิงก์ล้มเหลว",
+      "link_copied": "คัดลอกแล้ว ✓",
+      "link_copy_title": "คัดลอกลิงก์คำเชิญ",
+      "link_copied_title": "คัดลอกลิงก์แล้ว!",
+      "refresh_title": "รีเฟรช",
+      "generate_invite": "สร้างลิงก์คำเชิญ",
+      "add_single": "เพิ่มสมาชิก",
+      "add_multiple": "เพิ่มสมาชิก {{count}} คน",
+      "failed_add": "เพิ่มสมาชิกล้มเหลว"
+    },
+    "set_nickname": {
+      "title": "ตั้งชื่อเล่น",
+      "placeholder": "ป้อนชื่อเล่น",
+      "failed": "อัปเดตชื่อเล่นล้มเหลว"
+    },
+    "delete_call": {
+      "title": "ลบประวัติการโทร",
+      "description": "คุณแน่ใจหรือว่าต้องการลบการโทรนี้ การกระทำนี้ถาวร และข้อความที่เกี่ยวข้องทั้งหมดจะถูกลบ",
+      "failed": "ลบการโทรล้มเหลว"
+    }
+  },
+
+  "system": {
+    "another_member": "สมาชิกอื่น",
+    "unknown_event": "เกิดเหตุการณ์ของระบบ",
+    "member_joined": "{{displayName}} เข้าร่วมแชท",
+    "member_added": "{{displayName}} เพิ่ม {{targetName}} เข้าแชท",
+    "member_left": "{{displayName}} ออกจากแชท",
+    "member_kicked": "{{displayName}} ลบ {{targetName}} ออกจากแชท",
+    "member_banned": "{{displayName}} แบน {{targetName}} จากแชท",
+    "chat_renamed": "{{displayName}} เปลี่ยนชื่อแชท",
+    "chat_renamed_with_values": "{{displayName}} เปลี่ยนชื่อแชทจาก \"{{oldVal}}\" เป็น \"{{newVal}}\"",
+    "chat_update_avatar": "{{displayName}} อัปเดตอวตารแชท",
+    "chat_update_description": "{{displayName}} อัปเดตคำอธิบายแชท",
+    "chat_update_description_with_values": "{{displayName}} เปลี่ยนคำอธิบายจาก \"{{oldVal}}\" เป็น \"{{newVal}}\"",
+    "chat_set_description": "{{displayName}} ตั้งคำอธิบายเป็น \"{{newVal}}\"",
+    "member_update_nickname": "{{displayName}} อัปเดตชื่อเล่นของ {{targetName}}",
+    "member_update_nickname_with_values": "{{displayName}} เปลี่ยนชื่อเล่นของ {{targetName}} จาก \"{{oldVal}}\" เป็น \"{{newVal}}\"",
+    "member_set_nickname": "{{displayName}} ตั้งชื่อเล่นของ {{targetName}} เป็น \"{{newVal}}\"",
+    "member_promote_owner": "{{displayName}} เลื่อนขั้น {{targetName}} เป็นเจ้าของ",
+    "member_update_role": "{{displayName}} เปลี่ยนบทบาทของ {{targetName}} เป็น {{newVal}}",
+    "member_update_status": "{{displayName}} เปลี่ยนสถานะของ {{targetName}} เป็น {{newVal}}",
+    "message_pinned": "{{displayName}} ปักหมุดข้อความ \"{{newVal}}\"",
+    "message_unpinned": "{{displayName}} ยกเลิกการปักหมุดข้อความ",
+    "chat_deleted": "{{displayName}} ลบแชท",
+    "broadcast_message": {
+      "broadcasted": "ออกอากาศแล้ว",
+      "live_now": "กำลังถ่ายทอดสด",
+      "started_at": "เริ่มเมื่อ {{time}}"
+    }
+  },
+
+  "messages": {
+    "search_bar": {
+      "placeholder": "ค้นหาข้อความ",
+      "filter_important": "กรองข้อความสำคัญ"
+    }
+  }
+}

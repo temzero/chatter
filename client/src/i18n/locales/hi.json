@@ -1,0 +1,578 @@
+{
+  "common": {
+    "you": "आप",
+    "actions": {
+      "accept": "स्वीकार करें",
+      "back": "वापस",
+      "block": "ब्लॉक करें",
+      "blocked_by_user": "उपयोगकर्ता द्वारा ब्लॉक किया गया",
+      "cancel": "रद्द करें",
+      "cancel_request": "अनुरोध रद्द करें",
+      "clear_selection": "चयन हटाएं",
+      "close": "बंद करें",
+      "delete": "हटाएं",
+      "decline": "अस्वीकार करें",
+      "edit": "संपादन करें",
+      "forward": "आगे भेजें",
+      "leave": "छोड़ें",
+      "logout": "लॉगआउट करें",
+      "mark_important": "महत्वपूर्ण चिह्नित करें",
+      "mute": "म्यूट करें",
+      "pin": "पिन करें",
+      "reply": "उत्तर दें",
+      "remove": "हटाएं",
+      "requests": "अनुरोध",
+      "resend_code": "कोड फिर से भेजें",
+      "save": "सहेजें",
+      "save_changes": "परिवर्तन सहेजें",
+      "search": "खोजें",
+      "send_verification": "सत्यापन भेजें",
+      "unfriend": "मित्रता समाप्त करें",
+      "unmark_important": "महत्वपूर्ण चिह्न हटाएं",
+      "unmute": "अनम्यूट करें",
+      "unpin": "अनपिन करें",
+      "unblock": "अनब्लॉक करें",
+      "update": "अपडेट करें",
+      "verify": "सत्यापित करें",
+      "verify_code": "कोड सत्यापित करें",
+      "sent": "भेजा गया"
+    },
+    "messages": {
+      "success": "सफल!",
+      "failed": "असफल",
+      "unknown": "अज्ञात",
+      "empty": "खाली",
+      "error": "एक त्रुटि हुई",
+      "required": "यह फ़ील्ड आवश्यक है",
+      "invalid_code": "कृपया 6-अंकीय कोड दर्ज करें"
+    },
+    "loading": {
+      "loading": "लोड हो रहा है...",
+      "searching": "खोज रहा है...",
+      "creating": "बनाया जा रहा है...",
+      "saving": "सहेजा जा रहा है..."
+    }
+  },
+
+  "account": {
+    "first_name": "पहला नाम",
+    "last_name": "अंतिम नाम"
+  },
+
+  "chat": {
+    "all": "सभी चैट",
+    "all_with_type": "प्रकार के साथ सभी चैट:",
+    "label": "चैट प्रकार",
+    "direct": "सीधा",
+    "group": "समूह",
+    "channel": "चैनल"
+  },
+
+  "chat_bar": {
+    "placeholder": "संदेश...",
+    "attach_file": "फ़ाइल संलग्न करें"
+  },
+
+  "emoji": {
+    "recently": "हाल ही में",
+    "smileys_emotion": "स्माइली और भावनाएँ",
+    "people_body": "लोग और शरीर",
+    "animals_nature": "जानवर और प्रकृति",
+    "food_drink": "खाना और पेय",
+    "activities": "गतिविधियाँ",
+    "objects": "वस्तुएँ",
+    "flags": "झंडे"
+  },
+
+  "sidebar": {
+    "saved_messages": "सहेजे गए संदेश",
+    "calls": "कॉल",
+    "contacts": "संपर्क",
+    "friend_requests": "मित्र अनुरोध {count, plural, =0 {मित्र अनुरोध} other {मित्र अनुरोध #}}",
+    "friend_requests_none": "मित्र अनुरोध",
+    "folders": "चैट फ़ोल्डर",
+    "blocked": "ब्लॉक किए गए",
+    "settings": "सेटिंग्स"
+  },
+
+  "sidebar_profile": {
+    "title": "मेरी प्रोफ़ाइल",
+    "no_username": "कोई उपयोगकर्ता नाम नहीं",
+    "edit_tooltip": "प्रोफ़ाइल संपादित करें",
+    "edit": {
+      "title": "प्रोफ़ाइल संपादित करें",
+      "birthday": "जन्मदिन (महीना/दिन/वर्ष)",
+      "bio": "जीवनी",
+      "bio_placeholder": "अपने बारे में कुछ बताएं",
+      "account_settings": "खाता सेटिंग्स",
+      "update_success": "प्रोफ़ाइल सफलतापूर्वक अपडेट की गई",
+      "update_error": "प्रोफ़ाइल अपडेट करने में विफल!"
+    }
+  },
+
+  "sidebar_new_chat": {
+    "title": "नया {{type}} चैट",
+    "direct": {
+      "placeholder": "@उपयोगकर्तानाम/ईमेल/फोन नंबर",
+      "find_user": "उपयोगकर्ता खोजें",
+      "user_not_found": "उपयोगकर्ता नहीं मिला!",
+      "blocked_by_user_message": "इस उपयोगकर्ता ने आपको ब्लॉक किया है। आप उनकी प्रोफ़ाइल नहीं देख सकते या उनसे बातचीत नहीं कर सकते।",
+      "friend": "मित्र",
+      "friend_but_blocked": "मित्र लेकिन ब्लॉक किया गया",
+      "no_username": "कोई उपयोगकर्ता नाम नहीं",
+      "start_chat": "चैट शुरू करें"
+    },
+
+    "group": {
+      "search_placeholder": "सदस्यों की खोज करें...",
+      "no_contacts_found": "कोई संपर्क नहीं मिला",
+      "enter_name": "नाम दर्ज करें",
+      "create_group": "समूह बनाएं",
+      "create_channel": "चैनल बनाएं",
+      "user_not_authenticated": "उपयोगकर्ता प्रमाणित नहीं है",
+      "failed_create": "{{type}} बनाने में विफल"
+    }
+  },
+  "sidebar_search": {
+    "placeholder": "चैट खोजें...",
+    "no_result": "कोई परिणाम नहीं!"
+  },
+
+  "sidebar_calls": {
+    "title": "कॉल इतिहास",
+    "no_calls": "अभी तक कोई कॉल नहीं!"
+  },
+
+  "sidebar_contacts": {
+    "title": "संपर्क",
+    "no_contacts": "फोन नंबर के साथ कोई संपर्क नहीं",
+    "video_call": "वीडियो कॉल",
+    "audio_call": "ऑडियो कॉल"
+  },
+
+  "sidebar_friend_requests": {
+    "title": "मित्र अनुरोध",
+    "messages": {
+      "no_friend_requests": "कोई मित्र अनुरोध नहीं",
+      "no_sent_requests": "कोई भेजे गए अनुरोध नहीं",
+      "mutual_friends_one": "{{count}} आपसी मित्र",
+      "mutual_friends_other": "{{count}} आपसी मित्र"
+    }
+  },
+
+  "sidebar_folders": {
+    "title": "चैट फ़ोल्डर",
+    "messages": {
+      "no_folders": "अभी तक कोई फ़ोल्डर नहीं"
+    },
+    "buttons": {
+      "add_folder": "फ़ोल्डर जोड़ें"
+    },
+
+    "detail": {
+      "title": "फ़ोल्डर विवरण",
+      "folder_not_found": "फ़ोल्डर नहीं मिला",
+      "no_chats": "इस फ़ोल्डर में कोई चैट नहीं",
+      "delete_folder": "फ़ोल्डर हटाएं"
+    },
+
+    "new_folder": {
+      "create_title": "नया फ़ोल्डर बनाएं",
+      "edit_title": "फ़ोल्डर संपादित करें",
+      "folder_name_placeholder": "फ़ोल्डर का नाम",
+      "folder_name_empty_error": "फ़ोल्डर का नाम खाली नहीं हो सकता",
+      "chat_selection": {
+        "selected_count": "{count} चैट शामिल",
+        "search_placeholder": "चैट खोजें..."
+      },
+      "buttons": {
+        "create": "फ़ोल्डर बनाएं"
+      }
+    }
+  },
+
+  "sidebar_blocked": {
+    "title": "ब्लॉक किए गए उपयोगकर्ता",
+    "empty": {
+      "title": "कोई ब्लॉक किए गए उपयोगकर्ता नहीं मिले",
+      "subtitle": "ब्लॉक किए गए उपयोगकर्ता यहाँ दिखाई देंगे। आप किसी को उनकी प्रोफ़ाइल या चैट स्क्रीन से ब्लॉक कर सकते हैं।"
+    }
+  },
+
+  "settings": {
+    "account": "खाता सेटिंग्स",
+    "privacy_security": "गोपनीयता और सुरक्षा",
+    "display": "प्रदर्शन",
+    "keyboard": "कीबोर्ड",
+    "messages": "संदेश",
+    "folders": "चैट फ़ोल्डर",
+    "notifications": "सूचनाएँ",
+    "data_storage": "डेटा और संग्रहण",
+    "language": "भाषा",
+    "theme": "थीम",
+    "theme_options": {
+      "light": "हल्का",
+      "dark": "गहरा",
+      "auto": "स्वचालित"
+    }
+  },
+
+  "account_settings": {
+    "title": "खाता सेटिंग्स",
+    "change_username": {
+      "title": "उपयोगकर्ता नाम बदलें",
+      "placeholder": "नया उपयोगकर्ता नाम सेट करें",
+      "button": "उपयोगकर्ता नाम अपडेट करें",
+      "requirements": [
+        "अधिकतम 24 अक्षर",
+        "अक्षर (A-Z), संख्या (0-9), बिंदु (.) या अंडरस्कोर (_)",
+        "कोई स्थान या विशेष अक्षर नहीं",
+        "बिंदु (.) के साथ समाप्त नहीं हो सकता",
+        "लगातार बिंदु (..) नहीं हो सकते",
+        "अद्वितीय होना चाहिए"
+      ],
+      "messages": {
+        "already_current": "यह पहले से ही आपका वर्तमान उपयोगकर्ता नाम है",
+        "available": "उपयोगकर्ता नाम उपलब्ध है!",
+        "taken": "उपयोगकर्ता नाम पहले से लिया गया है",
+        "success": "उपयोगकर्ता नाम सफलतापूर्वक अपडेट किया गया!",
+        "verify_first": "कृपया पहले उपयोगकर्ता नाम की उपलब्धता सत्यापित करें"
+      }
+    },
+
+    "change_email": {
+      "title": "ईमेल बदलें",
+      "placeholder": "नया ईमेल सेट करें",
+      "requirements": [
+        "मान्य ईमेल पता होना चाहिए",
+        "अधिकतम 254 अक्षर",
+        "अद्वितीय होना चाहिए (किसी अन्य खाते द्वारा उपयोग नहीं किया गया)",
+        "नए ईमेल पते को सत्यापित करना होगा"
+      ],
+      "resend_in": "{time} में फिर से भेजें",
+      "messages": {
+        "already_current": "यह पहले से ही आपका वर्तमान ईमेल है",
+        "sent": "आपके ईमेल पर सत्यापन कोड भेजा गया: {email}",
+        "success": "ईमेल सत्यापित और सफलतापूर्वक अपडेट किया गया",
+        "verify_first": "कृपया पहले नया ईमेल सत्यापित करें",
+        "invalid": "कृपया मान्य ईमेल पता दर्ज करें",
+        "failed_send": "सत्यापन कोड भेजने में विफल",
+        "failed_verify": "ईमेल सत्यापन विफल",
+        "failed_resend": "सत्यापन कोड फिर से भेजने में विफल"
+      }
+    },
+
+    "change_phone": {
+      "title": "फोन नंबर बदलें",
+      "placeholder": "नया फोन नंबर सेट करें",
+      "requirements": [
+        "मान्य फोन नंबर होना चाहिए",
+        "10-15 अंक (देश कोड वैकल्पिक)",
+        "अद्वितीय होना चाहिए (किसी अन्य खाते द्वारा उपयोग नहीं किया गया)",
+        "नए फोन नंबर को सत्यापित करना पड़ सकता है"
+      ],
+      "resend_in": "{time} में फिर से भेजें",
+      "messages": {
+        "already_current": "यह पहले से ही आपका वर्तमान फोन नंबर है",
+        "sent": "आपके फोन पर सत्यापन कोड भेजा गया: {phone}",
+        "success": "फोन नंबर सत्यापित और सफलतापूर्वक अपडेट किया गया",
+        "verify_first": "कृपया पहले नया फोन नंबर सत्यापित करें",
+        "invalid": "कृपया मान्य फोन नंबर दर्ज करें",
+        "failed_send": "सत्यापन कोड भेजने में विफल",
+        "failed_verify": "फोन नंबर सत्यापन विफल",
+        "failed_resend": "सत्यापन कोड फिर से भेजने में विफल"
+      }
+    },
+    "change_password": {
+      "title": "पासवर्ड बदलें",
+      "placeholder": {
+        "current": "वर्तमान पासवर्ड",
+        "new": "नया पासवर्ड",
+        "confirm": "नए पासवर्ड की पुष्टि करें"
+      },
+      "requirements": [
+        "कम से कम 8 अक्षर",
+        "कम से कम एक बड़ा अक्षर",
+        "कम से कम एक छोटा अक्षर",
+        "कम से कम एक संख्या"
+      ],
+      "messages": {
+        "all_required": "सभी फ़ील्ड आवश्यक हैं",
+        "invalid_format": "पासवर्ड प्रारूप अमान्य है",
+        "success": "पासवर्ड सफलतापूर्वक बदला गया",
+        "failed": "पासवर्ड बदलने में विफल"
+      },
+      "buttons": {
+        "change": "पासवर्ड बदलें",
+        "changing": "बदल रहा है..."
+      }
+    }
+  },
+
+  "privacy_settings": {
+    "title": "गोपनीयता और सुरक्षा",
+    "private_account": {
+      "label": "निजी खाता",
+      "desc_private": "केवल स्वीकृत अनुयायी आपके सामग्री को देख सकते हैं",
+      "desc_public": "कोई भी आपकी सामग्री को देख सकता है"
+    },
+    "read_receipts": {
+      "label": "पढ़ने की पुष्टि",
+      "desc_on": "लोग देख सकते हैं कि आपने उनके संदेश पढ़े हैं",
+      "desc_off": "लोग नहीं देख सकते कि आपने उनके संदेश पढ़े हैं"
+    },
+    "online_status": {
+      "label": "ऑनलाइन स्थिति",
+      "desc_on": "लोग देख सकते हैं कि आप ऑनलाइन हैं",
+      "desc_off": "लोग नहीं देख सकते कि आप ऑनलाइन हैं"
+    },
+    "allow_messages_from": {
+      "label": "आपको संदेश कौन भेज सकता है",
+      "options": {
+        "everyone": "सभी",
+        "friends": "केवल मित्र",
+        "none": "कोई नहीं"
+      }
+    },
+    "buttons": {
+      "save_changes": "परिवर्तन सहेजें",
+      "saving": "सहेजा जा रहा है..."
+    },
+    "messages": {
+      "no_changes": "कोई परिवर्तन नहीं पाया गया",
+      "success": "गोपनीयता सेटिंग्स सफलतापूर्वक अपडेट की गईं",
+      "error": "गोपनीयता सेटिंग्स अपडेट करने में विफल"
+    }
+  },
+
+  "display_settings": {
+    "title": "प्रदर्शन",
+    "options": {
+      "animations": "एनीमेशन सक्षम करें",
+      "reduce_motion": "गति कम करें",
+      "high_contrast": "उच्च कंट्रास्ट मोड",
+      "text_size_large": "बड़ा पाठ आकार"
+    }
+  },
+
+  "keyboard_settings": {
+    "title": "कीबोर्ड",
+    "options": {
+      "enter_send": "Enter से संदेश भेजें",
+      "ctrl_enter_send": "Ctrl + Enter से संदेश भेजें",
+      "vim_mode": "Vim मोड सक्षम करें",
+      "emacs_mode": "Emacs मोड सक्षम करें"
+    }
+  },
+
+  "message_settings": {
+    "title": "संदेश",
+    "options": {
+      "read_receipts": "पढ़ने की पुष्टि",
+      "typing_indicators": "टाइपिंग संकेतक दिखाएं",
+      "auto_download_media": "मीडिया स्वचालित डाउनलोड",
+      "desktop_notifications": "डेस्कटॉप सूचनाएँ"
+    }
+  },
+
+  "folder_settings": {
+    "title": "फ़ोल्डर",
+    "options": {
+      "show_unread_count": "अपठित गणना दिखाएं",
+      "auto_archive": "पुराने संदेश स्वचालित रूप से संग्रहित करें",
+      "sort_by_date": "दिनांक के अनुसार फ़ोल्डर क्रमबद्ध करें",
+      "sort_by_name": "नाम के अनुसार फ़ोल्डर क्रमबद्ध करें",
+      "hide_empty": "खाली फ़ोल्डर छिपाएं"
+    }
+  },
+
+  "notification_settings": {
+    "title": "सूचनाएँ",
+    "options": {
+      "message_sounds": "संदेश ध्वनियाँ",
+      "desktop_banners": "डेस्कटॉप बैनर",
+      "mentions_only": "केवल उल्लेख",
+      "email_notifications": "ईमेल सूचनाएँ",
+      "vibrate": "मोबाइल पर कंपन"
+    }
+  },
+
+  "data_settings": {
+    "title": "डेटा और संग्रहण",
+    "options": {
+      "auto_download_media": "मीडिया स्वचालित डाउनलोड",
+      "limit_storage": "संग्रहण उपयोग सीमित करें",
+      "clear_cache": "कैश साफ करें",
+      "low_data_mode": "कम डेटा मोड",
+      "backup_messages": "संदेश बैकअप करें"
+    }
+  },
+
+  "sidebar_info": {
+    "edit": {
+      "title": "चैट संपादित करें",
+      "set_partner_nickname": "{{name}} का उपनाम सेट करें",
+      "set_my_nickname": "मेरा उपनाम सेट करें",
+      "unfriend": "मित्रता समाप्त करें",
+      "leave_chat": "चैट छोड़ें",
+      "delete_chat": "चैट हटाएं",
+      "update_success": "सफलतापूर्वक अपडेट किया गया"
+    },
+    "group_edit": {
+      "title": "{{type}} संपादित करें",
+      "group_name": "समूह का नाम",
+      "description": "विवरण",
+      "members": "सदस्य",
+      "leave_chat": "{{type}} छोड़ें",
+      "delete_chat": "{{type}} हटाएं",
+      "update_success": "सफलतापूर्वक अपडेट किया गया"
+    },
+    "members_edit": {
+      "title": "सदस्य",
+      "you_role": "आप, {{role}}",
+      "owner": "मालिक",
+      "admin": "प्रशासक",
+      "guest": "अतिथि",
+      "member": "सदस्य",
+      "status_left": "छोड़ दिया",
+      "status_banned": "प्रतिबंधित",
+      "set_nickname": "उपनाम सेट करें",
+      "promote_owner": "मालिक के रूप में पदोन्नति करें",
+      "set_admin": "प्रशासक के रूप में सेट करें",
+      "add_member": "सदस्य जोड़ें",
+      "set_member": "सदस्य के रूप में सेट करें"
+    },
+    "media_files": {
+      "title": "मीडिया और फ़ाइलें",
+      "images": "छवियाँ",
+      "videos": "वीडियो",
+      "files": "फ़ाइलें"
+    }
+  },
+
+  "modal": {
+    "friend_request": {
+      "title": "मित्र अनुरोध भेजें",
+      "optional_message": "वैकल्पिक संदेश...",
+      "send_request": "मित्र अनुरोध भेजें"
+    },
+    "forward_message": {
+      "title_message": "संदेश को अग्रेषित करें...",
+      "title_attachment": "इस {{type}} को भेजें...",
+      "search_placeholder": "अग्रेषित करने के लिए चैट खोजें"
+    },
+    "delete_message": {
+      "title": "संदेश हटाएं",
+      "description": "क्या आप वाकई इस संदेश को हटाना चाहते हैं? यह क्रिया पूर्ववत नहीं की जा सकती।",
+      "delete_for_me": "मेरे लिए हटाएं",
+      "delete_for_everyone": "सभी के लिए हटाएं"
+    },
+    "delete_folder": {
+      "title": "फ़ोल्डर हटाएं",
+      "description": "इस फ़ोल्डर को हटाने से यह आपके कार्यक्षेत्र से हट जाएगा। इस फ़ोल्डर में वर्तमान में मौजूद सभी चैट आपके चैट सूची में रहेंगे, लेकिन अब इस फ़ोल्डर में व्यवस्थित नहीं होंगे।"
+    },
+    "mute_chat": {
+      "title": "चैट म्यूट करें",
+      "description": "सूचनाओं को म्यूट करने की अवधि चुनें:",
+      "options": {
+        "1_hour": "1 घंटा",
+        "8_hours": "8 घंटे",
+        "1_day": "1 दिन",
+        "1_week": "1 सप्ताह",
+        "1_month": "1 महीना",
+        "forever": "हमेशा के लिए"
+      },
+      "muted_until": "{{time}} तक म्यूट",
+      "mute_failed": "चैट सदस्य को म्यूट करने में विफल"
+    },
+    "block_user": {
+      "title": "उपयोगकर्ता ब्लॉक करें",
+      "description": "ब्लॉक करने से यह उपयोगकर्ता आपको संदेश भेजने या आपकी ऑनलाइन स्थिति देखने में सक्षम नहीं होगा।",
+      "success": "{{username}} को ब्लॉक कर दिया गया है",
+      "error": "उपयोगकर्ता को ब्लॉक करने में विफल"
+    },
+    "unblock_user": {
+      "title": "उपयोगकर्ता अनब्लॉक करें",
+      "description": "अनब्लॉक करने से यह उपयोगकर्ता आपको संदेश भेज सकेगा और आपकी ऑनलाइन स्थिति देख सकेगा।",
+      "toast_success": "{{username}} को अनब्लॉक कर दिया गया है",
+      "toast_error": "उपयोगकर्ता को अनब्लॉक करने में विफल"
+    },
+    "delete_chat": {
+      "title_direct": "चैट हटाएं",
+      "title_group": "{{type}} हटाएं",
+      "chat_type": "{{type}} चैट",
+      "description_direct": "क्या आप वाकई इस चैट को हटाना चाहते हैं?\nयह क्रिया स्थायी है — आप और {{name}} इसे फिर से एक्सेस नहीं कर पाएंगे।",
+      "description_group": "क्या आप वाकई इस {{type}} को हटाना चाहते हैं?\nयह सभी सदस्यों के लिए बातचीत को स्थायी रूप से हटा देगा।"
+    },
+    "leave_chat": {
+      "title_direct": "चैट छोड़ें",
+      "title_group": "{{type}} छोड़ें",
+      "chat_type": "{{type}} चैट",
+      "description_direct": "क्या आप वाकई इस चैट को छोड़ना चाहते हैं?\nआप इसे फिर से एक्सेस नहीं कर पाएंगे।",
+      "description_group": "क्या आप वाकई इस {{type}} को छोड़ना चाहते हैं?\nआपको इसके संदेश अब प्राप्त नहीं होंगे।"
+    },
+    "add_member": {
+      "title": "सदस्यों को आमंत्रित करें",
+      "search_placeholder": "लोगों की खोज करें...",
+      "loading": "संपर्क लोड हो रहे हैं...",
+      "no_contacts": "कोई संपर्क नहीं मिला",
+      "copy_success": "आमंत्रण लिंक कॉपी किया गया!",
+      "copy_failed": "लिंक कॉपी करने में विफल।",
+      "link_copied": "कॉपी किया गया ✓",
+      "link_copy_title": "आमंत्रण लिंक कॉपी करें",
+      "link_copied_title": "लिंक कॉपी किया गया!",
+      "refresh_title": "ताज़ा करें",
+      "generate_invite": "आमंत्रण लिंक जनरेट करें",
+      "add_single": "सदस्य जोड़ें",
+      "add_multiple": "{{count}} सदस्य जोड़ें",
+      "failed_add": "सदस्य जोड़ने में विफल"
+    },
+    "set_nickname": {
+      "title": "उपनाम सेट करें",
+      "placeholder": "उपनाम दर्ज करें",
+      "failed": "उपनाम अपडेट करने में विफल"
+    },
+    "delete_call": {
+      "title": "अपना कॉल इतिहास हटाएं",
+      "description": "क्या आप वाकई इस कॉल को हटाना चाहते हैं?\nयह क्रिया स्थायी है और सभी संबंधित संदेश हटा दिए जाएंगे।",
+      "failed": "कॉल हटाने में विफल"
+    }
+  },
+
+  "system": {
+    "another_member": "एक अन्य सदस्य",
+    "unknown_event": "सिस्टम इवेंट हुआ।",
+    "member_joined": "{{displayName}} चैट में शामिल हुआ",
+    "member_added": "{{displayName}} ने {{targetName}} को चैट में जोड़ा",
+    "member_left": "{{displayName}} चैट से बाहर निकला",
+    "member_kicked": "{{displayName}} ने {{targetName}} को चैट से हटाया",
+    "member_banned": "{{displayName}} ने {{targetName}} को चैट से प्रतिबंधित किया",
+    "chat_renamed": "{{displayName}} ने चैट का नाम बदला",
+    "chat_renamed_with_values": "{{displayName}} ने चैट का नाम \"{{oldVal}}\" से \"{{newVal}}\" में बदला",
+    "chat_update_avatar": "{{displayName}} ने चैट अवतार अपडेट किया",
+    "chat_update_description": "{{displayName}} ने चैट विवरण अपडेट किया",
+    "chat_update_description_with_values": "{{displayName}} ने विवरण को \"{{oldVal}}\" से \"{{newVal}}\" में बदला",
+    "chat_set_description": "{{displayName}} ने विवरण को \"{{newVal}}\" पर सेट किया",
+    "member_update_nickname": "{{displayName}} ने {{targetName}} का उपनाम अपडेट किया",
+    "member_update_nickname_with_values": "{{displayName}} ने {{targetName}} का उपनाम \"{{oldVal}}\" से \"{{newVal}}\" में बदला",
+    "member_set_nickname": "{{displayName}} ने {{targetName}} का उपनाम \"{{newVal}}\" पर सेट किया",
+    "member_promote_owner": "{{displayName}} ने {{targetName}} को मालिक बनाया",
+    "member_update_role": "{{displayName}} ने {{targetName}} की भूमिका को {{newVal}} में बदला",
+    "member_update_status": "{{displayName}} ने {{targetName}} की स्थिति को {{newVal}} में बदला",
+    "message_pinned": "{{displayName}} ने संदेश \"{{newVal}}\" को पिन किया",
+    "message_unpinned": "{{displayName}} ने संदेश को अनपिन किया",
+    "chat_deleted": "{{displayName}} ने चैट हटा दिया",
+    "broadcast_message": {
+      "broadcasted": "प्रसारित",
+      "live_now": "अब लाइव",
+      "started_at": "{{time}} पर शुरू हुआ"
+    }
+  },
+
+  "messages": {
+    "search_bar": {
+      "placeholder": "संदेश खोजें",
+      "filter_important": "महत्वपूर्ण फ़िल्टर करें"
+    }
+  }
+}

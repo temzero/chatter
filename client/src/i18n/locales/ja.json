@@ -1,0 +1,578 @@
+{
+  "common": {
+    "you": "あなた",
+    "actions": {
+      "accept": "承認",
+      "back": "戻る",
+      "block": "ブロック",
+      "blocked_by_user": "ユーザーによってブロックされています",
+      "cancel": "キャンセル",
+      "cancel_request": "リクエストをキャンセル",
+      "clear_selection": "選択を解除",
+      "close": "閉じる",
+      "delete": "削除",
+      "decline": "拒否",
+      "edit": "編集",
+      "forward": "転送",
+      "leave": "退出",
+      "logout": "ログアウト",
+      "mark_important": "重要としてマーク",
+      "mute": "ミュート",
+      "pin": "ピン留め",
+      "reply": "返信",
+      "remove": "削除",
+      "requests": "リクエスト",
+      "resend_code": "コードを再送信",
+      "save": "保存",
+      "save_changes": "変更を保存",
+      "search": "検索",
+      "send_verification": "認証を送信",
+      "unfriend": "友達解除",
+      "unmark_important": "重要マークを解除",
+      "unmute": "ミュート解除",
+      "unpin": "ピン留め解除",
+      "unblock": "ブロック解除",
+      "update": "更新",
+      "verify": "認証",
+      "verify_code": "コードを認証",
+      "sent": "送信済み"
+    },
+    "messages": {
+      "success": "成功！",
+      "failed": "失敗",
+      "unknown": "不明",
+      "empty": "空",
+      "error": "エラーが発生しました",
+      "required": "このフィールドは必須です",
+      "invalid_code": "6桁のコードを入力してください"
+    },
+    "loading": {
+      "loading": "読み込み中...",
+      "searching": "検索中...",
+      "creating": "作成中...",
+      "saving": "保存中..."
+    }
+  },
+
+  "account": {
+    "first_name": "名",
+    "last_name": "姓"
+  },
+
+  "chat": {
+    "all": "すべてのチャット",
+    "all_with_type": "タイプ別のすべてのチャット：",
+    "label": "チャットの種類",
+    "direct": "ダイレクト",
+    "group": "グループ",
+    "channel": "チャンネル"
+  },
+
+  "chat_bar": {
+    "placeholder": "メッセージ...",
+    "attach_file": "ファイルを添付"
+  },
+
+  "emoji": {
+    "recently": "最近",
+    "smileys_emotion": "スマイリーと感情",
+    "people_body": "人物と体",
+    "animals_nature": "動物と自然",
+    "food_drink": "食べ物と飲み物",
+    "activities": "アクティビティ",
+    "objects": "オブジェクト",
+    "flags": "旗"
+  },
+
+  "sidebar": {
+    "saved_messages": "保存したメッセージ",
+    "calls": "通話",
+    "contacts": "連絡先",
+    "friend_requests": "友達リクエスト {count, plural, =0 {友達リクエスト} other {友達リクエスト #}}",
+    "friend_requests_none": "友達リクエスト",
+    "folders": "チャットフォルダ",
+    "blocked": "ブロック済み",
+    "settings": "設定"
+  },
+
+  "sidebar_profile": {
+    "title": "マイプロフィール",
+    "no_username": "ユーザー名なし",
+    "edit_tooltip": "プロフィールを編集",
+    "edit": {
+      "title": "プロフィールを編集",
+      "birthday": "誕生日（月/日/年）",
+      "bio": "自己紹介",
+      "bio_placeholder": "あなたについて説明してください",
+      "account_settings": "アカウント設定",
+      "update_success": "プロフィールが正常に更新されました",
+      "update_error": "プロフィールの更新に失敗しました！"
+    }
+  },
+
+  "sidebar_new_chat": {
+    "title": "新しい{{type}}チャット",
+    "direct": {
+      "placeholder": "@ユーザー名/メール/電話番号",
+      "find_user": "ユーザーを見つける",
+      "user_not_found": "ユーザーが見つかりません！",
+      "blocked_by_user_message": "このユーザーにブロックされています。プロフィールの閲覧ややり取りはできません。",
+      "friend": "友達",
+      "friend_but_blocked": "友達だがブロックされています",
+      "no_username": "ユーザー名なし",
+      "start_chat": "チャットを開始"
+    },
+
+    "group": {
+      "search_placeholder": "メンバーを検索...",
+      "no_contacts_found": "連絡先が見つかりません",
+      "enter_name": "名前を入力",
+      "create_group": "グループを作成",
+      "create_channel": "チャンネルを作成",
+      "user_not_authenticated": "ユーザーが認証されていません",
+      "failed_create": "{{type}}の作成に失敗しました"
+    }
+  },
+  "sidebar_search": {
+    "placeholder": "チャットを検索...",
+    "no_result": "結果なし！"
+  },
+
+  "sidebar_calls": {
+    "title": "通話履歴",
+    "no_calls": "まだ通話がありません！"
+  },
+
+  "sidebar_contacts": {
+    "title": "連絡先",
+    "no_contacts": "電話番号の連絡先がありません",
+    "video_call": "ビデオ通話",
+    "audio_call": "音声通話"
+  },
+
+  "sidebar_friend_requests": {
+    "title": "友達リクエスト",
+    "messages": {
+      "no_friend_requests": "友達リクエストがありません",
+      "no_sent_requests": "送信済みリクエストがありません",
+      "mutual_friends_one": "{{count}}人の共通の友達",
+      "mutual_friends_other": "{{count}}人の共通の友達"
+    }
+  },
+
+  "sidebar_folders": {
+    "title": "チャットフォルダ",
+    "messages": {
+      "no_folders": "まだフォルダがありません"
+    },
+    "buttons": {
+      "add_folder": "フォルダを追加"
+    },
+
+    "detail": {
+      "title": "フォルダの詳細",
+      "folder_not_found": "フォルダが見つかりません",
+      "no_chats": "このフォルダにチャットがありません",
+      "delete_folder": "フォルダを削除"
+    },
+
+    "new_folder": {
+      "create_title": "新しいフォルダを作成",
+      "edit_title": "フォルダを編集",
+      "folder_name_placeholder": "フォルダ名",
+      "folder_name_empty_error": "フォルダ名は空にできません",
+      "chat_selection": {
+        "selected_count": "{count}件のチャットが含まれています",
+        "search_placeholder": "チャットを検索..."
+      },
+      "buttons": {
+        "create": "フォルダを作成"
+      }
+    }
+  },
+
+  "sidebar_blocked": {
+    "title": "ブロックされたユーザー",
+    "empty": {
+      "title": "ブロックされたユーザーが見つかりません",
+      "subtitle": "ブロックされたユーザーはここに表示されます。プロフィールまたはチャット画面から誰かをブロックできます。"
+    }
+  },
+
+  "settings": {
+    "account": "アカウント設定",
+    "privacy_security": "プライバシーとセキュリティ",
+    "display": "表示",
+    "keyboard": "キーボード",
+    "messages": "メッセージ",
+    "folders": "チャットフォルダ",
+    "notifications": "通知",
+    "data_storage": "データとストレージ",
+    "language": "言語",
+    "theme": "テーマ",
+    "theme_options": {
+      "light": "ライト",
+      "dark": "ダーク",
+      "auto": "自動"
+    }
+  },
+
+  "account_settings": {
+    "title": "アカウント設定",
+    "change_username": {
+      "title": "ユーザー名の変更",
+      "placeholder": "新しいユーザー名を設定",
+      "button": "ユーザー名を更新",
+      "requirements": [
+        "最大24文字",
+        "文字（A-Z）、数字（0-9）、ピリオド（.）またはアンダースコア（_）",
+        "スペースや特殊文字は使用不可",
+        "ピリオド（.）で終わることはできません",
+        "連続するピリオド（..）を含めることはできません",
+        "一意である必要があります"
+      ],
+      "messages": {
+        "already_current": "これはすでに現在のユーザー名です",
+        "available": "ユーザー名は利用可能です！",
+        "taken": "ユーザー名はすでに使用されています",
+        "success": "ユーザー名が正常に更新されました！",
+        "verify_first": "まずユーザー名の可用性を確認してください"
+      }
+    },
+
+    "change_email": {
+      "title": "メールアドレスの変更",
+      "placeholder": "新しいメールアドレスを設定",
+      "requirements": [
+        "有効なメールアドレスである必要があります",
+        "最大254文字",
+        "一意である必要があります（他のアカウントで使用されていない）",
+        "新しいメールアドレスを認証する必要があります"
+      ],
+      "resend_in": "{time}後に再送信",
+      "messages": {
+        "already_current": "これはすでに現在のメールアドレスです",
+        "sent": "認証コードがあなたのメールに送信されました：{email}",
+        "success": "メールが認証され、正常に更新されました",
+        "verify_first": "まず新しいメールを認証してください",
+        "invalid": "有効なメールアドレスを入力してください",
+        "failed_send": "認証コードの送信に失敗しました",
+        "failed_verify": "メール認証に失敗しました",
+        "failed_resend": "認証コードの再送信に失敗しました"
+      }
+    },
+
+    "change_phone": {
+      "title": "電話番号の変更",
+      "placeholder": "新しい電話番号を設定",
+      "requirements": [
+        "有効な電話番号である必要があります",
+        "10〜15桁（国コードは任意）",
+        "一意である必要があります（他のアカウントで使用されていない）",
+        "新しい電話番号を認証する必要がある場合があります"
+      ],
+      "resend_in": "{time}後に再送信",
+      "messages": {
+        "already_current": "これはすでに現在の電話番号です",
+        "sent": "認証コードがあなたの電話に送信されました：{phone}",
+        "success": "電話番号が認証され、正常に更新されました",
+        "verify_first": "まず新しい電話番号を認証してください",
+        "invalid": "有効な電話番号を入力してください",
+        "failed_send": "認証コードの送信に失敗しました",
+        "failed_verify": "電話番号の認証に失敗しました",
+        "failed_resend": "認証コードの再送信に失敗しました"
+      }
+    },
+    "change_password": {
+      "title": "パスワードの変更",
+      "placeholder": {
+        "current": "現在のパスワード",
+        "new": "新しいパスワード",
+        "confirm": "新しいパスワードを確認"
+      },
+      "requirements": [
+        "少なくとも8文字",
+        "少なくとも1つの大文字",
+        "少なくとも1つの小文字",
+        "少なくとも1つの数字"
+      ],
+      "messages": {
+        "all_required": "すべてのフィールドが必須です",
+        "invalid_format": "パスワードの形式が無効です",
+        "success": "パスワードが正常に変更されました",
+        "failed": "パスワードの変更に失敗しました"
+      },
+      "buttons": {
+        "change": "パスワードを変更",
+        "changing": "変更中..."
+      }
+    }
+  },
+
+  "privacy_settings": {
+    "title": "プライバシーとセキュリティ",
+    "private_account": {
+      "label": "プライベートアカウント",
+      "desc_private": "承認されたフォロワーのみがあなたのコンテンツを見ることができます",
+      "desc_public": "誰でもあなたのコンテンツを見ることができます"
+    },
+    "read_receipts": {
+      "label": "既読レシート",
+      "desc_on": "メッセージを読んだことが相手に通知されます",
+      "desc_off": "メッセージを読んだことが相手に通知されません"
+    },
+    "online_status": {
+      "label": "オンラインステータス",
+      "desc_on": "オンラインであることが相手に表示されます",
+      "desc_off": "オンラインであることが相手に表示されません"
+    },
+    "allow_messages_from": {
+      "label": "メッセージを許可する相手",
+      "options": {
+        "everyone": "全員",
+        "friends": "友達のみ",
+        "none": "誰も許可しない"
+      }
+    },
+    "buttons": {
+      "save_changes": "変更を保存",
+      "saving": "保存中..."
+    },
+    "messages": {
+      "no_changes": "変更が検出されませんでした",
+      "success": "プライバシー設定が正常に更新されました",
+      "error": "プライバシー設定の更新に失敗しました"
+    }
+  },
+
+  "display_settings": {
+    "title": "表示",
+    "options": {
+      "animations": "アニメーションを有効にする",
+      "reduce_motion": "モーションを減らす",
+      "high_contrast": "高コントラストモード",
+      "text_size_large": "大きなテキストサイズ"
+    }
+  },
+
+  "keyboard_settings": {
+    "title": "キーボード",
+    "options": {
+      "enter_send": "Enterでメッセージを送信",
+      "ctrl_enter_send": "Ctrl + Enterでメッセージを送信",
+      "vim_mode": "Vimモードを有効にする",
+      "emacs_mode": "Emacsモードを有効にする"
+    }
+  },
+
+  "message_settings": {
+    "title": "メッセージ",
+    "options": {
+      "read_receipts": "既読レシート",
+      "typing_indicators": "入力インジケーターを表示",
+      "auto_download_media": "メディアを自動ダウンロード",
+      "desktop_notifications": "デスクトップ通知"
+    }
+  },
+
+  "folder_settings": {
+    "title": "フォルダ",
+    "options": {
+      "show_unread_count": "未読数を表示",
+      "auto_archive": "古いメッセージを自動アーカイブ",
+      "sort_by_date": "日付でフォルダを並べ替え",
+      "sort_by_name": "名前でフォルダを並べ替え",
+      "hide_empty": "空のフォルダを非表示"
+    }
+  },
+
+  "notification_settings": {
+    "title": "通知",
+    "options": {
+      "message_sounds": "メッセージ音",
+      "desktop_banners": "デスクトップバナー",
+      "mentions_only": "メンションのみ",
+      "email_notifications": "メール通知",
+      "vibrate": "モバイルで振動"
+    }
+  },
+
+  "data_settings": {
+    "title": "データとストレージ",
+    "options": {
+      "auto_download_media": "メディアを自動ダウンロード",
+      "limit_storage": "ストレージ使用量を制限",
+      "clear_cache": "キャッシュをクリア",
+      "low_data_mode": "低データモード",
+      "backup_messages": "メッセージをバックアップ"
+    }
+  },
+
+  "sidebar_info": {
+    "edit": {
+      "title": "チャットを編集",
+      "set_partner_nickname": "{{name}}のニックネームを設定",
+      "set_my_nickname": "自分のニックネームを設定",
+      "unfriend": "友達解除",
+      "leave_chat": "チャットを退出",
+      "delete_chat": "チャットを削除",
+      "update_success": "正常に更新されました"
+    },
+    "group_edit": {
+      "title": "{{type}}を編集",
+      "group_name": "グループ名",
+      "description": "説明",
+      "members": "メンバー",
+      "leave_chat": "{{type}}を退出",
+      "delete_chat": "{{type}}を削除",
+      "update_success": "正常に更新されました"
+    },
+    "members_edit": {
+      "title": "メンバー",
+      "you_role": "あなた、{{role}}",
+      "owner": "オーナー",
+      "admin": "管理者",
+      "guest": "ゲスト",
+      "member": "メンバー",
+      "status_left": "退出",
+      "status_banned": "追放",
+      "set_nickname": "ニックネームを設定",
+      "promote_owner": "オーナーに昇格",
+      "set_admin": "管理者として設定",
+      "add_member": "メンバーを追加",
+      "set_member": "メンバーとして設定"
+    },
+    "media_files": {
+      "title": "メディアとファイル",
+      "images": "画像",
+      "videos": "ビデオ",
+      "files": "ファイル"
+    }
+  },
+
+  "modal": {
+    "friend_request": {
+      "title": "友達リクエストを送信",
+      "optional_message": "任意のメッセージ...",
+      "send_request": "友達リクエストを送信"
+    },
+    "forward_message": {
+      "title_message": "メッセージを転送...",
+      "title_attachment": "{{type}}を送信...",
+      "search_placeholder": "転送先のチャットを検索"
+    },
+    "delete_message": {
+      "title": "メッセージを削除",
+      "description": "このメッセージを削除してもよろしいですか？この操作は元に戻せません。",
+      "delete_for_me": "自分のみ削除",
+      "delete_for_everyone": "全員に対して削除"
+    },
+    "delete_folder": {
+      "title": "フォルダを削除",
+      "description": "このフォルダを削除すると、ワークスペースから削除されます。このフォルダに現在含まれているすべてのチャットはチャットリストに残りますが、このフォルダで整理されなくなります。"
+    },
+    "mute_chat": {
+      "title": "チャットをミュート",
+      "description": "通知をミュートする期間を選択してください：",
+      "options": {
+        "1_hour": "1時間",
+        "8_hours": "8時間",
+        "1_day": "1日",
+        "1_week": "1週間",
+        "1_month": "1ヶ月",
+        "forever": "永久に"
+      },
+      "muted_until": "{{time}}までミュート",
+      "mute_failed": "チャットメンバーのミュートに失敗しました"
+    },
+    "block_user": {
+      "title": "ユーザーをブロック",
+      "description": "ブロックすると、このユーザーからのメッセージの受信やオンラインステータスの表示が防止されます。",
+      "success": "{{username}}がブロックされました",
+      "error": "ユーザーのブロックに失敗しました"
+    },
+    "unblock_user": {
+      "title": "ユーザーのブロック解除",
+      "description": "ブロック解除すると、このユーザーからのメッセージの受信やオンラインステータスの表示が可能になります。",
+      "toast_success": "{{username}}のブロックが解除されました",
+      "toast_error": "ユーザーのブロック解除に失敗しました"
+    },
+    "delete_chat": {
+      "title_direct": "チャットを削除",
+      "title_group": "{{type}}を削除",
+      "chat_type": "{{type}}チャット",
+      "description_direct": "このチャットを削除してもよろしいですか？\nこの操作は永久的で、あなたと{{name}}は二度とアクセスできなくなります。",
+      "description_group": "この{{type}}を削除してもよろしいですか？\nすべてのメンバーに対して会話が完全に削除されます。"
+    },
+    "leave_chat": {
+      "title_direct": "チャットを退出",
+      "title_group": "{{type}}を退出",
+      "chat_type": "{{type}}チャット",
+      "description_direct": "このチャットを退出してもよろしいですか？\n二度とアクセスできなくなります。",
+      "description_group": "この{{type}}を退出してもよろしいですか？\nメッセージを受信できなくなります。"
+    },
+    "add_member": {
+      "title": "メンバーを招待",
+      "search_placeholder": "人を検索...",
+      "loading": "連絡先を読み込み中...",
+      "no_contacts": "連絡先が見つかりません",
+      "copy_success": "招待リンクがコピーされました！",
+      "copy_failed": "リンクのコピーに失敗しました。",
+      "link_copied": "コピー済み ✓",
+      "link_copy_title": "招待リンクをコピー",
+      "link_copied_title": "リンクがコピーされました！",
+      "refresh_title": "更新",
+      "generate_invite": "招待リンクを生成",
+      "add_single": "メンバーを追加",
+      "add_multiple": "{{count}}人のメンバーを追加",
+      "failed_add": "メンバーの追加に失敗しました"
+    },
+    "set_nickname": {
+      "title": "ニックネームを設定",
+      "placeholder": "ニックネームを入力",
+      "failed": "ニックネームの更新に失敗しました"
+    },
+    "delete_call": {
+      "title": "通話履歴を削除",
+      "description": "この通話を削除してもよろしいですか？\nこの操作は永久的で、関連するすべてのメッセージが削除されます。",
+      "failed": "通話の削除に失敗しました"
+    }
+  },
+
+  "system": {
+    "another_member": "他のメンバー",
+    "unknown_event": "システムイベントが発生しました。",
+    "member_joined": "{{displayName}}がチャットに参加しました",
+    "member_added": "{{displayName}}が{{targetName}}をチャットに追加しました",
+    "member_left": "{{displayName}}がチャットを退出しました",
+    "member_kicked": "{{displayName}}が{{targetName}}をチャットから削除しました",
+    "member_banned": "{{displayName}}が{{targetName}}をチャットから追放しました",
+    "chat_renamed": "{{displayName}}がチャットの名前を変更しました",
+    "chat_renamed_with_values": "{{displayName}}がチャット名を「{{oldVal}}」から「{{newVal}}」に変更しました",
+    "chat_update_avatar": "{{displayName}}がチャットのアバターを更新しました",
+    "chat_update_description": "{{displayName}}がチャットの説明を更新しました",
+    "chat_update_description_with_values": "{{displayName}}が説明を「{{oldVal}}」から「{{newVal}}」に変更しました",
+    "chat_set_description": "{{displayName}}が説明を「{{newVal}}」に設定しました",
+    "member_update_nickname": "{{displayName}}が{{targetName}}のニックネームを更新しました",
+    "member_update_nickname_with_values": "{{displayName}}が{{targetName}}のニックネームを「{{oldVal}}」から「{{newVal}}」に変更しました",
+    "member_set_nickname": "{{displayName}}が{{targetName}}のニックネームを「{{newVal}}」に設定しました",
+    "member_promote_owner": "{{displayName}}が{{targetName}}をオーナーに昇格しました",
+    "member_update_role": "{{displayName}}が{{targetName}}の役割を{{newVal}}に変更しました",
+    "member_update_status": "{{displayName}}が{{targetName}}のステータスを{{newVal}}に変更しました",
+    "message_pinned": "{{displayName}}がメッセージ「{{newVal}}」をピン留めしました",
+    "message_unpinned": "{{displayName}}がメッセージのピン留めを解除しました",
+    "chat_deleted": "{{displayName}}がチャットを削除しました",
+    "broadcast_message": {
+      "broadcasted": "ブロードキャスト済み",
+      "live_now": "現在ライブ中",
+      "started_at": "{{time}}に開始"
+    }
+  },
+
+  "messages": {
+    "search_bar": {
+      "placeholder": "メッセージを検索",
+      "filter_important": "重要をフィルター"
+    }
+  }
+}

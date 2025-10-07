@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 import SidebarLayout from "@/pages/SidebarLayout";
 import { SidebarMode } from "@/types/enums/sidebarMode";
+import SwitchBtn from "@/components/ui/SwitchBtn";
 
 interface KeyboardOption {
   code: string;
-  labelKey: string; // key for translation
+  labelKey: string;
 }
 
 const keyboardOptions: KeyboardOption[] = [
@@ -20,10 +21,22 @@ const keyboardOptions: KeyboardOption[] = [
 
 const SidebarSettingsKeyboard: React.FC = () => {
   const { t } = useTranslation();
-  const [selectedOption, setSelectedOption] = useState<string>("enter-send");
 
-  const handleSelect = (code: string) => {
-    setSelectedOption(code);
+  // For toggle switches, we can store state in a record
+  const [settings, setSettings] = React.useState<Record<string, boolean>>(
+    () => {
+      const initialState: Record<string, boolean> = {};
+      keyboardOptions.forEach((opt) => (initialState[opt.code] = false));
+      return initialState;
+    }
+  );
+
+  const handleToggle = (code: string) => {
+    setSettings((prev) => ({
+      ...prev,
+      [code]: !prev[code],
+    }));
+    console.log("Toggled:", code, !settings[code]);
     // TODO: save to user settings / context
   };
 
@@ -36,15 +49,13 @@ const SidebarSettingsKeyboard: React.FC = () => {
         {keyboardOptions.map((option) => (
           <div
             key={option.code}
-            onClick={() => handleSelect(option.code)}
-            className={`settings-item ${
-              selectedOption === option.code ? "selected" : ""
-            }`}
+            className="settings-option"
           >
             <span>{t(option.labelKey)}</span>
-            {selectedOption === option.code && (
-              <span className="font-bold">✓</span>
-            )}
+            <SwitchBtn
+              checked={settings[option.code]}
+              onCheckedChange={() => handleToggle(option.code)}
+            />
           </div>
         ))}
       </div>

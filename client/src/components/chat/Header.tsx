@@ -8,7 +8,7 @@ import { OnlineDot } from "../ui/OnlineDot";
 import { useChatStatus } from "@/stores/presenceStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import type { ChatResponse } from "@/types/responses/chat.response";
-import PinnedMessage from "@/components/chat/message/PinnedMessage";
+import PinnedMessage from "@/components/chat/components/message/PinnedMessage";
 import { DirectChatMember } from "@/types/responses/chatMember.response";
 import { useMessageStore } from "@/stores/messageStore";
 import MessageSearchBar from "../ui/MessageSearchBar";
@@ -24,10 +24,7 @@ interface ChatHeaderProps {
   isBlockedByMe: boolean;
 }
 
-const ChatHeader: React.FC<ChatHeaderProps> = ({
-  chat,
-  isBlockedByMe = false,
-}) => {
+const Header: React.FC<ChatHeaderProps> = ({ chat, isBlockedByMe = false }) => {
   const toggleSidebarInfo = useSidebarInfoStore(
     (state) => state.toggleSidebarInfo
   );
@@ -215,4 +212,4 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   );
 };
 
-export default React.memo(ChatHeader);
+export default React.memo(Header);

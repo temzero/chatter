@@ -7,16 +7,16 @@ import {
   useMessagesByChatId,
   useMessageStore,
 } from "@/stores/messageStore";
-import ChannelMessages from "./ChannelMessages";
 import TypingIndicator from "../../ui/typingIndicator/TypingIndicator";
-import ChatMessages from "./ChatMessages";
 import InfiniteScroller from "@/components/ui/InfiniteScroller";
+import Messages from "./Messages";
+import ChannelMessages from "./ChannelMessages";
 
 interface ChatBoxProps {
   chat?: ChatResponse;
 }
 
-const ChatBox: React.FC<ChatBoxProps> = ({ chat }) => {
+const MessagesContainer: React.FC<ChatBoxProps> = ({ chat }) => {
   const chatId = chat?.id || "";
   const isMessagePinned = chat?.pinnedMessage !== null;
 
@@ -64,7 +64,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ chat }) => {
       case ChatType.CHANNEL:
         return <ChannelMessages chat={chat} messages={messages} />;
       default:
-        return <ChatMessages chat={chat} messages={messages} />;
+        return <Messages chat={chat} messages={messages} />;
     }
   }, [chat, messages]);
 
@@ -91,4 +91,4 @@ const ChatBox: React.FC<ChatBoxProps> = ({ chat }) => {
   );
 };
 
-export default React.memo(ChatBox);
+export default React.memo(MessagesContainer);

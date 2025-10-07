@@ -8,6 +8,7 @@ import { SidebarMode } from "@/types/enums/sidebarMode";
 import SidebarLayout from "@/pages/SidebarLayout";
 import { handleError } from "@/utils/handleError";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 export interface ProfileFormData {
   avatarUrl: string;
@@ -18,6 +19,7 @@ export interface ProfileFormData {
 }
 
 const SidebarProfileEdit: React.FC = () => {
+  const { t } = useTranslation();
   const currentUser = useCurrentUser();
   const { updateProfile } = useProfileStore();
   const { setSidebar } = useSidebarStore();
@@ -79,10 +81,10 @@ const SidebarProfileEdit: React.FC = () => {
         setFormData((prev) => ({ ...prev, avatarUrl: newAvatarUrl }));
       }
       await updateProfile({ ...formData, avatarUrl: newAvatarUrl });
-      toast.success("Profile update successfully");
+      toast.success(t("sidebar_profile.edit.update_success"));
       setSidebar(SidebarMode.PROFILE);
     } catch (error) {
-      handleError(error, "Failed to update profile!");
+      handleError(error, t("sidebar_profile.edit.update_error"));
     } finally {
       setIsSubmitting(false);
     }
@@ -118,7 +120,7 @@ const SidebarProfileEdit: React.FC = () => {
 
   return (
     <SidebarLayout
-      title="Edit Profile"
+      title={t("sidebar_profile.edit.title")}
       backLocation={SidebarMode.PROFILE}
       rightButton={rightButton}
     >
@@ -135,32 +137,36 @@ const SidebarProfileEdit: React.FC = () => {
 
           <div className="w-full space-y-4">
             <div className="flex flex-col gap-1">
-              <label className="text-sm opacity-70">First Name</label>
+              <label className="text-sm opacity-70">
+                {t("account.first_name")}
+              </label>
               <input
                 type="text"
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
                 className="input text-lg"
-                placeholder="First Name"
+                placeholder={t("account.first_name")}
               />
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-sm opacity-70">Last Name</label>
+              <label className="text-sm opacity-70">
+                {t("account.last_name")}
+              </label>
               <input
                 type="text"
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
                 className="input text-lg"
-                placeholder="Last Name"
+                placeholder={t("account.last_name")}
               />
             </div>
 
             <div className="flex flex-col gap-1">
               <label className="text-sm opacity-70">
-                Birthday (Month/Date/Year)
+                {t("sidebar_profile.edit.birthday")}
               </label>
               <input
                 type="date"
@@ -185,13 +191,15 @@ const SidebarProfileEdit: React.FC = () => {
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-sm opacity-70">Bio</label>
+              <label className="text-sm opacity-70">
+                {t("sidebar_profile.edit.bio")}
+              </label>
               <textarea
                 name="bio"
                 value={formData.bio}
                 onChange={handleChange}
                 className="input min-h-[120px]"
-                placeholder="Describe something about yourself"
+                placeholder={t("sidebar_profile.edit.bio_placeholder")}
                 maxLength={150}
               />
               <span className="text-xs opacity-50 text-right">
@@ -206,7 +214,7 @@ const SidebarProfileEdit: React.FC = () => {
           onClick={() => setSidebar(SidebarMode.SETTINGS_ACCOUNT)}
         >
           <i className="material-symbols-outlined">person</i>
-          <span>Account Settings</span>
+          <span>{t("sidebar_profile.edit.account_settings")}</span>
         </div>
       </form>
     </SidebarLayout>

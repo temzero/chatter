@@ -4,8 +4,8 @@ import { SidebarMode } from "@/types/enums/sidebarMode";
 import { useAuthStore } from "@/stores/authStore";
 import { useCurrentUser } from "@/stores/authStore";
 import { userService } from "@/services/userService";
-import SwitchBtn from "@/components/ui/SwitchBtn";
 import { useTranslation } from "react-i18next";
+import SwitchBtn from "@/components/ui/SwitchBtn";
 
 const SidebarSettingsPrivacy: React.FC = () => {
   const { t } = useTranslation();
@@ -14,7 +14,6 @@ const SidebarSettingsPrivacy: React.FC = () => {
   const setMessage = useAuthStore((state) => state.setMessage);
   const setLoading = useAuthStore((state) => state.setLoading);
   const clearMessage = useAuthStore((state) => state.clearMessage);
-  const loading = useAuthStore((state) => state.loading);
   const message = useAuthStore((state) => state.message);
 
   const [privacySettings, setPrivacySettings] = useState({
@@ -162,18 +161,6 @@ const SidebarSettingsPrivacy: React.FC = () => {
             ))}
           </div>
         </div>
-
-        <button
-          type="submit"
-          className={`${
-            !isChanged ? "" : "primary"
-          } absolute bottom-0 left-0 p-1 w-full`}
-          disabled={!isChanged || loading}
-        >
-          {loading
-            ? t("privacy_settings.buttons.saving")
-            : t("privacy_settings.buttons.save_changes")}
-        </button>
 
         {message && (
           <div

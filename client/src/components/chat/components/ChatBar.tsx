@@ -2,14 +2,14 @@ import clsx from "clsx";
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useMessageStore } from "@/stores/messageStore";
 import { AnimatePresence, motion } from "framer-motion";
-import EmojiPicker from "../ui/EmojiPicker";
-import AttachFile from "../ui/AttachFile";
-import AttachmentImportedPreview from "../ui/AttachmentImportedPreview";
-import useTypingIndicator from "@/hooks/useTypingIndicator";
 import { handleSendMessage } from "@/utils/sendMessageHandler";
 import { useModalStore, useReplyToMessageId } from "@/stores/modalStore";
 import { useCurrentUserId } from "@/stores/authStore";
 import { useTranslation } from "react-i18next";
+import EmojiPicker from "../../ui/EmojiPicker";
+import AttachFile from "../../ui/AttachFile";
+import AttachmentImportedPreview from "../../ui/AttachmentImportedPreview";
+import useTypingIndicator from "@/hooks/useTypingIndicator";
 
 interface ChatBarProps {
   chatId: string;
@@ -256,7 +256,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
         <AttachmentImportedPreview
           files={attachedFiles}
           urls={filePreviewUrls}
-          onRemove={(index) => {
+          onRemove={(index: number) => {
             setAttachedFiles((prev) => prev.filter((_, i) => i !== index));
             setFilePreviewUrls((prev) => prev.filter((_, i) => i !== index));
           }}
