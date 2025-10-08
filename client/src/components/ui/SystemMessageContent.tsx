@@ -57,7 +57,7 @@ export const SystemMessageContent = ({
 
   return (
     <div
-      className={`flex gap-1 items-center text-muted-foreground text-sm  ${getSystemMessageColor(
+      className={`flex gap-1 items-center text-sm truncate ${getSystemMessageColor(
         systemEvent,
         callStatus
       )} ${ClassName}`}

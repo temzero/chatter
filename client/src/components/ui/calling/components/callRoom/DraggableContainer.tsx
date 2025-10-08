@@ -26,11 +26,12 @@ export const DraggableContainer = ({
       initial={{ scale: 0.2, opacity: 0, ...initialX }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ type: "spring", stiffness: 500, damping: 25 }}
-      className={`absolute z-30 cursor-grab active:cursor-grabbing ${positionClasses[position]} ${className} ${className}`}
+      className={`absolute cursor-grab active:cursor-grabbing ${positionClasses[position]} ${className} ${className}`}
       drag
       dragConstraints={containerRef}
       dragElastic={0.8}
       dragMomentum={false}
+      style={{ zIndex: 10 }}
     >
       {children}
     </motion.div>

@@ -18,6 +18,9 @@ import { useCallStore } from "@/stores/callStore/callStore";
 import { CallStatus } from "@/types/enums/CallStatus";
 import { useShallow } from "zustand/shallow";
 import { ChatMemberRole } from "@/types/enums/chatMemberRole";
+import { useDeviceStore } from "@/stores/deviceStore";
+import { useChatStore } from "@/stores/chatStore";
+import { useNavigate } from "react-router-dom";
 
 interface ChatHeaderProps {
   chat: ChatResponse;
@@ -25,9 +28,12 @@ interface ChatHeaderProps {
 }
 
 const Header: React.FC<ChatHeaderProps> = ({ chat, isBlockedByMe = false }) => {
+  const isMobile = useDeviceStore((state) => state.isMobile);
   const toggleSidebarInfo = useSidebarInfoStore(
     (state) => state.toggleSidebarInfo
   );
+  const navigate = useNavigate();
+  const setActiveChat = useChatStore((state) => state.setActiveChat);
 
   const {
     callId,
@@ -101,25 +107,43 @@ const Header: React.FC<ChatHeaderProps> = ({ chat, isBlockedByMe = false }) => {
     }
   };
 
+  const handleGoHome = () => {
+    setActiveChat(null);
+    navigate("/", { replace: true });
+  };
+
   if (!chat) return null;
 
   return (
     <header
-      className="absolute top-0 left-0 w-full cursor-pointer hover:shadow-2xl flex items-center justify-between min-h-[var(--header-height)] max-h-[var(--header-height)] px-3 backdrop-blur-xl shadow z-[80]"
-      onClick={toggleSidebarInfo}
+      className="w-full absolute top-0 left-0 hover:shadow-2xl flex items-center justify-between min-h-[var(--header-height)] max-h-[var(--header-height)] px-3 backdrop-blur-xl shadow select-none"
+      style={{ zIndex: 2 }}
     >
       {chat.pinnedMessage && (
         <PinnedMessage message={chat.pinnedMessage} chatType={chat.type} />
       )}
 
+      {isMobile && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleGoHome();
+          }}
+          className="flex items-center justify-center opacity-40 hover:opacity-100 w-[--header-height] h-[--header-height] -ml-3"
+        >
+          <i className="material-symbols-outlined text-2xl">arrow_back_ios</i>
+        </button>
+      )}
+
       <AnimatePresence mode="wait">
         <motion.div
           key={chat.id}
-          className="flex gap-3 items-center cursor-pointer"
+          className="flex gap-3 items-center cursor-pointer hover:text-[--primary-green]"
           initial={{ opacity: 0.2, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0.2, scale: 0.9 }}
           transition={{ type: "tween", duration: 0.1, ease: "easeInOut" }}
+          onClick={toggleSidebarInfo}
         >
           <ChatAvatar chat={chat} type="header" isBlocked={isBlockedByMe} />
           <h1 className="text-xl font-medium">

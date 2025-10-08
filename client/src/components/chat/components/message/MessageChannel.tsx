@@ -1,21 +1,15 @@
 import React, { useState, useRef } from "react";
 import clsx from "clsx";
-import { motion } from "framer-motion";
 import RenderMultipleAttachments from "@/components/ui/RenderMultipleAttachments";
-import { formatTime } from "@/utils/formatTime";
-import type { MessageResponse } from "@/types/responses/message.response";
 import SystemMessage from "./SystemMessage";
+import ForwardedMessagePreview from "@/components/ui/ForwardMessagePreview";
+import { motion } from "framer-motion";
+import { formatTime } from "@/utils/formatTime";
 import { SystemMessageJSONContent } from "@/components/ui/SystemMessageContent";
 import { useCurrentUserId } from "@/stores/authStore";
 import { MessageReactionDisplay } from "@/components/ui/MessageReactionsDisplay";
-import ForwardedMessagePreview from "@/components/ui/ForwardMessagePreview";
 import { handleQuickReaction } from "@/utils/quickReaction";
 import { messageAnimations } from "@/animations/messageAnimations";
-import {
-  useIsMessageFocus,
-  useIsReplyToThisMessage,
-  useModalStore,
-} from "@/stores/modalStore";
 import { MessageStatus } from "@/types/enums/message";
 import { ChatType } from "@/types/enums/ChatType";
 import { MessageContextMenu } from "./MessageContextMenu";
@@ -24,12 +18,20 @@ import { scrollToMessageById } from "@/utils/scrollToMessageById";
 import { MessageHorizontalPreviewTypes } from "@/types/enums/MessageHorizontalPreviewTypes";
 import { BroadcastMessage } from "./BroadcastMessage";
 import { SystemEventType } from "@/types/enums/systemEventType";
+import { useDeviceStore } from "@/stores/deviceStore";
+import type { MessageResponse } from "@/types/responses/message.response";
+import {
+  useIsMessageFocus,
+  useIsReplyToThisMessage,
+  useModalStore,
+} from "@/stores/modalStore";
 
 interface ChannelMessageProps {
   message: MessageResponse;
 }
 
 const ChannelMessage: React.FC<ChannelMessageProps> = ({ message }) => {
+  const isMobile = useDeviceStore((state) => state.isMobile);
   const currentUserId = useCurrentUserId();
   const isMe = message.sender.id === currentUserId;
 
@@ -82,9 +84,10 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ message }) => {
       key={message.id}
       ref={messageRef}
       id={`message-${message.id}`}
-      className={clsx("relative w-[60%] group mx-auto mb-4", {
+      className={clsx("relative group mx-auto mb-4", {
         "scale-[1.1]": isReplyToThisMessage,
         "z-[99]": isFocus,
+        "w-[60%]": !isMobile,
       })}
       initial={animationProps.initial}
       animate={animationProps.animate}
@@ -145,7 +148,10 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ message }) => {
           />
         )}
 
-        <div className="absolute bottom-1 right-1 text-xs italic opacity-0 group-hover:opacity-80 font-semibold bg-[--sidebar-color] p-0.5 px-1.5 rounded-full z-9 backdrop-blur-lg">
+        <div
+          className="absolute bottom-1 right-1 text-xs italic opacity-0 group-hover:opacity-80 font-semibold bg-[--sidebar-color] p-0.5 px-1.5 rounded-full backdrop-blur-lg"
+          style={{ zIndex: 1 }}
+        >
           {formatTime(message.createdAt)}
         </div>
 

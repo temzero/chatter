@@ -133,7 +133,10 @@ const CustomEmojiPicker = ({ onSelect }: CustomEmojiPickerProps) => {
       </a>
 
       {isOpen && (
-        <div className="absolute right-4 bottom-12 mb-3 w-80 bg-[var(--sidebar-color)] rounded-lg shadow-lg border custom-border z-50 overflow-x-hidden">
+        <div
+          className="absolute right-4 bottom-12 mb-3 w-80 bg-[var(--sidebar-color)] rounded-lg shadow-lg border custom-border overflow-x-hidden"
+          style={{ zIndex: 99 }}
+        >
           <div className="h-80 overflow-y-auto overflow-x-hidden pt-0">
             {combinedCategories.map((category) => (
               <div key={category.name}>

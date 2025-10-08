@@ -75,7 +75,7 @@ const Modal = () => {
 
       case ModalType.CALL:
         return <CallModal />;
-        
+
       case ModalType.DELETE_CALL:
         return <DeleteCallModal />;
 
@@ -89,8 +89,9 @@ const Modal = () => {
       {modalContent && (
         <motion.div
           {...modalAnimation}
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[96] flex items-center justify-center"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center"
           onClick={handleCloseModal}
+          style={{ zIndex: 99 }}
         >
           {renderModalContent}
         </motion.div>

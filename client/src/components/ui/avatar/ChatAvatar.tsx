@@ -156,7 +156,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
     default:
       return (
         <div
-          className={`bg-[var(--border-color)] select-none ${parentScaleClass} ${styles.size} flex items-center justify-center`}
+          className={`bg-[var(--border-color)] select-none ${parentScaleClass} ${styles.size} flex flex-1 items-center justify-center`}
         >
           <i
             className={`material-symbols-outlined ${styles.fallbackIconSize} opacity-20`}

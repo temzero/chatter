@@ -52,7 +52,10 @@ const CallMember = ({
     <div
       className={`relative w-full h-full overflow-hidden bg-[--border-color] text-[--text-color] flex items-center justify-center ${className}`}
     >
-      <div className="absolute inset-0 w-full h-full flex items-center justify-center z-0 bg-[--border-color]">
+      <div
+        className="absolute inset-0 w-full h-full flex items-center justify-center bg-[--border-color]"
+        style={{ zIndex: 0 }}
+      >
         {avatarUrl && !hasVideo ? (
           <img
             src={avatarUrl}
@@ -73,7 +76,6 @@ const CallMember = ({
           {/* Video or screen share */}
           <VideoStream
             stream={screenTrack || videoTrack!}
-            // className="absolute inset-0 z-0"
             className="z-0"
             objectCover
             mirror
@@ -93,7 +95,10 @@ const CallMember = ({
 
           {/* Screen share indicator */}
           {isShowingScreen && (
-            <div className="absolute top-2 left-2 bg-blue-600/80 px-2 py-1 rounded text-xs z-10">
+            <div
+              className="absolute top-2 left-2 bg-blue-600/80 px-2 py-1 rounded text-xs"
+              style={{ zIndex: 1 }}
+            >
               🖥️ Screen Sharing
             </div>
           )}
@@ -104,7 +109,10 @@ const CallMember = ({
           {audioTrack && <VoiceStream stream={audioTrack} muted={isMuted} />}
           <div className="relative flex items-center justify-center rounded-full">
             {showVoiceVisualizer && audioTrack && !isMuted && (
-              <div className="absolute inset-0 flex items-center justify-center z-0">
+              <div
+                className="absolute inset-0 flex items-center justify-center"
+                style={{ zIndex: 0 }}
+              >
                 <VoiceVisualizer
                   stream={audioTrack}
                   isMuted={isMuted}
@@ -122,14 +130,20 @@ const CallMember = ({
             />
           </div>
 
-          <p className="text-lg font-medium text-center relative z-10">
+          <p
+            className="text-lg font-medium text-center relative"
+            style={{ zIndex: 1 }}
+          >
             {displayName}
           </p>
         </div>
       )}
 
       {/* Overlay name */}
-      <div className="absolute bottom-2 left-2 bg-black/50 text-white px-2 py-1 rounded text-sm z-10">
+      <div
+        className="absolute bottom-2 left-2 bg-black/50 text-white px-2 py-1 rounded text-sm"
+        style={{ zIndex: 1 }}
+      >
         {displayName}
         {isMuted && " 🔇"}
         {isShowingScreen && " 🖥️"}

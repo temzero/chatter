@@ -57,9 +57,10 @@ export const VoiceVisualizerButton = ({
         icon={isMuted ? "mic_off" : "mic"}
         isIconFilled={!isMuted}
         isRoundedFull
-        className={`w-full h-full z-10 ${
+        className={`w-full h-full ${
           isMuted ? "bg-red-500/50" : "!text-[--primary-green]"
         }`}
+        style={{ zIndex: 10 }}
       />
     </div>
   );

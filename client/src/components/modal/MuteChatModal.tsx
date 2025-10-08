@@ -51,7 +51,8 @@ const MuteChatModal: React.FC = () => {
   return (
     <motion.div
       {...childrenModalAnimation}
-      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border z-[99]"
+      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border"
+      style={{ zIndex: 100 }}
     >
       <div className="p-4 flex flex-col items-center justify-center">
         <h2 className="text-2xl flex items-center justify-center gap-2 font-semibold mb-4 text-yellow-500">

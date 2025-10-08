@@ -113,9 +113,8 @@
   },
 
   "sidebar_new_chat": {
-    "title": "Chat {{type}} mới",
+    "title": "Tạo {{type}} mới",
     "direct": {
-      "title": "Tạo {{type}} mới",
       "placeholder": "@username/email/ĐT",
       "find_user": "Tìm kiếm",
       "user_not_found": "Không tìm thấy người dùng!",

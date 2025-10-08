@@ -43,7 +43,7 @@ const SidebarSearch: React.FC = () => {
   };
 
   return (
-    <aside className="w-[var(--sidebar-width)] h-full flex flex-col transition-all duration-300 ease-in-out">
+    <aside className="w-full h-full flex flex-col transition-all duration-300 ease-in-out">
       {/* Header */}
       <header
         id="logo-container"

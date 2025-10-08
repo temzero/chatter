@@ -1,11 +1,11 @@
 import React from "react";
-import { CallResponseDto } from "@/types/responses/call.response";
 import { CallStatus } from "@/types/enums/CallStatus";
 import { formatDurationByStartAndEnd } from "@/utils/formatDuration";
 import { formatTime } from "@/utils/formatTime";
 import { useTranslation } from "react-i18next";
+import { CallLiteResponse } from "@/types/responses/callLite.response";
 interface BroadcastMessageProps {
-  call: CallResponseDto;
+  call: CallLiteResponse;
 }
 
 export const BroadcastMessage: React.FC<BroadcastMessageProps> = ({ call }) => {

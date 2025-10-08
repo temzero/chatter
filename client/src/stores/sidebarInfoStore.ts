@@ -3,11 +3,13 @@ import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useShallow } from "zustand/shallow";
+import { useActiveChatId } from "./chatStore";
 
 interface SidebarInfoStore {
   isSidebarInfoVisible: boolean;
   currentSidebarInfo: SidebarInfoMode;
   toggleSidebarInfo: () => void;
+  setIsSidebarInfoVisible: (isVisible: boolean) => void;
   setSidebarInfo: (mode?: SidebarInfoMode) => void;
   initializeKeyListeners: () => () => void;
 }
@@ -22,9 +24,12 @@ export const useSidebarInfoStore = create<SidebarInfoStore>()(
         const currentVisibility = get().isSidebarInfoVisible;
         set({
           isSidebarInfoVisible: !currentVisibility,
-          currentSidebarInfo: SidebarInfoMode.DEFAULT, // Reset mode when toggling
+          currentSidebarInfo: SidebarInfoMode.DEFAULT,
         });
       },
+
+      setIsSidebarInfoVisible: (isVisible: boolean) =>
+        set({ isSidebarInfoVisible: isVisible }),
 
       setSidebarInfo: (mode = SidebarInfoMode.DEFAULT) =>
         set({ currentSidebarInfo: mode }),
@@ -68,8 +73,16 @@ export const useSidebarInfoStore = create<SidebarInfoStore>()(
 );
 
 // Selector hooks
-export const useSidebarInfoVisibility = () =>
-  useSidebarInfoStore(useShallow((state) => state.isSidebarInfoVisible));
+// export const useSidebarInfoVisibility = () =>
+//   useSidebarInfoStore(useShallow((state) => state.isSidebarInfoVisible));
+export const useSidebarInfoVisibility = () => {
+  const isSidebarInfoVisible = useSidebarInfoStore(
+    useShallow((state) => state.isSidebarInfoVisible)
+  );
+  const activeChatId = useActiveChatId();
+  // Only visible if store flag is true AND there is an active chat
+  return isSidebarInfoVisible && !!activeChatId;
+};
 
 export const useCurrentSidebarInfo = () =>
   useSidebarInfoStore(useShallow((state) => state.currentSidebarInfo));

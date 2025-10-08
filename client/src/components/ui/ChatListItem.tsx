@@ -36,7 +36,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
 
     const getUserItemClass = () => {
       const baseClasses =
-        "relative flex items-center w-full h-24 gap-3 p-3 transition-all duration-300 ease-in-out cursor-pointer";
+        "relative flex items-center w-full h-24 gap-3 p-3 transition-all duration-300 ease-in-out custom-border-b cursor-pointer";
       const activeClasses = isActive
         ? "bg-[var(--active-chat-color)]"
         : "hover:bg-[var(--hover-color)]";
@@ -44,8 +44,9 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
     };
 
     const draft = getDraftMessage(chat.id);
+
     const displayMessage = draft ? (
-      <p className="text-[var(--primary-green)] flex items-center gap-1 overflow-hidden max-w-[196px]">
+      <p className="text-[var(--primary-green)] flex items-center gap-1 overflow-hidden flex-1 min-w-0">
         <i className="material-symbols-outlined flex items-center justify-center text-[16px] h-3">
           edit
         </i>
@@ -61,13 +62,12 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
           senderId={lastMessage.senderId}
           senderDisplayName={lastMessage.senderDisplayName}
           JSONcontent={lastMessage.content as SystemMessageJSONContent}
-          ClassName="gap-1 max-w-[196px] opacity-60"
+          ClassName="gap-1 truncate opacity-60 flex-1 min-w-0"
         />
       ) : (
         <p
-          className={`flex items-center gap-1 text-xs max-w-[196px] min-h-6 
-          ${unreadCount > 0 ? "opacity-100" : "opacity-40"}
-        `}
+          className={`flex items-center gap-1 text-xs min-h-6 flex-1 min-w-0
+      ${unreadCount > 0 ? "opacity-100" : "opacity-40"}`}
         >
           {lastMessage.senderId === currentUserId ? (
             <strong>Me:</strong>
@@ -75,7 +75,6 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
             <strong>{lastMessage.senderDisplayName.split(" ")[0]}:</strong>
           ) : null}
 
-          {/* If forwarded */}
           {lastMessage.isForwarded && (
             <span className="material-symbols-outlined rotate-90">
               arrow_warm_up
@@ -118,10 +117,10 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
           <ChatAvatar chat={chat} type="sidebar" isBlocked={isBlockedByMe} />
 
           {!isCompact && (
-            <>
-              <div className="flex flex-col justify-center gap-1">
+            <div className="flex flex-col flex-1 min-w-0 gap-1">
+              <div className="flex items-center justify-between">
                 <h1
-                  className={`text-lg font-semibold whitespace-nowrap text-ellipsis ${
+                  className={`text-lg font-semibold whitespace-nowrap text-ellipsis flex-1 min-w-0 ${
                     chat.isDeleted ? "text-yellow-500/80" : ""
                   }`}
                 >
@@ -129,68 +128,72 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
                   {chat.name}
                 </h1>
 
-                <AnimatePresence mode="wait" initial={false}>
-                  {typingUsers.length > 0 ? (
-                    <motion.div
-                      key="typing"
-                      initial={{ opacity: 0, y: 4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <SimpleTypingIndicator
-                        chatId={chat.id}
-                        userIds={typingUsers}
-                      />
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="message"
-                      initial={{ opacity: 0, y: 4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      {displayMessage}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              <div className="flex gap-1 absolute top-2 right-4 text-xs opacity-40">
-                <p className="">
-                  {formatTimeAgo(
-                    (lastMessage?.createdAt as string | Date | undefined) ??
-                      (chat.updatedAt as string | Date)
-                  )}
-                </p>
-                <AnimatePresence>
-                  {chat.mutedUntil && (
-                    <motion.div
-                      key="typing"
-                      initial={{ opacity: 0, scale: 3 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.1 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <span className="material-symbols-outlined text-[18px]">
-                        notifications_off
-                      </span>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {unreadCount > 0 && (
-                <div className="absolute bottom-6 right-4 font-bold text-white bg-red-500 rounded-full text-xs flex items-center justify-center ml-auto w-4 h-4">
-                  {unreadCount}
+                <div className="flex gap-1 text-xs opacity-40 items-center flex-shrink-0 ml-2">
+                  <p className="whitespace-nowrap">
+                    {formatTimeAgo(
+                      (lastMessage?.createdAt as string | Date | undefined) ??
+                        (chat.updatedAt as string | Date)
+                    )}
+                  </p>
+                  <AnimatePresence>
+                    {chat.mutedUntil && (
+                      <motion.div
+                        key="muted"
+                        initial={{ opacity: 0, scale: 3 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.1 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          notifications_off
+                        </span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
-              )}
-            </>
+              </div>
+
+              <div className="flex items-center justify-between min-h-6">
+                <div className="flex-1 min-w-0 mr-2">
+                  <AnimatePresence mode="wait" initial={false}>
+                    {typingUsers.length > 0 ? (
+                      <motion.div
+                        key="typing"
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        transition={{ duration: 0.2 }}
+                        className="min-w-0"
+                      >
+                        <SimpleTypingIndicator
+                          chatId={chat.id}
+                          userIds={typingUsers}
+                        />
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="message"
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        transition={{ duration: 0.2 }}
+                        className="min-w-0"
+                      >
+                        {displayMessage}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {unreadCount > 0 && (
+                  <div className="flex-shrink-0 font-bold text-white bg-red-500 rounded-full text-xs flex items-center justify-center w-4 h-4">
+                    {unreadCount}
+                  </div>
+                )}
+              </div>
+            </div>
           )}
         </div>
-
-        {!isCompact && <div className="w-[90%] mx-auto custom-border-b"></div>}
       </>
     );
   }

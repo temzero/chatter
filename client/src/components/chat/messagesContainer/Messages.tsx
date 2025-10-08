@@ -73,8 +73,11 @@ const Messages: React.FC<ChatMessagesProps> = ({ chat, messages }) => {
     <>
       {messagesByDate.map((group) => (
         <React.Fragment key={`${group.date}-${chatId}`}>
-          <div className="sticky top-0 z-20 flex justify-center">
-            <div className="bg-[var(--background-color)] text-xs p-1 rounded z-30">
+          <div
+            className="sticky top-0 flex justify-center"
+            style={{ zIndex: 1 }}
+          >
+            <div className="bg-[var(--background-color)] text-xs p-1 rounded">
               {group.date || "Today"}
             </div>
           </div>

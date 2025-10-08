@@ -14,11 +14,17 @@ import { useMuteControl } from "@/hooks/useMuteControl";
 import { SidebarInfoHeaderIcons } from "@/components/ui/SidebarInfoHeaderIcons";
 import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
 import { useTranslation } from "react-i18next";
+import { useDeviceStore } from "@/stores/deviceStore";
 
 const DirectChat: React.FC = () => {
   const { t } = useTranslation();
+  const isMobile = useDeviceStore((state) => state.isMobile);
+
   const activeChat = useActiveChat() as ChatResponse;
   const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
+  const setIsSidebarInfoVisible = useSidebarInfoStore(
+    (state) => state.setIsSidebarInfoVisible
+  );
   const chatMembers = useActiveMembers();
   const openModal = useModalStore((state) => state.openModal);
   const setDisplaySearchMessage = useMessageStore(
@@ -91,6 +97,14 @@ const DirectChat: React.FC = () => {
       }
     );
   }
+  
+  if (isMobile) {
+    headerIcons.unshift({
+      icon: "arrow_back_ios",
+      title: t("common.actions.back"),
+      action: () => setIsSidebarInfoVisible(false),
+    });
+  }
 
   return (
     <div className="flex flex-col w-full h-full">
@@ -115,9 +129,7 @@ const DirectChat: React.FC = () => {
         )}
 
         {chatPartner.isBlockedMe && (
-          <h1 className="text-red-500">
-            {t("common.actions.blocked_me")}
-          </h1>
+          <h1 className="text-red-500">{t("common.actions.blocked_me")}</h1>
         )}
         {chatPartner.isBlockedByMe ? (
           <h1 className="text-red-500">

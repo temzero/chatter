@@ -41,7 +41,8 @@ const BlockUserModal: React.FC = () => {
   return (
     <motion.div
       {...childrenModalAnimation}
-      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border z-[99]"
+      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border"
+      style={{ zIndex: 100 }}
     >
       <div className="p-4">
         <h2 className="text-2xl font-semibold mb-4 text-red-500">

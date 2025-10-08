@@ -8,7 +8,10 @@ export const CallHeader = ({
   chat: ChatResponse;
   className?: string;
 }) => (
-  <div className={`flex flex-col items-center z-20 ${className}`}>
+  <div
+    className={`flex flex-col items-center ${className}`}
+    style={{ zIndex: 1 }}
+  >
     <ChatAvatar chat={chat} type="call" />
     <h2 className="text-xl font-semibold mt-2">{chat.name}</h2>
   </div>

@@ -75,7 +75,10 @@ const MessagesContainer: React.FC<ChatBoxProps> = ({ chat }) => {
       hasMore={hasMoreMessages}
       isScrollUp={true}
       loader={
-        <div className="w-full flex justify-center py-4 sticky top-0 z-10 bg-bg-primary">
+        <div
+          className="w-full flex justify-center py-4 sticky top-0 bg-bg-primary"
+          style={{ zIndex: 3 }}
+        >
           <RingLoader color="#777777" size={24} />
         </div>
       }

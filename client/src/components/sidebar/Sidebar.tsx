@@ -81,7 +81,10 @@ const Sidebar = () => {
     ] || sidebarAnimations.fallback;
 
   return (
-    <div className="bg-[var(--sidebar-color)] h-full flex flex-col shadow border-[var(--border-color)] border-r-2 transition-all duration-300 ease-in-out z-50">
+    <div
+      className="h-full w-full flex flex-col bg-[var(--sidebar-color)] shadow border-[var(--border-color)] border-r-2 transition-all duration-300 ease-in-out"
+      style={{ zIndex: 10 }}
+    >
       <AnimatePresence mode="wait">
         <motion.div key={currentSidebar} {...animation} className="h-full">
           {CurrentComponent}

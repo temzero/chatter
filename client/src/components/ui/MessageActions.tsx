@@ -127,8 +127,9 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
 
   return (
     <div
-      className={clsx("flex rounded-lg blur-card z-50", className)}
       onClick={(e) => e.stopPropagation()}
+      className={clsx("flex rounded-lg blur-card", className)}
+      style={{ zIndex: 99 }}
     >
       {baseActions.map((action, index) => (
         <button

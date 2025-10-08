@@ -16,6 +16,7 @@ const ChatBox = React.memo(() => {
     activeChat?.myMemberId ?? ""
   );
 
+  console.log('activeChat', activeChat)
   if (!activeChat) return null;
 
   const isDirectChat = activeChat.type === ChatType.DIRECT;
@@ -23,7 +24,7 @@ const ChatBox = React.memo(() => {
   const isMember = Boolean(activeChat.myMemberId);
 
   return (
-    <section className="relative flex-1 flex flex-col justify-between h-full overflow-hidden">
+    <section className="h-full flex-1 relative flex flex-col justify-between overflow-hidden transition-all">
       <Header chat={activeChat} isBlockedByMe={isBlockedByMe} />
       <MessagesContainer chat={activeChat} />
       {!activeChat.isDeleted && (

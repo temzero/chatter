@@ -31,10 +31,16 @@ export const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
   if (!chat) return null;
 
   return (
-    <div className="flex flex-col items-center justify-between w-full h-full z-20">
+    <div
+      className="flex flex-col items-center justify-between w-full h-full"
+      style={{ zIndex: 1 }}
+    >
       {/* Background - Avatar or Webcam */}
       {localVideoStream ? (
-        <div className="absolute inset-0 overflow-hidden z-0 opacity-70 w-full h-full">
+        <div
+          className="absolute inset-0 overflow-hidden opacity-70 w-full h-full"
+          style={{ zIndex: 0 }}
+        >
           <VideoStream
             stream={localVideoStream}
             className="scale-125 pointer-events-none"
@@ -45,7 +51,8 @@ export const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
         chat?.avatarUrl && (
           <img
             src={chat.avatarUrl}
-            className="absolute inset-0 overflow-hidden z-0 opacity-20 w-full h-full object-cover scale-125 blur select-none pointer-events-none"
+            className="absolute inset-0 overflow-hidden opacity-20 w-full h-full object-cover scale-125 blur select-none pointer-events-none"
+            style={{ zIndex: 0 }}
           />
         )
       )}
@@ -76,7 +83,7 @@ export const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
       </div>
 
       {/* Cancel Button */}
-      <div className="flex gap-4 mt-4 z-50">
+      <div className="flex gap-4 mt-4" style={{ zIndex: 2 }}>
         <Button
           onClick={cancelCall}
           variant="danger"

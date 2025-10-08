@@ -68,7 +68,7 @@ const SidebarNewChat: React.FC = () => {
   };
 
   return (
-    <aside className="w-[var(--sidebar-width)] h-full flex flex-col transition-all duration-300 ease-in-out">
+    <aside className="w-full h-full flex flex-col transition-all duration-300 ease-in-out">
       <header className="flex w-full items-center h-[var(--header-height)] p-2 pr-0 justify-between">
         <h1 className="font-semibold text-xl pl-1">
           {t("sidebar_new_chat.title", {

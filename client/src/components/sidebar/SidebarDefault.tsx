@@ -13,8 +13,8 @@ import type FolderResponse from "@/types/responses/folder.response";
 const SidebarDefault: React.FC = () => {
   const allChats = useAllChats();
   const setSidebar = useSidebarStore((state) => state.setSidebar);
-  const isCompact = useSidebarStore((state) => state.isCompact);
   const folders = useFolderStore((state) => state.folders);
+  const isCompact = useSidebarStore((state) => state.isCompact);
 
   // Create a virtual "All" folder
   const allFolder: FolderResponse = {
@@ -60,11 +60,9 @@ const SidebarDefault: React.FC = () => {
 
   return (
     <aside
-      className={`h-full flex flex-col transition-all duration-300 ease-in-out ${
-        isCompact
-          ? "w-[var(--sidebar-width-small)]"
-          : "w-[var(--sidebar-width)]"
-      }`}
+      className={`h-full flex flex-col transition-all duration-300 ease-in-out
+
+      `}
     >
       {/* Header */}
       <header className="relative flex w-full items-center h-[var(--header-height)] justify-between">
@@ -112,7 +110,7 @@ const SidebarDefault: React.FC = () => {
         <ChatFolderSelector
           selectedFolder={selectedFolder}
           onSelectFolder={handleChatTypeChange}
-          folders={folderList} // Pass the whole folder list
+          folders={folderList}
         />
       ) : (
         <div className="custom-border" />

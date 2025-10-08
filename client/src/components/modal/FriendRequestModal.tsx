@@ -53,7 +53,8 @@ const FriendRequestModal: React.FC = () => {
   return (
     <motion.div
       {...childrenModalAnimation}
-      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded p-4 max-w-xl w-[400px] custom-border z-[99]"
+      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded p-4 max-w-xl w-[400px] custom-border"
+      style={{ zIndex: 100 }}
     >
       <h1 className="font-bold text-center text-xl">
         {t("modal.friend_request.title")}

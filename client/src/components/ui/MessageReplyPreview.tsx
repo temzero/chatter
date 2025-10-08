@@ -140,12 +140,13 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
             ) : (
               <span
                 className={clsx(
-                  "material-symbols-outlined text-2xl absolute z-50 rotate-180",
+                  "material-symbols-outlined text-2xl absolute rotate-180",
                   {
                     "-bottom-[16px] -left-[5px]": isMe,
                     "-bottom-[16px] -right-[5px] scale-x-[-1]": !isMe,
                   }
                 )}
+                style={{ zIndex: 10 }}
               >
                 reply
               </span>

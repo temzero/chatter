@@ -51,11 +51,12 @@ const AppRoutes: React.FC = () => {
         />
 
         {/* Private Routes */}
-        <Route path={ROUTES.PRIVATE.HOME} element={<PrivateLayout />}>
+        {/* <Route path={ROUTES.PRIVATE.HOME} element={<PrivateLayout />}>
           <Route index element={null} />
-        </Route>
+        </Route> */}
+        <Route path={ROUTES.PRIVATE.HOME} element={<PrivateLayout />} />
+        <Route path={ROUTES.PRIVATE.CHAT} element={<PrivateLayout />} />
 
-        {/* <Route path={ROUTES.PRIVATE.CHAT} element={<Chat />} /> */}
         {/* Catch-all Route */}
         <Route
           path="*"

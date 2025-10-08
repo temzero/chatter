@@ -63,7 +63,7 @@ const SystemMessage = ({
       animate={animationProps.animate}
       transition={animationProps.transition}
       className={clsx(
-        "cursor-pointer max-w-[80%] opacity-50 pb-2 mx-auto flex items-center justify-center",
+        "cursor-pointer opacity-50 pb-2 mx-auto flex items-center justify-center",
         {
           "z-[99]": isFocus,
         }

@@ -13,12 +13,18 @@ import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
 import { rolePriority } from "@/types/enums/chatMemberRole";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { useTranslation } from "react-i18next";
+import { useDeviceStore } from "@/stores/deviceStore";
 
 const GroupChat: React.FC = () => {
   const { t } = useTranslation();
+  const isMobile = useDeviceStore((state) => state.isMobile);
   const activeChat = useActiveChat() as ChatResponse;
   const activeMembers = useActiveMembers() || [];
   const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
+  const setIsSidebarInfoVisible = useSidebarInfoStore(
+    (state) => state.setIsSidebarInfoVisible
+  );
+  
   const setDisplaySearchMessage = useMessageStore(
     (state) => state.setDisplaySearchMessage
   );
@@ -74,6 +80,14 @@ const GroupChat: React.FC = () => {
       title: t("common.actions.mute"),
       action: mute,
       className: "",
+    });
+  }
+
+  if (isMobile) {
+    headerIcons.unshift({
+      icon: "arrow_back",
+      title: t("common.actions.back"),
+      action: () => setIsSidebarInfoVisible(false),
     });
   }
 

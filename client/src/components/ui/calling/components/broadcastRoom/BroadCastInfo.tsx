@@ -16,7 +16,10 @@ export const BroadcastInfo: React.FC<BroadcastInfoProps> = ({
   return (
     <>
       {/* Left bottom: audience + chat info */}
-      <div className="flex gap-2 opacity-60 hover:opacity-100 z-20 absolute bottom-2 left-2">
+      <div
+        className="flex gap-2 opacity-60 hover:opacity-100 absolute bottom-2 left-2"
+        style={{ zIndex: 1 }}
+      >
         <ChatAvatar chat={chat} type="header" />
         <div className="flex flex-col justify-end">
           <h1 className="flex items-center gap-1 text-xs -mb-0.5">
@@ -27,7 +30,10 @@ export const BroadcastInfo: React.FC<BroadcastInfoProps> = ({
       </div>
 
       {/* Right bottom: timer */}
-      <div className="flex gap-2 opacity-60 hover:opacity-100 items-center z-20 absolute bottom-1 right-2.5">
+      <div
+        className="flex gap-2 opacity-60 hover:opacity-100 items-center absolute bottom-1 right-2.5"
+        style={{ zIndex: 1 }}
+      >
         {startedAt && <Timer startTime={startedAt} />}
       </div>
     </>

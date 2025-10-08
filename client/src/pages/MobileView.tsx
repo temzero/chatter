@@ -1,43 +1,47 @@
-import { useState } from "react";
-import Sidebar from "@/components/sidebar/Sidebar";
+import React from "react";
 import ChatBox from "@/components/chat/ChatBox";
-import ChatSidebar from "@/components/chat/ChatSidebar";
-
-import { MobileViewMode } from "@/types/enums/MobileViewMode";
+import SidebarInfo from "@/components/chat/sidebarInfo/SidebarInfo";
+import Sidebar from "@/components/sidebar/Sidebar";
+import { useActiveChat } from "@/stores/chatStore";
+import { useSidebarInfoVisibility } from "@/stores/sidebarInfoStore";
+import { AnimatePresence, motion } from "framer-motion";
 
 const MobileView: React.FC = () => {
-  const [activeView, setActiveView] = useState<MobileViewMode>(
-    MobileViewMode.SIDEBAR
-  );
+  const activeChat = useActiveChat();
+  const isSidebarVisible = useSidebarInfoVisibility();
 
   return (
-    <div className="w-full h-full relative">
-      {/* Sidebar view */}
-      {activeView === MobileViewMode.SIDEBAR && (
-        // <Sidebar onSelectChat={() => setActiveView(MobileViewMode.CHAT)} />
-        <Sidebar />
-      )}
+    <div className="w-full h-full flex relative">
+      <AnimatePresence>
+        <motion.div
+          key="sidebar"
+          initial={{ x: 0 }} // start visible
+          animate={{ x: activeChat ? "-100%" : 0 }} // move left when activeChat, else x=0
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          className="absolute top-0 left-0 h-full w-full"
+          style={{ zIndex: 10 }}
+        >
+          <Sidebar />
+        </motion.div>
+      </AnimatePresence>
 
-      {/* Chat view */}
-      {activeView === MobileViewMode.CHAT && (
-        <div className="w-full h-full flex flex-col">
-          {/* Optional back button at the top */}
-          <div className="p-2">
-            <button
-              className="text-blue-500 font-semibold"
-              onClick={() => setActiveView(MobileViewMode.SIDEBAR)}
-            >
-              Back
-            </button>
-          </div>
+      <ChatBox />
 
-          {/* Chat content */}
-          <div className="flex-1 flex h-full">
-            <ChatBox />
-            <ChatSidebar />
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {isSidebarVisible && (
+          <motion.div
+            key="sidebarInfo"
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="absolute top-0 right-0 h-full w-full"
+            style={{ zIndex: 10 }}
+          >
+            <SidebarInfo />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

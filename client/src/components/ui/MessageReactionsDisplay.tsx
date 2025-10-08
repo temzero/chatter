@@ -65,13 +65,14 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
       }}
       whileTap={{ scale: 0.8 }}
       className={clsx(
-        "message-reaction absolute z-10 flex bg-black/50 rounded-full",
+        "message-reaction absolute flex bg-black/50 rounded-full",
         isChannel
           ? "left-1 -bottom-2"
           : isMe && !isSystemMessage
           ? "-left-4 -bottom-2"
           : "-right-4 -bottom-4 flex-row-reverse"
       )}
+      style={{ zIndex: 1 }}
     >
       <AnimatePresence>
         {sortedReactions.map(([emoji, userIds]) => {

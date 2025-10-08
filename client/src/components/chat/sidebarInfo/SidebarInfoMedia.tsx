@@ -102,12 +102,12 @@ const ChatInfoMedia: React.FC = () => {
     <aside className="relative w-full h-full overflow-hidden flex flex-col">
       <header className="flex p-4 w-full items-center min-h-[var(--header-height)] custom-border-b">
         <h1 className="text-xl font-semibold">{t("sidebar_info.media_files.title")}</h1>
-        <a
+        {/* <a
           className="flex items-center rounded-full cursor-pointer opacity-50 hover:opacity-100 ml-auto"
           onClick={() => setSidebarInfo(SidebarInfoMode.DEFAULT)}
         >
           <i className="material-symbols-outlined">edit</i>
-        </a>
+        </a> */}
       </header>
 
       <div className="flex justify-around items-center custom-border-b w-full backdrop-blur-[120px]">

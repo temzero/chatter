@@ -68,7 +68,7 @@ export const CallRoom = ({
     >
       {/* Header info */}
       {/* <CallInfo chat={chat} memberCount={memberCount} startedAt={startedAt} /> */}
-      <div className="absolute left-2 top-1 z-20">
+      <div className="absolute left-2 top-1" style={{ zIndex: 2 }}>
         {chat.name}
         {memberCount > 1 && (
           <span>
@@ -77,7 +77,7 @@ export const CallRoom = ({
           </span>
         )}
       </div>
-      <div className="absolute bottom-1 right-2 z-20">
+      <div className="absolute bottom-1 right-2" style={{ zIndex: 2 }}>
         {startedAt && <Timer startTime={startedAt} />}
       </div>
 
@@ -86,7 +86,7 @@ export const CallRoom = ({
       ) : (
         <CallHeader
           chat={chat}
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10"
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-1"
         />
       )}
 

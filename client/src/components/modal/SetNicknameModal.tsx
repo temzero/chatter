@@ -36,7 +36,8 @@ const SetNicknameModal: React.FC = () => {
   return (
     <motion.div
       {...childrenModalAnimation}
-      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border z-[99]"
+      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border"
+      style={{ zIndex: 100 }}
     >
       <div className="p-4">
         <div className="flex gap-2 items-center mb-4 font-semibold">
@@ -74,9 +75,7 @@ const SetNicknameModal: React.FC = () => {
           onClick={handleSave}
           disabled={loading}
         >
-          {loading
-            ? t("common.loading.saving")
-            : t("common.actions.save")}
+          {loading ? t("common.loading.saving") : t("common.actions.save")}
         </button>
         <button
           className="p-3 hover:bg-[var(--background-secondary)] font-semibold hover:font-bold opacity-80 hover:opacity-100 flex-1"

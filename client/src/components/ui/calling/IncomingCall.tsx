@@ -28,7 +28,10 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
     <div className="flex flex-col items-center w-full h-full">
       {/* Background - Avatar or Webcam */}
       {showVideoPreview && (
-        <div className="absolute inset-0 overflow-hidden z-0 opacity-70 w-full h-full">
+        <div
+          className="absolute inset-0 overflow-hidden opacity-70 w-full h-full"
+          style={{ zIndex: 0 }}
+        >
           <VideoStream
             stream={localVideoStream}
             className="scale-125 blur-md"
@@ -38,7 +41,11 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
       )}
 
       {/* Header with avatar */}
-      <div id="calling-title" className="flex flex-col items-center z-50">
+      <div
+        id="calling-title"
+        className="flex flex-col items-center"
+        style={{ zIndex: 1 }}
+      >
         <CallHeader chat={chat} />
         <p className="text-sm text-gray-400 mt-1">
           Incoming {isVideoCall ? "video" : "voice"} call
@@ -46,7 +53,10 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
       </div>
 
       {/* calling-content */}
-      <div className="flex flex-col justify-center items-center gap-4 py-6 select-none z-0">
+      <div
+        className="flex flex-col justify-center items-center gap-4 py-6 select-none"
+        style={{ zIndex: 0 }}
+      >
         <motion.button
           title={`Incoming ${isVideoCall ? "Video" : "Voice"} Call`}
           className="p-4 rounded-full hover:bg-[--primary-green] transition-colors relative hover:custom-border"
@@ -85,14 +95,17 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
           </AnimatePresence>
 
           {/* Loader */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-20 z-0 pointer-events-none">
+          <div
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-20 pointer-events-none"
+            style={{ zIndex: 0 }}
+          >
             <BounceLoader color="#8b8b8b" size={500} />
           </div>
         </motion.button>
       </div>
 
       {/* Actions */}
-      <div className="flex gap-4 w-full z-50">
+      <div className="flex gap-4 w-full" style={{ zIndex: 1 }}>
         <Button
           onClick={acceptCall}
           variant="success"

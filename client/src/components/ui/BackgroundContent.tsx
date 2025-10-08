@@ -7,7 +7,7 @@ const BackgroundContent = () => {
   const theme = useTheme();
 
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden">
+    <div className="fixed inset-0 overflow-hidden" style={{ zIndex: -1 }}>
       <img
         className="w-full h-full object-cover"
         src={theme === Theme.Dark ? backgroundDark : backgroundLight}

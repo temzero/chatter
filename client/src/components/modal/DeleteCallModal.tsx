@@ -40,7 +40,8 @@ const DeleteCallModal: React.FC = () => {
   return (
     <motion.div
       {...childrenModalAnimation}
-      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border z-[99]"
+      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border"
+      style={{ zIndex: 100 }}
     >
       <div className="p-4">
         <div className="flex gap-2 items-center mb-4 text-red-500 font-semibold">
@@ -70,7 +71,9 @@ const DeleteCallModal: React.FC = () => {
           />
         </div>
 
-        <p className="mb-6 text-sm opacity-70">{t("modal.delete_call.description")}</p>
+        <p className="mb-6 text-sm opacity-70">
+          {t("modal.delete_call.description")}
+        </p>
       </div>
 
       <div className="flex custom-border-t">

@@ -50,7 +50,7 @@ export const SummaryCall = ({
 
   return (
     <>
-      <div className="flex flex-col items-center z-20">
+      <div className="flex flex-col items-center">
         <CallHeader chat={chat} />
         {getStatusMessage() && (
           <div

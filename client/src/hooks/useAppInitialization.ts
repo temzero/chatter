@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
 // 🧱 Stores
-import { useAuthStore, useIsAuthenticated } from "@/stores/authStore";
+import { useAuthStore } from "@/stores/authStore";
 import { useChatStore } from "@/stores/chatStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
@@ -16,40 +16,31 @@ import { useNotificationSocketListeners } from "@/lib/websocket/hooks/useNotific
 import { useChatSocketListeners } from "@/lib/websocket/hooks/useChatSocketListener";
 import { usePresenceSocketListeners } from "@/lib/websocket/hooks/usePresenceSocketListeners";
 import { useCallSocketListeners } from "@/lib/websocket/hooks/useCallSocketListener";
-
-// 🧭 Utils
-import { useIsMobile } from "@/hooks/useIsMobile";
+import { useDevice } from "./useDevice";
 
 export const useAppInitialization = () => {
   const { id: chatId } = useParams();
+  const location = useLocation();
   const [isInitializing, setIsInitializing] = useState(true);
-
-  // 🧱 Store hooks
-  const isAuthenticated = useIsAuthenticated();
-  const isMobile = useIsMobile();
 
   const { initialize: initializeAuth } = useAuthStore();
   const {
     initialize: initializeChats,
     setActiveChatById,
-    isLoading: chatsLoading,
     error: chatError,
   } = useChatStore();
 
-  const { fetchPendingRequests, isLoading: friendshipsLoading } =
-    useFriendshipStore();
+  const { fetchPendingRequests } = useFriendshipStore();
 
-  const {
-    initialize: initializeFolders,
-    isLoading: foldersLoading,
-    error: folderError,
-  } = useFolderStore();
+  const { initialize: initializeFolders, error: folderError } =
+    useFolderStore();
 
   const { initializeKeyListeners: initializeSidebar } = useSidebarStore();
   const { initializeKeyListeners: initializeSidebarInfo } =
     useSidebarInfoStore();
 
   // 🧩 Socket connections (attach listeners once)
+  useDevice();
   useWebSocket();
   useNotificationSocketListeners();
   useChatSocketListeners();
@@ -73,14 +64,38 @@ export const useAppInitialization = () => {
       }
     };
     initApp();
-  }, [fetchPendingRequests, initializeAuth, initializeChats, initializeFolders, initializeSidebar, initializeSidebarInfo]);
+  }, [
+    fetchPendingRequests,
+    initializeAuth,
+    initializeChats,
+    initializeFolders,
+    initializeSidebar,
+    initializeSidebarInfo,
+  ]);
 
   // 🧠 Chat switching — independent of full initialization
+  // useEffect(() => {
+  //   if (!isInitializing) {
+  //     if (chatId) {
+  //       setActiveChatById(chatId);
+  //     } else {
+  //       setActiveChatById(null);
+  //     }
+  //   }
+  // }, [chatId, isInitializing, setActiveChatById]);
   useEffect(() => {
-    if (!isInitializing && chatId) {
-      setActiveChatById(chatId);
+    if (isInitializing) return;
+
+    // check the current path
+    const path = location.pathname;
+
+    if (path.startsWith("/chat/")) {
+      const currentChatId = chatId || path.split("/chat/")[1];
+      setActiveChatById(currentChatId);
+    } else if (path === "/chat" || path === "/") {
+      setActiveChatById(null);
     }
-  }, [chatId, isInitializing, setActiveChatById]);
+  }, [chatId, isInitializing, location.pathname, setActiveChatById]);
 
   // ⚠️ Show toast if any store error appears
   useEffect(() => {
@@ -89,19 +104,5 @@ export const useAppInitialization = () => {
     }
   }, [chatError, folderError]);
 
-  // 🌀 Loading and error states
-  const isLoading =
-    isInitializing || chatsLoading || friendshipsLoading || foldersLoading;
-
-  const hasError = chatError || folderError;
-
-  const status = hasError ? "error" : isLoading ? "loading" : "ready";
-
-  // ✅ Return unified API
-  return {
-    status,
-    isAuthenticated,
-    isMobile,
-    error: hasError,
-  };
+  // ⚡ No return needed — just initialize app internally
 };

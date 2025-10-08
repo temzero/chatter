@@ -1,26 +1,21 @@
 // components/PrivateLayout.tsx
 import { Navigate } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
+import { useAppInitialization } from "@/hooks/useAppInitialization";
 import BackgroundContent from "@/components/ui/BackgroundContent";
 import Modal from "@/components/modal/Modal";
 import MobileView from "./MobileView";
 import DesktopView from "./DestopView";
-import { useAppInitialization } from "@/hooks/useAppInitialization";
-import { PuffLoader } from "react-spinners";
+import { useIsAuthenticated } from "@/stores/authStore";
+import { useDeviceStore } from "@/stores/deviceStore";
 
 const PrivateLayout: React.FC = () => {
-  const { isAuthenticated, isMobile, status } = useAppInitialization();
+  useAppInitialization();
+  const isAuthenticated = useIsAuthenticated();
+  const isMobile = useDeviceStore((state) => state.isMobile);
 
   if (!isAuthenticated) {
     return <Navigate to={ROUTES.PUBLIC.LOGIN} replace />;
-  }
-
-  if (status === "loading") {
-    return (
-      <div className="w-full h-screen flex items-center justify-center">
-        <PuffLoader color="#6a6a6a" />
-      </div>
-    );
   }
 
   return (

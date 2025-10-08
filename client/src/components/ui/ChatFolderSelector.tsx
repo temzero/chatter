@@ -93,7 +93,7 @@ const ChatFolderSelector: React.FC<Props> = ({
   };
 
   return (
-    <div className="relative px-2 flex items-center justify-center w-full custom-border-t custom-border-b shadow select-none">
+    <div className="w-full relative px-2 flex items-center custom-border-t custom-border-b shadow select-none">
       <div
         ref={scrollRef}
         className="flex items-center overflow-x-auto no-scrollbar scrollbar-hide"
@@ -124,7 +124,8 @@ const ChatFolderSelector: React.FC<Props> = ({
       {!isCompact && canScrollLeft && (
         <button
           onClick={scrollLeft}
-          className="bg-[input-border-color] custom-border-r shadow-lg backdrop-blur-sm rounded-none flex items-center justify-center overflow-hidden h-full w-6 absolute left-0 top-0 z-40 select-none"
+          className="bg-[input-border-color] custom-border-r shadow-lg backdrop-blur-sm rounded-none flex items-center justify-center overflow-hidden h-full w-6 absolute left-0 top-0 select-none"
+          style={{ zIndex: 10 }}
         >
           <i className="material-symbols-outlined text-sm font-bold pl-1.5">
             arrow_back_ios
@@ -135,7 +136,8 @@ const ChatFolderSelector: React.FC<Props> = ({
       {!isCompact && canScrollRight && (
         <button
           onClick={scrollRight}
-          className="bg-[input-border-color] custom-border-l shadow-lg backdrop-blur-sm rounded-none flex items-center justify-center overflow-hidden h-full w-6 absolute right-0 top-0 z-40 select-none"
+          className="bg-[input-border-color] custom-border-l shadow-lg backdrop-blur-sm rounded-none flex items-center justify-center overflow-hidden h-full w-6 absolute right-0 top-0 select-none"
+          style={{ zIndex: 10 }}
         >
           <i className="material-symbols-outlined text-sm font-bold pl-0.5">
             arrow_forward_ios
