@@ -44,8 +44,7 @@ export function useCallSocketListeners() {
     };
 
     const handleIncomingCall = (callResponse: IncomingCallResponse) => {
-      console.log("[INCOMING_CALL]" );
-
+      // console.log("[INCOMING_CALL]");
       const {
         callId,
         chatId,
@@ -82,7 +81,7 @@ export function useCallSocketListeners() {
     };
 
     const handleStartCall = (data: UpdateCallPayload) => {
-      console.log("[CALL_START]");
+      // console.log("[CALL_START]");
       const { callId, chatId } = data;
       const callStore = useCallStore.getState();
 
@@ -112,7 +111,7 @@ export function useCallSocketListeners() {
     };
 
     const handleUpdateCall = (updatedCall: UpdateCallPayload) => {
-      console.log("[UPDATE_CALL]");
+      // console.log("[UPDATE_CALL]");
       const { callId, isVideoCall, callStatus } = updatedCall;
       const callStore = useCallStore.getState();
 
@@ -138,7 +137,7 @@ export function useCallSocketListeners() {
     };
 
     const handleCallDeclined = (data: CallActionResponse) => {
-      console.log("[CALL_DECLINED]");
+      // console.log("[CALL_DECLINED]");
       const { callId, isCallerCancel } = data;
       const callStore = useCallStore.getState();
 
@@ -155,7 +154,7 @@ export function useCallSocketListeners() {
     };
 
     const handleCallEnded = (data: UpdateCallPayload) => {
-      console.log("CALL_ENDED");
+      // console.log("CALL_ENDED");
       const { callId } = data;
       const callStore = useCallStore.getState();
 
@@ -174,7 +173,7 @@ export function useCallSocketListeners() {
     };
 
     const handleCallError = (data: CallErrorResponse) => {
-      console.warn("Call error:", data);
+      // console.warn("Call error:", data);
       const { reason, callId } = data;
 
       if (reason === CallError.LINE_BUSY) {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
 // 🧱 Stores
@@ -17,10 +17,10 @@ import { useChatSocketListeners } from "@/lib/websocket/hooks/useChatSocketListe
 import { usePresenceSocketListeners } from "@/lib/websocket/hooks/usePresenceSocketListeners";
 import { useCallSocketListeners } from "@/lib/websocket/hooks/useCallSocketListener";
 import { useDevice } from "./useDevice";
+import { useCleanup } from "./useCleanup";
 
 export const useAppInitialization = () => {
   const { id: chatId } = useParams();
-  const location = useLocation();
   const [isInitializing, setIsInitializing] = useState(true);
 
   const { initialize: initializeAuth } = useAuthStore();
@@ -46,6 +46,8 @@ export const useAppInitialization = () => {
   useChatSocketListeners();
   usePresenceSocketListeners();
   useCallSocketListeners();
+  // 🧹 Call cleanup
+  useCleanup();
 
   // ⚙️ Full initialization — runs only once
   useEffect(() => {
@@ -56,6 +58,7 @@ export const useAppInitialization = () => {
         await initializeFolders();
         initializeSidebar();
         initializeSidebarInfo();
+        setActiveChatById(null);
       } catch (err) {
         console.error("Initialization error:", err);
         toast.error("Failed to initialize application");
@@ -71,31 +74,19 @@ export const useAppInitialization = () => {
     initializeFolders,
     initializeSidebar,
     initializeSidebarInfo,
+    setActiveChatById,
   ]);
 
   // 🧠 Chat switching — independent of full initialization
-  // useEffect(() => {
-  //   if (!isInitializing) {
-  //     if (chatId) {
-  //       setActiveChatById(chatId);
-  //     } else {
-  //       setActiveChatById(null);
-  //     }
-  //   }
-  // }, [chatId, isInitializing, setActiveChatById]);
   useEffect(() => {
-    if (isInitializing) return;
-
-    // check the current path
-    const path = location.pathname;
-
-    if (path.startsWith("/chat/")) {
-      const currentChatId = chatId || path.split("/chat/")[1];
-      setActiveChatById(currentChatId);
-    } else if (path === "/chat" || path === "/") {
-      setActiveChatById(null);
+    if (!isInitializing) {
+      if (chatId) {
+        setActiveChatById(chatId);
+      } else {
+        setActiveChatById(null);
+      }
     }
-  }, [chatId, isInitializing, location.pathname, setActiveChatById]);
+  }, [chatId, isInitializing, setActiveChatById]);
 
   // ⚠️ Show toast if any store error appears
   useEffect(() => {
@@ -103,6 +94,4 @@ export const useAppInitialization = () => {
       toast.error(chatError || folderError);
     }
   }, [chatError, folderError]);
-
-  // ⚡ No return needed — just initialize app internally
 };

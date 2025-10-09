@@ -1,14 +1,14 @@
 // src/components/ui/calling/ConnectingCall.tsx
 import { ChatResponse } from "@/types/responses/chat.response";
 import { BeatLoader } from "react-spinners";
-import { CallHeader } from "./components/CallHeader";
 import { useCallStore } from "@/stores/callStore/callStore";
+import CallHeader from "./components/CallHeader";
 
-export const ConnectingCall = ({ chat }: { chat: ChatResponse }) => {
+const ConnectingCall = ({ chat }: { chat: ChatResponse }) => {
   const { isVideoCall } = useCallStore();
 
   return (
-    <div className="flex flex-col items-center justify-center w-full h-full gap-4">
+    <div className="w-full h-full p-10 flex flex-col items-center justify-center gap-4">
       {/* Header (avatar + chat name) */}
       <CallHeader chat={chat} />
       <div className="flex flex-col items-center gap-2 mt-8">
@@ -30,3 +30,5 @@ export const ConnectingCall = ({ chat }: { chat: ChatResponse }) => {
     </div>
   );
 };
+
+export default ConnectingCall;

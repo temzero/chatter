@@ -400,9 +400,9 @@ export const getMyChatMemberId = async (
 };
 
 export const useDirectChatPartner = (
-  chatId: string
+  chatId: string,
+  myMemberId: string
 ): ChatMember | undefined => {
-  const myMemberId = useCurrentUserId();
   return useChatMemberStore(
     useShallow((state) => {
       const members = state.chatMembers[chatId];

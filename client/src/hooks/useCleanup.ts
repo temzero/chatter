@@ -3,9 +3,11 @@ import { useEffect } from "react";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { useModalStore } from "@/stores/modalStore";
 import { LocalCallStatus } from "@/types/enums/CallStatus";
+import { useChatStore } from "@/stores/chatStore";
 
-export const useCallCleanup = () => {
+export const useCleanup = () => {
   const callStore = useCallStore();
+  const chatStore = useChatStore();
   const modalStore = useModalStore();
 
   useEffect(() => {
@@ -18,8 +20,11 @@ export const useCallCleanup = () => {
       ) {
         callStore.endCall();
       }
-
+      // 🧼 Close any open modals
       modalStore.closeModal();
+
+      // 💬 Clear all chat state
+      chatStore.clearChats();
     };
 
     // ✅ only run when window is closing / refreshing

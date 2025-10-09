@@ -57,7 +57,7 @@ export interface CallActions {
 
   // toggles
   toggleLocalVoice: (enable?: boolean) => Promise<void>;
-  toggleLocalVideo: (enable?: boolean) => Promise<void>;
+  toggleLocalVideo: (enable?: boolean) => Promise<boolean>;
   toggleLocalScreenShare: (enable?: boolean) => Promise<void>;
 
   // utils
@@ -115,12 +115,12 @@ export const useCallStore = create<CallState & CallActions>()(
 
         useModalStore.getState().openModal(ModalType.CALL);
 
-        const timeoutRef = setTimeout(() => {
-          if (get().localCallStatus === LocalCallStatus.OUTGOING) {
-            get().endCall({ isTimeout: true });
-          }
-        }, 45000);
-        set({ timeoutRef });
+        // const timeoutRef = setTimeout(() => {
+        //   if (get().localCallStatus === LocalCallStatus.OUTGOING) {
+        //     get().endCall({ isTimeout: true });
+        //   }
+        // }, 45000);
+        // set({ timeoutRef });
 
         // init LiveKit
         const liveKitService = new LiveKitService();
@@ -330,6 +330,8 @@ export const useCallStore = create<CallState & CallActions>()(
         enable !== undefined ? enable : !local.isCameraEnabled;
 
       await liveKitService.toggleCamera(shouldEnable);
+      set({ isVideoCall: shouldEnable });
+      return shouldEnable;
     },
 
     toggleLocalScreenShare: async (enable?: boolean) => {

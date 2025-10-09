@@ -5,13 +5,14 @@ import { RemoteParticipant, RoomEvent } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
 import { ParticipantsGrid } from "./ParticipantsGrid";
 import { CallControls } from "./CallControls";
-import { CallHeader } from "../CallHeader";
 import { DraggableContainer } from "./DraggableContainer";
 import { UserCamera } from "./UserCamera";
 import { Button } from "@/components/ui/Button";
 import { Timer } from "@/components/ui/Timer";
+import CallHeader from "../CallHeader";
+import { useDeviceStore } from "@/stores/deviceStore";
 
-export const CallRoom = ({
+const CallRoom = ({
   chat,
   isExpanded,
   onToggleExpand,
@@ -20,6 +21,8 @@ export const CallRoom = ({
   isExpanded: boolean;
   onToggleExpand?: () => void;
 }) => {
+  const isMobile = useDeviceStore((state) => state.isMobile);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const startedAt = useCallStore((state) => state.startedAt);
   const room = useCallStore((state) => state.getLiveKitRoom());
@@ -98,16 +101,18 @@ export const CallRoom = ({
         />
       </DraggableContainer>
 
-      <div className="flex gap-2 absolute top-1 right-1">
-        <Button
-          variant="ghost"
-          className="w-8 h-8 opacity-70"
-          isIconFilled={true}
-          isRoundedFull
-          onClick={onToggleExpand}
-          icon={isExpanded ? "collapse_content" : "expand_content"}
-        />
-      </div>
+      {isMobile || (
+        <div className="flex gap-2 absolute top-1 right-1">
+          <Button
+            variant="ghost"
+            className="w-8 h-8 opacity-70"
+            isIconFilled={true}
+            isRoundedFull
+            onClick={onToggleExpand}
+            icon={isExpanded ? "collapse_content" : "expand_content"}
+          />
+        </div>
+      )}
 
       {/* Controls */}
       <DraggableContainer containerRef={containerRef} position="bottom-middle">
@@ -121,3 +126,5 @@ export const CallRoom = ({
     </div>
   );
 };
+
+export default CallRoom;

@@ -38,6 +38,7 @@ export class CallGateway {
     const responsePayload: UpdateCallPayload = {
       callId: payload.callId, // rely on payload or generate from context
       chatId: payload.chatId,
+      isVideoCall: payload.isVideoCall,
       callStatus: payload.callStatus,
     };
 

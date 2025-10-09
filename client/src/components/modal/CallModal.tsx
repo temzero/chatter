@@ -1,33 +1,34 @@
 import clsx from "clsx";
 import React from "react";
 import { motion } from "framer-motion";
-import { childrenModalAnimation } from "@/animations/modalAnimations";
 import { useCallStore } from "@/stores/callStore/callStore";
-import { LocalCallStatus } from "@/types/enums/CallStatus";
-
-import { CallRoom } from "../ui/calling/components/callRoom/CallRoom";
-import { IncomingCall } from "../ui/calling/IncomingCall";
-import { SummaryCall } from "../ui/calling/SummaryCall";
-import { OutgoingCall } from "../ui/calling/OutgoingCall";
 import { useChatStore } from "@/stores/chatStore";
-import { ConnectingCall } from "../ui/calling/ConnectingCall";
+import { useDeviceStore } from "@/stores/deviceStore";
+import { CallStatus, LocalCallStatus } from "@/types/enums/CallStatus";
 import { ChatResponse } from "@/types/responses/chat.response";
-import { BroadcastPreviewModal } from "../ui/calling/BroadcastPreviewModal";
 import { ChatType } from "@/types/enums/ChatType";
-import { BroadcastRoom } from "../ui/calling/components/broadcastRoom/BroadcastRoom";
+import {
+  childrenModalAnimation,
+  childrenModalMobileAnimation,
+} from "@/animations/modalAnimations";
+
+import CallRoom from "../ui/calling/components/callRoom/CallRoom";
+import IncomingCall from "../ui/calling/IncomingCall";
+import OutgoingCall from "../ui/calling/OutgoingCall";
+import ConnectingCall from "../ui/calling/ConnectingCall";
+import SummaryCall from "../ui/calling/SummaryCall";
+import BroadcastPreviewModal from "../ui/calling/BroadcastPreviewModal";
+import BroadcastRoom from "../ui/calling/components/broadcastRoom/BroadcastRoom";
 
 const CallModal: React.FC = () => {
-  const { chatId, localCallStatus } = useCallStore();
+  const isMobile = useDeviceStore((state) => state.isMobile);
+
+  const { chatId, localCallStatus, callStatus } = useCallStore();
   const getOrFetchChatById = useChatStore((state) => state.getOrFetchChatById);
   const [chat, setChat] = React.useState<ChatResponse | null>(null);
-  const isBroadcast: boolean = chat?.type === ChatType.CHANNEL;
-  const [isExpanded, setIsExpanded] = React.useState(isBroadcast);
-
-  React.useEffect(() => {
-    if (chat?.type === ChatType.CHANNEL) {
-      setIsExpanded(true);
-    }
-  }, [chat?.type]);
+  const isBroadcasting: boolean =
+    chat?.type === ChatType.CHANNEL && callStatus == CallStatus.IN_PROGRESS;
+  const [isExpanded, setIsExpanded] = React.useState(isBroadcasting);
 
   React.useEffect(() => {
     if (!chatId) return;
@@ -63,7 +64,7 @@ const CallModal: React.FC = () => {
       case LocalCallStatus.CONNECTING:
         return <ConnectingCall chat={chat} />;
       case LocalCallStatus.CONNECTED:
-        return isBroadcast ? (
+        return isBroadcasting ? (
           <BroadcastRoom
             chat={chat}
             isExpanded={isExpanded}
@@ -90,41 +91,40 @@ const CallModal: React.FC = () => {
   };
 
   const getSizeClasses = () => {
-    switch (localCallStatus) {
-      case LocalCallStatus.CONNECTED:
-        return "w-full h-full custom-border";
-      case LocalCallStatus.CHECK_BROADCAST:
-        return "min-w-[420px] custom-border p-6";
-      default:
-        return "w-full max-w-[420px] p-6";
+    if (isMobile || isExpanded) return "w-full h-full";
+
+    // only when not mobile and not expanded
+    if (localCallStatus === LocalCallStatus.CHECK_BROADCAST) {
+      return "min-w-[420px] custom-border rounded-lg";
     }
+
+    if (chat.type === ChatType.DIRECT) {
+      return "aspect-[1/1] h-[80%] custom-border rounded-lg";
+    }
+
+    // channel (broadcast) that is not expanded
+    return "w-[80%] h-[80%] custom-border rounded-lg";
   };
 
-  const modalSize = isExpanded
-    ? "w-full h-full"
-    : chat.type === ChatType.DIRECT
-    ? "aspect-[1/1] h-[80%]"
-    : "w-[80%] h-[80%]";
+  const animationProps = isMobile
+    ? childrenModalMobileAnimation
+    : childrenModalAnimation;
 
   return (
     <motion.div
-      {...childrenModalAnimation}
-      className={`${modalSize} transition-all flex items-center justify-center select-none`}
+      {...animationProps}
+      className={clsx(
+        "relative flex flex-col items-center justify-between overflow-hidden transition-all select-none bg-[var(--sidebar-color)]",
+        getSizeClasses()
+      )}
     >
-      <div
-        className={clsx(
-          "relative bg-[var(--sidebar-color)] rounded-lg flex flex-col items-center justify-between overflow-hidden",
-          getSizeClasses()
-        )}
-      >
-        {chat?.avatarUrl && (
-          <img
-            src={chat.avatarUrl}
-            className="absolute inset-0 overflow-hidden z-0 opacity-20 w-full h-full object-cover scale-125 blur select-none pointer-events-none"
-          />
-        )}
-        {renderCallUI()}
-      </div>
+      {chat?.avatarUrl && (
+        <img
+          src={chat.avatarUrl}
+          className="absolute inset-0 overflow-hidden z-0 opacity-20 w-full h-full object-cover scale-125 blur select-none pointer-events-none"
+        />
+      )}
+      {renderCallUI()}
     </motion.div>
   );
 };

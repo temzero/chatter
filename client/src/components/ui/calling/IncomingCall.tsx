@@ -1,23 +1,24 @@
-import { ChatResponse } from "@/types/responses/chat.response";
-import { motion, AnimatePresence } from "framer-motion";
-import { CallHeader } from "./components/CallHeader";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import { BounceLoader } from "react-spinners";
-import { Button } from "../Button";
+import { ChatResponse } from "@/types/responses/chat.response";
 import { VideoStream } from "./components/VideoStream";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { useLocalPreviewVideoTrack } from "@/hooks/mediaStreams/useLocalPreviewVideoTrack";
+import { CallActionButton } from "./CallActionButton";
+import CallHeader from "./components/CallHeader";
 
-export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
+const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
+  const [loaderColor, setLoaderColor] = useState("#8b8b8b");
   const isVideoCall = useCallStore((state) => state.isVideoCall);
   const declineCall = useCallStore((state) => state.declineCall);
 
-  // Always call the hook
   const { localVideoStream, isVideoEnabled, toggleVideo } =
     useLocalPreviewVideoTrack(isVideoCall);
 
   const acceptCall = () => {
     useCallStore.getState().joinCall({
-      isVideoEnabled: isVideoCall ? isVideoEnabled : false, // respect video call
+      isVideoEnabled: isVideoCall ? isVideoEnabled : false,
       isVoiceEnabled: true,
     });
   };
@@ -25,12 +26,11 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
   const showVideoPreview = isVideoCall && localVideoStream && isVideoEnabled;
 
   return (
-    <div className="flex flex-col items-center w-full h-full">
-      {/* Background - Avatar or Webcam */}
+    <div className="w-full h-full p-10 flex flex-col items-center justify-between">
       {showVideoPreview && (
         <div
           className="absolute inset-0 overflow-hidden opacity-70 w-full h-full"
-          style={{ zIndex: 0 }}
+          style={{ zIndex: -1 }}
         >
           <VideoStream
             stream={localVideoStream}
@@ -40,95 +40,51 @@ export const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
         </div>
       )}
 
-      {/* Header with avatar */}
-      <div
-        id="calling-title"
-        className="flex flex-col items-center"
-        style={{ zIndex: 1 }}
-      >
+      <div id="calling-title" className="flex flex-col items-center">
         <CallHeader chat={chat} />
-        <p className="text-sm text-gray-400 mt-1">
+        <motion.p
+          className="mt-1"
+          animate={{
+            opacity: [0.3, 0.6, 0.3],
+          }}
+          transition={{
+            duration: 1,
+            repeat: Infinity,
+            repeatType: "loop",
+            ease: "easeInOut",
+            repeatDelay: 1,
+          }}
+        >
           Incoming {isVideoCall ? "video" : "voice"} call
-        </p>
+        </motion.p>
       </div>
 
-      {/* calling-content */}
-      <div
-        className="flex flex-col justify-center items-center gap-4 py-6 select-none"
-        style={{ zIndex: 0 }}
-      >
-        <motion.button
-          title={`Incoming ${isVideoCall ? "Video" : "Voice"} Call`}
-          className="p-4 rounded-full hover:bg-[--primary-green] transition-colors relative hover:custom-border"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <AnimatePresence mode="wait">
-            <motion.span
-              key={
-                isVideoCall
-                  ? isVideoEnabled
-                    ? "videocam"
-                    : "videocam_off"
-                  : "call"
-              }
-              onClick={isVideoCall ? toggleVideo : undefined}
-              className="material-symbols-outlined text-6xl flex items-center justify-center"
-              initial={{ opacity: 0, scale: 0.1 }}
-              animate={{
-                opacity: 1,
-                scale: 1,
-                x: [0, -5, 5, -5, 5, 0],
-              }}
-              transition={{
-                x: { duration: 0.5, repeat: Infinity, repeatDelay: 1 },
-                opacity: { duration: 0.2 },
-                scale: { duration: 0.2 },
-              }}
-            >
-              {isVideoCall
-                ? isVideoEnabled
-                  ? "videocam"
-                  : "videocam_off"
-                : "call"}
-            </motion.span>
-          </AnimatePresence>
+      <div className="flex flex-col justify-center items-center gap-10">
+        {/* 🔹 Loader changes color dynamically */}
 
-          {/* Loader */}
+        <div className="relative ">
+          <CallActionButton
+            isVideoCall={isVideoCall}
+            isVideoEnabled={isVideoEnabled}
+            toggleVideo={toggleVideo}
+            onAccept={acceptCall}
+            onDecline={declineCall}
+            onDragColorChange={setLoaderColor}
+          />
+
           <div
             className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-20 pointer-events-none"
-            style={{ zIndex: 0 }}
+            style={{ zIndex: 0, mixBlendMode: "screen" }}
           >
-            <BounceLoader color="#8b8b8b" size={500} />
+            <BounceLoader color={loaderColor} size={620} />
           </div>
-        </motion.button>
-      </div>
-
-      {/* Actions */}
-      <div className="flex gap-4 w-full" style={{ zIndex: 1 }}>
-        <Button
-          onClick={acceptCall}
-          variant="success"
-          size="lg"
-          isRoundedFull
-          fullWidth
-          iconPosition="left"
-          className="py-3"
-        >
-          Accept
-        </Button>
-        <Button
-          onClick={() => declineCall()}
-          variant="danger"
-          size="lg"
-          isRoundedFull
-          fullWidth
-          iconPosition="left"
-          className="py-3"
-        >
-          Decline
-        </Button>
+        </div>
+        <p className="opacity-40 text-sm">
+          Slide up to accept, slide down to decline
+        </p>
       </div>
     </div>
   );
 };
+
+export default IncomingCall;

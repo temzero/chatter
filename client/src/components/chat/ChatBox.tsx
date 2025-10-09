@@ -11,16 +11,19 @@ import { chatMemberService } from "@/services/chat/chatMemberService";
 
 const ChatBox = React.memo(() => {
   const activeChat = useActiveChat();
-  const { isBlockedByMe, isBlockedMe } = useBlockStatus(
-    activeChat?.id ?? "",
-    activeChat?.myMemberId ?? ""
-  );
+  // const { isBlockedByMe, isBlockedMe } = useBlockStatus(
+  //   activeChat?.id ?? "",
+  //   activeChat?.myMemberId ?? ""
+  // );
 
-  console.log('activeChat', activeChat)
+  console.log("ChatBox activeChat", activeChat);
   if (!activeChat) return null;
 
   const isDirectChat = activeChat.type === ChatType.DIRECT;
-  const isBlocked = isDirectChat && (isBlockedByMe || isBlockedMe);
+  // const isBlocked = isDirectChat && (isBlockedByMe || isBlockedMe);
+  const isBlocked = false;
+  const isBlockedByMe = false;
+  const isBlockedMe = false;
   const isMember = Boolean(activeChat.myMemberId);
 
   return (

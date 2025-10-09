@@ -13,6 +13,8 @@ import errorSound from "@/assets/sound/error.mp3";
 import messageSound from "@/assets/sound/message-bubble.mp3";
 import notificationSound from "@/assets/sound/bell.mp3";
 import pageSound from "@/assets/sound/paper.mp3";
+import pop1Sound from "@/assets/sound/pop1.mp3";
+import pop2Sound from "@/assets/sound/pop2.mp3";
 import reactionSound from "@/assets/sound/reaction.mp3";
 import reactionRemoveSound from "@/assets/sound/reaction-remove.mp3";
 import ringSound from "@/assets/sound/old-telephone-ringing.mp3";
@@ -35,6 +37,8 @@ export enum SoundType {
   CARD3 = "card3",
   CARD4 = "card4",
   PAGE = "page",
+  POP1 = "pop1",
+  POP2 = "pop2",
   TYPING = "typing",
   ERROR = "error",
 }
@@ -77,6 +81,8 @@ class AudioServiceImpl implements AudioService {
       [SoundType.CARD3]: card3Sound,
       [SoundType.CARD4]: card4Sound,
       [SoundType.PAGE]: pageSound,
+      [SoundType.POP1]: pop1Sound,
+      [SoundType.POP2]: pop2Sound,
       [SoundType.TYPING]: typingSound,
       [SoundType.ERROR]: errorSound,
     };

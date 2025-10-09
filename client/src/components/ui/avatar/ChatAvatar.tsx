@@ -34,7 +34,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
             : type === "contact"
             ? "h-12 w-12 rounded-[30px]"
             : type === "call"
-            ? "h-12 w-12 rounded-[12px]"
+            ? "h-14 w-14 rounded-[16px]"
             : "h-16 w-16 rounded-xl"
         }`}
       >
@@ -77,8 +77,8 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
         };
       case "call":
         return {
-          size: "h-24 w-24",
-          rounded: "rounded-[24px]",
+          size: "h-32 w-32",
+          rounded: "rounded-[28px]",
           iconSize: "text-6xl",
           fallbackIconSize: "text-8xl",
           borderWidth: "6px",

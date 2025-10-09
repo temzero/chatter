@@ -9,8 +9,9 @@ import { Button } from "@/components/ui/Button";
 import BroadcastStream from "./BroadcastStream";
 import { LocalStreamPreview } from "./LocalStreamPreview";
 import { DraggableContainer } from "../callRoom/DraggableContainer";
+import { useDeviceStore } from "@/stores/deviceStore";
 
-export const BroadcastRoom = ({
+const BroadcastRoom = ({
   chat,
   isExpanded,
   onToggleExpand,
@@ -19,6 +20,8 @@ export const BroadcastRoom = ({
   isExpanded: boolean;
   onToggleExpand?: () => void;
 }) => {
+  const isMobile = useDeviceStore((state) => state.isMobile);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const isCaller = useCallStore((state) => state.isCaller);
   const room = useCallStore((state) => state.getLiveKitRoom());
@@ -143,14 +146,18 @@ export const BroadcastRoom = ({
           onClick={() => setObjectCover((prev) => !prev)}
           icon={isObjectCover ? "picture_in_picture_center" : "aspect_ratio"}
         />
-        <Button
-          variant="transparent"
-          className="w-8 h-8 opacity-70 text-white"
-          isIconFilled={true}
-          isRoundedFull
-          onClick={onToggleExpand}
-          icon={isExpanded ? "collapse_content" : "expand_content"}
-        />
+
+        {isMobile || (
+          <Button
+            variant="transparent"
+            className="w-8 h-8 opacity-70 text-white"
+            isIconFilled={true}
+            isRoundedFull
+            onClick={onToggleExpand}
+            icon={isExpanded ? "collapse_content" : "expand_content"}
+          />
+        )}
+
         {!isCaller && (
           <Button
             variant="transparent"
@@ -188,3 +195,5 @@ export const BroadcastRoom = ({
     </div>
   );
 };
+
+export default BroadcastRoom;

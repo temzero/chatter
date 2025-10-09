@@ -1,18 +1,13 @@
 import { ChatResponse } from "@/types/responses/chat.response";
 import { Button } from "../Button";
-import { CallHeader } from "./components/CallHeader";
 import { formatDuration } from "@/utils/formatDuration";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { LocalCallStatus } from "@/types/enums/CallStatus";
 import { useEffect } from "react";
 import { CallError } from "@/types/callPayload";
+import CallHeader from "./components/CallHeader";
 
-export const SummaryCall = ({
-  chat,
-}: {
-  chat: ChatResponse;
-  duration?: number;
-}) => {
+const SummaryCall = ({ chat }: { chat: ChatResponse; duration?: number }) => {
   const duration = useCallStore((state) => state.getCallDuration());
   const localCallStatus = useCallStore((state) => state.localCallStatus);
   const error = useCallStore((state) => state.error);
@@ -49,7 +44,7 @@ export const SummaryCall = ({
   };
 
   return (
-    <>
+    <div className="w-full h-full p-10 flex flex-col items-center justify-between">
       <div className="flex flex-col items-center">
         <CallHeader chat={chat} />
         {getStatusMessage() && (
@@ -88,6 +83,8 @@ export const SummaryCall = ({
       >
         Close
       </Button>
-    </>
+    </div>
   );
 };
+
+export default SummaryCall;

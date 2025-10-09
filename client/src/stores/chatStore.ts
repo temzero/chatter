@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { useShallow } from "zustand/shallow";
 import { chatService } from "@/services/chat/chatService";
 import { chatMemberService } from "@/services/chat/chatMemberService";
 import { useMessageStore } from "./messageStore";
@@ -355,11 +354,11 @@ export const useChatStore = create<ChatStore>()(
             return;
           }
 
-          // const currentActive = get().activeChat;
-          // if (currentActive?.id === chatId) {
-          //   console.log("Already active", currentActive);
-          //   return;
-          // }
+          const currentActive = get().activeChat;
+          if (currentActive?.id === chatId) {
+            console.log("Already active", currentActive);
+            return;
+          }
 
           const existingChat = get().chats.find((chat) => chat.id === chatId);
           if (existingChat) {
@@ -684,16 +683,12 @@ export const useChatStore = create<ChatStore>()(
   )
 );
 
-export const useActiveChat = () =>
-  useChatStore(useShallow((s) => s.activeChat));
-export const useActiveChatId = () =>
-  useChatStore(useShallow((s) => s.activeChat?.id));
+export const useActiveChat = () => useChatStore((s) => s.activeChat);
+export const useActiveChatId = () => useChatStore((s) => s.activeChat?.id);
+export const useAllChats = () => useChatStore((s) => s.chats);
+export const useSavedChat = () => useChatStore((s) => s.savedChat);
 export const useIsActiveChat = (chatId: string) =>
   useChatStore((state) => state.activeChat?.id === chatId);
-export const useAllChats = () => useChatStore(useShallow((s) => s.chats));
-
-// Saved chat
-export const useSavedChat = () => useChatStore(useShallow((s) => s.savedChat));
 
 export const useSetActiveSavedChat = () => {
   const getState = useChatStore;

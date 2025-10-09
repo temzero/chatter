@@ -1,25 +1,41 @@
 // components/ui/calling/CallCallingUI.tsx
-import React from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { PulseLoader } from "react-spinners";
 import { useCallStore } from "@/stores/callStore/callStore";
-import { CallHeader } from "./components/CallHeader";
 import { Button } from "../Button";
 import { VideoStream } from "./components/VideoStream";
 import { ChatResponse } from "@/types/responses/chat.response";
 import { useModalStore } from "@/stores/modalStore";
 import { useLocalTracks } from "@/hooks/mediaStreams/useLocalTracks";
+import CallHeader from "./components/CallHeader";
+import { UpdateCallPayload } from "@/types/callPayload";
+import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
 
 interface CallCallingUIProps {
   chat: ChatResponse;
 }
 
-export const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
+const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
   const isVideoCall = useCallStore((state) => state.isVideoCall);
+  const callId = useCallStore((state) => state.callId);
   const toggleLocalVideo = useCallStore((state) => state.toggleLocalVideo);
   const endCall = useCallStore((state) => state.endCall);
   const closeModal = useModalStore.getState().closeModal;
   const { localVideoStream } = useLocalTracks();
+  const [isHovering, setIsHovering] = useState(false);
+
+  const toggleVideoCall = async () => {
+    // Wait for the local video toggle to finish
+    const isVideo = await toggleLocalVideo();
+    // Get the updated state after toggling
+    const payload: UpdateCallPayload = {
+      chatId: chat.id,
+      callId: callId!,
+      isVideoCall: isVideo, // send boolean
+    };
+
+    callWebSocketService.emitUpdateCall(payload);
+  };
 
   const cancelCall = () => {
     endCall({
@@ -32,7 +48,7 @@ export const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
 
   return (
     <div
-      className="flex flex-col items-center justify-between w-full h-full"
+      className="w-full h-full p-10 flex flex-col items-center justify-between"
       style={{ zIndex: 1 }}
     >
       {/* Background - Avatar or Webcam */}
@@ -45,6 +61,7 @@ export const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
             stream={localVideoStream}
             className="scale-125 pointer-events-none"
             objectCover
+            mirror
           />
         </div>
       ) : (
@@ -57,29 +74,71 @@ export const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
         )
       )}
 
-      {/* Rest of the UI remains exactly the same */}
-      <CallHeader chat={chat} />
+      <div id="calling-title" className="flex flex-col items-center mb-4">
+        <CallHeader chat={chat} />
+        <motion.p
+          className="mt-1"
+          animate={{
+            opacity: [0.6, 0.2, 0.6],
+          }}
+          transition={{
+            duration: 1,
+            repeat: Infinity,
+            repeatType: "loop",
+            ease: "easeInOut",
+            repeatDelay: 1,
+          }}
+        >
+          Outgoing {isVideoCall ? "video" : "voice"} call
+        </motion.p>
+      </div>
       {/* Calling Content */}
       <div className="flex flex-col justify-center items-center gap-4 py-10 select-none">
         <motion.button
           title={`Switch To ${isVideoCall ? "Voice" : "Video"} Call`}
-          onClick={() => toggleLocalVideo()}
+          onClick={toggleVideoCall}
+          onMouseEnter={() => setIsHovering(true)}
+          onMouseLeave={() => setIsHovering(false)}
           className="p-4 rounded-full hover:bg-[--primary-green] transition-colors relative hover:custom-border"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
         >
           <AnimatePresence mode="wait">
             <motion.span
-              key={isVideoCall ? "videocam" : "call"}
-              className="material-symbols-outlined text-6xl flex items-center justify-center"
-              initial={{ opacity: 0, scale: 0.1 }}
-              animate={{ opacity: 1, scale: 1 }}
+              key={
+                isHovering
+                  ? isVideoCall
+                    ? "call"
+                    : "videocam"
+                  : isVideoCall
+                  ? "videocam"
+                  : "call"
+              }
+              className="material-symbols-outlined filled text-6xl flex items-center justify-center"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{
+                scale: [1, 1.5, 1],
+                opacity: isHovering ? 1 : [0.4, 0.8, 0.8, 0.4],
+                rotate: isHovering ? 0 : [0, 15, -15, 0],
+              }}
+              transition={{
+                duration: isHovering ? 0.3 : 0.5,
+                repeat: isHovering ? 0 : Infinity,
+                repeatType: "loop",
+                ease: "easeInOut",
+                repeatDelay: isHovering ? 0 : 0.5,
+              }}
             >
-              {isVideoCall ? "videocam" : "call"}
+              {isHovering
+                ? isVideoCall
+                  ? "call"
+                  : "videocam"
+                : isVideoCall
+                ? "videocam"
+                : "call"}
             </motion.span>
           </AnimatePresence>
         </motion.button>
-        <PulseLoader color="#808080" margin={6} size={10} />
       </div>
 
       {/* Cancel Button */}
@@ -97,3 +156,5 @@ export const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
     </div>
   );
 };
+
+export default OutgoingCall;

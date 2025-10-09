@@ -11,6 +11,12 @@ export const childrenModalAnimation = {
   exit: { scale: 0.6, opacity: 0 },
 };
 
+export const childrenModalMobileAnimation = {
+  initial: { scale: 1.1, opacity: 0 },
+  animate: { scale: 1, opacity: 1 },
+  exit: { scale: 1.1, opacity: 0 },
+};
+
 export const fadeInUp = {
   initial: { y: 20, opacity: 0 },
   animate: { y: 0, opacity: 1 },
