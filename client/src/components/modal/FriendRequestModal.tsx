@@ -4,7 +4,7 @@ import { useModalStore } from "@/stores/modalStore";
 import { Avatar } from "../ui/avatar/Avatar";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import { motion } from "framer-motion";
-import { childrenModalAnimation } from "@/animations/modalAnimations";
+import { modalAnimations } from "@/animations/modalAnimations";
 import { useCurrentUserId } from "@/stores/authStore";
 import { useTranslation } from "react-i18next";
 
@@ -52,7 +52,7 @@ const FriendRequestModal: React.FC = () => {
 
   return (
     <motion.div
-      {...childrenModalAnimation}
+      {...modalAnimations.children}
       className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded p-4 max-w-xl w-[400px] custom-border"
       style={{ zIndex: 100 }}
     >

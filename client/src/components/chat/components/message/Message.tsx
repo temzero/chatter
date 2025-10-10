@@ -71,7 +71,7 @@ const Message: React.FC<MessageProps> = ({
     ? isMe
       ? messageAnimations.myMessage
       : messageAnimations.otherMessage
-    : messageAnimations.none;
+    : {};
 
   const isGroupChat = chatType === "group";
 
@@ -101,9 +101,7 @@ const Message: React.FC<MessageProps> = ({
         "pb-2": !isRecent,
         "z-[99]": isFocus,
       })}
-      initial={animationProps.initial}
-      animate={animationProps.animate}
-      transition={animationProps.transition}
+      {...animationProps}
       onDoubleClick={() => handleQuickReaction(message.id, message.chatId)}
       onContextMenu={handleContextMenu}
     >

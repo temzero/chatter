@@ -110,7 +110,7 @@ const DirectChat: React.FC = () => {
     <div className="flex flex-col w-full h-full">
       <SidebarInfoHeaderIcons icons={headerIcons} />
 
-      <div className="flex flex-col justify-center items-center gap-4 p-4 w-full h-full overflow-y-auto">
+      <div className="flex flex-col items-center gap-4 p-4 w-full h-full overflow-y-auto">
         <Avatar
           size="36"
           textSize="text-6xl"

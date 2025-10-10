@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useModalStore } from "@/stores/modalStore";
 import { motion } from "framer-motion";
-import { childrenModalAnimation } from "@/animations/modalAnimations";
+import { modalAnimations } from "@/animations/modalAnimations";
 import { DirectChatMember } from "@/types/responses/chatMember.response";
 import { Avatar } from "../ui/avatar/Avatar";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
@@ -35,7 +35,7 @@ const SetNicknameModal: React.FC = () => {
 
   return (
     <motion.div
-      {...childrenModalAnimation}
+      {...modalAnimations.children}
       className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border"
       style={{ zIndex: 100 }}
     >

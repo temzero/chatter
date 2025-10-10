@@ -1,5 +1,4 @@
 import { useCallback } from "react";
-import { audioService, SoundType } from "@/services/audio.service";
 interface MediaViewerNavigationButtonsProps {
   currentIndex: number;
   attachmentLength: number;
@@ -16,7 +15,6 @@ export const MediaViewerNavigationButtons = ({
   const handleNext = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      audioService.playSound(SoundType.NOTIFICATION);
       onNext();
     },
     [onNext]
@@ -25,7 +23,6 @@ export const MediaViewerNavigationButtons = ({
   const handlePrev = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      audioService.playSound(SoundType.NOTIFICATION); // ✅ same here
       onPrev();
     },
     [onPrev]
@@ -35,7 +32,7 @@ export const MediaViewerNavigationButtons = ({
     <>
       {currentIndex > 0 && (
         <button
-          className="h-full w-12 flex items-center justify-center absolute left-0 top-1/2 -translate-y-1/2 z-10 text-white/60 hover:text-white hover:bg-gradient-to-r hover:from-[rgba(255,255,255,0.05)] hover:to-[rgba(0,0,0,0)]"
+          className="h-full w-12 flex items-center justify-center absolute left-0 top-1/2 -translate-y-1/2 z-10 text-white/60 hover:text-white hover:bg-gradient-to-r hover:from-[rgba(255,255,255,0.1)] hover:to-[rgba(0,0,0,0)]"
           onClick={handlePrev}
         >
           <i className="material-symbols-outlined text-5xl">chevron_left</i>
@@ -43,7 +40,7 @@ export const MediaViewerNavigationButtons = ({
       )}
       {attachmentLength > 1 && currentIndex < attachmentLength - 1 && (
         <button
-          className="h-full w-12 flex items-center justify-center absolute right-0 top-1/2 -translate-y-1/2 z-10 text-white/60 hover:text-white hover:bg-gradient-to-l hover:from-[rgba(255,255,255,0.05)] hover:to-[rgba(0,0,0,0)]"
+          className="h-full w-12 flex items-center justify-center absolute right-0 top-1/2 -translate-y-1/2 z-10 text-white/60 hover:text-white hover:bg-gradient-to-l hover:from-[rgba(255,255,255,0.1)] hover:to-[rgba(0,0,0,0)]"
           onClick={handleNext}
         >
           <i className="material-symbols-outlined text-5xl">chevron_right</i>

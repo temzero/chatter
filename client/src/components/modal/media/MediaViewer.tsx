@@ -9,8 +9,11 @@ import { RenderModalAttachment } from "./RenderModalAttachment";
 import { useShallow } from "zustand/shallow";
 import { handleDownload } from "@/utils/handleDownload";
 import { audioService, SoundType } from "@/services/audio.service";
+import { useDeviceStore } from "@/stores/deviceStore";
 
 export const MediaViewer = () => {
+  const isMobile = useDeviceStore((state) => state.isMobile);
+
   const { currentAttachmentId, closeModal } = useModalStore(
     useShallow((state) => ({
       currentAttachmentId: state.currentAttachmentId,
@@ -175,7 +178,11 @@ export const MediaViewer = () => {
   if (!currentMedia) return null;
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center select-none">
+    <div
+      className={`relative w-full h-full flex flex-col items-center justify-center select-none ${
+        isMobile && "bg-black"
+      }`}
+    >
       <MediaViewerTopBar
         attachment={currentMedia}
         onRotate={handleRotate}

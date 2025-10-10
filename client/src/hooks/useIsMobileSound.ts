@@ -14,10 +14,10 @@ export const useIsMobileSound = (isMobile: boolean) => {
 
     if (prevIsMobileRef.current === false && isMobile === true) {
       // Desktop → Mobile
-      audioService.playSound(SoundType.POP1, 0.2);
+      audioService.playSound(SoundType.POP1, 0.3);
     } else if (prevIsMobileRef.current === true && isMobile === false) {
       // Mobile → Desktop
-      audioService.playSound(SoundType.POP2, 0.2);
+      audioService.playSound(SoundType.POP2, 0.3);
     }
 
     prevIsMobileRef.current = isMobile; // update previous value

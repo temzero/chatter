@@ -54,14 +54,12 @@ const SystemMessage = ({
 
   const animationProps = message.shouldAnimate
     ? messageAnimations.SystemMessage
-    : messageAnimations.none;
+    : {};
 
   return (
     <motion.div
       id={`message-${messageId}`}
-      initial={animationProps.initial}
-      animate={animationProps.animate}
-      transition={animationProps.transition}
+      {...animationProps}
       className={clsx(
         "cursor-pointer opacity-50 pb-2 mx-auto flex items-center justify-center",
         {

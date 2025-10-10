@@ -4,8 +4,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { AlertMessage } from "@/components/ui/AlertMessage";
 import { AuthenticationLayout } from "../PublicLayout";
 import { motion } from "framer-motion";
-// import { QRCode } from "@/components/ui/QRCode";
-// import qrCode from "@/assets/icon/qr-code.svg";
+import { publicLayoutAnimations } from "@/animations/publicLayoutAnimations";
 
 const Login = () => {
   const formRef = useRef<HTMLFormElement>(null);
@@ -34,8 +33,7 @@ const Login = () => {
   return (
     <AuthenticationLayout loading={loading}>
       <motion.div
-        initial={{ scale: 1.2, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
+        {...publicLayoutAnimations.container}
         className="flex items-center rounded-lg custom-border backdrop-blur-md bg-[var(--card-bg-color)] overflow-hidden"
       >
         <form
@@ -92,7 +90,7 @@ const Login = () => {
             </Link>
           </div>
         </form>
-{/* 
+        {/* 
         <motion.div
           className="h-full p-6 flex flex-1 flex-col gap-3 justify-end custom-border-l cursor-pointer select-none"
           onClick={toggleQrCode}

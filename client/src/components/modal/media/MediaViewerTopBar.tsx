@@ -36,8 +36,11 @@ export const MediaViewerTopBar = ({
   };
 
   return (
-    <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-3 pb-8 z-20">
-      <div className="flex items-center gap-2">
+    <>
+      <div
+        className="absolute top-2 left-2 flex items-center gap-2"
+        style={{ zIndex: 1 }}
+      >
         <Avatar
           avatarUrl={sender?.avatarUrl}
           name={sender?.displayName}
@@ -47,7 +50,11 @@ export const MediaViewerTopBar = ({
           {sender?.displayName || "Sender"}
         </div>
       </div>
-      <div className="flex items-center gap-4">
+
+      <div
+        className="absolute top-2 right-2 flex items-center gap-4"
+        style={{ zIndex: 1 }}
+      >
         <button
           onClick={onRotate}
           className="opacity-60 hover:opacity-100 rounded-full"
@@ -79,6 +86,6 @@ export const MediaViewerTopBar = ({
           <i className="material-symbols-outlined">close</i>
         </button>
       </div>
-    </div>
+    </>
   );
 };

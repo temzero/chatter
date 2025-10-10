@@ -11,7 +11,7 @@ import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.se
 import { ForwardMessageRequest } from "@/types/requests/forwardMessage.request";
 import { ChatAvatar } from "../ui/avatar/ChatAvatar";
 import SearchBar from "../ui/SearchBar";
-import { childrenModalAnimation } from "@/animations/modalAnimations";
+import { modalAnimations } from "@/animations/modalAnimations";
 import { AttachmentType } from "@/types/enums/attachmentType";
 import { AttachmentUploadRequest } from "@/types/requests/sendMessage.request";
 import { ChatType } from "@/types/enums/ChatType";
@@ -77,7 +77,7 @@ const ForwardMessageModal: React.FC = () => {
 
   return (
     <motion.div
-      {...childrenModalAnimation}
+      {...modalAnimations.children}
       className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded p-4 max-w-xl w-[400px] custom-border"
       style={{ zIndex: 100 }}
     >

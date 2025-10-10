@@ -2,7 +2,7 @@ import React from "react";
 import { useModalStore } from "@/stores/modalStore";
 import { callService } from "@/services/callService";
 import { motion } from "framer-motion";
-import { childrenModalAnimation } from "@/animations/modalAnimations";
+import { modalAnimations } from "@/animations/modalAnimations";
 import { CallResponseDto } from "@/types/responses/call.response";
 import { ChatAvatar } from "../ui/avatar/ChatAvatar";
 import { getCallColor, getCallText } from "@/utils/callHelpers";
@@ -39,7 +39,7 @@ const DeleteCallModal: React.FC = () => {
 
   return (
     <motion.div
-      {...childrenModalAnimation}
+      {...modalAnimations.children}
       className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border"
       style={{ zIndex: 100 }}
     >

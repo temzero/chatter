@@ -1,13 +1,13 @@
 // animations/sidebarAnimations.ts
+import { MotionProps } from "framer-motion";
 import { SidebarMode } from "@/types/enums/sidebarMode";
 
-export const sidebarAnimations = {
+export const sidebarAnimations: Record<string, MotionProps> = {
   [SidebarMode.DEFAULT]: {
     initial: { opacity: 0, scale: 0.9 },
     animate: {
       opacity: 1,
       scale: 1,
-      transition: { duration: 0.2, ease: "easeOut" },
     },
     exit: {
       opacity: 0,

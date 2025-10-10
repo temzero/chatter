@@ -4,7 +4,7 @@ import { useModalStore } from "@/stores/modalStore";
 import { useActiveChat, useChatStore } from "@/stores/chatStore";
 import { Avatar } from "../ui/avatar/Avatar";
 import SearchBar from "../ui/SearchBar";
-import { childrenModalAnimation } from "@/animations/modalAnimations";
+import { modalAnimations } from "@/animations/modalAnimations";
 import { toast } from "react-toastify";
 import { copyToClipboard } from "@/utils/copyToClipboard";
 import { handleError } from "@/utils/handleError";
@@ -100,7 +100,7 @@ const AddMemberModal: React.FC = () => {
 
   return (
     <motion.div
-      {...childrenModalAnimation}
+      {...modalAnimations.children}
       className="bg-[var(--modal-color)] text-[var(--text-color)] rounded p-4 max-w-xl w-[400px] custom-border"
       style={{ zIndex: 100 }}
     >

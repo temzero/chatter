@@ -25,7 +25,6 @@ export const OnlineDot = ({
           key="online-dot"
           initial={{ scale: 2 }}
           animate={{ scale: 1 }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
           className={`rounded-full bg-green-500 ${sizeClasses[size]} ${className}`}
         />
       )}

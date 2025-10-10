@@ -2,7 +2,7 @@ import { useEffect, useMemo } from "react";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { AnimatePresence, motion } from "framer-motion";
 import { useShallow } from "zustand/shallow";
-import { modalAnimation } from "@/animations/modalAnimations";
+import { modalAnimations } from "@/animations/modalAnimations";
 import MediaViewer from "./media/MediaViewer";
 import FriendRequestModal from "./FriendRequestModal";
 import ForwardMessageModal from "./ForwardMessageModal";
@@ -88,7 +88,7 @@ const Modal = () => {
     <AnimatePresence>
       {modalContent && (
         <motion.div
-          {...modalAnimation}
+          {...modalAnimations.modal}
           className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center"
           onClick={handleCloseModal}
           style={{ zIndex: 99 }}

@@ -1,9 +1,6 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  sliderVariants,
-  sliderTransition,
-} from "@/animations/slidingAnimations";
+import { slidingAnimations } from "@/animations/slidingAnimations";
 
 interface SlidingContainerProps {
   children: React.ReactNode;
@@ -23,13 +20,8 @@ export const SlidingContainer: React.FC<SlidingContainerProps> = ({
       <AnimatePresence initial={false} custom={direction}>
         <motion.div
           key={uniqueKey}
-          custom={direction}
-          variants={sliderVariants}
-          initial="incoming"
-          animate="active"
-          exit="exit"
-          transition={sliderTransition}
           className={`w-full h-full ${className}`}
+          {...slidingAnimations.slide(direction)}
         >
           {children}
         </motion.div>

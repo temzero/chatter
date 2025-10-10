@@ -7,10 +7,7 @@ import { useDeviceStore } from "@/stores/deviceStore";
 import { CallStatus, LocalCallStatus } from "@/types/enums/CallStatus";
 import { ChatResponse } from "@/types/responses/chat.response";
 import { ChatType } from "@/types/enums/ChatType";
-import {
-  childrenModalAnimation,
-  childrenModalMobileAnimation,
-} from "@/animations/modalAnimations";
+import { modalAnimations } from "@/animations/modalAnimations";
 
 import CallRoom from "../ui/calling/components/callRoom/CallRoom";
 import IncomingCall from "../ui/calling/IncomingCall";
@@ -107,8 +104,8 @@ const CallModal: React.FC = () => {
   };
 
   const animationProps = isMobile
-    ? childrenModalMobileAnimation
-    : childrenModalAnimation;
+    ? modalAnimations.childrenMobile
+    : modalAnimations.children;
 
   return (
     <motion.div

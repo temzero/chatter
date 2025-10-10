@@ -8,9 +8,10 @@ import { VoiceVisualizerButton } from "../VoiceVisualizerBtn";
 import { useLocalPreviewVoiceTrack } from "@/hooks/mediaStreams/useLocalPreviewVoiceTrack";
 import { useLocalPreviewVideoTrack } from "@/hooks/mediaStreams/useLocalPreviewVideoTrack";
 import { useLocalPreviewScreenTrack } from "@/hooks/mediaStreams/useLocalPreviewScreenTrack";
-import CallHeader from "./components/CallHeader";
 import { useDeviceStore } from "@/stores/deviceStore";
 import { motion } from "framer-motion";
+import CallHeader from "./components/CallHeader";
+import { callAnimations } from "@/animations/callAnimations";
 
 const BroadcastPreviewModal = ({ chat }: { chat: ChatResponse }) => {
   const isMobile = useDeviceStore((state) => state.isMobile);
@@ -68,16 +69,7 @@ const BroadcastPreviewModal = ({ chat }: { chat: ChatResponse }) => {
         <CallHeader chat={chat} />
         <motion.p
           className="flex items-center gap-1 opacity-60 mt-2 mb-4 bg-[--border-color] rounded-full p-1 pr-2"
-          animate={{
-            opacity: [1, 0.6, 1],
-          }}
-          transition={{
-            duration: 1,
-            repeat: Infinity,
-            repeatType: "loop",
-            ease: "easeInOut",
-            repeatDelay: 1,
-          }}
+          {...callAnimations.titlePulse([1, 0.6, 1])}
         >
           <span className="material-symbols-outlined">info</span>
           Check your mic, webcam, and screen before broadcasting

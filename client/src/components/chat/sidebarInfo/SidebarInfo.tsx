@@ -32,8 +32,8 @@ const SidebarInfo: React.FC = () => {
         {CurrentComponent && (
           <motion.div
             key={currentSidebarInfo}
-            {...animation}
             className="absolute inset-0 overflow-y-auto"
+            {...animation}
           >
             {CurrentComponent}
           </motion.div>

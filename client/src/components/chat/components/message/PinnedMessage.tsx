@@ -24,7 +24,7 @@ const PinnedMessage: React.FC<MessageProps> = ({
   const isMe = useIsMe(message.sender.id);
   const animationProps = shouldAnimate
     ? messageAnimations.pinMessage
-    : messageAnimations.none;
+    : {};
 
   return (
     <motion.div
@@ -39,9 +39,7 @@ const PinnedMessage: React.FC<MessageProps> = ({
               : "bg-[linear-gradient(to_right,var(--message-color-50)_0%,var(--message-color)_50%,var(--message-color-50)_100%)]"
           }
         `}
-      initial={animationProps.initial}
-      animate={animationProps.animate}
-      transition={animationProps.transition}
+      {...animationProps}
     >
       <button
         className={`group custom-border hover:bg-red-500 p-1 rounded-full -rotate-[30deg]

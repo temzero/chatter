@@ -7,6 +7,7 @@ import { useCallStore } from "@/stores/callStore/callStore";
 import { useLocalPreviewVideoTrack } from "@/hooks/mediaStreams/useLocalPreviewVideoTrack";
 import { CallActionButton } from "./CallActionButton";
 import CallHeader from "./components/CallHeader";
+import { callAnimations } from "@/animations/callAnimations";
 
 const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
   const [loaderColor, setLoaderColor] = useState("#8b8b8b");
@@ -42,19 +43,7 @@ const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
 
       <div id="calling-title" className="flex flex-col items-center">
         <CallHeader chat={chat} />
-        <motion.p
-          className="mt-1"
-          animate={{
-            opacity: [0.3, 0.6, 0.3],
-          }}
-          transition={{
-            duration: 1,
-            repeat: Infinity,
-            repeatType: "loop",
-            ease: "easeInOut",
-            repeatDelay: 1,
-          }}
-        >
+        <motion.p className="mt-1" {...callAnimations.titlePulse}>
           Incoming {isVideoCall ? "video" : "voice"} call
         </motion.p>
       </div>

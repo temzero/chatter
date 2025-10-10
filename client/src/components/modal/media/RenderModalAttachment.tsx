@@ -2,9 +2,11 @@ import React, { useState, useEffect, useRef } from "react";
 import type { AttachmentResponse } from "@/types/responses/message.response";
 import { formatFileSize } from "@/utils/formatFileSize";
 import { getFileIcon } from "@/utils/getFileIcon";
-import CustomAudioPlayer, { AudioPlayerRef } from "../../ui/CustomAudioPlayer";
 import { handleDownload } from "@/utils/handleDownload";
 import { AttachmentType } from "@/types/enums/attachmentType";
+import CustomAudioPlayer, { AudioPlayerRef } from "../../ui/CustomAudioPlayer";
+import { motion } from "framer-motion";
+import { mediaViewerAnimations } from "@/animations/mediaViewerAnimations";
 
 export const RenderModalAttachment = ({
   attachment,
@@ -16,6 +18,7 @@ export const RenderModalAttachment = ({
   isCurrent?: boolean;
 }) => {
   const [isZoom, setZoom] = useState(false);
+  const [zoomOrigin, setZoomOrigin] = useState<string>("50% 50%");
   const [isHorizontal, setIsHorizontal] = useState<boolean | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const audioPlayerRef = useRef<AudioPlayerRef | null>(null);
@@ -40,10 +43,6 @@ export const RenderModalAttachment = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === "Space") {
         e.preventDefault();
-
-        if (attachment.type === "image") {
-          handleZoom();
-        }
 
         if (attachment.type === "video" && videoRef.current) {
           if (videoRef.current.paused) {
@@ -94,7 +93,31 @@ export const RenderModalAttachment = ({
     }
   }, [isCurrent]);
 
-  const handleZoom = () => {
+  // const handleZoom = () => {
+  //   setZoom((prev) => !prev);
+  // };
+  const handleZoom = (e: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const w = rect.width;
+    const h = rect.height;
+
+    // Cursor position relative to image
+    const offsetX = ((e.clientX - rect.left) / w) * 100;
+    const offsetY = ((e.clientY - rect.top) / h) * 100;
+
+    // Adjust for rotation
+    const rad = (rotation * Math.PI) / 180;
+    const centerX = 50;
+    const centerY = 50;
+    const dx = offsetX - centerX;
+    const dy = offsetY - centerY;
+
+    const rotatedX = centerX + dx * Math.cos(rad) + dy * Math.sin(rad);
+    const rotatedY = centerY - dx * Math.sin(rad) + dy * Math.cos(rad);
+
+    setZoomOrigin(`${rotatedX}% ${rotatedY}%`);
+
+    // Toggle zoom
     setZoom((prev) => !prev);
   };
 
@@ -108,44 +131,32 @@ export const RenderModalAttachment = ({
   switch (attachment.type) {
     case "image":
       return (
-        <div
+        <motion.div
           ref={scrollContainerRef}
-          className={`w-full h-full flex items-center justify-center scrollbar-hide overflow-auto ${
+          className={`w-full h-full flex items-center justify-center scrollbar-hide ${
             isHorizontal ? "" : "py-5"
           }`}
+          animate={mediaViewerAnimations.rotation(rotation)}
         >
-          <img
+          <motion.img
             onClick={handleZoom}
             onLoad={handleImageLoad}
             src={attachment.url}
             alt={attachment.type || attachment.filename || "Image"}
-            className={`mx-auto my-auto object-contain transition-all duration-500 ease-in-out rounded ${
-              isHorizontal === null
-                ? ""
-                : isHorizontal
-                ? `${
-                    isZoom
-                      ? "w-[100vw] max-h-[200vh] cursor-zoom-out"
-                      : "w-[80vw] max-h-[80vh] cursor-zoom-in"
-                  }`
-                : `${
-                    isZoom
-                      ? "h-[160vh] cursor-zoom-out"
-                      : "h-[93vh] cursor-zoom-in"
-                  }`
-            }`}
-            draggable="false"
+            draggable={false}
+            className="mx-auto my-auto object-contain rounded max-h-[90vh]"
             style={{
-              transform: `rotate(${rotation}deg)`,
-              transition: "all 0.3s ease",
+              cursor: isZoom ? "zoom-out" : "zoom-in",
+              transformOrigin: zoomOrigin, // keep origin for zooming
             }}
+            animate={mediaViewerAnimations.zoom(isZoom)}
           />
-        </div>
+        </motion.div>
       );
 
     case "video":
       return (
-        <video
+        <motion.video
           ref={videoRef}
           src={attachment.url}
           controls
@@ -161,21 +172,15 @@ export const RenderModalAttachment = ({
               : "h-[93vh] max-w-[80vw]"
           }`}
           draggable="false"
-          style={{
-            transform: `rotate(${rotation}deg)`,
-            transition: "all 0.3s ease",
-          }}
+          animate={mediaViewerAnimations.rotation(rotation)}
         />
       );
 
     case "audio":
       return (
-        <div
+        <motion.div
           className="max-w-md rounded-lg border-4 border-[var(--border-color)]"
-          style={{
-            transform: `rotate(${rotation}deg)`,
-            transition: "all 0.3s ease",
-          }}
+          animate={mediaViewerAnimations.rotation(rotation)}
         >
           <div className="p-4 custom-border-b flex items-center gap-1">
             <i className="material-symbols-outlined">music_note</i>
@@ -188,17 +193,14 @@ export const RenderModalAttachment = ({
             ref={audioPlayerRef}
             isDisplayName={false}
           />
-        </div>
+        </motion.div>
       );
 
     case "file":
       return (
-        <div
+        <motion.div
           className="mx-auto my-auto w-md pt-0 rounded-lg flex flex-col items-center border-4 border-[var(--border-color)]"
-          style={{
-            transform: `rotate(${rotation}deg)`,
-            transition: "all 0.3s ease",
-          }}
+          animate={mediaViewerAnimations.rotation(rotation)}
         >
           <i className="material-symbols-outlined text-8xl px-4">
             {getFileIcon(attachment.filename, attachment.mimeType)}
@@ -215,7 +217,7 @@ export const RenderModalAttachment = ({
           >
             Download
           </button>
-        </div>
+        </motion.div>
       );
 
     default:

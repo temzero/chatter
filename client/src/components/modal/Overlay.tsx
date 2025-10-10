@@ -1,3 +1,4 @@
+import { modalAnimations } from "@/animations/modalAnimations";
 import { useModalStore } from "@/stores/modalStore";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -6,7 +7,7 @@ interface OverlayProps {
 }
 
 const Overlay = ({ onClick }: OverlayProps) => {
-  const closeModal = useModalStore(state => state.closeModal);
+  const closeModal = useModalStore((state) => state.closeModal);
 
   const handleClick = () => {
     onClick?.();
@@ -16,10 +17,7 @@ const Overlay = ({ onClick }: OverlayProps) => {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.15 }}
+        {...modalAnimations.modal}
         className="fixed inset-0 flex bg-black/30 backdrop-blur-sm"
         onClick={handleClick}
       />

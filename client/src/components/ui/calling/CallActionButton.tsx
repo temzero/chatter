@@ -6,6 +6,7 @@ import {
   useTransform,
   animate,
 } from "framer-motion";
+import { callAnimations } from "@/animations/callAnimations";
 
 interface CallActionButtonProps {
   isVideoCall: boolean;
@@ -108,27 +109,7 @@ export const CallActionButton: React.FC<CallActionButtonProps> = ({
             onClick={isVideoCall ? toggleVideo : undefined}
             className="material-symbols-outlined filled text-6xl"
             style={{ color: textColor, rotate: rotateOnDrag }}
-            initial={{ scale: 0.5, rotate: 0 }}
-            animate={
-              isDragging
-                ? { scale: 1, rotate: 0, opacity: 1 }
-                : {
-                    scale: [1, 1.25, 1],
-                    rotate: [0, 15, -15, 0],
-                    opacity: [1, 0.8, 1],
-                  }
-            }
-            transition={
-              isDragging
-                ? { duration: 0.2 }
-                : {
-                    duration: 0.5,
-                    repeat: Infinity,
-                    repeatType: "loop",
-                    ease: "easeInOut",
-                    repeatDelay: 0.5,
-                  }
-            }
+            {...callAnimations.incomingActionButton(isDragging)}
           >
             {isVideoCall
               ? isVideoEnabled

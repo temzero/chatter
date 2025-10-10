@@ -7,9 +7,10 @@ import { VideoStream } from "./components/VideoStream";
 import { ChatResponse } from "@/types/responses/chat.response";
 import { useModalStore } from "@/stores/modalStore";
 import { useLocalTracks } from "@/hooks/mediaStreams/useLocalTracks";
-import CallHeader from "./components/CallHeader";
-import { UpdateCallPayload } from "@/types/callPayload";
 import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
+import { UpdateCallPayload } from "@/types/callPayload";
+import { callAnimations } from "@/animations/callAnimations";
+import CallHeader from "./components/CallHeader";
 
 interface CallCallingUIProps {
   chat: ChatResponse;
@@ -76,19 +77,7 @@ const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
 
       <div id="calling-title" className="flex flex-col items-center mb-4">
         <CallHeader chat={chat} />
-        <motion.p
-          className="mt-1"
-          animate={{
-            opacity: [0.6, 0.2, 0.6],
-          }}
-          transition={{
-            duration: 1,
-            repeat: Infinity,
-            repeatType: "loop",
-            ease: "easeInOut",
-            repeatDelay: 1,
-          }}
-        >
+        <motion.p className="mt-1" {...callAnimations.titlePulse}>
           Outgoing {isVideoCall ? "video" : "voice"} call
         </motion.p>
       </div>
@@ -115,19 +104,7 @@ const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
                   : "call"
               }
               className="material-symbols-outlined filled text-6xl flex items-center justify-center"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{
-                scale: [1, 1.5, 1],
-                opacity: isHovering ? 1 : [0.4, 0.8, 0.8, 0.4],
-                rotate: isHovering ? 0 : [0, 15, -15, 0],
-              }}
-              transition={{
-                duration: isHovering ? 0.3 : 0.5,
-                repeat: isHovering ? 0 : Infinity,
-                repeatType: "loop",
-                ease: "easeInOut",
-                repeatDelay: isHovering ? 0 : 0.5,
-              }}
+              {...callAnimations.outgoingActionButton(isHovering)}
             >
               {isHovering
                 ? isVideoCall

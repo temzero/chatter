@@ -8,6 +8,7 @@ import {
   calculateContextMenuPosition,
   Position,
 } from "@/utils/contextMenuUtils";
+import { messageAnimations } from "@/animations/messageAnimations";
 
 interface MessageContextMenuProps {
   message: MessageResponse;
@@ -48,9 +49,7 @@ export const MessageContextMenu: React.FC<MessageContextMenuProps> = ({
   return (
     <motion.div
       ref={menuRef}
-      initial={{ opacity: 0, scale: 0.2 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.2 }}
+      {...messageAnimations.contextMenu}
       style={{
         position: position ? "fixed" : "absolute",
         left: adjustedPosition?.x,
@@ -60,10 +59,7 @@ export const MessageContextMenu: React.FC<MessageContextMenuProps> = ({
         transformOrigin: transformOrigin,
         // zIndex: 10,
       }}
-      className={clsx(
-        "flex flex-col gap-1 rounded-lg",
-        "origin-top-left"
-      )}
+      className={clsx("flex flex-col gap-1 rounded-lg", "origin-top-left")}
       onClick={(e) => e.stopPropagation()}
       onContextMenu={(e: React.MouseEvent) => {
         e.preventDefault();

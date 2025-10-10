@@ -1,29 +1,28 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useActiveChat } from "@/stores/chatStore";
-import Header from "./Header";
-import ChatBar from "./components/ChatBar";
-import MessagesContainer from "./messagesContainer/MessagesContainer";
 import { ChatMemberRole } from "@/types/enums/chatMemberRole";
 import { useBlockStatus } from "@/hooks/useBlockStatus";
 import { ChatType } from "@/types/enums/ChatType";
 import { chatMemberService } from "@/services/chat/chatMemberService";
+import Header from "./Header";
+import ChatBar from "./components/ChatBar";
+import MessagesContainer from "./messagesContainer/MessagesContainer";
 
 const ChatBox = React.memo(() => {
   const activeChat = useActiveChat();
-  // const { isBlockedByMe, isBlockedMe } = useBlockStatus(
-  //   activeChat?.id ?? "",
-  //   activeChat?.myMemberId ?? ""
-  // );
+  const { isBlockedByMe, isBlockedMe } = useBlockStatus(
+    activeChat?.id ?? "",
+    activeChat?.myMemberId ?? ""
+  );
 
-  console.log("ChatBox activeChat", activeChat);
   if (!activeChat) return null;
 
   const isDirectChat = activeChat.type === ChatType.DIRECT;
-  // const isBlocked = isDirectChat && (isBlockedByMe || isBlockedMe);
-  const isBlocked = false;
-  const isBlockedByMe = false;
-  const isBlockedMe = false;
+  const isBlocked = isDirectChat && (isBlockedByMe || isBlockedMe);
+  // const isBlocked = false;
+  // const isBlockedByMe = false;
+  // const isBlockedMe = false;
   const isMember = Boolean(activeChat.myMemberId);
 
   return (

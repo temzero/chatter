@@ -4,7 +4,7 @@ import { useModalStore } from "@/stores/modalStore";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
 import { useCurrentUserId } from "@/stores/authStore";
 import { motion } from "framer-motion";
-import { childrenModalAnimation } from "@/animations/modalAnimations";
+import { modalAnimations } from "@/animations/modalAnimations";
 import { useMessageStore } from "@/stores/messageStore";
 import { useTranslation } from "react-i18next";
 
@@ -30,7 +30,7 @@ const DeleteMessageModal: React.FC = () => {
 
   return (
     <motion.div
-      {...childrenModalAnimation}
+      {...modalAnimations.children}
       className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border"
       style={{ zIndex: 100 }}
     >

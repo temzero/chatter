@@ -7,7 +7,6 @@ import { ChatType } from "@/types/enums/ChatType";
 import { OnlineDot } from "../ui/OnlineDot";
 import { useChatStatus } from "@/stores/presenceStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
-import type { ChatResponse } from "@/types/responses/chat.response";
 import PinnedMessage from "@/components/chat/components/message/PinnedMessage";
 import { DirectChatMember } from "@/types/responses/chatMember.response";
 import { useMessageStore } from "@/stores/messageStore";
@@ -21,6 +20,7 @@ import { ChatMemberRole } from "@/types/enums/chatMemberRole";
 import { useDeviceStore } from "@/stores/deviceStore";
 import { useChatStore } from "@/stores/chatStore";
 import { useNavigate } from "react-router-dom";
+import type { ChatResponse } from "@/types/responses/chat.response";
 
 interface ChatHeaderProps {
   chat: ChatResponse;

@@ -1,7 +1,7 @@
 import React from "react";
 import { useModalStore } from "@/stores/modalStore";
 import { motion } from "framer-motion";
-import { childrenModalAnimation } from "@/animations/modalAnimations";
+import { modalAnimations } from "@/animations/modalAnimations";
 import { ChatResponse } from "@/types/responses/chat.response";
 import { DirectChatMember } from "@/types/responses/chatMember.response";
 import { useChatStore } from "@/stores/chatStore";
@@ -32,7 +32,7 @@ const LeaveChatModal: React.FC = () => {
 
   return (
     <motion.div
-      {...childrenModalAnimation}
+      {...modalAnimations.children}
       className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border"
       style={{ zIndex: 100 }}
     >

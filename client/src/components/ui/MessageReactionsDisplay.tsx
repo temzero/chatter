@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { handleReaction } from "@/utils/handleReaction";
 import { useMessageReactions } from "@/stores/messageStore";
 import { audioService, SoundType } from "@/services/audio.service"; // ✅ enum
+import { messageAnimations } from "@/animations/messageAnimations";
 
 interface MessageReactionDisplayProps {
   isMe?: boolean;
@@ -55,15 +56,6 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.1, y: 12 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.1, y: 12 }}
-      transition={{
-        type: "spring",
-        stiffness: 500,
-        damping: 28,
-      }}
-      whileTap={{ scale: 0.8 }}
       className={clsx(
         "message-reaction absolute flex bg-black/50 rounded-full",
         isChannel
@@ -73,6 +65,7 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
           : "-right-4 -bottom-4 flex-row-reverse"
       )}
       style={{ zIndex: 1 }}
+      {...messageAnimations.reaction}
     >
       <AnimatePresence>
         {sortedReactions.map(([emoji, userIds]) => {

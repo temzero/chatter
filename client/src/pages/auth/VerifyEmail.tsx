@@ -3,6 +3,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { AlertMessage } from "@/components/ui/AlertMessage";
 import { AuthenticationLayout } from "../PublicLayout";
 import { motion } from "framer-motion";
+import { publicLayoutAnimations } from "@/animations/publicLayoutAnimations";
 
 const VerifyEmail = () => {
   const { firstName, email, token } = useParams();
@@ -28,8 +29,7 @@ const VerifyEmail = () => {
   return (
     <AuthenticationLayout>
       <motion.div
-        initial={{ scale: 1.2, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
+        {...publicLayoutAnimations.container}
         className="flex items-center rounded-lg custom-border backdrop-blur-md bg-[var(--card-bg-color)]"
       >
         <form

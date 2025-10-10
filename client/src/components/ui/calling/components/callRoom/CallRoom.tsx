@@ -1,5 +1,6 @@
 import { ChatResponse } from "@/types/responses/chat.response";
 import { useCallStore } from "@/stores/callStore/callStore";
+import { useDeviceStore } from "@/stores/deviceStore";
 import { useLocalTracks } from "@/hooks/mediaStreams/useLocalTracks";
 import { RemoteParticipant, RoomEvent } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
@@ -10,7 +11,6 @@ import { UserCamera } from "./UserCamera";
 import { Button } from "@/components/ui/Button";
 import { Timer } from "@/components/ui/Timer";
 import CallHeader from "../CallHeader";
-import { useDeviceStore } from "@/stores/deviceStore";
 
 const CallRoom = ({
   chat,

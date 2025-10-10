@@ -63,7 +63,7 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ message }) => {
     ? isMe
       ? messageAnimations.myMessage
       : messageAnimations.otherMessage
-    : messageAnimations.none;
+    : {};
 
   // Check system message
   const isSystemMessage = !!message.systemEvent;
@@ -89,9 +89,7 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ message }) => {
         "z-[99]": isFocus,
         "w-[60%]": !isMobile,
       })}
-      initial={animationProps.initial}
-      animate={animationProps.animate}
-      transition={animationProps.transition}
+      {...animationProps}
     >
       {repliedMessage && (
         <div

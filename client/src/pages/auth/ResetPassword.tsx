@@ -4,20 +4,23 @@ import { useAuthStore } from "@/stores/authStore";
 import { AlertMessage } from "@/components/ui/AlertMessage";
 import { AuthenticationLayout } from "../PublicLayout";
 import { motion } from "framer-motion";
+import { publicLayoutAnimations } from "@/animations/publicLayoutAnimations";
 
 const ResetPassword = () => {
   const formRef = useRef<HTMLFormElement>(null);
   const { token } = useParams();
-  const loading = useAuthStore(state => state.loading);
-  const resetPasswordWithToken = useAuthStore(state => state.resetPasswordWithToken);
-  const setMessage = useAuthStore(state => state.setMessage);
+  const loading = useAuthStore((state) => state.loading);
+  const resetPasswordWithToken = useAuthStore(
+    (state) => state.resetPasswordWithToken
+  );
+  const setMessage = useAuthStore((state) => state.setMessage);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formRef.current) return;
-    
+
     const formData = new FormData(formRef.current);
     const password = formData.get("password") as string;
     const confirmPassword = formData.get("confirmPassword") as string;
@@ -37,8 +40,7 @@ const ResetPassword = () => {
   return (
     <AuthenticationLayout>
       <motion.div
-        initial={{ scale: 1.2, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
+        {...publicLayoutAnimations.container}
         className="flex items-center rounded-lg custom-border backdrop-blur-md bg-[var(--card-bg-color)]"
       >
         <form

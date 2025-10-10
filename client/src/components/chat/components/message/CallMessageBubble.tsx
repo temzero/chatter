@@ -6,6 +6,7 @@ import { MessageResponse } from "@/types/responses/message.response";
 import { CallStatus } from "@/types/enums/CallStatus";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { getCallColor, getCallIcon, getCallText } from "@/utils/callHelpers";
+import { callAnimations } from "@/animations/callAnimations";
 
 interface CallMessageBubbleProps {
   message: MessageResponse;
@@ -22,6 +23,16 @@ const CallMessageBubble: React.FC<CallMessageBubbleProps> = ({
   const openModal = useModalStore((state) => state.openModal);
   const call = message.call;
   if (!call) return null;
+
+  const motionProps =
+    call.status === CallStatus.DIALING
+      ? callAnimations.incomingActionButton() // shake + bounce
+      : call.status === CallStatus.IN_PROGRESS
+      ? callAnimations.titlePulse() // pulse
+      : {
+          animate: { x: 0, scale: 1, opacity: 1 },
+          transition: { duration: 0 },
+        };
 
   return (
     <div
@@ -51,23 +62,7 @@ const CallMessageBubble: React.FC<CallMessageBubbleProps> = ({
             "material-symbols-outlined text-3xl",
             getCallColor(call.status)
           )}
-          animate={
-            call.status === CallStatus.DIALING
-              ? { x: [-2, 2, -2, 2, 0], scale: [1, 1.05, 1] } // shake + bounce
-              : call.status === CallStatus.IN_PROGRESS
-              ? { opacity: [1, 0.4, 1] } // pulse
-              : { x: 0, scale: 1, opacity: 1 }
-          }
-          transition={
-            call.status === CallStatus.DIALING
-              ? {
-                  x: { duration: 0.4, repeat: Infinity, repeatDelay: 0.4 },
-                  scale: { duration: 0.2, repeat: Infinity, repeatDelay: 0.4 },
-                }
-              : call.status === CallStatus.IN_PROGRESS
-              ? { duration: 1.2, repeat: Infinity }
-              : { duration: 0 }
-          }
+          {...motionProps}
         >
           {getCallIcon(call.status)}
         </motion.span>

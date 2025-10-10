@@ -1,4 +1,5 @@
 // components/MediaViewerBottomInfo.tsx
+import { useDeviceStore } from "@/stores/deviceStore";
 import { AttachmentResponse } from "@/types/responses/message.response";
 import { formatFileSize } from "@/utils/formatFileSize";
 
@@ -13,22 +14,27 @@ export const MediaViewerBottomInfo = ({
   currentIndex,
   mediaLength,
 }: MediaViewerBottomInfoProps) => {
+  const isMobile = useDeviceStore((state) => state.isMobile);
   if (mediaLength <= 1) return null;
 
   return (
     <>
-      <div className="absolute bottom-0 left-0 right-0 flex justify-between items-center p-2 pt-6 ">
-        {attachment.filename && (
-          <div className="text-white/60 truncate max-w-[50%]">
-            {attachment.filename}
-          </div>
-        )}
-        {attachment.size && (
-          <div className="text-white/60">{formatFileSize(attachment.size)}</div>
-        )}
-      </div>
+      {isMobile || (
+        <div className="absolute bottom-0 left-0 right-0 flex justify-between items-center p-2 pointer-events-none">
+          {attachment.filename && (
+            <div className="text-white/60 truncate max-w-[50%]">
+              {attachment.filename}
+            </div>
+          )}
+          {attachment.size && (
+            <div className="text-white/60">
+              {formatFileSize(attachment.size)}
+            </div>
+          )}
+        </div>
+      )}
       {/* Dot Indicator */}
-      <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-2 z-20 ">
+      <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-2 z-20 pointer-events-none">
         {Array.from({ length: mediaLength }).map((_, index) => (
           <span
             key={index}
