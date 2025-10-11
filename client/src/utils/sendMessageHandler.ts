@@ -1,15 +1,16 @@
+import { v4 as uuidv4 } from "uuid";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
+import { useMessageStore } from "@/stores/messageStore";
+import { AttachmentResponse } from "@/types/responses/message.response";
+import { determineAttachmentType } from "./determineAttachmentType";
+import { handleError } from "./handleError";
+import { uploadFilesToSupabase } from "./supabase/uploadToSupabase";
+import { MessageStatus, MessageType } from "@/types/enums/message";
+import { toast } from "react-toastify";
 import {
   SendMessageRequest,
   AttachmentUploadRequest,
 } from "@/types/requests/sendMessage.request";
-import { convertToAttachmentPayload } from "./convertToAttachmentPayload";
-import { useMessageStore } from "@/stores/messageStore";
-import { MessageStatus, MessageType } from "@/types/enums/message";
-import { v4 as uuidv4 } from "uuid";
-import { AttachmentResponse } from "@/types/responses/message.response";
-import { determineAttachmentType } from "./determineAttachmentType";
-import { handleError } from "./handleError";
 
 function toOptimisticAttachmentResponseFromFile(
   file: File,
@@ -56,12 +57,18 @@ export async function handleSendMessage({
   onSuccess?: () => void;
   onError?: (error: unknown) => void;
 }) {
-  if (!myUserId || !chatId || !myMemberId) return;
+  if (!myUserId || !chatId || !myMemberId) {
+    toast.error("Unable to send message — user not authenticated.");
+    return;
+  }
 
   const inputValue = inputRef.current?.value || "";
   const trimmedInput = inputValue.trim();
 
-  if (!(trimmedInput || attachments.length)) return;
+  if (!(trimmedInput || attachments.length)) {
+    toast.warn("You can’t send an empty message.");
+    return;
+  }
   if (inputRef.current) inputRef.current.value = "";
 
   const now = new Date().toISOString();
@@ -108,17 +115,8 @@ export async function handleSendMessage({
   useMessageStore.getState().addMessage(optimisticMessage);
 
   try {
-    // Upload files to Supabase
-    const uploads = await Promise.all(
-      attachments.map((file) => convertToAttachmentPayload(file))
-    );
-
-    const hasFailed = uploads.some((res) => res === null);
-    if (hasFailed) {
-      throw new Error("One or more attachments failed to upload.");
-    }
-
-    const uploadedAttachments = uploads as AttachmentUploadRequest[];
+    const uploadedAttachments: AttachmentUploadRequest[] =
+      await uploadFilesToSupabase(attachments);
 
     const messagePayload: SendMessageRequest = {
       id: messageId,
@@ -138,6 +136,7 @@ export async function handleSendMessage({
     useMessageStore.getState().updateMessageById(chatId, messageId, {
       status: MessageStatus.FAILED,
     });
+    toast.error("Failed to send message.");
     onError?.(error);
     handleError(error, "Failed to send message");
   }

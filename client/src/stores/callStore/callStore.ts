@@ -115,12 +115,12 @@ export const useCallStore = create<CallState & CallActions>()(
 
         useModalStore.getState().openModal(ModalType.CALL);
 
-        // const timeoutRef = setTimeout(() => {
-        //   if (get().localCallStatus === LocalCallStatus.OUTGOING) {
-        //     get().endCall({ isTimeout: true });
-        //   }
-        // }, 45000);
-        // set({ timeoutRef });
+        const timeoutRef = setTimeout(() => {
+          if (get().localCallStatus === LocalCallStatus.OUTGOING) {
+            get().endCall({ isTimeout: true });
+          }
+        }, 45000);
+        set({ timeoutRef });
 
         // init LiveKit
         const liveKitService = new LiveKitService();
@@ -250,12 +250,6 @@ export const useCallStore = create<CallState & CallActions>()(
       // Close modal but keep call data if call is still in progress
       closeCallModal();
     },
-
-    // leaveCall: () => {
-    //   const { disconnectFromLiveKit, closeCallModal } = get();
-    //   disconnectFromLiveKit();
-    //   closeCallModal();
-    // },
 
     leaveCall: () => {
       const { disconnectFromLiveKit, closeCallModal, liveKitService } = get();

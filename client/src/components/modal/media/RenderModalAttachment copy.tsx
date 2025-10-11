@@ -1,14 +1,12 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import type { AttachmentResponse } from "@/types/responses/message.response";
 import { formatFileSize } from "@/utils/formatFileSize";
 import { getFileIcon } from "@/utils/getFileIcon";
 import { handleDownload } from "@/utils/handleDownload";
 import { AttachmentType } from "@/types/enums/attachmentType";
-// import CustomAudioPlayer, { AudioPlayerRef } from "../../ui/CustomAudioPlayer";
-import CustomAudioDiskPlayer, { AudioPlayerRef } from "@/components/ui/CustomAudioDiskPlayer";
+import CustomAudioPlayer, { AudioPlayerRef } from "../../ui/CustomAudioPlayer";
 import { motion } from "framer-motion";
 import { mediaViewerAnimations } from "@/animations/mediaViewerAnimations";
-import { ModalImageViewer } from "./ModalImageViewer";
 
 export const RenderModalAttachment = ({
   attachment,
@@ -19,12 +17,14 @@ export const RenderModalAttachment = ({
   rotation?: number;
   isCurrent?: boolean;
 }) => {
-  const [isHorizontalAspectRatio, setIsHorizontalAspectRatio] = useState<
-    boolean | null
-  >(null);
+  const [isZoom, setZoom] = useState(false);
+  const [zoomOrigin, setZoomOrigin] = useState<string>("50% 50%");
+  const [isHorizontal, setIsHorizontal] = useState<boolean | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const audioPlayerRef = useRef<AudioPlayerRef | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+
+  // const isRotateHorizontal = rotation % 90 === 0
 
   // Pause media when it's not the current one
   useEffect(() => {
@@ -37,22 +37,6 @@ export const RenderModalAttachment = ({
       }
     }
   }, [isCurrent, attachment.type]);
-
-  // ✅ Ensure audio autoplay when visible
-  useEffect(() => {
-    const audio = audioPlayerRef.current;
-    if (!audio) return;
-
-    if (isCurrent) {
-      try {
-        audio.play();
-      } catch (err) {
-        console.warn("Audio autoplay blocked:", err);
-      }
-    } else {
-      audio.pause();
-    }
-  }, [isCurrent]);
 
   // Handle spaceBar play/pause
   useEffect(() => {
@@ -111,16 +95,68 @@ export const RenderModalAttachment = ({
     }
   }, [isCurrent]);
 
+  // const handleZoom = () => {
+  //   setZoom((prev) => !prev);
+  // };
+  const handleZoom = (e: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const w = rect.width;
+    const h = rect.height;
+
+    // Cursor position relative to image
+    const offsetX = ((e.clientX - rect.left) / w) * 100;
+    const offsetY = ((e.clientY - rect.top) / h) * 100;
+
+    // Adjust for rotation
+    const rad = (rotation * Math.PI) / 180;
+    const centerX = 50;
+    const centerY = 50;
+    const dx = offsetX - centerX;
+    const dy = offsetY - centerY;
+
+    const rotatedX = centerX + dx * Math.cos(rad) + dy * Math.sin(rad);
+    const rotatedY = centerY - dx * Math.sin(rad) + dy * Math.cos(rad);
+
+    setZoomOrigin(`${rotatedX}% ${rotatedY}%`);
+
+    // Toggle zoom
+    setZoom((prev) => !prev);
+  };
+
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { naturalWidth, naturalHeight } = e.currentTarget;
+    setIsHorizontal(naturalWidth > naturalHeight);
+  };
+
   if (!attachment) return null;
 
   switch (attachment.type) {
     case "image":
       return (
-        <ModalImageViewer
-          attachment={attachment}
-          rotation={rotation}
+        <motion.div
           ref={scrollContainerRef}
-        />
+          // className={`w-full flex items-center justify-center overflow-auto scrollbar-hide border-4 ${
+          //   isRotateHorizontal ? "h-full" : "h-[2000px]"
+          // }`}
+          // className={`w-full h-full flex items-center justify-center overflow-auto scrollbar-hide`}
+          className={`w-full h-full flex items-center justify-center border-2`}
+          animate={mediaViewerAnimations.rotation(rotation)}
+          // animate={mediaViewerAnimations.image(isZoom, rotation)}
+        >
+          <motion.img
+            onClick={handleZoom}
+            onLoad={handleImageLoad}
+            src={attachment.url}
+            alt={attachment.type || attachment.filename || "Image"}
+            draggable={false}
+            className="mx-auto my-auto object-contain rounded max-h-[90vh]"
+            style={{
+              cursor: isZoom ? "zoom-out" : "zoom-in",
+              transformOrigin: zoomOrigin, // keep origin for zooming
+            }}
+            animate={mediaViewerAnimations.zoom(isZoom)}
+          />
+        </motion.div>
       );
 
     case "video":
@@ -131,12 +167,12 @@ export const RenderModalAttachment = ({
           controls
           onLoadedMetadata={(e) => {
             const video = e.currentTarget;
-            setIsHorizontalAspectRatio(video.videoWidth > video.videoHeight);
+            setIsHorizontal(video.videoWidth > video.videoHeight);
           }}
-          className={`object-contain rounded ${
-            isHorizontalAspectRatio === null
+          className={`object-contain transition-all duration-500 ease-in-out rounded ${
+            isHorizontal === null
               ? ""
-              : isHorizontalAspectRatio
+              : isHorizontal
               ? "w-[80vw] max-h-[80vh]"
               : "h-[93vh] max-w-[80vw]"
           }`}
@@ -147,23 +183,22 @@ export const RenderModalAttachment = ({
 
     case "audio":
       return (
-        // <motion.div
-        //   className="max-w-md rounded-lg border-4 border-[var(--border-color)]"
-        //   animate={mediaViewerAnimations.rotation(rotation)}
-        // >
-        //   {/* <div className="p-4 custom-border-b flex items-center gap-1">
-        //     <i className="material-symbols-outlined">music_note</i>
-        //     {attachment.filename || "Audio file"}
-        //   </div> */}
-        <CustomAudioDiskPlayer
-          // <CustomAudioDiskPlayer
-          attachmentType={AttachmentType.AUDIO}
-          mediaUrl={attachment.url}
-          fileName={attachment.filename ?? ""}
-          ref={audioPlayerRef}
-          // isDisplayName={false}
-        />
-        // </motion.div>
+        <motion.div
+          className="max-w-md rounded-lg border-4 border-[var(--border-color)]"
+          animate={mediaViewerAnimations.rotation(rotation)}
+        >
+          <div className="p-4 custom-border-b flex items-center gap-1">
+            <i className="material-symbols-outlined">music_note</i>
+            {attachment.filename || "Audio file"}
+          </div>
+          <CustomAudioPlayer
+            attachmentType={AttachmentType.AUDIO}
+            mediaUrl={attachment.url}
+            fileName={attachment.filename ?? ""}
+            ref={audioPlayerRef}
+            isDisplayName={false}
+          />
+        </motion.div>
       );
 
     case "file":

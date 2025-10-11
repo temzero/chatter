@@ -8,6 +8,7 @@ import card4Sound from "@/assets/sound/card4.mp3";
 import connectSound from "@/assets/sound/connect.mp3";
 import dialSound from "@/assets/sound/telephone-dialing.mp3";
 import disconnectSound from "@/assets/sound/disconnect.mp3";
+import downloadSound from "@/assets/sound/download.mp3";
 import endCallSound from "@/assets/sound/end-call.mp3";
 import errorSound from "@/assets/sound/error.mp3";
 import messageSound from "@/assets/sound/message-bubble.mp3";
@@ -27,6 +28,7 @@ export enum SoundType {
   OUTGOING_CALL = "call-outgoing",
   CALL_CONNECTED = "call-connected",
   CALL_END = "call-end",
+  DOWNLOAD = "download",
   USER_CONNECTED = "user-connected",
   USER_DISCONNECTED = "user-disconnected",
   NEW_MESSAGE = "new-message",
@@ -71,6 +73,7 @@ class AudioServiceImpl implements AudioService {
       [SoundType.OUTGOING_CALL]: dialSound,
       [SoundType.CALL_CONNECTED]: activeSound,
       [SoundType.CALL_END]: endCallSound,
+      [SoundType.DOWNLOAD]: downloadSound,
       [SoundType.USER_CONNECTED]: connectSound,
       [SoundType.USER_DISCONNECTED]: disconnectSound,
       [SoundType.NEW_MESSAGE]: messageSound,

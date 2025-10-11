@@ -80,10 +80,12 @@ export const MediaViewer = () => {
       setCurrentIndex(newIndex);
       scrollToMedia(newIndex, true);
       setRotation(0);
-      audioService.playRandomSound(
-        [SoundType.CARD1, SoundType.CARD2, SoundType.CARD3, SoundType.CARD4],
-        0.9
-      );
+      audioService.playRandomSound([
+        SoundType.CARD1,
+        SoundType.CARD2,
+        SoundType.CARD3,
+        SoundType.CARD4,
+      ]);
     }
   }, [activeAttachments, currentIndex, scrollToMedia]);
 
@@ -179,7 +181,7 @@ export const MediaViewer = () => {
 
   return (
     <div
-      className={`relative w-full h-full flex flex-col items-center justify-center select-none ${
+      className={`relative w-full h-full flex flex-col items-center justify-center select-none text-white ${
         isMobile && "bg-black"
       }`}
     >

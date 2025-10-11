@@ -21,7 +21,7 @@ export const MediaViewerTopBar = ({
   const sender = useSenderByMessageId(attachment.messageId);
 
   const handleDownloadClick = useCallback(() => {
-    audioService.playSound(SoundType.NOTIFICATION); // ✅ play centralized sound
+    audioService.playSound(SoundType.DOWNLOAD);
     handleDownload(attachment);
   }, [attachment]);
 
@@ -35,11 +35,14 @@ export const MediaViewerTopBar = ({
     });
   };
 
+  const buttonClasses =
+    "opacity-60 hover:opacity-100 rounded-full p-1 hover:bg-[--border-color] select-none focus:outline-none";
+
   return (
     <>
       <div
         className="absolute top-2 left-2 flex items-center gap-2"
-        style={{ zIndex: 1 }}
+        style={{ zIndex: 2 }}
       >
         <Avatar
           avatarUrl={sender?.avatarUrl}
@@ -52,35 +55,23 @@ export const MediaViewerTopBar = ({
       </div>
 
       <div
-        className="absolute top-2 right-2 flex items-center gap-4"
-        style={{ zIndex: 1 }}
+        className="absolute top-2 right-2 flex items-center gap-2"
+        style={{ zIndex: 2 }}
       >
-        <button
-          onClick={onRotate}
-          className="opacity-60 hover:opacity-100 rounded-full"
-        >
+        <button onClick={onRotate} className={buttonClasses}>
           <i className="material-symbols-outlined">refresh</i>
         </button>
-        <button
-          onClick={handleForwardAttachment}
-          className="opacity-60 hover:opacity-100 rounded-full"
-        >
+        <button onClick={handleForwardAttachment} className={buttonClasses}>
           <i className="material-symbols-outlined">send</i>
         </button>
-        <button
-          onClick={handleDownloadClick}
-          className="opacity-60 hover:opacity-100 rounded-full"
-        >
+        <button onClick={handleDownloadClick} className={buttonClasses}>
           <i className="material-symbols-outlined">download</i>
         </button>
-        <button
-          onClick={handleDeleteMessage}
-          className="opacity-60 hover:opacity-100 rounded-full"
-        >
+        <button onClick={handleDeleteMessage} className={buttonClasses}>
           <i className="material-symbols-outlined">delete</i>
         </button>
         <button
-          className="p-0.5 opacity-60 hover:opacity-100 hover:bg-red-500/80 rounded-full"
+          className={`${buttonClasses} hover:text-red-400`}
           onClick={onClose}
         >
           <i className="material-symbols-outlined">close</i>

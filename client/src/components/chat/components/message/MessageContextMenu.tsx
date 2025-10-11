@@ -57,7 +57,7 @@ export const MessageContextMenu: React.FC<MessageContextMenuProps> = ({
         right: !position && isMe ? 0 : "auto",
         bottom: isChannel && !position ? -40 : "auto",
         transformOrigin: transformOrigin,
-        // zIndex: 10,
+        zIndex: 999,
       }}
       className={clsx("flex flex-col gap-1 rounded-lg", "origin-top-left")}
       onClick={(e) => e.stopPropagation()}

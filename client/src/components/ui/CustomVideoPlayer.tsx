@@ -197,18 +197,26 @@ const CustomVideoPlayer = ({
 
       {previewMode && !isPlaying && (
         <div
-          className="absolute inset-0 flex items-center justify-center cursor-pointer"
-          onClick={handleClick}
+          className="w-full h-full absolute inset-0 flex items-center justify-center cursor-pointer select-none"
+          onClick={onOpenModal}
         >
-          <div className="w-14 h-14 flex items-center justify-center rounded-full bg-black/50 select-none">
-            <span className="text-white text-3xl">▶</span>
-          </div>
+          <button
+            className="  bg-black/70 rounded-full opacity-70 hover:opacity-100 hover:scale-125 transition-all"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleClick(e);
+            }}
+          >
+            <span className="material-symbols-outlined filled text-6xl">
+              play_arrow
+            </span>
+          </button>
         </div>
       )}
 
       <div
         ref={displayRef}
-        className="absolute bottom-1 right-1 bg-black/50 text-white text-xs p-0.5 rounded"
+        className="absolute bottom-1 right-1 bg-black/50 text-white text-xs p-1 rounded"
       >
         {formatDuration(totalDuration)}
       </div>
@@ -216,7 +224,7 @@ const CustomVideoPlayer = ({
       {/* Mute button */}
       {previewMode && isPlaying && (
         <button
-          className="absolute bottom-1 left-1 bg-black/50 text-white px-1 rounded hover:bg-black/70 transition"
+          className="absolute bottom-1 left-1 bg-black/50 text-white px-1 rounded-full hover:bg-black/70 transition"
           onClick={(e) => {
             e.stopPropagation();
             toggleLocalVoice();

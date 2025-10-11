@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  Post,
   Put,
   Param,
   Body,
@@ -10,7 +9,6 @@ import {
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { MessageService } from './message.service';
-import { CreateMessageDto } from './dto/requests/create-message.dto';
 import { UpdateMessageDto } from './dto/requests/update-message.dto';
 import { SuccessResponse } from '../../common/api-response/success';
 import { CurrentUser } from '../auth/decorators/user.decorator';
@@ -27,25 +25,6 @@ export class MessageController {
     private readonly messageService: MessageService,
     private readonly messageMapper: MessageMapper,
   ) {}
-
-  @Post()
-  async create(
-    @CurrentUser('id') currentUserId: string,
-    @Body() createMessageDto: CreateMessageDto,
-  ): Promise<SuccessResponse<MessageResponseDto>> {
-    if (!createMessageDto.content && !createMessageDto.attachments) {
-      ErrorResponse.badRequest('Message must have at least Text or Attachment');
-    }
-
-    const message = await this.messageService.createMessage(
-      currentUserId,
-      createMessageDto,
-    );
-
-    const messageResponse =
-      this.messageMapper.mapMessageToMessageResDto(message);
-    return new SuccessResponse(messageResponse, 'Message created successfully');
-  }
 
   @Get(':messageId')
   async findOne(

@@ -135,18 +135,13 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
 
     case AttachmentType.AUDIO:
       return (
-        <div
-          className={`w-full flex items-center gap-2 custom-border-b overflow-hidden ${
-            type === "info" ? "opacity-80" : "text-black bg-purple-400"
-          }`}
-        >
-          <CustomAudioPlayer
-            mediaUrl={attachment.url}
-            fileName={attachment.filename ?? undefined}
-            type={type}
-            attachmentType={AttachmentType.AUDIO}
-          />
-        </div>
+        <CustomAudioPlayer
+          type={type}
+          mediaUrl={attachment.url}
+          fileName={attachment.filename ?? undefined}
+          attachmentType={AttachmentType.AUDIO}
+          onOpenModal={handleOpenModal}
+        />
       );
 
     case AttachmentType.FILE:
@@ -172,10 +167,6 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
           <p className="opacity-70 ml-auto">
             ({attachment.size ? formatFileSize(attachment.size) : "???"})
           </p>
-
-          {/* <div className="fixed inset-0 flex bg-black/30 backdrop-blur-sm">
-            <i className="material-symbols-outlined ml-auto">download</i>
-          </div> */}
         </div>
       );
 

@@ -94,16 +94,18 @@ const Message: React.FC<MessageProps> = ({
     <motion.div
       id={`message-${message.id}`}
       ref={messageRef}
+      onDoubleClick={() => handleQuickReaction(message.id, message.chatId)}
+      onContextMenu={handleContextMenu}
       className={clsx("flex max-w-[60%] group relative ", {
         "ml-auto": isMe,
         "mr-auto": !isMe,
         "pb-1": isRecent,
         "pb-2": !isRecent,
-        "z-[99]": isFocus,
       })}
+      style={{
+        zIndex: isFocus ? 100 : "auto",
+      }}
       {...animationProps}
-      onDoubleClick={() => handleQuickReaction(message.id, message.chatId)}
-      onContextMenu={handleContextMenu}
     >
       {isGroupChat && !isMe && (
         <div className={clsx("flex-shrink-0 mt-auto mr-2 h-10 w-10 min-w-10")}>

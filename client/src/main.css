@@ -110,6 +110,15 @@ button.primary {
   background: var(--primary-green);
   color: white;
 }
+button:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+video:focus {
+  outline: none;
+  box-shadow: none;
+}
 
 input,
 textarea {

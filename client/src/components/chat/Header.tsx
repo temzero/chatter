@@ -28,7 +28,7 @@ interface ChatHeaderProps {
 }
 
 const Header: React.FC<ChatHeaderProps> = ({ chat, isBlockedByMe = false }) => {
-  console.log('Header')
+  // console.log('Header')
   const isMobile = useDeviceStore((state) => state.isMobile);
   const toggleSidebarInfo = useSidebarInfoStore(
     (state) => state.toggleSidebarInfo
