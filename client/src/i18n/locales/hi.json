@@ -5,31 +5,33 @@
       "accept": "स्वीकार करें",
       "back": "वापस",
       "block": "ब्लॉक करें",
-      "blocked_by_user": "उपयोगकर्ता द्वारा ब्लॉक किया गया",
+      "blocked_by_user": "उपयोगकर्ता द्वारा अवरुद्ध",
       "cancel": "रद्द करें",
       "cancel_request": "अनुरोध रद्द करें",
-      "clear_selection": "चयन हटाएं",
+      "clear_selection": "चयन साफ़ करें",
       "close": "बंद करें",
       "delete": "हटाएं",
       "decline": "अस्वीकार करें",
-      "edit": "संपादन करें",
-      "forward": "आगे भेजें",
+      "edit": "संपादित करें",
+      "forward": "आगे बढ़ाएँ",
       "leave": "छोड़ें",
-      "logout": "लॉगआउट करें",
-      "mark_important": "महत्वपूर्ण चिह्नित करें",
+      "login": "लॉग इन करें",
+      "logout": "लॉग आउट करें",
+      "mark_important": "महत्वपूर्ण के रूप में चिह्नित करें",
       "mute": "म्यूट करें",
       "pin": "पिन करें",
+      "register": "रजिस्टर करें",
       "reply": "उत्तर दें",
-      "remove": "हटाएं",
+      "remove": "हटाएँ",
       "requests": "अनुरोध",
-      "resend_code": "कोड फिर से भेजें",
+      "resend_code": "कोड पुन: भेजें",
       "save": "सहेजें",
       "save_changes": "परिवर्तन सहेजें",
       "search": "खोजें",
       "send_verification": "सत्यापन भेजें",
       "unfriend": "मित्रता समाप्त करें",
-      "unmark_important": "महत्वपूर्ण चिह्न हटाएं",
-      "unmute": "अनम्यूट करें",
+      "unmark_important": "महत्वपूर्ण चिह्न हटाएँ",
+      "unmute": "म्यूट हटाएँ",
       "unpin": "अनपिन करें",
       "unblock": "अनब्लॉक करें",
       "update": "अपडेट करें",
@@ -44,19 +46,61 @@
       "empty": "खाली",
       "error": "एक त्रुटि हुई",
       "required": "यह फ़ील्ड आवश्यक है",
-      "invalid_code": "कृपया 6-अंकीय कोड दर्ज करें"
+      "invalid_code": "कृपया 6-अंकों का कोड दर्ज करें"
     },
     "loading": {
       "loading": "लोड हो रहा है...",
       "searching": "खोज रहा है...",
-      "creating": "बनाया जा रहा है...",
-      "saving": "सहेजा जा रहा है..."
+      "creating": "बना रहा है...",
+      "sending": "भेज रहा है...",
+      "saving": "सहेज रहा है...",
+      "logging_in": "लॉग इन हो रहा है...",
+      "verifying": "सत्यापित कर रहा है...",
+      "processing": "प्रसंस्करण..."
     }
   },
 
   "account": {
     "first_name": "पहला नाम",
-    "last_name": "अंतिम नाम"
+    "last_name": "अंतिम नाम",
+    "username": "उपयोगकर्ता नाम",
+    "email": "ईमेल",
+    "password": "पासवर्ड"
+  },
+
+  "auth": {
+    "common": {
+      "back_to_login": "लॉगिन पर वापस जाएँ",
+      "password_mismatch": "पासवर्ड मेल नहीं खा रहे!",
+      "confirm_password": "पासवर्ड की पुष्टि करें"
+    },
+
+    "login": {
+      "username_placeholder": "उपयोगकर्ता नाम, ईमेल, या फ़ोन नंबर",
+      "forgot_password": "पासवर्ड भूल गए?"
+    },
+
+    "register": {
+      "button_loading": "खाता बना रहा है..."
+    },
+
+    "forgot_password": {
+      "title": "पासवर्ड भूल गए",
+      "button": "रीसेट पासवर्ड लिंक भेजें"
+    },
+
+    "reset_password": {
+      "title": "पासवर्ड रीसेट करें",
+      "new_password": "नया पासवर्ड",
+      "invalid_token": "अमान्य रीसेट टोकन"
+    },
+
+    "verify_email": {
+      "title": "ईमेल सत्यापित करें",
+      "greeting": "नमस्ते {{name}}!",
+      "confirm_message": "कृपया पुष्टि करें कि यह आपका ईमेल पता है",
+      "invalid_token": "अमान्य सत्यापन टोकन।"
+    }
   },
 
   "chat": {

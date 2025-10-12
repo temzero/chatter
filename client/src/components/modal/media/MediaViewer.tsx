@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, useAnimationControls } from "framer-motion";
-import { MediaViewerTopBar } from "./MediaViewerTopBar";
 import { MediaViewerNavigationButtons } from "./MediaViewerNavigationButtons";
 import { MediaViewerBottomInfo } from "./MediaViewerBottomInfo";
 import { useModalStore } from "@/stores/modalStore";
@@ -10,6 +9,7 @@ import { useShallow } from "zustand/shallow";
 import { handleDownload } from "@/utils/handleDownload";
 import { audioService, SoundType } from "@/services/audio.service";
 import { useDeviceStore } from "@/stores/deviceStore";
+import { MediaViewerButtons } from "./MediaViewerButtons";
 
 export const MediaViewer = () => {
   const isMobile = useDeviceStore((state) => state.isMobile);
@@ -185,7 +185,7 @@ export const MediaViewer = () => {
         isMobile && "bg-black"
       }`}
     >
-      <MediaViewerTopBar
+      <MediaViewerButtons
         attachment={currentMedia}
         onRotate={handleRotate}
         onClose={handleClose}

@@ -5,20 +5,22 @@
       "accept": "承認",
       "back": "戻る",
       "block": "ブロック",
-      "blocked_by_user": "ユーザーによってブロックされています",
+      "blocked_by_user": "ユーザーによってブロックされました",
       "cancel": "キャンセル",
       "cancel_request": "リクエストをキャンセル",
-      "clear_selection": "選択を解除",
+      "clear_selection": "選択をクリア",
       "close": "閉じる",
       "delete": "削除",
       "decline": "拒否",
       "edit": "編集",
       "forward": "転送",
       "leave": "退出",
+      "login": "ログイン",
       "logout": "ログアウト",
       "mark_important": "重要としてマーク",
       "mute": "ミュート",
-      "pin": "ピン留め",
+      "pin": "固定",
+      "register": "登録",
       "reply": "返信",
       "remove": "削除",
       "requests": "リクエスト",
@@ -30,11 +32,11 @@
       "unfriend": "友達解除",
       "unmark_important": "重要マークを解除",
       "unmute": "ミュート解除",
-      "unpin": "ピン留め解除",
+      "unpin": "固定解除",
       "unblock": "ブロック解除",
       "update": "更新",
-      "verify": "認証",
-      "verify_code": "コードを認証",
+      "verify": "確認",
+      "verify_code": "コードを確認",
       "sent": "送信済み"
     },
     "messages": {
@@ -50,13 +52,55 @@
       "loading": "読み込み中...",
       "searching": "検索中...",
       "creating": "作成中...",
-      "saving": "保存中..."
+      "sending": "送信中...",
+      "saving": "保存中...",
+      "logging_in": "ログイン中...",
+      "verifying": "認証中...",
+      "processing": "処理中..."
     }
   },
 
   "account": {
     "first_name": "名",
-    "last_name": "姓"
+    "last_name": "姓",
+    "username": "ユーザー名",
+    "email": "メール",
+    "password": "パスワード"
+  },
+
+  "auth": {
+    "common": {
+      "back_to_login": "ログインに戻る",
+      "password_mismatch": "パスワードが一致しません！",
+      "confirm_password": "パスワードを確認"
+    },
+
+    "login": {
+      "username_placeholder": "ユーザー名、メール、または電話番号",
+      "forgot_password": "パスワードをお忘れですか？"
+    },
+
+    "register": {
+      "button_loading": "アカウント作成中..."
+    },
+
+    "forgot_password": {
+      "title": "パスワードを忘れた",
+      "button": "パスワードリセットリンクを送信"
+    },
+
+    "reset_password": {
+      "title": "パスワードをリセット",
+      "new_password": "新しいパスワード",
+      "invalid_token": "無効なリセットトークン"
+    },
+
+    "verify_email": {
+      "title": "メールを確認",
+      "greeting": "こんにちは {{name}}！",
+      "confirm_message": "これはあなたのメールアドレスであることを確認してください",
+      "invalid_token": "無効な確認トークンです。"
+    }
   },
 
   "chat": {

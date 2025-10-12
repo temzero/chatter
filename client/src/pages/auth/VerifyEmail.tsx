@@ -4,8 +4,11 @@ import { AlertMessage } from "@/components/ui/AlertMessage";
 import { AuthenticationLayout } from "../PublicLayout";
 import { motion } from "framer-motion";
 import { publicLayoutAnimations } from "@/animations/publicLayoutAnimations";
+import { useTranslation } from "react-i18next";
 
 const VerifyEmail = () => {
+  const { t } = useTranslation();
+
   const { firstName, email, token } = useParams();
 
   const verifyEmailWithToken = useAuthStore(
@@ -19,7 +22,7 @@ const VerifyEmail = () => {
     e.preventDefault();
 
     if (!token) {
-      return setMessage("error", "Invalid verification token.");
+      return setMessage("error", t("auth.verify_email.invalid_token"));
     }
 
     await verifyEmailWithToken(token);
@@ -37,14 +40,12 @@ const VerifyEmail = () => {
           className="flex flex-col justify-center w-[400px] gap-2 p-8"
         >
           <h2 className="text-4xl font-semibold mb-4 text-center">
-            Verify Email
+            {t("auth.verify_email.title")}
           </h2>
 
           <div className="opacity-80 py-2 flex flex-col items-center justify-center">
-            <p>
-              Hi <strong>{firstName}!</strong>
-            </p>
-            <p>Please confirm that this is your email address</p>
+            <p>{t("auth.verify_email.greeting", { name: firstName })}</p>
+            <p>{t("auth.verify_email.confirm_message")}</p>
             <div className="text-green-400 flex items-center gap-1 font-semibold mt-2">
               <span className="material-symbols-outlined">mail</span>
               {email}
@@ -59,7 +60,9 @@ const VerifyEmail = () => {
             disabled={loading}
             className="primary w-full py-1 mt-2"
           >
-            {loading ? "Verifying..." : "Verify Email"}
+            {loading
+              ? t("common.loading.verifying")
+              : t("common.actions.verify")}
           </motion.button>
         </form>
       </motion.div>

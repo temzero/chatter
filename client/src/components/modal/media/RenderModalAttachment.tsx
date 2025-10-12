@@ -5,7 +5,9 @@ import { getFileIcon } from "@/utils/getFileIcon";
 import { handleDownload } from "@/utils/handleDownload";
 import { AttachmentType } from "@/types/enums/attachmentType";
 // import CustomAudioPlayer, { AudioPlayerRef } from "../../ui/CustomAudioPlayer";
-import CustomAudioDiskPlayer, { AudioPlayerRef } from "@/components/ui/CustomAudioDiskPlayer";
+import CustomAudioDiskPlayer, {
+  AudioPlayerRef,
+} from "@/components/ui/CustomAudioDiskPlayer";
 import { motion } from "framer-motion";
 import { mediaViewerAnimations } from "@/animations/mediaViewerAnimations";
 import { ModalImageViewer } from "./ModalImageViewer";
@@ -155,15 +157,14 @@ export const RenderModalAttachment = ({
         //     <i className="material-symbols-outlined">music_note</i>
         //     {attachment.filename || "Audio file"}
         //   </div> */}
+        // </motion.div>
+
         <CustomAudioDiskPlayer
-          // <CustomAudioDiskPlayer
           attachmentType={AttachmentType.AUDIO}
           mediaUrl={attachment.url}
           fileName={attachment.filename ?? ""}
           ref={audioPlayerRef}
-          // isDisplayName={false}
         />
-        // </motion.div>
       );
 
     case "file":

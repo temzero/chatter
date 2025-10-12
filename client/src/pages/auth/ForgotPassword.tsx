@@ -5,8 +5,11 @@ import { AlertMessage } from "@/components/ui/AlertMessage";
 import { AuthenticationLayout } from "../PublicLayout";
 import { motion } from "framer-motion";
 import { publicLayoutAnimations } from "@/animations/publicLayoutAnimations";
+import { useTranslation } from "react-i18next";
 
 const ForgotPassword = () => {
+  const { t } = useTranslation();
+
   const formRef = useRef<HTMLFormElement>(null);
   const sendPasswordResetEmail = useAuthStore(
     (state) => state.sendPasswordResetEmail
@@ -35,13 +38,13 @@ const ForgotPassword = () => {
           className="flex flex-col justify-center w-[400px] gap-2 p-8"
         >
           <h2 className="text-4xl font-semibold text-center mb-6">
-            Forgot Password
+            {t("auth.forgot_password.title")}
           </h2>
 
           <input
             type="email"
             name="email"
-            placeholder="Email"
+            placeholder={t("account.email")}
             required
             className="input backdrop-blur-lg"
             autoFocus
@@ -55,7 +58,9 @@ const ForgotPassword = () => {
             disabled={loading}
             className="primary w-full py-1 mt-2"
           >
-            {loading ? "Processing..." : "Send Reset Password Link"}
+            {loading
+              ? t("common.action.sending")
+              : t("auth.forgot_password.button")}
           </motion.button>
 
           <div className="flex items-center gap-4 mt-2">
@@ -63,7 +68,7 @@ const ForgotPassword = () => {
               to="/auth/login"
               className="opacity-40 hover:opacity-100 hover:text-green-400"
             >
-              Back to Login
+              {t("auth.common.back_to_login")}
             </Link>
           </div>
         </form>

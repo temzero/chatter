@@ -5,18 +5,21 @@ import { useSenderByMessageId } from "@/stores/messageStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { audioService, SoundType } from "@/services/audio.service";
+import { useDeviceStore } from "@/stores/deviceStore";
 
-interface MediaViewerTopBarProps {
+interface MediaViewerButtonsProps {
   attachment: AttachmentResponse;
   onRotate: () => void;
   onClose: () => void;
 }
 
-export const MediaViewerTopBar = ({
+export const MediaViewerButtons = ({
   attachment,
   onRotate,
   onClose,
-}: MediaViewerTopBarProps) => {
+}: MediaViewerButtonsProps) => {
+  const isMobile = useDeviceStore((state) => state.isMobile);
+
   const openModal = useModalStore((state) => state.openModal);
   const sender = useSenderByMessageId(attachment.messageId);
 
@@ -35,27 +38,33 @@ export const MediaViewerTopBar = ({
     });
   };
 
+  const positionClass = isMobile
+    ? "bottom-2 left-1/2 -translate-x-1/2 w-full  justify-evenly"
+    : "top-2 right-2";
+
   const buttonClasses =
-    "opacity-60 hover:opacity-100 rounded-full p-1 hover:bg-[--border-color] select-none focus:outline-none";
+    "opacity-60 hover:opacity-100 rounded-full p-2 select-none focus:outline-none";
 
   return (
     <>
       <div
-        className="absolute top-2 left-2 flex items-center gap-2"
+        className={`absolute top-2 left-2 flex items-center gap-2`}
         style={{ zIndex: 2 }}
       >
         <Avatar
           avatarUrl={sender?.avatarUrl}
           name={sender?.displayName}
-          size="8"
+          size='8'
         />
-        <div className="text-white font-medium">
-          {sender?.displayName || "Sender"}
-        </div>
+        {isMobile || (
+          <div className="text-white font-medium">
+            {sender?.displayName || "Sender"}
+          </div>
+        )}
       </div>
 
       <div
-        className="absolute top-2 right-2 flex items-center gap-2"
+        className={`absolute flex items-center gap-2 ${positionClass}`}
         style={{ zIndex: 2 }}
       >
         <button onClick={onRotate} className={buttonClasses}>
@@ -70,13 +79,25 @@ export const MediaViewerTopBar = ({
         <button onClick={handleDeleteMessage} className={buttonClasses}>
           <i className="material-symbols-outlined">delete</i>
         </button>
+        {isMobile || (
+          <button
+            className={`${buttonClasses} hover:text-red-400`}
+            onClick={onClose}
+          >
+            <i className="material-symbols-outlined">close</i>
+          </button>
+        )}
+      </div>
+
+      {isMobile && (
         <button
-          className={`${buttonClasses} hover:text-red-400`}
+          className={`${buttonClasses} hover:text-red-400 absolute top-2 right-2`}
           onClick={onClose}
+          style={{ zIndex: 2 }}
         >
           <i className="material-symbols-outlined">close</i>
         </button>
-      </div>
+      )}
     </>
   );
 };

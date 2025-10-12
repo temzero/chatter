@@ -1,9 +1,9 @@
 {
-  "common": {
+ "common": {
     "you": "คุณ",
     "actions": {
       "accept": "ยอมรับ",
-      "back": "กลับ",
+      "back": "ย้อนกลับ",
       "block": "บล็อก",
       "blocked_by_user": "ถูกบล็อกโดยผู้ใช้",
       "cancel": "ยกเลิก",
@@ -15,14 +15,16 @@
       "edit": "แก้ไข",
       "forward": "ส่งต่อ",
       "leave": "ออก",
+      "login": "เข้าสู่ระบบ",
       "logout": "ออกจากระบบ",
       "mark_important": "ทำเครื่องหมายสำคัญ",
       "mute": "ปิดเสียง",
       "pin": "ปักหมุด",
+      "register": "ลงทะเบียน",
       "reply": "ตอบกลับ",
-      "remove": "ลบ",
+      "remove": "ลบออก",
       "requests": "คำขอ",
-      "resend_code": "ส่งรหัสใหม่",
+      "resend_code": "ส่งรหัสอีกครั้ง",
       "save": "บันทึก",
       "save_changes": "บันทึกการเปลี่ยนแปลง",
       "search": "ค้นหา",
@@ -30,33 +32,75 @@
       "unfriend": "เลิกเป็นเพื่อน",
       "unmark_important": "ยกเลิกเครื่องหมายสำคัญ",
       "unmute": "เปิดเสียง",
-      "unpin": "ยกเลิกการปักหมุด",
-      "unblock": "ยกเลิกการบล็อก",
+      "unpin": "ยกเลิกปักหมุด",
+      "unblock": "ปลดบล็อก",
       "update": "อัปเดต",
       "verify": "ยืนยัน",
-      "verify_code": "ยืนยันรหัส",
+      "verify_code": "ตรวจสอบรหัส",
       "sent": "ส่งแล้ว"
     },
     "messages": {
       "success": "สำเร็จ!",
       "failed": "ล้มเหลว",
       "unknown": "ไม่ทราบ",
-      "empty": "ว่างเปล่า",
+      "empty": "ว่าง",
       "error": "เกิดข้อผิดพลาด",
-      "required": "ช่องนี้จำเป็นต้องกรอก",
-      "invalid_code": "กรุณากรอกรหัส 6 หลัก"
+      "required": "จำเป็นต้องกรอกฟิลด์นี้",
+      "invalid_code": "กรุณาใส่รหัส 6 หลัก"
     },
     "loading": {
       "loading": "กำลังโหลด...",
       "searching": "กำลังค้นหา...",
       "creating": "กำลังสร้าง...",
-      "saving": "กำลังบันทึก..."
+      "sending": "กำลังส่ง...",
+      "saving": "กำลังบันทึก...",
+      "logging_in": "กำลังเข้าสู่ระบบ...",
+      "verifying": "กำลังยืนยัน...",
+      "processing": "กำลังประมวลผล..."
     }
   },
 
   "account": {
     "first_name": "ชื่อ",
-    "last_name": "นามสกุล"
+    "last_name": "นามสกุล",
+    "username": "ชื่อผู้ใช้",
+    "email": "อีเมล",
+    "password": "รหัสผ่าน"
+  },
+
+  "auth": {
+    "common": {
+      "back_to_login": "กลับไปที่หน้าล็อกอิน",
+      "password_mismatch": "รหัสผ่านไม่ตรงกัน!",
+      "confirm_password": "ยืนยันรหัสผ่าน"
+    },
+
+    "login": {
+      "username_placeholder": "ชื่อผู้ใช้, อีเมล หรือหมายเลขโทรศัพท์",
+      "forgot_password": "ลืมรหัสผ่าน?"
+    },
+
+    "register": {
+      "button_loading": "กำลังสร้างบัญชี..."
+    },
+
+    "forgot_password": {
+      "title": "ลืมรหัสผ่าน",
+      "button": "ส่งลิงก์รีเซ็ตรหัสผ่าน"
+    },
+
+    "reset_password": {
+      "title": "รีเซ็ตรหัสผ่าน",
+      "new_password": "รหัสผ่านใหม่",
+      "invalid_token": "โทเค็นรีเซ็ตไม่ถูกต้อง"
+    },
+
+    "verify_email": {
+      "title": "ยืนยันอีเมล",
+      "greeting": "สวัสดี {{name}}!",
+      "confirm_message": "โปรดยืนยันว่านี่คืออีเมลของคุณ",
+      "invalid_token": "โทเค็นยืนยันไม่ถูกต้อง"
+    }
   },
 
   "chat": {

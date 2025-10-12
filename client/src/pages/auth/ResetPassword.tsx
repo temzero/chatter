@@ -5,8 +5,11 @@ import { AlertMessage } from "@/components/ui/AlertMessage";
 import { AuthenticationLayout } from "../PublicLayout";
 import { motion } from "framer-motion";
 import { publicLayoutAnimations } from "@/animations/publicLayoutAnimations";
+import { useTranslation } from "react-i18next";
 
 const ResetPassword = () => {
+  const { t } = useTranslation();
+
   const formRef = useRef<HTMLFormElement>(null);
   const { token } = useParams();
   const loading = useAuthStore((state) => state.loading);
@@ -26,11 +29,11 @@ const ResetPassword = () => {
     const confirmPassword = formData.get("confirmPassword") as string;
 
     if (password !== confirmPassword) {
-      return setMessage("error", "Passwords do not match");
+      return setMessage("error", t("auth.common.password_mismatch"));
     }
 
     if (!token) {
-      return setMessage("error", "Invalid reset token");
+      return setMessage("error", t("auth.reset_password.invalid_token"));
     }
 
     await resetPasswordWithToken(token, password);
@@ -49,13 +52,13 @@ const ResetPassword = () => {
           className="flex flex-col justify-center w-[400px] gap-2 p-8"
         >
           <h2 className="text-4xl font-semibold mb-4 text-center">
-            Reset Password
+            {t("auth.reset_password.title")}
           </h2>
 
           <input
             type="password"
             name="password"
-            placeholder="New Password"
+            placeholder={t("auth.reset_password.new_password")}
             required
             className="input"
             autoFocus
@@ -64,7 +67,9 @@ const ResetPassword = () => {
           <input
             type="password"
             name="confirmPassword"
-            placeholder="Confirm New Password"
+            placeholder={t(
+              "auth.common.confirm_password"
+            )}
             required
             className="input"
           />
@@ -77,7 +82,9 @@ const ResetPassword = () => {
             disabled={loading}
             className="primary w-full py-1 mt-2"
           >
-            {loading ? "Processing..." : "Reset Password"}
+            {loading
+              ? t("common.loading.processing")
+              : t("auth.reset_password.title")}
           </motion.button>
 
           <div className="flex items-center gap-4 mt-2">
@@ -85,7 +92,7 @@ const ResetPassword = () => {
               to="/auth/login"
               className="opacity-40 hover:opacity-100 hover:text-green-400"
             >
-              Back to Login
+              {t("auth.common.back_to_login")}
             </Link>
           </div>
         </form>

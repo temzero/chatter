@@ -34,7 +34,7 @@ export const MediaViewerBottomInfo = ({
         </div>
       )}
       {/* Dot Indicator */}
-      <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-2 z-20 pointer-events-none">
+      <div className={`absolute left-1/2 transform -translate-x-1/2 flex gap-2 z-20 pointer-events-none ${isMobile ? "top-4" : " bottom-3"}`}>
         {Array.from({ length: mediaLength }).map((_, index) => (
           <span
             key={index}

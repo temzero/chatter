@@ -5,8 +5,10 @@ import { AlertMessage } from "@/components/ui/AlertMessage";
 import { AuthenticationLayout } from "../PublicLayout";
 import { motion } from "framer-motion";
 import { publicLayoutAnimations } from "@/animations/publicLayoutAnimations";
+import { useTranslation } from "react-i18next";
 
 const Register = () => {
+  const { t } = useTranslation();
   const formRef = useRef<HTMLFormElement>(null);
   const firstNameRef = useRef<HTMLInputElement>(null);
   const lastNameRef = useRef<HTMLInputElement>(null);
@@ -14,12 +16,10 @@ const Register = () => {
   const register = useAuthStore((state) => state.register);
   const setMessage = useAuthStore((state) => state.setMessage);
   const loading = useAuthStore((state) => state.loading);
-
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!formRef.current) return;
 
     const formData = new FormData(formRef.current);
@@ -27,7 +27,7 @@ const Register = () => {
     const confirmPassword = formData.get("confirmPassword") as string;
 
     if (password !== confirmPassword) {
-      return setMessage("error", "Passwords do not match!");
+      return setMessage("error", t("auth.common.password_mismatch"));
     }
 
     await register({
@@ -35,7 +35,7 @@ const Register = () => {
       username: formData.get("username") as string,
       firstName: formData.get("firstName") as string,
       lastName: formData.get("lastName") as string,
-      password: password,
+      password,
     });
     navigate("/");
   };
@@ -44,7 +44,6 @@ const Register = () => {
     const { value, selectionStart } = e.target;
     if (value.length === 1) {
       e.target.value = value.charAt(0).toUpperCase() + value.slice(1);
-      // Move cursor to end after capitalization
       e.target.setSelectionRange(selectionStart, selectionStart);
     }
   };
@@ -60,11 +59,14 @@ const Register = () => {
           onSubmit={handleSubmit}
           className="flex flex-col justify-center w-[400px] gap-2 p-8"
         >
-          <h2 className="text-4xl font-semibold mb-4">Register</h2>
+          <h2 className="text-4xl font-semibold mb-4">
+            {t("common.actions.register")}
+          </h2>
+
           <input
             type="text"
             name="username"
-            placeholder="Username"
+            placeholder={t("account.username")}
             required
             className="input"
             autoComplete="username"
@@ -75,17 +77,16 @@ const Register = () => {
             <input
               type="text"
               name="firstName"
-              placeholder="First Name"
+              placeholder={t("account.first_name")}
               required
               className="input"
               ref={firstNameRef}
               onChange={capitalizeFirstLetter}
             />
-
             <input
               type="text"
               name="lastName"
-              placeholder="Last Name"
+              placeholder={t("account.last_name")}
               required
               className="input"
               ref={lastNameRef}
@@ -96,28 +97,25 @@ const Register = () => {
           <input
             type="email"
             name="email"
-            placeholder="Email"
+            placeholder={t("account.email")}
             required
             className="input"
-            autoComplete="email"
           />
 
           <input
             type="password"
             name="password"
-            placeholder="Password"
+            placeholder={t("account.password")}
             required
             className="input"
-            autoComplete="new-password"
           />
 
           <input
             type="password"
             name="confirmPassword"
-            placeholder="Confirm Password"
+            placeholder={t("auth.common.confirm_password")}
             required
             className="input"
-            autoComplete="new-password"
           />
 
           <AlertMessage className="-mb-1" />
@@ -128,7 +126,9 @@ const Register = () => {
             disabled={loading}
             className="primary w-full py-1 mt-2"
           >
-            {loading ? "Creating account..." : "Register"}
+            {loading
+              ? t("auth.register.button_loading")
+              : t("common.actions.register")}
           </motion.button>
 
           <div className="flex items-center gap-4 mt-2">
@@ -136,7 +136,7 @@ const Register = () => {
               to="/auth/login"
               className="opacity-40 hover:opacity-100 hover:text-green-400"
             >
-              Back to Login
+              {t("auth.common.back_to_login")}
             </Link>
           </div>
         </form>

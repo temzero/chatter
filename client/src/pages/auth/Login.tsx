@@ -5,17 +5,17 @@ import { AlertMessage } from "@/components/ui/AlertMessage";
 import { AuthenticationLayout } from "../PublicLayout";
 import { motion } from "framer-motion";
 import { publicLayoutAnimations } from "@/animations/publicLayoutAnimations";
+import { useTranslation } from "react-i18next";
 
 const Login = () => {
+  const { t } = useTranslation();
   const formRef = useRef<HTMLFormElement>(null);
-  // const [showQrCode, setShowQrCode] = useState(false);
   const login = useAuthStore((state) => state.login);
   const loading = useAuthStore((state) => state.loading);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!formRef.current) return;
 
     const formData = new FormData(formRef.current);
@@ -25,10 +25,6 @@ const Login = () => {
     await login(identifier, password);
     navigate("/");
   };
-
-  // const toggleQrCode = () => {
-  //   setShowQrCode(!showQrCode);
-  // };
 
   return (
     <AuthenticationLayout loading={loading}>
@@ -41,13 +37,15 @@ const Login = () => {
           onSubmit={handleSubmit}
           className="flex flex-col justify-center w-[400px] gap-2 p-8"
         >
-          <h2 className="text-4xl font-semibold mb-4">Login</h2>
+          <h2 className="text-4xl font-semibold mb-4">
+            {t("common.actions.login")}
+          </h2>
 
           <input
             id="username"
             name="username"
             type="text"
-            placeholder="Username, Email, or Phone Number"
+            placeholder={t("auth.login.username_placeholder")}
             required
             className="input"
             autoComplete="username"
@@ -58,7 +56,7 @@ const Login = () => {
             id="password"
             type="password"
             name="password"
-            placeholder="Password"
+            placeholder={t("account.password")}
             required
             className="input"
             autoComplete="current-password"
@@ -72,7 +70,9 @@ const Login = () => {
             disabled={loading}
             className="primary w-full py-1 mt-2"
           >
-            {loading ? "Logging in..." : "Log In"}
+            {loading
+              ? t("common.loading.logging_in")
+              : t("common.actions.login")}
           </motion.button>
 
           <div className="flex items-center justify-between gap-4 mt-2">
@@ -80,13 +80,13 @@ const Login = () => {
               to="/auth/register"
               className="opacity-40 hover:opacity-100 hover:text-green-400"
             >
-              Register
+              {t("common.actions.register")}
             </Link>
             <Link
               to="/auth/forgot-password"
               className="opacity-40 hover:opacity-100 hover:text-green-400"
             >
-              Forgot Password?
+              {t("auth.login.forgot_password")}
             </Link>
           </div>
         </form>

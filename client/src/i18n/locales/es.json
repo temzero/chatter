@@ -15,10 +15,12 @@
       "edit": "Editar",
       "forward": "Reenviar",
       "leave": "Salir",
+      "login": "Iniciar sesión",
       "logout": "Cerrar sesión",
       "mark_important": "Marcar como importante",
       "mute": "Silenciar",
       "pin": "Fijar",
+      "register": "Registrarse",
       "reply": "Responder",
       "remove": "Eliminar",
       "requests": "Solicitudes",
@@ -28,8 +30,8 @@
       "search": "Buscar",
       "send_verification": "Enviar verificación",
       "unfriend": "Eliminar amigo",
-      "unmark_important": "Desmarcar como importante",
-      "unmute": "Desactivar silencio",
+      "unmark_important": "Quitar marca de importante",
+      "unmute": "Activar sonido",
       "unpin": "Desfijar",
       "unblock": "Desbloquear",
       "update": "Actualizar",
@@ -44,21 +46,63 @@
       "empty": "Vacío",
       "error": "Ocurrió un error",
       "required": "Este campo es obligatorio",
-      "invalid_code": "Por favor, introduce un código de 6 dígitos"
+      "invalid_code": "Por favor ingrese un código de 6 dígitos"
     },
     "loading": {
       "loading": "Cargando...",
       "searching": "Buscando...",
       "creating": "Creando...",
-      "saving": "Guardando..."
+      "sending": "Enviando...",
+      "saving": "Guardando...",
+      "logging_in": "Iniciando sesión...",
+      "verifying": "Verificando...",
+      "processing": "Procesando..."
     }
   },
 
   "account": {
     "first_name": "Nombre",
-    "last_name": "Apellido"
+    "last_name": "Apellido",
+    "username": "Usuario",
+    "email": "Correo electrónico",
+    "password": "Contraseña"
   },
 
+  "auth": {
+    "common": {
+      "back_to_login": "Volver al inicio de sesión",
+      "password_mismatch": "¡Las contraseñas no coinciden!",
+      "confirm_password": "Confirmar contraseña"
+    },
+
+    "login": {
+      "username_placeholder": "Usuario, correo o número de teléfono",
+      "forgot_password": "¿Olvidaste tu contraseña?"
+    },
+
+    "register": {
+      "button_loading": "Creando cuenta..."
+    },
+
+    "forgot_password": {
+      "title": "Olvidé mi contraseña",
+      "button": "Enviar enlace para restablecer contraseña"
+    },
+
+    "reset_password": {
+      "title": "Restablecer contraseña",
+      "new_password": "Nueva contraseña",
+      "invalid_token": "Token de restablecimiento inválido"
+    },
+
+    "verify_email": {
+      "title": "Verificar correo electrónico",
+      "greeting": "¡Hola {{name}}!",
+      "confirm_message": "Por favor confirma que este es tu correo electrónico",
+      "invalid_token": "Token de verificación inválido."
+    }
+  },
+  
   "chat": {
     "all": "Todos los chats",
     "all_with_type": "Todos los chats con tipo:",

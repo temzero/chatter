@@ -248,7 +248,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
   return (
     <div
       className="absolute bottom-0 left-0 backdrop-blur-xl w-full flex flex-col items-start p-4 shadow border-[var(--border-color)]"
-      style={{ zIndex: replyToMessageId ? 99 : 2 }}
+      style={{ zIndex: replyToMessageId ? 100 : 2 }}
     >
       {filePreviewUrls.length > 0 && (
         <AttachmentImportedPreview

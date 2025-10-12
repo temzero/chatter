@@ -5,31 +5,33 @@
       "accept": "Chấp nhận",
       "back": "Quay lại",
       "block": "Chặn",
-      "blocked_by_user": "Bị người dùng chặn",
+      "blocked_by_user": "Đã bị người dùng chặn",
       "cancel": "Hủy",
       "cancel_request": "Hủy yêu cầu",
       "clear_selection": "Xóa lựa chọn",
       "close": "Đóng",
-      "delete": "Xoá",
+      "delete": "Xóa",
       "decline": "Từ chối",
       "edit": "Chỉnh sửa",
       "forward": "Chuyển tiếp",
-      "leave": "Rời",
+      "leave": "Rời đi",
+      "login": "Đăng nhập",
       "logout": "Đăng xuất",
       "mark_important": "Đánh dấu quan trọng",
-      "mute": "Tắt thông báo",
+      "mute": "Tắt tiếng",
       "pin": "Ghim",
+      "register": "Đăng ký",
       "reply": "Trả lời",
-      "remove": "Loại bỏ",
+      "remove": "Gỡ bỏ",
       "requests": "Yêu cầu",
       "resend_code": "Gửi lại mã",
       "save": "Lưu",
       "save_changes": "Lưu thay đổi",
       "search": "Tìm kiếm",
-      "send_verification": "Gửi mã xác minh",
-      "unfriend": "Huỷ bạn bè",
+      "send_verification": "Gửi xác minh",
+      "unfriend": "Hủy kết bạn",
       "unmark_important": "Bỏ đánh dấu quan trọng",
-      "unmute": "Bật thông báo",
+      "unmute": "Bật tiếng",
       "unpin": "Bỏ ghim",
       "unblock": "Bỏ chặn",
       "update": "Cập nhật",
@@ -41,8 +43,8 @@
       "success": "Thành công!",
       "failed": "Thất bại",
       "unknown": "Không xác định",
-      "error": "Đã xảy ra lỗi",
       "empty": "Trống",
+      "error": "Đã xảy ra lỗi",
       "required": "Trường này là bắt buộc",
       "invalid_code": "Vui lòng nhập mã 6 chữ số"
     },
@@ -50,14 +52,55 @@
       "loading": "Đang tải...",
       "searching": "Đang tìm...",
       "creating": "Đang tạo...",
+      "sending": "Đang gửi...",
       "saving": "Đang lưu...",
-      "empty": "Trống"
+      "logging_in": "Đang đăng nhập...",
+      "verifying": "Đang xác minh...",
+      "processing": "Đang xử lý..."
     }
   },
 
   "account": {
     "first_name": "Tên",
-    "last_name": "Họ"
+    "last_name": "Họ",
+    "username": "Tên người dùng",
+    "email": "Email",
+    "password": "Mật khẩu"
+  },
+
+  "auth": {
+    "common": {
+      "back_to_login": "Quay lại đăng nhập",
+      "password_mismatch": "Mật khẩu không khớp!",
+      "confirm_password": "Xác nhận mật khẩu"
+    },
+
+    "login": {
+      "username_placeholder": "Tên người dùng, Email hoặc số điện thoại",
+      "forgot_password": "Quên mật khẩu?"
+    },
+
+    "register": {
+      "button_loading": "Đang tạo tài khoản..."
+    },
+
+    "forgot_password": {
+      "title": "Quên mật khẩu",
+      "button": "Gửi liên kết đặt lại mật khẩu"
+    },
+
+    "reset_password": {
+      "title": "Đặt lại mật khẩu",
+      "new_password": "Mật khẩu mới",
+      "invalid_token": "Mã đặt lại không hợp lệ"
+    },
+
+    "verify_email": {
+      "title": "Xác minh Email",
+      "greeting": "Xin chào {{name}}!",
+      "confirm_message": "Vui lòng xác nhận đây là địa chỉ email của bạn",
+      "invalid_token": "Mã xác minh không hợp lệ."
+    }
   },
 
   "chat": {

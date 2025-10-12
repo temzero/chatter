@@ -15,10 +15,12 @@
       "edit": "Edit",
       "forward": "Forward",
       "leave": "Leave",
+      "login": "Login",
       "logout": "Logout",
       "mark_important": "Mark Important",
       "mute": "Mute",
       "pin": "Pin",
+      "register": "Register",
       "reply": "Reply",
       "remove": "Remove",
       "requests": "Requests",
@@ -50,15 +52,57 @@
       "loading": "Loading...",
       "searching": "Searching...",
       "creating": "Creating...",
-      "saving": "Saving..."
+      "sending": "Sending...",
+      "saving": "Saving...",
+      "logging_in": "Logging in...",
+      "verifying": "Verifying...",
+      "processing": "Processing..."
     }
   },
 
   "account": {
     "first_name": "First Name",
-    "last_name": "Last Name"
+    "last_name": "Last Name",
+    "username": "Username",
+    "email": "Email",
+    "password": "Password"
   },
 
+  "auth": {
+    "common": {
+      "back_to_login": "Back to Login",
+      "password_mismatch": "Passwords do not match!",
+      "confirm_password": "Confirm Password"
+    },
+
+    "login": {
+      "username_placeholder": "Username, Email, or Phone Number",
+      "forgot_password": "Forgot Password?"
+    },
+
+    "register": {
+      "button_loading": "Creating account..."
+    },
+
+    "forgot_password": {
+      "title": "Forgot Password",
+      "button": "Send Reset Password Link"
+    },
+
+    "reset_password": {
+      "title": "Reset Password",
+      "new_password": "New Password",
+      "invalid_token": "Invalid reset token"
+    },
+
+    "verify_email": {
+      "title": "Verify Email",
+      "greeting": "Hi {{name}}!",
+      "confirm_message": "Please confirm that this is your email address",
+      "invalid_token": "Invalid verification token."
+    }
+  },
+  
   "chat": {
     "all": "All Chats",
     "all_with_type": "All Chats with type:",
