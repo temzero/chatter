@@ -58,13 +58,6 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ message }) => {
   };
   const attachments = message.attachments ?? [];
 
-  // Animation
-  const animationProps = message.shouldAnimate
-    ? isMe
-      ? messageAnimations.myMessage
-      : messageAnimations.otherMessage
-    : {};
-
   // Check system message
   const isSystemMessage = !!message.systemEvent;
   if (isSystemMessage && message.systemEvent != SystemEventType.CALL) {
@@ -84,12 +77,16 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ message }) => {
       key={message.id}
       ref={messageRef}
       id={`message-${message.id}`}
-      className={clsx("relative group mx-auto mb-4", {
+      className={clsx("relative group mb-4", {
         "scale-[1.1]": isReplyToThisMessage,
-        "z-[99]": isFocus,
         "w-[60%]": !isMobile,
+        "w-[80%]": isMobile,
       })}
-      {...animationProps}
+      style={{
+        zIndex: isFocus ? 100 : "auto",
+      }}
+      layout='position'
+      {...messageAnimations.SystemMessage}
     >
       {repliedMessage && (
         <div

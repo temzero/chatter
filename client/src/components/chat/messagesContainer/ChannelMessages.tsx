@@ -5,6 +5,7 @@ import { useCurrentUser } from "@/stores/authStore";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
 import { useActiveMembers } from "@/stores/chatMemberStore";
 import ChannelMessage from "../components/message/MessageChannel";
+import { AnimatePresence } from "framer-motion";
 
 interface ChannelMessagesProps {
   chat: ChatResponse;
@@ -90,37 +91,45 @@ const ChannelMessages: React.FC<ChannelMessagesProps> = ({
             </div>
           </div>
 
-          {group.messages.map((msg, index) => {
-            const nextMsg = group.messages[index + 1];
-            const isLastRead =
-              myLastReadMessageId === msg.id &&
-              (!nextMsg || nextMsg.id !== myLastReadMessageId);
+          <AnimatePresence initial={false}>
+            {group.messages.map((msg, index) => {
+              const nextMsg = group.messages[index + 1];
+              const isLastRead =
+                myLastReadMessageId === msg.id &&
+                (!nextMsg || nextMsg.id !== myLastReadMessageId);
 
-            return (
-              <React.Fragment key={msg.id}>
-                <ChannelMessage message={msg} />
-                {isLastRead && (
-                  <div className="relative flex items-center gap-1 justify-between text-xs italic w-full select-none text-white">
-                    <div
-                      className="h-4 flex items-center bg-[--primary-green] rounded-full px-0.5"
-                      style={{ zIndex: 1 }}
-                    >
-                      <span className="material-symbols-outlined text-xl">
-                        visibility
-                      </span>
+              const isMe = msg.sender.id === currentUser?.id;
+
+              return (
+                <div
+                  key={msg.id}
+                  className="custom-border flex flex-col items-center"
+                  // layout
+                >
+                  <ChannelMessage message={msg} />
+                  {isLastRead && !isMe && (
+                    <div className="relative flex items-center gap-1 justify-between text-xs italic w-full select-none text-white">
+                      <div
+                        className="h-4 flex items-center bg-[--primary-green] rounded-full px-0.5"
+                        style={{ zIndex: 1 }}
+                      >
+                        <span className="material-symbols-outlined text-xl">
+                          visibility
+                        </span>
+                      </div>
+                      <div
+                        className="h-4 flex items-center bg-[--primary-green] rounded-full px-2"
+                        style={{ zIndex: 1 }}
+                      >
+                        Last Read
+                      </div>
+                      <div className="absolute left-0 right-0 h-[2px] bg-[--primary-green] top-1/2 -translate-y-1/2"></div>
                     </div>
-                    <div
-                      className="h-4 flex items-center bg-[--primary-green] rounded-full px-2"
-                      style={{ zIndex: 1 }}
-                    >
-                      Last Read
-                    </div>
-                    <div className="absolute left-0 right-0 h-[2px] bg-[--primary-green] top-1/2 -translate-y-1/2"></div>
-                  </div>
-                )}
-              </React.Fragment>
-            );
-          })}
+                  )}
+                </div>
+              );
+            })}
+          </AnimatePresence>
         </React.Fragment>
       ))}
     </>

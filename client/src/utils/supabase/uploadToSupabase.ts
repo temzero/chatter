@@ -2,6 +2,7 @@ import { AttachmentUploadRequest } from "@/types/requests/sendMessage.request";
 import { determineAttachmentType } from "../determineAttachmentType";
 import { createClient } from "@supabase/supabase-js";
 import { toast } from "react-toastify";
+
 // Supabase setup
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -52,9 +53,10 @@ export async function uploadFilesToSupabase(
         mimeType: file.type,
       });
     } catch (error) {
-      console.error(`Failed to upload file ${file.name}:`, error);
-      toast.warn(`File too large: ${file.name}`);
-      // Optionally: continue or throw to stop all
+      console.error(`❌ Failed to upload file ${file.name}:`, error);
+      toast.error(`Failed to upload "${file.name}". Please try again.`);
+      // ❗ Stop all uploads if one fails
+      throw new Error(`Upload failed for ${file.name}`);
     }
   }
 

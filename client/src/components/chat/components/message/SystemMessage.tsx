@@ -1,10 +1,7 @@
-import clsx from "clsx";
 import { motion } from "framer-motion";
 import { useCurrentUserId } from "@/stores/authStore";
 import { SystemEventType } from "@/types/enums/systemEventType";
 import { MessageResponse } from "@/types/responses/message.response";
-import { MessageActions } from "@/components/ui/MessageActions";
-import { ReactionPicker } from "@/components/ui/MessageReactionPicker";
 import { MessageReactionDisplay } from "@/components/ui/MessageReactionsDisplay";
 import { messageAnimations } from "@/animations/messageAnimations";
 import { SystemMessageContent } from "@/components/ui/SystemMessageContent";
@@ -14,6 +11,7 @@ import {
   useIsReplyToThisMessage,
   useModalStore,
 } from "@/stores/modalStore";
+import { MessageContextMenu } from "./MessageContextMenu";
 
 type Props = {
   message: MessageResponse;
@@ -52,24 +50,19 @@ const SystemMessage = ({
     return classes.join(" ");
   };
 
-  const animationProps = message.shouldAnimate
-    ? messageAnimations.SystemMessage
-    : {};
-
   return (
     <motion.div
       id={`message-${messageId}`}
-      {...animationProps}
-      className={clsx(
-        "cursor-pointer opacity-50 pb-2 mx-auto flex items-center justify-center",
-        {
-          "z-[99]": isFocus,
-        }
-      )}
       onContextMenu={(e) => {
         e.preventDefault();
         openMessageModal(messageId);
       }}
+      className="cursor-pointer opacity-50 pb-2 mx-auto flex items-center justify-center"
+      style={{
+        zIndex: isFocus ? 100 : "auto",
+      }}
+      layout="position"
+      {...messageAnimations.SystemMessage}
     >
       {systemEvent === SystemEventType.CHAT_UPDATE_AVATAR &&
         content?.newValue && (
@@ -104,18 +97,7 @@ const SystemMessage = ({
         />
 
         {isFocus && !isRelyToThisMessage && (
-          <div>
-            <ReactionPicker
-              messageId={messageId}
-              chatId={message.chatId}
-              isMe={false}
-            />
-            <MessageActions
-              message={message}
-              isMe={false}
-              isSystemMessage={true}
-            />
-          </div>
+          <MessageContextMenu message={message} />
         )}
       </div>
     </motion.div>

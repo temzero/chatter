@@ -1,30 +1,29 @@
 import React, { useState, useRef } from "react";
 import clsx from "clsx";
-import { motion } from "framer-motion";
-import { useCurrentUserId } from "@/stores/authStore";
 import { formatTime } from "@/utils/formatTime";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { ChatType } from "@/types/enums/ChatType";
 import { MessageReactionDisplay } from "@/components/ui/MessageReactionsDisplay";
 import MessageReplyPreview from "@/components/ui/MessageReplyPreview";
 import { handleQuickReaction } from "@/utils/quickReaction";
-import { messageAnimations } from "@/animations/messageAnimations";
 import { MessageStatus } from "@/types/enums/message";
 import { BeatLoader } from "react-spinners";
 import { SystemMessageJSONContent } from "@/components/ui/SystemMessageContent";
 import SystemMessage from "./SystemMessage";
+import { MessageContextMenu } from "./MessageContextMenu";
+import type { MessageResponse } from "@/types/responses/message.response";
 import {
   useIsMessageFocus,
   useIsReplyToThisMessage,
   useModalStore,
 } from "@/stores/modalStore";
-import { MessageContextMenu } from "./MessageContextMenu";
-import type { MessageResponse } from "@/types/responses/message.response";
 
 // ✅ new
 import MessageBubble from "./MessageBubble";
 import CallMessageBubble from "./CallMessageBubble";
 import { SystemEventType } from "@/types/enums/systemEventType";
+import { motion } from "framer-motion";
+import { getMessageAnimation } from "@/animations/messageAnimations";
 
 interface MessageProps {
   message: MessageResponse;
@@ -33,6 +32,8 @@ interface MessageProps {
   isRecent?: boolean;
   isRead?: boolean;
   readUserAvatars?: string[];
+  currentUserId?: string;
+  isMe?: boolean;
 }
 
 const Message: React.FC<MessageProps> = ({
@@ -41,10 +42,9 @@ const Message: React.FC<MessageProps> = ({
   showInfo = true,
   isRecent = false,
   readUserAvatars,
+  currentUserId,
+  isMe = false,
 }) => {
-  const currentUserId = useCurrentUserId();
-  const isMe = message.sender.id === currentUserId;
-
   const isRelyToThisMessage = useIsReplyToThisMessage(message.id);
   const isFocus = useIsMessageFocus(message.id);
 
@@ -66,12 +66,6 @@ const Message: React.FC<MessageProps> = ({
   const closeContextMenu = () => {
     setContextMenuPosition(null);
   };
-
-  const animationProps = message.shouldAnimate
-    ? isMe
-      ? messageAnimations.myMessage
-      : messageAnimations.otherMessage
-    : {};
 
   const isGroupChat = chatType === "group";
 
@@ -96,16 +90,17 @@ const Message: React.FC<MessageProps> = ({
       ref={messageRef}
       onDoubleClick={() => handleQuickReaction(message.id, message.chatId)}
       onContextMenu={handleContextMenu}
-      className={clsx("flex max-w-[60%] group relative ", {
-        "ml-auto": isMe,
-        "mr-auto": !isMe,
+      className={clsx("flex group relative max-w-[60%]", {
+        "justify-end": isMe,
+        "justify-start": !isMe,
         "pb-1": isRecent,
         "pb-2": !isRecent,
       })}
       style={{
         zIndex: isFocus ? 100 : "auto",
       }}
-      {...animationProps}
+      layout='position'
+      {...getMessageAnimation(isMe)}
     >
       {isGroupChat && !isMe && (
         <div className={clsx("flex-shrink-0 mt-auto mr-2 h-10 w-10 min-w-10")}>
@@ -118,7 +113,7 @@ const Message: React.FC<MessageProps> = ({
         </div>
       )}
 
-      <div className="flex flex-col w-full">
+      <div className="flex flex-col ">
         <div
           className={clsx("relative flex flex-col transition-all", {
             "scale-[1.1]": isRelyToThisMessage,
@@ -161,7 +156,6 @@ const Message: React.FC<MessageProps> = ({
               <MessageContextMenu
                 message={message}
                 isMe={isMe}
-                isChannel={false}
                 position={contextMenuPosition || undefined}
                 onClose={closeContextMenu}
               />
@@ -201,7 +195,7 @@ const Message: React.FC<MessageProps> = ({
 
         {readUserAvatars && (
           <div
-            className={clsx("flex items-center", {
+            className={clsx("flex items-center ", {
               "justify-end": isMe,
               "justify-start": !isMe,
             })}

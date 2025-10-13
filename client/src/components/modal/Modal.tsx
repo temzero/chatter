@@ -91,6 +91,7 @@ const Modal = () => {
           {...modalAnimations.modal}
           className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center"
           onClick={handleCloseModal}
+          onContextMenu={(e) => e.preventDefault()}
           style={{ zIndex: 99 }}
         >
           {renderModalContent}

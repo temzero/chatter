@@ -129,15 +129,17 @@ export async function handleSendMessage({
 
     console.log("messagePayload", messagePayload);
 
-    // ✅ Send to WebSocket only if all uploads succeeded
+    // ✅ Send to WebSocket only if uploads succeeded
     chatWebSocketService.sendMessage(messagePayload);
     onSuccess?.();
   } catch (error) {
+    // ❌ Upload or send failed — mark message as failed and stop
     useMessageStore.getState().updateMessageById(chatId, messageId, {
       status: MessageStatus.FAILED,
     });
-    toast.error("Failed to send message.");
+    toast.error("Message upload failed. Please try again.");
     onError?.(error);
     handleError(error, "Failed to send message");
+    return; // ✅ prevent further execution
   }
 }

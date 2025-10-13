@@ -10,7 +10,6 @@ import {
   shouldShowInfo,
 } from "@/utils/messageHelpers";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
-import { AnimatePresence } from "framer-motion";
 
 interface ChatMessagesProps {
   chat: ChatResponse;
@@ -34,13 +33,14 @@ const Messages: React.FC<ChatMessagesProps> = ({ chat, messages }) => {
 
   const myLastReadMessageId = myMember?.lastReadMessageId ?? null;
 
-  // ✅ Auto mark message as read
+  // Mark the last message as read if it's from another user and unread
   useEffect(() => {
     if (!chatId || !chat.myMemberId || messages.length === 0) return;
 
     const lastMessage = messages[messages.length - 1];
     const isUnread =
       myLastReadMessageId === null || lastMessage.id !== myLastReadMessageId;
+
     const isFromOther = lastMessage.sender.id !== currentUser?.id;
 
     if (isUnread && isFromOther) {
@@ -51,6 +51,7 @@ const Messages: React.FC<ChatMessagesProps> = ({ chat, messages }) => {
           lastMessage.id
         );
       }, 1000);
+
       return () => clearTimeout(timer);
     }
   }, [chatId, chat.myMemberId, messages, myLastReadMessageId, currentUser?.id]);
@@ -70,58 +71,47 @@ const Messages: React.FC<ChatMessagesProps> = ({ chat, messages }) => {
 
   return (
     <>
-      {messagesByDate.map((group) => {
-        const groupKey = `${group.date}-${chatId}`;
-        return (
-          <React.Fragment key={groupKey}>
-            {/* Sticky Date Header */}
-            <div className="sticky top-0 flex justify-center z-[1]">
-              <div className="bg-[var(--background-color)] text-xs p-1 rounded">
-                {group.date || "Today"}
-              </div>
+      {messagesByDate.map((group) => (
+        <React.Fragment key={`${group.date}-${chatId}`}>
+          <div
+            className="sticky top-0 flex justify-center"
+            style={{ zIndex: 1 }}
+          >
+            <div className="bg-[var(--background-color)] text-xs p-1 rounded">
+              {group.date || "Today"}
             </div>
+          </div>
 
-            {/* ✅ AnimatePresence wraps entire message list */}
-            <AnimatePresence initial={false}>
-              {group.messages.map((msg, index) => {
-                const prevMsg = group.messages[index - 1];
-                const nextMsg = group.messages[index + 1];
-                const showInfo = shouldShowInfo(msg, prevMsg, nextMsg);
-                const isRecent = isRecentMessage(msg, prevMsg, nextMsg);
-                const readUserAvatars: string[] = [];
+          {group.messages.map((msg, index) => {
+            const prevMsg = group.messages[index - 1];
+            const nextMsg = group.messages[index + 1];
+            const showInfo = shouldShowInfo(msg, prevMsg, nextMsg);
+            const isRecent = isRecentMessage(msg, prevMsg, nextMsg);
+            const readUserAvatars: string[] = [];
 
-                if (msg.id === myLastReadMessageId && currentUser?.avatarUrl) {
-                  readUserAvatars.push(currentUser.avatarUrl);
-                }
+            if (msg.id === myLastReadMessageId && currentUser?.avatarUrl) {
+              readUserAvatars.push(currentUser.avatarUrl);
+            }
 
-                for (const member of otherMembers) {
-                  if (member.avatarUrl && member.lastReadMessageId === msg.id) {
-                    readUserAvatars.push(member.avatarUrl);
-                  }
-                }
-                const isMe = msg.sender.id === currentUser?.id;
+            for (const member of otherMembers) {
+              if (member.avatarUrl && member.lastReadMessageId === msg.id) {
+                readUserAvatars.push(member.avatarUrl);
+              }
+            }
 
-                return (
-                  <div
-                    key={msg.id}
-                    className={`flex ${isMe ? "justify-end" : "justify-start"}`}
-                  >
-                    <Message
-                      message={msg}
-                      chatType={chat.type}
-                      showInfo={showInfo}
-                      isRecent={isRecent}
-                      readUserAvatars={readUserAvatars}
-                      currentUserId={currentUser?.id || ""}
-                      isMe={isMe}
-                    />
-                  </div>
-                );
-              })}
-            </AnimatePresence>
-          </React.Fragment>
-        );
-      })}
+            return (
+              <Message
+                key={msg.id}
+                message={msg}
+                chatType={chat.type}
+                showInfo={showInfo}
+                isRecent={isRecent}
+                readUserAvatars={readUserAvatars}
+              />
+            );
+          })}
+        </React.Fragment>
+      ))}
     </>
   );
 };

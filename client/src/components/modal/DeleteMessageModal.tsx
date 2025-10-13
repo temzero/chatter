@@ -48,14 +48,14 @@ const DeleteMessageModal: React.FC = () => {
       </div>
       <div className="flex custom-border-t">
         <button
-          className="p-3 hover:text-yellow-500 opacity-60 hover:opacity-100 flex-1"
+          className="p-3 text-yellow-500 opacity-80 hover:opacity-100 font-semibold flex-1"
           onClick={() => handleDelete(false)}
         >
           {t("modal.delete_message.delete_for_me")}
         </button>
         {isMe && (
           <button
-            className="p-3 hover:text-red-500 opacity-60 hover:opacity-100 flex-1"
+            className="p-3 text-red-500 opacity-80 hover:opacity-100 font-semibold flex-1"
             onClick={() => handleDelete(true)}
           >
             {t("modal.delete_message.delete_for_everyone")}

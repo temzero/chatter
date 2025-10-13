@@ -15,7 +15,6 @@ type SystemMessageJSONContent = {
 
 export const handleSystemEventMessage = (message: MessageResponse) => {
   if (!message.systemEvent) {
-    console.log("not a system message");
     return;
   }
 

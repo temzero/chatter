@@ -216,6 +216,7 @@ const AudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
         window.removeEventListener("touchmove", onTouchMove);
         window.removeEventListener("touchend", onTouchEnd);
       };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [state.isPlaying, state.duration]);
 
     // -------------------- Memoized values --------------------
@@ -296,7 +297,7 @@ const AudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
           </div>
 
           <button
-            className="aspect-square absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full border-8 border-[--border-color]"
+            className="aspect-square absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full border-[16px] border-[--border-color]"
             style={{ width: diskHoleSize, zIndex: 1 }}
             onClick={(e) => {
               e.stopPropagation();

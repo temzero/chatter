@@ -29,6 +29,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
         "opacity-60": message.status === MessageStatus.SENDING,
         "opacity-60 border-2 border-red-500":
           message.status === MessageStatus.FAILED,
+        "opacity-100": !message.status || message.status === MessageStatus.SENT,
       })}
       style={{
         width:

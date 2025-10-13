@@ -2,24 +2,15 @@ import { MotionProps } from "framer-motion";
 
 // Shared animation configurations
 export const messageAnimations: Record<string, MotionProps> = {
-  myMessage: {
-    initial: { opacity: 0, scale: 0.1, x: 100, y: 0 },
-    animate: { opacity: 1, scale: 1, x: 0, y: 0 },
-    transition: { type: "spring", stiffness: 300, damping: 29 },
-  },
-  otherMessage: {
-    initial: { opacity: 0, scale: 0.1, x: -200, y: 30 },
-    animate: { opacity: 1, scale: 1, x: 0, y: 0 },
-    transition: { type: "spring", stiffness: 222, damping: 20 },
-  },
   SystemMessage: {
-    initial: { opacity: 0, scale: 0.1, y: 60 },
-    animate: { opacity: 1, scale: 1, y: 0 },
-    transition: { type: "spring", stiffness: 300, damping: 29 },
+    initial: { scale: 0.5, y: 90 },
+    animate: { scale: 1, y: 0 },
+    exit: { opacity: 0, scale: 1.5 },
   },
   pinMessage: {
     initial: { opacity: 0, scale: 1.1, y: 50 },
     animate: { opacity: 1, scale: 1, y: 0 },
+    exit: { opacity: 0, scale: 2 },
     transition: { type: "spring", stiffness: 300, damping: 29 },
   },
   reaction: {
@@ -36,3 +27,14 @@ export const messageAnimations: Record<string, MotionProps> = {
     transition: { type: "spring", stiffness: 350, damping: 30 },
   },
 };
+
+export const getMessageAnimation = (isMe: boolean): MotionProps => ({
+  initial: { opacity: 0, scale: 0.1, x: isMe ? "100%" : "-100%" },
+  animate: { opacity: 1, scale: 1, x: 0 },
+  exit: { opacity: 0, scale: 2 },
+  transition: {
+    type: "spring",
+    stiffness: 300,
+    damping: 20,
+  },
+});
