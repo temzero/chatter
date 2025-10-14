@@ -1,7 +1,8 @@
-import { AttachmentType } from '../../constants/attachment-type.constants';
 import { IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
+import { AttachmentType } from 'src/shared/types/attachment-type.enum';
+import { AttachmentUploadRequest } from 'src/shared/interfaces/attachment-upload-request';
 
-export class AttachmentUploadDto {
+export class AttachmentUploadDto implements AttachmentUploadRequest {
   // additional field only process in server
   @IsOptional()
   @IsString()

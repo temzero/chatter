@@ -1,7 +1,7 @@
 // components/ui/MessageReplyPreview.tsx
 import React from "react";
-import { MessageResponse } from "@/types/responses/message.response";
-import { ChatType } from "@/types/enums/ChatType";
+import { MessageResponse } from "@/shared/types/responses/message.response";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { Avatar } from "./avatar/Avatar";
 import clsx from "clsx";
 import { scrollToMessageById } from "@/utils/scrollToMessageById";

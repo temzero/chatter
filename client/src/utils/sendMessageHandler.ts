@@ -1,16 +1,15 @@
 import { v4 as uuidv4 } from "uuid";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
 import { useMessageStore } from "@/stores/messageStore";
-import { AttachmentResponse } from "@/types/responses/message.response";
+import { AttachmentResponse } from "@/shared/types/responses/message.response";
 import { determineAttachmentType } from "./determineAttachmentType";
 import { handleError } from "./handleError";
 import { uploadFilesToSupabase } from "./supabase/uploadToSupabase";
-import { MessageStatus, MessageType } from "@/types/enums/message";
+import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { toast } from "react-toastify";
-import {
-  SendMessageRequest,
-  AttachmentUploadRequest,
-} from "@/types/requests/sendMessage.request";
+import { SendMessageRequest } from "@/shared/requests/sendMessage.request";
+import { AttachmentUploadRequest } from "@/shared/types/requests/attachment-upload.request";
+import { deleteFilesFromSupabase } from "./supabase/deleteFileFromSupabase";
 
 function toOptimisticAttachmentResponseFromFile(
   file: File,
@@ -93,7 +92,6 @@ export async function handleSendMessage({
       displayName: "Me",
       avatarUrl: "",
     },
-    type: MessageType.TEXT,
     content: trimmedInput || null,
     status: MessageStatus.SENDING,
     isPinned: false,
@@ -113,10 +111,10 @@ export async function handleSendMessage({
   };
 
   useMessageStore.getState().addMessage(optimisticMessage);
+  let uploadedAttachments: AttachmentUploadRequest[] = [];
 
   try {
-    const uploadedAttachments: AttachmentUploadRequest[] =
-      await uploadFilesToSupabase(attachments);
+    uploadedAttachments = await uploadFilesToSupabase(attachments);
 
     const messagePayload: SendMessageRequest = {
       id: messageId,
@@ -127,19 +125,26 @@ export async function handleSendMessage({
       attachments: uploadedAttachments,
     };
 
-    console.log("messagePayload", messagePayload);
-
-    // ✅ Send to WebSocket only if uploads succeeded
     chatWebSocketService.sendMessage(messagePayload);
+
+    // Revoke previews
+    filePreviewUrls.forEach((url) => URL.revokeObjectURL(url));
+
     onSuccess?.();
   } catch (error) {
-    // ❌ Upload or send failed — mark message as failed and stop
+    // Delete any uploaded files
+
+    const uploadedUrls = uploadedAttachments.map((att) => att.url);
+    if (uploadedUrls.length) await deleteFilesFromSupabase(uploadedUrls);
+
     useMessageStore.getState().updateMessageById(chatId, messageId, {
       status: MessageStatus.FAILED,
     });
+
+    filePreviewUrls.forEach((url) => URL.revokeObjectURL(url));
+
     toast.error("Message upload failed. Please try again.");
     onError?.(error);
     handleError(error, "Failed to send message");
-    return; // ✅ prevent further execution
   }
 }

@@ -1,7 +1,7 @@
 // import { useChatStore } from "@/stores/chatStore";
 // import { useFriendshipStore } from "@/stores/friendshipStore";
 // import { ModalType, useModalStore } from "@/stores/modalStore";
-// import { FriendshipStatus } from "@/types/enums/friendshipType";
+// import { FriendshipStatus } from "@shared/types/friendship-type.enum";
 // import { useCurrentUserId } from "@/stores/authStore"; // Access current user
 // import { toast } from "react-toastify";
 
@@ -169,7 +169,7 @@
 
 // src/components/FriendshipBtn.tsx
 import { ModalType, useModalStore } from "@/stores/modalStore";
-import { FriendshipStatus } from "@/types/enums/friendshipType";
+import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { useCurrentUserId } from "@/stores/authStore";
 import { useFriendRequest } from "@/hooks/useFriendRequest";
 

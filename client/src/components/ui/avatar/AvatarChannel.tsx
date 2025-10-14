@@ -1,5 +1,5 @@
 import { OnlineDot } from "../OnlineDot";
-import type { ChatResponse } from "@/types/responses/chat.response";
+import type { ChatResponse } from "@/shared/types/responses/chat.response";
 
 type ChannelAvatarProps = {
   chat: ChatResponse;

@@ -1,6 +1,6 @@
 // src/hooks/useFriendRequest.ts
 import { useFriendshipStore } from "@/stores/friendshipStore";
-import { FriendshipStatus } from "@/types/enums/friendshipType";
+import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { useChatStore } from "@/stores/chatStore";
 import { toast } from "react-toastify";
 

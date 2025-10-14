@@ -1,11 +1,11 @@
-import { SystemEventType } from "@/types/enums/systemEventType";
+import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 import { SystemEventIcon } from "./SystemEventIcon";
 import { JSX } from "react";
 import { parseJsonContent } from "@/utils/parseJsonContent";
-import { ChatMemberRole } from "@/types/enums/chatMemberRole";
-import { CallStatus } from "@/types/enums/CallStatus";
+import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
+import { CallStatus } from "@/shared/types/enums/call-status.enum";
 import { getCallText } from "@/utils/callHelpers";
-import { CallLiteResponse } from "@/types/responses/callLite.response";
+import { CallLiteResponse } from "@/shared/responses/callLite.response";
 import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
 

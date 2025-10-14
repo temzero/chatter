@@ -2,8 +2,8 @@ import React from "react";
 import clsx from "clsx";
 import RenderMultipleAttachments from "@/components/ui/RenderMultipleAttachments";
 import ForwardedMessagePreview from "@/components/ui/ForwardMessagePreview";
-import { MessageStatus } from "@/types/enums/message";
-import type { MessageResponse } from "@/types/responses/message.response";
+import { MessageStatus } from "@/shared/types/enums/message-status.enum";
+import type { MessageResponse } from "@/shared/types/responses/message.response";
 
 interface MessageBubbleProps {
   message: MessageResponse;

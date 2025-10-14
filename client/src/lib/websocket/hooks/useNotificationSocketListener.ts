@@ -2,14 +2,14 @@
 import { useEffect } from "react";
 import { notificationWebSocketService } from "../services/notification.service";
 import { useFriendshipStore } from "@/stores/friendshipStore";
-import { FriendshipStatus } from "@/types/enums/friendshipType";
+import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { toast } from "react-toastify";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useCurrentUserId } from "@/stores/authStore";
 import {
   FriendRequestResponse,
   FriendshipUpdateNotification,
-} from "@/types/responses/friendship.response";
+} from "@/shared/types/responses/friendship.response";
 import { webSocketService } from "../services/websocket.service";
 
 export function useNotificationSocketListeners() {

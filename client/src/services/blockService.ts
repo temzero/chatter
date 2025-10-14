@@ -1,6 +1,6 @@
 // src/services/blockService.ts
 import API from "@/services/api/api";
-import { BlockResponseDto } from "@/types/responses/block.response";
+import { BlockResponseDto } from "@/shared/types/responses/block.response";
 // import { CreateBlockDto } from "@/types/requests/create-block.dto";
 
 export const blockService = {

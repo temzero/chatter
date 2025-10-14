@@ -1,9 +1,7 @@
-import { AnimatePresence, motion } from "framer-motion";
-import {
-  determineAttachmentType,
-  attachmentTypeIcons,
-} from "@/utils/determineAttachmentType";
 import React from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { determineAttachmentType } from "@/utils/determineAttachmentType";
+import { getFileIcon } from "@shared/utils/getFileIcon";
 
 interface AttachmentImportedPreviewProps {
   files: File[];
@@ -27,14 +25,13 @@ const AttachmentImportedPreview: React.FC<AttachmentImportedPreviewProps> = ({
   urls,
   onRemove,
 }) => {
-  const filesWithMeta = files
-    .map((file, index) => ({
-      file,
-      url: urls[index],
-      type: determineAttachmentType(file),
-      originalIndex: index,
-    }))
-    // .sort((a, b) => typeOrder.indexOf(a.type) - typeOrder.indexOf(b.type));
+  const filesWithMeta = files.map((file, index) => ({
+    file,
+    url: urls[index],
+    type: determineAttachmentType(file),
+    originalIndex: index,
+  }));
+  // .sort((a, b) => typeOrder.indexOf(a.type) - typeOrder.indexOf(b.type));
 
   const baseClass =
     "w-full h-full border-2 border-[var(--input-border-color)] rounded";
@@ -66,25 +63,30 @@ const AttachmentImportedPreview: React.FC<AttachmentImportedPreviewProps> = ({
                 <p className={`${textClass} absolute bottom-0 left-1`}>
                   {file.name}
                 </p>
-                <video className="w-full h-full object-cover">
-                  <source src={url} />
-                </video>
+                <video
+                  src={url}
+                  className="w-full h-full object-cover"
+                  muted
+                  preload="metadata"
+                />
               </div>
             ) : (
               <div className={`${baseClass} p-1 flex flex-col justify-between`}>
-                <i
-                  className={`material-symbols-outlined text-3xl ${
-                    type !== "audio" && "-mt-1"
-                  }`}
-                >
-                  {type === "audio" ? "music_note" : attachmentTypeIcons[type]}
+                <i className={`material-symbols-outlined text-3xl -mt-1`}>
+                  {getFileIcon(file.name)}
                 </i>
                 <span className={textClass}>{file.name}</span>
               </div>
             )}
 
             <button
-              onClick={() => onRemove(originalIndex)}
+              onClick={() => {
+                // Revoke object URLs for videos to free memory
+                if (file.type.startsWith("video/")) {
+                  URL.revokeObjectURL(url);
+                }
+                onRemove(originalIndex);
+              }}
               className="absolute inset-0 flex items-center justify-center bg-black/50 text-white text-3xl rounded opacity-0 group-hover:opacity-100 transition-opacity"
               aria-label="Remove file"
             >

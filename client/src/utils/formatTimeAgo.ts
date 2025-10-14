@@ -14,7 +14,7 @@ export const formatTimeAgo = (dateString: string | Date): string => {
   // Calculate minutes
   const diffMins = Math.floor(diffSecs / 60);
   if (diffMins < 60) {
-    return `${diffMins}min`;
+    return `${diffMins}m`;
   }
 
   // Calculate hours
@@ -32,7 +32,7 @@ export const formatTimeAgo = (dateString: string | Date): string => {
   // Calculate months (approximate)
   const diffMonths = Math.floor(diffDays / 30);
   if (diffMonths < 12) {
-    return `${diffMonths}m`;
+    return `${diffMonths}mth`;
   }
 
   // Calculate years

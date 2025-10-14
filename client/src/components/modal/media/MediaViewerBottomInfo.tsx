@@ -1,6 +1,6 @@
 // components/MediaViewerBottomInfo.tsx
 import { useDeviceStore } from "@/stores/deviceStore";
-import { AttachmentResponse } from "@/types/responses/message.response";
+import { AttachmentResponse } from "@/shared/types/responses/message.response";
 import { formatFileSize } from "@/utils/formatFileSize";
 
 interface MediaViewerBottomInfoProps {
@@ -34,7 +34,11 @@ export const MediaViewerBottomInfo = ({
         </div>
       )}
       {/* Dot Indicator */}
-      <div className={`absolute left-1/2 transform -translate-x-1/2 flex gap-2 z-20 pointer-events-none ${isMobile ? "top-4" : " bottom-3"}`}>
+      <div
+        className={`absolute left-1/2 transform -translate-x-1/2 flex gap-2 z-20 pointer-events-none ${
+          isMobile ? "top-4" : " bottom-3"
+        }`}
+      >
         {Array.from({ length: mediaLength }).map((_, index) => (
           <span
             key={index}

@@ -4,11 +4,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { Button } from "../Button";
 import { VideoStream } from "./components/VideoStream";
-import { ChatResponse } from "@/types/responses/chat.response";
+import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useModalStore } from "@/stores/modalStore";
 import { useLocalTracks } from "@/hooks/mediaStreams/useLocalTracks";
 import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
-import { UpdateCallPayload } from "@/types/callPayload";
+import { UpdateCallPayload } from "@shared/types/call";
 import { callAnimations } from "@/animations/callAnimations";
 import CallHeader from "./components/CallHeader";
 

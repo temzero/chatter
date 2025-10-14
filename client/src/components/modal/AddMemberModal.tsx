@@ -10,7 +10,7 @@ import { copyToClipboard } from "@/utils/copyToClipboard";
 import { handleError } from "@/utils/handleError";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
-import { FriendContactResponse } from "@/types/responses/friendContact.response";
+import { FriendContactResponse } from "@/shared/types/responses/friend-contact.response";
 import { useFriendContacts } from "@/hooks/useFriendContacts";
 import { useAllUniqueMembers } from "@/hooks/useAllUniqueMembers";
 import { useTranslation } from "react-i18next";

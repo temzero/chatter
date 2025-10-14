@@ -1,5 +1,5 @@
 import React from "react";
-import type { ChatResponse } from "@/types/responses/chat.response";
+import type { ChatResponse } from "@/shared/types/responses/chat.response";
 import { ChatAvatar } from "./avatar/ChatAvatar";
 
 interface ChatListProps {

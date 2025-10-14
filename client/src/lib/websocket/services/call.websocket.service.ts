@@ -7,7 +7,7 @@ import {
   UpdateCallPayload,
   IncomingCallResponse,
   CallErrorResponse,
-} from "@/types/callPayload";
+} from "@shared/types/call";
 
 export const callWebSocketService = {
   // INCOMING CALL
@@ -28,7 +28,7 @@ export const callWebSocketService = {
 
   // UPDATE CALL
   emitUpdateCall(payload: UpdateCallPayload) {
-    console.log('UpdateCallPayload', payload)
+    console.log("UpdateCallPayload", payload);
     webSocketService.emit(CallEvent.UPDATE_CALL, payload);
   },
   onCallUpdated(callback: (data: UpdateCallPayload) => void) {

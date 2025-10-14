@@ -1,10 +1,9 @@
 import { useCallback } from "react";
-import { AttachmentResponse } from "@/types/responses/message.response";
+import { AttachmentResponse } from "@/shared/types/responses/message.response";
 import { handleDownload } from "@/utils/handleDownload";
 import { useSenderByMessageId } from "@/stores/messageStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { ModalType, useModalStore } from "@/stores/modalStore";
-import { audioService, SoundType } from "@/services/audio.service";
 import { useDeviceStore } from "@/stores/deviceStore";
 
 interface MediaViewerButtonsProps {
@@ -24,7 +23,6 @@ export const MediaViewerButtons = ({
   const sender = useSenderByMessageId(attachment.messageId);
 
   const handleDownloadClick = useCallback(() => {
-    audioService.playSound(SoundType.DOWNLOAD);
     handleDownload(attachment);
   }, [attachment]);
 
@@ -54,7 +52,7 @@ export const MediaViewerButtons = ({
         <Avatar
           avatarUrl={sender?.avatarUrl}
           name={sender?.displayName}
-          size='8'
+          size="8"
         />
         {isMobile || (
           <div className="text-white font-medium">

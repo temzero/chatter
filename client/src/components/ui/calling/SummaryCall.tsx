@@ -1,10 +1,10 @@
-import { ChatResponse } from "@/types/responses/chat.response";
+import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { Button } from "../Button";
 import { formatDuration } from "@/utils/formatDuration";
 import { useCallStore } from "@/stores/callStore/callStore";
-import { LocalCallStatus } from "@/types/enums/CallStatus";
+import { LocalCallStatus } from "@/types/enums/LocalCallStatus";
 import { useEffect } from "react";
-import { CallError } from "@/types/callPayload";
+import { CallError } from "@shared/types/call";
 import CallHeader from "./components/CallHeader";
 
 const SummaryCall = ({ chat }: { chat: ChatResponse; duration?: number }) => {

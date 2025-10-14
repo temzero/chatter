@@ -4,18 +4,18 @@ import { motion } from "framer-motion";
 import {
   AttachmentResponse,
   MessageResponse,
-} from "@/types/responses/message.response";
+} from "@/shared/types/responses/message.response";
 import { useModalStore } from "@/stores/modalStore";
 import { useChatStore } from "@/stores/chatStore";
 import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
-import { ForwardMessageRequest } from "@/types/requests/forwardMessage.request";
+import { ForwardMessageRequest } from "@/shared/types/requests/forward-message.request";
 import { ChatAvatar } from "../ui/avatar/ChatAvatar";
-import SearchBar from "../ui/SearchBar";
 import { modalAnimations } from "@/animations/modalAnimations";
-import { AttachmentType } from "@/types/enums/attachmentType";
-import { AttachmentUploadRequest } from "@/types/requests/sendMessage.request";
-import { ChatType } from "@/types/enums/ChatType";
+import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
+import { AttachmentUploadRequest } from "@/shared/types/requests/attachment-upload.request";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useTranslation } from "react-i18next";
+import SearchBar from "../ui/SearchBar";
 
 const ForwardMessageModal: React.FC = () => {
   const { t } = useTranslation();

@@ -1,9 +1,9 @@
 import React from "react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { MessageStatus } from "@/types/enums/message";
-import { MessageResponse } from "@/types/responses/message.response";
-import { CallStatus } from "@/types/enums/CallStatus";
+import { MessageStatus } from "@/shared/types/enums/message-status.enum";
+import { MessageResponse } from "@/shared/types/responses/message.response";
+import { CallStatus } from "@/shared/types/enums/call-status.enum";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { getCallColor, getCallIcon, getCallText } from "@/utils/callHelpers";
 import { callAnimations } from "@/animations/callAnimations";

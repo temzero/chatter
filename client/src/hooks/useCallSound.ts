@@ -1,7 +1,7 @@
 // hooks/useCallSounds.ts
 import { useEffect } from "react";
 import { useCallStore } from "@/stores/callStore/callStore";
-import { LocalCallStatus } from "@/types/enums/CallStatus";
+import { LocalCallStatus } from "@/types/enums/LocalCallStatus";
 import { audioService, SoundType } from "@/services/audio.service";
 
 export const useCallSounds = () => {

@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useCallback } from "react";
 import { RingLoader } from "react-spinners";
-import type { ChatResponse } from "@/types/responses/chat.response";
-import { ChatType } from "@/types/enums/ChatType";
+import type { ChatResponse } from "@/shared/types/responses/chat.response";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import {
   useHasMoreMessages,
   useMessagesByChatId,

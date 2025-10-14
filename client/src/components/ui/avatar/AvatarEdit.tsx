@@ -1,4 +1,4 @@
-import { ChatType } from "@/types/enums/ChatType";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 interface AvatarEditProps {

@@ -4,7 +4,7 @@ import InfiniteScroller from "@/components/ui/InfiniteScroller";
 import { useAuthStore } from "@/stores/authStore";
 import { useChatStore } from "@/stores/chatStore";
 import { useShallow } from "zustand/shallow";
-import type { ChatResponse } from "@/types/responses/chat.response";
+import type { ChatResponse } from "@/shared/types/responses/chat.response";
 
 interface ChatListProps {
   chats: ChatResponse[];

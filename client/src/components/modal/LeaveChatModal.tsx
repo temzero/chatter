@@ -2,12 +2,12 @@ import React from "react";
 import { useModalStore } from "@/stores/modalStore";
 import { motion } from "framer-motion";
 import { modalAnimations } from "@/animations/modalAnimations";
-import { ChatResponse } from "@/types/responses/chat.response";
-import { DirectChatMember } from "@/types/responses/chatMember.response";
+import { ChatResponse } from "@/shared/types/responses/chat.response";
+import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
 import { useChatStore } from "@/stores/chatStore";
 import { ChatAvatar } from "../ui/avatar/ChatAvatar";
 import { Avatar } from "../ui/avatar/Avatar";
-import { ChatType } from "@/types/enums/ChatType";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useTranslation } from "react-i18next";
 
 const LeaveChatModal: React.FC = () => {

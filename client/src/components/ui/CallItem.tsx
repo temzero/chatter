@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
-import { CallResponseDto } from "@/types/responses/call.response";
+import { CallResponseDto } from "@/shared/types/responses/call.response";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { useChatStore } from "@/stores/chatStore";
 import { getCallColor, getCallText } from "@/utils/callHelpers";
 import { formatDateTime } from "@/utils/formatDate";
-import { ChatType } from "@/types/enums/ChatType";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import CallIcon from "./CallIcon";
 
 interface CallItemProps {
@@ -59,9 +59,7 @@ const CallItem: React.FC<CallItemProps> = ({ call, isCaller, onDelete }) => {
       {isCaller && (
         <div className="bg-[--primary-green] w-[3px] h-full absolute left-0 top-0" />
       )}
-      <div
-        className={`relative overflow-hidden ${roundedClass}`}
-      >
+      <div className={`relative overflow-hidden ${roundedClass}`}>
         <ChatAvatar chat={chat} type="sidebar" />
       </div>
 

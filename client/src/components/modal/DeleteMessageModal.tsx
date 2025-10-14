@@ -6,6 +6,8 @@ import { useCurrentUserId } from "@/stores/authStore";
 import { motion } from "framer-motion";
 import { modalAnimations } from "@/animations/modalAnimations";
 import { useMessageStore } from "@/stores/messageStore";
+import { audioService, SoundType } from "@/services/audio.service";
+
 import { useTranslation } from "react-i18next";
 
 const DeleteMessageModal: React.FC = () => {
@@ -25,6 +27,7 @@ const DeleteMessageModal: React.FC = () => {
       messageId: message.id,
       isDeleteForEveryone,
     });
+    audioService.playSound(SoundType.BREAK);
     closeModal();
   };
 

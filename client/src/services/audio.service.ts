@@ -1,6 +1,7 @@
 // services/audio.service.ts
 import { handleError } from "@/utils/handleError";
 import activeSound from "@/assets/sound/active.mp3";
+import breakSound from "@/assets/sound/break.mp3";
 import card1Sound from "@/assets/sound/card1.mp3";
 import card2Sound from "@/assets/sound/card2.mp3";
 import card3Sound from "@/assets/sound/card3.mp3";
@@ -42,6 +43,7 @@ export enum SoundType {
   POP1 = "pop1",
   POP2 = "pop2",
   TYPING = "typing",
+  BREAK = "break",
   ERROR = "error",
 }
 
@@ -87,6 +89,7 @@ class AudioServiceImpl implements AudioService {
       [SoundType.POP1]: pop1Sound,
       [SoundType.POP2]: pop2Sound,
       [SoundType.TYPING]: typingSound,
+      [SoundType.BREAK]: breakSound,
       [SoundType.ERROR]: errorSound,
     };
 

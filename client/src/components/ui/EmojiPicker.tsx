@@ -1,4 +1,5 @@
 import { useEmojiCategories } from "@/hooks/useEmojiCategories";
+import { motion } from "framer-motion";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -121,7 +122,7 @@ const CustomEmojiPicker = ({ onSelect }: CustomEmojiPickerProps) => {
   }, []);
 
   return (
-    <div title="Emoji" ref={pickerRef}>
+    <motion.div title="Emoji" ref={pickerRef} whileTap={{ scale: 0.8 }}>
       <a
         onClick={() => setIsOpen(!isOpen)}
         className={` hover:opacity-90 rounded-full cursor-pointer flex items-center select-none ${
@@ -201,7 +202,7 @@ const CustomEmojiPicker = ({ onSelect }: CustomEmojiPickerProps) => {
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

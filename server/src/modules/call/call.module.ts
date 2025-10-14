@@ -9,7 +9,6 @@ import { Chat } from '../chat/entities/chat.entity';
 import { ChatMemberModule } from '../chat-member/chat-member.module';
 import { LiveKitService } from './liveKit.service';
 import { LiveKitWebhookController } from './livekit.webhook.controller';
-import { CallStoreService } from '../websocket/services/call-store.service ';
 import { ChatModule } from '../chat/chat.module';
 import { WebsocketCallService } from '../websocket/services/websocket-call.service';
 import { WebSocketModule } from '../websocket/websocket.module';
@@ -26,13 +25,7 @@ import { CallMapper } from './mappers/call.mapper';
     ChatMemberModule,
   ],
   controllers: [CallController, LiveKitWebhookController],
-  providers: [
-    CallMapper,
-    CallService,
-    LiveKitService,
-    CallStoreService,
-    WebsocketCallService,
-  ],
-  exports: [CallService, CallStoreService],
+  providers: [CallMapper, CallService, LiveKitService, WebsocketCallService],
+  exports: [CallService],
 })
 export class CallModule {}

@@ -2,8 +2,8 @@
 import clsx from "clsx";
 import React, { useRef } from "react";
 import { Avatar } from "@/components/ui/avatar/Avatar";
-import { MessageResponse } from "@/types/responses/message.response";
-import { ChatType } from "@/types/enums/ChatType";
+import { MessageResponse } from "@/shared/types/responses/message.response";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useCurrentUserId } from "@/stores/authStore";
 import RenderAttachment from "@/components/ui/RenderAttachment";
 import RenderPinnedAttachment from "@/components/ui/RenderPinnedAttachment";
@@ -41,7 +41,7 @@ export const MessageHorizontalPreview: React.FC<
 
   const messageTextClass = clsx("overflow-hidden", {
     "font-semibold opacity-70": !!forwardedMessage,
-    "truncate": type === MessageHorizontalPreviewTypes.PIN,
+    truncate: type === MessageHorizontalPreviewTypes.PIN,
     "line-clamp-2":
       type === MessageHorizontalPreviewTypes.REPLY_CHANNEL_MESSAGE,
   });

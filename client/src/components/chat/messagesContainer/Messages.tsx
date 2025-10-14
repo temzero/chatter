@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect } from "react";
 import Message from "@/components/chat/components/message/Message";
-import { MessageResponse } from "@/types/responses/message.response";
-import { ChatResponse } from "@/types/responses/chat.response";
+import { MessageResponse } from "@/shared/types/responses/message.response";
+import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useCurrentUser } from "@/stores/authStore";
 import { useActiveMembers } from "@/stores/chatMemberStore";
 import {
@@ -26,6 +26,8 @@ const Messages: React.FC<ChatMessagesProps> = ({ chat, messages }) => {
     () => members.find((m) => m.id === chat.myMemberId),
     [members, chat.myMemberId]
   );
+
+  console.log("Rendering Messages component", messages);
 
   const otherMembers = useMemo(
     () => members.filter((m) => m.id !== chat.myMemberId),

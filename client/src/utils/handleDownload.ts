@@ -1,4 +1,5 @@
-import { AttachmentResponse } from "@/types/responses/message.response";
+import { AttachmentResponse } from "@/shared/types/responses/message.response";
+import { audioService, SoundType } from "@/services/audio.service";
 
 export const handleDownload = async (attachment: AttachmentResponse) => {
   if (!attachment?.url) return;
@@ -14,6 +15,10 @@ export const handleDownload = async (attachment: AttachmentResponse) => {
     link.href = url;
     link.download = attachment.filename || "download";
     document.body.appendChild(link);
+
+    // Play download sound right before triggering download
+    audioService.playSound(SoundType.DOWNLOAD);
+
     link.click();
     document.body.removeChild(link);
 

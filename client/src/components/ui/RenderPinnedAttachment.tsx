@@ -1,7 +1,8 @@
 import React from "react";
-import { AttachmentResponse } from "@/types/responses/message.response";
-import { AttachmentType } from "@/types/enums/attachmentType";
-import { getFileIcon } from "@/utils/getFileIcon";
+import { AttachmentResponse } from "@/shared/types/responses/message.response";
+import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
+import { getFileIcon } from "@shared/utils/getFileIcon";
+
 // import { formatFileSize } from "@/utils/formatFileSize";
 import { useModalStore } from "@/stores/modalStore";
 import CustomAudioPlayer from "./CustomAudioPlayer";
@@ -33,7 +34,7 @@ const RenderPinnedAttachment: React.FC<RenderPinnedAttachmentProps> = ({
   const icon =
     attachment.type === AttachmentType.AUDIO
       ? "music_note"
-      : getFileIcon(attachment.filename || "", attachment.mimeType || "");
+      : getFileIcon(attachment.filename);
 
   return (
     <div

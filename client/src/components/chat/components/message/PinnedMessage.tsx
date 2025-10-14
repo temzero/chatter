@@ -3,8 +3,8 @@ import { motion } from "framer-motion";
 import { useIsMe } from "@/stores/authStore";
 import { formatDateTime } from "@/utils/formatDate";
 import { scrollToMessageById } from "@/utils/scrollToMessageById";
-import type { MessageResponse } from "@/types/responses/message.response";
-import { ChatType } from "@/types/enums/ChatType";
+import type { MessageResponse } from "@/shared/types/responses/message.response";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { MessageHorizontalPreview } from "./MessageHorizontalPreview";
 import { messageAnimations } from "@/animations/messageAnimations";
 import { MessageHorizontalPreviewTypes } from "@/types/enums/MessageHorizontalPreviewTypes";
@@ -22,9 +22,7 @@ const PinnedMessage: React.FC<MessageProps> = ({
   shouldAnimate = false,
 }) => {
   const isMe = useIsMe(message.sender.id);
-  const animationProps = shouldAnimate
-    ? messageAnimations.pinMessage
-    : {};
+  const animationProps = shouldAnimate ? messageAnimations.pinMessage : {};
 
   return (
     <motion.div

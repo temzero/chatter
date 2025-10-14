@@ -1,9 +1,9 @@
 import React from "react";
-import { CallStatus } from "@/types/enums/CallStatus";
+import { CallStatus } from "@/shared/types/enums/call-status.enum";
 import { formatDurationByStartAndEnd } from "@/utils/formatDuration";
 import { formatTime } from "@/utils/formatTime";
 import { useTranslation } from "react-i18next";
-import { CallLiteResponse } from "@/types/responses/callLite.response";
+import { CallLiteResponse } from "@/shared/responses/callLite.response";
 interface BroadcastMessageProps {
   call: CallLiteResponse;
 }

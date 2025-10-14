@@ -1,12 +1,12 @@
 import API from "../api/api";
-import type { ChatResponse } from "@/types/responses/chat.response";
+import type { ChatResponse } from "@/shared/types/responses/chat.response";
 import { directChatService } from "./directChatService";
 import { groupChatService } from "./groupChatService";
-import type { ApiSuccessResponse } from "@/types/responses/apiSuccess.response";
+import type { ApiSuccessResponse } from "@/shared/types/responses/api-success.response";
 import { toast } from "react-toastify";
 import { handleError } from "@/utils/handleError";
-import { PaginationQuery } from "@/types/query/paginationQuery";
-import InitialDataResponse from "@/types/responses/initialData.response";
+import { PaginationQuery } from "@/shared/types/queries/pagination-query";
+import InitialDataResponse from "@/shared/types/responses/initial-data.response";
 
 export const chatService = {
   ...directChatService,

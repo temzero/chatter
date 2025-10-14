@@ -1,5 +1,5 @@
-import { CallStatus } from "@/types/enums/CallStatus";
-import { SystemEventType } from "@/types/enums/systemEventType";
+import { CallStatus } from "@/shared/types/enums/call-status.enum";
+import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 
 // Component that renders the icon, now accepting className prop
 export const SystemEventIcon = ({

@@ -2,8 +2,8 @@ import { useState, useMemo, useEffect } from "react";
 import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
-import { ChatResponse } from "@/types/responses/chat.response";
-import { FriendshipStatus } from "@/types/enums/friendshipType";
+import { ChatResponse } from "@/shared/types/responses/chat.response";
+import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { handleError } from "@/utils/handleError";
 import { toast } from "react-toastify";
 import {
@@ -13,7 +13,7 @@ import {
 } from "@/stores/chatMemberStore";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
-import { DirectChatMember } from "@/types/responses/chatMember.response";
+import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
 import { useTranslation } from "react-i18next";
 
 const DirectChatEdit = () => {

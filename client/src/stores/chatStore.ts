@@ -5,15 +5,15 @@ import { chatMemberService } from "@/services/chat/chatMemberService";
 import { useMessageStore } from "./messageStore";
 import { useAuthStore } from "./authStore";
 import { useChatMemberStore } from "./chatMemberStore";
-import { ChatType } from "@/types/enums/ChatType";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import type {
   ChatMemberPreview,
   ChatResponse,
-} from "@/types/responses/chat.response";
+} from "@/shared/types/responses/chat.response";
 import type {
   LastMessageResponse,
   MessageResponse,
-} from "@/types/responses/message.response";
+} from "@/shared/types/responses/message.response";
 import { toast } from "react-toastify";
 import { useModalStore } from "./modalStore";
 import { useSidebarInfoStore } from "./sidebarInfoStore";

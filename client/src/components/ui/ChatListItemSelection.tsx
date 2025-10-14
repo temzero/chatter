@@ -1,6 +1,6 @@
 import React from "react";
 import { ChatAvatar } from "./avatar/ChatAvatar";
-import type { ChatResponse } from "@/types/responses/chat.response";
+import type { ChatResponse } from "@/shared/types/responses/chat.response";
 
 interface ChatListItemSelectionProps {
   chat: ChatResponse;

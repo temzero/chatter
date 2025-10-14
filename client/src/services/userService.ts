@@ -1,5 +1,5 @@
 import API from "@/services/api/api";
-import { UserResponse } from "@/types/responses/user.response";
+import { UserResponse } from "@/shared/types/responses/user.response";
 import { ProfileFormData } from "@/components/sidebar/SidebarProfileEdit";
 
 export const userService = {

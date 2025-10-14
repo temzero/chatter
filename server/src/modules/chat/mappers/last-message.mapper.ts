@@ -1,8 +1,10 @@
 // mappers/lastMessageMapper.ts
 import { Message } from 'src/modules/message/entities/message.entity';
 import { ChatMember } from 'src/modules/chat-member/entities/chat-member.entity';
+import { AttachmentType } from 'src/shared/types/attachment-type.enum';
 import { LastMessageResponseDto } from '../dto/responses/last-message-response.dto';
-import { AttachmentType } from 'src/modules/message/constants/attachment-type.constants';
+import { getFileIcon } from 'src/shared/utils/getFileIcon';
+
 export function mapMessageToLastMessageResDto(
   message: Message,
   members: ChatMember[],
@@ -46,33 +48,57 @@ export function mapMessageToLastMessageResDto(
 }
 
 function getAttachmentIcons(
-  attachments?: { type: AttachmentType }[],
+  attachments?: { type: AttachmentType; filename?: string | null }[],
 ): string[] | undefined {
   if (!attachments || attachments.length === 0) return undefined;
-
-  const iconMap: Record<AttachmentType, string> = {
-    [AttachmentType.IMAGE]: 'image',
-    [AttachmentType.VIDEO]: 'videocam',
-    [AttachmentType.AUDIO]: 'music_note',
-    [AttachmentType.TEXT]: '',
-    [AttachmentType.FILE]: 'folder_zip',
-    [AttachmentType.VOICE]: 'voice',
-    [AttachmentType.LOCATION]: 'location',
-    [AttachmentType.POLL]: 'poll',
-    [AttachmentType.SYSTEM]: 'system',
-  };
 
   const seen = new Set<string>();
   const icons: string[] = [];
 
   for (const att of attachments) {
-    const icon = iconMap[att.type] || 'insert_drive_file';
+    const fileName = att.filename;
+    if (!fileName) continue;
+
+    const icon: string =
+      att.type === AttachmentType.LOCATION
+        ? 'location_on'
+        : getFileIcon(fileName);
+
     if (!seen.has(icon)) {
       icons.push(icon);
       seen.add(icon);
       if (icons.length >= 5) break;
     }
-
-    return icons;
   }
+
+  return icons;
 }
+
+// function getAttachmentIcons(
+//   attachments?: { type: AttachmentType }[],
+// ): string[] | undefined {
+//   if (!attachments || attachments.length === 0) return undefined;
+
+//   const iconMap: Record<AttachmentType, string> = {
+//     [AttachmentType.IMAGE]: 'image',
+//     [AttachmentType.VIDEO]: 'videocam',
+//     [AttachmentType.AUDIO]: 'music_note',
+//     [AttachmentType.VOICE]: 'mic',
+//     [AttachmentType.LOCATION]: 'location_on',
+//     [AttachmentType.FILE]: 'insert_drive_file',
+//   };
+
+//   const seen = new Set<string>();
+//   const icons: string[] = [];
+
+//   for (const att of attachments) {
+//     const icon = iconMap[att.type] || 'insert_drive_file';
+//     if (!seen.has(icon)) {
+//       icons.push(icon);
+//       seen.add(icon);
+//       if (icons.length >= 5) break;
+//     }
+
+//     return icons;
+//   }
+// }

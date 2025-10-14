@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { Button } from "../Button";
-import { ChatResponse } from "@/types/responses/chat.response";
+import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { VideoStream } from "./components/VideoStream";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { useModalStore } from "@/stores/modalStore";

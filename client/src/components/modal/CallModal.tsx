@@ -4,9 +4,10 @@ import { motion } from "framer-motion";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { useChatStore } from "@/stores/chatStore";
 import { useDeviceStore } from "@/stores/deviceStore";
-import { CallStatus, LocalCallStatus } from "@/types/enums/CallStatus";
-import { ChatResponse } from "@/types/responses/chat.response";
-import { ChatType } from "@/types/enums/ChatType";
+import { LocalCallStatus } from "@/types/enums/LocalCallStatus";
+import { CallStatus } from "@/shared/types/enums/call-status.enum";
+import { ChatResponse } from "@/shared/types/responses/chat.response";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { modalAnimations } from "@/animations/modalAnimations";
 
 import CallRoom from "../ui/calling/components/callRoom/CallRoom";

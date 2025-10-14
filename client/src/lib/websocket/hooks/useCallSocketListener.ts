@@ -2,7 +2,8 @@
 import { useEffect } from "react";
 import { callWebSocketService } from "../services/call.websocket.service";
 import { toast } from "react-toastify";
-import { LocalCallStatus, CallStatus } from "@/types/enums/CallStatus";
+import { LocalCallStatus } from "@/types/enums/LocalCallStatus";
+import { CallStatus } from "@/shared/types/enums/call-status.enum";
 import { handleError } from "@/utils/handleError";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { useCallStore } from "@/stores/callStore/callStore";
@@ -16,7 +17,7 @@ import {
   IncomingCallResponse,
   CallError,
   CallErrorResponse,
-} from "@/types/callPayload";
+} from "@shared/types/call";
 
 export function useCallSocketListeners() {
   const currentUserId = useAuthStore((state) => state.currentUser?.id);

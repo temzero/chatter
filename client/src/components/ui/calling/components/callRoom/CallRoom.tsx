@@ -1,4 +1,4 @@
-import { ChatResponse } from "@/types/responses/chat.response";
+import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { useDeviceStore } from "@/stores/deviceStore";
 import { useLocalTracks } from "@/hooks/mediaStreams/useLocalTracks";

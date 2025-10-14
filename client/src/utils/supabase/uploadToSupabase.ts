@@ -1,4 +1,4 @@
-import { AttachmentUploadRequest } from "@/types/requests/sendMessage.request";
+import { AttachmentUploadRequest } from "@/shared/types/requests/attachment-upload.request";
 import { determineAttachmentType } from "../determineAttachmentType";
 import { createClient } from "@supabase/supabase-js";
 import { toast } from "react-toastify";
@@ -34,7 +34,7 @@ export async function uploadFilesToSupabase(
       const { error: uploadError } = await supabase.storage
         .from(attachmentsBucket)
         .upload(path, file, {
-          contentType: file.type,
+          contentType: file.type || "application/octet-stream",
           upsert: false,
           cacheControl: "3600",
         });
@@ -44,13 +44,14 @@ export async function uploadFilesToSupabase(
       const {
         data: { publicUrl },
       } = supabase.storage.from(attachmentsBucket).getPublicUrl(path);
+      console.log(`Uploaded ${file.name}:`, publicUrl);
 
       uploads.push({
         url: publicUrl,
         type,
         filename: file.name,
         size: file.size,
-        mimeType: file.type,
+        mimeType: file.type || "application/octet-stream",
       });
     } catch (error) {
       console.error(`❌ Failed to upload file ${file.name}:`, error);

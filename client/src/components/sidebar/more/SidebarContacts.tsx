@@ -3,7 +3,7 @@ import React from "react";
 import SidebarLayout from "@/pages/SidebarLayout";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useFriendContacts } from "@/hooks/useFriendContacts";
-import { FriendContactResponse } from "@/types/responses/friendContact.response";
+import { FriendContactResponse } from "@/shared/types/responses/friend-contact.response";
 import { useTranslation } from "react-i18next";
 
 interface SidebarContactsProps {

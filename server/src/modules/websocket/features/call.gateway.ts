@@ -18,14 +18,12 @@ import {
 } from '../constants/callPayload.type';
 import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
 import { WebsocketNotificationService } from '../services/websocket-notification.service';
-import { CallStoreService } from '../services/call-store.service ';
 
 @WebSocketGateway()
 export class CallGateway {
   constructor(
     private readonly websocketNotificationService: WebsocketNotificationService,
     private readonly chatMemberService: ChatMemberService,
-    private readonly callStore: CallStoreService,
   ) {}
 
   @SubscribeMessage(CallEvent.UPDATE_CALL)

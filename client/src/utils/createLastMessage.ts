@@ -1,6 +1,6 @@
-import { AttachmentType } from "@/types/enums/attachmentType";
-import type { MessageResponse } from "@/types/responses/message.response";
-import type { LastMessageResponse } from "@/types/responses/message.response";
+import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
+import type { MessageResponse } from "@/shared/types/responses/message.response";
+import type { LastMessageResponse } from "@/shared/types/responses/message.response";
 
 export function createLastMessage(
   message: MessageResponse
@@ -44,13 +44,6 @@ function getAttachmentIcons(
     [AttachmentType.FILE]: "folder_zip",
     [AttachmentType.VOICE]: "voice",
     [AttachmentType.LOCATION]: "location",
-    [AttachmentType.PDF]: "",
-    [AttachmentType.WORD]: "",
-    [AttachmentType.EXCEL]: "",
-    [AttachmentType.PPT]: "",
-    [AttachmentType.ARCHIVE]: "",
-    [AttachmentType.TEXT]: "",
-    [AttachmentType.CODE]: "",
   };
 
   const seen = new Set<string>();

@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import React, { useRef } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -33,7 +34,11 @@ const AttachFile: React.FC<AttachFileProps> = ({ onFileSelect }) => {
   };
 
   return (
-    <div title={t("chat_bar.attach_file")} className="flex items-center">
+    <motion.div
+      title={t("chat_bar.attach_file")}
+      className="flex items-center"
+      whileTap={{ scale: 0.8 }}
+    >
       <span
         className="material-symbols-outlined opacity-50 hover:opacity-90 cursor-pointer rounded select-none"
         aria-label="Attach file"
@@ -51,7 +56,7 @@ const AttachFile: React.FC<AttachFileProps> = ({ onFileSelect }) => {
         onChange={handleChange}
         style={{ display: "none" }}
       />
-    </div>
+    </motion.div>
   );
 };
 

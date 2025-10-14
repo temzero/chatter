@@ -3,7 +3,7 @@ import clsx from "clsx";
 import type {
   MessageResponse,
   SenderResponse,
-} from "@/types/responses/message.response";
+} from "@/shared/types/responses/message.response";
 import RenderMultipleAttachments from "./RenderMultipleAttachments";
 
 interface ForwardedMessagePreviewProps {

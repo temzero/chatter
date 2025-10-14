@@ -1,4 +1,4 @@
-import { AttachmentUploadRequest } from "@/types/requests/sendMessage.request";
+import { AttachmentUploadRequest } from "@/shared/types/requests/attachment-upload.request";
 import { determineAttachmentType } from "../determineAttachmentType";
 import { createClient } from "@supabase/supabase-js";
 

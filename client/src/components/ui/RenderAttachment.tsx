@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import CustomAudioPlayer from "./CustomAudioPlayer";
 import { formatFileSize } from "@/utils/formatFileSize";
-import { getFileIcon } from "@/utils/getFileIcon";
 import { useModalStore } from "@/stores/modalStore";
-import { AttachmentResponse } from "@/types/responses/message.response";
-import { AttachmentType } from "@/types/enums/attachmentType";
+import { AttachmentResponse } from "@/shared/types/responses/message.response";
+import { handleDownload } from "@/utils/handleDownload";
+import { getFileIcon } from "@shared/utils/getFileIcon";
+import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
+import CustomAudioPlayer from "./CustomAudioPlayer";
 import CustomVideoPlayer from "./CustomVideoPlayer";
 
 // Helper function to calculate greatest common divisor (GCD)
@@ -37,6 +38,7 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
   const closeModal = useModalStore((state) => state.closeModal);
 
   const [aspectRatio, setAspectRatio] = useState<string | null>(null);
+  console.log("attachment.type", attachment.type);
 
   useEffect(() => {
     if (attachment.type === AttachmentType.IMAGE) {
@@ -75,13 +77,6 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
       {content}
     </div>
   );
-
-  const handleDownloadClick = (url: string, fileName: string | null) => {
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = fileName || "file";
-    link.click();
-  };
 
   const handleVideoLoadedMetadata = (
     e: React.SyntheticEvent<HTMLVideoElement>
@@ -150,28 +145,35 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
           className={`w-full p-2 flex items-center gap-2 custom-border-b overflow-hidden ${
             type === "info" ? "text-purple-400" : "text-black bg-purple-400"
           }`}
-          onClick={() =>
-            handleDownloadClick(attachment.url, attachment.filename ?? null)
-          }
+          onClick={handleOpenModal}
         >
-          <i className="material-symbols-outlined text-3xl">
-            {getFileIcon(attachment.filename ?? "", attachment.mimeType ?? "")}
-          </i>
-          <a
-            href={attachment.url}
-            download={attachment.filename || true}
-            className="truncate"
+          <div
+            className="flex items-center gap-2 group cursor-pointer transition-all pointer-events-auto"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDownload(attachment);
+            }}
           >
-            {attachment.filename || "Download File"}
-          </a>
-          <p className="opacity-70 ml-auto">
+            <i className="material-symbols-outlined text-3xl transition-all group-hover:scale-110 group-hover:font-bold">
+              {getFileIcon(attachment.filename)}
+            </i>
+            <h1 className="truncate transition-all group-hover:font-bold">
+              {attachment.filename || "Download File"}
+            </h1>
+          </div>
+          <p className="opacity-70 ml-auto pointer-events-none">
             ({attachment.size ? formatFileSize(attachment.size) : "???"})
           </p>
         </div>
       );
 
     default:
-      return null;
+      return (
+        <div className="flex items-center p-2 rounded text-6xl ">
+          <span className="material-symbols-outlined">attach_file</span>
+          <p className="text-lg">Type not supported</p>
+        </div>
+      );
   }
 };
 

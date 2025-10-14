@@ -6,7 +6,7 @@ import { useFolderStore } from "@/stores/folderStore";
 import { SidebarMode } from "@/types/enums/sidebarMode";
 import { useChatStore } from "@/stores/chatStore";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
-import { ChatType } from "@/types/enums/ChatType";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { useTranslation } from "react-i18next";
 

@@ -1,4 +1,4 @@
-import { FriendContactResponse } from "@/types/responses/friendContact.response";
+import { FriendContactResponse } from "@/shared/types/responses/friend-contact.response";
 import { useCurrentUserId } from "@/stores/authStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useChatStore } from "@/stores/chatStore";

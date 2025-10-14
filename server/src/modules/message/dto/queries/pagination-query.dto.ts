@@ -1,8 +1,8 @@
-// src/common/dto/pagination-query.dto.ts
 import { Type } from 'class-transformer';
 import { IsOptional, IsInt, Min, IsString } from 'class-validator';
+import { PaginationQuery } from 'src/shared/interfaces/pagination-query';
 
-export class PaginationQuery {
+export class PaginationQueryDto implements PaginationQuery {
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -17,5 +17,5 @@ export class PaginationQuery {
 
   @IsOptional()
   @IsString()
-  lastId?: string; // Generic ID parameter
+  lastId?: string;
 }

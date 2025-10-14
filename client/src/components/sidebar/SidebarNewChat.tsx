@@ -3,7 +3,7 @@ import { useSidebarStore } from "@/stores/sidebarStore";
 import CreateNewChat from "../ui/CreateNewChat";
 import CreateNewGroupChat from "../ui/CreateNewGroupChat";
 import { SlidingContainer } from "../ui/SlidingContainer";
-import { ChatType } from "@/types/enums/ChatType";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { SidebarMode } from "@/types/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
 
@@ -33,9 +33,9 @@ const SidebarNewChat: React.FC = () => {
   const getTypeLabel = (type: ChatType) => {
     switch (type) {
       case ChatType.GROUP:
-        return t("chat.group")
+        return t("chat.group");
       case ChatType.CHANNEL:
-        return t("chat.channel")
+        return t("chat.channel");
       case ChatType.DIRECT:
       default:
         return "Chat";

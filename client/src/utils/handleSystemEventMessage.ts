@@ -1,10 +1,10 @@
-import { MessageResponse } from "@/types/responses/message.response";
+import { MessageResponse } from "@/shared/types/responses/message.response";
 import { useChatStore } from "@/stores/chatStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
-import { SystemEventType } from "@/types/enums/systemEventType";
-import { ChatMemberRole } from "@/types/enums/chatMemberRole";
-import { ChatMemberStatus } from "@/types/enums/chatMemberStatus";
+import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
+import { ChatMemberStatus } from "@/shared/types/enums/chat-member-status.enum";
 import { chatMemberService } from "@/services/chat/chatMemberService";
+import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 
 type SystemMessageJSONContent = {
   oldValue?: string;
@@ -22,6 +22,7 @@ export const handleSystemEventMessage = (message: MessageResponse) => {
   const memberStore = useChatMemberStore.getState();
 
   const { chatId, sender, systemEvent, content } = message;
+  const typedSystemEvent = systemEvent as SystemEventType;
 
   let updatedValue: string | null | undefined;
   let targetId: string | undefined;
@@ -120,6 +121,5 @@ export const handleSystemEventMessage = (message: MessageResponse) => {
       }
     },
   };
-
-  updateMap[systemEvent]?.();
+  updateMap[typedSystemEvent]?.();
 };

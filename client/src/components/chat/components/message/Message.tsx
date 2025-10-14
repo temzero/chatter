@@ -2,16 +2,16 @@ import React, { useState, useRef } from "react";
 import clsx from "clsx";
 import { formatTime } from "@/utils/formatTime";
 import { Avatar } from "@/components/ui/avatar/Avatar";
-import { ChatType } from "@/types/enums/ChatType";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { MessageReactionDisplay } from "@/components/ui/MessageReactionsDisplay";
 import MessageReplyPreview from "@/components/ui/MessageReplyPreview";
 import { handleQuickReaction } from "@/utils/quickReaction";
-import { MessageStatus } from "@/types/enums/message";
+import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { BeatLoader } from "react-spinners";
 import { SystemMessageJSONContent } from "@/components/ui/SystemMessageContent";
 import SystemMessage from "./SystemMessage";
 import { MessageContextMenu } from "./MessageContextMenu";
-import type { MessageResponse } from "@/types/responses/message.response";
+import type { MessageResponse } from "@/shared/types/responses/message.response";
 import {
   useIsMessageFocus,
   useIsReplyToThisMessage,
@@ -21,7 +21,7 @@ import {
 // ✅ new
 import MessageBubble from "./MessageBubble";
 import CallMessageBubble from "./CallMessageBubble";
-import { SystemEventType } from "@/types/enums/systemEventType";
+import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 import { motion } from "framer-motion";
 import { getMessageAnimation } from "@/animations/messageAnimations";
 
@@ -90,7 +90,7 @@ const Message: React.FC<MessageProps> = ({
       ref={messageRef}
       onDoubleClick={() => handleQuickReaction(message.id, message.chatId)}
       onContextMenu={handleContextMenu}
-      className={clsx("flex group relative max-w-[60%]", {
+      className={clsx("flex relative max-w-[60%]", {
         "justify-end": isMe,
         "justify-start": !isMe,
         "pb-1": isRecent,
@@ -99,7 +99,7 @@ const Message: React.FC<MessageProps> = ({
       style={{
         zIndex: isFocus ? 100 : "auto",
       }}
-      layout='position'
+      layout="position"
       {...getMessageAnimation(isMe)}
     >
       {isGroupChat && !isMe && (

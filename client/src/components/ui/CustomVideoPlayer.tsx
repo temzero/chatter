@@ -1,4 +1,4 @@
-import { AttachmentResponse } from "@/types/responses/message.response";
+import { AttachmentResponse } from "@/shared/types/responses/message.response";
 import { useRef, useState, MouseEvent, useEffect } from "react";
 import { formatDuration } from "@/utils/formatDuration";
 import { ModalType, useModalContent } from "@/stores/modalStore";

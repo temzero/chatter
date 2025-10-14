@@ -10,11 +10,7 @@ export class CallResponseDto {
 
   @Expose()
   @Type(() => ChatResponseDto)
-  chat?: ChatResponseDto | null; // ✅ optional + nullable
-
-  // @Expose()
-  // @Type(() => Chat)
-  // chat: Chat;
+  chat?: ChatResponseDto | null;
 
   @Expose() status: CallStatus;
 

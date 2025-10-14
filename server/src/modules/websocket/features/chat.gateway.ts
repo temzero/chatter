@@ -16,6 +16,7 @@ import { Message } from 'src/modules/message/entities/message.entity';
 import { ChatEvent } from '../constants/websocket-events';
 import { WebsocketNotificationService } from '../services/websocket-notification.service';
 import { WebsocketConnectionService } from '../services/websocket-connection.service';
+import { SupabaseService } from 'src/modules/superbase/supabase.service';
 
 @WebSocketGateway()
 export class ChatGateway {
@@ -26,6 +27,7 @@ export class ChatGateway {
     private readonly websocketConnectionService: WebsocketConnectionService,
     private readonly chatMemberService: ChatMemberService,
     private readonly messageMapper: MessageMapper,
+    private readonly supabaseService: SupabaseService,
   ) {}
 
   @SubscribeMessage(ChatEvent.GET_STATUS)
@@ -133,6 +135,13 @@ export class ChatGateway {
         );
       }
     } catch (error) {
+      // Delete uploaded files
+      if (payload.attachments?.length) {
+        for (const att of payload.attachments) {
+          await this.supabaseService.deleteFileByUrl(att.url);
+        }
+      }
+
       // Handle specific message errors
       if (payload?.id) {
         const errorMessage =

@@ -1,12 +1,12 @@
 import { useChatStore } from "@/stores/chatStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
-import { ChatResponse } from "@/types/responses/chat.response";
+import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useActiveMembers } from "@/stores/chatMemberStore";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
-import { GroupChatMember } from "@/types/responses/chatMember.response";
+import { GroupChatMember } from "@/shared/types/responses/chat-member.response";
 import { useCurrentUserId } from "@/stores/authStore";
-import { ChatMemberRole } from "@/types/enums/chatMemberRole";
+import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { ChatMemberItems } from "./ChatMemberItems";
 import { useTranslation } from "react-i18next";
 

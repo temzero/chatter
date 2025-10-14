@@ -1,7 +1,7 @@
 import API from "../api/api";
-import type { ChatResponse } from "@/types/responses/chat.response";
-import type { ApiSuccessResponse } from "@/types/responses/apiSuccess.response";
-import { ChatType } from "@/types/enums/ChatType";
+import type { ChatResponse } from "@/shared/types/responses/chat.response";
+import type { ApiSuccessResponse } from "@/shared/types/responses/api-success.response";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import logFormData from "@/utils/logFormdata";
 
 export const groupChatService = {

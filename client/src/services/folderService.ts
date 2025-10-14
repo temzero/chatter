@@ -1,7 +1,7 @@
 // services/folderService.ts
 import API from "@/services/api/api";
-import { FolderResponse } from "@/types/responses/folder.response";
-import { ChatType } from "@/types/enums/ChatType";
+import { FolderResponse } from "@/shared/types/responses/folder.response";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
 
 export const folderService = {
   async createFolder(folderData: {

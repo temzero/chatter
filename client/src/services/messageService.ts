@@ -1,7 +1,7 @@
 import API from "./api/api";
-import { MessageResponse } from "@/types/responses/message.response";
-import { UpdateMessageRequest } from "@/types/requests/updateMessage.request";
-import { PaginationQuery } from "@/types/query/paginationQuery";
+import { MessageResponse } from "@/shared/types/responses/message.response";
+import { UpdateMessageRequest } from "@/shared/types/requests/update-message.request";
+import { PaginationQuery } from "@/shared/types/queries/pagination-query";
 
 export const messageService = {
   async getChatMessages(

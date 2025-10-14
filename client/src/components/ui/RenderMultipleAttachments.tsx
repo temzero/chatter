@@ -1,7 +1,7 @@
 import React from "react";
 import RenderAttachment from "./RenderAttachment";
-import { AttachmentResponse } from "@/types/responses/message.response";
-import { AttachmentType } from "@/types/enums/attachmentType";
+import { AttachmentResponse } from "@/shared/types/responses/message.response";
+import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 
 interface RenderMultipleAttachmentsProps {
   attachments: AttachmentResponse[];

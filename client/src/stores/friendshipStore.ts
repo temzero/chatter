@@ -1,11 +1,11 @@
 import { create } from "zustand";
 import { friendshipService } from "@/services/friendshipService";
-import { FriendshipStatus } from "@/types/enums/friendshipType";
+import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { handleError } from "@/utils/handleError";
 import {
   FriendRequestResponse,
   FriendshipUpdateNotification,
-} from "@/types/responses/friendship.response";
+} from "@/shared/types/responses/friendship.response";
 import { toast } from "react-toastify";
 import { useChatMemberStore } from "./chatMemberStore";
 

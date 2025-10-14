@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FriendContactResponse } from "@/types/responses/friendContact.response";
+import { FriendContactResponse } from "@/shared/types/responses/friend-contact.response";
 import { friendshipService } from "@/services/friendshipService";
 import { handleError } from "@/utils/handleError";
 

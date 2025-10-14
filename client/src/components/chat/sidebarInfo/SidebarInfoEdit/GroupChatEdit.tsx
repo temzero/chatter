@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useChatStore } from "@/stores/chatStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
-import { ChatResponse } from "@/types/responses/chat.response";
+import { ChatResponse } from "@/shared/types/responses/chat.response";
 import AvatarEdit from "@/components/ui/avatar/AvatarEdit";
 import { fileStorageService } from "@/services/storage/fileStorageService";
 import { handleError } from "@/utils/handleError";
@@ -9,10 +9,10 @@ import { toast } from "react-toastify";
 import { useActiveMembers } from "@/stores/chatMemberStore";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
-import { GroupChatMember } from "@/types/responses/chatMember.response";
+import { GroupChatMember } from "@/shared/types/responses/chat-member.response";
 import { useCurrentUserId } from "@/stores/authStore";
-import { ChatMemberRole } from "@/types/enums/chatMemberRole";
-import { ChatType } from "@/types/enums/ChatType";
+import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useTranslation } from "react-i18next";
 
 const GroupChatEdit = () => {

@@ -1,9 +1,10 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useActiveChat } from "@/stores/chatStore";
-import { ChatMemberRole } from "@/types/enums/chatMemberRole";
+import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { useBlockStatus } from "@/hooks/useBlockStatus";
-import { ChatType } from "@/types/enums/ChatType";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
+
 import { chatMemberService } from "@/services/chat/chatMemberService";
 import Header from "./Header";
 import ChatBar from "./components/ChatBar";

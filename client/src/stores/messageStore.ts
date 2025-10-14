@@ -13,7 +13,7 @@ import type {
   AttachmentResponse,
   MessageResponse,
   SenderResponse,
-} from "@/types/responses/message.response";
+} from "@/shared/types/responses/message.response";
 
 interface Messages {
   [chatId: string]: MessageResponse[];

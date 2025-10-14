@@ -1,6 +1,5 @@
 import { Exclude, Expose, Type } from 'class-transformer';
 import { MessageStatus } from '../../constants/message-status.constants';
-import { MessageType } from '../../constants/message-type.constants';
 import { AttachmentResponseDto } from './attachment-response.dto';
 import { SenderResponseDto } from './sender-response.dto';
 import { SystemEventType } from '../../constants/system-event-type.constants';
@@ -12,7 +11,6 @@ export class MessageResponseDto {
   @Expose() chatId: string;
   @Expose() sender: SenderResponseDto;
 
-  @Expose() type: MessageType;
   @Expose() content?: string | null;
   @Expose() status: MessageStatus;
 

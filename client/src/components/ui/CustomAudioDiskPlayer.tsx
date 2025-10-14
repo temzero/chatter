@@ -6,10 +6,10 @@ import {
   useReducer,
   useMemo,
 } from "react";
-import { AttachmentType } from "@/types/enums/attachmentType";
+import { useDeviceStore } from "@/stores/deviceStore";
+import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { formatDuration } from "@/utils/formatDuration";
 import musicDiskCover from "@/assets/image/disk.png";
-import { useDeviceStore } from "@/stores/deviceStore";
 
 // Audio manager
 let currentAudio: HTMLAudioElement | null = null;
@@ -216,7 +216,7 @@ const AudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
         window.removeEventListener("touchmove", onTouchMove);
         window.removeEventListener("touchend", onTouchEnd);
       };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [state.isPlaying, state.duration]);
 
     // -------------------- Memoized values --------------------

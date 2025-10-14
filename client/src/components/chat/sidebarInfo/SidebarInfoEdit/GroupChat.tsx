@@ -1,16 +1,16 @@
 import React from "react";
-import { ChatResponse } from "@/types/responses/chat.response";
+import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useActiveChat } from "@/stores/chatStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import MemberItem from "./MemberItem";
-import { ChatMemberRole } from "@/types/enums/chatMemberRole";
+import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { useActiveMembers } from "@/stores/chatMemberStore";
 import { useMessageStore } from "@/stores/messageStore";
 import { useMuteControl } from "@/hooks/useMuteControl";
 import { SidebarInfoHeaderIcons } from "@/components/ui/SidebarInfoHeaderIcons";
 import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
-import { rolePriority } from "@/types/enums/chatMemberRole";
+import { rolePriority } from "@/shared/types/enums/chat-member-role.enum";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { useTranslation } from "react-i18next";
 import { useDeviceStore } from "@/stores/deviceStore";
@@ -24,7 +24,7 @@ const GroupChat: React.FC = () => {
   const setIsSidebarInfoVisible = useSidebarInfoStore(
     (state) => state.setIsSidebarInfoVisible
   );
-  
+
   const setDisplaySearchMessage = useMessageStore(
     (state) => state.setDisplaySearchMessage
   );
@@ -92,12 +92,15 @@ const GroupChat: React.FC = () => {
   }
 
   // Group members by role
-  const groupedMembers = activeMembers.reduce((acc, member) => {
-    const role = member.role || ChatMemberRole.MEMBER;
-    if (!acc[role]) acc[role] = [];
-    acc[role].push(member);
-    return acc;
-  }, {} as Record<ChatMemberRole, typeof activeMembers>);
+  const groupedMembers = activeMembers.reduce(
+    (acc: Record<ChatMemberRole, typeof activeMembers>, member) => {
+      const role: ChatMemberRole = member.role || ChatMemberRole.MEMBER;
+      if (!acc[role]) acc[role] = [];
+      acc[role].push(member);
+      return acc;
+    },
+    {} as Record<ChatMemberRole, typeof activeMembers>
+  );
 
   // Sort groups by role priority
   const sortedGroups = Object.entries(groupedMembers).sort(

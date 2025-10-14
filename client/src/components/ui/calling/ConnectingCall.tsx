@@ -1,5 +1,5 @@
 // src/components/ui/calling/ConnectingCall.tsx
-import { ChatResponse } from "@/types/responses/chat.response";
+import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { BeatLoader } from "react-spinners";
 import { useCallStore } from "@/stores/callStore/callStore";
 import CallHeader from "./components/CallHeader";

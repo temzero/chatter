@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import SidebarLayout from "@/pages/SidebarLayout";
 import { callService } from "@/services/callService";
-import { CallResponseDto } from "@/types/responses/call.response";
+import { CallResponseDto } from "@/shared/types/responses/call.response";
 import InfiniteScroller from "@/components/ui/InfiniteScroller";
 import CallItem from "@/components/ui/CallItem";
 import { useCurrentUserId } from "@/stores/authStore";
@@ -91,10 +91,7 @@ const SidebarCalls: React.FC = () => {
             </div>
           ) : (
             calls.map((call) => (
-              <motion.div
-                key={call.id}
-                layout
-              >
+              <motion.div key={call.id} layout>
                 <CallItem
                   call={call}
                   isCaller={call.initiator.userId === currentUserId}

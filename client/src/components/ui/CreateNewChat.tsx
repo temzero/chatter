@@ -5,11 +5,11 @@ import { useCurrentUser } from "@/stores/authStore";
 import { AnimatePresence, motion } from "framer-motion";
 import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "./avatar/Avatar";
-import { FriendshipStatus } from "@/types/enums/friendshipType";
+import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { blockService } from "@/services/blockService";
 import { toast } from "react-toastify";
 import FriendshipBtn from "./FriendshipBtn";
-import type { UserResponse } from "@/types/responses/user.response";
+import type { UserResponse } from "@/shared/types/responses/user.response";
 import { OnlineDot } from "./OnlineDot";
 import { useUserStatus } from "@/stores/presenceStore";
 import { useTranslation } from "react-i18next";
@@ -88,7 +88,9 @@ const CreateNewChat: React.FC = () => {
           className="bg-[var(--primary-green)] py-1 w-full flex gap-2 items-center justify-center text-white rounded"
           disabled={loading}
         >
-          {loading ? t("common.loading.searching") : t("sidebar_new_chat.direct.find_user")}
+          {loading
+            ? t("common.loading.searching")
+            : t("sidebar_new_chat.direct.find_user")}
           <span className="material-symbols-outlined">person_search</span>
         </button>
       </form>

@@ -1,29 +1,31 @@
 import { useEffect } from "react";
+import { toast } from "react-toastify";
 import { chatWebSocketService } from "../services/chat.websocket.service";
 import { useMessageStore } from "@/stores/messageStore";
-import { MessageResponse } from "@/types/responses/message.response";
+import { MessageResponse } from "@/shared/types/responses/message.response";
 import { useTypingStore } from "@/stores/typingStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useChatStore } from "@/stores/chatStore";
-import { MessageStatus } from "@/types/enums/message";
+import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { audioService, SoundType } from "@/services/audio.service";
-import { WsMessageResponse } from "@/types/websocket/websocketMessageRes";
-import { toast } from "react-toastify";
 import { handleSystemEventMessage } from "@/utils/handleSystemEventMessage";
 import { webSocketService } from "../services/websocket.service";
+import { WsEmitChatMemberResponse } from "@/shared/types/responses/ws-emit-chat-member.response";
 
 export function useChatSocketListeners() {
   useEffect(() => {
-    const handleNewMessage = async (WsMessageResponse: WsMessageResponse) => {
-      const { meta, ...message } = WsMessageResponse as MessageResponse & {
-        meta?: { isMuted?: boolean; isOwnMessage?: boolean };
-      };
+    // ======== Message Handlers ========
+    const handleNewMessage = async (
+      wsMessage: WsEmitChatMemberResponse<MessageResponse>
+    ) => {
+      const { payload: message, meta } = wsMessage;
+      console.log("Received new message via WebSocket:", message);
 
       const chatStore = useChatStore.getState();
       const messageStore = useMessageStore.getState();
 
       const isMuted = meta?.isMuted ?? false;
-      const isOwnMessage = meta?.isOwnMessage ?? false;
+      const isOwnMessage = meta?.isSender ?? false;
 
       try {
         await chatStore.getOrFetchChatById(message.chatId, {
@@ -49,16 +51,23 @@ export function useChatSocketListeners() {
       }
     };
 
-    const handleMessageSaved = (message: MessageResponse) => {
+    const handleMessageSaved = (
+      wsMessage: WsEmitChatMemberResponse<MessageResponse>
+    ) => {
+      const { payload: message } = wsMessage;
       toast.success("Message saved!");
       useMessageStore.getState().addMessage(message);
     };
 
-    const handleTyping = (data: {
-      chatId: string;
-      userId: string;
-      isTyping: boolean;
-    }) => {
+    // ======== Typing ========
+    const handleTyping = (
+      wsData: WsEmitChatMemberResponse<{
+        chatId: string;
+        userId: string;
+        isTyping: boolean;
+      }>
+    ) => {
+      const { payload: data } = wsData;
       const typingStore = useTypingStore.getState();
       if (data.isTyping) {
         typingStore.startTyping(data.chatId, data.userId);
@@ -67,38 +76,53 @@ export function useChatSocketListeners() {
       }
     };
 
-    // New handler for mark as read
-    const handleMessagesRead = (data: {
-      chatId: string;
-      memberId: string;
-      messageId: string;
-    }) => {
+    // ======== Mark as read ========
+    const handleMessagesRead = (
+      wsData: WsEmitChatMemberResponse<{
+        chatId: string;
+        memberId: string;
+        messageId: string;
+      }>
+    ) => {
+      const { payload: data } = wsData;
       useChatMemberStore
         .getState()
         .updateMemberLastRead(data.chatId, data.memberId, data.messageId);
     };
 
-    const handleReaction = (data: {
-      messageId: string;
-      reactions: { [emoji: string]: string[] };
-    }) => {
+    // ======== Reactions ========
+    const handleReaction = (
+      wsReaction: WsEmitChatMemberResponse<{
+        messageId: string;
+        reactions: { [emoji: string]: string[] };
+      }>
+    ) => {
+      const { payload: data } = wsReaction;
       useMessageStore
         .getState()
         .updateMessageReactions(data.messageId, data.reactions);
     };
 
-    const handleMessagePinned = (data: {
-      chatId: string;
-      message: MessageResponse | null;
-    }) => {
+    // ======== Pin ========
+    const handleMessagePinned = (
+      wsPinned: WsEmitChatMemberResponse<{
+        chatId: string;
+        message: MessageResponse | null;
+      }>
+    ) => {
+      const { payload: data } = wsPinned;
       useChatStore.getState().setPinnedMessage(data.chatId, data.message);
     };
 
-    const handleMessageMarkedImportant = (update: {
-      chatId: string;
-      messageId: string;
-      isImportant: boolean;
-    }) => {
+    // ======== Important ========
+    const handleMessageMarkedImportant = (
+      wsImportant: WsEmitChatMemberResponse<{
+        chatId: string;
+        messageId: string;
+        isImportant: boolean;
+      }>
+    ) => {
+      const { payload: update } = wsImportant;
       console.log("isImportant", update.isImportant);
       useMessageStore
         .getState()
@@ -107,34 +131,36 @@ export function useChatSocketListeners() {
         });
     };
 
-    const handleMessageDeleted = (data: {
-      messageId: string;
-      chatId: string;
-    }) => {
+    // ======== Delete ========
+    const handleMessageDeleted = (
+      wsDeleted: WsEmitChatMemberResponse<{ chatId: string; messageId: string }>
+    ) => {
+      const { payload: data } = wsDeleted;
       useMessageStore.getState().deleteMessage(data.chatId, data.messageId);
     };
 
-    const handleMessageError = (error: {
-      messageId: string;
-      chatId: string;
-      error: string;
-      code?: string;
-    }) => {
+    // ======== Error ========
+    const handleMessageError = (
+      wsError: WsEmitChatMemberResponse<{
+        chatId: string;
+        messageId: string;
+        error: string;
+        code?: string;
+      }>
+    ) => {
+      const { payload: error } = wsError;
       console.log("handleMessageError", error);
-      // Update specific message state
       useMessageStore
         .getState()
         .updateMessageById(error.chatId, error.messageId, {
           status: MessageStatus.FAILED,
         });
-
-      // Show contextual error
-      // toast.error(`Message failed: ${error.error}`);
     };
 
+    // ======== Subscribe ========
     const socket = webSocketService.getSocket();
     if (!socket) return;
-    // Subscribe to events
+
     chatWebSocketService.onNewMessage(handleNewMessage);
     chatWebSocketService.onSaveMessage(handleMessageSaved);
     chatWebSocketService.onReaction(handleReaction);
@@ -145,10 +171,10 @@ export function useChatSocketListeners() {
     chatWebSocketService.onDeleteMessage(handleMessageDeleted);
     chatWebSocketService.onMessageError(handleMessageError);
 
+    // ======== Cleanup ========
     return () => {
       const socket = webSocketService.getSocket();
       if (!socket) return;
-      // Clean up listeners
       chatWebSocketService.removeAllListeners();
     };
   }, []);

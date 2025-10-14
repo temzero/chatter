@@ -2,7 +2,7 @@
 import React from "react";
 import { SidebarMode } from "@/types/enums/sidebarMode";
 import { useSidebarStore } from "@/stores/sidebarStore";
-import type FolderResponse from "@/types/responses/folder.response";
+import type FolderResponse from "@/shared/types/responses/folder.response";
 
 type FolderCardProps = {
   folder: FolderResponse;

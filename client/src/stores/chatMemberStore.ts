@@ -4,10 +4,10 @@ import { useActiveChatId, useChatStore } from "./chatStore";
 import type {
   ChatMember,
   GroupChatMember,
-} from "@/types/responses/chatMember.response";
-import { ChatType } from "@/types/enums/ChatType";
+} from "@/shared/types/responses/chat-member.response";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useShallow } from "zustand/shallow";
-import { FriendshipStatus } from "@/types/enums/friendshipType";
+import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { useAuthStore, useCurrentUserId } from "./authStore";
 import { handleError } from "@/utils/handleError";
 import { useMemo } from "react";

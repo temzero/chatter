@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import type { AttachmentResponse } from "@/types/responses/message.response";
+import type { AttachmentResponse } from "@/shared/types/responses/message.response";
 import { formatFileSize } from "@/utils/formatFileSize";
-import { getFileIcon } from "@/utils/getFileIcon";
 import { handleDownload } from "@/utils/handleDownload";
-import { AttachmentType } from "@/types/enums/attachmentType";
-// import CustomAudioPlayer, { AudioPlayerRef } from "../../ui/CustomAudioPlayer";
+import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
+import { getFileIcon } from "@shared/utils/getFileIcon";
 import CustomAudioDiskPlayer, {
   AudioPlayerRef,
 } from "@/components/ui/CustomAudioDiskPlayer";
@@ -116,7 +115,7 @@ export const RenderModalAttachment = ({
   if (!attachment) return null;
 
   switch (attachment.type) {
-    case "image":
+    case AttachmentType.IMAGE:
       return (
         <ModalImageViewer
           attachment={attachment}
@@ -125,7 +124,7 @@ export const RenderModalAttachment = ({
         />
       );
 
-    case "video":
+    case AttachmentType.VIDEO:
       return (
         <motion.video
           ref={videoRef}
@@ -147,7 +146,7 @@ export const RenderModalAttachment = ({
         />
       );
 
-    case "audio":
+    case AttachmentType.AUDIO:
       return (
         // <motion.div
         //   className="max-w-md rounded-lg border-4 border-[var(--border-color)]"
@@ -167,24 +166,28 @@ export const RenderModalAttachment = ({
         />
       );
 
-    case "file":
+    case AttachmentType.FILE:
       return (
         <motion.div
-          className="mx-auto my-auto w-md pt-0 rounded-lg flex flex-col items-center border-4 border-[var(--border-color)]"
+          className="mx-auto my-auto rounded-lg flex flex-col items-center border-4 border-[var(--border-color)]"
           animate={mediaViewerAnimations.rotation(rotation)}
         >
-          <i className="material-symbols-outlined text-8xl px-4">
-            {getFileIcon(attachment.filename, attachment.mimeType)}
-          </i>
-          <div className="text-lg font-medium text-center">
-            {attachment.filename || "File"}
-          </div>
-          <div className="text-sm text-gray-400 mt-1">
-            {attachment.size ? formatFileSize(attachment.size) : "Unknown size"}
+          <div className="flex flex-col justify-center items-center px-4">
+            <i className="material-symbols-outlined text-8xl px-4">
+              {getFileIcon(attachment.filename)}
+            </i>
+            <div className="text-lg font-medium text-center">
+              {attachment.filename || "File"}
+            </div>
+            <div className="text-sm text-gray-400">
+              {attachment.size
+                ? formatFileSize(attachment.size)
+                : "Unknown size"}
+            </div>
           </div>
           <button
             onClick={() => handleDownload(attachment)}
-            className="mt-4 w-full py-2 custom-border-t text-blue-500 hover:underline"
+            className="mt-4 w-full py-2 text-blue-500 hover:underline font-semibold rounded-none border-t-2 border-[var(--border-color)]"
           >
             Download
           </button>
@@ -192,6 +195,11 @@ export const RenderModalAttachment = ({
       );
 
     default:
-      return null;
+      return (
+        <div className="flex items-center p-2 rounded text-6xl ">
+          <span className="material-symbols-outlined">attach_file</span>
+          <p className="text-lg">Type not supported</p>
+        </div>
+      );
   }
 };

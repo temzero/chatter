@@ -8,13 +8,13 @@ import { useSidebarStore } from "./sidebarStore";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
 import { SidebarMode } from "@/types/enums/sidebarMode";
 import { webSocketService } from "@/lib/websocket/services/websocket.service";
-import type { UserResponse } from "@/types/responses/user.response";
+import type { UserResponse } from "@/shared/types/responses/user.response";
 import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
 
-type MessageType = "error" | "success" | "info";
+type AuthMessageType = "error" | "success" | "info";
 
 type Message = {
-  type: MessageType;
+  type: AuthMessageType;
   content: string;
 } | null;
 
@@ -27,7 +27,7 @@ type AuthState = {
 
 type AuthActions = {
   setCurrentUser: (user: UserResponse | null) => void;
-  setMessage: (type: MessageType, content: string) => void;
+  setMessage: (type: AuthMessageType, content: string) => void;
   clearMessage: () => void;
   setLoading: (loading: boolean, clearMessages?: boolean) => void;
   login: (identifier: string, password: string) => Promise<void>;

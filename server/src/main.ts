@@ -17,14 +17,6 @@ async function bootstrap() {
     bufferLogs: true,
   });
 
-  // Middleware
-  // app.use(json({ limit: BODY_PARSER_LIMIT }));
-  // app.use(
-  //   json({
-  //     limit: BODY_PARSER_LIMIT,
-  //     type: ['application/json', 'application/*+json'],
-  //   }),
-  // );
   app.use(
     json({
       limit: BODY_PARSER_LIMIT,

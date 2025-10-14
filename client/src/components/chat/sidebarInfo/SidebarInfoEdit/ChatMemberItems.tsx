@@ -1,13 +1,12 @@
-import { useState, useRef } from "react";
-import { GroupChatMember } from "@/types/responses/chatMember.response";
-import { ChatMemberRole } from "@/types/enums/chatMemberRole";
-import { ChatMemberStatus } from "@/types/enums/chatMemberStatus";
-import { Avatar } from "@/components/ui/avatar/Avatar";
-import React from "react";
+import React, { useState, useRef } from "react";
+import { GroupChatMember } from "@/shared/types/responses/chat-member.response";
+import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useCurrentUserId } from "@/stores/authStore";
-import { rolePriority } from "@/types/enums/chatMemberRole";
+import { rolePriority } from "@/shared/types/enums/chat-member-role.enum";
+import { ChatMemberStatus } from "@/shared/types/enums/chat-member-status.enum";
+import { Avatar } from "@/components/ui/avatar/Avatar";
 import {
   calculateContextMenuPosition,
   useClickOutside,

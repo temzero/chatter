@@ -1,12 +1,12 @@
+import clsx from "clsx";
 import React, { useState, useMemo } from "react";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { useActiveChatAttachments } from "@/stores/messageStore";
 import { SlidingContainer } from "@/components/ui/SlidingContainer";
-import { AttachmentType } from "@/types/enums/attachmentType";
-import RenderAttachment from "@/components/ui/RenderAttachment";
-import clsx from "clsx";
+import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
 import { useTranslation } from "react-i18next";
+import RenderAttachment from "@/components/ui/RenderAttachment";
 
 const mediaTypes = ["images", "videos", "audio", "files"];
 
@@ -101,7 +101,9 @@ const ChatInfoMedia: React.FC = () => {
   return (
     <aside className="relative w-full h-full overflow-hidden flex flex-col">
       <header className="flex p-4 w-full items-center min-h-[var(--header-height)] custom-border-b">
-        <h1 className="text-xl font-semibold">{t("sidebar_info.media_files.title")}</h1>
+        <h1 className="text-xl font-semibold">
+          {t("sidebar_info.media_files.title")}
+        </h1>
         {/* <a
           className="flex items-center rounded-full cursor-pointer opacity-50 hover:opacity-100 ml-auto"
           onClick={() => setSidebarInfo(SidebarInfoMode.DEFAULT)}

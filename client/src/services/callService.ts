@@ -1,9 +1,9 @@
 import API from "./api/api";
 import { handleError } from "@/utils/handleError";
-import { CallResponseDto } from "@/types/responses/call.response";
-import { IncomingCallResponse } from "@/types/callPayload";
-import { generateLiveKitTokenRequest } from "@/types/requests/generate-livekit-token.request";
-import { PaginationQuery } from "@/types/query/paginationQuery";
+import { CallResponseDto } from "@/shared/types/responses/call.response";
+import { IncomingCallResponse } from "@shared/types/call";
+import { generateLiveKitTokenRequest } from "@/shared/types/requests/generate-livekit-token.request";
+import { PaginationQuery } from "@/shared/types/queries/pagination-query";
 
 export const callService = {
   async fetchCallHistory(

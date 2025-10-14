@@ -10,16 +10,16 @@ import { useCurrentUserId } from "@/stores/authStore";
 import { MessageReactionDisplay } from "@/components/ui/MessageReactionsDisplay";
 import { handleQuickReaction } from "@/utils/quickReaction";
 import { messageAnimations } from "@/animations/messageAnimations";
-import { MessageStatus } from "@/types/enums/message";
-import { ChatType } from "@/types/enums/ChatType";
+import { MessageStatus } from "@/shared/types/enums/message-status.enum";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { MessageContextMenu } from "./MessageContextMenu";
 import { MessageHorizontalPreview } from "./MessageHorizontalPreview";
 import { scrollToMessageById } from "@/utils/scrollToMessageById";
 import { MessageHorizontalPreviewTypes } from "@/types/enums/MessageHorizontalPreviewTypes";
 import { BroadcastMessage } from "./BroadcastMessage";
-import { SystemEventType } from "@/types/enums/systemEventType";
+import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 import { useDeviceStore } from "@/stores/deviceStore";
-import type { MessageResponse } from "@/types/responses/message.response";
+import type { MessageResponse } from "@/shared/types/responses/message.response";
 import {
   useIsMessageFocus,
   useIsReplyToThisMessage,
@@ -85,7 +85,7 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ message }) => {
       style={{
         zIndex: isFocus ? 100 : "auto",
       }}
-      layout='position'
+      layout="position"
       {...messageAnimations.SystemMessage}
     >
       {repliedMessage && (

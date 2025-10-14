@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { useMemo } from "react";
 import { useCurrentUserId } from "./authStore";
-import { ChatType } from "@/types/enums/ChatType";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useChatMemberStore } from "./chatMemberStore";
 
 interface PresenceStore {

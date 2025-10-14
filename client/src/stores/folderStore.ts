@@ -1,8 +1,8 @@
 // stores/folderStore.ts
 import { create } from "zustand";
-import type FolderResponse from "@/types/responses/folder.response";
+import type FolderResponse from "@/shared/types/responses/folder.response";
 import { folderService } from "@/services/folderService";
-import { ChatType } from "@/types/enums/ChatType";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
 
 interface FolderStore {
   folders: FolderResponse[];

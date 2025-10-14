@@ -1,5 +1,5 @@
 import React from "react";
-import { CallStatus } from "@/types/enums/CallStatus";
+import { CallStatus } from "@/shared/types/enums/call-status.enum";
 import { getCallColor } from "@/utils/callHelpers";
 
 interface CallIconProps {
@@ -36,7 +36,9 @@ const CallIcon: React.FC<CallIconProps> = ({
   }
 
   return (
-    <span className={`material-symbols-outlined select-none ${iconClasses} ${className}`}>
+    <span
+      className={`material-symbols-outlined select-none ${iconClasses} ${className}`}
+    >
       {icon}
     </span>
   );

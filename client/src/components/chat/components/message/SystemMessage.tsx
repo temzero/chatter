@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useCurrentUserId } from "@/stores/authStore";
-import { SystemEventType } from "@/types/enums/systemEventType";
-import { MessageResponse } from "@/types/responses/message.response";
+import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
+import { MessageResponse } from "@/shared/types/responses/message.response";
 import { MessageReactionDisplay } from "@/components/ui/MessageReactionsDisplay";
 import { messageAnimations } from "@/animations/messageAnimations";
 import { SystemMessageContent } from "@/components/ui/SystemMessageContent";

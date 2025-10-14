@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import SidebarLayout from "@/pages/SidebarLayout";
 import { blockService } from "@/services/blockService";
-import { BlockResponseDto } from "@/types/responses/block.response";
+import { BlockResponseDto } from "@/shared/types/responses/block.response";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { FadeLoader } from "react-spinners";
 import { ModalType, useModalStore } from "@/stores/modalStore";
@@ -37,7 +37,9 @@ const SidebarBlockedUsers: React.FC = () => {
       {loading ? (
         <div className="flex flex-col items-center justify-center w-full pt-6">
           <FadeLoader color="#737373" height={8} width={3} margin={2} />
-          <p className="text-sm text-gray-500 mt-4">{t("common.loading.loading")}</p>
+          <p className="text-sm text-gray-500 mt-4">
+            {t("common.loading.loading")}
+          </p>
         </div>
       ) : blockedUsers.length === 0 ? (
         <div className="flex flex-col items-center justify-center w-full p-10 opacity-70 text-center space-y-4">

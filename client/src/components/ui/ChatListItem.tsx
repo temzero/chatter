@@ -1,7 +1,7 @@
 import React from "react";
 import { useMessageStore } from "@/stores/messageStore";
 import { useTypingUsersByChatId } from "@/stores/typingStore";
-import type { ChatResponse } from "@/types/responses/chat.response";
+import type { ChatResponse } from "@/shared/types/responses/chat.response";
 import { ChatAvatar } from "./avatar/ChatAvatar";
 import { formatTimeAgo } from "@/utils/formatTimeAgo";
 import { OnlineDot } from "./OnlineDot";
@@ -9,7 +9,7 @@ import SimpleTypingIndicator from "./typingIndicator/SimpleTypingIndicator";
 import { AnimatePresence, motion } from "framer-motion";
 import { useChatStore, useIsActiveChat } from "@/stores/chatStore";
 import { useChatStatus } from "@/stores/presenceStore";
-import { ChatType } from "@/types/enums/ChatType";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useBlockStatus } from "@/hooks/useBlockStatus";
 import {
   SystemMessageContent,

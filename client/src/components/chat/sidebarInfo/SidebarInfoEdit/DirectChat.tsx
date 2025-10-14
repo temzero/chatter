@@ -1,11 +1,11 @@
 import React from "react";
 import ContactInfoItem from "@/components/ui/contactInfoItem";
-import { ChatResponse } from "@/types/responses/chat.response";
+import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import FriendshipBtn from "@/components/ui/FriendshipBtn";
-import { FriendshipStatus } from "@/types/enums/friendshipType";
+import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { useActiveChat } from "@/stores/chatStore";
-import { DirectChatMember } from "@/types/responses/chatMember.response";
+import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { useActiveMembers } from "@/stores/chatMemberStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
@@ -97,7 +97,7 @@ const DirectChat: React.FC = () => {
       }
     );
   }
-  
+
   if (isMobile) {
     headerIcons.unshift({
       icon: "arrow_back_ios",

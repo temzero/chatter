@@ -3,7 +3,7 @@ import { Avatar } from "./Avatar";
 import type {
   ChatMemberPreview,
   ChatResponse,
-} from "@/types/responses/chat.response";
+} from "@/shared/types/responses/chat.response";
 
 type GroupAvatarProps = {
   chat: ChatResponse;

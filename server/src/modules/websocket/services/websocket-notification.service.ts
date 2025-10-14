@@ -11,11 +11,11 @@ import {
 import { FriendRequestResponseDto } from '../../friendship/dto/responses/friend-request-response.dto';
 import { FriendshipUpdateNotificationDto } from '../../friendship/dto/responses/friendship-update-notification.dto';
 
-interface EnhancedPayload {
-  payload: any;
+export interface WsEmitChatMemberResponse<T = any> {
+  payload: T;
   meta?: {
     isMuted?: boolean;
-    isOwnMessage?: boolean;
+    isSender?: boolean;
   };
 }
 
@@ -34,10 +34,10 @@ export class WebsocketNotificationService {
   }
 
   /* Chat/Call Notifications */
-  async emitToChatMembers(
+  async emitToChatMembers<T extends object>(
     chatId: string,
     event: ChatEvent | CallEvent,
-    payload: any,
+    payload: T,
     options: {
       senderId?: string;
       excludeSender?: boolean;
@@ -63,12 +63,11 @@ export class WebsocketNotificationService {
         continue;
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const enhancedPayload: EnhancedPayload = {
-        ...payload,
+      const enhancedPayload: WsEmitChatMemberResponse = {
+        payload,
         meta: {
           isMuted,
-          isOwnMessage: options.senderId ? userId === options.senderId : false,
+          isSender: options.senderId ? userId === options.senderId : false,
         },
       };
 

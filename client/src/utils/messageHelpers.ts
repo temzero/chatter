@@ -1,5 +1,5 @@
 // src/utils/messageHelpers.ts
-import { MessageResponse } from "@/types/responses/message.response";
+import { MessageResponse } from "@/shared/types/responses/message.response";
 
 export interface MessagesByDateGroup {
   date: string;

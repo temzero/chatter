@@ -1,4 +1,4 @@
-import { AttachmentType } from "@/types/enums/attachmentType";
+import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { formatDuration } from "@/utils/formatDuration";
 import clsx from "clsx";
 import React, {

@@ -3,7 +3,7 @@ import React from "react";
 import { useModalStore } from "@/stores/modalStore";
 import { motion } from "framer-motion";
 import { modalAnimations } from "@/animations/modalAnimations";
-import { DirectChatMember } from "@/types/responses/chatMember.response";
+import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
 import { Avatar } from "../ui/avatar/Avatar";
 import { toast } from "react-toastify";
 import { useFriendshipStore } from "@/stores/friendshipStore";

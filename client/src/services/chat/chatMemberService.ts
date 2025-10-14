@@ -3,8 +3,8 @@ import {
   DirectChatMember,
   GroupChatMember,
   ChatMember,
-} from "@/types/responses/chatMember.response";
-import type { ApiSuccessResponse } from "@/types/responses/apiSuccess.response";
+} from "@/shared/types/responses/chat-member.response";
+import type { ApiSuccessResponse } from "@/shared/types/responses/api-success.response";
 
 export const chatMemberService = {
   // Get direct chat members
@@ -35,7 +35,7 @@ export const chatMemberService = {
     userId: string
   ): Promise<ChatMember> {
     const response = await API.get<ApiSuccessResponse<ChatMember>>(
-      `/chat-members/chat/${chatId}/user/${userId}` 
+      `/chat-members/chat/${chatId}/user/${userId}`
     );
     return response.data.payload;
   },

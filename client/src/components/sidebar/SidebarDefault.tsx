@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 import { SidebarMode } from "@/types/enums/sidebarMode";
 import ChatList from "@/components/ui/ChatList";
 import ChatFolderSelector from "../ui/ChatFolderSelector";
-import type FolderResponse from "@/types/responses/folder.response";
+import type FolderResponse from "@/shared/types/responses/folder.response";
 
 const SidebarDefault: React.FC = () => {
   const allChats = useAllChats();

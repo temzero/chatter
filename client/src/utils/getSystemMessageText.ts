@@ -1,5 +1,5 @@
-import { ChatMemberRole } from "@/types/enums/chatMemberRole";
-import { SystemEventType } from "@/types/enums/systemEventType";
+import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
+import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 import { SystemMessageJSONContent } from "@/components/ui/SystemMessageContent";
 import { parseJsonContent } from "@/utils/parseJsonContent";
 

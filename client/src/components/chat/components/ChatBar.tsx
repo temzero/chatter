@@ -172,19 +172,22 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
 
     setAttachedFiles((prev) => [...prev, ...newFiles]);
 
-    const newPreviews: string[] = [];
-    let loadedCount = 0;
+    const previewPromises = newFiles.map((file) => {
+      if (file.type.startsWith("video/")) {
+        // ✅ Create a blob URL immediately (wrap in Promise for consistency)
+        return Promise.resolve(URL.createObjectURL(file));
+      } else {
+        // ✅ Read image or other file as Data URL
+        return new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        });
+      }
+    });
 
-    newFiles.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        newPreviews.push(reader.result as string);
-        loadedCount++;
-        if (loadedCount === newFiles.length) {
-          setFilePreviewUrls((prev) => [...prev, ...newPreviews]);
-        }
-      };
-      reader.readAsDataURL(file);
+    Promise.all(previewPromises).then((urls) => {
+      setFilePreviewUrls((prev) => [...prev, ...urls]);
     });
   }, []);
 

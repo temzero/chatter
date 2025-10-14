@@ -3,9 +3,9 @@ import {
   FriendshipResponse,
   FriendRequestResponse,
   FriendshipUpdateNotification,
-} from "@/types/responses/friendship.response";
-import { FriendshipStatus } from "@/types/enums/friendshipType";
-import { FriendContactResponse } from "@/types/responses/friendContact.response";
+} from "@/shared/types/responses/friendship.response";
+import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
+import { FriendContactResponse } from "@/shared/types/responses/friend-contact.response";
 
 export const friendshipService = {
   /**
@@ -42,7 +42,7 @@ export const friendshipService = {
    */
   async getFriendContacts(): Promise<FriendContactResponse[]> {
     const { data } = await API.get("/friendships/contacts");
-    console.log('Friend contacts', data.payload)
+    console.log("Friend contacts", data.payload);
     return data.payload;
   },
 

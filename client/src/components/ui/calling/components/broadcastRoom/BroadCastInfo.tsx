@@ -1,4 +1,4 @@
-import { ChatResponse } from "@/types/responses/chat.response";
+import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { Timer } from "@/components/ui/Timer";
 

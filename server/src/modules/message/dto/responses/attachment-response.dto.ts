@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { AttachmentType } from '../../constants/attachment-type.constants';
+import { AttachmentType } from 'src/shared/types/attachment-type.enum';
 
 @Exclude()
 export class AttachmentResponseDto {
