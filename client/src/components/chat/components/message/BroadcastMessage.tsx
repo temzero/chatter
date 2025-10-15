@@ -3,7 +3,8 @@ import { CallStatus } from "@/shared/types/enums/call-status.enum";
 import { formatDurationByStartAndEnd } from "@/utils/formatDuration";
 import { formatTime } from "@/utils/formatTime";
 import { useTranslation } from "react-i18next";
-import { CallLiteResponse } from "@/shared/responses/callLite.response";
+import { CallLiteResponse } from "@/shared/types/responses/call-lite.response";
+
 interface BroadcastMessageProps {
   call: CallLiteResponse;
 }

@@ -14,14 +14,14 @@ import { BlockModule } from '../block/block.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, RefreshToken, VerificationCode]),
-    forwardRef(() => AuthModule), // Use forwardRef here
+    forwardRef(() => AuthModule),
     forwardRef(() => ChatModule),
     forwardRef(() => FriendshipModule),
-    forwardRef(() => BlockModule), // Assuming BlockModule is defined similarly
+    forwardRef(() => BlockModule),
     SupabaseModule,
   ],
   controllers: [UserController],
-  providers: [UserService], // Removed MailService and TokenStorageService as they come from AuthModule
+  providers: [UserService],
   exports: [UserService, TypeOrmModule],
 })
 export class UserModule {}

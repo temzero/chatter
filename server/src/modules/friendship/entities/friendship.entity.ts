@@ -11,7 +11,7 @@ import {
   Unique,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
-import { FriendshipStatus } from '../constants/friendship-status.constants';
+import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
 
 @Entity('friendship')
 @Index(['senderId', 'receiverId'])

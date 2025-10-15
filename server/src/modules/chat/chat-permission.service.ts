@@ -2,7 +2,7 @@
 import { Injectable } from '@nestjs/common';
 import { BlockService } from '../block/block.service';
 import { Chat } from './entities/chat.entity';
-import { ChatType } from './constants/chat-types.constants';
+import { ChatType } from 'src/shared/types/enums/chat-type.enum';
 import { Message } from '../message/entities/message.entity';
 
 @Injectable()

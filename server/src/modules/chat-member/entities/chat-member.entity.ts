@@ -10,8 +10,8 @@ import {
 } from 'typeorm';
 import { Chat } from 'src/modules/chat/entities/chat.entity';
 import { User } from '../../user/entities/user.entity';
-import { ChatMemberRole } from '../constants/chat-member-roles.constants';
-import { ChatMemberStatus } from '../constants/chat-member-status.constants';
+import { ChatMemberRole } from 'src/shared/types/enums/chat-member-role.enum';
+import { ChatMemberStatus } from 'src/shared/types/enums/chat-member-status.enum';
 import { Message } from 'src/modules/message/entities/message.entity';
 
 @Entity('chat_member')

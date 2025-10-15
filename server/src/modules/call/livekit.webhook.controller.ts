@@ -1,11 +1,11 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { CallService } from './call.service';
-import { CallStatus } from './type/callStatus';
+import { CallStatus } from 'src/shared/types/call';
 import { MessageService } from '../message/message.service';
-import { SystemEventType } from '../message/constants/system-event-type.constants';
+import { SystemEventType } from 'src/shared/types/enums/system-event-type.enum';
 import { WebsocketCallService } from '../websocket/services/websocket-call.service';
 import { ValidateWebhookPipe } from 'src/common/pipes/validate-webhook.pipe';
-import { ChatType } from '../chat/constants/chat-types.constants';
+import { ChatType } from 'src/shared/types/enums/chat-type.enum';
 import { LiveKitService } from './liveKit.service';
 import { LiveKitWebhookPayload } from '../websocket/constants/LiveKitWebhookPayload.type';
 import { UserService } from '../user/user.service';

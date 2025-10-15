@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
-import { CallResponseDto } from "@/shared/types/responses/call.response";
+import { CallResponse } from "@/shared/types/responses/call.response";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { useChatStore } from "@/stores/chatStore";
 import { getCallColor, getCallText } from "@/utils/callHelpers";
@@ -9,7 +9,7 @@ import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import CallIcon from "./CallIcon";
 
 interface CallItemProps {
-  call: CallResponseDto;
+  call: CallResponse;
   isCaller: boolean;
   onDelete?: () => void;
 }
@@ -20,7 +20,7 @@ const CallItem: React.FC<CallItemProps> = ({ call, isCaller, onDelete }) => {
 
   const [isHovered, setIsHovered] = useState(false);
 
-  const getChatInfo = (call: CallResponseDto) => {
+  const getChatInfo = (call: CallResponse) => {
     const name =
       call.chat.name ||
       call.initiator.nickname ||

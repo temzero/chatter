@@ -1,8 +1,9 @@
 import { Exclude, Expose } from 'class-transformer';
-import { FriendshipStatus } from 'src/modules/friendship/constants/friendship-status.constants';
+import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
+import { UserResponse } from 'src/shared/types/responses/user.response';
 
 @Exclude()
-export class UserResponseDto {
+export class UserResponseDto implements UserResponse {
   @Expose() id: string;
   @Expose() username: string;
   @Expose() avatarUrl: string | null;

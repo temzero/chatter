@@ -1,14 +1,14 @@
-import { CallStatus } from "@/shared/types/enums/call-status.enum";
-import { ChatResponse } from "./chat.response";
-import { ChatMember } from "./chat-member.response";
+import { CallStatus } from 'src/shared/types/enums/call-status.enum';
+import { ChatResponse } from './chat.response';
+import { ChatMember } from './chat-member.response';
 
-export interface CallResponseDto {
+export interface CallResponse {
   id: string;
-  chat: ChatResponse;
+  chat?: ChatResponse | null;
   status: CallStatus;
   isVideoCall: boolean;
-  initiator: ChatMember;
-  startedAt: Date;
+  initiator: ChatMember | null;
+  startedAt: Date | null;
   endedAt?: Date | null;
   updatedAt?: Date | null;
   createdAt: Date;

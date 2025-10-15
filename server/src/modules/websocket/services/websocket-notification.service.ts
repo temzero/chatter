@@ -7,7 +7,7 @@ import {
   ChatEvent,
   CallEvent,
   NotificationEvent,
-} from '.././constants/websocket-events';
+} from 'src/shared/types/enums/websocket-events.enum';
 import { FriendRequestResponseDto } from '../../friendship/dto/responses/friend-request-response.dto';
 import { FriendshipUpdateNotificationDto } from '../../friendship/dto/responses/friendship-update-notification.dto';
 

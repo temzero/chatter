@@ -21,7 +21,7 @@ const GroupChatEdit = () => {
   const activeChat = useChatStore((state) => state.activeChat) as ChatResponse;
   console.log("activeChat", activeChat);
   const activeMembers = useActiveMembers();
-  const updateGroupChat = useChatStore((state) => state.updateGroupChat);
+  const updateChat = useChatStore((state) => state.updateChat);
 
   const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
   const openModal = useModalStore((state) => state.openModal);
@@ -90,7 +90,8 @@ const GroupChatEdit = () => {
       }
 
       // Call your update action
-      await updateGroupChat(activeChat.id, {
+      await updateChat({
+        chatId: activeChat.id,
         name: formData.name,
         avatarUrl: newAvatarUrl,
         description: formData.description,

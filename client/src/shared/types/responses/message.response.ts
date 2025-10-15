@@ -2,7 +2,7 @@
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
-import { CallLiteResponse } from "./callLite.response";
+import { CallLiteResponse } from "./call-lite.response";
 
 export interface MessageResponse {
   id: string;
@@ -52,14 +52,6 @@ export interface SenderResponse {
   id: string;
   avatarUrl?: string | null;
   displayName: string;
-}
-
-export interface ReactionResponse {
-  id: string;
-  emoji: string;
-  userId: string;
-  user?: SenderResponse;
-  updatedAt: string;
 }
 
 export interface AttachmentResponse {

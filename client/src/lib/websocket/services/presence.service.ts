@@ -1,5 +1,5 @@
 import { webSocketService } from "./websocket.service";
-import { PresenceEvent } from "../constants/websocket-event.type";
+import { PresenceEvent } from "@/shared/types/enums/websocket-events.enum";
 import {
   PresenceInitEvent,
   PresenceUpdateEvent,

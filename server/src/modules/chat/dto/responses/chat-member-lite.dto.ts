@@ -1,7 +1,8 @@
 import { Exclude, Expose } from 'class-transformer';
+import { ChatMemberLite } from 'src/shared/types/responses/chat.response';
 
 @Exclude()
-export class ChatMemberLiteDto {
+export class ChatMemberLiteDto implements ChatMemberLite {
   @Expose() id: string;
   @Expose() userId: string;
   @Expose() avatarUrl?: string | null;

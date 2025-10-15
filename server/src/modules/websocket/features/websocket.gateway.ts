@@ -12,7 +12,10 @@ import { WebsocketService } from '../websocket.service';
 import { emitWsError } from '../utils/emitWsError';
 import type { AuthenticatedSocket } from '../constants/authenticatedSocket.type';
 import { PresenceInitEvent } from '../constants/presenceEvent.type';
-import { SystemEvent, PresenceEvent } from '../constants/websocket-events';
+import {
+  SystemEvent,
+  PresenceEvent,
+} from 'src/shared/types/enums/websocket-events.enum';
 import { WebsocketConnectionService } from '../services/websocket-connection.service';
 
 @WebSocketGateway({

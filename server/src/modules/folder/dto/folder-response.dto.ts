@@ -1,8 +1,9 @@
-import { ChatType } from 'src/modules/chat/constants/chat-types.constants';
+import { ChatType } from 'src/shared/types/enums/chat-type.enum';
 import { Exclude, Expose, Type } from 'class-transformer';
+import { FolderResponse } from 'src/shared/types/responses/folder.response';
 
 @Exclude()
-export class FolderResponseDto {
+export class FolderResponseDto implements FolderResponse {
   @Expose()
   id: string;
 
@@ -23,8 +24,8 @@ export class FolderResponseDto {
   position: number;
 
   @Expose()
-  createdAt: Date;
+  createdAt: Date | string;
 
   @Expose()
-  updatedAt: Date;
+  updatedAt: Date | string;
 }

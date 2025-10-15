@@ -19,7 +19,6 @@ export interface UserResponse {
   lastActiveAt: Date | string | null;
   emailVerified: boolean;
   phoneVerified: boolean;
-
   // Relationship fields
   friendshipStatus?: FriendshipStatus | null;
   isBlockedByMe?: boolean;

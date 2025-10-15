@@ -1,4 +1,4 @@
-import { CallStatus } from "@shared/types/enums/call-status.enum";
+import { CallStatus } from 'src/shared/types/enums/call-status.enum';
 
 export interface IncomingCallResponse {
   callId: string; // optional, if no call entity exists yet

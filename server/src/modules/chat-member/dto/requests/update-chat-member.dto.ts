@@ -1,6 +1,6 @@
-import { EmptyStringToNull } from 'src/common/utils/dto.utils';
-import { ChatMemberRole } from '../../constants/chat-member-roles.constants';
-import { ChatMemberStatus } from '../../constants/chat-member-status.constants';
+import { ChatMemberRole } from 'src/shared/types/enums/chat-member-role.enum';
+import { ChatMemberStatus } from 'src/shared/types/enums/chat-member-status.enum';
+import { UpdateChatMemberRequest } from 'src/shared/types/requests/update-chat-member.request';
 import {
   IsDate,
   IsEnum,
@@ -10,7 +10,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class UpdateChatMemberDto {
+export class UpdateChatMemberDto implements UpdateChatMemberRequest {
   @IsOptional()
   @IsString()
   @MaxLength(32)

@@ -8,7 +8,7 @@ import {
 import { UseGuards } from '@nestjs/common';
 import { WsJwtGuard } from 'src/modules/auth/guards/ws-jwt.guard';
 import { AuthenticatedSocket } from '../constants/authenticatedSocket.type';
-import { NotificationEvent } from '../constants/websocket-events';
+import { NotificationEvent } from 'src/shared/types/enums/websocket-events.enum';
 import { FriendRequestResponseDto } from 'src/modules/friendship/dto/responses/friend-request-response.dto';
 import { WebsocketNotificationService } from '../services/websocket-notification.service';
 

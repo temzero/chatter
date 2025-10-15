@@ -1,7 +1,5 @@
-// src/modules/friendship/dto/friendship-update-notification.dto.ts
-
 import { Expose } from 'class-transformer';
-import { FriendshipStatus } from '../../constants/friendship-status.constants';
+import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
 
 export class FriendshipUpdateNotificationDto {
   @Expose()

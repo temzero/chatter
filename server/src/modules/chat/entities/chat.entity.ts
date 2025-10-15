@@ -12,7 +12,7 @@ import {
 } from 'typeorm';
 import { Message } from '../../message/entities/message.entity';
 import { ChatMember } from 'src/modules/chat-member/entities/chat-member.entity';
-import { ChatType } from '../constants/chat-types.constants';
+import { ChatType } from 'src/shared/types/enums/chat-type.enum';
 import { InviteLink } from 'src/modules/invite-link/entities/invite-link.entity';
 
 @Entity('chat')

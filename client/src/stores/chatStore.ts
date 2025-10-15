@@ -7,7 +7,7 @@ import { useAuthStore } from "./authStore";
 import { useChatMemberStore } from "./chatMemberStore";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import type {
-  ChatMemberPreview,
+  ChatMemberLite,
   ChatResponse,
 } from "@/shared/types/responses/chat.response";
 import type {
@@ -18,6 +18,7 @@ import { toast } from "react-toastify";
 import { useModalStore } from "./modalStore";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
 import { handleError } from "@/utils/handleError";
+import { UpdateChatRequest } from "@/shared/types/requests/update-chat.request";
 
 interface ChatStore {
   chats: ChatResponse[];
@@ -52,15 +53,8 @@ interface ChatStore {
     userIds: string[];
     type: ChatType.GROUP | ChatType.CHANNEL;
   }) => Promise<ChatResponse>;
-  updateDirectChat: (
-    id: string,
-    payload: Partial<ChatResponse>
-  ) => Promise<void>;
-  updateGroupChatLocally: (id: string, payload: Partial<ChatResponse>) => void;
-  updateGroupChat: (
-    id: string,
-    payload: Partial<ChatResponse>
-  ) => Promise<void>;
+  updateChat: (payload: UpdateChatRequest) => Promise<void>;
+  updateChatLocally: (id: string, payload: Partial<ChatResponse>) => void;
   addMembersToChat: (chatId: string, userIds: string[]) => Promise<void>;
   setMute: (chatId: string, memberId: string, mutedUntil: Date | null) => void;
   setLastMessage: (chatId: string, message: LastMessageResponse | null) => void;
@@ -74,7 +68,7 @@ interface ChatStore {
   cleanupChat: (chatId: string) => void;
   clearChats: () => void;
 
-  addToGroupPreviewMembers: (chatId: string, member: ChatMemberPreview) => void;
+  addToGroupPreviewMembers: (chatId: string, member: ChatMemberLite) => void;
   removeFromGroupPreviewMembers: (chatId: string, userId: string) => void;
 }
 
@@ -427,26 +421,7 @@ export const useChatStore = create<ChatStore>()(
           }
         },
 
-        updateDirectChat: async (id, payload) => {
-          set({ isLoading: true });
-          try {
-            const updatedChat = await chatService.updateDirectChat(id, payload);
-            set((state) =>
-              updateChatState(state, id, (chat) => ({
-                ...chat,
-                ...updatedChat,
-              }))
-            );
-          } catch (error) {
-            set({ error: "Failed to update direct chat" });
-            handleError(error, "Failed to update chat");
-            throw error;
-          } finally {
-            set({ isLoading: false });
-          }
-        },
-
-        updateGroupChatLocally: (id, payload) => {
+        updateChatLocally: (id, payload) => {
           set((state) =>
             updateChatState(state, id, (chat) => ({
               ...chat,
@@ -455,14 +430,14 @@ export const useChatStore = create<ChatStore>()(
           );
         },
 
-        updateGroupChat: async (id, payload) => {
+        updateChat: async (payload: UpdateChatRequest) => {
           set({ isLoading: true });
           try {
-            const updatedChat = await chatService.updateGroupChat(id, payload);
-            get().updateGroupChatLocally(id, updatedChat);
+            const updatedChat = await chatService.updateChat(payload);
+            get().updateChatLocally(payload.chatId, updatedChat);
           } catch (error) {
-            set({ error: "Failed to update group chat" });
-            handleError(error, "Failed to update group chat");
+            set({ error: "Failed to update chat" });
+            handleError(error, "Failed to update chat");
             throw error;
           } finally {
             set({ isLoading: false });
@@ -569,10 +544,7 @@ export const useChatStore = create<ChatStore>()(
           }
         },
 
-        addToGroupPreviewMembers: (
-          chatId: string,
-          member: ChatMemberPreview
-        ) => {
+        addToGroupPreviewMembers: (chatId: string, member: ChatMemberLite) => {
           const chat = get().chats.find((c) => c.id === chatId);
           if (!chat || chat.type === ChatType.DIRECT || chat.avatarUrl) return;
 
@@ -587,7 +559,7 @@ export const useChatStore = create<ChatStore>()(
             const updatedPreviews = [...currentPreviews, member].slice(0, 4);
             const updatedMemberIds = [...currentMemberIds, member.userId];
 
-            get().updateGroupChatLocally(chatId, {
+            get().updateChatLocally(chatId, {
               previewMembers: updatedPreviews,
               otherMemberUserIds: updatedMemberIds,
             });
@@ -606,7 +578,7 @@ export const useChatStore = create<ChatStore>()(
             (id) => id !== userId
           );
 
-          get().updateGroupChatLocally(chatId, {
+          get().updateChatLocally(chatId, {
             previewMembers: updatedPreviews,
             otherMemberUserIds: updatedMemberIds,
           });

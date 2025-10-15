@@ -1,7 +1,7 @@
 import { OnlineDot } from "../OnlineDot";
 import { Avatar } from "./Avatar";
 import type {
-  ChatMemberPreview,
+  ChatMemberLite,
   ChatResponse,
 } from "@/shared/types/responses/chat.response";
 
@@ -63,7 +63,7 @@ export const GroupAvatar: React.FC<GroupAvatarProps> = ({
 };
 
 export const GroupAvatarLayout: React.FC<{
-  members: ChatMemberPreview[];
+  members: ChatMemberLite[];
 }> = ({ members }) => {
   const length = members.length;
   const textSize = "text-xl";

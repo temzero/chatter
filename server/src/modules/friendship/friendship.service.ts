@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
 import { Friendship } from './entities/friendship.entity';
 import { UserService } from '../user/user.service';
-import { FriendshipStatus } from './constants/friendship-status.constants';
+import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
 import { ErrorResponse } from '../../common/api-response/errors';
 import { FriendRequestResponseDto } from './dto/responses/friend-request-response.dto';
 

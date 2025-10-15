@@ -3,7 +3,7 @@ import { useModalStore } from "@/stores/modalStore";
 import { callService } from "@/services/callService";
 import { motion } from "framer-motion";
 import { modalAnimations } from "@/animations/modalAnimations";
-import { CallResponseDto } from "@/shared/types/responses/call.response";
+import { CallResponse } from "@/shared/types/responses/call.response";
 import { ChatAvatar } from "../ui/avatar/ChatAvatar";
 import { getCallColor, getCallText } from "@/utils/callHelpers";
 import { formatDateTime } from "@/utils/formatDate";
@@ -19,7 +19,7 @@ const DeleteCallModal: React.FC = () => {
   if (!modalContent?.props) return null;
 
   const { call } = modalContent.props as {
-    call: CallResponseDto;
+    call: CallResponse;
     onDeleted?: () => void;
   };
 

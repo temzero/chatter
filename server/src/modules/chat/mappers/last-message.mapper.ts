@@ -1,7 +1,7 @@
 // mappers/lastMessageMapper.ts
 import { Message } from 'src/modules/message/entities/message.entity';
 import { ChatMember } from 'src/modules/chat-member/entities/chat-member.entity';
-import { AttachmentType } from 'src/shared/types/attachment-type.enum';
+import { AttachmentType } from 'src/shared/types/enums/attachment-type.enum';
 import { LastMessageResponseDto } from '../dto/responses/last-message-response.dto';
 import { getFileIcon } from 'src/shared/utils/getFileIcon';
 

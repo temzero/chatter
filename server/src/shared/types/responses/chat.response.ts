@@ -1,6 +1,6 @@
-import { ChatType } from "@/shared/types/enums/chat-type.enum";
-import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
-import { LastMessageResponse, MessageResponse } from "./message.response";
+import { ChatType } from 'src/shared/types/enums/chat-type.enum';
+import { ChatMemberRole } from 'src/shared/types/enums/chat-member-role.enum';
+import { LastMessageResponse, MessageResponse } from './message.response';
 
 export interface ChatResponse {
   id: string;
@@ -8,9 +8,9 @@ export interface ChatResponse {
   name: string | null;
   avatarUrl?: string | null;
   description?: string | null;
-  myMemberId: string;
+  myMemberId: string | null;
   myRole?: ChatMemberRole;
-  updatedAt?: string;
+  updatedAt?: Date | string | null;
   otherMemberUserIds?: string[];
   pinnedMessage?: MessageResponse | null;
   lastMessage?: LastMessageResponse | null;
@@ -18,10 +18,10 @@ export interface ChatResponse {
   mutedUntil?: string | Date | null;
   inviteLinks?: string[];
   isDeleted?: boolean | null;
-  previewMembers?: ChatMemberPreview[];
+  previewMembers?: ChatMemberLite[];
 }
 
-export interface ChatMemberPreview {
+export interface ChatMemberLite {
   id: string;
   userId: string;
   avatarUrl?: string | null;

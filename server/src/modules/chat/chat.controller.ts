@@ -13,10 +13,8 @@ import {
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { ChatService } from './chat.service';
-import {
-  CreateDirectChatDto,
-  CreateGroupChatDto,
-} from 'src/modules/chat/dto/requests/create-chat.dto';
+import { CreateDirectChatDto } from './dto/requests/create-direct-chat.dto';
+import { CreateGroupChatDto } from './dto/requests/create-group-chat.dto';
 import { UpdateChatDto } from 'src/modules/chat/dto/requests/update-chat.dto';
 import {
   GetOrCreateResponse,
@@ -26,12 +24,13 @@ import { CurrentUser } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { ErrorResponse } from 'src/common/api-response/errors';
 import { ChatResponseDto } from './dto/responses/chat-response.dto';
-import { ChatType } from './constants/chat-types.constants';
-import { SystemEventType } from '../message/constants/system-event-type.constants';
+import { ChatType } from 'src/shared/types/enums/chat-type.enum';
+import { SystemEventType } from 'src/shared/types/enums/system-event-type.enum';
 import { MessageService } from '../message/message.service';
 import { MessageResponseDto } from '../message/dto/responses/message-response.dto';
-import { PaginationQuery } from '../message/dto/queries/pagination-query.dto';
-import InitialDataResponse from './dto/responses/initial-data-response.dto';
+import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
+import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
+import { ChatWithMessagesResponse } from 'src/shared/types/responses/chat.response';
 
 @Controller('chat')
 @UseGuards(JwtAuthGuard)
@@ -46,7 +45,7 @@ export class ChatController {
     @CurrentUser('id') userId: string,
     @Query('chatLimit') chatLimit: number = 20,
     @Query('messageLimit') messageLimit: number = 20,
-  ): Promise<SuccessResponse<InitialDataResponse>> {
+  ): Promise<SuccessResponse<PaginationResponse<ChatWithMessagesResponse>>> {
     try {
       const result = await this.chatService.getInitialChatsWithMessages(
         userId,
@@ -65,15 +64,15 @@ export class ChatController {
   async findByPagination(
     @CurrentUser('id') userId: string,
     @Query() queryParams: PaginationQuery,
-  ): Promise<SuccessResponse<{ chats: ChatResponseDto[]; hasMore: boolean }>> {
+  ): Promise<SuccessResponse<PaginationResponse<ChatResponseDto>>> {
     try {
-      const { chats, hasMore } = await this.chatService.getUserChats(
+      const { items, hasMore } = await this.chatService.getUserChats(
         userId,
         queryParams,
       );
 
       return new SuccessResponse(
-        { chats, hasMore },
+        { items, hasMore },
         'User chats retrieved successfully',
       );
     } catch (error: unknown) {

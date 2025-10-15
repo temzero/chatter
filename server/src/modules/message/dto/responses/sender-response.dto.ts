@@ -1,7 +1,8 @@
 import { Exclude, Expose } from 'class-transformer';
+import { SenderResponse } from 'src/shared/types/responses/message.response';
 
 @Exclude()
-export class SenderResponseDto {
+export class SenderResponseDto implements SenderResponse {
   @Expose()
   id: string;
 
@@ -9,5 +10,5 @@ export class SenderResponseDto {
   avatarUrl?: string | null;
 
   @Expose()
-  displayName: string | null;
+  displayName: string;
 }

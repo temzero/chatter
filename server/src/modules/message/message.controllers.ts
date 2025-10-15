@@ -16,7 +16,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { MessageResponseDto } from './dto/responses/message-response.dto';
 import { ErrorResponse } from '../../common/api-response/errors';
 import { MessageMapper } from './mappers/message.mapper';
-import { PaginationQuery } from './dto/queries/pagination-query.dto';
+import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
+import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
 
 @Controller('messages')
 @UseGuards(JwtAuthGuard)
@@ -44,21 +45,20 @@ export class MessageController {
     @CurrentUser('id') currentUserId: string,
     @Param('chatId') chatId: string,
     @Query() queryParams: PaginationQuery,
-  ): Promise<
-    SuccessResponse<{ messages: MessageResponseDto[]; hasMore: boolean }>
-  > {
-    const { messages, hasMore } = await this.messageService.getMessagesByChatId(
-      chatId,
-      currentUserId,
-      queryParams,
-    );
+  ): Promise<SuccessResponse<PaginationResponse<MessageResponseDto>>> {
+    const { items: messages, hasMore } =
+      await this.messageService.getMessagesByChatId(
+        chatId,
+        currentUserId,
+        queryParams,
+      );
 
     const messagesResponse = messages.map((message) =>
       this.messageMapper.mapMessageToMessageResDto(message),
     );
 
     return new SuccessResponse(
-      { messages: messagesResponse, hasMore },
+      { items: messagesResponse, hasMore },
       'Chat messages retrieved successfully',
     );
   }

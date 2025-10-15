@@ -13,11 +13,11 @@ export async function getMyToken(chatId: string): Promise<string | undefined> {
       myChatMember.nickname ||
       [myChatMember.firstName, myChatMember.lastName].filter(Boolean).join(" ");
 
-    const token = await callService.generateAndFetchLiveKitToken(
+    const token = await callService.generateAndFetchLiveKitToken({
       chatId,
       participantName,
-      myChatMember.avatarUrl || undefined
-    );
+      avatarUrl: myChatMember.avatarUrl || null,
+    });
 
     return token;
   } catch (err) {

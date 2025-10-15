@@ -1,4 +1,4 @@
-import { MessageStatus } from "@/shared/types/enums/message-status.enum";
+import { MessageStatus } from 'src/shared/types/enums/message-status.enum';
 
 export class UpdateMessageRequest {
   content?: string;

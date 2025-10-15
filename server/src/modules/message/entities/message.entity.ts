@@ -18,8 +18,8 @@ import { User } from '../../user/entities/user.entity';
 import { Call } from 'src/modules/call/entities/call.entity';
 import { Reaction } from './reaction.entity';
 import { Attachment } from './attachment.entity';
-import { MessageStatus } from '../constants/message-status.constants';
-import { SystemEventType } from '../constants/system-event-type.constants';
+import { MessageStatus } from 'src/shared/types/enums/message-status.enum';
+import { SystemEventType } from 'src/shared/types/enums/system-event-type.enum';
 
 @Entity('message')
 @Index(['chatId']) // Index for faster chat message queries

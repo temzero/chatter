@@ -13,7 +13,7 @@ import { FriendshipService } from './friendship.service';
 import { SuccessResponse } from '../../common/api-response/success';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
-import { FriendshipStatus } from './constants/friendship-status.constants';
+import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
 import { RespondToRequestDto } from './dto/requests/response-to-request.dto';
 import { FriendRequestResponseDto } from './dto/responses/friend-request-response.dto';
 import { Friendship } from './entities/friendship.entity';

@@ -10,15 +10,12 @@ import {
   Req,
   Res,
 } from '@nestjs/common';
+import { AuthResponse } from 'src/shared/types/responses/auth.response';
+import { SuccessResponse } from 'src/common/api-response/success';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from '../services/auth.service';
 import { TokenService } from '../services/token.service';
-import {
-  RefreshResponse,
-  SuccessResponse,
-} from 'src/common/api-response/success';
 import { ErrorResponse } from 'src/common/api-response/errors';
-import { AuthResponse } from 'src/common/api-response/success';
 import { User } from '../../user/entities/user.entity';
 import { LocalGuard } from '../guards/local.guard';
 import { JwtAuthGuard } from '../guards/jwt.guard';
@@ -56,10 +53,10 @@ export class AuthController {
     );
     // Optional: Set HTTP-only cookie for web clients
     setRefreshTokenCookie(response, refreshToken, this.configService);
-    return new AuthResponse(
+    return {
       accessToken,
-      `Login successful, welcome back ${user.firstName}`,
-    );
+      message: `Login successful, welcome back ${user.firstName}`,
+    };
   }
 
   @Post('register')
@@ -76,10 +73,10 @@ export class AuthController {
     );
     // Optional: Set HTTP-only cookie for web clients
     setRefreshTokenCookie(response, refreshToken, this.configService);
-    return new AuthResponse(
+    return {
       accessToken,
-      `User ${user.firstName} registered and logged in successfully. Please verify your email.`,
-    );
+      message: `User ${user.firstName} registered and logged in successfully. Please verify your email.`,
+    };
   }
 
   @Get('access-token')
@@ -129,24 +126,22 @@ export class AuthController {
   async refresh(
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
-  ) {
+  ): Promise<AuthResponse> {
     // The guard will validate and add the user info to request.user
-    const user = request.user as {
-      refreshToken: string;
-    };
+    const user = request.user as { refreshToken: string };
 
-    const { accessToken, refreshToken, email, deviceName } =
-      await this.authService.refreshTokens(user.refreshToken);
+    const { accessToken, refreshToken } = await this.authService.refreshTokens(
+      user.refreshToken,
+    );
 
     // Optional: set HTTP-only cookie for web clients
     setRefreshTokenCookie(response, refreshToken, this.configService);
 
-    return new RefreshResponse(
+    // Return plain object conforming to RefreshResponse
+    return {
       accessToken,
-      email,
-      deviceName,
-      'Tokens refreshed successfully',
-    );
+      message: 'Tokens refreshed successfully',
+    };
   }
 
   @Get('verify-email')

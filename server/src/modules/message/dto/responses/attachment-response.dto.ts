@@ -1,8 +1,9 @@
 import { Exclude, Expose } from 'class-transformer';
-import { AttachmentType } from 'src/shared/types/attachment-type.enum';
+import { AttachmentType } from 'src/shared/types/enums/attachment-type.enum';
+import { AttachmentResponse } from 'src/shared/types/responses/message.response';
 
 @Exclude()
-export class AttachmentResponseDto {
+export class AttachmentResponseDto implements AttachmentResponse {
   @Expose() id: string;
   @Expose() messageId: string;
   @Expose() type: AttachmentType;
@@ -17,6 +18,6 @@ export class AttachmentResponseDto {
   @Expose() duration?: number | null = null;
   @Expose() metadata?: Record<string, unknown> | null = null;
 
-  @Expose() createdAt: Date;
-  @Expose() updatedAt: Date;
+  @Expose() createdAt: Date | string;
+  @Expose() updatedAt: Date | string;
 }

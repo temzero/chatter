@@ -1,4 +1,4 @@
-export const getFileIcon = (fileName?: string | null | undefined): string => {
+export const getFileIcon = (fileName?: string | null): string => {
   if (!fileName) return "attach_file";
   const name = fileName.toLowerCase();
 

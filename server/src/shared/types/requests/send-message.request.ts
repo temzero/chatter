@@ -1,6 +1,6 @@
-import { AttachmentUploadRequest } from "@/shared/types/requests/attachment-upload.request";
+import { AttachmentUploadRequest } from 'src/shared/types/requests/attachment-upload.request';
 
-export interface SendMessageRequest {
+export interface CreateMessageRequest {
   id?: string;
   chatId: string;
   memberId?: string;

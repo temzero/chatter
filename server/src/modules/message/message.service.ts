@@ -11,16 +11,17 @@ import { Reaction } from './entities/reaction.entity';
 import { Attachment } from './entities/attachment.entity';
 import { SupabaseService } from '../superbase/supabase.service';
 import { BlockService } from '../block/block.service';
-import { ChatType } from '../chat/constants/chat-types.constants';
-import { SystemEventType } from './constants/system-event-type.constants';
+import { ChatType } from 'src/shared/types/enums/chat-type.enum';
+import { SystemEventType } from 'src/shared/types/enums/system-event-type.enum';
 import { MessageMapper } from './mappers/message.mapper';
 import { MessageResponseDto } from './dto/responses/message-response.dto';
 import { User } from '../user/entities/user.entity';
-import { ChatEvent } from '../websocket/constants/websocket-events';
-import { ChatMemberRole } from '../chat-member/constants/chat-member-roles.constants';
-import { PaginationQuery } from './dto/queries/pagination-query.dto';
+import { ChatEvent } from 'src/shared/types/enums/websocket-events.enum';
+import { ChatMemberRole } from 'src/shared/types/enums/chat-member-role.enum';
+import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
 import { WebsocketNotificationService } from '../websocket/services/websocket-notification.service';
 import { Call } from '../call/entities/call.entity';
+import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
 
 @Injectable()
 export class MessageService {
@@ -491,7 +492,7 @@ export class MessageService {
     chatId: string,
     currentUserId: string,
     queryParams: PaginationQuery,
-  ): Promise<{ messages: Message[]; hasMore: boolean }> {
+  ): Promise<PaginationResponse<Message>> {
     try {
       const query = this.buildFullMessageQuery()
         .where('message.chat_id = :chatId', { chatId })
@@ -546,7 +547,7 @@ export class MessageService {
         hasMore = remainingCount > 0;
       }
 
-      return { messages: sortedMessages, hasMore };
+      return { items: sortedMessages, hasMore };
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to retrieve conversation messages');
     }

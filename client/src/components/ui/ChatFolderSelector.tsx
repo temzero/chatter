@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useSidebarStore } from "@/stores/sidebarStore";
-import type FolderResponse from "@/shared/types/responses/folder.response";
+import { FolderResponse } from "@/shared/types/responses/folder.response";
+
 
 type Props = {
   selectedFolder: FolderResponse;

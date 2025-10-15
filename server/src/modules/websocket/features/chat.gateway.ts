@@ -13,7 +13,7 @@ import { MessageMapper } from 'src/modules/message/mappers/message.mapper';
 import { ChatService } from 'src/modules/chat/chat.service';
 import { emitWsError } from '../utils/emitWsError';
 import { Message } from 'src/modules/message/entities/message.entity';
-import { ChatEvent } from '../constants/websocket-events';
+import { ChatEvent } from 'src/shared/types/enums/websocket-events.enum';
 import { WebsocketNotificationService } from '../services/websocket-notification.service';
 import { WebsocketConnectionService } from '../services/websocket-connection.service';
 import { SupabaseService } from 'src/modules/superbase/supabase.service';

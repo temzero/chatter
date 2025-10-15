@@ -1,12 +1,12 @@
-import { ChatType } from "@/shared/types/enums/chat-type.enum";
+import { ChatType } from 'src/shared/types/enums/chat-type.enum';
 
-export default interface FolderResponse {
+export interface FolderResponse {
   id: string;
   name: string;
   color: string | null;
   types: ChatType[];
   chatIds: string[];
   position: number;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 }

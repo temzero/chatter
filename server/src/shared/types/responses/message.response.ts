@@ -1,8 +1,8 @@
 // types/message-response.ts
-import { MessageStatus } from "@/shared/types/enums/message-status.enum";
-import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
-import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
-import { CallLiteResponse } from "./callLite.response";
+import { MessageStatus } from 'src/shared/types/enums/message-status.enum';
+import { AttachmentType } from 'src/shared/types/enums/attachment-type.enum';
+import { SystemEventType } from 'src/shared/types/enums/system-event-type.enum';
+import { CallLiteResponse } from './call-lite.response';
 
 export interface MessageResponse {
   id: string;
@@ -11,22 +11,22 @@ export interface MessageResponse {
   content?: string | null;
   status: MessageStatus;
   isPinned: boolean;
-  pinnedAt?: string | null;
+  pinnedAt?: Date | string | null;
 
   replyToMessageId?: string | null;
-  replyToMessage: MessageResponse | null;
+  replyToMessage?: MessageResponse | null;
   replyCount: number;
 
   forwardedFromMessageId?: string | null;
-  forwardedFromMessage: MessageResponse | null;
+  forwardedFromMessage?: MessageResponse | null;
 
   isImportant?: boolean;
   systemEvent?: SystemEventType | null;
-  editedAt?: string | null;
+  editedAt?: Date | string | null;
   isDeleted: boolean;
-  deletedAt?: string | null;
-  createdAt: string;
-  updatedAt: string;
+  deletedAt?: Date | string | null;
+  createdAt: Date | string;
+  updatedAt: Date | string;
   reactions?: Record<string, string[]>;
   attachments?: AttachmentResponse[];
 
@@ -45,21 +45,13 @@ export interface LastMessageResponse {
   call?: CallLiteResponse;
   isForwarded?: boolean;
   systemEvent?: SystemEventType | null;
-  createdAt: string;
+  createdAt: Date | string;
 }
 
 export interface SenderResponse {
   id: string;
   avatarUrl?: string | null;
   displayName: string;
-}
-
-export interface ReactionResponse {
-  id: string;
-  emoji: string;
-  userId: string;
-  user?: SenderResponse;
-  updatedAt: string;
 }
 
 export interface AttachmentResponse {
@@ -75,6 +67,6 @@ export interface AttachmentResponse {
   height?: number | null;
   duration?: number | null;
   metadata?: Record<string, unknown> | null;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 }

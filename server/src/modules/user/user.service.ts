@@ -9,7 +9,7 @@ import { User } from 'src/modules/user/entities/user.entity';
 import { ErrorResponse } from 'src/common/api-response/errors';
 import { TokenStorageService } from '../auth/services/token-storage.service';
 import { UserResponseDto } from './dto/responses/user-response.dto';
-import { FriendshipStatus } from '../friendship/constants/friendship-status.constants';
+import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
 import { FriendshipService } from '../friendship/friendship.service';
 import { ChatService } from '../chat/chat.service';
 import { BlockService } from '../block/block.service';

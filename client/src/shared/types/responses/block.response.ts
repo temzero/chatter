@@ -1,6 +1,6 @@
 import { UserResponse } from "@/shared/types/responses/user.response";
 
-export interface BlockResponseDto {
+export interface BlockResponse {
   id: string;
   blockerId: string;
   blocked: UserResponse;

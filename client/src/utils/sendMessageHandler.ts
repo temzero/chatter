@@ -7,7 +7,7 @@ import { handleError } from "./handleError";
 import { uploadFilesToSupabase } from "./supabase/uploadToSupabase";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { toast } from "react-toastify";
-import { SendMessageRequest } from "@/shared/requests/sendMessage.request";
+import { CreateMessageRequest } from "@/shared/types/requests/send-message.request";
 import { AttachmentUploadRequest } from "@/shared/types/requests/attachment-upload.request";
 import { deleteFilesFromSupabase } from "./supabase/deleteFileFromSupabase";
 
@@ -116,7 +116,7 @@ export async function handleSendMessage({
   try {
     uploadedAttachments = await uploadFilesToSupabase(attachments);
 
-    const messagePayload: SendMessageRequest = {
+    const messagePayload: CreateMessageRequest = {
       id: messageId,
       chatId,
       memberId: myMemberId,

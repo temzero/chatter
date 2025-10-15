@@ -1,28 +1,31 @@
 import API from "../api/api";
-import type { ChatResponse } from "@/shared/types/responses/chat.response";
-import { directChatService } from "./directChatService";
-import { groupChatService } from "./groupChatService";
-import type { ApiSuccessResponse } from "@/shared/types/responses/api-success.response";
+import type {
+  ChatResponse,
+  ChatWithMessagesResponse,
+} from "@/shared/types/responses/chat.response";
+import type {
+  ApiSuccessResponse,
+  DirectChatApiResponse,
+} from "@/shared/types/responses/api-success.response";
 import { toast } from "react-toastify";
 import { handleError } from "@/utils/handleError";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
+import { UpdateChatRequest } from "@/shared/types/requests/update-chat.request";
 import { PaginationQuery } from "@/shared/types/queries/pagination-query";
-import InitialDataResponse from "@/shared/types/responses/initial-data.response";
+import { PaginationResponse } from "@/shared/types/responses/pagination.response";
 
 export const chatService = {
-  ...directChatService,
-  ...groupChatService,
   // Get all direct and group chats
   async fetchInitialData(
     chatLimit = 20,
     messageLimit = 20
-  ): Promise<InitialDataResponse | null> {
+  ): Promise<PaginationResponse<ChatWithMessagesResponse> | null> {
     try {
-      const response = await API.get<ApiSuccessResponse<InitialDataResponse>>(
-        "/chat/initial",
-        {
-          params: { chatLimit, messageLimit },
-        }
-      );
+      const response = await API.get<
+        ApiSuccessResponse<PaginationResponse<ChatWithMessagesResponse>>
+      >("/chat/initial", {
+        params: { chatLimit, messageLimit },
+      });
 
       return response.data.payload;
     } catch (error) {
@@ -73,6 +76,45 @@ export const chatService = {
       console.error("Failed to fetch saved chat:", error);
       throw new Error("Unable to fetch saved chat.");
     }
+  },
+
+  async createOrGetDirectChat(
+    partnerId: string
+  ): Promise<DirectChatApiResponse> {
+    const response = await API.post<DirectChatApiResponse>("/chat/direct", {
+      partnerId,
+    });
+    return response.data;
+  },
+
+  async createGroupChat(payload: {
+    name: string;
+    userIds: string[];
+    type: ChatType.GROUP | ChatType.CHANNEL;
+  }): Promise<ChatResponse> {
+    const response = await API.post<ApiSuccessResponse<ChatResponse>>(
+      "/chat/group",
+      payload
+    );
+    return response.data.payload;
+  },
+
+  async getGroupChatById(groupChatId: string): Promise<ChatResponse> {
+    const response = await API.get<ApiSuccessResponse<ChatResponse>>(
+      `/chat/${groupChatId}`
+    );
+    return response.data.payload;
+  },
+
+  async updateChat(payload: UpdateChatRequest): Promise<ChatResponse> {
+    const { chatId, ...updates } = payload;
+
+    const response = await API.put<ApiSuccessResponse<ChatResponse>>(
+      `/chat/${chatId}`,
+      updates
+    );
+
+    return response.data.payload;
   },
 
   async deleteChat(chatId: string): Promise<string> {

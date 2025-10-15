@@ -5,6 +5,7 @@ import {
   ChatMember,
 } from "@/shared/types/responses/chat-member.response";
 import type { ApiSuccessResponse } from "@/shared/types/responses/api-success.response";
+import { UpdateChatMemberRequest } from "@/shared/types/requests/update-chat-member.request";
 
 export const chatMemberService = {
   // Get direct chat members
@@ -59,7 +60,7 @@ export const chatMemberService = {
   // Update a chat member
   async updateMember(
     memberId: string,
-    updates: Partial<ChatMember>
+    updates: UpdateChatMemberRequest
   ): Promise<ChatMember> {
     const response = await API.patch<ApiSuccessResponse<ChatMember>>(
       `/chat-members/${memberId}`,

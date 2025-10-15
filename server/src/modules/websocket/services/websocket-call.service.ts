@@ -6,9 +6,9 @@ import {
   CallErrorResponse,
   IncomingCallResponse,
   UpdateCallPayload,
-} from '../constants/callPayload.type';
-import { CallEvent } from '../constants/websocket-events';
-import { CallStatus } from 'src/modules/call/type/callStatus';
+} from 'src/shared/types/call';
+import { CallEvent } from 'src/shared/types/enums/websocket-events.enum';
+import { CallStatus } from 'src/shared/types/call';
 import { ChatService } from 'src/modules/chat/chat.service';
 import { CallService } from 'src/modules/call/call.service';
 import { ChatMember } from 'src/modules/chat-member/entities/chat-member.entity';

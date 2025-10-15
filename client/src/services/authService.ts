@@ -1,6 +1,11 @@
 import API from "@/services/api/api";
 import rawAPI from "./api/rawApi";
 import { localStorageService } from "./storage/localStorageService";
+import { AuthResponse } from "@/shared/types/responses/auth.response";
+import {
+  LoginRequest,
+  RegisterRequest,
+} from "@/shared/types/requests/auth.request";
 
 export const authService = {
   async getCurrentUser() {
@@ -8,24 +13,14 @@ export const authService = {
     return data.payload;
   },
 
-  async login(identifier: string, password: string) {
-    const { data } = await API.post("/auth/login", {
-      identifier,
-      password,
-    });
-    console.log("data response: ", data);
+  async login(payload: LoginRequest): Promise<AuthResponse> {
+    const { data } = await API.post<AuthResponse>("/auth/login", payload);
     localStorageService.setAccessToken(data.accessToken);
     return data;
   },
 
-  async register(userData: {
-    username: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    password: string;
-  }) {
-    const { data } = await API.post("/auth/register", userData);
+  async register(payload: RegisterRequest): Promise<AuthResponse> {
+    const { data } = await API.post<AuthResponse>("/auth/register", payload);
     return data;
   },
 
@@ -51,9 +46,9 @@ export const authService = {
     return data;
   },
 
-  async refreshToken() {
+  async refreshToken(): Promise<string> {
     try {
-      const response = await rawAPI.post("/auth/refresh");
+      const response = await rawAPI.post<AuthResponse>("/auth/refresh");
       return response.data.accessToken;
     } catch (error) {
       console.error("REFRESH TOKEN ERROR:", error);

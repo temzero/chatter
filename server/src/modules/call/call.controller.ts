@@ -17,12 +17,12 @@ import { CurrentUser } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { ChatMemberService } from '../chat-member/chat-member.service';
 import { LiveKitService } from './liveKit.service';
-import { CallStatus } from './type/callStatus';
+import { CallStatus } from 'src/shared/types/call';
 import { IncomingCallResponse } from '../websocket/constants/callPayload.type';
 import { ChatService } from '../chat/chat.service';
-import { ChatType } from '../chat/constants/chat-types.constants';
+import { ChatType } from 'src/shared/types/enums/chat-type.enum';
 import { GenerateLiveKitTokenDto } from './dto/generate-livekit-token.dto';
-import { UpdateCallDto } from './dto/update-call.dto';
+import { UpdateCallData } from './type/update-call-data.type';
 
 @Controller('calls')
 @UseGuards(JwtAuthGuard)
@@ -224,7 +224,7 @@ export class CallController {
   @Post(':id')
   async updateCall(
     @Param('id') id: string,
-    @Body() body: UpdateCallDto,
+    @Body() body: UpdateCallData,
   ): Promise<SuccessResponse<CallResponseDto>> {
     try {
       const updatedCall = await this.callService.updateCall(id, body);

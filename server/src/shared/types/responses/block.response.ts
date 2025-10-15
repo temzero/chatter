@@ -1,9 +1,9 @@
-import { UserResponse } from "@/shared/types/responses/user.response";
+import { UserResponse } from 'src/shared/types/responses/user.response';
 
-export interface BlockResponseDto {
+export interface BlockResponse {
   id: string;
   blockerId: string;
   blocked: UserResponse;
-  createdAt: string;
+  createdAt: string | Date;
   reason: string | null;
 }

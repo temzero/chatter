@@ -5,23 +5,23 @@ import { Chat } from 'src/modules/chat/entities/chat.entity';
 import { UpdateChatDto } from 'src/modules/chat/dto/requests/update-chat.dto';
 import { User } from 'src/modules/user/entities/user.entity';
 import { ChatMember } from 'src/modules/chat-member/entities/chat-member.entity';
-import { ChatMemberRole } from 'src/modules/chat-member/constants/chat-member-roles.constants';
+import { ChatMemberRole } from 'src/shared/types/enums/chat-member-role.enum';
 import { ErrorResponse } from 'src/common/api-response/errors';
-import { ChatType } from './constants/chat-types.constants';
-import { CreateGroupChatDto } from './dto/requests/create-chat.dto';
+import { ChatType } from 'src/shared/types/enums/chat-type.enum';
+import { CreateGroupChatDto } from './dto/requests/create-group-chat.dto';
 import { plainToInstance } from 'class-transformer';
 import { ChatMapper } from './mappers/chat.mapper';
 import { MessageService } from '../message/message.service';
 import { Message } from '../message/entities/message.entity';
-import { SystemEventType } from '../message/constants/system-event-type.constants';
-import { PaginationQuery } from '../message/dto/queries/pagination-query.dto';
+import { SystemEventType } from 'src/shared/types/enums/system-event-type.enum';
+import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
 import { MessageMapper } from '../message/mappers/message.mapper';
-import InitialDataResponse from './dto/responses/initial-data-response.dto';
 import {
   ChatResponseDto,
   ChatWithMessagesResponseDto,
 } from './dto/responses/chat-response.dto';
 import { PublicChatMapper } from './mappers/public-chat.mapper';
+import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
 
 @Injectable()
 export class ChatService {
@@ -42,9 +42,9 @@ export class ChatService {
     userId: string,
     chatLimit: number,
     messageLimit: number,
-  ): Promise<InitialDataResponse> {
+  ): Promise<PaginationResponse<ChatWithMessagesResponseDto>> {
     // 1. Get base chats with pagination
-    const { chats: baseChats, hasMore: hasMoreChats } = await this.getUserChats(
+    const { items: baseChats, hasMore: hasMoreChats } = await this.getUserChats(
       userId,
       { limit: chatLimit },
     );
@@ -52,7 +52,7 @@ export class ChatService {
     // 2. Fetch messages for each chat
     const chatsWithMessages: ChatWithMessagesResponseDto[] = await Promise.all(
       baseChats.map(async (chat) => {
-        const { messages, hasMore } =
+        const { items: messages, hasMore } =
           await this.messageService.getMessagesByChatId(chat.id, userId, {
             limit: messageLimit,
           });
@@ -68,8 +68,8 @@ export class ChatService {
     );
 
     return {
-      chats: chatsWithMessages,
-      hasMoreChats,
+      items: chatsWithMessages,
+      hasMore: hasMoreChats,
     };
   }
 
@@ -253,7 +253,7 @@ export class ChatService {
   async getUserChats(
     userId: string,
     options: PaginationQuery = { offset: 0, limit: 20 },
-  ): Promise<{ chats: ChatResponseDto[]; hasMore: boolean }> {
+  ): Promise<PaginationResponse<ChatResponseDto>> {
     const { offset, limit } = options;
     const savedChat = await this.getSavedChat(userId).catch(() => null);
 
@@ -297,7 +297,7 @@ export class ChatService {
 
     const resultChats = savedChat ? [savedChat, ...chatDtos] : chatDtos;
 
-    return { chats: resultChats, hasMore };
+    return { items: resultChats, hasMore };
   }
 
   async getUserChat(chatId: string, userId: string): Promise<ChatResponseDto> {

@@ -1,10 +1,10 @@
 import { Exclude, Expose } from 'class-transformer';
-// import { CallResponseDto } from 'src/modules/call/dto/call-response.dto';
-import { Call } from 'src/modules/call/entities/call.entity';
-import { SystemEventType } from 'src/modules/message/constants/system-event-type.constants';
+import { SystemEventType } from 'src/shared/types/enums/system-event-type.enum';
+import { CallLiteResponse } from 'src/shared/types/responses/call-lite.response';
+import { LastMessageResponse } from 'src/shared/types/responses/message.response';
 
 @Exclude()
-export class LastMessageResponseDto {
+export class LastMessageResponseDto implements LastMessageResponse {
   @Expose()
   id: string;
 
@@ -21,8 +21,7 @@ export class LastMessageResponseDto {
   icons?: string[];
 
   @Expose()
-  call?: Call;
-  // call?: CallResponseDto;
+  call?: CallLiteResponse;
 
   @Expose()
   isForwarded?: boolean;
@@ -31,5 +30,5 @@ export class LastMessageResponseDto {
   systemEvent?: SystemEventType | null;
 
   @Expose()
-  createdAt: Date;
+  createdAt: Date | string;
 }

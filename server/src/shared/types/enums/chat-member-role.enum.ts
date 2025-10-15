@@ -1,8 +1,8 @@
 export enum ChatMemberRole {
-  OWNER = "owner",
-  ADMIN = "admin",
-  MEMBER = "member",
-  GUEST = "guest",
+  OWNER = 'owner',
+  ADMIN = 'admin',
+  MEMBER = 'member',
+  GUEST = 'guest',
 }
 
 export const rolePriority = {

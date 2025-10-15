@@ -39,15 +39,15 @@ export const handleSystemEventMessage = (message: MessageResponse) => {
 
   const updateMap: Partial<Record<SystemEventType, () => void>> = {
     [SystemEventType.CHAT_RENAMED]: () =>
-      chatStore.updateGroupChatLocally?.(chatId, { name: updatedValue }),
+      chatStore.updateChatLocally?.(chatId, { name: updatedValue }),
 
     [SystemEventType.CHAT_UPDATE_DESCRIPTION]: () =>
-      chatStore.updateGroupChatLocally?.(chatId, {
+      chatStore.updateChatLocally?.(chatId, {
         description: updatedValue,
       }),
 
     [SystemEventType.CHAT_UPDATE_AVATAR]: () =>
-      chatStore.updateGroupChatLocally?.(chatId, {
+      chatStore.updateChatLocally?.(chatId, {
         avatarUrl: updatedValue,
       }),
 

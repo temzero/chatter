@@ -1,6 +1,6 @@
 export enum ChatType {
-  DIRECT = "direct",
-  GROUP = "group",
-  CHANNEL = "channel",
-  SAVED = "saved",
+  DIRECT = 'direct',
+  GROUP = 'group',
+  CHANNEL = 'channel',
+  SAVED = 'saved',
 }

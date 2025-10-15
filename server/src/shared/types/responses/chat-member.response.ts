@@ -1,6 +1,7 @@
-import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
-import { ChatMemberStatus } from "@/shared/types/enums/chat-member-status.enum";
-import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
+import { ChatMemberRole } from 'src/shared/types/enums/chat-member-role.enum';
+import { ChatMemberStatus } from 'src/shared/types/enums/chat-member-status.enum';
+import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
+
 export type ChatMember = DirectChatMember | GroupChatMember;
 
 // Base for both group and direct chat members
@@ -21,7 +22,7 @@ export interface GroupChatMember {
   isBlockedByMe: boolean;
   isBlockedMe: boolean;
 
-  createdAt: string;
+  createdAt: Date | string;
 }
 
 // Extends base GroupChatMember for direct chat specific fields
@@ -29,7 +30,7 @@ export interface DirectChatMember extends GroupChatMember {
   username: string;
   email: string;
   phoneNumber: string | null;
-  birthday: string | null;
+  birthday: Date | string | null;
   bio: string | null;
   friendshipStatus?: FriendshipStatus | null;
 }

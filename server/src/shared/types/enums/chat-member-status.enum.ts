@@ -1,6 +1,6 @@
 export enum ChatMemberStatus {
-  ACTIVE = "active",
-  MUTED = "muted",
-  BANNED = "banned",
-  LEFT = "left",
+  ACTIVE = 'active',
+  MUTED = 'muted',
+  BANNED = 'banned',
+  LEFT = 'left',
 }

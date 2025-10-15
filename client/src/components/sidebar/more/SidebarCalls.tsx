@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import SidebarLayout from "@/pages/SidebarLayout";
 import { callService } from "@/services/callService";
-import { CallResponseDto } from "@/shared/types/responses/call.response";
+import { CallResponse } from "@/shared/types/responses/call.response";
 import InfiniteScroller from "@/components/ui/InfiniteScroller";
 import CallItem from "@/components/ui/CallItem";
 import { useCurrentUserId } from "@/stores/authStore";
@@ -14,7 +14,7 @@ const PAGE_LIMIT = 10;
 const SidebarCalls: React.FC = () => {
   const { t } = useTranslation();
   const currentUserId = useCurrentUserId();
-  const [calls, setCalls] = useState<CallResponseDto[]>([]);
+  const [calls, setCalls] = useState<CallResponse[]>([]);
   const [hasMore, setHasMore] = useState(true);
   const [lastCallId, setLastCallId] = useState<string | null>(null);
   const openModal = useModalStore((s) => s.openModal);
@@ -62,7 +62,7 @@ const SidebarCalls: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUserId]); // run when user changes
 
-  const handleDeleteCall = (call: CallResponseDto) => {
+  const handleDeleteCall = (call: CallResponse) => {
     openModal(ModalType.DELETE_CALL, {
       call,
       onDeleted: () => setCalls((prev) => prev.filter((c) => c.id !== call.id)),

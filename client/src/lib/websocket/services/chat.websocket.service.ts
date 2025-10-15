@@ -1,9 +1,9 @@
 // src/services/websocket/chat.service.ts
 import { webSocketService } from "./websocket.service";
-import { SendMessageRequest } from "@/shared/types/requests/send-message.request";
+import { CreateMessageRequest } from "@/shared/types/requests/send-message.request";
 import { ForwardMessageRequest } from "@/shared/types/requests/forward-message.request";
 import { MessageResponse } from "@/shared/types/responses/message.response";
-import { ChatEvent } from "../constants/websocket-event.type";
+import { ChatEvent } from "@/shared/types/enums/websocket-events.enum";
 import { WsEmitChatMemberResponse } from "@/shared/types/responses/ws-emit-chat-member.response";
 
 export const chatWebSocketService = {
@@ -43,7 +43,7 @@ export const chatWebSocketService = {
     webSocketService.emit(ChatEvent.TYPING, { chatId, isTyping });
   },
 
-  sendMessage(message: SendMessageRequest) {
+  sendMessage(message: CreateMessageRequest) {
     webSocketService.emit(ChatEvent.SEND_MESSAGE, message);
   },
 

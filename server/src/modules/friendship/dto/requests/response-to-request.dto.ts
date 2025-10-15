@@ -1,5 +1,5 @@
 import { IsEnum } from 'class-validator';
-import { FriendshipStatus } from '../../constants/friendship-status.constants';
+import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
 
 export class RespondToRequestDto {
   @IsEnum([FriendshipStatus.ACCEPTED, FriendshipStatus.DECLINED])

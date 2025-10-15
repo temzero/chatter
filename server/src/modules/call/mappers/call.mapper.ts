@@ -4,7 +4,7 @@ import { Call } from '../entities/call.entity';
 import { CallResponseDto } from '../dto/call-response.dto';
 import { ChatMapper } from 'src/modules/chat/mappers/chat.mapper';
 import { mapChatMemberToChatMemberResDto } from 'src/modules/chat-member/mappers/chat-member.mapper';
-import { ChatType } from 'src/modules/chat/constants/chat-types.constants';
+import { ChatType } from 'src/shared/types/enums/chat-type.enum';
 
 @Injectable()
 export class CallMapper {

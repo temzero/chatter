@@ -12,7 +12,7 @@ import {
 } from 'typeorm';
 import { ChatMember } from 'src/modules/chat-member/entities/chat-member.entity';
 import { Chat } from 'src/modules/chat/entities/chat.entity';
-import { CallStatus } from '../type/callStatus';
+import { CallStatus } from 'src/shared/types/call';
 import { Message } from 'src/modules/message/entities/message.entity';
 import { User } from 'src/modules/user/entities/user.entity';
 

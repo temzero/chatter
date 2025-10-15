@@ -2,7 +2,7 @@ import { CallStatus } from "@/shared/types/enums/call-status.enum";
 import { ChatResponse } from "./chat.response";
 import { ChatMember } from "./chat-member.response";
 
-export interface CallResponseDto {
+export interface CallResponse {
   id: string;
   chat: ChatResponse;
   status: CallStatus;

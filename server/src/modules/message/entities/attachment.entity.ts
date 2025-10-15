@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Message } from './message.entity';
-import { AttachmentType } from 'src/shared/types/attachment-type.enum';
+import { AttachmentType } from 'src/shared/types/enums/attachment-type.enum';
 
 @Entity('attachment')
 export class Attachment {

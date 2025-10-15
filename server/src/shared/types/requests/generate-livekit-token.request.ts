@@ -1,5 +1,5 @@
 export interface generateLiveKitTokenRequest {
   chatId: string;
-  participantName: string | null;
-  avatarUrl: string | null;
+  participantName?: string | null;
+  avatarUrl?: string | null;
 }

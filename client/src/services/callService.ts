@@ -1,6 +1,6 @@
 import API from "./api/api";
 import { handleError } from "@/utils/handleError";
-import { CallResponseDto } from "@/shared/types/responses/call.response";
+import { CallResponse } from "@/shared/types/responses/call.response";
 import { IncomingCallResponse } from "@shared/types/call";
 import { generateLiveKitTokenRequest } from "@/shared/types/requests/generate-livekit-token.request";
 import { PaginationQuery } from "@/shared/types/queries/pagination-query";
@@ -8,7 +8,7 @@ import { PaginationQuery } from "@/shared/types/queries/pagination-query";
 export const callService = {
   async fetchCallHistory(
     options: PaginationQuery = { limit: 20 }
-  ): Promise<{ calls: CallResponseDto[]; hasMore: boolean }> {
+  ): Promise<{ calls: CallResponse[]; hasMore: boolean }> {
     try {
       const { offset, lastId, limit } = options;
 
@@ -50,17 +50,9 @@ export const callService = {
   },
 
   async generateAndFetchLiveKitToken(
-    chatId: string,
-    participantName?: string,
-    avatarUrl?: string
+    payload: generateLiveKitTokenRequest
   ): Promise<string | undefined> {
     try {
-      const payload: generateLiveKitTokenRequest = {
-        chatId,
-        participantName: participantName ?? null,
-        avatarUrl: avatarUrl ?? null,
-      };
-
       const { data } = await API.post("/calls/token", payload);
       if (!data.payload?.token) {
         throw new Error("No token returned from server");

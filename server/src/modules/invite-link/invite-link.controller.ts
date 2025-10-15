@@ -15,7 +15,7 @@ import { generateInviteLink } from 'src/common/utils/invite-link.util';
 import { SuccessResponse } from 'src/common/api-response/success';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { ErrorResponse } from 'src/common/api-response/errors';
-import { SystemEventType } from '../message/constants/system-event-type.constants';
+import { SystemEventType } from 'src/shared/types/enums/system-event-type.enum';
 import { MessageService } from '../message/message.service';
 
 @UseGuards(JwtAuthGuard)

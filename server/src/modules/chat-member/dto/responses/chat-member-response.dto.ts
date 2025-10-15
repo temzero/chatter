@@ -1,14 +1,19 @@
 import { Exclude, Expose } from 'class-transformer';
-import { ChatMemberRole } from '../../constants/chat-member-roles.constants';
-import { ChatMemberStatus } from '../../constants/chat-member-status.constants';
-import { FriendshipStatus } from 'src/modules/friendship/constants/friendship-status.constants';
+import { ChatMemberRole } from 'src/shared/types/enums/chat-member-role.enum';
+import { ChatMemberStatus } from 'src/shared/types/enums/chat-member-status.enum';
+import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
+
+import {
+  DirectChatMember,
+  GroupChatMember,
+} from 'src/shared/types/responses/chat-member.response';
 
 export type ChatMemberResponseDto =
   | DirectChatMemberResponseDto
   | GroupChatMemberResponseDto;
 
 @Exclude()
-export class GroupChatMemberResponseDto {
+export class GroupChatMemberResponseDto implements GroupChatMember {
   @Expose() id: string;
 
   @Expose() chatId: string;
@@ -37,11 +42,14 @@ export class GroupChatMemberResponseDto {
 
   @Expose() isBlockedMe: boolean;
 
-  @Expose() createdAt: Date;
+  @Expose() createdAt: Date | string;
 }
 
 @Exclude()
-export class DirectChatMemberResponseDto extends GroupChatMemberResponseDto {
+export class DirectChatMemberResponseDto
+  extends GroupChatMemberResponseDto
+  implements DirectChatMember
+{
   @Expose() username: string;
 
   @Expose() email: string;

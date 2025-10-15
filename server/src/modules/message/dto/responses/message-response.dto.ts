@@ -1,12 +1,13 @@
 import { Exclude, Expose, Type } from 'class-transformer';
-import { MessageStatus } from '../../constants/message-status.constants';
+import { MessageStatus } from 'src/shared/types/enums/message-status.enum';
 import { AttachmentResponseDto } from './attachment-response.dto';
 import { SenderResponseDto } from './sender-response.dto';
-import { SystemEventType } from '../../constants/system-event-type.constants';
+import { SystemEventType } from 'src/shared/types/enums/system-event-type.enum';
 import { CallLiteResponseDto } from 'src/modules/call/dto/call-lite-response.dto';
+import { MessageResponse } from 'src/shared/types/responses/message.response';
 
 @Exclude()
-export class MessageResponseDto {
+export class MessageResponseDto implements MessageResponse {
   @Expose() id: string;
   @Expose() chatId: string;
   @Expose() sender: SenderResponseDto;
@@ -33,7 +34,7 @@ export class MessageResponseDto {
 
   @Type(() => CallLiteResponseDto)
   @Expose()
-  call?: CallLiteResponseDto | null;
+  call?: CallLiteResponseDto;
 
   @Expose() isImportant?: boolean;
   @Expose() systemEvent?: SystemEventType | null;

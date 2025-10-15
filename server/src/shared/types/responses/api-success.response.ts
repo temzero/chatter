@@ -1,4 +1,4 @@
-import { ChatResponse } from "./chat.response";
+import { ChatResponse } from './chat.response';
 
 export type ApiSuccessResponse<T> = {
   payload: T;

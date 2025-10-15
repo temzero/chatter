@@ -1,7 +1,6 @@
 import { webSocketService } from "./websocket.service";
-import { CallEvent } from "../constants/websocket-event.type";
+import { CallEvent } from "@/shared/types/enums/websocket-events.enum";
 import {
-  // InitiateCallRequest,
   CallActionRequest,
   CallActionResponse,
   UpdateCallPayload,

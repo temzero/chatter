@@ -5,8 +5,8 @@ import {
   DirectChatMemberResponseDto,
   GroupChatMemberResponseDto,
 } from '../dto/responses/chat-member-response.dto';
-import { ChatType } from '../../chat/constants/chat-types.constants';
-import { FriendshipStatus } from 'src/modules/friendship/constants/friendship-status.constants';
+import { ChatType } from 'src/shared/types/enums/chat-type.enum';
+import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
 
 export function mapChatMemberToChatMemberResDto(
   member: ChatMember,

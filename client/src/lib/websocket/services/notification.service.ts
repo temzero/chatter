@@ -2,7 +2,7 @@
 import { FriendRequestResponse } from "@/shared/types/responses/friendship.response";
 import { webSocketService } from "./websocket.service";
 import { FriendshipUpdateNotification } from "@/shared/types/responses/friendship.response";
-import { NotificationEvent } from "../constants/websocket-event.type";
+import { NotificationEvent } from "@/shared/types/enums/websocket-events.enum";
 
 export const notificationWebSocketService = {
   onFriendshipUpdate(callback: (data: FriendshipUpdateNotification) => void) {

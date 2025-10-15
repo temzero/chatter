@@ -1,5 +1,5 @@
-import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
-import { UserResponse } from "./user.response";
+import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
+import { UserResponse } from './user.response';
 
 export interface FriendshipResponse {
   id: string;

@@ -2,9 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, In, Repository } from 'typeorm';
 import { Call } from './entities/call.entity';
-import { CreateCallDto } from './dto/create-call.dto';
-import { UpdateCallDto } from './dto/update-call.dto';
-import { CallStatus } from './type/callStatus';
+import { CreateCallData } from './type/create-call-data.type';
+import { UpdateCallData } from './type/update-call-data.type';
+import { CallStatus } from 'src/shared/types/call';
 import { ChatMemberService } from '../chat-member/chat-member.service';
 import { CallResponseDto } from './dto/call-response.dto';
 import { UserService } from '../user/user.service';
@@ -123,8 +123,8 @@ export class CallService {
     return call?.id ?? null;
   }
 
-  async createCall(createCallDto: CreateCallDto): Promise<Call> {
-    const { chatId, status, initiatorUser, startedAt } = createCallDto;
+  async createCall(createCall: CreateCallData): Promise<Call> {
+    const { chatId, status, initiatorUser, startedAt } = createCall;
 
     const initiatorMember =
       await this.chatMemberService.getMemberByChatIdAndUserId(
@@ -155,7 +155,7 @@ export class CallService {
 
   async updateCall(
     id: string,
-    updateCallDto: UpdateCallDto,
+    updateCall: UpdateCallData,
   ): Promise<Call | undefined> {
     console.log('Update call');
     const call = await this.getCallById(id);
@@ -165,7 +165,7 @@ export class CallService {
     }
 
     const { attendedUserIds, status, startedAt, endedAt, currentUserIds } =
-      updateCallDto;
+      updateCall;
 
     // Handle attendedUserIds -> attendedUsers
     if (attendedUserIds?.length) {

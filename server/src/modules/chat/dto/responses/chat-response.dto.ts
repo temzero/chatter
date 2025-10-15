@@ -1,19 +1,20 @@
-import { ChatType } from '../../constants/chat-types.constants';
+import { ChatType } from 'src/shared/types/enums/chat-type.enum';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { LastMessageResponseDto } from './last-message-response.dto';
-import { ChatMemberRole } from 'src/modules/chat-member/constants/chat-member-roles.constants';
+import { ChatMemberRole } from 'src/shared/types/enums/chat-member-role.enum';
 import { MessageResponseDto } from 'src/modules/message/dto/responses/message-response.dto';
 import { ChatMemberLiteDto } from './chat-member-lite.dto';
+import { ChatResponse } from 'src/shared/types/responses/chat.response';
 
 @Exclude()
-export class ChatResponseDto {
+export class ChatResponseDto implements ChatResponse {
   @Expose() id: string;
 
   @Expose() type: ChatType;
 
   @Expose() myMemberId: string | null;
 
-  @Expose() updatedAt: Date;
+  @Expose() updatedAt: Date | string | null;
 
   @Expose() unreadCount?: number;
 
@@ -34,7 +35,7 @@ export class ChatResponseDto {
   /** Group/channel only */
   @Expose() description?: string | null;
 
-  @Expose() myRole?: ChatMemberRole | null;
+  @Expose() myRole?: ChatMemberRole;
 
   @Expose()
   @Type(() => ChatMemberLiteDto)

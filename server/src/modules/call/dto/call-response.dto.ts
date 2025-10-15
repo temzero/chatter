@@ -1,11 +1,11 @@
 import { Exclude, Expose, Type } from 'class-transformer';
-import { CallStatus } from '../type/callStatus';
-// import { Chat } from 'src/modules/chat/entities/chat.entity';
+import { CallStatus } from 'src/shared/types/call';
 import { ChatResponseDto } from 'src/modules/chat/dto/responses/chat-response.dto';
 import { ChatMemberResponseDto } from 'src/modules/chat-member/dto/responses/chat-member-response.dto';
+import { CallResponse } from 'src/shared/types/responses/call.response';
 
 @Exclude()
-export class CallResponseDto {
+export class CallResponseDto implements CallResponse {
   @Expose() id: string;
 
   @Expose()
