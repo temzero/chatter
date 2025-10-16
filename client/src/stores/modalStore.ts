@@ -1,4 +1,4 @@
-import { ModalType } from "@/types/enums/modalType";
+import { ModalType } from "@/common/enums/modalType";
 import { create } from "zustand";
 import { useShallow } from "zustand/shallow";
 
@@ -90,4 +90,3 @@ export const useIsReplyToThisMessage = (messageId: string | null | undefined) =>
 export const useSetReplyToMessageId = () =>
   useModalStore((state) => state.setReplyToMessageId);
 export { ModalType };
-

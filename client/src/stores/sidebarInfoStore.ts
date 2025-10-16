@@ -1,5 +1,5 @@
 // stores/sidebarInfoStore.ts
-import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
+import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useShallow } from "zustand/shallow";

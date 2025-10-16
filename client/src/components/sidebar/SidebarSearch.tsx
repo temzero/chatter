@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import SearchBar from "@/components/ui/SearchBar";
 import { useSidebarStore } from "@/stores/sidebarStore";
-import { SlidingContainer } from "../ui/SlidingContainer";
+import { SlidingContainer } from "@/components/ui/SlidingContainer";
 import ChatList from "@/components/ui/ChatList";
 import { useChatStore } from "@/stores/chatStore";
-import { filterChatsByType } from "@/utils/filterChatsByType";
-import { SidebarMode } from "@/types/enums/sidebarMode";
+import { filterChatsByType } from "@/common/utils/filterChatsByType";
+import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
 
 const chatTypes = ["all", "direct", "group", "channel"];

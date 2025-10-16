@@ -137,7 +137,6 @@ export class AuthController {
     // Optional: set HTTP-only cookie for web clients
     setRefreshTokenCookie(response, refreshToken, this.configService);
 
-    // Return plain object conforming to RefreshResponse
     return {
       accessToken,
       message: 'Tokens refreshed successfully',

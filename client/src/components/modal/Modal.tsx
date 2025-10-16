@@ -2,7 +2,7 @@ import { useEffect, useMemo } from "react";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { AnimatePresence, motion } from "framer-motion";
 import { useShallow } from "zustand/shallow";
-import { modalAnimations } from "@/animations/modalAnimations";
+import { modalAnimations } from "@/common/animations/modalAnimations";
 import MediaViewer from "./media/MediaViewer";
 import FriendRequestModal from "./FriendRequestModal";
 import ForwardMessageModal from "./ForwardMessageModal";

@@ -6,8 +6,8 @@ import {
   useModalStore,
   useSetReplyToMessageId,
 } from "@/stores/modalStore";
-import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
-import { scrollToMessageById } from "@/utils/scrollToMessageById";
+import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
+import { scrollToMessageById } from "@/common/utils/scrollToMessageById";
 import { useTranslation } from "react-i18next";
 
 interface MessageActionsProps {
@@ -31,14 +31,15 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   const openModal = useModalStore((state) => state.openModal);
   const closeModal = useModalStore((state) => state.closeModal);
   const setReplyToMessageId = useSetReplyToMessageId();
-  const isPinned = false;
   const isAlreadyReply = !!message.replyToMessageId;
-
+  const isPinned = message.isPinned;
+  const isImportant = message.isImportant;
   // 🔹 Helper to stop repeat code
   const actions = {
     reply: {
       icon: "reply",
       label: t("common.actions.reply"),
+      class: "rotate-180",
       action: () => {
         setReplyToMessageId(message.id);
         scrollToMessageById(message.id, { animate: false });
@@ -47,14 +48,16 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
     forward: {
       icon: "arrow_warm_up",
       label: t("common.actions.forward"),
+      class: "rotate-90",
       action: () => {
         if (onClose) onClose();
         openModal(ModalType.FORWARD_MESSAGE, { message });
       },
     },
     pin: {
-      icon: isPinned ? "remove" : "keep",
+      icon: isPinned ? "keep_off" : "keep",
       label: isPinned ? t("common.actions.unpin") : t("common.actions.pin"),
+      class: isPinned && "filled",
       action: () => {
         chatWebSocketService.togglePinMessage({
           chatId: message.chatId,
@@ -67,6 +70,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
     save: {
       icon: "bookmark",
       label: t("common.actions.save"),
+      class: "",
       action: () => {
         if (onClose) onClose();
         chatWebSocketService.saveMessage({ messageId: message.id });
@@ -75,15 +79,16 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
     },
     important: {
       icon: "star",
-      label: message.isImportant
+      label: isImportant
         ? t("common.actions.unmark_important")
         : t("common.actions.mark_important"),
+      class: isImportant && "filled text-red-400",
       action: () => {
         if (onClose) onClose();
         chatWebSocketService.toggleImportantMessage({
           messageId: message.id,
           chatId: message.chatId,
-          isImportant: !message.isImportant,
+          isImportant: !isImportant,
         });
         closeModal();
       },
@@ -91,6 +96,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
     delete: {
       icon: "delete",
       label: t("common.actions.delete"),
+      class: "text-red-400",
       action: () => {
         if (onClose) onClose();
         openModal(ModalType.DELETE_MESSAGE, { messageId: message.id });
@@ -128,7 +134,10 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   return (
     <div
       onClick={(e) => e.stopPropagation()}
-      className={clsx("flex rounded-lg blur-card", className)}
+      className={clsx(
+        "flex rounded-lg bg-[--sidebar-color] custom-border",
+        className
+      )}
       style={{ zIndex: 99 }}
     >
       {baseActions.map((action, index) => (
@@ -145,15 +154,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
           title={action.label}
         >
           <i
-            className={clsx(
-              "material-symbols-outlined text-2xl",
-              action.label === t("common.actions.reply") && "rotate-180",
-              action.label === t("common.actions.forward") && "rotate-90",
-              action.label === t("common.actions.delete") && "text-red-400",
-              action.label.includes("Important") &&
-                message.isImportant &&
-                "filled text-red-500 font-bold"
-            )}
+            className={clsx("material-symbols-outlined text-2xl", action.class)}
           >
             {action.icon}
           </i>

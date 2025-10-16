@@ -1,4 +1,4 @@
-// components/ui/MessageHorizontalPreview.tsx
+// componen@/components/ui/MessageHorizontalPreview.tsx
 import clsx from "clsx";
 import React, { useRef } from "react";
 import { Avatar } from "@/components/ui/avatar/Avatar";
@@ -7,7 +7,7 @@ import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useCurrentUserId } from "@/stores/authStore";
 import RenderAttachment from "@/components/ui/RenderAttachment";
 import RenderPinnedAttachment from "@/components/ui/RenderPinnedAttachment";
-import { MessageHorizontalPreviewTypes } from "@/types/enums/MessageHorizontalPreviewTypes";
+import { MessageHorizontalPreviewTypes } from "@/common/enums/MessageHorizontalPreviewTypes";
 
 interface MessageHorizontalPreviewProps {
   message: MessageResponse;

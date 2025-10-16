@@ -7,7 +7,7 @@ import { useSidebarInfoVisibility } from "@/stores/sidebarInfoStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useDeviceStore } from "@/stores/deviceStore";
 import { AnimatePresence, motion } from "framer-motion";
-import { useIsMobileSound } from "@/hooks/useIsMobileSound";
+import { useIsMobileSound } from "@/common/hooks/useIsMobileSound";
 
 const AdaptiveView: React.FC = () => {
   const isMobile = useDeviceStore((state) => state.isMobile);

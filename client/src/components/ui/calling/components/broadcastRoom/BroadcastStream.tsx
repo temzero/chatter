@@ -7,7 +7,7 @@ import {
   RemoteTrackPublication,
   Track,
 } from "livekit-client";
-import { useRemoteTracks } from "@/hooks/mediaStreams/useRemoteTracks";
+import { useRemoteTracks } from "@/common/hooks/mediaStreams/useRemoteTracks";
 import { DraggableContainer } from "../callRoom/DraggableContainer";
 import { UserCamera } from "../callRoom/UserCamera";
 

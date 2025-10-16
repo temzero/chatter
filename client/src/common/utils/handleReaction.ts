@@ -1,4 +1,4 @@
-import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
+import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 
 export const handleReaction = ({
   emoji,

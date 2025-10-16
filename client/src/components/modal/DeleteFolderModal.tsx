@@ -2,10 +2,10 @@
 import React from "react";
 import { useModalStore } from "@/stores/modalStore";
 import { motion } from "framer-motion";
-import { modalAnimations } from "@/animations/modalAnimations";
+import { modalAnimations } from "@/common/animations/modalAnimations";
 import { useFolderStore } from "@/stores/folderStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
-import { SidebarMode } from "@/types/enums/sidebarMode";
+import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
 
 const DeleteFolderModal: React.FC = () => {

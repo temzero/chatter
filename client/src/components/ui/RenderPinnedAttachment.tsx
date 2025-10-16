@@ -3,7 +3,7 @@ import { AttachmentResponse } from "@/shared/types/responses/message.response";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { getFileIcon } from "@shared/utils/getFileIcon";
 
-// import { formatFileSize } from "@/utils/formatFileSize";
+// import { formatFileSize } from "@/common/utils/formatFileSize";
 import { useModalStore } from "@/stores/modalStore";
 import CustomAudioPlayer from "./CustomAudioPlayer";
 

@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useCurrentUser } from "@/stores/authStore";
-import { Avatar } from "../../ui/avatar/Avatar";
 import { useFriendshipStore } from "@/stores/friendshipStore";
-import ThemeSwitcher from "../../ui/ThemeSwitcher";
-import { SidebarMode } from "@/types/enums/sidebarMode";
 import { useSetActiveSavedChat } from "@/stores/chatStore";
+import { Avatar } from "@/components/ui/avatar/Avatar";
+import ThemeSwitcher from "@/components/ui/ThemeSwitcher";
+import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
 
 const SidebarMore: React.FC = () => {
@@ -151,7 +151,9 @@ const SidebarMore: React.FC = () => {
             <i className="material-symbols-outlined text-3xl">settings</i>
           </div>
           {!isCompact && (
-            <p className="whitespace-nowrap text-ellipsis">{t("sidebar.settings")}</p>
+            <p className="whitespace-nowrap text-ellipsis">
+              {t("sidebar.settings")}
+            </p>
           )}
         </div>
 

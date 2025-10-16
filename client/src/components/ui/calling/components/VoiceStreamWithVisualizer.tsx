@@ -1,8 +1,8 @@
 // components/call/VoiceStream.tsx
 import { useEffect, useRef, useMemo } from "react";
 import { RemoteTrack } from "livekit-client";
-import { VoiceVisualizerBar } from "../../VoiceVisualizerBar";
-import { VoiceVisualizerBorder } from "../../VoiceVisualizerBorder"; // import the border visualizer
+import { VoiceVisualizerBar } from "@/components/ui/VoiceVisualizerBar";
+import { VoiceVisualizerBorder } from "@/components/ui/VoiceVisualizerBorder"; // import the border visualizer
 
 type VoiceStreamProps = {
   stream?: MediaStream | RemoteTrack | null;

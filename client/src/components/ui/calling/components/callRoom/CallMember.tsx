@@ -5,7 +5,7 @@ import { VoiceStreamWithVisualizer } from "../VoiceStreamWithVisualizer";
 import { Avatar } from "../../../avatar/Avatar";
 import { VoiceVisualizer } from "../../../VoiceVisualizer";
 import { Participant } from "livekit-client";
-import { useRemoteTracks } from "@/hooks/mediaStreams/useRemoteTracks";
+import { useRemoteTracks } from "@/common/hooks/mediaStreams/useRemoteTracks";
 import { Theme, useTheme } from "@/stores/themeStore";
 import callManDarkImage from "@/assets/image/call-man-dark.png";
 import callManLightImage from "@/assets/image/call-man-light.png";

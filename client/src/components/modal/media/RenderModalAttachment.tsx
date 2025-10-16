@@ -1,24 +1,26 @@
 import { useState, useEffect, useRef } from "react";
 import type { AttachmentResponse } from "@/shared/types/responses/message.response";
-import { formatFileSize } from "@/utils/formatFileSize";
-import { handleDownload } from "@/utils/handleDownload";
+import { formatFileSize } from "@/common/utils/formatFileSize";
+import { handleDownload } from "@/common/utils/handleDownload";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { getFileIcon } from "@shared/utils/getFileIcon";
 import CustomAudioDiskPlayer, {
   AudioPlayerRef,
 } from "@/components/ui/CustomAudioDiskPlayer";
 import { motion } from "framer-motion";
-import { mediaViewerAnimations } from "@/animations/mediaViewerAnimations";
+import { mediaViewerAnimations } from "@/common/animations/mediaViewerAnimations";
 import { ModalImageViewer } from "./ModalImageViewer";
 
 export const RenderModalAttachment = ({
   attachment,
   rotation = 0,
   isCurrent = false,
+  onMediaEnd,
 }: {
   attachment: AttachmentResponse;
   rotation?: number;
   isCurrent?: boolean;
+  onMediaEnd?: () => void;
 }) => {
   const [isHorizontalAspectRatio, setIsHorizontalAspectRatio] = useState<
     boolean | null
@@ -130,6 +132,9 @@ export const RenderModalAttachment = ({
           ref={videoRef}
           src={attachment.url}
           controls
+          onEnded={() => {
+            if (onMediaEnd) onMediaEnd();
+          }}
           onLoadedMetadata={(e) => {
             const video = e.currentTarget;
             setIsHorizontalAspectRatio(video.videoWidth > video.videoHeight);
@@ -163,6 +168,7 @@ export const RenderModalAttachment = ({
           mediaUrl={attachment.url}
           fileName={attachment.filename ?? ""}
           ref={audioPlayerRef}
+          goNext={onMediaEnd}
         />
       );
 

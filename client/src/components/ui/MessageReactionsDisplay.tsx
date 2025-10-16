@@ -1,10 +1,10 @@
 import React from "react";
 import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
-import { handleReaction } from "@/utils/handleReaction";
+import { handleReaction } from "@/common/utils/handleReaction";
 import { useMessageReactions } from "@/stores/messageStore";
 import { audioService, SoundType } from "@/services/audio.service"; // ✅ enum
-import { messageAnimations } from "@/animations/messageAnimations";
+import { messageAnimations } from "@/common/animations/messageAnimations";
 
 interface MessageReactionDisplayProps {
   isMe?: boolean;

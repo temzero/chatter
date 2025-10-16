@@ -1,14 +1,14 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useIsMe } from "@/stores/authStore";
-import { formatDateTime } from "@/utils/formatDate";
-import { scrollToMessageById } from "@/utils/scrollToMessageById";
+import { formatDateTime } from "@/common/utils/formatDate";
+import { scrollToMessageById } from "@/common/utils/scrollToMessageById";
 import type { MessageResponse } from "@/shared/types/responses/message.response";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { MessageHorizontalPreview } from "./MessageHorizontalPreview";
-import { messageAnimations } from "@/animations/messageAnimations";
-import { MessageHorizontalPreviewTypes } from "@/types/enums/MessageHorizontalPreviewTypes";
-import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
+import { messageAnimations } from "@/common/animations/messageAnimations";
+import { MessageHorizontalPreviewTypes } from "@/common/enums/MessageHorizontalPreviewTypes";
+import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 
 interface MessageProps {
   message: MessageResponse;
@@ -30,7 +30,7 @@ const PinnedMessage: React.FC<MessageProps> = ({
         e.stopPropagation();
         scrollToMessageById(message.id, { smooth: false });
       }}
-      className={`absolute custom-border w-full h-[--pinned-message-height] top-[var(--header-height)] left-1/2 -translate-x-1/2 flex gap-4 p-1 px-2 items-center justify-between
+      className={`absolute custom-border w-full h-[--pinned-message-height] top-[var(--header-height)] left-1/2 -translate-x-1/2 flex gap-4 p-1 px-2 items-center justify-between cursor-pointer
           ${
             isMe
               ? "bg-[linear-gradient(to_right,var(--primary-green-50)_0%,var(--primary-green)_50%,var(--primary-green-50)_100%)]"
@@ -51,10 +51,10 @@ const PinnedMessage: React.FC<MessageProps> = ({
           });
         }}
       >
-        <span className="material-symbols-outlined block group-hover:hidden">
+        <span className="material-symbols-outlined filled block group-hover:hidden">
           keep
         </span>
-        <span className="material-symbols-outlined hidden group-hover:block">
+        <span className="material-symbols-outlined filled hidden group-hover:block">
           keep_off
         </span>
       </button>

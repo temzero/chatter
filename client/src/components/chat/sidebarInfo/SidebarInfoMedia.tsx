@@ -4,7 +4,7 @@ import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { useActiveChatAttachments } from "@/stores/messageStore";
 import { SlidingContainer } from "@/components/ui/SlidingContainer";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
-import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
+import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { useTranslation } from "react-i18next";
 import RenderAttachment from "@/components/ui/RenderAttachment";
 

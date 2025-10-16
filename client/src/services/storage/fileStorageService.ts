@@ -1,6 +1,6 @@
 // src/services/fileStorageService.ts
 import API from "@/services/api/api";
-import logFormData from "@/utils/logFormdata";
+import logFormData from "@/common/utils/logFormdata";
 
 type UploadResponse = {
   url: string;

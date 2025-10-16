@@ -1,4 +1,4 @@
 export interface PaginationResponse<T> {
-  data: T[];
+  items: T[];
   hasMore: boolean;
 }

@@ -9,10 +9,10 @@ import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { blockService } from "@/services/blockService";
 import { toast } from "react-toastify";
 import FriendshipBtn from "./FriendshipBtn";
-import type { UserResponse } from "@/shared/types/responses/user.response";
-import { OnlineDot } from "./OnlineDot";
+import { OnlineDot } from "@/components/ui/OnlineDot";
 import { useUserStatus } from "@/stores/presenceStore";
 import { useTranslation } from "react-i18next";
+import { UserResponse } from "@/shared/types/responses/user.response";
 
 const CreateNewChat: React.FC = () => {
   const { t } = useTranslation();

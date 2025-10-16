@@ -3,7 +3,7 @@ import { PresenceEvent } from "@/shared/types/enums/websocket-events.enum";
 import {
   PresenceInitEvent,
   PresenceUpdateEvent,
-} from "../constants/present-payload.type";
+} from "@/shared/types/interfaces/presenceEvent";
 
 export const presenceWebSocketService = {
   subscribe(userIds: string[]) {

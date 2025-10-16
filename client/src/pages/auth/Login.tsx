@@ -4,7 +4,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { AlertMessage } from "@/components/ui/AlertMessage";
 import { AuthenticationLayout } from "../PublicLayout";
 import { motion } from "framer-motion";
-import { publicLayoutAnimations } from "@/animations/publicLayoutAnimations";
+import { publicLayoutAnimations } from "@/common/animations/publicLayoutAnimations";
 import { useTranslation } from "react-i18next";
 
 const Login = () => {

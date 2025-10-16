@@ -8,7 +8,7 @@ import {
 } from "react";
 import { useDeviceStore } from "@/stores/deviceStore";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
-import { formatDuration } from "@/utils/formatDuration";
+import { formatDuration } from "@/common/utils/formatDuration";
 import musicDiskCover from "@/assets/image/disk.png";
 
 // Audio manager
@@ -79,6 +79,7 @@ interface AudioDiskPlayerProps {
   fileName?: string;
   attachmentType: AttachmentType.AUDIO | AttachmentType.VOICE;
   cdImageUrl?: string;
+  goNext?: () => void;
 }
 
 export interface AudioPlayerRef {
@@ -88,7 +89,7 @@ export interface AudioPlayerRef {
 }
 
 const AudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
-  ({ mediaUrl, fileName, cdImageUrl }, ref) => {
+  ({ mediaUrl, fileName, cdImageUrl, goNext }, ref) => {
     const isMobile = useDeviceStore((state) => state.isMobile);
 
     const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -190,6 +191,9 @@ const AudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
     const handleEnded = () => {
       dispatch({ type: "reset" });
       if (audioRef.current) audioRef.current.currentTime = 0;
+      if (goNext) {
+        goNext();
+      }
     };
 
     // -------------------- Event Listeners --------------------

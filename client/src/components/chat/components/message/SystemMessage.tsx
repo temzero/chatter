@@ -3,7 +3,7 @@ import { useCurrentUserId } from "@/stores/authStore";
 import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 import { MessageResponse } from "@/shared/types/responses/message.response";
 import { MessageReactionDisplay } from "@/components/ui/MessageReactionsDisplay";
-import { messageAnimations } from "@/animations/messageAnimations";
+import { messageAnimations } from "@/common/animations/messageAnimations";
 import { SystemMessageContent } from "@/components/ui/SystemMessageContent";
 import { SystemMessageJSONContent } from "@/components/ui/SystemMessageContent";
 import {
@@ -57,7 +57,7 @@ const SystemMessage = ({
         e.preventDefault();
         openMessageModal(messageId);
       }}
-      className="cursor-pointer opacity-50 pb-2 mx-auto flex items-center justify-center"
+      className="cursor-pointer pb-2 mx-auto flex items-center justify-center"
       style={{
         zIndex: isFocus ? 100 : "auto",
       }}
@@ -85,7 +85,7 @@ const SystemMessage = ({
           senderId={senderId}
           senderDisplayName={senderDisplayName}
           JSONcontent={content}
-          ClassName={`italic truncate text-center ${getClass()}`}
+          ClassName={`italic truncate text-center opacity-60 ${getClass()}`}
         />
 
         <MessageReactionDisplay

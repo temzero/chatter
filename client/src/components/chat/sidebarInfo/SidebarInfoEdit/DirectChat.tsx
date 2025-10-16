@@ -10,9 +10,9 @@ import { ModalType, useModalStore } from "@/stores/modalStore";
 import { useActiveMembers } from "@/stores/chatMemberStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useMessageStore } from "@/stores/messageStore";
-import { useMuteControl } from "@/hooks/useMuteControl";
+import { useMuteControl } from "@/common/hooks/useMuteControl";
 import { SidebarInfoHeaderIcons } from "@/components/ui/SidebarInfoHeaderIcons";
-import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
+import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { useTranslation } from "react-i18next";
 import { useDeviceStore } from "@/stores/deviceStore";
 

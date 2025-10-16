@@ -2,7 +2,7 @@
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { useCurrentUserId } from "@/stores/authStore";
-import { useFriendRequest } from "@/hooks/useFriendRequest";
+import { useFriendRequest } from "@/common/hooks/useFriendRequest";
 
 interface FriendshipBtnProps {
   userId: string;

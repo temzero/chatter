@@ -6,6 +6,11 @@ import { useMessageStore } from "./messageStore";
 import { useAuthStore } from "./authStore";
 import { useChatMemberStore } from "./chatMemberStore";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
+import { toast } from "react-toastify";
+import { useModalStore } from "./modalStore";
+import { useSidebarInfoStore } from "./sidebarInfoStore";
+import { UpdateChatRequest } from "@/shared/types/requests/update-chat.request";
+import { handleError } from "@/common/utils/handleError";
 import type {
   ChatMemberLite,
   ChatResponse,
@@ -14,11 +19,6 @@ import type {
   LastMessageResponse,
   MessageResponse,
 } from "@/shared/types/responses/message.response";
-import { toast } from "react-toastify";
-import { useModalStore } from "./modalStore";
-import { useSidebarInfoStore } from "./sidebarInfoStore";
-import { handleError } from "@/utils/handleError";
-import { UpdateChatRequest } from "@/shared/types/requests/update-chat.request";
 
 interface ChatStore {
   chats: ChatResponse[];
@@ -114,16 +114,20 @@ export const useChatStore = create<ChatStore>()(
               return;
             }
 
+            const chatsWithMessages = initialData.items;
+            const hasMoreChats = initialData.hasMore;
+
             // Process chats (without messages)
-            const chats = initialData.chats.map((chat) => {
+            const processedChats = chatsWithMessages.map((chat) => {
               // eslint-disable-next-line @typescript-eslint/no-unused-vars
               const { messages, hasMoreMessages, ...chatData } = chat;
               return chatData;
             });
 
             const savedChat =
-              chats.find((chat) => chat.type === ChatType.SAVED) || null;
-            const otherChats = chats.filter(
+              processedChats.find((chat) => chat.type === ChatType.SAVED) ||
+              null;
+            const otherChats = processedChats.filter(
               (chat) => chat.type !== ChatType.SAVED
             );
 
@@ -132,11 +136,11 @@ export const useChatStore = create<ChatStore>()(
               savedChat,
               chats: otherChats,
               filteredChats: otherChats,
-              hasMoreChats: initialData.hasMoreChats,
+              hasMoreChats: hasMoreChats, // Use the variable from initialData
             });
 
             // Process messages for each chat
-            initialData.chats.forEach((chat) => {
+            chatsWithMessages.forEach((chat) => {
               if (chat.messages?.length) {
                 useMessageStore
                   .getState()

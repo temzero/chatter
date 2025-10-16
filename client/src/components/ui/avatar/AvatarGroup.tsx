@@ -1,5 +1,5 @@
-import { OnlineDot } from "../OnlineDot";
 import { Avatar } from "./Avatar";
+import { OnlineDot } from "@/components/ui/OnlineDot";
 import type {
   ChatMemberLite,
   ChatResponse,

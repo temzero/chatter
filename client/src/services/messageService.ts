@@ -2,14 +2,15 @@ import API from "./api/api";
 import { MessageResponse } from "@/shared/types/responses/message.response";
 import { UpdateMessageRequest } from "@/shared/types/requests/update-message.request";
 import { PaginationQuery } from "@/shared/types/queries/pagination-query";
+import { PaginationResponse } from "@/shared/types/responses/pagination.response";
 
 export const messageService = {
   async getChatMessages(
     chatId: string,
-    options: PaginationQuery = { limit: 10 }
-  ): Promise<{ messages: MessageResponse[]; hasMore: boolean }> {
+    options?: PaginationQuery
+  ): Promise<PaginationResponse<MessageResponse>> {
     try {
-      const { offset, lastId, limit } = options;
+      const { offset, lastId, limit = 20 } = options || {};
 
       const { data } = await API.get(`/messages/chat/${chatId}`, {
         params: {
@@ -19,8 +20,7 @@ export const messageService = {
         },
       });
 
-      const { messages, hasMore } = data.payload;
-      return { messages, hasMore };
+      return data.payload;
     } catch (error) {
       console.error("Error fetching chat messages:", error);
       throw new Error("Failed to fetch chat messages");

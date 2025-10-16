@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import { Transporter } from 'nodemailer';
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ErrorResponse } from 'src/common/api-response/errors';
 import { TokenService } from '../services/token.service';
-import { VerificationPurpose } from './constants/verificationPurpose';
+import { VerificationPurpose } from './constants/verificationPurpose.enum';
 import { VerificationCodeService } from '../services/verification-code.service';
 
 @Injectable()

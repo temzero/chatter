@@ -1,4 +1,3 @@
-// src/auth/types/jwt-payload.interface.ts
 export type JwtPayload = {
   sub: string; // User ID
   email: string;

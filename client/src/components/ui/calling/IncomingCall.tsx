@@ -4,10 +4,10 @@ import { BounceLoader } from "react-spinners";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { VideoStream } from "./components/VideoStream";
 import { useCallStore } from "@/stores/callStore/callStore";
-import { useLocalPreviewVideoTrack } from "@/hooks/mediaStreams/useLocalPreviewVideoTrack";
+import { useLocalPreviewVideoTrack } from "@/common/hooks/mediaStreams/useLocalPreviewVideoTrack";
 import { CallActionButton } from "./CallActionButton";
 import CallHeader from "./components/CallHeader";
-import { callAnimations } from "@/animations/callAnimations";
+import { callAnimations } from "@/common/animations/callAnimations";
 
 const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
   const [loaderColor, setLoaderColor] = useState("#8b8b8b");

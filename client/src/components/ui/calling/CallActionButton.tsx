@@ -6,7 +6,7 @@ import {
   useTransform,
   animate,
 } from "framer-motion";
-import { callAnimations } from "@/animations/callAnimations";
+import { callAnimations } from "@/common/animations/callAnimations";
 
 interface CallActionButtonProps {
   isVideoCall: boolean;

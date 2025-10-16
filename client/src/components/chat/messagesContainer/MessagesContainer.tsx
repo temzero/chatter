@@ -7,7 +7,7 @@ import {
   useMessagesByChatId,
   useMessageStore,
 } from "@/stores/messageStore";
-import TypingIndicator from "../../ui/typingIndicator/TypingIndicator";
+import TypingIndicator from "@/components/ui/typingIndicator/TypingIndicator";
 import InfiniteScroller from "@/components/ui/InfiniteScroller";
 import Messages from "./Messages";
 import ChannelMessages from "./ChannelMessages";

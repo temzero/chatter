@@ -1,11 +1,11 @@
 // src/components/SidebarFriendRequests.tsx
 import React, { useState } from "react";
-import { Avatar } from "../../ui/avatar/Avatar";
-import { formatTimeAgo } from "../../../utils/formatTimeAgo";
-import { SlidingContainer } from "../../ui/SlidingContainer";
+import { Avatar } from "@/components/ui/avatar/Avatar";
+import { formatTimeAgo } from "@/common/utils/formatTimeAgo";
+import { SlidingContainer } from "@/components/ui/SlidingContainer";
 import SidebarLayout from "@/pages/SidebarLayout";
 import { useCurrentUserId } from "@/stores/authStore";
-import { useFriendRequest } from "@/hooks/useFriendRequest";
+import { useFriendRequest } from "@/common/hooks/useFriendRequest";
 import { useChatStore } from "@/stores/chatStore";
 import { useTranslation } from "react-i18next";
 

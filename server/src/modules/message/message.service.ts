@@ -126,7 +126,6 @@ export class MessageService {
     const replyToMessage = await this.messageRepo.findOne({
       where: { id: dto.replyToMessageId },
     });
-    console.log('replyMessage', replyToMessage);
     if (!replyToMessage) ErrorResponse.notFound('Replied message not found');
     if (replyToMessage.chatId !== dto.chatId) {
       ErrorResponse.badRequest('Replied message is from another chat');
@@ -245,7 +244,6 @@ export class MessageService {
       call?: Call;
     },
   ): Promise<MessageResponseDto> {
-    console.log('(createSystemEventMessage)');
     let targetName: string | undefined;
     if (options?.targetId && options.targetId !== senderId) {
       targetName =
@@ -283,7 +281,6 @@ export class MessageService {
     const messageResponse =
       this.messageMapper.mapMessageToMessageResDto(fullMessage);
 
-    console.log('🔔 Emit SYSTEM EVENT MESSAGE');
     await this.websocketNotificationService.emitToChatMembers(
       chatId,
       ChatEvent.NEW_MESSAGE,
@@ -568,9 +565,8 @@ export class MessageService {
       throw new Error('Only sender can mark message as important');
     }
 
-    message.isImportant = isImportant;
-    const updatedMessage = await this.messageRepo.save(message);
-    return updatedMessage.isImportant;
+    await this.messageRepo.update(message.id, { isImportant });
+    return isImportant;
   }
 
   // Delete message

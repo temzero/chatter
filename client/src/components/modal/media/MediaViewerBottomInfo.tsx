@@ -1,7 +1,7 @@
 // components/MediaViewerBottomInfo.tsx
 import { useDeviceStore } from "@/stores/deviceStore";
 import { AttachmentResponse } from "@/shared/types/responses/message.response";
-import { formatFileSize } from "@/utils/formatFileSize";
+import { formatFileSize } from "@/common/utils/formatFileSize";
 
 interface MediaViewerBottomInfoProps {
   attachment: AttachmentResponse;

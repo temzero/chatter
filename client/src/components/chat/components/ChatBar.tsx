@@ -2,14 +2,14 @@ import clsx from "clsx";
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useMessageStore } from "@/stores/messageStore";
 import { AnimatePresence, motion } from "framer-motion";
-import { handleSendMessage } from "@/utils/sendMessageHandler";
+import { handleSendMessage } from "@/common/utils/sendMessageHandler";
 import { useModalStore, useReplyToMessageId } from "@/stores/modalStore";
 import { useCurrentUserId } from "@/stores/authStore";
 import { useTranslation } from "react-i18next";
-import EmojiPicker from "../../ui/EmojiPicker";
-import AttachFile from "../../ui/AttachFile";
-import AttachmentImportedPreview from "../../ui/AttachmentImportedPreview";
-import useTypingIndicator from "@/hooks/useTypingIndicator";
+import EmojiPicker from "@/components/ui/EmojiPicker";
+import AttachFile from "@/components/ui/AttachFile";
+import AttachmentImportedPreview from "@/components/ui/AttachmentImportedPreview";
+import useTypingIndicator from "@/common/hooks/useTypingIndicator";
 
 interface ChatBarProps {
   chatId: string;

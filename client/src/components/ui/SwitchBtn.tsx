@@ -1,4 +1,4 @@
-// components/ui/SwitchBtn.tsx
+// componen@/components/ui/SwitchBtn.tsx
 import React from "react";
 import * as Switch from "@radix-ui/react-switch";
 

@@ -9,7 +9,7 @@ import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useShallow } from "zustand/shallow";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { useAuthStore, useCurrentUserId } from "./authStore";
-import { handleError } from "@/utils/handleError";
+import { handleError } from "@/common/utils/handleError";
 import { useMemo } from "react";
 
 interface ChatMemberStore {

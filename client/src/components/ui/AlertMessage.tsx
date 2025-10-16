@@ -6,22 +6,24 @@ type AlertMessageProps = {
 };
 
 export const AlertMessage = ({ className = "" }: AlertMessageProps) => {
-  const message = useAuthStore(state => state.message);
+  const message = useAuthStore((state) => state.message);
 
   if (!message) return null;
 
   const getMessageColor = () => {
     switch (message.type) {
-      case 'error': return 'text-red-400';
-      case 'success': return 'text-green-400';
-      case 'info': return 'text-blue-400';
-      default: return 'text-gray-400';
+      case "error":
+        return "text-red-400";
+      case "success":
+        return "text-green-400";
+      case "info":
+        return "text-blue-400";
+      default:
+        return "text-gray-400";
     }
   };
 
   return (
-    <div className={`${getMessageColor()} ${className}`}>
-      {message.content}
-    </div>
+    <div className={`${getMessageColor()} ${className}`}>{message.content}</div>
   );
 };

@@ -5,8 +5,12 @@ import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { MessageResponse } from "@/shared/types/responses/message.response";
 import { CallStatus } from "@/shared/types/enums/call-status.enum";
 import { ModalType, useModalStore } from "@/stores/modalStore";
-import { getCallColor, getCallIcon, getCallText } from "@/utils/callHelpers";
-import { callAnimations } from "@/animations/callAnimations";
+import {
+  getCallColor,
+  getCallIcon,
+  getCallText,
+} from "@/common/utils/callHelpers";
+import { callAnimations } from "@/common/animations/callAnimations";
 
 interface CallMessageBubbleProps {
   message: MessageResponse;

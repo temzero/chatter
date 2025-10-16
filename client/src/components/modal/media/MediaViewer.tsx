@@ -6,7 +6,7 @@ import { useModalStore } from "@/stores/modalStore";
 import { useActiveChatAttachments } from "@/stores/messageStore";
 import { RenderModalAttachment } from "./RenderModalAttachment";
 import { useShallow } from "zustand/shallow";
-import { handleDownload } from "@/utils/handleDownload";
+import { handleDownload } from "@/common/utils/handleDownload";
 import { audioService, SoundType } from "@/services/audio.service";
 import { useDeviceStore } from "@/stores/deviceStore";
 import { MediaViewerButtons } from "./MediaViewerButtons";
@@ -220,6 +220,7 @@ export const MediaViewer = () => {
               attachment={attachment}
               rotation={index === currentIndex ? rotation : 0}
               isCurrent={index === currentIndex}
+              onMediaEnd={goNext}
             />
           </motion.div>
         ))}

@@ -1,6 +1,7 @@
 import { ChatMemberRole } from 'src/shared/types/enums/chat-member-role.enum';
 import { ChatMemberStatus } from 'src/shared/types/enums/chat-member-status.enum';
 import { UpdateChatMemberRequest } from 'src/shared/types/requests/update-chat-member.request';
+import { EmptyStringToNull } from 'src/common/utils/dto.utils';
 import {
   IsDate,
   IsEnum,

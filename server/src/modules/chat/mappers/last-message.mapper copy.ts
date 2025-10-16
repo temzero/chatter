@@ -21,30 +21,18 @@ export function mapMessageToLastMessageResDto(
       'User';
 
   const isForwarded = !!message.forwardedFromMessage;
-  const source =
-    isForwarded && message.forwardedFromMessage
-      ? message.forwardedFromMessage
-      : message;
 
-  let content: string | undefined = source.content || undefined;
-  const attachments = source.attachments;
-  const icons = getAttachmentIcons(attachments);
+  let content: string | undefined;
+  let icons: string[] | undefined;
 
-  // ✅ Combine filenames and text as "file1, file2 | text"
-  if (attachments && attachments.length > 0) {
-    const fileNames = attachments
-      .map((att) => att.filename)
-      .filter(Boolean)
-      .join(', ');
-
-    if (fileNames && content) {
-      content = `${fileNames} | ${content}`;
-    } else if (fileNames) {
-      content = fileNames;
-    }
+  if (isForwarded && message.forwardedFromMessage) {
+    const fwd = message.forwardedFromMessage;
+    content = fwd.content || 'Attachment';
+    icons = getAttachmentIcons(fwd.attachments);
+  } else {
+    content = message.content || 'Attachment';
+    icons = getAttachmentIcons(message.attachments);
   }
-
-  if (!content) content = 'Attachment';
 
   return {
     id: message.id,

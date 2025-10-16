@@ -1,9 +1,9 @@
 import React from "react";
 import { useModalStore } from "@/stores/modalStore";
 import { motion } from "framer-motion";
-import { modalAnimations } from "@/animations/modalAnimations";
+import { modalAnimations } from "@/common/animations/modalAnimations";
 import { toast } from "react-toastify";
-import { formatDateTime } from "@/utils/formatDate";
+import { formatDateTime } from "@/common/utils/formatDate";
 import { useChatStore } from "@/stores/chatStore";
 import { useTranslation } from "react-i18next";
 

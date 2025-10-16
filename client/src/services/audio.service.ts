@@ -1,5 +1,5 @@
 // services/audio.service.ts
-import { handleError } from "@/utils/handleError";
+import { handleError } from "@/common/utils/handleError";
 import activeSound from "@/assets/sound/active.mp3";
 import breakSound from "@/assets/sound/break.mp3";
 import card1Sound from "@/assets/sound/card1.mp3";

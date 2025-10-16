@@ -1,7 +1,7 @@
 // components/SidebarLayout.tsx
 import React from "react";
 import { useSidebarStore } from "@/stores/sidebarStore";
-import { SidebarMode } from "@/types/enums/sidebarMode";
+import { SidebarMode } from "@/common/enums/sidebarMode";
 
 interface BackLocation {
   mode: SidebarMode;

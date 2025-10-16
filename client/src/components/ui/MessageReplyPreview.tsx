@@ -4,7 +4,7 @@ import { MessageResponse } from "@/shared/types/responses/message.response";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { Avatar } from "./avatar/Avatar";
 import clsx from "clsx";
-import { scrollToMessageById } from "@/utils/scrollToMessageById";
+import { scrollToMessageById } from "@/common/utils/scrollToMessageById";
 import RenderMultipleAttachments from "./RenderMultipleAttachments";
 import { useModalStore } from "@/stores/modalStore";
 import {

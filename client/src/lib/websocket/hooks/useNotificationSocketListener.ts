@@ -1,16 +1,16 @@
 // src/hooks/useNotificationSocketListeners.ts
 import { useEffect } from "react";
-import { notificationWebSocketService } from "../services/notification.service";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { toast } from "react-toastify";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useCurrentUserId } from "@/stores/authStore";
+import { notificationWebSocketService } from "@/services/websocket/notification.service";
+import { webSocketService } from "@/services/websocket/websocket.service";
 import {
   FriendRequestResponse,
   FriendshipUpdateNotification,
 } from "@/shared/types/responses/friendship.response";
-import { webSocketService } from "../services/websocket.service";
 
 export function useNotificationSocketListeners() {
   const currentUserId = useCurrentUserId();

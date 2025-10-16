@@ -1,5 +1,5 @@
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
-import { formatDuration } from "@/utils/formatDuration";
+import { formatDuration } from "@/common/utils/formatDuration";
 import clsx from "clsx";
 import React, {
   useState,

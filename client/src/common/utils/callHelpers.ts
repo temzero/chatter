@@ -1,4 +1,4 @@
-import { LocalCallStatus } from "@/types/enums/LocalCallStatus";
+import { LocalCallStatus } from "@/common/enums/LocalCallStatus";
 import { CallStatus } from "@/shared/types/enums/call-status.enum";
 import { formatDurationByStartAndEnd } from "./formatDuration";
 

@@ -6,10 +6,10 @@ import { authService } from "@/services/authService";
 import { useChatStore } from "@/stores/chatStore";
 import { useSidebarStore } from "./sidebarStore";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
-import { SidebarMode } from "@/types/enums/sidebarMode";
-import { webSocketService } from "@/lib/websocket/services/websocket.service";
+import { SidebarMode } from "@/common/enums/sidebarMode";
+import { webSocketService } from "@/services/websocket/websocket.service";
 import type { UserResponse } from "@/shared/types/responses/user.response";
-import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
+import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 
 type AuthMessageType = "error" | "success" | "info";
 
@@ -101,7 +101,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       login: async (identifier, password) => {
         try {
           get().setLoading(true); // Auto-clears messages
-          await authService.login(identifier, password);
+          await authService.login({ identifier, password });
           set({
             isAuthenticated: true,
             loading: false,
@@ -119,9 +119,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       register: async (userData) => {
         try {
           get().setLoading(true);
-          const { user } = await authService.register(userData);
+          await authService.register(userData);
           set({
-            currentUser: user,
             isAuthenticated: true,
             loading: false,
             message: {
@@ -250,6 +249,7 @@ export const useCurrentUserId = () =>
 
 export const useIsMe = (userId: string): boolean => {
   const currentUser = useCurrentUser();
+  if (!userId) return false;
   return currentUser?.id === userId;
 };
 export const useIsAuthenticated = () =>

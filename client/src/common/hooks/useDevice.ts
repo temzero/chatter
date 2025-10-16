@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { useDeviceStore } from "@/stores/deviceStore";
 
-export const useDevice = (breakpoint = 768) => {
+export const useDevice = (breakpoint = 800) => {
   const setIsMobile = useDeviceStore((state) => state.setIsMobile);
 
   useEffect(() => {

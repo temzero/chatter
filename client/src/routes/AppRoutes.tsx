@@ -1,7 +1,7 @@
 // src/routes/AppRoutes.tsx
-import { ROUTES } from "@/constants/routes";
 import { useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { ROUTES } from "@/common/constants/routes";
 import { useIsAuthenticated, useAuthStore } from "@/stores/authStore";
 import PublicRoutes from "./PublicRoutes";
 import PrivateLayout from "../pages/PrivateLayout";

@@ -5,13 +5,13 @@ import { VideoStream } from "./components/VideoStream";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { useModalStore } from "@/stores/modalStore";
 import { VoiceVisualizerButton } from "../VoiceVisualizerBtn";
-import { useLocalPreviewVoiceTrack } from "@/hooks/mediaStreams/useLocalPreviewVoiceTrack";
-import { useLocalPreviewVideoTrack } from "@/hooks/mediaStreams/useLocalPreviewVideoTrack";
-import { useLocalPreviewScreenTrack } from "@/hooks/mediaStreams/useLocalPreviewScreenTrack";
+import { useLocalPreviewVoiceTrack } from "@/common/hooks/mediaStreams/useLocalPreviewVoiceTrack";
+import { useLocalPreviewVideoTrack } from "@/common/hooks/mediaStreams/useLocalPreviewVideoTrack";
+import { useLocalPreviewScreenTrack } from "@/common/hooks/mediaStreams/useLocalPreviewScreenTrack";
 import { useDeviceStore } from "@/stores/deviceStore";
 import { motion } from "framer-motion";
 import CallHeader from "./components/CallHeader";
-import { callAnimations } from "@/animations/callAnimations";
+import { callAnimations } from "@/common/animations/callAnimations";
 
 const BroadcastPreviewModal = ({ chat }: { chat: ChatResponse }) => {
   const isMobile = useDeviceStore((state) => state.isMobile);

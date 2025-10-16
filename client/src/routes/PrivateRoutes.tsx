@@ -1,6 +1,6 @@
 // routes/PrivateRoute.tsx
 import { Navigate } from 'react-router-dom';
-import { ROUTES } from "@/constants/routes";
+import { ROUTES } from "@/common/constants/routes";
 import { useIsAuthenticated } from '@/stores/authStore';
 
 interface PrivateRouteProps {

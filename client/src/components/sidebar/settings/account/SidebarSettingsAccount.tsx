@@ -1,6 +1,6 @@
 import { useCurrentUser } from "@/stores/authStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
-import { SidebarMode } from "@/types/enums/sidebarMode";
+import { SidebarMode } from "@/common/enums/sidebarMode";
 import SidebarLayout from "@/pages/SidebarLayout";
 import { useTranslation } from "react-i18next";
 
@@ -32,7 +32,10 @@ const SidebarSettingsAccount: React.FC = () => {
   ];
 
   return (
-    <SidebarLayout title={t("settings.account")} backLocation={SidebarMode.SETTINGS}>
+    <SidebarLayout
+      title={t("settings.account")}
+      backLocation={SidebarMode.SETTINGS}
+    >
       {accountSettingsItems.map((item, index) => (
         <div key={index} className="settings-item" onClick={item.onClick}>
           <div>

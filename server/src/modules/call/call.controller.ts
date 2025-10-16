@@ -18,11 +18,11 @@ import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { ChatMemberService } from '../chat-member/chat-member.service';
 import { LiveKitService } from './liveKit.service';
 import { CallStatus } from 'src/shared/types/call';
-import { IncomingCallResponse } from '../websocket/constants/callPayload.type';
+import { IncomingCallResponse } from 'src/shared/types/call';
 import { ChatService } from '../chat/chat.service';
 import { ChatType } from 'src/shared/types/enums/chat-type.enum';
 import { GenerateLiveKitTokenDto } from './dto/generate-livekit-token.dto';
-import { UpdateCallData } from './type/update-call-data.type';
+import { UpdateCallData } from './types/update-call-data.type';
 
 @Controller('calls')
 @UseGuards(JwtAuthGuard)

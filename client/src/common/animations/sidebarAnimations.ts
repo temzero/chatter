@@ -1,6 +1,6 @@
 // animations/sidebarAnimations.ts
 import { MotionProps } from "framer-motion";
-import { SidebarMode } from "@/types/enums/sidebarMode";
+import { SidebarMode } from "@/common/enums/sidebarMode";
 
 export const sidebarAnimations: Record<string, MotionProps> = {
   [SidebarMode.DEFAULT]: {

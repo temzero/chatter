@@ -32,7 +32,6 @@ export class MessageController {
     @Param('messageId') messageId: string,
   ): Promise<SuccessResponse<MessageResponseDto>> {
     const message = await this.messageService.getMessageById(messageId);
-    // console.log('message: ', message);
 
     return new SuccessResponse(
       plainToInstance(MessageResponseDto, message),

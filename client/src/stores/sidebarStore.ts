@@ -1,7 +1,7 @@
 // sidebarStore.ts
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { SidebarMode } from "@/types/enums/sidebarMode";
+import { SidebarMode } from "@/common/enums/sidebarMode";
 
 interface SidebarStore {
   currentSidebar: SidebarMode;

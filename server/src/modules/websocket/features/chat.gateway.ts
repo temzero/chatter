@@ -299,7 +299,7 @@ export class ChatGateway {
 
     try {
       if (data.messageId) {
-        const updatedChat = await this.chatService.pinMessage(
+        const pinnedMessage = await this.chatService.pinMessage(
           data.chatId,
           data.messageId,
           userId,
@@ -310,18 +310,21 @@ export class ChatGateway {
           ChatEvent.PIN_UPDATED,
           {
             chatId: data.chatId,
-            message: updatedChat.pinnedMessage,
+            message: pinnedMessage,
           },
         );
       } else {
-        await this.chatService.unpinMessage(data.chatId, userId);
+        const unpinMessage = await this.chatService.unpinMessage(
+          data.chatId,
+          userId,
+        );
 
         await this.websocketNotificationService.emitToChatMembers(
           data.chatId,
           ChatEvent.PIN_UPDATED,
           {
             chatId: data.chatId,
-            message: null,
+            message: unpinMessage,
           },
         );
       }
@@ -392,8 +395,6 @@ export class ChatGateway {
         messageId: data.messageId,
         isImportant: isImportantUpdated,
       };
-
-      console.log('isImportant', data.isImportant);
 
       await this.websocketNotificationService.emitToChatMembers(
         data.chatId,

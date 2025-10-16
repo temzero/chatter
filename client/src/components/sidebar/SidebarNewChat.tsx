@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { useSidebarStore } from "@/stores/sidebarStore";
-import CreateNewChat from "../ui/CreateNewChat";
-import CreateNewGroupChat from "../ui/CreateNewGroupChat";
-import { SlidingContainer } from "../ui/SlidingContainer";
+import CreateNewChat from "@/components/ui/CreateNewChat";
+import CreateNewGroupChat from "@/components/ui/CreateNewGroupChat";
+import { SlidingContainer } from "@/components/ui/SlidingContainer";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
-import { SidebarMode } from "@/types/enums/sidebarMode";
+import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
 
 const sidebarChatTypes = [ChatType.DIRECT, ChatType.GROUP, ChatType.CHANNEL];

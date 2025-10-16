@@ -1,12 +1,12 @@
 import React from "react";
 import { useModalStore } from "@/stores/modalStore";
 import { motion } from "framer-motion";
-import { modalAnimations } from "@/animations/modalAnimations";
+import { modalAnimations } from "@/common/animations/modalAnimations";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
 import { useChatStore } from "@/stores/chatStore";
-import { ChatAvatar } from "../ui/avatar/ChatAvatar";
-import { Avatar } from "../ui/avatar/Avatar";
+import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
+import { Avatar } from "@/components/ui/avatar/Avatar";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useTranslation } from "react-i18next";
 

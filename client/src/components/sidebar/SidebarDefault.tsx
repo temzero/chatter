@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import { useAllChats } from "@/stores/chatStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useFolderStore } from "@/stores/folderStore";
-import { Logo } from "../ui/Logo";
-import { SlidingContainer } from "../ui/SlidingContainer";
+import { Logo } from "@/components/ui/Logo";
+import { SlidingContainer } from "@/components/ui/SlidingContainer";
 import { motion } from "framer-motion";
-import { SidebarMode } from "@/types/enums/sidebarMode";
-import {FolderResponse} from "@/shared/types/responses/folder.response";
+import { SidebarMode } from "@/common/enums/sidebarMode";
+import { FolderResponse } from "@/shared/types/responses/folder.response";
 import ChatList from "@/components/ui/ChatList";
-import ChatFolderSelector from "../ui/ChatFolderSelector";
+import ChatFolderSelector from "@/components/ui/ChatFolderSelector";
 
 const SidebarDefault: React.FC = () => {
   const allChats = useAllChats();

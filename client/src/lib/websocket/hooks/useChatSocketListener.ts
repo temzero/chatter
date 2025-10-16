@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { toast } from "react-toastify";
-import { chatWebSocketService } from "../services/chat.websocket.service";
 import { useMessageStore } from "@/stores/messageStore";
 import { MessageResponse } from "@/shared/types/responses/message.response";
 import { useTypingStore } from "@/stores/typingStore";
@@ -8,9 +7,10 @@ import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useChatStore } from "@/stores/chatStore";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { audioService, SoundType } from "@/services/audio.service";
-import { handleSystemEventMessage } from "@/utils/handleSystemEventMessage";
-import { webSocketService } from "../services/websocket.service";
+import { handleSystemEventMessage } from "@/common/utils/handleSystemEventMessage";
 import { WsEmitChatMemberResponse } from "@/shared/types/responses/ws-emit-chat-member.response";
+import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
+import { webSocketService } from "@/services/websocket/websocket.service";
 
 export function useChatSocketListeners() {
   useEffect(() => {
@@ -110,8 +110,31 @@ export function useChatSocketListeners() {
         message: MessageResponse | null;
       }>
     ) => {
-      const { payload: data } = wsPinned;
-      useChatStore.getState().setPinnedMessage(data.chatId, data.message);
+      const { payload } = wsPinned;
+      const { chatId, message } = payload;
+      if (!chatId || !message) return null;
+
+      const isPinned = message.isPinned;
+
+      // 1. Update pinnedMessage in chat store
+      useChatStore
+        .getState()
+        .setPinnedMessage(chatId, isPinned ? message : null);
+
+      // 2. Unpin all messages in the chat
+      const allMessages = useMessageStore.getState().messages[chatId] || [];
+      allMessages.forEach((msg) => {
+        if (msg.isPinned && msg.id !== message.id) {
+          useMessageStore.getState().updateMessageById(chatId, msg.id, {
+            isPinned: false,
+          });
+        }
+      });
+
+      // 3. Update the target message
+      useMessageStore.getState().updateMessageById(chatId, message.id, {
+        isPinned,
+      });
     };
 
     // ======== Important ========

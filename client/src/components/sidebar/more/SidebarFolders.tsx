@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 
 import SidebarLayout from "@/pages/SidebarLayout";
 import { useSidebarStore } from "@/stores/sidebarStore";
-import { SidebarMode } from "@/types/enums/sidebarMode";
+import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useFolderStore } from "@/stores/folderStore";
 import FolderCard from "@/components/ui/FolderCard";
 import { FolderResponse } from "@/shared/types/responses/folder.response";

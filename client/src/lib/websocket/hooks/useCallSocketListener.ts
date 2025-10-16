@@ -1,16 +1,16 @@
 // hooks/useCallSocketListeners.ts
 import { useEffect } from "react";
-import { callWebSocketService } from "../services/call.websocket.service";
 import { toast } from "react-toastify";
-import { LocalCallStatus } from "@/types/enums/LocalCallStatus";
+import { LocalCallStatus } from "@/common/enums/LocalCallStatus";
 import { CallStatus } from "@/shared/types/enums/call-status.enum";
-import { handleError } from "@/utils/handleError";
+import { handleError } from "@/common/utils/handleError";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { useCallStore } from "@/stores/callStore/callStore";
-import { useCallSounds } from "@/hooks/useCallSound";
+import { useCallSounds } from "@/common/hooks/useCallSound";
 import { callService } from "@/services/callService";
 import { useAuthStore } from "@/stores/authStore";
-import { webSocketService } from "../services/websocket.service";
+import { webSocketService } from "@/services/websocket/websocket.service";
+import { callWebSocketService } from "@/services/websocket/call.websocket.service";
 import {
   CallActionResponse,
   UpdateCallPayload,

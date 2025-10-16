@@ -1,10 +1,10 @@
 // components/modals/DeleteMessageModal.tsx
 import React from "react";
 import { useModalStore } from "@/stores/modalStore";
-import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
+import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { useCurrentUserId } from "@/stores/authStore";
 import { motion } from "framer-motion";
-import { modalAnimations } from "@/animations/modalAnimations";
+import { modalAnimations } from "@/common/animations/modalAnimations";
 import { useMessageStore } from "@/stores/messageStore";
 import { audioService, SoundType } from "@/services/audio.service";
 
@@ -27,7 +27,7 @@ const DeleteMessageModal: React.FC = () => {
       messageId: message.id,
       isDeleteForEveryone,
     });
-    audioService.playSound(SoundType.BREAK);
+    audioService.playSound(SoundType.BREAK, 0.3);
     closeModal();
   };
 

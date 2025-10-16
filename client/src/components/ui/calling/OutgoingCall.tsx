@@ -1,4 +1,4 @@
-// components/ui/calling/CallCallingUI.tsx
+// componen@/components/ui/calling/CallCallingUI.tsx
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCallStore } from "@/stores/callStore/callStore";
@@ -6,10 +6,10 @@ import { Button } from "../Button";
 import { VideoStream } from "./components/VideoStream";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useModalStore } from "@/stores/modalStore";
-import { useLocalTracks } from "@/hooks/mediaStreams/useLocalTracks";
-import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
+import { useLocalTracks } from "@/common/hooks/mediaStreams/useLocalTracks";
+import { callWebSocketService } from "@/services/websocket/call.websocket.service";
 import { UpdateCallPayload } from "@shared/types/call";
-import { callAnimations } from "@/animations/callAnimations";
+import { callAnimations } from "@/common/animations/callAnimations";
 import CallHeader from "./components/CallHeader";
 
 interface CallCallingUIProps {

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { formatFileSize } from "@/utils/formatFileSize";
 import { useModalStore } from "@/stores/modalStore";
 import { AttachmentResponse } from "@/shared/types/responses/message.response";
-import { handleDownload } from "@/utils/handleDownload";
 import { getFileIcon } from "@shared/utils/getFileIcon";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
+import { formatFileSize } from "@/common/utils/formatFileSize";
+import { handleDownload } from "@/common/utils/handleDownload";
 import CustomAudioPlayer from "./CustomAudioPlayer";
 import CustomVideoPlayer from "./CustomVideoPlayer";
 
@@ -38,7 +38,6 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
   const closeModal = useModalStore((state) => state.closeModal);
 
   const [aspectRatio, setAspectRatio] = useState<string | null>(null);
-  console.log("attachment.type", attachment.type);
 
   useEffect(() => {
     if (attachment.type === AttachmentType.IMAGE) {

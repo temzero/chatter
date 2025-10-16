@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import SidebarLayout from "@/pages/SidebarLayout";
-import { SidebarMode } from "@/types/enums/sidebarMode";
+import { SidebarMode } from "@/common/enums/sidebarMode";
 import SwitchBtn from "@/components/ui/SwitchBtn";
 
 interface NotificationOption {
@@ -57,10 +57,7 @@ const SidebarSettingsNotifications: React.FC = () => {
     >
       <div className="flex flex-col">
         {notificationOptions.map((option) => (
-          <div
-            key={option.code}
-            className="settings-option"
-          >
+          <div key={option.code} className="settings-option">
             <span>{t(option.labelKey)}</span>
             <SwitchBtn
               checked={settings[option.code]}

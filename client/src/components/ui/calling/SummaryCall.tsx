@@ -1,8 +1,8 @@
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { Button } from "../Button";
-import { formatDuration } from "@/utils/formatDuration";
+import { formatDuration } from "@/common/utils/formatDuration";
 import { useCallStore } from "@/stores/callStore/callStore";
-import { LocalCallStatus } from "@/types/enums/LocalCallStatus";
+import { LocalCallStatus } from "@/common/enums/LocalCallStatus";
 import { useEffect } from "react";
 import { CallError } from "@shared/types/call";
 import CallHeader from "./components/CallHeader";

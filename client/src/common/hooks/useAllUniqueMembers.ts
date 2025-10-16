@@ -5,10 +5,11 @@ import { useChatStore } from "@/stores/chatStore";
 
 export const useAllUniqueMembers = (
   excludeChatId?: string
-): FriendContactResponse[] => {
+): FriendContactResponse[] | null => {
   const currentUserId = useCurrentUserId();
   const chatMembers = useChatMemberStore.getState().chatMembers;
   const chats = useChatStore.getState().chats;
+  if (!currentUserId) return null;
 
   // Get user IDs to exclude (current user + members already in the chat we're adding to)
   const excludeUserIds = new Set<string>();

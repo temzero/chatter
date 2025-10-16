@@ -1,5 +1,5 @@
 import API from "./api/api";
-import { handleError } from "@/utils/handleError";
+import { handleError } from "@/common/utils/handleError";
 import { CallResponse } from "@/shared/types/responses/call.response";
 import { IncomingCallResponse } from "@shared/types/call";
 import { generateLiveKitTokenRequest } from "@/shared/types/requests/generate-livekit-token.request";

@@ -1,4 +1,3 @@
-// src/constants/routes.js
 export const ROUTES = {
   PUBLIC: {
     LOGIN: "/auth/login",

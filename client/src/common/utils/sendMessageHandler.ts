@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
+import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { useMessageStore } from "@/stores/messageStore";
 import { AttachmentResponse } from "@/shared/types/responses/message.response";
 import { determineAttachmentType } from "./determineAttachmentType";

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import SidebarLayout from "@/pages/SidebarLayout";
-import { SidebarMode } from "@/types/enums/sidebarMode";
+import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useAuthStore, useCurrentUser } from "@/stores/authStore";
 import { userService } from "@/services/userService";
-import { handleError } from "@/utils/handleError";
+import { handleError } from "@/common/utils/handleError";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 

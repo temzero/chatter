@@ -128,6 +128,16 @@ export class Message {
   @BeforeInsert()
   @BeforeUpdate()
   validateContent() {
+    // --- skip validation for pin/unpin updates ---
+    if (
+      this.isPinned !== undefined &&
+      this.pinnedAt !== undefined &&
+      this.content === null &&
+      !this.attachments?.length &&
+      !this.forwardedFromMessageId
+    ) {
+      return;
+    }
     // Skip validation if this is a delete operation
     if (
       this.isDeleted ||

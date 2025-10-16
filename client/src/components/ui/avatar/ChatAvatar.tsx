@@ -1,9 +1,9 @@
 import { Avatar } from "./Avatar";
-import { OnlineDot } from "../OnlineDot";
-import type { ChatResponse } from "@/shared/types/responses/chat.response";
+import { OnlineDot } from "@/components/ui/OnlineDot";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { GroupAvatar } from "./AvatarGroup";
 import { ChannelAvatar } from "./AvatarChannel";
+import { ChatResponse } from "@/shared/types/responses/chat.response";
 
 type ChatAvatarProps = {
   chat?: ChatResponse | null;

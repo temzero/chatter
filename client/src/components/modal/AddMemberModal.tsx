@@ -2,17 +2,17 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useModalStore } from "@/stores/modalStore";
 import { useActiveChat, useChatStore } from "@/stores/chatStore";
-import { Avatar } from "../ui/avatar/Avatar";
-import SearchBar from "../ui/SearchBar";
-import { modalAnimations } from "@/animations/modalAnimations";
+import { Avatar } from "@/components/ui/avatar/Avatar";
+import SearchBar from "@/components/ui/SearchBar";
+import { modalAnimations } from "@/common/animations/modalAnimations";
 import { toast } from "react-toastify";
-import { copyToClipboard } from "@/utils/copyToClipboard";
-import { handleError } from "@/utils/handleError";
+import { copyToClipboard } from "@/common/utils/copyToClipboard";
+import { handleError } from "@/common/utils/handleError";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
-import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
+import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { FriendContactResponse } from "@/shared/types/responses/friend-contact.response";
-import { useFriendContacts } from "@/hooks/useFriendContacts";
-import { useAllUniqueMembers } from "@/hooks/useAllUniqueMembers";
+import { useFriendContacts } from "@/common/hooks/useFriendContacts";
+import { useAllUniqueMembers } from "@/common/hooks/useAllUniqueMembers";
 import { useTranslation } from "react-i18next";
 
 const AddMemberModal: React.FC = () => {
@@ -28,7 +28,7 @@ const AddMemberModal: React.FC = () => {
   const chatMemberUserIds = chat?.otherMemberUserIds || [];
 
   // Use the new hook to get unique members from other chats
-  const allUniqueMembers = useAllUniqueMembers(chat?.id);
+  const allUniqueMembers = useAllUniqueMembers(chat?.id) ?? [];
   const { contacts: friendContacts, loading } =
     useFriendContacts(chatMemberUserIds);
 

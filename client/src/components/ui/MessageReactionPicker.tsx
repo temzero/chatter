@@ -1,9 +1,9 @@
 import React from "react";
-import { handleReaction } from "@/utils/handleReaction";
+import { handleReaction } from "@/common/utils/handleReaction";
 import { audioService, SoundType } from "@/services/audio.service";
 import { useModalStore } from "@/stores/modalStore";
 
-const emojis = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
+const emojis = ["👍", "❤️", "😂", "😮", "😢", "🙏", "🎉", "🔥", "💯"];
 
 interface ReactionPickerProps {
   messageId: string;
@@ -20,7 +20,7 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = ({
 
   return (
     <div
-      className={`flex gap-1 rounded-full p-1 blur-card`}
+      className={`flex gap-1 rounded-full p-1 bg-[--sidebar-color] custom-border`}
       onClick={(e) => e.stopPropagation()}
     >
       {emojis.map((emoji) => (
@@ -28,7 +28,7 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = ({
           key={emoji}
           className="text-xl hover:scale-150 transition-transform duration-150"
           onClick={() => {
-            audioService.playSound(SoundType.REACTION)
+            audioService.playSound(SoundType.REACTION);
             handleReaction({
               emoji,
               messageId,

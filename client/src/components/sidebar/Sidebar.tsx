@@ -1,8 +1,8 @@
 import { JSX } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCurrentSidebar } from "@/stores/sidebarStore";
-import { SidebarMode } from "@/types/enums/sidebarMode";
-import { sidebarAnimations } from "@/animations/sidebarAnimations";
+import { SidebarMode } from "@/common/enums/sidebarMode";
+import { sidebarAnimations } from "@/common/animations/sidebarAnimations";
 
 import SidebarDefault from "@/components/sidebar/SidebarDefault";
 import SidebarSearch from "@/components/sidebar/SidebarSearch";

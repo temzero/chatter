@@ -2,11 +2,11 @@ import { useState, useEffect, useMemo } from "react";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useCurrentUser } from "@/stores/authStore";
 import { useProfileStore } from "@/stores/profileStore";
-import AvatarEdit from "../ui/avatar/AvatarEdit";
+import AvatarEdit from "@/components/ui/avatar/AvatarEdit";
 import { fileStorageService } from "@/services/storage/fileStorageService";
-import { SidebarMode } from "@/types/enums/sidebarMode";
+import { SidebarMode } from "@/common/enums/sidebarMode";
 import SidebarLayout from "@/pages/SidebarLayout";
-import { handleError } from "@/utils/handleError";
+import { handleError } from "@/common/utils/handleError";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 

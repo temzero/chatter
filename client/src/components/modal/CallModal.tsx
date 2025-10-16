@@ -4,19 +4,19 @@ import { motion } from "framer-motion";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { useChatStore } from "@/stores/chatStore";
 import { useDeviceStore } from "@/stores/deviceStore";
-import { LocalCallStatus } from "@/types/enums/LocalCallStatus";
+import { LocalCallStatus } from "@/common/enums/LocalCallStatus";
 import { CallStatus } from "@/shared/types/enums/call-status.enum";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
-import { modalAnimations } from "@/animations/modalAnimations";
+import { modalAnimations } from "@/common/animations/modalAnimations";
 
-import CallRoom from "../ui/calling/components/callRoom/CallRoom";
-import IncomingCall from "../ui/calling/IncomingCall";
-import OutgoingCall from "../ui/calling/OutgoingCall";
-import ConnectingCall from "../ui/calling/ConnectingCall";
-import SummaryCall from "../ui/calling/SummaryCall";
-import BroadcastPreviewModal from "../ui/calling/BroadcastPreviewModal";
-import BroadcastRoom from "../ui/calling/components/broadcastRoom/BroadcastRoom";
+import CallRoom from "@/components/ui/calling/components/callRoom/CallRoom";
+import IncomingCall from "@/components/ui/calling/IncomingCall";
+import OutgoingCall from "@/components/ui/calling/OutgoingCall";
+import ConnectingCall from "@/components/ui/calling/ConnectingCall";
+import SummaryCall from "@/components/ui/calling/SummaryCall";
+import BroadcastPreviewModal from "@/components/ui/calling/BroadcastPreviewModal";
+import BroadcastRoom from "@/components/ui/calling/components/broadcastRoom/BroadcastRoom";
 
 const CallModal: React.FC = () => {
   const isMobile = useDeviceStore((state) => state.isMobile);

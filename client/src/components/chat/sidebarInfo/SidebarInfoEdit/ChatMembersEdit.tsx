@@ -3,7 +3,7 @@ import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useActiveMembers } from "@/stores/chatMemberStore";
 import { ModalType, useModalStore } from "@/stores/modalStore";
-import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
+import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { GroupChatMember } from "@/shared/types/responses/chat-member.response";
 import { useCurrentUserId } from "@/stores/authStore";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";

@@ -1,11 +1,11 @@
 import React, { useState, useRef } from "react";
 import clsx from "clsx";
-import { formatTime } from "@/utils/formatTime";
+import { formatTime } from "@/common/utils/formatTime";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { MessageReactionDisplay } from "@/components/ui/MessageReactionsDisplay";
 import MessageReplyPreview from "@/components/ui/MessageReplyPreview";
-import { handleQuickReaction } from "@/utils/quickReaction";
+import { handleQuickReaction } from "@/common/utils/quickReaction";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { BeatLoader } from "react-spinners";
 import { SystemMessageJSONContent } from "@/components/ui/SystemMessageContent";
@@ -23,7 +23,8 @@ import MessageBubble from "./MessageBubble";
 import CallMessageBubble from "./CallMessageBubble";
 import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 import { motion } from "framer-motion";
-import { getMessageAnimation } from "@/animations/messageAnimations";
+import { getMessageAnimation } from "@/common/animations/messageAnimations";
+import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 
 interface MessageProps {
   message: MessageResponse;
@@ -159,6 +160,26 @@ const Message: React.FC<MessageProps> = ({
                 position={contextMenuPosition || undefined}
                 onClose={closeContextMenu}
               />
+            )}
+
+            {message.isPinned && (
+              <div
+                className={clsx(
+                  "absolute top-0 text-red-400 rounded-full cursor-pointer hover:scale-110 transition-all",
+                  {
+                    "-left-5 rotate-[-45deg]": isMe,
+                    "-right-5 rotate-45": !isMe,
+                  }
+                )}
+                onClick={() => {
+                  chatWebSocketService.togglePinMessage({
+                    chatId: message.chatId,
+                    messageId: null,
+                  });
+                }}
+              >
+                <span className="material-symbols-outlined filled">keep</span>
+              </div>
             )}
           </div>
         </div>

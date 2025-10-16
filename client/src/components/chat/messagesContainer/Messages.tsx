@@ -8,8 +8,8 @@ import {
   groupMessagesByDate,
   isRecentMessage,
   shouldShowInfo,
-} from "@/utils/messageHelpers";
-import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
+} from "@/common/utils/messageHelpers";
+import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { AnimatePresence } from "framer-motion";
 
 interface ChatMessagesProps {

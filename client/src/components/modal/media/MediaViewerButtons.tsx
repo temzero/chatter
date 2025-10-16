@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { AttachmentResponse } from "@/shared/types/responses/message.response";
-import { handleDownload } from "@/utils/handleDownload";
+import { handleDownload } from "@/common/utils/handleDownload";
 import { useSenderByMessageId } from "@/stores/messageStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { ModalType, useModalStore } from "@/stores/modalStore";

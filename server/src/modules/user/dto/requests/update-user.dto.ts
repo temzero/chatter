@@ -61,7 +61,6 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsUrl()
-  // @Length(0, 512)
   @EmptyStringToNull()
   avatarUrl?: string | null;
 

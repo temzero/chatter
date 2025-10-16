@@ -10,7 +10,7 @@ import { Avatar } from "@/components/ui/avatar/Avatar";
 import {
   calculateContextMenuPosition,
   useClickOutside,
-} from "@/utils/contextMenuUtils";
+} from "@/common/utils/contextMenuUtils";
 import { useTranslation } from "react-i18next";
 
 interface ChatMemberItemsProps {

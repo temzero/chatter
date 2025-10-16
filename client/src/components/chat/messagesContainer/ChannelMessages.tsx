@@ -2,7 +2,7 @@ import React, { useMemo, useEffect } from "react";
 import { MessageResponse } from "@/shared/types/responses/message.response";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useCurrentUser } from "@/stores/authStore";
-import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
+import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { useActiveMembers } from "@/stores/chatMemberStore";
 import ChannelMessage from "../components/message/MessageChannel";
 import { AnimatePresence } from "framer-motion";

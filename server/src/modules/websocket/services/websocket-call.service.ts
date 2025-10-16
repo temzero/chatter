@@ -9,14 +9,12 @@ import {
 } from 'src/shared/types/call';
 import { CallEvent } from 'src/shared/types/enums/websocket-events.enum';
 import { CallStatus } from 'src/shared/types/call';
-import { ChatService } from 'src/modules/chat/chat.service';
 import { CallService } from 'src/modules/call/call.service';
 import { ChatMember } from 'src/modules/chat-member/entities/chat-member.entity';
 
 @Injectable()
 export class WebsocketCallService {
   constructor(
-    private readonly chatService: ChatService,
     private readonly callService: CallService,
     private readonly chatMemberService: ChatMemberService,
     private readonly websocketNotificationService: WebsocketNotificationService,

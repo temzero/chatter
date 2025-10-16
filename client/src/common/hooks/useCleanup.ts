@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { useModalStore } from "@/stores/modalStore";
-import { LocalCallStatus } from "@/types/enums/LocalCallStatus";
+import { LocalCallStatus } from "@/common/enums/LocalCallStatus";
 import { useChatStore } from "@/stores/chatStore";
 
 export const useCleanup = () => {
@@ -33,5 +33,5 @@ export const useCleanup = () => {
     return () => {
       window.removeEventListener("beforeunload", handleCleanup);
     };
-  }, [callStore, modalStore]);
+  }, [callStore, chatStore, modalStore]);
 };

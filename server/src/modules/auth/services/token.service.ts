@@ -7,7 +7,7 @@ import { JwtPayload, JwtRefreshPayload } from '../types/jwt-payload.type';
 import { Request } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { ErrorResponse } from 'src/common/api-response/errors';
-import { VerificationPurpose } from '../mail/constants/verificationPurpose';
+import { VerificationPurpose } from '../mail/constants/verificationPurpose.enum';
 import { VerificationCodeService } from './verification-code.service';
 
 @Injectable()

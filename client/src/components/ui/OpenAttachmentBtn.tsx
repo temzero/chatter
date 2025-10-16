@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { useTranslation } from "react-i18next";
-import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
+import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 
 const OpenAttachmentBtn: React.FC = () => {
   const { t } = useTranslation();

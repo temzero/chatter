@@ -10,13 +10,13 @@ import {
 import { Server } from 'socket.io';
 import { WebsocketService } from '../websocket.service';
 import { emitWsError } from '../utils/emitWsError';
-import type { AuthenticatedSocket } from '../constants/authenticatedSocket.type';
-import { PresenceInitEvent } from '../constants/presenceEvent.type';
+import { AuthenticatedSocket } from '../constants/authenticatedSocket.type';
+import { PresenceInitEvent } from 'src/shared/types/interfaces/presenceEvent';
+import { WebsocketConnectionService } from '../services/websocket-connection.service';
 import {
   SystemEvent,
   PresenceEvent,
 } from 'src/shared/types/enums/websocket-events.enum';
-import { WebsocketConnectionService } from '../services/websocket-connection.service';
 
 @WebSocketGateway({
   pingInterval: 10000,

@@ -1,7 +1,7 @@
 // components/PrivateLayout.tsx
 import { Navigate } from "react-router-dom";
-import { ROUTES } from "@/constants/routes";
-import { useAppInitialization } from "@/hooks/useAppInitialization";
+import { ROUTES } from "@/common/constants/routes";
+import { useAppInitialization } from "@/common/hooks/useAppInitialization";
 import BackgroundContent from "@/components/ui/BackgroundContent";
 import Modal from "@/components/modal/Modal";
 import { useIsAuthenticated } from "@/stores/authStore";

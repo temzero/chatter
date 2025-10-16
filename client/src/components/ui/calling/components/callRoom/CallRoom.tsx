@@ -1,7 +1,7 @@
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { useDeviceStore } from "@/stores/deviceStore";
-import { useLocalTracks } from "@/hooks/mediaStreams/useLocalTracks";
+import { useLocalTracks } from "@/common/hooks/mediaStreams/useLocalTracks";
 import { RemoteParticipant, RoomEvent } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
 import { ParticipantsGrid } from "./ParticipantsGrid";

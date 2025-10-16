@@ -1,6 +1,6 @@
 // src/routes/PublicRoutes.tsx
 import { Routes, Route, Navigate } from "react-router-dom";
-import { ROUTES } from "@/constants/routes";
+import { ROUTES } from "@/common/constants/routes";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
 import ForgotPassword from "@/pages/auth/ForgotPassword";

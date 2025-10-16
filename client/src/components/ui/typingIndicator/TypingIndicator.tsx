@@ -2,7 +2,7 @@ import { useEffect, useRef, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Avatar } from "../avatar/Avatar";
 import { audioService, SoundType } from "@/services/audio.service";
-import { useTypingMembers } from "@/hooks/useTypingMembers";
+import { useTypingMembers } from "@/common/hooks/useTypingMembers";
 import "./TypingIndicator.css";
 import React from "react";
 

@@ -8,7 +8,7 @@ import type {
   DirectChatApiResponse,
 } from "@/shared/types/responses/api-success.response";
 import { toast } from "react-toastify";
-import { handleError } from "@/utils/handleError";
+import { handleError } from "@/common/utils/handleError";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { UpdateChatRequest } from "@/shared/types/requests/update-chat.request";
 import { PaginationQuery } from "@/shared/types/queries/pagination-query";

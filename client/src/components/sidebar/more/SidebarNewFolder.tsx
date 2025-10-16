@@ -2,7 +2,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useChatStore } from "@/stores/chatStore";
 import SidebarLayout from "@/pages/SidebarLayout";
-import { SidebarMode } from "@/types/enums/sidebarMode";
+import { SidebarMode } from "@/common/enums/sidebarMode";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useFolderStore } from "@/stores/folderStore";
 import { useSidebarStore } from "@/stores/sidebarStore";

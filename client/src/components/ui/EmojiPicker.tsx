@@ -1,6 +1,6 @@
-import { useEmojiCategories } from "@/hooks/useEmojiCategories";
-import { motion } from "framer-motion";
 import { useState, useRef, useEffect, useMemo } from "react";
+import { motion } from "framer-motion";
+import { useEmojiCategories } from "@/common/hooks/useEmojiCategories";
 import { useTranslation } from "react-i18next";
 
 interface EmojiCategory {

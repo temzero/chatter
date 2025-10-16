@@ -1,16 +1,18 @@
 // shared/presence.types.ts
-export type PresenceStatusMap = Record<string, boolean>;
+export interface PresenceStatusMap {
+  [key: string]: boolean;
+}
 
-export type PresenceInitEvent = {
+export interface PresenceInitEvent {
   statuses: PresenceStatusMap;
   subscribedCount: number;
   serverTime: string;
-};
+}
 
-export type PresenceUpdateEvent = {
+export interface PresenceUpdateEvent {
   userId: string;
   isOnline: boolean;
   lastSeen?: string;
-};
+}
 
 export type PresenceEvent = PresenceInitEvent | PresenceUpdateEvent;

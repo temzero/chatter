@@ -7,15 +7,15 @@ import {
 } from "@/shared/types/responses/message.response";
 import { useModalStore } from "@/stores/modalStore";
 import { useChatStore } from "@/stores/chatStore";
-import { chatWebSocketService } from "@/lib/websocket/services/chat.websocket.service";
+import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { ForwardMessageRequest } from "@/shared/types/requests/forward-message.request";
-import { ChatAvatar } from "../ui/avatar/ChatAvatar";
-import { modalAnimations } from "@/animations/modalAnimations";
+import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
+import { modalAnimations } from "@/common/animations/modalAnimations";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { AttachmentUploadRequest } from "@/shared/types/requests/attachment-upload.request";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useTranslation } from "react-i18next";
-import SearchBar from "../ui/SearchBar";
+import SearchBar from "@/components/ui/SearchBar";
 
 const ForwardMessageModal: React.FC = () => {
   const { t } = useTranslation();
@@ -47,8 +47,6 @@ const ForwardMessageModal: React.FC = () => {
 
         chatWebSocketService.forwardMessage(payload);
       } else if (attachment) {
-        console.log("forward Attachment", attachment);
-
         const attachmentPayload: AttachmentUploadRequest = {
           url: attachment.url,
           type: attachment.type as AttachmentType,

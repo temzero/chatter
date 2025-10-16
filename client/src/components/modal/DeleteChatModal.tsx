@@ -1,15 +1,15 @@
 import React from "react";
 import { useModalStore } from "@/stores/modalStore";
 import { motion } from "framer-motion";
-import { modalAnimations } from "@/animations/modalAnimations";
+import { modalAnimations } from "@/common/animations/modalAnimations";
 import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
-import { Avatar } from "../ui/avatar/Avatar";
+import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useChatStore } from "@/stores/chatStore";
-import { ChatAvatar } from "../ui/avatar/ChatAvatar";
+import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
-import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
+import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { useTranslation } from "react-i18next";
 
 const DeleteChatModal: React.FC = () => {

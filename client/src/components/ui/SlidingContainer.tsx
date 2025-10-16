@@ -1,6 +1,6 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { slidingAnimations } from "@/animations/slidingAnimations";
+import { slidingAnimations } from "@/common/animations/slidingAnimations";
 
 interface SlidingContainerProps {
   children: React.ReactNode;

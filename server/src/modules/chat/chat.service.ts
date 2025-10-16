@@ -343,45 +343,48 @@ export class ChatService {
     chatId: string,
     messageId: string,
     userId: string,
-  ): Promise<ChatResponseDto> {
-    const isParticipant = await this.isChatParticipant(chatId, userId);
-    if (!isParticipant)
+  ): Promise<Message> {
+    // 1. Check participant
+    if (!(await this.isChatParticipant(chatId, userId))) {
       ErrorResponse.unauthorized('You are not a member of this chat');
+    }
 
+    // 2. Load chat and current pinned message
     const chat = await this.chatRepo.findOne({
       where: { id: chatId },
-      relations: ['pinnedMessage'], // Include pinnedMessage relation
+      relations: ['pinnedMessage'],
     });
     if (!chat) ErrorResponse.notFound('Chat not found');
 
-    // Check if the message is already pinned
+    // 3. Check if already pinned
     if (chat.pinnedMessage?.id === messageId) {
       ErrorResponse.badRequest('This message is already pinned');
     }
 
+    // 4. Load message
     const message = await this.messageRepo.findOne({
       where: { id: messageId },
-      relations: ['attachments', 'forwardedFromMessage'],
+      relations: ['sender', 'attachments', 'forwardedFromMessage'],
     });
     if (!message) ErrorResponse.notFound('Message not found');
 
-    // Unpin all other messages (only if we're pinning a different message)
-    if (chat.pinnedMessage?.id !== messageId) {
+    // 5. Unpin existing pinned message (if any)
+    if (chat.pinnedMessage) {
       await this.messageRepo.update(
         { chat: { id: chatId }, isPinned: true },
         { isPinned: false, pinnedAt: null },
       );
     }
 
-    // Update and save the pinned message
     message.isPinned = true;
     message.pinnedAt = new Date();
     await this.messageRepo.save(message);
 
-    // Update chat's pinned message
+    // 6. Update chat pinned message
     chat.pinnedMessage = message;
     await this.chatRepo.save(chat);
 
+    // 7. Create system event message
     await this.messageService.createSystemEventMessage(
       chatId,
       userId,
@@ -397,26 +400,40 @@ export class ChatService {
       },
     );
 
-    return this.getUserChat(chatId, userId);
+    return message;
   }
 
-  async unpinMessage(chatId: string, userId: string): Promise<ChatResponseDto> {
-    const isParticipant = await this.isChatParticipant(chatId, userId);
-    if (!isParticipant)
+  async unpinMessage(chatId: string, userId: string): Promise<Message> {
+    // 1. Check participant
+    if (!(await this.isChatParticipant(chatId, userId))) {
       ErrorResponse.unauthorized('You are not a member of this chat');
+    }
 
+    // 2. Load chat
     const chat = await this.chatRepo.findOne({ where: { id: chatId } });
     if (!chat) ErrorResponse.notFound('Chat not found');
 
-    await this.messageRepo.update(
-      { chat: { id: chatId }, isPinned: true },
-      { isPinned: false, pinnedAt: null },
-    );
+    // 3. Load currently pinned message
+    const message = await this.messageRepo.findOne({
+      where: { chat: { id: chatId }, isPinned: true },
+      relations: ['sender', 'attachments', 'forwardedFromMessage'],
+    });
 
+    if (!message) {
+      ErrorResponse.notFound('No pinned message found for this chat');
+    }
+
+    // 4. Unpin the message
+    message.isPinned = false;
+    message.pinnedAt = null;
+    await this.messageRepo.save(message);
+
+    // 5. Clear chat's pinned message
     chat.pinnedMessage = null;
     await this.chatRepo.save(chat);
 
-    return this.getUserChat(chatId, userId);
+    // 6. Return updated message
+    return message;
   }
 
   async deleteChat(chatId: string, userId: string): Promise<ChatResponseDto> {

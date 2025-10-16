@@ -3,8 +3,8 @@ import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { CallResponse } from "@/shared/types/responses/call.response";
 import { useCallStore } from "@/stores/callStore/callStore";
 import { useChatStore } from "@/stores/chatStore";
-import { getCallColor, getCallText } from "@/utils/callHelpers";
-import { formatDateTime } from "@/utils/formatDate";
+import { getCallColor, getCallText } from "@/common/utils/callHelpers";
+import { formatDateTime } from "@/common/utils/formatDate";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import CallIcon from "./CallIcon";
 

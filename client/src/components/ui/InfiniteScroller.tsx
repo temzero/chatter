@@ -4,7 +4,7 @@ interface InfiniteScrollerProps {
   children: React.ReactNode;
   onLoadMore: () => Promise<number | null>;
   hasMore: boolean;
-  threshold?: number; // px from bottom or top
+  thresholdPercent?: number;
   loader?: React.ReactNode;
   className?: string;
   isScrollUp?: boolean;
@@ -16,7 +16,7 @@ const InfiniteScroller = forwardRef<HTMLDivElement, InfiniteScrollerProps>(
       children,
       onLoadMore,
       hasMore,
-      threshold = 100,
+      thresholdPercent = 0.2,
       loader,
       className = "",
       isScrollUp = false,
@@ -27,34 +27,48 @@ const InfiniteScroller = forwardRef<HTMLDivElement, InfiniteScrollerProps>(
     const isFetchingRef = useRef(false);
     const [isLoading, setIsLoading] = useState(false);
 
-    // ✅ Scroll handler: only trigger when user scrolls near threshold
     const handleScroll = useCallback(
       async (event: React.UIEvent<HTMLDivElement>) => {
         if (!hasMore || isFetchingRef.current) return;
 
         const el = event.currentTarget;
-        let shouldLoad = false;
+        const scrollTop = el.scrollTop;
+        const scrollHeight = el.scrollHeight;
+        const clientHeight = el.clientHeight;
+
+        let scrollPercent: number;
 
         if (isScrollUp) {
-          shouldLoad = el.scrollTop < threshold;
+          // When scrolling upward
+          scrollPercent = scrollTop / (scrollHeight - clientHeight);
+          if (scrollPercent <= thresholdPercent) {
+            // top 25%
+            isFetchingRef.current = true;
+            setIsLoading(true);
+            try {
+              await onLoadMore();
+            } finally {
+              isFetchingRef.current = false;
+              setIsLoading(false);
+            }
+          }
         } else {
-          shouldLoad =
-            el.scrollTop + el.clientHeight >= el.scrollHeight - threshold;
-        }
-
-        if (shouldLoad) {
-          isFetchingRef.current = true;
-          setIsLoading(true);
-
-          try {
-            await onLoadMore();
-          } finally {
-            isFetchingRef.current = false;
-            setIsLoading(false);
+          // When scrolling downward
+          scrollPercent = (scrollTop + clientHeight) / scrollHeight;
+          if (scrollPercent >= 1 - thresholdPercent) {
+            // bottom 75%
+            isFetchingRef.current = true;
+            setIsLoading(true);
+            try {
+              await onLoadMore();
+            } finally {
+              isFetchingRef.current = false;
+              setIsLoading(false);
+            }
           }
         }
       },
-      [hasMore, onLoadMore, threshold, isScrollUp]
+      [hasMore, isScrollUp, thresholdPercent, onLoadMore]
     );
 
     return (

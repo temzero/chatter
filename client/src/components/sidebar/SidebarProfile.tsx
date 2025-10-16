@@ -1,9 +1,9 @@
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useCurrentUser, useAuthStore } from "@/stores/authStore";
-import { Avatar } from "../ui/avatar/Avatar";
-import { SidebarMode } from "@/types/enums/sidebarMode";
+import { Avatar } from "@/components/ui/avatar/Avatar";
+import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
-import ContactInfoItem from "../ui/contactInfoItem";
+import ContactInfoItem from "@/components/ui/contactInfoItem";
 import SidebarLayout from "@/pages/SidebarLayout";
 
 const SidebarProfile: React.FC = () => {

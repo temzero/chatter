@@ -1,12 +1,12 @@
 // export default SidebarSettingsPassword;
 import React, { useState, useEffect } from "react";
 import SidebarLayout from "@/pages/SidebarLayout";
-import { SidebarMode } from "@/types/enums/sidebarMode";
+import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useAuthStore } from "@/stores/authStore";
 import { userService } from "@/services/userService";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { toast } from "react-toastify";
-import { handleError } from "@/utils/handleError";
+import { handleError } from "@/common/utils/handleError";
 import { useTranslation } from "react-i18next";
 
 const SidebarSettingsPassword: React.FC = () => {

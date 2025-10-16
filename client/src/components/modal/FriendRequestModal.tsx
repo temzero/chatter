@@ -1,10 +1,10 @@
 // FriendRequestModal.tsx
 import React, { useRef, useState } from "react";
 import { useModalStore } from "@/stores/modalStore";
-import { Avatar } from "../ui/avatar/Avatar";
+import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import { motion } from "framer-motion";
-import { modalAnimations } from "@/animations/modalAnimations";
+import { modalAnimations } from "@/common/animations/modalAnimations";
 import { useCurrentUserId } from "@/stores/authStore";
 import { useTranslation } from "react-i18next";
 

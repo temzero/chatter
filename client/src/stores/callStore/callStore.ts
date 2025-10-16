@@ -4,15 +4,15 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { audioService } from "@/services/audio.service";
 import { useModalStore, ModalType } from "../modalStore";
-import { LocalCallStatus } from "@/types/enums/LocalCallStatus";
+import { LocalCallStatus } from "@/common/enums/LocalCallStatus";
 import { CallStatus } from "@/shared/types/enums/call-status.enum";
 import { LiveKitService } from "@/services/liveKitService";
 import { getMyToken } from "./helpers/call.helper";
-import { handleError } from "@/utils/handleError";
 import { CallError, IncomingCallResponse } from "@shared/types/call";
 import { callService } from "@/services/callService";
-import { callWebSocketService } from "@/lib/websocket/services/call.websocket.service";
-import { getLocalCallStatus } from "@/utils/callHelpers";
+import { callWebSocketService } from "@/services/websocket/call.websocket.service";
+import { handleError } from "@/common/utils/handleError";
+import { getLocalCallStatus } from "@/common/utils/callHelpers";
 
 export interface CallState {
   liveKitService: LiveKitService | null;

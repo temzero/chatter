@@ -3,12 +3,12 @@ import { create } from "zustand";
 import { useActiveChatId, useChatStore } from "./chatStore";
 import { messageService } from "@/services/messageService";
 import { useMemo } from "react";
-import { handleError } from "@/utils/handleError";
 import { useShallow } from "zustand/react/shallow";
 import { useChatMemberStore } from "./chatMemberStore";
 import { useAuthStore } from "./authStore";
-import { createLastMessage } from "@/utils/createLastMessage";
 import { useMembersByChatId } from "./chatMemberStore";
+import { handleError } from "@/common/utils/handleError";
+import { createLastMessage } from "@/common/utils/createLastMessage";
 import type {
   AttachmentResponse,
   MessageResponse,
@@ -89,7 +89,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
   fetchMessages: async (chatId: string) => {
     set({ isLoading: true });
     try {
-      const { messages, hasMore } = await messageService.getChatMessages(
+      const { items: messages, hasMore } = await messageService.getChatMessages(
         chatId
       );
 
@@ -119,7 +119,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         return 0;
       }
 
-      const { messages: newMessages, hasMore } =
+      const { items: newMessages, hasMore } =
         await messageService.getChatMessages(chatId, {
           lastId: existingMessages[0].id,
         });
@@ -281,6 +281,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         const newLast = createLastMessage(updatedMessages[index]);
         useChatStore.getState().setLastMessage(chatId, newLast);
       }
+      console.log("updatedMessage", updatedMessage);
 
       return {
         messages: {

@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { Logo } from "@/components/ui/Logo";
 import { useNavigate } from "react-router-dom";
-import { ROUTES } from "@/constants/routes";
+import { ROUTES } from "@/common/constants/routes";
 import BackgroundContent from "@/components/ui/BackgroundContent";
 
 interface AuthenticationLayoutProps {

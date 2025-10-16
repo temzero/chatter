@@ -1,5 +1,5 @@
 import { MotionProps } from "framer-motion";
-import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
+import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 
 export const sidebarInfoAnimations: Record<string, MotionProps> = {
   [SidebarInfoMode.DEFAULT]: {
@@ -36,7 +36,7 @@ export const sidebarInfoAnimations: Record<string, MotionProps> = {
       },
     },
   },
-  
+
   fallback: {
     initial: { opacity: 0, x: "var(--sidebar-width)" },
     animate: {

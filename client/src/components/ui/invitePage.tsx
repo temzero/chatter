@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { handleError } from "@/utils/handleError";
+import { handleError } from "@/common/utils/handleError";
 import { AuthenticationLayout } from "@/pages/PublicLayout";
 import { chatService } from "@/services/chat/chatService";
 import { BarLoader } from "react-spinners";

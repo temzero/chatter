@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { friendshipService } from "@/services/friendshipService";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
-import { handleError } from "@/utils/handleError";
+import { handleError } from "@/common/utils/handleError";
 import {
   FriendRequestResponse,
   FriendshipUpdateNotification,

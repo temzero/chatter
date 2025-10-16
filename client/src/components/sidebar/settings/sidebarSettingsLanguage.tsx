@@ -1,7 +1,7 @@
 // SidebarSettingsLanguage.tsx
 import React, { useState } from "react";
 import SidebarLayout from "@/pages/SidebarLayout";
-import { SidebarMode } from "@/types/enums/sidebarMode";
+import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
 import { languages } from "@/i18n/languages";
 

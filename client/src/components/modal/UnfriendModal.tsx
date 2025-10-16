@@ -2,13 +2,13 @@
 import React from "react";
 import { useModalStore } from "@/stores/modalStore";
 import { motion } from "framer-motion";
-import { modalAnimations } from "@/animations/modalAnimations";
+import { modalAnimations } from "@/common/animations/modalAnimations";
 import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
-import { Avatar } from "../ui/avatar/Avatar";
+import { Avatar } from "@/components/ui/avatar/Avatar";
 import { toast } from "react-toastify";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
-import { SidebarInfoMode } from "@/types/enums/sidebarInfoMode";
+import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { useTranslation } from "react-i18next";
 
 const UnfriendModal: React.FC = () => {

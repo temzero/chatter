@@ -7,8 +7,8 @@ import { useEffect, useRef, useState } from "react";
 import {
   calculateContextMenuPosition,
   Position,
-} from "@/utils/contextMenuUtils";
-import { messageAnimations } from "@/animations/messageAnimations";
+} from "@/common/utils/contextMenuUtils";
+import { messageAnimations } from "@/common/animations/messageAnimations";
 
 interface MessageContextMenuProps {
   message: MessageResponse;
