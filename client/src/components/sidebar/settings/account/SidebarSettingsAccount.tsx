@@ -1,7 +1,7 @@
 import { useCurrentUser } from "@/stores/authStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
-import SidebarLayout from "@/pages/SidebarLayout";
+import SidebarLayout from "@/layouts/SidebarLayout";
 import { useTranslation } from "react-i18next";
 
 const SidebarSettingsAccount: React.FC = () => {

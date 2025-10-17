@@ -4,8 +4,8 @@ import ChatInfoDefault from "./SidebarInfoDefault";
 import ChatInfoMedia from "./SidebarInfoMedia";
 import PrivateChatEdit from "./SidebarInfoEdit/DirectChatEdit";
 import GroupChatEdit from "./SidebarInfoEdit/GroupChatEdit";
-import { sidebarInfoAnimations } from "@/common/animations/sidebarInfoAnimations";
 import ChatMembersEdit from "./SidebarInfoEdit/ChatMembersEdit";
+import { sidebarInfoAnimations } from "@/common/animations/sidebarInfoAnimations";
 
 const SidebarInfo: React.FC = () => {
   const currentSidebarInfo = useCurrentSidebarInfo();

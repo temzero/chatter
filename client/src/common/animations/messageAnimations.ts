@@ -21,10 +21,9 @@ export const messageAnimations: Record<string, MotionProps> = {
     whileTap: { scale: 0.8 },
   },
   contextMenu: {
-    initial: { opacity: 0, scale: 0.2 },
+    initial: { opacity: 0, scale: 0.3 },
     animate: { opacity: 1, scale: 1 },
-    exit: { opacity: 0, scale: 0.2 },
-    transition: { type: "spring", stiffness: 350, damping: 30 },
+    exit: { opacity: 0, scale: 0.3 },
   },
 };
 

@@ -1,8 +1,8 @@
 // SidebarSettingsTheme.tsx
 import React from "react";
-import SidebarLayout from "@/pages/SidebarLayout";
+import SidebarLayout from "@/layouts/SidebarLayout";
 import { SidebarMode } from "@/common/enums/sidebarMode";
-import ThemeSelector from "@/components/ui/ThemeSelector";
+import ThemeSelector from "@/components/ui/buttons/ThemeSelector";
 import { useTranslation } from "react-i18next";
 
 const SidebarSettingsTheme: React.FC = () => {

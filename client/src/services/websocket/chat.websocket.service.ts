@@ -1,9 +1,9 @@
 // src/services/websocket/chat.service.ts
-import { webSocketService } from "./websocket.service";
+import { ChatEvent } from "@/shared/types/enums/websocket-events.enum";
+import { webSocketService } from "../websocket/websocket.service";
 import { CreateMessageRequest } from "@/shared/types/requests/send-message.request";
 import { ForwardMessageRequest } from "@/shared/types/requests/forward-message.request";
 import { MessageResponse } from "@/shared/types/responses/message.response";
-import { ChatEvent } from "@/shared/types/enums/websocket-events.enum";
 import { WsEmitChatMemberResponse } from "@/shared/types/responses/ws-emit-chat-member.response";
 
 export const chatWebSocketService = {

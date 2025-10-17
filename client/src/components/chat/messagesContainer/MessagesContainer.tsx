@@ -8,7 +8,7 @@ import {
   useMessageStore,
 } from "@/stores/messageStore";
 import TypingIndicator from "@/components/ui/typingIndicator/TypingIndicator";
-import InfiniteScroller from "@/components/ui/InfiniteScroller";
+import InfiniteScroller from "@/components/ui/layout/InfiniteScroller";
 import Messages from "./Messages";
 import ChannelMessages from "./ChannelMessages";
 

@@ -1,6 +1,6 @@
 // src/lib/hooks/useCallCleanup.ts
 import { useEffect } from "react";
-import { useCallStore } from "@/stores/callStore/callStore";
+import { useCallStore } from "@/stores/callStore";
 import { useModalStore } from "@/stores/modalStore";
 import { LocalCallStatus } from "@/common/enums/LocalCallStatus";
 import { useChatStore } from "@/stores/chatStore";

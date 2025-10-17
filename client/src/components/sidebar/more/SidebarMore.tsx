@@ -4,7 +4,7 @@ import { useCurrentUser } from "@/stores/authStore";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import { useSetActiveSavedChat } from "@/stores/chatStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
-import ThemeSwitcher from "@/components/ui/ThemeSwitcher";
+import ThemeSwitcher from "@/components/ui/buttons/ThemeSwitcher";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
 

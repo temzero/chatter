@@ -4,8 +4,8 @@ import { formatDateTime } from "@/common/utils/formatDate";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import type { MessageResponse } from "@/shared/types/responses/message.response";
 import { useCurrentUserId } from "@/stores/authStore";
-import RenderMultipleAttachments from "@/components/ui/RenderMultipleAttachments";
-import ForwardedMessagePreview from "@/components/ui/ForwardMessagePreview";
+import RenderMultipleAttachments from "@/components/ui/attachments/RenderMultipleAttachments";
+import ForwardedMessagePreview from "@/components/ui/messages/ForwardMessagePreview";
 
 interface MessagePreviewProps {
   message: MessageResponse;

@@ -5,8 +5,8 @@ import { Avatar } from "@/components/ui/avatar/Avatar";
 import { MessageResponse } from "@/shared/types/responses/message.response";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useCurrentUserId } from "@/stores/authStore";
-import RenderAttachment from "@/components/ui/RenderAttachment";
-import RenderPinnedAttachment from "@/components/ui/RenderPinnedAttachment";
+import RenderAttachment from "@/components/ui/attachments/RenderAttachment";
+import RenderPinnedAttachment from "@/components/ui/attachments/RenderPinnedAttachment";
 import { MessageHorizontalPreviewTypes } from "@/common/enums/MessageHorizontalPreviewTypes";
 
 interface MessageHorizontalPreviewProps {

@@ -11,11 +11,11 @@ import { useFriendshipStore } from "@/stores/friendshipStore";
 import { useFolderStore } from "@/stores/folderStore";
 
 // 🧩 Socket hooks
-import { useWebSocket } from "@/lib/websocket/hooks/useWebsocket";
-import { useNotificationSocketListeners } from "@/lib/websocket/hooks/useNotificationSocketListener";
-import { useChatSocketListeners } from "@/lib/websocket/hooks/useChatSocketListener";
-import { usePresenceSocketListeners } from "@/lib/websocket/hooks/usePresenceSocketListeners";
-import { useCallSocketListeners } from "@/lib/websocket/hooks/useCallSocketListener";
+import { useWebSocket } from "@/common/hooks/websocket/useWebsocket";
+import { useNotificationSocketListeners } from "@/common/hooks/websocket/useNotificationSocketListener";
+import { useChatSocketListeners } from "@/common/hooks/websocket/useChatSocketListener";
+import { usePresenceSocketListeners } from "@/common/hooks/websocket/usePresenceSocketListeners";
+import { useCallSocketListeners } from "@/common/hooks/websocket/useCallSocketListener";
 import { useDevice } from "./useDevice";
 import { useCleanup } from "./useCleanup";
 

@@ -104,12 +104,8 @@
   },
 
   "chat": {
-    "all": "Tất cả cuộc trò chuyện",
     "all_with_type": "Tất cả cuộc trò chuyện với loại:",
-    "label": "Loại cuộc trò chuyện",
-    "direct": "Trực tiếp",
-    "group": "Nhóm",
-    "channel": "Kênh"
+    "label": "Loại cuộc trò chuyện"
   },
 
   "chat_bar": {

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { chatMemberService } from "@/services/chat/chatMemberService";
+import { chatMemberService } from "@/services/chatMemberService";
 import { useActiveChatId, useChatStore } from "./chatStore";
 import type {
   ChatMember,

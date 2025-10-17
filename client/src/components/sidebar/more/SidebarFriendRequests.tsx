@@ -2,8 +2,8 @@
 import React, { useState } from "react";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { formatTimeAgo } from "@/common/utils/formatTimeAgo";
-import { SlidingContainer } from "@/components/ui/SlidingContainer";
-import SidebarLayout from "@/pages/SidebarLayout";
+import { SlidingContainer } from "@/components/ui/layout/SlidingContainer";
+import SidebarLayout from "@/layouts/SidebarLayout";
 import { useCurrentUserId } from "@/stores/authStore";
 import { useFriendRequest } from "@/common/hooks/useFriendRequest";
 import { useChatStore } from "@/stores/chatStore";

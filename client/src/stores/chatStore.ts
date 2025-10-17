@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { chatService } from "@/services/chat/chatService";
-import { chatMemberService } from "@/services/chat/chatMemberService";
+import { chatService } from "@/services/chatService";
+import { chatMemberService } from "@/services/chatMemberService";
 import { useMessageStore } from "./messageStore";
 import { useAuthStore } from "./authStore";
 import { useChatMemberStore } from "./chatMemberStore";

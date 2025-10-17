@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import SidebarLayout from "@/pages/SidebarLayout";
+import SidebarLayout from "@/layouts/SidebarLayout";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useAuthStore, useCurrentUser } from "@/stores/authStore";
 import { userService } from "@/services/userService";

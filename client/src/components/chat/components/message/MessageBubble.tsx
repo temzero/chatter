@@ -1,7 +1,7 @@
 import React from "react";
 import clsx from "clsx";
-import RenderMultipleAttachments from "@/components/ui/RenderMultipleAttachments";
-import ForwardedMessagePreview from "@/components/ui/ForwardMessagePreview";
+import RenderMultipleAttachments from "@/components/ui/attachments/RenderMultipleAttachments";
+import ForwardedMessagePreview from "@/components/ui/messages/ForwardMessagePreview";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import type { MessageResponse } from "@/shared/types/responses/message.response";
 

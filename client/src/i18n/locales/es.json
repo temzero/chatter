@@ -102,14 +102,10 @@
       "invalid_token": "Token de verificación inválido."
     }
   },
-  
+
   "chat": {
-    "all": "Todos los chats",
     "all_with_type": "Todos los chats con tipo:",
-    "label": "Tipos de chat",
-    "direct": "Directo",
-    "group": "Grupo",
-    "channel": "Canal"
+    "label": "Tipos de chat"
   },
 
   "chat_bar": {

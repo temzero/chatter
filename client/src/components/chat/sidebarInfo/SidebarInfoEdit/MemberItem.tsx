@@ -1,5 +1,5 @@
 import { Avatar } from "@/components/ui/avatar/Avatar";
-import { OnlineDot } from "@/components/ui/OnlineDot";
+import { OnlineDot } from "@/components/ui/icons/OnlineDot";
 import { useCurrentUser } from "@/stores/authStore";
 import { useChatStore } from "@/stores/chatStore";
 import { useUserStatus } from "@/stores/presenceStore";

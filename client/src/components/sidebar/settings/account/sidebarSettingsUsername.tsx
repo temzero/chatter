@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import SidebarLayout from "@/pages/SidebarLayout";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useAuthStore, useCurrentUser } from "@/stores/authStore";
 import { userService } from "@/services/userService";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { handleError } from "@/common/utils/handleError";
 import { useTranslation } from "react-i18next";
+import SidebarLayout from "@/layouts/SidebarLayout";
 
 const SidebarSettingsUsername: React.FC = () => {
   const { t } = useTranslation();

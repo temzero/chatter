@@ -3,7 +3,7 @@ import { useChatStore } from "@/stores/chatStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { ChatMemberStatus } from "@/shared/types/enums/chat-member-status.enum";
-import { chatMemberService } from "@/services/chat/chatMemberService";
+import { chatMemberService } from "@/services/chatMemberService";
 import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 
 type SystemMessageJSONContent = {

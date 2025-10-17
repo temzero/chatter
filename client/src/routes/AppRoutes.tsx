@@ -4,8 +4,8 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { ROUTES } from "@/common/constants/routes";
 import { useIsAuthenticated, useAuthStore } from "@/stores/authStore";
 import PublicRoutes from "./PublicRoutes";
-import PrivateLayout from "../pages/PrivateLayout";
-import InvitePage from "@/components/ui/InvitePage";
+import HomePage from "@/pages/HomePage";
+import InvitePage from "@/pages/InvitePage";
 // import Chat from "@/components/chat/Chat";
 
 const RouteMessageCleaner = () => {
@@ -51,8 +51,8 @@ const AppRoutes: React.FC = () => {
         />
 
         {/* Private Routes */}
-        <Route path={ROUTES.PRIVATE.HOME} element={<PrivateLayout />} />
-        <Route path={ROUTES.PRIVATE.CHAT} element={<PrivateLayout />} />
+        <Route path={ROUTES.PRIVATE.HOME} element={<HomePage />} />
+        <Route path={ROUTES.PRIVATE.CHAT} element={<HomePage />} />
 
         {/* Catch-all Route */}
         <Route

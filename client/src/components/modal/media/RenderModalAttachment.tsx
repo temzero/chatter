@@ -6,7 +6,7 @@ import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { getFileIcon } from "@shared/utils/getFileIcon";
 import CustomAudioDiskPlayer, {
   AudioPlayerRef,
-} from "@/components/ui/CustomAudioDiskPlayer";
+} from "@/components/ui/media/CustomAudioDiskPlayer";
 import { motion } from "framer-motion";
 import { mediaViewerAnimations } from "@/common/animations/mediaViewerAnimations";
 import { ModalImageViewer } from "./ModalImageViewer";

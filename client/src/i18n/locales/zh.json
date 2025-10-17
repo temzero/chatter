@@ -104,12 +104,8 @@
   },
 
   "chat": {
-    "all": "所有聊天",
     "all_with_type": "按类型的所有聊天：",
-    "label": "聊天类型",
-    "direct": "直接",
-    "group": "群组",
-    "channel": "频道"
+    "label": "聊天类型"
   },
 
   "chat_bar": {

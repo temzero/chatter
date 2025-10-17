@@ -15,7 +15,7 @@ const DEFAULT_AVATAR_ICONS = {
   [ChatType.SAVED]: "bookmark",
 } as const;
 
-const AvatarEdit: React.FC<AvatarEditProps> = ({
+export const AvatarEdit: React.FC<AvatarEditProps> = ({
   avatarUrl,
   onAvatarChange,
   type = ChatType.DIRECT,
@@ -153,5 +153,3 @@ const AvatarEdit: React.FC<AvatarEditProps> = ({
     </div>
   );
 };
-
-export default AvatarEdit;

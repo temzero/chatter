@@ -23,15 +23,15 @@ import SidebarSettingsNotifications from "./settings/sidebarSettingsNotification
 import SidebarSettingsData from "./settings/sidebarSettingsData";
 import SidebarSettingsLanguage from "./settings/sidebarSettingsLanguage";
 import SidebarFriendRequests from "./more/SidebarFriendRequests";
-import SidebarCalls from "./more/SidebarCalls";
+import SidebarCalls from "./more/sidebarCalls/SidebarCalls";
 import SidebarContacts from "./more/SidebarContacts";
-import SidebarFolders from "./more/SidebarFolders";
+import SidebarFolders from "./more/sidebarFolders/SidebarFolders";
+import SidebarFolder from "./more/sidebarFolders/SidebarFolder";
 import SidebarBlockedUsers from "./more/SidebarBlockedUsers";
 import SidebarSettingsEmail from "./settings/account/sidebarSettingsEmail";
 import SidebarSettingsUsername from "./settings/account/sidebarSettingsUsername";
 import SidebarSettingsPhoneNumber from "./settings/account/sidebarSettingsPhoneNumber";
 import SidebarNewFolder from "./more/SidebarNewFolder";
-import SidebarFolder from "./more/SidebarFolder";
 
 const Sidebar = () => {
   const currentSidebar = useCurrentSidebar();

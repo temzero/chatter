@@ -1,13 +1,13 @@
 import React, { useState, useRef } from "react";
-import clsx from "clsx"; 
-import RenderMultipleAttachments from "@/components/ui/RenderMultipleAttachments";
-import SystemMessage from "./SystemMessage";
-import ForwardedMessagePreview from "@/components/ui/ForwardMessagePreview";
+import clsx from "clsx";
 import { motion } from "framer-motion";
+import RenderMultipleAttachments from "@/components/ui/attachments/RenderMultipleAttachments";
+import { SystemMessageJSONContent } from "@/components/ui/messages/SystemMessageContent";
+import SystemMessage from "./SystemMessage";
+import ForwardedMessagePreview from "@/components/ui/messages/ForwardMessagePreview";
+import { MessageReactionDisplay } from "@/components/ui/messages/MessageReactionsDisplay";
 import { formatTime } from "@/common/utils/formatTime";
-import { SystemMessageJSONContent } from "@/components/ui/SystemMessageContent";
 import { useCurrentUserId } from "@/stores/authStore";
-import { MessageReactionDisplay } from "@/components/ui/MessageReactionsDisplay";
 import { handleQuickReaction } from "@/common/utils/quickReaction";
 import { messageAnimations } from "@/common/animations/messageAnimations";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
@@ -138,6 +138,7 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ message }) => {
             message={message}
             isMe={isMe}
             isChannel={true}
+            isSystemMessage={message.systemEvent === SystemEventType.CALL}
             position={contextMenuPosition || undefined}
             onClose={closeContextMenu}
           />

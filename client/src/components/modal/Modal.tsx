@@ -16,7 +16,7 @@ import UnfriendModal from "./UnfriendModal";
 import LeaveChatModal from "./LeaveChatModal";
 import AddMemberModal from "./AddMemberModal";
 import SetNicknameModal from "./SetNicknameModal";
-import CallModal from "./CallModal";
+import CallModal from "./call/CallModal";
 import DeleteCallModal from "./DeleteCallModal";
 
 const Modal = () => {

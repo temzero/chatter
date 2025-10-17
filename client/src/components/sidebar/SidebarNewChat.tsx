@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useSidebarStore } from "@/stores/sidebarStore";
-import CreateNewChat from "@/components/ui/CreateNewChat";
-import CreateNewGroupChat from "@/components/ui/CreateNewGroupChat";
-import { SlidingContainer } from "@/components/ui/SlidingContainer";
+import CreateNewChat from "@/components/ui/chat/CreateNewChat";
+import CreateNewGroupChat from "@/components/ui/chat/CreateNewGroupChat";
+import { SlidingContainer } from "@/components/ui/layout/SlidingContainer";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";

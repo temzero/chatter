@@ -1,8 +1,8 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import SidebarLayout from "@/pages/SidebarLayout";
+import SidebarLayout from "@/layouts/SidebarLayout";
 import { SidebarMode } from "@/common/enums/sidebarMode";
-import SwitchBtn from "@/components/ui/SwitchBtn";
+import SwitchBtn from "@/components/ui/buttons/SwitchBtn";
 
 interface FolderOption {
   code: string;

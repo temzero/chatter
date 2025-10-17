@@ -104,12 +104,8 @@
   },
 
   "chat": {
-    "all": "모든 채팅",
     "all_with_type": "유형별 모든 채팅:",
-    "label": "채팅 유형",
-    "direct": "다이렉트",
-    "group": "그룹",
-    "channel": "채널"
+    "label": "채팅 유형"
   },
 
   "chat_bar": {

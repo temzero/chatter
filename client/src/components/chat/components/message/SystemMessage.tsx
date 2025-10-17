@@ -1,11 +1,12 @@
 import { motion } from "framer-motion";
+import clsx from "clsx";
 import { useCurrentUserId } from "@/stores/authStore";
 import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 import { MessageResponse } from "@/shared/types/responses/message.response";
-import { MessageReactionDisplay } from "@/components/ui/MessageReactionsDisplay";
+import { MessageReactionDisplay } from "@/components/ui/messages/MessageReactionsDisplay";
 import { messageAnimations } from "@/common/animations/messageAnimations";
-import { SystemMessageContent } from "@/components/ui/SystemMessageContent";
-import { SystemMessageJSONContent } from "@/components/ui/SystemMessageContent";
+import { SystemMessageContent } from "@/components/ui/messages/SystemMessageContent";
+import { SystemMessageJSONContent } from "@/components/ui/messages/SystemMessageContent";
 import {
   useIsMessageFocus,
   useIsReplyToThisMessage,
@@ -57,7 +58,11 @@ const SystemMessage = ({
         e.preventDefault();
         openMessageModal(messageId);
       }}
-      className="cursor-pointer pb-2 mx-auto flex items-center justify-center"
+      className={clsx(
+        "cursor-pointer rounded-full mb-2 px-1 mx-auto flex items-center justify-center",
+        message.isImportant &&
+          "border-2 border-red-500/50 bg-[--background-color]"
+      )}
       style={{
         zIndex: isFocus ? 100 : "auto",
       }}
@@ -97,7 +102,7 @@ const SystemMessage = ({
         />
 
         {isFocus && !isRelyToThisMessage && (
-          <MessageContextMenu message={message} />
+          <MessageContextMenu message={message} isSystemMessage={true} />
         )}
       </div>
     </motion.div>

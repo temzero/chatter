@@ -1,5 +1,5 @@
 import API from "@/services/api/api";
-import rawAPI from "./api/rawApi";
+import rawAPI from "@/services/api/rawApi";
 import { localStorageService } from "./storage/localStorageService";
 import { AuthResponse } from "@/shared/types/responses/auth.response";
 import {
@@ -48,7 +48,9 @@ export const authService = {
 
   async refreshToken(): Promise<string> {
     try {
-      const response = await rawAPI.post<AuthResponse>("/auth/refresh");
+      // const response = await rawAPI.post<AuthResponse>("/auth/refresh");
+      const response = await API.post<AuthResponse>("/auth/refresh");
+      console.log('refreshToken', response.data)
       return response.data.accessToken;
     } catch (error) {
       console.error("REFRESH TOKEN ERROR:", error);

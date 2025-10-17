@@ -3,8 +3,8 @@ import { useCurrentUser, useAuthStore } from "@/stores/authStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
-import ContactInfoItem from "@/components/ui/contactInfoItem";
-import SidebarLayout from "@/pages/SidebarLayout";
+import ContactInfoItem from "@/components/ui/contact/contactInfoItem";
+import SidebarLayout from "@/layouts/SidebarLayout";
 
 const SidebarProfile: React.FC = () => {
   const { t } = useTranslation();

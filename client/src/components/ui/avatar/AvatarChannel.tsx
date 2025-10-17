@@ -1,4 +1,4 @@
-import { OnlineDot } from "@/components/ui/OnlineDot";
+import { OnlineDot } from "@/components/ui/icons/OnlineDot";
 import type { ChatResponse } from "@/shared/types/responses/chat.response";
 
 type ChannelAvatarProps = {

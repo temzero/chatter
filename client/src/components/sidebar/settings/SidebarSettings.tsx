@@ -1,6 +1,6 @@
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
-import SidebarLayout from "@/pages/SidebarLayout";
+import SidebarLayout from "@/layouts/SidebarLayout";
 import { useThemeStore } from "@/stores/themeStore";
 import { useTranslation } from "react-i18next";
 import { languages } from "@/i18n/languages";

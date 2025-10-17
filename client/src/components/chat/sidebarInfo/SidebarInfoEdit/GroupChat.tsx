@@ -8,7 +8,7 @@ import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { useActiveMembers } from "@/stores/chatMemberStore";
 import { useMessageStore } from "@/stores/messageStore";
 import { useMuteControl } from "@/common/hooks/useMuteControl";
-import { SidebarInfoHeaderIcons } from "@/components/ui/SidebarInfoHeaderIcons";
+import { SidebarInfoHeaderIcons } from "@/components/ui/icons/SidebarInfoHeaderIcons";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { rolePriority } from "@/shared/types/enums/chat-member-role.enum";
 import { ModalType, useModalStore } from "@/stores/modalStore";

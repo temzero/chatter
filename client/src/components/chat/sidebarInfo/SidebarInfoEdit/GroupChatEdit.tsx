@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useChatStore } from "@/stores/chatStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
-import AvatarEdit from "@/components/ui/avatar/AvatarEdit";
+import { AvatarEdit } from "@/components/ui/avatar/AvatarEdit";
 import { fileStorageService } from "@/services/storage/fileStorageService";
 import { handleError } from "@/common/utils/handleError";
 import { toast } from "react-toastify";

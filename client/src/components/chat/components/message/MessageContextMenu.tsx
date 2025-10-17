@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import clsx from "clsx";
-import { MessageActions } from "@/components/ui/MessageActions";
-import { ReactionPicker } from "@/components/ui/MessageReactionPicker";
+import { MessageActions } from "@/components/ui/messages/MessageActions";
+import { MessageReactionPicker } from "@/components/ui/messages/MessageReactionPicker";
 import { MessageResponse } from "@/shared/types/responses/message.response";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -14,6 +14,7 @@ interface MessageContextMenuProps {
   message: MessageResponse;
   isMe?: boolean;
   isChannel?: boolean;
+  isSystemMessage?: boolean;
   position?: { x: number; y: number };
   onClose?: () => void;
 }
@@ -22,6 +23,7 @@ export const MessageContextMenu: React.FC<MessageContextMenuProps> = ({
   message,
   isMe = false,
   isChannel = false,
+  isSystemMessage = false,
   position,
   onClose,
 }) => {
@@ -66,7 +68,7 @@ export const MessageContextMenu: React.FC<MessageContextMenuProps> = ({
         e.stopPropagation();
       }}
     >
-      <ReactionPicker
+      <MessageReactionPicker
         messageId={message.id}
         chatId={message.chatId}
         isMe={isMe}
@@ -76,6 +78,7 @@ export const MessageContextMenu: React.FC<MessageContextMenuProps> = ({
         message={message}
         isMe={isMe}
         isChannel={isChannel}
+        isSystemMessage={isSystemMessage}
         onClose={onClose}
       />
     </motion.div>

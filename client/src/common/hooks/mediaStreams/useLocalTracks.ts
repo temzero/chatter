@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Track } from "livekit-client";
-import { useCallStore } from "@/stores/callStore/callStore";
+import { useCallStore } from "@/stores/callStore";
 
 export const useLocalTracks = () => {
   const [localVideoStream, setLocalVideoStream] = useState<MediaStream | null>(

@@ -8,7 +8,7 @@ import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { getCallColor, getCallText } from "@/common/utils/callHelpers";
 import { formatDateTime } from "@/common/utils/formatDate";
 import { useCurrentUserId } from "@/stores/authStore";
-import CallIcon from "@/components/ui/CallIcon";
+import CallIcon from "@/components/ui/icons/CallIcon";
 import { useTranslation } from "react-i18next";
 
 const DeleteCallModal: React.FC = () => {

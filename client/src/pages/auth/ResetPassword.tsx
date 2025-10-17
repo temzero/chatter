@@ -1,8 +1,8 @@
 import { useRef } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
-import { AlertMessage } from "@/components/ui/AlertMessage";
-import { AuthenticationLayout } from "../PublicLayout";
+import { AlertMessage } from "@/components/ui/messages/AlertMessage";
+import { AuthenticationLayout } from "@/layouts/PublicLayout";
 import { motion } from "framer-motion";
 import { publicLayoutAnimations } from "@/common/animations/publicLayoutAnimations";
 import { useTranslation } from "react-i18next";

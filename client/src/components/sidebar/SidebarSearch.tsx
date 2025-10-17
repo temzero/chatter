@@ -1,63 +1,68 @@
 import React, { useState } from "react";
 import SearchBar from "@/components/ui/SearchBar";
 import { useSidebarStore } from "@/stores/sidebarStore";
-import { SlidingContainer } from "@/components/ui/SlidingContainer";
-import ChatList from "@/components/ui/ChatList";
+import { SlidingContainer } from "@/components/ui/layout/SlidingContainer";
+import ChatList from "@/components/ui/chat/ChatList";
 import { useChatStore } from "@/stores/chatStore";
 import { filterChatsByType } from "@/common/utils/filterChatsByType";
 import { SidebarMode } from "@/common/enums/sidebarMode";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useTranslation } from "react-i18next";
 
-const chatTypes = ["all", "direct", "group", "channel"];
+const chatTypes = ["all", ChatType.DIRECT, ChatType.GROUP, ChatType.CHANNEL];
 
 const SidebarSearch: React.FC = () => {
   const { t } = useTranslation();
   const filteredChats = useChatStore((state) => state.filteredChats);
   const { setSidebar } = useSidebarStore();
 
-  const [selectedType, setSelectedType] = useState<string>(chatTypes[0]);
+  const [selectedType, setSelectedType] = useState("all");
   const [direction, setDirection] = useState<number>(1);
 
-  const filteredChatsByType = React.useMemo(() => {
-    return filterChatsByType(filteredChats, selectedType);
-  }, [selectedType, filteredChats]);
-
-  const getTypeClass = React.useCallback(
-    (type: string) =>
-      `flex items-center justify-center cursor-pointer p-2 ${
-        selectedType === type
-          ? "opacity-100 font-bold"
-          : "opacity-50 hover:opacity-80"
-      }`,
-    [selectedType]
+  const filteredChatsByType = React.useMemo(
+    () => filterChatsByType(filteredChats, selectedType),
+    [selectedType, filteredChats]
   );
 
-  const handleChatTypeChange = (type: string) => {
-    if (type === selectedType) return;
+  const getTypeClass = (type: ChatType | string) =>
+    `flex flex-col items-center justify-center gap-0.5 cursor-pointer py-2 flex-1 transition ${
+      selectedType === type
+        ? "opacity-100 font-semibold text-green-400"
+        : "opacity-50 hover:opacity-80"
+    }`;
 
+  const handleChatTypeChange = (type: ChatType | string) => {
+    if (type === selectedType) return;
     const currentIndex = chatTypes.indexOf(selectedType);
     const newIndex = chatTypes.indexOf(type);
-
     setDirection(newIndex > currentIndex ? 1 : -1);
     setSelectedType(type);
+  };
+
+  const getTypeIcon = (type: ChatType | string) => {
+    switch (type) {
+      case ChatType.DIRECT:
+        return "person";
+      case ChatType.GROUP:
+        return "groups";
+      case ChatType.CHANNEL:
+        return "tv";
+      default:
+        return "menu";
+    }
   };
 
   return (
     <aside className="w-full h-full flex flex-col transition-all duration-300 ease-in-out">
       {/* Header */}
-      <header
-        id="logo-container"
-        className="flex w-full items-center h-[var(--header-height)] justify-between"
-      >
-        <div className="flex items-center w-full px-2">
-          <SearchBar placeholder={t("sidebar_search.placeholder")} />
-          <span
-            className="material-symbols-outlined text-2xl opacity-60 hover:opacity-100 p-1 cursor-pointer ml-2"
-            onClick={() => setSidebar(SidebarMode.DEFAULT)}
-          >
-            close
-          </span>
-        </div>
+      <header className="flex w-full items-center h-[var(--header-height)] justify-between px-2">
+        <SearchBar placeholder={t("sidebar_search.placeholder")} />
+        <span
+          className="material-symbols-outlined text-2xl opacity-60 hover:opacity-100 p-1 cursor-pointer"
+          onClick={() => setSidebar(SidebarMode.DEFAULT)}
+        >
+          close
+        </span>
       </header>
 
       {/* Chat Type Selector */}
@@ -68,7 +73,13 @@ const SidebarSearch: React.FC = () => {
             className={getTypeClass(type)}
             onClick={() => handleChatTypeChange(type)}
           >
-            {t(`chat.${type}`)}
+            <i
+              className={`material-symbols-outlined ${
+                type === ChatType.GROUP ? "text-[2.1rem]" : ""
+              }`}
+            >
+              {getTypeIcon(type)}
+            </i>
           </a>
         ))}
       </div>

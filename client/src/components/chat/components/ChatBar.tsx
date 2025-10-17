@@ -7,8 +7,8 @@ import { useModalStore, useReplyToMessageId } from "@/stores/modalStore";
 import { useCurrentUserId } from "@/stores/authStore";
 import { useTranslation } from "react-i18next";
 import EmojiPicker from "@/components/ui/EmojiPicker";
-import AttachFile from "@/components/ui/AttachFile";
-import AttachmentImportedPreview from "@/components/ui/AttachmentImportedPreview";
+import AttachFile from "@/components/ui/attachments/AttachFile";
+import AttachmentImportedPreview from "@/components/ui/attachments/AttachmentImportedPreview";
 import useTypingIndicator from "@/common/hooks/useTypingIndicator";
 
 interface ChatBarProps {

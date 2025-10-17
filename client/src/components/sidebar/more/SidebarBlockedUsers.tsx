@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import SidebarLayout from "@/pages/SidebarLayout";
+import SidebarLayout from "@/layouts/SidebarLayout";
 import { blockService } from "@/services/blockService";
 import { BlockResponse } from "@/shared/types/responses/block.response";
 import { Avatar } from "@/components/ui/avatar/Avatar";
