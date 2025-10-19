@@ -3,7 +3,7 @@ import { useModalStore } from "@/stores/modalStore";
 import { motion } from "framer-motion";
 import { modalAnimations } from "@/common/animations/modalAnimations";
 import { toast } from "react-toastify";
-import { formatDateTime } from "@/common/utils/formatDate";
+import { formatDateTime } from "@/common/utils/format/formatDateTime";
 import { useChatStore } from "@/stores/chatStore";
 import { useTranslation } from "react-i18next";
 

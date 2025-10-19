@@ -42,6 +42,8 @@ export class GroupChatMemberResponseDto implements GroupChatMember {
 
   @Expose() isBlockedMe: boolean;
 
+  @Expose() pinnedAt?: Date | string;
+
   @Expose() createdAt: Date | string;
 }
 

@@ -5,6 +5,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useChatStore } from "@/stores/chatStore";
 import { useShallow } from "zustand/shallow";
 import type { ChatResponse } from "@/shared/types/responses/chat.response";
+import { AnimatePresence } from "framer-motion";
 
 interface ChatListProps {
   chats: ChatResponse[];
@@ -21,12 +22,22 @@ const ChatList: React.FC<ChatListProps> = React.memo(
       }))
     );
 
-    // const ids = chats.map((c) => c.id);
-    // console.log("chatIds", ids);
-    // console.log(
-    //   "Duplicate chat IDs:",
-    //   ids.filter((v, i, a) => a.indexOf(v) !== i)
-    // );
+    // Sort chats: pinned first, then by updatedAt descending
+    const sortedChats = [...chats].sort((a, b) => {
+      const aPinned = a.pinnedAt ? new Date(a.pinnedAt).getTime() : 0;
+      const bPinned = b.pinnedAt ? new Date(b.pinnedAt).getTime() : 0;
+
+      if (aPinned && bPinned) {
+        return bPinned - aPinned; // both pinned: newest first
+      }
+      if (aPinned) return -1; // a pinned, b not
+      if (bPinned) return 1; // b pinned, a not
+
+      // neither pinned: fallback to updatedAt
+      const aUpdated = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+      const bUpdated = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+      return bUpdated - aUpdated;
+    });
 
     return (
       <InfiniteScroller
@@ -39,17 +50,19 @@ const ChatList: React.FC<ChatListProps> = React.memo(
         }
         className="flex-1 relative"
       >
-        {chats.map((chat) => (
-          <ChatListItem
-            key={chat.id}
-            chat={chat}
-            isCompact={isCompact}
-            currentUserId={currentUserId}
-          />
-        ))}
-        {/* {!hasMoreChats && chats.length > 0 && (
+        <AnimatePresence initial={false} mode="wait">
+          {sortedChats.map((chat) => (
+            <ChatListItem
+              key={chat.id}
+              chat={chat}
+              isCompact={isCompact}
+              currentUserId={currentUserId}
+            />
+          ))}
+          {/* {!hasMoreChats && chats.length > 0 && (
           <div className="p-2 text-center opacity-40">No more chats</div>
         )} */}
+        </AnimatePresence>
       </InfiniteScroller>
     );
   }

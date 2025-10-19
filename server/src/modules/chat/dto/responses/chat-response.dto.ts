@@ -56,6 +56,9 @@ export class ChatResponseDto implements ChatResponse {
   inviteLinks?: string[];
 
   @Expose()
+  pinnedAt?: Date | string | null;
+
+  @Expose()
   isDeleted?: boolean | null;
 }
 

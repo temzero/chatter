@@ -7,6 +7,7 @@ export enum ModalType {
   DELETE_FOLDER = "delete-folder",
   DELETE_CHAT = "delete-chat",
   DELETE_DIRECT_CHAT = "delete-direct-chat",
+  FOLDER="folder",
   ADD_CONTACT = "add-contact",
   MUTE = "mute",
   BLOCK_USER = "block-user",

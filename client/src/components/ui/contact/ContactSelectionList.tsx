@@ -1,6 +1,7 @@
 import React from "react";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
+import Checkbox from "../buttons/CheckBox";
 
 interface ChatListProps {
   chats: ChatResponse[];
@@ -28,13 +29,12 @@ const ContactSelectionList: React.FC<ChatListProps> = ({
                 <h1 className="text-lg font-semibold whitespace-nowrap text-ellipsis">
                   {chat.name}
                 </h1>
-                <input
-                  type="checkbox"
-                  className="absolute top-1/2 -translate-y-1/2 right-1 h-5 w-5 accent-[var(--primary-green)]"
-                  checked={selectedContacts.includes(chat.id)}
-                  onClick={() => onContactToggle(chat.id)}
-                  onChange={() => onContactToggle(chat.id)}
-                />
+                <div className="absolute top-1/2 -translate-y-1/2 right-1">
+                  <Checkbox
+                    checked={selectedContacts.includes(chat.id)}
+                    onChange={() => onContactToggle(chat.id)}
+                  />
+                </div>
               </div>
             </div>
           </React.Fragment>

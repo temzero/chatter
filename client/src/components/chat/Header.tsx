@@ -12,7 +12,7 @@ import { DirectChatMember } from "@/shared/types/responses/chat-member.response"
 import { useMessageStore } from "@/stores/messageStore";
 import MessageSearchBar from "@/components/ui/messages/MessageSearchBar";
 import { useUserLastSeen } from "@/stores/presenceStore";
-import { formatTimeAgo } from "@/common/utils/formatTimeAgo";
+import { formatTimeAgo } from "@/common/utils/format/formatTimeAgo";
 import { useCallStore } from "@/stores/callStore";
 import { CallStatus } from "@/shared/types/enums/call-status.enum";
 import { useShallow } from "zustand/shallow";

@@ -3,6 +3,7 @@
     "you": "당신",
     "actions": {
       "accept": "수락",
+      "add": "추가",
       "back": "뒤로",
       "block": "차단",
       "blocked_by_user": "사용자에 의해 차단됨",
@@ -105,7 +106,10 @@
 
   "chat": {
     "all_with_type": "유형별 모든 채팅:",
-    "label": "채팅 유형"
+    "label": "채팅 유형",
+    "direct": "직접",
+    "group": "그룹",
+    "channel": "채널"
   },
 
   "chat_bar": {
@@ -506,6 +510,9 @@
       "description": "이 메시지를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
       "delete_for_me": "나에게만 삭제",
       "delete_for_everyone": "모두에게 삭제"
+    },
+    "folder": {
+      "title": "채팅을 폴더에 추가"
     },
     "delete_folder": {
       "title": "폴더 삭제",

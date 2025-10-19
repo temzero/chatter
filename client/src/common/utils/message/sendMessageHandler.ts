@@ -2,14 +2,14 @@ import { v4 as uuidv4 } from "uuid";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { useMessageStore } from "@/stores/messageStore";
 import { AttachmentResponse } from "@/shared/types/responses/message.response";
-import { determineAttachmentType } from "./determineAttachmentType";
-import { handleError } from "./handleError";
-import { uploadFilesToSupabase } from "./supabase/uploadToSupabase";
+import { determineAttachmentType } from "@/common/utils/message/determineAttachmentType";
+import { handleError } from "../handleError";
+import { uploadFilesToSupabase } from "@/common/utils/supabase/uploadToSupabase";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
-import { toast } from "react-toastify";
 import { CreateMessageRequest } from "@/shared/types/requests/send-message.request";
 import { AttachmentUploadRequest } from "@/shared/types/requests/attachment-upload.request";
-import { deleteFilesFromSupabase } from "./supabase/deleteFileFromSupabase";
+import { deleteFilesFromSupabase } from "@/common/utils/supabase/deleteFileFromSupabase";
+import { toast } from "react-toastify";
 
 function toOptimisticAttachmentResponseFromFile(
   file: File,

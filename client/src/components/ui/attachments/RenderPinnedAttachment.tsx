@@ -2,8 +2,6 @@ import React from "react";
 import { AttachmentResponse } from "@/shared/types/responses/message.response";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { getFileIcon } from "@shared/utils/getFileIcon";
-
-// import { formatFileSize } from "@/common/utils/formatFileSize";
 import { useModalStore } from "@/stores/modalStore";
 import CustomAudioPlayer from "@/components/ui/media/CustomAudioPlayer";
 

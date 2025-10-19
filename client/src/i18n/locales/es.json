@@ -3,6 +3,7 @@
     "you": "Tú",
     "actions": {
       "accept": "Aceptar",
+      "add": "añadir",
       "back": "Volver",
       "block": "Bloquear",
       "blocked_by_user": "Bloqueado por el usuario",
@@ -105,7 +106,10 @@
 
   "chat": {
     "all_with_type": "Todos los chats con tipo:",
-    "label": "Tipos de chat"
+    "label": "Tipos de chat",
+    "direct": "Directo",
+    "group": "Grupo",
+    "channel": "Canal"
   },
 
   "chat_bar": {
@@ -506,6 +510,9 @@
       "description": "¿Estás seguro de que quieres eliminar este mensaje? Esta acción no se puede deshacer.",
       "delete_for_me": "Eliminar para mí",
       "delete_for_everyone": "Eliminar para todos"
+    },
+    "folder": {
+      "title": "Agregar chat a la carpeta"
     },
     "delete_folder": {
       "title": "Eliminar carpeta",

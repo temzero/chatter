@@ -72,6 +72,7 @@ export class GroupChatMapper {
       inviteLinks: getActiveInviteLinks(chat.inviteLinks),
       unreadCount,
       mutedUntil,
+      pinnedAt: myMember.pinnedAt,
     };
   }
 }

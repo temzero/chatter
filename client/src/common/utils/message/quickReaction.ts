@@ -1,5 +1,5 @@
 // utils/handleDoubleClickReaction.ts
-import { handleReaction } from "@/common/utils/handleReaction";
+import { handleReaction } from "@/common/utils/message/handleReaction";
 import { audioService, SoundType } from "@/services/audio.service";
 
 export const handleQuickReaction = (

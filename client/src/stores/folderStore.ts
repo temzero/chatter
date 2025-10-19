@@ -18,6 +18,7 @@ interface FolderStore {
     chatIds: string[];
   }) => Promise<FolderResponse>;
   addFolder: (folder: FolderResponse) => void;
+  addChatToFolder: (chatId: string, folderId: string) => Promise<void>;
   updateFolder: (folder: Partial<FolderResponse>) => Promise<void>;
   reorderFolders: (newOrderIds: string[]) => Promise<void>;
   deleteFolder: (folderId: string) => Promise<void>;
@@ -90,6 +91,33 @@ export const useFolderStore = create<FolderStore>((set, get) => ({
       const message =
         error instanceof Error ? error.message : "Failed to update folder";
       set({ error: message, isLoading: false });
+      throw new Error(message);
+    }
+  },
+
+  addChatToFolder: async (chatId, folderId) => {
+    try {
+      const folder = get().folders.find((f) => f.id === folderId);
+      if (!folder) throw new Error("Folder not found");
+
+      // Optimistic update: add chat locally first if not already in the folder
+      if (!folder.chatIds.includes(chatId)) {
+        folder.chatIds.push(chatId);
+        set((state) => ({
+          folders: state.folders.map((f) =>
+            f.id === folderId ? { ...folder } : f
+          ),
+        }));
+      }
+
+      // API call
+      await folderService.addChatsToFolder(folderId, [chatId]);
+
+      // No need to re-sort, position remains the same
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to add chat to folder";
+      set({ error: message });
       throw new Error(message);
     }
   },

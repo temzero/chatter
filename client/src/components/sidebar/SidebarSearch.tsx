@@ -4,7 +4,7 @@ import { useSidebarStore } from "@/stores/sidebarStore";
 import { SlidingContainer } from "@/components/ui/layout/SlidingContainer";
 import ChatList from "@/components/ui/chat/ChatList";
 import { useChatStore } from "@/stores/chatStore";
-import { filterChatsByType } from "@/common/utils/filterChatsByType";
+import { filterChatsByType } from "@/common/utils/chat/filterChatsByType";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useTranslation } from "react-i18next";

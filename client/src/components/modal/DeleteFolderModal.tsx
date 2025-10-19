@@ -7,6 +7,7 @@ import { useFolderStore } from "@/stores/folderStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
+import { Button } from "../ui/buttons/Button";
 
 const DeleteFolderModal: React.FC = () => {
   const { t } = useTranslation();
@@ -54,8 +55,20 @@ const DeleteFolderModal: React.FC = () => {
           {t("modal.delete_folder.description")}
         </p>
       </div>
+
       <div className="flex custom-border-t">
-        <button
+        <Button
+          variant="ghost"
+          fullWidth
+          onClick={handleDelete}
+          className="text-red-500"
+        >
+          {t("common.actions.delete")}
+        </Button>
+        <Button variant="ghost" fullWidth onClick={closeModal}>
+          {t("common.actions.cancel")}
+        </Button>
+        {/* <button
           className="p-3 text-red-500 hover:bg-[var(--background-secondary)] opacity-80 hover:opacity-100 flex-1"
           onClick={handleDelete}
         >
@@ -66,7 +79,7 @@ const DeleteFolderModal: React.FC = () => {
           onClick={closeModal}
         >
           {t("common.actions.cancel")}
-        </button>
+        </button> */}
       </div>
     </motion.div>
   );

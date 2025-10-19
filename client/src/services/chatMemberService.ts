@@ -84,10 +84,18 @@ export const chatMemberService = {
   // Update last read message
   async updateLastRead(
     memberId: string,
-    messageId: string
+    messageId: string | null
   ): Promise<ChatMember> {
     const response = await API.patch<ApiSuccessResponse<ChatMember>>(
       `/chat-members/last-read/${memberId}/${messageId}`
+    );
+    return response.data.payload;
+  },
+
+  async pinChat(myMemberId: string, isPin: boolean): Promise<GroupChatMember> {
+    const response = await API.patch<ApiSuccessResponse<GroupChatMember>>(
+      `/chat-members/pin/${myMemberId}`,
+      { isPinned: isPin }
     );
     return response.data.payload;
   },

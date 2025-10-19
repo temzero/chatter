@@ -5,11 +5,12 @@ import { motion } from "framer-motion";
 import { modalAnimations } from "@/common/animations/modalAnimations";
 import { CallResponse } from "@/shared/types/responses/call.response";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
-import { getCallColor, getCallText } from "@/common/utils/callHelpers";
-import { formatDateTime } from "@/common/utils/formatDate";
+import { getCallColor, getCallText } from "@/common/utils/call/callHelpers";
+import { formatDateTime } from "@/common/utils/format/formatDateTime";
 import { useCurrentUserId } from "@/stores/authStore";
 import CallIcon from "@/components/ui/icons/CallIcon";
 import { useTranslation } from "react-i18next";
+import { Button } from "../ui/buttons/Button";
 
 const DeleteCallModal: React.FC = () => {
   const { t } = useTranslation();
@@ -77,18 +78,29 @@ const DeleteCallModal: React.FC = () => {
       </div>
 
       <div className="flex custom-border-t">
-        <button
+        <Button
+          variant="ghost"
+          fullWidth
+          onClick={handleDelete}
+          className="text-red-500"
+        >
+          {t("common.actions.delete")}
+        </Button>
+        <Button variant="ghost" fullWidth onClick={closeModal}>
+          {t("common.actions.cancel")}
+        </Button>
+        {/* <button
           className="p-3 text-red-500 hover:bg-[var(--background-secondary)] font-semibold hover:font-bold opacity-80 hover:opacity-100 flex-1"
           onClick={handleDelete}
         >
           {t("common.actions.delete")}
-        </button>
-        <button
+        </button> */}
+        {/* <button
           className="p-3 hover:bg-[var(--background-secondary)] font-semibold hover:font-bold opacity-80 hover:opacity-100 flex-1"
           onClick={closeModal}
         >
           {t("common.actions.cancel")}
-        </button>
+        </button> */}
       </div>
     </motion.div>
   );

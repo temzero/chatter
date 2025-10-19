@@ -8,7 +8,7 @@ import { useChatMemberStore } from "./chatMemberStore";
 import { useAuthStore } from "./authStore";
 import { useMembersByChatId } from "./chatMemberStore";
 import { handleError } from "@/common/utils/handleError";
-import { createLastMessage } from "@/common/utils/createLastMessage";
+import { createLastMessage } from "@/common/utils/message/createLastMessage";
 import type {
   AttachmentResponse,
   MessageResponse,

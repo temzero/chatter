@@ -8,7 +8,7 @@ import {
   groupMessagesByDate,
   isRecentMessage,
   shouldShowInfo,
-} from "@/common/utils/messageHelpers";
+} from "@/common/utils/message/messageHelpers";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { AnimatePresence } from "framer-motion";
 

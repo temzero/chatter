@@ -1,6 +1,6 @@
 import { LocalCallStatus } from "@/common/enums/LocalCallStatus";
 import { CallStatus } from "@/shared/types/enums/call-status.enum";
-import { formatDurationByStartAndEnd } from "./formatDuration";
+import { formatDurationByStartAndEnd } from "../format/formatDuration";
 
 export const getCallText = (
   status: CallStatus,

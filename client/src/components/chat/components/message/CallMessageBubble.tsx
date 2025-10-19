@@ -9,7 +9,7 @@ import {
   getCallColor,
   getCallIcon,
   getCallText,
-} from "@/common/utils/callHelpers";
+} from "@/common/utils/call/callHelpers";
 import { callAnimations } from "@/common/animations/callAnimations";
 
 interface CallMessageBubbleProps {

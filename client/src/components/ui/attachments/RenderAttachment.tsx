@@ -3,7 +3,7 @@ import { useModalStore } from "@/stores/modalStore";
 import { AttachmentResponse } from "@/shared/types/responses/message.response";
 import { getFileIcon } from "@shared/utils/getFileIcon";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
-import { formatFileSize } from "@/common/utils/formatFileSize";
+import { formatFileSize } from "@/common/utils/format/formatFileSize";
 import { handleDownload } from "@/common/utils/handleDownload";
 import CustomAudioPlayer from "@/components/ui/media/CustomAudioPlayer";
 import CustomVideoPlayer from "@/components/ui/media/CustomVideoPlayer";

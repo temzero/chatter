@@ -3,12 +3,11 @@ import { useModalStore } from "@/stores/modalStore";
 import { motion } from "framer-motion";
 import { modalAnimations } from "@/common/animations/modalAnimations";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
-import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
 import { useChatStore } from "@/stores/chatStore";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
-import { Avatar } from "@/components/ui/avatar/Avatar";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useTranslation } from "react-i18next";
+import { Button } from "../ui/buttons/Button";
 
 const LeaveChatModal: React.FC = () => {
   const { t } = useTranslation();
@@ -17,8 +16,6 @@ const LeaveChatModal: React.FC = () => {
   const leaveChat = useChatStore((state) => state.leaveChat);
 
   const chat = modalContent?.props?.chat as ChatResponse;
-  const chatPartner = modalContent?.props?.chatPartner as DirectChatMember;
-
   if (!chat) return null;
 
   const isDirectChat = chat.type === ChatType.DIRECT;
@@ -43,56 +40,37 @@ const LeaveChatModal: React.FC = () => {
           </span>
           <h2 className="text-2xl">
             {isDirectChat
-              ? t("common.leave_chat")
-              : t("common.leave_chat_type", { type: capitalizedChatType })}
+              ? t("modal.leave_chat.title_direct")
+              : t("modal.leave_chat.title_group", {
+                  type: capitalizedChatType,
+                })}
           </h2>
         </div>
 
         <div className="flex items-center gap-3 mb-6">
-          {isDirectChat ? (
-            <>
-              <Avatar
-                avatarUrl={chatPartner?.avatarUrl}
-                name={chatPartner?.nickname || chatPartner?.firstName}
-              />
-              <div>
-                <h3 className="font-medium">{chatPartner?.username}</h3>
-                <p className="text-sm opacity-70">{chatPartner?.email}</p>
-              </div>
-            </>
-          ) : (
-            <>
-              <ChatAvatar chat={chat} />
-              <div>
-                <h3 className="font-medium">{chat.name}</h3>
-                <p className="text-sm opacity-70">
-                  {t("common.chat_type_label", { type: capitalizedChatType })}
-                </p>
-              </div>
-            </>
-          )}
+          <ChatAvatar chat={chat} />
+          <h3 className="font-semibold text-2xl">{chat.name}</h3>
         </div>
 
         <p className="mb-6 text-sm opacity-70">
           {isDirectChat
-            ? t("common.leave_chat_confirm")
-            : t("common.leave_chat_type_confirm", { type: chat.type })}
+            ? t("modal.leave_chat.description_direct")
+            : t("modal.leave_chat.description_group", { type: chat.type })}
         </p>
       </div>
 
       <div className="flex custom-border-t">
-        <button
-          className="p-3 text-yellow-500 hover:bg-[var(--background-secondary)] font-semibold hover:font-bold opacity-80 hover:opacity-100 flex-1"
+        <Button
+          variant="ghost"
+          fullWidth
           onClick={handleLeaveChat}
+          className="text-yellow-500"
         >
-          {t("common.action.leave")}
-        </button>
-        <button
-          className="p-3 hover:bg-[var(--background-secondary)] font-semibold hover:font-bold opacity-80 hover:opacity-100 flex-1"
-          onClick={closeModal}
-        >
-          {t("common.action.cancel")}
-        </button>
+          {t("common.actions.leave")}
+        </Button>
+        <Button variant="ghost" fullWidth onClick={closeModal}>
+          {t("common.actions.cancel")}
+        </Button>
       </div>
     </motion.div>
   );

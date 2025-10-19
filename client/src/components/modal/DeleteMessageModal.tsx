@@ -9,6 +9,7 @@ import { useMessageStore } from "@/stores/messageStore";
 import { audioService, SoundType } from "@/services/audio.service";
 
 import { useTranslation } from "react-i18next";
+import { Button } from "../ui/buttons/Button";
 
 const DeleteMessageModal: React.FC = () => {
   const { t } = useTranslation();
@@ -49,20 +50,25 @@ const DeleteMessageModal: React.FC = () => {
         </p>
         {/* <MessagePreview message={message} /> */}
       </div>
+
       <div className="flex custom-border-t">
-        <button
-          className="p-3 text-yellow-500 opacity-80 hover:opacity-100 font-semibold flex-1"
+        <Button
+          variant="ghost"
+          fullWidth
           onClick={() => handleDelete(false)}
+          className="text-yellow-500"
         >
           {t("modal.delete_message.delete_for_me")}
-        </button>
+        </Button>
         {isMe && (
-          <button
-            className="p-3 text-red-500 opacity-80 hover:opacity-100 font-semibold flex-1"
+          <Button
+            variant="ghost"
+            fullWidth
             onClick={() => handleDelete(true)}
+            className="text-red-500"
           >
             {t("modal.delete_message.delete_for_everyone")}
-          </button>
+          </Button>
         )}
       </div>
     </motion.div>

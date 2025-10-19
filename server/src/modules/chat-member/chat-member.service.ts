@@ -397,7 +397,7 @@ export class ChatMemberService {
 
   async updateLastRead(
     memberId: string,
-    messageId: string,
+    messageId: string | null,
   ): Promise<ChatMember> {
     try {
       return await this.updateMember(memberId, {

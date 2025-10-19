@@ -113,9 +113,7 @@ const GroupChatEdit = () => {
   };
 
   const handleOpenDeleteChatModal = () => {
-    openModal(ModalType.DELETE_CHAT, {
-      chat: activeChat,
-    });
+    openModal(ModalType.DELETE_CHAT, { chat: activeChat });
   };
 
   const chatTypeDisplay =

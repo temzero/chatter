@@ -1,7 +1,7 @@
 import React from "react";
 import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
-import { handleReaction } from "@/common/utils/handleReaction";
+import { handleReaction } from "@/common/utils/message/handleReaction";
 import { useMessageReactions } from "@/stores/messageStore";
 import { audioService, SoundType } from "@/services/audio.service";
 import { messageAnimations } from "@/common/animations/messageAnimations";

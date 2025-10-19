@@ -13,6 +13,7 @@ import { useSidebarStore } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useFolderStore } from "@/stores/folderStore";
 import { FolderResponse } from "@/shared/types/responses/folder.response";
+import { audioService, SoundType } from "@/services/audio.service";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import FolderCard from "./FolderCard";
 
@@ -34,6 +35,13 @@ const SidebarFolders: React.FC = () => {
       oldIndex,
       newIndex
     );
+
+    audioService.playRandomSound([
+      SoundType.CARD1,
+      SoundType.CARD2,
+      SoundType.CARD3,
+      SoundType.CARD4,
+    ]);
 
     reorderFolders(newOrderIds);
   };

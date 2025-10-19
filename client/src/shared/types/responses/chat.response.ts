@@ -17,8 +17,9 @@ export interface ChatResponse {
   unreadCount?: number;
   mutedUntil?: string | Date | null;
   inviteLinks?: string[];
-  isDeleted?: boolean | null;
   previewMembers?: ChatMemberLite[];
+  pinnedAt?: Date | string | null;
+  isDeleted?: boolean | null;
 }
 
 export interface ChatMemberLite {

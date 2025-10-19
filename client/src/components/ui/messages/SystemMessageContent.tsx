@@ -5,7 +5,7 @@ import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { CallStatus } from "@/shared/types/enums/call-status.enum";
 import { CallLiteResponse } from "@/shared/types/responses/call-lite.response";
 import { parseJsonContent } from "@/common/utils/parseJsonContent";
-import { getCallText } from "@/common/utils/callHelpers";
+import { getCallText } from "@/common/utils/call/callHelpers";
 import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
 

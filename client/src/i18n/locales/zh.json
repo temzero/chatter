@@ -3,6 +3,7 @@
     "you": "你",
     "actions": {
       "accept": "接受",
+      "add": "添加",
       "back": "返回",
       "block": "屏蔽",
       "blocked_by_user": "被用户屏蔽",
@@ -104,10 +105,13 @@
   },
 
   "chat": {
-    "all_with_type": "按类型的所有聊天：",
-    "label": "聊天类型"
+    "all_with_type": "所有聊天类型：",
+    "label": "聊天类型",
+    "direct": "直接",
+    "group": "群组",
+    "channel": "频道"
   },
-
+  
   "chat_bar": {
     "placeholder": "消息...",
     "attach_file": "附件"
@@ -506,6 +510,9 @@
       "description": "你确定要删除此消息吗？此操作无法撤销。",
       "delete_for_me": "仅为我删除",
       "delete_for_everyone": "为所有人删除"
+    },
+    "folder": {
+      "title": "将聊天添加到文件夹"
     },
     "delete_folder": {
       "title": "删除文件夹",

@@ -8,4 +8,5 @@ export interface UpdateChatMemberRequest {
   customTitle?: string | null;
   mutedUntil?: Date | null;
   lastReadMessageId?: string | null;
+  pinnedAt?: Date | string | null;
 }

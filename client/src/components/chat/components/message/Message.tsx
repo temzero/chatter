@@ -1,11 +1,11 @@
 import React, { useState, useRef } from "react";
 import clsx from "clsx";
-import { formatTime } from "@/common/utils/formatTime";
+import { formatTime } from "@/common/utils/format/formatTime";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { MessageReactionDisplay } from "@/components/ui/messages/MessageReactionsDisplay";
 import MessageReplyPreview from "@/components/ui/messages/MessageReplyPreview";
-import { handleQuickReaction } from "@/common/utils/quickReaction";
+import { handleQuickReaction } from "@/common/utils/message/quickReaction";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { BeatLoader } from "react-spinners";
 import { SystemMessageJSONContent } from "@/components/ui/messages/SystemMessageContent";
@@ -216,7 +216,7 @@ const Message: React.FC<MessageProps> = ({
 
         {readUserAvatars && (
           <div
-            className={clsx("flex items-center ", {
+            className={clsx("flex items-center", {
               "justify-end": isMe,
               "justify-start": !isMe,
             })}
@@ -226,7 +226,7 @@ const Message: React.FC<MessageProps> = ({
                 <Avatar
                   avatarUrl={avatarUrl}
                   name={message.sender.displayName}
-                  size="5"
+                  size="4"
                   id={index}
                 />
               </div>

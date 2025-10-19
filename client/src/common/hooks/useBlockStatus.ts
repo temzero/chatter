@@ -1,5 +1,5 @@
 // hooks/useBlockStatus.ts
-import { useDirectChatPartner } from "@/stores/chatMemberStore";
+import { getDirectChatPartner } from "@/stores/chatMemberStore";
 
 export const useBlockStatus = (
   chatId: string,
@@ -10,7 +10,7 @@ export const useBlockStatus = (
   isEitherBlocked: boolean;
   isBothBlocked: boolean;
 } => {
-  const partner = useDirectChatPartner(chatId, myMemberId);
+  const partner = getDirectChatPartner(chatId, myMemberId);
   if (!partner) {
     return {
       isBlockedByMe: false,

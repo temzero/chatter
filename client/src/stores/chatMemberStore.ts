@@ -53,7 +53,7 @@ interface ChatMemberStore {
   updateMemberLastRead: (
     chatId: string,
     memberId: string,
-    messageId: string
+    messageId: string | null
   ) => Promise<void>;
   updateFriendshipStatus: (
     otherUserId: string,
@@ -304,12 +304,23 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
   updateMemberLastRead: async (
     chatId: string,
     memberId: string,
-    messageId: string
+    messageId: string | null
   ) => {
-    // Just update directly without comparison
-    get().updateMemberLocally(chatId, memberId, {
-      lastReadMessageId: messageId,
-    });
+    try {
+      // Update backend
+      await chatMemberService.updateLastRead(memberId, messageId);
+
+      // Update local chat member data
+      get().updateMemberLocally(chatId, memberId, {
+        lastReadMessageId: messageId,
+      });
+
+      // Also reset unread count in chat store
+      const chatStore = useChatStore.getState();
+      chatStore.updateChatLocally(chatId, { unreadCount: 0 });
+    } catch (error) {
+      console.error("Failed to update last read:", error);
+    }
   },
 
   addGroupMember: (chatId, member) => {
@@ -399,18 +410,18 @@ export const getMyChatMemberId = async (
   return member?.id;
 };
 
-export const useDirectChatPartner = (
+export const getDirectChatPartner = (
   chatId: string,
   myMemberId: string
 ): ChatMember | undefined => {
-  return useChatMemberStore(
-    useShallow((state) => {
-      const members = state.chatMembers[chatId];
-      if (!members || members.length !== 2) return undefined;
+  if (!chatId || !myMemberId) return undefined;
 
-      return members.find((member) => member.id !== myMemberId);
-    })
-  );
+  const state = useChatMemberStore.getState();
+  const members = state.chatMembers[chatId];
+
+  if (!members || members.length !== 2) return undefined;
+
+  return members.find((member) => member.id !== myMemberId);
 };
 
 export const useGroupOtherMembers = (chatId: string): ChatMember[] => {

@@ -10,6 +10,7 @@ import { useFriendshipStore } from "@/stores/friendshipStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { useTranslation } from "react-i18next";
+import { Button } from "../ui/buttons/Button";
 
 const UnfriendModal: React.FC = () => {
   const { t } = useTranslation();
@@ -29,7 +30,7 @@ const UnfriendModal: React.FC = () => {
     setSidebarInfo(SidebarInfoMode.DEFAULT);
     await deleteFriendship(userToUnfriend.userId);
     toast.success(
-      t("modals.unfriend.success", {
+      t("modal.unfriend.success", {
         name: userToUnfriend.username || userToUnfriend.firstName,
       })
     );
@@ -46,7 +47,7 @@ const UnfriendModal: React.FC = () => {
           <span className="material-symbols-outlined text-3xl font-bold">
             person_cancel
           </span>
-          <h2 className="text-2xl">{t("modals.unfriend.title")}</h2>
+          <h2 className="text-2xl">{t("modal.unfriend.title")}</h2>
         </div>
 
         <div className="flex items-center gap-3 mb-6">
@@ -61,23 +62,22 @@ const UnfriendModal: React.FC = () => {
         </div>
 
         <p className="mb-6 text-sm opacity-70">
-          {t("modals.unfriend.description")}
+          {t("modal.unfriend.description")}
         </p>
       </div>
 
       <div className="flex custom-border-t">
-        <button
-          className="p-3 text-yellow-500 hover:bg-[var(--background-secondary)] font-semibold hover:font-bold opacity-80 hover:opacity-100 flex-1"
+        <Button
+          variant="ghost"
+          fullWidth
           onClick={handleUnfriend}
+          className="text-yellow-500"
         >
           {t("common.actions.unfriend")}
-        </button>
-        <button
-          className="p-3 hover:bg-[var(--background-secondary)] font-semibold hover:font-bold opacity-80 hover:opacity-100 flex-1"
-          onClick={closeModal}
-        >
+        </Button>
+        <Button variant="ghost" fullWidth onClick={closeModal}>
           {t("common.actions.cancel")}
-        </button>
+        </Button>
       </div>
     </motion.div>
   );

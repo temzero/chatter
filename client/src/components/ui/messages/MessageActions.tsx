@@ -7,7 +7,7 @@ import {
   useSetReplyToMessageId,
 } from "@/stores/modalStore";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
-import { scrollToMessageById } from "@/common/utils/scrollToMessageById";
+import { scrollToMessageById } from "@/common/utils/message/scrollToMessageById";
 import { useTranslation } from "react-i18next";
 import { audioService, SoundType } from "@/services/audio.service";
 

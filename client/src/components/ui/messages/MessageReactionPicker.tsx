@@ -1,5 +1,5 @@
 import React from "react";
-import { handleReaction } from "@/common/utils/handleReaction";
+import { handleReaction } from "@/common/utils/message/handleReaction";
 import { audioService, SoundType } from "@/services/audio.service";
 import { useModalStore } from "@/stores/modalStore";
 

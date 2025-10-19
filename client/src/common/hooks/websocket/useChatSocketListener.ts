@@ -7,7 +7,7 @@ import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useChatStore } from "@/stores/chatStore";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { audioService, SoundType } from "@/services/audio.service";
-import { handleSystemEventMessage } from "@/common/utils/handleSystemEventMessage";
+import { handleSystemEventMessage } from "@/common/utils/message/handleSystemEventMessage";
 import { WsEmitChatMemberResponse } from "@/shared/types/responses/ws-emit-chat-member.response";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { webSocketService } from "@/services/websocket/websocket.service";

@@ -54,6 +54,7 @@ interface ChatStore {
     type: ChatType.GROUP | ChatType.CHANNEL;
   }) => Promise<ChatResponse>;
   updateChat: (payload: UpdateChatRequest) => Promise<void>;
+  pinChat: (myMemberId: string, isPinned: boolean) => Promise<void>;
   updateChatLocally: (id: string, payload: Partial<ChatResponse>) => void;
   addMembersToChat: (chatId: string, userIds: string[]) => Promise<void>;
   setMute: (chatId: string, memberId: string, mutedUntil: Date | null) => void;
@@ -445,6 +446,29 @@ export const useChatStore = create<ChatStore>()(
             throw error;
           } finally {
             set({ isLoading: false });
+          }
+        },
+
+        pinChat: async (myMemberId: string, isPinned: boolean) => {
+          try {
+            // 1. Pin/unpin the member via API
+            const updatedMember = await chatMemberService.pinChat(
+              myMemberId,
+              isPinned
+            );
+
+            // 2. Update the corresponding chat's pinnedAt field in the store
+            const chatId = updatedMember.chatId;
+            if (chatId) {
+              get().updateChatLocally(chatId, {
+                pinnedAt: isPinned ? new Date() : null,
+              });
+            }
+
+            // Optional: show toast
+            toast.success(isPinned ? "Chat pinned" : "Chat unpinned");
+          } catch (error) {
+            handleError(error, "Failed to pin/unpin chat");
           }
         },
 

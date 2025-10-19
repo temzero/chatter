@@ -80,6 +80,7 @@ export class DirectChatMapper {
       previewMembers,
       unreadCount,
       mutedUntil,
+      pinnedAt: myMember.pinnedAt,
       isDeleted: !!otherMember?.deletedAt,
     };
   }

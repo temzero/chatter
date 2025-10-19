@@ -20,7 +20,7 @@ export interface GroupChatMember {
   // block status fields:
   isBlockedByMe: boolean;
   isBlockedMe: boolean;
-
+  
   createdAt: string;
 }
 

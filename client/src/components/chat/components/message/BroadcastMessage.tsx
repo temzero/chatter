@@ -1,7 +1,7 @@
 import React from "react";
 import { CallStatus } from "@/shared/types/enums/call-status.enum";
-import { formatDurationByStartAndEnd } from "@/common/utils/formatDuration";
-import { formatTime } from "@/common/utils/formatTime";
+import { formatDurationByStartAndEnd } from "@/common/utils/format/formatDuration";
+import { formatTime } from "@/common/utils/format/formatTime";
 import { useTranslation } from "react-i18next";
 import { CallLiteResponse } from "@/shared/types/responses/call-lite.response";
 

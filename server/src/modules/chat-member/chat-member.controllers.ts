@@ -264,7 +264,7 @@ export class ChatMemberController {
   @Patch('last-read/:memberId/:messageId')
   async updateLastReadMessage(
     @Param('memberId') memberId: string,
-    @Param('messageId') messageId: string,
+    @Param('messageId') messageId: string | null,
   ): Promise<SuccessResponse<GroupChatMemberResponseDto>> {
     const updatedMember = await this.memberService.updateLastRead(
       memberId,
@@ -273,6 +273,21 @@ export class ChatMemberController {
     return new SuccessResponse(
       plainToInstance(GroupChatMemberResponseDto, updatedMember),
       'Last read message updated successfully',
+    );
+  }
+
+  @Patch('pin/:memberId')
+  async pinChat(
+    @Param('memberId') memberId: string,
+    @Body() body: { isPinned: boolean },
+  ): Promise<SuccessResponse<GroupChatMemberResponseDto>> {
+    const updatedMember = await this.memberService.updateMember(memberId, {
+      pinnedAt: body.isPinned ? new Date() : null, // ✅ set pinnedAt
+    });
+
+    return new SuccessResponse(
+      plainToInstance(GroupChatMemberResponseDto, updatedMember),
+      body.isPinned ? 'Chat pinned successfully' : 'Chat unpinned successfully',
     );
   }
 

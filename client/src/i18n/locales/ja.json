@@ -3,6 +3,7 @@
     "you": "あなた",
     "actions": {
       "accept": "承認",
+      "add": "追加",
       "back": "戻る",
       "block": "ブロック",
       "blocked_by_user": "ユーザーによってブロックされました",
@@ -105,7 +106,10 @@
 
   "chat": {
     "all_with_type": "タイプ別のすべてのチャット：",
-    "label": "チャットの種類"
+    "label": "チャットタイプ",
+    "direct": "ダイレクト",
+    "group": "グループ",
+    "channel": "チャンネル"
   },
 
   "chat_bar": {
@@ -506,6 +510,9 @@
       "description": "このメッセージを削除してもよろしいですか？この操作は元に戻せません。",
       "delete_for_me": "自分のみ削除",
       "delete_for_everyone": "全員に対して削除"
+    },
+    "folder_ja": {
+      "title": "チャットをフォルダーに追加"
     },
     "delete_folder": {
       "title": "フォルダを削除",

@@ -174,13 +174,12 @@ const SidebarNewFolder: React.FC = () => {
                         isSelected ? "bg-[--primary-green] font-semibold" : ""
                       }`}
                     >
-                      {t(`chat.${type.toLowerCase()}`)}
                       <span className="material-symbols-outlined opacity-50 ml-1">
                         {type === ChatType.DIRECT
                           ? "person"
                           : type === ChatType.GROUP
                           ? "groups"
-                          : "campaign"}
+                          : "monitor"}
                       </span>
                     </button>
                   );

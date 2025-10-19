@@ -1,7 +1,7 @@
 // src/components/SidebarFriendRequests.tsx
 import React, { useState } from "react";
 import { Avatar } from "@/components/ui/avatar/Avatar";
-import { formatTimeAgo } from "@/common/utils/formatTimeAgo";
+import { formatTimeAgo } from "@/common/utils/format/formatTimeAgo";
 import { SlidingContainer } from "@/components/ui/layout/SlidingContainer";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { useCurrentUserId } from "@/stores/authStore";

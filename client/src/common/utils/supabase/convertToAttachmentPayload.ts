@@ -1,5 +1,5 @@
 import { AttachmentUploadRequest } from "@/shared/types/requests/attachment-upload.request";
-import { determineAttachmentType } from "../determineAttachmentType";
+import { determineAttachmentType } from "@/common/utils/message/determineAttachmentType";
 import { createClient } from "@supabase/supabase-js";
 
 // Initialize Supabase with proper checks

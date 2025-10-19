@@ -1,6 +1,6 @@
 import React from "react";
 import clsx from "clsx";
-import { formatDateTime } from "@/common/utils/formatDate";
+import { formatDateTime } from "@/common/utils/format/formatDateTime";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import type { MessageResponse } from "@/shared/types/responses/message.response";
 import { useCurrentUserId } from "@/stores/authStore";

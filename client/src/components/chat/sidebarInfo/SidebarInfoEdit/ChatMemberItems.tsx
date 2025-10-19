@@ -7,11 +7,11 @@ import { useCurrentUserId } from "@/stores/authStore";
 import { rolePriority } from "@/shared/types/enums/chat-member-role.enum";
 import { ChatMemberStatus } from "@/shared/types/enums/chat-member-status.enum";
 import { Avatar } from "@/components/ui/avatar/Avatar";
+import { useTranslation } from "react-i18next";
 import {
   calculateContextMenuPosition,
   useClickOutside,
 } from "@/common/utils/contextMenuUtils";
-import { useTranslation } from "react-i18next";
 
 interface ChatMemberItemsProps {
   members: GroupChatMember[];

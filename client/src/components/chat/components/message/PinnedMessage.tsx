@@ -1,8 +1,8 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useIsMe } from "@/stores/authStore";
-import { formatDateTime } from "@/common/utils/formatDate";
-import { scrollToMessageById } from "@/common/utils/scrollToMessageById";
+import { formatDateTime } from "@/common/utils/format/formatDateTime";
+import { scrollToMessageById } from "@/common/utils/message/scrollToMessageById";
 import type { MessageResponse } from "@/shared/types/responses/message.response";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { MessageHorizontalPreview } from "./MessageHorizontalPreview";
@@ -67,7 +67,7 @@ const PinnedMessage: React.FC<MessageProps> = ({
         />
       </div>
 
-      <p className="text-sm font-light italic">
+      <p className="text-sm font-light italic truncate">
         {message.pinnedAt
           ? `${formatDateTime(message.pinnedAt)}`
           : `Sent at ${formatDateTime(message.createdAt)}`}

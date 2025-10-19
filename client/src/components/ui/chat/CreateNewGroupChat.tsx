@@ -5,10 +5,10 @@ import ContactSelectionList from "@/components/ui/contact/ContactSelectionList";
 import { useChatStore } from "@/stores/chatStore";
 import { useCurrentUser } from "@/stores/authStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
-import type { ChatResponse } from "@/shared/types/responses/chat.response";
-import type { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
+import type { ChatResponse } from "@/shared/types/responses/chat.response";
+import type { ChatType } from "@/shared/types/enums/chat-type.enum";
 
 interface CreateChatProps {
   type: ChatType.GROUP | ChatType.CHANNEL;

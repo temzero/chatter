@@ -18,6 +18,7 @@ import AddMemberModal from "./AddMemberModal";
 import SetNicknameModal from "./SetNicknameModal";
 import CallModal from "./call/CallModal";
 import DeleteCallModal from "./DeleteCallModal";
+import FolderModal from "./FolderModal";
 
 const Modal = () => {
   const { modalContent, closeModal } = useModalStore(
@@ -52,6 +53,8 @@ const Modal = () => {
         return <ForwardMessageModal />;
       case ModalType.DELETE_MESSAGE:
         return <DeleteMessageModal />;
+        case ModalType.FOLDER:
+          return <FolderModal />;
       case ModalType.DELETE_FOLDER:
         return <DeleteFolderModal />;
 

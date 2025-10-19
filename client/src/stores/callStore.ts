@@ -7,12 +7,12 @@ import { useModalStore, ModalType } from "./modalStore";
 import { LocalCallStatus } from "@/common/enums/LocalCallStatus";
 import { CallStatus } from "@/shared/types/enums/call-status.enum";
 import { LiveKitService } from "@/services/liveKitService";
-import { getMyCallToken } from "@/common/utils/getMyCallToken";
+import { getMyCallToken } from "@/common/utils/call/getMyCallToken";
 import { CallError, IncomingCallResponse } from "@shared/types/call";
 import { callService } from "@/services/callService";
 import { callWebSocketService } from "@/services/websocket/call.websocket.service";
 import { handleError } from "@/common/utils/handleError";
-import { getLocalCallStatus } from "@/common/utils/callHelpers";
+import { getLocalCallStatus } from "@/common/utils/call/callHelpers";
 
 export interface CallState {
   liveKitService: LiveKitService | null;

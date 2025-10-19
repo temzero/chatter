@@ -1,4 +1,7 @@
-export function formatDateTime(time?: Date | string | null): string | null {
+export function formatDateTime(
+  time?: Date | string | null,
+  isDateOnly: boolean = false
+): string | null {
   if (!time) return null;
 
   const date = new Date(time);
@@ -19,6 +22,11 @@ export function formatDateTime(time?: Date | string | null): string | null {
     month: "short", // e.g. Jun
     day: "numeric", // e.g. 30
   };
+
+  if (isDateOnly) {
+    // Only show date (no time)
+    return date.toLocaleDateString(undefined, dateOptions);
+  }
 
   if (isSameDay) {
     return date.toLocaleTimeString(undefined, timeOptions);

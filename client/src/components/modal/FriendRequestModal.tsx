@@ -92,6 +92,7 @@ const FriendRequestModal: React.FC = () => {
             {charCount}/{maxChar}
           </span>
         </div>
+        
         <button
           type="submit"
           className="bg-[var(--primary-green)] text-white w-full py-1 flex gap-2 justify-center"

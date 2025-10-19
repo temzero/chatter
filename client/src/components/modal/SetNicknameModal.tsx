@@ -6,6 +6,7 @@ import { DirectChatMember } from "@/shared/types/responses/chat-member.response"
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useTranslation } from "react-i18next";
+import { Button } from "../ui/buttons/Button";
 
 const SetNicknameModal: React.FC = () => {
   const { t } = useTranslation();
@@ -70,7 +71,18 @@ const SetNicknameModal: React.FC = () => {
       </div>
 
       <div className="flex custom-border-t">
-        <button
+        <Button
+          variant="ghost"
+          fullWidth
+          onClick={handleSave}
+          className="text-green-500"
+        >
+          {loading ? t("common.loading.saving") : t("common.actions.save")}
+        </Button>
+        <Button variant="ghost" fullWidth onClick={closeModal}>
+          {t("common.actions.cancel")}
+        </Button>
+        {/* <button
           className="p-3 text-[--primary-green] hover:bg-[var(--background-secondary)] font-semibold hover:font-bold opacity-80 hover:opacity-100 flex-1"
           onClick={handleSave}
           disabled={loading}
@@ -82,7 +94,7 @@ const SetNicknameModal: React.FC = () => {
           onClick={closeModal}
         >
           {t("common.actions.cancel")}
-        </button>
+        </button> */}
       </div>
     </motion.div>
   );

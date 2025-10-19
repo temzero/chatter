@@ -8,7 +8,7 @@ import {
 } from "react";
 import { useDeviceStore } from "@/stores/deviceStore";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
-import { formatDuration } from "@/common/utils/formatDuration";
+import { formatDuration } from "@/common/utils/format/formatDuration";
 import musicDiskCover from "@/assets/image/disk.png";
 
 // Audio manager

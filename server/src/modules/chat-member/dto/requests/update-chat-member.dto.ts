@@ -41,4 +41,9 @@ export class UpdateChatMemberDto implements UpdateChatMemberRequest {
   @IsOptional()
   @IsString()
   lastReadMessageId?: string | null;
+
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  pinnedAt?: Date | null; // ✅ Add this
 }

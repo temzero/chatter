@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import { blockService } from "@/services/blockService";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useTranslation } from "react-i18next";
+import { Button } from "../ui/buttons/Button";
 
 const BlockUserModal: React.FC = () => {
   const { t } = useTranslation();
@@ -73,7 +74,22 @@ const BlockUserModal: React.FC = () => {
         </p>
       </div>
       <div className="flex custom-border-t">
-        <button
+        <Button
+          variant="ghost"
+          fullWidth
+          onClick={handleBlock}
+          className="text-red-500"
+        >
+           {t("common.actions.block")}
+        </Button>
+        <Button
+          variant="ghost"
+          fullWidth
+          onClick={closeModal}
+        >
+           {t("common.actions.cancel")}
+        </Button>
+        {/* <button
           className="p-3 text-red-500 hover:bg-[var(--background-secondary)] opacity-80 hover:opacity-100 flex-1"
           onClick={handleBlock}
         >
@@ -84,7 +100,7 @@ const BlockUserModal: React.FC = () => {
           onClick={closeModal}
         >
           {t("common.actions.cancel")}
-        </button>
+        </button> */}
       </div>
     </motion.div>
   );

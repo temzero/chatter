@@ -3,6 +3,7 @@
     "you": "Bạn",
     "actions": {
       "accept": "Chấp nhận",
+      "add": "Thêm",
       "back": "Quay lại",
       "block": "Chặn",
       "blocked_by_user": "Đã bị người dùng chặn",
@@ -104,8 +105,11 @@
   },
 
   "chat": {
-    "all_with_type": "Tất cả cuộc trò chuyện với loại:",
-    "label": "Loại cuộc trò chuyện"
+    "all_with_type": "Tất cả các cuộc trò chuyện theo loại:",
+    "label": "Loại trò chuyện",
+    "direct": "Trực tiếp",
+    "group": "Nhóm",
+    "channel": "Kênh"
   },
 
   "chat_bar": {
@@ -511,6 +515,9 @@
       "description": "Bạn có chắc chắn muốn xóa tin nhắn này? Hành động này không thể hoàn tác.",
       "delete_for_me": "Chỉ xóa với tôi",
       "delete_for_everyone": "Xóa với mọi người"
+    },
+    "folder": {
+      "title": "Thêm vào thư mục"
     },
     "delete_folder": {
       "title": "Xóa Thư mục",

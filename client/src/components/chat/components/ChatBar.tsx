@@ -2,7 +2,7 @@ import clsx from "clsx";
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useMessageStore } from "@/stores/messageStore";
 import { AnimatePresence, motion } from "framer-motion";
-import { handleSendMessage } from "@/common/utils/sendMessageHandler";
+import { handleSendMessage } from "@/common/utils/message/sendMessageHandler";
 import { useModalStore, useReplyToMessageId } from "@/stores/modalStore";
 import { useCurrentUserId } from "@/stores/authStore";
 import { useTranslation } from "react-i18next";

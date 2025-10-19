@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 import {
   useChatMemberStore,
   useActiveMembers,
-  useDirectChatPartner,
+  getDirectChatPartner,
 } from "@/stores/chatMemberStore";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
@@ -26,7 +26,10 @@ const DirectChatEdit = () => {
   const chatMembers = useActiveMembers();
   const openModal = useModalStore((state) => state.openModal);
 
-  const chatPartner = useDirectChatPartner(activeChat.id, activeChat.myMemberId) as DirectChatMember;
+  const chatPartner = getDirectChatPartner(
+    activeChat.id,
+    activeChat.myMemberId
+  ) as DirectChatMember;
 
   const initialFormData = useMemo(
     () => ({
@@ -92,11 +95,13 @@ const DirectChatEdit = () => {
     });
   };
 
-  const handleOpenDeleteChatModal = () => {
-    openModal(ModalType.DELETE_CHAT, {
+  const handleOpenLeaveChatModal = () => {
+    openModal(ModalType.LEAVE_CHAT, {
       chat: activeChat,
-      chatPartner,
     });
+  };
+  const handleOpenDeleteChatModal = () => {
+    openModal(ModalType.DELETE_CHAT, { chat: activeChat });
   };
 
   return (
@@ -188,12 +193,7 @@ const DirectChatEdit = () => {
 
           <button
             className="flex gap-2 justify-center items-center p-2 text-yellow-500 w-full font-medium custom-border-t"
-            onClick={() =>
-              openModal(ModalType.LEAVE_CHAT, {
-                chat: activeChat,
-                chatPartner,
-              })
-            }
+            onClick={handleOpenLeaveChatModal}
           >
             <span className="material-symbols-outlined">logout</span>
             {t("sidebar_info.edit.leave_chat")}

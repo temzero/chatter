@@ -6,15 +6,15 @@ import { SystemMessageJSONContent } from "@/components/ui/messages/SystemMessage
 import SystemMessage from "./SystemMessage";
 import ForwardedMessagePreview from "@/components/ui/messages/ForwardMessagePreview";
 import { MessageReactionDisplay } from "@/components/ui/messages/MessageReactionsDisplay";
-import { formatTime } from "@/common/utils/formatTime";
+import { formatTime } from "@/common/utils/format/formatTime";
 import { useCurrentUserId } from "@/stores/authStore";
-import { handleQuickReaction } from "@/common/utils/quickReaction";
+import { handleQuickReaction } from "@/common/utils/message/quickReaction";
+import { scrollToMessageById } from "@/common/utils/message/scrollToMessageById";
 import { messageAnimations } from "@/common/animations/messageAnimations";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { MessageContextMenu } from "./MessageContextMenu";
 import { MessageHorizontalPreview } from "./MessageHorizontalPreview";
-import { scrollToMessageById } from "@/common/utils/scrollToMessageById";
 import { MessageHorizontalPreviewTypes } from "@/common/enums/MessageHorizontalPreviewTypes";
 import { BroadcastMessage } from "./BroadcastMessage";
 import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
