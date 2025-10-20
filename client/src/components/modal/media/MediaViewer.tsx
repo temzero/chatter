@@ -2,24 +2,20 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, useAnimationControls } from "framer-motion";
 import { MediaViewerNavigationButtons } from "./MediaViewerNavigationButtons";
 import { MediaViewerBottomInfo } from "./MediaViewerBottomInfo";
-import { useModalStore } from "@/stores/modalStore";
 import { useActiveChatAttachments } from "@/stores/messageStore";
 import { RenderModalAttachment } from "./RenderModalAttachment";
-import { useShallow } from "zustand/shallow";
 import { handleDownload } from "@/common/utils/handleDownload";
 import { audioService, SoundType } from "@/services/audio.service";
 import { useDeviceStore } from "@/stores/deviceStore";
 import { MediaViewerButtons } from "./MediaViewerButtons";
+import { useMediaModalData, useModalActions } from "@/stores/modalStore";
 
-export const MediaViewer = () => {
+export const MediaViewer: React.FC = () => {
   const isMobile = useDeviceStore((state) => state.isMobile);
+  const { closeModal } = useModalActions();
 
-  const { currentAttachmentId, closeModal } = useModalStore(
-    useShallow((state) => ({
-      currentAttachmentId: state.currentAttachmentId,
-      closeModal: state.closeModal,
-    }))
-  );
+  // derive mediaId from data
+  const currentAttachmentId = useMediaModalData();
 
   const activeAttachments = useActiveChatAttachments();
 

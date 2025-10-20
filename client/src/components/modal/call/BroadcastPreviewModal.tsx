@@ -1,6 +1,7 @@
 import { useRef } from "react";
-import { Button } from "@/components/ui/buttons/Button";
+import { motion } from "framer-motion";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
+import { callAnimations } from "@/common/animations/callAnimations";
 import { VideoStream } from "@/components/ui/streams/VideoStream";
 import { useCallStore } from "@/stores/callStore";
 import { useModalStore } from "@/stores/modalStore";
@@ -9,9 +10,8 @@ import { useLocalPreviewVoiceTrack } from "@/common/hooks/mediaStreams/useLocalP
 import { useLocalPreviewVideoTrack } from "@/common/hooks/mediaStreams/useLocalPreviewVideoTrack";
 import { useLocalPreviewScreenTrack } from "@/common/hooks/mediaStreams/useLocalPreviewScreenTrack";
 import { useDeviceStore } from "@/stores/deviceStore";
-import { motion } from "framer-motion";
 import CallHeader from "./components/CallHeader";
-import { callAnimations } from "@/common/animations/callAnimations";
+import Button from "@/components/ui/buttons/Button";
 
 const BroadcastPreviewModal = ({ chat }: { chat: ChatResponse }) => {
   const isMobile = useDeviceStore((state) => state.isMobile);

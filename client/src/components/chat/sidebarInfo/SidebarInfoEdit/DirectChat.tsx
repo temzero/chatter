@@ -6,7 +6,7 @@ import FriendshipBtn from "@/components/ui/buttons/FriendshipBtn";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { useActiveChat } from "@/stores/chatStore";
 import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
-import { ModalType, useModalStore } from "@/stores/modalStore";
+import { ModalType, useModalActions } from "@/stores/modalStore";
 import { useActiveMembers } from "@/stores/chatMemberStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useMessageStore } from "@/stores/messageStore";
@@ -26,7 +26,7 @@ const DirectChat: React.FC = () => {
     (state) => state.setIsSidebarInfoVisible
   );
   const chatMembers = useActiveMembers();
-  const openModal = useModalStore((state) => state.openModal);
+  const { openModal } = useModalActions();
   const setDisplaySearchMessage = useMessageStore(
     (state) => state.setDisplaySearchMessage
   );

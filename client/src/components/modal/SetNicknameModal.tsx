@@ -1,22 +1,24 @@
 import React, { useState } from "react";
-import { useModalStore } from "@/stores/modalStore";
-import { motion } from "framer-motion";
-import { modalAnimations } from "@/common/animations/modalAnimations";
+import { useModalActions, useModalData } from "@/stores/modalStore";
 import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useTranslation } from "react-i18next";
-import { Button } from "../ui/buttons/Button";
+import Button from "../ui/buttons/Button";
+
+interface SetNicknameModalData {
+  member: DirectChatMember;
+}
 
 const SetNicknameModal: React.FC = () => {
   const { t } = useTranslation();
-  const closeModal = useModalStore((state) => state.closeModal);
-  const modalContent = useModalStore((state) => state.modalContent);
-  const member = modalContent?.props?.member as DirectChatMember;
-
+  const { closeModal } = useModalActions();
+  const data = useModalData() as unknown as SetNicknameModalData | undefined;
   const updateMemberNickname = useChatMemberStore(
     (state) => state.updateMemberNickname
   );
+
+  const member = data?.member;
   const [nickname, setNickname] = useState(member?.nickname || "");
   const [loading, setLoading] = useState(false);
 
@@ -35,11 +37,7 @@ const SetNicknameModal: React.FC = () => {
   };
 
   return (
-    <motion.div
-      {...modalAnimations.children}
-      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border"
-      style={{ zIndex: 100 }}
-    >
+    <>
       <div className="p-4">
         <div className="flex gap-2 items-center mb-4 font-semibold">
           <span className="material-symbols-outlined text-3xl font-bold">
@@ -82,21 +80,8 @@ const SetNicknameModal: React.FC = () => {
         <Button variant="ghost" fullWidth onClick={closeModal}>
           {t("common.actions.cancel")}
         </Button>
-        {/* <button
-          className="p-3 text-[--primary-green] hover:bg-[var(--background-secondary)] font-semibold hover:font-bold opacity-80 hover:opacity-100 flex-1"
-          onClick={handleSave}
-          disabled={loading}
-        >
-          {loading ? t("common.loading.saving") : t("common.actions.save")}
-        </button>
-        <button
-          className="p-3 hover:bg-[var(--background-secondary)] font-semibold hover:font-bold opacity-80 hover:opacity-100 flex-1"
-          onClick={closeModal}
-        >
-          {t("common.actions.cancel")}
-        </button> */}
       </div>
-    </motion.div>
+    </>
   );
 };
 

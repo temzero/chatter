@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useModalStore } from "@/stores/modalStore";
+import { useModalActions, useModalStore } from "@/stores/modalStore";
 import { AttachmentResponse } from "@/shared/types/responses/message.response";
 import { getFileIcon } from "@shared/utils/getFileIcon";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
@@ -34,7 +34,7 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
   type,
   previewMode = true,
 }) => {
-  const openMediaModal = useModalStore((state) => state.openMediaModal);
+  const { openMediaModal } = useModalActions();
   const closeModal = useModalStore((state) => state.closeModal);
 
   const [aspectRatio, setAspectRatio] = useState<string | null>(null);

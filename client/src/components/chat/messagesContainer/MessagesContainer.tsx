@@ -1,7 +1,5 @@
 import React, { useRef, useEffect, useCallback } from "react";
 import { RingLoader } from "react-spinners";
-import type { ChatResponse } from "@/shared/types/responses/chat.response";
-import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import {
   useHasMoreMessages,
   useMessagesByChatId,
@@ -11,12 +9,16 @@ import TypingIndicator from "@/components/ui/typingIndicator/TypingIndicator";
 import InfiniteScroller from "@/components/ui/layout/InfiniteScroller";
 import Messages from "./Messages";
 import ChannelMessages from "./ChannelMessages";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
+import { ChatResponse } from "@/shared/types/responses/chat.response";
 
 interface ChatBoxProps {
   chat?: ChatResponse;
 }
 
 const MessagesContainer: React.FC<ChatBoxProps> = ({ chat }) => {
+  console.log("MessagesContainer");
+
   const chatId = chat?.id || "";
   const isMessagePinned = chat?.pinnedMessage !== null;
 

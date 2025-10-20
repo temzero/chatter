@@ -50,7 +50,7 @@ const ChatList: React.FC<ChatListProps> = React.memo(
         }
         className="flex-1 relative"
       >
-        <AnimatePresence initial={false} mode="wait">
+        <AnimatePresence initial={false}>
           {sortedChats.map((chat) => (
             <ChatListItem
               key={chat.id}

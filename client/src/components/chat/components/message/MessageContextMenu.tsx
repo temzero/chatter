@@ -15,7 +15,7 @@ interface MessageContextMenuProps {
   isMe?: boolean;
   isChannel?: boolean;
   isSystemMessage?: boolean;
-  position?: { x: number; y: number };
+  initialMousePosition?: { x: number; y: number };
   onClose?: () => void;
 }
 
@@ -24,49 +24,46 @@ export const MessageContextMenu: React.FC<MessageContextMenuProps> = ({
   isMe = false,
   isChannel = false,
   isSystemMessage = false,
-  position,
+  initialMousePosition,
   onClose,
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
-  const [adjustedPosition, setAdjustedPosition] = useState<
-    Position | undefined
-  >(position);
+  const [position, setPosition] = useState<Position | undefined>(undefined);
   const [transformOrigin, setTransformOrigin] = useState("top left");
 
   useEffect(() => {
-    if (menuRef.current && position) {
+    if (menuRef.current && initialMousePosition) {
       const menuWidth = menuRef.current.offsetWidth;
       const menuHeight = menuRef.current.offsetHeight;
 
       const {
         position: calculatedPosition,
         transformOrigin: calculatedOrigin,
-      } = calculateContextMenuPosition(position, menuWidth, menuHeight);
+      } = calculateContextMenuPosition(
+        initialMousePosition,
+        menuWidth,
+        menuHeight
+      );
 
-      setAdjustedPosition(calculatedPosition);
+      setPosition(calculatedPosition);
       setTransformOrigin(calculatedOrigin);
     }
-  }, [position]);
+  }, [initialMousePosition]);
 
   return (
     <motion.div
       ref={menuRef}
       {...messageAnimations.contextMenu}
       style={{
-        position: position ? "fixed" : "absolute",
-        left: adjustedPosition?.x,
-        top: adjustedPosition?.y,
-        right: !position && isMe ? 0 : "auto",
-        bottom: isChannel && !position ? -40 : "auto",
+        position: "fixed",
+        left: position?.x,
+        top: position?.y,
         transformOrigin: transformOrigin,
         zIndex: 999,
       }}
-      className={clsx("flex flex-col gap-1 rounded-lg", "origin-top-left")}
+      className={clsx("flex flex-col gap-1")}
       onClick={(e) => e.stopPropagation()}
-      onContextMenu={(e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-      }}
+      onContextMenu={(e) => e.preventDefault()}
     >
       <MessageReactionPicker
         messageId={message.id}

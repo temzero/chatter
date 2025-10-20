@@ -4,25 +4,23 @@ import { formatTime } from "@/common/utils/format/formatTime";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { MessageReactionDisplay } from "@/components/ui/messages/MessageReactionsDisplay";
-import MessageReplyPreview from "@/components/ui/messages/MessageReplyPreview";
 import { handleQuickReaction } from "@/common/utils/message/quickReaction";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { BeatLoader } from "react-spinners";
 import { SystemMessageJSONContent } from "@/components/ui/messages/SystemMessageContent";
-import SystemMessage from "./SystemMessage";
 import { MessageContextMenu } from "./MessageContextMenu";
 import type { MessageResponse } from "@/shared/types/responses/message.response";
 import {
   useIsMessageFocus,
   useIsReplyToThisMessage,
-  useModalStore,
+  useModalActions,
 } from "@/stores/modalStore";
-
-// ✅ new
+import MessageReplyPreview from "@/components/ui/messages/MessageReplyPreview";
+import SystemMessage from "./SystemMessage";
 import MessageBubble from "./MessageBubble";
 import CallMessageBubble from "./CallMessageBubble";
 import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { getMessageAnimation } from "@/common/animations/messageAnimations";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 
@@ -46,32 +44,32 @@ const Message: React.FC<MessageProps> = ({
   currentUserId,
   isMe = false,
 }) => {
-  const isRelyToThisMessage = useIsReplyToThisMessage(message.id);
+  const { openFocusMessageModal } = useModalActions();
   const isFocus = useIsMessageFocus(message.id);
-
+  const isRelyToThisMessage = useIsReplyToThisMessage(message.id);
+  console.log("isFocus", isFocus, "isRelyToThisMessage", isRelyToThisMessage);
   const repliedMessage = message.replyToMessage;
 
-  const openMessageModal = useModalStore((state) => state.openMessageModal);
   const messageRef = useRef<HTMLDivElement>(null);
-  const [contextMenuPosition, setContextMenuPosition] = useState<{
+  const [contextMenuMousePos, setContextMenuMousePos] = useState<{
     x: number;
     y: number;
   } | null>(null);
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
-    openMessageModal(message.id);
-    setContextMenuPosition({ x: e.clientX, y: e.clientY });
+    openFocusMessageModal(message.id);
+    setContextMenuMousePos({ x: e.clientX, y: e.clientY });
   };
 
   const closeContextMenu = () => {
-    setContextMenuPosition(null);
+    setContextMenuMousePos(null);
   };
 
   const isGroupChat = chatType === "group";
 
   // system message
-  if (message.systemEvent && message.systemEvent != SystemEventType.CALL) {
+  if (message.systemEvent && message.systemEvent !== SystemEventType.CALL) {
     return (
       <div className="w-full flex items-center justify-center">
         <SystemMessage
@@ -85,6 +83,11 @@ const Message: React.FC<MessageProps> = ({
     );
   }
 
+  // console.log("message.shouldAnimate", message.shouldAnimate);
+  // const messageAnimation = message.shouldAnimate
+  //   ? getMessageAnimation(isMe)
+  //   : {};
+
   return (
     <motion.div
       id={`message-${message.id}`}
@@ -97,9 +100,7 @@ const Message: React.FC<MessageProps> = ({
         "pb-1": isRecent,
         "pb-2": !isRecent,
       })}
-      style={{
-        zIndex: isFocus ? 100 : "auto",
-      }}
+      style={{ zIndex: isFocus || isRelyToThisMessage ? 100 : "auto" }}
       layout="position"
       {...getMessageAnimation(isMe)}
     >
@@ -134,7 +135,6 @@ const Message: React.FC<MessageProps> = ({
           )}
 
           <div className="relative">
-            {/* ✅ choose correct bubble */}
             {message.call ? (
               <CallMessageBubble message={message} isMe={isMe} />
             ) : (
@@ -153,14 +153,17 @@ const Message: React.FC<MessageProps> = ({
               chatId={message.chatId}
             />
 
-            {isFocus && !isRelyToThisMessage && (
-              <MessageContextMenu
-                message={message}
-                isMe={isMe}
-                position={contextMenuPosition || undefined}
-                onClose={closeContextMenu}
-              />
-            )}
+            <AnimatePresence>
+              {isFocus && !isRelyToThisMessage && contextMenuMousePos && (
+                <MessageContextMenu
+                  key={message.id}
+                  message={message}
+                  isMe={isMe}
+                  initialMousePosition={contextMenuMousePos}
+                  onClose={closeContextMenu}
+                />
+              )}
+            </AnimatePresence>
 
             {message.isPinned && (
               <div
@@ -222,14 +225,12 @@ const Message: React.FC<MessageProps> = ({
             })}
           >
             {readUserAvatars.map((avatarUrl, index) => (
-              <div key={index}>
-                <Avatar
-                  avatarUrl={avatarUrl}
-                  name={message.sender.displayName}
-                  size="4"
-                  id={index}
-                />
-              </div>
+              <Avatar
+                key={index}
+                avatarUrl={avatarUrl}
+                name={message.sender.displayName}
+                size="4"
+              />
             ))}
           </div>
         )}

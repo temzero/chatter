@@ -52,7 +52,7 @@ const iconSizeMap: Record<ButtonSize, number> = {
   xl: 40,
 };
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
       children,
@@ -109,4 +109,4 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   }
 );
 
-Button.displayName = "Button";
+export default Button;

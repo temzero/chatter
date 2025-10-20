@@ -1,7 +1,8 @@
 import { AttachmentResponse } from "@/shared/types/responses/message.response";
 import { useRef, useState, MouseEvent, useEffect } from "react";
 import { formatDuration } from "@/common/utils/format/formatDuration";
-import { ModalType, useModalContent } from "@/stores/modalStore";
+import { ModalType } from "@/common/enums/modalType";
+import { useModalStore } from "@/stores/modalStore";
 
 // Video manager implementation
 let currentVideo: HTMLVideoElement | null = null;
@@ -48,8 +49,6 @@ const CustomVideoPlayer = ({
   const [totalDuration, setTotalDuration] = useState(
     videoAttachment.duration || 0
   );
-
-  const modalContent = useModalContent();
 
   const url = videoAttachment.url;
   const mimeType = videoAttachment.mimeType || "video/mp4";
@@ -129,7 +128,7 @@ const CustomVideoPlayer = ({
   };
 
   const handleRightClick = (e: MouseEvent) => {
-    if (modalContent?.type !== ModalType.MESSAGE) return;
+    if (useModalStore.getState().type !== ModalType.OVERLAY) return;
     e.preventDefault();
     e.stopPropagation();
     if (videoRef.current?.play) {

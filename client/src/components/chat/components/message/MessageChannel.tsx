@@ -23,7 +23,7 @@ import type { MessageResponse } from "@/shared/types/responses/message.response"
 import {
   useIsMessageFocus,
   useIsReplyToThisMessage,
-  useModalStore,
+  useModalActions,
 } from "@/stores/modalStore";
 
 interface ChannelMessageProps {
@@ -34,12 +34,12 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ message }) => {
   const isMobile = useDeviceStore((state) => state.isMobile);
   const currentUserId = useCurrentUserId();
   const isMe = message.sender.id === currentUserId;
+  const { openFocusMessageModal } = useModalActions();
 
   const isReplyToThisMessage = useIsReplyToThisMessage(message.id);
   const isFocus = useIsMessageFocus(message.id);
   const repliedMessage = message.replyToMessage;
 
-  const openMessageModal = useModalStore((state) => state.openMessageModal);
   const messageRef = useRef<HTMLDivElement>(null);
   const [contextMenuPosition, setContextMenuPosition] = useState<{
     x: number;
@@ -48,7 +48,7 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ message }) => {
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     // Open your existing modal
-    openMessageModal(message.id);
+    openFocusMessageModal(message.id);
     // Set position for reaction picker
     setContextMenuPosition({ x: e.clientX, y: e.clientY });
   };

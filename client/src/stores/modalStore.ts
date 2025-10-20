@@ -1,92 +1,82 @@
-import { ModalType } from "@/common/enums/modalType";
 import { create } from "zustand";
-import { useShallow } from "zustand/shallow";
-
-type ModalContent = {
-  type: ModalType | null;
-  props?: Record<string, unknown>;
-};
+import { ModalType } from "@/common/enums/modalType";
 
 interface ModalState {
-  modalContent: ModalContent | null;
-  currentAttachmentId: string | null;
-  focusMessageId: string | null;
-  replyToMessageId: string | null;
+  type: ModalType | null;
+  data: Record<string, unknown> | null;
 }
 
 interface ModalActions {
-  openModal: (type: ModalType, props?: Record<string, unknown>) => void;
-  openMessageModal: (messageId: string) => void;
-  openMediaModal: (mediaId: string) => void;
+  openModal: (type: ModalType, data?: Record<string, unknown>) => void;
   closeModal: () => void;
-  setFocusMessageId: (messageId: string | null) => void;
-  setReplyToMessageId: (messageId: string | null) => void;
 }
 
 export const useModalStore = create<ModalState & ModalActions>((set) => ({
-  modalContent: null,
-  currentAttachmentId: null,
-  focusMessageId: null,
-  replyToMessageId: null,
+  type: null,
+  data: null,
 
-  openModal: (type, props) => {
+  openModal: (type, data = {}) =>
     set({
-      modalContent: { type, props },
-      focusMessageId: null,
-    });
-  },
-
-  openMessageModal: (messageId) =>
-    set({
-      focusMessageId: messageId,
-      modalContent: { type: ModalType.MESSAGE, props: { messageId } },
-    }),
-
-  openMediaModal: (mediaId) =>
-    set({
-      currentAttachmentId: mediaId,
-      modalContent: { type: ModalType.MEDIA, props: { mediaId } },
+      type,
+      data,
     }),
 
   closeModal: () =>
     set({
-      modalContent: null,
-      // currentAttachmentId: null,
-      focusMessageId: null,
-      replyToMessageId: null,
+      type: null,
+      data: null,
     }),
-
-  setFocusMessageId: (messageId) => set({ focusMessageId: messageId }),
-  setReplyToMessageId: (messageId) => set({ replyToMessageId: messageId }),
 }));
 
-// Selectors and custom hooks
-export const useCurrentMediaId = () =>
-  useModalStore((state) => state.currentAttachmentId);
+export { ModalType };
 
-export const useModalContent = () =>
-  useModalStore((state) => state.modalContent);
+// Custom hooks for specific modal types
+export const useModalActions = () => {
+  const { openModal, closeModal } = useModalStore();
 
-export const useIsModalOpen = () =>
-  useModalStore((state) => state.modalContent !== null);
+  return {
+    openModal,
+    closeModal,
+    openMediaModal: (attachmentId: string) =>
+      openModal(ModalType.MEDIA, { attachmentId }),
 
+    openFocusMessageModal: (messageId: string) =>
+      openModal(ModalType.OVERLAY, { focusedMessageId: messageId }),
+
+    // setReplyToMessage: (messageId: string | null) =>
+    openReplyToMessageModal: (messageId: string | null) =>
+      openModal(ModalType.OVERLAY, { replyToMessageId: messageId }),
+  };
+};
+
+// Selectors
+export const useModalType = () => useModalStore((state) => state.type);
+// export const useModalData = () => useModalStore((state) => state.data);
+export const useModalData = () => useModalStore.getState().data;
+
+// Specific data selectors
+export const useMediaModalData = () => {
+  const data = useModalStore((state) => state.data);
+  return data?.attachmentId as string | undefined;
+};
+
+export const useFocusMessageModalData = () => {
+  const data = useModalStore((state) => state.data);
+  return data?.focusedMessageId as string | undefined;
+};
+
+export const useReplyToMessageId = () => {
+  const data = useModalStore((state) => state.data);
+  return data?.replyToMessageId as string | undefined;
+};
+
+// ✅ Message focus and reply hooks
 export const useIsMessageFocus = (messageId: string | null | undefined) =>
   useModalStore(
-    useShallow((state) =>
-      messageId ? state.focusMessageId === messageId : false
-    )
+    (state) => !!messageId && state.data?.focusedMessageId === messageId
   );
-
-export const useReplyToMessageId = () =>
-  useModalStore(useShallow((state) => state.replyToMessageId));
 
 export const useIsReplyToThisMessage = (messageId: string | null | undefined) =>
   useModalStore(
-    useShallow((state) =>
-      messageId ? state.replyToMessageId === messageId : false
-    )
+    (state) => !!messageId && state.data?.replyToMessageId === messageId
   );
-
-export const useSetReplyToMessageId = () =>
-  useModalStore((state) => state.setReplyToMessageId);
-export { ModalType };

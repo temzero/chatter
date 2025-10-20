@@ -1,13 +1,11 @@
 import React from "react";
-import { useModalStore } from "@/stores/modalStore";
-import { motion } from "framer-motion";
-import { modalAnimations } from "@/common/animations/modalAnimations";
+import { useModalActions, useModalData } from "@/stores/modalStore";
 import { toast } from "react-toastify";
 import { formatDateTime } from "@/common/utils/format/formatDateTime";
 import { useChatStore } from "@/stores/chatStore";
 import { useTranslation } from "react-i18next";
 
-interface MuteChatModalProps {
+interface MuteChatModalData {
   chatId: string;
   myMemberId: string;
 }
@@ -23,15 +21,14 @@ const MUTE_OPTIONS = [
 
 const MuteChatModal: React.FC = () => {
   const { t } = useTranslation();
-  const closeModal = useModalStore((state) => state.closeModal);
-  const modalContent = useModalStore((state) => state.modalContent);
+  const { closeModal } = useModalActions();
   const setMute = useChatStore((state) => state.setMute);
-  // Add safe destructuring with default values
-  const { chatId, myMemberId } =
-    (modalContent?.props as unknown as MuteChatModalProps) ?? {
-      chatId: "",
-      myMemberId: "",
-    };
+  const data = useModalData() as unknown as MuteChatModalData | undefined;
+
+  const chatId = data?.chatId;
+  const myMemberId = data?.myMemberId;
+
+  if (!chatId || !myMemberId) return null;
 
   const handleMute = async (duration: number) => {
     try {
@@ -49,11 +46,7 @@ const MuteChatModal: React.FC = () => {
   };
 
   return (
-    <motion.div
-      {...modalAnimations.children}
-      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border"
-      style={{ zIndex: 100 }}
-    >
+    <>
       <div className="p-4 flex flex-col items-center justify-center">
         <h2 className="text-2xl flex items-center justify-center gap-2 font-semibold mb-4 text-yellow-500">
           <span className="material-symbols-outlined text-3xl">
@@ -80,7 +73,7 @@ const MuteChatModal: React.FC = () => {
           ))}
         </div>
       </div>
-    </motion.div>
+    </>
   );
 };
 

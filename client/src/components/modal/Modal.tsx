@@ -1,8 +1,10 @@
-import { useEffect, useMemo } from "react";
-import { ModalType, useModalStore } from "@/stores/modalStore";
+import { ComponentType, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useShallow } from "zustand/shallow";
+import { ModalType } from "@/common/enums/modalType";
 import { modalAnimations } from "@/common/animations/modalAnimations";
+import { useModalActions, useModalType } from "@/stores/modalStore";
+
+// modal imports...
 import MediaViewer from "./media/MediaViewer";
 import FriendRequestModal from "./FriendRequestModal";
 import ForwardMessageModal from "./ForwardMessageModal";
@@ -20,86 +22,77 @@ import CallModal from "./call/CallModal";
 import DeleteCallModal from "./DeleteCallModal";
 import FolderModal from "./FolderModal";
 
-const Modal = () => {
-  const { modalContent, closeModal } = useModalStore(
-    useShallow((state) => ({
-      modalContent: state.modalContent,
-      closeModal: state.closeModal,
-    }))
+// Map modal types to components
+const modalMap: Record<ModalType, ComponentType | null> = {
+  [ModalType.OVERLAY]: null,
+  [ModalType.CALL]: CallModal,
+  [ModalType.MEDIA]: MediaViewer,
+  [ModalType.FRIEND_REQUEST]: FriendRequestModal,
+  [ModalType.FORWARD_MESSAGE]: ForwardMessageModal,
+  [ModalType.DELETE_MESSAGE]: DeleteMessageModal,
+  [ModalType.FOLDER]: FolderModal,
+  [ModalType.DELETE_FOLDER]: DeleteFolderModal,
+  [ModalType.MUTE]: MuteChatModal,
+  [ModalType.BLOCK_USER]: BlockUserModal,
+  [ModalType.UNBLOCK_USER]: UnblockUserModal,
+  [ModalType.DELETE_CHAT]: DeleteChatModal,
+  [ModalType.UNFRIEND]: UnfriendModal,
+  [ModalType.LEAVE_CHAT]: LeaveChatModal,
+  [ModalType.ADD_MEMBER]: AddMemberModal,
+  [ModalType.SET_NICKNAME]: SetNicknameModal,
+  [ModalType.DELETE_CALL]: DeleteCallModal,
+};
+
+const ModalContent = ({
+  type,
+  onClose,
+}: {
+  type: ModalType;
+  onClose: () => void;
+}) => {
+  const Component = modalMap[type];
+  const isCustomAnimated = type === ModalType.CALL || type === ModalType.MEDIA;
+
+  return (
+    <motion.div
+      {...modalAnimations.modal}
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center"
+      onClick={(e) => {
+        if (!isCustomAnimated && e.target === e.currentTarget) onClose();
+      }}
+      style={{ zIndex: 99 }}
+    >
+      {/* ✅ Only render modal content if Component exists */}
+      {Component &&
+        (isCustomAnimated ? (
+          <Component />
+        ) : (
+          <motion.div
+            {...modalAnimations.children}
+            className="bg-[var(--sidebar-color)] w-[400px] rounded custom-border"
+          >
+            <Component />
+          </motion.div>
+        ))}
+    </motion.div>
   );
+};
+
+const Modal = () => {
+  const type = useModalType();
+  const { closeModal } = useModalActions();
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") closeModal();
     };
-
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
   }, [closeModal]);
 
-  const handleCloseModal = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) closeModal();
-  };
-
-  const renderModalContent = useMemo(() => {
-    if (!modalContent) return null;
-
-    switch (modalContent.type) {
-      case ModalType.MEDIA:
-        return <MediaViewer />;
-      case ModalType.FRIEND_REQUEST:
-        return <FriendRequestModal />;
-      case ModalType.FORWARD_MESSAGE:
-        return <ForwardMessageModal />;
-      case ModalType.DELETE_MESSAGE:
-        return <DeleteMessageModal />;
-        case ModalType.FOLDER:
-          return <FolderModal />;
-      case ModalType.DELETE_FOLDER:
-        return <DeleteFolderModal />;
-
-      case ModalType.MUTE:
-        return <MuteChatModal />;
-      case ModalType.BLOCK_USER:
-        return <BlockUserModal />;
-      case ModalType.UNBLOCK_USER:
-        return <UnblockUserModal />;
-
-      case ModalType.DELETE_CHAT:
-        return <DeleteChatModal />;
-      case ModalType.UNFRIEND:
-        return <UnfriendModal />;
-      case ModalType.LEAVE_CHAT:
-        return <LeaveChatModal />;
-      case ModalType.ADD_MEMBER:
-        return <AddMemberModal />;
-      case ModalType.SET_NICKNAME:
-        return <SetNicknameModal />;
-
-      case ModalType.CALL:
-        return <CallModal />;
-
-      case ModalType.DELETE_CALL:
-        return <DeleteCallModal />;
-
-      default:
-        return null;
-    }
-  }, [modalContent]);
-
   return (
     <AnimatePresence>
-      {modalContent && (
-        <motion.div
-          {...modalAnimations.modal}
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center"
-          onClick={handleCloseModal}
-          onContextMenu={(e) => e.preventDefault()}
-          style={{ zIndex: 99 }}
-        >
-          {renderModalContent}
-        </motion.div>
-      )}
+      {type && <ModalContent type={type} onClose={closeModal} />}
     </AnimatePresence>
   );
 };

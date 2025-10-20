@@ -1,5 +1,5 @@
 import { ChatResponse } from "@/shared/types/responses/chat.response";
-import { Button } from "@/components/ui/buttons/Button";
+import Button from "@/components/ui/buttons/Button";
 import { formatDuration } from "@/common/utils/format/formatDuration";
 import { useCallStore } from "@/stores/callStore";
 import { LocalCallStatus } from "@/common/enums/LocalCallStatus";

@@ -1,11 +1,9 @@
 import React, { useState } from "react";
+import { toast } from "react-toastify";
 import { motion } from "framer-motion";
-import { useModalStore } from "@/stores/modalStore";
 import { useActiveChat, useChatStore } from "@/stores/chatStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
-import SearchBar from "@/components/ui/SearchBar";
 import { modalAnimations } from "@/common/animations/modalAnimations";
-import { toast } from "react-toastify";
 import { copyToClipboard } from "@/common/utils/copyToClipboard";
 import { handleError } from "@/common/utils/handleError";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
@@ -14,15 +12,17 @@ import { FriendContactResponse } from "@/shared/types/responses/friend-contact.r
 import { useFriendContacts } from "@/common/hooks/useFriendContacts";
 import { useAllUniqueMembers } from "@/common/hooks/useAllUniqueMembers";
 import { useTranslation } from "react-i18next";
+import SearchBar from "@/components/ui/SearchBar";
+import { useModalActions } from "@/stores/modalStore";
 
 const AddMemberModal: React.FC = () => {
   const { t } = useTranslation();
+  const { closeModal } = useModalActions();
   const [copied, setCopied] = useState(false);
   const [refreshed, setRefreshed] = useState(false);
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
 
   const chat = useActiveChat();
-  const closeModal = useModalStore((state) => state.closeModal);
   const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
 
   const chatMemberUserIds = chat?.otherMemberUserIds || [];
@@ -102,7 +102,6 @@ const AddMemberModal: React.FC = () => {
     <motion.div
       {...modalAnimations.children}
       className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded p-4 max-w-xl w-[400px] custom-border"
-      style={{ zIndex: 100 }}
     >
       <h1 className="font-bold text-center text-xl mb-4 flex items-center justify-center gap-2">
         <span className="material-symbols-outlined font-bold text-3xl">

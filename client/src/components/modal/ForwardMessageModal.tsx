@@ -1,31 +1,33 @@
 // components/modals/ForwardMessageModal.tsx
 import React from "react";
-import { motion } from "framer-motion";
-import {
-  AttachmentResponse,
-  MessageResponse,
-} from "@/shared/types/responses/message.response";
-import { useModalStore } from "@/stores/modalStore";
+import { useModalActions, useModalData } from "@/stores/modalStore";
 import { useChatStore } from "@/stores/chatStore";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { ForwardMessageRequest } from "@/shared/types/requests/forward-message.request";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
-import { modalAnimations } from "@/common/animations/modalAnimations";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { AttachmentUploadRequest } from "@/shared/types/requests/attachment-upload.request";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useTranslation } from "react-i18next";
+import {
+  AttachmentResponse,
+  MessageResponse,
+} from "@/shared/types/responses/message.response";
 import SearchBar from "@/components/ui/SearchBar";
+
+interface ForwardMessageModalData {
+  message?: MessageResponse;
+  attachment?: AttachmentResponse;
+}
 
 const ForwardMessageModal: React.FC = () => {
   const { t } = useTranslation();
-  const modalContent = useModalStore((state) => state.modalContent);
-  const message = modalContent?.props?.message as MessageResponse | undefined;
-  const attachment = modalContent?.props?.attachment as
-    | AttachmentResponse
-    | undefined;
-  const closeModal = useModalStore((state) => state.closeModal);
+  const { closeModal } = useModalActions();
   const filteredChats = useChatStore((state) => state.filteredChats);
+  const data = useModalData() as unknown as ForwardMessageModalData | undefined;
+
+  const message = data?.message;
+  const attachment = data?.attachment;
 
   const forwardChats = filteredChats.filter(
     (chat) =>
@@ -74,11 +76,7 @@ const ForwardMessageModal: React.FC = () => {
   };
 
   return (
-    <motion.div
-      {...modalAnimations.children}
-      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded p-4 max-w-xl w-[400px] custom-border"
-      style={{ zIndex: 100 }}
-    >
+    <>
       <h1 className="font-bold text-center text-xl mb-4 flex items-center justify-center gap-2">
         {message
           ? t("modal.forward_message.title_message")
@@ -110,7 +108,7 @@ const ForwardMessageModal: React.FC = () => {
           </div>
         ))}
       </div>
-    </motion.div>
+    </>
   );
 };
 

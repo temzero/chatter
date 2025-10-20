@@ -11,6 +11,7 @@ import ChatBar from "./components/ChatBar";
 import MessagesContainer from "./messagesContainer/MessagesContainer";
 
 const ChatBox = React.memo(() => {
+  console.log("ChatBox");
   const activeChat = useActiveChat();
   const { isBlockedByMe, isBlockedMe } = useBlockStatus(
     activeChat?.id ?? "",
@@ -21,13 +22,13 @@ const ChatBox = React.memo(() => {
 
   const isDirectChat = activeChat.type === ChatType.DIRECT;
   const isBlocked = isDirectChat && (isBlockedByMe || isBlockedMe);
-  // const isBlocked = false;
-  // const isBlockedByMe = false;
-  // const isBlockedMe = false;
   const isMember = Boolean(activeChat.myMemberId);
 
   return (
-    <section className="h-full flex-1 relative flex flex-col justify-between overflow-hidden transition-all">
+    <section
+      className="h-full flex-1 relative flex flex-col justify-between overflow-hidden transition-all"
+      onContextMenu={(e) => e.preventDefault()}
+    >
       <Header chat={activeChat} isBlockedByMe={isBlockedByMe} />
       <MessagesContainer chat={activeChat} />
       {!activeChat.isDeleted && (

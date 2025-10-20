@@ -2,7 +2,7 @@ import { useChatStore } from "@/stores/chatStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useActiveMembers } from "@/stores/chatMemberStore";
-import { ModalType, useModalStore } from "@/stores/modalStore";
+import { ModalType, useModalActions } from "@/stores/modalStore";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { GroupChatMember } from "@/shared/types/responses/chat-member.response";
 import { useCurrentUserId } from "@/stores/authStore";
@@ -16,7 +16,7 @@ const ChatMembersEdit = () => {
   const activeChat = useChatStore((state) => state.activeChat) as ChatResponse;
   const activeMembers = useActiveMembers();
   const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
-  const openModal = useModalStore((state) => state.openModal);
+  const { openModal } = useModalActions();
 
   const myMember = activeMembers?.find(
     (member) => member.userId === currentUserId

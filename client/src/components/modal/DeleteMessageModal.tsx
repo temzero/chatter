@@ -1,25 +1,29 @@
 // components/modals/DeleteMessageModal.tsx
 import React from "react";
-import { useModalStore } from "@/stores/modalStore";
+import { useModalActions, useModalData } from "@/stores/modalStore";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { useCurrentUserId } from "@/stores/authStore";
-import { motion } from "framer-motion";
-import { modalAnimations } from "@/common/animations/modalAnimations";
 import { useMessageStore } from "@/stores/messageStore";
 import { audioService, SoundType } from "@/services/audio.service";
 
 import { useTranslation } from "react-i18next";
-import { Button } from "../ui/buttons/Button";
+import Button from "../ui/buttons/Button";
+
+interface DeleteMessageModalData {
+  messageId: string;
+}
 
 const DeleteMessageModal: React.FC = () => {
   const { t } = useTranslation();
-  const closeModal = useModalStore((state) => state.closeModal);
-  const modalContent = useModalStore((state) => state.modalContent);
-  const messageId = modalContent?.props?.messageId as string;
-
   const currentUserId = useCurrentUserId();
-  const message = useMessageStore.getState().getMessageById(messageId);
-  if (!message) return;
+  const { closeModal } = useModalActions();
+  const data = useModalData() as unknown as DeleteMessageModalData | undefined;
+
+  const getMessageById = useMessageStore((state) => state.getMessageById);
+  const messageId = data?.messageId;
+  const message = messageId ? getMessageById(messageId) : undefined;
+
+  if (!message) return null;
   const isMe = message.sender.id === currentUserId;
 
   const handleDelete = (isDeleteForEveryone: boolean = false) => {
@@ -33,11 +37,7 @@ const DeleteMessageModal: React.FC = () => {
   };
 
   return (
-    <motion.div
-      {...modalAnimations.children}
-      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border"
-      style={{ zIndex: 100 }}
-    >
+    <>
       <div className="p-4">
         <div className="flex gap-2 items-center mb-3">
           <span className="material-symbols-outlined text-3xl">chat_error</span>
@@ -71,7 +71,7 @@ const DeleteMessageModal: React.FC = () => {
           </Button>
         )}
       </div>
-    </motion.div>
+    </>
   );
 };
 

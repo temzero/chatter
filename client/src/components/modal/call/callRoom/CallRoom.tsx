@@ -9,8 +9,8 @@ import { CallControls } from "./CallControls";
 import { DraggableContainer } from "@/components/ui/layout/DraggableContainer";
 
 import { UserCamera } from "@/components/ui/media/UserCamera";
-import { Button } from "@/components/ui/buttons/Button";
 import { Timer } from "@/components/ui/Timer";
+import Button from "@/components/ui/buttons/Button";
 import CallHeader from "@/components/modal/call/components/CallHeader";
 
 const CallRoom = ({

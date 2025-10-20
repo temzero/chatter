@@ -11,7 +11,7 @@ import { useMuteControl } from "@/common/hooks/useMuteControl";
 import { SidebarInfoHeaderIcons } from "@/components/ui/icons/SidebarInfoHeaderIcons";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { rolePriority } from "@/shared/types/enums/chat-member-role.enum";
-import { ModalType, useModalStore } from "@/stores/modalStore";
+import { ModalType, useModalActions } from "@/stores/modalStore";
 import { useTranslation } from "react-i18next";
 import { useDeviceStore } from "@/stores/deviceStore";
 
@@ -28,7 +28,7 @@ const GroupChat: React.FC = () => {
   const setDisplaySearchMessage = useMessageStore(
     (state) => state.setDisplaySearchMessage
   );
-  const openModal = useModalStore((state) => state.openModal);
+  const { openModal } = useModalActions();
   const { mute, unmute } = useMuteControl(activeChat.id, activeChat.myMemberId);
 
   // Header buttons specific to group chat

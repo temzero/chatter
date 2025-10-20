@@ -1,28 +1,30 @@
 // components/modals/UnblockUserModal.tsx
 import React from "react";
-import { useModalStore } from "@/stores/modalStore";
-import { motion } from "framer-motion";
-import { modalAnimations } from "@/common/animations/modalAnimations";
+import { useModalActions, useModalData } from "@/stores/modalStore";
 import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { blockService } from "@/services/blockService";
 import { toast } from "react-toastify";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useTranslation } from "react-i18next";
-import { Button } from "../ui/buttons/Button";
+import Button from "../ui/buttons/Button";
+
+interface UnblockUserModalData {
+  blockedUser: DirectChatMember;
+  onUnblockSuccess?: () => void;
+}
 
 const UnblockUserModal: React.FC = () => {
   const { t } = useTranslation();
-  const closeModal = useModalStore((state) => state.closeModal);
-  const modalContent = useModalStore((state) => state.modalContent);
+  const { closeModal } = useModalActions();
+  const data = useModalData() as unknown as UnblockUserModalData | undefined;
   const updateMemberLocally = useChatMemberStore.getState().updateMemberLocally;
 
   // Extract user data from modal props
-  const blockedUser = modalContent?.props?.blockedUser as DirectChatMember;
+  const blockedUser = data?.blockedUser;
+  const onUnblockSuccess = data?.onUnblockSuccess;
+
   if (!blockedUser) return null;
-  const onUnblockSuccess = modalContent?.props?.onUnblockSuccess as
-    | (() => void)
-    | undefined;
 
   const handleUnblock = async () => {
     try {
@@ -46,11 +48,7 @@ const UnblockUserModal: React.FC = () => {
   };
 
   return (
-    <motion.div
-      {...modalAnimations.children}
-      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border"
-      style={{ zIndex: 100 }}
-    >
+    <>
       <div className="p-4">
         {/* Changed to green color and "Unblock User" title */}
         <div className="flex gap-2 items-center mb-4 text-[--primary-green] font-semibold">
@@ -90,7 +88,7 @@ const UnblockUserModal: React.FC = () => {
           {t("common.actions.cancel")}
         </Button>
       </div>
-    </motion.div>
+    </>
   );
 };
 

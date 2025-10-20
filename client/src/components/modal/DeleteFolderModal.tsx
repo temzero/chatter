@@ -1,24 +1,28 @@
 // components/modals/DeleteFolderModal.tsx
 import React from "react";
-import { useModalStore } from "@/stores/modalStore";
-import { motion } from "framer-motion";
-import { modalAnimations } from "@/common/animations/modalAnimations";
+import { useModalActions, useModalData } from "@/stores/modalStore";
 import { useFolderStore } from "@/stores/folderStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
-import { Button } from "../ui/buttons/Button";
+import Button from "../ui/buttons/Button";
+
+interface DeleteFolderModalData {
+  folderId: string;
+}
 
 const DeleteFolderModal: React.FC = () => {
   const { t } = useTranslation();
+  const { closeModal } = useModalActions();
   const deleteFolder = useFolderStore((state) => state.deleteFolder);
-  const closeModal = useModalStore((state) => state.closeModal);
   const setSidebar = useSidebarStore((state) => state.setSidebar);
-  const modalContent = useModalStore((state) => state.modalContent);
-  const folderId = modalContent?.props?.folderId as string;
+  const getFolderById = useFolderStore((state) => state.getFolderById);
+  const data = useModalData() as unknown as DeleteFolderModalData | undefined;
 
-  const folder = useFolderStore.getState().getFolderById(folderId);
-  if (!folder) return;
+  const folderId = data?.folderId;
+  const folder = folderId ? getFolderById(folderId) : undefined;
+
+  if (!folder) return null;
 
   const handleDelete = () => {
     closeModal();
@@ -32,11 +36,7 @@ const DeleteFolderModal: React.FC = () => {
   };
 
   return (
-    <motion.div
-      {...modalAnimations.children}
-      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border"
-      style={{ zIndex: 100 }}
-    >
+    <>
       <div className="p-4">
         <h2 className="text-2xl font-semibold mb-3">
           {t("modal.delete_folder.title")}
@@ -68,20 +68,8 @@ const DeleteFolderModal: React.FC = () => {
         <Button variant="ghost" fullWidth onClick={closeModal}>
           {t("common.actions.cancel")}
         </Button>
-        {/* <button
-          className="p-3 text-red-500 hover:bg-[var(--background-secondary)] opacity-80 hover:opacity-100 flex-1"
-          onClick={handleDelete}
-        >
-          {t("common.actions.delete")}
-        </button>
-        <button
-          className="p-3 hover:bg-[var(--background-secondary)] opacity-80 hover:opacity-100 flex-1"
-          onClick={closeModal}
-        >
-          {t("common.actions.cancel")}
-        </button> */}
       </div>
-    </motion.div>
+    </>
   );
 };
 

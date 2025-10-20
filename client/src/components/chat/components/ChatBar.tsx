@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useMessageStore } from "@/stores/messageStore";
 import { AnimatePresence, motion } from "framer-motion";
 import { handleSendMessage } from "@/common/utils/message/sendMessageHandler";
-import { useModalStore, useReplyToMessageId } from "@/stores/modalStore";
+import { useModalActions, useReplyToMessageId } from "@/stores/modalStore";
 import { useCurrentUserId } from "@/stores/authStore";
 import { useTranslation } from "react-i18next";
 import EmojiPicker from "@/components/ui/EmojiPicker";
@@ -20,9 +20,9 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
   const { t } = useTranslation();
   const currentUserId = useCurrentUserId();
 
+  const { closeModal } = useModalActions();
   const setDraftMessage = useMessageStore((state) => state.setDraftMessage);
   const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
-  const closeModal = useModalStore((state) => state.closeModal);
   const replyToMessageId = useReplyToMessageId();
 
   const inputRef = useRef<HTMLTextAreaElement>(null!);

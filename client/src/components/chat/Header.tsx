@@ -136,7 +136,7 @@ const Header: React.FC<ChatHeaderProps> = ({ chat, isBlockedByMe = false }) => {
         </button>
       )}
 
-      <AnimatePresence mode="wait">
+      <AnimatePresence>
         <motion.div
           key={chat.id}
           className="flex gap-3 items-center cursor-pointer hover:text-[--primary-green]"

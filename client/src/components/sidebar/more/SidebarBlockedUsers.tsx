@@ -4,13 +4,13 @@ import { blockService } from "@/services/blockService";
 import { BlockResponse } from "@/shared/types/responses/block.response";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { FadeLoader } from "react-spinners";
-import { ModalType, useModalStore } from "@/stores/modalStore";
+import { ModalType, useModalActions } from "@/stores/modalStore";
 import { useTranslation } from "react-i18next";
 
 const SidebarBlockedUsers: React.FC = () => {
   const { t } = useTranslation();
+  const { openModal } = useModalActions();
   const [blockedUsers, setBlockedUsers] = useState<BlockResponse[]>([]);
-  const openModal = useModalStore((state) => state.openModal);
   const [loading, setLoading] = useState(true);
 
   const fetchBlockedUsers = async () => {

@@ -1,6 +1,6 @@
 import React from "react";
 import { CallStatus } from "@/shared/types/enums/call-status.enum";
-import { getCallColor } from "@/common/utils/callHelpers";
+import { getCallColor } from "@/common/utils/call/callHelpers";
 
 interface CallIconProps {
   status: CallStatus;

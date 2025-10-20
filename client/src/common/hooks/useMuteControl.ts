@@ -1,10 +1,10 @@
 // hooks/chat/useMuteControl.ts
 import { useChatStore } from "@/stores/chatStore";
-import { ModalType, useModalStore } from "@/stores/modalStore";
+import { ModalType, useModalActions } from "@/stores/modalStore";
 import { toast } from "react-toastify";
 
 export function useMuteControl(chatId: string, myMemberId: string) {
-  const openModal = useModalStore((state) => state.openModal);
+  const { openModal } = useModalActions();
   const setMute = useChatStore((state) => state.setMute);
 
   const mute = () => {

@@ -1,14 +1,12 @@
 // FriendRequestModal.tsx
 import React, { useRef, useState } from "react";
-import { useModalStore } from "@/stores/modalStore";
+import { useModalActions, useModalData } from "@/stores/modalStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useFriendshipStore } from "@/stores/friendshipStore";
-import { motion } from "framer-motion";
-import { modalAnimations } from "@/common/animations/modalAnimations";
 import { useCurrentUserId } from "@/stores/authStore";
 import { useTranslation } from "react-i18next";
 
-interface FriendRequestModalProps {
+interface FriendRequestModalData {
   receiver: {
     id: string;
     username: string;
@@ -20,19 +18,18 @@ interface FriendRequestModalProps {
 
 const FriendRequestModal: React.FC = () => {
   const { t } = useTranslation();
-  const modalContent = useModalStore((state) => state.modalContent);
-  const props = modalContent?.props as FriendRequestModalProps | undefined;
   const currentUserId = useCurrentUserId();
-
+  const { closeModal } = useModalActions();
   const sendFriendRequest = useFriendshipStore.getState().sendFriendRequest;
-  const closeModal = useModalStore.getState().closeModal;
+  const data = useModalData() as unknown as FriendRequestModalData | undefined;
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [charCount, setCharCount] = useState(0);
   const [requestMessage, setRequestMessage] = useState("");
   const maxChar = 200;
 
-  if (!props) return null;
-  const { receiver } = props;
+  const receiver = data?.receiver;
+  if (!receiver) return null;
 
   const handleFriendRequest = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,11 +48,7 @@ const FriendRequestModal: React.FC = () => {
   };
 
   return (
-    <motion.div
-      {...modalAnimations.children}
-      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded p-4 max-w-xl w-[400px] custom-border"
-      style={{ zIndex: 100 }}
-    >
+    <>
       <h1 className="font-bold text-center text-xl">
         {t("modal.friend_request.title")}
       </h1>
@@ -92,7 +85,7 @@ const FriendRequestModal: React.FC = () => {
             {charCount}/{maxChar}
           </span>
         </div>
-        
+
         <button
           type="submit"
           className="bg-[var(--primary-green)] text-white w-full py-1 flex gap-2 justify-center"
@@ -100,7 +93,7 @@ const FriendRequestModal: React.FC = () => {
           {t("modal.friend_request.send_request")}
         </button>
       </form>
-    </motion.div>
+    </>
   );
 };
 

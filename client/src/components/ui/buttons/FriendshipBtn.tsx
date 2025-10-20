@@ -1,5 +1,5 @@
 // src/components/FriendshipBtn.tsx
-import { ModalType, useModalStore } from "@/stores/modalStore";
+import { ModalType, useModalActions } from "@/stores/modalStore";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { useCurrentUserId } from "@/stores/authStore";
 import { useFriendRequest } from "@/common/hooks/useFriendRequest";
@@ -26,7 +26,7 @@ const FriendshipBtn: React.FC<FriendshipBtnProps> = ({
   className,
 }) => {
   const currentUserId = useCurrentUserId();
-  const openModal = useModalStore((state) => state.openModal);
+  const { openModal } = useModalActions();
   const {
     findReceivedRequest,
     findSentRequest,

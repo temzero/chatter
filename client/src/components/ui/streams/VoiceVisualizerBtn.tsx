@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { RemoteTrack } from "livekit-client";
 import { VoiceVisualizer } from "./VoiceVisualizer";
-import { Button } from "@/components/ui/buttons/Button";
+import Button from "@/components/ui/buttons/Button";
 
 type VoiceVisualizerButtonProps = {
   stream: MediaStream | RemoteTrack | null;

@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCallStore } from "@/stores/callStore";
-import { Button } from "@/components/ui/buttons/Button";
+import Button from "@/components/ui/buttons/Button";
 import { VideoStream } from "@/components/ui/streams/VideoStream";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useModalStore } from "@/stores/modalStore";

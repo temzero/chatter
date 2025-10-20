@@ -16,6 +16,7 @@ const ChannelMessages: React.FC<ChannelMessagesProps> = ({
   chat,
   messages,
 }) => {
+  console.log('ChannelMessages')
   const chatId = chat?.id;
   const currentUser = useCurrentUser();
   const rawMembers = useActiveMembers();

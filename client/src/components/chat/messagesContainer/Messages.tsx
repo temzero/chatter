@@ -18,6 +18,7 @@ interface ChatMessagesProps {
 }
 
 const Messages: React.FC<ChatMessagesProps> = ({ chat, messages }) => {
+  console.log("Messages");
   const chatId = chat?.id;
   const currentUser = useCurrentUser();
   const rawMembers = useActiveMembers();

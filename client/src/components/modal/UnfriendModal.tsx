@@ -1,8 +1,6 @@
 // components/modals/UnfriendModal.tsx
 import React from "react";
-import { useModalStore } from "@/stores/modalStore";
-import { motion } from "framer-motion";
-import { modalAnimations } from "@/common/animations/modalAnimations";
+import { useModalActions, useModalData } from "@/stores/modalStore";
 import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { toast } from "react-toastify";
@@ -10,19 +8,22 @@ import { useFriendshipStore } from "@/stores/friendshipStore";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { useTranslation } from "react-i18next";
-import { Button } from "../ui/buttons/Button";
+import Button from "../ui/buttons/Button";
+
+interface UnfriendModalData {
+  userToUnfriend: DirectChatMember;
+}
 
 const UnfriendModal: React.FC = () => {
   const { t } = useTranslation();
-  const closeModal = useModalStore((state) => state.closeModal);
-  const modalContent = useModalStore((state) => state.modalContent);
+  const { closeModal } = useModalActions();
+  const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
   const deleteFriendship = useFriendshipStore(
     (state) => state.deleteFriendship
   );
-  const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
+  const data = useModalData() as unknown as UnfriendModalData | undefined;
 
-  const userToUnfriend = modalContent?.props
-    ?.userToUnfriend as DirectChatMember;
+  const userToUnfriend = data?.userToUnfriend;
   if (!userToUnfriend) return null;
 
   const handleUnfriend = async () => {
@@ -37,11 +38,7 @@ const UnfriendModal: React.FC = () => {
   };
 
   return (
-    <motion.div
-      {...modalAnimations.children}
-      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border"
-      style={{ zIndex: 100 }}
-    >
+    <>
       <div className="p-4">
         <div className="flex gap-2 items-center mb-4 text-yellow-500 font-semibold">
           <span className="material-symbols-outlined text-3xl font-bold">
@@ -79,7 +76,7 @@ const UnfriendModal: React.FC = () => {
           {t("common.actions.cancel")}
         </Button>
       </div>
-    </motion.div>
+    </>
   );
 };
 

@@ -65,7 +65,7 @@ interface ChatStore {
   refreshInviteLink: (chatId: string, token: string) => Promise<string>;
   setSearchTerm: (term: string) => void;
   leaveChat: (chatId: string) => Promise<void>;
-  deleteChat: (id: string, type: ChatType) => Promise<void>;
+  deleteChat: (id: string) => Promise<void>;
   cleanupChat: (chatId: string) => void;
   clearChats: () => void;
 
@@ -304,9 +304,9 @@ export const useChatStore = create<ChatStore>()(
         setActiveChat: async (chat) => {
           useSidebarInfoStore.getState().setSidebarInfo();
           useMessageStore.getState().setDisplaySearchMessage(false);
+          useModalStore.getState().closeModal();
           if (!chat) {
             set({ activeChat: null, isLoading: false });
-            useModalStore.getState().setReplyToMessageId(null);
             return;
           }
 
@@ -317,7 +317,6 @@ export const useChatStore = create<ChatStore>()(
 
           set({ activeChat: chat, isLoading: true });
           window.history.pushState({}, "", `/${chat.id}`);
-          useModalStore.getState().setReplyToMessageId(null);
 
           try {
             const fetchMessagesPromise = alreadyFetchedMessages

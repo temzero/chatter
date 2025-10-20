@@ -7,11 +7,7 @@ import { MessageReactionDisplay } from "@/components/ui/messages/MessageReaction
 import { messageAnimations } from "@/common/animations/messageAnimations";
 import { SystemMessageContent } from "@/components/ui/messages/SystemMessageContent";
 import { SystemMessageJSONContent } from "@/components/ui/messages/SystemMessageContent";
-import {
-  useIsMessageFocus,
-  useIsReplyToThisMessage,
-  useModalStore,
-} from "@/stores/modalStore";
+import { useIsMessageFocus, useIsReplyToThisMessage, useModalActions } from "@/stores/modalStore";
 import { MessageContextMenu } from "./MessageContextMenu";
 
 type Props = {
@@ -32,9 +28,10 @@ const SystemMessage = ({
   const currentUserId = useCurrentUserId();
   const messageId = message.id;
 
-  const isRelyToThisMessage = useIsReplyToThisMessage(messageId);
+  const { openFocusMessageModal } = useModalActions();
+  // const openOverlayModal = useModalStore((state) => state.openOverlayModal);
   const isFocus = useIsMessageFocus(messageId);
-  const openMessageModal = useModalStore((state) => state.openMessageModal);
+  const isRelyToThisMessage = useIsReplyToThisMessage(messageId);
 
   if (!message || !currentUserId) return;
 
@@ -56,7 +53,7 @@ const SystemMessage = ({
       id={`message-${messageId}`}
       onContextMenu={(e) => {
         e.preventDefault();
-        openMessageModal(messageId);
+        openFocusMessageModal(messageId);
       }}
       className={clsx(
         "cursor-pointer rounded-full mb-2 px-1 mx-auto flex items-center justify-center",
@@ -64,7 +61,7 @@ const SystemMessage = ({
           "border-2 border-red-500/50 bg-[--background-color]"
       )}
       style={{
-        zIndex: isFocus ? 100 : "auto",
+        zIndex: isFocus || isRelyToThisMessage ? 100 : "auto",
       }}
       layout="position"
       {...messageAnimations.SystemMessage}

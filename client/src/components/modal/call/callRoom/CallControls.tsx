@@ -1,7 +1,7 @@
 // components/call-room/CallControls.tsx
-import { Button } from "@/components/ui/buttons/Button";
 import { VoiceVisualizerButton } from "@/components/ui/streams/VoiceVisualizerBtn";
 import { useCallStore } from "@/stores/callStore";
+import Button from "@/components/ui/buttons/Button";
 
 interface CallControlsProps {
   isVideoEnabled: boolean;

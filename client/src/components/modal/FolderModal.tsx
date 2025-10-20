@@ -1,25 +1,31 @@
 // components/modals/AddChatToFolderModal.tsx
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { modalAnimations } from "@/common/animations/modalAnimations";
 import { useFolderStore } from "@/stores/folderStore";
-import { useModalStore } from "@/stores/modalStore";
+import { useModalActions, useModalData } from "@/stores/modalStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
 import Checkbox from "../ui/buttons/CheckBox";
-import { Button } from "../ui/buttons/Button";
+import Button from "../ui/buttons/Button";
+import { ChatResponse } from "@/shared/types/responses/chat.response";
+import { ChatAvatar } from "../ui/avatar/ChatAvatar";
+
+interface AddChatToFolderModalData {
+  chat: ChatResponse;
+}
 
 const AddChatToFolderModal: React.FC = () => {
   const { t } = useTranslation();
-  const closeModal = useModalStore((state) => state.closeModal);
+  const { closeModal } = useModalActions();
   const addChatToFolder = useFolderStore((state) => state.addChatToFolder);
   const folders = useFolderStore((state) => state.folders);
   const setSidebar = useSidebarStore((state) => state.setSidebar);
+  const data = useModalData() as unknown as
+    | AddChatToFolderModalData
+    | undefined;
 
-  const modalContent = useModalStore((state) => state.modalContent);
-  const chatId = modalContent?.props?.chatId as string;
-
+  const chat = data?.chat;
+  const chatId = chat?.id;
   // Pre-check folders that already contain the chat
   const [selectedFolderIds, setSelectedFolderIds] = useState<string[]>([]);
 
@@ -30,8 +36,6 @@ const AddChatToFolderModal: React.FC = () => {
       .map((f) => f.id);
     setSelectedFolderIds(initialSelected);
   }, [folders, chatId]);
-
-  if (!folders || folders.length === 0) return null;
 
   const handleToggleFolder = (folderId: string) => {
     setSelectedFolderIds((prev) =>
@@ -59,15 +63,14 @@ const AddChatToFolderModal: React.FC = () => {
   };
 
   return (
-    <motion.div
-      {...modalAnimations.children}
-      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border"
-      style={{ zIndex: 100 }}
-    >
+    <>
       <div className="p-4">
-        <h2 className="text-2xl font-semibold mb-3">
-          {t("modal.folder.title")}
-        </h2>
+        <h2 className="text-2xl font-semibold">{t("modal.folder.title")}</h2>
+
+        <div className="flex items-center gap-3 my-2">
+          <ChatAvatar chat={chat} />
+          <h3 className="text-2xl font-semibold">{chat?.name}</h3>
+        </div>
 
         <div className="flex flex-col max-h-60 overflow-y-auto">
           {folders.map((folder) => (
@@ -104,7 +107,7 @@ const AddChatToFolderModal: React.FC = () => {
           {t("common.actions.cancel")}
         </Button>
       </div>
-    </motion.div>
+    </>
   );
 };
 

@@ -5,7 +5,7 @@ import { callService } from "@/services/callService";
 import { CallResponse } from "@/shared/types/responses/call.response";
 import { useCurrentUserId } from "@/stores/authStore";
 import { AnimatePresence, motion } from "framer-motion";
-import { ModalType, useModalStore } from "@/stores/modalStore";
+import { ModalType, useModalActions } from "@/stores/modalStore";
 import InfiniteScroller from "@/components/ui/layout/InfiniteScroller";
 import CallItem from "./CallItem";
 
@@ -17,7 +17,7 @@ const SidebarCalls: React.FC = () => {
   const [calls, setCalls] = useState<CallResponse[]>([]);
   const [hasMore, setHasMore] = useState(true);
   const [lastCallId, setLastCallId] = useState<string | null>(null);
-  const openModal = useModalStore((s) => s.openModal);
+  const { openModal } = useModalActions();
 
   // ✅ Load more calls (cursor-based)
   const loadCallData = async (): Promise<number | null> => {

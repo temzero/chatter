@@ -1,25 +1,29 @@
 // components/modals/BlockUserModal.tsx
 import React from "react";
-import { useModalStore } from "@/stores/modalStore";
-import { motion } from "framer-motion";
-import { modalAnimations } from "@/common/animations/modalAnimations";
+import {
+  useModalActions,
+  useModalData,
+} from "@/stores/modalStore";
 import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { toast } from "react-toastify";
 import { blockService } from "@/services/blockService";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useTranslation } from "react-i18next";
-import { Button } from "../ui/buttons/Button";
+import Button from "../ui/buttons/Button";
+
+interface BlockUserModalData {
+  userToBlock: DirectChatMember;
+}
 
 const BlockUserModal: React.FC = () => {
   const { t } = useTranslation();
-
-  const closeModal = useModalStore((state) => state.closeModal);
-  const modalContent = useModalStore((state) => state.modalContent);
+  const { closeModal } = useModalActions();
   const updateMemberLocally = useChatMemberStore.getState().updateMemberLocally;
+  const data = useModalData() as unknown as BlockUserModalData | undefined;
 
   // Extract user data from modal props
-  const userToBlock = modalContent?.props?.userToBlock as DirectChatMember;
+  const userToBlock = data?.userToBlock as DirectChatMember;
   if (!userToBlock) return null;
 
   const handleBlock = async () => {
@@ -40,11 +44,7 @@ const BlockUserModal: React.FC = () => {
   };
 
   return (
-    <motion.div
-      {...modalAnimations.children}
-      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border"
-      style={{ zIndex: 100 }}
-    >
+    <>
       <div className="p-4">
         <h2 className="text-2xl font-semibold mb-4 text-red-500">
           {t("modal.block_user.title")}
@@ -80,29 +80,13 @@ const BlockUserModal: React.FC = () => {
           onClick={handleBlock}
           className="text-red-500"
         >
-           {t("common.actions.block")}
-        </Button>
-        <Button
-          variant="ghost"
-          fullWidth
-          onClick={closeModal}
-        >
-           {t("common.actions.cancel")}
-        </Button>
-        {/* <button
-          className="p-3 text-red-500 hover:bg-[var(--background-secondary)] opacity-80 hover:opacity-100 flex-1"
-          onClick={handleBlock}
-        >
           {t("common.actions.block")}
-        </button>
-        <button
-          className="p-3 hover:bg-[var(--background-secondary)] opacity-80 hover:opacity-100 flex-1"
-          onClick={closeModal}
-        >
+        </Button>
+        <Button variant="ghost" fullWidth onClick={closeModal}>
           {t("common.actions.cancel")}
-        </button> */}
+        </Button>
       </div>
-    </motion.div>
+    </>
   );
 };
 

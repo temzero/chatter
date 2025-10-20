@@ -21,7 +21,7 @@ interface FolderStore {
   addChatToFolder: (chatId: string, folderId: string) => Promise<void>;
   updateFolder: (folder: Partial<FolderResponse>) => Promise<void>;
   reorderFolders: (newOrderIds: string[]) => Promise<void>;
-  deleteFolder: (folderId: string) => Promise<void>;
+  deleteFolder: (folderId?: string) => Promise<void>;
 }
 
 // Helper function to sort folders by position
@@ -161,7 +161,8 @@ export const useFolderStore = create<FolderStore>((set, get) => ({
     }
   },
 
-  deleteFolder: async (folderId: string) => {
+  deleteFolder: async (folderId?: string) => {
+    if (!folderId) return;
     try {
       await folderService.deleteFolder(folderId);
       set((state) => ({

@@ -3,7 +3,7 @@ import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useMuteControl } from "@/common/hooks/useMuteControl";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useFolderStore } from "@/stores/folderStore";
-import { ModalType, useModalStore } from "@/stores/modalStore";
+import { ModalType, useModalActions } from "@/stores/modalStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useChatStore } from "@/stores/chatStore";
 
@@ -26,7 +26,7 @@ export const ChatListItemContextMenu = React.forwardRef<
   ChatContextMenuProps
 >(({ x, y, chat, onClose }, ref) => {
   const { mute, unmute } = useMuteControl(chat.id, chat.myMemberId);
-  const openModal = useModalStore((state) => state.openModal);
+  const { openModal } = useModalActions();
   const updateMemberLastRead = useChatMemberStore(
     (state) => state.updateMemberLastRead
   );
@@ -72,7 +72,7 @@ export const ChatListItemContextMenu = React.forwardRef<
             icon: "folder_open",
             onClick: () =>
               openModal(ModalType.FOLDER, {
-                chatId: chat.id,
+                chat,
               }),
           },
         ]
@@ -86,7 +86,7 @@ export const ChatListItemContextMenu = React.forwardRef<
             icon: "delete",
             onClick: () =>
               openModal(ModalType.DELETE_CHAT, {
-                chat: chat,
+                chat,
               }),
             className: "text-red-500",
           },
@@ -97,7 +97,7 @@ export const ChatListItemContextMenu = React.forwardRef<
             icon: "logout",
             onClick: () =>
               openModal(ModalType.LEAVE_CHAT, {
-                chat: chat,
+                chat,
               }),
             className: "text-yellow-500",
           },

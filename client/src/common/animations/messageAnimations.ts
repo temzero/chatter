@@ -28,12 +28,12 @@ export const messageAnimations: Record<string, MotionProps> = {
 };
 
 export const getMessageAnimation = (isMe: boolean): MotionProps => ({
-  initial: { opacity: 0, scale: 0.1, x: isMe ? "100%" : "-100%" },
+  initial: { opacity: 0, x: isMe ? 300 : -300 }, // 300px from side
   animate: { opacity: 1, scale: 1, x: 0 },
   exit: { opacity: 0, scale: 2 },
   transition: {
     type: "spring",
     stiffness: 300,
-    damping: 20,
+    damping: 28,
   },
 });

@@ -1,21 +1,23 @@
 import React from "react";
-import { useModalStore } from "@/stores/modalStore";
-import { motion } from "framer-motion";
-import { modalAnimations } from "@/common/animations/modalAnimations";
+import { useModalActions, useModalData } from "@/stores/modalStore";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useChatStore } from "@/stores/chatStore";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useTranslation } from "react-i18next";
-import { Button } from "../ui/buttons/Button";
+import Button from "../ui/buttons/Button";
+
+interface LeaveChatModalData {
+  chat: ChatResponse;
+}
 
 const LeaveChatModal: React.FC = () => {
   const { t } = useTranslation();
-  const closeModal = useModalStore((state) => state.closeModal);
-  const modalContent = useModalStore((state) => state.modalContent);
   const leaveChat = useChatStore((state) => state.leaveChat);
+  const { closeModal } = useModalActions();
+  const data = useModalData() as unknown as LeaveChatModalData | undefined;
 
-  const chat = modalContent?.props?.chat as ChatResponse;
+  const chat = data?.chat;
   if (!chat) return null;
 
   const isDirectChat = chat.type === ChatType.DIRECT;
@@ -28,11 +30,7 @@ const LeaveChatModal: React.FC = () => {
   };
 
   return (
-    <motion.div
-      {...modalAnimations.children}
-      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded max-w-xl w-[400px] custom-border"
-      style={{ zIndex: 100 }}
-    >
+    <>
       <div className="p-4">
         <div className="flex gap-2 items-center mb-4 text-yellow-500 font-semibold">
           <span className="material-symbols-outlined text-3xl font-bold">
@@ -72,7 +70,7 @@ const LeaveChatModal: React.FC = () => {
           {t("common.actions.cancel")}
         </Button>
       </div>
-    </motion.div>
+    </>
   );
 };
 

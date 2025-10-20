@@ -12,6 +12,8 @@ export const ModalImageViewer = forwardRef<
   const [translateX, setTranslateX] = useState(0);
   const [zoomOrigin, setZoomOrigin] = useState("50% 50%");
 
+  const SCROLL_SPEED = 1;
+
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
     if (!isZoom) return;
 
@@ -21,12 +23,12 @@ export const ModalImageViewer = forwardRef<
 
     if (e.shiftKey) {
       setTranslateX((prev) => {
-        const newX = prev - delta * 0.5;
+        const newX = prev - delta * SCROLL_SPEED;
         return Math.max(-maxX, Math.min(maxX, newX));
       });
     } else {
       setTranslateY((prev) => {
-        const newY = prev - delta * 0.5;
+        const newY = prev - delta * SCROLL_SPEED;
         return Math.max(-maxY, Math.min(maxY, newY));
       });
     }

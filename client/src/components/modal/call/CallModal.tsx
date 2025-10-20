@@ -20,9 +20,9 @@ import BroadcastRoom from "@/components/modal/call/broadcastRoom/BroadcastRoom";
 
 const CallModal: React.FC = () => {
   const isMobile = useDeviceStore((state) => state.isMobile);
+  const getOrFetchChatById = useChatStore((state) => state.getOrFetchChatById);
 
   const { chatId, localCallStatus, callStatus } = useCallStore();
-  const getOrFetchChatById = useChatStore((state) => state.getOrFetchChatById);
   const [chat, setChat] = React.useState<ChatResponse | null>(null);
   const isBroadcasting: boolean =
     chat?.type === ChatType.CHANNEL && callStatus == CallStatus.IN_PROGRESS;

@@ -5,7 +5,7 @@ import { RemoteParticipant, RoomEvent } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
 import { CallControls } from "../callRoom/CallControls";
 import { BroadcastInfo } from "./BroadCastInfo";
-import { Button } from "@/components/ui/buttons/Button";
+import Button from "@/components/ui/buttons/Button";
 import { LocalStreamPreview } from "@/components/ui/streams/LocalStreamPreview";
 import { DraggableContainer } from "@/components/ui/layout/DraggableContainer";
 import { useDeviceStore } from "@/stores/deviceStore";

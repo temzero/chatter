@@ -1,11 +1,8 @@
 import React from "react";
 import clsx from "clsx";
 import { MessageResponse } from "@/shared/types/responses/message.response";
-import {
-  ModalType,
-  useModalStore,
-  useSetReplyToMessageId,
-} from "@/stores/modalStore";
+import { useModalActions } from "@/stores/modalStore";
+import { ModalType } from "@/common/enums/modalType";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { scrollToMessageById } from "@/common/utils/message/scrollToMessageById";
 import { useTranslation } from "react-i18next";
@@ -29,9 +26,8 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   onClose,
 }) => {
   const { t } = useTranslation();
-  const openModal = useModalStore((state) => state.openModal);
-  const closeModal = useModalStore((state) => state.closeModal);
-  const setReplyToMessageId = useSetReplyToMessageId();
+  const { openModal, closeModal, openReplyToMessageModal } = useModalActions();
+
   const isAlreadyReply = !!message.replyToMessageId;
   const isPinned = message.isPinned;
   const isImportant = message.isImportant;
@@ -42,7 +38,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       label: t("common.actions.reply"),
       class: "rotate-180",
       action: () => {
-        setReplyToMessageId(message.id);
+        openReplyToMessageModal(message.id);
         scrollToMessageById(message.id, { animate: false });
       },
     },
