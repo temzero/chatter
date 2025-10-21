@@ -13,7 +13,7 @@ interface MemberItemProps {
 const MemberItem: React.FC<MemberItemProps> = ({ member }) => {
   const currentUser = useCurrentUser();
   const isMemberOnline = useUserStatus(member.userId);
-  const { createOrGetDirectChat } = useChatStore();
+  const createOrGetDirectChat = useChatStore.getState().createOrGetDirectChat;
 
   const isCurrentUser = currentUser?.id === member.userId;
   const isBlockedByMe = member.isBlockedByMe;

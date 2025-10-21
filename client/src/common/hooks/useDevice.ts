@@ -1,9 +1,9 @@
 // hooks/useDevice.ts
 import { useEffect } from "react";
-import { useDeviceStore } from "@/stores/deviceStore";
+import { getSetMobile } from "@/stores/deviceStore";
 
 export const useDevice = (breakpoint = 800) => {
-  const setIsMobile = useDeviceStore((state) => state.setIsMobile);
+  const setIsMobile = getSetMobile();
 
   useEffect(() => {
     const handleResize = () => {

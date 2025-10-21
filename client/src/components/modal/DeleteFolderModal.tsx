@@ -1,8 +1,8 @@
 // components/modals/DeleteFolderModal.tsx
 import React from "react";
-import { useModalActions, useModalData } from "@/stores/modalStore";
+import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { useFolderStore } from "@/stores/folderStore";
-import { useSidebarStore } from "@/stores/sidebarStore";
+import { getSetSidebar } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
 import Button from "../ui/buttons/Button";
@@ -13,11 +13,11 @@ interface DeleteFolderModalData {
 
 const DeleteFolderModal: React.FC = () => {
   const { t } = useTranslation();
-  const { closeModal } = useModalActions();
-  const deleteFolder = useFolderStore((state) => state.deleteFolder);
-  const setSidebar = useSidebarStore((state) => state.setSidebar);
-  const getFolderById = useFolderStore((state) => state.getFolderById);
-  const data = useModalData() as unknown as DeleteFolderModalData | undefined;
+  const closeModal = getCloseModal();
+  const setSidebar = getSetSidebar();
+  const deleteFolder = useFolderStore.getState().deleteFolder;
+  const getFolderById = useFolderStore.getState().getFolderById;
+  const data = getModalData() as unknown as DeleteFolderModalData | undefined;
 
   const folderId = data?.folderId;
   const folder = folderId ? getFolderById(folderId) : undefined;

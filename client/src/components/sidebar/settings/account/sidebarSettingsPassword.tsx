@@ -4,16 +4,16 @@ import SidebarLayout from "@/layouts/SidebarLayout";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useAuthStore } from "@/stores/authStore";
 import { userService } from "@/services/userService";
-import { useSidebarStore } from "@/stores/sidebarStore";
+import { getSetSidebar, } from "@/stores/sidebarStore";
 import { toast } from "react-toastify";
 import { handleError } from "@/common/utils/handleError";
 import { useTranslation } from "react-i18next";
 
 const SidebarSettingsPassword: React.FC = () => {
   const { t } = useTranslation();
-  const setLoading = useAuthStore((state) => state.setLoading);
   const loading = useAuthStore((state) => state.loading);
-  const { setSidebar } = useSidebarStore();
+  const setLoading = useAuthStore.getState().setLoading;
+  const setSidebar = getSetSidebar();
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");

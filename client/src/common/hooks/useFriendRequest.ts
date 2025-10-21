@@ -5,9 +5,11 @@ import { useChatStore } from "@/stores/chatStore";
 import { toast } from "react-toastify";
 
 export const useFriendRequest = () => {
-  const { pendingRequests, respondToRequest, cancelRequest } =
-    useFriendshipStore();
-  const { getDirectChatByUserId } = useChatStore();
+  const pendingRequests = useFriendshipStore((state) => state.pendingRequests);
+  const respondToRequest = useFriendshipStore.getState().respondToRequest;
+  const cancelRequest = useFriendshipStore.getState().cancelRequest;
+
+  const getDirectChatByUserId = useChatStore.getState().getDirectChatByUserId;
 
   const findReceivedRequest = (userId: string, currentUserId: string) => {
     return pendingRequests.find(

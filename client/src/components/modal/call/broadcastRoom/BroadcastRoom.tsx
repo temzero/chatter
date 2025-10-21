@@ -8,7 +8,7 @@ import { BroadcastInfo } from "./BroadCastInfo";
 import Button from "@/components/ui/buttons/Button";
 import { LocalStreamPreview } from "@/components/ui/streams/LocalStreamPreview";
 import { DraggableContainer } from "@/components/ui/layout/DraggableContainer";
-import { useDeviceStore } from "@/stores/deviceStore";
+import { useIsMobile } from "@/stores/deviceStore";
 import BroadcastStream from "./BroadcastStream";
 
 const BroadcastRoom = ({
@@ -20,20 +20,17 @@ const BroadcastRoom = ({
   isExpanded: boolean;
   onToggleExpand?: () => void;
 }) => {
-  const isMobile = useDeviceStore((state) => state.isMobile);
+  const isMobile = useIsMobile();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const isCaller = useCallStore((state) => state.isCaller);
   const room = useCallStore((state) => state.getLiveKitRoom());
   const initiatorUserId = useCallStore((state) => state.initiatorUserId);
-  const leaveCall = useCallStore((state) => state.leaveCall);
   const startedAt = useCallStore((state) => state.startedAt);
+  const leaveCall = useCallStore.getState().leaveCall;
 
-  const toggleLocalVideo = useCallStore((state) => state.toggleLocalVideo);
-  const toggleLocalScreenShare = useCallStore(
-    (state) => state.toggleLocalScreenShare
-  );
-
+  const toggleLocalVideo = useCallStore.getState().toggleLocalVideo;
+  const toggleLocalScreenShare = useCallStore.getState().toggleLocalScreenShare;
   const { localVideoStream, localAudioStream, localScreenStream } =
     useLocalTracks();
   const [initiator, setInitiator] = useState<RemoteParticipant | null>(null);

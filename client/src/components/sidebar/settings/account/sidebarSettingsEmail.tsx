@@ -3,17 +3,17 @@ import SidebarLayout from "@/layouts/SidebarLayout";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useAuthStore, useCurrentUser } from "@/stores/authStore";
 import { userService } from "@/services/userService";
-import { useSidebarStore } from "@/stores/sidebarStore";
+import { getSetSidebar } from "@/stores/sidebarStore";
 import { handleError } from "@/common/utils/handleError";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 
 const SidebarSettingsEmail: React.FC = () => {
   const { t } = useTranslation();
-  const { setSidebar } = useSidebarStore();
   const currentUser = useCurrentUser();
+  const setSidebar = getSetSidebar();
 
-  const setCurrentUser = useAuthStore((state) => state.setCurrentUser);
+  const setCurrentUser = useAuthStore.getState().setCurrentUser;
   const [loading, setLoading] = useState(false);
 
   const [email, setEmail] = useState(currentUser?.email || "");

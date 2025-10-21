@@ -1,5 +1,5 @@
 import { useCurrentUser } from "@/stores/authStore";
-import { useSidebarStore } from "@/stores/sidebarStore";
+import { getSetSidebar } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { useTranslation } from "react-i18next";
@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 const SidebarSettingsAccount: React.FC = () => {
   const { t } = useTranslation();
   const currentUser = useCurrentUser();
-  const { setSidebar } = useSidebarStore();
+  const setSidebar = getSetSidebar();
 
   const accountSettingsItems = [
     {

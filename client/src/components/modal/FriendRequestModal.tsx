@@ -1,6 +1,6 @@
 // FriendRequestModal.tsx
 import React, { useRef, useState } from "react";
-import { useModalActions, useModalData } from "@/stores/modalStore";
+import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import { useCurrentUserId } from "@/stores/authStore";
@@ -19,9 +19,9 @@ interface FriendRequestModalData {
 const FriendRequestModal: React.FC = () => {
   const { t } = useTranslation();
   const currentUserId = useCurrentUserId();
-  const { closeModal } = useModalActions();
+  const closeModal = getCloseModal();
   const sendFriendRequest = useFriendshipStore.getState().sendFriendRequest;
-  const data = useModalData() as unknown as FriendRequestModalData | undefined;
+  const data = getModalData() as unknown as FriendRequestModalData | undefined;
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [charCount, setCharCount] = useState(0);

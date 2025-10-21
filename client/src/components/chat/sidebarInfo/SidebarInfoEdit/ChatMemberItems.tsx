@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { GroupChatMember } from "@/shared/types/responses/chat-member.response";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
-import { ModalType, useModalActions } from "@/stores/modalStore";
+import { ModalType, getOpenModal } from "@/stores/modalStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useCurrentUserId } from "@/stores/authStore";
 import { rolePriority } from "@/shared/types/enums/chat-member-role.enum";
@@ -206,7 +206,7 @@ interface ContextMenuProps {
 const MemberContextMenu = React.forwardRef<HTMLDivElement, ContextMenuProps>(
   ({ x, y, member, currentRole, onClose }, ref) => {
     const { t } = useTranslation();
-    const { openModal } = useModalActions();
+    const openModal = getOpenModal();
     const updateMember = useChatMemberStore.getState().updateMember;
     const removeMember = useChatMemberStore.getState().removeChatMember;
     const currentUserId = useCurrentUserId();

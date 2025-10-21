@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import SearchBar from "@/components/ui/SearchBar";
-import { useSidebarStore } from "@/stores/sidebarStore";
+import { getSetSidebar } from "@/stores/sidebarStore";
 import { SlidingContainer } from "@/components/ui/layout/SlidingContainer";
 import ChatList from "@/components/ui/chat/ChatList";
 import { useChatStore } from "@/stores/chatStore";
@@ -14,7 +14,7 @@ const chatTypes = ["all", ChatType.DIRECT, ChatType.GROUP, ChatType.CHANNEL];
 const SidebarSearch: React.FC = () => {
   const { t } = useTranslation();
   const filteredChats = useChatStore((state) => state.filteredChats);
-  const { setSidebar } = useSidebarStore();
+  const setSidebar = getSetSidebar();
 
   const [selectedType, setSelectedType] = useState("all");
   const [direction, setDirection] = useState<number>(1);

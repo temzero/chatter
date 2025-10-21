@@ -29,7 +29,7 @@ interface ChatListItemProps {
 
 const ChatListItem: React.FC<ChatListItemProps> = React.memo(
   ({ chat, isCompact = false, currentUserId = "" }) => {
-    const getDraftMessage = useMessageStore((state) => state.getDraftMessage);
+    const getDraftMessage = useMessageStore.getState().getDraftMessage;
     const setActiveChatById = useChatStore.getState().setActiveChatById;
     const isActive = useIsActiveChat(chat.id);
     const typingUsers = useTypingUsersByChatId(chat.id);

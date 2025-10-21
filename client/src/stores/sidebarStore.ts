@@ -73,13 +73,10 @@ export const useSidebarStore = create<SidebarStore>()(
   )
 );
 
-// Selector hooks
+// EXPORT HOOKS
+
 export const useCurrentSidebar = () =>
   useSidebarStore((state) => state.currentSidebar);
 export const useIsCompactSidebar = () =>
   useSidebarStore((state) => state.isCompact);
-export const useSidebarActions = () =>
-  useSidebarStore((state) => ({
-    setSidebar: state.setSidebar,
-    toggleCompact: state.toggleCompact,
-  }));
+export const getSetSidebar = () => useSidebarStore.getState().setSidebar

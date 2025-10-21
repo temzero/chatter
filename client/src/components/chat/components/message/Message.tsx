@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import clsx from "clsx";
 import { formatTime } from "@/common/utils/format/formatTime";
 import { Avatar } from "@/components/ui/avatar/Avatar";
@@ -13,7 +13,7 @@ import type { MessageResponse } from "@/shared/types/responses/message.response"
 import {
   useIsMessageFocus,
   useIsReplyToThisMessage,
-  useModalActions,
+  setOpenFocusMessageModal,
 } from "@/stores/modalStore";
 import MessageReplyPreview from "@/components/ui/messages/MessageReplyPreview";
 import SystemMessage from "./SystemMessage";
@@ -44,10 +44,10 @@ const Message: React.FC<MessageProps> = ({
   currentUserId,
   isMe = false,
 }) => {
-  const { openFocusMessageModal } = useModalActions();
+  console.log("Message");
+  const openFocusMessageModal = setOpenFocusMessageModal();
   const isFocus = useIsMessageFocus(message.id);
   const isRelyToThisMessage = useIsReplyToThisMessage(message.id);
-  console.log("isFocus", isFocus, "isRelyToThisMessage", isRelyToThisMessage);
   const repliedMessage = message.replyToMessage;
 
   const messageRef = useRef<HTMLDivElement>(null);
@@ -68,6 +68,11 @@ const Message: React.FC<MessageProps> = ({
 
   const isGroupChat = chatType === "group";
 
+  const messageAnimation = useMemo(
+    () => (message.shouldAnimate ? getMessageAnimation(isMe) : {}),
+    [message.shouldAnimate, isMe]
+  );
+
   // system message
   if (message.systemEvent && message.systemEvent !== SystemEventType.CALL) {
     return (
@@ -83,11 +88,6 @@ const Message: React.FC<MessageProps> = ({
     );
   }
 
-  // console.log("message.shouldAnimate", message.shouldAnimate);
-  // const messageAnimation = message.shouldAnimate
-  //   ? getMessageAnimation(isMe)
-  //   : {};
-
   return (
     <motion.div
       id={`message-${message.id}`}
@@ -102,7 +102,7 @@ const Message: React.FC<MessageProps> = ({
       })}
       style={{ zIndex: isFocus || isRelyToThisMessage ? 100 : "auto" }}
       layout="position"
-      {...getMessageAnimation(isMe)}
+      {...messageAnimation}
     >
       {isGroupChat && !isMe && (
         <div className={clsx("flex-shrink-0 mt-auto mr-2 h-10 w-10 min-w-10")}>

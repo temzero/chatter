@@ -1,13 +1,13 @@
 import React, { useCallback } from "react";
-import { useModalActions, useModalData } from "@/stores/modalStore";
+import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { callService } from "@/services/callService";
 import { CallResponse } from "@/shared/types/responses/call.response";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { getCallColor, getCallText } from "@/common/utils/call/callHelpers";
 import { formatDateTime } from "@/common/utils/format/formatDateTime";
+import { useTranslation } from "react-i18next";
 import { useCurrentUserId } from "@/stores/authStore";
 import CallIcon from "@/components/ui/icons/CallIcon";
-import { useTranslation } from "react-i18next";
 import Button from "../ui/buttons/Button";
 
 interface DeleteCallModalData {
@@ -18,8 +18,8 @@ interface DeleteCallModalData {
 const DeleteCallModal: React.FC = () => {
   const { t } = useTranslation();
   const currentUserId = useCurrentUserId();
-  const { closeModal } = useModalActions();
-  const data = useModalData() as unknown as DeleteCallModalData | undefined;
+  const closeModal = getCloseModal();
+  const data = getModalData() as unknown as DeleteCallModalData | undefined;
 
   // Memoized delete handler - MUST be called unconditionally
   const handleDelete = useCallback(async () => {

@@ -1,9 +1,14 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Theme, ThemeOption, useThemeStore } from "@/stores/themeStore";
+import {
+  Theme,
+  ThemeOption,
+  getSetTheme,
+  useTheme,
+} from "@/stores/themeStore";
 
 const ThemeSwitcher = () => {
-  const theme = useThemeStore((state) => state.theme);
-  const setTheme = useThemeStore((state) => state.setTheme);
+  const theme = useTheme();
+  const setTheme = getSetTheme();
   const toggleTheme = () => {
     setTheme(theme === Theme.Light ? ThemeOption.Dark : ThemeOption.Light);
   };

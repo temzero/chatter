@@ -57,7 +57,8 @@ export const usePresenceStore = create<PresenceStore>((set, get) => ({
   getLastSeen: (userId) => get().lastSeenMap[userId],
 }));
 
-// Existing hooks remain the same, but we'll add new ones:
+// EXPORT HOOKS
+
 export const useUserStatus = (userId?: string) => {
   return usePresenceStore(
     useShallow((state) =>

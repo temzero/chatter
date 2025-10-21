@@ -9,12 +9,12 @@ import { useTranslation } from "react-i18next";
 
 const ForgotPassword = () => {
   const { t } = useTranslation();
-
+  
+  const loading = useAuthStore((state) => state.loading);
   const formRef = useRef<HTMLFormElement>(null);
   const sendPasswordResetEmail = useAuthStore(
     (state) => state.sendPasswordResetEmail
   );
-  const loading = useAuthStore((state) => state.loading);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

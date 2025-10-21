@@ -4,7 +4,7 @@ import { useChatStore } from "@/stores/chatStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useFolderStore } from "@/stores/folderStore";
-import { useSidebarStore } from "@/stores/sidebarStore";
+import { getSetSidebar, useSidebarStore } from "@/stores/sidebarStore";
 import ChatListItemSelection from "@/components/ui/chat/ChatListItemSelection";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { toast } from "react-toastify";
@@ -33,9 +33,10 @@ interface folderToEdit {
 const SidebarNewFolder: React.FC = () => {
   const { t } = useTranslation();
   const chats = useChatStore((state) => state.chats);
-  const createFolder = useFolderStore((state) => state.createFolder);
-  const updateFolder = useFolderStore((state) => state.updateFolder);
-  const setSidebar = useSidebarStore((state) => state.setSidebar);
+  const setSidebar = getSetSidebar();
+  const createFolder = useFolderStore.getState().createFolder;
+  const updateFolder = useFolderStore.getState().updateFolder;
+
   const sidebarData = useSidebarStore((state) => state.sidebarData) as
     | { folderToEdit?: folderToEdit }
     | undefined;

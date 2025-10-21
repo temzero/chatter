@@ -17,7 +17,7 @@ import FriendshipBtn from "@/components/ui/buttons/FriendshipBtn";
 const CreateNewChat: React.FC = () => {
   const { t } = useTranslation();
   const currentUser = useCurrentUser();
-  const createOrGetDirectChat = useChatStore((s) => s.createOrGetDirectChat);
+  const createOrGetDirectChat = useChatStore.getState().createOrGetDirectChat;
 
   const [query, setQuery] = useState("");
   const [user, setUser] = useState<UserResponse | null>(null);

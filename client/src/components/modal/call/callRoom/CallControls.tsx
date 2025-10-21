@@ -20,12 +20,9 @@ export const CallControls = ({
   audioStream,
   onLeaveCall,
 }: CallControlsProps) => {
-  const toggleLocalVideo = useCallStore((state) => state.toggleLocalVideo);
-  const toggleLocalVoice = useCallStore((state) => state.toggleLocalVoice);
-  const toggleLocalScreenShare = useCallStore(
-    (state) => state.toggleLocalScreenShare
-  );
-
+  const toggleLocalVideo = useCallStore.getState().toggleLocalVideo;
+  const toggleLocalVoice = useCallStore.getState().toggleLocalVoice;
+  const toggleLocalScreenShare = useCallStore.getState().toggleLocalScreenShare;
   return (
     <div
       className="flex justify-center gap-4 p-2 

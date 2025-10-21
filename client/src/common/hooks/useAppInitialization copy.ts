@@ -23,29 +23,42 @@ export const useAppInitialization = () => {
   const { id: chatId } = useParams();
   const [isInitializing, setIsInitializing] = useState(true);
 
-  // Socket hooks
+  const { initialize: initializeAuth } = useAuthStore();
+  const {
+    initialize: initializeChats,
+    setActiveChatById,
+    error: chatError,
+  } = useChatStore();
+
+  const { fetchPendingRequests } = useFriendshipStore();
+
+  const { initialize: initializeFolders, error: folderError } =
+    useFolderStore();
+
+  const { initializeKeyListeners: initializeSidebar } = useSidebarStore();
+  const { initializeKeyListeners: initializeSidebarInfo } =
+    useSidebarInfoStore();
+
+  // 🧩 Socket connections (attach listeners once)
   useDevice();
   useWebSocket();
   useNotificationSocketListeners();
   useChatSocketListeners();
   usePresenceSocketListeners();
   useCallSocketListeners();
+  // 🧹 Call cleanup
   useCleanup();
 
-  // ✅ Single initialization effect
+  // ⚙️ Full initialization — runs only once
   useEffect(() => {
     const initApp = async () => {
       try {
-        // Use getState() for one-time initialization calls
-        await useAuthStore.getState().initialize();
-        await Promise.all([
-          useChatStore.getState().initialize(),
-          useFriendshipStore.getState().fetchPendingRequests(),
-        ]);
-        await useFolderStore.getState().initialize();
-        useSidebarStore.getState().initializeKeyListeners();
-        useSidebarInfoStore.getState().initializeKeyListeners();
-        useChatStore.getState().setActiveChatById(null);
+        await initializeAuth();
+        await Promise.all([initializeChats(), fetchPendingRequests()]);
+        await initializeFolders();
+        initializeSidebar();
+        initializeSidebarInfo();
+        setActiveChatById(null);
       } catch (err) {
         console.error("Initialization error:", err);
         toast.error("Failed to initialize application");
@@ -54,21 +67,28 @@ export const useAppInitialization = () => {
       }
     };
     initApp();
-  }, []); // ✅ Truly empty deps
+  }, [
+    fetchPendingRequests,
+    initializeAuth,
+    initializeChats,
+    initializeFolders,
+    initializeSidebar,
+    initializeSidebarInfo,
+    setActiveChatById,
+  ]);
 
-  // ✅ Subscribe ONLY to what you need reactively
-  const chatError = useChatStore((state) => state.error);
-  const folderError = useFolderStore((state) => state.error);
-  const setActiveChatById = useChatStore((state) => state.setActiveChatById);
-
-  // Chat switching effect
+  // 🧠 Chat switching — independent of full initialization
   useEffect(() => {
-    if (!isInitializing && chatId) {
-      setActiveChatById(chatId);
+    if (!isInitializing) {
+      if (chatId) {
+        setActiveChatById(chatId);
+      } else {
+        setActiveChatById(null);
+      }
     }
   }, [chatId, isInitializing, setActiveChatById]);
 
-  // Error effect
+  // ⚠️ Show toast if any store error appears
   useEffect(() => {
     if (chatError || folderError) {
       toast.error(chatError || folderError);

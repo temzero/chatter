@@ -9,7 +9,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { useTranslation } from "react-i18next";
 
-import { useSidebarStore } from "@/stores/sidebarStore";
+import { getSetSidebar } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useFolderStore } from "@/stores/folderStore";
 import { FolderResponse } from "@/shared/types/responses/folder.response";
@@ -19,9 +19,9 @@ import FolderCard from "./FolderCard";
 
 const SidebarFolders: React.FC = () => {
   const { t } = useTranslation();
-  const setSidebar = useSidebarStore((state) => state.setSidebar);
   const folders = useFolderStore((state) => state.folders) || [];
-  const reorderFolders = useFolderStore((state) => state.reorderFolders);
+  const setSidebar = getSetSidebar();
+  const reorderFolders = useFolderStore.getState().reorderFolders;
 
   const handleDragEnd = (event: import("@dnd-kit/core").DragEndEvent) => {
     const { active, over } = event;

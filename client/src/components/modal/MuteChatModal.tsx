@@ -1,5 +1,5 @@
 import React from "react";
-import { useModalActions, useModalData } from "@/stores/modalStore";
+import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { toast } from "react-toastify";
 import { formatDateTime } from "@/common/utils/format/formatDateTime";
 import { useChatStore } from "@/stores/chatStore";
@@ -21,9 +21,9 @@ const MUTE_OPTIONS = [
 
 const MuteChatModal: React.FC = () => {
   const { t } = useTranslation();
-  const { closeModal } = useModalActions();
-  const setMute = useChatStore((state) => state.setMute);
-  const data = useModalData() as unknown as MuteChatModalData | undefined;
+  const closeModal = getCloseModal();
+  const setMute = useChatStore.getState().setMute;
+  const data = getModalData() as unknown as MuteChatModalData | undefined;
 
   const chatId = data?.chatId;
   const myMemberId = data?.myMemberId;

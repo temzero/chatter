@@ -7,7 +7,11 @@ import { MessageReactionDisplay } from "@/components/ui/messages/MessageReaction
 import { messageAnimations } from "@/common/animations/messageAnimations";
 import { SystemMessageContent } from "@/components/ui/messages/SystemMessageContent";
 import { SystemMessageJSONContent } from "@/components/ui/messages/SystemMessageContent";
-import { useIsMessageFocus, useIsReplyToThisMessage, useModalActions } from "@/stores/modalStore";
+import {
+  useIsMessageFocus,
+  useIsReplyToThisMessage,
+  setOpenFocusMessageModal,
+} from "@/stores/modalStore";
 import { MessageContextMenu } from "./MessageContextMenu";
 
 type Props = {
@@ -28,8 +32,7 @@ const SystemMessage = ({
   const currentUserId = useCurrentUserId();
   const messageId = message.id;
 
-  const { openFocusMessageModal } = useModalActions();
-  // const openOverlayModal = useModalStore((state) => state.openOverlayModal);
+  const openFocusMessageModal = setOpenFocusMessageModal();
   const isFocus = useIsMessageFocus(messageId);
   const isRelyToThisMessage = useIsReplyToThisMessage(messageId);
 

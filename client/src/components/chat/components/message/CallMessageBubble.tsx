@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { MessageResponse } from "@/shared/types/responses/message.response";
 import { CallStatus } from "@/shared/types/enums/call-status.enum";
-import { ModalType, useModalActions } from "@/stores/modalStore";
+import { ModalType, getOpenModal } from "@/stores/modalStore";
 import {
   getCallColor,
   getCallIcon,
@@ -24,7 +24,7 @@ const CallMessageBubble: React.FC<CallMessageBubbleProps> = ({
   isMe,
   isRelyToThisMessage,
 }) => {
-  const { openModal } = useModalActions();
+  const openModal = getOpenModal();
   const call = message.call;
   if (!call) return null;
 

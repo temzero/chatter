@@ -7,7 +7,7 @@ import { fileStorageService } from "@/services/storage/fileStorageService";
 import { handleError } from "@/common/utils/handleError";
 import { toast } from "react-toastify";
 import { useActiveMembers } from "@/stores/chatMemberStore";
-import { ModalType, useModalActions } from "@/stores/modalStore";
+import { ModalType, getOpenModal } from "@/stores/modalStore";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { GroupChatMember } from "@/shared/types/responses/chat-member.response";
 import { useCurrentUserId } from "@/stores/authStore";
@@ -21,10 +21,10 @@ const GroupChatEdit = () => {
   const activeChat = useChatStore((state) => state.activeChat) as ChatResponse;
   console.log("activeChat", activeChat);
   const activeMembers = useActiveMembers();
-  const updateChat = useChatStore((state) => state.updateChat);
+  const updateChat = useChatStore.getState().updateChat;
 
-  const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
-  const { openModal } = useModalActions();
+  const setSidebarInfo = useSidebarInfoStore.getState().setSidebarInfo;
+  const openModal = getOpenModal();
 
   const myMember = activeMembers?.find(
     (member) => member.userId === currentUserId

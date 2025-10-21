@@ -18,12 +18,12 @@ import { MessageHorizontalPreview } from "./MessageHorizontalPreview";
 import { MessageHorizontalPreviewTypes } from "@/common/enums/MessageHorizontalPreviewTypes";
 import { BroadcastMessage } from "./BroadcastMessage";
 import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
-import { useDeviceStore } from "@/stores/deviceStore";
+import { useIsMobile } from "@/stores/deviceStore";
 import type { MessageResponse } from "@/shared/types/responses/message.response";
 import {
   useIsMessageFocus,
   useIsReplyToThisMessage,
-  useModalActions,
+  setOpenFocusMessageModal,
 } from "@/stores/modalStore";
 
 interface ChannelMessageProps {
@@ -31,10 +31,10 @@ interface ChannelMessageProps {
 }
 
 const ChannelMessage: React.FC<ChannelMessageProps> = ({ message }) => {
-  const isMobile = useDeviceStore((state) => state.isMobile);
+  const isMobile = useIsMobile();
   const currentUserId = useCurrentUserId();
   const isMe = message.sender.id === currentUserId;
-  const { openFocusMessageModal } = useModalActions();
+  const openFocusMessageModal = setOpenFocusMessageModal();
 
   const isReplyToThisMessage = useIsReplyToThisMessage(message.id);
   const isFocus = useIsMessageFocus(message.id);
@@ -139,7 +139,7 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ message }) => {
             isMe={isMe}
             isChannel={true}
             isSystemMessage={message.systemEvent === SystemEventType.CALL}
-            position={contextMenuPosition || undefined}
+            initialMousePosition={contextMenuPosition ?? undefined}
             onClose={closeContextMenu}
           />
         )}

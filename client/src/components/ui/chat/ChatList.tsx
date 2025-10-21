@@ -3,7 +3,6 @@ import ChatListItem from "./ChatListItem";
 import InfiniteScroller from "@/components/ui/layout/InfiniteScroller";
 import { useAuthStore } from "@/stores/authStore";
 import { useChatStore } from "@/stores/chatStore";
-import { useShallow } from "zustand/shallow";
 import type { ChatResponse } from "@/shared/types/responses/chat.response";
 import { AnimatePresence } from "framer-motion";
 
@@ -15,12 +14,9 @@ interface ChatListProps {
 const ChatList: React.FC<ChatListProps> = React.memo(
   ({ chats, isCompact = false }) => {
     const currentUserId = useAuthStore((state) => state.currentUser?.id || "");
-    const { fetchMoreChats, hasMoreChats } = useChatStore(
-      useShallow((state) => ({
-        fetchMoreChats: state.fetchMoreChats,
-        hasMoreChats: state.hasMoreChats,
-      }))
-    );
+    const hasMoreChats = useChatStore((state) => state.hasMoreChats);
+    const fetchMoreChats = useChatStore.getState().fetchMoreChats;
+
 
     // Sort chats: pinned first, then by updatedAt descending
     const sortedChats = [...chats].sort((a, b) => {

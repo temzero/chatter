@@ -12,7 +12,7 @@ const SearchBar = ({
   type,
 }: SearchBarProps) => {
   const [localSearchTerm, setLocalSearchTerm] = useState("");
-  const setSearchTerm = useChatStore((state) => state.setSearchTerm);
+  const setSearchTerm = useChatStore.getState().setSearchTerm;
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Create debounced setSearchTerm

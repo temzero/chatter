@@ -10,7 +10,7 @@ import InvitePage from "@/pages/InvitePage";
 
 const RouteMessageCleaner = () => {
   const location = useLocation();
-  const clearMessage = useAuthStore((state) => state.clearMessage);
+  const clearMessage = useAuthStore.getState().clearMessage;
 
   useEffect(() => {
     clearMessage();
@@ -20,6 +20,7 @@ const RouteMessageCleaner = () => {
 };
 
 const AppRoutes: React.FC = () => {
+  console.log("AppRoutes");
   const isAuthenticated = useIsAuthenticated();
 
   return (

@@ -9,11 +9,11 @@ import { useTranslation } from "react-i18next";
 
 const SidebarSettingsPhoneNumber: React.FC = () => {
   const { t } = useTranslation();
+  const loading = useAuthStore((state) => state.loading);
   const currentUser = useCurrentUser();
 
-  const setCurrentUser = useAuthStore((state) => state.setCurrentUser);
-  const setLoading = useAuthStore((state) => state.setLoading);
-  const loading = useAuthStore((state) => state.loading);
+  const setCurrentUser = useAuthStore.getState().setCurrentUser;
+  const setLoading = useAuthStore.getState().setLoading;
 
   const [phoneNumber, setPhoneNumber] = useState(
     currentUser?.phoneNumber || ""

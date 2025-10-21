@@ -367,19 +367,22 @@ export const useChatMemberStore = create<ChatMemberStore>((set, get) => ({
   },
 }));
 
+// EXPORT HOOKS
+
 export const useActiveMembers = (): ChatMember[] | undefined => {
   const activeChatId = useActiveChatId();
   return useChatMemberStore(
-    useShallow((state) => (activeChatId ? state.chatMembers[activeChatId] : []))
+    useShallow((state) => {
+      if (!activeChatId) return undefined;
+      return state.chatMembers[activeChatId];
+    })
   );
 };
 
 export const useMembersByChatId = (
   chatId: string
 ): ChatMember[] | undefined => {
-  return useChatMemberStore(
-    useShallow((state) => state.chatMembers[chatId] || [])
-  );
+  return useChatMemberStore(useShallow((state) => state.chatMembers[chatId]));
 };
 
 export const getMyChatMember = async (
@@ -424,12 +427,14 @@ export const getDirectChatPartner = (
   return members.find((member) => member.id !== myMemberId);
 };
 
-export const useGroupOtherMembers = (chatId: string): ChatMember[] => {
+export const useGroupOtherMembers = (
+  chatId: string
+): ChatMember[] | undefined => {
   const myMemberId = useCurrentUserId();
   return useChatMemberStore(
     useShallow((state) => {
       const members = state.chatMembers[chatId];
-      if (!members) return [];
+      if (!members) return undefined;
       return members.filter((member) => member.id !== myMemberId);
     })
   );
@@ -454,8 +459,7 @@ export const useAllUniqueUserIds = (): string[] => {
 };
 
 export const useMemberAvatars = (chatId: string, limit: number = 4) => {
-  const members = useChatMemberStore.getState().chatMembers[chatId] || [];
-  // Filter out members without avatars and get their avatar URLs
+  const members = useChatMemberStore.getState().chatMembers[chatId];
   return members
     .filter((member) => member.avatarUrl)
     .slice(0, limit)

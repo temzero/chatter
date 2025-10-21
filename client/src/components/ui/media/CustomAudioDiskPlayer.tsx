@@ -6,7 +6,7 @@ import {
   useReducer,
   useMemo,
 } from "react";
-import { useDeviceStore } from "@/stores/deviceStore";
+import { useIsMobile } from "@/stores/deviceStore";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { formatDuration } from "@/common/utils/format/formatDuration";
 import musicDiskCover from "@/assets/image/disk.png";
@@ -90,7 +90,7 @@ export interface AudioPlayerRef {
 
 const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
   ({ mediaUrl, fileName, cdImageUrl, goNext }, ref) => {
-    const isMobile = useDeviceStore((state) => state.isMobile);
+    const isMobile = useIsMobile();
 
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const diskRef = useRef<HTMLDivElement | null>(null);

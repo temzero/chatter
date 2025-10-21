@@ -1,6 +1,6 @@
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useCallStore } from "@/stores/callStore";
-import { useDeviceStore } from "@/stores/deviceStore";
+import { useIsMobile } from "@/stores/deviceStore";
 import { useLocalTracks } from "@/common/hooks/mediaStreams/useLocalTracks";
 import { RemoteParticipant, RoomEvent } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
@@ -22,12 +22,12 @@ const CallRoom = ({
   isExpanded: boolean;
   onToggleExpand?: () => void;
 }) => {
-  const isMobile = useDeviceStore((state) => state.isMobile);
+  const isMobile = useIsMobile();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const startedAt = useCallStore((state) => state.startedAt);
   const room = useCallStore((state) => state.getLiveKitRoom());
-  const leaveCall = useCallStore((state) => state.leaveCall);
+  const leaveCall = useCallStore.getState().leaveCall;
 
   const { localVideoStream, localAudioStream } = useLocalTracks();
   const [participants, setParticipants] = useState<RemoteParticipant[]>([]);

@@ -12,7 +12,7 @@ import CallHeader from "./components/CallHeader";
 const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
   const [loaderColor, setLoaderColor] = useState("#8b8b8b");
   const isVideoCall = useCallStore((state) => state.isVideoCall);
-  const declineCall = useCallStore((state) => state.declineCall);
+  const declineCall = useCallStore.getState().declineCall;
 
   const { localVideoStream, isVideoEnabled, toggleVideo } =
     useLocalPreviewVideoTrack(isVideoCall);

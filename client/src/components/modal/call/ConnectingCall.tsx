@@ -5,7 +5,7 @@ import { useCallStore } from "@/stores/callStore";
 import CallHeader from "./components/CallHeader";
 
 const ConnectingCall = ({ chat }: { chat: ChatResponse }) => {
-  const { isVideoCall } = useCallStore();
+  const isVideoCall = useCallStore((state) => state.isVideoCall);
 
   return (
     <div className="w-full h-full p-10 flex flex-col items-center justify-center gap-4">

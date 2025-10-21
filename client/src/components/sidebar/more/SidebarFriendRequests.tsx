@@ -14,9 +14,7 @@ type RequestTab = "received" | "sent";
 const SidebarFriendRequests: React.FC = () => {
   const { t } = useTranslation();
   const currentUserId = useCurrentUserId();
-  const createOrGetDirectChat = useChatStore(
-    (state) => state.createOrGetDirectChat
-  );
+  const createOrGetDirectChat = useChatStore.getState().createOrGetDirectChat;
   const { pendingRequests, handleAccept, handleDecline, handleCancel } =
     useFriendRequest();
 

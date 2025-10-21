@@ -1,37 +1,30 @@
 // src/lib/hooks/useCallCleanup.ts
 import { useEffect } from "react";
 import { useCallStore } from "@/stores/callStore";
-import { useModalStore } from "@/stores/modalStore";
+import { getCloseModal } from "@/stores/modalStore";
 import { LocalCallStatus } from "@/common/enums/LocalCallStatus";
 import { useChatStore } from "@/stores/chatStore";
 
 export const useCleanup = () => {
-  const callStore = useCallStore();
-  const chatStore = useChatStore();
-  const modalStore = useModalStore();
+  // ✅ Only subscribe to the specific actions needed
+  const clearChats = useChatStore.getState().clearChats;
+  const endCall = useCallStore.getState().endCall;
+  const closeModal = getCloseModal();
 
   useEffect(() => {
     const handleCleanup = () => {
-      // Only cleanup if there's an active call that hasn't ended
       if (
-        callStore.chatId &&
-        callStore.localCallStatus &&
-        callStore.localCallStatus !== LocalCallStatus.ENDED
+        useCallStore.getState().chatId &&
+        useCallStore.getState().localCallStatus &&
+        useCallStore.getState().localCallStatus !== LocalCallStatus.ENDED
       ) {
-        callStore.endCall();
+        endCall();
       }
-      // 🧼 Close any open modals
-      modalStore.closeModal();
-
-      // 💬 Clear all chat state
-      chatStore.clearChats();
+      closeModal();
+      clearChats();
     };
 
-    // ✅ only run when window is closing / refreshing
     window.addEventListener("beforeunload", handleCleanup);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleCleanup);
-    };
-  }, [callStore, chatStore, modalStore]);
+    return () => window.removeEventListener("beforeunload", handleCleanup);
+  }, [clearChats, endCall, closeModal]);
 };

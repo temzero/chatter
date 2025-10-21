@@ -17,9 +17,9 @@ import { useCallStore } from "@/stores/callStore";
 import { CallStatus } from "@/shared/types/enums/call-status.enum";
 import { useShallow } from "zustand/shallow";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
-import { useDeviceStore } from "@/stores/deviceStore";
 import { useChatStore } from "@/stores/chatStore";
 import { useNavigate } from "react-router-dom";
+import { useIsMobile } from "@/stores/deviceStore";
 import type { ChatResponse } from "@/shared/types/responses/chat.response";
 
 interface ChatHeaderProps {
@@ -28,13 +28,11 @@ interface ChatHeaderProps {
 }
 
 const Header: React.FC<ChatHeaderProps> = ({ chat, isBlockedByMe = false }) => {
-  // console.log('Header')
-  const isMobile = useDeviceStore((state) => state.isMobile);
-  const toggleSidebarInfo = useSidebarInfoStore(
-    (state) => state.toggleSidebarInfo
-  );
+  console.log("Header");
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
-  const setActiveChat = useChatStore((state) => state.setActiveChat);
+  const toggleSidebarInfo = useSidebarInfoStore.getState().toggleSidebarInfo;
+  const setActiveChat = useChatStore.getState().setActiveChat;
 
   const {
     callId,
@@ -136,30 +134,28 @@ const Header: React.FC<ChatHeaderProps> = ({ chat, isBlockedByMe = false }) => {
         </button>
       )}
 
-      <AnimatePresence>
-        <motion.div
-          key={chat.id}
-          className="flex gap-3 items-center cursor-pointer hover:text-[--primary-green]"
-          initial={{ opacity: 0.2, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0.2, scale: 0.9 }}
-          transition={{ type: "tween", duration: 0.1, ease: "easeInOut" }}
-          onClick={toggleSidebarInfo}
-        >
-          <ChatAvatar chat={chat} type="header" isBlocked={isBlockedByMe} />
-          <h1 className="text-xl font-medium">
-            {chat.type === ChatType.SAVED ? "Saved" : chat.name}
-          </h1>
-          {isDirect && !isOnline && lastSeen && (
-            <span className="text-xs text-gray-400">
-              Last seen {formatTimeAgo(lastSeen)}
-            </span>
-          )}
-          {chat.isDeleted && (
-            <h1 className="text-yellow-500/80">Has left the chat</h1>
-          )}
-        </motion.div>
-      </AnimatePresence>
+      <motion.div
+        key={chat.id}
+        className="flex gap-3 items-center cursor-pointer hover:text-[--primary-green]"
+        initial={{ opacity: 0.2, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0.2, scale: 0.9 }}
+        transition={{ type: "tween", duration: 0.1, ease: "easeInOut" }}
+        onClick={toggleSidebarInfo}
+      >
+        <ChatAvatar chat={chat} type="header" isBlocked={isBlockedByMe} />
+        <h1 className="text-xl font-medium">
+          {chat.type === ChatType.SAVED ? "Saved" : chat.name}
+        </h1>
+        {isDirect && !isOnline && lastSeen && (
+          <span className="text-xs text-gray-400">
+            Last seen {formatTimeAgo(lastSeen)}
+          </span>
+        )}
+        {chat.isDeleted && (
+          <h1 className="text-yellow-500/80">Has left the chat</h1>
+        )}
+      </motion.div>
 
       <AnimatePresence mode="wait">
         <motion.div

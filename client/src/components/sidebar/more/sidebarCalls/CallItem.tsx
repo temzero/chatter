@@ -15,7 +15,7 @@ interface CallItemProps {
 }
 
 const CallItem: React.FC<CallItemProps> = ({ call, isCaller, onDelete }) => {
-  const startCall = useCallStore((state) => state.startCall);
+  const startCall = useCallStore.getState().startCall;
   const setActiveChatById = useChatStore.getState().setActiveChatById;
 
   const [isHovered, setIsHovered] = useState(false);

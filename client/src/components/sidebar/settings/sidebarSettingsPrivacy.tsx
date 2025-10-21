@@ -10,11 +10,11 @@ import SwitchBtn from "@/components/ui/buttons/SwitchBtn";
 const SidebarSettingsPrivacy: React.FC = () => {
   const { t } = useTranslation();
   const currentUser = useCurrentUser();
-  const setCurrentUser = useAuthStore((state) => state.setCurrentUser);
-  const setMessage = useAuthStore((state) => state.setMessage);
-  const setLoading = useAuthStore((state) => state.setLoading);
-  const clearMessage = useAuthStore((state) => state.clearMessage);
   const message = useAuthStore((state) => state.message);
+  const setCurrentUser = useAuthStore.getState().setCurrentUser;
+  const setMessage = useAuthStore.getState().setMessage;
+  const setLoading = useAuthStore.getState().setLoading;
+  const clearMessage = useAuthStore.getState().clearMessage;
 
   const [privacySettings, setPrivacySettings] = useState({
     isPrivateAccount: currentUser?.isPrivateAccount || false,

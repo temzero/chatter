@@ -252,8 +252,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         const newLast = createLastMessage(updatedMessages[index]);
         useChatStore.getState().setLastMessage(chatId, newLast);
       }
-      console.log("updatedMessage", updatedMessage);
-
+      
       return {
         messages: {
           ...state.messages,
@@ -471,15 +470,23 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
   setSearchQuery: (query: string) => set({ searchQuery: query }),
 }));
 
-// Hooks remain unchanged
+// EXPORT HOOKS
+
 export const useActiveChatMessages = () => {
-  const activeChat = useChatStore((state) => state.activeChat);
-  const messages = useMessageStore((state) => state.messages);
+  const activeChatId = useChatStore((state) => state.activeChat?.id);
   const isLoading = useMessageStore((state) => state.isLoading);
 
+  // Subscribe *only* to the messages of the current chat
+  const chatMessages = useMessageStore(
+    useShallow((state) =>
+      activeChatId ? state.messages[activeChatId] || [] : []
+    )
+  );
+
+  // Return a stable reference if nothing changed
   return useMemo(() => {
-    return activeChat && !isLoading ? messages[activeChat.id] || [] : [];
-  }, [activeChat, isLoading, messages]);
+    return activeChatId && !isLoading ? chatMessages : [];
+  }, [activeChatId, chatMessages, isLoading]);
 };
 
 export const useMessagesByChatId = (chatId: string): MessageResponse[] => {
@@ -488,29 +495,28 @@ export const useMessagesByChatId = (chatId: string): MessageResponse[] => {
   );
   const searchQuery = useMessageStore((state) => state.searchQuery);
   const showImportantOnly = useMessageStore((state) => state.showImportantOnly);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const members = useMembersByChatId(chatId) || [];
   const currentUserId = useAuthStore.getState().currentUser?.id;
 
-  // Build a set of blocked userIds by me
-  const blockedUserIds = new Set(
-    members
-      .filter(
-        (member) => member.userId !== currentUserId && member.isBlockedByMe
-      )
-      .map((member) => member.userId)
-  );
+  return useMemo(() => {
+    const blockedUserIds = new Set(
+      members
+        .filter(
+          (member) => member.userId !== currentUserId && member.isBlockedByMe
+        )
+        .map((member) => member.userId)
+    );
 
-  // Filter logic
-  return allMessages.filter((msg) => {
-    const notBlocked = !blockedUserIds.has(msg.sender.id);
-    const matchesQuery =
-      !searchQuery ||
-      msg.content?.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const isImportant = !showImportantOnly || msg.isImportant;
-
-    return notBlocked && matchesQuery && isImportant;
-  });
+    return allMessages.filter((msg) => {
+      const notBlocked = !blockedUserIds.has(msg.sender.id);
+      const matchesQuery =
+        !searchQuery ||
+        msg.content?.toLowerCase().includes(searchQuery.toLowerCase());
+      const isImportant = !showImportantOnly || msg.isImportant;
+      return notBlocked && matchesQuery && isImportant;
+    });
+  }, [allMessages, members, searchQuery, showImportantOnly, currentUserId]);
 };
 
 export const useSenderByMessageId = (
@@ -532,32 +538,6 @@ export const useActiveChatAttachments = () => {
   return useMemo(
     () => (activeChatId && !isLoading ? getChatAttachments(activeChatId) : []),
     [activeChatId, isLoading, getChatAttachments]
-  );
-};
-
-export const useActiveChatDraft = () => {
-  const activeChatId = useChatStore((state) => state.activeChat?.id);
-  return useMessageStore((state) =>
-    activeChatId ? state.getDraftMessage(activeChatId) : ""
-  );
-};
-
-export const useMessageLoading = () => {
-  return useMessageStore((state) => state.isLoading);
-};
-
-export const useUnreadMessagesCount = (chatId: string, memberId: string) => {
-  return useMessageStore((state) =>
-    state.getUnreadMessagesCount(chatId, memberId)
-  );
-};
-
-export const useIsMessageReadByMember = (
-  message: MessageResponse,
-  memberId: string
-) => {
-  return useMessageStore((state) =>
-    state.isMessageReadByMember(message, memberId)
   );
 };
 

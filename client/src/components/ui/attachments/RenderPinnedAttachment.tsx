@@ -2,8 +2,8 @@ import React from "react";
 import { AttachmentResponse } from "@/shared/types/responses/message.response";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { getFileIcon } from "@shared/utils/getFileIcon";
-import { useModalActions } from "@/stores/modalStore";
 import CustomAudioPlayer from "@/components/ui/media/CustomAudioPlayer";
+import { setOpenMediaModal } from "@/stores/modalStore";
 
 interface RenderPinnedAttachmentProps {
   attachment: AttachmentResponse;
@@ -18,7 +18,7 @@ const RenderPinnedAttachment: React.FC<RenderPinnedAttachmentProps> = ({
   className = "",
   index,
 }) => {
-  const { openMediaModal } = useModalActions();
+  const openMediaModal = setOpenMediaModal();
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();

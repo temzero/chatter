@@ -37,7 +37,8 @@ export const useProfileStore = create<ProfileState & ProfileActions>()(
           }
 
           // Optimized: Get and update auth store in one operation
-          const { currentUser, setCurrentUser } = useAuthStore.getState();
+          const currentUser = useAuthStore.getState().currentUser;
+          const setCurrentUser = useAuthStore.getState().setCurrentUser; // ✅ Good
           const mergedUser = currentUser
             ? { ...currentUser, ...updatedUser }
             : updatedUser;

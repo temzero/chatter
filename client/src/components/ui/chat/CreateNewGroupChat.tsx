@@ -4,7 +4,7 @@ import SearchBar from "@/components/ui/SearchBar";
 import ContactSelectionList from "@/components/ui/contact/ContactSelectionList";
 import { useChatStore } from "@/stores/chatStore";
 import { useCurrentUser } from "@/stores/authStore";
-import { useSidebarStore } from "@/stores/sidebarStore";
+import { getSetSidebar,  } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
 import type { ChatResponse } from "@/shared/types/responses/chat.response";
@@ -16,12 +16,12 @@ interface CreateChatProps {
 
 const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
   const { t } = useTranslation();
-  const createGroupChat = useChatStore((state) => state.createGroupChat);
+  const createGroupChat = useChatStore.getState().createGroupChat;
   const isLoading = useChatStore((state) => state.isLoading);
   const currentUser = useCurrentUser();
 
-  const setActiveChat = useChatStore((state) => state.setActiveChat);
-  const setSidebar = useSidebarStore((state) => state.setSidebar);
+  const setActiveChat = useChatStore.getState().setActiveChat;
+  const setSidebar = getSetSidebar();
 
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [name, setName] = useState("");

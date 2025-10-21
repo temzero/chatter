@@ -214,8 +214,7 @@ export const useCallStore = create<CallState & CallActions>()(
           callStatus: CallStatus.IN_PROGRESS,
         });
 
-        const { openModal } = useModalStore.getState();
-        openModal(ModalType.CALL, { callId, chatId });
+        useModalStore.getState().openModal(ModalType.CALL, { callId, chatId });
 
         console.log("[joinCall] Successfully connected to LiveKit");
       } catch (err) {

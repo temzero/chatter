@@ -1,13 +1,13 @@
 // components/sidebar/SidebarFolder.tsx
 import React from "react";
 import SidebarLayout from "@/layouts/SidebarLayout";
-import { useSidebarStore } from "@/stores/sidebarStore";
+import { getSetSidebar, useSidebarStore } from "@/stores/sidebarStore";
 import { useFolderStore } from "@/stores/folderStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useChatStore } from "@/stores/chatStore";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
-import { ModalType, useModalActions } from "@/stores/modalStore";
+import { ModalType, getOpenModal } from "@/stores/modalStore";
 import { useTranslation } from "react-i18next";
 
 type SidebarData = { folderId?: string } | undefined;
@@ -19,10 +19,10 @@ const SidebarFolder: React.FC = () => {
   const sidebarData = useSidebarStore(
     (state) => state.sidebarData
   ) as SidebarData;
-  const setSidebar = useSidebarStore((state) => state.setSidebar);
+  const setSidebar = getSetSidebar();
   const folders = useFolderStore((state) => state.folders);
   const folder = folders.find((f) => f.id === sidebarData?.folderId);
-  const { openModal } = useModalActions();
+  const openModal = getOpenModal();
 
   if (!folder) {
     return (

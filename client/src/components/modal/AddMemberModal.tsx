@@ -13,17 +13,17 @@ import { useFriendContacts } from "@/common/hooks/useFriendContacts";
 import { useAllUniqueMembers } from "@/common/hooks/useAllUniqueMembers";
 import { useTranslation } from "react-i18next";
 import SearchBar from "@/components/ui/SearchBar";
-import { useModalActions } from "@/stores/modalStore";
+import { getCloseModal } from "@/stores/modalStore";
 
 const AddMemberModal: React.FC = () => {
   const { t } = useTranslation();
-  const { closeModal } = useModalActions();
+  const closeModal = getCloseModal();
   const [copied, setCopied] = useState(false);
   const [refreshed, setRefreshed] = useState(false);
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
 
   const chat = useActiveChat();
-  const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
+  const setSidebarInfo = useSidebarInfoStore.getState().setSidebarInfo;
 
   const chatMemberUserIds = chat?.otherMemberUserIds || [];
 

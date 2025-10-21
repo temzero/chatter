@@ -1,7 +1,7 @@
 // componen@/components/ui/FolderCard.tsx
 import React from "react";
 import { SidebarMode } from "@/common/enums/sidebarMode";
-import { useSidebarStore } from "@/stores/sidebarStore";
+import { getSetSidebar } from "@/stores/sidebarStore";
 import { FolderResponse } from "@/shared/types/responses/folder.response";
 
 type FolderCardProps = {
@@ -15,7 +15,7 @@ const FolderCard: React.FC<FolderCardProps> = ({
   dragAttributes,
   dragListeners,
 }) => {
-  const setSidebar = useSidebarStore((state) => state.setSidebar);
+  const setSidebar = getSetSidebar();
 
   return (
     <div

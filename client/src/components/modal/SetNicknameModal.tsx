@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useModalActions, useModalData } from "@/stores/modalStore";
+import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
@@ -12,12 +12,11 @@ interface SetNicknameModalData {
 
 const SetNicknameModal: React.FC = () => {
   const { t } = useTranslation();
-  const { closeModal } = useModalActions();
-  const data = useModalData() as unknown as SetNicknameModalData | undefined;
-  const updateMemberNickname = useChatMemberStore(
-    (state) => state.updateMemberNickname
-  );
+  const closeModal = getCloseModal();
 
+  const data = getModalData() as unknown as SetNicknameModalData | undefined;
+  const updateMemberNickname =
+    useChatMemberStore.getState().updateMemberNickname;
   const member = data?.member;
   const [nickname, setNickname] = useState(member?.nickname || "");
   const [loading, setLoading] = useState(false);

@@ -12,7 +12,7 @@ const mediaTypes = ["images", "videos", "audio", "files"];
 
 const ChatInfoMedia: React.FC = () => {
   const { t } = useTranslation();
-  const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
+  const setSidebarInfo = useSidebarInfoStore.getState().setSidebarInfo;
   const activeAttachments = useActiveChatAttachments();
 
   const [selectedType, setSelectedType] = useState<string>(mediaTypes[0]);

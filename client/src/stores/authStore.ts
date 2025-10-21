@@ -242,7 +242,8 @@ export const useAuthActions = () =>
     verifyEmailWithToken: state.verifyEmailWithToken,
   }));
 
-// Individual selectors (only for frequently used isolated values)
+  
+// EXPORT HOOKS
 export const useCurrentUser = () => useAuthStore((state) => state.currentUser);
 export const useCurrentUserId = () =>
   useAuthStore((state) => state.currentUser?.id);

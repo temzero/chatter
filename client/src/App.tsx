@@ -1,14 +1,14 @@
 // src/App.tsx
 import { BrowserRouter as Router } from "react-router-dom";
 import { useEffect } from "react";
-import { Theme, useThemeStore } from "./stores/themeStore";
-import AppRoutes from "@/routes/AppRoutes";
+import { Theme, useTheme, useThemeStore } from "./stores/themeStore";
 import { ToastContainer } from "react-toastify";
+import AppRoutes from "@/routes/AppRoutes";
 import "react-toastify/dist/ReactToastify.css";
 
 const App: React.FC = () => {
-  const initializeTheme = useThemeStore((state) => state.initialize);
-  const theme = useThemeStore((state) => state.theme);
+  const initializeTheme = useThemeStore.getState().initialize;
+  const theme = useTheme();
 
   useEffect(() => {
     initializeTheme();

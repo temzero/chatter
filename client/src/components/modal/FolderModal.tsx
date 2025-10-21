@@ -1,8 +1,8 @@
 // components/modals/AddChatToFolderModal.tsx
 import React, { useState, useEffect } from "react";
 import { useFolderStore } from "@/stores/folderStore";
-import { useModalActions, useModalData } from "@/stores/modalStore";
-import { useSidebarStore } from "@/stores/sidebarStore";
+import { getCloseModal, getModalData } from "@/stores/modalStore";
+import { getSetSidebar } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
 import Checkbox from "../ui/buttons/CheckBox";
@@ -16,11 +16,11 @@ interface AddChatToFolderModalData {
 
 const AddChatToFolderModal: React.FC = () => {
   const { t } = useTranslation();
-  const { closeModal } = useModalActions();
-  const addChatToFolder = useFolderStore((state) => state.addChatToFolder);
+  const closeModal = getCloseModal();
+  const addChatToFolder = useFolderStore.getState().addChatToFolder;
+  const setSidebar = getSetSidebar();
   const folders = useFolderStore((state) => state.folders);
-  const setSidebar = useSidebarStore((state) => state.setSidebar);
-  const data = useModalData() as unknown as
+  const data = getModalData() as unknown as
     | AddChatToFolderModalData
     | undefined;
 

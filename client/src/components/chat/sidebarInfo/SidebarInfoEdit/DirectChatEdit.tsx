@@ -11,7 +11,7 @@ import {
   useActiveMembers,
   getDirectChatPartner,
 } from "@/stores/chatMemberStore";
-import { ModalType, useModalStore } from "@/stores/modalStore";
+import { ModalType, getOpenModal } from "@/stores/modalStore";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
 import { useTranslation } from "react-i18next";
@@ -19,12 +19,11 @@ import { useTranslation } from "react-i18next";
 const DirectChatEdit = () => {
   const { t } = useTranslation();
   const activeChat = useChatStore((state) => state.activeChat) as ChatResponse;
-  const updateMemberNickname = useChatMemberStore(
-    (state) => state.updateMemberNickname
-  );
-  const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
+  const updateMemberNickname =
+    useChatMemberStore.getState().updateMemberNickname;
+  const setSidebarInfo = useSidebarInfoStore.getState().setSidebarInfo;
   const chatMembers = useActiveMembers();
-  const openModal = useModalStore((state) => state.openModal);
+  const openModal = getOpenModal();
 
   const chatPartner = getDirectChatPartner(
     activeChat.id,

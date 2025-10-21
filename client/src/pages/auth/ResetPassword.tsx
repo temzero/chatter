@@ -13,11 +13,9 @@ const ResetPassword = () => {
   const formRef = useRef<HTMLFormElement>(null);
   const { token } = useParams();
   const loading = useAuthStore((state) => state.loading);
-  const resetPasswordWithToken = useAuthStore(
-    (state) => state.resetPasswordWithToken
-  );
-  const setMessage = useAuthStore((state) => state.setMessage);
   const navigate = useNavigate();
+  const resetPasswordWithToken = useAuthStore.getState().resetPasswordWithToken;
+  const setMessage = useAuthStore.getState().setMessage;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

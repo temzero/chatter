@@ -2,7 +2,7 @@ import { ComponentType, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ModalType } from "@/common/enums/modalType";
 import { modalAnimations } from "@/common/animations/modalAnimations";
-import { useModalActions, useModalType } from "@/stores/modalStore";
+import { getCloseModal, useModalType } from "@/stores/modalStore";
 
 // modal imports...
 import MediaViewer from "./media/MediaViewer";
@@ -80,7 +80,7 @@ const ModalContent = ({
 
 const Modal = () => {
   const type = useModalType();
-  const { closeModal } = useModalActions();
+  const closeModal = getCloseModal();
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {

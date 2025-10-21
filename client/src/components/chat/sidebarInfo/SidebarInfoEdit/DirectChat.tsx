@@ -2,34 +2,32 @@ import React from "react";
 import ContactInfoItem from "@/components/ui/contact/contactInfoItem";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
-import FriendshipBtn from "@/components/ui/buttons/FriendshipBtn";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { useActiveChat } from "@/stores/chatStore";
 import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
-import { ModalType, useModalActions } from "@/stores/modalStore";
+import { ModalType, getOpenModal } from "@/stores/modalStore";
 import { useActiveMembers } from "@/stores/chatMemberStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useMessageStore } from "@/stores/messageStore";
 import { useMuteControl } from "@/common/hooks/useMuteControl";
 import { SidebarInfoHeaderIcons } from "@/components/ui/icons/SidebarInfoHeaderIcons";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
+import { useIsMobile } from "@/stores/deviceStore";
 import { useTranslation } from "react-i18next";
-import { useDeviceStore } from "@/stores/deviceStore";
+import FriendshipBtn from "@/components/ui/buttons/FriendshipBtn";
 
 const DirectChat: React.FC = () => {
   const { t } = useTranslation();
-  const isMobile = useDeviceStore((state) => state.isMobile);
+  const isMobile = useIsMobile();
 
   const activeChat = useActiveChat() as ChatResponse;
-  const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
-  const setIsSidebarInfoVisible = useSidebarInfoStore(
-    (state) => state.setIsSidebarInfoVisible
-  );
+  const setSidebarInfo = useSidebarInfoStore.getState().setSidebarInfo;
+  const setSidebarInfoVisible =
+    useSidebarInfoStore.getState().setSidebarInfoVisible;
   const chatMembers = useActiveMembers();
-  const { openModal } = useModalActions();
-  const setDisplaySearchMessage = useMessageStore(
-    (state) => state.setDisplaySearchMessage
-  );
+  const openModal = getOpenModal();
+  const setDisplaySearchMessage =
+    useMessageStore.getState().setDisplaySearchMessage;
   const { mute, unmute } = useMuteControl(activeChat.id, activeChat.myMemberId);
 
   const chatPartner = chatMembers?.find(
@@ -102,7 +100,7 @@ const DirectChat: React.FC = () => {
     headerIcons.unshift({
       icon: "arrow_back_ios",
       title: t("common.actions.back"),
-      action: () => setIsSidebarInfoVisible(false),
+      action: () => setSidebarInfoVisible(false),
     });
   }
 

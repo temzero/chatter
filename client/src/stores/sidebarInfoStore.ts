@@ -9,7 +9,7 @@ interface SidebarInfoStore {
   isSidebarInfoVisible: boolean;
   currentSidebarInfo: SidebarInfoMode;
   toggleSidebarInfo: () => void;
-  setIsSidebarInfoVisible: (isVisible: boolean) => void;
+  setSidebarInfoVisible: (isVisible: boolean) => void;
   setSidebarInfo: (mode?: SidebarInfoMode) => void;
   initializeKeyListeners: () => () => void;
 }
@@ -28,7 +28,7 @@ export const useSidebarInfoStore = create<SidebarInfoStore>()(
         });
       },
 
-      setIsSidebarInfoVisible: (isVisible: boolean) =>
+      setSidebarInfoVisible: (isVisible: boolean) =>
         set({ isSidebarInfoVisible: isVisible }),
 
       setSidebarInfo: (mode = SidebarInfoMode.DEFAULT) =>
@@ -72,9 +72,8 @@ export const useSidebarInfoStore = create<SidebarInfoStore>()(
   )
 );
 
-// Selector hooks
-// export const useSidebarInfoVisibility = () =>
-//   useSidebarInfoStore(useShallow((state) => state.isSidebarInfoVisible));
+// EXPORT HOOKS
+
 export const useSidebarInfoVisibility = () => {
   const isSidebarInfoVisible = useSidebarInfoStore(
     useShallow((state) => state.isSidebarInfoVisible)
@@ -86,9 +85,3 @@ export const useSidebarInfoVisibility = () => {
 
 export const useCurrentSidebarInfo = () =>
   useSidebarInfoStore(useShallow((state) => state.currentSidebarInfo));
-
-export const useSidebarInfoActions = () =>
-  useSidebarInfoStore((state) => ({
-    toggleSidebarInfo: state.toggleSidebarInfo,
-    setSidebarInfo: state.setSidebarInfo,
-  }));

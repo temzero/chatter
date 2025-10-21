@@ -11,11 +11,11 @@ const VerifyEmail = () => {
 
   const { firstName, email, token } = useParams();
 
+  const loading = useAuthStore((state) => state.loading);
   const verifyEmailWithToken = useAuthStore(
     (state) => state.verifyEmailWithToken
   );
-  const setMessage = useAuthStore((state) => state.setMessage);
-  const loading = useAuthStore((state) => state.loading);
+  const setMessage = useAuthStore.getState().setMessage;
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {

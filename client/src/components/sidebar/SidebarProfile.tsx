@@ -1,4 +1,4 @@
-import { useSidebarStore } from "@/stores/sidebarStore";
+import { getSetSidebar } from "@/stores/sidebarStore";
 import { useCurrentUser, useAuthStore } from "@/stores/authStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { SidebarMode } from "@/common/enums/sidebarMode";
@@ -9,8 +9,8 @@ import SidebarLayout from "@/layouts/SidebarLayout";
 const SidebarProfile: React.FC = () => {
   const { t } = useTranslation();
   const currentUser = useCurrentUser();
-  const { setSidebar } = useSidebarStore();
-  const logout = useAuthStore((state) => state.logout);
+  const setSidebar = getSetSidebar();
+  const logout = useAuthStore.getState().logout;
 
   return (
     <SidebarLayout

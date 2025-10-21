@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useAuthStore, useCurrentUser } from "@/stores/authStore";
 import { userService } from "@/services/userService";
-import { useSidebarStore } from "@/stores/sidebarStore";
+import { getSetSidebar } from "@/stores/sidebarStore";
 import { handleError } from "@/common/utils/handleError";
 import { useTranslation } from "react-i18next";
 import SidebarLayout from "@/layouts/SidebarLayout";
@@ -12,14 +12,14 @@ const SidebarSettingsUsername: React.FC = () => {
   const { t } = useTranslation();
   const currentUser = useCurrentUser();
 
-  const setCurrentUser = useAuthStore((state) => state.setCurrentUser);
+  const setCurrentUser = useAuthStore.getState().setCurrentUser;
+  const setSidebar = getSetSidebar();
   const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState(currentUser?.username || "");
   const [isValid, setIsValid] = useState(false);
   const [ErrorMessage, setErrorMessage] = useState("");
   const [isVerified, setIsVerified] = useState(false);
   const [isAvailable, setIsAvailable] = useState(false);
-  const { setSidebar } = useSidebarStore();
 
   const isUnchanged = username === currentUser?.username;
   const isDisabled = loading || !isValid || isUnchanged;

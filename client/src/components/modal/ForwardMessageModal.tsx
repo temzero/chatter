@@ -1,6 +1,6 @@
 // components/modals/ForwardMessageModal.tsx
 import React from "react";
-import { useModalActions, useModalData } from "@/stores/modalStore";
+import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { useChatStore } from "@/stores/chatStore";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { ForwardMessageRequest } from "@/shared/types/requests/forward-message.request";
@@ -22,9 +22,9 @@ interface ForwardMessageModalData {
 
 const ForwardMessageModal: React.FC = () => {
   const { t } = useTranslation();
-  const { closeModal } = useModalActions();
+  const closeModal = getCloseModal();
   const filteredChats = useChatStore((state) => state.filteredChats);
-  const data = useModalData() as unknown as ForwardMessageModalData | undefined;
+  const data = getModalData() as unknown as ForwardMessageModalData | undefined;
 
   const message = data?.message;
   const attachment = data?.attachment;

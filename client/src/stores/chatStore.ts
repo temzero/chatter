@@ -302,6 +302,7 @@ export const useChatStore = create<ChatStore>()(
         },
 
         setActiveChat: async (chat) => {
+          console.log("setActiveChat");
           useSidebarInfoStore.getState().setSidebarInfo();
           useMessageStore.getState().setDisplaySearchMessage(false);
           useModalStore.getState().closeModal();
@@ -310,8 +311,8 @@ export const useChatStore = create<ChatStore>()(
             return;
           }
 
-          const { messages } = useMessageStore.getState();
-          const { chatMembers } = useChatMemberStore.getState();
+          const messages = useMessageStore.getState().messages;
+          const chatMembers = useChatMemberStore.getState().chatMembers;
           const alreadyFetchedMessages = !!messages[chat.id];
           const alreadyFetchedMembers = !!chatMembers[chat.id];
 
@@ -681,6 +682,8 @@ export const useChatStore = create<ChatStore>()(
     }
   )
 );
+
+// EXPORT HOOKS
 
 export const useActiveChat = () => useChatStore((s) => s.activeChat);
 export const useActiveChatId = () => useChatStore((s) => s.activeChat?.id);

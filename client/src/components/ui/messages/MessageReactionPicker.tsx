@@ -1,7 +1,7 @@
 import React from "react";
 import { handleReaction } from "@/common/utils/message/handleReaction";
 import { audioService, SoundType } from "@/services/audio.service";
-import { useModalStore } from "@/stores/modalStore";
+import { getCloseModal } from "@/stores/modalStore";
 
 const emojis = ["👍", "❤️", "😂", "😮", "😢", "🙏", "🎉", "🔥", "💯"];
 
@@ -16,7 +16,7 @@ export const MessageReactionPicker: React.FC<ReactionPickerProps> = ({
   messageId,
   chatId,
 }) => {
-  const closeModal = useModalStore.getState().closeModal;
+  const closeModal = getCloseModal();
 
   return (
     <div

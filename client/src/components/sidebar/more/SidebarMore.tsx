@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useSidebarStore } from "@/stores/sidebarStore";
+import { getSetSidebar, useSidebarStore } from "@/stores/sidebarStore";
 import { useCurrentUser } from "@/stores/authStore";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import { useSetActiveSavedChat } from "@/stores/chatStore";
@@ -11,8 +11,11 @@ import { useTranslation } from "react-i18next";
 const SidebarMore: React.FC = () => {
   const { t } = useTranslation();
   const currentUser = useCurrentUser();
-  const { setSidebar, isCompact, toggleCompact } = useSidebarStore();
-  const { pendingRequests } = useFriendshipStore();
+  const isCompact = useSidebarStore((state) => state.isCompact);
+  const setSidebar = getSetSidebar();
+  const toggleCompact = useSidebarStore.getState().toggleCompact;
+
+  const pendingRequests = useFriendshipStore((state) => state.pendingRequests);
   const requestsCount = pendingRequests.length;
   const setActiveSavedChat = useSetActiveSavedChat();
 

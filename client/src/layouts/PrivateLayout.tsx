@@ -5,12 +5,13 @@ import Sidebar from "@/components/sidebar/Sidebar";
 import { useActiveChat } from "@/stores/chatStore";
 import { useSidebarInfoVisibility } from "@/stores/sidebarInfoStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
-import { useDeviceStore } from "@/stores/deviceStore";
+import { useIsMobile } from "@/stores/deviceStore";
 import { AnimatePresence, motion } from "framer-motion";
 import { useIsMobileSound } from "@/common/hooks/useIsMobileSound";
 
 const PrivateLayout: React.FC = () => {
-  const isMobile = useDeviceStore((state) => state.isMobile);
+  console.log('PrivateLayout')
+  const isMobile = useIsMobile();
   const activeChat = useActiveChat();
   const isSidebarVisible = useSidebarInfoVisibility();
   const isSidebarCompact = useSidebarStore((state) => state.isCompact);

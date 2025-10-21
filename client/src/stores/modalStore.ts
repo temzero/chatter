@@ -1,9 +1,12 @@
 import { create } from "zustand";
 import { ModalType } from "@/common/enums/modalType";
 
+// ---- STATE + ACTIONS ----
 interface ModalState {
   type: ModalType | null;
   data: Record<string, unknown> | null;
+  focusMessageId: string | null;
+  replyToMessageId: string | null;
 }
 
 interface ModalActions {
@@ -11,72 +14,72 @@ interface ModalActions {
   closeModal: () => void;
 }
 
+// ---- STORE ----
 export const useModalStore = create<ModalState & ModalActions>((set) => ({
   type: null,
   data: null,
+  focusMessageId: null,
+  replyToMessageId: null,
 
-  openModal: (type, data = {}) =>
-    set({
-      type,
-      data,
-    }),
+  openModal: (type, data = {}) => set({ type, data }),
 
   closeModal: () =>
     set({
       type: null,
       data: null,
+      focusMessageId: null,
+      replyToMessageId: null,
     }),
 }));
 
 export { ModalType };
 
-// Custom hooks for specific modal types
-export const useModalActions = () => {
-  const { openModal, closeModal } = useModalStore();
+// EXPORT HOOKS
 
-  return {
-    openModal,
-    closeModal,
-    openMediaModal: (attachmentId: string) =>
-      openModal(ModalType.MEDIA, { attachmentId }),
-
-    openFocusMessageModal: (messageId: string) =>
-      openModal(ModalType.OVERLAY, { focusedMessageId: messageId }),
-
-    // setReplyToMessage: (messageId: string | null) =>
-    openReplyToMessageModal: (messageId: string | null) =>
-      openModal(ModalType.OVERLAY, { replyToMessageId: messageId }),
-  };
-};
-
-// Selectors
-export const useModalType = () => useModalStore((state) => state.type);
-// export const useModalData = () => useModalStore((state) => state.data);
-export const useModalData = () => useModalStore.getState().data;
-
-// Specific data selectors
+// ---- SELECTORS ----
+export const useModalType = () => useModalStore((s) => s.type);
+export const getModalData = () => useModalStore.getState().data;
+export const useReplyToMessageId = () =>
+  useModalStore((s) => s.replyToMessageId);
 export const useMediaModalData = () => {
-  const data = useModalStore((state) => state.data);
+  const data = useModalStore((s) => s.data);
   return data?.attachmentId as string | undefined;
 };
 
-export const useFocusMessageModalData = () => {
-  const data = useModalStore((state) => state.data);
-  return data?.focusedMessageId as string | undefined;
+// ---- MESSAGE STATE HOOKS ----
+export const useIsMessageFocus = (messageId: string) =>
+  useModalStore((state) => state.focusMessageId === messageId);
+
+export const useIsReplyToThisMessage = (messageId: string) =>
+  useModalStore((state) => state.replyToMessageId === messageId);
+
+// ---- SPECIALIZED ACTION HOOKS ----
+export const getOpenModal = () => useModalStore.getState().openModal;
+export const getCloseModal = () => useModalStore.getState().closeModal;
+
+export const setOpenMediaModal = () => {
+  return (attachmentId: string) => {
+    useModalStore.setState({
+      type: ModalType.MEDIA,
+      data: { attachmentId },
+    });
+  };
 };
 
-export const useReplyToMessageId = () => {
-  const data = useModalStore((state) => state.data);
-  return data?.replyToMessageId as string | undefined;
+export const setOpenFocusMessageModal = () => {
+  return (messageId: string) => {
+    useModalStore.setState({
+      type: ModalType.OVERLAY,
+      focusMessageId: messageId,
+    });
+  };
 };
 
-// ✅ Message focus and reply hooks
-export const useIsMessageFocus = (messageId: string | null | undefined) =>
-  useModalStore(
-    (state) => !!messageId && state.data?.focusedMessageId === messageId
-  );
-
-export const useIsReplyToThisMessage = (messageId: string | null | undefined) =>
-  useModalStore(
-    (state) => !!messageId && state.data?.replyToMessageId === messageId
-  );
+export const setOpenReplyToMessageModal = () => {
+  return (messageId: string) => {
+    useModalStore.setState({
+      type: ModalType.OVERLAY,
+      replyToMessageId: messageId,
+    });
+  };
+};

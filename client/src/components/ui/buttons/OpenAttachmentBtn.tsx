@@ -6,7 +6,7 @@ import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 
 const OpenAttachmentBtn: React.FC = () => {
   const { t } = useTranslation();
-  const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
+  const setSidebarInfo = useSidebarInfoStore.getState().setSidebarInfo;
 
   return (
     <motion.div

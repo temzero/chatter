@@ -1,5 +1,5 @@
 // components/MediaViewerBottomInfo.tsx
-import { useDeviceStore } from "@/stores/deviceStore";
+import { useIsMobile } from "@/stores/deviceStore";
 import { AttachmentResponse } from "@/shared/types/responses/message.response";
 import { formatFileSize } from "@/common/utils/format/formatFileSize";
 
@@ -14,7 +14,7 @@ export const MediaViewerBottomInfo = ({
   currentIndex,
   mediaLength,
 }: MediaViewerBottomInfoProps) => {
-  const isMobile = useDeviceStore((state) => state.isMobile);
+  const isMobile = useIsMobile();
   if (mediaLength <= 1) return null;
 
   return (

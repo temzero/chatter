@@ -48,19 +48,8 @@ export const useTypingStore = create<TypingState>((set, get) => ({
   },
 }));
 
-// Using useShallow to select multiple values
-export const useTypingInfo = (chatId: string) => {
-  return useTypingStore(
-    useShallow((state) => ({
-      typingUsers: state.activeTyping[chatId] || [],
-      isTyping: (userId: string) => state.isTyping(chatId, userId),
-      startTyping: state.startTyping,
-      stopTyping: state.stopTyping,
-    }))
-  );
-};
+// EXPORT HOOKS
 
-// Keep your existing shallow selector for single value
 export const useTypingUsersByChatId = (chatId: string) => {
   return useTypingStore(
     useShallow((state) => state.activeTyping[chatId] || [])

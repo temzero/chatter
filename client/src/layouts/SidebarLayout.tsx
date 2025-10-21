@@ -1,6 +1,6 @@
 // components/SidebarLayout.tsx
 import React from "react";
-import { useSidebarStore } from "@/stores/sidebarStore";
+import { getSetSidebar } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 
 interface BackLocation {
@@ -21,7 +21,7 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({
   backLocation = SidebarMode.MORE,
   rightButton,
 }) => {
-  const { setSidebar } = useSidebarStore();
+  const setSidebar = getSetSidebar();
 
   const handleBackClick = () => {
     if (typeof backLocation === "object") {

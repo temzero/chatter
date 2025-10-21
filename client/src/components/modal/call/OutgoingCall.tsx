@@ -5,7 +5,7 @@ import { useCallStore } from "@/stores/callStore";
 import Button from "@/components/ui/buttons/Button";
 import { VideoStream } from "@/components/ui/streams/VideoStream";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
-import { useModalStore } from "@/stores/modalStore";
+import { getCloseModal } from "@/stores/modalStore";
 import { useLocalTracks } from "@/common/hooks/mediaStreams/useLocalTracks";
 import { callWebSocketService } from "@/services/websocket/call.websocket.service";
 import { UpdateCallPayload } from "@shared/types/call";
@@ -19,9 +19,9 @@ interface CallCallingUIProps {
 const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
   const isVideoCall = useCallStore((state) => state.isVideoCall);
   const callId = useCallStore((state) => state.callId);
-  const toggleLocalVideo = useCallStore((state) => state.toggleLocalVideo);
-  const endCall = useCallStore((state) => state.endCall);
-  const closeModal = useModalStore.getState().closeModal;
+  const closeModal = getCloseModal();
+  const toggleLocalVideo = useCallStore.getState().toggleLocalVideo;
+  const endCall = useCallStore.getState().endCall;
   const { localVideoStream } = useLocalTracks();
   const [isHovering, setIsHovering] = useState(false);
 

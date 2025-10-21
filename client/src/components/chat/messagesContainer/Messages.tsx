@@ -18,7 +18,7 @@ interface ChatMessagesProps {
 }
 
 const Messages: React.FC<ChatMessagesProps> = ({ chat, messages }) => {
-  console.log("Messages");
+  console.log("Messages", messages.length);
   const chatId = chat?.id;
   const currentUser = useCurrentUser();
   const rawMembers = useActiveMembers();
@@ -27,9 +27,6 @@ const Messages: React.FC<ChatMessagesProps> = ({ chat, messages }) => {
     () => members.find((m) => m.id === chat.myMemberId),
     [members, chat.myMemberId]
   );
-
-  console.log("Rendering Messages component", messages);
-
   const otherMembers = useMemo(
     () => members.filter((m) => m.id !== chat.myMemberId),
     [members, chat.myMemberId]

@@ -4,21 +4,21 @@ import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { callAnimations } from "@/common/animations/callAnimations";
 import { VideoStream } from "@/components/ui/streams/VideoStream";
 import { useCallStore } from "@/stores/callStore";
-import { useModalStore } from "@/stores/modalStore";
+import { getCloseModal } from "@/stores/modalStore";
 import { VoiceVisualizerButton } from "@/components/ui/streams/VoiceVisualizerBtn";
 import { useLocalPreviewVoiceTrack } from "@/common/hooks/mediaStreams/useLocalPreviewVoiceTrack";
 import { useLocalPreviewVideoTrack } from "@/common/hooks/mediaStreams/useLocalPreviewVideoTrack";
 import { useLocalPreviewScreenTrack } from "@/common/hooks/mediaStreams/useLocalPreviewScreenTrack";
-import { useDeviceStore } from "@/stores/deviceStore";
+import { useIsMobile } from "@/stores/deviceStore";
 import CallHeader from "./components/CallHeader";
 import Button from "@/components/ui/buttons/Button";
 
 const BroadcastPreviewModal = ({ chat }: { chat: ChatResponse }) => {
-  const isMobile = useDeviceStore((state) => state.isMobile);
+  const isMobile = useIsMobile();
 
-  const startCall = useCallStore((state) => state.startCall);
-  const endCall = useCallStore((state) => state.endCall);
-  const closeModal = useModalStore.getState().closeModal;
+  const startCall = useCallStore.getState().startCall;
+  const endCall = useCallStore.getState().endCall;
+  const closeModal = getCloseModal();
 
   const { localVoiceStream, isVoiceEnabled, toggleVoice, stopVoice } =
     useLocalPreviewVoiceTrack(true);

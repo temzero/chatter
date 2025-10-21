@@ -10,8 +10,8 @@ import { useTranslation } from "react-i18next";
 const Login = () => {
   const { t } = useTranslation();
   const formRef = useRef<HTMLFormElement>(null);
-  const login = useAuthStore((state) => state.login);
   const loading = useAuthStore((state) => state.loading);
+  const login = useAuthStore.getState().login;
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -3,7 +3,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { useCallStore } from "@/stores/callStore";
 import { useChatStore } from "@/stores/chatStore";
-import { useDeviceStore } from "@/stores/deviceStore";
+import { useIsMobile } from "@/stores/deviceStore";
 import { LocalCallStatus } from "@/common/enums/LocalCallStatus";
 import { CallStatus } from "@/shared/types/enums/call-status.enum";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
@@ -19,10 +19,13 @@ import BroadcastPreviewModal from "@/components/modal/call/BroadcastPreviewModal
 import BroadcastRoom from "@/components/modal/call/broadcastRoom/BroadcastRoom";
 
 const CallModal: React.FC = () => {
-  const isMobile = useDeviceStore((state) => state.isMobile);
-  const getOrFetchChatById = useChatStore((state) => state.getOrFetchChatById);
+  const isMobile = useIsMobile()
+  const getOrFetchChatById = useChatStore.getState().getOrFetchChatById;
 
-  const { chatId, localCallStatus, callStatus } = useCallStore();
+  const chatId = useCallStore((state) => state.chatId);
+  const localCallStatus = useCallStore((state) => state.localCallStatus);
+  const callStatus = useCallStore((state) => state.callStatus);
+  
   const [chat, setChat] = React.useState<ChatResponse | null>(null);
   const isBroadcasting: boolean =
     chat?.type === ChatType.CHANNEL && callStatus == CallStatus.IN_PROGRESS;

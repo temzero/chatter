@@ -26,7 +26,7 @@ const MessagesContainer: React.FC<ChatBoxProps> = ({ chat }) => {
 
   const messages = useMessagesByChatId(chatId);
   const hasMoreMessages = useHasMoreMessages(chatId);
-  const fetchMoreMessages = useMessageStore((state) => state.fetchMoreMessages);
+  const fetchMoreMessages = useMessageStore.getState().fetchMoreMessages;
 
   // Scroll to bottom helper
   const scrollToBottom = useCallback((behavior: ScrollBehavior = "auto") => {

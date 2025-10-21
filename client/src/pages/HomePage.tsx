@@ -4,13 +4,13 @@ import { ROUTES } from "@/common/constants/routes";
 import { useAppInitialization } from "@/common/hooks/useAppInitialization";
 import { useIsAuthenticated } from "@/stores/authStore";
 import BackgroundContent from "@/components/ui/layout/BackgroundContent";
-import Modal from "@/components/modal/Modal";
 import PrivateLayout from "@/layouts/PrivateLayout";
+import Modal from "@/components/modal/Modal";
 
 const HomePage: React.FC = () => {
+  console.log('HomePage')
   useAppInitialization();
   const isAuthenticated = useIsAuthenticated();
-
   if (!isAuthenticated) {
     return <Navigate to={ROUTES.PUBLIC.LOGIN} replace />;
   }

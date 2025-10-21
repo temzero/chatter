@@ -6,7 +6,7 @@ import { Avatar } from "@/components/ui/avatar/Avatar";
 import clsx from "clsx";
 import { scrollToMessageById } from "@/common/utils/message/scrollToMessageById";
 import RenderMultipleAttachments from "@/components/ui/attachments/RenderMultipleAttachments";
-import { useModalStore } from "@/stores/modalStore";
+import { getCloseModal } from "@/stores/modalStore";
 import {
   SystemMessageContent,
   SystemMessageJSONContent,
@@ -29,7 +29,7 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
   senderId,
   isHidden = false,
 }) => {
-  const closeModal = useModalStore((state) => state.closeModal);
+  const closeModal = getCloseModal();
   if (!replyMessage) return null;
 
   const isSelfReply = replyMessage.sender.id === senderId;

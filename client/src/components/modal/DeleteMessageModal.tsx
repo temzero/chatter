@@ -1,6 +1,6 @@
 // components/modals/DeleteMessageModal.tsx
 import React from "react";
-import { useModalActions, useModalData } from "@/stores/modalStore";
+import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { useCurrentUserId } from "@/stores/authStore";
 import { useMessageStore } from "@/stores/messageStore";
@@ -16,10 +16,10 @@ interface DeleteMessageModalData {
 const DeleteMessageModal: React.FC = () => {
   const { t } = useTranslation();
   const currentUserId = useCurrentUserId();
-  const { closeModal } = useModalActions();
-  const data = useModalData() as unknown as DeleteMessageModalData | undefined;
+  const closeModal = getCloseModal();
+  const data = getModalData() as unknown as DeleteMessageModalData | undefined;
 
-  const getMessageById = useMessageStore((state) => state.getMessageById);
+  const getMessageById = useMessageStore.getState().getMessageById;
   const messageId = data?.messageId;
   const message = messageId ? getMessageById(messageId) : undefined;
 

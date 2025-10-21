@@ -12,10 +12,10 @@ const Register = () => {
   const formRef = useRef<HTMLFormElement>(null);
   const firstNameRef = useRef<HTMLInputElement>(null);
   const lastNameRef = useRef<HTMLInputElement>(null);
-
-  const register = useAuthStore((state) => state.register);
-  const setMessage = useAuthStore((state) => state.setMessage);
+  
   const loading = useAuthStore((state) => state.loading);
+  const register = useAuthStore.getState().register;
+  const setMessage = useAuthStore.getState().setMessage;
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {

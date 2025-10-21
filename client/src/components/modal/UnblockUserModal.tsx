@@ -1,6 +1,6 @@
 // components/modals/UnblockUserModal.tsx
 import React from "react";
-import { useModalActions, useModalData } from "@/stores/modalStore";
+import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { blockService } from "@/services/blockService";
@@ -16,8 +16,8 @@ interface UnblockUserModalData {
 
 const UnblockUserModal: React.FC = () => {
   const { t } = useTranslation();
-  const { closeModal } = useModalActions();
-  const data = useModalData() as unknown as UnblockUserModalData | undefined;
+  const closeModal = getCloseModal();
+  const data = getModalData() as unknown as UnblockUserModalData | undefined;
   const updateMemberLocally = useChatMemberStore.getState().updateMemberLocally;
 
   // Extract user data from modal props

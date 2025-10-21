@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useSidebarStore } from "@/stores/sidebarStore";
+import { getSetSidebar } from "@/stores/sidebarStore";
 import CreateNewChat from "@/components/ui/chat/CreateNewChat";
 import CreateNewGroupChat from "@/components/ui/chat/CreateNewGroupChat";
 import { SlidingContainer } from "@/components/ui/layout/SlidingContainer";
@@ -11,7 +11,7 @@ const sidebarChatTypes = [ChatType.DIRECT, ChatType.GROUP, ChatType.CHANNEL];
 
 const SidebarNewChat: React.FC = () => {
   const { t } = useTranslation();
-  const setSidebar = useSidebarStore((state) => state.setSidebar);
+  const setSidebar = getSetSidebar();
   const [selectedType, setSelectedType] = useState<ChatType>(ChatType.DIRECT);
   const [direction, setDirection] = useState<number>(1);
 

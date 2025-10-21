@@ -1,5 +1,5 @@
 import React from "react";
-import { useModalActions, useModalData } from "@/stores/modalStore";
+import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useChatStore } from "@/stores/chatStore";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
@@ -15,10 +15,10 @@ interface DeleteChatModalData {
 
 const DeleteChatModal: React.FC = () => {
   const { t } = useTranslation();
-  const deleteChat = useChatStore((state) => state.deleteChat);
-  const setSidebarInfo = useSidebarInfoStore((state) => state.setSidebarInfo);
-  const { closeModal } = useModalActions();
-  const data = useModalData() as unknown as DeleteChatModalData | undefined;
+  const closeModal = getCloseModal();
+  const deleteChat = useChatStore.getState().deleteChat;
+  const setSidebarInfo = useSidebarInfoStore.getState().setSidebarInfo;
+  const data = getModalData() as unknown as DeleteChatModalData | undefined;
 
   const chat = data?.chat;
   if (!chat) return null;

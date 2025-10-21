@@ -6,13 +6,13 @@ import { useActiveChatAttachments } from "@/stores/messageStore";
 import { RenderModalAttachment } from "./RenderModalAttachment";
 import { handleDownload } from "@/common/utils/handleDownload";
 import { audioService, SoundType } from "@/services/audio.service";
-import { useDeviceStore } from "@/stores/deviceStore";
+import { useIsMobile } from "@/stores/deviceStore";
 import { MediaViewerButtons } from "./MediaViewerButtons";
-import { useMediaModalData, useModalActions } from "@/stores/modalStore";
+import { getCloseModal, useMediaModalData } from "@/stores/modalStore";
 
 export const MediaViewer: React.FC = () => {
-  const isMobile = useDeviceStore((state) => state.isMobile);
-  const { closeModal } = useModalActions();
+  const isMobile = useIsMobile();
+  const closeModal = getCloseModal();
 
   // derive mediaId from data
   const currentAttachmentId = useMediaModalData();

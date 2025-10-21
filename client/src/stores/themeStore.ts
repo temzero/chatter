@@ -84,9 +84,8 @@ export const useThemeStore = create<ThemeState & ThemeActions>()(
   )
 );
 
-// Selector hooks for themes
+// EXPORT HOOKS
+
 export const useTheme = () => useThemeStore((state) => state.theme);
-export const useThemeActions = () =>
-  useThemeStore((state) => ({
-    setTheme: state.setTheme,
-  }));
+export const useThemeOption = () => useThemeStore((state) => state.themeOption);
+export const getSetTheme = () => useThemeStore.getState().setTheme;

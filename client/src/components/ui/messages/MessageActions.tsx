@@ -1,12 +1,16 @@
 import React from "react";
 import clsx from "clsx";
 import { MessageResponse } from "@/shared/types/responses/message.response";
-import { useModalActions } from "@/stores/modalStore";
 import { ModalType } from "@/common/enums/modalType";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { scrollToMessageById } from "@/common/utils/message/scrollToMessageById";
 import { useTranslation } from "react-i18next";
 import { audioService, SoundType } from "@/services/audio.service";
+import {
+  getCloseModal,
+  getOpenModal,
+  setOpenReplyToMessageModal,
+} from "@/stores/modalStore";
 
 interface MessageActionsProps {
   message: MessageResponse;
@@ -26,7 +30,9 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   onClose,
 }) => {
   const { t } = useTranslation();
-  const { openModal, closeModal, openReplyToMessageModal } = useModalActions();
+  const openModal = getOpenModal();
+  const closeModal = getCloseModal();
+  const openReplyToMessageModal = setOpenReplyToMessageModal();
 
   const isAlreadyReply = !!message.replyToMessageId;
   const isPinned = message.isPinned;

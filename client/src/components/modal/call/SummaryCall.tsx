@@ -8,10 +8,10 @@ import { CallError } from "@shared/types/call";
 import CallHeader from "./components/CallHeader";
 
 const SummaryCall = ({ chat }: { chat: ChatResponse; duration?: number }) => {
-  const duration = useCallStore((state) => state.getCallDuration());
   const localCallStatus = useCallStore((state) => state.localCallStatus);
   const error = useCallStore((state) => state.error);
-  const closeCallModal = useCallStore((state) => state.closeCallModal);
+  const duration = useCallStore.getState().getCallDuration();
+  const closeCallModal = useCallStore.getState().closeCallModal;
   // console.log("localCallStatus", localCallStatus);
   // Auto-close when call is canceled
   useEffect(() => {

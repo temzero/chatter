@@ -3,8 +3,8 @@ import { AttachmentResponse } from "@/shared/types/responses/message.response";
 import { handleDownload } from "@/common/utils/handleDownload";
 import { useSenderByMessageId } from "@/stores/messageStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
-import { useDeviceStore } from "@/stores/deviceStore";
-import { ModalType, useModalActions } from "@/stores/modalStore";
+import { useIsMobile } from "@/stores/deviceStore";
+import { ModalType, getOpenModal } from "@/stores/modalStore";
 
 interface MediaViewerButtonsProps {
   attachment: AttachmentResponse;
@@ -17,8 +17,8 @@ export const MediaViewerButtons = ({
   onRotate,
   onClose,
 }: MediaViewerButtonsProps) => {
-  const isMobile = useDeviceStore((state) => state.isMobile);
-  const { openModal } = useModalActions();
+  const isMobile = useIsMobile();
+  const openModal = getOpenModal();
   const sender = useSenderByMessageId(attachment.messageId);
 
   const handleDownloadClick = useCallback(() => {

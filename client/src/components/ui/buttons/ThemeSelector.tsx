@@ -1,10 +1,10 @@
-import { ThemeOption, useThemeStore } from "@/stores/themeStore";
+import { ThemeOption, getSetTheme, useThemeOption } from "@/stores/themeStore";
 import { useTranslation } from "react-i18next";
 
 const ThemeSelector = () => {
   const { t } = useTranslation();
-  const themeOption = useThemeStore((state) => state.themeOption);
-  const setTheme = useThemeStore((state) => state.setTheme);
+  const themeOption = useThemeOption();
+  const setTheme = getSetTheme();
 
   const getOptionClass = (value: string) =>
     `flex items-center gap-4 p-4 w-full cursor-pointer transition-colors custom-border-b
