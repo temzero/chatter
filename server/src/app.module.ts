@@ -13,6 +13,7 @@ import { SupabaseModule } from './modules/superbase/supabase.module';
 import { WebSocketModule } from './modules/websocket/websocket.module';
 import { FolderModule } from './modules/folder/folder.module';
 import { CallModule } from './modules/call/call.module';
+import { BootstrapModule } from './modules/bootstrap/bootstrap.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { CallModule } from './modules/call/call.module';
       inject: [ConfigService],
     }),
     AuthModule,
+    BootstrapModule,
     ChatModule,
     FolderModule,
     ChatMemberModule,

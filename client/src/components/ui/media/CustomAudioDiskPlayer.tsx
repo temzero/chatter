@@ -2,7 +2,6 @@ import {
   useRef,
   forwardRef,
   useImperativeHandle,
-  useEffect,
   useReducer,
   useMemo,
 } from "react";
@@ -10,6 +9,7 @@ import { useIsMobile } from "@/stores/deviceStore";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { formatDuration } from "@/common/utils/format/formatDuration";
 import musicDiskCover from "@/assets/image/disk.png";
+import { useAudioDiskDrag } from "@/common/hooks/keyEvent/useAudioDiskDrag";
 
 // Audio manager
 let currentAudio: HTMLAudioElement | null = null;
@@ -197,31 +197,12 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
     };
 
     // -------------------- Event Listeners --------------------
-    useEffect(() => {
-      const onMouseMove = (e: MouseEvent) =>
-        handleDragMove(e.clientX, e.clientY);
-      const onMouseUp = () => handleDragEnd();
-      const onTouchMove = (e: TouchEvent) => {
-        if (e.touches.length > 0) {
-          const touch = e.touches[0];
-          handleDragMove(touch.clientX, touch.clientY);
-        }
-      };
-      const onTouchEnd = () => handleDragEnd();
-
-      window.addEventListener("mousemove", onMouseMove);
-      window.addEventListener("mouseup", onMouseUp);
-      window.addEventListener("touchmove", onTouchMove);
-      window.addEventListener("touchend", onTouchEnd);
-
-      return () => {
-        window.removeEventListener("mousemove", onMouseMove);
-        window.removeEventListener("mouseup", onMouseUp);
-        window.removeEventListener("touchmove", onTouchMove);
-        window.removeEventListener("touchend", onTouchEnd);
-      };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [state.isPlaying, state.duration]);
+    useAudioDiskDrag({
+      isPlaying: state.isPlaying,
+      duration: state.duration,
+      handleDragMove,
+      handleDragEnd,
+    });
 
     // -------------------- Memoized values --------------------
     const diskSize = isMobile ? 300 : 400;

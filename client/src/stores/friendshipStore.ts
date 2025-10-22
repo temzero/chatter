@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { friendshipService } from "@/services/friendshipService";
+import { friendshipService } from "@/services/http/friendshipService";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { handleError } from "@/common/utils/handleError";
 import {
@@ -8,20 +8,23 @@ import {
 } from "@/shared/types/responses/friendship.response";
 import { toast } from "react-toastify";
 import { useChatMemberStore } from "./chatMemberStore";
+import { PaginationResponse } from "@/shared/types/responses/pagination.response";
 
-type FriendshipState = {
+interface FriendshipState {
   pendingRequests: FriendRequestResponse[];
+  hasMore: boolean;
   isLoading: boolean;
-};
+}
 
-type FriendshipActions = {
+interface FriendshipActions {
+  initialize: () => Promise<void>;
+  setInitialData: (data: PaginationResponse<FriendRequestResponse>) => void;
   sendFriendRequest: (
     receiverId: string,
     receiverName: string,
     currentUserId?: string,
     message?: string
   ) => Promise<FriendRequestResponse | undefined>;
-  fetchPendingRequests: () => Promise<void>;
   respondToRequest: (
     friendshipId: string,
     userId: string,
@@ -32,12 +35,42 @@ type FriendshipActions = {
   removeRequestLocally: (friendshipId?: string, senderId?: string) => void;
   deleteFriendship: (userId: string) => Promise<void>;
   clearRequests: () => void;
+}
+
+const initialState: FriendshipState = {
+  pendingRequests: [],
+  hasMore: false,
+  isLoading: false,
 };
 
 export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
   (set) => ({
-    pendingRequests: [],
-    isLoading: false,
+    ...initialState,
+
+    initialize: async () => {
+      set({ isLoading: true });
+
+      try {
+        const response = await friendshipService.getPendingRequests({
+          limit: 20,
+        });
+        set({
+          pendingRequests: response.items,
+          hasMore: response.hasMore,
+          isLoading: false,
+        });
+      } catch (error) {
+        console.error("Failed to fetch friend requests:", error);
+        set({ isLoading: false });
+      }
+    },
+
+    setInitialData: (data: PaginationResponse<FriendRequestResponse>) => {
+      set({
+        pendingRequests: data.items,
+        hasMore: data.hasMore,
+      });
+    },
 
     sendFriendRequest: async (
       receiverId,
@@ -69,17 +102,6 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
         console.error("Failed to send friend request:", error);
         handleError(error, "Failed to send friend request");
         throw error;
-      }
-    },
-
-    fetchPendingRequests: async () => {
-      set({ isLoading: true });
-      try {
-        const requests = await friendshipService.getPendingRequests();
-        set({ pendingRequests: requests, isLoading: false });
-      } catch (error) {
-        console.error("Failed to fetch friend requests:", error);
-        set({ isLoading: false });
       }
     },
 

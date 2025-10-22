@@ -1,5 +1,6 @@
 import { getMyChatMember } from "@/stores/chatMemberStore";
-import { callService } from "@/services/callService";
+import { callService } from "@/services/http/callService";
+
 
 export async function getMyCallToken(chatId: string): Promise<string | undefined> {
   try {

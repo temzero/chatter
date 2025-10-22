@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useAuthStore, useCurrentUser } from "@/stores/authStore";
-import { userService } from "@/services/userService";
+import { userService } from "@/services/http/userService";
 import { getSetSidebar } from "@/stores/sidebarStore";
 import { handleError } from "@/common/utils/handleError";
 import { toast } from "react-toastify";

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import SidebarLayout from "@/layouts/SidebarLayout";
-import { blockService } from "@/services/blockService";
+import { blockService } from "@/services/http/blockService";
 import { BlockResponse } from "@/shared/types/responses/block.response";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { FadeLoader } from "react-spinners";

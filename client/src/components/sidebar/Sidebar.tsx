@@ -34,6 +34,7 @@ import SidebarSettingsPhoneNumber from "./settings/account/sidebarSettingsPhoneN
 import SidebarNewFolder from "./more/SidebarNewFolder";
 
 const Sidebar = () => {
+  console.log('Sidebar')
   const currentSidebar = useCurrentSidebar();
 
   const sidebars: Record<SidebarMode, JSX.Element> = {

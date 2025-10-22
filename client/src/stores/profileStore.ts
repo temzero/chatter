@@ -1,16 +1,16 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { userService } from "@/services/userService";
+import { userService } from "@/services/http/userService";
 import { localStorageService } from "@/services/storage/localStorageService";
 import { useAuthStore } from "./authStore";
 import { ProfileFormData } from "@/components/sidebar/SidebarProfileEdit";
 
-type ProfileState = {
+interface ProfileState {
   loading: boolean;
   error: string | null;
 };
 
-type ProfileActions = {
+interface ProfileActions {
   updateProfile: (updatedData: ProfileFormData) => Promise<void>;
   reset: () => void;
   deleteProfile: () => Promise<void>;

@@ -1,7 +1,8 @@
-// services/folderService.ts
 import API from "@/services/api/api";
 import { FolderResponse } from "@/shared/types/responses/folder.response";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
+import { PaginationQuery } from "@/shared/types/queries/pagination-query";
+import { PaginationResponse } from "@/shared/types/responses/pagination.response";
 
 export const folderService = {
   async createFolder(folderData: {
@@ -14,29 +15,27 @@ export const folderService = {
     return data;
   },
 
-  async getFolders(): Promise<FolderResponse[]> {
-    const { data } = await API.get("/folders");
-    return data;
-  },
+  async getFolders(
+    queries: PaginationQuery = { limit: 20 }
+  ): Promise<PaginationResponse<FolderResponse>> {
+    const { offset, lastId, limit } = queries;
 
-  async getFolder(id: string): Promise<FolderResponse> {
-    const { data } = await API.get(`/folders/${id}`);
-    return data;
+    const { data } = await API.get("/folders", {
+      params: {
+        ...(offset !== undefined ? { offset } : {}),
+        ...(lastId ? { lastId } : {}),
+        limit,
+      },
+    });
+
+    return data.payload; // matches SuccessResponse<PaginationResponse<FolderResponse>>
   },
 
   async updateFolder(
     id: string,
     updates: Partial<FolderResponse>
   ): Promise<FolderResponse> {
-    const { data } = await API.patch(`/folders/${id}`, updates);
-    return data;
-  },
-
-  async updateFolderPosition(
-    id: string,
-    position: number
-  ): Promise<FolderResponse> {
-    const { data } = await API.patch(`/folders/position/${id}`, position);
+    const { data } = await API.patch(`/folders/update/${id}`, updates);
     return data;
   },
 
@@ -57,7 +56,9 @@ export const folderService = {
     folderId: string,
     chatIds: string[]
   ): Promise<FolderResponse> {
-    const { data } = await API.post(`/folders/${folderId}/chats`, { chatIds });
+    const { data } = await API.post(`/folders/add-chats/${folderId}/chats`, {
+      chatIds,
+    });
     return data;
   },
 
@@ -65,7 +66,9 @@ export const folderService = {
     folderId: string,
     chatId: string
   ): Promise<FolderResponse> {
-    const { data } = await API.delete(`/folders/${folderId}/chats/${chatId}`);
+    const { data } = await API.delete(
+      `/folders/remove-chat/${folderId}/chats/${chatId}`
+    );
     return data;
   },
 };

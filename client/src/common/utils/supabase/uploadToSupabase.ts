@@ -1,21 +1,7 @@
 import { AttachmentUploadRequest } from "@/shared/types/requests/attachment-upload.request";
 import { determineAttachmentType } from "@/common/utils/message/determineAttachmentType";
-import { createClient } from "@supabase/supabase-js";
+import supabase, { attachmentsBucket } from "@/common/utils/supabaseClient";
 import { toast } from "react-toastify";
-
-// Supabase setup
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const attachmentsBucket =
-  import.meta.env.VITE_SUPABASE_ATTACHMENTS_BUCKET ?? "attachments";
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    "Supabase environment variables not configured! Please check your VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY"
-  );
-}
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 /**
  * Upload multiple files to Supabase and return their metadata

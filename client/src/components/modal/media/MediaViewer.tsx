@@ -4,11 +4,11 @@ import { MediaViewerNavigationButtons } from "./MediaViewerNavigationButtons";
 import { MediaViewerBottomInfo } from "./MediaViewerBottomInfo";
 import { useActiveChatAttachments } from "@/stores/messageStore";
 import { RenderModalAttachment } from "./RenderModalAttachment";
-import { handleDownload } from "@/common/utils/handleDownload";
 import { audioService, SoundType } from "@/services/audio.service";
 import { useIsMobile } from "@/stores/deviceStore";
 import { MediaViewerButtons } from "./MediaViewerButtons";
 import { getCloseModal, useMediaModalData } from "@/stores/modalStore";
+import { useMediaViewerKeys } from "@/common/hooks/keyEvent/useMediaViewerKeys";
 
 export const MediaViewer: React.FC = () => {
   const isMobile = useIsMobile();
@@ -60,7 +60,7 @@ export const MediaViewer: React.FC = () => {
         if (animate) {
           controls.start({
             x: targetX,
-            transition: { type: "spring", stiffness: 290, damping: 29 },
+            transition: { type: "spring", stiffness: 300, damping: 30 },
           });
         } else {
           controls.set({ x: targetX });
@@ -109,38 +109,13 @@ export const MediaViewer: React.FC = () => {
     closeModal();
   }, [closeModal]);
 
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      e.stopPropagation();
-
-      if (e.key === "ArrowRight") {
-        e.preventDefault();
-        goNext();
-      } else if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        goPrev();
-      } else if (e.key === "Escape") {
-        e.preventDefault();
-        handleClose();
-      } else if (e.key.toLowerCase() === "r") {
-        e.preventDefault();
-        handleRotate();
-      } else if (e.key.toLowerCase() === "d") {
-        e.preventDefault();
-        if (activeAttachments) handleDownload(activeAttachments[currentIndex]);
-      }
-    },
-    [goNext, goPrev, handleClose, handleRotate, currentIndex, activeAttachments]
-  );
-
-  useEffect(() => {
-    if (currentAttachmentId) {
-      window.addEventListener("keydown", handleKeyDown);
-    }
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [currentAttachmentId, handleKeyDown]);
+  useMediaViewerKeys({
+    currentIndex,
+    goNext,
+    goPrev,
+    handleRotate,
+    isActive: !!currentAttachmentId,
+  });
 
   useEffect(() => {
     const onResize = () => {
@@ -152,7 +127,7 @@ export const MediaViewer: React.FC = () => {
       if (hasMounted.current) {
         controls.start({
           x: targetX,
-          transition: { type: "spring", stiffness: 290, damping: 29 },
+          transition: { type: "spring", stiffness: 300, damping: 30 },
         });
       } else {
         hasMounted.current = true;

@@ -1,20 +1,6 @@
 import { AttachmentUploadRequest } from "@/shared/types/requests/attachment-upload.request";
 import { determineAttachmentType } from "@/common/utils/message/determineAttachmentType";
-import { createClient } from "@supabase/supabase-js";
-
-// Initialize Supabase with proper checks
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const attachmentsBucket =
-  import.meta.env.VITE_SUPABASE_ATTACHMENTS_BUCKET ?? "attachments";
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    "Supabase environment variables not configured! Please check your VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY"
-  );
-}
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+import supabase, { attachmentsBucket } from "@/common/utils/supabaseClient";
 
 export async function convertToAttachmentPayload(
   file: File

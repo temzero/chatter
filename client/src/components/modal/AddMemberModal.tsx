@@ -6,7 +6,6 @@ import { Avatar } from "@/components/ui/avatar/Avatar";
 import { modalAnimations } from "@/common/animations/modalAnimations";
 import { copyToClipboard } from "@/common/utils/copyToClipboard";
 import { handleError } from "@/common/utils/handleError";
-import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { FriendContactResponse } from "@/shared/types/responses/friend-contact.response";
 import { useFriendContacts } from "@/common/hooks/useFriendContacts";
@@ -14,6 +13,7 @@ import { useAllUniqueMembers } from "@/common/hooks/useAllUniqueMembers";
 import { useTranslation } from "react-i18next";
 import SearchBar from "@/components/ui/SearchBar";
 import { getCloseModal } from "@/stores/modalStore";
+import { getSetSidebarInfo } from "@/stores/sidebarInfoStore";
 
 const AddMemberModal: React.FC = () => {
   const { t } = useTranslation();
@@ -23,7 +23,7 @@ const AddMemberModal: React.FC = () => {
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
 
   const chat = useActiveChat();
-  const setSidebarInfo = useSidebarInfoStore.getState().setSidebarInfo;
+ const setSidebarInfo = getSetSidebarInfo();
 
   const chatMemberUserIds = chat?.otherMemberUserIds || [];
 

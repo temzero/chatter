@@ -7,6 +7,7 @@ import {
   Body,
   UseGuards,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { FriendshipService } from './friendship.service';
@@ -23,6 +24,8 @@ import { FriendshipUpdateNotificationDto } from './dto/responses/friendship-upda
 import { WebsocketNotificationService } from '../websocket/services/websocket-notification.service';
 import { ContactResponseDto } from './dto/responses/friend-contact-response.dto';
 import { mapFriendshipToContactResDto } from './mappers/contact.mapper';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
 
 @Controller('friendships')
 @UseGuards(JwtAuthGuard)
@@ -33,7 +36,51 @@ export class FriendshipController {
     private readonly websocketNotificationService: WebsocketNotificationService,
   ) {}
 
-  @Post('requests/:receiverId')
+  @Get('requests/pending')
+  async getPendingRequests(
+    @CurrentUser('id') userId: string,
+    @Query() query: PaginationQueryDto,
+  ): Promise<SuccessResponse<PaginationResponse<FriendRequestResponseDto>>> {
+    const { limit = 20, offset = 0, lastId } = query;
+
+    const result = await this.friendshipService.getPendingRequests(userId, {
+      limit,
+      offset,
+      lastId,
+    });
+
+    return new SuccessResponse(
+      result,
+      'Pending friend requests retrieved successfully',
+    );
+  }
+
+  @Get('contacts')
+  async getFriendContacts(
+    @CurrentUser('id') userId: string,
+  ): Promise<SuccessResponse<ContactResponseDto[]>> {
+    const friendships = await this.friendshipService.getFriends(userId);
+    const contacts = mapFriendshipToContactResDto(friendships, userId);
+    return new SuccessResponse(contacts, 'Friends retrieved successfully');
+  }
+
+  @Get('status/:otherUserId')
+  async getFriendshipStatus(
+    @CurrentUser('id') currentUserId: string,
+    @Param('otherUserId') otherUserId: string,
+  ): Promise<SuccessResponse<FriendshipStatus | null>> {
+    const status = await this.friendshipService.getFriendshipStatus(
+      currentUserId,
+      otherUserId,
+    );
+
+    return new SuccessResponse(
+      status,
+      'Friendship status retrieved successfully',
+    );
+  }
+
+  @Post('requests/send/:receiverId')
   async sendRequest(
     @CurrentUser('id') senderId: string,
     @Param('receiverId') receiverId: string,
@@ -53,7 +100,7 @@ export class FriendshipController {
     return new SuccessResponse(sentRequest, 'Friend request sent successfully');
   }
 
-  @Patch('requests/:friendshipId')
+  @Patch('requests/response/:friendshipId')
   async respondToRequest(
     @CurrentUser('id') receiverId: string,
     @Param('friendshipId') friendshipId: string,
@@ -96,43 +143,6 @@ export class FriendshipController {
       body.status === FriendshipStatus.ACCEPTED
         ? 'Friend request accepted successfully'
         : 'Friend request declined successfully',
-    );
-  }
-
-  @Get('/contacts')
-  async getFriendContacts(
-    @CurrentUser('id') userId: string,
-  ): Promise<SuccessResponse<ContactResponseDto[]>> {
-    const friendships = await this.friendshipService.getFriends(userId);
-    const contacts = mapFriendshipToContactResDto(friendships, userId);
-    return new SuccessResponse(contacts, 'Friends retrieved successfully');
-  }
-
-  @Get('requests/pending')
-  async getPendingRequests(
-    @CurrentUser('id') userId: string,
-  ): Promise<SuccessResponse<FriendRequestResponseDto[]>> {
-    const requests = await this.friendshipService.getPendingRequests(userId);
-
-    return new SuccessResponse(
-      requests,
-      'Pending friend requests retrieved successfully',
-    );
-  }
-
-  @Get('status/:otherUserId')
-  async getFriendshipStatus(
-    @CurrentUser('id') currentUserId: string,
-    @Param('otherUserId') otherUserId: string,
-  ): Promise<SuccessResponse<FriendshipStatus | null>> {
-    const status = await this.friendshipService.getFriendshipStatus(
-      currentUserId,
-      otherUserId,
-    );
-
-    return new SuccessResponse(
-      status,
-      'Friendship status retrieved successfully',
     );
   }
 

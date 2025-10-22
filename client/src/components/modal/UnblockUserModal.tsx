@@ -3,10 +3,10 @@ import React from "react";
 import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
 import { Avatar } from "@/components/ui/avatar/Avatar";
-import { blockService } from "@/services/blockService";
-import { toast } from "react-toastify";
+import { blockService } from "@/services/http/blockService";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
 import Button from "../ui/buttons/Button";
 
 interface UnblockUserModalData {

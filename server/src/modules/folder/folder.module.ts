@@ -11,5 +11,6 @@ import { User } from '../user/entities/user.entity';
   imports: [TypeOrmModule.forFeature([Folder, Chat, User])],
   controllers: [FolderController],
   providers: [FolderService],
+  exports: [FolderService],
 })
 export class FolderModule {}

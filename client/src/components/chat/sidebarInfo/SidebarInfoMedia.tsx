@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import React, { useState, useMemo } from "react";
-import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
+import { getSetSidebarInfo } from "@/stores/sidebarInfoStore";
 import { useActiveChatAttachments } from "@/stores/messageStore";
 import { SlidingContainer } from "@/components/ui/layout/SlidingContainer";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
@@ -12,7 +12,7 @@ const mediaTypes = ["images", "videos", "audio", "files"];
 
 const ChatInfoMedia: React.FC = () => {
   const { t } = useTranslation();
-  const setSidebarInfo = useSidebarInfoStore.getState().setSidebarInfo;
+  const setSidebarInfo = getSetSidebarInfo();
   const activeAttachments = useActiveChatAttachments();
 
   const [selectedType, setSelectedType] = useState<string>(mediaTypes[0]);

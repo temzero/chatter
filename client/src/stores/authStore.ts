@@ -2,7 +2,7 @@
 import axios from "axios";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { authService } from "@/services/authService";
+import { authService } from "@/services/http/authService";
 import { useChatStore } from "@/stores/chatStore";
 import { useSidebarStore } from "./sidebarStore";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
@@ -13,19 +13,20 @@ import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 
 type AuthMessageType = "error" | "success" | "info";
 
-type Message = {
+interface Message {
   type: AuthMessageType;
   content: string;
-} | null;
+}
 
-type AuthState = {
+interface AuthState {
   currentUser: UserResponse | null;
   isAuthenticated: boolean;
   loading: boolean;
-  message: Message;
-};
+  message: Message | null;
+}
 
-type AuthActions = {
+interface AuthActions {
+  initialize: () => Promise<void>;
   setCurrentUser: (user: UserResponse | null) => void;
   setMessage: (type: AuthMessageType, content: string) => void;
   clearMessage: () => void;
@@ -42,8 +43,7 @@ type AuthActions = {
   sendPasswordResetEmail: (email: string) => Promise<void>;
   resetPasswordWithToken: (token: string, newPassword: string) => Promise<void>;
   verifyEmailWithToken: (token: string) => Promise<void>;
-  initialize: () => Promise<void>;
-};
+}
 
 const initialState: AuthState = {
   currentUser: null,
@@ -242,7 +242,6 @@ export const useAuthActions = () =>
     verifyEmailWithToken: state.verifyEmailWithToken,
   }));
 
-  
 // EXPORT HOOKS
 export const useCurrentUser = () => useAuthStore((state) => state.currentUser);
 export const useCurrentUserId = () =>

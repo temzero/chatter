@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { getCloseModal, getModalData } from "@/stores/modalStore";
-import { callService } from "@/services/callService";
+import { callService } from "@/services/http/callService";
 import { CallResponse } from "@/shared/types/responses/call.response";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { getCallColor, getCallText } from "@/common/utils/call/callHelpers";

@@ -4,7 +4,7 @@ import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useChatStore } from "@/stores/chatStore";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
-import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
+import { getSetSidebarInfo } from "@/stores/sidebarInfoStore";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { useTranslation } from "react-i18next";
 import Button from "../ui/buttons/Button";
@@ -17,7 +17,7 @@ const DeleteChatModal: React.FC = () => {
   const { t } = useTranslation();
   const closeModal = getCloseModal();
   const deleteChat = useChatStore.getState().deleteChat;
-  const setSidebarInfo = useSidebarInfoStore.getState().setSidebarInfo;
+  const setSidebarInfo = getSetSidebarInfo();
   const data = getModalData() as unknown as DeleteChatModalData | undefined;
 
   const chat = data?.chat;

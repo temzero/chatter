@@ -1,12 +1,11 @@
-// src/routes/AppRoutes.tsx
-import { useEffect } from "react";
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { ROUTES } from "@/common/constants/routes";
-import { useIsAuthenticated, useAuthStore } from "@/stores/authStore";
+import { useAuthStore, useIsAuthenticated } from "@/stores/authStore";
 import PublicRoutes from "./PublicRoutes";
+import PrivateRoute from "./PrivateRoute";
 import HomePage from "@/pages/HomePage";
 import InvitePage from "@/pages/InvitePage";
-// import Chat from "@/components/chat/Chat";
+import { useEffect } from "react";
 
 const RouteMessageCleaner = () => {
   const location = useLocation();
@@ -20,7 +19,6 @@ const RouteMessageCleaner = () => {
 };
 
 const AppRoutes: React.FC = () => {
-  console.log("AppRoutes");
   const isAuthenticated = useIsAuthenticated();
 
   return (
@@ -39,21 +37,33 @@ const AppRoutes: React.FC = () => {
           }
         />
 
-        {/* Invite route is a special case — still protected */}
+        {/* Invite route is still protected */}
         <Route
           path={ROUTES.PRIVATE.INVITE}
           element={
-            isAuthenticated ? (
+            <PrivateRoute>
               <InvitePage />
-            ) : (
-              <Navigate to={ROUTES.PUBLIC.LOGIN} />
-            )
+            </PrivateRoute>
           }
         />
 
         {/* Private Routes */}
-        <Route path={ROUTES.PRIVATE.HOME} element={<HomePage />} />
-        <Route path={ROUTES.PRIVATE.CHAT} element={<HomePage />} />
+        <Route
+          path={ROUTES.PRIVATE.HOME}
+          element={
+            <PrivateRoute>
+              <HomePage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path={ROUTES.PRIVATE.CHAT}
+          element={
+            <PrivateRoute>
+              <HomePage />
+            </PrivateRoute>
+          }
+        />
 
         {/* Catch-all Route */}
         <Route

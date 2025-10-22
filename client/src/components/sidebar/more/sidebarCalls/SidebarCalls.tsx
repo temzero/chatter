@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import SidebarLayout from "@/layouts/SidebarLayout";
-import { callService } from "@/services/callService";
+import { callService } from "@/services/http/callService";
 import { CallResponse } from "@/shared/types/responses/call.response";
 import { useCurrentUserId } from "@/stores/authStore";
 import { AnimatePresence, motion } from "framer-motion";

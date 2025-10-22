@@ -9,12 +9,12 @@ import { CallStatus } from "@/shared/types/enums/call-status.enum";
 import { LiveKitService } from "@/services/liveKitService";
 import { getMyCallToken } from "@/common/utils/call/getMyCallToken";
 import { CallError, IncomingCallResponse } from "@shared/types/call";
-import { callService } from "@/services/callService";
+import { callService } from "@/services/http/callService";
 import { callWebSocketService } from "@/services/websocket/call.websocket.service";
 import { handleError } from "@/common/utils/handleError";
 import { getLocalCallStatus } from "@/common/utils/call/callHelpers";
 
-export interface CallState {
+interface CallState {
   liveKitService: LiveKitService | null;
 
   callId: string | null;
@@ -33,7 +33,7 @@ export interface CallState {
   error?: CallError | null;
 }
 
-export interface CallActions {
+interface CallActions {
   // lifecycle
   startCall: (
     chatId: string,
@@ -82,18 +82,25 @@ export interface CallActions {
   clearLiveKitState: () => void;
 }
 
+const initialState: CallState = {
+  liveKitService: null,
+
+  callId: null,
+  chatId: null,
+  isCaller: false,
+
+  callStatus: null,
+  localCallStatus: null,
+  isVideoCall: false,
+  timeoutRef: null,
+  startedAt: undefined,
+  endedAt: undefined,
+  error: null,
+};
+
 export const useCallStore = create<CallState & CallActions>()(
   devtools((set, get) => ({
-    // ========== BASE STATE ==========
-    liveKitService: null,
-    callId: null,
-    chatId: null,
-    localCallStatus: null,
-    isVideoCall: false,
-    timeoutRef: null,
-    startedAt: undefined,
-    endedAt: undefined,
-    error: null,
+    ...initialState,
 
     startCall: async (
       chatId: string,

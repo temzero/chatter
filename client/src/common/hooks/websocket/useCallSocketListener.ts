@@ -7,7 +7,7 @@ import { handleError } from "@/common/utils/handleError";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { useCallStore } from "@/stores/callStore";
 import { useCallSounds } from "@/common/hooks/useCallSound";
-import { callService } from "@/services/callService";
+import { callService } from "@/services/http/callService";
 import { useAuthStore } from "@/stores/authStore";
 import { webSocketService } from "@/services/websocket/websocket.service";
 import { callWebSocketService } from "@/services/websocket/call.websocket.service";

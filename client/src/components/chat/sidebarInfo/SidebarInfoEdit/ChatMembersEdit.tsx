@@ -1,5 +1,4 @@
 import { useChatStore } from "@/stores/chatStore";
-import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useActiveMembers } from "@/stores/chatMemberStore";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
@@ -9,13 +8,14 @@ import { useCurrentUserId } from "@/stores/authStore";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { ChatMemberItems } from "./ChatMemberItems";
 import { useTranslation } from "react-i18next";
+import { getSetSidebarInfo } from "@/stores/sidebarInfoStore";
 
 const ChatMembersEdit = () => {
   const { t } = useTranslation();
   const currentUserId = useCurrentUserId();
   const activeChat = useChatStore((state) => state.activeChat) as ChatResponse;
   const activeMembers = useActiveMembers();
-  const setSidebarInfo = useSidebarInfoStore.getState().setSidebarInfo;
+  const setSidebarInfo = getSetSidebarInfo();
   const openModal = getOpenModal();
 
   const myMember = activeMembers?.find(

@@ -10,6 +10,7 @@ import CustomAudioDiskPlayer, {
 import { motion } from "framer-motion";
 import { mediaViewerAnimations } from "@/common/animations/mediaViewerAnimations";
 import { ModalImageViewer } from "./ModalImageViewer";
+import { useMediaAttachmentKeys } from "@/common/hooks/keyEvent/useMediaAttachmentKeys";
 
 export const RenderModalAttachment = ({
   attachment,
@@ -28,6 +29,14 @@ export const RenderModalAttachment = ({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const audioPlayerRef = useRef<AudioPlayerRef | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+
+  useMediaAttachmentKeys({
+    isCurrent,
+    attachmentType: attachment.type,
+    videoRef,
+    audioPlayerRef,
+    scrollContainerRef,
+  });
 
   // Pause media when it's not the current one
   useEffect(() => {
@@ -56,46 +65,6 @@ export const RenderModalAttachment = ({
       audio.pause();
     }
   }, [isCurrent]);
-
-  // Handle spaceBar play/pause
-  useEffect(() => {
-    if (!isCurrent) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === "Space") {
-        e.preventDefault();
-
-        if (attachment.type === "video" && videoRef.current) {
-          if (videoRef.current.paused) {
-            videoRef.current.play();
-          } else {
-            videoRef.current.pause();
-          }
-        }
-
-        if (attachment.type === "audio" && audioPlayerRef.current) {
-          audioPlayerRef.current.togglePlayPause();
-        }
-      }
-      if (
-        (e.key === "ArrowUp" || e.key === "ArrowDown") &&
-        scrollContainerRef.current
-      ) {
-        e.preventDefault();
-        const container = scrollContainerRef.current;
-        const amount = container.clientHeight * 0.8;
-        container.scrollBy({
-          top: e.key === "ArrowDown" ? amount : -amount,
-          behavior: "smooth",
-        });
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isCurrent, attachment.type]);
 
   // Ensure video autoplay when visible
   useEffect(() => {

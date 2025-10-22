@@ -6,7 +6,7 @@ import axios, {
   InternalAxiosRequestConfig,
 } from "axios";
 import { localStorageService } from "../storage/localStorageService";
-import { authService } from "../authService";
+import { authService } from "@/services/http/authService";
 import { handleError } from "@/common/utils/handleError";
 
 const API: AxiosInstance = axios.create({

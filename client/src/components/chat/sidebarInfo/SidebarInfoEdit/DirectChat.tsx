@@ -1,7 +1,7 @@
 import React from "react";
 import ContactInfoItem from "@/components/ui/contact/contactInfoItem";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
-import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
+import { getSetSidebarInfo, useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { useActiveChat } from "@/stores/chatStore";
 import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
@@ -21,7 +21,7 @@ const DirectChat: React.FC = () => {
   const isMobile = useIsMobile();
 
   const activeChat = useActiveChat() as ChatResponse;
-  const setSidebarInfo = useSidebarInfoStore.getState().setSidebarInfo;
+  const setSidebarInfo = getSetSidebarInfo();
   const setSidebarInfoVisible =
     useSidebarInfoStore.getState().setSidebarInfoVisible;
   const chatMembers = useActiveMembers();

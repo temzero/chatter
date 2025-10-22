@@ -1,4 +1,3 @@
-// src/services/blockService.ts
 import API from "@/services/api/api";
 import { CreateBlockRequest } from "@/shared/types/requests/create-block.request";
 import { BlockResponse } from "@/shared/types/responses/block.response";
@@ -29,15 +28,6 @@ export const blockService = {
    */
   async getAllBlockedUsers(): Promise<BlockResponse[]> {
     const { data } = await API.get("/block");
-    return data.payload;
-  },
-
-  /**
-   * Check if a specific user is blocked
-   * @param blockedId - ID of the user to check
-   */
-  async getBlockStatus(blockedId: string): Promise<BlockResponse> {
-    const { data } = await API.get(`/block/${blockedId}`);
     return data.payload;
   },
 };

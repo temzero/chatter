@@ -1,52 +1,61 @@
 import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 
-interface TypingState {
+interface TypingStoreState {
   activeTyping: Record<string, string[]>; // chatId - UserId[]
+}
+
+interface TypingStoreActions {
   startTyping: (chatId: string, userId: string) => void;
   stopTyping: (chatId: string, userId: string) => void;
   isTyping: (chatId: string, userId: string) => boolean;
 }
 
-export const useTypingStore = create<TypingState>((set, get) => ({
+const initialState: TypingStoreState = {
   activeTyping: {},
+};
 
-  startTyping: (chatId, userId) => {
-    set((state) => {
-      const currentTyping = state.activeTyping[chatId] || [];
-      if (currentTyping.includes(userId)) return state;
+export const useTypingStore = create<TypingStoreState & TypingStoreActions>(
+  (set, get) => ({
+    ...initialState,
 
-      return {
-        activeTyping: {
-          ...state.activeTyping,
-          [chatId]: [...currentTyping, userId],
-        },
-      };
-    });
-  },
+    startTyping: (chatId, userId) => {
+      set((state) => {
+        const currentTyping = state.activeTyping[chatId] || [];
+        if (currentTyping.includes(userId)) return state;
 
-  stopTyping: (chatId, userId) => {
-    set((state) => {
-      const currentTyping = state.activeTyping[chatId];
-      if (!currentTyping || !currentTyping.includes(userId)) return state;
+        return {
+          activeTyping: {
+            ...state.activeTyping,
+            [chatId]: [...currentTyping, userId],
+          },
+        };
+      });
+    },
 
-      const updated = currentTyping.filter((id) => id !== userId);
-      const updatedActiveTyping = { ...state.activeTyping };
+    stopTyping: (chatId, userId) => {
+      set((state) => {
+        const currentTyping = state.activeTyping[chatId];
+        if (!currentTyping || !currentTyping.includes(userId)) return state;
 
-      if (updated.length > 0) {
-        updatedActiveTyping[chatId] = updated;
-      } else {
-        delete updatedActiveTyping[chatId];
-      }
+        const updated = currentTyping.filter((id) => id !== userId);
+        const updatedActiveTyping = { ...state.activeTyping };
 
-      return { activeTyping: updatedActiveTyping };
-    });
-  },
+        if (updated.length > 0) {
+          updatedActiveTyping[chatId] = updated;
+        } else {
+          delete updatedActiveTyping[chatId];
+        }
 
-  isTyping: (chatId, userId) => {
-    return Boolean(get().activeTyping[chatId]?.includes(userId));
-  },
-}));
+        return { activeTyping: updatedActiveTyping };
+      });
+    },
+
+    isTyping: (chatId, userId) => {
+      return Boolean(get().activeTyping[chatId]?.includes(userId));
+    },
+  })
+);
 
 // EXPORT HOOKS
 

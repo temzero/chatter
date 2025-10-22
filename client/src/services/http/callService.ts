@@ -1,4 +1,4 @@
-import API from "./api/api";
+import API from "@/services/api/api";
 import { handleError } from "@/common/utils/handleError";
 import { CallResponse } from "@/shared/types/responses/call.response";
 import { IncomingCallResponse } from "@shared/types/call";
@@ -7,10 +7,10 @@ import { PaginationQuery } from "@/shared/types/queries/pagination-query";
 
 export const callService = {
   async fetchCallHistory(
-    options: PaginationQuery = { limit: 20 }
+    queries: PaginationQuery = { limit: 20 }
   ): Promise<{ calls: CallResponse[]; hasMore: boolean }> {
     try {
-      const { offset, lastId, limit } = options;
+      const { offset, lastId, limit } = queries;
 
       const { data } = await API.get(`/calls/history`, {
         params: {
@@ -38,16 +38,17 @@ export const callService = {
     }
   },
 
-  async fetchPendingCalls(): Promise<IncomingCallResponse[]> {
-    try {
-      const { data } = await API.get(`/calls/pending`);
-      // Adjust based on your API response structure
-      return data.payload ?? data;
-    } catch (error) {
-      console.error("Failed to fetch pending calls:", error);
-      throw error;
-    }
-  },
+  // async fetchPendingCalls(): Promise<IncomingCallResponse[]> {
+  //   try {
+  //     const { data } = await API.get(`/calls/pending`);
+  //     // Adjust based on your API response structure
+  //     return data.payload ?? data;
+  //   } catch (error) {
+  //     console.error("Failed to fetch pending calls:", error);
+  //     throw error;
+  //   }
+  // },
+  async fetchPendingCalls() {},
 
   async generateAndFetchLiveKitToken(
     payload: generateLiveKitTokenRequest

@@ -9,40 +9,37 @@ import {
   HttpStatus,
   HttpCode,
   Body,
+  Query,
 } from '@nestjs/common';
 import { FolderService } from './folder.service';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { FolderResponseDto } from './dto/folder-response.dto';
 import { Folder } from './entities/folder.entity';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { SuccessResponse } from 'src/common/api-response/success';
+import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
 
 @Controller('folders')
 @UseGuards(JwtAuthGuard)
 export class FolderController {
   constructor(private readonly folderService: FolderService) {}
 
-  @Patch('reorder')
-  async reorderFolders(
-    @CurrentUser('id') userId: string,
-    @Body() body: { newOrder: Array<{ id: string; position: number }> },
-  ) {
-    return this.folderService.reorderFolders(userId, body.newOrder);
-  }
-
   @Get()
   @HttpCode(HttpStatus.OK)
-  async findAll(
+  async getFolders(
     @CurrentUser('id') userId: string,
-  ): Promise<FolderResponseDto[]> {
-    return this.folderService.findAll(userId);
-  }
+    @Query() query: PaginationQueryDto,
+  ): Promise<SuccessResponse<PaginationResponse<FolderResponseDto>>> {
+    const { limit = 20, offset = 0, lastId } = query;
 
-  @Get(':id')
-  async findOne(
-    @Param('id') id: string,
-    @CurrentUser('id') userId: string,
-  ): Promise<FolderResponseDto> {
-    return this.folderService.findOne(id, userId);
+    const result = await this.folderService.getFolders(userId, {
+      limit,
+      offset,
+      lastId,
+    });
+
+    return new SuccessResponse(result, 'Folders retrieved successfully');
   }
 
   @Post()
@@ -53,7 +50,7 @@ export class FolderController {
     return this.folderService.create(data, userId);
   }
 
-  @Patch(':id')
+  @Patch('update/:id')
   async update(
     @Param('id') id: string,
     @CurrentUser('id') userId: string,
@@ -62,13 +59,12 @@ export class FolderController {
     return this.folderService.update(id, body, userId);
   }
 
-  @Patch('position/:id')
-  async updatePosition(
-    @Param('id') id: string,
+  @Patch('reorder')
+  async reorderFolders(
     @CurrentUser('id') userId: string,
-    @Body('position') position: number,
-  ): Promise<FolderResponseDto> {
-    return this.folderService.updateFolderPosition(id, position, userId);
+    @Body() body: { newOrder: Array<{ id: string; position: number }> },
+  ) {
+    return this.folderService.reorderFolders(userId, body.newOrder);
   }
 
   @Delete(':id')
@@ -79,7 +75,7 @@ export class FolderController {
     return this.folderService.remove(id, userId);
   }
 
-  @Post(':id/chats')
+  @Post('add-chats/:id/chats')
   async addChats(
     @Param('id') folderId: string,
     @Body('chatIds') chatIds: string[],
@@ -88,7 +84,7 @@ export class FolderController {
     return this.folderService.addChatsToFolder(folderId, chatIds, userId);
   }
 
-  @Delete(':folderId/chats/:chatId')
+  @Delete('remove-chat/:folderId/chats/:chatId')
   async removeChat(
     @Param('folderId') folderId: string,
     @Param('chatId') chatId: string,

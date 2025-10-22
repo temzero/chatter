@@ -6,6 +6,8 @@ import { UserService } from '../user/user.service';
 import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
 import { ErrorResponse } from '../../common/api-response/errors';
 import { FriendRequestResponseDto } from './dto/responses/friend-request-response.dto';
+import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Injectable()
 export class FriendshipService {
@@ -214,58 +216,92 @@ export class FriendshipService {
 
   async getPendingRequests(
     userId: string,
-  ): Promise<FriendRequestResponseDto[]> {
-    try {
-      // Get received requests (where user is the receiver and status is pending)
-      const receivedRequests = await this.friendshipRepo.find({
-        where: {
-          receiverId: userId,
-          receiverStatus: FriendshipStatus.PENDING,
-        },
-        relations: ['sender', 'receiver'],
-      });
+    query: PaginationQueryDto,
+  ): Promise<PaginationResponse<FriendRequestResponseDto>> {
+    const { limit = 20, offset = 0, lastId } = query;
 
-      // Get sent requests (where user is the sender and receiver hasn't responded yet)
-      const sentRequests = await this.friendshipRepo.find({
-        where: {
-          senderId: userId,
-          receiverStatus: FriendshipStatus.PENDING,
-          senderStatus: FriendshipStatus.ACCEPTED,
-        },
-        relations: ['sender', 'receiver'],
-      });
+    // Received requests
+    const receivedQb = this.friendshipRepo
+      .createQueryBuilder('friendship')
+      .leftJoinAndSelect('friendship.sender', 'sender')
+      .leftJoinAndSelect('friendship.receiver', 'receiver')
+      .where('friendship.receiverId = :userId', { userId })
+      .andWhere('friendship.receiverStatus = :status', {
+        status: FriendshipStatus.PENDING,
+      })
+      .orderBy('friendship.updatedAt', 'DESC');
 
-      // Combine both into one unified format
-      const requests = await Promise.all(
-        [...receivedRequests, ...sentRequests].map(async (request) => {
-          const mutualFriends = await this.getMutualFriendsCount(
-            request.senderId,
-            request.receiverId,
-          );
+    // Sent requests
+    const sentQb = this.friendshipRepo
+      .createQueryBuilder('friendship')
+      .leftJoinAndSelect('friendship.sender', 'sender')
+      .leftJoinAndSelect('friendship.receiver', 'receiver')
+      .where('friendship.senderId = :userId', { userId })
+      .andWhere('friendship.senderStatus = :senderStatus', {
+        senderStatus: FriendshipStatus.ACCEPTED,
+      })
+      .andWhere('friendship.receiverStatus = :receiverStatus', {
+        receiverStatus: FriendshipStatus.PENDING,
+      })
+      .orderBy('friendship.updatedAt', 'DESC');
 
-          return {
-            id: request.id,
-            sender: {
-              id: request.sender.id,
-              name: `${request.sender.firstName} ${request.sender.lastName}`,
-              avatarUrl: request.sender.avatarUrl,
-            },
-            receiver: {
-              id: request.receiver.id,
-              name: `${request.receiver.firstName} ${request.receiver.lastName}`,
-              avatarUrl: request.receiver.avatarUrl,
-            },
-            mutualFriends,
-            requestMessage: request.requestMessage,
-            updatedAt: request.updatedAt,
-          };
-        }),
-      );
+    // Fetch and combine
+    const [receivedRequests, sentRequests] = await Promise.all([
+      receivedQb
+        .skip(offset)
+        .take(limit + 1)
+        .getMany(),
+      sentQb
+        .skip(offset)
+        .take(limit + 1)
+        .getMany(),
+    ]);
 
-      return requests;
-    } catch (error) {
-      ErrorResponse.throw(error, 'Failed to retrieve pending friend requests');
+    const combinedRequests = [...receivedRequests, ...sentRequests];
+
+    // Handle lastId-based pagination
+    let startIndex = 0;
+    if (lastId) {
+      const idx = combinedRequests.findIndex((r) => r.id === lastId);
+      if (idx !== -1) startIndex = idx + 1;
     }
+
+    const paginatedRequests = combinedRequests.slice(
+      startIndex,
+      startIndex + limit + 1,
+    );
+    const hasMore = paginatedRequests.length > limit;
+    const slicedRequests = hasMore
+      ? paginatedRequests.slice(0, limit)
+      : paginatedRequests;
+
+    // Map to DTOs
+    const items = await Promise.all(
+      slicedRequests.map(async (request) => {
+        const mutualFriends = await this.getMutualFriendsCount(
+          request.senderId,
+          request.receiverId,
+        );
+        return {
+          id: request.id,
+          sender: {
+            id: request.sender.id,
+            name: `${request.sender.firstName} ${request.sender.lastName}`,
+            avatarUrl: request.sender.avatarUrl,
+          },
+          receiver: {
+            id: request.receiver.id,
+            name: `${request.receiver.firstName} ${request.receiver.lastName}`,
+            avatarUrl: request.receiver.avatarUrl,
+          },
+          mutualFriends,
+          requestMessage: request.requestMessage,
+          updatedAt: request.updatedAt,
+        } as FriendRequestResponseDto;
+      }),
+    );
+
+    return { items, hasMore };
   }
 
   async getMutualFriendsCount(

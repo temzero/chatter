@@ -1,9 +1,8 @@
 import React from "react";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useActiveChat } from "@/stores/chatStore";
-import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
+import { getSetSidebarInfo, useSidebarInfoStore } from "@/stores/sidebarInfoStore";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
-import MemberItem from "./MemberItem";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { useActiveMembers } from "@/stores/chatMemberStore";
 import { useMessageStore } from "@/stores/messageStore";
@@ -14,13 +13,14 @@ import { rolePriority } from "@/shared/types/enums/chat-member-role.enum";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
 import { useIsMobile } from "@/stores/deviceStore";
 import { useTranslation } from "react-i18next";
+import MemberItem from "./MemberItem";
 
 const GroupChat: React.FC = () => {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
   const activeChat = useActiveChat() as ChatResponse;
   const activeMembers = useActiveMembers() || [];
-  const setSidebarInfo = useSidebarInfoStore.getState().setSidebarInfo;
+  const setSidebarInfo = getSetSidebarInfo();
   const setSidebarInfoVisible =
     useSidebarInfoStore.getState().setSidebarInfoVisible;
 

@@ -10,6 +10,7 @@ import EmojiPicker from "@/components/ui/EmojiPicker";
 import AttachFile from "@/components/ui/attachments/AttachFile";
 import AttachmentImportedPreview from "@/components/ui/attachments/AttachmentImportedPreview";
 import useTypingIndicator from "@/common/hooks/useTypingIndicator";
+import { useKeyDown } from "@/common/hooks/keyEvent/useKeydown";
 
 interface ChatBarProps {
   chatId: string;
@@ -54,56 +55,35 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
   }, [chatId, setDraftMessage]);
 
   useEffect(() => {
-    inputRef.current?.focus();
-    const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "/" && document.activeElement !== inputRef.current) {
-        e.preventDefault();
-        inputRef.current?.focus();
-      }
-    };
-    document.addEventListener("keydown", handleGlobalKeyDown);
-    return () => document.removeEventListener("keydown", handleGlobalKeyDown);
-  }, []);
-
-  useEffect(() => {
     if (replyToMessageId && inputRef.current) {
       inputRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
       inputRef.current.focus();
     }
   }, [replyToMessageId]);
 
-  // Open attachFile without open menu
-  useEffect(() => {
-    const handleMenuKey = (e: KeyboardEvent) => {
-      if (e.key === "ContextMenu") {
-        if (document.activeElement === inputRef.current) {
-          e.preventDefault();
-          e.stopPropagation();
-
-          const fileInput = document.querySelector(
-            'input[type="file"]'
-          ) as HTMLInputElement;
-          if (fileInput) {
-            fileInput.accept = "*";
-            fileInput.click();
-          }
-
-          return false;
-        }
+  // Replace this useEffect for "/" focus
+  useKeyDown(
+    (e) => {
+      if (document.activeElement !== inputRef.current) {
+        e.preventDefault(); // prevent "/" when first focus
+        inputRef.current?.focus();
       }
-    };
-
-    document.addEventListener("keydown", handleMenuKey, {
-      capture: true,
-      passive: false,
-    });
-
-    return () => {
-      document.removeEventListener("keydown", handleMenuKey, {
-        capture: true,
-      });
-    };
-  }, []);
+    },
+    ["/"],
+    { preventDefault: false } // will not block default typing
+  );
+  // Replace this useEffect for ContextMenu key to open file input
+  useKeyDown(() => {
+    if (document.activeElement === inputRef.current) {
+      const fileInput = document.querySelector(
+        'input[type="file"]'
+      ) as HTMLInputElement;
+      if (fileInput) {
+        fileInput.accept = "*";
+        fileInput.click();
+      }
+    }
+  }, ["ContextMenu"]);
 
   const updateInputHeight = () => {
     if (inputRef.current && containerRef.current) {
@@ -312,22 +292,13 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
           <div className="flex items-center justify-between gap-2 h-[24px]">
             {chatId && (
               <>
-                <motion.div
-                  className="flex gap-2 items-center"
-                  animate={{
-                    transition: {
-                      type: "spring",
-                      stiffness: 300,
-                      damping: 20,
-                    },
-                  }}
-                >
+                <div className="flex gap-2 items-center">
                   <EmojiPicker onSelect={handleEmojiSelect} />
 
                   {!replyToMessageId && (
                     <AttachFile onFileSelect={handleFileSelect} />
                   )}
-                </motion.div>
+                </div>
 
                 <button
                   className={clsx(

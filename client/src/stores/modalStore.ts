@@ -14,13 +14,17 @@ interface ModalActions {
   closeModal: () => void;
 }
 
-// ---- STORE ----
-export const useModalStore = create<ModalState & ModalActions>((set) => ({
+const initialState: ModalState = {
   type: null,
   data: null,
   focusMessageId: null,
   replyToMessageId: null,
+};
 
+// ---- STORE ----
+export const useModalStore = create<ModalState & ModalActions>((set) => ({
+  ...initialState,
+  
   openModal: (type, data = {}) => set({ type, data }),
 
   closeModal: () =>
@@ -37,12 +41,12 @@ export { ModalType };
 // EXPORT HOOKS
 
 // ---- SELECTORS ----
-export const useModalType = () => useModalStore((s) => s.type);
+export const useModalType = () => useModalStore((state) => state.type);
 export const getModalData = () => useModalStore.getState().data;
 export const useReplyToMessageId = () =>
-  useModalStore((s) => s.replyToMessageId);
+  useModalStore((state) => state.replyToMessageId);
 export const useMediaModalData = () => {
-  const data = useModalStore((s) => s.data);
+  const data = useModalStore((state) => state.data);
   return data?.attachmentId as string | undefined;
 };
 

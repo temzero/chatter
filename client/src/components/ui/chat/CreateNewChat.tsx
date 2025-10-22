@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import ContactInfoItem from "@/components/ui/contact/contactInfoItem";
-import { userService } from "@/services/userService";
+import { userService } from "@/services/http/userService";
+import { blockService } from "@/services/http/blockService";
 import { useCurrentUser } from "@/stores/authStore";
 import { AnimatePresence, motion } from "framer-motion";
 import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
-import { blockService } from "@/services/blockService";
 import { toast } from "react-toastify";
 import { OnlineDot } from "@/components/ui/icons/OnlineDot";
 import { useUserStatus } from "@/stores/presenceStore";

@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useEmojiCategories } from "@/common/hooks/useEmojiCategories";
+import { useClickOutside } from "@/common/hooks/keyEvent/useClickOutside";
 import { useTranslation } from "react-i18next";
+import { useKeyDown } from "@/common/hooks/keyEvent/useKeydown";
 
 interface EmojiCategory {
   name: string;
@@ -14,7 +16,7 @@ interface CustomEmojiPickerProps {
   onSelect: (emoji: string) => void;
 }
 
-const CustomEmojiPicker = ({ onSelect }: CustomEmojiPickerProps) => {
+const EmojiPicker = ({ onSelect }: CustomEmojiPickerProps) => {
   const { t } = useTranslation();
   const emojiCategories = useEmojiCategories();
   const [isOpen, setIsOpen] = useState(false);
@@ -43,21 +45,7 @@ const CustomEmojiPicker = ({ onSelect }: CustomEmojiPickerProps) => {
     [emojiCategories, recentEmojis, t]
   );
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        pickerRef.current &&
-        !pickerRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  useClickOutside(pickerRef, () => setIsOpen(false));
 
   const handleEmojiClick = (emoji: string) => {
     onSelect(emoji);
@@ -109,29 +97,24 @@ const CustomEmojiPicker = ({ onSelect }: CustomEmojiPickerProps) => {
     };
   }, [combinedCategories]);
 
-  useEffect(() => {
-    const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.key === "e") {
-        e.preventDefault();
-        setIsOpen((pre) => !pre);
-      }
-    };
-
-    document.addEventListener("keydown", handleGlobalKeyDown);
-    return () => document.removeEventListener("keydown", handleGlobalKeyDown);
-  }, []);
+  useKeyDown(
+    () => setIsOpen((prev) => !prev),
+    ["e"],
+    { ctrl: true } // Only trigger on Ctrl + E
+  );
 
   return (
-    <motion.div title="Emoji" ref={pickerRef} whileTap={{ scale: 0.8 }}>
-      <a
+    <div title="Emoji" ref={pickerRef}>
+      <motion.a
+        whileTap={{ scale: 0.88 }}
         onClick={() => setIsOpen(!isOpen)}
-        className={` hover:opacity-90 rounded-full cursor-pointer flex items-center select-none ${
+        className={`hover:opacity-90 rounded-full cursor-pointer flex items-center select-none focus:outline-none ${
           isOpen ? "bg-[--border-color] opacity-100" : "opacity-50"
         }`}
         aria-label="Open emoji picker"
       >
         <i className="material-symbols-outlined">sentiment_satisfied</i>
-      </a>
+      </motion.a>
 
       {isOpen && (
         <div
@@ -202,8 +185,8 @@ const CustomEmojiPicker = ({ onSelect }: CustomEmojiPickerProps) => {
           </div>
         </div>
       )}
-    </motion.div>
+    </div>
   );
 };
 
-export default CustomEmojiPicker;
+export default EmojiPicker;

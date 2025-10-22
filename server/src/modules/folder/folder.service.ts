@@ -6,6 +6,8 @@ import { User } from '../user/entities/user.entity';
 import { plainToInstance } from 'class-transformer';
 import { FolderResponseDto } from './dto/folder-response.dto';
 import { ErrorResponse } from 'src/common/api-response/errors';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
 
 @Injectable()
 export class FolderService {
@@ -20,12 +22,37 @@ export class FolderService {
     return plainToInstance(FolderResponseDto, folder);
   }
 
-  async findAll(userId: string): Promise<FolderResponseDto[]> {
-    const folders = await this.folderRepository.find({
-      where: { user: { id: userId } },
-      order: { position: 'ASC' },
-    });
-    return folders.map((folder) => this.toDto(folder));
+  async getFolders(
+    userId: string,
+    query: PaginationQueryDto,
+  ): Promise<PaginationResponse<FolderResponseDto>> {
+    const { limit = 20, offset = 0, lastId } = query;
+
+    let qb = this.folderRepository
+      .createQueryBuilder('folder')
+      .where('folder.user_id = :userId', { userId })
+      .orderBy('folder.position', 'ASC');
+
+    if (lastId) {
+      const lastFolder = await this.folderRepository.findOne({
+        where: { id: lastId },
+      });
+      if (lastFolder) {
+        qb = qb.andWhere('folder.position > :position', {
+          position: lastFolder.position,
+        });
+      }
+    } else {
+      qb = qb.skip(offset);
+    }
+
+    const folders = await qb.take(limit + 1).getMany(); // take one extra to check hasMore
+    const hasMore = folders.length > limit;
+    const items = hasMore
+      ? folders.slice(0, limit).map((f) => this.toDto(f))
+      : folders.map((f) => this.toDto(f));
+
+    return { items, hasMore };
   }
 
   async findOne(id: string, userId: string): Promise<FolderResponseDto> {
@@ -168,23 +195,6 @@ export class FolderService {
     }
 
     folder.chatIds = (folder.chatIds || []).filter((id) => id !== chatId);
-    const updatedFolder = await this.folderRepository.save(folder);
-    return this.toDto(updatedFolder);
-  }
-
-  async updateFolderPosition(
-    folderId: string,
-    position: number,
-    userId: string,
-  ): Promise<FolderResponseDto> {
-    const folder = await this.folderRepository.findOne({
-      where: { id: folderId, user: { id: userId } },
-    });
-    if (!folder) {
-      ErrorResponse.notFound('Folder not found');
-    }
-
-    folder.position = position;
     const updatedFolder = await this.folderRepository.save(folder);
     return this.toDto(updatedFolder);
   }

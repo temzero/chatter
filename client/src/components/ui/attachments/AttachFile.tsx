@@ -34,19 +34,16 @@ const AttachFile: React.FC<AttachFileProps> = ({ onFileSelect }) => {
   };
 
   return (
-    <motion.div
-      title={t("chat_bar.attach_file")}
-      className="flex items-center"
-      whileTap={{ scale: 0.8 }}
-    >
-      <span
-        className="material-symbols-outlined opacity-50 hover:opacity-90 cursor-pointer rounded select-none"
+    <div title={t("chat_bar.attach_file")} className="flex items-center">
+      <motion.span
+        whileTap={{ scale: 0.88 }}
+        className="material-symbols-outlined opacity-50 hover:opacity-90 cursor-pointer rounded select-none focus:outline-none"
         aria-label="Attach file"
         onClick={handleNormalClick} // Left click to allow all files
         onContextMenu={handleRightClick} // Right click to allow only image and video
       >
         attach_file
-      </span>
+      </motion.span>
 
       <input
         type="file"
@@ -56,7 +53,7 @@ const AttachFile: React.FC<AttachFileProps> = ({ onFileSelect }) => {
         onChange={handleChange}
         style={{ display: "none" }}
       />
-    </motion.div>
+    </div>
   );
 };
 

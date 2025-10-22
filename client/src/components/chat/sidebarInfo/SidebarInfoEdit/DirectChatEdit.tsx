@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
-import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
+import { getSetSidebarInfo } from "@/stores/sidebarInfoStore";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { handleError } from "@/common/utils/handleError";
@@ -21,7 +21,7 @@ const DirectChatEdit = () => {
   const activeChat = useChatStore((state) => state.activeChat) as ChatResponse;
   const updateMemberNickname =
     useChatMemberStore.getState().updateMemberNickname;
-  const setSidebarInfo = useSidebarInfoStore.getState().setSidebarInfo;
+  const setSidebarInfo = getSetSidebarInfo();
   const chatMembers = useActiveMembers();
   const openModal = getOpenModal();
 

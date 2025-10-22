@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useChatStore } from "@/stores/chatStore";
-import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
+import { getSetSidebarInfo } from "@/stores/sidebarInfoStore";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { AvatarEdit } from "@/components/ui/avatar/AvatarEdit";
 import { fileStorageService } from "@/services/storage/fileStorageService";
@@ -23,7 +23,7 @@ const GroupChatEdit = () => {
   const activeMembers = useActiveMembers();
   const updateChat = useChatStore.getState().updateChat;
 
-  const setSidebarInfo = useSidebarInfoStore.getState().setSidebarInfo;
+  const setSidebarInfo = getSetSidebarInfo();
   const openModal = getOpenModal();
 
   const myMember = activeMembers?.find(

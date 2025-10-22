@@ -1,4 +1,4 @@
-import { ComponentType, useEffect } from "react";
+import { ComponentType } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ModalType } from "@/common/enums/modalType";
 import { modalAnimations } from "@/common/animations/modalAnimations";
@@ -81,14 +81,6 @@ const ModalContent = ({
 const Modal = () => {
   const type = useModalType();
   const closeModal = getCloseModal();
-
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeModal();
-    };
-    window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
-  }, [closeModal]);
 
   return (
     <AnimatePresence>

@@ -23,6 +23,7 @@ import { ChatService } from '../chat/chat.service';
 import { ChatType } from 'src/shared/types/enums/chat-type.enum';
 import { GenerateLiveKitTokenDto } from './dto/generate-livekit-token.dto';
 import { UpdateCallData } from './types/update-call-data.type';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Controller('calls')
 @UseGuards(JwtAuthGuard)
@@ -34,42 +35,16 @@ export class CallController {
     private readonly chatMemberService: ChatMemberService,
   ) {}
 
-  // @Get('history')
-  // async getCallHistory(
-  //   @CurrentUser('id') userId: string,
-  //   @Query('offset') offset = 0,
-  //   @Query('limit') limit = 20,
-  // ): Promise<SuccessResponse<{ calls: CallResponseDto[]; hasMore: boolean }>> {
-  //   console.log('getCallHistory, Limit', limit, 'Offset', offset);
-  //   try {
-  //     const { calls, hasMore } = await this.callService.getCallHistory(userId, {
-  //       limit,
-  //       offset,
-  //     });
-  //     console.log('calls:', calls.length, 'hasMore:', hasMore);
-
-  //     return new SuccessResponse(
-  //       {
-  //         calls,
-  //         hasMore,
-  //       },
-  //       'Call history retrieved successfully',
-  //     );
-  //   } catch (error: unknown) {
-  //     ErrorResponse.throw(error, 'Failed to retrieve call history');
-  //   }
-  // }
-
   @Get('history')
   async getCallHistory(
     @CurrentUser('id') userId: string,
-    @Query('limit') limit = 20,
-    @Query('lastCallId') lastCallId?: string,
+    @Query() query: PaginationQueryDto,
   ): Promise<SuccessResponse<{ calls: CallResponseDto[]; hasMore: boolean }>> {
     try {
       const { calls, hasMore } = await this.callService.getCallHistory(userId, {
-        limit,
-        lastCallId,
+        limit: query.limit,
+        lastId: query.lastId,
+        offset: query.offset,
       });
 
       return new SuccessResponse(

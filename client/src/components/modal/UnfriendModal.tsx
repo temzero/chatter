@@ -5,7 +5,7 @@ import { DirectChatMember } from "@/shared/types/responses/chat-member.response"
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { toast } from "react-toastify";
 import { useFriendshipStore } from "@/stores/friendshipStore";
-import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
+import { getSetSidebarInfo } from "@/stores/sidebarInfoStore";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { useTranslation } from "react-i18next";
 import Button from "../ui/buttons/Button";
@@ -17,7 +17,7 @@ interface UnfriendModalData {
 const UnfriendModal: React.FC = () => {
   const { t } = useTranslation();
   const closeModal = getCloseModal();
-  const setSidebarInfo = useSidebarInfoStore.getState().setSidebarInfo;
+  const setSidebarInfo = getSetSidebarInfo();
   const deleteFriendship = useFriendshipStore.getState().deleteFriendship;
   const data = getModalData() as unknown as UnfriendModalData | undefined;
 

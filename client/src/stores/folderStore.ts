@@ -1,15 +1,20 @@
 // stores/folderStore.ts
 import { create } from "zustand";
 import { FolderResponse } from "@/shared/types/responses/folder.response";
-import { folderService } from "@/services/folderService";
+import { folderService } from "@/services/http/folderService";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
+import { PaginationResponse } from "@/shared/types/responses/pagination.response";
 
-interface FolderStore {
+interface FolderStoreState {
   folders: FolderResponse[];
+  hasMore: boolean;
   isLoading: boolean;
   error: string | null;
+}
 
+interface FolderStoreActions {
   initialize: () => Promise<void>;
+  setInitialData: (data: PaginationResponse<FolderResponse>) => void;
   getFolderById: (folderId: string) => FolderResponse | undefined;
   createFolder: (folderData: {
     name: string;
@@ -29,151 +34,181 @@ const sortByPosition = (folders: FolderResponse[]) => {
   return [...folders].sort((a, b) => a.position - b.position);
 };
 
-export const useFolderStore = create<FolderStore>((set, get) => ({
+const initialState: FolderStoreState = {
   folders: [],
+  hasMore: false,
   isLoading: false,
   error: null,
+};
 
-  initialize: async () => {
-    if (get().folders.length > 0) return;
-    try {
-      set({ isLoading: true, error: null });
-      const folders = await folderService.getFolders();
-      set({ folders: sortByPosition(folders), isLoading: false });
-    } catch (error: unknown) {
-      set({
-        error:
-          error instanceof Error ? error.message : "Failed to fetch folders",
-        isLoading: false,
-      });
-    }
-  },
+export const useFolderStore = create<FolderStoreState & FolderStoreActions>(
+  (set, get) => ({
+    ...initialState,
 
-  getFolderById: (folderId: string) => {
-    const { folders } = get();
-    return folders.find((folder: { id: string }) => folder.id === folderId);
-  },
+    initialize: async () => {
+      if (get().folders.length > 0) return;
 
-  createFolder: async (folderData) => {
-    try {
-      const newFolder = await folderService.createFolder(folderData);
-      set((state) => ({
-        folders: sortByPosition([...state.folders, newFolder]),
-      }));
-      return newFolder;
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to create folder";
-      set({ error: message });
-      throw new Error(message);
-    }
-  },
+      try {
+        set({ isLoading: true, error: null });
 
-  addFolder: (folder) =>
-    set((state) => ({
-      folders: sortByPosition([...state.folders, folder]),
-    })),
+        // Fetch first page
+        const response = await folderService.getFolders({ limit: 20 });
+        const folders = response.items;
 
-  updateFolder: async (folder) => {
-    try {
-      set({ isLoading: true, error: null });
-      if (!folder.id) {
-        throw new Error("Cannot update folder: missing folder id");
+        set({
+          folders: sortByPosition(folders),
+          isLoading: false,
+          hasMore: response.hasMore,
+        });
+      } catch (error: unknown) {
+        set({
+          error:
+            error instanceof Error ? error.message : "Failed to fetch folders",
+          isLoading: false,
+        });
       }
-      const updatedFolder = await folderService.updateFolder(folder.id, folder);
-      set((state) => ({
-        folders: sortByPosition(
-          state.folders.map((f) => (f.id === folder.id ? updatedFolder : f))
-        ),
-        isLoading: false,
-      }));
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to update folder";
-      set({ error: message, isLoading: false });
-      throw new Error(message);
-    }
-  },
+    },
 
-  addChatToFolder: async (chatId, folderId) => {
-    try {
-      const folder = get().folders.find((f) => f.id === folderId);
-      if (!folder) throw new Error("Folder not found");
+    setInitialData: (data: PaginationResponse<FolderResponse>) => {
+      set({
+        folders: sortByPosition(data.items),
+        hasMore: data.hasMore,
+      });
+    },
 
-      // Optimistic update: add chat locally first if not already in the folder
-      if (!folder.chatIds.includes(chatId)) {
-        folder.chatIds.push(chatId);
+    getFolderById: (folderId: string) => {
+      const { folders } = get();
+      return folders.find((folder: { id: string }) => folder.id === folderId);
+    },
+
+    createFolder: async (folderData) => {
+      try {
+        const newFolder = await folderService.createFolder(folderData);
         set((state) => ({
-          folders: state.folders.map((f) =>
-            f.id === folderId ? { ...folder } : f
-          ),
+          folders: sortByPosition([...state.folders, newFolder]),
         }));
+        return newFolder;
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Failed to create folder";
+        set({ error: message });
+        throw new Error(message);
       }
+    },
 
-      // API call
-      await folderService.addChatsToFolder(folderId, [chatId]);
-
-      // No need to re-sort, position remains the same
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to add chat to folder";
-      set({ error: message });
-      throw new Error(message);
-    }
-  },
-
-  reorderFolders: async (newOrderIds) => {
-    try {
-      set({ isLoading: true });
-
-      // Get current folders
-      const currentFolders = get().folders;
-
-      // Create new folder array with updated positions
-      const updatedFolders = newOrderIds.map((id, index) => {
-        const folder = currentFolders.find((f) => f.id === id);
-        if (!folder) throw new Error(`Folder ${id} not found`);
-        return { ...folder, position: index + 1 }; // 1-based indexing
-      });
-
-      // Optimistic update
-      set({ folders: updatedFolders });
-
-      // Prepare position updates for API
-      const positionUpdates = updatedFolders.map((folder) => ({
-        id: folder.id,
-        position: folder.position,
-      }));
-
-      // API call
-      await folderService.reorderFolders(positionUpdates);
-
-      set({ isLoading: false });
-    } catch (error) {
-      // Revert on error
-      set({
-        error:
-          error instanceof Error ? error.message : "Failed to reorder folders",
-        isLoading: false,
-        folders: get().folders, // revert to previous state
-      });
-      throw error;
-    }
-  },
-
-  deleteFolder: async (folderId?: string) => {
-    if (!folderId) return;
-    try {
-      await folderService.deleteFolder(folderId);
+    addFolder: (folder) =>
       set((state) => ({
-        folders: state.folders.filter((f) => f.id !== folderId),
-        // No need to re-sort after deletion (order remains consistent)
-      }));
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to delete folder";
-      set({ error: message });
-      throw new Error(message);
-    }
-  },
-}));
+        folders: sortByPosition([...state.folders, folder]),
+      })),
+
+    updateFolder: async (folder) => {
+      try {
+        set({ isLoading: true, error: null });
+        if (!folder.id) {
+          throw new Error("Cannot update folder: missing folder id");
+        }
+        const updatedFolder = await folderService.updateFolder(
+          folder.id,
+          folder
+        );
+        set((state) => ({
+          folders: sortByPosition(
+            state.folders.map((f) => (f.id === folder.id ? updatedFolder : f))
+          ),
+          isLoading: false,
+        }));
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Failed to update folder";
+        set({ error: message, isLoading: false });
+        throw new Error(message);
+      }
+    },
+
+    addChatToFolder: async (chatId, folderId) => {
+      try {
+        const folder = get().folders.find((f) => f.id === folderId);
+        if (!folder) throw new Error("Folder not found");
+
+        // Optimistic update: add chat locally first if not already in the folder
+        if (!folder.chatIds.includes(chatId)) {
+          folder.chatIds.push(chatId);
+          set((state) => ({
+            folders: state.folders.map((f) =>
+              f.id === folderId ? { ...folder } : f
+            ),
+          }));
+        }
+
+        // API call
+        await folderService.addChatsToFolder(folderId, [chatId]);
+
+        // No need to re-sort, position remains the same
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Failed to add chat to folder";
+        set({ error: message });
+        throw new Error(message);
+      }
+    },
+
+    reorderFolders: async (newOrderIds) => {
+      try {
+        set({ isLoading: true });
+
+        // Get current folders
+        const currentFolders = get().folders;
+
+        // Create new folder array with updated positions
+        const updatedFolders = newOrderIds.map((id, index) => {
+          const folder = currentFolders.find((f) => f.id === id);
+          if (!folder) throw new Error(`Folder ${id} not found`);
+          return { ...folder, position: index + 1 }; // 1-based indexing
+        });
+
+        // Optimistic update
+        set({ folders: updatedFolders });
+
+        // Prepare position updates for API
+        const positionUpdates = updatedFolders.map((folder) => ({
+          id: folder.id,
+          position: folder.position,
+        }));
+
+        // API call
+        await folderService.reorderFolders(positionUpdates);
+
+        set({ isLoading: false });
+      } catch (error) {
+        // Revert on error
+        set({
+          error:
+            error instanceof Error
+              ? error.message
+              : "Failed to reorder folders",
+          isLoading: false,
+          folders: get().folders, // revert to previous state
+        });
+        throw error;
+      }
+    },
+
+    deleteFolder: async (folderId?: string) => {
+      if (!folderId) return;
+      try {
+        await folderService.deleteFolder(folderId);
+        set((state) => ({
+          folders: state.folders.filter((f) => f.id !== folderId),
+          // No need to re-sort after deletion (order remains consistent)
+        }));
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Failed to delete folder";
+        set({ error: message });
+        throw new Error(message);
+      }
+    },
+  })
+);

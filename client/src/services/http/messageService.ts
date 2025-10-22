@@ -1,4 +1,4 @@
-import API from "./api/api";
+import API from "@/services/api/api";
 import { MessageResponse } from "@/shared/types/responses/message.response";
 import { UpdateMessageRequest } from "@/shared/types/requests/update-message.request";
 import { PaginationQuery } from "@/shared/types/queries/pagination-query";
@@ -7,10 +7,10 @@ import { PaginationResponse } from "@/shared/types/responses/pagination.response
 export const messageService = {
   async getChatMessages(
     chatId: string,
-    options?: PaginationQuery
+    queries?: PaginationQuery
   ): Promise<PaginationResponse<MessageResponse>> {
     try {
-      const { offset, lastId, limit = 20 } = options || {};
+      const { offset, lastId, limit = 20 } = queries || {};
 
       const { data } = await API.get(`/messages/chat/${chatId}`, {
         params: {

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { useMessageStore } from "@/stores/messageStore";
 import { useTypingUsersByChatId } from "@/stores/typingStore";
 import type { ChatResponse } from "@/shared/types/responses/chat.response";
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/messages/SystemMessageContent";
 import { ChatListItemContextMenu } from "./ChatListItem-contextMenu";
 import { calculateContextMenuPosition } from "@/common/utils/contextMenuUtils";
+import { useClickOutside } from "@/common/hooks/keyEvent/useClickOutside";
 
 // Keep track of open menu globally
 let openMenuSetter: (() => void) | null = null;
@@ -29,6 +30,7 @@ interface ChatListItemProps {
 
 const ChatListItem: React.FC<ChatListItemProps> = React.memo(
   ({ chat, isCompact = false, currentUserId = "" }) => {
+    console.log('ChatListItem')
     const getDraftMessage = useMessageStore.getState().getDraftMessage;
     const setActiveChatById = useChatStore.getState().setActiveChatById;
     const isActive = useIsActiveChat(chat.id);
@@ -44,6 +46,11 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
       y: number;
     } | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
+
+    // Close menu when clicking outside
+    useClickOutside(menuRef, () => {
+      if (contextMenu) handleCloseContextMenu();
+    });
 
     const handleContextMenu = (e: React.MouseEvent) => {
       e.preventDefault();
@@ -77,19 +84,6 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
         window.open(`/${chat.id}`, "_blank");
       }
     };
-
-    // Close menu when clicking outside
-    useEffect(() => {
-      const handleClickOutside = (e: MouseEvent) => {
-        if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-          handleCloseContextMenu();
-        }
-      };
-      if (contextMenu) {
-        document.addEventListener("click", handleClickOutside);
-      }
-      return () => document.removeEventListener("click", handleClickOutside);
-    }, [contextMenu]);
 
     const getUserItemClass = () => {
       const baseClasses =
@@ -159,8 +153,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
 
     return (
       <>
-        <motion.div
-          layout
+        <div
           className={getUserItemClass()}
           onClick={() => setActiveChatById(chat.id)}
           onMouseDown={handleMouseDown}
@@ -169,7 +162,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
           {!chat.isDeleted && (
             <OnlineDot
               isOnline={isOnline}
-              className={`absolute top-1/2 left-[3px] -translate-y-1/2 ${
+              className={`absolute top-1/2 left-[3px] -translate-y-1/2 border-4 ${
                 isActive && "bg-white border"
               }`}
             />
@@ -273,8 +266,8 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
               </div>
             </div>
           )}
-        </motion.div>
-        
+        </div>
+
         {contextMenu && (
           <ChatListItemContextMenu
             ref={menuRef}

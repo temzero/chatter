@@ -2,7 +2,6 @@ import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { FolderResponse } from "@/shared/types/responses/folder.response";
 
-
 type Props = {
   selectedFolder: FolderResponse;
   onSelectFolder: (folder: FolderResponse) => void;
@@ -100,7 +99,17 @@ const ChatFolderSelector: React.FC<Props> = ({
         className="flex items-center overflow-x-auto no-scrollbar scrollbar-hide"
       >
         {isCompact ? (
-          <a className={getFolderClass(selectedFolder.id)}>
+          <a
+            className={getFolderClass(selectedFolder.id)}
+            style={
+              selectedFolder.color
+                ? {
+                    color: selectedFolder.color,
+                    borderColor: selectedFolder.color,
+                  }
+                : {}
+            }
+          >
             {selectedFolder.name.charAt(0).toUpperCase() +
               selectedFolder.name.slice(1)}
           </a>

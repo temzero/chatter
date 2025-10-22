@@ -5,20 +5,28 @@ import { persist } from "zustand/middleware";
 import { useShallow } from "zustand/shallow";
 import { useActiveChatId } from "./chatStore";
 
-interface SidebarInfoStore {
+interface SidebarInfoStoreState {
   isSidebarInfoVisible: boolean;
   currentSidebarInfo: SidebarInfoMode;
+}
+
+interface SidebarInfoStoreActions {
   toggleSidebarInfo: () => void;
   setSidebarInfoVisible: (isVisible: boolean) => void;
   setSidebarInfo: (mode?: SidebarInfoMode) => void;
-  initializeKeyListeners: () => () => void;
 }
 
-export const useSidebarInfoStore = create<SidebarInfoStore>()(
+const initialState: SidebarInfoStoreState = {
+  isSidebarInfoVisible: false,
+  currentSidebarInfo: SidebarInfoMode.DEFAULT,
+};
+
+export const useSidebarInfoStore = create<
+  SidebarInfoStoreState & SidebarInfoStoreActions
+>()(
   persist(
     (set, get) => ({
-      isSidebarInfoVisible: false,
-      currentSidebarInfo: SidebarInfoMode.DEFAULT,
+      ...initialState,
 
       toggleSidebarInfo: () => {
         const currentVisibility = get().isSidebarInfoVisible;
@@ -33,47 +41,20 @@ export const useSidebarInfoStore = create<SidebarInfoStore>()(
 
       setSidebarInfo: (mode = SidebarInfoMode.DEFAULT) =>
         set({ currentSidebarInfo: mode }),
-
-      initializeKeyListeners: () => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-          if (e.key === "F1") {
-            e.preventDefault();
-            get().toggleSidebarInfo();
-          }
-
-          if (e.key === "Escape") {
-            e.preventDefault();
-            set({ currentSidebarInfo: SidebarInfoMode.DEFAULT });
-            e.stopPropagation();
-          }
-        };
-
-        window.addEventListener("keydown", handleKeyDown);
-
-        // Return cleanup function
-        return () => {
-          window.removeEventListener("keydown", handleKeyDown);
-        };
-      },
     }),
     {
       name: "sidebar-info-storage",
       partialize: (state) => ({
         isSidebarInfoVisible: state.isSidebarInfoVisible,
       }),
-      onRehydrateStorage: () => (state) => {
-        if (state) {
-          const cleanup = state.initializeKeyListeners();
-          // Store the cleanup function if needed for later
-          return cleanup;
-        }
-      },
     }
   )
 );
 
 // EXPORT HOOKS
 
+export const getSetSidebarInfo = () =>
+  useSidebarInfoStore.getState().setSidebarInfo;
 export const useSidebarInfoVisibility = () => {
   const isSidebarInfoVisible = useSidebarInfoStore(
     useShallow((state) => state.isSidebarInfoVisible)

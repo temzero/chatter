@@ -1,4 +1,10 @@
-import API from "./api/api";
+import API from "@/services/api/api";
+import { toast } from "react-toastify";
+import { handleError } from "@/common/utils/handleError";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
+import { UpdateChatRequest } from "@/shared/types/requests/update-chat.request";
+import { PaginationQuery } from "@/shared/types/queries/pagination-query";
+import { PaginationResponse } from "@/shared/types/responses/pagination.response";
 import type {
   ChatResponse,
   ChatWithMessagesResponse,
@@ -7,12 +13,6 @@ import type {
   ApiSuccessResponse,
   DirectChatApiResponse,
 } from "@/shared/types/responses/api-success.response";
-import { toast } from "react-toastify";
-import { handleError } from "@/common/utils/handleError";
-import { ChatType } from "@/shared/types/enums/chat-type.enum";
-import { UpdateChatRequest } from "@/shared/types/requests/update-chat.request";
-import { PaginationQuery } from "@/shared/types/queries/pagination-query";
-import { PaginationResponse } from "@/shared/types/responses/pagination.response";
 
 export const chatService = {
   // Get all direct and group chats
@@ -36,10 +36,10 @@ export const chatService = {
   },
 
   async fetchChats(
-    options: PaginationQuery = { limit: 10 }
+    queries: PaginationQuery = { limit: 10 }
   ): Promise<{ chats: ChatResponse[]; hasMore: boolean }> {
     try {
-      const { offset, lastId, limit } = options;
+      const { offset, lastId, limit } = queries;
 
       const { data } = await API.get(`/chat`, {
         params: {
@@ -95,13 +95,6 @@ export const chatService = {
     const response = await API.post<ApiSuccessResponse<ChatResponse>>(
       "/chat/group",
       payload
-    );
-    return response.data.payload;
-  },
-
-  async getGroupChatById(groupChatId: string): Promise<ChatResponse> {
-    const response = await API.get<ApiSuccessResponse<ChatResponse>>(
-      `/chat/${groupChatId}`
     );
     return response.data.payload;
   },

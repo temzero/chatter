@@ -13,10 +13,10 @@ interface ChatListProps {
 
 const ChatList: React.FC<ChatListProps> = React.memo(
   ({ chats, isCompact = false }) => {
+    console.log("ChatList", chats.length);
     const currentUserId = useAuthStore((state) => state.currentUser?.id || "");
     const hasMoreChats = useChatStore((state) => state.hasMoreChats);
     const fetchMoreChats = useChatStore.getState().fetchMoreChats;
-
 
     // Sort chats: pinned first, then by updatedAt descending
     const sortedChats = [...chats].sort((a, b) => {

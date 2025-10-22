@@ -23,11 +23,15 @@ interface ThemeActions {
   initialize: () => void;
 }
 
+const initialState: ThemeState = {
+  themeOption: ThemeOption.Auto,
+  theme: Theme.Light,
+};
+
 export const useThemeStore = create<ThemeState & ThemeActions>()(
   persist(
     (set, get) => ({
-      themeOption: ThemeOption.Auto,
-      theme: Theme.Light,
+      ...initialState,
 
       detectSystemTheme: () => {
         return window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -77,6 +81,7 @@ export const useThemeStore = create<ThemeState & ThemeActions>()(
         themeOption: state.themeOption,
         theme: state.theme,
       }),
+      // Optional: Auto-initialize when store is created
       onRehydrateStorage: () => (state) => {
         state?.initialize();
       },

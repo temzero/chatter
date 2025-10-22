@@ -9,6 +9,7 @@ import { ChatMemberService } from '../chat-member/chat-member.service';
 import { CallResponseDto } from './dto/call-response.dto';
 import { UserService } from '../user/user.service';
 import { CallMapper } from './mappers/call.mapper';
+import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
 
 @Injectable()
 export class CallService {
@@ -22,9 +23,9 @@ export class CallService {
 
   async getCallHistory(
     userId: string,
-    options: { limit?: number; lastCallId?: string } = { limit: 20 },
+    queries: PaginationQuery,
   ): Promise<{ calls: CallResponseDto[]; hasMore: boolean }> {
-    const { limit = 20, lastCallId } = options;
+    const { limit = 20, lastId } = queries;
 
     // Get all calls with relations
     const query = this.callRepository
@@ -45,10 +46,8 @@ export class CallService {
 
     // Handle pagination
     let startIndex = 0;
-    if (lastCallId) {
-      const lastCallIndex = allCalls.findIndex(
-        (call) => call.id === lastCallId,
-      );
+    if (lastId) {
+      const lastCallIndex = allCalls.findIndex((call) => call.id === lastId);
       if (lastCallIndex !== -1) {
         startIndex = lastCallIndex + 1;
       }

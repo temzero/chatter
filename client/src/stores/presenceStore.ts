@@ -5,19 +5,28 @@ import { useCurrentUserId } from "./authStore";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useChatMemberStore } from "./chatMemberStore";
 
-interface PresenceStore {
+interface PresenceStoreState {
   onlineUserIds: string[];
   lastSeenMap: Record<string, string>; // userId → ISO timestamp
+}
+
+interface PresenceStoreActions {
   setUserStatus: (userId: string, isOnline: boolean, lastSeen?: string) => void;
   setMultipleStatuses: (statuses: Record<string, boolean>) => void;
   setLastSeen: (userId: string, timestamp: string) => void;
   getLastSeen: (userId: string) => string | undefined;
 }
 
-export const usePresenceStore = create<PresenceStore>((set, get) => ({
+const initialState: PresenceStoreState = {
   onlineUserIds: [],
   lastSeenMap: {},
+};
 
+export const usePresenceStore = create<
+  PresenceStoreState & PresenceStoreActions
+>((set, get) => ({
+  ...initialState,
+  
   setUserStatus: (userId, isOnline, lastSeen) =>
     set((state) => {
       const exists = state.onlineUserIds.includes(userId);

@@ -3,7 +3,7 @@ import SidebarLayout from "@/layouts/SidebarLayout";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useAuthStore } from "@/stores/authStore";
 import { useCurrentUser } from "@/stores/authStore";
-import { userService } from "@/services/userService";
+import { userService } from "@/services/http/userService";
 import { useTranslation } from "react-i18next";
 import SwitchBtn from "@/components/ui/buttons/SwitchBtn";
 
