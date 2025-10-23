@@ -1,9 +1,8 @@
-import { useChatStore } from "@/stores/chatStore";
-import { ChatResponse } from "@/shared/types/responses/chat.response";
+import { useActiveChatId } from "@/stores/chatStore";
 import { useActiveMembers } from "@/stores/chatMemberStore";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
-import { GroupChatMember } from "@/shared/types/responses/chat-member.response";
+import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
 import { useCurrentUserId } from "@/stores/authStore";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { ChatMemberItems } from "./ChatMemberItems";
@@ -13,20 +12,20 @@ import { getSetSidebarInfo } from "@/stores/sidebarInfoStore";
 const ChatMembersEdit = () => {
   const { t } = useTranslation();
   const currentUserId = useCurrentUserId();
-  const activeChat = useChatStore((state) => state.activeChat) as ChatResponse;
+  const activeChatId = useActiveChatId() as string;
   const activeMembers = useActiveMembers();
   const setSidebarInfo = getSetSidebarInfo();
   const openModal = getOpenModal();
 
   const myMember = activeMembers?.find(
     (member) => member.userId === currentUserId
-  ) as GroupChatMember;
+  ) as ChatMemberResponse;
 
-  if (!activeChat || !activeMembers || !myMember) return null;
+  if (!activeChatId || !activeMembers || !myMember) return null;
 
   const handleOpenAddMemberModal = () => {
     openModal(ModalType.ADD_MEMBER, {
-      chatId: activeChat.id,
+      chatId: activeChatId,
     });
   };
 
@@ -48,7 +47,7 @@ const ChatMembersEdit = () => {
       <div className="overflow-y-auto h-screen p-4">
         {activeMembers.length > 0 && (
           <ChatMemberItems
-            chatId={activeChat.id}
+            chatId={activeChatId}
             members={activeMembers}
             currentUserId={currentUserId}
           />

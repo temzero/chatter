@@ -1,11 +1,11 @@
 import { PaginationResponse } from './pagination.response';
-import { ChatWithMessagesResponse } from './chat.response';
 import { FriendRequestResponse } from './friendship.response';
 import { FolderResponse } from './folder.response';
+import { ChatDataResponseDto } from 'src/modules/bootstrap/dto/chat-data-response.dto';
 
 export interface BootstrapResponse {
   userId: string;
-  chatData: PaginationResponse<ChatWithMessagesResponse>;
-  folders: PaginationResponse<FolderResponse>;
-  friendRequests: PaginationResponse<FriendRequestResponse>;
+  chatData: PaginationResponse<ChatDataResponseDto>;
+  folderData: PaginationResponse<FolderResponse>;
+  friendRequestData: PaginationResponse<FriendRequestResponse>;
 }

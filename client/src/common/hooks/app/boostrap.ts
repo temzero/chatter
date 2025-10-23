@@ -4,14 +4,10 @@ import { useAuthStore } from "@/stores/authStore";
 import { useChatStore } from "@/stores/chatStore";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import { useFolderStore } from "@/stores/folderStore";
-import { useThemeStore } from "@/stores/themeStore";
 import { toast } from "react-toastify";
 import { BootstrapResponse } from "@/shared/types/responses/bootstrap.response";
 
 const bootstrapApp = async () => {
-  // Sync initialization
-  useThemeStore.getState().initialize();
-
   try {
     // STEP 1: Initialize auth first
     await useAuthStore.getState().initialize();

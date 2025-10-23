@@ -1,7 +1,7 @@
 // components/modals/BlockUserModal.tsx
 import React from "react";
 import { getCloseModal, getModalData } from "@/stores/modalStore";
-import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
+import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { toast } from "react-toastify";
 import { blockService } from "@/services/http/blockService";
@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 import Button from "../ui/buttons/Button";
 
 interface BlockUserModalData {
-  userToBlock: DirectChatMember;
+  userToBlock: ChatMemberResponse;
 }
 
 const BlockUserModal: React.FC = () => {
@@ -20,7 +20,7 @@ const BlockUserModal: React.FC = () => {
   const data = getModalData() as unknown as BlockUserModalData | undefined;
 
   // Extract user data from modal props
-  const userToBlock = data?.userToBlock as DirectChatMember;
+  const userToBlock = data?.userToBlock as ChatMemberResponse;
   if (!userToBlock) return null;
 
   const handleBlock = async () => {

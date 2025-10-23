@@ -1,7 +1,4 @@
-import { useEffect } from "react";
 import { useParams } from "react-router-dom";
-
-// 🧩 Socket hooks
 import { useWebSocket } from "@/common/hooks/websocket/useWebsocket";
 import { useNotificationSocketListeners } from "@/common/hooks/websocket/useNotificationSocketListener";
 import { useChatSocketListeners } from "@/common/hooks/websocket/useChatSocketListener";
@@ -16,6 +13,9 @@ import { useChatStore } from "@/stores/chatStore";
 export const useAppInitialization = () => {
   console.log("useAppInitialization");
   const { id: chatId } = useParams();
+  if (chatId) {
+    useChatStore.getState().setActiveChatId(chatId);
+  }
 
   // 🧩 Socket + device setup
   useDevice();
@@ -27,8 +27,4 @@ export const useAppInitialization = () => {
   useGlobalKeyListeners();
   useAppErrorListeners();
   useCleanup();
-
-  useEffect(() => {
-    useChatStore.getState().setActiveChatById(chatId ?? null);
-  }, [chatId]);
 };

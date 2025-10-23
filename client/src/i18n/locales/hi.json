@@ -45,6 +45,9 @@
       "failed": "असफल",
       "unknown": "अज्ञात",
       "empty": "खाली",
+      "no_result": "कोई परिणाम नहीं!",
+      "no_chats": "कोई चैट नहीं मिली",
+      "no_contacts": "कोई संपर्क नहीं मिला",
       "error": "एक त्रुटि हुई",
       "required": "यह फ़ील्ड आवश्यक है",
       "invalid_code": "कृपया 6-अंकों का कोड दर्ज करें"
@@ -178,8 +181,7 @@
     }
   },
   "sidebar_search": {
-    "placeholder": "चैट खोजें...",
-    "no_result": "कोई परिणाम नहीं!"
+    "placeholder": "चैट खोजें..."
   },
 
   "sidebar_calls": {

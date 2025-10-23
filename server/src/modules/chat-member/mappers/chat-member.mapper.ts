@@ -1,10 +1,7 @@
 // chat-member.mapper.ts
 import { plainToInstance } from 'class-transformer';
 import { ChatMember } from '../entities/chat-member.entity';
-import {
-  DirectChatMemberResponseDto,
-  GroupChatMemberResponseDto,
-} from '../dto/responses/chat-member-response.dto';
+import { ChatMemberResponseDto } from '../dto/responses/chat-member-response.dto';
 import { ChatType } from 'src/shared/types/enums/chat-type.enum';
 import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
 
@@ -14,7 +11,7 @@ export function mapChatMemberToChatMemberResDto(
   isBlockedByMe?: boolean,
   isBlockedMe?: boolean,
   friendshipStatus?: FriendshipStatus | null,
-) {
+): ChatMemberResponseDto {
   // If the user has blocked me, return minimal information
   if (isBlockedMe) {
     const blockedMember = {
@@ -25,9 +22,7 @@ export function mapChatMemberToChatMemberResDto(
       // Don't include any other personal information
     };
 
-    return chatType === ChatType.DIRECT
-      ? plainToInstance(DirectChatMemberResponseDto, blockedMember)
-      : plainToInstance(GroupChatMemberResponseDto, blockedMember);
+    return plainToInstance(ChatMemberResponseDto, blockedMember);
   }
 
   // Normal response if not blocked
@@ -46,11 +41,12 @@ export function mapChatMemberToChatMemberResDto(
     lastReadMessageId: member.lastReadMessageId,
     isBlockedByMe: isBlockedByMe,
     isBlockedMe: false,
+    pinnedAt: member.pinnedAt,
     createdAt: member.createdAt,
   };
 
   if (chatType === ChatType.DIRECT) {
-    return plainToInstance(DirectChatMemberResponseDto, {
+    return plainToInstance(ChatMemberResponseDto, {
       ...baseMember,
       username: member.user.username,
       email: member.user.email,
@@ -61,5 +57,14 @@ export function mapChatMemberToChatMemberResDto(
     });
   }
 
-  return plainToInstance(GroupChatMemberResponseDto, baseMember);
+  // For group chats, direct-specific fields will be null
+  return plainToInstance(ChatMemberResponseDto, {
+    ...baseMember,
+    username: null,
+    email: null,
+    phoneNumber: null,
+    birthday: null,
+    bio: null,
+    friendshipStatus: null,
+  });
 }

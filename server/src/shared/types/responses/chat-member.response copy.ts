@@ -2,8 +2,10 @@ import { ChatMemberRole } from 'src/shared/types/enums/chat-member-role.enum';
 import { ChatMemberStatus } from 'src/shared/types/enums/chat-member-status.enum';
 import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
 
-export interface ChatMemberResponse {
-  // Common fields for both direct and group chats
+export type ChatMember = DirectChatMember | GroupChatMember;
+
+// Base for both group and direct chat members
+export interface GroupChatMember {
   id: string;
   chatId: string;
   userId: string;
@@ -14,18 +16,21 @@ export interface ChatMemberResponse {
   role: ChatMemberRole;
   status: ChatMemberStatus;
   customTitle: string | null;
-  mutedUntil: Date | null;
   lastReadMessageId: string | null;
+
+  // block status fields:
   isBlockedByMe: boolean;
   isBlockedMe: boolean;
-  pinnedAt?: Date | string;
-  createdAt: Date | string;
 
-  // Direct chat specific fields (will be null for group chats)
-  username: string | null;
-  email: string | null;
+  createdAt: Date | string;
+}
+
+// Extends base GroupChatMember for direct chat specific fields
+export interface DirectChatMember extends GroupChatMember {
+  username: string;
+  email: string;
   phoneNumber: string | null;
-  birthday: Date | null;
+  birthday: Date | string | null;
   bio: string | null;
   friendshipStatus?: FriendshipStatus | null;
 }

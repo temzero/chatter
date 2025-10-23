@@ -1,33 +1,27 @@
 import API from "@/services/api/api";
 import type { ApiSuccessResponse } from "@/shared/types/responses/api-success.response";
-import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
-import { PaginationResponse } from "@/shared/types/responses/pagination.response";
-import { PaginationQuery } from "@/shared/types/queries/pagination-query";
 import { UpdateChatMemberRequest } from "@/shared/types/requests/update-chat-member.request";
+import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
 
 export const chatMemberService = {
   // Get direct chat members
-  async fetchChatMembers(
-    chatId: string,
-    queries?: PaginationQuery
-  ): Promise<PaginationResponse<ChatMemberResponse>> {
-    try {
-      const { data } = await API.get<
-        ApiSuccessResponse<PaginationResponse<ChatMemberResponse>>
-      >(`/chat-members/members/${chatId}`, {
-        params: queries,
-      });
-
-      return data.payload;
-    } catch (error) {
-      console.error("Error fetching chat members:", error);
-      throw new Error("Failed to fetch chat members");
-    }
+  async fetchDirectChatMembers(chatId: string): Promise<ChatMemberResponse[]> {
+    const response = await API.get<ApiSuccessResponse<ChatMemberResponse[]>>(
+      `/chat-members/direct/${chatId}`
+    );
+    return response.data.payload;
+  },
+  // Get group chat members
+  async fetchGroupChatMembers(chatId: string): Promise<ChatMemberResponse[]> {
+    const response = await API.get<ApiSuccessResponse<ChatMemberResponse[]>>(
+      `/chat-members/group/${chatId}`
+    );
+    return response.data.payload;
   },
 
   async fetchMemberById(memberId: string): Promise<ChatMemberResponse> {
     const response = await API.get<ApiSuccessResponse<ChatMemberResponse>>(
-      `/chat-members/member/${memberId}`
+      `/chat-members/${memberId}`
     );
     return response.data.payload;
   },

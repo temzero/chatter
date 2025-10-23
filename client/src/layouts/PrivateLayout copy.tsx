@@ -1,24 +1,16 @@
-// PrivateLayout.tsx
 import React from "react";
-import { AnimatePresence, motion } from "framer-motion";
-
-import Sidebar from "@/components/sidebar/Sidebar";
 import ChatBox from "@/components/chat/ChatBox";
 import SidebarInfo from "@/components/chat/sidebarInfo/SidebarInfo";
-
+import Sidebar from "@/components/sidebar/Sidebar";
+import { useActiveChatId } from "@/stores/chatStore";
 import { useSidebarInfoVisibility } from "@/stores/sidebarInfoStore";
 import { useIsCompactSidebar } from "@/stores/sidebarStore";
 import { useIsMobile } from "@/stores/deviceStore";
+import { AnimatePresence, motion } from "framer-motion";
 import { useIsMobileSound } from "@/common/hooks/useIsMobileSound";
-import { useActiveChatId } from "@/stores/chatStore";
-
-// Memoize static components to prevent unnecessary rerenders
-const MemoSidebar = React.memo(Sidebar);
-const MemoSidebarInfo = React.memo(SidebarInfo);
 
 const PrivateLayout: React.FC = () => {
   console.log("PrivateLayout");
-
   const isMobile = useIsMobile();
   const activeChatId = useActiveChatId();
   const isSidebarCompact = useIsCompactSidebar();
@@ -35,17 +27,13 @@ const PrivateLayout: React.FC = () => {
     return (
       <div className="w-full h-full flex justify-between">
         <div id="sidebar" className={sidebarClasses}>
-          <MemoSidebar />
+          <Sidebar />
         </div>
-        {activeChatId && (
-          <>
-            <ChatBox />
-            {isSidebarInfoVisible && (
-              <div id="sidebar-info" className="w-[var(--sidebar-width)]">
-                <MemoSidebarInfo />
-              </div>
-            )}
-          </>
+        <ChatBox />
+        {isSidebarInfoVisible && (
+          <div id="sidebar-info" className="w-[var(--sidebar-width)]">
+            <SidebarInfo />
+          </div>
         )}
       </div>
     );
@@ -63,31 +51,27 @@ const PrivateLayout: React.FC = () => {
           className="absolute top-0 left-0 h-full w-full"
           style={{ zIndex: 10 }}
         >
-          <MemoSidebar />
+          <Sidebar />
         </motion.div>
       </AnimatePresence>
 
-      {activeChatId && (
-        <>
-          <ChatBox />
+      <ChatBox />
 
-          <AnimatePresence>
-            {isSidebarInfoVisible && (
-              <motion.div
-                key="sidebarInfo"
-                initial={{ x: "100%" }}
-                animate={{ x: 0 }}
-                exit={{ x: "100%" }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="absolute top-0 right-0 h-full w-full"
-                style={{ zIndex: 10 }}
-              >
-                <MemoSidebarInfo />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </>
-      )}
+      <AnimatePresence>
+        {isSidebarInfoVisible && (
+          <motion.div
+            key="sidebarInfo"
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="absolute top-0 right-0 h-full w-full"
+            style={{ zIndex: 10 }}
+          >
+            <SidebarInfo />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

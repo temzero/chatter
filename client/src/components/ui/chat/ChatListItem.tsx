@@ -30,15 +30,17 @@ interface ChatListItemProps {
 
 const ChatListItem: React.FC<ChatListItemProps> = React.memo(
   ({ chat, isCompact = false, currentUserId = "" }) => {
-    console.log('ChatListItem')
-    const getDraftMessage = useMessageStore.getState().getDraftMessage;
-    const setActiveChatById = useChatStore.getState().setActiveChatById;
+    console.log("ChatListItem");
     const isActive = useIsActiveChat(chat.id);
+
     const typingUsers = useTypingUsersByChatId(chat.id);
     const isOnline = useChatStatus(chat?.id, chat.type);
     const unreadCount = chat.unreadCount || 0;
     const lastMessage = chat.lastMessage;
     const { isBlockedByMe } = useBlockStatus(chat.id, chat.myMemberId);
+
+    const getDraftMessage = useMessageStore.getState().getDraftMessage;
+    const setActiveChatId = useChatStore.getState().setActiveChatId;
 
     // ======== Context Menu ========
     const [contextMenu, setContextMenu] = useState<{
@@ -155,7 +157,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
       <>
         <div
           className={getUserItemClass()}
-          onClick={() => setActiveChatById(chat.id)}
+          onClick={() => setActiveChatId(chat.id)}
           onMouseDown={handleMouseDown}
           onContextMenu={handleContextMenu}
         >

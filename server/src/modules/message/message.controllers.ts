@@ -52,12 +52,8 @@ export class MessageController {
         queryParams,
       );
 
-    const messagesResponse = messages.map((message) =>
-      this.messageMapper.mapMessageToMessageResDto(message),
-    );
-
     return new SuccessResponse(
-      { items: messagesResponse, hasMore },
+      { items: messages, hasMore },
       'Chat messages retrieved successfully',
     );
   }

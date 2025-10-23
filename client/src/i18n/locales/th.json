@@ -45,6 +45,9 @@
       "failed": "ล้มเหลว",
       "unknown": "ไม่ทราบ",
       "empty": "ว่าง",
+      "no_result": "ไม่มีผลลัพธ์!",
+      "no_chats": "ไม่พบแชท",
+      "no_contacts": "ไม่พบผู้ติดต่อ",
       "error": "เกิดข้อผิดพลาด",
       "required": "จำเป็นต้องกรอกฟิลด์นี้",
       "invalid_code": "กรุณาใส่รหัส 6 หลัก"
@@ -178,8 +181,7 @@
     }
   },
   "sidebar_search": {
-    "placeholder": "ค้นหาแชท...",
-    "no_result": "ไม่มีผลลัพธ์!"
+    "placeholder": "ค้นหาแชท..."
   },
 
   "sidebar_calls": {

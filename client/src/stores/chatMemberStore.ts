@@ -1,34 +1,42 @@
 import { create } from "zustand";
+import { useMemo } from "react";
 import { chatMemberService } from "@/services/http/chatMemberService";
 import { useActiveChatId, useChatStore } from "./chatStore";
-import type {
-  ChatMember,
-  GroupChatMember,
-} from "@/shared/types/responses/chat-member.response";
+import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useShallow } from "zustand/shallow";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { useAuthStore, useCurrentUserId } from "./authStore";
 import { handleError } from "@/common/utils/handleError";
-import { useMemo } from "react";
+import { PaginationQuery } from "@/shared/types/queries/pagination-query";
 
 interface ChatMemberState {
-  chatMembers: Record<string, ChatMember[]>; // chatId -> members
+  chatMembers: Record<string, ChatMemberResponse[]>; // chatId -> members
+  hasMoreMembers: Record<string, boolean>; // chatId -> hasMore
   isLoading: boolean;
   error: string | null;
 }
 
 interface ChatMemberActions {
-  fetchChatMembers: (chatId: string, type: ChatType) => Promise<ChatMember[]>;
+  fetchChatMembers: (
+    chatId: string,
+    queries?: PaginationQuery
+  ) => Promise<void>;
+  fetchMoreMembers: (chatId: string) => Promise<number>;
+  setInitialMembers: (
+    chatId: string,
+    members: ChatMemberResponse[],
+    hasMore: boolean
+  ) => void;
   getChatMemberById: (
     memberId: string,
     fetchIfMissing?: boolean
-  ) => ChatMember | undefined | Promise<ChatMember | undefined>;
+  ) => ChatMemberResponse | undefined | Promise<ChatMemberResponse | undefined>;
   getChatMemberByUserIdAndChatId: (
     chatId: string,
     userId: string,
     fetchIfMissing?: boolean
-  ) => ChatMember | undefined | Promise<ChatMember | undefined>;
+  ) => ChatMemberResponse | undefined | Promise<ChatMemberResponse | undefined>;
   getChatMemberUserIds: (chatId: string, type: ChatType) => string[];
   getDirectChatOtherMemberId: (
     chatId: string,
@@ -36,16 +44,16 @@ interface ChatMemberActions {
   ) => string | null;
   getAllChatMemberIds: () => string[];
   getAllUniqueUserIds: () => string[];
-  addMemberLocally: (newMember: GroupChatMember) => void;
+  addMemberLocally: (newMember: ChatMemberResponse) => void;
   updateMemberLocally: (
     chatId: string,
     memberId: string,
-    updates: Partial<ChatMember>
+    updates: Partial<ChatMemberResponse>
   ) => void;
   updateMember: (
     chatId: string,
     memberId: string,
-    updates: Partial<ChatMember>
+    updates: Partial<ChatMemberResponse>
   ) => Promise<void>;
   updateMemberNickname: (
     chatId: string,
@@ -61,7 +69,7 @@ interface ChatMemberActions {
     otherUserId: string,
     status: FriendshipStatus | null
   ) => void;
-  addGroupMember: (chatId: string, member: ChatMember) => void;
+  addGroupMember: (chatId: string, member: ChatMemberResponse) => void;
   removeChatMember: (chatId: string, userId: string) => void;
   clearChatMember: (chatId: string, userId: string) => void;
   clearChatMembers: (chatId: string) => void;
@@ -69,6 +77,7 @@ interface ChatMemberActions {
 
 const initialState: ChatMemberState = {
   chatMembers: {},
+  hasMoreMembers: {},
   isLoading: false,
   error: null,
 };
@@ -77,27 +86,87 @@ export const useChatMemberStore = create<ChatMemberState & ChatMemberActions>(
   (set, get) => ({
     ...initialState,
 
-    fetchChatMembers: async (chatId, type) => {
+    setInitialMembers: (chatId, members, hasMore) => {
+      set((state) => ({
+        chatMembers: {
+          ...state.chatMembers,
+          [chatId]: members,
+        },
+        hasMoreMembers: {
+          ...state.hasMoreMembers,
+          [chatId]: hasMore,
+        },
+      }));
+    },
+
+    fetchChatMembers: async (chatId: string, queries?: PaginationQuery) => {
+      set({ isLoading: true });
       try {
-        set({ isLoading: true });
-
-        let members: ChatMember[] = [];
-
-        if (type === ChatType.DIRECT) {
-          members = await chatMemberService.fetchDirectChatMembers(chatId);
-        } else {
-          members = await chatMemberService.fetchGroupChatMembers(chatId);
-        }
+        const { items: members, hasMore } =
+          await chatMemberService.fetchChatMembers(chatId, queries);
 
         set((state) => ({
-          chatMembers: { ...state.chatMembers, [chatId]: members },
+          chatMembers: {
+            ...state.chatMembers,
+            [chatId]: members,
+          },
+          hasMoreMembers: {
+            ...state.hasMoreMembers,
+            [chatId]: hasMore,
+          },
           isLoading: false,
         }));
-        return members;
       } catch (error) {
         console.error("Failed to fetch chat members:", error);
         set({ error: "Failed to fetch members", isLoading: false });
-        return [];
+      }
+    },
+
+    fetchMoreMembers: async (chatId: string) => {
+      set({ isLoading: true });
+      try {
+        const existingMembers = get().chatMembers[chatId] || [];
+        if (existingMembers.length === 0) {
+          set({ isLoading: false });
+          return 0;
+        }
+
+        const { items: newMembers, hasMore } =
+          await chatMemberService.fetchChatMembers(chatId, {
+            lastId: existingMembers[existingMembers.length - 1].id,
+          });
+
+        if (newMembers.length > 0) {
+          set((state) => {
+            const existing = state.chatMembers[chatId] || [];
+            return {
+              chatMembers: {
+                ...state.chatMembers,
+                [chatId]: [...existing, ...newMembers],
+              },
+              hasMoreMembers: {
+                ...state.hasMoreMembers,
+                [chatId]: hasMore,
+              },
+              isLoading: false,
+            };
+          });
+        } else {
+          // still update hasMoreMembers in case server returned 0 and hasMore = false
+          set((state) => ({
+            hasMoreMembers: {
+              ...state.hasMoreMembers,
+              [chatId]: hasMore,
+            },
+            isLoading: false,
+          }));
+        }
+
+        return newMembers.length;
+      } catch (err) {
+        handleError(err, "Failed to fetch more members");
+        set({ isLoading: false });
+        return 0;
       }
     },
 
@@ -371,8 +440,13 @@ export const useChatMemberStore = create<ChatMemberState & ChatMemberActions>(
     clearChatMembers: (chatId: string) => {
       set((state) => {
         const newMembers = { ...state.chatMembers };
+        const newHasMore = { ...state.hasMoreMembers };
         delete newMembers[chatId];
-        return { chatMembers: newMembers };
+        delete newHasMore[chatId];
+        return {
+          chatMembers: newMembers,
+          hasMoreMembers: newHasMore,
+        };
       });
     },
   })
@@ -380,7 +454,7 @@ export const useChatMemberStore = create<ChatMemberState & ChatMemberActions>(
 
 // EXPORT HOOKS
 
-export const useActiveMembers = (): ChatMember[] | undefined => {
+export const useActiveMembers = (): ChatMemberResponse[] | undefined => {
   const activeChatId = useActiveChatId();
   return useChatMemberStore(
     useShallow((state) => {
@@ -392,14 +466,18 @@ export const useActiveMembers = (): ChatMember[] | undefined => {
 
 export const useMembersByChatId = (
   chatId: string
-): ChatMember[] | undefined => {
+): ChatMemberResponse[] | undefined => {
   return useChatMemberStore(useShallow((state) => state.chatMembers[chatId]));
+};
+
+export const useHasMoreMembers = (chatId: string) => {
+  return useChatMemberStore((state) => state.hasMoreMembers[chatId] ?? true);
 };
 
 export const getMyChatMember = async (
   chatId?: string,
   fetchIfMissing: boolean = true
-): Promise<ChatMember | undefined | null> => {
+): Promise<ChatMemberResponse | undefined | null> => {
   if (!chatId) return null;
 
   const currentUserId = useAuthStore.getState().currentUser?.id;
@@ -427,7 +505,7 @@ export const getMyChatMemberId = async (
 export const getDirectChatPartner = (
   chatId: string,
   myMemberId: string
-): ChatMember | undefined => {
+): ChatMemberResponse | undefined => {
   if (!chatId || !myMemberId) return undefined;
 
   const state = useChatMemberStore.getState();
@@ -440,7 +518,7 @@ export const getDirectChatPartner = (
 
 export const useGroupOtherMembers = (
   chatId: string
-): ChatMember[] | undefined => {
+): ChatMemberResponse[] | undefined => {
   const myMemberId = useCurrentUserId();
   return useChatMemberStore(
     useShallow((state) => {
@@ -471,8 +549,10 @@ export const useAllUniqueUserIds = (): string[] => {
 
 export const useMemberAvatars = (chatId: string, limit: number = 4) => {
   const members = useChatMemberStore.getState().chatMembers[chatId];
-  return members
-    .filter((member) => member.avatarUrl)
-    .slice(0, limit)
-    .map((member) => member.avatarUrl as string);
+  return (
+    members
+      ?.filter((member) => member.avatarUrl)
+      .slice(0, limit)
+      .map((member) => member.avatarUrl as string) || []
+  );
 };

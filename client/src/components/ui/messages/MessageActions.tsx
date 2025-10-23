@@ -153,6 +153,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
           )}
           onClick={(e) => {
             e.stopPropagation();
+            closeModal();
             action.action();
           }}
           title={action.label}

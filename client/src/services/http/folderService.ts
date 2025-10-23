@@ -16,16 +16,10 @@ export const folderService = {
   },
 
   async getFolders(
-    queries: PaginationQuery = { limit: 20 }
+    queries: PaginationQuery
   ): Promise<PaginationResponse<FolderResponse>> {
-    const { offset, lastId, limit } = queries;
-
     const { data } = await API.get("/folders", {
-      params: {
-        ...(offset !== undefined ? { offset } : {}),
-        ...(lastId ? { lastId } : {}),
-        limit,
-      },
+      params: queries,
     });
 
     return data.payload; // matches SuccessResponse<PaginationResponse<FolderResponse>>

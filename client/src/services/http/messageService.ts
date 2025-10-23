@@ -10,14 +10,8 @@ export const messageService = {
     queries?: PaginationQuery
   ): Promise<PaginationResponse<MessageResponse>> {
     try {
-      const { offset, lastId, limit = 20 } = queries || {};
-
       const { data } = await API.get(`/messages/chat/${chatId}`, {
-        params: {
-          ...(offset !== undefined ? { offset } : {}),
-          ...(lastId ? { lastId } : {}),
-          limit,
-        },
+        params: queries,
       });
 
       return data.payload;

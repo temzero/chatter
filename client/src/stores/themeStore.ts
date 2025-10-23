@@ -81,7 +81,6 @@ export const useThemeStore = create<ThemeState & ThemeActions>()(
         themeOption: state.themeOption,
         theme: state.theme,
       }),
-      // Optional: Auto-initialize when store is created
       onRehydrateStorage: () => (state) => {
         state?.initialize();
       },

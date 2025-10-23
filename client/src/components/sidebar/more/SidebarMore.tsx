@@ -1,4 +1,4 @@
-import { getSetSidebar, useSidebarStore } from "@/stores/sidebarStore";
+import { getSetSidebar, useIsCompactSidebar } from "@/stores/sidebarStore";
 import { useCurrentUser } from "@/stores/authStore";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import { useSetActiveSavedChat } from "@/stores/chatStore";
@@ -10,7 +10,7 @@ import ThemeSwitcher from "@/components/ui/buttons/ThemeSwitcher";
 const SidebarMore: React.FC = () => {
   const { t } = useTranslation();
   const currentUser = useCurrentUser();
-  const isCompact = useSidebarStore((state) => state.isCompact);
+  const isCompact = useIsCompactSidebar();
   const setSidebar = getSetSidebar();
 
   const pendingRequests = useFriendshipStore((state) => state.pendingRequests);

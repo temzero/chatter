@@ -7,23 +7,24 @@ import {
   Param,
   Get,
   UseGuards,
-  Query,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { SuccessResponse } from 'src/common/api-response/success';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { ChatMemberService } from './chat-member.service';
-import { ChatMemberResponseDto } from './dto/responses/chat-member-response.dto';
+import {
+  GroupChatMemberResponseDto,
+  DirectChatMemberResponseDto,
+} from './dto/responses/chat-member-response.dto';
 import { UpdateChatMemberDto } from './dto/requests/update-chat-member.dto';
 import { mapChatMemberToChatMemberResDto } from './mappers/chat-member.mapper';
 import { ChatService } from '../chat/chat.service';
+import { ChatType } from 'src/shared/types/enums/chat-type.enum';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { SystemEventType } from 'src/shared/types/enums/system-event-type.enum';
 import { MessageService } from '../message/message.service';
 import { MessageResponseDto } from '../message/dto/responses/message-response.dto';
 import { ErrorResponse } from 'src/common/api-response/errors';
-import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
-import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
 
 @Controller('chat-members')
 @UseGuards(JwtAuthGuard)
@@ -34,29 +35,46 @@ export class ChatMemberController {
     private readonly messageService: MessageService,
   ) {}
 
-  @Get('members/:chatId')
-  async getChatMembers(
-    @CurrentUser('id') currentUserId: string,
+  @Get('direct/:chatId')
+  async getDirectChatMembers(
     @Param('chatId') chatId: string,
-    @Query() queryParams: PaginationQuery,
-  ): Promise<SuccessResponse<PaginationResponse<ChatMemberResponseDto>>> {
-    const { items: members, hasMore } =
-      await this.memberService.findByChatIdWithBlockStatus(
-        chatId,
-        currentUserId,
-        queryParams, // Pass pagination params
-      );
+    @CurrentUser('id') currentUserId: string,
+  ): Promise<SuccessResponse<DirectChatMemberResponseDto[]>> {
+    const members = await this.memberService.findByChatIdWithBlockStatus(
+      chatId,
+      currentUserId,
+      ChatType.DIRECT,
+    );
 
     return new SuccessResponse(
-      { items: members, hasMore },
-      'Chat members retrieved successfully',
+      members as DirectChatMemberResponseDto[],
+      'Direct chat members retrieved successfully',
     );
   }
 
-  @Get('member/:memberId')
+  @Get('group/:chatId')
+  async getGroupChatMembers(
+    @Param('chatId') chatId: string,
+    @CurrentUser('id') currentUserId: string,
+  ): Promise<SuccessResponse<GroupChatMemberResponseDto[]>> {
+    const members = await this.memberService.findByChatIdWithBlockStatus(
+      chatId,
+      currentUserId,
+      ChatType.GROUP,
+    );
+
+    return new SuccessResponse(
+      members as GroupChatMemberResponseDto[],
+      'Group chat members retrieved successfully',
+    );
+  }
+
+  @Get(':memberId')
   async fetchMemberById(
     @Param('memberId') memberId: string,
-  ): Promise<SuccessResponse<ChatMemberResponseDto>> {
+  ): Promise<
+    SuccessResponse<GroupChatMemberResponseDto | DirectChatMemberResponseDto>
+  > {
     const member = await this.memberService.findById(memberId);
 
     const chatType = await this.chatService.getChatType(member.chatId);
@@ -72,7 +90,9 @@ export class ChatMemberController {
   async fetchMemberByChatIdAndUserId(
     @Param('chatId') chatId: string,
     @Param('userId') userId: string,
-  ): Promise<SuccessResponse<ChatMemberResponseDto>> {
+  ): Promise<
+    SuccessResponse<GroupChatMemberResponseDto | DirectChatMemberResponseDto>
+  > {
     const member = await this.memberService.getMemberByChatIdAndUserId(
       chatId,
       userId,
@@ -135,7 +155,7 @@ export class ChatMemberController {
     @CurrentUser('id') userId: string,
     @Param('memberId') memberId: string,
     @Body() updateDto: UpdateChatMemberDto,
-  ): Promise<SuccessResponse<ChatMemberResponseDto>> {
+  ): Promise<SuccessResponse<GroupChatMemberResponseDto>> {
     try {
       const oldMember = await this.memberService.findById(memberId);
       const updatedMember = await this.memberService.updateMember(
@@ -206,7 +226,7 @@ export class ChatMemberController {
 
       const memberResponse = mapChatMemberToChatMemberResDto(updatedMember);
       return new SuccessResponse(
-        plainToInstance(ChatMemberResponseDto, memberResponse),
+        plainToInstance(GroupChatMemberResponseDto, memberResponse),
         'Member updated successfully',
       );
     } catch (error: unknown) {
@@ -245,13 +265,13 @@ export class ChatMemberController {
   async updateLastReadMessage(
     @Param('memberId') memberId: string,
     @Param('messageId') messageId: string | null,
-  ): Promise<SuccessResponse<ChatMemberResponseDto>> {
+  ): Promise<SuccessResponse<GroupChatMemberResponseDto>> {
     const updatedMember = await this.memberService.updateLastRead(
       memberId,
       messageId,
     );
     return new SuccessResponse(
-      plainToInstance(ChatMemberResponseDto, updatedMember),
+      plainToInstance(GroupChatMemberResponseDto, updatedMember),
       'Last read message updated successfully',
     );
   }
@@ -260,13 +280,13 @@ export class ChatMemberController {
   async pinChat(
     @Param('memberId') memberId: string,
     @Body() body: { isPinned: boolean },
-  ): Promise<SuccessResponse<ChatMemberResponseDto>> {
+  ): Promise<SuccessResponse<GroupChatMemberResponseDto>> {
     const updatedMember = await this.memberService.updateMember(memberId, {
       pinnedAt: body.isPinned ? new Date() : null, // ✅ set pinnedAt
     });
 
     return new SuccessResponse(
-      plainToInstance(ChatMemberResponseDto, updatedMember),
+      plainToInstance(GroupChatMemberResponseDto, updatedMember),
       body.isPinned ? 'Chat pinned successfully' : 'Chat unpinned successfully',
     );
   }

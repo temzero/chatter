@@ -12,7 +12,6 @@ import { mapChatMemberToChatMemberResDto } from './mappers/chat-member.mapper';
 import { ChatType } from 'src/shared/types/enums/chat-type.enum';
 import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
 import { ChatMemberStatus } from 'src/shared/types/enums/chat-member-status.enum';
-import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
 
 @Injectable()
 export class ChatMemberService {
@@ -120,24 +119,9 @@ export class ChatMemberService {
   async findByChatIdWithBlockStatus(
     chatId: string,
     currentUserId: string,
-    queryParams: PaginationQuery = { limit: 20, offset: 0 },
-  ): Promise<{
-    items: ChatMemberResponseDto[];
-    hasMore: boolean;
-  }> {
-    const { limit = 20, offset = 0, lastId } = queryParams;
-
-    // Get chat to determine type
-    const chat = await this.chatRepo.findOne({
-      where: { id: chatId },
-      select: ['id', 'type'], // Only select what we need
-    });
-    if (!chat) {
-      ErrorResponse.notFound('Chat not found');
-    }
-    const chatType: ChatType = chat.type;
-
-    const queryBuilder = this.memberRepo
+    chatType: ChatType,
+  ): Promise<ChatMemberResponseDto[]> {
+    const { entities, raw } = await this.memberRepo
       .createQueryBuilder('member')
       .leftJoinAndSelect('member.user', 'user')
       .leftJoin(
@@ -152,6 +136,7 @@ export class ChatMemberService {
         'block2.blockerId = member.userId AND block2.blockedId = :currentUserId',
         { currentUserId },
       )
+      // Updated friendship join to match your entity
       .leftJoin(
         'friendship',
         'friendship',
@@ -162,35 +147,12 @@ export class ChatMemberService {
       .addSelect([
         'block1.id AS block1_id',
         'block2.id AS block2_id',
+        // Get both statuses and determine the overall friendship status
         'friendship.sender_status AS sender_status',
         'friendship.receiver_status AS receiver_status',
       ])
       .where('member.chatId = :chatId AND member.deletedAt IS NULL', { chatId })
-      .orderBy('member.createdAt', 'DESC')
-      .skip(offset)
-      .take(limit + 1); // Get one extra to check hasMore
-
-    // Optional: lastId-based pagination for better performance
-    if (lastId) {
-      const lastMember = await this.memberRepo.findOne({
-        where: { id: lastId },
-        select: ['createdAt'],
-      });
-      if (lastMember) {
-        queryBuilder.andWhere('member.createdAt < :lastCreatedAt', {
-          lastCreatedAt: lastMember.createdAt,
-        });
-      }
-    }
-
-    const { entities, raw } = await queryBuilder.getRawAndEntities();
-
-    // Check if there are more results
-    const hasMore = entities.length > limit;
-    if (hasMore) {
-      entities.pop(); // Remove the extra item
-      raw.pop();
-    }
+      .getRawAndEntities();
 
     type RawType = {
       block1_id?: string | null;
@@ -199,16 +161,19 @@ export class ChatMemberService {
       receiver_status?: string | null;
     };
 
-    const items = entities.map((member, i) => {
+    return entities.map((member, i) => {
       const row = raw[i] as RawType;
       const isBlockedByMe = !!row?.block1_id;
       const isBlockedMe = !!row?.block2_id;
 
+      // Determine friendship status based on who is the current user
       let friendshipStatus: FriendshipStatus | null = null;
       if (row?.sender_status && row?.receiver_status) {
         if (member.userId === currentUserId) {
+          // Current user is the sender
           friendshipStatus = row.sender_status as FriendshipStatus;
         } else {
+          // Current user is the receiver
           friendshipStatus = row.receiver_status as FriendshipStatus;
         }
       }
@@ -221,8 +186,6 @@ export class ChatMemberService {
         friendshipStatus,
       );
     });
-
-    return { items, hasMore };
   }
 
   async isMemberExists(chatId: string, userId: string): Promise<boolean> {

@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { GroupChatMember } from "@/shared/types/responses/chat-member.response";
+import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
@@ -12,7 +12,7 @@ import { calculateContextMenuPosition } from "@/common/utils/contextMenuUtils";
 import { useClickOutside } from "@/common/hooks/keyEvent/useClickOutside";
 
 interface ChatMemberItemsProps {
-  members: GroupChatMember[];
+  members: ChatMemberResponse[];
   chatId: string;
   currentUserId?: string;
 }
@@ -25,7 +25,7 @@ export const ChatMemberItems = ({
   const [contextMenu, setContextMenu] = useState<{
     position: { x: number; y: number };
     transformOrigin: string;
-    member: GroupChatMember | null;
+    member: ChatMemberResponse | null;
   } | null>(null);
 
   const menuRef = useRef<HTMLDivElement>(null);
@@ -58,7 +58,7 @@ export const ChatMemberItems = ({
     }
   };
 
-  const handleRightClick = (e: React.MouseEvent, member: GroupChatMember) => {
+  const handleRightClick = (e: React.MouseEvent, member: ChatMemberResponse) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -84,7 +84,7 @@ export const ChatMemberItems = ({
     setContextMenu({ ...position, member });
   };
 
-  const handleClickMember = (member: GroupChatMember) => {
+  const handleClickMember = (member: ChatMemberResponse) => {
     console.log("Clicked member:", member);
   };
 
@@ -97,7 +97,7 @@ export const ChatMemberItems = ({
     if (!acc[role]) acc[role] = [];
     acc[role].push(m);
     return acc;
-  }, {} as Record<string, GroupChatMember[]>);
+  }, {} as Record<string, ChatMemberResponse[]>);
 
   const sortedGroups = Object.entries(grouped).sort(
     ([a], [b]) =>
@@ -196,7 +196,7 @@ export const ChatMemberItems = ({
 interface ContextMenuProps {
   x: number;
   y: number;
-  member: GroupChatMember;
+  member: ChatMemberResponse;
   currentRole: ChatMemberRole;
   onClose: () => void;
 }

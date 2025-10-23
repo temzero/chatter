@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { useChatStore } from "@/stores/chatStore";
+import { useActiveChat } from "@/stores/chatStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { getSetSidebarInfo } from "@/stores/sidebarInfoStore";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
@@ -13,12 +13,12 @@ import {
 } from "@/stores/chatMemberStore";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
-import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
+import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
 import { useTranslation } from "react-i18next";
 
 const DirectChatEdit = () => {
   const { t } = useTranslation();
-  const activeChat = useChatStore((state) => state.activeChat) as ChatResponse;
+  const activeChat = useActiveChat() as ChatResponse
   const updateMemberNickname =
     useChatMemberStore.getState().updateMemberNickname;
   const setSidebarInfo = getSetSidebarInfo();
@@ -28,7 +28,7 @@ const DirectChatEdit = () => {
   const chatPartner = getDirectChatPartner(
     activeChat.id,
     activeChat.myMemberId
-  ) as DirectChatMember;
+  ) as ChatMemberResponse;
 
   const initialFormData = useMemo(
     () => ({

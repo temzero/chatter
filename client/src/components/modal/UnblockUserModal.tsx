@@ -1,7 +1,7 @@
 // components/modals/UnblockUserModal.tsx
 import React from "react";
 import { getCloseModal, getModalData } from "@/stores/modalStore";
-import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
+import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { blockService } from "@/services/http/blockService";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import Button from "../ui/buttons/Button";
 
 interface UnblockUserModalData {
-  blockedUser: DirectChatMember;
+  blockedUser: ChatMemberResponse;
   onUnblockSuccess?: () => void;
 }
 

@@ -1,10 +1,13 @@
 import React from "react";
 import ContactInfoItem from "@/components/ui/contact/contactInfoItem";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
-import { getSetSidebarInfo, useSidebarInfoStore } from "@/stores/sidebarInfoStore";
+import {
+  getSetSidebarInfo,
+  useSidebarInfoStore,
+} from "@/stores/sidebarInfoStore";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { useActiveChat } from "@/stores/chatStore";
-import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
+import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
 import { useActiveMembers } from "@/stores/chatMemberStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
@@ -32,7 +35,7 @@ const DirectChat: React.FC = () => {
 
   const chatPartner = chatMembers?.find(
     (member) => member.id !== activeChat.myMemberId
-  ) as DirectChatMember;
+  ) as ChatMemberResponse;
 
   if (!chatPartner || !activeChat) return null;
 
@@ -141,7 +144,7 @@ const DirectChat: React.FC = () => {
         ) : (
           <FriendshipBtn
             userId={chatPartner.userId}
-            username={chatPartner.username}
+            username={chatPartner.username ?? "No name"}
             firstName={chatPartner.firstName}
             lastName={chatPartner.lastName}
             avatarUrl={chatPartner.avatarUrl ?? undefined}

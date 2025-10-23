@@ -45,6 +45,9 @@
       "failed": "Fallido",
       "unknown": "Desconocido",
       "empty": "Vacío",
+      "no_result": "¡Sin resultados!",
+      "no_chats": "No se encontraron chats",
+      "no_contacts": "No se encontraron contactos",
       "error": "Ocurrió un error",
       "required": "Este campo es obligatorio",
       "invalid_code": "Por favor ingrese un código de 6 dígitos"
@@ -177,9 +180,9 @@
       "failed_create": "Error al crear {{type}}"
     }
   },
+
   "sidebar_search": {
-    "placeholder": "Buscar chats...",
-    "no_result": "¡Sin resultados!"
+    "placeholder": "Buscar chats..."
   },
 
   "sidebar_calls": {

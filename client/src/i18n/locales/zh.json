@@ -45,6 +45,9 @@
       "failed": "失败",
       "unknown": "未知",
       "empty": "空",
+      "no_result": "没有结果！",
+      "no_chats": "未找到聊天",
+      "no_contacts": "未找到联系人",
       "error": "发生错误",
       "required": "此字段为必填项",
       "invalid_code": "请输入6位验证码"
@@ -111,7 +114,7 @@
     "group": "群组",
     "channel": "频道"
   },
-  
+
   "chat_bar": {
     "placeholder": "消息...",
     "attach_file": "附件"
@@ -178,8 +181,7 @@
     }
   },
   "sidebar_search": {
-    "placeholder": "搜索聊天...",
-    "no_result": "无结果！"
+    "placeholder": "搜索聊天..."
   },
 
   "sidebar_calls": {

@@ -18,7 +18,7 @@ import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
 import { MessageMapper } from '../message/mappers/message.mapper';
 import {
   ChatResponseDto,
-  ChatWithMessagesResponseDto,
+  // ChatWithMessagesResponseDto,
 } from './dto/responses/chat-response.dto';
 import { PublicChatMapper } from './mappers/public-chat.mapper';
 import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
@@ -38,40 +38,129 @@ export class ChatService {
     private readonly messageMapper: MessageMapper,
   ) {}
 
-  async getInitialChatsWithMessages(
+  async getUserChats(
     userId: string,
-    chatLimit: number,
-    messageLimit: number,
-  ): Promise<PaginationResponse<ChatWithMessagesResponseDto>> {
-    // 1. Get base chats with pagination
-    const { items: baseChats, hasMore: hasMoreChats } = await this.getUserChats(
-      userId,
-      { limit: chatLimit },
-    );
+    queries: PaginationQuery = { limit: 20, offset: 0 },
+  ): Promise<PaginationResponse<ChatResponseDto>> {
+    const { limit, offset } = queries;
+    const savedChat = await this.getSavedChat(userId).catch(() => null);
 
-    // 2. Fetch messages for each chat
-    const chatsWithMessages: ChatWithMessagesResponseDto[] = await Promise.all(
-      baseChats.map(async (chat) => {
-        const { items: messages, hasMore } =
-          await this.messageService.getMessagesByChatId(chat.id, userId, {
-            limit: messageLimit,
-          });
+    const query = this.buildFullChatQueryForUser(userId)
+      .andWhere('chat.type != :savedType', { savedType: 'saved' })
+      .addSelect(
+        'COALESCE(lastMessage.created_at, chat.created_at)',
+        'last_activity_at',
+      )
+      .orderBy('last_activity_at', 'DESC')
+      .skip(offset);
 
-        return {
-          ...chat,
-          messages: messages.map((m) =>
-            this.messageMapper.mapMessageToMessageResDto(m),
-          ),
-          hasMoreMessages: hasMore,
-        };
-      }),
-    );
+    // Only apply limit if provided
+    if (limit != null && Number.isFinite(limit)) {
+      query.take(limit + 1); // fetch 1 extra to check hasMore
+    }
 
-    return {
-      items: chatsWithMessages,
-      hasMore: hasMoreChats,
-    };
+    const chats = await query.getMany();
+
+    let hasMore = false;
+    if (limit != null && Number.isFinite(limit)) {
+      hasMore = chats.length > limit;
+      if (hasMore) {
+        chats.pop(); // remove the extra one
+      }
+    }
+
+    const chatDtos = (
+      await Promise.all(
+        chats.map(async (chat) => {
+          try {
+            // ✅ Use the unified mapper for all chat types
+            return await this.chatMapper.mapChatToChatResDto(chat, userId);
+          } catch (err) {
+            console.error('❌ Failed to transform chat:', chat.id, err);
+            return null;
+          }
+        }),
+      )
+    ).filter((dto): dto is ChatResponseDto => dto !== null);
+
+    const resultChats = savedChat ? [savedChat, ...chatDtos] : chatDtos;
+
+    return { items: resultChats, hasMore };
   }
+
+  async getUserChat(chatId: string, userId: string): Promise<ChatResponseDto> {
+    // First try to get chat with user membership
+    const chat = await this.buildFullChatQueryForUser(userId)
+      .andWhere('chat.id = :chatId', { chatId })
+      .getOne();
+
+    if (chat) {
+      // ✅ Use unified mapper
+      const chatDto = await this.chatMapper.mapChatToChatResDto(chat, userId);
+      if (!chatDto) {
+        ErrorResponse.notFound('Failed to map chat to response DTO');
+      }
+      return chatDto;
+    }
+
+    // If not a member, allow access only if it's a public channel
+    const channel = await this.chatRepo.findOne({
+      where: { id: chatId, type: ChatType.CHANNEL },
+      relations: [
+        'members',
+        'members.user',
+        'pinnedMessage',
+        'pinnedMessage.sender',
+        'pinnedMessage.attachments',
+        'pinnedMessage.forwardedFromMessage',
+      ],
+    });
+
+    if (!channel) {
+      ErrorResponse.notFound('Chat not found or not accessible');
+    }
+
+    const chatDto = this.publicChatMapper.map(channel);
+    if (!chatDto) {
+      ErrorResponse.notFound('Failed to map chat to response DTO');
+    }
+    return chatDto;
+  }
+
+  // async getInitialChatsWithData(
+  //   userId: string,
+  //   chatLimit: number,
+  //   messageLimit: number,
+  // ): Promise<PaginationResponse<ChatWithMessagesResponseDto>> {
+  //   // 1. Get base chats with pagination
+  //   const { items: baseChats, hasMore: hasMoreChats } = await this.getUserChats(
+  //     userId,
+  //     { limit: chatLimit },
+  //   );
+
+  //   // 2. Fetch messages for each chat
+  //   const chatsWithMessages: ChatWithMessagesResponseDto[] = await Promise.all(
+  //     baseChats.map(async (chat) => {
+  //       const { items: messages, hasMore } =
+  //         await this.messageService.getMessagesByChatId(chat.id, userId, {
+  //           limit: messageLimit,
+  //         });
+
+  //       return {
+  //         ...chat,
+  //         messages: messages.map((m) =>
+  //           this.messageMapper.mapMessageToMessageResDto(m),
+  //         ),
+  //         hasMoreMessages: hasMore,
+  //       };
+  //     }),
+  //   );
+
+  //   return {
+  //     items: chatsWithMessages,
+  //     hasMore: hasMoreChats,
+  //   };
+  // }
 
   async getOrCreateDirectChat(
     myUserId: string,
@@ -248,95 +337,6 @@ export class ChatService {
     }
 
     return chat;
-  }
-
-  async getUserChats(
-    userId: string,
-    options: PaginationQuery = { offset: 0, limit: 20 },
-  ): Promise<PaginationResponse<ChatResponseDto>> {
-    const { offset, limit } = options;
-    const savedChat = await this.getSavedChat(userId).catch(() => null);
-
-    const query = this.buildFullChatQueryForUser(userId)
-      .andWhere('chat.type != :savedType', { savedType: 'saved' })
-      .addSelect(
-        'COALESCE(lastMessage.created_at, chat.created_at)',
-        'last_activity_at',
-      )
-      .orderBy('last_activity_at', 'DESC')
-      .skip(offset ?? 0);
-
-    // Only apply limit if provided
-    if (limit != null && Number.isFinite(limit)) {
-      query.take(limit + 1); // fetch 1 extra to check hasMore
-    }
-
-    const chats = await query.getMany();
-
-    let hasMore = false;
-    if (limit != null && Number.isFinite(limit)) {
-      hasMore = chats.length > limit;
-      if (hasMore) {
-        chats.pop(); // remove the extra one
-      }
-    }
-
-    const chatDtos = (
-      await Promise.all(
-        chats.map(async (chat) => {
-          try {
-            // ✅ Use the unified mapper for all chat types
-            return await this.chatMapper.mapChatToChatResDto(chat, userId);
-          } catch (err) {
-            console.error('❌ Failed to transform chat:', chat.id, err);
-            return null;
-          }
-        }),
-      )
-    ).filter((dto): dto is ChatResponseDto => dto !== null);
-
-    const resultChats = savedChat ? [savedChat, ...chatDtos] : chatDtos;
-
-    return { items: resultChats, hasMore };
-  }
-
-  async getUserChat(chatId: string, userId: string): Promise<ChatResponseDto> {
-    // First try to get chat with user membership
-    const chat = await this.buildFullChatQueryForUser(userId)
-      .andWhere('chat.id = :chatId', { chatId })
-      .getOne();
-
-    if (chat) {
-      // ✅ Use unified mapper
-      const chatDto = await this.chatMapper.mapChatToChatResDto(chat, userId);
-      if (!chatDto) {
-        ErrorResponse.notFound('Failed to map chat to response DTO');
-      }
-      return chatDto;
-    }
-
-    // If not a member, allow access only if it's a public channel
-    const channel = await this.chatRepo.findOne({
-      where: { id: chatId, type: ChatType.CHANNEL },
-      relations: [
-        'members',
-        'members.user',
-        'pinnedMessage',
-        'pinnedMessage.sender',
-        'pinnedMessage.attachments',
-        'pinnedMessage.forwardedFromMessage',
-      ],
-    });
-
-    if (!channel) {
-      ErrorResponse.notFound('Chat not found or not accessible');
-    }
-
-    const chatDto = this.publicChatMapper.map(channel);
-    if (!chatDto) {
-      ErrorResponse.notFound('Failed to map chat to response DTO');
-    }
-    return chatDto;
   }
 
   async pinMessage(

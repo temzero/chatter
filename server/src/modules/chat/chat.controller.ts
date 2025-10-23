@@ -30,7 +30,6 @@ import { MessageService } from '../message/message.service';
 import { MessageResponseDto } from '../message/dto/responses/message-response.dto';
 import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
 import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
-import { ChatWithMessagesResponse } from 'src/shared/types/responses/chat.response';
 
 @Controller('chat')
 @UseGuards(JwtAuthGuard)
@@ -40,24 +39,24 @@ export class ChatController {
     private readonly messageService: MessageService,
   ) {}
 
-  @Get('initial')
-  async getInitialData(
-    @CurrentUser('id') userId: string,
-    @Query('chatLimit') chatLimit: number = 20,
-    @Query('messageLimit') messageLimit: number = 20,
-  ): Promise<SuccessResponse<PaginationResponse<ChatWithMessagesResponse>>> {
-    try {
-      const result = await this.chatService.getInitialChatsWithMessages(
-        userId,
-        chatLimit,
-        messageLimit,
-      );
+  // @Get('initial')
+  // async getInitialData(
+  //   @CurrentUser('id') userId: string,
+  //   @Query('chatLimit') chatLimit: number = 20,
+  //   @Query('messageLimit') messageLimit: number = 20,
+  // ): Promise<SuccessResponse<PaginationResponse<ChatWithMessagesResponse>>> {
+  //   try {
+  //     const result = await this.chatService.getInitialChatsWithData(
+  //       userId,
+  //       chatLimit,
+  //       messageLimit,
+  //     );
 
-      return new SuccessResponse(result, 'Initial data loaded');
-    } catch (error) {
-      ErrorResponse.throw(error, 'Failed to load initial data');
-    }
-  }
+  //     return new SuccessResponse(result, 'Initial data loaded');
+  //   } catch (error) {
+  //     ErrorResponse.throw(error, 'Failed to load initial data');
+  //   }
+  // }
 
   @Get()
   @HttpCode(HttpStatus.OK)

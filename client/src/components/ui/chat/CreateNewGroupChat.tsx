@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { Avatar } from "@/components/ui/avatar/Avatar";
-import SearchBar from "@/components/ui/SearchBar";
 import ContactSelectionList from "@/components/ui/contact/ContactSelectionList";
 import { useChatStore } from "@/stores/chatStore";
 import { useCurrentUser } from "@/stores/authStore";
-import { getSetSidebar,  } from "@/stores/sidebarStore";
+import { getSetSidebar } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
 import type { ChatResponse } from "@/shared/types/responses/chat.response";
 import type { ChatType } from "@/shared/types/enums/chat-type.enum";
+import SearchBar from "@/components/ui/SearchBar";
 
 interface CreateChatProps {
   type: ChatType.GROUP | ChatType.CHANNEL;
@@ -20,14 +20,25 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
   const isLoading = useChatStore((state) => state.isLoading);
   const currentUser = useCurrentUser();
 
-  const setActiveChat = useChatStore.getState().setActiveChat;
+  const setActiveChatId = useChatStore.getState().setActiveChatId;
   const setSidebar = getSetSidebar();
 
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [name, setName] = useState("");
+  const [searchTerm, setSearchTerm] = useState(""); // Add search state
 
-  const filteredChats = useChatStore((state) => state.filteredChats);
-  const privateChats = filteredChats.filter((chat) => chat.type === "direct");
+  const chats = useChatStore((state) => state.chats); // Get all chats instead of filteredChats
+
+  // Filter private chats locally with search
+  const privateChats = React.useMemo(() => {
+    const directChats = chats.filter((chat) => chat.type === "direct");
+
+    if (!searchTerm) return directChats;
+
+    return directChats.filter((chat) =>
+      chat.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [chats, searchTerm]);
 
   const handleContactToggle = (contactId: string) => {
     setSelectedContacts((prev) =>
@@ -43,6 +54,10 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
 
   const getSelectedChats = (): ChatResponse[] => {
     return privateChats.filter((chat) => selectedContacts.includes(chat.id));
+  };
+
+  const handleSearch = (term: string) => {
+    setSearchTerm(term);
   };
 
   const CreateNewGroup = async () => {
@@ -74,7 +89,7 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
       const newChat = await createGroupChat(payload);
       console.log("Successfully created:", newChat);
 
-      setActiveChat(newChat);
+      setActiveChatId(newChat.id);
       setSidebar(SidebarMode.DEFAULT);
     } catch (error) {
       console.error("Failed to create group/channel:", error);
@@ -86,6 +101,7 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
       <div className="p-2">
         <SearchBar
           placeholder={t("sidebar_new_chat.group.search_placeholder")}
+          onSearch={handleSearch} // Add this!
         />
       </div>
 
@@ -100,7 +116,11 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
       ) : (
         <div className="flex flex-col items-center justify-center my-auto opacity-40">
           <i className="material-symbols-outlined text-6xl">search_off</i>
-          <p>{t("sidebar_new_chat.group.no_contacts_found")}</p>
+          <p>
+            {searchTerm
+              ? t("common.messages.no_result")
+              : t("common.messages.no_contacts")}
+          </p>
         </div>
       )}
 

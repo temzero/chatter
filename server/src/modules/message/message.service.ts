@@ -489,7 +489,7 @@ export class MessageService {
     chatId: string,
     currentUserId: string,
     queryParams: PaginationQuery,
-  ): Promise<PaginationResponse<Message>> {
+  ): Promise<PaginationResponse<MessageResponseDto>> {
     try {
       const query = this.buildFullMessageQuery()
         .where('message.chat_id = :chatId', { chatId })
@@ -544,7 +544,11 @@ export class MessageService {
         hasMore = remainingCount > 0;
       }
 
-      return { items: sortedMessages, hasMore };
+      const messagesResponse = sortedMessages.map((message) =>
+        this.messageMapper.mapMessageToMessageResDto(message),
+      );
+
+      return { items: messagesResponse, hasMore };
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to retrieve conversation messages');
     }

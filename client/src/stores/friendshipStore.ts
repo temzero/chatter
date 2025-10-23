@@ -17,7 +17,6 @@ interface FriendshipState {
 }
 
 interface FriendshipActions {
-  initialize: () => Promise<void>;
   setInitialData: (data: PaginationResponse<FriendRequestResponse>) => void;
   sendFriendRequest: (
     receiverId: string,
@@ -46,24 +45,6 @@ const initialState: FriendshipState = {
 export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
   (set) => ({
     ...initialState,
-
-    initialize: async () => {
-      set({ isLoading: true });
-
-      try {
-        const response = await friendshipService.getPendingRequests({
-          limit: 20,
-        });
-        set({
-          pendingRequests: response.items,
-          hasMore: response.hasMore,
-          isLoading: false,
-        });
-      } catch (error) {
-        console.error("Failed to fetch friend requests:", error);
-        set({ isLoading: false });
-      }
-    },
 
     setInitialData: (data: PaginationResponse<FriendRequestResponse>) => {
       set({

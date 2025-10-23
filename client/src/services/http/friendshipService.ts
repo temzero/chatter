@@ -14,16 +14,10 @@ export const friendshipService = {
    * Get all pending friend requests for the current user
    */
   async getPendingRequests(
-    queries: PaginationQuery = { limit: 20 }
+    queries: PaginationQuery
   ): Promise<PaginationResponse<FriendRequestResponse>> {
-    const { offset, lastId, limit } = queries;
-
     const { data } = await API.get("/friendships/requests/pending", {
-      params: {
-        ...(offset !== undefined ? { offset } : {}),
-        ...(lastId ? { lastId } : {}),
-        limit,
-      },
+      params: queries,
     });
 
     return data.payload; // matches SuccessResponse<PaginationResponse<FriendRequestResponse>>

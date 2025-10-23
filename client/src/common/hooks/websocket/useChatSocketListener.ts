@@ -44,7 +44,7 @@ export function useChatSocketListeners() {
       } else {
         messageStore.addMessage(message);
 
-        const activeChatId = chatStore.activeChat?.id;
+        const activeChatId = chatStore.activeChatId;
         if (!isMuted && activeChatId !== message.chatId) {
           audioService.playSound(SoundType.NEW_MESSAGE);
         }

@@ -1,5 +1,5 @@
 // components/modals/ForwardMessageModal.tsx
-import React, { useState, useMemo } from "react";
+import React from "react";
 import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { useChatStore } from "@/stores/chatStore";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
@@ -21,33 +21,19 @@ interface ForwardMessageModalData {
 }
 
 const ForwardMessageModal: React.FC = () => {
-  console.log("ForwardMessageModal");
-
   const { t } = useTranslation();
   const closeModal = getCloseModal();
-  const chats = useChatStore((state) => state.chats);
-  const [searchTerm, setSearchTerm] = useState("");
+  const filteredChats = useChatStore((state) => state.filteredChats);
   const data = getModalData() as unknown as ForwardMessageModalData | undefined;
 
   const message = data?.message;
   const attachment = data?.attachment;
 
-  // Memoized filtering for better performance
-  const forwardChats = useMemo(() => {
-    return chats
-      .filter(
-        (chat) =>
-          // Search filter - only apply if searchTerm is not empty
-          !searchTerm ||
-          chat.name?.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-      .filter(
-        (chat) =>
-          // Forward-specific filters
-          (message ? chat.id !== message.chatId : true) &&
-          chat.type !== ChatType.CHANNEL
-      );
-  }, [chats, searchTerm, message]);
+  const forwardChats = filteredChats.filter(
+    (chat) =>
+      (message ? chat.id !== message.chatId : true) &&
+      chat.type !== ChatType.CHANNEL
+  );
 
   const handleForward = async (chatId: string) => {
     try {
@@ -89,10 +75,6 @@ const ForwardMessageModal: React.FC = () => {
     }
   };
 
-  const handleSearch = (term: string) => {
-    setSearchTerm(term);
-  };
-
   return (
     <div className="p-4 pb-0">
       <h1 className="font-bold text-center text-xl mb-4 flex items-center justify-center gap-2">
@@ -106,36 +88,25 @@ const ForwardMessageModal: React.FC = () => {
             })}
       </h1>
 
-      <SearchBar
-        placeholder={t("modal.forward_message.search_placeholder")}
-        onSearch={handleSearch}
-      />
+      <SearchBar placeholder={t("modal.forward_message.search_placeholder")} />
 
       <div className="flex flex-col items-start h-[50vh] overflow-y-auto mt-2">
-        {forwardChats.length === 0 ? (
-          <div className="w-full text-center py-4 text-gray-500">
-            {searchTerm
-              ? t("common.messages.no_result")
-              : t("common.messages.no_chats")}
-          </div>
-        ) : (
-          forwardChats.map((chat) => (
-            <div
-              key={chat.id}
-              className="flex items-center w-full gap-3 p-2 text-left transition custom-border-b"
+        {forwardChats.map((chat) => (
+          <div
+            key={chat.id}
+            className="flex items-center w-full gap-3 p-2 text-left transition custom-border-b"
+          >
+            <ChatAvatar chat={chat} type="header" />
+            <h2 className="font-medium">{chat.name}</h2>
+            <button
+              className="ml-auto w-10 h-8 opacity-60 hover:opacity-100 rounded hover:bg-[var(--primary-green)] hover:border-2 hover:border-green-400 flex items-center justify-center text-white transition-all duration-300"
+              onClick={() => handleForward(chat.id)}
+              title={t("common.actions.send")}
             >
-              <ChatAvatar chat={chat} type="header" />
-              <h2 className="font-medium">{chat.name}</h2>
-              <button
-                className="ml-auto w-10 h-8 opacity-60 hover:opacity-100 rounded hover:bg-[var(--primary-green)] hover:border-2 hover:border-green-400 flex items-center justify-center text-white transition-all duration-300"
-                onClick={() => handleForward(chat.id)}
-                title={t("common.actions.send")}
-              >
-                <span className="material-symbols-outlined text-3xl">send</span>
-              </button>
-            </div>
-          ))
-        )}
+              <span className="material-symbols-outlined text-3xl">send</span>
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );

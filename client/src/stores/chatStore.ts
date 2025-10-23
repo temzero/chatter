@@ -21,36 +21,36 @@ import type {
   MessageResponse,
 } from "@/shared/types/responses/message.response";
 import { PaginationResponse } from "@/shared/types/responses/pagination.response";
+import { useShallow } from "zustand/shallow";
+import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 
 interface ChatStoreState {
+  activeChatId: string | null;
   chats: ChatResponse[];
   savedChat: ChatResponse | null;
-  activeChat: ChatResponse | null;
-  filteredChats: ChatResponse[];
-  searchTerm: string;
   hasMoreChats: boolean;
   isLoading: boolean;
   error: string | null;
 }
 
 interface ChatStoreActions {
-  initialize: () => Promise<void>;
   setInitialData: (data: PaginationResponse<ChatWithMessagesResponse>) => void;
   getChatById: (id?: string) => ChatResponse | undefined;
+  getActiveChat: () => ChatResponse | null;
   getOrFetchChatById: (
     id: string,
     options?: { fetchFullData?: boolean }
   ) => Promise<ChatResponse>;
   getChatType: (chatId: string) => ChatType | undefined;
-  // fetchChats: () => Promise<void>;
   fetchMoreChats: (limit?: number) => Promise<number>;
   fetchChatById: (
     chatId?: string,
     options?: { fetchFullData?: boolean }
   ) => Promise<ChatResponse>;
   getDirectChatByUserId: (userId: string) => Promise<ChatResponse | void>;
-  setActiveChat: (chat: ChatResponse | null) => Promise<void>;
-  setActiveChatById: (chatId: string | null) => Promise<void>;
+
+  setActiveChatId: (chatId: string | null) => Promise<void>;
+  fetchChatData: (chatId: string) => Promise<void>;
   getAllUserIdsInChats: () => string[];
   createOrGetDirectChat: (partnerId: string) => Promise<ChatResponse>;
   createGroupChat: (payload: {
@@ -68,7 +68,6 @@ interface ChatStoreActions {
   setPinnedMessage: (chatId: string, message: MessageResponse | null) => void;
   generateInviteLink: (chatId: string) => Promise<string>;
   refreshInviteLink: (chatId: string, token: string) => Promise<string>;
-  setSearchTerm: (term: string) => void;
   leaveChat: (chatId: string) => Promise<void>;
   deleteChat: (id: string) => Promise<void>;
   cleanupChat: (chatId: string) => void;
@@ -79,11 +78,9 @@ interface ChatStoreActions {
 }
 
 const initialState: ChatStoreState = {
+  activeChatId: null,
   chats: [],
   savedChat: null,
-  filteredChats: [],
-  searchTerm: "",
-  activeChat: null,
   hasMoreChats: true,
   isLoading: false,
   error: null,
@@ -93,62 +90,6 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
   // persist(
   (set, get) => ({
     ...initialState,
-
-    initialize: async () => {
-      try {
-        set({ isLoading: true, error: null });
-
-        // Fetch initial data (chats + messages)
-        const initialData = await chatService.fetchInitialData();
-        if (!initialData) {
-          console.warn("get initialData failed, No Chats and messages");
-          return;
-        }
-
-        const chatsWithMessages = initialData.items;
-        const hasMoreChats = initialData.hasMore;
-
-        // Process chats (without messages)
-        const processedChats = chatsWithMessages.map((chat) => {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { messages, hasMoreMessages, ...chatData } = chat;
-          return chatData;
-        });
-
-        const savedChat =
-          processedChats.find((chat) => chat.type === ChatType.SAVED) || null;
-        const otherChats = processedChats.filter(
-          (chat) => chat.type !== ChatType.SAVED
-        );
-
-        // Update chat store
-        set({
-          savedChat,
-          chats: otherChats,
-          filteredChats: otherChats,
-          hasMoreChats: hasMoreChats, // Use the variable from initialData
-        });
-
-        // Process messages for each chat
-        chatsWithMessages.forEach((chat) => {
-          if (chat.messages?.length) {
-            useMessageStore.getState().setChatMessages(chat.id, chat.messages);
-            useMessageStore.setState((state) => ({
-              hasMoreMessages: {
-                ...state.hasMoreMessages,
-                [chat.id]: chat.hasMoreMessages,
-              },
-            }));
-          }
-        });
-      } catch (error) {
-        console.error("Initialization failed:", error);
-        set({ error: "Failed to initialize chat data" });
-        throw error;
-      } finally {
-        set({ isLoading: false });
-      }
-    },
 
     setInitialData: (data: PaginationResponse<ChatWithMessagesResponse>) => {
       const chatsWithMessages = data.items;
@@ -171,20 +112,14 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
       set({
         savedChat,
         chats: otherChats,
-        filteredChats: otherChats,
         hasMoreChats: hasMoreChats,
       });
 
-      // Process messages for each chat
       chatsWithMessages.forEach((chat) => {
         if (chat.messages?.length) {
-          useMessageStore.getState().setChatMessages(chat.id, chat.messages);
-          useMessageStore.setState((state) => ({
-            hasMoreMessages: {
-              ...state.hasMoreMessages,
-              [chat.id]: chat.hasMoreMessages,
-            },
-          }));
+          useMessageStore
+            .getState()
+            .setInitialData(chat.id, chat.messages, chat.hasMoreMessages);
         }
       });
     },
@@ -193,6 +128,12 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
       if (!chatId) return undefined;
       const chat = get().chats.find((c) => c.id === chatId);
       return chat;
+    },
+
+    getActiveChat: () => {
+      const { activeChatId, chats } = get();
+      if (!activeChatId) return null;
+      return chats.find((chat) => chat.id === activeChatId) || null;
     },
 
     getOrFetchChatById: async (
@@ -241,7 +182,6 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
 
           set({
             chats: [...chats, ...filteredNewChats],
-            filteredChats: [...chats, ...filteredNewChats],
             hasMoreChats: hasMore,
           });
 
@@ -259,7 +199,7 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
     },
 
     fetchChatById: async (chatId, options = { fetchFullData: false }) => {
-      const targetChatId = chatId || get().activeChat?.id;
+      const targetChatId = chatId || get().activeChatId;
       if (!targetChatId) {
         throw new Error("No chat ID provided and no active chat");
       }
@@ -273,23 +213,19 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
           chats: state.chats.some((c) => c.id === targetChatId)
             ? state.chats.map((c) => (c.id === targetChatId ? chat : c))
             : [chat, ...state.chats],
-          activeChat:
-            state.activeChat?.id === targetChatId ? chat : state.activeChat,
         }));
 
         // Optionally fetch full data
         if (options.fetchFullData) {
           await Promise.all([
-            useChatMemberStore
-              .getState()
-              .fetchChatMembers(targetChatId, chat.type),
+            useChatMemberStore.getState().fetchChatMembers(targetChatId),
             useMessageStore.getState().fetchMessages(targetChatId),
           ]);
         }
 
         return chat;
       } catch (error) {
-        set({ activeChat: null });
+        set({ activeChatId: null });
         handleError(error, "Failed to fetch chat");
         window.history.pushState({}, "", "/");
         throw error;
@@ -311,81 +247,48 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
       return;
     },
 
-    setSearchTerm: (term) => {
-      const { chats } = get();
-      const trimmed = term.trim().toLowerCase();
-
-      if (!trimmed) {
-        set({ searchTerm: term, filteredChats: chats });
-        return;
-      }
-
-      const filtered = chats.filter((chat) => {
-        return chat.name?.toLowerCase().includes(trimmed);
-      });
-
-      set({ searchTerm: term, filteredChats: filtered });
-    },
-
-    setActiveChat: async (chat) => {
-      console.log("setActiveChat");
-      useSidebarInfoStore.getState().setSidebarInfo();
+    setActiveChatId: async (chatId) => {
+      console.log("setActiveChatId");
+      useSidebarInfoStore.getState().setSidebarInfo(SidebarInfoMode.DEFAULT);
       useMessageStore.getState().setDisplaySearchMessage(false);
       useModalStore.getState().closeModal();
-      if (!chat) {
-        set({ activeChat: null, isLoading: false });
+
+      if (!chatId) {
+        set({ activeChatId: null });
         return;
       }
+      set({ activeChatId: chatId });
+      get().updateChatLocally(chatId, { unreadCount: 0 });
+      window.history.pushState({}, "", `/${chatId}`);
 
-      const messages = useMessageStore.getState().messages;
-      const chatMembers = useChatMemberStore.getState().chatMembers;
-      const alreadyFetchedMessages = !!messages[chat.id];
-      const alreadyFetchedMembers = !!chatMembers[chat.id];
+      // get().fetchChatData(chatId);
+    },
 
-      set({ activeChat: chat, isLoading: true });
-      window.history.pushState({}, "", `/${chat.id}`);
-
+    fetchChatData: async (chatId: string) => {
+      set({ isLoading: true });
       try {
+        const alreadyFetchedMessages =
+          !!useMessageStore.getState().messages[chatId];
+        const alreadyFetchedMembers =
+          !!useChatMemberStore.getState().chatMembers[chatId];
+
         const fetchMessagesPromise = alreadyFetchedMessages
           ? null
-          : useMessageStore.getState().fetchMessages(chat.id);
+          : useMessageStore.getState().fetchMessages(chatId);
 
-        const fetchMembersPromise = alreadyFetchedMembers
-          ? null
-          : useChatMemberStore.getState().fetchChatMembers(chat.id, chat.type);
+        const chat = get().getChatById(chatId);
+        const fetchMembersPromise =
+          alreadyFetchedMembers || !chat
+            ? null
+            : useChatMemberStore.getState().fetchChatMembers(chatId);
 
         await Promise.all(
           [fetchMessagesPromise, fetchMembersPromise].filter(Boolean)
         );
-
-        get().updateChatLocally(chat.id, { unreadCount: 0 });
       } catch (error) {
-        handleError(error, "Failed to set active chat");
+        handleError(error, "Failed to fetch active chat data");
       } finally {
         set({ isLoading: false });
-      }
-    },
-
-    setActiveChatById: async (chatId) => {
-      if (!chatId) {
-        await get().setActiveChat(null);
-        return;
-      }
-
-      const currentActive = get().activeChat;
-      if (currentActive?.id === chatId) {
-        console.log("Already active", currentActive);
-        return;
-      }
-
-      const existingChat = get().chats.find((chat) => chat.id === chatId);
-      if (existingChat) {
-        await get().setActiveChat(existingChat);
-      } else {
-        console.log("fetchChatById");
-        await get().fetchChatById(chatId);
-        const fetchedChat = get().chats.find((chat) => chat.id === chatId);
-        if (fetchedChat) await get().setActiveChat(fetchedChat);
       }
     },
 
@@ -409,11 +312,10 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
         if (!wasExisting) {
           set((state) => ({
             chats: [payload, ...state.chats],
-            filteredChats: [payload, ...state.filteredChats],
           }));
         }
 
-        await get().setActiveChat(payload);
+        await get().setActiveChatId(payload.id);
         return payload;
       } catch (error) {
         set({ error: "Failed to create chat" });
@@ -430,7 +332,6 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
         const newChat = await chatService.createGroupChat(payload);
         set((state) => ({
           chats: [newChat, ...state.chats],
-          filteredChats: [newChat, ...state.filteredChats],
         }));
         return newChat;
       } catch (error) {
@@ -465,13 +366,6 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
           chats: state.chats.map((chat) =>
             chat.id === chatId ? updateFn(chat) : chat
           ),
-          filteredChats: state.filteredChats.map((chat) =>
-            chat.id === chatId ? updateFn(chat) : chat
-          ),
-          activeChat:
-            state.activeChat?.id === chatId
-              ? updateFn(state.activeChat)
-              : state.activeChat,
         };
       });
     },
@@ -534,7 +428,7 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
     },
 
     setUnreadCount: (chatId: string, incrementBy: number) => {
-      const isActiveChat = get().activeChat?.id === chatId;
+      const isActiveChat = get().activeChatId === chatId;
       if (isActiveChat) return;
       const currentChat = get().chats.find((c) => c.id === chatId);
       if (!currentChat) return;
@@ -650,7 +544,7 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
     },
 
     clearChats: () => {
-      set({ chats: [], filteredChats: [], activeChat: null });
+      set({ chats: [], activeChatId: null });
     },
 
     cleanupChat: (chatId: string) => {
@@ -658,15 +552,14 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
       useChatMemberStore.getState().clearChatMembers(chatId);
       set((state) => ({
         chats: state.chats.filter((chat) => chat.id !== chatId),
-        filteredChats: state.filteredChats.filter((chat) => chat.id !== chatId),
-        activeChat: state.activeChat?.id === chatId ? null : state.activeChat,
+        activeChatId: state.activeChatId === chatId ? null : state.activeChatId,
       }));
     },
   })
   //   {
   //     name: "chat-storage",
   //     partialize: (state) => ({
-  //       activeChat: state.activeChat,
+  //       activeChatId: state.activeChatId,
   //       chats: state.chats,
   //     }),
   //   }
@@ -675,12 +568,16 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
 
 // EXPORT HOOKS
 
-export const useActiveChat = () => useChatStore((s) => s.activeChat);
-export const useActiveChatId = () => useChatStore((s) => s.activeChat?.id);
-export const useAllChats = () => useChatStore((s) => s.chats);
-export const useSavedChat = () => useChatStore((s) => s.savedChat);
+export const useActiveChat = () =>
+  useChatStore((state) => state.getActiveChat());
+
+export const useActiveChatId = () =>
+  useChatStore((state) => state.activeChatId);
+export const useAllChats = () => useChatStore((state) => state.chats);
+export const useSavedChat = () => useChatStore((state) => state.savedChat);
+
 export const useIsActiveChat = (chatId: string) =>
-  useChatStore((state) => state.activeChat?.id === chatId);
+  useChatStore(useShallow((state) => state.activeChatId === chatId));
 
 export const useSetActiveSavedChat = () => {
   const getState = useChatStore;
@@ -707,6 +604,6 @@ export const useSetActiveSavedChat = () => {
       }
     }
 
-    await state.setActiveChat(savedChat);
+    await state.setActiveChatId(savedChat.id);
   };
 };

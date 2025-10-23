@@ -15,14 +15,14 @@ import type {
   SenderResponse,
 } from "@/shared/types/responses/message.response";
 
-interface Messages {
-  [chatId: string]: MessageResponse[];
-}
+type Messages = Record<string, MessageResponse[]>; // chatId: messages
+type HasMoreMessages = Record<string, boolean>; // chatId: boolean
+type Drafts = Record<string, string>; // chatId: draft-message
 
 interface MessageStoreState {
   messages: Messages;
-  hasMoreMessages: Record<string, boolean>;
-  drafts: Record<string, string>;
+  hasMoreMessages: HasMoreMessages;
+  drafts: Drafts;
   searchQuery: string;
   showImportantOnly: boolean;
   isSearchMessages: boolean;
@@ -30,6 +30,11 @@ interface MessageStoreState {
 }
 
 interface MessageStoreActions {
+  setInitialData: (
+    chatId: string,
+    messages: MessageResponse[],
+    hasMore: boolean
+  ) => void;
   fetchMessages: (chatId: string) => Promise<void>;
   fetchMoreMessages: (chatId: string) => Promise<number>;
   addMessage: (newMessage: MessageResponse) => void;
@@ -92,6 +97,19 @@ const initialState: MessageStoreState = {
 export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
   (set, get) => ({
     ...initialState,
+
+    setInitialData: (chatId, messages, hasMore) => {
+      set((state) => ({
+        messages: {
+          ...state.messages,
+          [chatId]: messages,
+        },
+        hasMoreMessages: {
+          ...state.hasMoreMessages,
+          [chatId]: hasMore,
+        },
+      }));
+    },
 
     fetchMessages: async (chatId: string) => {
       set({ isLoading: true });
@@ -480,7 +498,7 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
 // EXPORT HOOKS
 
 export const useActiveChatMessages = () => {
-  const activeChatId = useChatStore((state) => state.activeChat?.id);
+  const activeChatId = useChatStore((state) => state.activeChatId);
   const isLoading = useMessageStore((state) => state.isLoading);
 
   // Subscribe *only* to the messages of the current chat

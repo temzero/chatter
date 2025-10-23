@@ -45,6 +45,9 @@
       "failed": "Failed",
       "unknown": "Unknown",
       "empty": "Empty",
+      "no_result": "No Result!",
+      "no_chats": "No chats Found",
+      "no_contacts": "No contacts Found",
       "error": "An error occurred",
       "required": "This field is required",
       "invalid_code": "Please enter a 6-digit code"
@@ -177,9 +180,9 @@
       "failed_create": "Failed to create {{type}}"
     }
   },
+
   "sidebar_search": {
-    "placeholder": "Search chats...",
-    "no_result": "No Result!"
+    "placeholder": "Search chats..."
   },
 
   "sidebar_calls": {

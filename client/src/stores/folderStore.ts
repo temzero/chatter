@@ -13,7 +13,6 @@ interface FolderStoreState {
 }
 
 interface FolderStoreActions {
-  initialize: () => Promise<void>;
   setInitialData: (data: PaginationResponse<FolderResponse>) => void;
   getFolderById: (folderId: string) => FolderResponse | undefined;
   createFolder: (folderData: {
@@ -44,30 +43,6 @@ const initialState: FolderStoreState = {
 export const useFolderStore = create<FolderStoreState & FolderStoreActions>(
   (set, get) => ({
     ...initialState,
-
-    initialize: async () => {
-      if (get().folders.length > 0) return;
-
-      try {
-        set({ isLoading: true, error: null });
-
-        // Fetch first page
-        const response = await folderService.getFolders({ limit: 20 });
-        const folders = response.items;
-
-        set({
-          folders: sortByPosition(folders),
-          isLoading: false,
-          hasMore: response.hasMore,
-        });
-      } catch (error: unknown) {
-        set({
-          error:
-            error instanceof Error ? error.message : "Failed to fetch folders",
-          isLoading: false,
-        });
-      }
-    },
 
     setInitialData: (data: PaginationResponse<FolderResponse>) => {
       set({

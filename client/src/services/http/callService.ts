@@ -7,17 +7,11 @@ import { PaginationQuery } from "@/shared/types/queries/pagination-query";
 
 export const callService = {
   async fetchCallHistory(
-    queries: PaginationQuery = { limit: 20 }
+    queries: PaginationQuery
   ): Promise<{ calls: CallResponse[]; hasMore: boolean }> {
     try {
-      const { offset, lastId, limit } = queries;
-
       const { data } = await API.get(`/calls/history`, {
-        params: {
-          ...(offset !== undefined ? { offset } : {}),
-          ...(lastId ? { lastCallId: lastId } : {}), // maps `lastId` to API param
-          limit,
-        },
+        params: queries,
       });
 
       const { calls, hasMore } = data.payload;

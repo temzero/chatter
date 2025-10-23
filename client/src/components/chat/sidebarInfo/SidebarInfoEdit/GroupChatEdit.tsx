@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { useChatStore } from "@/stores/chatStore";
+import { useActiveChat, useChatStore } from "@/stores/chatStore";
 import { getSetSidebarInfo } from "@/stores/sidebarInfoStore";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { AvatarEdit } from "@/components/ui/avatar/AvatarEdit";
@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 import { useActiveMembers } from "@/stores/chatMemberStore";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
-import { GroupChatMember } from "@/shared/types/responses/chat-member.response";
+import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
 import { useCurrentUserId } from "@/stores/authStore";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
@@ -18,7 +18,7 @@ import { useTranslation } from "react-i18next";
 const GroupChatEdit = () => {
   const { t } = useTranslation();
   const currentUserId = useCurrentUserId();
-  const activeChat = useChatStore((state) => state.activeChat) as ChatResponse;
+  const activeChat = useActiveChat() as ChatResponse;
   console.log("activeChat", activeChat);
   const activeMembers = useActiveMembers();
   const updateChat = useChatStore.getState().updateChat;
@@ -28,7 +28,7 @@ const GroupChatEdit = () => {
 
   const myMember = activeMembers?.find(
     (member) => member.userId === currentUserId
-  ) as GroupChatMember;
+  ) as ChatMemberResponse;
 
   const initialFormData = useMemo(
     () => ({

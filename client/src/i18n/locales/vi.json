@@ -45,6 +45,9 @@
       "failed": "Thất bại",
       "unknown": "Không xác định",
       "empty": "Trống",
+      "no_result": "Không có kết quả!",
+      "no_chats": "Không tìm thấy cuộc trò chuyện",
+      "no_contacts": "Không tìm thấy liên hệ",
       "error": "Đã xảy ra lỗi",
       "required": "Trường này là bắt buộc",
       "invalid_code": "Vui lòng nhập mã 6 chữ số"
@@ -179,8 +182,7 @@
   },
 
   "sidebar_search": {
-    "placeholder": "Tìm kiếm cuộc trò chuyện...",
-    "no_result": "Không có kết quả!"
+    "placeholder": "Tìm kiếm cuộc trò chuyện..."
   },
 
   "sidebar_calls": {

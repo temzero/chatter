@@ -11,9 +11,9 @@ import { FriendContactResponse } from "@/shared/types/responses/friend-contact.r
 import { useFriendContacts } from "@/common/hooks/useFriendContacts";
 import { useAllUniqueMembers } from "@/common/hooks/useAllUniqueMembers";
 import { useTranslation } from "react-i18next";
-import SearchBar from "@/components/ui/SearchBar";
 import { getCloseModal } from "@/stores/modalStore";
 import { getSetSidebarInfo } from "@/stores/sidebarInfoStore";
+import SearchBar from "@/components/ui/SearchBar";
 
 const AddMemberModal: React.FC = () => {
   const { t } = useTranslation();
@@ -21,9 +21,10 @@ const AddMemberModal: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const [refreshed, setRefreshed] = useState(false);
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const chat = useActiveChat();
- const setSidebarInfo = getSetSidebarInfo();
+  const setSidebarInfo = getSetSidebarInfo();
 
   const chatMemberUserIds = chat?.otherMemberUserIds || [];
 
@@ -40,6 +41,13 @@ const AddMemberModal: React.FC = () => {
         !friendContacts.some((friend) => friend.userId === uniqueMember.userId)
     ),
   ];
+
+  const filteredContacts = combinedContacts.filter(
+    (contact) =>
+      !searchTerm ||
+      contact.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contact.lastName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleContactToggle = (userId: string) => {
     setSelectedContacts((prev) =>
@@ -110,15 +118,18 @@ const AddMemberModal: React.FC = () => {
         {t("modal.add_member.title")}
       </h1>
 
-      <SearchBar placeholder={t("modal.add_member.search_placeholder")} />
+      <SearchBar
+        placeholder={t("modal.add_member.search_placeholder")}
+        onSearch={(term) => setSearchTerm(term)}
+      />
 
       <div className="flex flex-col items-start h-[50vh] overflow-y-auto mt-2 select-none">
         {loading ? (
           <p className="text-center w-full text-gray-500">
             {t("modal.add_member.loading")}
           </p>
-        ) : combinedContacts.length > 0 ? (
-          combinedContacts.map((contact) => (
+        ) : filteredContacts.length > 0 ? (
+          filteredContacts.map((contact) => (
             <div
               key={contact.userId}
               className="flex items-center w-full select-none gap-3 p-2 text-left transition custom-border-b hover:bg-[var(--hover-color)] cursor-pointer"

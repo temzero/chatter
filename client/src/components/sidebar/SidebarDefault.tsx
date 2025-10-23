@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useAllChats } from "@/stores/chatStore";
-import { getSetSidebar, useSidebarStore } from "@/stores/sidebarStore";
+import { getSetSidebar, useIsCompactSidebar } from "@/stores/sidebarStore";
 import { useFolderStore } from "@/stores/folderStore";
 import { Logo } from "@/components/ui/icons/Logo";
 import { SlidingContainer } from "@/components/ui/layout/SlidingContainer";
@@ -11,9 +11,10 @@ import ChatList from "@/components/ui/chat/ChatList";
 import ChatFolderSelector from "@/components/ui/chat/ChatFolderSelector";
 
 const SidebarDefault: React.FC = () => {
+  console.log('SidebarDefault')
   const allChats = useAllChats();
   const setSidebar = getSetSidebar();
-  const isCompact = useSidebarStore((state) => state.isCompact);
+  const isCompact = useIsCompactSidebar();
   const folders = useFolderStore((state) => state.folders);
 
   // Create a virtual "All" folder

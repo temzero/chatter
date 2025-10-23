@@ -1,10 +1,10 @@
 import React from "react";
+import { AnimatePresence } from "framer-motion";
 import ChatListItem from "./ChatListItem";
 import InfiniteScroller from "@/components/ui/layout/InfiniteScroller";
-import { useAuthStore } from "@/stores/authStore";
+import { useCurrentUserId } from "@/stores/authStore";
 import { useChatStore } from "@/stores/chatStore";
 import type { ChatResponse } from "@/shared/types/responses/chat.response";
-import { AnimatePresence } from "framer-motion";
 
 interface ChatListProps {
   chats: ChatResponse[];
@@ -14,9 +14,10 @@ interface ChatListProps {
 const ChatList: React.FC<ChatListProps> = React.memo(
   ({ chats, isCompact = false }) => {
     console.log("ChatList", chats.length);
-    const currentUserId = useAuthStore((state) => state.currentUser?.id || "");
+    const currentUserId = useCurrentUserId();
     const hasMoreChats = useChatStore((state) => state.hasMoreChats);
     const fetchMoreChats = useChatStore.getState().fetchMoreChats;
+    if (!currentUserId) return;
 
     // Sort chats: pinned first, then by updatedAt descending
     const sortedChats = [...chats].sort((a, b) => {

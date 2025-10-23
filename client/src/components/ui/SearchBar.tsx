@@ -1,58 +1,28 @@
-import { useEffect, useRef, useState } from "react";
-import { useChatStore } from "@/stores/chatStore";
-import { debounce } from "lodash";
+import { useRef } from "react";
 
 type SearchBarProps = {
   placeholder?: string;
   type?: string;
+  onSearch?: (searchTerm: string) => void;
 };
 
 const SearchBar = ({
   placeholder = "Search something...",
   type,
+  onSearch,
 }: SearchBarProps) => {
-  const [localSearchTerm, setLocalSearchTerm] = useState("");
-  const setSearchTerm = useChatStore.getState().setSearchTerm;
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Create debounced setSearchTerm
-  const debouncedSetSearchTerm = useRef(
-    debounce((term: string) => {
-      setSearchTerm(term);
-    }, 200)
-  ).current;
-
-  useEffect(() => {
-    debouncedSetSearchTerm(localSearchTerm);
-    // Cleanup on unmount
-    return () => {
-      debouncedSetSearchTerm.cancel();
-    };
-  }, [localSearchTerm, debouncedSetSearchTerm]);
-
-  useEffect(() => {
-    return () => {
-      setSearchTerm("");
-      setLocalSearchTerm("");
-    };
-  }, [setSearchTerm]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      inputRef.current?.focus();
-    }, 202);
-    return () => clearTimeout(timer);
-  }, []);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLocalSearchTerm(e.target.value);
+    const value = e.target.value;
+    onSearch?.(value); // Call onSearch immediately
   };
 
   return (
     <div className="flex w-full items-center gap-1 p-1 rounded border-2 border-[var(--border-color)] shadow focus-within:border-[var(--primary-color)] focus-within:shadow-md transition-all duration-200">
       <i
         className={`material-symbols-outlined transition-opacity duration-200 ${
-          localSearchTerm ? "opacity-100" : "opacity-40"
+          inputRef.current?.value ? "opacity-100" : "opacity-40"
         }`}
       >
         {type === "add" ? "add" : "search"}
@@ -61,9 +31,9 @@ const SearchBar = ({
         ref={inputRef}
         type="text"
         placeholder={placeholder}
-        value={localSearchTerm}
         onChange={handleChange}
         className="w-full bg-transparent outline-none"
+        autoFocus
       />
     </div>
   );

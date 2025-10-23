@@ -6,11 +6,8 @@ import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { OnlineDot } from "@/components/ui/icons/OnlineDot";
 import { useChatStatus } from "@/stores/presenceStore";
-import { useChatMemberStore } from "@/stores/chatMemberStore";
-import PinnedMessage from "@/components/chat/components/message/PinnedMessage";
-import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
 import { useMessageStore } from "@/stores/messageStore";
-import MessageSearchBar from "@/components/ui/messages/MessageSearchBar";
+import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useUserLastSeen } from "@/stores/presenceStore";
 import { formatTimeAgo } from "@/common/utils/format/formatTimeAgo";
 import { useCallStore } from "@/stores/callStore";
@@ -20,7 +17,10 @@ import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { useChatStore } from "@/stores/chatStore";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/stores/deviceStore";
-import type { ChatResponse } from "@/shared/types/responses/chat.response";
+import { ChatResponse } from "@/shared/types/responses/chat.response";
+import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
+import MessageSearchBar from "@/components/ui/messages/MessageSearchBar";
+import PinnedMessage from "@/components/chat/components/message/PinnedMessage";
 
 interface ChatHeaderProps {
   chat: ChatResponse;
@@ -32,7 +32,7 @@ const Header: React.FC<ChatHeaderProps> = ({ chat, isBlockedByMe = false }) => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const toggleSidebarInfo = useSidebarInfoStore.getState().toggleSidebarInfo;
-  const setActiveChat = useChatStore.getState().setActiveChat;
+  const setActiveChatId = useChatStore.getState().setActiveChatId;
 
   const {
     callId,
@@ -81,7 +81,7 @@ const Header: React.FC<ChatHeaderProps> = ({ chat, isBlockedByMe = false }) => {
   if (isDirect && chat.otherMemberUserIds && chatListMembers) {
     const partnerMember = chatListMembers.find(
       (member) => member.userId === partnerId
-    ) as DirectChatMember;
+    ) as ChatMemberResponse;
     if (partnerMember?.friendshipStatus === FriendshipStatus.ACCEPTED) {
       canCall = true;
     }
@@ -107,7 +107,7 @@ const Header: React.FC<ChatHeaderProps> = ({ chat, isBlockedByMe = false }) => {
   };
 
   const handleGoHome = () => {
-    setActiveChat(null);
+    setActiveChatId(null);
     navigate("/", { replace: true });
   };
 

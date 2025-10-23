@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { getCloseModal, getModalData } from "@/stores/modalStore";
-import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
+import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useTranslation } from "react-i18next";
 import Button from "../ui/buttons/Button";
 
 interface SetNicknameModalData {
-  member: DirectChatMember;
+  member: ChatMemberResponse;
 }
 
 const SetNicknameModal: React.FC = () => {

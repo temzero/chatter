@@ -1,7 +1,7 @@
 // components/modals/UnfriendModal.tsx
 import React from "react";
 import { getCloseModal, getModalData } from "@/stores/modalStore";
-import { DirectChatMember } from "@/shared/types/responses/chat-member.response";
+import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { toast } from "react-toastify";
 import { useFriendshipStore } from "@/stores/friendshipStore";
@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 import Button from "../ui/buttons/Button";
 
 interface UnfriendModalData {
-  userToUnfriend: DirectChatMember;
+  userToUnfriend: ChatMemberResponse;
 }
 
 const UnfriendModal: React.FC = () => {

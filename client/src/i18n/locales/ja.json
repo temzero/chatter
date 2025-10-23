@@ -45,6 +45,9 @@
       "failed": "失敗",
       "unknown": "不明",
       "empty": "空",
+      "no_result": "結果がありません！",
+      "no_chats": "チャットが見つかりません",
+      "no_contacts": "連絡先が見つかりません",
       "error": "エラーが発生しました",
       "required": "このフィールドは必須です",
       "invalid_code": "6桁のコードを入力してください"
@@ -178,8 +181,7 @@
     }
   },
   "sidebar_search": {
-    "placeholder": "チャットを検索...",
-    "no_result": "結果なし！"
+    "placeholder": "チャットを検索..."
   },
 
   "sidebar_calls": {

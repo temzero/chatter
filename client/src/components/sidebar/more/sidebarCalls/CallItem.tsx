@@ -16,7 +16,7 @@ interface CallItemProps {
 
 const CallItem: React.FC<CallItemProps> = ({ call, isCaller, onDelete }) => {
   const startCall = useCallStore.getState().startCall;
-  const setActiveChatById = useChatStore.getState().setActiveChatById;
+  const setActiveChatId = useChatStore.getState().setActiveChatId;
 
   const [isHovered, setIsHovered] = useState(false);
 
@@ -52,7 +52,7 @@ const CallItem: React.FC<CallItemProps> = ({ call, isCaller, onDelete }) => {
         isHovered ? "bg-[--hover-color]" : ""
       }`}
       key={call.id}
-      onClick={() => setActiveChatById(chat.id)}
+      onClick={() => setActiveChatId(chat.id)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >

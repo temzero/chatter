@@ -3,11 +3,11 @@ import { OnlineDot } from "@/components/ui/icons/OnlineDot";
 import { useCurrentUser } from "@/stores/authStore";
 import { useChatStore } from "@/stores/chatStore";
 import { useUserStatus } from "@/stores/presenceStore";
-import { GroupChatMember } from "@/shared/types/responses/chat-member.response";
+import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
 import { ChatMemberStatus } from "@/shared/types/enums/chat-member-status.enum";
 
 interface MemberItemProps {
-  member: GroupChatMember;
+  member: ChatMemberResponse;
 }
 
 const MemberItem: React.FC<MemberItemProps> = ({ member }) => {
