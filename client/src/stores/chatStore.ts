@@ -12,9 +12,9 @@ import { useSidebarInfoStore } from "./sidebarInfoStore";
 import { UpdateChatRequest } from "@/shared/types/requests/update-chat.request";
 import { handleError } from "@/common/utils/handleError";
 import type {
-  ChatMemberLite,
   ChatResponse,
-  ChatWithMessagesResponse,
+  ChatDataResponse,
+  ChatMemberLite,
 } from "@/shared/types/responses/chat.response";
 import type {
   LastMessageResponse,
@@ -34,7 +34,7 @@ interface ChatStoreState {
 }
 
 interface ChatStoreActions {
-  setInitialData: (data: PaginationResponse<ChatWithMessagesResponse>) => void;
+  setInitialData: (data: PaginationResponse<ChatDataResponse>) => void;
   getChatById: (id?: string) => ChatResponse | undefined;
   getActiveChat: () => ChatResponse | null;
   getOrFetchChatById: (
@@ -91,39 +91,46 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
   (set, get) => ({
     ...initialState,
 
-    setInitialData: (data: PaginationResponse<ChatWithMessagesResponse>) => {
-      const chatsWithMessages = data.items;
-      const hasMoreChats = data.hasMore;
+    setInitialData: (data: PaginationResponse<ChatDataResponse>) => {
+      const chats: ChatResponse[] = [];
+      let savedChat: ChatResponse | null = null;
 
-      // Process chats (without messages) - same logic as your initialize method
-      const processedChats = chatsWithMessages.map((chat) => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { messages, hasMoreMessages, ...chatData } = chat;
-        return chatData;
-      });
+      data.items.forEach((chat) => {
+        const { messageData, memberData, ...chatData } = chat;
 
-      const savedChat =
-        processedChats.find((chat) => chat.type === ChatType.SAVED) || null;
-      const otherChats = processedChats.filter(
-        (chat) => chat.type !== ChatType.SAVED
-      );
-
-      // Update chat store
-      set({
-        savedChat,
-        chats: otherChats,
-        hasMoreChats: hasMoreChats,
-      });
-
-      chatsWithMessages.forEach((chat) => {
-        if (chat.messages?.length) {
+        // --- Messages ---
+        const messages = messageData?.items || [];
+        const hasMoreMessages = messageData?.hasMore ?? false;
+        if (messages.length) {
           useMessageStore
             .getState()
-            .setInitialData(chat.id, chat.messages, chat.hasMoreMessages);
+            .setInitialData(chat.id, messages, hasMoreMessages);
+        }
+
+        // --- Chat Members ---
+        const members = memberData?.items || [];
+        const hasMoreMembers = memberData?.hasMore ?? false;
+        if (members.length) {
+          useChatMemberStore
+            .getState()
+            .setInitialData(chat.id, members, hasMoreMembers);
+        }
+
+        // --- Process chats (without messageData/memberData) ---
+        if (chatData.type === ChatType.SAVED) {
+          savedChat = chatData;
+        } else {
+          chats.push(chatData);
         }
       });
-    },
 
+      // --- Update chat store ---
+      set({
+        savedChat,
+        chats,
+        hasMoreChats: data.hasMore,
+      });
+    },
     getChatById: (chatId?: string) => {
       if (!chatId) return undefined;
       const chat = get().chats.find((c) => c.id === chatId);
@@ -568,12 +575,33 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
 
 // EXPORT HOOKS
 
+export const useChat = (chatId: string) =>
+  useChatStore((state) => state.chats.find((chat) => chat.id === chatId));
+
 export const useActiveChat = () =>
   useChatStore((state) => state.getActiveChat());
 
 export const useActiveChatId = () =>
   useChatStore((state) => state.activeChatId);
-export const useAllChats = () => useChatStore((state) => state.chats);
+
+export const useAllChats = () =>
+  useChatStore(useShallow((state) => state.chats));
+
+export const useAllChatIds = () =>
+  useChatStore(useShallow((state) => state.chats.map((chat) => chat.id)));
+
+export const useChatsForFolderFilter = () =>
+  useChatStore(
+    useShallow((state) =>
+      state.chats.map((chat) => ({
+        id: chat.id,
+        type: chat.type,
+        pinnedAt: chat.pinnedAt,
+        updatedAt: chat.updatedAt,
+      }))
+    )
+  );
+
 export const useSavedChat = () => useChatStore((state) => state.savedChat);
 
 export const useIsActiveChat = (chatId: string) =>

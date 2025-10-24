@@ -1,13 +1,12 @@
 import React, { useState, useRef } from "react";
 import { useMessageStore } from "@/stores/messageStore";
 import { useTypingUsersByChatId } from "@/stores/typingStore";
-import type { ChatResponse } from "@/shared/types/responses/chat.response";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { formatTimeAgo } from "@/common/utils/format/formatTimeAgo";
 import { OnlineDot } from "@/components/ui/icons/OnlineDot";
 import SimpleTypingIndicator from "@/components/ui/typingIndicator/SimpleTypingIndicator";
 import { AnimatePresence, motion } from "framer-motion";
-import { useChatStore, useIsActiveChat } from "@/stores/chatStore";
+import { useChat, useChatStore, useIsActiveChat } from "@/stores/chatStore";
 import { useChatStatus } from "@/stores/presenceStore";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useBlockStatus } from "@/common/hooks/useBlockStatus";
@@ -23,21 +22,23 @@ import { useClickOutside } from "@/common/hooks/keyEvent/useClickOutside";
 let openMenuSetter: (() => void) | null = null;
 
 interface ChatListItemProps {
-  chat: ChatResponse;
+  chatId: string;
   isCompact?: boolean;
   currentUserId: string;
 }
 
 const ChatListItem: React.FC<ChatListItemProps> = React.memo(
-  ({ chat, isCompact = false, currentUserId = "" }) => {
+  ({ chatId, isCompact = false, currentUserId = "" }) => {
     console.log("ChatListItem");
-    const isActive = useIsActiveChat(chat.id);
+    const chat = useChat(chatId);
 
-    const typingUsers = useTypingUsersByChatId(chat.id);
-    const isOnline = useChatStatus(chat?.id, chat.type);
-    const unreadCount = chat.unreadCount || 0;
-    const lastMessage = chat.lastMessage;
-    const { isBlockedByMe } = useBlockStatus(chat.id, chat.myMemberId);
+    const isActive = useIsActiveChat(chatId);
+
+    const typingUsers = useTypingUsersByChatId(chatId);
+    const isOnline = useChatStatus(chatId, chat.type);
+    const unreadCount = chat?.unreadCount || 0;
+    const lastMessage = chat?.lastMessage;
+    const { isBlockedByMe } = useBlockStatus(chatId, chat.myMemberId);
 
     const getDraftMessage = useMessageStore.getState().getDraftMessage;
     const setActiveChatId = useChatStore.getState().setActiveChatId;
@@ -73,6 +74,8 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
       setContextMenu(position.position);
     };
 
+    if (!chat) return null;
+
     const handleCloseContextMenu = () => {
       setContextMenu(null);
       if (openMenuSetter) openMenuSetter = null;
@@ -83,7 +86,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
       if (e.button === 1) {
         e.preventDefault();
         e.stopPropagation();
-        window.open(`/${chat.id}`, "_blank");
+        window.open(`/${chatId}`, "_blank");
       }
     };
 
@@ -96,7 +99,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
       return `${baseClasses} ${activeClasses}`;
     };
 
-    const draft = getDraftMessage(chat.id);
+    const draft = getDraftMessage(chatId);
 
     const displayMessage = draft ? (
       <p className="text-[var(--primary-green)] flex items-center gap-1 overflow-hidden flex-1 min-w-0">
@@ -157,7 +160,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
       <>
         <div
           className={getUserItemClass()}
-          onClick={() => setActiveChatId(chat.id)}
+          onClick={() => setActiveChatId(chatId)}
           onMouseDown={handleMouseDown}
           onContextMenu={handleContextMenu}
         >
@@ -241,7 +244,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
                         className="min-w-0"
                       >
                         <SimpleTypingIndicator
-                          chatId={chat.id}
+                          chatId={chatId}
                           userIds={typingUsers}
                         />
                       </motion.div>

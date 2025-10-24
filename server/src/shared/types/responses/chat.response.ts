@@ -1,6 +1,8 @@
 import { ChatType } from 'src/shared/types/enums/chat-type.enum';
 import { ChatMemberRole } from 'src/shared/types/enums/chat-member-role.enum';
 import { LastMessageResponse, MessageResponse } from './message.response';
+import { ChatMemberResponse } from './chat-member.response';
+import { PaginationResponse } from './pagination.response';
 
 export interface ChatResponse {
   id: string;
@@ -31,7 +33,7 @@ export interface ChatMemberLite {
   lastName: string | null;
 }
 
-export interface ChatWithMessagesResponse extends ChatResponse {
-  messages: MessageResponse[];
-  hasMoreMessages: boolean;
+export interface ChatDataResponse extends ChatResponse {
+  messageData: PaginationResponse<MessageResponse>;
+  memberData: PaginationResponse<ChatMemberResponse>;
 }

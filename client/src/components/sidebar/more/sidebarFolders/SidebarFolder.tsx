@@ -2,7 +2,7 @@
 import React from "react";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { getSetSidebar, useSidebarStore } from "@/stores/sidebarStore";
-import { useFolderStore } from "@/stores/folderStore";
+import { useFolders } from "@/stores/folderStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useChatStore } from "@/stores/chatStore";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
@@ -20,7 +20,7 @@ const SidebarFolder: React.FC = () => {
     (state) => state.sidebarData
   ) as SidebarData;
   const setSidebar = getSetSidebar();
-  const folders = useFolderStore((state) => state.folders);
+  const folders = useFolders();
   const folder = folders.find((f) => f.id === sidebarData?.folderId);
   const openModal = getOpenModal();
 

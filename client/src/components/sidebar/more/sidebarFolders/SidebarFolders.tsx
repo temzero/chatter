@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 
 import { getSetSidebar } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
-import { useFolderStore } from "@/stores/folderStore";
+import { useFolders, useFolderStore } from "@/stores/folderStore";
 import { FolderResponse } from "@/shared/types/responses/folder.response";
 import { audioService, SoundType } from "@/services/audio.service";
 import SidebarLayout from "@/layouts/SidebarLayout";
@@ -19,7 +19,7 @@ import FolderCard from "./FolderCard";
 
 const SidebarFolders: React.FC = () => {
   const { t } = useTranslation();
-  const folders = useFolderStore((state) => state.folders) || [];
+  const folders = useFolders() || [];
   const setSidebar = getSetSidebar();
   const reorderFolders = useFolderStore.getState().reorderFolders;
 

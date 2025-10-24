@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useAllChats, useChatsForFolderFilter, useChatStore } from "@/stores/chatStore";
+import { useAllChats } from "@/stores/chatStore";
 import { getSetSidebar, useIsCompactSidebar } from "@/stores/sidebarStore";
 import { useFolders } from "@/stores/folderStore";
 import { Logo } from "@/components/ui/icons/Logo";
@@ -9,26 +9,13 @@ import { SidebarMode } from "@/common/enums/sidebarMode";
 import { FolderResponse } from "@/shared/types/responses/folder.response";
 import ChatList from "@/components/ui/chat/ChatList";
 import ChatFolderSelector from "@/components/ui/chat/ChatFolderSelector";
-import { useShallow } from "zustand/shallow";
 
 const SidebarDefault: React.FC = () => {
   console.log("SidebarDefault");
-  // const chats = useChatsForFolderFilter();
-
-  const chats = useChatStore(
-    useShallow((state) =>
-      state.chats.map((chat) => ({
-        id: chat.id,
-        type: chat.type,
-        pinnedAt: chat.pinnedAt,
-        updatedAt: chat.updatedAt,
-      }))
-    )
-  );
-
-  const folders = useFolders();
-  const isCompact = useIsCompactSidebar();
+  const allChats = useAllChats();
   const setSidebar = getSetSidebar();
+  const isCompact = useIsCompactSidebar();
+  const folders = useFolders();
 
   // Create a virtual "All" folder
   const allFolder: FolderResponse = {
@@ -50,14 +37,14 @@ const SidebarDefault: React.FC = () => {
   // Filter chats based on selected folder
   const filteredChats = React.useMemo(() => {
     if (!selectedFolder) return [];
-    if (selectedFolder.id === "all") return chats;
+    if (selectedFolder.id === "all") return allChats;
 
-    return chats.filter(
+    return allChats.filter(
       (chat) =>
         selectedFolder.chatIds.includes(chat.id) ||
         selectedFolder.types.includes(chat.type)
     );
-  }, [selectedFolder, chats]);
+  }, [selectedFolder, allChats]);
 
   // Handle folder change
   const handleChatTypeChange = (folder: (typeof folderList)[number]) => {

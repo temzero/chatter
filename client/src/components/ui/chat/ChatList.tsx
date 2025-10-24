@@ -7,7 +7,7 @@ import { useChatStore } from "@/stores/chatStore";
 import type { ChatResponse } from "@/shared/types/responses/chat.response";
 
 interface ChatListProps {
-  chats: ChatResponse[];
+  chats: Partial<ChatResponse>[];
   isCompact?: boolean;
 }
 
@@ -17,7 +17,7 @@ const ChatList: React.FC<ChatListProps> = React.memo(
     const currentUserId = useCurrentUserId();
     const hasMoreChats = useChatStore((state) => state.hasMoreChats);
     const fetchMoreChats = useChatStore.getState().fetchMoreChats;
-    if (!currentUserId) return;
+    if (!currentUserId) return null;
 
     // Sort chats: pinned first, then by updatedAt descending
     const sortedChats = [...chats].sort((a, b) => {
@@ -48,14 +48,16 @@ const ChatList: React.FC<ChatListProps> = React.memo(
         className="flex-1 relative"
       >
         <AnimatePresence initial={false}>
-          {sortedChats.map((chat) => (
-            <ChatListItem
-              key={chat.id}
-              chat={chat}
-              isCompact={isCompact}
-              currentUserId={currentUserId}
-            />
-          ))}
+          {sortedChats.map((chat) =>
+            chat.id ? (
+              <ChatListItem
+                key={chat.id}
+                chatId={chat.id}
+                isCompact={isCompact}
+                currentUserId={currentUserId}
+              />
+            ) : null
+          )}
           {/* {!hasMoreChats && chats.length > 0 && (
           <div className="p-2 text-center opacity-40">No more chats</div>
         )} */}

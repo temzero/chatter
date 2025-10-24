@@ -18,16 +18,16 @@ interface ChatMemberState {
 }
 
 interface ChatMemberActions {
+  setInitialData: (
+    chatId: string,
+    members: ChatMemberResponse[],
+    hasMore: boolean
+  ) => void;
   fetchChatMembers: (
     chatId: string,
     queries?: PaginationQuery
   ) => Promise<void>;
   fetchMoreMembers: (chatId: string) => Promise<number>;
-  setInitialMembers: (
-    chatId: string,
-    members: ChatMemberResponse[],
-    hasMore: boolean
-  ) => void;
   getChatMemberById: (
     memberId: string,
     fetchIfMissing?: boolean
@@ -86,7 +86,7 @@ export const useChatMemberStore = create<ChatMemberState & ChatMemberActions>(
   (set, get) => ({
     ...initialState,
 
-    setInitialMembers: (chatId, members, hasMore) => {
+    setInitialData: (chatId, members, hasMore) => {
       set((state) => ({
         chatMembers: {
           ...state.chatMembers,

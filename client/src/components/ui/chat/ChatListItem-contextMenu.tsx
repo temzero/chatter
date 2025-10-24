@@ -2,7 +2,7 @@ import React from "react";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useMuteControl } from "@/common/hooks/useMuteControl";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
-import { useFolderStore } from "@/stores/folderStore";
+import { useFolders } from "@/stores/folderStore";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useChatStore } from "@/stores/chatStore";
@@ -30,7 +30,7 @@ export const ChatListItemContextMenu = React.forwardRef<
   const updateMemberLastRead =
     useChatMemberStore.getState().updateMemberLastRead;
   const pinChat = useChatStore.getState().pinChat;
-  const folders = useFolderStore((state) => state.folders);
+  const folders = useFolders();
 
   const isMuted =
     chat.mutedUntil && new Date(chat.mutedUntil).getTime() > Date.now();

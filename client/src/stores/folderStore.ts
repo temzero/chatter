@@ -187,3 +187,5 @@ export const useFolderStore = create<FolderStoreState & FolderStoreActions>(
     },
   })
 );
+
+export const useFolders = () => useFolderStore((state) => state.folders);

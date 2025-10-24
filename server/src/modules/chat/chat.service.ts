@@ -127,41 +127,6 @@ export class ChatService {
     return chatDto;
   }
 
-  // async getInitialChatsWithData(
-  //   userId: string,
-  //   chatLimit: number,
-  //   messageLimit: number,
-  // ): Promise<PaginationResponse<ChatWithMessagesResponseDto>> {
-  //   // 1. Get base chats with pagination
-  //   const { items: baseChats, hasMore: hasMoreChats } = await this.getUserChats(
-  //     userId,
-  //     { limit: chatLimit },
-  //   );
-
-  //   // 2. Fetch messages for each chat
-  //   const chatsWithMessages: ChatWithMessagesResponseDto[] = await Promise.all(
-  //     baseChats.map(async (chat) => {
-  //       const { items: messages, hasMore } =
-  //         await this.messageService.getMessagesByChatId(chat.id, userId, {
-  //           limit: messageLimit,
-  //         });
-
-  //       return {
-  //         ...chat,
-  //         messages: messages.map((m) =>
-  //           this.messageMapper.mapMessageToMessageResDto(m),
-  //         ),
-  //         hasMoreMessages: hasMore,
-  //       };
-  //     }),
-  //   );
-
-  //   return {
-  //     items: chatsWithMessages,
-  //     hasMore: hasMoreChats,
-  //   };
-  // }
-
   async getOrCreateDirectChat(
     myUserId: string,
     partnerId: string,

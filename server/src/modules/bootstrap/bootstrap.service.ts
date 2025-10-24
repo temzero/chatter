@@ -1,21 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { ChatService } from '../chat/chat.service';
+import { ChatMemberService } from '../chat-member/chat-member.service';
+import { MessageService } from '../message/message.service';
 import { FolderService } from '../folder/folder.service';
 import { FriendshipService } from '../friendship/friendship.service';
-import { MessageService } from '../message/message.service';
-import { ChatMemberService } from '../chat-member/chat-member.service'; // Add this
 import { BootstrapResponse } from 'src/shared/types/responses/bootstrap.response';
 import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
-import { ChatDataResponseDto } from './dto/chat-data-response.dto'; // Fixed casing
+import { ChatDataResponseDto } from './dto/chat-data-response.dto';
 
 @Injectable()
 export class BootstrapService {
   constructor(
     private readonly chatService: ChatService,
+    private readonly chatMemberService: ChatMemberService,
     private readonly messageService: MessageService,
     private readonly folderService: FolderService,
     private readonly friendshipService: FriendshipService,
-    private readonly chatMemberService: ChatMemberService, // Add this
   ) {}
 
   async getAppInitiationData(userId: string): Promise<BootstrapResponse> {

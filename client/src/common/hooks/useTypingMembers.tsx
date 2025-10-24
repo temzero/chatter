@@ -1,16 +1,16 @@
 // hooks/useTypingMembers.ts
 import { useMemo } from "react";
 import { useTypingUsersByChatId } from "@/stores/typingStore";
-import { ChatMember } from "@/shared/types/responses/chat-member.response";
+import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
 import { useMembersByChatId } from "@/stores/chatMemberStore";
 
 type UseTypingMembersResult = {
-  typingMembers: ChatMember[];
+  typingMembers: ChatMemberResponse[];
   isTyping: boolean;
 };
 
 export const useTypingMembers = (chatId: string): UseTypingMembersResult => {
-  const members = useMembersByChatId(chatId) as ChatMember[];
+  const members = useMembersByChatId(chatId) as ChatMemberResponse[];
   const typingUserIds = useTypingUsersByChatId(chatId);
 
   const typingMembers = useMemo(() => {

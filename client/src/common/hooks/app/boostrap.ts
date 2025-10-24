@@ -26,10 +26,10 @@ const bootstrapApp = async () => {
 
     // Initialize stores with their respective data
     useChatStore.getState().setInitialData(appInitiationData.chatData);
-    useFolderStore.getState().setInitialData(appInitiationData.folders);
+    useFolderStore.getState().setInitialData(appInitiationData.folderData);
     useFriendshipStore
       .getState()
-      .setInitialData(appInitiationData.friendRequests);
+      .setInitialData(appInitiationData.friendRequestData);
   } catch (error) {
     console.error("Bootstrap failed:", error);
     toast.error("Fail to Load App Data");

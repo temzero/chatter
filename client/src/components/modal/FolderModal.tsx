@@ -1,6 +1,6 @@
 // components/modals/AddChatToFolderModal.tsx
 import React, { useState, useEffect } from "react";
-import { useFolderStore } from "@/stores/folderStore";
+import { useFolders, useFolderStore } from "@/stores/folderStore";
 import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { getSetSidebar } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
@@ -17,9 +17,9 @@ interface AddChatToFolderModalData {
 const AddChatToFolderModal: React.FC = () => {
   const { t } = useTranslation();
   const closeModal = getCloseModal();
-  const addChatToFolder = useFolderStore.getState().addChatToFolder;
   const setSidebar = getSetSidebar();
-  const folders = useFolderStore((state) => state.folders);
+  const addChatToFolder = useFolderStore.getState().addChatToFolder;
+  const folders = useFolders();
   const data = getModalData() as unknown as
     | AddChatToFolderModalData
     | undefined;

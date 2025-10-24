@@ -5,6 +5,7 @@ import { BootstrapService } from './bootstrap.service';
 import { BootstrapController } from './bootstrap.controller';
 import { AuthModule } from '../auth/modules/auth.module';
 import { ChatModule } from '../chat/chat.module';
+import { ChatMemberModule } from '../chat-member/chat-member.module';
 import { MessageModule } from '../message/message.module';
 import { FolderModule } from '../folder/folder.module';
 import { FriendshipModule } from '../friendship/friendship.module';
@@ -14,6 +15,7 @@ import { FriendshipModule } from '../friendship/friendship.module';
     TypeOrmModule.forFeature([]),
     AuthModule,
     ChatModule,
+    ChatMemberModule,
     MessageModule,
     FolderModule,
     FriendshipModule,
