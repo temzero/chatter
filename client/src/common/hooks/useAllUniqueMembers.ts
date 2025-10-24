@@ -8,7 +8,6 @@ export const useAllUniqueMembers = (
 ): FriendContactResponse[] | null => {
   const currentUserId = useCurrentUserId();
   const chatMembers = useChatMemberStore.getState().chatMembers;
-  const chats = useChatStore.getState().chats;
   if (!currentUserId) return null;
 
   // Get user IDs to exclude (current user + members already in the chat we're adding to)
@@ -16,7 +15,7 @@ export const useAllUniqueMembers = (
   excludeUserIds.add(currentUserId);
 
   if (excludeChatId) {
-    const chat = chats.find((c) => c.id === excludeChatId);
+    const chat = useChatStore.getState().getChatById(excludeChatId);
     if (chat) {
       chat.otherMemberUserIds?.forEach((id) => excludeUserIds.add(id));
     }
@@ -39,7 +38,7 @@ export const useAllUniqueMembers = (
             firstName: member.firstName,
             lastName: member.lastName,
             avatarUrl: member.avatarUrl,
-            username: "username" in member ? member.username : undefined,
+            username: member.username ?? undefined,
           });
         }
       }

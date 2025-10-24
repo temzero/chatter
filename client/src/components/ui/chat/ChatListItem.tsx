@@ -29,16 +29,17 @@ interface ChatListItemProps {
 
 const ChatListItem: React.FC<ChatListItemProps> = React.memo(
   ({ chatId, isCompact = false, currentUserId = "" }) => {
-    console.log("ChatListItem");
-    const chat = useChat(chatId);
+    console.log("ChatListItem", chatId);
 
+    // This now uses the updated useChat hook that works with Record structure
+    const chat = useChat(chatId);
     const isActive = useIsActiveChat(chatId);
 
     const typingUsers = useTypingUsersByChatId(chatId);
-    const isOnline = useChatStatus(chatId, chat.type);
+    const isOnline = useChatStatus(chatId, chat?.type);
     const unreadCount = chat?.unreadCount || 0;
     const lastMessage = chat?.lastMessage;
-    const { isBlockedByMe } = useBlockStatus(chatId, chat.myMemberId);
+    const { isBlockedByMe } = useBlockStatus(chatId, chat?.myMemberId);
 
     const getDraftMessage = useMessageStore.getState().getDraftMessage;
     const setActiveChatId = useChatStore.getState().setActiveChatId;
@@ -62,8 +63,8 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
       if (openMenuSetter) openMenuSetter();
       openMenuSetter = () => setContextMenu(null);
 
-      const menuWidth = 180; // approximate context menu width
-      const menuHeight = 160; // adjust as needed
+      const menuWidth = 180;
+      const menuHeight = 160;
 
       const position = calculateContextMenuPosition(
         { x: e.clientX, y: e.clientY },
@@ -198,7 +199,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
                     <AnimatePresence>
                       {chat.mutedUntil && (
                         <motion.div
-                          key="muted" // unique key
+                          key="muted"
                           initial={{ opacity: 0, scale: 3 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.1 }}
@@ -212,9 +213,9 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
 
                       {/* Pinned icon */}
                       <AnimatePresence>
-                        {chat.pinnedAt && ( // use pinnedAt, not !pinnedAt if you want icon visible when pinned
+                        {chat.pinnedAt && (
                           <motion.div
-                            key="pinned" // unique key
+                            key="pinned"
                             initial={{ opacity: 0, scale: 3 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.1 }}

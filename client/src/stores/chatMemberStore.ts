@@ -229,7 +229,7 @@ export const useChatMemberStore = create<ChatMemberState & ChatMemberActions>(
     },
 
     getChatMemberUserIds: (chatId: string): string[] => {
-      const chat = useChatStore.getState().chats.find((c) => c.id === chatId);
+      const chat = useChatStore.getState().getChatById(chatId);
       if (!chat) return [];
       return chat.otherMemberUserIds || [];
     },

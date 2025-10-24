@@ -26,8 +26,7 @@ import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 
 interface ChatStoreState {
   activeChatId: string | null;
-  chats: Record<string, ChatResponse>; // Changed to Record
-  chatIds: string[]; // Added for maintaining order
+  chats: ChatResponse[];
   savedChat: ChatResponse | null;
   hasMoreChats: boolean;
   isLoading: boolean;
@@ -80,8 +79,7 @@ interface ChatStoreActions {
 
 const initialState: ChatStoreState = {
   activeChatId: null,
-  chats: {}, // Changed to empty object
-  chatIds: [], // Added empty array
+  chats: [],
   savedChat: null,
   hasMoreChats: true,
   isLoading: false,
@@ -94,8 +92,7 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
     ...initialState,
 
     setInitialData: (data: PaginationResponse<ChatDataResponse>) => {
-      const chatsMap: Record<string, ChatResponse> = {};
-      const chatIds: string[] = [];
+      const chats: ChatResponse[] = [];
       let savedChat: ChatResponse | null = null;
 
       data.items.forEach((chat) => {
@@ -123,29 +120,27 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
         if (chatData.type === ChatType.SAVED) {
           savedChat = chatData;
         } else {
-          chatsMap[chatData.id] = chatData;
-          chatIds.push(chatData.id);
+          chats.push(chatData);
         }
       });
 
       // --- Update chat store ---
       set({
         savedChat,
-        chats: chatsMap,
-        chatIds,
+        chats,
         hasMoreChats: data.hasMore,
       });
     },
-
     getChatById: (chatId?: string) => {
       if (!chatId) return undefined;
-      return get().chats[chatId];
+      const chat = get().chats.find((c) => c.id === chatId);
+      return chat;
     },
 
     getActiveChat: () => {
       const { activeChatId, chats } = get();
       if (!activeChatId) return null;
-      return chats[activeChatId] || null;
+      return chats.find((chat) => chat.id === activeChatId) || null;
     },
 
     getOrFetchChatById: async (
@@ -157,6 +152,7 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
       // 1. Try get from store
       const existingChat = getChatById(chatId);
       if (existingChat) {
+        // If already cached, just return it
         return existingChat;
       }
 
@@ -172,18 +168,18 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
 
     fetchMoreChats: async (limit): Promise<number> => {
       console.log("fetchMore Chat", limit);
-      const { chats, chatIds, hasMoreChats, isLoading } = get();
-      if (isLoading || !hasMoreChats) return 0;
+      const { chats, hasMoreChats, isLoading } = get();
+      if (isLoading || !hasMoreChats) return 0; // return 0 if no load
 
-      const lastChatId = chatIds[chatIds.length - 1];
-      if (!lastChatId) return 0;
+      const lastChat = get().chats[get().chats.length - 1];
+      if (!lastChat?.id) return 0;
 
       set({ isLoading: true });
       try {
         const { chats: newChats, hasMore } = await chatService.fetchChats({
-          offset: chatIds.length,
+          offset: chats.length,
           limit,
-          lastId: lastChatId,
+          lastId: lastChat.id,
         });
 
         if (newChats.length > 0) {
@@ -191,24 +187,15 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
             (chat) => chat.type !== ChatType.SAVED
           );
 
-          const newChatsMap: Record<string, ChatResponse> = {};
-          const newChatIds: string[] = [];
-
-          filteredNewChats.forEach((chat) => {
-            newChatsMap[chat.id] = chat;
-            newChatIds.push(chat.id);
-          });
-
           set({
-            chats: { ...chats, ...newChatsMap },
-            chatIds: [...chatIds, ...newChatIds],
+            chats: [...chats, ...filteredNewChats],
             hasMoreChats: hasMore,
           });
 
-          return filteredNewChats.length;
+          return filteredNewChats.length; // <-- Return number of chats loaded
         } else {
           set({ hasMoreChats: hasMore });
-          return 0;
+          return 0; // no chats loaded
         }
       } catch (error) {
         handleError(error, "Failed to load more chats");
@@ -229,16 +216,11 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
         const chat = await chatService.fetchChatById(targetChatId);
 
         // Update chat in state
-        set((state) => {
-          const chatExists = !!state.chats[targetChatId];
-          return {
-            chats: {
-              ...state.chats,
-              [targetChatId]: chat,
-            },
-            chatIds: chatExists ? state.chatIds : [chat.id, ...state.chatIds],
-          };
-        });
+        set((state) => ({
+          chats: state.chats.some((c) => c.id === targetChatId)
+            ? state.chats.map((c) => (c.id === targetChatId ? chat : c))
+            : [chat, ...state.chats],
+        }));
 
         // Optionally fetch full data
         if (options.fetchFullData) {
@@ -260,18 +242,14 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
     },
 
     getDirectChatByUserId: async (userId) => {
-      const { chats, chatIds } = get();
-      const existingChat = chatIds.find((chatId) => {
-        const chat = chats[chatId];
-        return (
-          chat?.type === ChatType.DIRECT &&
+      const existingChat = get().chats.find(
+        (chat) =>
+          chat.type === ChatType.DIRECT &&
           chat.otherMemberUserIds?.includes(userId)
-        );
-      });
-
+      );
       if (existingChat) {
-        await get().fetchChatById(existingChat);
-        return chats[existingChat];
+        await get().fetchChatById(existingChat.id);
+        return existingChat;
       }
       return;
     },
@@ -289,6 +267,8 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
       set({ activeChatId: chatId });
       get().updateChatLocally(chatId, { unreadCount: 0 });
       window.history.pushState({}, "", `/${chatId}`);
+
+      // get().fetchChatData(chatId);
     },
 
     fetchChatData: async (chatId: string) => {
@@ -320,12 +300,11 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
     },
 
     getAllUserIdsInChats: () => {
-      const { chats, chatIds } = get();
+      const chats = get().chats;
       const allUserIds = new Set<string>();
 
-      chatIds.forEach((chatId) => {
-        const chat = chats[chatId];
-        chat?.otherMemberUserIds?.forEach((userId) => allUserIds.add(userId));
+      chats.forEach((chat) => {
+        chat.otherMemberUserIds?.forEach((userId) => allUserIds.add(userId));
       });
 
       return Array.from(allUserIds);
@@ -339,8 +318,7 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
 
         if (!wasExisting) {
           set((state) => ({
-            chats: { [payload.id]: payload, ...state.chats },
-            chatIds: [payload.id, ...state.chatIds],
+            chats: [payload, ...state.chats],
           }));
         }
 
@@ -360,8 +338,7 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
       try {
         const newChat = await chatService.createGroupChat(payload);
         set((state) => ({
-          chats: { [newChat.id]: newChat, ...state.chats },
-          chatIds: [newChat.id, ...state.chatIds],
+          chats: [newChat, ...state.chats],
         }));
         return newChat;
       } catch (error) {
@@ -390,32 +367,33 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
 
     updateChatLocally: (chatId: string, payload: Partial<ChatResponse>) => {
       set((state) => {
-        const existingChat = state.chats[chatId];
-        if (!existingChat) return state;
+        const updateFn = (chat: ChatResponse) => ({ ...chat, ...payload });
 
         return {
-          chats: {
-            ...state.chats,
-            [chatId]: { ...existingChat, ...payload },
-          },
+          chats: state.chats.map((chat) =>
+            chat.id === chatId ? updateFn(chat) : chat
+          ),
         };
       });
     },
 
     pinChat: async (myMemberId: string, isPinned: boolean) => {
       try {
+        // 1. Pin/unpin the member via API
         const updatedMember = await chatMemberService.pinChat(
           myMemberId,
           isPinned
         );
-        const chatId = updatedMember.chatId;
 
+        // 2. Update the corresponding chat's pinnedAt field in the store
+        const chatId = updatedMember.chatId;
         if (chatId) {
           get().updateChatLocally(chatId, {
             pinnedAt: isPinned ? new Date() : null,
           });
         }
 
+        // Optional: show toast
         toast.success(isPinned ? "Chat pinned" : "Chat unpinned");
       } catch (error) {
         handleError(error, "Failed to pin/unpin chat");
@@ -443,6 +421,7 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
           memberId,
           mutedUntil
         );
+
         get().updateChatLocally(chatId, { mutedUntil: updatedMuteUntil });
       } catch (error) {
         handleError(error, "Failed to set mute");
@@ -458,10 +437,8 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
     setUnreadCount: (chatId: string, incrementBy: number) => {
       const isActiveChat = get().activeChatId === chatId;
       if (isActiveChat) return;
-
-      const currentChat = get().chats[chatId];
+      const currentChat = get().chats.find((c) => c.id === chatId);
       if (!currentChat) return;
-
       const newUnreadCount = (currentChat.unreadCount || 0) + incrementBy;
       get().updateChatLocally(chatId, { unreadCount: newUnreadCount });
     },
@@ -493,7 +470,7 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
     },
 
     addToGroupPreviewMembers: (chatId: string, member: ChatMemberLite) => {
-      const chat = get().chats[chatId];
+      const chat = get().chats.find((c) => c.id === chatId);
       if (!chat || chat.type === ChatType.DIRECT || chat.avatarUrl) return;
 
       const currentPreviews = chat.previewMembers || [];
@@ -513,7 +490,7 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
     },
 
     removeFromGroupPreviewMembers: (chatId: string, userId: string) => {
-      const chat = get().chats[chatId];
+      const chat = get().chats.find((c) => c.id === chatId);
       if (!chat || chat.type === ChatType.DIRECT || chat.avatarUrl) return;
 
       const updatedPreviews = (chat.previewMembers || []).filter(
@@ -535,7 +512,6 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
       try {
         const currentUserId = useAuthStore.getState().currentUser?.id;
         if (!currentUserId) throw new Error("User not authenticated");
-
         const { chatDeleted } = await chatMemberService.DeleteMember(
           chatId,
           currentUserId
@@ -575,22 +551,16 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
     },
 
     clearChats: () => {
-      set({ chats: {}, chatIds: [], activeChatId: null });
+      set({ chats: [], activeChatId: null });
     },
 
     cleanupChat: (chatId: string) => {
       useMessageStore.getState().clearChatMessages(chatId);
       useChatMemberStore.getState().clearChatMembers(chatId);
-      set((state) => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { [chatId]: removedChat, ...remainingChats } = state.chats;
-        return {
-          chats: remainingChats,
-          chatIds: state.chatIds.filter((id) => id !== chatId),
-          activeChatId:
-            state.activeChatId === chatId ? null : state.activeChatId,
-        };
-      });
+      set((state) => ({
+        chats: state.chats.filter((chat) => chat.id !== chatId),
+        activeChatId: state.activeChatId === chatId ? null : state.activeChatId,
+      }));
     },
   })
   //   {
@@ -598,16 +568,15 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
   //     partialize: (state) => ({
   //       activeChatId: state.activeChatId,
   //       chats: state.chats,
-  //       chatIds: state.chatIds,
   //     }),
   //   }
   // )
 );
 
-// EXPORT HOOKS - UPDATED
+// EXPORT HOOKS
 
 export const useChat = (chatId: string) =>
-  useChatStore((state) => state.chats[chatId]);
+  useChatStore((state) => state.chats.find((chat) => chat.id === chatId));
 
 export const useActiveChat = () =>
   useChatStore((state) => state.getActiveChat());
@@ -619,20 +588,17 @@ export const useAllChats = () =>
   useChatStore(useShallow((state) => state.chats));
 
 export const useAllChatIds = () =>
-  useChatStore(useShallow((state) => state.chatIds));
+  useChatStore(useShallow((state) => state.chats.map((chat) => chat.id)));
 
 export const useChatsForFolderFilter = () =>
   useChatStore(
     useShallow((state) =>
-      state.chatIds.map((chatId) => {
-        const chat = state.chats[chatId];
-        return {
-          id: chat.id,
-          type: chat.type,
-          pinnedAt: chat.pinnedAt,
-          updatedAt: chat.updatedAt,
-        };
-      })
+      state.chats.map((chat) => ({
+        id: chat.id,
+        type: chat.type,
+        pinnedAt: chat.pinnedAt,
+        updatedAt: chat.updatedAt,
+      }))
     )
   );
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useAllChats, useChatsForFolderFilter, useChatStore } from "@/stores/chatStore";
+import { useAllChatIds, useAllChats } from "@/stores/chatStore";
 import { getSetSidebar, useIsCompactSidebar } from "@/stores/sidebarStore";
 import { useFolders } from "@/stores/folderStore";
 import { Logo } from "@/components/ui/icons/Logo";
@@ -9,55 +9,56 @@ import { SidebarMode } from "@/common/enums/sidebarMode";
 import { FolderResponse } from "@/shared/types/responses/folder.response";
 import ChatList from "@/components/ui/chat/ChatList";
 import ChatFolderSelector from "@/components/ui/chat/ChatFolderSelector";
-import { useShallow } from "zustand/shallow";
 
 const SidebarDefault: React.FC = () => {
   console.log("SidebarDefault");
-  // const chats = useChatsForFolderFilter();
 
-  const chats = useChatStore(
-    useShallow((state) =>
-      state.chats.map((chat) => ({
-        id: chat.id,
-        type: chat.type,
-        pinnedAt: chat.pinnedAt,
-        updatedAt: chat.updatedAt,
-      }))
-    )
-  );
-
+  // Much better approach - stable selectors
+  const chatIds = useAllChatIds(); // Returns state.chatIds (stable array)
+  const chatMap = useAllChats(); // Returns state.chats (stable object)
   const folders = useFolders();
   const isCompact = useIsCompactSidebar();
   const setSidebar = getSetSidebar();
 
-  // Create a virtual "All" folder
-  const allFolder: FolderResponse = {
-    id: "all",
-    name: "all",
-    chatIds: [],
-    types: [],
-    color: "",
-    position: 0,
-    createdAt: "",
-    updatedAt: "",
-  };
-  const folderList = [allFolder, ...folders];
+  // Memoize the "All" folder to prevent recreating on every render
+  const allFolder = React.useMemo(
+    (): FolderResponse => ({
+      id: "all",
+      name: "all",
+      chatIds: [],
+      types: [],
+      color: "",
+      position: 0,
+      createdAt: "",
+      updatedAt: "",
+    }),
+    []
+  );
+
+  // Memoize folder list
+  const folderList = React.useMemo(
+    () => [allFolder, ...folders],
+    [allFolder, folders]
+  );
 
   // State for selected folder & scroll direction
   const [selectedFolder, setSelectedFolder] = useState(folderList[0]);
   const [direction, setDirection] = useState<number>(1);
 
-  // Filter chats based on selected folder
-  const filteredChats = React.useMemo(() => {
+  // Filter chat IDs based on selected folder - much more efficient
+  const filteredChatIds = React.useMemo(() => {
     if (!selectedFolder) return [];
-    if (selectedFolder.id === "all") return chats;
 
-    return chats.filter(
-      (chat) =>
-        selectedFolder.chatIds.includes(chat.id) ||
+    if (selectedFolder.id === "all") return chatIds;
+
+    return chatIds.filter((chatId) => {
+      const chat = chatMap[chatId];
+      return (
+        selectedFolder.chatIds.includes(chatId) ||
         selectedFolder.types.includes(chat.type)
-    );
-  }, [selectedFolder, chats]);
+      );
+    });
+  }, [selectedFolder, chatIds, chatMap]);
 
   // Handle folder change
   const handleChatTypeChange = (folder: (typeof folderList)[number]) => {
@@ -74,9 +75,7 @@ const SidebarDefault: React.FC = () => {
 
   return (
     <aside
-      className={`h-full flex flex-col transition-all duration-300 ease-in-out
-
-      `}
+      className={`h-full flex flex-col transition-all duration-300 ease-in-out`}
     >
       {/* Header */}
       <header className="relative flex w-full items-center h-[var(--header-height)] justify-between">
@@ -130,9 +129,9 @@ const SidebarDefault: React.FC = () => {
         <div className="custom-border" />
       )}
 
-      {/* Chat List */}
+      {/* Chat List - Now passing chatIds instead of chat objects */}
       <SlidingContainer direction={direction} uniqueKey={selectedFolder.id}>
-        <ChatList chats={filteredChats} isCompact={isCompact} />
+        <ChatList chatIds={filteredChatIds} isCompact={isCompact} />
       </SlidingContainer>
     </aside>
   );

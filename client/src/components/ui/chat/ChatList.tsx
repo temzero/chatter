@@ -4,37 +4,19 @@ import ChatListItem from "./ChatListItem";
 import InfiniteScroller from "@/components/ui/layout/InfiniteScroller";
 import { useCurrentUserId } from "@/stores/authStore";
 import { useChatStore } from "@/stores/chatStore";
-import type { ChatResponse } from "@/shared/types/responses/chat.response";
-
 interface ChatListProps {
-  chats: Partial<ChatResponse>[];
+  chatIds: string[]; // Changed from chats to chatIds
   isCompact?: boolean;
 }
 
 const ChatList: React.FC<ChatListProps> = React.memo(
-  ({ chats, isCompact = false }) => {
-    console.log("ChatList", chats.length);
+  ({ chatIds, isCompact = false }) => {
+    console.log("ChatList", chatIds.length);
     const currentUserId = useCurrentUserId();
     const hasMoreChats = useChatStore((state) => state.hasMoreChats);
     const fetchMoreChats = useChatStore.getState().fetchMoreChats;
-    if (!currentUserId) return null;
 
-    // Sort chats: pinned first, then by updatedAt descending
-    const sortedChats = [...chats].sort((a, b) => {
-      const aPinned = a.pinnedAt ? new Date(a.pinnedAt).getTime() : 0;
-      const bPinned = b.pinnedAt ? new Date(b.pinnedAt).getTime() : 0;
-
-      if (aPinned && bPinned) {
-        return bPinned - aPinned; // both pinned: newest first
-      }
-      if (aPinned) return -1; // a pinned, b not
-      if (bPinned) return 1; // b pinned, a not
-
-      // neither pinned: fallback to updatedAt
-      const aUpdated = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
-      const bUpdated = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
-      return bUpdated - aUpdated;
-    });
+    if (!currentUserId) return;
 
     return (
       <InfiniteScroller
@@ -48,19 +30,14 @@ const ChatList: React.FC<ChatListProps> = React.memo(
         className="flex-1 relative"
       >
         <AnimatePresence initial={false}>
-          {sortedChats.map((chat) =>
-            chat.id ? (
-              <ChatListItem
-                key={chat.id}
-                chatId={chat.id}
-                isCompact={isCompact}
-                currentUserId={currentUserId}
-              />
-            ) : null
-          )}
-          {/* {!hasMoreChats && chats.length > 0 && (
-          <div className="p-2 text-center opacity-40">No more chats</div>
-        )} */}
+          {chatIds.map((chatId) => (
+            <ChatListItem
+              key={chatId}
+              chatId={chatId}
+              isCompact={isCompact}
+              currentUserId={currentUserId}
+            />
+          ))}
         </AnimatePresence>
       </InfiniteScroller>
     );
