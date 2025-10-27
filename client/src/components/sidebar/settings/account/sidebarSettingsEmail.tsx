@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { SidebarMode } from "@/common/enums/sidebarMode";
-import { useAuthStore, useCurrentUser } from "@/stores/authStore";
+import { useAuthStore, getCurrentUser } from "@/stores/authStore";
 import { userService } from "@/services/http/userService";
 import { getSetSidebar } from "@/stores/sidebarStore";
 import { handleError } from "@/common/utils/handleError";
@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 
 const SidebarSettingsEmail: React.FC = () => {
   const { t } = useTranslation();
-  const currentUser = useCurrentUser();
+  const currentUser = getCurrentUser();
   const setSidebar = getSetSidebar();
 
   const setCurrentUser = useAuthStore.getState().setCurrentUser;

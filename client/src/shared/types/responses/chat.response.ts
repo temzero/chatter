@@ -1,6 +1,6 @@
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
-import { LastMessageResponse, MessageResponse } from "./message.response";
+import { MessageResponse } from "./message.response";
 import { ChatMemberResponse } from "./chat-member.response";
 import { PaginationResponse } from "./pagination.response";
 
@@ -15,7 +15,6 @@ export interface ChatResponse {
   updatedAt?: string;
   otherMemberUserIds?: string[];
   pinnedMessage?: MessageResponse | null;
-  lastMessage?: LastMessageResponse | null;
   unreadCount?: number;
   mutedUntil?: string | Date | null;
   inviteLinks?: string[];

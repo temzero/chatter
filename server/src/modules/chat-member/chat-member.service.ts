@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, IsNull, Repository } from 'typeorm';
+import { In, IsNull, Not, Repository } from 'typeorm';
 
 import { ChatMember } from './entities/chat-member.entity';
 import { ErrorResponse } from '../../common/api-response/errors';
@@ -13,6 +13,8 @@ import { ChatType } from 'src/shared/types/enums/chat-type.enum';
 import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
 import { ChatMemberStatus } from 'src/shared/types/enums/chat-member-status.enum';
 import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
+
+export const MAX_PINNED = 99;
 
 @Injectable()
 export class ChatMemberService {
@@ -120,7 +122,7 @@ export class ChatMemberService {
   async findByChatIdWithBlockStatus(
     chatId: string,
     currentUserId: string,
-    queryParams: PaginationQuery = { limit: 20, offset: 0 },
+    queryParams: PaginationQuery,
   ): Promise<{
     items: ChatMemberResponseDto[];
     hasMore: boolean;
@@ -580,6 +582,38 @@ export class ChatMemberService {
       console.error('Error in removeMember:', error);
       ErrorResponse.throw(error, 'Failed to remove chat member');
     }
+  }
+
+  async togglePinChat(
+    memberId: string,
+    isPinned: boolean,
+  ): Promise<ChatMember> {
+    // Find the member first
+    const member = await this.findById(memberId);
+
+    if (isPinned) {
+      // Count current pinned chats of this user
+      const pinnedCount = await this.memberRepo.count({
+        where: {
+          userId: member.userId,
+          pinnedAt: Not(IsNull()),
+          deletedAt: IsNull(),
+        },
+      });
+
+      // Throw error if limit exceeded
+      if (pinnedCount >= MAX_PINNED) {
+        ErrorResponse.badRequest(
+          'You can only pin up to 20 chats. Please unpin another chat first.',
+        );
+      }
+
+      member.pinnedAt = new Date();
+    } else {
+      member.pinnedAt = null;
+    }
+
+    return await this.memberRepo.save(member);
   }
 
   checkAndClearExpiredMute(member: ChatMember): Date | null {

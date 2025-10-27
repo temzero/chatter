@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { SidebarMode } from "@/common/enums/sidebarMode";
-import { useAuthStore, useCurrentUser } from "@/stores/authStore";
+import { getCurrentUser, useAuthStore } from "@/stores/authStore";
 import { userService } from "@/services/http/userService"
 import { handleError } from "@/common/utils/handleError";
 import { toast } from "react-toastify";
@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 const SidebarSettingsPhoneNumber: React.FC = () => {
   const { t } = useTranslation();
   const loading = useAuthStore((state) => state.loading);
-  const currentUser = useCurrentUser();
+  const currentUser = getCurrentUser();
 
   const setCurrentUser = useAuthStore.getState().setCurrentUser;
   const setLoading = useAuthStore.getState().setLoading;

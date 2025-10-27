@@ -1,7 +1,7 @@
 import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { determineAttachmentType } from "@/common/utils/message/determineAttachmentType";
-import { getFileIcon } from "@shared/utils/getFileIcon";
+import { getFileIcon } from "@/common/utils/getFileIcon";
 
 interface AttachmentImportedPreviewProps {
   files: File[];

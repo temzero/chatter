@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { useLastMessage, useMessageStore } from "@/stores/messageStore";
+import { useMessageStore } from "@/stores/messageStore";
 import { useTypingUsersByChatId } from "@/stores/typingStore";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { formatTimeAgo } from "@/common/utils/format/formatTimeAgo";
@@ -17,7 +17,6 @@ import {
 import { ChatListItemContextMenu } from "./ChatListItem-contextMenu";
 import { calculateContextMenuPosition } from "@/common/utils/contextMenuUtils";
 import { useClickOutside } from "@/common/hooks/keyEvent/useClickOutside";
-import { getAttachmentIcons } from "@/common/utils/getFileIcon";
 
 // Keep track of open menu globally
 let openMenuSetter: (() => void) | null = null;
@@ -39,8 +38,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
     const typingUsers = useTypingUsersByChatId(chatId);
     const isOnline = useChatStatus(chatId, chat?.type);
     const unreadCount = chat?.unreadCount || 0;
-    // const lastMessage = chat?.lastMessage;
-    const lastMessage = useLastMessage(chatId);
+    const lastMessage = chat?.lastMessage;
     const { isBlockedByMe } = useBlockStatus(chatId, chat?.myMemberId);
 
     const getDraftMessage = useMessageStore.getState().getDraftMessage;
@@ -118,8 +116,8 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
           call={lastMessage.call}
           isBroadcast={chat.type === ChatType.CHANNEL}
           currentUserId={currentUserId}
-          senderId={lastMessage.sender.id}
-          senderDisplayName={lastMessage.sender.displayName}
+          senderId={lastMessage.senderId}
+          senderDisplayName={lastMessage.senderDisplayName}
           JSONcontent={lastMessage.content as SystemMessageJSONContent}
           ClassName="gap-1 truncate opacity-60 flex-1 min-w-0"
         />
@@ -128,31 +126,29 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
           className={`flex items-center gap-1 text-xs min-h-6 flex-1 min-w-0
       ${unreadCount > 0 ? "opacity-100" : "opacity-40"}`}
         >
-          {lastMessage.sender.id === currentUserId ? (
+          {lastMessage.senderId === currentUserId ? (
             <strong>Me:</strong>
           ) : chat.type !== ChatType.DIRECT ? (
-            <strong>{lastMessage.sender.displayName.split(" ")[0]}:</strong>
+            <strong>{lastMessage.senderDisplayName.split(" ")[0]}:</strong>
           ) : null}
 
-          {lastMessage.forwardedFromMessage && (
+          {lastMessage.isForwarded && (
             <span className="material-symbols-outlined rotate-90">
               arrow_warm_up
             </span>
           )}
 
-          {lastMessage.attachments?.length ? (
+          {lastMessage.icons?.length ? (
             <span className="flex gap-1 truncate">
-              {getAttachmentIcons(lastMessage.attachments)?.map(
-                (icon, index) => (
-                  <i
-                    key={index}
-                    className="material-symbols-outlined text-base"
-                    aria-hidden="true"
-                  >
-                    {icon}
-                  </i>
-                )
-              )}
+              {lastMessage.icons.map((icon, index) => (
+                <i
+                  key={index}
+                  className="material-symbols-outlined text-base"
+                  aria-hidden="true"
+                >
+                  {icon}
+                </i>
+              ))}
             </span>
           ) : (
             <span className="truncate">{lastMessage.content}</span>
@@ -171,7 +167,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
         >
           <OnlineDot
             isOnline={isOnline}
-            className={`absolute top-1/2 left-[3px] -translate-y-1/2`}
+            className={`absolute top-1/2 left-[3px] -translate-y-1/2`}  
           />
           <ChatAvatar chat={chat} type="sidebar" isBlocked={isBlockedByMe} />
 

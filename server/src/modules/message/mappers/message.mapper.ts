@@ -39,7 +39,6 @@ export class MessageMapper {
       ),
 
       // ✅ Call
-      // call: message.call,
       call: message.call ? mapCallToCallLiteResponse(message.call) : undefined,
 
       replyToMessage: this.mapNestedMessage(message.replyToMessage),

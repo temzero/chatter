@@ -49,7 +49,7 @@ export class BootstrapService {
   ): Promise<PaginationResponse<ChatDataResponseDto>> {
     // 1. Get base chats with pagination from ChatService
     const { items: baseChats, hasMore: hasMoreChats } =
-      await this.chatService.getUserChats(userId, { limit: chatLimit });
+      await this.chatService.getInitialChats(userId, { limit: chatLimit });
 
     // 2. Fetch messages AND members for each chat in parallel
     const chatsWithData = await Promise.all(

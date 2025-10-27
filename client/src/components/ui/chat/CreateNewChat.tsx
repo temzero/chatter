@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import ContactInfoItem from "@/components/ui/contact/contactInfoItem";
 import { userService } from "@/services/http/userService";
 import { blockService } from "@/services/http/blockService";
-import { useCurrentUser } from "@/stores/authStore";
+import { getCurrentUser } from "@/stores/authStore";
 import { AnimatePresence, motion } from "framer-motion";
 import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
@@ -16,7 +16,7 @@ import FriendshipBtn from "@/components/ui/buttons/FriendshipBtn";
 
 const CreateNewChat: React.FC = () => {
   const { t } = useTranslation();
-  const currentUser = useCurrentUser();
+  const currentUser = getCurrentUser();
   const createOrGetDirectChat = useChatStore.getState().createOrGetDirectChat;
 
   const [query, setQuery] = useState("");

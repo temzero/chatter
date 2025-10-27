@@ -15,13 +15,13 @@ import { MessageService } from '../message/message.service';
 import { Message } from '../message/entities/message.entity';
 import { SystemEventType } from 'src/shared/types/enums/system-event-type.enum';
 import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
-import { MessageMapper } from '../message/mappers/message.mapper';
 import {
   ChatResponseDto,
   // ChatWithMessagesResponseDto,
 } from './dto/responses/chat-response.dto';
 import { PublicChatMapper } from './mappers/public-chat.mapper';
 import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
+import { MAX_PINNED } from '../chat-member/chat-member.service';
 
 @Injectable()
 export class ChatService {
@@ -35,126 +35,33 @@ export class ChatService {
     private readonly messageService: MessageService,
     private readonly chatMapper: ChatMapper,
     private readonly publicChatMapper: PublicChatMapper,
-    private readonly messageMapper: MessageMapper,
   ) {}
 
-  // async getUserChats(
-  //   userId: string,
-  //   queries: PaginationQuery = { limit: 20, offset: 0 },
-  // ): Promise<PaginationResponse<ChatResponseDto>> {
-  //   const { limit = 20, offset = 0 } = queries;
-  //   const savedChat = await this.getSavedChat(userId).catch(() => null);
-
-  //   const query = this.buildFullChatQueryForUser(userId)
-  //     .andWhere('chat.type != :savedType', { savedType: 'saved' })
-  //     .addSelect(
-  //       'COALESCE(lastMessage.created_at, chat.created_at)',
-  //       'last_activity_at',
-  //     )
-  // .skip(offset)
-  // .take(limit);
-
-  //   // Only apply limit if provided
-  //   if (limit != null && Number.isFinite(limit)) {
-  //     query.take(limit + 1); // fetch 1 extra to check hasMore
-  //   }
-
-  //   const chats = await query.getMany();
-
-  //   let hasMore = false;
-  //   if (limit != null && Number.isFinite(limit)) {
-  //     hasMore = chats.length > limit;
-  //     if (hasMore) {
-  //       chats.pop(); // remove the extra one
-  //     }
-  //   }
-
-  //   const chatDtos = (
-  //     await Promise.all(
-  //       chats.map(async (chat) => {
-  //         try {
-  //           // ✅ Use the unified mapper for all chat types
-  //           return await this.chatMapper.mapChatToChatResDto(chat, userId);
-  //         } catch (err) {
-  //           console.error('❌ Failed to transform chat:', chat.id, err);
-  //           return null;
-  //         }
-  //       }),
-  //     )
-  //   ).filter((dto): dto is ChatResponseDto => dto !== null);
-
-  //   const resultChats = savedChat ? [savedChat, ...chatDtos] : chatDtos;
-
-  //   return { items: resultChats, hasMore };
-  // }
-
-  // async getUserChats(
-  //   userId: string,
-  //   queries: PaginationQuery = { limit: 20, offset: 0 },
-  // ): Promise<PaginationResponse<ChatResponseDto>> {
-  //   const { limit = 20, offset = 0 } = queries;
-  //   const savedChat = await this.getSavedChat(userId).catch(() => null);
-
-  //   // 1. Pinned chats
-  //   const pinnedQuery = this.buildFullChatQueryForUser(userId)
-  //     .andWhere('chat.type != :savedType', { savedType: 'saved' })
-  //     .addSelect(
-  //       'COALESCE(lastMessage.created_at, chat.created_at)',
-  //       'last_activity_at',
-  //     )
-  //     .andWhere('myMember.pinned_at IS NOT NULL')
-  //     .orderBy('myMember.pinned_at', 'DESC')
-  //     .skip(offset)
-  //     .take(limit);
-
-  //   // 2. Unpinned chats
-  //   const unpinnedQuery = this.buildFullChatQueryForUser(userId)
-  //     .andWhere('chat.type != :savedType', { savedType: 'saved' })
-  //     .addSelect(
-  //       'COALESCE(lastMessage.created_at, chat.created_at)',
-  //       'last_activity_at',
-  //     )
-  //     .orderBy('last_activity_at', 'DESC')
-  //     .skip(0) // unpinned offset starts after pinned
-  //     .take(limit);
-
-  //   const [pinnedChats, unpinnedChats] = await Promise.all([
-  //     pinnedQuery.getMany(),
-  //     unpinnedQuery.getMany(),
-  //   ]);
-
-  //   // Merge and limit
-  //   const allChats = [...pinnedChats, ...unpinnedChats].slice(0, limit);
-  //   const hasMore = pinnedChats.length + unpinnedChats.length > limit;
-
-  //   // Map to DTOs
-  //   const chatDtos = (
-  //     await Promise.all(
-  //       allChats.map(async (chat) => {
-  //         try {
-  //           return await this.chatMapper.mapChatToChatResDto(chat, userId);
-  //         } catch (err) {
-  //           console.error('❌ Failed to transform chat:', chat.id, err);
-  //           return null;
-  //         }
-  //       }),
-  //     )
-  //   ).filter((dto): dto is ChatResponseDto => dto !== null);
-
-  //   const resultChats = savedChat ? [savedChat, ...chatDtos] : chatDtos;
-
-  //   return { items: resultChats, hasMore };
-  // }
-
-  async getUserChats(
+  async getInitialChats(
     userId: string,
-    queries: PaginationQuery = { limit: 20, offset: 0 },
+    queries: PaginationQuery,
   ): Promise<PaginationResponse<ChatResponseDto>> {
-    const { limit = 20, offset = 0 } = queries;
     const savedChat = await this.getSavedChat(userId).catch(() => null);
 
-    // 1️⃣ Pinned chats – always first, no offset
-    const pinnedQuery = this.buildFullChatQueryForUser(userId)
+    // 1️⃣ Get pinned chats
+    const pinnedChats = await this.getPinnedChats(userId);
+
+    // 2️⃣ Get unpinned chats (with pagination)
+    const unpinnedChats = await this.getUnpinnedChats(userId, queries);
+
+    // 3️⃣ Combine pinned + unpinned
+    const combinedChats = [...pinnedChats.items, ...unpinnedChats.items];
+
+    // Add saved chat at top if exists
+    const chats = savedChat ? [savedChat, ...combinedChats] : combinedChats;
+
+    return { items: chats, hasMore: unpinnedChats.hasMore };
+  }
+
+  async getPinnedChats(
+    userId: string,
+  ): Promise<PaginationResponse<ChatResponseDto>> {
+    const chats = await this.buildFullChatQueryForUser(userId)
       .andWhere('chat.type != :savedType', { savedType: 'saved' })
       .andWhere('myMember.pinned_at IS NOT NULL')
       .addSelect(
@@ -162,51 +69,64 @@ export class ChatService {
         'last_activity_at',
       )
       .orderBy('last_activity_at', 'DESC')
-      .skip(offset);
+      .limit(MAX_PINNED)
+      .getMany();
 
-    const pinnedChats = await pinnedQuery.getMany();
-    const pinnedCount = pinnedChats.length;
-
-    // 2️⃣ Unpinned chats – fill remaining slots
-    const remainingLimit = limit - pinnedCount;
-
-    let unpinnedChats: Chat[] = [];
-    if (remainingLimit > 0) {
-      const unpinnedQuery = this.buildFullChatQueryForUser(userId)
-        .andWhere('chat.type != :savedType', { savedType: 'saved' })
-        .andWhere('myMember.pinned_at IS NULL')
-        .addSelect(
-          'COALESCE(lastMessage.created_at, chat.created_at)',
-          'last_activity_at',
-        )
-        .orderBy('last_activity_at', 'DESC')
-        .skip(offset)
-        .take(remainingLimit);
-      unpinnedChats = await unpinnedQuery.getMany();
-    }
-
-    // 3️⃣ Combine pinned + unpinned
-    const allChats = [...pinnedChats, ...unpinnedChats];
-    const hasMore =
-      unpinnedChats.length === remainingLimit && remainingLimit > 0;
-
-    // 4️⃣ Map to DTOs
-    const chatDtos = (
+    const items = (
       await Promise.all(
-        allChats.map(async (chat) => {
+        chats.map(async (chat) => {
           try {
             return await this.chatMapper.mapChatToChatResDto(chat, userId);
           } catch (err) {
-            console.error('❌ Failed to transform chat:', chat.id, err);
+            console.error('❌ Failed to transform pinned chat:', chat.id, err);
             return null;
           }
         }),
       )
     ).filter((dto): dto is ChatResponseDto => dto !== null);
 
-    const resultChats = savedChat ? [savedChat, ...chatDtos] : chatDtos;
+    return { items, hasMore: false }; // pinned chats are always fixed, no pagination
+  }
 
-    return { items: resultChats, hasMore };
+  async getUnpinnedChats(
+    userId: string,
+    queries: PaginationQuery,
+  ): Promise<PaginationResponse<ChatResponseDto>> {
+    const { limit = 20, offset = 0 } = queries;
+
+    const chats = await this.buildFullChatQueryForUser(userId)
+      .andWhere('chat.type != :savedType', { savedType: 'saved' })
+      .andWhere('myMember.pinned_at IS NULL')
+      .addSelect(
+        'COALESCE(lastMessage.created_at, chat.created_at)',
+        'last_activity_at',
+      )
+      .orderBy('last_activity_at', 'DESC')
+      .skip(offset)
+      .take(limit + 1) // fetch one extra to detect hasMore
+      .getMany();
+
+    const hasMore = chats.length > limit;
+    if (hasMore) chats.pop(); // remove extra chat
+
+    const items = (
+      await Promise.all(
+        chats.map(async (chat) => {
+          try {
+            return await this.chatMapper.mapChatToChatResDto(chat, userId);
+          } catch (err) {
+            console.error(
+              '❌ Failed to transform unpinned chat:',
+              chat.id,
+              err,
+            );
+            return null;
+          }
+        }),
+      )
+    ).filter((dto): dto is ChatResponseDto => dto !== null);
+
+    return { items, hasMore };
   }
 
   async getUserChat(chatId: string, userId: string): Promise<ChatResponseDto> {

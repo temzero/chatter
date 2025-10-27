@@ -7,7 +7,7 @@ import SystemMessage from "./SystemMessage";
 import ForwardedMessagePreview from "@/components/ui/messages/ForwardMessagePreview";
 import { MessageReactionDisplay } from "@/components/ui/messages/MessageReactionsDisplay";
 import { formatTime } from "@/common/utils/format/formatTime";
-import { useCurrentUserId } from "@/stores/authStore";
+import { getCurrentUserId } from "@/stores/authStore";
 import { handleQuickReaction } from "@/common/utils/message/quickReaction";
 import { scrollToMessageById } from "@/common/utils/message/scrollToMessageById";
 import { messageAnimations } from "@/common/animations/messageAnimations";
@@ -32,7 +32,7 @@ interface ChannelMessageProps {
 
 const ChannelMessage: React.FC<ChannelMessageProps> = ({ message }) => {
   const isMobile = useIsMobile();
-  const currentUserId = useCurrentUserId();
+  const currentUserId = getCurrentUserId();
   const isMe = message.sender.id === currentUserId;
   const openFocusMessageModal = setOpenFocusMessageModal();
 

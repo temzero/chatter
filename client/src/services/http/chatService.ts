@@ -5,10 +5,7 @@ import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { UpdateChatRequest } from "@/shared/types/requests/update-chat.request";
 import { PaginationQuery } from "@/shared/types/queries/pagination-query";
 import { PaginationResponse } from "@/shared/types/responses/pagination.response";
-import type {
-  ChatResponse,
-  ChatWithMessagesResponse,
-} from "@/shared/types/responses/chat.response";
+import type { ChatResponse } from "@/shared/types/responses/chat.response";
 import type {
   ApiSuccessResponse,
   DirectChatApiResponse,
@@ -16,44 +13,20 @@ import type {
 
 export const chatService = {
   // Get all direct and group chats
-  async fetchInitialData(
-    chatLimit = 20,
-    messageLimit = 20
-  ): Promise<PaginationResponse<ChatWithMessagesResponse> | null> {
+
+  async fetchMoreChats(
+    queries: PaginationQuery
+  ): Promise<PaginationResponse<ChatResponse>> {
     try {
-      const response = await API.get<
-        ApiSuccessResponse<PaginationResponse<ChatWithMessagesResponse>>
-      >("/chat/initial", {
-        params: { chatLimit, messageLimit },
+      const { data } = await API.get(`/chat/more`, {
+        params: queries,
       });
 
-      return response.data.payload;
-    } catch (error) {
-      console.error("Failed to fetch initial data:", error);
-      toast.error("Failed to load initial chat data");
-      return null;
-    }
-  },
-
-  async fetchChats(
-    queries: PaginationQuery = { limit: 10 }
-  ): Promise<{ chats: ChatResponse[]; hasMore: boolean }> {
-    try {
-      const { offset, lastId, limit } = queries;
-
-      const { data } = await API.get(`/chat`, {
-        params: {
-          ...(offset !== undefined ? { offset } : {}),
-          ...(lastId ? { lastId } : {}),
-          limit,
-        },
-      });
-
-      const { chats, hasMore } = data.payload;
-      return { chats, hasMore };
+      const { items, hasMore } = data.payload;
+      return { items, hasMore };
     } catch (error) {
       console.error("Failed to fetch chats:", error);
-      return { chats: [], hasMore: false };
+      return { items: [], hasMore: false };
     }
   },
 

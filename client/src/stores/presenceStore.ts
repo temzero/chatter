@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { useMemo } from "react";
-import { useCurrentUserId } from "./authStore";
+import { getCurrentUserId } from "./authStore";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useChatMemberStore } from "./chatMemberStore";
 
@@ -83,7 +83,7 @@ export const useUserLastSeen = (userId?: string) => {
 };
 
 export const useChatStatus = (chatId: string, type: ChatType) => {
-  const currentUserId = useCurrentUserId();
+  const currentUserId = getCurrentUserId();
   const getChatMemberUserIds = useChatMemberStore(
     (state) => state.getChatMemberUserIds
   );

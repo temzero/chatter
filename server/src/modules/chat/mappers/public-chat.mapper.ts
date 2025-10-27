@@ -22,7 +22,6 @@ export class PublicChatMapper {
       pinnedMessage: chat.pinnedMessage
         ? this.messageMapper.mapMessageToMessageResDto(chat.pinnedMessage)
         : null,
-      lastMessage: null,
       otherMemberUserIds: [],
       unreadCount: 0,
       mutedUntil: null,

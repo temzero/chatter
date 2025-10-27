@@ -6,7 +6,7 @@ import { ChatMemberResponse } from "@/shared/types/responses/chat-member.respons
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useShallow } from "zustand/shallow";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
-import { useAuthStore, useCurrentUserId } from "./authStore";
+import { getCurrentUserId } from "./authStore";
 import { handleError } from "@/common/utils/handleError";
 import { PaginationQuery } from "@/shared/types/queries/pagination-query";
 
@@ -464,6 +464,33 @@ export const useActiveMembers = (): ChatMemberResponse[] | undefined => {
   );
 };
 
+export const getActiveMembers = (): ChatMemberResponse[] | undefined => {
+  const activeChatId = useChatStore.getState().activeChatId;
+  if (!activeChatId) return;
+  return useChatMemberStore.getState().chatMembers[activeChatId];
+};
+
+export const getMyActiveChatMember = (
+  myMemberId: string
+): ChatMemberResponse | null => {
+  const activeChatId = useChatStore.getState().activeChatId;
+  if (!activeChatId) return null;
+  const activeMembers =
+    useChatMemberStore.getState().chatMembers[activeChatId] || [];
+  return activeMembers.find((m) => m.id === myMemberId) || null;
+};
+
+export const getOthersActiveChatMembers = (
+  myMemberId: string
+): ChatMemberResponse[] => {
+  const activeChatId = useChatStore.getState().activeChatId;
+  if (!activeChatId) return [];
+  const activeMembers =
+    useChatMemberStore.getState().chatMembers[activeChatId] || [];
+
+  return activeMembers.filter((m) => m.id !== myMemberId);
+};
+
 export const useMembersByChatId = (
   chatId: string
 ): ChatMemberResponse[] | undefined => {
@@ -472,34 +499,6 @@ export const useMembersByChatId = (
 
 export const useHasMoreMembers = (chatId: string) => {
   return useChatMemberStore((state) => state.hasMoreMembers[chatId] ?? true);
-};
-
-export const getMyChatMember = async (
-  chatId?: string,
-  fetchIfMissing: boolean = true
-): Promise<ChatMemberResponse | undefined | null> => {
-  if (!chatId) return null;
-
-  const currentUserId = useAuthStore.getState().currentUser?.id;
-  if (!currentUserId) return null;
-
-  return await useChatMemberStore
-    .getState()
-    .getChatMemberByUserIdAndChatId(chatId, currentUserId, fetchIfMissing);
-};
-
-export const getMyChatMemberId = async (
-  chatId: string,
-  fetchIfMissing: boolean = true
-): Promise<string | undefined> => {
-  const currentUserId = useAuthStore.getState().currentUser?.id;
-  if (!currentUserId) return undefined;
-
-  const member = await useChatMemberStore
-    .getState()
-    .getChatMemberByUserIdAndChatId(chatId, currentUserId, fetchIfMissing);
-
-  return member?.id;
 };
 
 export const getDirectChatPartner = (
@@ -519,7 +518,7 @@ export const getDirectChatPartner = (
 export const useGroupOtherMembers = (
   chatId: string
 ): ChatMemberResponse[] | undefined => {
-  const myMemberId = useCurrentUserId();
+  const myMemberId = getCurrentUserId();
   return useChatMemberStore(
     useShallow((state) => {
       const members = state.chatMembers[chatId];

@@ -1,12 +1,20 @@
-import { getMyChatMember } from "@/stores/chatMemberStore";
+import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { callService } from "@/services/http/callService";
+import { useAuthStore } from "@/stores/authStore";
 
-
-export async function getMyCallToken(chatId: string): Promise<string | undefined> {
+export async function getMyCallToken(
+  chatId: string
+): Promise<string | undefined> {
   try {
-    const myChatMember = await getMyChatMember(chatId);
+    const currentUserId = useAuthStore.getState().currentUser?.id;
+    if (!currentUserId) return;
+    const myChatMember = await useChatMemberStore
+      .getState()
+      .getChatMemberByUserIdAndChatId(chatId, currentUserId, true);
     if (!myChatMember?.id) {
-      console.warn("[getMyCallToken] No chat member found, returning undefined");
+      console.warn(
+        "[getMyCallToken] No chat member found, returning undefined"
+      );
       return undefined;
     }
 

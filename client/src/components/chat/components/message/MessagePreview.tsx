@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { formatDateTime } from "@/common/utils/format/formatDateTime";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import type { MessageResponse } from "@/shared/types/responses/message.response";
-import { useCurrentUserId } from "@/stores/authStore";
+import { getCurrentUserId } from "@/stores/authStore";
 import RenderMultipleAttachments from "@/components/ui/attachments/RenderMultipleAttachments";
 import ForwardedMessagePreview from "@/components/ui/messages/ForwardMessagePreview";
 
@@ -12,7 +12,7 @@ interface MessagePreviewProps {
 }
 
 const MessagePreview: React.FC<MessagePreviewProps> = ({ message }) => {
-  const currentUserId = useCurrentUserId();
+  const currentUserId = getCurrentUserId();
   const isMe = message.sender.id === currentUserId;
 
   const attachments = message.attachments || [];

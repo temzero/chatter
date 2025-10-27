@@ -1,6 +1,5 @@
 import { ChatType } from 'src/shared/types/enums/chat-type.enum';
 import { Exclude, Expose, Type } from 'class-transformer';
-import { LastMessageResponseDto } from './last-message-response.dto';
 import { ChatMemberRole } from 'src/shared/types/enums/chat-member-role.enum';
 import { MessageResponseDto } from 'src/modules/message/dto/responses/message-response.dto';
 import { ChatMemberLiteDto } from './chat-member-lite.dto';
@@ -44,10 +43,6 @@ export class ChatResponseDto implements ChatResponse {
   @Expose()
   @Type(() => MessageResponseDto)
   pinnedMessage?: MessageResponseDto | null;
-
-  @Expose()
-  @Type(() => LastMessageResponseDto)
-  lastMessage?: LastMessageResponseDto | null;
 
   @Expose()
   mutedUntil?: string | Date | null;

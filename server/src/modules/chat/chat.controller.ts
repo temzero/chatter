@@ -60,12 +60,33 @@ export class ChatController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
+  async findInitialChats(
+    @CurrentUser('id') userId: string,
+    @Query() queryParams: PaginationQuery,
+  ): Promise<SuccessResponse<PaginationResponse<ChatResponseDto>>> {
+    try {
+      const { items, hasMore } = await this.chatService.getInitialChats(
+        userId,
+        queryParams,
+      );
+
+      return new SuccessResponse(
+        { items, hasMore },
+        'User chats retrieved successfully',
+      );
+    } catch (error: unknown) {
+      ErrorResponse.throw(error, 'Failed to retrieve user chats');
+    }
+  }
+
+  @Get('more')
+  @HttpCode(HttpStatus.OK)
   async findByPagination(
     @CurrentUser('id') userId: string,
     @Query() queryParams: PaginationQuery,
   ): Promise<SuccessResponse<PaginationResponse<ChatResponseDto>>> {
     try {
-      const { items, hasMore } = await this.chatService.getUserChats(
+      const { items, hasMore } = await this.chatService.getUnpinnedChats(
         userId,
         queryParams,
       );

@@ -3,7 +3,7 @@ import type { AttachmentResponse } from "@/shared/types/responses/message.respon
 import { formatFileSize } from "@/common/utils/format/formatFileSize";
 import { handleDownload } from "@/common/utils/handleDownload";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
-import { getFileIcon } from "@shared/utils/getFileIcon";
+import { getFileIcon } from "@/common/utils/getFileIcon";
 import CustomAudioDiskPlayer, {
   AudioPlayerRef,
 } from "@/components/ui/media/CustomAudioDiskPlayer";

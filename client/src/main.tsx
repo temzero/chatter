@@ -1,10 +1,10 @@
 // import { StrictMode } from 'react'
-import { createRoot } from "react-dom/client";
 import "./main.css";
 import "@/i18n"; // initializes i18n globally
 import App from "./App.tsx";
 import ErrorBoundary from "./ErrorBoundary";
 import bootstrapApp from "./common/hooks/app/boostrap.ts";
+import { createRoot } from "react-dom/client";
 
 // Wait for all stores to initialize before mounting React
 bootstrapApp()

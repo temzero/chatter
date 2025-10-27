@@ -4,7 +4,7 @@ import { Avatar } from "@/components/ui/avatar/Avatar";
 import { formatTimeAgo } from "@/common/utils/format/formatTimeAgo";
 import { SlidingContainer } from "@/components/ui/layout/SlidingContainer";
 import SidebarLayout from "@/layouts/SidebarLayout";
-import { useCurrentUserId } from "@/stores/authStore";
+import { getCurrentUserId } from "@/stores/authStore";
 import { useFriendRequest } from "@/common/hooks/useFriendRequest";
 import { useChatStore } from "@/stores/chatStore";
 import { useTranslation } from "react-i18next";
@@ -13,7 +13,7 @@ type RequestTab = "received" | "sent";
 
 const SidebarFriendRequests: React.FC = () => {
   const { t } = useTranslation();
-  const currentUserId = useCurrentUserId();
+  const currentUserId = getCurrentUserId();
   const createOrGetDirectChat = useChatStore.getState().createOrGetDirectChat;
   const { pendingRequests, handleAccept, handleDecline, handleCancel } =
     useFriendRequest();

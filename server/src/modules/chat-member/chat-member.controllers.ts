@@ -261,9 +261,10 @@ export class ChatMemberController {
     @Param('memberId') memberId: string,
     @Body() body: { isPinned: boolean },
   ): Promise<SuccessResponse<ChatMemberResponseDto>> {
-    const updatedMember = await this.memberService.updateMember(memberId, {
-      pinnedAt: body.isPinned ? new Date() : null, // ✅ set pinnedAt
-    });
+    const updatedMember = await this.memberService.togglePinChat(
+      memberId,
+      body.isPinned,
+    );
 
     return new SuccessResponse(
       plainToInstance(ChatMemberResponseDto, updatedMember),

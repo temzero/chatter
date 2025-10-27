@@ -20,6 +20,7 @@ const RouteMessageCleaner = () => {
 
 const AppRoutes: React.FC = () => {
   const isAuthenticated = useIsAuthenticated();
+  console.log("AppRoutes-isAuthenticated ", isAuthenticated);
 
   return (
     <>

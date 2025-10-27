@@ -6,7 +6,7 @@ import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { getCallColor, getCallText } from "@/common/utils/call/callHelpers";
 import { formatDateTime } from "@/common/utils/format/formatDateTime";
 import { useTranslation } from "react-i18next";
-import { useCurrentUserId } from "@/stores/authStore";
+import { getCurrentUserId } from "@/stores/authStore";
 import CallIcon from "@/components/ui/icons/CallIcon";
 import Button from "../ui/buttons/Button";
 
@@ -17,7 +17,7 @@ interface DeleteCallModalData {
 
 const DeleteCallModal: React.FC = () => {
   const { t } = useTranslation();
-  const currentUserId = useCurrentUserId();
+  const currentUserId = getCurrentUserId();
   const closeModal = getCloseModal();
   const data = getModalData() as unknown as DeleteCallModalData | undefined;
 

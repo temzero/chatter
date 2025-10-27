@@ -1,9 +1,9 @@
 import React from "react";
 import { AttachmentResponse } from "@/shared/types/responses/message.response";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
-import { getFileIcon } from "@shared/utils/getFileIcon";
-import CustomAudioPlayer from "@/components/ui/media/CustomAudioPlayer";
+import { getFileIcon } from "@/common/utils/getFileIcon";
 import { setOpenMediaModal } from "@/stores/modalStore";
+import CustomAudioPlayer from "@/components/ui/media/CustomAudioPlayer";
 
 interface RenderPinnedAttachmentProps {
   attachment: AttachmentResponse;

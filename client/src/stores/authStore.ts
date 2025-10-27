@@ -10,6 +10,7 @@ import { SidebarMode } from "@/common/enums/sidebarMode";
 import { webSocketService } from "@/services/websocket/websocket.service";
 import type { UserResponse } from "@/shared/types/responses/user.response";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
+import { localStorageService } from "@/services/storage/localStorageService";
 
 type AuthMessageType = "error" | "success" | "info";
 
@@ -26,7 +27,7 @@ interface AuthState {
 }
 
 interface AuthActions {
-  initialize: () => Promise<void>;
+  initialize: () => Promise<boolean>;
   setCurrentUser: (user: UserResponse | null) => void;
   setMessage: (type: AuthMessageType, content: string) => void;
   clearMessage: () => void;
@@ -48,7 +49,7 @@ interface AuthActions {
 const initialState: AuthState = {
   currentUser: null,
   isAuthenticated: false,
-  loading: false, // Changed default to false
+  loading: false,
   message: null,
 };
 
@@ -57,13 +58,24 @@ export const useAuthStore = create<AuthState & AuthActions>()(
     (set, get) => ({
       ...initialState,
 
-      initialize: async () => {
+      initialize: async (): Promise<boolean> => {
         try {
+          const token = localStorageService.getAccessToken();
+          if (!token) {
+            console.log("No Access-token");
+            // refresh everything
+            set({ ...initialState });
+            return false;
+          }
+
           get().setLoading(true);
+
           const user = await authService.getCurrentUser();
 
           if (!user) {
-            return set({ ...initialState, loading: false });
+            // refresh everything
+            set({ ...initialState });
+            return false;
           }
 
           set({
@@ -72,9 +84,13 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             loading: false,
             message: null,
           });
+
+          return true; // success
         } catch (error) {
-          console.error(error);
-          set({ ...initialState, loading: false });
+          console.error("Bootstrap auth error:", error);
+          // refresh everything
+          set({ ...initialState });
+          return false;
         }
       },
 
@@ -226,29 +242,13 @@ function handleAuthError(error: unknown): string {
   return error instanceof Error ? error.message : "Unknown error occurred";
 }
 
-// Selector hooks
-
-// Memoized action selector (won't cause re-renders when actions don't change)
-export const useAuthActions = () =>
-  useAuthStore((state) => ({
-    setMessage: state.setMessage,
-    clearMessage: state.clearMessage,
-    setLoading: state.setLoading,
-    login: state.login,
-    logout: state.logout,
-    register: state.register,
-    sendPasswordResetEmail: state.sendPasswordResetEmail,
-    resetPasswordWithToken: state.resetPasswordWithToken,
-    verifyEmailWithToken: state.verifyEmailWithToken,
-  }));
-
 // EXPORT HOOKS
-export const useCurrentUser = () => useAuthStore((state) => state.currentUser);
-export const useCurrentUserId = () =>
-  useAuthStore((state) => state.currentUser?.id);
+
+export const getCurrentUser = () => useAuthStore.getState().currentUser;
+export const getCurrentUserId = () => useAuthStore.getState().currentUser?.id;
 
 export const useIsMe = (userId: string): boolean => {
-  const currentUser = useCurrentUser();
+  const currentUser = getCurrentUser();
   if (!userId) return false;
   return currentUser?.id === userId;
 };

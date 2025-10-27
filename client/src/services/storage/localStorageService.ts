@@ -10,15 +10,6 @@ export const localStorageService = {
     localStorage.setItem("accessToken", token);
   },
 
-  // User data management
-  // getUser(): User | null {
-  //   const user = localStorage.getItem("user");
-  //   return user ? JSON.parse(user) : null;
-  // },
-  // setUser(user: User): void {
-  //   localStorage.setItem("user", JSON.stringify(user));
-  // },
-
   getDeviceId(): string {
     let deviceId = localStorage.getItem("deviceId");
     if (!deviceId) {

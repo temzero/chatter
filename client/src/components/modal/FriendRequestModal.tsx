@@ -3,7 +3,7 @@ import React, { useRef, useState } from "react";
 import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useFriendshipStore } from "@/stores/friendshipStore";
-import { useCurrentUserId } from "@/stores/authStore";
+import { getCurrentUserId } from "@/stores/authStore";
 import { useTranslation } from "react-i18next";
 
 interface FriendRequestModalData {
@@ -18,7 +18,7 @@ interface FriendRequestModalData {
 
 const FriendRequestModal: React.FC = () => {
   const { t } = useTranslation();
-  const currentUserId = useCurrentUserId();
+  const currentUserId = getCurrentUserId();
   const closeModal = getCloseModal();
   const sendFriendRequest = useFriendshipStore.getState().sendFriendRequest;
   const data = getModalData() as unknown as FriendRequestModalData | undefined;

@@ -43,7 +43,6 @@ export class SavedChatMapper {
       pinnedMessage: chat.pinnedMessage
         ? this.messageMapper.mapMessageToMessageResDto(chat.pinnedMessage)
         : null,
-      lastMessage: null,
       otherMemberUserIds: [],
       previewMembers: [],
       unreadCount,

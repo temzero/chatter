@@ -23,7 +23,7 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
   messageId,
   chatId,
 }) => {
-  const reactions = useMessageReactions(messageId);
+  const reactions = useMessageReactions(chatId, messageId);
 
   if (!reactions || Object.keys(reactions).length === 0) return null;
 

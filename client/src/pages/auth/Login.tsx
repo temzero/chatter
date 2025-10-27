@@ -1,18 +1,18 @@
 import { useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 import { AlertMessage } from "@/components/ui/messages/AlertMessage";
 import { AuthenticationLayout } from "@/layouts/PublicLayout";
 import { motion } from "framer-motion";
 import { publicLayoutAnimations } from "@/common/animations/publicLayoutAnimations";
 import { useTranslation } from "react-i18next";
+import { fetchInitialAppData } from "@/common/hooks/app/fetchInitialAppData";
 
 const Login = () => {
   const { t } = useTranslation();
   const formRef = useRef<HTMLFormElement>(null);
   const loading = useAuthStore((state) => state.loading);
   const login = useAuthStore.getState().login;
-  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +23,8 @@ const Login = () => {
     const password = formData.get("password") as string;
 
     await login(identifier, password);
-    navigate("/");
+
+    await fetchInitialAppData();
   };
 
   return (

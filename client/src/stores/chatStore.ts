@@ -16,10 +16,7 @@ import type {
   ChatDataResponse,
   ChatMemberLite,
 } from "@/shared/types/responses/chat.response";
-import type {
-  LastMessageResponse,
-  MessageResponse,
-} from "@/shared/types/responses/message.response";
+import type { MessageResponse } from "@/shared/types/responses/message.response";
 import { PaginationResponse } from "@/shared/types/responses/pagination.response";
 import { useShallow } from "zustand/shallow";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
@@ -64,7 +61,6 @@ interface ChatStoreActions {
   pinChat: (myMemberId: string, isPinned: boolean) => Promise<void>;
   addMembersToChat: (chatId: string, userIds: string[]) => Promise<void>;
   setMute: (chatId: string, memberId: string, mutedUntil: Date | null) => void;
-  setLastMessage: (chatId: string, message: LastMessageResponse | null) => void;
   setUnreadCount: (chatId: string, incrementBy: number) => void;
   setPinnedMessage: (chatId: string, message: MessageResponse | null) => void;
   generateInviteLink: (chatId: string) => Promise<string>;
@@ -80,8 +76,8 @@ interface ChatStoreActions {
 
 const initialState: ChatStoreState = {
   activeChatId: null,
-  chats: {}, // Changed to empty object
-  chatIds: [], // Added empty array
+  chats: {},
+  chatIds: [],
   savedChat: null,
   hasMoreChats: true,
   isLoading: false,
@@ -180,7 +176,7 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
 
       set({ isLoading: true });
       try {
-        const { chats: newChats, hasMore } = await chatService.fetchChats({
+        const { items: newChats, hasMore } = await chatService.fetchMoreChats({
           offset: chatIds.length,
           limit,
           lastId: lastChatId,
@@ -388,15 +384,22 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
       }
     },
 
-    updateChatLocally: (chatId: string, payload: Partial<ChatResponse>) => {
+    updateChatLocally: (chatId, payload) => {
       set((state) => {
-        const existingChat = state.chats[chatId];
-        if (!existingChat) return state;
+        const chat = state.chats[chatId];
+        if (!chat) return state;
+
+        const updatedChat = { ...chat, ...payload };
+
+        // skip update if no difference
+        if (JSON.stringify(chat) === JSON.stringify(updatedChat)) {
+          return state;
+        }
 
         return {
           chats: {
             ...state.chats,
-            [chatId]: { ...existingChat, ...payload },
+            [chatId]: updatedChat,
           },
         };
       });
@@ -448,11 +451,6 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
         handleError(error, "Failed to set mute");
         throw error;
       }
-    },
-
-    setLastMessage: (chatId, message) => {
-      if (!chatId || !message) return;
-      get().updateChatLocally(chatId, { lastMessage: message });
     },
 
     setUnreadCount: (chatId: string, incrementBy: number) => {
@@ -615,11 +613,14 @@ export const useActiveChat = () =>
 export const useActiveChatId = () =>
   useChatStore((state) => state.activeChatId);
 
+export const useIsActiveChat = (chatId: string) =>
+  useChatStore(useShallow((state) => state.activeChatId === chatId));
+
 export const useAllChats = () =>
   useChatStore(useShallow((state) => state.chats));
 
 export const useAllChatIds = () =>
-  useChatStore(useShallow((state) => state.chatIds));
+  useChatStore((state) => state.chatIds);
 
 export const useChatsForFolderFilter = () =>
   useChatStore(
@@ -637,9 +638,6 @@ export const useChatsForFolderFilter = () =>
   );
 
 export const useSavedChat = () => useChatStore((state) => state.savedChat);
-
-export const useIsActiveChat = (chatId: string) =>
-  useChatStore(useShallow((state) => state.activeChatId === chatId));
 
 export const useSetActiveSavedChat = () => {
   const getState = useChatStore;

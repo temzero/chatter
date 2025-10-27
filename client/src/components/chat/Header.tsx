@@ -62,8 +62,8 @@ const Header: React.FC<ChatHeaderProps> = ({ chat, isBlockedByMe = false }) => {
     }
   }, [chat?.id, getActiveCall]);
 
-  const chatListMembers = useChatMemberStore.getState().chatMembers[chat.id];
   const isOnline = useChatStatus(chat?.id, chat.type);
+  const chatListMembers = useChatMemberStore.getState().chatMembers[chat.id];
   const isSearchMessages = useMessageStore((state) => state.isSearchMessages);
 
   const isChannel = chat.type === ChatType.CHANNEL;

@@ -1,12 +1,12 @@
 import { FriendContactResponse } from "@/shared/types/responses/friend-contact.response";
-import { useCurrentUserId } from "@/stores/authStore";
+import { getCurrentUserId } from "@/stores/authStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useChatStore } from "@/stores/chatStore";
 
 export const useAllUniqueMembers = (
   excludeChatId?: string
 ): FriendContactResponse[] | null => {
-  const currentUserId = useCurrentUserId();
+  const currentUserId = getCurrentUserId();
   const chatMembers = useChatMemberStore.getState().chatMembers;
   if (!currentUserId) return null;
 

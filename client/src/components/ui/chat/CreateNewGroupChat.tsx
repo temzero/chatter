@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import ContactSelectionList from "@/components/ui/contact/ContactSelectionList";
 import { useChatStore } from "@/stores/chatStore";
-import { useCurrentUser } from "@/stores/authStore";
+import { getCurrentUser } from "@/stores/authStore";
 import { getSetSidebar } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
@@ -16,9 +16,9 @@ interface CreateChatProps {
 
 const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
   const { t } = useTranslation();
-  const createGroupChat = useChatStore.getState().createGroupChat;
+  const currentUser = getCurrentUser();
   const isLoading = useChatStore((state) => state.isLoading);
-  const currentUser = useCurrentUser();
+  const createGroupChat = useChatStore.getState().createGroupChat;
 
   const setActiveChatId = useChatStore.getState().setActiveChatId;
   const setSidebar = getSetSidebar();
@@ -27,16 +27,21 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
   const [name, setName] = useState("");
   const [searchTerm, setSearchTerm] = useState(""); // Add search state
 
-  const chats = useChatStore((state) => state.chats); // Get all chats instead of filteredChats
+  const chats = useChatStore((state) => state.chats);
 
   // Filter private chats locally with search
   const privateChats = React.useMemo(() => {
-    const directChats = chats.filter((chat) => chat.type === "direct");
+    // Convert object → array, then filter
+    const directChats = Object.values(chats).filter(
+      (chat: { type: string }) => chat.type === "direct"
+    );
 
     if (!searchTerm) return directChats;
 
-    return directChats.filter((chat) =>
-      chat.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    return directChats.filter((chat: ChatResponse) =>
+      (chat.name ?? "") // handle null safely
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
     );
   }, [chats, searchTerm]);
 
@@ -53,7 +58,9 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
   };
 
   const getSelectedChats = (): ChatResponse[] => {
-    return privateChats.filter((chat) => selectedContacts.includes(chat.id));
+    return privateChats.filter((chat: { id: string }) =>
+      selectedContacts.includes(chat.id)
+    );
   };
 
   const handleSearch = (term: string) => {

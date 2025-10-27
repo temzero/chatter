@@ -1,3 +1,5 @@
+import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
+
 export const getFileIcon = (fileName?: string | null): string => {
   if (!fileName) return "attach_file";
   const name = fileName.toLowerCase();
@@ -17,3 +19,30 @@ export const getFileIcon = (fileName?: string | null): string => {
   // Fallback
   return "insert_drive_file";
 };
+
+export function getAttachmentIcons(
+  attachments?: { type: AttachmentType; filename?: string | null }[]
+): string[] | undefined {
+  if (!attachments || attachments.length === 0) return undefined;
+
+  const seen = new Set<string>();
+  const icons: string[] = [];
+
+  for (const att of attachments) {
+    const fileName = att.filename;
+    if (!fileName) continue;
+
+    const icon: string =
+      att.type === AttachmentType.LOCATION
+        ? "location_on"
+        : getFileIcon(fileName);
+
+    if (!seen.has(icon)) {
+      icons.push(icon);
+      seen.add(icon);
+      if (icons.length >= 5) break;
+    }
+  }
+
+  return icons;
+}

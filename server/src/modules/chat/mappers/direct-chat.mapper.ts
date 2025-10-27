@@ -6,9 +6,9 @@ import { ChatType } from 'src/shared/types/enums/chat-type.enum';
 import { MessageService } from 'src/modules/message/message.service';
 import { MessageMapper } from 'src/modules/message/mappers/message.mapper';
 import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
-import { mapMessageToLastMessageResDto } from './last-message.mapper';
 import { mapChatMemberToChatMemberLiteDto } from '../../chat-member/mappers/chat-member-lite.mapper';
 import { ChatMemberLiteDto } from '../dto/responses/chat-member-lite.dto';
+// import { mapMessageToLastMessageResDto } from './last-message.mapper';
 
 @Injectable()
 export class DirectChatMapper {
@@ -69,19 +69,19 @@ export class DirectChatMapper {
       pinnedMessage: chat.pinnedMessage
         ? this.messageMapper.mapMessageToMessageResDto(chat.pinnedMessage)
         : null,
-      lastMessage: myMember.lastVisibleMessage
-        ? mapMessageToLastMessageResDto(
-            myMember.lastVisibleMessage,
-            chat.members,
-            currentUserId,
-          )
-        : undefined,
       otherMemberUserIds: otherMember ? [otherMember.userId] : [],
       previewMembers,
       unreadCount,
       mutedUntil,
       pinnedAt: myMember.pinnedAt,
       isDeleted: !!otherMember?.deletedAt,
+      // lastMessage: myMember.lastVisibleMessage
+      //   ? mapMessageToLastMessageResDto(
+      //       myMember.lastVisibleMessage,
+      //       chat.members,
+      //       currentUserId,
+      //     )
+      //   : undefined,
     };
   }
 }

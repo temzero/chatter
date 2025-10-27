@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import clsx from "clsx";
-import { useCurrentUserId } from "@/stores/authStore";
+import { getCurrentUserId } from "@/stores/authStore";
 import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 import { MessageResponse } from "@/shared/types/responses/message.response";
 import { MessageReactionDisplay } from "@/components/ui/messages/MessageReactionsDisplay";
@@ -29,7 +29,7 @@ const SystemMessage = ({
   senderDisplayName,
   content,
 }: Props) => {
-  const currentUserId = useCurrentUserId();
+  const currentUserId = getCurrentUserId();
   const messageId = message.id;
 
   const openFocusMessageModal = setOpenFocusMessageModal();

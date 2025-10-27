@@ -6,9 +6,7 @@ import { useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useChatMemberStore } from "./chatMemberStore";
 import { useAuthStore } from "./authStore";
-import { useMembersByChatId } from "./chatMemberStore";
 import { handleError } from "@/common/utils/handleError";
-import { createLastMessage } from "@/common/utils/message/createLastMessage";
 import type {
   AttachmentResponse,
   MessageResponse,
@@ -135,6 +133,7 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
     },
 
     fetchMoreMessages: async (chatId: string) => {
+      console.log("fetchMoreMessages");
       set({ isLoading: true });
       try {
         const existingMessages = get().messages[chatId] || [];
@@ -204,47 +203,13 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
       const currentUserId = currentUser?.id;
       const isFromMe = newMessage.sender.id === currentUserId;
 
-      // 5. Update last message
-      const lastMessage = createLastMessage(newMessage);
-      useChatStore.getState().setLastMessage(chatId, lastMessage);
-
-      // 6. Handle unread count
+      // 5. Handle unread count
       if (!isFromMe) {
         useChatStore.getState().setUnreadCount(chatId, +1);
       }
 
-      // 7. Update store
+      // 6. Update store
       set({ messages: updatedMessages });
-
-      // // 8. Clean up animation after 500ms
-      // const timer = setTimeout(() => {
-      //   set((state) => {
-      //     const chatMessages = state.messages[chatId] || [];
-      //     const messageIndex = chatMessages.findIndex(
-      //       (m) => m.id === newMessage.id
-      //     );
-
-      //     if (messageIndex === -1) return state; // Message not found
-
-      //     // Create new array with animation disabled
-      //     const newChatMessages = [...chatMessages];
-      //     newChatMessages[messageIndex] = {
-      //       ...newChatMessages[messageIndex],
-      //       shouldAnimate: false,
-      //     };
-
-      //     return {
-      //       messages: {
-      //         ...state.messages,
-      //         [chatId]: newChatMessages,
-      //       },
-      //     };
-      //   });
-      // }, 500); // Match this to your CSS animation duration
-
-      // // Return cleanup for useEffect (if used in a component)
-      // // In Zustand, you'd handle this differently (see note below)
-      // return () => clearTimeout(timer);
     },
 
     getMessageById: (messageId) => {
@@ -271,12 +236,6 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
           ...updatedMessage,
         };
 
-        const lastMessage = updatedMessages[updatedMessages.length - 1];
-        if (lastMessage?.id === messageId) {
-          const newLast = createLastMessage(updatedMessages[index]);
-          useChatStore.getState().setLastMessage(chatId, newLast);
-        }
-
         return {
           messages: {
             ...state.messages,
@@ -291,7 +250,6 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
       if (!chatId) return;
 
       const chatMessages = messages[chatId] || [];
-      const messageToDelete = chatMessages.find((msg) => msg.id === messageId);
 
       set({
         messages: {
@@ -299,24 +257,6 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
           [chatId]: chatMessages.filter((msg) => msg.id !== messageId),
         },
       });
-
-      if (
-        messageToDelete &&
-        chatMessages.length > 0 &&
-        chatMessages[chatMessages.length - 1].id === messageId
-      ) {
-        const updatedMessages = messages[chatId].filter(
-          (msg) => msg.id !== messageId
-        );
-
-        if (updatedMessages.length > 0) {
-          const newLastMessage = updatedMessages[updatedMessages.length - 1];
-          const lastMessage = createLastMessage(newLastMessage);
-          useChatStore.getState().setLastMessage(chatId, lastMessage);
-        } else {
-          useChatStore.getState().setLastMessage(chatId, null);
-        }
-      }
     },
 
     getChatMessages: (chatId) => get().messages[chatId] || [],
@@ -520,8 +460,8 @@ export const useMessagesByChatId = (chatId: string): MessageResponse[] => {
   );
   const searchQuery = useMessageStore((state) => state.searchQuery);
   const showImportantOnly = useMessageStore((state) => state.showImportantOnly);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const members = useMembersByChatId(chatId) || [];
+
+  const members = useChatMemberStore.getState().chatMembers[chatId];
   const currentUserId = useAuthStore.getState().currentUser?.id;
 
   return useMemo(() => {
@@ -556,9 +496,7 @@ export const useSenderByMessageId = (
 export const useActiveChatAttachments = () => {
   const activeChatId = useActiveChatId();
   const isLoading = useMessageStore((state) => state.isLoading);
-  const getChatAttachments = useMessageStore(
-    (state) => state.getChatAttachments
-  );
+  const getChatAttachments = useMessageStore.getState().getChatAttachments;
 
   return useMemo(
     () => (activeChatId && !isLoading ? getChatAttachments(activeChatId) : []),
@@ -566,20 +504,26 @@ export const useActiveChatAttachments = () => {
   );
 };
 
-export const useMessageReactions = (messageId: string) =>
+export const useMessageReactions = (chatId: string, messageId: string) =>
   useMessageStore(
     useShallow((state) => {
-      const messages = state.messages;
-      for (const chatId in messages) {
-        const message = messages[chatId].find((msg) => msg.id === messageId);
-        if (message) {
-          return message.reactions || {};
-        }
-      }
-      return {};
+      const message = state.messages[chatId]?.find(
+        (msg) => msg.id === messageId
+      );
+      return message?.reactions || {};
     })
   );
 
 export const useHasMoreMessages = (chatId: string) => {
   return useMessageStore((state) => state.hasMoreMessages[chatId] ?? true);
+};
+
+// store/messageStore.ts
+export const useLastMessage = (chatId: string) => {
+  return useMessageStore(
+    useShallow((state) => {
+      const messages = state.messages[chatId] || [];
+      return messages[messages.length - 1] ?? null;
+    })
+  );
 };

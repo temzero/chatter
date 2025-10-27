@@ -41,6 +41,8 @@ export function useChatSocketListeners() {
 
       if (isOwnMessage && messageStore.getMessageById(message.id)) {
         messageStore.updateMessageById(message.chatId, message.id, message);
+        // my message is already added
+        return
       } else {
         messageStore.addMessage(message);
 

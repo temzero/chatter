@@ -10,16 +10,15 @@ import { useActiveMembers } from "@/stores/chatMemberStore";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
-import { useCurrentUserId } from "@/stores/authStore";
+import { getCurrentUserId } from "@/stores/authStore";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useTranslation } from "react-i18next";
 
 const GroupChatEdit = () => {
   const { t } = useTranslation();
-  const currentUserId = useCurrentUserId();
+  const currentUserId = getCurrentUserId();
   const activeChat = useActiveChat() as ChatResponse;
-  console.log("activeChat", activeChat);
   const activeMembers = useActiveMembers();
   const updateChat = useChatStore.getState().updateChat;
 

@@ -1,6 +1,8 @@
 import React, { useMemo, useEffect } from "react";
+import Message from "@/components/chat/components/message/Message";
 import { MessageResponse } from "@/shared/types/responses/message.response";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
+import { useActiveMembers } from "@/stores/chatMemberStore";
 import {
   groupMessagesByDate,
   isRecentMessage,
@@ -9,7 +11,6 @@ import {
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { AnimatePresence } from "framer-motion";
 import { getCurrentUser } from "@/stores/authStore";
-import MessageWithInfo from "./MessagesWithInfo";
 
 interface ChatMessagesProps {
   chat: ChatResponse;
@@ -17,20 +18,25 @@ interface ChatMessagesProps {
 }
 
 const Messages: React.FC<ChatMessagesProps> = ({ chat, messages }) => {
-  console.log("Messages render:", messages.length);
-
+  console.log("Messages", messages.length);
   const chatId = chat?.id;
   const currentUser = getCurrentUser();
+
+  const members = useActiveMembers() || [];
+  const myMember = members.find((m) => m.id === chat.myMemberId);
+  const otherMembers = members.filter((m) => m.id !== chat.myMemberId);
+  const myLastReadMessageId = myMember?.lastReadMessageId ?? null;
 
   // ✅ Auto mark message as read
   useEffect(() => {
     if (!chatId || !chat.myMemberId || messages.length === 0) return;
 
     const lastMessage = messages[messages.length - 1];
+    const isUnread =
+      myLastReadMessageId === null || lastMessage.id !== myLastReadMessageId;
     const isFromOther = lastMessage.sender.id !== currentUser?.id;
 
-    // Mark as read only if last message is from another user
-    if (isFromOther) {
+    if (isUnread && isFromOther) {
       const timer = setTimeout(() => {
         chatWebSocketService.messageRead(
           chatId,
@@ -40,7 +46,7 @@ const Messages: React.FC<ChatMessagesProps> = ({ chat, messages }) => {
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [chatId, chat.myMemberId, messages, currentUser?.id]);
+  }, [chatId, chat.myMemberId, messages, myLastReadMessageId, currentUser?.id]);
 
   const messagesByDate = useMemo(
     () => groupMessagesByDate(messages),
@@ -70,20 +76,39 @@ const Messages: React.FC<ChatMessagesProps> = ({ chat, messages }) => {
 
             {/* ✅ AnimatePresence wraps entire message list */}
             <AnimatePresence initial={false}>
-              {group.messages.map((message, index) => {
+              {group.messages.map((msg, index) => {
                 const prevMsg = group.messages[index - 1];
                 const nextMsg = group.messages[index + 1];
-                const showInfo = shouldShowInfo(message, prevMsg, nextMsg);
-                const isRecent = isRecentMessage(message, prevMsg, nextMsg);
+                const showInfo = shouldShowInfo(msg, prevMsg, nextMsg);
+                const isRecent = isRecentMessage(msg, prevMsg, nextMsg);
+                const readUserAvatars: string[] = [];
+
+                if (msg.id === myLastReadMessageId && currentUser?.avatarUrl) {
+                  readUserAvatars.push(currentUser.avatarUrl);
+                }
+
+                for (const member of otherMembers) {
+                  if (member.avatarUrl && member.lastReadMessageId === msg.id) {
+                    readUserAvatars.push(member.avatarUrl);
+                  }
+                }
+                const isMe = msg.sender.id === currentUser?.id;
 
                 return (
-                  <MessageWithInfo
-                    key={message.id}
-                    chat={chat}
-                    message={message}
-                    showInfo={showInfo}
-                    isRecent={isRecent}
-                  />
+                  <div
+                    key={msg.id}
+                    className={`flex ${isMe ? "justify-end" : "justify-start"}`}
+                  >
+                    <Message
+                      message={msg}
+                      chatType={chat.type}
+                      showInfo={showInfo}
+                      isRecent={isRecent}
+                      readUserAvatars={readUserAvatars}
+                      currentUserId={currentUser?.id || ""}
+                      isMe={isMe}
+                    />
+                  </div>
                 );
               })}
             </AnimatePresence>

@@ -3,7 +3,7 @@ import { ChatMemberResponse } from "@/shared/types/responses/chat-member.respons
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
-import { useCurrentUserId } from "@/stores/authStore";
+import { getCurrentUserId, } from "@/stores/authStore";
 import { rolePriority } from "@/shared/types/enums/chat-member-role.enum";
 import { ChatMemberStatus } from "@/shared/types/enums/chat-member-status.enum";
 import { Avatar } from "@/components/ui/avatar/Avatar";
@@ -204,10 +204,10 @@ interface ContextMenuProps {
 const MemberContextMenu = React.forwardRef<HTMLDivElement, ContextMenuProps>(
   ({ x, y, member, currentRole, onClose }, ref) => {
     const { t } = useTranslation();
+    const currentUserId = getCurrentUserId();
     const openModal = getOpenModal();
     const updateMember = useChatMemberStore.getState().updateMember;
     const removeMember = useChatMemberStore.getState().removeChatMember;
-    const currentUserId = useCurrentUserId();
 
     const classes =
       "flex items-center gap-1 px-4 py-2 hover:bg-[--hover-color] cursor-pointer";

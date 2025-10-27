@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { SidebarMode } from "@/common/enums/sidebarMode";
-import { useAuthStore, useCurrentUser } from "@/stores/authStore";
+import { getCurrentUser, useAuthStore } from "@/stores/authStore";
 import { userService } from "@/services/http/userService"
 import { getSetSidebar } from "@/stores/sidebarStore";
 import { handleError } from "@/common/utils/handleError";
@@ -10,7 +10,7 @@ import SidebarLayout from "@/layouts/SidebarLayout";
 
 const SidebarSettingsUsername: React.FC = () => {
   const { t } = useTranslation();
-  const currentUser = useCurrentUser();
+  const currentUser = getCurrentUser();
 
   const setCurrentUser = useAuthStore.getState().setCurrentUser;
   const setSidebar = getSetSidebar();

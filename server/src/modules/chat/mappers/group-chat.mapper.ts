@@ -5,10 +5,10 @@ import { ChatResponseDto } from '../dto/responses/chat-response.dto';
 import { MessageService } from 'src/modules/message/message.service';
 import { MessageMapper } from 'src/modules/message/mappers/message.mapper';
 import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
-import { mapMessageToLastMessageResDto } from './last-message.mapper';
 import { mapChatMemberToChatMemberLiteDto } from '../../chat-member/mappers/chat-member-lite.mapper';
 import { getActiveInviteLinks } from 'src/common/utils/invite-link.util';
 import { ChatMemberLiteDto } from '../dto/responses/chat-member-lite.dto';
+// import { mapMessageToLastMessageResDto } from './last-message.mapper';
 
 @Injectable()
 export class GroupChatMapper {
@@ -60,19 +60,19 @@ export class GroupChatMapper {
       pinnedMessage: chat.pinnedMessage
         ? this.messageMapper.mapMessageToMessageResDto(chat.pinnedMessage)
         : null,
-      lastMessage: myMember.lastVisibleMessage
-        ? mapMessageToLastMessageResDto(
-            myMember.lastVisibleMessage,
-            chat.members,
-            currentUserId,
-          )
-        : null,
       otherMemberUserIds: otherMembers.map((m) => m.userId),
       previewMembers,
       inviteLinks: getActiveInviteLinks(chat.inviteLinks),
       unreadCount,
       mutedUntil,
       pinnedAt: myMember.pinnedAt,
+      // lastMessage: myMember.lastVisibleMessage
+      //   ? mapMessageToLastMessageResDto(
+      //       myMember.lastVisibleMessage,
+      //       chat.members,
+      //       currentUserId,
+      //     )
+      //   : null,
     };
   }
 }

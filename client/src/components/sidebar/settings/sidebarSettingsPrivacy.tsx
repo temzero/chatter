@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from "react";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { SidebarMode } from "@/common/enums/sidebarMode";
-import { useAuthStore } from "@/stores/authStore";
-import { useCurrentUser } from "@/stores/authStore";
+import { getCurrentUser, useAuthStore } from "@/stores/authStore";
 import { userService } from "@/services/http/userService";
 import { useTranslation } from "react-i18next";
 import SwitchBtn from "@/components/ui/buttons/SwitchBtn";
 
 const SidebarSettingsPrivacy: React.FC = () => {
   const { t } = useTranslation();
-  const currentUser = useCurrentUser();
+  const currentUser = getCurrentUser();
   const message = useAuthStore((state) => state.message);
   const setCurrentUser = useAuthStore.getState().setCurrentUser;
   const setMessage = useAuthStore.getState().setMessage;

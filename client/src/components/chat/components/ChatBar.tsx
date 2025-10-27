@@ -4,7 +4,7 @@ import { useMessageStore } from "@/stores/messageStore";
 import { AnimatePresence, motion } from "framer-motion";
 import { handleSendMessage } from "@/common/utils/message/sendMessageHandler";
 import { getCloseModal, useReplyToMessageId } from "@/stores/modalStore";
-import { useCurrentUserId } from "@/stores/authStore";
+import { getCurrentUserId } from "@/stores/authStore";
 import { useTranslation } from "react-i18next";
 import EmojiPicker from "@/components/ui/EmojiPicker";
 import AttachFile from "@/components/ui/attachments/AttachFile";
@@ -19,7 +19,7 @@ interface ChatBarProps {
 
 const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
   const { t } = useTranslation();
-  const currentUserId = useCurrentUserId();
+  const currentUserId = getCurrentUserId();
 
   const closeModal = getCloseModal();
   const setDraftMessage = useMessageStore.getState().setDraftMessage;

@@ -490,6 +490,7 @@ export class MessageService {
     currentUserId: string,
     queryParams: PaginationQuery,
   ): Promise<PaginationResponse<MessageResponseDto>> {
+    const { limit = 20, offset = 0, lastId } = queryParams;
     try {
       const query = this.buildFullMessageQuery()
         .where('message.chat_id = :chatId', { chatId })
@@ -500,9 +501,9 @@ export class MessageService {
         );
 
       // Apply lastId for pagination
-      if (queryParams.lastId) {
+      if (lastId) {
         const beforeMessage = await this.messageRepo.findOne({
-          where: { id: queryParams.lastId },
+          where: { id: lastId },
           select: ['createdAt'],
         });
 
@@ -515,9 +516,8 @@ export class MessageService {
 
       // Order newest to oldest in DB query
       query.orderBy('message.createdAt', 'DESC');
-
-      if (queryParams.limit) query.take(Number(queryParams.limit));
-      if (queryParams.offset) query.skip(Number(queryParams.offset));
+      query.take(Number(limit));
+      query.skip(Number(offset));
 
       const messages = await query.getMany();
 

@@ -3,7 +3,7 @@ import { useActiveMembers } from "@/stores/chatMemberStore";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
-import { useCurrentUserId } from "@/stores/authStore";
+import { getCurrentUserId } from "@/stores/authStore";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { ChatMemberItems } from "./ChatMemberItems";
 import { useTranslation } from "react-i18next";
@@ -11,7 +11,7 @@ import { getSetSidebarInfo } from "@/stores/sidebarInfoStore";
 
 const ChatMembersEdit = () => {
   const { t } = useTranslation();
-  const currentUserId = useCurrentUserId();
+  const currentUserId = getCurrentUserId();
   const activeChatId = useActiveChatId() as string;
   const activeMembers = useActiveMembers();
   const setSidebarInfo = getSetSidebarInfo();

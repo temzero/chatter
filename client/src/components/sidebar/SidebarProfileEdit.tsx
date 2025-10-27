@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { getSetSidebar } from "@/stores/sidebarStore";
-import { useCurrentUser } from "@/stores/authStore";
+import { getCurrentUser } from "@/stores/authStore";
 import { useProfileStore } from "@/stores/profileStore";
 import { AvatarEdit } from "@/components/ui/avatar/AvatarEdit";
 import { fileStorageService } from "@/services/storage/fileStorageService";
@@ -20,7 +20,7 @@ export interface ProfileFormData {
 
 const SidebarProfileEdit: React.FC = () => {
   const { t } = useTranslation();
-  const currentUser = useCurrentUser();
+  const currentUser = getCurrentUser();
   const updateProfile = useProfileStore.getState().updateProfile;
   const setSidebar = getSetSidebar();
 

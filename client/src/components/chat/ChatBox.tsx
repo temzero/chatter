@@ -1,17 +1,35 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { chatMemberService } from "@/services/http/chatMemberService";
-import { useActiveChat } from "@/stores/chatStore";
+import { useChatStore } from "@/stores/chatStore";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { useBlockStatus } from "@/common/hooks/useBlockStatus";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import Header from "./Header";
 import ChatBar from "./components/ChatBar";
 import MessagesContainer from "./messagesContainer/MessagesContainer";
+import { useShallow } from "zustand/shallow";
 
 const ChatBox = React.memo(() => {
   console.log("ChatBox");
-  const activeChat = useActiveChat();
+  const activeChat = useChatStore(
+    useShallow((state) => {
+      const chat = state.getActiveChat?.();
+      if (!chat) return null;
+      return {
+        id: chat.id,
+        name: chat.name,
+        type: chat.type,
+        myRole: chat.myRole,
+        otherMemberUserIds: chat.otherMemberUserIds,
+        pinnedMessage: chat.pinnedMessage,
+        isDeleted: chat.isDeleted,
+        avatarUrl: chat.avatarUrl,
+        myMemberId: chat.myMemberId,
+      };
+    })
+  );
+
   const { isBlockedByMe, isBlockedMe } = useBlockStatus(
     activeChat?.id ?? "",
     activeChat?.myMemberId ?? ""

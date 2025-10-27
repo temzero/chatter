@@ -2,7 +2,7 @@ import React from "react";
 import { AnimatePresence } from "framer-motion";
 import ChatListItem from "./ChatListItem";
 import InfiniteScroller from "@/components/ui/layout/InfiniteScroller";
-import { useCurrentUserId } from "@/stores/authStore";
+import { getCurrentUserId } from "@/stores/authStore";
 import { useChatStore } from "@/stores/chatStore";
 interface ChatListProps {
   chatIds: string[]; // Changed from chats to chatIds
@@ -12,7 +12,7 @@ interface ChatListProps {
 const ChatList: React.FC<ChatListProps> = React.memo(
   ({ chatIds, isCompact = false }) => {
     console.log("ChatList", chatIds.length);
-    const currentUserId = useCurrentUserId();
+    const currentUserId = getCurrentUserId();
     const hasMoreChats = useChatStore((state) => state.hasMoreChats);
     const fetchMoreChats = useChatStore.getState().fetchMoreChats;
 

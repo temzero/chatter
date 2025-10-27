@@ -8,8 +8,8 @@ import { handleError } from "@/common/utils/handleError";
 import { toast } from "react-toastify";
 import {
   useChatMemberStore,
-  useActiveMembers,
   getDirectChatPartner,
+  getMyActiveChatMember,
 } from "@/stores/chatMemberStore";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
@@ -18,12 +18,12 @@ import { useTranslation } from "react-i18next";
 
 const DirectChatEdit = () => {
   const { t } = useTranslation();
-  const activeChat = useActiveChat() as ChatResponse
+  const activeChat = useActiveChat() as ChatResponse;
+  const myMember = getMyActiveChatMember(activeChat.myMemberId);
+  const openModal = getOpenModal();
   const updateMemberNickname =
     useChatMemberStore.getState().updateMemberNickname;
   const setSidebarInfo = getSetSidebarInfo();
-  const chatMembers = useActiveMembers();
-  const openModal = getOpenModal();
 
   const chatPartner = getDirectChatPartner(
     activeChat.id,
@@ -33,11 +33,9 @@ const DirectChatEdit = () => {
   const initialFormData = useMemo(
     () => ({
       partnerNickname: chatPartner?.nickname || "",
-      myNickname:
-        chatMembers?.find((m) => m.id === activeChat.myMemberId)?.nickname ||
-        "",
+      myNickname: myMember?.nickname || "",
     }),
-    [chatPartner?.nickname, chatMembers, activeChat.myMemberId]
+    [chatPartner?.nickname, myMember?.nickname]
   );
 
   const [formData, setFormData] = useState(initialFormData);
@@ -70,7 +68,6 @@ const DirectChatEdit = () => {
         );
       }
 
-      const myMember = chatMembers?.find((m) => m.id === activeChat.myMemberId);
       if (!myMember) return;
 
       if (formData.myNickname !== initialFormData.myNickname) {

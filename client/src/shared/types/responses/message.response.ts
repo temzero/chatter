@@ -36,18 +36,6 @@ export interface MessageResponse {
   shouldAnimate?: boolean;
 }
 
-export interface LastMessageResponse {
-  id: string;
-  senderId: string;
-  senderDisplayName: string;
-  content?: string;
-  icons?: string[];
-  call?: CallLiteResponse;
-  isForwarded?: boolean;
-  systemEvent?: SystemEventType | null;
-  createdAt: string;
-}
-
 export interface SenderResponse {
   id: string;
   avatarUrl?: string | null;

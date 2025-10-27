@@ -5,12 +5,11 @@ import {
   getSetSidebarInfo,
   useSidebarInfoStore,
 } from "@/stores/sidebarInfoStore";
+import { Avatar } from "@/components/ui/avatar/Avatar";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { useActiveChat } from "@/stores/chatStore";
-import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
-import { useActiveMembers } from "@/stores/chatMemberStore";
-import { Avatar } from "@/components/ui/avatar/Avatar";
+import { getOthersActiveChatMembers } from "@/stores/chatMemberStore";
 import { useMessageStore } from "@/stores/messageStore";
 import { useMuteControl } from "@/common/hooks/useMuteControl";
 import { SidebarInfoHeaderIcons } from "@/components/ui/icons/SidebarInfoHeaderIcons";
@@ -24,18 +23,14 @@ const DirectChat: React.FC = () => {
   const isMobile = useIsMobile();
 
   const activeChat = useActiveChat() as ChatResponse;
+  const chatPartner = getOthersActiveChatMembers(activeChat.myMemberId)[0];
   const setSidebarInfo = getSetSidebarInfo();
   const setSidebarInfoVisible =
     useSidebarInfoStore.getState().setSidebarInfoVisible;
-  const chatMembers = useActiveMembers();
   const openModal = getOpenModal();
   const setDisplaySearchMessage =
     useMessageStore.getState().setDisplaySearchMessage;
   const { mute, unmute } = useMuteControl(activeChat.id, activeChat.myMemberId);
-
-  const chatPartner = chatMembers?.find(
-    (member) => member.id !== activeChat.myMemberId
-  ) as ChatMemberResponse;
 
   if (!chatPartner || !activeChat) return null;
 

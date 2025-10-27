@@ -4,7 +4,7 @@ import { useFriendshipStore } from "@/stores/friendshipStore";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { toast } from "react-toastify";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
-import { useCurrentUserId } from "@/stores/authStore";
+import { getCurrentUserId } from "@/stores/authStore";
 import { notificationWebSocketService } from "@/services/websocket/notification.service";
 import { webSocketService } from "@/services/websocket/websocket.service";
 import {
@@ -13,7 +13,7 @@ import {
 } from "@/shared/types/responses/friendship.response";
 
 export function useNotificationSocketListeners() {
-  const currentUserId = useCurrentUserId();
+  const currentUserId = getCurrentUserId();
 
   useEffect(() => {
     const handleNewFriendRequest = (request: FriendRequestResponse) => {

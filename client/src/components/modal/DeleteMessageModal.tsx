@@ -2,7 +2,7 @@
 import React from "react";
 import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
-import { useCurrentUserId } from "@/stores/authStore";
+import { getCurrentUserId } from "@/stores/authStore";
 import { useMessageStore } from "@/stores/messageStore";
 import { audioService, SoundType } from "@/services/audio.service";
 
@@ -15,7 +15,7 @@ interface DeleteMessageModalData {
 
 const DeleteMessageModal: React.FC = () => {
   const { t } = useTranslation();
-  const currentUserId = useCurrentUserId();
+  const currentUserId = getCurrentUserId();
   const closeModal = getCloseModal();
   const data = getModalData() as unknown as DeleteMessageModalData | undefined;
 

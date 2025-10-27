@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { callService } from "@/services/http/callService";
 import { CallResponse } from "@/shared/types/responses/call.response";
-import { useCurrentUserId } from "@/stores/authStore";
+import { getCurrentUserId } from "@/stores/authStore";
 import { AnimatePresence, motion } from "framer-motion";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
 import InfiniteScroller from "@/components/ui/layout/InfiniteScroller";
@@ -13,7 +13,7 @@ const PAGE_LIMIT = 10;
 
 const SidebarCalls: React.FC = () => {
   const { t } = useTranslation();
-  const currentUserId = useCurrentUserId();
+  const currentUserId = getCurrentUserId();
   const [calls, setCalls] = useState<CallResponse[]>([]);
   const [hasMore, setHasMore] = useState(true);
   const [lastCallId, setLastCallId] = useState<string | null>(null);
