@@ -27,7 +27,6 @@ export function groupMessagesByDate(
 
 export function shouldShowInfo(
   currentMsg: MessageResponse,
-  _prevMsg: MessageResponse | undefined,
   nextMsg: MessageResponse | undefined
 ): boolean {
   return !nextMsg || nextMsg.sender.id !== currentMsg.sender.id;

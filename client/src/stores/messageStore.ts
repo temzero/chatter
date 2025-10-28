@@ -3,7 +3,6 @@ import { create } from "zustand";
 import { useActiveChatId, useChatStore } from "./chatStore";
 import { messageService } from "@/services/http/messageService";
 import { useMemo } from "react";
-import { useShallow } from "zustand/react/shallow";
 import { useChatMemberStore } from "./chatMemberStore";
 import { useAuthStore } from "./authStore";
 import { handleError } from "@/common/utils/handleError";
@@ -13,12 +12,16 @@ import type {
   SenderResponse,
 } from "@/shared/types/responses/message.response";
 
-type Messages = Record<string, MessageResponse[]>; // chatId: messages
-type HasMoreMessages = Record<string, boolean>; // chatId: boolean
-type Drafts = Record<string, string>; // chatId: draft-message
+// Normalized structure
+type MessagesById = Record<string, MessageResponse>; // messageId -> Message
+type MessageIdsByChat = Record<string, string[]>; // chatId -> [messageId]
+
+type HasMoreMessages = Record<string, boolean>; // chatId -> boolean
+type Drafts = Record<string, string>; // chatId -> draft
 
 interface MessageStoreState {
-  messages: Messages;
+  messagesById: MessagesById;
+  messageIdsByChat: MessageIdsByChat;
   hasMoreMessages: HasMoreMessages;
   drafts: Drafts;
   searchQuery: string;
@@ -38,7 +41,6 @@ interface MessageStoreActions {
   addMessage: (newMessage: MessageResponse) => void;
   getMessageById: (messageId: string) => MessageResponse | undefined;
   updateMessageById: (
-    chatId: string,
     messageId: string,
     updatedMessage: Partial<MessageResponse>
   ) => void;
@@ -83,7 +85,8 @@ export const getAttachmentsFromMessages = (
     );
 
 const initialState: MessageStoreState = {
-  messages: {},
+  messagesById: {},
+  messageIdsByChat: {},
   hasMoreMessages: {},
   drafts: {},
   searchQuery: "",
@@ -96,83 +99,66 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
   (set, get) => ({
     ...initialState,
 
+    // ---------- CORE ACTIONS ----------
     setInitialData: (chatId, messages, hasMore) => {
-      set((state) => ({
-        messages: {
-          ...state.messages,
-          [chatId]: messages,
-        },
-        hasMoreMessages: {
-          ...state.hasMoreMessages,
-          [chatId]: hasMore,
-        },
-      }));
+      const messagesById = { ...get().messagesById };
+      const messageIds = messages.map((m) => {
+        messagesById[m.id] = m;
+        return m.id;
+      });
+      set({
+        messagesById,
+        messageIdsByChat: { ...get().messageIdsByChat, [chatId]: messageIds },
+        hasMoreMessages: { ...get().hasMoreMessages, [chatId]: hasMore },
+      });
     },
 
-    fetchMessages: async (chatId: string) => {
+    fetchMessages: async (chatId) => {
       set({ isLoading: true });
       try {
         const { items: messages, hasMore } =
           await messageService.getChatMessages(chatId);
-
-        set((state) => ({
-          messages: {
-            ...state.messages,
-            [chatId]: messages,
-          },
-          hasMoreMessages: {
-            ...state.hasMoreMessages,
-            [chatId]: hasMore,
-          },
-          isLoading: false,
-        }));
+        get().setInitialData(chatId, messages, hasMore);
+        set({ isLoading: false });
       } catch (error) {
         handleError(error, "Fail fetching messages");
         set({ isLoading: false });
       }
     },
 
-    fetchMoreMessages: async (chatId: string) => {
-      console.log("fetchMoreMessages");
+    fetchMoreMessages: async (chatId) => {
       set({ isLoading: true });
       try {
-        const existingMessages = get().messages[chatId] || [];
-        if (existingMessages.length === 0) {
-          set({ isLoading: false });
-          return 0;
-        }
+        const existingIds = get().messageIdsByChat[chatId] || [];
+        if (existingIds.length === 0) return 0;
 
+        const lastMessageId = existingIds[0];
         const { items: newMessages, hasMore } =
           await messageService.getChatMessages(chatId, {
-            lastId: existingMessages[0].id,
+            lastId: lastMessageId,
           });
 
         if (newMessages.length > 0) {
-          set((state) => {
-            const existing = state.messages[chatId] || [];
-            return {
-              messages: {
-                ...state.messages,
-                [chatId]: [...newMessages, ...existing],
-              },
-              hasMoreMessages: {
-                ...state.hasMoreMessages,
-                [chatId]: hasMore,
-              },
-              isLoading: false,
-            };
+          const messagesById = { ...get().messagesById };
+          newMessages.forEach((msg) => {
+            messagesById[msg.id] = msg;
+          });
+
+          set({
+            messagesById,
+            messageIdsByChat: {
+              ...get().messageIdsByChat,
+              [chatId]: [...newMessages.map((m) => m.id), ...existingIds],
+            },
+            hasMoreMessages: { ...get().hasMoreMessages, [chatId]: hasMore },
+            isLoading: false,
           });
         } else {
-          // still update hasMoreMessages in case server returned 0 and hasMore = false
-          set((state) => ({
-            hasMoreMessages: {
-              ...state.hasMoreMessages,
-              [chatId]: hasMore,
-            },
+          set({
+            hasMoreMessages: { ...get().hasMoreMessages, [chatId]: hasMore },
             isLoading: false,
-          }));
+          });
         }
-
         return newMessages.length;
       } catch (err) {
         handleError(err, "Failed to fetch more messages");
@@ -182,124 +168,100 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
     },
 
     addMessage: (newMessage) => {
-      // 1. Get current state
-      const { messages } = get();
+      const { messagesById, messageIdsByChat } = get();
       const chatId = newMessage.chatId;
 
-      // 2. Add animation flag (client-side only)
-      const messageWithAnimation = {
-        ...newMessage,
-        shouldAnimate: true, // This triggers the animation
-      };
+      const messageWithAnimation = { ...newMessage, shouldAnimate: true };
 
-      // 3. Update messages array
-      const updatedMessages = {
-        ...messages,
-        [chatId]: [...(messages[chatId] || []), messageWithAnimation],
-      };
+      const currentIds = messageIdsByChat[chatId] || [];
+      set({
+        messagesById: {
+          ...messagesById,
+          [newMessage.id]: messageWithAnimation,
+        },
+        messageIdsByChat: {
+          ...messageIdsByChat,
+          [chatId]: [...currentIds, newMessage.id],
+        },
+      });
 
-      // 4. Check sender
-      const currentUser = useAuthStore.getState().currentUser;
-      const currentUserId = currentUser?.id;
-      const isFromMe = newMessage.sender.id === currentUserId;
-
-      // 5. Handle unread count
-      if (!isFromMe) {
+      const currentUserId = useAuthStore.getState().currentUser?.id;
+      if (newMessage.sender.id !== currentUserId) {
         useChatStore.getState().setUnreadCount(chatId, +1);
       }
-
-      // 6. Update store
-      set({ messages: updatedMessages });
     },
 
-    getMessageById: (messageId) => {
-      const messages = get().messages;
-      for (const chatId in messages) {
-        const found = messages[chatId].find((msg) => msg.id === messageId);
-        if (found) return found;
-      }
-      return undefined;
-    },
+    getMessageById: (messageId) => get().messagesById[messageId],
 
-    updateMessageById: (chatId, messageId, updatedMessage) => {
-      set((state) => {
-        const chatMessages = state.messages[chatId] || [];
-        const index = chatMessages.findIndex((msg) => msg.id === messageId);
-        if (index === -1) {
-          console.log("Message not found");
-          return state;
-        } // Message not found
-
-        const updatedMessages = [...chatMessages];
-        updatedMessages[index] = {
-          ...updatedMessages[index],
-          ...updatedMessage,
-        };
-
-        return {
-          messages: {
-            ...state.messages,
-            [chatId]: updatedMessages,
-          },
-        };
-      });
+    updateMessageById: (messageId, updatedMessage) => {
+      set((state) => ({
+        messagesById: {
+          ...state.messagesById,
+          [messageId]: { ...state.messagesById[messageId], ...updatedMessage },
+        },
+      }));
     },
 
     deleteMessage: (chatId, messageId) => {
-      const { messages } = get();
-      if (!chatId) return;
-
-      const chatMessages = messages[chatId] || [];
+      const { messagesById, messageIdsByChat } = get();
+      const newMessagesById = { ...messagesById };
+      delete newMessagesById[messageId];
+      const newIds = (messageIdsByChat[chatId] || []).filter(
+        (id) => id !== messageId
+      );
 
       set({
-        messages: {
-          ...messages,
-          [chatId]: chatMessages.filter((msg) => msg.id !== messageId),
-        },
+        messagesById: newMessagesById,
+        messageIdsByChat: { ...messageIdsByChat, [chatId]: newIds },
       });
     },
 
-    getChatMessages: (chatId) => get().messages[chatId] || [],
-
-    getChatAttachments: (chatId) => {
-      const chatMessages = get().messages[chatId] || [];
-      return getAttachmentsFromMessages(chatMessages);
+    getChatMessages: (chatId) => {
+      const ids = get().messageIdsByChat[chatId] || [];
+      const messagesById = get().messagesById;
+      return ids.map((id) => messagesById[id]);
     },
 
+    getChatAttachments: (chatId) =>
+      getAttachmentsFromMessages(get().getChatMessages(chatId)),
+
     setDraftMessage: (chatId, draft) =>
-      set((state) => ({
-        drafts: { ...state.drafts, [chatId]: draft },
-      })),
+      set({ drafts: { ...get().drafts, [chatId]: draft } }),
 
     getDraftMessage: (chatId) => get().drafts[chatId] || "",
 
-    setChatMessages: (chatId, messages) =>
-      set((state) => ({
-        messages: {
-          ...state.messages,
-          [chatId]: messages,
-        },
-      })),
+    setChatMessages: (chatId, messages) => {
+      const messagesById = { ...get().messagesById };
+      const messageIds = messages.map((m) => {
+        messagesById[m.id] = m;
+        return m.id;
+      });
+      set({
+        messagesById,
+        messageIdsByChat: { ...get().messageIdsByChat, [chatId]: messageIds },
+      });
+    },
 
     clearChatMessages: (chatId) => {
-      const { messages } = get();
+      const { messagesById, messageIdsByChat } = get();
+      const idsToRemove = messageIdsByChat[chatId] || [];
+      const newMessagesById = { ...messagesById };
+      idsToRemove.forEach((id) => delete newMessagesById[id]);
+
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { [chatId]: _, ...remainingMessages } = messages;
-      set({ messages: remainingMessages });
+      const { [chatId]: _, ...newIdsByChat } = messageIdsByChat;
+      set({ messagesById: newMessagesById, messageIdsByChat: newIdsByChat });
     },
 
     getUnreadMessagesCount: async (chatId, memberId) => {
-      const messages = get().messages[chatId] || [];
+      const messages = get().getChatMessages(chatId);
       const member = await useChatMemberStore
         .getState()
         .getChatMemberById(memberId);
-
       if (!member) return messages.length;
-
       const lastReadIndex = messages.findIndex(
         (msg) => msg.id === member.lastReadMessageId
       );
-
       return lastReadIndex === -1
         ? messages.length
         : messages.length - (lastReadIndex + 1);
@@ -310,188 +272,112 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
         .getState()
         .getChatMemberById(memberId);
       if (!member) return false;
-
-      const messages = get().messages[message.chatId] || [];
+      const messages = get().getChatMessages(message.chatId);
       const targetIndex = messages.findIndex((msg) => msg.id === message.id);
       const readIndex = messages.findIndex(
         (msg) => msg.id === member.lastReadMessageId
       );
-
       return readIndex >= targetIndex && targetIndex !== -1;
     },
 
     getUserReaction: (messageId, userId) => {
-      const messages = get().messages;
-      for (const chatId in messages) {
-        const message = messages[chatId].find((msg) => msg.id === messageId);
-        if (message?.reactions) {
-          for (const [emoji, userIds] of Object.entries(message.reactions)) {
-            if (userIds.includes(userId)) return emoji;
-          }
-        }
+      const msg = get().messagesById[messageId];
+      if (!msg?.reactions) return null;
+      for (const [emoji, userIds] of Object.entries(msg.reactions)) {
+        if (userIds.includes(userId)) return emoji;
       }
       return null;
     },
 
     getReactionCount: (messageId, emoji) => {
-      const messages = get().messages;
-      for (const chatId in messages) {
-        const message = messages[chatId].find((msg) => msg.id === messageId);
-        if (message?.reactions?.[emoji]) {
-          return message.reactions[emoji].length;
-        }
-      }
-      return 0;
+      const msg = get().messagesById[messageId];
+      return msg?.reactions?.[emoji]?.length || 0;
     },
 
     updateMessageReactions: (messageId, newReactions) => {
-      set((state) => {
-        const updatedMessages = { ...state.messages };
-        for (const chatId in updatedMessages) {
-          const index = updatedMessages[chatId].findIndex(
-            (msg) => msg.id === messageId
-          );
-          if (index !== -1) {
-            updatedMessages[chatId][index] = {
-              ...updatedMessages[chatId][index],
-              reactions: newReactions,
-            };
-            break;
-          }
-        }
-        return { messages: updatedMessages };
-      });
+      set((state) => ({
+        messagesById: {
+          ...state.messagesById,
+          [messageId]: {
+            ...state.messagesById[messageId],
+            reactions: newReactions,
+          },
+        },
+      }));
     },
 
-    setShowImportantOnly: (value) => set({ showImportantOnly: value }),
-
     addReaction: (messageId, emoji, userId) => {
-      set((state) => {
-        const updatedMessages = { ...state.messages };
-        for (const chatId in updatedMessages) {
-          const index = updatedMessages[chatId].findIndex(
-            (msg) => msg.id === messageId
-          );
-          if (index !== -1) {
-            const msg = updatedMessages[chatId][index];
-            const reactions = msg.reactions || {};
-            const users = reactions[emoji] || [];
-
-            if (!users.includes(userId)) {
-              updatedMessages[chatId][index] = {
-                ...msg,
-                reactions: {
-                  ...reactions,
-                  [emoji]: [...users, userId],
-                },
-              };
-            }
-            break;
-          }
-        }
-        return { messages: updatedMessages };
-      });
+      const msg = get().messagesById[messageId];
+      if (!msg) return;
+      const reactions = msg.reactions || {};
+      const users = reactions[emoji] || [];
+      if (!users.includes(userId)) {
+        const newReactions = { ...reactions, [emoji]: [...users, userId] };
+        get().updateMessageReactions(messageId, newReactions);
+      }
     },
 
     removeReaction: (messageId, emoji, userId) => {
-      set((state) => {
-        const updatedMessages = { ...state.messages };
-        for (const chatId in updatedMessages) {
-          const index = updatedMessages[chatId].findIndex(
-            (msg) => msg.id === messageId
-          );
-          if (index !== -1) {
-            const msg = updatedMessages[chatId][index];
-            const reactions = msg.reactions || {};
-            const filtered = (reactions[emoji] || []).filter(
-              (id) => id !== userId
-            );
-
-            const newReactions = { ...reactions };
-            if (filtered.length > 0) {
-              newReactions[emoji] = filtered;
-            } else {
-              delete newReactions[emoji];
-            }
-
-            updatedMessages[chatId][index] = {
-              ...msg,
-              reactions:
-                Object.keys(newReactions).length > 0 ? newReactions : undefined,
-            };
-            break;
-          }
-        }
-        return { messages: updatedMessages };
-      });
+      const msg = get().messagesById[messageId];
+      if (!msg || !msg.reactions?.[emoji]) return;
+      const filtered = msg.reactions[emoji].filter((id) => id !== userId);
+      const newReactions = { ...msg.reactions };
+      if (filtered.length > 0) newReactions[emoji] = filtered;
+      else delete newReactions[emoji];
+      get().updateMessageReactions(messageId, newReactions);
     },
 
-    setDisplaySearchMessage: (isOpen: boolean) =>
-      set(() => ({
-        isSearchMessages: isOpen,
-      })),
-
-    setSearchQuery: (query: string) => set({ searchQuery: query }),
+    setShowImportantOnly: (value) => set({ showImportantOnly: value }),
+    setDisplaySearchMessage: (isOpen) => set({ isSearchMessages: isOpen }),
+    setSearchQuery: (query) => set({ searchQuery: query }),
   })
 );
 
-// EXPORT HOOKS
+// ---------- HOOKS ----------
 
-export const useActiveChatMessages = () => {
-  const activeChatId = useChatStore((state) => state.activeChatId);
-  const isLoading = useMessageStore((state) => state.isLoading);
-
-  // Subscribe *only* to the messages of the current chat
-  const chatMessages = useMessageStore(
-    useShallow((state) =>
-      activeChatId ? state.messages[activeChatId] || [] : []
-    )
-  );
-
-  // Return a stable reference if nothing changed
-  return useMemo(() => {
-    return activeChatId && !isLoading ? chatMessages : [];
-  }, [activeChatId, chatMessages, isLoading]);
+export const useMessageIds = (chatId: string): string[] => {
+  return useMessageStore((state) => state.messageIdsByChat[chatId] || []);
 };
 
-export const useMessagesByChatId = (chatId: string): MessageResponse[] => {
-  const allMessages = useMessageStore(
-    useShallow((state) => state.messages[chatId] || [])
+export const useMessagesByChatId = (chatId: string) => {
+  const messageIds = useMessageStore(
+    (state) => state.messageIdsByChat[chatId] || []
   );
+  const messagesById = useMessageStore((state) => state.messagesById);
   const searchQuery = useMessageStore((state) => state.searchQuery);
   const showImportantOnly = useMessageStore((state) => state.showImportantOnly);
-
-  const members = useChatMemberStore.getState().chatMembers[chatId];
   const currentUserId = useAuthStore.getState().currentUser?.id;
 
   return useMemo(() => {
+    const members = useChatMemberStore.getState().chatMembers[chatId] || [];
     const blockedUserIds = new Set(
       members
-        .filter(
-          (member) => member.userId !== currentUserId && member.isBlockedByMe
-        )
-        .map((member) => member.userId)
+        .filter((m) => m.userId !== currentUserId && m.isBlockedByMe)
+        .map((m) => m.userId)
     );
-
-    return allMessages.filter((msg) => {
-      const notBlocked = !blockedUserIds.has(msg.sender.id);
-      const matchesQuery =
-        !searchQuery ||
-        msg.content?.toLowerCase().includes(searchQuery.toLowerCase());
-      const isImportant = !showImportantOnly || msg.isImportant;
-      return notBlocked && matchesQuery && isImportant;
-    });
-  }, [allMessages, members, searchQuery, showImportantOnly, currentUserId]);
+    return messageIds
+      .map((id) => messagesById[id])
+      .filter((msg) => msg && !blockedUserIds.has(msg.sender.id))
+      .filter(
+        (msg) =>
+          !searchQuery ||
+          msg.content?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      .filter((msg) => !showImportantOnly || msg.isImportant);
+  }, [
+    chatId,
+    messageIds,
+    currentUserId,
+    messagesById,
+    searchQuery,
+    showImportantOnly,
+  ]);
 };
 
 export const useSenderByMessageId = (
   messageId: string
-): SenderResponse | undefined => {
-  return useMessageStore((state) => {
-    const message = state.getMessageById(messageId);
-    return message?.sender;
-  });
-};
+): SenderResponse | undefined =>
+  useMessageStore((state) => state.messagesById[messageId]?.sender);
 
 export const useActiveChatAttachments = () => {
   const activeChatId = useActiveChatId();
@@ -504,26 +390,14 @@ export const useActiveChatAttachments = () => {
   );
 };
 
-export const useMessageReactions = (chatId: string, messageId: string) =>
-  useMessageStore(
-    useShallow((state) => {
-      const message = state.messages[chatId]?.find(
-        (msg) => msg.id === messageId
-      );
-      return message?.reactions || {};
-    })
-  );
+export const useMessageReactions = (messageId: string) =>
+  useMessageStore((state) => state.messagesById[messageId]?.reactions || {});
 
-export const useHasMoreMessages = (chatId: string) => {
-  return useMessageStore((state) => state.hasMoreMessages[chatId] ?? true);
-};
+export const useHasMoreMessages = (chatId: string) =>
+  useMessageStore((state) => state.hasMoreMessages[chatId] ?? true);
 
-// store/messageStore.ts
-export const useLastMessage = (chatId: string) => {
-  return useMessageStore(
-    useShallow((state) => {
-      const messages = state.messages[chatId] || [];
-      return messages[messages.length - 1] ?? null;
-    })
-  );
-};
+export const useLastMessage = (chatId: string) =>
+  useMessageStore((state) => {
+    const ids = state.messageIdsByChat[chatId] || [];
+    return ids.length ? state.messagesById[ids[ids.length - 1]] : null;
+  });

@@ -15,10 +15,9 @@ import { useAutoMarkLastMessageRead } from "@/common/hooks/useAutoMarkMessageRea
 interface ChatMessagesProps {
   chat: ChatResponse;
   messageIds: string[];
-  isSearch: boolean;
 }
 
-const Messages: React.FC<ChatMessagesProps> = ({ chat, messageIds, isSearch }) => {
+const Messages: React.FC<ChatMessagesProps> = ({ chat, messageIds }) => {
   console.log("Messages render:", messageIds.length);
 
   const chatId = chat.id;
@@ -53,13 +52,11 @@ const Messages: React.FC<ChatMessagesProps> = ({ chat, messageIds, isSearch }) =
         return (
           <React.Fragment key={groupKey}>
             {/* Sticky Date Header */}
-            {!isSearch && (
-              <div className="sticky top-0 flex justify-center z-[1]">
-                <div className="bg-[var(--background-color)] text-xs p-1 rounded">
-                  {group.date || "Today"}
-                </div>
+            <div className="sticky top-0 flex justify-center z-[1]">
+              <div className="bg-[var(--background-color)] text-xs p-1 rounded">
+                {group.date || "Today"}
               </div>
-            )}
+            </div>
 
             <AnimatePresence initial={false}>
               {group.messages.map((message, index) => {

@@ -16,7 +16,10 @@ const ChatList: React.FC<ChatListProps> = React.memo(
     const hasMoreChats = useChatStore((state) => state.hasMoreChats);
     const fetchMoreChats = useChatStore.getState().fetchMoreChats;
 
-    if (!currentUserId) return;
+    if (!currentUserId) {
+      console.error('No User Data')
+      return 
+    };
 
     return (
       <InfiniteScroller

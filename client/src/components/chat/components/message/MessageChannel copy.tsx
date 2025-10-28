@@ -19,20 +19,18 @@ import { MessageHorizontalPreviewTypes } from "@/common/enums/MessageHorizontalP
 import { BroadcastMessage } from "./BroadcastMessage";
 import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 import { useIsMobile } from "@/stores/deviceStore";
+import type { MessageResponse } from "@/shared/types/responses/message.response";
 import {
   useIsMessageFocus,
   useIsReplyToThisMessage,
   setOpenFocusMessageModal,
 } from "@/stores/modalStore";
-import { useMessageStore } from "@/stores/messageStore";
 
 interface ChannelMessageProps {
-  messageId: string;
+  message: MessageResponse;
 }
 
-const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
-  const message = useMessageStore((state) => state.messagesById[messageId]);
-
+const ChannelMessage: React.FC<ChannelMessageProps> = ({ message }) => {
   const isMobile = useIsMobile();
   const currentUserId = getCurrentUserId();
   const isMe = message.sender.id === currentUserId;

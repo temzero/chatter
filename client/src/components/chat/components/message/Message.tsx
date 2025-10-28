@@ -9,7 +9,6 @@ import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { BeatLoader } from "react-spinners";
 import { SystemMessageJSONContent } from "@/components/ui/messages/SystemMessageContent";
 import { MessageContextMenu } from "./MessageContextMenu";
-import type { MessageResponse } from "@/shared/types/responses/message.response";
 import {
   useIsMessageFocus,
   useIsReplyToThisMessage,
@@ -23,9 +22,10 @@ import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 import { AnimatePresence, motion } from "framer-motion";
 import { getMessageAnimation } from "@/common/animations/messageAnimations";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
+import { useMessageStore } from "@/stores/messageStore";
 
 interface MessageProps {
-  message: MessageResponse;
+  messageId: string;
   chatType?: ChatType;
   showInfo?: boolean;
   isRecent?: boolean;
@@ -36,15 +36,18 @@ interface MessageProps {
 }
 
 const Message: React.FC<MessageProps> = ({
-  message,
+  messageId,
   chatType = ChatType.DIRECT,
   showInfo = true,
   isRecent = false,
-  readUserAvatars,
   currentUserId,
   isMe = false,
 }) => {
-  console.log("Message");
+  const message = useMessageStore((state) => state.messagesById[messageId]);
+  const searchQuery = useMessageStore((state) => state.searchQuery);
+  const showImportantOnly = useMessageStore((state) => state.showImportantOnly);
+
+  console.log("Message", message.id);
   const openFocusMessageModal = setOpenFocusMessageModal();
   const isFocus = useIsMessageFocus(message.id);
   const isRelyToThisMessage = useIsReplyToThisMessage(message.id);
@@ -73,6 +76,23 @@ const Message: React.FC<MessageProps> = ({
     [message.shouldAnimate, isMe]
   );
 
+  if (
+    searchQuery.trim() !== "" &&
+    !message.content?.toLowerCase().includes(searchQuery.toLowerCase())
+  ) {
+    return null;
+  }
+
+  // Manage filtering
+  const contentText = message.content?.toString().toLowerCase() ?? "";
+  const notMatchingSearch =
+    searchQuery.trim() !== "" &&
+    !contentText.includes(searchQuery.toLowerCase());
+  const notImportant = showImportantOnly && !message.isImportant;
+  if (notMatchingSearch || notImportant) {
+    return null;
+  }
+
   // system message
   if (message.systemEvent && message.systemEvent !== SystemEventType.CALL) {
     return (
@@ -94,11 +114,11 @@ const Message: React.FC<MessageProps> = ({
       ref={messageRef}
       onDoubleClick={() => handleQuickReaction(message.id, message.chatId)}
       onContextMenu={handleContextMenu}
-      className={clsx("flex relative max-w-[60%]", {
+      className={clsx("flex relative max-w-[60%] pb-1.5", {
         "justify-end": isMe,
         "justify-start": !isMe,
-        "pb-1": isRecent,
-        "pb-2": !isRecent,
+        // "pb-1": isRecent,
+        // "pb-2": !isRecent,
       })}
       style={{ zIndex: isFocus || isRelyToThisMessage ? 100 : "auto" }}
       layout="position"
@@ -197,7 +217,7 @@ const Message: React.FC<MessageProps> = ({
           message.status !== MessageStatus.SENDING &&
           message.status !== MessageStatus.FAILED && (
             <p
-              className={clsx("text-xs py-1 opacity-40", {
+              className={clsx("text-xs opacity-40 p-0.5 pb-0", {
                 "ml-auto": isMe,
                 "mr-auto": !isMe,
               })}
@@ -215,24 +235,6 @@ const Message: React.FC<MessageProps> = ({
           <h1 className="text-red-500 text-sm text-right">
             Failed to send message
           </h1>
-        )}
-
-        {readUserAvatars && (
-          <div
-            className={clsx("flex items-center", {
-              "justify-end": isMe,
-              "justify-start": !isMe,
-            })}
-          >
-            {readUserAvatars.map((avatarUrl, index) => (
-              <Avatar
-                key={index}
-                avatarUrl={avatarUrl}
-                name={message.sender.displayName}
-                size="4"
-              />
-            ))}
-          </div>
         )}
       </div>
     </motion.div>

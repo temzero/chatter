@@ -40,9 +40,8 @@ export function useChatSocketListeners() {
       handleSystemEventMessage(message);
 
       if (isOwnMessage && messageStore.getMessageById(message.id)) {
-        messageStore.updateMessageById(message.chatId, message.id, message);
-        // my message is already added
-        return
+        messageStore.updateMessageById(message.id, message);
+        return;
       } else {
         messageStore.addMessage(message);
 
@@ -124,17 +123,17 @@ export function useChatSocketListeners() {
         .setPinnedMessage(chatId, isPinned ? message : null);
 
       // 2. Unpin all messages in the chat
-      const allMessages = useMessageStore.getState().messages[chatId] || [];
+      const allMessages = useMessageStore.getState().getChatMessages(chatId);
       allMessages.forEach((msg) => {
         if (msg.isPinned && msg.id !== message.id) {
-          useMessageStore.getState().updateMessageById(chatId, msg.id, {
+          useMessageStore.getState().updateMessageById(msg.id, {
             isPinned: false,
           });
         }
       });
 
       // 3. Update the target message
-      useMessageStore.getState().updateMessageById(chatId, message.id, {
+      useMessageStore.getState().updateMessageById(message.id, {
         isPinned,
       });
     };
@@ -149,11 +148,9 @@ export function useChatSocketListeners() {
     ) => {
       const { payload: update } = wsImportant;
       console.log("isImportant", update.isImportant);
-      useMessageStore
-        .getState()
-        .updateMessageById(update.chatId, update.messageId, {
-          isImportant: update.isImportant,
-        });
+      useMessageStore.getState().updateMessageById(update.messageId, {
+        isImportant: update.isImportant,
+      });
     };
 
     // ======== Delete ========
@@ -175,11 +172,9 @@ export function useChatSocketListeners() {
     ) => {
       const { payload: error } = wsError;
       console.log("handleMessageError", error);
-      useMessageStore
-        .getState()
-        .updateMessageById(error.chatId, error.messageId, {
-          status: MessageStatus.FAILED,
-        });
+      useMessageStore.getState().updateMessageById(error.messageId, {
+        status: MessageStatus.FAILED,
+      });
     };
 
     // ======== Subscribe ========

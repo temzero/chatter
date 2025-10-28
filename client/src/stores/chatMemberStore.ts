@@ -555,3 +555,29 @@ export const useMemberAvatars = (chatId: string, limit: number = 4) => {
       .map((member) => member.avatarUrl as string) || []
   );
 };
+
+// export const useReadStatuses = (chatId: string) => {
+//   return useChatMemberStore(
+//     useShallow((state) =>
+//       (state.chatMembers[chatId] || []).map((m) => ({
+//         id: m.id,
+//         lastReadMessageId: m.lastReadMessageId,
+//         avatarUrl: m.avatarUrl,
+//       }))
+//     )
+//   );
+// };
+
+export const useReadStatuses = (chatId: string) => {
+  return useChatMemberStore(
+    useShallow((state) => {
+      const members = state.chatMembers[chatId] || [];
+      // Memoize mapped array to avoid creating new objects every time
+      return members.map((m) => ({
+        id: m.id,
+        lastReadMessageId: m.lastReadMessageId,
+        avatarUrl: m.avatarUrl,
+      }));
+    })
+  );
+};

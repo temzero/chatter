@@ -1,62 +1,44 @@
-import React, { useMemo, useEffect } from "react";
-import { MessageResponse } from "@/shared/types/responses/message.response";
+import React, { useMemo } from "react";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
-import { getCurrentUser } from "@/stores/authStore";
-import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
-import { getMyActiveChatMember } from "@/stores/chatMemberStore";
 import { AnimatePresence } from "framer-motion";
+import { useMessageStore } from "@/stores/messageStore";
+import { useAutoMarkLastMessageRead } from "@/common/hooks/useAutoMarkMessageRead";
 import ChannelMessage from "../components/message/MessageChannel";
 
 interface ChannelMessagesProps {
   chat: ChatResponse;
-  messages: MessageResponse[];
+  messageIds: string[];
+  isSearch: boolean;
 }
 
 const ChannelMessages: React.FC<ChannelMessagesProps> = ({
   chat,
-  messages,
+  messageIds,
+  isSearch = false,
 }) => {
-  console.log("ChannelMessages");
-  const chatId = chat?.id;
-  const currentUser = getCurrentUser();
-  const myMember = getMyActiveChatMember(chat.myMemberId);
+  console.log("ChannelMessages render:", messageIds.length);
 
-  const myLastReadMessageId = myMember?.lastReadMessageId ?? null;
+  const chatId = chat.id;
+  const messagesById = useMessageStore.getState().messagesById;
+  const messages = messageIds.map((id) => messagesById[id]).filter(Boolean);
+
 
   // Send read receipt if the last message is unread and not sent by you
-  useEffect(() => {
-    if (!chatId || !chat.myMemberId || messages.length === 0) return;
+  useAutoMarkLastMessageRead({
+    chat,
+    messages,
+  });
 
-    const lastMessage = messages[messages.length - 1];
-    const isFromOther = lastMessage.sender?.id !== currentUser?.id;
-    const isUnread =
-      myLastReadMessageId === null || lastMessage.id !== myLastReadMessageId;
-
-    if (isUnread && isFromOther) {
-      const timer = setTimeout(() => {
-        chatWebSocketService.messageRead(
-          chatId,
-          chat.myMemberId,
-          lastMessage.id
-        );
-      }, 1000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [chatId, chat.myMemberId, messages, myLastReadMessageId, currentUser?.id]);
-
+  // Group messages by date
   const messagesByDate = useMemo(() => {
-    const groups: { date: string; messages: MessageResponse[] }[] = [];
+    const groups: { date: string; messages: typeof messages }[] = [];
 
     messages.forEach((msg) => {
-      const messageDate = new Date(msg.createdAt).toLocaleDateString();
+      const date = new Date(msg.createdAt).toLocaleDateString();
       const lastGroup = groups[groups.length - 1];
 
-      if (!lastGroup || lastGroup.date !== messageDate) {
-        groups.push({
-          date: messageDate,
-          messages: [msg],
-        });
+      if (!lastGroup || lastGroup.date !== date) {
+        groups.push({ date, messages: [msg] });
       } else {
         lastGroup.messages.push(msg);
       }
@@ -77,50 +59,22 @@ const ChannelMessages: React.FC<ChannelMessagesProps> = ({
     <>
       {messagesByDate.map((group) => (
         <React.Fragment key={`${group.date}-${chatId}`}>
-          <div
-            className="sticky top-0 flex justify-center my-2"
-            style={{ zIndex: 1 }}
-          >
-            <div className="bg-[var(--background-color)] text-xs p-1 rounded">
-              {group.date || "Today"}
+          {!isSearch && (
+            <div
+              className="sticky top-0 flex justify-center my-2"
+              style={{ zIndex: 1 }}
+            >
+              <div className="bg-[var(--background-color)] text-xs p-1 rounded">
+                {group.date || "Today"}
+              </div>
             </div>
-          </div>
+          )}
 
           <AnimatePresence initial={false}>
-            {group.messages.map((msg, index) => {
-              const nextMsg = group.messages[index + 1];
-              const isLastRead =
-                myLastReadMessageId === msg.id &&
-                (!nextMsg || nextMsg.id !== myLastReadMessageId);
-
-              const isMe = msg.sender.id === currentUser?.id;
-
+            {group.messages.map((msg) => {
               return (
-                <div
-                  key={msg.id}
-                  className="flex flex-col items-center"
-                  // layout
-                >
-                  <ChannelMessage message={msg} />
-                  {isLastRead && !isMe && (
-                    <div className="relative flex items-center gap-1 justify-between text-xs italic w-full select-none text-white">
-                      <div
-                        className="h-4 flex items-center bg-[--primary-green] rounded-full px-0.5"
-                        style={{ zIndex: 1 }}
-                      >
-                        <span className="material-symbols-outlined text-xl">
-                          visibility
-                        </span>
-                      </div>
-                      <div
-                        className="h-4 flex items-center bg-[--primary-green] rounded-full px-2"
-                        style={{ zIndex: 1 }}
-                      >
-                        Last Read
-                      </div>
-                      <div className="absolute left-0 right-0 h-[2px] bg-[--primary-green] top-1/2 -translate-y-1/2"></div>
-                    </div>
-                  )}
+                <div key={msg.id} className="flex flex-col items-center">
+                  <ChannelMessage messageId={msg.id} />
                 </div>
               );
             })}

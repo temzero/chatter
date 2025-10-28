@@ -137,7 +137,7 @@ export async function handleSendMessage({
     const uploadedUrls = uploadedAttachments.map((att) => att.url);
     if (uploadedUrls.length) await deleteFilesFromSupabase(uploadedUrls);
 
-    useMessageStore.getState().updateMessageById(chatId, messageId, {
+    useMessageStore.getState().updateMessageById(messageId, {
       status: MessageStatus.FAILED,
     });
 

@@ -55,6 +55,7 @@ export class AuthController {
     setRefreshTokenCookie(response, refreshToken, this.configService);
     return {
       accessToken,
+      user,
       message: `Login successful, welcome back ${user.firstName}`,
     };
   }

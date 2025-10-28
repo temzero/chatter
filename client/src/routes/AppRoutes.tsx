@@ -6,6 +6,7 @@ import PrivateRoute from "./PrivateRoute";
 import HomePage from "@/pages/HomePage";
 import InvitePage from "@/pages/InvitePage";
 import { useEffect } from "react";
+import { BarLoader } from "react-spinners";
 
 const RouteMessageCleaner = () => {
   const location = useLocation();
@@ -20,7 +21,16 @@ const RouteMessageCleaner = () => {
 
 const AppRoutes: React.FC = () => {
   const isAuthenticated = useIsAuthenticated();
+  const isLoading = useAuthStore((state) => state.loading);
   console.log("AppRoutes-isAuthenticated ", isAuthenticated);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center w-full h-full">
+        <BarLoader />
+      </div>
+    );
+  }
 
   return (
     <>

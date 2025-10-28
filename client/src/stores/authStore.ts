@@ -11,6 +11,7 @@ import { webSocketService } from "@/services/websocket/websocket.service";
 import type { UserResponse } from "@/shared/types/responses/user.response";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { localStorageService } from "@/services/storage/localStorageService";
+import { fetchInitialAppData } from "@/common/hooks/app/fetchInitialAppData";
 
 type AuthMessageType = "error" | "success" | "info";
 
@@ -117,13 +118,16 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       login: async (identifier, password) => {
         try {
           get().setLoading(true); // Auto-clears messages
-          await authService.login({ identifier, password });
+          useChatStore.getState().clearChats();
+          const { user } = await authService.login({ identifier, password });
+          await fetchInitialAppData();
+
           set({
+            currentUser: user,
             isAuthenticated: true,
             loading: false,
             message: { type: "success", content: "Logged in successfully" },
           });
-          useChatStore.getState().clearChats();
         } catch (error) {
           const errorMessage = handleAuthError(error);
           get().setLoading(false, false); // Keep error message
@@ -244,6 +248,9 @@ function handleAuthError(error: unknown): string {
 
 // EXPORT HOOKS
 
+// export const useCurrentUser = () => useAuthStore((state) => state.currentUser);
+// export const useCurrentUserId = () =>
+//   useAuthStore((state) => state.currentUser?.id);
 export const getCurrentUser = () => useAuthStore.getState().currentUser;
 export const getCurrentUserId = () => useAuthStore.getState().currentUser?.id;
 

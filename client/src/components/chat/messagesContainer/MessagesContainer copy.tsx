@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useCallback } from "react";
 import { RingLoader } from "react-spinners";
 import {
   useHasMoreMessages,
-  useMessageIds,
+  useMessagesByChatId,
   useMessageStore,
 } from "@/stores/messageStore";
 import TypingIndicator from "@/components/ui/typingIndicator/TypingIndicator";
@@ -24,12 +24,10 @@ const MessagesContainer: React.FC<ChatBoxProps> = ({ chat }) => {
 
   const scrollerRef = useRef<HTMLDivElement | null>(null);
 
-  const messageIds = useMessageIds(chatId);
+  const messages = useMessagesByChatId(chatId);
   const hasMoreMessages = useHasMoreMessages(chatId);
   const fetchMoreMessages = useMessageStore.getState().fetchMoreMessages;
 
-  const isSearchMessages = useMessageStore((state) => state.isSearchMessages);
-  const isShowImportant = useMessageStore(state => state.showImportantOnly)
   // Scroll to bottom helper
   const scrollToBottom = useCallback((behavior: ScrollBehavior = "auto") => {
     if (scrollerRef.current) {
@@ -43,43 +41,34 @@ const MessagesContainer: React.FC<ChatBoxProps> = ({ chat }) => {
   // Scroll to bottom once after mount
   useEffect(() => {
     scrollToBottom();
-  }, [scrollToBottom, isShowImportant]);
+  }, [scrollToBottom]);
 
   // Auto scroll if near bottom when new message arrives
   useEffect(() => {
-    if (messageIds.length === 0) return;
+    if (messages.length === 0) return;
 
     if (scrollerRef.current) {
       const el = scrollerRef.current;
       const nearBottom =
         el.scrollHeight - (el.scrollTop + el.clientHeight) < 150; // 150px threshold
-      if (nearBottom) {
+
+      // Don't scroll if last message is a systemEvent
+      const lastMessage = messages[messages.length - 1];
+      if (!lastMessage.systemEvent && nearBottom) {
         scrollToBottom("smooth");
       }
     }
-  }, [messageIds, scrollToBottom]);
+  }, [messages, scrollToBottom]);
 
   const renderMessages = useCallback(() => {
     if (!chat) return null;
     switch (chat.type) {
       case ChatType.CHANNEL:
-        return (
-          <ChannelMessages
-            chat={chat}
-            messageIds={messageIds}
-            isSearch={isSearchMessages}
-          />
-        );
+        return <ChannelMessages chat={chat} messages={messages} />;
       default:
-        return (
-          <Messages
-            chat={chat}
-            messageIds={messageIds}
-            isSearch={isSearchMessages}
-          />
-        );
+        return <Messages chat={chat} messages={messages} />;
     }
-  }, [chat, isSearchMessages, messageIds]);
+  }, [chat, messages]);
 
   return (
     <InfiniteScroller

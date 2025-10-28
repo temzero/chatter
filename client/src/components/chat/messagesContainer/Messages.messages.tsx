@@ -1,4 +1,5 @@
 import React, { useMemo, useEffect } from "react";
+import { MessageResponse } from "@/shared/types/responses/message.response";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import {
   groupMessagesByDate,
@@ -8,32 +9,28 @@ import {
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { AnimatePresence } from "framer-motion";
 import { getCurrentUser } from "@/stores/authStore";
-import { MessageReadInfo } from "./MessageReadInfo";
-import { useMessageStore } from "@/stores/messageStore";
 import Message from "../components/message/Message";
+import { MessageReadInfo } from "./MessageReadInfo";
 
 interface ChatMessagesProps {
   chat: ChatResponse;
-  messageIds: string[];
+  messages: MessageResponse[];
 }
 
-const Messages: React.FC<ChatMessagesProps> = ({ chat, messageIds }) => {
-  console.log("Messages render:", messageIds.length);
+const Messages: React.FC<ChatMessagesProps> = ({ chat, messages }) => {
+  console.log("Messages render:", messages.length);
 
-  const chatId = chat.id;
+  const chatId = chat?.id;
   const currentUser = getCurrentUser();
-  const messagesById = useMessageStore.getState().messagesById;
-  const messages = messageIds.map((id) => messagesById[id]).filter(Boolean);
 
-  // ✅ Auto mark last message as read
+  // ✅ Auto mark message as read
   useEffect(() => {
-    if (!chatId || !chat.myMemberId || messageIds.length === 0) return;
+    if (!chatId || !chat.myMemberId || messages.length === 0) return;
 
     const lastMessage = messages[messages.length - 1];
-    if (!lastMessage) return;
-
     const isFromOther = lastMessage.sender.id !== currentUser?.id;
 
+    // Mark as read only if last message is from another user
     if (isFromOther) {
       const timer = setTimeout(() => {
         chatWebSocketService.messageRead(
@@ -44,14 +41,14 @@ const Messages: React.FC<ChatMessagesProps> = ({ chat, messageIds }) => {
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [chatId, chat.myMemberId, messageIds, currentUser?.id, messages]);
+  }, [chatId, chat.myMemberId, messages, currentUser?.id]);
 
-  // Group messageIds by date
-  const groupedIdsByDate = useMemo(() => {
-    return groupMessagesByDate(messages);
-  }, [messages]);
+  const messagesByDate = useMemo(
+    () => groupMessagesByDate(messages),
+    [messages]
+  );
 
-  if (messageIds.length === 0) {
+  if (messages.length === 0) {
     return (
       <div className="h-full w-full flex items-center justify-center opacity-50 italic text-xl">
         No messages yet!
@@ -61,7 +58,7 @@ const Messages: React.FC<ChatMessagesProps> = ({ chat, messageIds }) => {
 
   return (
     <>
-      {groupedIdsByDate.map((group) => {
+      {messagesByDate.map((group) => {
         const groupKey = `${group.date}-${chatId}`;
         return (
           <React.Fragment key={groupKey}>
@@ -72,31 +69,28 @@ const Messages: React.FC<ChatMessagesProps> = ({ chat, messageIds }) => {
               </div>
             </div>
 
+            {/* ✅ AnimatePresence wraps entire message list */}
             <AnimatePresence initial={false}>
               {group.messages.map((message, index) => {
-                const isMe = message.sender.id === currentUser?.id;
                 const prevMsg = group.messages[index - 1];
                 const nextMsg = group.messages[index + 1];
-
-                const showInfo = shouldShowInfo(message, nextMsg);
+                const showInfo = shouldShowInfo(message, prevMsg, nextMsg);
                 const isRecent = isRecentMessage(message, prevMsg, nextMsg);
+                const isMe = message.sender.id === currentUser?.id;
 
                 return (
                   <div
                     key={message.id}
-                    className={`flex flex-col ${
-                      isMe ? "items-end" : "items-start"
-                    }`}
+                    className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}
                   >
-                    {/* Pass only messageId to Message */}
                     <Message
-                      messageId={message.id}
-                      isMe={isMe}
+                      message={message}
+                      chatType={chat.type}
                       showInfo={showInfo}
                       isRecent={isRecent}
-                      chatType={chat.type}
+                      currentUserId={currentUser?.id || ""}
+                      isMe={isMe}
                     />
-
                     <MessageReadInfo
                       chat={chat}
                       messageId={message.id}

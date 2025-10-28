@@ -23,8 +23,8 @@ import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 
 interface ChatStoreState {
   activeChatId: string | null;
-  chats: Record<string, ChatResponse>; // Changed to Record
-  chatIds: string[]; // Added for maintaining order
+  chats: Record<string, ChatResponse>;
+  chatIds: string[];
   savedChat: ChatResponse | null;
   hasMoreChats: boolean;
   isLoading: boolean;
@@ -291,7 +291,7 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
       set({ isLoading: true });
       try {
         const alreadyFetchedMessages =
-          !!useMessageStore.getState().messages[chatId];
+          !!useMessageStore.getState().getChatMessages(chatId);
         const alreadyFetchedMembers =
           !!useChatMemberStore.getState().chatMembers[chatId];
 
@@ -619,8 +619,7 @@ export const useIsActiveChat = (chatId: string) =>
 export const useAllChats = () =>
   useChatStore(useShallow((state) => state.chats));
 
-export const useAllChatIds = () =>
-  useChatStore((state) => state.chatIds);
+export const useAllChatIds = () => useChatStore((state) => state.chatIds);
 
 export const useChatsForFolderFilter = () =>
   useChatStore(

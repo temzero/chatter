@@ -6,7 +6,6 @@ import { AuthenticationLayout } from "@/layouts/PublicLayout";
 import { motion } from "framer-motion";
 import { publicLayoutAnimations } from "@/common/animations/publicLayoutAnimations";
 import { useTranslation } from "react-i18next";
-import { fetchInitialAppData } from "@/common/hooks/app/fetchInitialAppData";
 
 const Login = () => {
   const { t } = useTranslation();
@@ -17,14 +16,11 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formRef.current) return;
-
     const formData = new FormData(formRef.current);
     const identifier = formData.get("username") as string;
     const password = formData.get("password") as string;
-
+    
     await login(identifier, password);
-
-    await fetchInitialAppData();
   };
 
   return (
