@@ -1,46 +1,33 @@
-import { audioService } from "@/services/audio.service";
+import { audioService, SoundType } from "@/services/audio.service";
 import { toast } from "react-toastify";
 
-export function handleError(error: unknown, defaultMessage: string) {
+export function handleError(error: unknown, defaultMessage: string): never {
   audioService.stopAllSounds();
-  // Handle Axios error structure
+  audioService.playSound(SoundType.ERROR);
+
+  let message = defaultMessage;
+
   if (typeof error === "object" && error !== null) {
     const axiosError = error as {
-      response?: {
-        data?: {
-          message?: string | string[];
-          error?: string;
-        };
-      };
+      response?: { data?: { message?: string | string[]; error?: string } };
       message?: string;
     };
 
-    // Check for array message in response
-    if (Array.isArray(axiosError?.response?.data?.message)) {
-      toast.error(axiosError.response.data.message[0] || defaultMessage);
-      throw error;
-    }
+    const data = axiosError?.response?.data;
 
-    // Check for string message in response
-    if (typeof axiosError?.response?.data?.message === "string") {
-      toast.error(axiosError.response.data.message || defaultMessage);
-      throw error;
-    }
-
-    // Check for error field in response
-    if (axiosError?.response?.data?.error) {
-      toast.error(axiosError.response.data.error || defaultMessage);
-      throw error;
-    }
-
-    // Check for top-level message
-    if (axiosError.message) {
-      toast.error(axiosError.message || defaultMessage);
-      throw error;
+    if (Array.isArray(data?.message)) {
+      message = data.message[0] || defaultMessage;
+    } else if (typeof data?.message === "string") {
+      message = data.message;
+    } else if (typeof data?.error === "string") {
+      message = data.error;
+    } else if (typeof axiosError.message === "string") {
+      message = axiosError.message;
     }
   }
 
-  // Fallback to default message
-  toast.error(defaultMessage);
-  throw error;
+  toast.error(message);
+  console.error(error);
+
+  throw error; // ensures TypeScript knows this never returns
 }

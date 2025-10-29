@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { formatDateTime } from "@/common/utils/format/formatDateTime";
 import { useChatStore } from "@/stores/chatStore";
 import { useTranslation } from "react-i18next";
+import { handleError } from "@/common/utils/handleError";
 
 interface MuteChatModalData {
   chatId: string;
@@ -33,13 +34,12 @@ const MuteChatModal: React.FC = () => {
   const handleMute = async (duration: number) => {
     try {
       const mutedUntil = new Date(Date.now() + duration * 1000);
-      await setMute(chatId, myMemberId, mutedUntil);
+      setMute(chatId, myMemberId, mutedUntil);
       toast.success(
         t("modal.mute_chat.muted_until", { time: formatDateTime(mutedUntil) })
       );
     } catch (error) {
-      console.error("Failed to mute chat member:", error);
-      toast.error(t("modal.mute_chat.mute_failed"));
+      handleError(error, t("modal.mute_chat.mute_failed"))
     } finally {
       closeModal();
     }

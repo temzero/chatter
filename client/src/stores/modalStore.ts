@@ -24,7 +24,7 @@ const initialState: ModalState = {
 // ---- STORE ----
 export const useModalStore = create<ModalState & ModalActions>((set) => ({
   ...initialState,
-  
+
   openModal: (type, data = {}) => set({ type, data }),
 
   closeModal: () =>
@@ -42,6 +42,7 @@ export { ModalType };
 
 // ---- SELECTORS ----
 export const useModalType = () => useModalStore((state) => state.type);
+export const getModalType = () => useModalStore.getState().type
 export const getModalData = () => useModalStore.getState().data;
 export const useReplyToMessageId = () =>
   useModalStore((state) => state.replyToMessageId);
@@ -61,29 +62,23 @@ export const useIsReplyToThisMessage = (messageId: string) =>
 export const getOpenModal = () => useModalStore.getState().openModal;
 export const getCloseModal = () => useModalStore.getState().closeModal;
 
-export const setOpenMediaModal = () => {
-  return (attachmentId: string) => {
-    useModalStore.setState({
-      type: ModalType.MEDIA,
-      data: { attachmentId },
-    });
-  };
+export const setOpenMediaModal = (attachmentId: string) => {
+  useModalStore.setState({
+    type: ModalType.MEDIA,
+    data: { attachmentId },
+  });
 };
 
-export const setOpenFocusMessageModal = () => {
-  return (messageId: string) => {
-    useModalStore.setState({
-      type: ModalType.OVERLAY,
-      focusMessageId: messageId,
-    });
-  };
+export const setOpenFocusMessageModal = (messageId: string) => {
+  useModalStore.setState({
+    type: ModalType.OVERLAY,
+    focusMessageId: messageId,
+  });
 };
 
-export const setOpenReplyToMessageModal = () => {
-  return (messageId: string) => {
-    useModalStore.setState({
-      type: ModalType.OVERLAY,
-      replyToMessageId: messageId,
-    });
-  };
+export const setOpenReplyToMessageModal = (messageId: string) => {
+  useModalStore.setState({
+    type: ModalType.OVERLAY,
+    replyToMessageId: messageId,
+  });
 };

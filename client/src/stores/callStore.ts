@@ -2,7 +2,6 @@
 import { Room } from "livekit-client";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { audioService } from "@/services/audio.service";
 import { useModalStore, ModalType } from "./modalStore";
 import { LocalCallStatus } from "@/common/enums/LocalCallStatus";
 import { CallStatus } from "@/shared/types/enums/call-status.enum";
@@ -157,13 +156,13 @@ export const useCallStore = create<CallState & CallActions>()(
         if (opts?.screenStream) {
           await liveKitService.toggleScreenShare(true, opts.screenStream);
         }
-      } catch (err) {
-        console.error("[startCall] error:", err);
+      } catch (error) {
+        console.error("[startCall] error:", error);
         set({
           error: CallError.INITIATION_FAILED,
           localCallStatus: LocalCallStatus.ERROR,
         });
-        audioService.stopAllSounds();
+        handleError(error, "Failed to start call");
       }
     },
 
@@ -224,16 +223,13 @@ export const useCallStore = create<CallState & CallActions>()(
         useModalStore.getState().openModal(ModalType.CALL, { callId, chatId });
 
         console.log("[joinCall] Successfully connected to LiveKit");
-      } catch (err) {
-        console.error("[joinCall] LiveKit connection failed:", err);
-        handleError(err, "Could not connect to SFU");
-
-        // Rollback state on failure
+      } catch (error) {
         set({
           localCallStatus: LocalCallStatus.ERROR,
           callStatus: CallStatus.FAILED,
           liveKitService: null,
         });
+        handleError(error, "Could not connect to SFU");
       }
     },
 
@@ -247,8 +243,8 @@ export const useCallStore = create<CallState & CallActions>()(
       // Notify server
       try {
         callWebSocketService.declineCall({ chatId, callId });
-      } catch (err) {
-        console.error("Failed to send decline call:", err);
+      } catch (error) {
+        console.error("Failed to send decline call:", error);
       }
 
       // Update local state
@@ -435,9 +431,9 @@ export const useCallStore = create<CallState & CallActions>()(
         audio: options?.audio ?? true,
         video: options?.video ?? false,
         screen: options?.screen ?? false,
-        onError: (err) => {
+        onError: (error) => {
           set({ localCallStatus: LocalCallStatus.ERROR });
-          console.error("LiveKit error:", err);
+          console.error("LiveKit error:", error);
         },
       });
     },

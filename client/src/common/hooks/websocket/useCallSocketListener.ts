@@ -39,7 +39,6 @@ export function useCallSocketListeners() {
           }
         }
       } catch (error) {
-        console.error("Failed to fetch pending calls:", error);
         handleError(error, "Failed to load pending calls");
       }
     };

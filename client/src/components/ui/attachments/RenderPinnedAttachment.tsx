@@ -18,11 +18,9 @@ const RenderPinnedAttachment: React.FC<RenderPinnedAttachmentProps> = ({
   className = "",
   index,
 }) => {
-  const openMediaModal = setOpenMediaModal();
-
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    openMediaModal(attachment.id);
+    setOpenMediaModal(attachment.id);
   };
 
   const handleFileClick = () => {

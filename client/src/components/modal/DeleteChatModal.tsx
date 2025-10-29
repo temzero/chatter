@@ -8,6 +8,7 @@ import { getSetSidebarInfo } from "@/stores/sidebarInfoStore";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { useTranslation } from "react-i18next";
 import Button from "../ui/buttons/Button";
+import { handleError } from "@/common/utils/handleError";
 
 interface DeleteChatModalData {
   chat: ChatResponse;
@@ -28,9 +29,13 @@ const DeleteChatModal: React.FC = () => {
     chat.type.charAt(0).toUpperCase() + chat.type.slice(1);
 
   const handleDeleteChat = async () => {
-    closeModal();
-    setSidebarInfo(SidebarInfoMode.DEFAULT);
-    await deleteChat(chat.id);
+    try {
+      closeModal();
+      setSidebarInfo(SidebarInfoMode.DEFAULT);
+      await deleteChat(chat.id);
+    } catch (error) {
+      handleError(error, "Delete chat failed");
+    }
   };
 
   return (

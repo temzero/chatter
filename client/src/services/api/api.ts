@@ -105,7 +105,6 @@ API.interceptors.response.use(
         authService.logout();
         window.location.href = "/login";
         handleError(refreshError, "Api refresh error");
-        return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
       }

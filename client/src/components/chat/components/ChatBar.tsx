@@ -41,7 +41,10 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
       const draft = getDraftMessage(chatId);
       inputRef.current.value = draft || "";
       setHasTextContent(!!draft?.trim());
-      updateInputHeight();
+      requestAnimationFrame(() => {
+        updateInputHeight();
+      });
+      // updateInputHeight();
     }
   }, [chatId, getDraftMessage]);
 

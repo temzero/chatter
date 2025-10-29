@@ -16,7 +16,7 @@ const InfiniteScroller = forwardRef<HTMLDivElement, InfiniteScrollerProps>(
       children,
       onLoadMore,
       hasMore,
-      thresholdPercent = 0.2,
+      thresholdPercent = 0.3,
       loader,
       className = "",
       isScrollUp = false,
@@ -38,33 +38,29 @@ const InfiniteScroller = forwardRef<HTMLDivElement, InfiniteScrollerProps>(
 
         let scrollPercent: number;
 
+        const loadMore = async () => {
+          isFetchingRef.current = true;
+          setIsLoading(true);
+          try {
+            await onLoadMore(); // call the passed store function
+          } catch (error) {
+            console.error("Error loading more items:", error);
+            // optionally: handleError(error, "Failed to load more items");
+          } finally {
+            isFetchingRef.current = false;
+            setIsLoading(false);
+          }
+        };
+
         if (isScrollUp) {
-          // When scrolling upward
           scrollPercent = scrollTop / (scrollHeight - clientHeight);
           if (scrollPercent <= thresholdPercent) {
-            // top 25%
-            isFetchingRef.current = true;
-            setIsLoading(true);
-            try {
-              await onLoadMore();
-            } finally {
-              isFetchingRef.current = false;
-              setIsLoading(false);
-            }
+            await loadMore();
           }
         } else {
-          // When scrolling downward
           scrollPercent = (scrollTop + clientHeight) / scrollHeight;
           if (scrollPercent >= 1 - thresholdPercent) {
-            // bottom 75%
-            isFetchingRef.current = true;
-            setIsLoading(true);
-            try {
-              await onLoadMore();
-            } finally {
-              isFetchingRef.current = false;
-              setIsLoading(false);
-            }
+            await loadMore();
           }
         }
       },

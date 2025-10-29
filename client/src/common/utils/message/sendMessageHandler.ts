@@ -133,7 +133,6 @@ export async function handleSendMessage({
     onSuccess?.();
   } catch (error) {
     // Delete any uploaded files
-
     const uploadedUrls = uploadedAttachments.map((att) => att.url);
     if (uploadedUrls.length) await deleteFilesFromSupabase(uploadedUrls);
 
@@ -142,9 +141,8 @@ export async function handleSendMessage({
     });
 
     filePreviewUrls.forEach((url) => URL.revokeObjectURL(url));
-
-    toast.error("Message upload failed. Please try again.");
     onError?.(error);
+
     handleError(error, "Failed to send message");
   }
 }

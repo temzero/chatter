@@ -39,14 +39,9 @@ export const userService = {
    * @param updatedProfile - Data to update
    */
   async updateProfile(updatedProfile: ProfileFormData) {
-    try {
-      const { data } = await API.put("/user/profile", updatedProfile);
-      console.log("Profile updated successfully:", data.payload);
-      return data.payload;
-    } catch (error: unknown) {
-      console.error("updateProfile failed:", error);
-      throw new Error("Profile update failed");
-    }
+    const { data } = await API.put("/user/profile", updatedProfile);
+    console.log("Profile updated successfully:", data.payload);
+    return data.payload;
   },
   /**
    * Update the currently authenticated user

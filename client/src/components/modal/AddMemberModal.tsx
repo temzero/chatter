@@ -75,7 +75,6 @@ const AddMemberModal: React.FC = () => {
       setSidebarInfo(SidebarInfoMode.DEFAULT);
     } catch (error) {
       handleError(error, t("modal.add_member.failed_add"));
-      console.error(t("modal.add_member.failed_add"), error);
     }
   };
 
@@ -84,15 +83,26 @@ const AddMemberModal: React.FC = () => {
 
   const generateInviteLink = async () => {
     if (!chat) return;
-    await useChatStore.getState().generateInviteLink(chat.id);
+    try {
+      await useChatStore.getState().generateInviteLink(chat.id);
+      toast.success("Invite link generated!");
+    } catch (error) {
+      handleError(error, "Failed to generate invite link");
+    }
   };
 
   const handleRefreshInviteLink = async () => {
     if (!chat || refreshed) return;
-    await useChatStore
-      .getState()
-      .refreshInviteLink(chat.id, primaryInviteLinkToken);
-    setRefreshed(true);
+
+    try {
+      await useChatStore
+        .getState()
+        .refreshInviteLink(chat.id, primaryInviteLinkToken);
+      setRefreshed(true);
+      toast.success("Invite link refreshed!");
+    } catch (error) {
+      handleError(error, "Failed to refresh invite link");
+    }
   };
 
   const handleCopy = async () => {

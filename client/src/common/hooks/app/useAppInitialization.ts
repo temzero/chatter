@@ -7,19 +7,14 @@ import { useCallSocketListeners } from "@/common/hooks/websocket/useCallSocketLi
 import { useDevice } from "@/common/hooks/useDevice";
 import { useCleanup } from "@/common/hooks/useCleanup";
 import { useGlobalKeyListeners } from "../keyEvent/useGlobalKeyListener";
-import { useAppErrorListeners } from "./useAppErrorListener";
 import { useChatStore } from "@/stores/chatStore";
-import { useLayoutEffect } from "react";
+import { useEffect } from "react";
 
 export const useAppInitialization = () => {
   console.log("useAppInitialization");
   const { id: chatId } = useParams();
-  // if (chatId) {
-  //   useChatStore.getState().setActiveChatId(chatId);
-  // }
 
-  // useLayoutEffect runs synchronously after render but before paint
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (chatId) {
       useChatStore.getState().setActiveChatId(chatId);
     }
@@ -33,6 +28,5 @@ export const useAppInitialization = () => {
   useChatSocketListeners();
   useCallSocketListeners();
   useGlobalKeyListeners();
-  useAppErrorListeners();
   useCleanup();
 };

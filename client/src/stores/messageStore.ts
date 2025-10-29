@@ -121,50 +121,44 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
         get().setInitialData(chatId, messages, hasMore);
         set({ isLoading: false });
       } catch (error) {
-        handleError(error, "Fail fetching messages");
         set({ isLoading: false });
+        handleError(error, "Fail fetching messages");
       }
     },
 
     fetchMoreMessages: async (chatId) => {
       set({ isLoading: true });
-      try {
-        const existingIds = get().messageIdsByChat[chatId] || [];
-        if (existingIds.length === 0) return 0;
+      const existingIds = get().messageIdsByChat[chatId] || [];
+      if (existingIds.length === 0) return 0;
 
-        const lastMessageId = existingIds[0];
-        const { items: newMessages, hasMore } =
-          await messageService.getChatMessages(chatId, {
-            lastId: lastMessageId,
-          });
+      const lastMessageId = existingIds[0];
+      const { items: newMessages, hasMore } =
+        await messageService.getChatMessages(chatId, {
+          lastId: lastMessageId,
+        });
 
-        if (newMessages.length > 0) {
-          const messagesById = { ...get().messagesById };
-          newMessages.forEach((msg) => {
-            messagesById[msg.id] = msg;
-          });
+      if (newMessages.length > 0) {
+        const messagesById = { ...get().messagesById };
+        newMessages.forEach((msg) => {
+          messagesById[msg.id] = msg;
+        });
 
-          set({
-            messagesById,
-            messageIdsByChat: {
-              ...get().messageIdsByChat,
-              [chatId]: [...newMessages.map((m) => m.id), ...existingIds],
-            },
-            hasMoreMessages: { ...get().hasMoreMessages, [chatId]: hasMore },
-            isLoading: false,
-          });
-        } else {
-          set({
-            hasMoreMessages: { ...get().hasMoreMessages, [chatId]: hasMore },
-            isLoading: false,
-          });
-        }
-        return newMessages.length;
-      } catch (err) {
-        handleError(err, "Failed to fetch more messages");
-        set({ isLoading: false });
-        return 0;
+        set({
+          messagesById,
+          messageIdsByChat: {
+            ...get().messageIdsByChat,
+            [chatId]: [...newMessages.map((m) => m.id), ...existingIds],
+          },
+          hasMoreMessages: { ...get().hasMoreMessages, [chatId]: hasMore },
+          isLoading: false,
+        });
+      } else {
+        set({
+          hasMoreMessages: { ...get().hasMoreMessages, [chatId]: hasMore },
+          isLoading: false,
+        });
       }
+      return newMessages.length;
     },
 
     addMessage: (newMessage) => {

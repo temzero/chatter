@@ -11,6 +11,7 @@ import { handleSystemEventMessage } from "@/common/utils/message/handleSystemEve
 import { WsEmitChatMemberResponse } from "@/shared/types/responses/ws-emit-chat-member.response";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { webSocketService } from "@/services/websocket/websocket.service";
+import { handleError } from "@/common/utils/handleError";
 
 export function useChatSocketListeners() {
   useEffect(() => {
@@ -55,9 +56,13 @@ export function useChatSocketListeners() {
     const handleMessageSaved = (
       wsMessage: WsEmitChatMemberResponse<MessageResponse>
     ) => {
-      const { payload: message } = wsMessage;
-      toast.success("Message saved!");
-      useMessageStore.getState().addMessage(message);
+      try {
+        const { payload: message } = wsMessage;
+        toast.success("Message saved!");
+        useMessageStore.getState().addMessage(message);
+      } catch (error) {
+        handleError(error, "Failed to save message");
+      }
     };
 
     // ======== Typing ========
@@ -68,12 +73,16 @@ export function useChatSocketListeners() {
         isTyping: boolean;
       }>
     ) => {
-      const { payload: data } = wsData;
-      const typingStore = useTypingStore.getState();
-      if (data.isTyping) {
-        typingStore.startTyping(data.chatId, data.userId);
-      } else {
-        typingStore.stopTyping(data.chatId, data.userId);
+      try {
+        const { payload: data } = wsData;
+        const typingStore = useTypingStore.getState();
+        if (data.isTyping) {
+          typingStore.startTyping(data.chatId, data.userId);
+        } else {
+          typingStore.stopTyping(data.chatId, data.userId);
+        }
+      } catch (error) {
+        handleError(error, "Typing failed");
       }
     };
 
@@ -85,10 +94,14 @@ export function useChatSocketListeners() {
         messageId: string;
       }>
     ) => {
-      const { payload: data } = wsData;
-      useChatMemberStore
-        .getState()
-        .updateMemberLastRead(data.chatId, data.memberId, data.messageId);
+      try {
+        const { payload: data } = wsData;
+        useChatMemberStore
+          .getState()
+          .updateMemberLastRead(data.chatId, data.memberId, data.messageId);
+      } catch (error) {
+        handleError(error, "Failed update reading");
+      }
     };
 
     // ======== Reactions ========
@@ -98,10 +111,14 @@ export function useChatSocketListeners() {
         reactions: { [emoji: string]: string[] };
       }>
     ) => {
-      const { payload: data } = wsReaction;
-      useMessageStore
-        .getState()
-        .updateMessageReactions(data.messageId, data.reactions);
+      try {
+        const { payload: data } = wsReaction;
+        useMessageStore
+          .getState()
+          .updateMessageReactions(data.messageId, data.reactions);
+      } catch (error) {
+        handleError(error, "Reaction failed");
+      }
     };
 
     // ======== Pin ========
@@ -111,31 +128,35 @@ export function useChatSocketListeners() {
         message: MessageResponse | null;
       }>
     ) => {
-      const { payload } = wsPinned;
-      const { chatId, message } = payload;
-      if (!chatId || !message) return null;
+      try {
+        const { payload } = wsPinned;
+        const { chatId, message } = payload;
+        if (!chatId || !message) return null;
 
-      const isPinned = message.isPinned;
+        const isPinned = message.isPinned;
 
-      // 1. Update pinnedMessage in chat store
-      useChatStore
-        .getState()
-        .setPinnedMessage(chatId, isPinned ? message : null);
+        // 1. Update pinnedMessage in chat store
+        useChatStore
+          .getState()
+          .setPinnedMessage(chatId, isPinned ? message : null);
 
-      // 2. Unpin all messages in the chat
-      const allMessages = useMessageStore.getState().getChatMessages(chatId);
-      allMessages.forEach((msg) => {
-        if (msg.isPinned && msg.id !== message.id) {
-          useMessageStore.getState().updateMessageById(msg.id, {
-            isPinned: false,
-          });
-        }
-      });
+        // 2. Unpin all messages in the chat
+        const allMessages = useMessageStore.getState().getChatMessages(chatId);
+        allMessages.forEach((msg) => {
+          if (msg.isPinned && msg.id !== message.id) {
+            useMessageStore.getState().updateMessageById(msg.id, {
+              isPinned: false,
+            });
+          }
+        });
 
-      // 3. Update the target message
-      useMessageStore.getState().updateMessageById(message.id, {
-        isPinned,
-      });
+        // 3. Update the target message
+        useMessageStore.getState().updateMessageById(message.id, {
+          isPinned,
+        });
+      } catch (error) {
+        handleError(error, "Error handling pinned message");
+      }
     };
 
     // ======== Important ========
@@ -146,19 +167,27 @@ export function useChatSocketListeners() {
         isImportant: boolean;
       }>
     ) => {
-      const { payload: update } = wsImportant;
-      console.log("isImportant", update.isImportant);
-      useMessageStore.getState().updateMessageById(update.messageId, {
-        isImportant: update.isImportant,
-      });
+      try {
+        const { payload: update } = wsImportant;
+        console.log("isImportant", update.isImportant);
+        useMessageStore.getState().updateMessageById(update.messageId, {
+          isImportant: update.isImportant,
+        });
+      } catch (error) {
+        handleError(error, "Mark important failed");
+      }
     };
 
     // ======== Delete ========
     const handleMessageDeleted = (
       wsDeleted: WsEmitChatMemberResponse<{ chatId: string; messageId: string }>
     ) => {
-      const { payload: data } = wsDeleted;
-      useMessageStore.getState().deleteMessage(data.chatId, data.messageId);
+      try {
+        const { payload: data } = wsDeleted;
+        useMessageStore.getState().deleteMessage(data.chatId, data.messageId);
+      } catch (error) {
+        handleError(error, "Can not delete message");
+      }
     };
 
     // ======== Error ========
@@ -170,11 +199,15 @@ export function useChatSocketListeners() {
         code?: string;
       }>
     ) => {
-      const { payload: error } = wsError;
-      console.log("handleMessageError", error);
-      useMessageStore.getState().updateMessageById(error.messageId, {
-        status: MessageStatus.FAILED,
-      });
+      try {
+        const { payload: error } = wsError;
+        console.log("handleMessageError", error);
+        useMessageStore.getState().updateMessageById(error.messageId, {
+          status: MessageStatus.FAILED,
+        });
+      } catch (error) {
+        handleError(error, "Error failed!");
+      }
     };
 
     // ======== Subscribe ========

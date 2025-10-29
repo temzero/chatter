@@ -3,13 +3,14 @@ import { ChatMemberResponse } from "@/shared/types/responses/chat-member.respons
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
-import { getCurrentUserId, } from "@/stores/authStore";
+import { getCurrentUserId } from "@/stores/authStore";
 import { rolePriority } from "@/shared/types/enums/chat-member-role.enum";
 import { ChatMemberStatus } from "@/shared/types/enums/chat-member-status.enum";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useTranslation } from "react-i18next";
 import { calculateContextMenuPosition } from "@/common/utils/contextMenuUtils";
 import { useClickOutside } from "@/common/hooks/keyEvent/useClickOutside";
+import { handleError } from "@/common/utils/handleError";
 
 interface ChatMemberItemsProps {
   members: ChatMemberResponse[];
@@ -58,7 +59,10 @@ export const ChatMemberItems = ({
     }
   };
 
-  const handleRightClick = (e: React.MouseEvent, member: ChatMemberResponse) => {
+  const handleRightClick = (
+    e: React.MouseEvent,
+    member: ChatMemberResponse
+  ) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -223,13 +227,21 @@ const MemberContextMenu = React.forwardRef<HTMLDivElement, ContextMenuProps>(
     };
 
     const handleChangeRole = (role: ChatMemberRole) => {
-      updateMember(member.chatId, member.id, { role });
-      onClose();
+      try {
+        updateMember(member.chatId, member.id, { role });
+        onClose();
+      } catch (error) {
+        handleError(error, "failed to change role");
+      }
     };
 
     const handleRemoveMember = () => {
-      removeMember(member.chatId, member.userId);
-      onClose();
+      try {
+        removeMember(member.chatId, member.userId);
+        onClose();
+      } catch (error) {
+        handleError(error, "Remove member failed");
+      }
     };
 
     return (

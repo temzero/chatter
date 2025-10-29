@@ -1,6 +1,5 @@
 import API from "@/services/api/api";
 import { toast } from "react-toastify";
-import { handleError } from "@/common/utils/handleError";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { UpdateChatRequest } from "@/shared/types/requests/update-chat.request";
 import { PaginationQuery } from "@/shared/types/queries/pagination-query";
@@ -17,17 +16,12 @@ export const chatService = {
   async fetchMoreChats(
     queries: PaginationQuery
   ): Promise<PaginationResponse<ChatResponse>> {
-    try {
-      const { data } = await API.get(`/chat/more`, {
-        params: queries,
-      });
+    const { data } = await API.get(`/chat/more`, {
+      params: queries,
+    });
 
-      const { items, hasMore } = data.payload;
-      return { items, hasMore };
-    } catch (error) {
-      console.error("Failed to fetch chats:", error);
-      return { items: [], hasMore: false };
-    }
+    const { items, hasMore } = data.payload;
+    return { items, hasMore };
   },
 
   // Get a specific chat by ID
@@ -40,15 +34,10 @@ export const chatService = {
   },
 
   async fetchSavedChat(): Promise<ChatResponse> {
-    try {
-      const response = await API.get<ApiSuccessResponse<ChatResponse>>(
-        `/chat/saved`
-      );
-      return response.data.payload;
-    } catch (error) {
-      console.error("Failed to fetch saved chat:", error);
-      throw new Error("Unable to fetch saved chat.");
-    }
+    const response = await API.get<ApiSuccessResponse<ChatResponse>>(
+      `/chat/saved`
+    );
+    return response.data.payload;
   },
 
   async createOrGetDirectChat(
@@ -83,6 +72,17 @@ export const chatService = {
     return response.data.payload;
   },
 
+  // async updateChat(payload: UpdateChatRequest): Promise<ChatResponse> {
+  //   const chatId = payload.chatId;
+
+  //   const response = await API.put<ApiSuccessResponse<ChatResponse>>(
+  //     `/chat/${chatId}`,
+  //     payload
+  //   );
+
+  //   return response.data.payload;
+  // },
+
   async deleteChat(chatId: string): Promise<string> {
     const response = await API.delete<ApiSuccessResponse<string>>(
       `/chat/${chatId}`
@@ -112,20 +112,15 @@ export const chatService = {
     chatId: string,
     options?: { expiresAt?: string; maxUses?: number }
   ): Promise<string> {
-    try {
-      const response = await API.post<ApiSuccessResponse<string>>(
-        `/invite/${chatId}`,
-        {
-          expiresAt: options?.expiresAt,
-          maxUses: options?.maxUses,
-        }
-      );
-      toast.success("Invite link created!");
-      return response.data.payload;
-    } catch (error) {
-      handleError(error, "Could not generate invite link");
-      throw error;
-    }
+    const response = await API.post<ApiSuccessResponse<string>>(
+      `/invite/${chatId}`,
+      {
+        expiresAt: options?.expiresAt,
+        maxUses: options?.maxUses,
+      }
+    );
+    toast.success("Invite link created!");
+    return response.data.payload;
   },
 
   async refreshInviteLink(token: string): Promise<string> {
@@ -134,15 +129,10 @@ export const chatService = {
       throw new Error("Invalid token format");
     }
 
-    try {
-      const response = await API.post<ApiSuccessResponse<string>>(
-        `/invite/refresh/${validToken}`
-      );
-      toast.success("Invite link refreshed!");
-      return response.data.payload;
-    } catch (error) {
-      handleError(error, "Could not refresh invite link");
-      throw error;
-    }
+    const response = await API.post<ApiSuccessResponse<string>>(
+      `/invite/refresh/${validToken}`
+    );
+    toast.success("Invite link refreshed!");
+    return response.data.payload;
   },
 };

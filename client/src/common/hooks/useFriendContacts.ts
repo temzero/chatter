@@ -18,7 +18,6 @@ export function useFriendContacts(excludeUserIds: string[] = []) {
         );
         setContacts(filtered);
       } catch (err) {
-        console.error("Failed to fetch contacts", err);
         handleError(err, "Failed to load friend contacts");
       } finally {
         setLoading(false);

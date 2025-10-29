@@ -8,13 +8,12 @@ import { ProfileFormData } from "@/components/sidebar/SidebarProfileEdit";
 interface ProfileState {
   loading: boolean;
   error: string | null;
-};
+}
 
 interface ProfileActions {
   updateProfile: (updatedData: ProfileFormData) => Promise<void>;
   reset: () => void;
-  deleteProfile: () => Promise<void>;
-};
+}
 
 const initialState: ProfileState = {
   loading: false,
@@ -28,46 +27,25 @@ export const useProfileStore = create<ProfileState & ProfileActions>()(
 
       updateProfile: async (updatedData) => {
         set({ loading: true, error: null });
-        try {
-          const updatedUser = await userService.updateProfile(updatedData);
+        const updatedUser = await userService.updateProfile(updatedData);
 
-          // Optimized: Avoid unnecessary `console.log` in production
-          if (process.env.NODE_ENV === "development") {
-            console.log("updated User: ", updatedUser);
-          }
-
-          // Optimized: Get and update auth store in one operation
-          const currentUser = useAuthStore.getState().currentUser;
-          const setCurrentUser = useAuthStore.getState().setCurrentUser; // ✅ Good
-          const mergedUser = currentUser
-            ? { ...currentUser, ...updatedUser }
-            : updatedUser;
-          setCurrentUser(mergedUser);
-
-          set({ loading: false });
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : "Failed to update profile";
-          set({ error: errorMessage, loading: false });
-          throw error; // Re-throw for error boundaries or further handling
+        // Optimized: Avoid unnecessary `console.log` in production
+        if (process.env.NODE_ENV === "development") {
+          console.log("updated User: ", updatedUser);
         }
+
+        // Optimized: Get and update auth store in one operation
+        const currentUser = useAuthStore.getState().currentUser;
+        const setCurrentUser = useAuthStore.getState().setCurrentUser; // ✅ Good
+        const mergedUser = currentUser
+          ? { ...currentUser, ...updatedUser }
+          : updatedUser;
+        setCurrentUser(mergedUser);
+
+        set({ loading: false });
       },
 
       updateUserNickname: async () => {},
-
-      deleteProfile: async () => {
-        set({ loading: true, error: null });
-        try {
-          await userService.deleteUser();
-          localStorageService.clearAuth();
-          set(initialState);
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : "Failed to delete profile";
-          set({ error: errorMessage, loading: false });
-          throw error;
-        }
-      },
 
       reset: () => {
         localStorageService.clearAuth();

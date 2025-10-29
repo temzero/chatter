@@ -88,10 +88,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
           return true; // success
         } catch (error) {
-          console.error("Bootstrap auth error:", error);
-          // refresh everything
           set({ ...initialState });
-          return false;
+          throw error;
         }
       },
 

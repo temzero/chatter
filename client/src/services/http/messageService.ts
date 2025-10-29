@@ -9,37 +9,22 @@ export const messageService = {
     chatId: string,
     queries?: PaginationQuery
   ): Promise<PaginationResponse<MessageResponse>> {
-    try {
-      const { data } = await API.get(`/messages/chat/${chatId}`, {
-        params: queries,
-      });
+    const { data } = await API.get(`/messages/chat/${chatId}`, {
+      params: queries,
+    });
 
-      return data.payload;
-    } catch (error) {
-      console.error("Error fetching chat messages:", error);
-      throw new Error("Failed to fetch chat messages");
-    }
+    return data.payload;
   },
 
   async editMessage(
     messageId: string,
     updateData: UpdateMessageRequest
   ): Promise<MessageResponse> {
-    try {
-      const { data } = await API.put(`/messages/${messageId}`, updateData);
-      return data;
-    } catch (error) {
-      console.error("Error editing message:", error);
-      throw new Error("Failed to edit message");
-    }
+    const { data } = await API.put(`/messages/${messageId}`, updateData);
+    return data;
   },
 
   async deleteMessage(messageId: string): Promise<void> {
-    try {
-      await API.delete(`/messages/${messageId}`);
-    } catch (error) {
-      console.error("Error deleting message:", error);
-      throw new Error("Failed to delete message");
-    }
+    await API.delete(`/messages/${messageId}`);
   },
 };

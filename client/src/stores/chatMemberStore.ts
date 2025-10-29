@@ -7,7 +7,6 @@ import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useShallow } from "zustand/shallow";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { getCurrentUserId } from "./authStore";
-import { handleError } from "@/common/utils/handleError";
 import { PaginationQuery } from "@/shared/types/queries/pagination-query";
 
 interface ChatMemberState {
@@ -101,73 +100,62 @@ export const useChatMemberStore = create<ChatMemberState & ChatMemberActions>(
 
     fetchChatMembers: async (chatId: string, queries?: PaginationQuery) => {
       set({ isLoading: true });
-      try {
-        const { items: members, hasMore } =
-          await chatMemberService.fetchChatMembers(chatId, queries);
+      const { items: members, hasMore } =
+        await chatMemberService.fetchChatMembers(chatId, queries);
 
+      set((state) => ({
+        chatMembers: {
+          ...state.chatMembers,
+          [chatId]: members,
+        },
+        hasMoreMembers: {
+          ...state.hasMoreMembers,
+          [chatId]: hasMore,
+        },
+        isLoading: false,
+      }));
+    },
+
+    fetchMoreMembers: async (chatId: string) => {
+      set({ isLoading: true });
+      const existingMembers = get().chatMembers[chatId] || [];
+      if (existingMembers.length === 0) {
+        set({ isLoading: false });
+        return 0;
+      }
+
+      const { items: newMembers, hasMore } =
+        await chatMemberService.fetchChatMembers(chatId, {
+          lastId: existingMembers[existingMembers.length - 1].id,
+        });
+
+      if (newMembers.length > 0) {
+        set((state) => {
+          const existing = state.chatMembers[chatId] || [];
+          return {
+            chatMembers: {
+              ...state.chatMembers,
+              [chatId]: [...existing, ...newMembers],
+            },
+            hasMoreMembers: {
+              ...state.hasMoreMembers,
+              [chatId]: hasMore,
+            },
+            isLoading: false,
+          };
+        });
+      } else {
+        // still update hasMoreMembers in case server returned 0 and hasMore = false
         set((state) => ({
-          chatMembers: {
-            ...state.chatMembers,
-            [chatId]: members,
-          },
           hasMoreMembers: {
             ...state.hasMoreMembers,
             [chatId]: hasMore,
           },
           isLoading: false,
         }));
-      } catch (error) {
-        console.error("Failed to fetch chat members:", error);
-        set({ error: "Failed to fetch members", isLoading: false });
       }
-    },
 
-    fetchMoreMembers: async (chatId: string) => {
-      set({ isLoading: true });
-      try {
-        const existingMembers = get().chatMembers[chatId] || [];
-        if (existingMembers.length === 0) {
-          set({ isLoading: false });
-          return 0;
-        }
-
-        const { items: newMembers, hasMore } =
-          await chatMemberService.fetchChatMembers(chatId, {
-            lastId: existingMembers[existingMembers.length - 1].id,
-          });
-
-        if (newMembers.length > 0) {
-          set((state) => {
-            const existing = state.chatMembers[chatId] || [];
-            return {
-              chatMembers: {
-                ...state.chatMembers,
-                [chatId]: [...existing, ...newMembers],
-              },
-              hasMoreMembers: {
-                ...state.hasMoreMembers,
-                [chatId]: hasMore,
-              },
-              isLoading: false,
-            };
-          });
-        } else {
-          // still update hasMoreMembers in case server returned 0 and hasMore = false
-          set((state) => ({
-            hasMoreMembers: {
-              ...state.hasMoreMembers,
-              [chatId]: hasMore,
-            },
-            isLoading: false,
-          }));
-        }
-
-        return newMembers.length;
-      } catch (err) {
-        handleError(err, "Failed to fetch more members");
-        set({ isLoading: false });
-        return 0;
-      }
+      return newMembers.length;
     },
 
     getChatMemberById: async (
@@ -321,40 +309,28 @@ export const useChatMemberStore = create<ChatMemberState & ChatMemberActions>(
 
     updateMember: async (chatId, memberId, updates) => {
       set({ isLoading: true });
-      try {
-        const updatedMember = await chatMemberService.updateMember(
-          memberId,
-          updates
-        );
+      const updatedMember = await chatMemberService.updateMember(
+        memberId,
+        updates
+      );
 
-        // Use the local update function instead of direct state manipulation
-        get().updateMemberLocally(chatId, memberId, updatedMember);
-        set({ isLoading: false });
-      } catch (error) {
-        console.error("Failed to update chat member:", error);
-        set({ error: "Failed to update member", isLoading: false });
-        throw error;
-      }
+      // Use the local update function instead of direct state manipulation
+      get().updateMemberLocally(chatId, memberId, updatedMember);
+      set({ isLoading: false });
     },
 
     updateMemberNickname: async (chatId, memberId, nickname) => {
       set({ isLoading: true });
-      try {
-        const updatedNickname = await chatMemberService.updateMemberNickname(
-          memberId,
-          nickname
-        );
+      const updatedNickname = await chatMemberService.updateMemberNickname(
+        memberId,
+        nickname
+      );
 
-        get().updateMemberLocally(chatId, memberId, {
-          nickname: updatedNickname,
-        });
+      get().updateMemberLocally(chatId, memberId, {
+        nickname: updatedNickname,
+      });
 
-        return updatedNickname;
-      } catch (error) {
-        console.error("Failed to update member nickname:", error);
-        set({ error: "Failed to update nickname", isLoading: false });
-        throw error;
-      }
+      return updatedNickname;
     },
 
     updateFriendshipStatus: (otherUserId, status) => {
@@ -385,21 +361,16 @@ export const useChatMemberStore = create<ChatMemberState & ChatMemberActions>(
       memberId: string,
       messageId: string | null
     ) => {
-      try {
-        // Update backend
-        await chatMemberService.updateLastRead(memberId, messageId);
+      await chatMemberService.updateLastRead(memberId, messageId);
 
-        // Update local chat member data
-        get().updateMemberLocally(chatId, memberId, {
-          lastReadMessageId: messageId,
-        });
+      // Update local chat member data
+      get().updateMemberLocally(chatId, memberId, {
+        lastReadMessageId: messageId,
+      });
 
-        // Also reset unread count in chat store
-        const chatStore = useChatStore.getState();
-        chatStore.updateChatLocally(chatId, { unreadCount: 0 });
-      } catch (error) {
-        console.error("Failed to update last read:", error);
-      }
+      // Also reset unread count in chat store
+      const chatStore = useChatStore.getState();
+      chatStore.updateChatLocally(chatId, { unreadCount: 0 });
     },
 
     addGroupMember: (chatId, member) => {
@@ -415,12 +386,8 @@ export const useChatMemberStore = create<ChatMemberState & ChatMemberActions>(
     },
 
     removeChatMember: async (chatId, userId) => {
-      try {
-        await chatMemberService.DeleteMember(chatId, userId);
-        get().clearChatMember(chatId, userId);
-      } catch (error) {
-        handleError(error, "Failed to remove member");
-      }
+      await chatMemberService.DeleteMember(chatId, userId);
+      get().clearChatMember(chatId, userId);
     },
 
     clearChatMember: (chatId, userId) => {

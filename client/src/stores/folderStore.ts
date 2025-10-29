@@ -4,6 +4,7 @@ import { FolderResponse } from "@/shared/types/responses/folder.response";
 import { folderService } from "@/services/http/folderService";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { PaginationResponse } from "@/shared/types/responses/pagination.response";
+import { handleError } from "@/common/utils/handleError";
 
 interface FolderStoreState {
   folders: FolderResponse[];
@@ -64,10 +65,8 @@ export const useFolderStore = create<FolderStoreState & FolderStoreActions>(
         }));
         return newFolder;
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Failed to create folder";
-        set({ error: message });
-        throw new Error(message);
+        set({ error: "Failed to create folder" });
+        handleError(error, "Failed to create folder");
       }
     },
 
@@ -93,40 +92,27 @@ export const useFolderStore = create<FolderStoreState & FolderStoreActions>(
           isLoading: false,
         }));
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Failed to update folder";
-        set({ error: message, isLoading: false });
-        throw new Error(message);
+        set({ error: "Failed to update folder", isLoading: false });
+        handleError(error, "Failed to update folder");
       }
     },
 
     addChatToFolder: async (chatId, folderId) => {
-      try {
-        const folder = get().folders.find((f) => f.id === folderId);
-        if (!folder) throw new Error("Folder not found");
+      const folder = get().folders.find((f) => f.id === folderId);
+      if (!folder) throw new Error("Folder not found");
 
-        // Optimistic update: add chat locally first if not already in the folder
-        if (!folder.chatIds.includes(chatId)) {
-          folder.chatIds.push(chatId);
-          set((state) => ({
-            folders: state.folders.map((f) =>
-              f.id === folderId ? { ...folder } : f
-            ),
-          }));
-        }
-
-        // API call
-        await folderService.addChatsToFolder(folderId, [chatId]);
-
-        // No need to re-sort, position remains the same
-      } catch (error) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : "Failed to add chat to folder";
-        set({ error: message });
-        throw new Error(message);
+      // Optimistic update: add chat locally first if not already in the folder
+      if (!folder.chatIds.includes(chatId)) {
+        folder.chatIds.push(chatId);
+        set((state) => ({
+          folders: state.folders.map((f) =>
+            f.id === folderId ? { ...folder } : f
+          ),
+        }));
       }
+
+      // API call
+      await folderService.addChatsToFolder(folderId, [chatId]);
     },
 
     reorderFolders: async (newOrderIds) => {
@@ -159,14 +145,11 @@ export const useFolderStore = create<FolderStoreState & FolderStoreActions>(
       } catch (error) {
         // Revert on error
         set({
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to reorder folders",
+          error: "Failed to reorder folders",
           isLoading: false,
           folders: get().folders, // revert to previous state
         });
-        throw error;
+        handleError(error, "Failed to reorder folders");
       }
     },
 
@@ -179,10 +162,8 @@ export const useFolderStore = create<FolderStoreState & FolderStoreActions>(
           // No need to re-sort after deletion (order remains consistent)
         }));
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Failed to delete folder";
-        set({ error: message });
-        throw new Error(message);
+        set({ error: "Failed to delete folder" });
+        handleError(error, "Failed to delete folder");
       }
     },
   })

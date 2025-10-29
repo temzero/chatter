@@ -11,18 +11,13 @@ export const chatMemberService = {
     chatId: string,
     queries?: PaginationQuery
   ): Promise<PaginationResponse<ChatMemberResponse>> {
-    try {
-      const { data } = await API.get<
-        ApiSuccessResponse<PaginationResponse<ChatMemberResponse>>
-      >(`/chat-members/members/${chatId}`, {
-        params: queries,
-      });
+    const { data } = await API.get<
+      ApiSuccessResponse<PaginationResponse<ChatMemberResponse>>
+    >(`/chat-members/members/${chatId}`, {
+      params: queries,
+    });
 
-      return data.payload;
-    } catch (error) {
-      console.error("Error fetching chat members:", error);
-      throw new Error("Failed to fetch chat members");
-    }
+    return data.payload;
   },
 
   async fetchMemberById(memberId: string): Promise<ChatMemberResponse> {

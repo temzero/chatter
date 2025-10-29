@@ -32,7 +32,6 @@ const SystemMessage = ({
   const currentUserId = getCurrentUserId();
   const messageId = message.id;
 
-  const openFocusMessageModal = setOpenFocusMessageModal();
   const isFocus = useIsMessageFocus(messageId);
   const isRelyToThisMessage = useIsReplyToThisMessage(messageId);
 
@@ -56,7 +55,7 @@ const SystemMessage = ({
       id={`message-${messageId}`}
       onContextMenu={(e) => {
         e.preventDefault();
-        openFocusMessageModal(messageId);
+        setOpenFocusMessageModal(message.id);
       }}
       className={clsx(
         "cursor-pointer rounded-full mb-2 px-1 mx-auto flex items-center justify-center",

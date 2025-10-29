@@ -47,15 +47,9 @@ export const authService = {
   },
 
   async refreshToken(): Promise<string> {
-    try {
-      // const response = await rawAPI.post<AuthResponse>("/auth/refresh");
-      const response = await API.post<AuthResponse>("/auth/refresh");
-      console.log('refreshToken', response.data)
-      return response.data.accessToken;
-    } catch (error) {
-      console.error("REFRESH TOKEN ERROR:", error);
-      throw error;
-    }
+    const response = await API.post<AuthResponse>("/auth/refresh");
+    console.log("refreshToken", response.data);
+    return response.data.accessToken;
   },
 
   logout: async () => {

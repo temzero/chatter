@@ -8,6 +8,7 @@ import { audioService, SoundType } from "@/services/audio.service";
 
 import { useTranslation } from "react-i18next";
 import Button from "../ui/buttons/Button";
+import { handleError } from "@/common/utils/handleError";
 
 interface DeleteMessageModalData {
   messageId: string;
@@ -27,13 +28,17 @@ const DeleteMessageModal: React.FC = () => {
   const isMe = message.sender.id === currentUserId;
 
   const handleDelete = (isDeleteForEveryone: boolean = false) => {
-    chatWebSocketService.deleteMessage({
-      chatId: message.chatId,
-      messageId: message.id,
-      isDeleteForEveryone,
-    });
-    audioService.playSound(SoundType.BREAK, 0.3);
-    closeModal();
+    try {
+      chatWebSocketService.deleteMessage({
+        chatId: message.chatId,
+        messageId: message.id,
+        isDeleteForEveryone,
+      });
+      audioService.playSound(SoundType.BREAK, 0.3);
+      closeModal();
+    } catch (error) {
+      handleError(error, "Delete Message failed");
+    }
   };
 
   return (

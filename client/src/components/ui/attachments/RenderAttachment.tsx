@@ -34,7 +34,6 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
   type,
   previewMode = true,
 }) => {
-  const openMediaModal = setOpenMediaModal();
   const closeModal = getCloseModal();
 
   const [aspectRatio, setAspectRatio] = useState<string | null>(null);
@@ -88,7 +87,7 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
 
   const handleOpenModal = () => {
     closeModal();
-    openMediaModal(attachment.id);
+    setOpenMediaModal(attachment.id);
   };
 
   // Get appropriate source URL based on preview mode

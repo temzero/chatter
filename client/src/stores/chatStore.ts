@@ -175,42 +175,37 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
       if (!lastChatId) return 0;
 
       set({ isLoading: true });
-      try {
-        const { items: newChats, hasMore } = await chatService.fetchMoreChats({
-          offset: chatIds.length,
-          limit,
-          lastId: lastChatId,
+
+      const { items: newChats, hasMore } = await chatService.fetchMoreChats({
+        offset: chatIds.length,
+        limit,
+        lastId: lastChatId,
+      });
+
+      if (newChats.length > 0) {
+        const filteredNewChats = newChats.filter(
+          (chat) => chat.type !== ChatType.SAVED
+        );
+
+        const newChatsMap: Record<string, ChatResponse> = {};
+        const newChatIds: string[] = [];
+
+        filteredNewChats.forEach((chat) => {
+          newChatsMap[chat.id] = chat;
+          newChatIds.push(chat.id);
         });
 
-        if (newChats.length > 0) {
-          const filteredNewChats = newChats.filter(
-            (chat) => chat.type !== ChatType.SAVED
-          );
+        set({
+          chats: { ...chats, ...newChatsMap },
+          chatIds: [...chatIds, ...newChatIds],
+          hasMoreChats: hasMore,
+          isLoading: false,
+        });
 
-          const newChatsMap: Record<string, ChatResponse> = {};
-          const newChatIds: string[] = [];
-
-          filteredNewChats.forEach((chat) => {
-            newChatsMap[chat.id] = chat;
-            newChatIds.push(chat.id);
-          });
-
-          set({
-            chats: { ...chats, ...newChatsMap },
-            chatIds: [...chatIds, ...newChatIds],
-            hasMoreChats: hasMore,
-          });
-
-          return filteredNewChats.length;
-        } else {
-          set({ hasMoreChats: hasMore });
-          return 0;
-        }
-      } catch (error) {
-        handleError(error, "Failed to load more chats");
+        return filteredNewChats.length;
+      } else {
+        set({ hasMoreChats: hasMore, isLoading: false });
         return 0;
-      } finally {
-        set({ isLoading: false });
       }
     },
 
@@ -247,7 +242,6 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
         return chat;
       } catch (error) {
         set({ activeChatId: null });
-        handleError(error, "Failed to fetch chat");
         window.history.pushState({}, "", "/");
         throw error;
       } finally {
@@ -289,30 +283,26 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
 
     fetchChatData: async (chatId: string) => {
       set({ isLoading: true });
-      try {
-        const alreadyFetchedMessages =
-          !!useMessageStore.getState().getChatMessages(chatId);
-        const alreadyFetchedMembers =
-          !!useChatMemberStore.getState().chatMembers[chatId];
+      const alreadyFetchedMessages = !!useMessageStore
+        .getState()
+        .getChatMessages(chatId);
+      const alreadyFetchedMembers =
+        !!useChatMemberStore.getState().chatMembers[chatId];
 
-        const fetchMessagesPromise = alreadyFetchedMessages
+      const fetchMessagesPromise = alreadyFetchedMessages
+        ? null
+        : useMessageStore.getState().fetchMessages(chatId);
+
+      const chat = get().getChatById(chatId);
+      const fetchMembersPromise =
+        alreadyFetchedMembers || !chat
           ? null
-          : useMessageStore.getState().fetchMessages(chatId);
+          : useChatMemberStore.getState().fetchChatMembers(chatId);
 
-        const chat = get().getChatById(chatId);
-        const fetchMembersPromise =
-          alreadyFetchedMembers || !chat
-            ? null
-            : useChatMemberStore.getState().fetchChatMembers(chatId);
-
-        await Promise.all(
-          [fetchMessagesPromise, fetchMembersPromise].filter(Boolean)
-        );
-      } catch (error) {
-        handleError(error, "Failed to fetch active chat data");
-      } finally {
-        set({ isLoading: false });
-      }
+      await Promise.all(
+        [fetchMessagesPromise, fetchMembersPromise].filter(Boolean)
+      );
+      set({ isLoading: false });
     },
 
     getAllUserIdsInChats: () => {
@@ -345,7 +335,6 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
       } catch (error) {
         set({ error: "Failed to create chat" });
         handleError(error, "Failed to create/get direct chat:");
-        throw error;
       } finally {
         set({ isLoading: false });
       }
@@ -364,7 +353,6 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
         console.error("Failed to create group chat:", error);
         set({ error: "Failed to create chat" });
         handleError(error, "Failed to create group chat");
-        throw error;
       } finally {
         set({ isLoading: false });
       }
@@ -377,7 +365,6 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
         get().updateChatLocally(payload.chatId, updatedChat);
       } catch (error) {
         set({ error: "Failed to update chat" });
-        handleError(error, "Failed to update chat");
         throw error;
       } finally {
         set({ isLoading: false });
@@ -425,32 +412,22 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
       }
     },
 
-    addMembersToChat: async (chatId, userIds) => {
-      set({ isLoading: true });
-      try {
-        await chatMemberService.addMembers(chatId, userIds);
-      } catch (error) {
-        handleError(error, "Error adding user to chat");
-      } finally {
-        set({ isLoading: false });
-      }
-    },
-
     setMute: async (
       chatId: string,
       memberId: string,
       mutedUntil: Date | null
     ) => {
-      try {
-        const updatedMuteUntil = await chatMemberService.setMute(
-          memberId,
-          mutedUntil
-        );
-        get().updateChatLocally(chatId, { mutedUntil: updatedMuteUntil });
-      } catch (error) {
-        handleError(error, "Failed to set mute");
-        throw error;
-      }
+      const updatedMuteUntil = await chatMemberService.setMute(
+        memberId,
+        mutedUntil
+      );
+      get().updateChatLocally(chatId, { mutedUntil: updatedMuteUntil });
+    },
+
+    addMembersToChat: async (chatId, userIds) => {
+      set({ isLoading: true });
+      await chatMemberService.addMembers(chatId, userIds);
+      set({ isLoading: false });
     },
 
     setUnreadCount: (chatId: string, incrementBy: number) => {
@@ -469,25 +446,15 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
     },
 
     generateInviteLink: async (chatId: string) => {
-      try {
-        const newInviteLink = await chatService.generateInviteLink(chatId);
-        get().updateChatLocally(chatId, { inviteLinks: [newInviteLink] });
-        return newInviteLink;
-      } catch (error) {
-        handleError(error, "Failed to generate invite link");
-        throw error;
-      }
+      const newInviteLink = await chatService.generateInviteLink(chatId);
+      get().updateChatLocally(chatId, { inviteLinks: [newInviteLink] });
+      return newInviteLink;
     },
 
     refreshInviteLink: async (chatId: string, token: string) => {
-      try {
-        const newInviteLink = await chatService.refreshInviteLink(token);
-        get().updateChatLocally(chatId, { inviteLinks: [newInviteLink] });
-        return newInviteLink;
-      } catch (error) {
-        handleError(error, "Failed to refresh invite link");
-        throw error;
-      }
+      const newInviteLink = await chatService.refreshInviteLink(token);
+      get().updateChatLocally(chatId, { inviteLinks: [newInviteLink] });
+      return newInviteLink;
     },
 
     addToGroupPreviewMembers: (chatId: string, member: ChatMemberLite) => {
@@ -530,46 +497,32 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
 
     leaveChat: async (chatId) => {
       set({ isLoading: true });
-      try {
-        const currentUserId = useAuthStore.getState().currentUser?.id;
-        if (!currentUserId) throw new Error("User not authenticated");
+      const currentUserId = useAuthStore.getState().currentUser?.id;
+      if (!currentUserId) throw new Error("User not authenticated");
 
-        const { chatDeleted } = await chatMemberService.DeleteMember(
-          chatId,
-          currentUserId
-        );
-        get().cleanupChat(chatId);
-        window.history.pushState({}, "", "/");
+      const { chatDeleted } = await chatMemberService.DeleteMember(
+        chatId,
+        currentUserId
+      );
+      get().cleanupChat(chatId);
+      window.history.pushState({}, "", "/");
 
-        if (chatDeleted) {
-          toast.info("This chat was deleted because no members remained.");
-        } else {
-          toast.success("You left the chat.");
-        }
-      } catch (error) {
-        console.error("Failed to leave chat:", error);
-        set({ error: "Failed to leave chat" });
-        handleError(error, "Failed to leave chat");
-        throw error;
-      } finally {
-        set({ isLoading: false });
+      if (chatDeleted) {
+        toast.info("This chat was deleted because no members remained.");
+      } else {
+        toast.success("You left the chat.");
       }
+
+      set({ isLoading: false });
     },
 
     deleteChat: async (id) => {
       set({ isLoading: true });
-      try {
-        await chatService.deleteChat(id);
-        get().cleanupChat(id);
-        window.history.pushState({}, "", "/");
-        toast.success("Chat deleted");
-      } catch (error) {
-        set({ error: "Failed to delete chat" });
-        handleError(error, "Failed to delete chat");
-        throw error;
-      } finally {
-        set({ isLoading: false });
-      }
+      await chatService.deleteChat(id);
+      get().cleanupChat(id);
+      window.history.pushState({}, "", "/");
+      toast.success("Chat deleted");
+      set({ isLoading: false });
     },
 
     clearChats: () => {
@@ -621,6 +574,11 @@ export const useAllChats = () =>
 
 export const useAllChatIds = () => useChatStore((state) => state.chatIds);
 
+export const getChatsArray = () => {
+  const state = useChatStore.getState();
+  return state.chatIds.map((id) => state.chats[id]).filter(Boolean);
+};
+
 export const useChatsForFolderFilter = () =>
   useChatStore(
     useShallow((state) =>
@@ -657,9 +615,7 @@ export const useSetActiveSavedChat = () => {
         useChatStore.setState({ savedChat: fetchedSavedChat });
         savedChat = fetchedSavedChat;
       } catch (error) {
-        toast.error("Error while fetching saved chat!");
-        console.error("Failed to fetch saved chat:", error);
-        return;
+        handleError(error, "Failed to fetch saved chat");
       }
     }
 

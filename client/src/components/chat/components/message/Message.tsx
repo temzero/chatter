@@ -47,8 +47,6 @@ const Message: React.FC<MessageProps> = ({
   const searchQuery = useMessageStore((state) => state.searchQuery);
   const showImportantOnly = useMessageStore((state) => state.showImportantOnly);
 
-  console.log("Message", message.id);
-  const openFocusMessageModal = setOpenFocusMessageModal();
   const isFocus = useIsMessageFocus(message.id);
   const isRelyToThisMessage = useIsReplyToThisMessage(message.id);
   const repliedMessage = message.replyToMessage;
@@ -61,7 +59,8 @@ const Message: React.FC<MessageProps> = ({
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
-    openFocusMessageModal(message.id);
+    e.stopPropagation();
+    setOpenFocusMessageModal(message.id)
     setContextMenuMousePos({ x: e.clientX, y: e.clientY });
   };
 
@@ -117,8 +116,6 @@ const Message: React.FC<MessageProps> = ({
       className={clsx("flex relative max-w-[60%] pb-1.5", {
         "justify-end": isMe,
         "justify-start": !isMe,
-        // "pb-1": isRecent,
-        // "pb-2": !isRecent,
       })}
       style={{ zIndex: isFocus || isRelyToThisMessage ? 100 : "auto" }}
       layout="position"

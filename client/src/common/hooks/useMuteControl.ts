@@ -2,6 +2,7 @@
 import { useChatStore } from "@/stores/chatStore";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
 import { toast } from "react-toastify";
+import { handleError } from "../utils/handleError";
 
 export function useMuteControl(chatId: string, myMemberId: string) {
   const openModal = getOpenModal();
@@ -16,11 +17,10 @@ export function useMuteControl(chatId: string, myMemberId: string) {
 
   const unmute = async () => {
     try {
-      await setMute(chatId, myMemberId, null);
+      setMute(chatId, myMemberId, null);
       toast.success("Unmuted successfully");
     } catch (error) {
-      console.error("Failed to unmute chat:", error);
-      toast.error("Failed to unmute chat");
+      handleError(error, "Failed to unmute chat");
     }
   };
 

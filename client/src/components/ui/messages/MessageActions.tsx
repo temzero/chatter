@@ -32,7 +32,6 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   const { t } = useTranslation();
   const openModal = getOpenModal();
   const closeModal = getCloseModal();
-  const openReplyToMessageModal = setOpenReplyToMessageModal();
 
   const isAlreadyReply = !!message.replyToMessageId;
   const isPinned = message.isPinned;
@@ -44,7 +43,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       label: t("common.actions.reply"),
       class: "rotate-180",
       action: () => {
-        openReplyToMessageModal(message.id);
+        setOpenReplyToMessageModal(message.id);
         scrollToMessageById(message.id, { animate: false });
       },
     },

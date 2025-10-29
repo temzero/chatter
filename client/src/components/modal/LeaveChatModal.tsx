@@ -6,6 +6,7 @@ import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useTranslation } from "react-i18next";
 import Button from "../ui/buttons/Button";
+import { handleError } from "@/common/utils/handleError";
 
 interface LeaveChatModalData {
   chat: ChatResponse;
@@ -25,8 +26,12 @@ const LeaveChatModal: React.FC = () => {
     chat.type.charAt(0).toUpperCase() + chat.type.slice(1);
 
   const handleLeaveChat = async () => {
-    await leaveChat(chat.id);
-    closeModal();
+    try {
+      await leaveChat(chat.id);
+      closeModal();
+    } catch (error) {
+      handleError(error, "Failed to leave chat");
+    }
   };
 
   return (

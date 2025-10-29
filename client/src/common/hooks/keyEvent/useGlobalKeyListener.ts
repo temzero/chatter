@@ -6,7 +6,7 @@ import {
 } from "@/stores/sidebarInfoStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
-import { getCloseModal, useModalType } from "@/stores/modalStore";
+import { getCloseModal, getModalType } from "@/stores/modalStore";
 
 export const useGlobalKeyListeners = () => {
   const setSidebar = getSetSidebar();
@@ -14,7 +14,6 @@ export const useGlobalKeyListeners = () => {
   const toggleSidebarInfo = useSidebarInfoStore.getState().toggleSidebarInfo;
   const toggleCompact = useSidebarStore.getState().toggleCompact;
   const closeModal = getCloseModal();
-  const modalType = useModalType();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -24,6 +23,7 @@ export const useGlobalKeyListeners = () => {
         e.preventDefault();
       }
 
+      const modalType = getModalType();
       if (modalType) {
         if (e.key === "Escape") {
           closeModal();
@@ -48,7 +48,6 @@ export const useGlobalKeyListeners = () => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [
-    modalType,
     closeModal,
     setSidebar,
     setSidebarInfo,

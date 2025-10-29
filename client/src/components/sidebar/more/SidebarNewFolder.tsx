@@ -1,6 +1,6 @@
 // components/sidebar/SidebarNewFolder.tsx
 import React, { useRef, useState, useEffect } from "react";
-import { useChatStore } from "@/stores/chatStore";
+import { getChatsArray } from "@/stores/chatStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useFolderStore } from "@/stores/folderStore";
@@ -32,7 +32,7 @@ interface folderToEdit {
 
 const SidebarNewFolder: React.FC = () => {
   const { t } = useTranslation();
-  const chats = useChatStore((state) => state.chats);
+  const chats = getChatsArray();
   const setSidebar = getSetSidebar();
   const createFolder = useFolderStore.getState().createFolder;
   const updateFolder = useFolderStore.getState().updateFolder;

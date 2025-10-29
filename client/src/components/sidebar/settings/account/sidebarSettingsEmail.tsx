@@ -89,12 +89,6 @@ const SidebarSettingsEmail: React.FC = () => {
       setCodeCountdown(120); // 2 minutes countdown
       toast.info(t("account_settings.change_email.messages.sent", { email }));
     } catch (error) {
-      console.error(error);
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : t("account_settings.change_email.messages.failed_send");
-      toast.error(errorMessage);
       handleError(
         error,
         t("account_settings.change_email.messages.failed_send")
@@ -142,11 +136,6 @@ const SidebarSettingsEmail: React.FC = () => {
       setCodeCountdown(120); // Reset to 2 minutes
       toast.info(t("account_settings.change_email.messages.sent", { email }));
     } catch (error) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : t("account_settings.change_email.messages.failed_resend");
-      toast.error(errorMessage);
       handleError(
         error,
         t("account_settings.change_email.messages.failed_resend")

@@ -39,25 +39,6 @@ export class ChatController {
     private readonly messageService: MessageService,
   ) {}
 
-  // @Get('initial')
-  // async getInitialData(
-  //   @CurrentUser('id') userId: string,
-  //   @Query('chatLimit') chatLimit: number = 20,
-  //   @Query('messageLimit') messageLimit: number = 20,
-  // ): Promise<SuccessResponse<PaginationResponse<ChatWithMessagesResponse>>> {
-  //   try {
-  //     const result = await this.chatService.getInitialChatsWithData(
-  //       userId,
-  //       chatLimit,
-  //       messageLimit,
-  //     );
-
-  //     return new SuccessResponse(result, 'Initial data loaded');
-  //   } catch (error) {
-  //     ErrorResponse.throw(error, 'Failed to load initial data');
-  //   }
-  // }
-
   @Get()
   @HttpCode(HttpStatus.OK)
   async findInitialChats(

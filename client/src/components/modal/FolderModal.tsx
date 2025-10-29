@@ -9,6 +9,7 @@ import Checkbox from "../ui/buttons/CheckBox";
 import Button from "../ui/buttons/Button";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { ChatAvatar } from "../ui/avatar/ChatAvatar";
+import { handleError } from "@/common/utils/handleError";
 
 interface AddChatToFolderModalData {
   chat: ChatResponse;
@@ -58,7 +59,7 @@ const AddChatToFolderModal: React.FC = () => {
       closeModal();
       setSidebar(SidebarMode.FOLDERS);
     } catch (error) {
-      console.error("Failed to add chat to folder:", error);
+      handleError(error, "Failed to add chat to folder");
     }
   };
 

@@ -1,7 +1,7 @@
 // bootstrap.ts
 import { useAuthStore } from "@/stores/authStore";
-import { toast } from "react-toastify";
 import { fetchInitialAppData } from "./fetchInitialAppData";
+import { handleError } from "@/common/utils/handleError";
 
 const bootstrapApp = async () => {
   try {
@@ -17,8 +17,7 @@ const bootstrapApp = async () => {
     // STEP 3: Fetch initial app data for authenticated users
     await fetchInitialAppData();
   } catch (error) {
-    console.error("Bootstrap failed:", error);
-    toast.error("Fail to Load App Data");
+    handleError(error, "Fail to Load App Data");
   }
 };
 

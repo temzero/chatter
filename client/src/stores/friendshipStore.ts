@@ -80,9 +80,7 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
         return newRequest;
       } catch (error) {
         set({ isLoading: false });
-        console.error("Failed to send friend request:", error);
         handleError(error, "Failed to send friend request");
-        throw error;
       }
     },
 
@@ -99,9 +97,8 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
 
         return friendship;
       } catch (error) {
-        console.error("Failed to respond to friend request:", error);
         set({ isLoading: false });
-        throw handleError(error, "Failed to respond to friend request");
+        throw error
       } finally {
         set((state) => ({
           pendingRequests: state.pendingRequests.filter(
@@ -134,8 +131,7 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
         }));
       } catch (error) {
         set({ isLoading: false });
-        handleError(error, "Failed to cancel friend request");
-        throw error;
+        throw error
       } finally {
         if (userId) {
           useChatMemberStore.getState().updateFriendshipStatus(userId, null);
