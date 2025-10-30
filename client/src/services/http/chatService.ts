@@ -62,26 +62,15 @@ export const chatService = {
   },
 
   async updateChat(payload: UpdateChatRequest): Promise<ChatResponse> {
-    const { chatId, ...updates } = payload;
+    const chatId = payload.chatId;
 
     const response = await API.put<ApiSuccessResponse<ChatResponse>>(
       `/chat/${chatId}`,
-      updates
+      payload
     );
 
     return response.data.payload;
   },
-
-  // async updateChat(payload: UpdateChatRequest): Promise<ChatResponse> {
-  //   const chatId = payload.chatId;
-
-  //   const response = await API.put<ApiSuccessResponse<ChatResponse>>(
-  //     `/chat/${chatId}`,
-  //     payload
-  //   );
-
-  //   return response.data.payload;
-  // },
 
   async deleteChat(chatId: string): Promise<string> {
     const response = await API.delete<ApiSuccessResponse<string>>(

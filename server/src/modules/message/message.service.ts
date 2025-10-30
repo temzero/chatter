@@ -8,8 +8,6 @@ import { CreateMessageDto } from './dto/requests/create-message.dto';
 import { UpdateMessageDto } from './dto/requests/update-message.dto';
 import { ErrorResponse } from '../../common/api-response/errors';
 import { Reaction } from './entities/reaction.entity';
-import { Attachment } from './entities/attachment.entity';
-import { SupabaseService } from '../superbase/supabase.service';
 import { BlockService } from '../block/block.service';
 import { ChatType } from 'src/shared/types/enums/chat-type.enum';
 import { SystemEventType } from 'src/shared/types/enums/system-event-type.enum';
@@ -22,6 +20,7 @@ import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
 import { WebsocketNotificationService } from '../websocket/services/websocket-notification.service';
 import { Call } from '../call/entities/call.entity';
 import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
+import { AttachmentService } from '../attachment/attachment.service';
 
 @Injectable()
 export class MessageService {
@@ -32,8 +31,6 @@ export class MessageService {
     private readonly chatRepo: Repository<Chat>,
     @InjectRepository(ChatMember)
     private readonly chatMemberRepo: Repository<ChatMember>,
-    @InjectRepository(Attachment)
-    private readonly attachmentRepo: Repository<Attachment>,
     @InjectRepository(Reaction)
     private readonly reactionRepo: Repository<Reaction>,
     @InjectRepository(Message)
@@ -41,8 +38,8 @@ export class MessageService {
     @InjectRepository(Call)
     public readonly callRepo: Repository<Call>,
 
+    private readonly attachmentService: AttachmentService,
     private readonly blockService: BlockService,
-    private readonly supabaseService: SupabaseService,
     private readonly messageMapper: MessageMapper,
     private readonly websocketNotificationService: WebsocketNotificationService,
   ) {}
@@ -52,54 +49,58 @@ export class MessageService {
     senderId: string,
     dto: CreateMessageDto,
   ): Promise<Message> {
+    console.log('CreateMessageDto', dto);
+    // Validation: Check if trying to reply (should use createReplyMessage instead)
     if (dto.replyToMessageId) {
       ErrorResponse.badRequest('Use createReplyMessage for replying');
     }
 
+    // Get chat with members for validation
     const chat = await this.chatRepo.findOne({
       where: { id: dto.chatId },
       relations: ['members'],
     });
     if (!chat) ErrorResponse.notFound('Chat not found');
 
+    // Check for blocking in direct chats
     await this.ensureNoBlockingInDirectChat(senderId, chat);
 
+    // Verify user is a member of the chat
     const isMember = await this.chatMemberRepo.exists({
       where: { chatId: dto.chatId, userId: senderId },
     });
     if (!isMember) ErrorResponse.notFound('You are not a member of this chat');
 
-    // 🔹 Convert raw DTO attachments to Attachment entities before saving Message
-    const attachmentEntities =
-      dto.attachments?.map((att) =>
-        this.attachmentRepo.create({
-          ...att,
-          thumbnailUrl: att.thumbnailUrl ?? null,
-          filename: att.filename ?? null,
-          size: att.size ?? null,
-          mimeType: att.mimeType ?? null,
-          width: att.width ?? null,
-          height: att.height ?? null,
-          duration: att.duration ?? null,
-        }),
-      ) || [];
-
+    // ✅ Create message FIRST to get the ID
     const message = this.messageRepo.create({
-      id: dto.id,
+      id: dto.id, // Client provides this ID
       chatId: dto.chatId,
       senderId,
       content: dto.content,
-      attachments: attachmentEntities, // ✅ Real entities here
     });
 
-    const saved = await this.messageRepo.save(message);
+    console.log('message', message);
 
+    const savedMessage = await this.messageRepo.save(message);
+
+    console.log('savedMessage', savedMessage);
+
+    if (dto.attachments?.length) {
+      await this.attachmentService.createAttachments(
+        savedMessage.id, // messageId
+        savedMessage.chatId, // chatId
+        dto.attachments, // attachment data without IDs
+      );
+    }
+
+    // Update last visible message for all chat members
     await this.chatMemberRepo.update(
       { chatId: dto.chatId },
-      { lastVisibleMessageId: saved.id },
+      { lastVisibleMessageId: savedMessage.id },
     );
 
-    return await this.getFullMessageById(saved.id);
+    // ✅ RELOAD the message to include attachments and all relations
+    return await this.getFullMessageById(savedMessage.id);
   }
 
   async createReplyMessage(
@@ -137,6 +138,7 @@ export class MessageService {
       ErrorResponse.badRequest('Cannot reply to a reply');
     }
 
+    // ✅ Create message first (without attachments)
     const message = this.messageRepo.create({
       id: dto.id,
       chatId: dto.chatId,
@@ -144,40 +146,33 @@ export class MessageService {
       content: dto.content,
       replyToMessageId: dto.replyToMessageId,
       replyToMessage: replyToMessage,
-      attachments: [],
+      // Don't include attachments here - handled by AttachmentService
     });
 
-    const saved = await this.messageRepo.save(message);
+    const savedMessage = await this.messageRepo.save(message);
 
+    // ✅ Increment reply count
     await this.messageRepo.increment(
       { id: dto.replyToMessageId },
       'replyCount',
       1,
     );
 
+    // ✅ Create attachments via AttachmentService (simplified)
     if (dto.attachments?.length) {
-      const attachments = dto.attachments.map((att) =>
-        this.attachmentRepo.create({
-          messageId: saved.id,
-          ...att,
-          thumbnailUrl: att.thumbnailUrl ?? null,
-          filename: att.filename ?? null,
-          size: att.size ?? null,
-          mimeType: att.mimeType ?? null,
-          width: att.width ?? null,
-          height: att.height ?? null,
-          duration: att.duration ?? null,
-        }),
+      await this.attachmentService.createAttachments(
+        savedMessage.id, // messageId
+        savedMessage.chatId, // chatId
+        dto.attachments, // attachment data without IDs
       );
-      await this.attachmentRepo.save(attachments);
     }
 
     await this.chatMemberRepo.update(
       { chatId: dto.chatId },
-      { lastVisibleMessageId: saved.id },
+      { lastVisibleMessageId: savedMessage.id },
     );
 
-    return await this.getFullMessageById(saved.id);
+    return await this.getFullMessageById(savedMessage.id);
   }
 
   async createForwardedMessage(
@@ -202,28 +197,25 @@ export class MessageService {
     }
 
     const myMember = chat.members.find((m) => m.userId === senderId);
-
     if (!myMember) {
       ErrorResponse.unauthorized('You are not a member of this Chat');
     }
 
-    // ⛔ Channel-only permission checks for forwarding
     this.ensureCanForwardInChannel(chat, myMember);
-
-    // ⛔ Blocking check only in direct chat
     await this.ensureNoBlockingInDirectChat(senderId, chat);
 
+    // ✅ Create message WITHOUT copying attachments
     const newMessage = this.messageRepo.create({
       senderId,
       chatId: targetChatId,
       content: originalMessage.content,
-      attachments: [...originalMessage.attachments],
       forwardedFromMessage: originalMessage,
+      // ❌ NO attachments here - they belong to the original message
     });
 
     const savedMessage = await this.messageRepo.save(newMessage);
 
-    // ✅ Update lastVisibleMessageId for all members
+    // ✅ NO attachment creation - forwarded message uses original's attachments
     await this.chatMemberRepo.update(
       { chatId: chat.id },
       { lastVisibleMessageId: savedMessage.id },
@@ -294,7 +286,7 @@ export class MessageService {
     try {
       const message = await this.messageRepo.findOne({
         where: { id },
-        relations: ['sender', 'chat', 'call'],
+        relations: ['sender', 'chat', 'call', 'attachments'],
       });
 
       if (!message) {
@@ -626,26 +618,10 @@ export class MessageService {
         );
       }
 
-      // 1. Delete all attachments from Supabase
-      if (message.attachments?.length) {
-        for (const attachment of message.attachments) {
-          // Delete main file
-          if (attachment.url) {
-            await this.supabaseService.deleteFileByUrl(attachment.url);
-          }
+      // ✅ Single call to handle all attachment deletion + file cleanup
+      await this.attachmentService.deleteAttachmentsByMessageId(messageId);
 
-          // Delete thumbnail if exists
-          if (attachment.thumbnailUrl) {
-            await this.supabaseService.deleteFileByUrl(attachment.thumbnailUrl);
-          }
-        }
-
-        // 2. Delete attachment records from DB
-        const attachmentIds = message.attachments.map((a) => a.id);
-        await this.attachmentRepo.delete(attachmentIds);
-      }
-
-      // 3. Delete the message itself
+      // Delete the message itself
       await this.messageRepo.delete(messageId);
 
       return message;

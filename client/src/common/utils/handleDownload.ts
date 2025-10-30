@@ -1,4 +1,4 @@
-import { AttachmentResponse } from "@/shared/types/responses/message.response";
+import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 import { audioService, SoundType } from "@/services/audio.service";
 
 export const handleDownload = async (attachment: AttachmentResponse) => {

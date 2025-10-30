@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from "react";
 import { handleDownload } from "@/common/utils/handleDownload";
-import { useActiveChatAttachments } from "@/stores/messageStore";
 import { getCloseModal } from "@/stores/modalStore";
+import { useActiveChatAttachments } from "@/stores/messageAttachmentStore";
 
 interface UseMediaViewerKeysProps {
   currentIndex: number;

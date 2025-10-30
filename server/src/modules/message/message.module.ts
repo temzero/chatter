@@ -8,11 +8,11 @@ import { ChatMember } from '../chat-member/entities/chat-member.entity';
 import { User } from '../user/entities/user.entity';
 import { MessageMapper } from './mappers/message.mapper';
 import { Reaction } from './entities/reaction.entity';
-import { Attachment } from './entities/attachment.entity';
-import { SupabaseModule } from '../superbase/supabase.module';
+import { Attachment } from 'src/modules/attachment/entity/attachment.entity';
 import { BlockModule } from '../block/block.module';
 import { WebSocketModule } from '../websocket/websocket.module';
 import { Call } from '../call/entities/call.entity';
+import { AttachmentModule } from '../attachment/attachment.module';
 
 @Module({
   imports: [
@@ -25,12 +25,12 @@ import { Call } from '../call/entities/call.entity';
       Reaction,
       Call,
     ]),
+    forwardRef(() => AttachmentModule),
     forwardRef(() => BlockModule),
-    forwardRef(() => SupabaseModule),
     forwardRef(() => WebSocketModule),
   ],
   controllers: [MessageController],
   providers: [MessageService, MessageMapper],
-  exports: [MessageService, MessageMapper, TypeOrmModule],
+  exports: [MessageService, MessageMapper, TypeOrmModule, AttachmentModule],
 })
 export class MessageModule {}

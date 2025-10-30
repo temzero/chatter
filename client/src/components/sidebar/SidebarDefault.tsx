@@ -1,5 +1,5 @@
   import React, { useState } from "react";
-  import { useAllChatIds, useAllChats } from "@/stores/chatStore";
+  import { useAllChatIds, useChatMap } from "@/stores/chatStore";
   import { getSetSidebar, useIsCompactSidebar } from "@/stores/sidebarStore";
   import { useFolders } from "@/stores/folderStore";
   import { Logo } from "@/components/ui/icons/Logo";
@@ -15,7 +15,7 @@
 
     // Much better approach - stable selectors
     const chatIds = useAllChatIds();
-    const chatMap = useAllChats();
+    const chatMap = useChatMap();
     const folders = useFolders();
     const isCompact = useIsCompactSidebar();
     const setSidebar = getSetSidebar();

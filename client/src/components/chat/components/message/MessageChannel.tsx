@@ -111,7 +111,10 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
         {message.call && <BroadcastMessage call={message.call} />}
         {attachments.length > 0 && (
           <div className="rounded overflow-hidden shadow-lg">
-            <RenderMultipleAttachments attachments={attachments} />
+            <RenderMultipleAttachments
+              chatId={message.chatId}
+              messageId={message.id}
+            />
           </div>
         )}
         {message.content && (

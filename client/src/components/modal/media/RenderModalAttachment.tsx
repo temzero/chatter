@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import type { AttachmentResponse } from "@/shared/types/responses/message.response";
+import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 import { formatFileSize } from "@/common/utils/format/formatFileSize";
 import { handleDownload } from "@/common/utils/handleDownload";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";

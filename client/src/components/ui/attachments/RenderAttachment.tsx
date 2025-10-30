@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getCloseModal, setOpenMediaModal } from "@/stores/modalStore";
-import { AttachmentResponse } from "@/shared/types/responses/message.response";
+import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { formatFileSize } from "@/common/utils/format/formatFileSize";
 import { handleDownload } from "@/common/utils/handleDownload";

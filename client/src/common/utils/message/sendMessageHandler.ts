@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { useMessageStore } from "@/stores/messageStore";
-import { AttachmentResponse } from "@/shared/types/responses/message.response";
+import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 import { determineAttachmentType } from "@/common/utils/message/determineAttachmentType";
 import { handleError } from "../handleError";
 import { uploadFilesToSupabase } from "@/common/utils/supabase/uploadToSupabase";
@@ -15,11 +15,13 @@ function toOptimisticAttachmentResponseFromFile(
   file: File,
   previewUrl: string,
   messageId: string,
+  chatId: string,
   now: string
 ): AttachmentResponse {
   return {
     id: uuidv4(),
     messageId,
+    chatId,
     url: previewUrl,
     type: determineAttachmentType(file),
     filename: file.name,
@@ -80,6 +82,7 @@ export async function handleSendMessage({
         file,
         filePreviewUrls[index],
         messageId,
+        chatId,
         now
       )
   );

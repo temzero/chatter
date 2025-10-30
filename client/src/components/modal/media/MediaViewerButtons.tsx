@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { AttachmentResponse } from "@/shared/types/responses/message.response";
+import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 import { handleDownload } from "@/common/utils/handleDownload";
 import { useSenderByMessageId } from "@/stores/messageStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";

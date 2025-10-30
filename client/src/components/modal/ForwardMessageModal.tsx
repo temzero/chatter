@@ -1,7 +1,7 @@
 // components/modals/ForwardMessageModal.tsx
 import React, { useState, useMemo } from "react";
 import { getCloseModal, getModalData } from "@/stores/modalStore";
-import { useChatStore } from "@/stores/chatStore";
+import { getChats } from "@/stores/chatStore";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { ForwardMessageRequest } from "@/shared/types/requests/forward-message.request";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
@@ -9,10 +9,9 @@ import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { AttachmentUploadRequest } from "@/shared/types/requests/attachment-upload.request";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useTranslation } from "react-i18next";
-import {
-  AttachmentResponse,
-  MessageResponse,
-} from "@/shared/types/responses/message.response";
+import { MessageResponse } from "@/shared/types/responses/message.response";
+import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
+import { ChatResponse } from "@/shared/types/responses/chat.response";
 import SearchBar from "@/components/ui/SearchBar";
 
 interface ForwardMessageModalData {
@@ -25,7 +24,7 @@ const ForwardMessageModal: React.FC = () => {
 
   const { t } = useTranslation();
   const closeModal = getCloseModal();
-  const chats = useChatStore((state) => state.chats);
+  const chats = getChats() as ChatResponse[];
   const [searchTerm, setSearchTerm] = useState("");
   const data = getModalData() as unknown as ForwardMessageModalData | undefined;
 
@@ -119,7 +118,7 @@ const ForwardMessageModal: React.FC = () => {
               : t("common.messages.no_chats")}
           </div>
         ) : (
-          forwardChats.map((chat) => (
+          forwardChats.map((chat: ChatResponse) => (
             <div
               key={chat.id}
               className="flex items-center w-full gap-3 p-2 text-left transition custom-border-b"

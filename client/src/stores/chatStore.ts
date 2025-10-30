@@ -11,12 +11,12 @@ import { useModalStore } from "./modalStore";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
 import { UpdateChatRequest } from "@/shared/types/requests/update-chat.request";
 import { handleError } from "@/common/utils/handleError";
-import type {
+import {
   ChatResponse,
   ChatDataResponse,
   ChatMemberLite,
 } from "@/shared/types/responses/chat.response";
-import type { MessageResponse } from "@/shared/types/responses/message.response";
+import { MessageResponse } from "@/shared/types/responses/message.response";
 import { PaginationResponse } from "@/shared/types/responses/pagination.response";
 import { useShallow } from "zustand/shallow";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
@@ -569,12 +569,12 @@ export const useActiveChatId = () =>
 export const useIsActiveChat = (chatId: string) =>
   useChatStore(useShallow((state) => state.activeChatId === chatId));
 
-export const useAllChats = () =>
+export const useChatMap = () =>
   useChatStore(useShallow((state) => state.chats));
 
 export const useAllChatIds = () => useChatStore((state) => state.chatIds);
 
-export const getChatsArray = () => {
+export const getChats = () => {
   const state = useChatStore.getState();
   return state.chatIds.map((id) => state.chats[id]).filter(Boolean);
 };

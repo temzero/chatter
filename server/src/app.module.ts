@@ -14,6 +14,7 @@ import { WebSocketModule } from './modules/websocket/websocket.module';
 import { FolderModule } from './modules/folder/folder.module';
 import { CallModule } from './modules/call/call.module';
 import { BootstrapModule } from './modules/bootstrap/bootstrap.module';
+import { AttachmentModule } from './modules/attachment/attachment.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { BootstrapModule } from './modules/bootstrap/bootstrap.module';
     ChatMemberModule,
     FriendshipModule,
     MessageModule,
+    AttachmentModule,
     UserModule,
     CallModule,
     SupabaseModule,

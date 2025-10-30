@@ -1,7 +1,7 @@
 import React, { useState, forwardRef } from "react";
 import { motion } from "framer-motion";
 import { mediaViewerAnimations } from "@/common/animations/mediaViewerAnimations";
-import type { AttachmentResponse } from "@/shared/types/responses/message.response";
+import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 
 export const ModalImageViewer = forwardRef<
   HTMLDivElement,

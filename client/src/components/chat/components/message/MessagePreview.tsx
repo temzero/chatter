@@ -15,7 +15,6 @@ const MessagePreview: React.FC<MessagePreviewProps> = ({ message }) => {
   const currentUserId = getCurrentUserId();
   const isMe = message.sender.id === currentUserId;
 
-  const attachments = message.attachments || [];
   const repliedMessage = message.replyToMessage;
   const forwardedMessage = message.forwardedFromMessage;
 
@@ -71,12 +70,11 @@ const MessagePreview: React.FC<MessagePreviewProps> = ({ message }) => {
         )}
 
         {/* Attachments */}
-        {attachments.length > 0 && (
-          <RenderMultipleAttachments
-            attachments={attachments}
-            className="w-full max-w-full"
-          />
-        )}
+        <RenderMultipleAttachments
+          chatId={message.chatId}
+          messageId={message.id}
+          className="w-full max-w-full"
+        />
       </div>
       {/* Message Content */}
       {message.content && (

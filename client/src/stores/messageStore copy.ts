@@ -1,17 +1,16 @@
 // store/messageStore.ts
 import { useMemo } from "react";
 import { create } from "zustand";
-import { useChatStore } from "./chatStore";
+import { useActiveChatId, useChatStore } from "./chatStore";
 import { messageService } from "@/services/http/messageService";
 import { useChatMemberStore } from "./chatMemberStore";
-import { getCurrentUserId, useAuthStore } from "./authStore";
+import { useAuthStore } from "./authStore";
 import { handleError } from "@/common/utils/handleError";
 import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 import {
   MessageResponse,
   SenderResponse,
 } from "@/shared/types/responses/message.response";
-import { useAttachmentStore } from "./messageAttachmentStore";
 
 // Normalized structure
 type MessagesById = Record<string, MessageResponse>; // messageId -> Message
@@ -104,62 +103,14 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
     setInitialData: (chatId, messages, hasMore) => {
       const messagesById = { ...get().messagesById };
       const messageIds = messages.map((m) => {
-        // Store message WITHOUT attachments
-        const { attachments, ...messageWithoutAttachments } = m;
-        messagesById[m.id] = messageWithoutAttachments as MessageResponse;
-
-        // Save attachments to attachment store
-        if (attachments && attachments.length > 0) {
-          useAttachmentStore
-            .getState()
-            .addMessageAttachments(m.id, attachments);
-        }
-
+        messagesById[m.id] = m;
         return m.id;
       });
-
       set({
         messagesById,
         messageIdsByChat: { ...get().messageIdsByChat, [chatId]: messageIds },
         hasMoreMessages: { ...get().hasMoreMessages, [chatId]: hasMore },
       });
-    },
-
-    addMessage: (newMessage) => {
-      const { messagesById, messageIdsByChat } = get();
-      const chatId = newMessage.chatId;
-
-      // Extract attachments before storing message
-      const { attachments, ...messageWithoutAttachments } = newMessage;
-
-      const messageWithAnimation = {
-        ...messageWithoutAttachments,
-        shouldAnimate: true,
-      } as MessageResponse;
-
-      const currentIds = messageIdsByChat[chatId] || [];
-      set({
-        messagesById: {
-          ...messagesById,
-          [newMessage.id]: messageWithAnimation,
-        },
-        messageIdsByChat: {
-          ...messageIdsByChat,
-          [chatId]: [...currentIds, newMessage.id],
-        },
-      });
-
-      // Save attachments to attachment store
-      if (attachments && attachments.length > 0) {
-        useAttachmentStore
-          .getState()
-          .addMessageAttachments(newMessage.id, attachments);
-      }
-
-      const currentUserId = getCurrentUserId();
-      if (newMessage.sender.id !== currentUserId) {
-        useChatStore.getState().setUnreadCount(chatId, +1);
-      }
     },
 
     fetchMessages: async (chatId) => {
@@ -189,16 +140,7 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
       if (newMessages.length > 0) {
         const messagesById = { ...get().messagesById };
         newMessages.forEach((msg) => {
-          // Extract attachments before storing
-          const { attachments, ...messageWithoutAttachments } = msg;
-          messagesById[msg.id] = messageWithoutAttachments as MessageResponse;
-
-          // Save attachments to attachment store
-          if (attachments && attachments.length > 0) {
-            useAttachmentStore
-              .getState()
-              .addMessageAttachments(msg.id, attachments);
-          }
+          messagesById[msg.id] = msg;
         });
 
         set({
@@ -217,6 +159,30 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
         });
       }
       return newMessages.length;
+    },
+
+    addMessage: (newMessage) => {
+      const { messagesById, messageIdsByChat } = get();
+      const chatId = newMessage.chatId;
+
+      const messageWithAnimation = { ...newMessage, shouldAnimate: true };
+
+      const currentIds = messageIdsByChat[chatId] || [];
+      set({
+        messagesById: {
+          ...messagesById,
+          [newMessage.id]: messageWithAnimation,
+        },
+        messageIdsByChat: {
+          ...messageIdsByChat,
+          [chatId]: [...currentIds, newMessage.id],
+        },
+      });
+
+      const currentUserId = useAuthStore.getState().currentUser?.id;
+      if (newMessage.sender.id !== currentUserId) {
+        useChatStore.getState().setUnreadCount(chatId, +1);
+      }
     },
 
     getMessageById: (messageId) => get().messagesById[messageId],
@@ -242,9 +208,6 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
         messagesById: newMessagesById,
         messageIdsByChat: { ...messageIdsByChat, [chatId]: newIds },
       });
-
-      // Also remove from attachment store
-      useAttachmentStore.getState().removeMessageAttachments(messageId);
     },
 
     getChatMessages: (chatId) => {
@@ -264,20 +227,9 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
     setChatMessages: (chatId, messages) => {
       const messagesById = { ...get().messagesById };
       const messageIds = messages.map((m) => {
-        // Extract attachments before storing
-        const { attachments, ...messageWithoutAttachments } = m;
-        messagesById[m.id] = messageWithoutAttachments as MessageResponse;
-
-        // Save attachments to attachment store
-        if (attachments && attachments.length > 0) {
-          useAttachmentStore
-            .getState()
-            .addMessageAttachments(m.id, attachments);
-        }
-
+        messagesById[m.id] = m;
         return m.id;
       });
-
       set({
         messagesById,
         messageIdsByChat: { ...get().messageIdsByChat, [chatId]: messageIds },
@@ -420,6 +372,17 @@ export const useSenderByMessageId = (
   messageId: string
 ): SenderResponse | undefined =>
   useMessageStore((state) => state.messagesById[messageId]?.sender);
+
+export const useActiveChatAttachments = () => {
+  const activeChatId = useActiveChatId();
+  const isLoading = useMessageStore((state) => state.isLoading);
+  const getChatAttachments = useMessageStore.getState().getChatAttachments;
+
+  return useMemo(
+    () => (activeChatId && !isLoading ? getChatAttachments(activeChatId) : []),
+    [activeChatId, isLoading, getChatAttachments]
+  );
+};
 
 export const useMessageReactions = (messageId: string) =>
   useMessageStore((state) => state.messagesById[messageId]?.reactions || {});

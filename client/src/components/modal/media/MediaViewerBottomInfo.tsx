@@ -1,6 +1,6 @@
 // components/MediaViewerBottomInfo.tsx
 import { useIsMobile } from "@/stores/deviceStore";
-import { AttachmentResponse } from "@/shared/types/responses/message.response";
+import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 import { formatFileSize } from "@/common/utils/format/formatFileSize";
 
 interface MediaViewerBottomInfoProps {

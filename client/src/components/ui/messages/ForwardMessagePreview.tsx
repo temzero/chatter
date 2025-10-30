@@ -31,7 +31,10 @@ const ForwardedMessagePreview: React.FC<ForwardedMessagePreviewProps> = ({
         })}
       >
         {message.attachments && (
-          <RenderMultipleAttachments attachments={message.attachments} />
+          <RenderMultipleAttachments
+            chatId={message.chatId}
+            messageId={message.id}
+          />
         )}
         {message.content && <p className="italic">{message.content}</p>}
       </div>

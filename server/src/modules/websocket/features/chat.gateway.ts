@@ -70,6 +70,7 @@ export class ChatGateway {
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: CreateMessageDto,
   ) {
+    console.log('handleMessage', payload);
     try {
       const senderId = client.data.userId;
       if (!senderId) {

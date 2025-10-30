@@ -191,6 +191,25 @@ export function useChatSocketListeners() {
     };
 
     // ======== Error ========
+    // const handleMessageError = (
+    //   wsError: WsEmitChatMemberResponse<{
+    //     chatId: string;
+    //     messageId: string;
+    //     error: string;
+    //     code?: string;
+    //   }>
+    // ) => {
+    //   try {
+    //     const { payload: error } = wsError;
+    //     console.log("handleMessageError", error);
+    //     useMessageStore.getState().updateMessageById(error.messageId, {
+    //       status: MessageStatus.FAILED,
+    //     });
+    //   } catch (error) {
+    //     handleError(error, "Error failed!");
+    //   }
+    // };
+
     const handleMessageError = (
       wsError: WsEmitChatMemberResponse<{
         chatId: string;
@@ -201,10 +220,30 @@ export function useChatSocketListeners() {
     ) => {
       try {
         const { payload: error } = wsError;
-        console.log("handleMessageError", error);
+        console.log("handleMessageError", error); // This logs "undefined"
+
+        // FIX: Check if the entire error payload is undefined
+        if (!error) {
+          console.error(
+            "WebSocket error payload is completely undefined:",
+            wsError
+          );
+          toast.error("Message failed to send (unknown error)");
+          return;
+        }
+
+        // Then check if messageId exists
+        if (!error.messageId) {
+          console.error("Message ID is undefined in error response:", error);
+          toast.error(`Message failed: ${error.error || "Unknown error"}`);
+          return;
+        }
+
         useMessageStore.getState().updateMessageById(error.messageId, {
           status: MessageStatus.FAILED,
         });
+
+        toast.error(`Message failed to send: ${error.error}`);
       } catch (error) {
         handleError(error, "Error failed!");
       }

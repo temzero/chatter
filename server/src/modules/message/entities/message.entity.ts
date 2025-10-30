@@ -6,8 +6,6 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Column,
-  BeforeInsert,
-  BeforeUpdate,
   Index,
   OneToMany,
   RelationId,
@@ -17,7 +15,7 @@ import { Chat } from 'src/modules/chat/entities/chat.entity';
 import { User } from '../../user/entities/user.entity';
 import { Call } from 'src/modules/call/entities/call.entity';
 import { Reaction } from './reaction.entity';
-import { Attachment } from './attachment.entity';
+import { Attachment } from 'src/modules/attachment/entity/attachment.entity';
 import { MessageStatus } from 'src/shared/types/enums/message-status.enum';
 import { SystemEventType } from 'src/shared/types/enums/system-event-type.enum';
 
@@ -124,50 +122,4 @@ export class Message {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
-
-  @BeforeInsert()
-  @BeforeUpdate()
-  validateContent() {
-    // --- skip validation for pin/unpin updates ---
-    if (
-      this.isPinned !== undefined &&
-      this.pinnedAt !== undefined &&
-      this.content === null &&
-      !this.attachments?.length &&
-      !this.forwardedFromMessageId
-    ) {
-      return;
-    }
-    // Skip validation if this is a delete operation
-    if (
-      this.isDeleted ||
-      this.deletedAt ||
-      this.deletedForUserIds ||
-      this.systemEvent ||
-      this.call ||
-      (Object.keys(this).length === 2 &&
-        'isPinned' in this &&
-        'pinnedAt' in this)
-    ) {
-      return;
-    }
-    // Trim content if it exists
-    if (this.content) {
-      this.content = this.content.trim();
-      if (this.content === '') {
-        this.content = null;
-      }
-    }
-
-    const hasText = !!this.content;
-    const hasAttachments =
-      Array.isArray(this.attachments) && this.attachments.length > 0;
-    const hasForward = !!this.forwardedFromMessageId;
-
-    if (!hasText && !hasAttachments && !hasForward) {
-      throw new Error(
-        'Message must contain either text content, at least one attachment, or a forwarded message reference',
-      );
-    }
-  }
 }

@@ -1,14 +1,14 @@
 // components/sidebar/SidebarNewFolder.tsx
 import React, { useRef, useState, useEffect } from "react";
-import { getChatsArray } from "@/stores/chatStore";
+import { getChats } from "@/stores/chatStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useFolderStore } from "@/stores/folderStore";
 import { getSetSidebar, useSidebarStore } from "@/stores/sidebarStore";
-import ChatListItemSelection from "@/components/ui/chat/ChatListItemSelection";
-import SidebarLayout from "@/layouts/SidebarLayout";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
+import ChatListItemSelection from "@/components/ui/chat/ChatListItemSelection";
+import SidebarLayout from "@/layouts/SidebarLayout";
 
 const COLORS = [
   null,
@@ -32,7 +32,7 @@ interface folderToEdit {
 
 const SidebarNewFolder: React.FC = () => {
   const { t } = useTranslation();
-  const chats = getChatsArray();
+  const chats = getChats();
   const setSidebar = getSetSidebar();
   const createFolder = useFolderStore.getState().createFolder;
   const updateFolder = useFolderStore.getState().updateFolder;

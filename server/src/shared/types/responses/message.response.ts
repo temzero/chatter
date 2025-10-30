@@ -1,8 +1,8 @@
 // types/message-response.ts
 import { MessageStatus } from 'src/shared/types/enums/message-status.enum';
-import { AttachmentType } from 'src/shared/types/enums/attachment-type.enum';
 import { SystemEventType } from 'src/shared/types/enums/system-event-type.enum';
 import { CallLiteResponse } from './call-lite.response';
+import { AttachmentResponse } from './message-attachment.response';
 
 export interface MessageResponse {
   id: string;
@@ -40,21 +40,4 @@ export interface SenderResponse {
   id: string;
   avatarUrl?: string | null;
   displayName: string;
-}
-
-export interface AttachmentResponse {
-  id: string;
-  messageId: string;
-  type: AttachmentType;
-  url: string;
-  thumbnailUrl?: string | null;
-  filename?: string | null;
-  size?: number | null;
-  mimeType?: string | null;
-  width?: number | null;
-  height?: number | null;
-  duration?: number | null;
-  metadata?: Record<string, unknown> | null;
-  createdAt: Date | string;
-  updatedAt: Date | string;
 }

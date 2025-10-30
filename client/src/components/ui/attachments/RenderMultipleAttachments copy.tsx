@@ -2,21 +2,16 @@ import React from "react";
 import RenderAttachment from "./RenderAttachment";
 import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
-import { getMessageAttachments } from "@/stores/messageAttachmentStore";
 
 interface RenderMultipleAttachmentsProps {
-  chatId: string;
-  messageId: string;
+  attachments: AttachmentResponse[];
   className?: string;
 }
 
 const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
-  chatId,
-  messageId,
+  attachments,
   className = "",
 }) => {
-  const attachments = getMessageAttachments(chatId, messageId);
-
   if (attachments.length === 0) return null;
   // Categorize attachments by type
   const visualMedia = attachments.filter(

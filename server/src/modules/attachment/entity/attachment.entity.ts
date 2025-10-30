@@ -1,3 +1,4 @@
+// src/modules/attachment/entities/attachment.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -6,11 +7,14 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
-import { Message } from './message.entity';
+import { Message } from 'src/modules/message/entities/message.entity';
 import { AttachmentType } from 'src/shared/types/enums/attachment-type.enum';
 
 @Entity('attachment')
+@Index(['chatId']) // Index for fast chat-based queries
+@Index(['chatId', 'createdAt']) // Composite index for pagination
 export class Attachment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -23,6 +27,9 @@ export class Attachment {
 
   @Column({ name: 'message_id' })
   messageId: string;
+
+  @Column({ name: 'chat_id' })
+  chatId: string;
 
   @Column({
     type: 'enum',
@@ -40,19 +47,19 @@ export class Attachment {
   filename: string | null;
 
   @Column({ type: 'int', nullable: true })
-  size: number | null; // in bytes
+  size: number | null;
 
   @Column({ type: 'varchar', length: 128, nullable: true })
   mimeType: string | null;
 
   @Column({ type: 'int', nullable: true })
-  width: number | null; // for images/videos
+  width: number | null;
 
   @Column({ type: 'int', nullable: true })
-  height: number | null; // for images/videos
+  height: number | null;
 
   @Column({ type: 'int', nullable: true })
-  duration: number | null; // in seconds for audio/video
+  duration: number | null;
 
   @Column({ type: 'json', nullable: true })
   metadata: Record<string, any> | null;

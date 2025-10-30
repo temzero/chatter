@@ -87,7 +87,9 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
             <div className="pointer-events-none">
               {replyMessage.attachments && (
                 <RenderMultipleAttachments
-                  attachments={replyMessage.attachments}
+                  chatId={replyMessage.chatId}
+                  messageId={replyMessage.id}
+                  className="w-full max-w-full"
                 />
               )}
 
