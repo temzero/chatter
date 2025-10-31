@@ -5,6 +5,7 @@ import App from "./App.tsx";
 import ErrorBoundary from "./ErrorBoundary";
 import bootstrapApp from "./common/hooks/app/boostrap.ts";
 import { createRoot } from "react-dom/client";
+import LoadAppErrorPage from "./pages/error/LoadAppErrorPage.tsx";
 
 // Wait for all stores to initialize before mounting React
 bootstrapApp()
@@ -19,9 +20,5 @@ bootstrapApp()
   })
   .catch((err) => {
     console.error("Failed to initialize app:", err);
-    createRoot(document.getElementById("root")!).render(
-      <div className="flex items-center justify-center h-screen">
-        Failed to load app. Please refresh.
-      </div>
-    );
+    createRoot(document.getElementById("root")!).render(<LoadAppErrorPage />);
   });

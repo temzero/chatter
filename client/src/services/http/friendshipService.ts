@@ -13,11 +13,11 @@ export const friendshipService = {
   /**
    * Get all pending friend requests for the current user
    */
-  async getPendingRequests(
-    queries: PaginationQuery
+  async fetchPendingRequests(
+    query?: PaginationQuery
   ): Promise<PaginationResponse<FriendRequestResponse>> {
     const { data } = await API.get("/friendships/requests/pending", {
-      params: queries,
+      params: query,
     });
 
     return data.payload; // matches SuccessResponse<PaginationResponse<FriendRequestResponse>>
@@ -26,7 +26,7 @@ export const friendshipService = {
   /**
    * Get all friends of the current user
    */
-  async getFriendContacts(): Promise<FriendContactResponse[]> {
+  async fetchFriendContacts(): Promise<FriendContactResponse[]> {
     const { data } = await API.get("/friendships/contacts");
     console.log("Friend contacts", data.payload);
     return data.payload;
@@ -36,7 +36,7 @@ export const friendshipService = {
    * Get friendship status between current user and another user
    * @param otherUserId - The other user's ID
    */
-  async getFriendshipStatus(
+  async fetchFriendshipStatus(
     otherUserId: string
   ): Promise<{ status: FriendshipStatus | null }> {
     const { data } = await API.get(`/friendships/status/${otherUserId}`);

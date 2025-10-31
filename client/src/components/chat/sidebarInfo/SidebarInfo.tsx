@@ -1,10 +1,10 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useCurrentSidebarInfo } from "@/stores/sidebarInfoStore";
 import ChatInfoDefault from "./SidebarInfoDefault";
-import ChatInfoMedia from "./SidebarInfoMedia";
-import PrivateChatEdit from "./SidebarInfoEdit/DirectChatEdit";
-import GroupChatEdit from "./SidebarInfoEdit/GroupChatEdit";
-import ChatMembersEdit from "./SidebarInfoEdit/ChatMembersEdit";
+import ChatInfoMedia from "./sidebarInfoMedia/SidebarInfoMedia";
+import PrivateChatEdit from "./sidebarInfoEdit/DirectChatEdit";
+import GroupChatEdit from "./sidebarInfoEdit/GroupChatEdit";
+import ChatMembersEdit from "./sidebarInfoEdit/ChatMembersEdit";
 import { sidebarInfoAnimations } from "@/common/animations/sidebarInfoAnimations";
 
 const SidebarInfo: React.FC = () => {

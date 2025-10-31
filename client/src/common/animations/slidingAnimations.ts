@@ -10,11 +10,11 @@ export const slidingAnimations = {
       position: "absolute" as const,
     },
     animate: { x: 0, scale: 1, opacity: 1, position: "relative" as const },
-    exit: {
-      x: direction > 0 ? "-100%" : "100%",
-      opacity: 0,
-      position: "absolute" as const,
-    },
+    // exit: {
+    //   x: direction > 0 ? "-100%" : "100%",
+    //   opacity: 0,
+    //   position: "absolute" as const,
+    // },
     transition: {
       duration: 0.3,
       type: "spring",

@@ -15,7 +15,7 @@ const SidebarBlockedUsers: React.FC = () => {
 
   const fetchBlockedUsers = async () => {
     try {
-      const users = await blockService.getAllBlockedUsers();
+      const users = await blockService.fetchAllBlockedUsers();
       setBlockedUsers(users);
     } catch (err) {
       console.error("Failed to fetch blocked users", err);

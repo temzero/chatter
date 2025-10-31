@@ -44,12 +44,12 @@ const Message: React.FC<MessageProps> = ({
   isMe = false,
 }) => {
   const message = useMessageStore((state) => state.messagesById[messageId]);
+
   const searchQuery = useMessageStore((state) => state.searchQuery);
   const showImportantOnly = useMessageStore((state) => state.showImportantOnly);
 
-  const isFocus = useIsMessageFocus(message.id);
-  const isRelyToThisMessage = useIsReplyToThisMessage(message.id);
-  const repliedMessage = message.replyToMessage;
+  const isFocus = useIsMessageFocus(messageId);
+  const isRelyToThisMessage = useIsReplyToThisMessage(messageId);
 
   const messageRef = useRef<HTMLDivElement>(null);
   const [contextMenuMousePos, setContextMenuMousePos] = useState<{
@@ -60,7 +60,7 @@ const Message: React.FC<MessageProps> = ({
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setOpenFocusMessageModal(message.id)
+    setOpenFocusMessageModal(messageId);
     setContextMenuMousePos({ x: e.clientX, y: e.clientY });
   };
 
@@ -70,10 +70,13 @@ const Message: React.FC<MessageProps> = ({
 
   const isGroupChat = chatType === "group";
 
-  const messageAnimation = useMemo(
-    () => (message.shouldAnimate ? getMessageAnimation(isMe) : {}),
-    [message.shouldAnimate, isMe]
-  );
+  const messageAnimation = useMemo(() => {
+    if (!message) return {}; // fallback if message is undefined
+    return message.shouldAnimate ? getMessageAnimation(isMe) : {};
+  }, [message, isMe]);
+
+  if (!message) return null;
+  const repliedMessage = message.replyToMessage;
 
   if (
     searchQuery.trim() !== "" &&
@@ -109,9 +112,9 @@ const Message: React.FC<MessageProps> = ({
 
   return (
     <motion.div
-      id={`message-${message.id}`}
+      id={`message-${messageId}`}
       ref={messageRef}
-      onDoubleClick={() => handleQuickReaction(message.id, message.chatId)}
+      onDoubleClick={() => handleQuickReaction(messageId, message.chatId)}
       onContextMenu={handleContextMenu}
       className={clsx("flex relative max-w-[60%] pb-1.5", {
         "justify-end": isMe,
@@ -166,14 +169,14 @@ const Message: React.FC<MessageProps> = ({
             <MessageReactionDisplay
               isMe={isMe}
               currentUserId={currentUserId}
-              messageId={message.id}
+              messageId={messageId}
               chatId={message.chatId}
             />
 
             <AnimatePresence>
               {isFocus && !isRelyToThisMessage && contextMenuMousePos && (
                 <MessageContextMenu
-                  key={message.id}
+                  key={messageId}
                   message={message}
                   isMe={isMe}
                   initialMousePosition={contextMenuMousePos}

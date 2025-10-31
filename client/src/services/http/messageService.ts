@@ -5,12 +5,12 @@ import { PaginationQuery } from "@/shared/types/queries/pagination-query";
 import { PaginationResponse } from "@/shared/types/responses/pagination.response";
 
 export const messageService = {
-  async getChatMessages(
+  async fetchChatMessages(
     chatId: string,
-    queries?: PaginationQuery
+    query?: PaginationQuery
   ): Promise<PaginationResponse<MessageResponse>> {
     const { data } = await API.get(`/messages/chat/${chatId}`, {
-      params: queries,
+      params: query,
     });
 
     return data.payload;

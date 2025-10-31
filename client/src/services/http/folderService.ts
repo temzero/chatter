@@ -15,11 +15,11 @@ export const folderService = {
     return data;
   },
 
-  async getFolders(
-    queries: PaginationQuery
+  async fetchFolders(
+    query?: PaginationQuery
   ): Promise<PaginationResponse<FolderResponse>> {
     const { data } = await API.get("/folders", {
-      params: queries,
+      params: query,
     });
 
     return data.payload; // matches SuccessResponse<PaginationResponse<FolderResponse>>

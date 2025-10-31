@@ -24,7 +24,7 @@ interface ChatMemberActions {
   ) => void;
   fetchChatMembers: (
     chatId: string,
-    queries?: PaginationQuery
+    query?: PaginationQuery
   ) => Promise<void>;
   fetchMoreMembers: (chatId: string) => Promise<number>;
   getChatMemberById: (
@@ -98,10 +98,10 @@ export const useChatMemberStore = create<ChatMemberState & ChatMemberActions>(
       }));
     },
 
-    fetchChatMembers: async (chatId: string, queries?: PaginationQuery) => {
+    fetchChatMembers: async (chatId: string, query?: PaginationQuery) => {
       set({ isLoading: true });
       const { items: members, hasMore } =
-        await chatMemberService.fetchChatMembers(chatId, queries);
+        await chatMemberService.fetchChatMembers(chatId, query);
 
       set((state) => ({
         chatMembers: {

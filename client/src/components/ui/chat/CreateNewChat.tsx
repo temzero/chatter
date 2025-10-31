@@ -31,7 +31,7 @@ const CreateNewChat: React.FC = () => {
     setLoading(true);
 
     try {
-      const foundUser = await userService.getUserByIdentifier(query.trim());
+      const foundUser = await userService.fetchUserByIdentifier(query.trim());
       setUser(foundUser);
     } catch (err: unknown) {
       console.error("Search for user: ", String(err));

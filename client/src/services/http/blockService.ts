@@ -26,7 +26,7 @@ export const blockService = {
   /**
    * Get all users blocked by the current user
    */
-  async getAllBlockedUsers(): Promise<BlockResponse[]> {
+  async fetchAllBlockedUsers(): Promise<BlockResponse[]> {
     const { data } = await API.get("/block");
     return data.payload;
   },

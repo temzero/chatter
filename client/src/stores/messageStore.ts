@@ -166,7 +166,7 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
       set({ isLoading: true });
       try {
         const { items: messages, hasMore } =
-          await messageService.getChatMessages(chatId);
+          await messageService.fetchChatMessages(chatId);
         get().setInitialData(chatId, messages, hasMore);
         set({ isLoading: false });
       } catch (error) {
@@ -182,7 +182,7 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
 
       const lastMessageId = existingIds[0];
       const { items: newMessages, hasMore } =
-        await messageService.getChatMessages(chatId, {
+        await messageService.fetchChatMessages(chatId, {
           lastId: lastMessageId,
         });
 

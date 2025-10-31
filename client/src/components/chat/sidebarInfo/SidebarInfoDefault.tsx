@@ -1,8 +1,8 @@
 import React from "react";
 import { useActiveChat } from "@/stores/chatStore";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
-import DirectChat from "./SidebarInfoEdit/DirectChat";
-import GroupChat from "./SidebarInfoEdit/GroupChat";
+import DirectChat from "./sidebarInfoEdit/DirectChat";
+import GroupChat from "./sidebarInfoEdit/GroupChat";
 import OpenAttachmentBtn from "@/components/ui/buttons/OpenAttachmentBtn";
 
 const SidebarInfoDefault: React.FC = () => {

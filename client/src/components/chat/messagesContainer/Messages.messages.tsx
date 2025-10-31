@@ -74,7 +74,7 @@ const Messages: React.FC<ChatMessagesProps> = ({ chat, messages }) => {
               {group.messages.map((message, index) => {
                 const prevMsg = group.messages[index - 1];
                 const nextMsg = group.messages[index + 1];
-                const showInfo = shouldShowInfo(message, prevMsg, nextMsg);
+                const showInfo = shouldShowInfo(message, nextMsg);
                 const isRecent = isRecentMessage(message, prevMsg, nextMsg);
                 const isMe = message.sender.id === currentUser?.id;
 
@@ -84,7 +84,7 @@ const Messages: React.FC<ChatMessagesProps> = ({ chat, messages }) => {
                     className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}
                   >
                     <Message
-                      message={message}
+                      messageId={message.id}
                       chatType={chat.type}
                       showInfo={showInfo}
                       isRecent={isRecent}

@@ -1,4 +1,3 @@
-// stores/attachmentStore.ts
 import { create } from "zustand";
 import { attachmentService } from "@/services/http/messageAttachmentService";
 import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
@@ -9,8 +8,7 @@ import { useActiveChatId } from "./chatStore";
 interface AttachmentStoreState {
   attachmentsByChat: Record<string, AttachmentResponse[]>; // chatId -> all attachments
   hasMore: Record<string, boolean>; // chatId -> boolean
-  isLoading: Record<string, boolean>; // chatId -> boolean
-  pagination: Record<string, { lastId?: string }>; // chatId -> pagination info
+  isLoading: boolean; // simplified global loading state
 }
 
 interface AttachmentStoreActions {
@@ -35,105 +33,84 @@ interface AttachmentStoreActions {
 const initialState: AttachmentStoreState = {
   attachmentsByChat: {},
   hasMore: {},
-  isLoading: {},
-  pagination: {},
+  isLoading: false,
 };
 
 export const useAttachmentStore = create<
   AttachmentStoreState & AttachmentStoreActions
 >((set, get) => ({
-  // Initial state - only one storage for attachments
   ...initialState,
 
   fetchAttachments: async (chatId, type) => {
-    set((state) => ({
-      isLoading: { ...state.isLoading, [chatId]: true },
-    }));
+    console.log("fetchAttachments", type);
+    set({ isLoading: true });
 
     try {
-      let response;
-      if (type) {
-        response = await attachmentService.getChatAttachments(chatId, type);
-      } else {
-        response = await attachmentService.getAllChatAttachments(chatId);
-      }
+      const response = await attachmentService.fetchChatAttachments(
+        chatId,
+        type
+      );
+      console.log("Attachment response", response);
+
+      // Use helper to add and sort attachments
+      addAttachmentsToState(chatId, response.items);
 
       set((state) => ({
-        attachmentsByChat: {
-          ...state.attachmentsByChat,
-          [chatId]: response.items,
-        },
         hasMore: { ...state.hasMore, [chatId]: response.hasMore },
-        isLoading: { ...state.isLoading, [chatId]: false },
-        pagination: {
-          ...state.pagination,
-          [chatId]: { lastId: response.items[response.items.length - 1]?.id },
-        },
+        isLoading: false,
       }));
     } catch (error) {
-      set((state) => ({
-        isLoading: { ...state.isLoading, [chatId]: false },
-      }));
+      set({ isLoading: false });
       handleError(error, "Failed to fetch attachments");
     }
   },
 
-  fetchMoreAttachments: async (chatId, type) => {
+  fetchMoreAttachments: async (chatId: string, type?: AttachmentType) => {
+    console.log("fetchMoreAttachments", type);
     const state = get();
-    if (state.isLoading[chatId] || !state.hasMore[chatId]) {
-      return 0;
-    }
+    if (state.isLoading || !state.hasMore[chatId]) return 0;
 
-    set((state) => ({
-      isLoading: { ...state.isLoading, [chatId]: true },
-    }));
+    set({ isLoading: true });
 
     try {
-      const pagination = state.pagination[chatId];
-      const queries = pagination?.lastId
-        ? { lastId: pagination.lastId }
-        : undefined;
+      // Get current attachments and filter by type if provided
+      const currentAttachments = state.attachmentsByChat[chatId] || [];
+      const filteredAttachments = type
+        ? currentAttachments.filter((att) => att.type === type)
+        : currentAttachments;
 
-      let response;
-      if (type) {
-        response = await attachmentService.getChatAttachments(
-          chatId,
-          type,
-          queries
-        );
-      } else {
-        response = await attachmentService.getAllChatAttachments(
-          chatId,
-          queries
-        );
-      }
+      const lastAttachment =
+        filteredAttachments[filteredAttachments.length - 1];
+      const lastId = lastAttachment?.id; // API pagination key
+
+      console.log("lastId", lastId);
+
+      const query = lastId ? { lastId } : undefined;
+      const response = await attachmentService.fetchChatAttachments(
+        chatId,
+        type,
+        query
+      );
+
+      console.log("fetchMoreAttachments response", response);
 
       if (response.items.length > 0) {
-        const currentAttachments = state.attachmentsByChat[chatId] || [];
+        addAttachmentsToState(chatId, response.items);
 
         set((state) => ({
-          attachmentsByChat: {
-            ...state.attachmentsByChat,
-            [chatId]: [...currentAttachments, ...response.items],
-          },
           hasMore: { ...state.hasMore, [chatId]: response.hasMore },
-          isLoading: { ...state.isLoading, [chatId]: false },
-          pagination: {
-            ...state.pagination,
-            [chatId]: { lastId: response.items[response.items.length - 1]?.id },
-          },
+          isLoading: false,
         }));
       } else {
         set((state) => ({
           hasMore: { ...state.hasMore, [chatId]: false },
-          isLoading: { ...state.isLoading, [chatId]: false },
+          isLoading: false,
         }));
       }
+
       return response.items.length;
     } catch (error) {
-      set((state) => ({
-        isLoading: { ...state.isLoading, [chatId]: false },
-      }));
+      set({ isLoading: false });
       handleError(error, "Failed to fetch more attachments");
       return 0;
     }
@@ -141,76 +118,33 @@ export const useAttachmentStore = create<
 
   getChatAttachments: (chatId, type) => {
     const attachments = get().attachmentsByChat[chatId] || [];
-
     if (!type) return attachments;
-
-    // Filter by type on the fly instead of storing separately
-    return attachments.filter((attachment) => {
-      switch (type) {
-        case AttachmentType.IMAGE:
-          return attachment.type === AttachmentType.IMAGE;
-        case AttachmentType.VIDEO:
-          return attachment.type === AttachmentType.VIDEO;
-        case AttachmentType.AUDIO:
-          return attachment.type === AttachmentType.AUDIO;
-        case AttachmentType.FILE:
-          return attachment.type === AttachmentType.FILE;
-        default:
-          return false;
-      }
-    });
+    return attachments.filter((att) => att.type === type);
   },
 
   addMessageAttachments: (messageId, attachments) => {
     if (!attachments || attachments.length === 0) return;
-
-    // All attachments should have the same chatId and messageId
     const chatId = attachments[0]?.chatId;
     if (!chatId) return;
 
-    // Ensure each attachment has the correct messageId
     const attachmentsWithMessageId = attachments.map((att) => ({
       ...att,
       messageId: att.messageId || messageId,
     }));
 
-    set((state) => {
-      const currentAttachments = state.attachmentsByChat[chatId] || [];
-
-      // Remove existing attachments for this message to avoid duplicates
-      const filteredAttachments = currentAttachments.filter(
-        (att) => att.messageId !== messageId
-      );
-
-      // Add new attachments
-      const newAttachments = [
-        ...filteredAttachments,
-        ...attachmentsWithMessageId,
-      ];
-
-      return {
-        attachmentsByChat: {
-          ...state.attachmentsByChat,
-          [chatId]: newAttachments,
-        },
-      };
-    });
+    // Use helper to merge and sort
+    addAttachmentsToState(chatId, attachmentsWithMessageId);
   },
 
   removeMessageAttachments: (messageId) => {
     set((state) => {
       const newAttachmentsByChat = { ...state.attachmentsByChat };
-
-      // Remove attachments for this message from all chats
       for (const chatId in newAttachmentsByChat) {
         newAttachmentsByChat[chatId] = newAttachmentsByChat[chatId].filter(
           (att) => att.messageId !== messageId
         );
       }
-
-      return {
-        attachmentsByChat: newAttachmentsByChat,
-      };
+      return { attachmentsByChat: newAttachmentsByChat };
     });
   },
 
@@ -218,32 +152,49 @@ export const useAttachmentStore = create<
     set((state) => {
       const newAttachmentsByChat = { ...state.attachmentsByChat };
       const newHasMore = { ...state.hasMore };
-      const newIsLoading = { ...state.isLoading };
-      const newPagination = { ...state.pagination };
-
       delete newAttachmentsByChat[chatId];
       delete newHasMore[chatId];
-      delete newIsLoading[chatId];
-      delete newPagination[chatId];
-
       return {
         attachmentsByChat: newAttachmentsByChat,
         hasMore: newHasMore,
-        isLoading: newIsLoading,
-        pagination: newPagination,
       };
     });
   },
 
-  getAttachmentCounts: async (chatId: string) => {
+  getAttachmentCounts: async (chatId) => {
     try {
-      return await attachmentService.getAttachmentsCountByType(chatId);
+      return await attachmentService.fetchAttachmentsCountByType(chatId);
     } catch (error) {
       handleError(error, "Failed to fetch attachment counts");
       return {};
     }
   },
 }));
+
+const addAttachmentsToState = (
+  chatId: string,
+  newAttachments: AttachmentResponse[]
+) => {
+  useAttachmentStore.setState((state) => {
+    const currentAttachments = state.attachmentsByChat[chatId] || [];
+
+    // Merge existing and new attachments
+    const merged = [...currentAttachments, ...newAttachments];
+
+    // Sort by createdAt descending (newest first)
+    merged.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+
+    return {
+      attachmentsByChat: {
+        ...state.attachmentsByChat,
+        [chatId]: merged,
+      },
+    };
+  });
+};
 
 // EXPORT HOOKS
 export const useActiveChatAttachments = (): AttachmentResponse[] | [] => {
@@ -253,12 +204,30 @@ export const useActiveChatAttachments = (): AttachmentResponse[] | [] => {
   );
 };
 
+// export const getMessageAttachments = (chatId: string, messageId: string) => {
+//   const state = useAttachmentStore.getState();
+//   const attachments = state.attachmentsByChat[chatId] || [];
+//   return attachments.filter((att) => att.messageId === messageId);
+// };
+
 export const getMessageAttachments = (chatId: string, messageId: string) => {
   const state = useAttachmentStore.getState();
   const attachments = state.attachmentsByChat[chatId] || [];
-  return attachments.filter((att) => att.messageId === messageId);
+
+  return (
+    attachments
+      .filter((att) => att.messageId === messageId)
+      // Sort by createdAt descending: newest first, oldest last
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )
+  );
 };
 
+export const useHasMore = (chatId: string) => {
+  return useAttachmentStore((state) => state.hasMore[chatId] ?? false);
+};
 
 export const useHasMoreForType = (chatId: string, type?: AttachmentType) => {
   return useAttachmentStore((state) => {
@@ -286,16 +255,7 @@ export const useHasMoreForType = (chatId: string, type?: AttachmentType) => {
       return true; // No attachments yet, might have some
     }
 
-    // You could add more sophisticated logic here based on your API
-    // For example, if you know each page returns 20 items:
-    // return typeAttachments.length % 20 === 0; // If divisible by page size, might have more
-
-    return true; // Default to true if we have general hasMore
-  });
-};
-
-export const useHasMore = (chatId: string) => {
-  return useAttachmentStore((state) => {
-    return state.hasMore[chatId] ?? true;
+    // Could add smarter logic here based on API pagination
+    return true; // Default to true if we still might have more
   });
 };

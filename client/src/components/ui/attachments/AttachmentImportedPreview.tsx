@@ -9,17 +9,6 @@ interface AttachmentImportedPreviewProps {
   onRemove: (index: number) => void;
 }
 
-// const typeOrder = [
-//   "image",
-//   "video",
-//   "audio",
-//   "pdf",
-//   "word",
-//   "excel",
-//   "archive",
-//   "file",
-// ];
-
 const AttachmentImportedPreview: React.FC<AttachmentImportedPreviewProps> = ({
   files,
   urls,
@@ -31,7 +20,6 @@ const AttachmentImportedPreview: React.FC<AttachmentImportedPreviewProps> = ({
     type: determineAttachmentType(file),
     originalIndex: index,
   }));
-  // .sort((a, b) => typeOrder.indexOf(a.type) - typeOrder.indexOf(b.type));
 
   const baseClass =
     "w-full h-full border-2 border-[var(--input-border-color)] rounded";

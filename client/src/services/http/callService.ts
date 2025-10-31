@@ -6,10 +6,10 @@ import { PaginationQuery } from "@/shared/types/queries/pagination-query";
 
 export const callService = {
   async fetchCallHistory(
-    queries: PaginationQuery
+    query?: PaginationQuery
   ): Promise<{ calls: CallResponse[]; hasMore: boolean }> {
     const { data } = await API.get(`/calls/history`, {
-      params: queries,
+      params: query,
     });
 
     const { calls, hasMore } = data.payload;

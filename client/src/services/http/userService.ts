@@ -4,32 +4,10 @@ import { ProfileFormData } from "@/components/sidebar/SidebarProfileEdit";
 
 export const userService = {
   /**
-   * Get all users
-   */
-  async getAllUsers(): Promise<UserResponse[]> {
-    const { data } = await API.get("/user");
-    return data.payload;
-  },
-
-  async getAllBlockedUsers(): Promise<UserResponse[]> {
-    const { data } = await API.get("/block");
-    return data.payload;
-  },
-
-  /**
-   * Get user by ID
-   * @param userId - User ID
-   */
-  async getUserById(userId: string): Promise<UserResponse> {
-    const { data } = await API.get(`/user/${userId}`);
-    return data.payload;
-  },
-
-  /**
    * Get user by identifier (username, email, or phone)
    * @param identifier - Username, email, or phone
    */
-  async getUserByIdentifier(identifier: string): Promise<UserResponse> {
+  async fetchUserByIdentifier(identifier: string): Promise<UserResponse> {
     const { data } = await API.get(`/user/find/${identifier}`);
     return data.payload;
   },

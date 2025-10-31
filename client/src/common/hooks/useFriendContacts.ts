@@ -11,7 +11,7 @@ export function useFriendContacts(excludeUserIds: string[] = []) {
     const fetchContacts = async () => {
       console.log("Fetching contacts...");
       try {
-        const allContacts = await friendshipService.getFriendContacts();
+        const allContacts = await friendshipService.fetchFriendContacts();
         console.log("All contacts fetched", allContacts);
         const filtered = allContacts.filter(
           (contact) => !excludeUserIds.includes(contact.userId)

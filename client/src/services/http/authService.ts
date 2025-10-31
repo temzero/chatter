@@ -8,7 +8,7 @@ import {
 } from "@/shared/types/requests/auth.request";
 
 export const authService = {
-  async getCurrentUser() {
+  async fetchCurrentUser() {
     const { data } = await API.get("/user/me");
     return data.payload;
   },

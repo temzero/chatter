@@ -9,12 +9,12 @@ export const chatMemberService = {
   // Get direct chat members
   async fetchChatMembers(
     chatId: string,
-    queries?: PaginationQuery
+    query?: PaginationQuery
   ): Promise<PaginationResponse<ChatMemberResponse>> {
     const { data } = await API.get<
       ApiSuccessResponse<PaginationResponse<ChatMemberResponse>>
     >(`/chat-members/members/${chatId}`, {
-      params: queries,
+      params: query,
     });
 
     return data.payload;

@@ -16,7 +16,6 @@ export const MediaViewer: React.FC = () => {
 
   // derive mediaId from data
   const currentAttachmentId = useMediaModalData();
-
   const activeAttachments = useActiveChatAttachments();
 
   const getInitialIndex = () => {
@@ -177,7 +176,7 @@ export const MediaViewer: React.FC = () => {
       >
         {activeAttachments.map((attachment, index) => (
           <motion.div
-            key={attachment.id}
+            key={`${attachment.id}-${index}`}
             className="w-full h-full flex-shrink-0 flex items-center justify-center"
             initial={{ scale: 0.2, opacity: 0 }}
             animate={{
@@ -191,7 +190,7 @@ export const MediaViewer: React.FC = () => {
               attachment={attachment}
               rotation={index === currentIndex ? rotation : 0}
               isCurrent={index === currentIndex}
-              onMediaEnd={goNext}
+              // onMediaEnd={goNext}
             />
           </motion.div>
         ))}

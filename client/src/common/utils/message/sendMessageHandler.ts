@@ -83,7 +83,7 @@ export async function handleSendMessage({
         filePreviewUrls[index],
         messageId,
         chatId,
-        now
+        new Date(Date.now() + index).toISOString()
       )
   );
 

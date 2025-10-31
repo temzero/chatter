@@ -5,45 +5,35 @@ import { PaginationResponse } from "@/shared/types/responses/pagination.response
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 
 export const attachmentService = {
-  async getChatAttachments(
+  async fetchChatAttachments(
     chatId: string,
-    type: AttachmentType,
-    queries?: PaginationQuery
+    type?: AttachmentType,
+    query?: PaginationQuery
   ): Promise<PaginationResponse<AttachmentResponse>> {
-    const { data } = await API.get(
-      `/attachments/chat/${chatId}/attachment-type/${type}`,
-      {
-        params: queries,
-      }
-    );
+    const route = type
+      ? `/attachments/chat/${chatId}/attachment-type/${type}`
+      : `/attachments/chat/${chatId}`;
 
-    return data.payload;
-  },
-
-  async getAllChatAttachments(
-    chatId: string,
-    queries?: PaginationQuery
-  ): Promise<PaginationResponse<AttachmentResponse>> {
-    const { data } = await API.get(`/attachments/chat/${chatId}`, {
-      params: queries,
+    const { data } = await API.get(route, {
+      params: query,
     });
 
     return data.payload;
   },
 
-  async getAttachmentCount(chatId: string): Promise<number> {
+  async fetchAttachmentCount(chatId: string): Promise<number> {
     const { data } = await API.get(`/attachments/count/chat/${chatId}`);
     return data.payload.count;
   },
 
-  async getAttachmentsCountByType(
+  async fetchAttachmentsCountByType(
     chatId: string
   ): Promise<Record<string, number>> {
     const { data } = await API.get(`/attachments/count-by-type/chat/${chatId}`);
     return data.payload;
   },
 
-  async getAttachment(attachmentId: string): Promise<AttachmentResponse> {
+  async fetchAttachment(attachmentId: string): Promise<AttachmentResponse> {
     const { data } = await API.get(`/attachments/${attachmentId}`);
     return data.payload;
   },

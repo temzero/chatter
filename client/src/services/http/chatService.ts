@@ -14,10 +14,10 @@ export const chatService = {
   // Get all direct and group chats
 
   async fetchMoreChats(
-    queries: PaginationQuery
+    query?: PaginationQuery
   ): Promise<PaginationResponse<ChatResponse>> {
     const { data } = await API.get(`/chat/more`, {
-      params: queries,
+      params: query,
     });
 
     const { items, hasMore } = data.payload;

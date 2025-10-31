@@ -71,7 +71,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
           get().setLoading(true);
 
-          const user = await authService.getCurrentUser();
+          const user = await authService.fetchCurrentUser();
 
           if (!user) {
             // refresh everything
