@@ -115,7 +115,7 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
               <Avatar
                 avatarUrl={replyMessage.sender.avatarUrl}
                 name={replyMessage.sender.displayName}
-                size="8"
+                size={8}
               />
               <h1 className="font-semibold">
                 {replyMessage.sender.displayName}

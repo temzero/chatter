@@ -38,14 +38,13 @@ export class CallController {
   @Get('history')
   async getCallHistory(
     @CurrentUser('id') userId: string,
-    @Query() query: PaginationQueryDto,
+    @Query() query?: PaginationQueryDto,
   ): Promise<SuccessResponse<{ calls: CallResponseDto[]; hasMore: boolean }>> {
     try {
-      const { calls, hasMore } = await this.callService.getCallHistory(userId, {
-        limit: query.limit,
-        lastId: query.lastId,
-        offset: query.offset,
-      });
+      const { calls, hasMore } = await this.callService.getCallHistory(
+        userId,
+        query,
+      );
 
       return new SuccessResponse(
         { calls, hasMore },

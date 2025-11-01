@@ -43,18 +43,12 @@ export class ChatController {
   @HttpCode(HttpStatus.OK)
   async findInitialChats(
     @CurrentUser('id') userId: string,
-    @Query() queryParams: PaginationQuery,
+    @Query() query?: PaginationQuery,
   ): Promise<SuccessResponse<PaginationResponse<ChatResponseDto>>> {
     try {
-      const { items, hasMore } = await this.chatService.getInitialChats(
-        userId,
-        queryParams,
-      );
+      const payload = await this.chatService.getInitialChats(userId, query);
 
-      return new SuccessResponse(
-        { items, hasMore },
-        'User chats retrieved successfully',
-      );
+      return new SuccessResponse(payload, 'User chats retrieved successfully');
     } catch (error: unknown) {
       ErrorResponse.throw(error, 'Failed to retrieve user chats');
     }
@@ -67,15 +61,12 @@ export class ChatController {
     @Query() queryParams: PaginationQuery,
   ): Promise<SuccessResponse<PaginationResponse<ChatResponseDto>>> {
     try {
-      const { items, hasMore } = await this.chatService.getUnpinnedChats(
+      const payload = await this.chatService.getUnpinnedChats(
         userId,
         queryParams,
       );
 
-      return new SuccessResponse(
-        { items, hasMore },
-        'User chats retrieved successfully',
-      );
+      return new SuccessResponse(payload, 'User chats retrieved successfully');
     } catch (error: unknown) {
       ErrorResponse.throw(error, 'Failed to retrieve user chats');
     }

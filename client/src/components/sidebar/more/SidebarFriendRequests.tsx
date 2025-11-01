@@ -75,7 +75,7 @@ const SidebarFriendRequests: React.FC = () => {
                     <Avatar
                       avatarUrl={request.sender.avatarUrl}
                       name={firstName}
-                      size="12"
+                      size={12}
                       className="mt-1"
                     />
 
@@ -151,7 +151,7 @@ const SidebarFriendRequests: React.FC = () => {
                   <Avatar
                     avatarUrl={request.receiver.avatarUrl}
                     name={firstName}
-                    size="12"
+                    size={12}
                     className="mt-1"
                   />
 

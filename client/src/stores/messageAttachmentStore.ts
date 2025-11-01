@@ -4,18 +4,21 @@ import { AttachmentResponse } from "@/shared/types/responses/message-attachment.
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { handleError } from "@/common/utils/handleError";
 import { useActiveChatId } from "./chatStore";
+import { PaginationQuery } from "@/shared/types/queries/pagination-query";
+
+const initialLimit = 30;
 
 interface AttachmentStoreState {
   attachmentsByChat: Record<string, AttachmentResponse[]>; // chatId -> all attachments
-  hasMore: Record<string, boolean>; // chatId -> boolean
-  isLoading: boolean; // simplified global loading state
+  hasMore: Record<string, Record<AttachmentType, boolean>>; // chatId -> type -> boolean
+  isLoading: boolean;
 }
 
 interface AttachmentStoreActions {
-  fetchAttachments: (chatId: string, type?: AttachmentType) => Promise<void>;
-  fetchMoreAttachments: (
+  fetchAttachments: (
     chatId: string,
-    type?: AttachmentType
+    type?: AttachmentType,
+    loadMore?: boolean
   ) => Promise<number>;
   getChatAttachments: (
     chatId: string,
@@ -41,85 +44,66 @@ export const useAttachmentStore = create<
 >((set, get) => ({
   ...initialState,
 
-  fetchAttachments: async (chatId, type) => {
-    console.log("fetchAttachments", type);
-    set({ isLoading: true });
-
-    try {
-      const response = await attachmentService.fetchChatAttachments(
-        chatId,
-        type
-      );
-      console.log("Attachment response", response);
-
-      // Use helper to add and sort attachments
-      addAttachmentsToState(chatId, response.items);
-
-      set((state) => ({
-        hasMore: { ...state.hasMore, [chatId]: response.hasMore },
-        isLoading: false,
-      }));
-    } catch (error) {
-      set({ isLoading: false });
-      handleError(error, "Failed to fetch attachments");
-    }
-  },
-
-  fetchMoreAttachments: async (chatId: string, type?: AttachmentType) => {
-    console.log("fetchMoreAttachments", type);
+  fetchAttachments: async (chatId, type, loadMore = false) => {
     const state = get();
-    if (state.isLoading || !state.hasMore[chatId]) return 0;
+
+    if (
+      loadMore &&
+      (state.isLoading || !(state.hasMore[chatId]?.[type!] ?? true))
+    ) {
+      return 0;
+    }
 
     set({ isLoading: true });
 
     try {
-      // Get current attachments and filter by type if provided
       const currentAttachments = state.attachmentsByChat[chatId] || [];
       const filteredAttachments = type
         ? currentAttachments.filter((att) => att.type === type)
         : currentAttachments;
 
-      const lastAttachment =
-        filteredAttachments[filteredAttachments.length - 1];
-      const lastId = lastAttachment?.id; // API pagination key
+      // Only use lastId when loading more OR when we have existing attachments
+      const lastId =
+        loadMore || filteredAttachments.length > 0
+          ? filteredAttachments[filteredAttachments.length - 1]?.id
+          : undefined;
 
-      console.log("lastId", lastId);
+      const query: PaginationQuery = {
+        ...(!loadMore && { limit: initialLimit }), // Only pass limit for initial load
+        ...(lastId && { lastId }),
+      };
 
-      const query = lastId ? { lastId } : undefined;
       const response = await attachmentService.fetchChatAttachments(
         chatId,
         type,
         query
       );
 
-      console.log("fetchMoreAttachments response", response);
-
       if (response.items.length > 0) {
         addAttachmentsToState(chatId, response.items);
-
-        set((state) => ({
-          hasMore: { ...state.hasMore, [chatId]: response.hasMore },
-          isLoading: false,
-        }));
-      } else {
-        set((state) => ({
-          hasMore: { ...state.hasMore, [chatId]: false },
-          isLoading: false,
-        }));
       }
+
+      set((state) => ({
+        hasMore: {
+          ...state.hasMore,
+          [chatId]: {
+            ...(state.hasMore[chatId] || {}),
+            [type!]: response.hasMore,
+          },
+        },
+        isLoading: false,
+      }));
 
       return response.items.length;
     } catch (error) {
       set({ isLoading: false });
-      handleError(error, "Failed to fetch more attachments");
-      return 0;
+      handleError(error, "Failed to fetch attachments");
     }
   },
 
   getChatAttachments: (chatId, type) => {
     const attachments = get().attachmentsByChat[chatId] || [];
-    if (!type) return attachments;
-    return attachments.filter((att) => att.type === type);
+    return type ? attachments.filter((att) => att.type === type) : attachments;
   },
 
   addMessageAttachments: (messageId, attachments) => {
@@ -132,7 +116,6 @@ export const useAttachmentStore = create<
       messageId: att.messageId || messageId,
     }));
 
-    // Use helper to merge and sort
     addAttachmentsToState(chatId, attachmentsWithMessageId);
   },
 
@@ -176,13 +159,14 @@ const addAttachmentsToState = (
   newAttachments: AttachmentResponse[]
 ) => {
   useAttachmentStore.setState((state) => {
-    const currentAttachments = state.attachmentsByChat[chatId] || [];
+    const current = state.attachmentsByChat[chatId] || [];
+    const map = new Map(current.map((a) => [a.id, a]));
 
-    // Merge existing and new attachments
-    const merged = [...currentAttachments, ...newAttachments];
+    for (const att of newAttachments) {
+      map.set(att.id, att); // replaces if exists
+    }
 
-    // Sort by createdAt descending (newest first)
-    merged.sort(
+    const merged = Array.from(map.values()).sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
@@ -196,66 +180,25 @@ const addAttachmentsToState = (
   });
 };
 
-// EXPORT HOOKS
-export const useActiveChatAttachments = (): AttachmentResponse[] | [] => {
+// Hooks
+export const useActiveChatAttachments = (): AttachmentResponse[] => {
   const activeChatId = useActiveChatId();
-  return useAttachmentStore((state) =>
-    activeChatId ? state.attachmentsByChat[activeChatId] || [] : []
-  );
+  const attachmentsByChat = useAttachmentStore((s) => s.attachmentsByChat);
+  return activeChatId ? attachmentsByChat[activeChatId] || [] : [];
 };
-
-// export const getMessageAttachments = (chatId: string, messageId: string) => {
-//   const state = useAttachmentStore.getState();
-//   const attachments = state.attachmentsByChat[chatId] || [];
-//   return attachments.filter((att) => att.messageId === messageId);
-// };
 
 export const getMessageAttachments = (chatId: string, messageId: string) => {
   const state = useAttachmentStore.getState();
   const attachments = state.attachmentsByChat[chatId] || [];
-
-  return (
-    attachments
-      .filter((att) => att.messageId === messageId)
-      // Sort by createdAt descending: newest first, oldest last
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      )
-  );
+  return attachments.filter((att) => att.messageId === messageId).reverse();
 };
 
 export const useHasMore = (chatId: string) => {
-  return useAttachmentStore((state) => state.hasMore[chatId] ?? false);
+  const state = useAttachmentStore.getState();
+  const types = state.hasMore[chatId] || {};
+  return Object.values(types).some((v) => v); // true if any type has more
 };
 
-export const useHasMoreForType = (chatId: string, type?: AttachmentType) => {
-  return useAttachmentStore((state) => {
-    if (!chatId) return false;
-
-    // If no type specified, use general hasMore
-    if (!type) {
-      return state.hasMore[chatId] ?? true;
-    }
-
-    const hasMoreGeneral = state.hasMore[chatId] ?? true;
-
-    // If no general hasMore, definitely no more for any type
-    if (!hasMoreGeneral) return false;
-
-    // Get current attachments of this type
-    const attachments = state.attachmentsByChat[chatId] || [];
-    const typeAttachments = attachments.filter(
-      (attachment) => attachment.type === type
-    );
-
-    // Simple heuristic: if we have few attachments of this type,
-    // there might be more (this could be enhanced based on your API)
-    if (typeAttachments.length === 0) {
-      return true; // No attachments yet, might have some
-    }
-
-    // Could add smarter logic here based on API pagination
-    return true; // Default to true if we still might have more
-  });
+export const useHasMoreForType = (chatId: string, type: AttachmentType) => {
+  return useAttachmentStore((state) => state.hasMore[chatId]?.[type] ?? true);
 };

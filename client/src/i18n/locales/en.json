@@ -491,9 +491,10 @@
     },
     "media_files": {
       "title": "Media & Files",
-      "images": "Images",
-      "videos": "Videos",
-      "files": "Files"
+      "image": "Images",
+      "video": "Videos",
+      "audio": "Audio",
+      "file": "Files"
     }
   },
 

@@ -161,7 +161,7 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
           </i>
         </button>
 
-        <div className="flex flex-col gap-2 flex-1 min-w-0">
+        <div className="flex flex-col gap-2 flex-1 min-w-0 cursor-pointer">
           {isDisplayName && (
             <div
               className="flex items-center hover:opacity-80"

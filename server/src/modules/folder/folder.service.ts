@@ -24,9 +24,9 @@ export class FolderService {
 
   async getFolders(
     userId: string,
-    query: PaginationQueryDto,
+    query?: PaginationQueryDto,
   ): Promise<PaginationResponse<FolderResponseDto>> {
-    const { limit = 20, offset = 0, lastId } = query;
+    const { limit = 20, offset = 0, lastId } = query ?? {};
 
     let qb = this.folderRepository
       .createQueryBuilder('folder')

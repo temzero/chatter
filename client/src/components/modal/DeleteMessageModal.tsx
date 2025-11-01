@@ -4,7 +4,6 @@ import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { getCurrentUserId } from "@/stores/authStore";
 import { useMessageStore } from "@/stores/messageStore";
-import { audioService, SoundType } from "@/services/audio.service";
 
 import { useTranslation } from "react-i18next";
 import Button from "../ui/buttons/Button";
@@ -27,14 +26,13 @@ const DeleteMessageModal: React.FC = () => {
   if (!message) return null;
   const isMe = message.sender.id === currentUserId;
 
-  const handleDelete = (isDeleteForEveryone: boolean = false) => {
+  const handleDelete = async (isDeleteForEveryone: boolean = false) => {
     try {
-      chatWebSocketService.deleteMessage({
+      await chatWebSocketService.deleteMessage({
         chatId: message.chatId,
         messageId: message.id,
         isDeleteForEveryone,
       });
-      audioService.playSound(SoundType.BREAK, 0.3);
       closeModal();
     } catch (error) {
       handleError(error, "Delete Message failed");

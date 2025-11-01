@@ -29,7 +29,7 @@ const MessagePreview: React.FC<MessagePreviewProps> = ({ message }) => {
         <Avatar
           avatarUrl={message.sender.avatarUrl}
           name={message.sender.displayName}
-          size="8"
+          size={8}
         />
         {isMe ? (
           "Me"
@@ -57,7 +57,7 @@ const MessagePreview: React.FC<MessagePreviewProps> = ({ message }) => {
               <Avatar
                 avatarUrl={repliedMessage.sender.avatarUrl}
                 name={repliedMessage.sender.displayName}
-                size="6"
+                size={6}
               />
               <p>{repliedMessage.content}</p>
             </div>

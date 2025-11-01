@@ -1,66 +1,69 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe, Logger } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
 import { json, urlencoded } from 'express';
 import { JwtIoAdapter } from './jwt.adapter';
 
-const logger = new Logger('Bootstrap');
 const DEFAULT_PORT = 3000;
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 const BODY_PARSER_LIMIT = '100mb';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    bufferLogs: true,
-  });
+  try {
+    console.log('1️⃣ Starting NestJS application...');
 
-  app.use(
-    json({
-      limit: BODY_PARSER_LIMIT,
-      type: ['application/json', 'application/*+json'], // include LiveKit type
-    }),
-  );
-  app.use(urlencoded({ limit: BODY_PARSER_LIMIT, extended: true }));
-  app.use(cookieParser());
+    const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+      bufferLogs: true,
+    });
 
-  // Global configurations
-  app.enableCors({
-    origin: CLIENT_URL,
-    credentials: true,
-  });
-  app.useWebSocketAdapter(new JwtIoAdapter(app));
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      validateCustomDecorators: true,
-    }),
-  );
-  app.useStaticAssets(join(__dirname, '..', 'public'));
+    console.log('2️⃣ App created, setting up middleware...');
 
-  // Start application
-  const port = process.env.PORT ?? DEFAULT_PORT;
-  await app.listen(port);
+    app.use(
+      json({
+        limit: BODY_PARSER_LIMIT,
+        type: ['application/json', 'application/*+json'],
+      }),
+    );
+    app.use(urlencoded({ limit: BODY_PARSER_LIMIT, extended: true }));
+    app.use(cookieParser());
 
-  // // Log startup information
-  // const server = app.getHttpServer();
-  // const address = server.address();
-  // const actualPort = typeof address === 'string' ? address : address?.port;
+    console.log('3️⃣ Middleware configured, setting up CORS...');
 
-  // logger.log(`Server running on port ${actualPort}`);
-  // logger.log(`CORS configured for ${CLIENT_URL}`);
-  // logger.log('Static assets served from /public');
+    app.enableCors({
+      origin: CLIENT_URL,
+      credentials: true,
+    });
 
-  // console.log(`Server running on port ${actualPort}`);
-  // console.log(`CORS configured for ${CLIENT_URL}`);
-  // console.log(`Static assets served from /public`);
+    console.log('4️⃣ CORS configured, setting up WebSocket adapter...');
+
+    app.useWebSocketAdapter(new JwtIoAdapter(app));
+
+    console.log('5️⃣ Setting up validation pipes...');
+
+    app.useGlobalPipes(
+      new ValidationPipe({
+        transform: true,
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        validateCustomDecorators: true,
+      }),
+    );
+
+    console.log('6️⃣ Setting up static assets...');
+    app.useStaticAssets(join(__dirname, '..', 'public'));
+
+    console.log('7️⃣ Starting server...');
+    const port = process.env.PORT ?? DEFAULT_PORT;
+    await app.listen(port);
+
+    console.log('✅ Server started successfully on port', port);
+  } catch (error) {
+    console.error('❌ Bootstrap failed:', error);
+    process.exit(1);
+  }
 }
 
-bootstrap().catch((err) => {
-  logger.error('Failed to start application', err);
-  process.exit(1);
-});
+void bootstrap();

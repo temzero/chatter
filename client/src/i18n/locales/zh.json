@@ -490,9 +490,10 @@
     },
     "media_files": {
       "title": "媒体与文件",
-      "images": "图片",
-      "videos": "视频",
-      "files": "文件"
+      "image": "图片",
+      "video": "视频",
+      "audio": "音频",
+      "file": "文件"
     }
   },
 

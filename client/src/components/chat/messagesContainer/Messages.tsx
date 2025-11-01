@@ -18,7 +18,11 @@ interface ChatMessagesProps {
   isSearch: boolean;
 }
 
-const Messages: React.FC<ChatMessagesProps> = ({ chat, messageIds, isSearch }) => {
+const Messages: React.FC<ChatMessagesProps> = ({
+  chat,
+  messageIds,
+  isSearch,
+}) => {
   console.log("Messages render:", messageIds.length);
 
   const chatId = chat.id;

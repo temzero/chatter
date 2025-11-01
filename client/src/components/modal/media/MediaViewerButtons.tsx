@@ -51,7 +51,7 @@ export const MediaViewerButtons = ({
         <Avatar
           avatarUrl={sender?.avatarUrl}
           name={sender?.displayName}
-          size="8"
+          size={8}
         />
         {isMobile || (
           <div className="text-white font-medium">

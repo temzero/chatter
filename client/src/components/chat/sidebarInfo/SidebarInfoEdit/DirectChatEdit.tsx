@@ -129,7 +129,7 @@ const DirectChatEdit = () => {
           <Avatar
             avatarUrl={chatPartner.avatarUrl}
             name={chatPartner.firstName}
-            size="12"
+            size={12}
           />
           <div>
             <h1 className="text-xl font-semibold">

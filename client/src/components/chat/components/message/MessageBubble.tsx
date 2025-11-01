@@ -4,7 +4,6 @@ import RenderMultipleAttachments from "@/components/ui/attachments/RenderMultipl
 import ForwardedMessagePreview from "@/components/ui/messages/ForwardMessagePreview";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { MessageResponse } from "@/shared/types/responses/message.response";
-// import { useMessageAttachments } from "@/stores/messageAttachmentStore";
 
 interface MessageBubbleProps {
   message: MessageResponse;
@@ -19,7 +18,6 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
   isRelyToThisMessage,
   currentUserId,
 }) => {
-  // const attachments = useMessageAttachments(message.chatId, message.id);
   const isForwardMessage = message.forwardedFromMessage;
 
   return (
@@ -33,14 +31,6 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
           message.status === MessageStatus.FAILED,
         "opacity-100": !message.status || message.status === MessageStatus.SENT,
       })}
-      // style={{
-      //   width:
-      //     attachments.length === 1
-      //       ? "var(--attachment-width)"
-      //       : attachments.length > 1
-      //       ? "var(--attachment-width-large)"
-      //       : undefined,
-      // }}
     >
       {/* Attachments */}
       <RenderMultipleAttachments

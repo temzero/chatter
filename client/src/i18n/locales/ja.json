@@ -490,9 +490,10 @@
     },
     "media_files": {
       "title": "メディアとファイル",
-      "images": "画像",
-      "videos": "ビデオ",
-      "files": "ファイル"
+      "image": "画像",
+      "video": "ビデオ",
+      "audio": "オーディオ",
+      "file": "ファイル"
     }
   },
 

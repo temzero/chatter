@@ -29,15 +29,9 @@ export class FolderController {
   @HttpCode(HttpStatus.OK)
   async getFolders(
     @CurrentUser('id') userId: string,
-    @Query() query: PaginationQueryDto,
+    @Query() query?: PaginationQueryDto,
   ): Promise<SuccessResponse<PaginationResponse<FolderResponseDto>>> {
-    const { limit = 20, offset = 0, lastId } = query;
-
-    const result = await this.folderService.getFolders(userId, {
-      limit,
-      offset,
-      lastId,
-    });
+    const result = await this.folderService.getFolders(userId, query);
 
     return new SuccessResponse(result, 'Folders retrieved successfully');
   }

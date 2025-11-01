@@ -16,7 +16,7 @@ const InfiniteScroller = forwardRef<HTMLDivElement, InfiniteScrollerProps>(
       children,
       onLoadMore,
       hasMore,
-      thresholdPercent = 0.3,
+      thresholdPercent = 0.39,
       loader,
       className = "",
       isScrollUp = false,

@@ -127,7 +127,7 @@ export const ChatMemberItems = ({
               <Avatar
                 avatarUrl={myMember.avatarUrl}
                 name={myMember.firstName}
-                size="10"
+                size={10}
                 textSize="sm"
               />
             </div>
@@ -163,7 +163,7 @@ export const ChatMemberItems = ({
                 <Avatar
                   avatarUrl={member.avatarUrl}
                   name={member.firstName}
-                  size="10"
+                  size={10}
                   textSize="sm"
                 />
               </div>

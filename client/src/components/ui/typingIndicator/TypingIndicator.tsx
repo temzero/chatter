@@ -34,7 +34,7 @@ const TypingIndicator = ({ chatId }: TypingIndicatorProps) => {
   const displayAvatars = useMemo(() => {
     return typingMembers.map((member) => (
       <div key={member.userId}>
-        <Avatar avatarUrl={member.avatarUrl} name={member.firstName} size="8" />
+        <Avatar avatarUrl={member.avatarUrl} name={member.firstName} size={8} />
       </div>
     ));
   }, [typingMembers]);

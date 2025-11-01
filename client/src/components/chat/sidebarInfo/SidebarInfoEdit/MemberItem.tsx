@@ -41,7 +41,7 @@ const MemberItem: React.FC<MemberItemProps> = ({ member }) => {
         <Avatar
           avatarUrl={member.avatarUrl}
           name={showBlockedContent ? undefined : member.firstName}
-          size="8"
+          size={8}
           textSize="sm"
           isBlocked={isBlocked}
           className={`transform transition-transform duration-300 ${

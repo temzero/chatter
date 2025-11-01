@@ -40,17 +40,13 @@ export class ChatMemberController {
     @Param('chatId') chatId: string,
     @Query() queryParams: PaginationQuery,
   ): Promise<SuccessResponse<PaginationResponse<ChatMemberResponseDto>>> {
-    const { items: members, hasMore } =
-      await this.memberService.findByChatIdWithBlockStatus(
-        chatId,
-        currentUserId,
-        queryParams, // Pass pagination params
-      );
-
-    return new SuccessResponse(
-      { items: members, hasMore },
-      'Chat members retrieved successfully',
+    const payload = await this.memberService.findByChatIdWithBlockStatus(
+      chatId,
+      currentUserId,
+      queryParams, // Pass pagination params
     );
+
+    return new SuccessResponse(payload, 'Chat members retrieved successfully');
   }
 
   @Get('member/:memberId')

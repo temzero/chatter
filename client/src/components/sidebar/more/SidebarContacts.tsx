@@ -43,7 +43,7 @@ const ContactItem: React.FC<ContactItemProps> = ({
         <Avatar
           avatarUrl={contact.avatarUrl}
           name={contact.firstName}
-          size="10"
+          size={10}
         />
         <h1 className="font-medium">
           {contact.firstName} {contact.lastName}

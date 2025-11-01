@@ -125,7 +125,7 @@ const CallMember = ({
             <Avatar
               avatarUrl={avatarUrl}
               name={displayName}
-              size="24"
+              size={24}
               className="z-10 relative bg-[--message-color]"
             />
           </div>

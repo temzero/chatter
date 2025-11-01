@@ -1,4 +1,10 @@
-import { IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  IsISO8601,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { AttachmentType } from 'src/shared/types/enums/attachment-type.enum';
 import { AttachmentUploadRequest } from 'src/shared/types/requests/attachment-upload.request';
 
@@ -36,4 +42,7 @@ export class AttachmentUploadDto implements AttachmentUploadRequest {
   @IsOptional()
   @IsInt()
   duration?: number;
+
+  @IsISO8601()
+  createdAt: string;
 }

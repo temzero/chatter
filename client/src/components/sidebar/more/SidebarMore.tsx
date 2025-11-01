@@ -85,7 +85,7 @@ const SidebarMore: React.FC = () => {
           <Avatar
             avatarUrl={currentUser?.avatarUrl}
             name={currentUser?.firstName}
-            size="16"
+            size={16}
           />
         </div>
 

@@ -23,12 +23,12 @@ export class CallService {
 
   async getCallHistory(
     userId: string,
-    queries: PaginationQuery,
+    query?: PaginationQuery,
   ): Promise<{ calls: CallResponseDto[]; hasMore: boolean }> {
-    const { limit = 20, lastId } = queries;
+    const { limit = 20, lastId } = query ?? {};
 
     // Get all calls with relations
-    const query = this.callRepository
+    const callQuery = this.callRepository
       .createQueryBuilder('call')
       .leftJoinAndSelect('call.chat', 'chat')
       .leftJoinAndSelect('chat.members', 'chatMember')
@@ -42,7 +42,7 @@ export class CallService {
     // .skip(offset)
     // .take(limit + 1);
 
-    const allCalls = await query.getMany();
+    const allCalls = await callQuery.getMany();
 
     // Handle pagination
     let startIndex = 0;

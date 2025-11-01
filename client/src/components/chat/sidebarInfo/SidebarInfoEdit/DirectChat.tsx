@@ -108,7 +108,7 @@ const DirectChat: React.FC = () => {
 
       <div className="flex flex-col items-center gap-4 p-4 w-full h-full overflow-y-auto">
         <Avatar
-          size="36"
+          size={36}
           textSize="text-6xl"
           avatarUrl={chatPartner.avatarUrl}
           name={chatPartner.nickname || chatPartner.firstName}

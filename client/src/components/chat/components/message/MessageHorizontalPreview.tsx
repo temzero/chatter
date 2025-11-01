@@ -52,7 +52,7 @@ export const MessageHorizontalPreview: React.FC<
         <Avatar
           avatarUrl={message.sender.avatarUrl}
           name={message.sender.displayName}
-          size="6"
+          size={6}
         />
       )}
 
@@ -80,7 +80,7 @@ export const MessageHorizontalPreview: React.FC<
               <Avatar
                 avatarUrl={forwardedMessage?.sender.avatarUrl}
                 name={forwardedMessage?.sender.displayName}
-                size="6"
+                size={6}
               />
             )}
             <p className={messageTextClass}>{forwardedMessage?.content}</p>

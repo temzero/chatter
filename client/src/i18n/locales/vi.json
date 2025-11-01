@@ -493,10 +493,10 @@
     },
     "media_files": {
       "title": "Phương tiện & Tệp tin",
-      "images": "Ảnh",
-      "videos": "Video",
+      "image": "Ảnh",
+      "video": "Video",
       "audio": "Âm thanh",
-      "files": "Tệp tin",
+      "file": "Tệp tin",
       "no_media": "Không có {{type}} nào"
     }
   },

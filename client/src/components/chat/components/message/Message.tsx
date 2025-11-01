@@ -43,8 +43,8 @@ const Message: React.FC<MessageProps> = ({
   currentUserId,
   isMe = false,
 }) => {
+  // console.log("messageId", messageId);
   const message = useMessageStore((state) => state.messagesById[messageId]);
-
   const searchQuery = useMessageStore((state) => state.searchQuery);
   const showImportantOnly = useMessageStore((state) => state.showImportantOnly);
 
@@ -64,57 +64,51 @@ const Message: React.FC<MessageProps> = ({
     setContextMenuMousePos({ x: e.clientX, y: e.clientY });
   };
 
-  const closeContextMenu = () => {
-    setContextMenuMousePos(null);
-  };
+  const closeContextMenu = () => setContextMenuMousePos(null);
 
   const isGroupChat = chatType === "group";
 
+  // Safe animation setup
   const messageAnimation = useMemo(() => {
-    if (!message) return {}; // fallback if message is undefined
+    if (!message) return {};
     return message.shouldAnimate ? getMessageAnimation(isMe) : {};
   }, [message, isMe]);
 
-  if (!message) return null;
-  const repliedMessage = message.replyToMessage;
-
-  if (
-    searchQuery.trim() !== "" &&
-    !message.content?.toLowerCase().includes(searchQuery.toLowerCase())
-  ) {
-    return null;
-  }
-
-  // Manage filtering
-  const contentText = message.content?.toString().toLowerCase() ?? "";
+  // Safe content checks
+  const contentText = message?.content?.toString().toLowerCase() ?? "";
   const notMatchingSearch =
     searchQuery.trim() !== "" &&
     !contentText.includes(searchQuery.toLowerCase());
-  const notImportant = showImportantOnly && !message.isImportant;
-  if (notMatchingSearch || notImportant) {
+  const notImportant = showImportantOnly && !message?.isImportant;
+
+  if (!message || notMatchingSearch || notImportant) {
     return null;
   }
 
-  // system message
+  // System message check
   if (message.systemEvent && message.systemEvent !== SystemEventType.CALL) {
     return (
       <div className="w-full flex items-center justify-center">
         <SystemMessage
           message={message}
           systemEvent={message.systemEvent}
-          senderId={message.sender.id}
-          senderDisplayName={message.sender.displayName}
+          senderId={message.sender?.id ?? ""}
+          senderDisplayName={message.sender?.displayName ?? ""}
           content={message.content as SystemMessageJSONContent}
         />
       </div>
     );
   }
 
+  const repliedMessage = message.replyToMessage;
+
   return (
     <motion.div
       id={`message-${messageId}`}
       ref={messageRef}
-      onDoubleClick={() => handleQuickReaction(messageId, message.chatId)}
+      onDoubleClick={() =>
+        message && handleQuickReaction(messageId, message.chatId)
+      }
       onContextMenu={handleContextMenu}
       className={clsx("flex relative max-w-[60%] pb-1.5", {
         "justify-end": isMe,
@@ -125,17 +119,17 @@ const Message: React.FC<MessageProps> = ({
       {...messageAnimation}
     >
       {isGroupChat && !isMe && (
-        <div className={clsx("flex-shrink-0 mt-auto mr-2 h-10 w-10 min-w-10")}>
+        <div className="flex-shrink-0 mt-auto mr-2 h-10 w-10 min-w-10">
           {!isRecent && (
             <Avatar
-              avatarUrl={message.sender.avatarUrl}
-              name={message.sender.displayName}
+              avatarUrl={message.sender?.avatarUrl}
+              name={message.sender?.displayName ?? ""}
             />
           )}
         </div>
       )}
 
-      <div className="flex flex-col ">
+      <div className="flex flex-col">
         <div
           className={clsx("relative flex flex-col transition-all", {
             "scale-[1.1]": isRelyToThisMessage,
@@ -149,7 +143,7 @@ const Message: React.FC<MessageProps> = ({
               chatType={chatType}
               isMe={isMe}
               currentUserId={currentUserId ?? ""}
-              senderId={message.sender.id}
+              senderId={message.sender?.id ?? ""}
               isHidden={isFocus}
             />
           )}
@@ -208,8 +202,8 @@ const Message: React.FC<MessageProps> = ({
         </div>
 
         {showInfo && isGroupChat && !isMe && (
-          <h1 className={clsx("text-sm font-semibold opacity-70 mr-2")}>
-            {message.sender.displayName}
+          <h1 className="text-sm font-semibold opacity-70 mr-2">
+            {message.sender?.displayName ?? ""}
           </h1>
         )}
 
@@ -217,7 +211,7 @@ const Message: React.FC<MessageProps> = ({
           message.status !== MessageStatus.SENDING &&
           message.status !== MessageStatus.FAILED && (
             <p
-              className={clsx("text-xs opacity-40 p-0.5 pb-0", {
+              className={clsx("text-xs opacity-40 px-0.5 pt-1 pb-4", {
                 "ml-auto": isMe,
                 "mr-auto": !isMe,
               })}
@@ -231,6 +225,7 @@ const Message: React.FC<MessageProps> = ({
             <BeatLoader color="gray" size={8} />
           </div>
         )}
+
         {message.status === MessageStatus.FAILED && (
           <h1 className="text-red-500 text-sm text-right">
             Failed to send message

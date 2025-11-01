@@ -56,7 +56,7 @@ const FriendRequestModal: React.FC = () => {
         <Avatar
           avatarUrl={receiver.avatarUrl}
           name={receiver.firstName}
-          size="12"
+          size={12}
         />
 
         <div>

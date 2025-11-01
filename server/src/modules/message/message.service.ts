@@ -86,10 +86,17 @@ export class MessageService {
     console.log('savedMessage', savedMessage);
 
     if (dto.attachments?.length) {
+      const normalizedAttachments = dto.attachments.map((attachment) => ({
+        ...attachment,
+        createdAt: attachment.createdAt
+          ? new Date(attachment.createdAt)
+          : new Date(),
+      }));
+
       await this.attachmentService.createAttachments(
         savedMessage.id, // messageId
         savedMessage.chatId, // chatId
-        dto.attachments, // attachment data without IDs
+        normalizedAttachments,
       );
     }
 
@@ -158,12 +165,18 @@ export class MessageService {
       1,
     );
 
-    // ✅ Create attachments via AttachmentService (simplified)
-    if (dto.attachments?.length) {
+    if (dto.attachments && dto.attachments.length > 0) {
+      const normalizedAttachments = dto.attachments.map((attachment) => ({
+        ...attachment,
+        createdAt: attachment.createdAt
+          ? new Date(attachment.createdAt)
+          : new Date(),
+      }));
+
       await this.attachmentService.createAttachments(
-        savedMessage.id, // messageId
-        savedMessage.chatId, // chatId
-        dto.attachments, // attachment data without IDs
+        savedMessage.id,
+        savedMessage.chatId,
+        normalizedAttachments,
       );
     }
 
@@ -480,11 +493,11 @@ export class MessageService {
   async getMessagesByChatId(
     chatId: string,
     currentUserId: string,
-    queryParams: PaginationQuery,
+    query?: PaginationQuery,
   ): Promise<PaginationResponse<MessageResponseDto>> {
-    const { limit = 20, offset = 0, lastId } = queryParams;
+    const { limit = 20, offset = 0, lastId } = query ?? {};
     try {
-      const query = this.buildFullMessageQuery()
+      const messagesQuery = this.buildFullMessageQuery()
         .where('message.chat_id = :chatId', { chatId })
         .andWhere('message.is_deleted = false')
         .andWhere(
@@ -500,18 +513,18 @@ export class MessageService {
         });
 
         if (beforeMessage) {
-          query.andWhere('message.createdAt < :beforeDate', {
+          messagesQuery.andWhere('message.createdAt < :beforeDate', {
             beforeDate: beforeMessage.createdAt,
           });
         }
       }
 
       // Order newest to oldest in DB query
-      query.orderBy('message.createdAt', 'DESC');
-      query.take(Number(limit));
-      query.skip(Number(offset));
+      messagesQuery.orderBy('message.createdAt', 'DESC');
+      messagesQuery.take(Number(limit));
+      messagesQuery.skip(Number(offset));
 
-      const messages = await query.getMany();
+      const messages = await messagesQuery.getMany();
 
       // Reverse to chronological order (oldest first)
       const sortedMessages = messages.reverse();

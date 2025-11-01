@@ -30,7 +30,7 @@ interface ChatListItemProps {
 
 const ChatListItem: React.FC<ChatListItemProps> = React.memo(
   ({ chatId, isCompact = false, currentUserId = "" }) => {
-    console.log("ChatListItem", chatId);
+    // console.log("ChatListItem", chatId);
 
     // This now uses the updated useChat hook that works with Record structure
     const chat = useChat(chatId);

@@ -21,6 +21,7 @@ import pinSound from "@/assets/sound/pin.mp3";
 import reactionSound from "@/assets/sound/reaction.mp3";
 import reactionRemoveSound from "@/assets/sound/reaction-remove.mp3";
 import ringSound from "@/assets/sound/old-telephone-ringing.mp3";
+import messageRemoveSound from "@/assets/sound/remove-message2.mp3";
 import typingSound from "@/assets/sound/typing.mp3";
 
 // Define the SoundType as an enum
@@ -36,6 +37,7 @@ export enum SoundType {
   NEW_MESSAGE = "new-message",
   REACTION = "reaction",
   REACTION_REMOVE = "reaction-remove",
+  MESSAGE_REMOVE = "message-remove",
   CARD1 = "card1",
   CARD2 = "card2",
   CARD3 = "card3",
@@ -83,6 +85,7 @@ class AudioServiceImpl implements AudioService {
       [SoundType.NEW_MESSAGE]: messageSound,
       [SoundType.REACTION]: reactionSound,
       [SoundType.REACTION_REMOVE]: reactionRemoveSound,
+      [SoundType.MESSAGE_REMOVE]: messageRemoveSound,
       [SoundType.CARD1]: card1Sound,
       [SoundType.CARD2]: card2Sound,
       [SoundType.CARD3]: card3Sound,

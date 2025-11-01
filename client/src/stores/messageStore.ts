@@ -12,6 +12,7 @@ import {
   SenderResponse,
 } from "@/shared/types/responses/message.response";
 import { useAttachmentStore } from "./messageAttachmentStore";
+import { audioService, SoundType } from "@/services/audio.service";
 
 // Normalized structure
 type MessagesById = Record<string, MessageResponse>; // messageId -> Message
@@ -245,6 +246,8 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
 
       // Also remove from attachment store
       useAttachmentStore.getState().removeMessageAttachments(messageId);
+
+      audioService.playSound(SoundType.MESSAGE_REMOVE)
     },
 
     getChatMessages: (chatId) => {

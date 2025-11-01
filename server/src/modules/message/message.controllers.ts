@@ -15,17 +15,13 @@ import { CurrentUser } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { MessageResponseDto } from './dto/responses/message-response.dto';
 import { ErrorResponse } from '../../common/api-response/errors';
-import { MessageMapper } from './mappers/message.mapper';
 import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
 import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
 
 @Controller('messages')
 @UseGuards(JwtAuthGuard)
 export class MessageController {
-  constructor(
-    private readonly messageService: MessageService,
-    private readonly messageMapper: MessageMapper,
-  ) {}
+  constructor(private readonly messageService: MessageService) {}
 
   @Get(':messageId')
   async findOne(
@@ -43,19 +39,15 @@ export class MessageController {
   async getChatMessages(
     @CurrentUser('id') currentUserId: string,
     @Param('chatId') chatId: string,
-    @Query() queryParams: PaginationQuery,
+    @Query() query?: PaginationQuery,
   ): Promise<SuccessResponse<PaginationResponse<MessageResponseDto>>> {
-    const { items: messages, hasMore } =
-      await this.messageService.getMessagesByChatId(
-        chatId,
-        currentUserId,
-        queryParams,
-      );
-
-    return new SuccessResponse(
-      { items: messages, hasMore },
-      'Chat messages retrieved successfully',
+    const payload = await this.messageService.getMessagesByChatId(
+      chatId,
+      currentUserId,
+      query,
     );
+
+    return new SuccessResponse(payload, 'Chat messages retrieved successfully');
   }
 
   @Put(':messageId')

@@ -1,7 +1,7 @@
 type AvatarProps = {
   avatarUrl?: string | undefined | null;
   name?: string;
-  size?: string;
+  size?: number;
   textSize?: string;
   className?: string;
   id?: number;
@@ -12,7 +12,7 @@ type AvatarProps = {
 export const Avatar: React.FC<AvatarProps> = ({
   avatarUrl,
   name,
-  size = "10",
+  size = 10,
   textSize = "text-4xl",
   className = "",
   id,

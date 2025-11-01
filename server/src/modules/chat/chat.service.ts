@@ -15,10 +15,7 @@ import { MessageService } from '../message/message.service';
 import { Message } from '../message/entities/message.entity';
 import { SystemEventType } from 'src/shared/types/enums/system-event-type.enum';
 import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
-import {
-  ChatResponseDto,
-  // ChatWithMessagesResponseDto,
-} from './dto/responses/chat-response.dto';
+import { ChatResponseDto } from './dto/responses/chat-response.dto';
 import { PublicChatMapper } from './mappers/public-chat.mapper';
 import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
 import { MAX_PINNED } from '../chat-member/chat-member.service';
@@ -39,7 +36,7 @@ export class ChatService {
 
   async getInitialChats(
     userId: string,
-    queries: PaginationQuery,
+    query?: PaginationQuery,
   ): Promise<PaginationResponse<ChatResponseDto>> {
     const savedChat = await this.getSavedChat(userId).catch(() => null);
 
@@ -47,7 +44,7 @@ export class ChatService {
     const pinnedChats = await this.getPinnedChats(userId);
 
     // 2️⃣ Get unpinned chats (with pagination)
-    const unpinnedChats = await this.getUnpinnedChats(userId, queries);
+    const unpinnedChats = await this.getUnpinnedChats(userId, query);
 
     // 3️⃣ Combine pinned + unpinned
     const combinedChats = [...pinnedChats.items, ...unpinnedChats.items];
@@ -90,9 +87,9 @@ export class ChatService {
 
   async getUnpinnedChats(
     userId: string,
-    queries: PaginationQuery,
+    query?: PaginationQuery,
   ): Promise<PaginationResponse<ChatResponseDto>> {
-    const { limit = 20, offset = 0 } = queries;
+    const { limit = 20, offset = 0 } = query ?? {};
 
     const chats = await this.buildFullChatQueryForUser(userId)
       .andWhere('chat.type != :savedType', { savedType: 'saved' })

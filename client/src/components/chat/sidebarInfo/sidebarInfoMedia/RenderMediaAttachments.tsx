@@ -9,7 +9,7 @@ import Button from "@/components/ui/buttons/Button";
 interface RenderMediaAttachmentsProps {
   attachments: AttachmentResponse[];
   selectedType: string;
-  onLoadMore: () => Promise<number | null>;
+  onLoadMore: () => Promise<number>;
   hasMore: boolean;
 }
 
@@ -44,7 +44,7 @@ const RenderMediaAttachments: React.FC<RenderMediaAttachmentsProps> = ({
         className={clsx(
           selectedType === "files" || selectedType === "audio"
             ? "flex flex-col items-center"
-            : "grid grid-cols-1"
+            : "grid grid-cols-3"
         )}
       >
         {attachments.map((media, index) => (
@@ -59,11 +59,12 @@ const RenderMediaAttachments: React.FC<RenderMediaAttachmentsProps> = ({
             <RenderAttachment
               attachment={media}
               type="info"
-              className={
+              className={clsx(
+                "cursor-pointer w-full",
                 selectedType === "files" || selectedType === "audio"
-                  ? "w-full"
-                  : "w-full h-full hover:scale-125 transition-transform duration-300 ease-in-out"
-              }
+                  ? ""
+                  : "h-full hover:scale-125 transition-transform duration-300 ease-in-out"
+              )}
               previewMode={false}
             />
           </div>

@@ -23,37 +23,47 @@ export class AttachmentService {
 
   async getChatAttachments(
     chatId: string,
-    type: AttachmentType,
-    queryDto: PaginationQuery,
+    type: AttachmentType | null,
+    query?: PaginationQuery,
   ): Promise<PaginationResponse<AttachmentResponseDto>> {
-    const { lastId, limit = 50 } = queryDto;
+    const { lastId, limit = 12 } = query ?? {};
 
-    // Simple query using chatId - no JOIN needed!
-    let query = this.attachmentRepo
+    // Start query filtered by chat
+    let attachmentQuery = this.attachmentRepo
       .createQueryBuilder('attachment')
-      .where('attachment.chatId = :chatId', { chatId })
-      .orderBy('attachment.createdAt', 'DESC')
-      .take(limit + 1); // Get one extra to check if there's more
+      .where('attachment.chatId = :chatId', { chatId });
 
-    // Filter by attachment type if provided
+    // Filter by type *first*
     if (type) {
-      query = query.andWhere('attachment.type = :type', { type });
+      attachmentQuery = attachmentQuery.andWhere('attachment.type = :type', {
+        type,
+      });
     }
 
-    // Pagination using createdAt
+    // Apply pagination *after* filtering by type
     if (lastId) {
       const lastAttachment = await this.attachmentRepo.findOne({
-        where: { id: lastId },
+        where: { id: lastId, chatId, ...(type ? { type } : {}) },
       });
 
       if (lastAttachment) {
-        query = query.andWhere('attachment.createdAt < :lastCreatedAt', {
-          lastCreatedAt: lastAttachment.createdAt,
-        });
+        attachmentQuery = attachmentQuery.andWhere(
+          '(attachment.createdAt < :lastCreatedAt OR (attachment.createdAt = :lastCreatedAt AND attachment.id < :lastId))',
+          {
+            lastCreatedAt: lastAttachment.createdAt,
+            lastId: lastAttachment.id,
+          },
+        );
       }
     }
 
-    const attachments = await query.getMany();
+    // Sort and limit
+    attachmentQuery = attachmentQuery
+      .orderBy('attachment.createdAt', 'DESC')
+      .addOrderBy('attachment.id', 'DESC')
+      .take(limit + 1);
+
+    const attachments = await attachmentQuery.getMany();
     const hasMore = attachments.length > limit;
     const items = hasMore ? attachments.slice(0, limit) : attachments;
 
@@ -137,6 +147,7 @@ export class AttachmentService {
         ...dto,
         messageId, // ✅ Always set correctly
         chatId, // ✅ Always set correctly
+        createdAt: dto.createdAt ? new Date(dto.createdAt) : new Date(),
       })),
     );
 

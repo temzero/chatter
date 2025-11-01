@@ -267,7 +267,7 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
     },
 
     setActiveChatId: async (chatId) => {
-      console.log("setActiveChatId");
+      // console.log("setActiveChatId", chatId);
       useSidebarInfoStore.getState().setSidebarInfo(SidebarInfoMode.DEFAULT);
       useMessageStore.getState().setDisplaySearchMessage(false);
       useModalStore.getState().closeModal();
