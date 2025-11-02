@@ -2,6 +2,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { SidebarMode } from "@/common/enums/sidebarMode";
+import { useIsMobile } from "./deviceStore";
+
+export const compactSupportedSidebars = [
+  SidebarMode.DEFAULT,
+  SidebarMode.PROFILE,
+  SidebarMode.MORE,
+];
 
 interface sidebarStoreState {
   currentSidebar: SidebarMode;
@@ -34,8 +41,12 @@ export const useSidebarStore = create<
         }),
 
       toggleCompact: () => {
-        const newCompactState = !get().isCompact;
-        set({ isCompact: newCompactState });
+        const currentSidebar = get().currentSidebar;
+        const isSupported = compactSupportedSidebars.includes(currentSidebar);
+
+        if (isSupported) {
+          set({ isCompact: !get().isCompact });
+        }
       },
     }),
     {
@@ -56,6 +67,10 @@ export const useSidebarStore = create<
 
 export const useCurrentSidebar = () =>
   useSidebarStore((state) => state.currentSidebar);
-export const useIsCompactSidebar = () =>
-  useSidebarStore((state) => state.isCompact);
+export const useIsCompactSidebar = () => {
+  const isCompact = useSidebarStore((state) => state.isCompact);
+  const isMobile = useIsMobile();
+  // On mobile, never use compact mode
+  return isMobile ? false : isCompact;
+};
 export const getSetSidebar = () => useSidebarStore.getState().setSidebar;

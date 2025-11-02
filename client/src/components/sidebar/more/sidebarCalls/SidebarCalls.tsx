@@ -91,7 +91,7 @@ const SidebarCalls: React.FC = () => {
             </div>
           ) : (
             calls.map((call) => (
-              <motion.div key={call.id} layout>
+              <motion.div key={call.id} layout='position'>
                 <CallItem
                   call={call}
                   isCaller={call.initiator.userId === currentUserId}

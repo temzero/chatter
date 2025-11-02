@@ -67,7 +67,6 @@ export async function handleSendMessage({
   const trimmedInput = inputValue.trim();
 
   if (!(trimmedInput || attachments.length)) {
-    toast.warn("You can’t send an empty message.");
     return;
   }
   if (inputRef.current) inputRef.current.value = "";

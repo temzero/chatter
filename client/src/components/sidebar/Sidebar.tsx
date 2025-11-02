@@ -1,8 +1,10 @@
 import { JSX } from "react";
+import { clsx } from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCurrentSidebar } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { sidebarAnimations } from "@/common/animations/sidebarAnimations";
+import { useSidebarWidth } from "@/common/hooks/useSidebarWidth";
 
 import SidebarDefault from "@/components/sidebar/SidebarDefault";
 import SidebarSearch from "@/components/sidebar/SidebarSearch";
@@ -34,8 +36,9 @@ import SidebarSettingsPhoneNumber from "./settings/account/sidebarSettingsPhoneN
 import SidebarNewFolder from "./more/SidebarNewFolder";
 
 const Sidebar = () => {
-  console.log('Sidebar')
+  console.log("Sidebar");
   const currentSidebar = useCurrentSidebar();
+  const sidebarWidthClass = useSidebarWidth();
 
   const sidebars: Record<SidebarMode, JSX.Element> = {
     [SidebarMode.DEFAULT]: <SidebarDefault />,
@@ -83,7 +86,10 @@ const Sidebar = () => {
 
   return (
     <div
-      className="h-full w-full flex flex-col bg-[var(--sidebar-color)] shadow border-[var(--border-color)] border-r-2 transition-all duration-300 ease-in-out"
+      className={clsx(
+        "h-full overflow-x-hidden flex flex-col bg-[var(--sidebar-color)] shadow border-[var(--border-color)] border-r-2 transition-all duration-300 ease-in-out",
+        sidebarWidthClass
+      )}
       style={{ zIndex: 10 }}
     >
       <AnimatePresence mode="wait">

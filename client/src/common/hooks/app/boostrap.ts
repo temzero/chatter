@@ -4,6 +4,7 @@ import { fetchInitialAppData } from "./fetchInitialAppData";
 import { handleError } from "@/common/utils/handleError";
 
 const bootstrapApp = async () => {
+  console.log('bootstrapApp')
   try {
     // STEP 1: Initialize auth first and get boolean result
     const isAuth = await useAuthStore.getState().initialize();

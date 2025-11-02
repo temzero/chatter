@@ -138,9 +138,22 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
       return get().chats[chatId];
     },
 
+    // getActiveChat: () => {
+    //   const { activeChatId, chats } = get();
+    //   if (!activeChatId) return null;
+    //   return chats[activeChatId] || null;
+    // },
+
     getActiveChat: () => {
-      const { activeChatId, chats } = get();
+      const { activeChatId, chats, savedChat } = get();
       if (!activeChatId) return null;
+
+      // First check if it's the saved chat
+      if (savedChat && activeChatId === savedChat.id) {
+        return savedChat;
+      }
+
+      // Then check regular chats
       return chats[activeChatId] || null;
     },
 
@@ -267,7 +280,7 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
     },
 
     setActiveChatId: async (chatId) => {
-      // console.log("setActiveChatId", chatId);
+      console.log("setActiveChatId", chatId);
       useSidebarInfoStore.getState().setSidebarInfo(SidebarInfoMode.DEFAULT);
       useMessageStore.getState().setDisplaySearchMessage(false);
       useModalStore.getState().closeModal();
@@ -597,11 +610,10 @@ export const useChatsForFolderFilter = () =>
 export const useSavedChat = () => useChatStore((state) => state.savedChat);
 
 export const useSetActiveSavedChat = () => {
-  const getState = useChatStore;
-
   return async () => {
-    const state = getState.getState();
+    const state = useChatStore.getState();
     let savedChat = state.savedChat;
+    console.log("savedChat", savedChat);
 
     if (!savedChat) {
       toast.warning("Saved chat not found, fetching from server...");

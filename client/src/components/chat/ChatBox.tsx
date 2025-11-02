@@ -35,7 +35,10 @@ const ChatBox = React.memo(() => {
     activeChat?.myMemberId ?? ""
   );
 
-  if (!activeChat) return null;
+  if (!activeChat) {
+    console.log("No activeChat");
+    return null;
+  }
 
   const isDirectChat = activeChat.type === ChatType.DIRECT;
   const isBlocked = isDirectChat && (isBlockedByMe || isBlockedMe);

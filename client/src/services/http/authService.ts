@@ -9,11 +9,13 @@ import {
 
 export const authService = {
   async fetchCurrentUser() {
+    console.log("fetchCurrentUser");
     const { data } = await API.get("/user/me");
     return data.payload;
   },
 
   async login(payload: LoginRequest): Promise<AuthResponse> {
+    console.log("login");
     const { data } = await API.post<AuthResponse>("/auth/login", payload);
     localStorageService.setAccessToken(data.accessToken);
     return data;
@@ -47,8 +49,8 @@ export const authService = {
   },
 
   async refreshToken(): Promise<string> {
+    console.log("refreshToken");
     const response = await API.post<AuthResponse>("/auth/refresh");
-    console.log("refreshToken", response.data);
     return response.data.accessToken;
   },
 

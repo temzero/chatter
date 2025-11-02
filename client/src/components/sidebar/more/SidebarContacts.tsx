@@ -15,6 +15,7 @@ interface ContactItemProps {
   contact: FriendContactResponse;
   onVideoCall?: (phoneNumber: string) => void;
   onAudioCall?: (phoneNumber: string) => void;
+  isCompact?: boolean;
 }
 
 const ContactItem: React.FC<ContactItemProps> = ({
@@ -43,9 +44,9 @@ const ContactItem: React.FC<ContactItemProps> = ({
         <Avatar
           avatarUrl={contact.avatarUrl}
           name={contact.firstName}
-          size={10}
+          size={12}
         />
-        <h1 className="font-medium">
+        <h1 className="text-xl">
           {contact.firstName} {contact.lastName}
         </h1>
       </div>
@@ -93,6 +94,7 @@ const SidebarContacts: React.FC<SidebarContactsProps> = ({
             contact={contact}
             onVideoCall={onVideoCall}
             onAudioCall={onAudioCall}
+            isCompact
           />
         ))
       ) : (

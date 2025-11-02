@@ -6,7 +6,6 @@ import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { MessageReactionDisplay } from "@/components/ui/messages/MessageReactionsDisplay";
 import { handleQuickReaction } from "@/common/utils/message/quickReaction";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
-import { BeatLoader } from "react-spinners";
 import { SystemMessageJSONContent } from "@/components/ui/messages/SystemMessageContent";
 import { MessageContextMenu } from "./MessageContextMenu";
 import {
@@ -43,8 +42,8 @@ const Message: React.FC<MessageProps> = ({
   currentUserId,
   isMe = false,
 }) => {
-  // console.log("messageId", messageId);
   const message = useMessageStore((state) => state.messagesById[messageId]);
+
   const searchQuery = useMessageStore((state) => state.searchQuery);
   const showImportantOnly = useMessageStore((state) => state.showImportantOnly);
 
@@ -66,12 +65,13 @@ const Message: React.FC<MessageProps> = ({
 
   const closeContextMenu = () => setContextMenuMousePos(null);
 
-  const isGroupChat = chatType === "group";
+  const isGroupChat = chatType === ChatType.GROUP;
 
   // Safe animation setup
   const messageAnimation = useMemo(() => {
     if (!message) return {};
-    return message.shouldAnimate ? getMessageAnimation(isMe) : {};
+    const sending = message.status === MessageStatus.SENDING;
+    return getMessageAnimation(isMe, sending);
   }, [message, isMe]);
 
   // Safe content checks
@@ -220,11 +220,11 @@ const Message: React.FC<MessageProps> = ({
             </p>
           )}
 
-        {message.status === MessageStatus.SENDING && (
+        {/* {message.status === MessageStatus.SENDING && (
           <div className="rounded-full flex justify-end mt-1">
             <BeatLoader color="gray" size={8} />
           </div>
-        )}
+        )} */}
 
         {message.status === MessageStatus.FAILED && (
           <h1 className="text-red-500 text-sm text-right">

@@ -81,7 +81,6 @@ const Messages: React.FC<ChatMessagesProps> = ({
                       isMe ? "items-end" : "items-start"
                     }`}
                   >
-                    {/* Pass only messageId to Message */}
                     <Message
                       messageId={message.id}
                       isMe={isMe}
@@ -89,7 +88,6 @@ const Messages: React.FC<ChatMessagesProps> = ({
                       isRecent={isRecent}
                       chatType={chat.type}
                     />
-
                     <MessageReadInfo
                       chat={chat}
                       messageId={message.id}

@@ -4,6 +4,8 @@ import RenderMultipleAttachments from "@/components/ui/attachments/RenderMultipl
 import ForwardedMessagePreview from "@/components/ui/messages/ForwardMessagePreview";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { MessageResponse } from "@/shared/types/responses/message.response";
+// import { getMessageAnimation } from "@/common/animations/messageAnimations";
+// import { motion } from "framer-motion";
 
 interface MessageBubbleProps {
   message: MessageResponse;
@@ -19,6 +21,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
   currentUserId,
 }) => {
   const isForwardMessage = message.forwardedFromMessage;
+  // const messageAnimation = getMessageAnimation(isMe);
 
   return (
     <div
@@ -31,6 +34,8 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
           message.status === MessageStatus.FAILED,
         "opacity-100": !message.status || message.status === MessageStatus.SENT,
       })}
+      // layout="position"
+      // {...messageAnimation}
     >
       {/* Attachments */}
       <RenderMultipleAttachments

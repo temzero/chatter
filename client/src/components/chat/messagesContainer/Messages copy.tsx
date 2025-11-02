@@ -1,50 +1,41 @@
-import React, { useMemo, useEffect } from "react";
+import React, { useMemo } from "react";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import {
   groupMessagesByDate,
   isRecentMessage,
   shouldShowInfo,
 } from "@/common/utils/message/messageHelpers";
-import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { AnimatePresence } from "framer-motion";
 import { getCurrentUser } from "@/stores/authStore";
 import { MessageReadInfo } from "./MessageReadInfo";
 import { useMessageStore } from "@/stores/messageStore";
 import Message from "../components/message/Message";
+import { useAutoMarkLastMessageRead } from "@/common/hooks/useAutoMarkMessageRead";
 
 interface ChatMessagesProps {
   chat: ChatResponse;
   messageIds: string[];
+  isSearch: boolean;
 }
 
-const Messages: React.FC<ChatMessagesProps> = ({ chat, messageIds }) => {
+const Messages: React.FC<ChatMessagesProps> = ({
+  chat,
+  messageIds,
+  isSearch,
+}) => {
   console.log("Messages render:", messageIds.length);
 
   const chatId = chat.id;
   const currentUser = getCurrentUser();
+
   const messagesById = useMessageStore.getState().messagesById;
   const messages = messageIds.map((id) => messagesById[id]).filter(Boolean);
 
   // ✅ Auto mark last message as read
-  useEffect(() => {
-    if (!chatId || !chat.myMemberId || messageIds.length === 0) return;
-
-    const lastMessage = messages[messages.length - 1];
-    if (!lastMessage) return;
-
-    const isFromOther = lastMessage.sender.id !== currentUser?.id;
-
-    if (isFromOther) {
-      const timer = setTimeout(() => {
-        chatWebSocketService.messageRead(
-          chatId,
-          chat.myMemberId,
-          lastMessage.id
-        );
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [chatId, chat.myMemberId, messageIds, currentUser?.id, messages]);
+  useAutoMarkLastMessageRead({
+    chat,
+    messages,
+  });
 
   // Group messageIds by date
   const groupedIdsByDate = useMemo(() => {
@@ -66,11 +57,13 @@ const Messages: React.FC<ChatMessagesProps> = ({ chat, messageIds }) => {
         return (
           <React.Fragment key={groupKey}>
             {/* Sticky Date Header */}
-            <div className="sticky top-0 flex justify-center z-[1]">
-              <div className="bg-[var(--background-color)] text-xs p-1 rounded">
-                {group.date || "Today"}
+            {!isSearch && (
+              <div className="sticky top-0 flex justify-center z-[1]">
+                <div className="bg-[var(--background-color)] text-xs p-1 rounded">
+                  {group.date || "Today"}
+                </div>
               </div>
-            </div>
+            )}
 
             <AnimatePresence initial={false}>
               {group.messages.map((message, index) => {

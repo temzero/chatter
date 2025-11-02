@@ -27,13 +27,31 @@ export const messageAnimations: Record<string, MotionProps> = {
   },
 };
 
-export const getMessageAnimation = (isMe: boolean): MotionProps => ({
-  initial: { opacity: 0, x: isMe ? 300 : -300 }, // 300px from side
-  animate: { opacity: 1, scale: 1, x: 0 },
-  exit: { opacity: 0, scale: 2 },
-  transition: {
-    type: "spring",
-    stiffness: 300,
-    damping: 28,
-  },
-});
+export const getMessageAnimation = (
+  isMe: boolean,
+  isSending = false
+): MotionProps => {
+  if (isSending) {
+    return {
+      animate: { opacity: [0.3, 0.6, 0.3] },
+      exit: { opacity: 0, scale: 0.1 },
+      transition: {
+        duration: 3,
+        repeat: Infinity,
+        repeatType: "loop",
+        ease: "easeInOut",
+      },
+    };
+  }
+
+  return {
+    initial: { opacity: 0, x: isMe ? 300 : -300 },
+    animate: { opacity: 1, scale: 1, x: 0 },
+    exit: { opacity: 0, scale: 2 },
+    transition: {
+      type: "spring",
+      stiffness: 300,
+      damping: 28,
+    },
+  };
+};

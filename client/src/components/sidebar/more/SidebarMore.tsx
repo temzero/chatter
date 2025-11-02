@@ -57,7 +57,7 @@ const SidebarMore: React.FC = () => {
 
   return (
     <aside
-      className={`relative h-full w-full flex flex-col justify-between transition-all duration-300 ease-in-out`}
+      className={`relative h-full w-full flex flex-col justify-between transition-all duration-300 ease-in-out select-none`}
     >
       {/* Header */}
       <header className="flex w-full justify-between items-center min-h-[var(--header-height)] custom-border-b">

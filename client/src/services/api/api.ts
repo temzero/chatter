@@ -6,8 +6,8 @@ import axios, {
   InternalAxiosRequestConfig,
 } from "axios";
 import { localStorageService } from "../storage/localStorageService";
-import { authService } from "@/services/http/authService";
 import { handleError } from "@/common/utils/handleError";
+import { useAuthStore } from "@/stores/authStore";
 
 const API: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -39,75 +39,19 @@ API.interceptors.request.use(
 );
 
 // RESPONSE interceptor
-let isRefreshing = false;
-let failedQueue: {
-  resolve: (value?: unknown) => void;
-  reject: (reason?: unknown) => void;
-}[] = [];
-
-const processQueue = (error: unknown, token: string | null = null) => {
-  failedQueue.forEach(({ resolve, reject }) => {
-    if (error) {
-      reject(error);
-    } else {
-      resolve(token);
-    }
-  });
-  failedQueue = [];
-};
-
 API.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError) => {
     console.error("API Error:", error.response?.data);
-    const originalRequest = error.config as InternalAxiosRequestConfig & {
-      _retry?: boolean;
-    };
-    // Handle 401 responses to refresh token via cookie
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
 
-      if (isRefreshing) {
-        // If refresh is in progress, queue the request until token refreshed
-        return new Promise((resolve, reject) => {
-          failedQueue.push({
-            resolve: (token?: unknown) => {
-              if (!originalRequest.headers)
-                originalRequest.headers = new axios.AxiosHeaders();
-              originalRequest.headers.Authorization = `Bearer ${
-                token as string
-              }`;
-              resolve(API(originalRequest));
-            },
-            reject: (err) => {
-              console.error("Error in failedQueue:", err);
-              reject(err);
-            },
-          });
-        });
-      }
-
-      isRefreshing = true;
-
-      try {
-        const newAccessToken = await authService.refreshToken();
-
-        localStorageService.setAccessToken(newAccessToken);
-
-        if (!originalRequest.headers)
-          originalRequest.headers = new axios.AxiosHeaders();
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-
-        processQueue(null, newAccessToken);
-        return API(originalRequest);
-      } catch (refreshError) {
-        processQueue(refreshError, null);
-        authService.logout();
+    if (error.response?.status === 401) {
+      console.log("Authentication failed, logging out...");
+      useAuthStore.getState().logout();
+      setTimeout(() => {
         window.location.href = "/login";
-        handleError(refreshError, "Api refresh error");
-      } finally {
-        isRefreshing = false;
-      }
+      }, 100);
+    } else {
+      handleError(error, "An unexpected error occurred");
     }
 
     return Promise.reject(error);

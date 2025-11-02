@@ -231,23 +231,52 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
       }));
     },
 
+    // deleteMessage: (chatId, messageId) => {
+    //   const { messagesById, messageIdsByChat } = get();
+    //   const newMessagesById = { ...messagesById };
+    //   delete newMessagesById[messageId];
+    //   const newIds = (messageIdsByChat[chatId] || []).filter(
+    //     (id) => id !== messageId
+    //   );
+
+    //   set({
+    //     messagesById: newMessagesById,
+    //     messageIdsByChat: { ...messageIdsByChat, [chatId]: newIds },
+    //   });
+
+    //   // Also remove from attachment store
+    //   useAttachmentStore.getState().removeMessageAttachments(messageId);
+
+    //   audioService.playSound(SoundType.MESSAGE_REMOVE);
+    // },
+
     deleteMessage: (chatId, messageId) => {
-      const { messagesById, messageIdsByChat } = get();
-      const newMessagesById = { ...messagesById };
-      delete newMessagesById[messageId];
+      const { messageIdsByChat } = get();
+
+      // 1️⃣ Immediately remove ID from messageIdsByChat → triggers exit animation
       const newIds = (messageIdsByChat[chatId] || []).filter(
         (id) => id !== messageId
       );
-
       set({
-        messagesById: newMessagesById,
         messageIdsByChat: { ...messageIdsByChat, [chatId]: newIds },
       });
 
-      // Also remove from attachment store
-      useAttachmentStore.getState().removeMessageAttachments(messageId);
+      // 2️⃣ Wait 3 seconds before removing from messagesById (cleanup)
+      setTimeout(() => {
+        const latestState = get();
+        const newMessagesById = { ...latestState.messagesById };
+        delete newMessagesById[messageId];
 
-      audioService.playSound(SoundType.MESSAGE_REMOVE)
+        set({
+          messagesById: newMessagesById,
+        });
+
+        // Also remove from attachment store
+        useAttachmentStore.getState().removeMessageAttachments(messageId);
+      }, 1000);
+
+      // 3️⃣ Play sound immediately
+      audioService.playSound(SoundType.MESSAGE_REMOVE);
     },
 
     getChatMessages: (chatId) => {

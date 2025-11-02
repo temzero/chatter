@@ -60,6 +60,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       ...initialState,
 
       initialize: async (): Promise<boolean> => {
+        console.log("initialize Auth");
         try {
           const token = localStorageService.getAccessToken();
           if (!token) {
@@ -114,6 +115,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       // Authentication methods
       login: async (identifier, password) => {
+        console.log("authStore login");
         try {
           get().setLoading(true); // Auto-clears messages
           useChatStore.getState().clearChats();

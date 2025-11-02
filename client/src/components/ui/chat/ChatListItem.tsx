@@ -265,7 +265,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
                 </div>
 
                 {unreadCount > 0 && (
-                  <div className="flex-shrink-0 font-bold text-white bg-red-500 rounded-full text-xs flex items-center justify-center w-4 h-4">
+                  <div className="flex-shrink-0 font-semibold text-white bg-red-500 rounded-full text-xs flex items-center justify-center p-1 h-4">
                     {unreadCount}
                   </div>
                 )}

@@ -7,7 +7,6 @@ import ChatBox from "@/components/chat/ChatBox";
 import SidebarInfo from "@/components/chat/sidebarInfo/SidebarInfo";
 
 import { useSidebarInfoVisibility } from "@/stores/sidebarInfoStore";
-import { useIsCompactSidebar } from "@/stores/sidebarStore";
 import { useIsMobile } from "@/stores/deviceStore";
 import { useIsMobileSound } from "@/common/hooks/useIsMobileSound";
 import { useActiveChatId } from "@/stores/chatStore";
@@ -21,22 +20,15 @@ const PrivateLayout: React.FC = () => {
 
   const isMobile = useIsMobile();
   const activeChatId = useActiveChatId();
-  const isSidebarCompact = useIsCompactSidebar();
   const isSidebarInfoVisible = useSidebarInfoVisibility();
 
   useIsMobileSound(isMobile);
 
   // Desktop Layout
   if (!isMobile) {
-    const sidebarClasses = isSidebarCompact
-      ? "w-[var(--sidebar-width-small)]"
-      : "w-[var(--sidebar-width)]";
-
     return (
       <div className="w-full h-full flex justify-between">
-        <div id="sidebar" className={sidebarClasses}>
-          <MemoSidebar />
-        </div>
+        <MemoSidebar />
         {activeChatId && (
           <>
             <ChatBox />
