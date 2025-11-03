@@ -142,6 +142,12 @@
     "settings": "Configuración"
   },
 
+  "sidebar_well_come": {
+    "well_come": "Bienvenido a",
+    "description": "Un lugar sencillo para chatear, compartir ideas y mantenerse conectado.",
+    "start_conversation": "¡Comienza una conversación ahora!"
+  },
+
   "sidebar_profile": {
     "title": "Mi perfil",
     "no_username": "Sin nombre de usuario",
@@ -158,7 +164,11 @@
   },
 
   "sidebar_new_chat": {
-    "title": "Nuevo chat {{type}}",
+    "title": {
+      "direct": "Nuevo Chat",
+      "group": "Nuevo Chat Grupal",
+      "channel": "Nuevo Chat de Canal"
+    },
     "direct": {
       "placeholder": "@nombredeusuario/correo/teléfono",
       "find_user": "Buscar usuario",

@@ -10,6 +10,9 @@ import {
   OneToMany,
   RelationId,
   OneToOne,
+  JoinTable,
+  ManyToMany,
+  BeforeInsert,
 } from 'typeorm';
 import { Chat } from 'src/modules/chat/entities/chat.entity';
 import { User } from '../../user/entities/user.entity';
@@ -87,8 +90,19 @@ export class Message {
   @OneToMany(() => Reaction, (reaction) => reaction.message)
   reactions: Reaction[];
 
-  @OneToMany(() => Attachment, (attachment) => attachment.message, {
-    cascade: ['insert', 'update'], // <- enable cascading saves
+  @ManyToMany(() => Attachment, (attachment) => attachment.messages, {
+    cascade: true, // This will handle the join table entries
+  })
+  @JoinTable({
+    name: 'message_attachments',
+    joinColumn: {
+      name: 'message_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'attachment_id',
+      referencedColumnName: 'id',
+    },
   })
   attachments: Attachment[];
 
@@ -122,4 +136,11 @@ export class Message {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @BeforeInsert()
+  validateMessage() {
+    if (!this.content && (!this.attachments || this.attachments.length === 0)) {
+      throw new Error('Message must have either content or attachments');
+    }
+  }
 }

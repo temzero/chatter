@@ -1,5 +1,6 @@
 // src/components/ui/Message.tsx
 import { useAuthStore } from "@/stores/authStore";
+import { useEffect } from "react";
 
 type AlertMessageProps = {
   className?: string;
@@ -7,6 +8,10 @@ type AlertMessageProps = {
 
 export const AlertMessage = ({ className = "" }: AlertMessageProps) => {
   const message = useAuthStore((state) => state.message);
+
+  useEffect(() => {
+    useAuthStore.setState({ message: null });
+  }, []);
 
   if (!message) return null;
 

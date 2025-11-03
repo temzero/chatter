@@ -55,14 +55,16 @@ const DeleteMessageModal: React.FC = () => {
       </div>
 
       <div className="flex custom-border-t">
-        <Button
-          variant="ghost"
-          fullWidth
-          onClick={() => handleDelete(false)}
-          className="text-yellow-500"
-        >
-          {t("modal.delete_message.delete_for_me")}
-        </Button>
+        {!isMe && (
+          <Button
+            variant="ghost"
+            fullWidth
+            onClick={() => handleDelete(false)}
+            className="text-yellow-500"
+          >
+            {t("modal.delete_message.delete_for_me")}
+          </Button>
+        )}
         {isMe && (
           <Button
             variant="ghost"
@@ -70,7 +72,7 @@ const DeleteMessageModal: React.FC = () => {
             onClick={() => handleDelete(true)}
             className="text-red-500"
           >
-            {t("modal.delete_message.delete_for_everyone")}
+            {t("common.actions.delete")}
           </Button>
         )}
       </div>

@@ -108,7 +108,6 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
         // Store message WITHOUT attachments
         const { attachments, ...messageWithoutAttachments } = m;
         messagesById[m.id] = messageWithoutAttachments as MessageResponse;
-
         // Save attachments to attachment store
         if (attachments && attachments.length > 0) {
           useAttachmentStore
@@ -127,6 +126,7 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
     },
 
     addMessage: (newMessage) => {
+      console.log('newMessage', newMessage)
       const { messagesById, messageIdsByChat } = get();
       const chatId = newMessage.chatId;
 

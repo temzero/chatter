@@ -4,6 +4,7 @@ import {
   useIsCompactSidebar,
 } from "@/stores/sidebarStore";
 import { useIsMobile } from "@/stores/deviceStore";
+import { SIDEBAR_WIDTHS } from "../constants/sidebarWidth";
 
 // hooks/useSidebarWidth.ts
 export const useSidebarWidth = () => {
@@ -11,14 +12,14 @@ export const useSidebarWidth = () => {
   const currentSidebar = useCurrentSidebar();
   const isSidebarCompact = useIsCompactSidebar();
 
-  if (isMobile) return "w-full";
+  if (isMobile) return SIDEBAR_WIDTHS.MOBILE;
 
   const getSidebarWidth = () => {
     // Default behavior
     const compactSupported = compactSupportedSidebars.includes(currentSidebar);
     return compactSupported && isSidebarCompact
-      ? "w-[var(--sidebar-width-small)]"
-      : "w-[var(--sidebar-width)]";
+      ? SIDEBAR_WIDTHS.DESKTOP_COMPACT
+      : SIDEBAR_WIDTHS.DESKTOP;
   };
 
   return getSidebarWidth();

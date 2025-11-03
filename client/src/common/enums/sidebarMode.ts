@@ -1,6 +1,7 @@
 export enum SidebarMode {
   // Main Modes
   DEFAULT = "default",
+  WELL_COME = "wellCome",
   NEW_CHAT = "newChat",
   SEARCH = "search",
   MORE = "more",

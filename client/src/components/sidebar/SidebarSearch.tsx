@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { getSetSidebar } from "@/stores/sidebarStore";
 import { SlidingContainer } from "@/components/ui/layout/SlidingContainer";
-import { useChatStore } from "@/stores/chatStore";
+import { getChats } from "@/stores/chatStore";
 import { filterChatsByType } from "@/common/utils/chat/filterChatsByType";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
@@ -13,7 +13,7 @@ const chatTypes = ["all", ChatType.DIRECT, ChatType.GROUP, ChatType.CHANNEL];
 
 const SidebarSearch: React.FC = () => {
   const { t } = useTranslation();
-  const chats = useChatStore((state) => state.chats); // Get all chats instead of filteredChats
+  const chats = getChats();
   const setSidebar = getSetSidebar();
 
   const [selectedType, setSelectedType] = useState("all");
@@ -33,6 +33,11 @@ const SidebarSearch: React.FC = () => {
   const filteredChatsByType = React.useMemo(
     () => filterChatsByType(filteredChats, selectedType),
     [selectedType, filteredChats]
+  );
+
+  const filteredChatIds = React.useMemo(
+    () => filteredChatsByType.map((chat) => chat.id),
+    [filteredChatsByType]
   );
 
   const getTypeClass = (type: ChatType | string) =>
@@ -76,7 +81,7 @@ const SidebarSearch: React.FC = () => {
           onSearch={handleSearch}
         />
         <span
-          className="material-symbols-outlined text-2xl opacity-60 hover:opacity-100 p-1 cursor-pointer"
+          className="material-symbols-outlined text-2xl opacity-60 hover:opacity-100 p-2 cursor-pointer"
           onClick={() => setSidebar(SidebarMode.DEFAULT)}
         >
           close
@@ -105,7 +110,7 @@ const SidebarSearch: React.FC = () => {
       {/* Chat List Container */}
       <SlidingContainer uniqueKey={selectedType} direction={direction}>
         {filteredChatsByType.length > 0 ? (
-          <ChatList chats={filteredChatsByType} />
+          <ChatList chatIds={filteredChatIds} />
         ) : (
           <div className="flex flex-col items-center justify-center my-auto opacity-40 py-10">
             <i className="material-symbols-outlined text-6xl">search_off</i>

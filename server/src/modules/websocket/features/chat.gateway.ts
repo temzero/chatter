@@ -232,6 +232,48 @@ export class ChatGateway {
     }
   }
 
+  @SubscribeMessage(ChatEvent.SAVE_MESSAGE)
+  async handleSaveMessage(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() data: { messageId: string | null },
+  ) {
+    const userId = client.data.userId;
+    if (!userId || !data.messageId) {
+      client.emit('error', { message: 'Invalid save request' });
+      return;
+    }
+    try {
+      // Step 1: Get or create the user's saved chat
+      const savedChat = await this.chatService.getOrCreateSavedChat(userId);
+
+      if (!savedChat) {
+        client.emit('error', { message: 'Saved chat not found!' });
+        return;
+      }
+
+      // 2. Forward the message into the saved chat
+      const savedMessage = await this.messageService.createForwardedMessage(
+        userId,
+        savedChat.id,
+        data.messageId,
+      );
+
+      // Step 3: Format and emit to client
+      const messageResponse =
+        this.messageMapper.mapMessageToMessageResDto(savedMessage);
+
+      console.log('Saved messageResponse', messageResponse);
+
+      await this.websocketNotificationService.emitToChatMembers(
+        savedChat.id,
+        ChatEvent.SAVE_MESSAGE,
+        messageResponse,
+      );
+    } catch (error) {
+      emitWsError(client, error, 'Failed to save message');
+    }
+  }
+
   @SubscribeMessage(ChatEvent.REACT_TO_MESSAGE)
   async handleReactToMessage(
     @ConnectedSocket() client: AuthenticatedSocket,
@@ -331,45 +373,6 @@ export class ChatGateway {
       }
     } catch (error) {
       emitWsError(client, error, 'Failed to toggle pin message');
-    }
-  }
-
-  @SubscribeMessage(ChatEvent.SAVE_MESSAGE)
-  async handleSaveMessage(
-    @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() data: { messageId: string | null },
-  ) {
-    const userId = client.data.userId;
-    if (!userId || !data.messageId) {
-      client.emit('error', { message: 'Invalid save request' });
-      return;
-    }
-    try {
-      // Step 1: Get or create the user's saved chat
-      const savedChat = await this.chatService.getOrCreateSavedChat(userId);
-
-      if (!savedChat) {
-        client.emit('error', { message: 'Saved chat not found!' });
-        return;
-      }
-
-      // 2. Forward the message into the saved chat
-      const savedMessage = await this.messageService.createForwardedMessage(
-        userId,
-        savedChat.id,
-        data.messageId,
-      );
-
-      // Step 3: Format and emit to client
-      const response =
-        this.messageMapper.mapMessageToMessageResDto(savedMessage);
-      this.websocketNotificationService.emitToUser(
-        userId,
-        ChatEvent.SAVE_MESSAGE,
-        response,
-      );
-    } catch (error) {
-      emitWsError(client, error, 'Failed to save message');
     }
   }
 

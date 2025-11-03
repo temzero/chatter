@@ -61,41 +61,6 @@ export class AttachmentsController {
     }
   }
 
-  @Get('count')
-  async getAttachmentCount(
-    @Param('chatId', ParseUUIDPipe) chatId: string,
-  ): Promise<SuccessResponse<{ count: number }>> {
-    try {
-      const count =
-        await this.attachmentService.getAttachmentCountByChat(chatId);
-      return new SuccessResponse(
-        { count },
-        'Attachment count retrieved successfully',
-      );
-    } catch (error: unknown) {
-      ErrorResponse.throw(error, 'Failed to retrieve attachment count');
-    }
-  }
-
-  @Get('count-by-type')
-  async getAttachmentsCountByType(
-    @Param('chatId', ParseUUIDPipe) chatId: string,
-  ): Promise<SuccessResponse<Record<string, number>>> {
-    try {
-      const counts =
-        await this.attachmentService.getAttachmentsByTypeCount(chatId);
-      return new SuccessResponse(
-        counts,
-        'Attachment counts by type retrieved successfully',
-      );
-    } catch (error: unknown) {
-      ErrorResponse.throw(
-        error,
-        'Failed to retrieve attachment counts by type',
-      );
-    }
-  }
-
   @Get(':attachmentId')
   async getAttachment(
     @Param('attachmentId', ParseUUIDPipe) attachmentId: string,

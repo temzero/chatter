@@ -10,6 +10,7 @@ import { AttachmentType } from 'src/shared/types/enums/attachment-type.enum';
 import { plainToInstance } from 'class-transformer';
 import { Message } from '../message/entities/message.entity';
 import { SupabaseService } from '../superbase/supabase.service';
+import { AttachmentUploadRequest } from 'src/shared/types/requests/attachment-upload.request';
 
 @Injectable()
 export class AttachmentService {
@@ -28,23 +29,38 @@ export class AttachmentService {
   ): Promise<PaginationResponse<AttachmentResponseDto>> {
     const { lastId, limit = 12 } = query ?? {};
 
-    // Start query filtered by chat
+    // Query attachments through the join table
     let attachmentQuery = this.attachmentRepo
       .createQueryBuilder('attachment')
-      .where('attachment.chatId = :chatId', { chatId });
+      .innerJoin(
+        'message_attachments',
+        'ma',
+        'ma.attachment_id = attachment.id',
+      )
+      .innerJoin('message', 'message', 'message.id = ma.message_id')
+      .where('message.chatId = :chatId', { chatId })
+      .andWhere('message.isDeleted = false');
 
-    // Filter by type *first*
+    // Filter by type
     if (type) {
       attachmentQuery = attachmentQuery.andWhere('attachment.type = :type', {
         type,
       });
     }
 
-    // Apply pagination *after* filtering by type
+    // Apply pagination
     if (lastId) {
-      const lastAttachment = await this.attachmentRepo.findOne({
-        where: { id: lastId, chatId, ...(type ? { type } : {}) },
-      });
+      const lastAttachment = await this.attachmentRepo
+        .createQueryBuilder('attachment')
+        .innerJoin(
+          'message_attachments',
+          'ma',
+          'ma.attachment_id = attachment.id',
+        )
+        .innerJoin('message', 'message', 'message.id = ma.message_id')
+        .where('message.chatId = :chatId', { chatId })
+        .andWhere('attachment.id = :lastId', { lastId })
+        .getOne();
 
       if (lastAttachment) {
         attachmentQuery = attachmentQuery.andWhere(
@@ -57,8 +73,8 @@ export class AttachmentService {
       }
     }
 
-    // Sort and limit
     attachmentQuery = attachmentQuery
+      .distinct(true)
       .orderBy('attachment.createdAt', 'DESC')
       .addOrderBy('attachment.id', 'DESC')
       .take(limit + 1);
@@ -86,114 +102,121 @@ export class AttachmentService {
   }
 
   async deleteAttachment(id: string): Promise<void> {
-    const result = await this.attachmentRepo.delete(id);
-
-    if (result.affected === 0) {
-      throw new NotFoundException('Attachment not found');
-    }
-  }
-
-  async getAttachmentCountByChat(chatId: string): Promise<number> {
-    return this.attachmentRepo
-      .createQueryBuilder('attachment')
-      .where('attachment.chatId = :chatId', { chatId })
-      .getCount();
-  }
-
-  async getAttachmentsByTypeCount(
-    chatId: string,
-  ): Promise<Record<string, number>> {
-    const result = await this.attachmentRepo
-      .createQueryBuilder('attachment')
-      .select('attachment.type', 'type')
-      .addSelect('COUNT(attachment.id)', 'count')
-      .where('attachment.chatId = :chatId', { chatId })
-      .groupBy('attachment.type')
-      .getRawMany<{ type: string; count: string }>();
-
-    const counts: Record<string, number> = {};
-
-    result.forEach((item) => {
-      counts[item.type] = Number(item.count);
+    const attachment = await this.attachmentRepo.findOne({
+      where: { id },
+      relations: ['messages'], // Check if used by any messages
     });
 
-    return counts;
+    if (!attachment) {
+      throw new NotFoundException('Attachment not found');
+    }
+
+    // Check if attachment is used by any messages
+    if (attachment.messages && attachment.messages.length > 0) {
+      throw new NotFoundException(
+        'Cannot delete attachment that is still used by messages',
+      );
+    }
+
+    // Delete files from storage
+    if (attachment.url) {
+      await this.supabaseService
+        .deleteFileByUrl(attachment.url)
+        .catch(console.error);
+    }
+    if (attachment.thumbnailUrl) {
+      await this.supabaseService
+        .deleteFileByUrl(attachment.thumbnailUrl)
+        .catch(console.error);
+    }
+
+    // Delete attachment record
+    await this.attachmentRepo.delete(id);
   }
 
   async createAttachment(
-    createDto: Partial<Attachment>,
-  ): Promise<AttachmentResponseDto> {
-    const attachment = this.attachmentRepo.create(createDto);
-    const savedAttachment = await this.attachmentRepo.save(attachment);
-    return plainToInstance(AttachmentResponseDto, savedAttachment);
+    createDto: AttachmentUploadRequest,
+  ): Promise<Attachment> {
+    const attachment = this.attachmentRepo.create({
+      ...createDto,
+      createdAt: createDto.createdAt || new Date(),
+    });
+    return await this.attachmentRepo.save(attachment);
   }
 
-  async createAttachments(
-    messageId: string, // ✅ Accept messageId as parameter
-    chatId: string, // ✅ Accept chatId as parameter
-    attachmentDtos: Omit<Partial<Attachment>, 'messageId' | 'chatId'>[], // ✅ Exclude these from DTOs
-  ): Promise<AttachmentResponseDto[]> {
-    // ✅ Validate that message exists
-    const messageExists = await this.messageRepo.exists({
-      where: { id: messageId },
-    });
-    if (!messageExists) {
-      throw new NotFoundException(`Message with ID ${messageId} not found`);
-    }
-
-    // ✅ Create attachments with guaranteed messageId and chatId
+  async createAttachmentsBulk(
+    createDtos: AttachmentUploadRequest[],
+  ): Promise<Attachment[]> {
     const attachments = this.attachmentRepo.create(
-      attachmentDtos.map((dto) => ({
+      createDtos.map((dto) => ({
         ...dto,
-        messageId, // ✅ Always set correctly
-        chatId, // ✅ Always set correctly
-        createdAt: dto.createdAt ? new Date(dto.createdAt) : new Date(),
+        createdAt: dto.createdAt || new Date(),
       })),
     );
-
-    const savedAttachments = await this.attachmentRepo.save(attachments);
-    return plainToInstance(AttachmentResponseDto, savedAttachments);
+    return await this.attachmentRepo.save(attachments);
   }
 
   async deleteAttachmentsByMessageId(messageId: string): Promise<void> {
-    // 1. Get all attachments for this message first
-    const attachments = await this.attachmentRepo.find({
-      where: { messageId },
-      select: ['id', 'url', 'thumbnailUrl'], // Only select needed fields
+    // 1. Get the message with its attachments
+    const message = await this.messageRepo.findOne({
+      where: { id: messageId },
+      relations: ['attachments'],
     });
 
-    if (attachments.length === 0) {
-      return; // No attachments to delete
+    if (!message || !message.attachments || message.attachments.length === 0) {
+      return; // No attachments to process
     }
 
-    // 2. Delete files from storage if SupabaseService is provided
-    for (const attachment of attachments) {
-      if (attachment.url) {
-        await this.supabaseService
-          .deleteFileByUrl(attachment.url)
-          .catch((error) => {
-            console.error(`Failed to delete file ${attachment.url}:`, error);
-            // Continue with other files even if one fails
-          });
-      }
-      if (attachment.thumbnailUrl) {
-        await this.supabaseService
-          .deleteFileByUrl(attachment.thumbnailUrl)
-          .catch((error) => {
-            console.error(
-              `Failed to delete thumbnail ${attachment.thumbnailUrl}:`,
-              error,
-            );
-            // Continue with other files even if one fails
-          });
+    // 2. Check each attachment to see if it's used by other messages
+    for (const attachment of message.attachments) {
+      // Count how many messages reference this attachment
+      const messageCount = await this.messageRepo
+        .createQueryBuilder('message')
+        .innerJoin('message.attachments', 'attachment')
+        .where('attachment.id = :attachmentId', { attachmentId: attachment.id })
+        .getCount();
+
+      // If this is the only message using the attachment, delete the files
+      if (messageCount <= 1) {
+        // Delete files from storage
+        if (attachment.url) {
+          await this.supabaseService
+            .deleteFileByUrl(attachment.url)
+            .catch((error) => {
+              console.error(`Failed to delete file ${attachment.url}:`, error);
+            });
+        }
+        if (attachment.thumbnailUrl) {
+          await this.supabaseService
+            .deleteFileByUrl(attachment.thumbnailUrl)
+            .catch((error) => {
+              console.error(
+                `Failed to delete thumbnail ${attachment.thumbnailUrl}:`,
+                error,
+              );
+            });
+        }
+
+        // Delete the attachment record from database
+        await this.attachmentRepo.delete(attachment.id);
+        console.log(`Deleted orphaned attachment: ${attachment.id}`);
+      } else {
+        console.log(
+          `Attachment ${attachment.id} is still used by ${messageCount - 1} other messages, keeping it.`,
+        );
       }
     }
 
-    // 3. Delete attachment records from database
-    const result = await this.attachmentRepo.delete({ messageId });
+    // 3. TypeORM automatically removes entries from message_attachments join table
+  }
 
-    console.log(
-      `Deleted ${result.affected} attachments for message ${messageId}`,
-    );
+  // ✅ NEW: Helper method to find existing attachments by URLs (for deduplication)
+  async findAttachmentsByUrls(urls: string[]): Promise<Attachment[]> {
+    if (!urls.length) return [];
+
+    return await this.attachmentRepo
+      .createQueryBuilder('attachment')
+      .where('attachment.url IN (:...urls)', { urls })
+      .getMany();
   }
 }

@@ -58,8 +58,8 @@ export function useChatSocketListeners() {
     ) => {
       try {
         const { payload: message } = wsMessage;
-        toast.success("Message saved!");
         useMessageStore.getState().addMessage(message);
+        toast.success("Message saved!");
       } catch (error) {
         handleError(error, "Failed to save message");
       }

@@ -21,6 +21,7 @@ import { WebsocketNotificationService } from '../websocket/services/websocket-no
 import { Call } from '../call/entities/call.entity';
 import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
 import { AttachmentService } from '../attachment/attachment.service';
+import { Attachment } from '../attachment/entity/attachment.entity';
 
 @Injectable()
 export class MessageService {
@@ -44,69 +45,58 @@ export class MessageService {
     private readonly websocketNotificationService: WebsocketNotificationService,
   ) {}
 
-  // Updated createMessage method
   async createMessage(
     senderId: string,
     dto: CreateMessageDto,
   ): Promise<Message> {
     console.log('CreateMessageDto', dto);
-    // Validation: Check if trying to reply (should use createReplyMessage instead)
+
     if (dto.replyToMessageId) {
       ErrorResponse.badRequest('Use createReplyMessage for replying');
     }
 
-    // Get chat with members for validation
     const chat = await this.chatRepo.findOne({
       where: { id: dto.chatId },
       relations: ['members'],
     });
     if (!chat) ErrorResponse.notFound('Chat not found');
 
-    // Check for blocking in direct chats
     await this.ensureNoBlockingInDirectChat(senderId, chat);
 
-    // Verify user is a member of the chat
     const isMember = await this.chatMemberRepo.exists({
       where: { chatId: dto.chatId, userId: senderId },
     });
     if (!isMember) ErrorResponse.notFound('You are not a member of this chat');
 
-    // ✅ Create message FIRST to get the ID
+    // ✅ Handle attachments first
+    let attachments: Attachment[] = [];
+    if (dto.attachments?.length) {
+      attachments = await this.attachmentService.createAttachmentsBulk(
+        dto.attachments,
+      );
+    }
+
+    // ✅ Create message WITH attachments
     const message = this.messageRepo.create({
-      id: dto.id, // Client provides this ID
+      id: dto.id,
       chatId: dto.chatId,
       senderId,
       content: dto.content,
+      attachments, // Many-to-many relationship
     });
 
     console.log('message', message);
 
     const savedMessage = await this.messageRepo.save(message);
-
     console.log('savedMessage', savedMessage);
 
-    if (dto.attachments?.length) {
-      const normalizedAttachments = dto.attachments.map((attachment) => ({
-        ...attachment,
-        createdAt: attachment.createdAt
-          ? new Date(attachment.createdAt)
-          : new Date(),
-      }));
-
-      await this.attachmentService.createAttachments(
-        savedMessage.id, // messageId
-        savedMessage.chatId, // chatId
-        normalizedAttachments,
-      );
-    }
-
-    // Update last visible message for all chat members
+    // ✅ Update last visible message
     await this.chatMemberRepo.update(
       { chatId: dto.chatId },
       { lastVisibleMessageId: savedMessage.id },
     );
 
-    // ✅ RELOAD the message to include attachments and all relations
+    // ✅ RELOAD with all relations
     return await this.getFullMessageById(savedMessage.id);
   }
 
@@ -145,7 +135,13 @@ export class MessageService {
       ErrorResponse.badRequest('Cannot reply to a reply');
     }
 
-    // ✅ Create message first (without attachments)
+    let attachments: Attachment[] = [];
+    if (dto.attachments?.length) {
+      attachments = await this.attachmentService.createAttachmentsBulk(
+        dto.attachments,
+      );
+    }
+
     const message = this.messageRepo.create({
       id: dto.id,
       chatId: dto.chatId,
@@ -153,7 +149,7 @@ export class MessageService {
       content: dto.content,
       replyToMessageId: dto.replyToMessageId,
       replyToMessage: replyToMessage,
-      // Don't include attachments here - handled by AttachmentService
+      attachments,
     });
 
     const savedMessage = await this.messageRepo.save(message);
@@ -164,21 +160,6 @@ export class MessageService {
       'replyCount',
       1,
     );
-
-    if (dto.attachments && dto.attachments.length > 0) {
-      const normalizedAttachments = dto.attachments.map((attachment) => ({
-        ...attachment,
-        createdAt: attachment.createdAt
-          ? new Date(attachment.createdAt)
-          : new Date(),
-      }));
-
-      await this.attachmentService.createAttachments(
-        savedMessage.id,
-        savedMessage.chatId,
-        normalizedAttachments,
-      );
-    }
 
     await this.chatMemberRepo.update(
       { chatId: dto.chatId },
@@ -217,18 +198,16 @@ export class MessageService {
     this.ensureCanForwardInChannel(chat, myMember);
     await this.ensureNoBlockingInDirectChat(senderId, chat);
 
-    // ✅ Create message WITHOUT copying attachments
     const newMessage = this.messageRepo.create({
       senderId,
       chatId: targetChatId,
       content: originalMessage.content,
       forwardedFromMessage: originalMessage,
-      // ❌ NO attachments here - they belong to the original message
+      attachments: originalMessage.attachments,
     });
 
     const savedMessage = await this.messageRepo.save(newMessage);
 
-    // ✅ NO attachment creation - forwarded message uses original's attachments
     await this.chatMemberRepo.update(
       { chatId: chat.id },
       { lastVisibleMessageId: savedMessage.id },
@@ -319,7 +298,7 @@ export class MessageService {
           chat: { id: chatId },
           content: Like(`%${searchTerm}%`),
         },
-        relations: ['sender', 'chat', 'call'],
+        relations: ['sender', 'chat', 'call', 'attachments'],
       });
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to search messages');
@@ -331,6 +310,7 @@ export class MessageService {
       return await this.messageRepo.findOne({
         where: { chat: { id: chatId } },
         order: { createdAt: 'DESC' },
+        relations: ['attachments'],
       });
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to retrieve last message');
@@ -712,10 +692,6 @@ export class MessageService {
           'replyForwarded',
         )
         .leftJoinAndSelect('replyForwarded.sender', 'replyForwardedSender')
-        .leftJoinAndSelect(
-          'replyForwarded.attachments',
-          'replyForwardedAttachments',
-        )
 
         // Direct forwarded message (of current message)
         .leftJoinAndSelect(
@@ -723,11 +699,6 @@ export class MessageService {
           'forwardedFromMessage',
         )
         .leftJoinAndSelect('forwardedFromMessage.sender', 'forwardedSender')
-        .leftJoinAndSelect(
-          'forwardedFromMessage.attachments',
-          'forwardedAttachments',
-        )
-
         .select([
           'message',
           'sender.id',
@@ -769,17 +740,14 @@ export class MessageService {
           'replyForwardedSender.firstName',
           'replyForwardedSender.lastName',
           'replyForwardedSender.avatarUrl',
-          'replyForwardedAttachments',
 
           // Forwarded from current message
           'forwardedFromMessage.id',
-          'forwardedFromMessage.content',
           'forwardedFromMessage.createdAt',
           'forwardedSender.id',
           'forwardedSender.firstName',
           'forwardedSender.lastName',
           'forwardedSender.avatarUrl',
-          'forwardedAttachments',
         ])
     );
   }

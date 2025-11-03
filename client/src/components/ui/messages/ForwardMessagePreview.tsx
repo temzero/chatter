@@ -22,21 +22,26 @@ const ForwardedMessagePreview: React.FC<ForwardedMessagePreviewProps> = ({
   if (!message) return null;
   const isOriginalFromMe = originalSender?.id === currentUserId;
 
+  const content = message.forwardedFromMessage?.content ?? message.content;
+  const attachments =
+    message.forwardedFromMessage?.attachments ?? message.attachments;
+
   return (
     <>
       <div
-        style={{ width: "100%" }}
-        className={clsx("message-bubble custom-border", {
+        style={{ width: "100%", borderRadius: 0 }}
+        className={clsx("message-bubble custom-border-b", {
           "self-message": isOriginalFromMe,
         })}
       >
-        {message.attachments && (
+        {attachments && (
           <RenderMultipleAttachments
             chatId={message.chatId}
             messageId={message.id}
+            // attachments={attachments}
           />
         )}
-        {message.content && <p className="italic">{message.content}</p>}
+        {content && <p className="italic">{content}</p>}
       </div>
 
       {/* show only if originalSender exists */}
@@ -45,7 +50,7 @@ const ForwardedMessagePreview: React.FC<ForwardedMessagePreviewProps> = ({
           <div className="opacity-60 text-sm px-2 pb-1 flex items-center justify-between gap-2 bg-black/50">
             <h1>
               {isOriginalFromMe
-                ? "from Me"
+                ? "from me"
                 : `from ${originalSender.displayName}`}
             </h1>
             <span className="material-symbols-outlined -rotate-90">

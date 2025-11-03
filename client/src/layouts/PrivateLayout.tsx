@@ -32,11 +32,7 @@ const PrivateLayout: React.FC = () => {
         {activeChatId && (
           <>
             <ChatBox />
-            {isSidebarInfoVisible && (
-              <div id="sidebar-info" className="w-[var(--sidebar-width)]">
-                <MemoSidebarInfo />
-              </div>
-            )}
+            {isSidebarInfoVisible && <MemoSidebarInfo />}
           </>
         )}
       </div>

@@ -3,6 +3,7 @@ import { Logo } from "@/components/ui/icons/Logo";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/common/constants/routes";
 import BackgroundContent from "@/components/ui/layout/BackgroundContent";
+import { APP_NAME } from "@/common/constants/name";
 
 interface AuthenticationLayoutProps {
   children: ReactNode;
@@ -29,7 +30,7 @@ export const AuthenticationLayout = ({
           onClick={handleLogoClick}
         >
           <Logo className="w-[50px] text-white" />
-          <h1 className="text-5xl text-white">Chatter</h1>
+          <h1 className="text-5xl text-white">{APP_NAME}</h1>
         </div>
 
         {children}

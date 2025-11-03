@@ -76,6 +76,7 @@ export class AuthController {
     setRefreshTokenCookie(response, refreshToken, this.configService);
     return {
       accessToken,
+      user,
       message: `User ${user.firstName} registered and logged in successfully. Please verify your email.`,
     };
   }

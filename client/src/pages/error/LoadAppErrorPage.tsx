@@ -1,13 +1,14 @@
 import React from "react";
 import { Logo } from "@/components/ui/icons/Logo";
 import { motion } from "framer-motion";
+import { APP_NAME } from "@/common/constants/name";
 
 const LoadAppErrorPage: React.FC = () => {
   return (
     <div className="relative flex flex-col items-center justify-center h-screen bg-red-500 text-white">
       <div className="absolute top-4 left-4 flex gap-1 items-center">
         <Logo className="h-8 w-8" />
-        <h1 className="text-2xl font-semibold">Chatter</h1>
+        <h1 className="text-2xl font-semibold">{APP_NAME}</h1>
       </div>
       <motion.span
         initial={{ scale: 1.6, opacity: 0 }}

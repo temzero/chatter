@@ -142,6 +142,12 @@
     "settings": "การตั้งค่า"
   },
 
+  "sidebar_well_come": {
+    "well_come": "ยินดีต้อนรับสู่",
+    "description": "สถานที่ง่ายๆ สำหรับการแชท แบ่งปันความคิด และติดต่อกัน",
+    "start_conversation": "เริ่มการสนทนาตอนนี้เลย!"
+  },
+  
   "sidebar_profile": {
     "title": "โปรไฟล์ของฉัน",
     "no_username": "ไม่มีชื่อผู้ใช้",
@@ -158,7 +164,11 @@
   },
 
   "sidebar_new_chat": {
-    "title": "แชท{{type}}ใหม่",
+    "title": {
+      "direct": "แชทใหม่",
+      "group": "แชทกลุ่มใหม่",
+      "channel": "แชทช่องใหม่"
+    },
     "direct": {
       "placeholder": "@ชื่อผู้ใช้/อีเมล/หมายเลขโทรศัพท์",
       "find_user": "ค้นหาผู้ใช้",

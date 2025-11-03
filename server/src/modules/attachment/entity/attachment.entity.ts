@@ -2,34 +2,35 @@
 import {
   Entity,
   PrimaryGeneratedColumn,
-  ManyToOne,
-  JoinColumn,
   Column,
   CreateDateColumn,
   UpdateDateColumn,
   Index,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { Message } from 'src/modules/message/entities/message.entity';
 import { AttachmentType } from 'src/shared/types/enums/attachment-type.enum';
 
 @Entity('attachment')
-@Index(['chatId']) // Index for fast chat-based queries
-@Index(['chatId', 'createdAt']) // Composite index for pagination
+@Index(['url'])
 export class Attachment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Message, (message) => message.attachments, {
-    onDelete: 'CASCADE',
+  @ManyToMany(() => Message, (message) => message.attachments)
+  @JoinTable({
+    name: 'message_attachments', // Join table name
+    joinColumn: {
+      name: 'attachment_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'message_id',
+      referencedColumnName: 'id',
+    },
   })
-  @JoinColumn({ name: 'message_id' })
-  message: Message;
-
-  @Column({ name: 'message_id' })
-  messageId: string;
-
-  @Column({ name: 'chat_id' })
-  chatId: string;
+  messages: Message[];
 
   @Column({
     type: 'enum',

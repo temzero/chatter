@@ -150,7 +150,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
 
     case ChatType.SAVED:
       return (
-        <span className="material-symbols-outlined text-4xl">bookmark</span>
+        <span className="material-symbols-outlined filled text-4xl">bookmark</span>
       );
 
     default:

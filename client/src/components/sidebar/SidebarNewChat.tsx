@@ -24,8 +24,8 @@ const SidebarNewChat: React.FC = () => {
 
   const handleChatTypeChange = (type: ChatType) => {
     if (type === selectedType) return;
-    const currentIndex = Object.values(ChatType).indexOf(selectedType);
-    const newIndex = Object.values(ChatType).indexOf(type);
+    const currentIndex = sidebarChatTypes.indexOf(selectedType);
+    const newIndex = sidebarChatTypes.indexOf(type);
     setDirection(newIndex > currentIndex ? 1 : -1);
     setSelectedType(type);
   };
@@ -33,12 +33,12 @@ const SidebarNewChat: React.FC = () => {
   const getTypeLabel = (type: ChatType) => {
     switch (type) {
       case ChatType.GROUP:
-        return t("chat.group");
+        return t("sidebar_new_chat.title.group");
       case ChatType.CHANNEL:
-        return t("chat.channel");
+        return t("sidebar_new_chat.title.channel");
       case ChatType.DIRECT:
       default:
-        return "Chat";
+        return t("sidebar_new_chat.title.direct");
     }
   };
 
@@ -63,20 +63,18 @@ const SidebarNewChat: React.FC = () => {
       case ChatType.CHANNEL:
         return <CreateNewGroupChat type={ChatType.CHANNEL} />;
       default:
-        return null;
+        return <CreateNewChat />;
     }
   };
 
   return (
     <aside className="w-full h-full flex flex-col transition-all duration-300 ease-in-out">
-      <header className="flex w-full items-center h-[var(--header-height)] p-2 pr-0 justify-between">
+      <header className="flex w-full items-center h-[var(--header-height)] justify-between px-2">
         <h1 className="font-semibold text-xl pl-1">
-          {t("sidebar_new_chat.title", {
-            type: t(getTypeLabel(selectedType)),
-          })}
+          {getTypeLabel(selectedType)}
         </h1>
         <i
-          className="material-symbols-outlined text-2xl opacity-60 hover:opacity-100 p-1 cursor-pointer"
+          className="material-symbols-outlined text-2xl opacity-60 hover:opacity-100 cursor-pointer"
           onClick={() => setSidebar(SidebarMode.DEFAULT)}
         >
           close
@@ -102,7 +100,7 @@ const SidebarNewChat: React.FC = () => {
       </div>
 
       <SlidingContainer uniqueKey={selectedType} direction={direction}>
-        {NewChatWrapper(selectedType)}
+          {NewChatWrapper(selectedType)}
       </SlidingContainer>
     </aside>
   );

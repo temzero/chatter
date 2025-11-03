@@ -33,7 +33,7 @@ interface ChatStoreState {
 
 interface ChatStoreActions {
   setInitialData: (data: PaginationResponse<ChatDataResponse>) => void;
-  getChatById: (id?: string) => ChatResponse | undefined;
+  getChatById: (id?: string) => ChatResponse | null;
   getActiveChat: () => ChatResponse | null;
   getOrFetchChatById: (
     id: string,
@@ -134,27 +134,35 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
     },
 
     getChatById: (chatId?: string) => {
-      if (!chatId) return undefined;
-      return get().chats[chatId];
-    },
+      if (!chatId) return null;
 
-    // getActiveChat: () => {
-    //   const { activeChatId, chats } = get();
-    //   if (!activeChatId) return null;
-    //   return chats[activeChatId] || null;
-    // },
+      const { chats, savedChat } = get();
+      const chat = chats[chatId];
+
+      if (chat) return chat;
+
+      // if not found in chats, check savedChat
+      if (savedChat && savedChat.id === chatId) {
+        return savedChat;
+      }
+
+      return null;
+    },
 
     getActiveChat: () => {
       const { activeChatId, chats, savedChat } = get();
       if (!activeChatId) return null;
 
-      // First check if it's the saved chat
-      if (savedChat && activeChatId === savedChat.id) {
+      // ✅ First check regular chats
+      const activeChat = chats[activeChatId];
+      if (activeChat) return activeChat;
+
+      // ✅ Then check savedChat if it matches
+      if (savedChat && savedChat.id === activeChatId) {
         return savedChat;
       }
 
-      // Then check regular chats
-      return chats[activeChatId] || null;
+      return null;
     },
 
     getOrFetchChatById: async (

@@ -1,14 +1,17 @@
+import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCurrentSidebarInfo } from "@/stores/sidebarInfoStore";
+import { sidebarInfoAnimations } from "@/common/animations/sidebarInfoAnimations";
+import { useSidebarInfoWidth } from "@/common/hooks/useSidebarInfoWidth";
 import ChatInfoDefault from "./SidebarInfoDefault";
 import ChatInfoMedia from "./sidebarInfoMedia/SidebarInfoMedia";
 import PrivateChatEdit from "./sidebarInfoEdit/DirectChatEdit";
 import GroupChatEdit from "./sidebarInfoEdit/GroupChatEdit";
 import ChatMembersEdit from "./sidebarInfoEdit/ChatMembersEdit";
-import { sidebarInfoAnimations } from "@/common/animations/sidebarInfoAnimations";
 
 const SidebarInfo: React.FC = () => {
   const currentSidebarInfo = useCurrentSidebarInfo();
+  const sidebarInfoWidthClass = useSidebarInfoWidth();
 
   // Define your chat info components
   const chatInfoComponents = {
@@ -27,7 +30,12 @@ const SidebarInfo: React.FC = () => {
     ] || sidebarInfoAnimations.fallback;
 
   return (
-    <div className="h-full w-full relative overflow-hidden bg-[var(--sidebar-color)] border-l-2 border-[var(--border-color)] shadow-lg">
+    <div
+      className={clsx(
+        "relative h-full overflow-hidden bg-[var(--sidebar-color)] border-l-2 border-[var(--border-color)] shadow-lg",
+        sidebarInfoWidthClass
+      )}
+    >
       <AnimatePresence mode="wait">
         {CurrentComponent && (
           <motion.div

@@ -44,6 +44,8 @@ const Message: React.FC<MessageProps> = ({
 }) => {
   const message = useMessageStore((state) => state.messagesById[messageId]);
 
+  console.log('message attachments', message.attachments)
+
   const searchQuery = useMessageStore((state) => state.searchQuery);
   const showImportantOnly = useMessageStore((state) => state.showImportantOnly);
 
@@ -219,12 +221,6 @@ const Message: React.FC<MessageProps> = ({
               {formatTime(message.createdAt)}
             </p>
           )}
-
-        {/* {message.status === MessageStatus.SENDING && (
-          <div className="rounded-full flex justify-end mt-1">
-            <BeatLoader color="gray" size={8} />
-          </div>
-        )} */}
 
         {message.status === MessageStatus.FAILED && (
           <h1 className="text-red-500 text-sm text-right">

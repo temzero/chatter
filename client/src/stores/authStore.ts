@@ -12,6 +12,7 @@ import type { UserResponse } from "@/shared/types/responses/user.response";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { localStorageService } from "@/services/storage/localStorageService";
 import { fetchInitialAppData } from "@/common/hooks/app/fetchInitialAppData";
+import { toast } from "react-toastify";
 
 type AuthMessageType = "error" | "success" | "info";
 
@@ -31,8 +32,6 @@ interface AuthActions {
   initialize: () => Promise<boolean>;
   setCurrentUser: (user: UserResponse | null) => void;
   setMessage: (type: AuthMessageType, content: string) => void;
-  clearMessage: () => void;
-  setLoading: (loading: boolean, clearMessages?: boolean) => void;
   login: (identifier: string, password: string) => Promise<void>;
   logout: () => void;
   register: (userData: {
@@ -70,7 +69,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             return false;
           }
 
-          get().setLoading(true);
+          set({ loading: true });
 
           const user = await authService.fetchCurrentUser();
 
@@ -87,9 +86,9 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             message: null,
           });
 
-          return true; // success
+          return true;
         } catch (error) {
-          set({ ...initialState });
+          get().logout();
           throw error;
         }
       },
@@ -103,56 +102,42 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       // Core actions
       setMessage: (type, content) => set({ message: { type, content } }),
-      clearMessage: () => set({ message: null }),
-
-      // New unified loading control
-      setLoading: (loading, clearMessages = true) => {
-        set({
-          loading,
-          ...(clearMessages ? { message: null } : {}),
-        });
-      },
 
       // Authentication methods
       login: async (identifier, password) => {
         console.log("authStore login");
         try {
-          get().setLoading(true); // Auto-clears messages
+          set({ loading: true });
           useChatStore.getState().clearChats();
-          const { user } = await authService.login({ identifier, password });
-          await fetchInitialAppData();
-
-          set({
-            currentUser: user,
-            isAuthenticated: true,
-            loading: false,
-            message: { type: "success", content: "Logged in successfully" },
+          const { user, accessToken } = await authService.login({
+            identifier,
+            password,
           });
+
+          await handleAuthSuccess(user, accessToken);
         } catch (error) {
           const errorMessage = handleAuthError(error);
-          get().setLoading(false, false); // Keep error message
           set({ message: { type: "error", content: errorMessage } });
           throw error;
+        } finally {
+          set({ loading: false });
         }
       },
 
       register: async (userData) => {
         try {
-          get().setLoading(true);
-          await authService.register(userData);
-          set({
-            isAuthenticated: true,
-            loading: false,
-            message: {
-              type: "success",
-              content: "Account created successfully",
-            },
-          });
+          set({ loading: true });
+
+          const { user, accessToken } = await authService.register(userData);
+
+          await handleAuthSuccess(user, accessToken);
+          toast.success("Account created successfully");
         } catch (error) {
           const errorMessage = handleAuthError(error);
-          get().setLoading(false, false);
           set({ message: { type: "error", content: errorMessage } });
           throw error;
+        } finally {
+          set({ loading: false });
         }
       },
 
@@ -164,67 +149,65 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         useSidebarInfoStore.getState().setSidebarInfo(SidebarInfoMode.DEFAULT);
         set({
           ...initialState,
-          loading: false,
-          message: { type: "success", content: "Logged out successfully" },
         });
       },
 
       // Password recovery
       sendPasswordResetEmail: async (email) => {
         try {
-          get().setLoading(true);
+          set({ loading: true });
           await authService.sendPasswordResetEmail(email);
           set({
             message: {
               type: "success",
               content: "Password reset email sent. Please check your inbox.",
             },
-            loading: false,
           });
         } catch (error) {
           const errorMessage = handleAuthError(error);
-          get().setLoading(false, false);
           set({ message: { type: "error", content: errorMessage } });
           throw error;
+        } finally {
+          set({ loading: false });
         }
       },
 
       resetPasswordWithToken: async (token, newPassword) => {
         try {
-          get().setLoading(true);
+          set({ loading: true });
           await authService.resetPasswordWithToken(token, newPassword);
           set({
             message: {
               type: "success",
               content: "Password reset successfully. You can now login.",
             },
-            loading: false,
           });
         } catch (error) {
           const errorMessage = handleAuthError(error);
-          get().setLoading(false, false);
           set({ message: { type: "error", content: errorMessage } });
           throw error;
+        } finally {
+          set({ loading: false });
         }
       },
 
       // Email verification
       verifyEmailWithToken: async (token) => {
         try {
-          get().setLoading(true);
+          set({ loading: true });
           await authService.verifyEmailWithToken(token);
           set({
             message: {
               type: "success",
               content: "Email verified successfully!",
             },
-            loading: false,
           });
         } catch (error) {
           const errorMessage = handleAuthError(error);
-          get().setLoading(false, false);
           set({ message: { type: "error", content: errorMessage } });
           throw error;
+        } finally {
+          set({ loading: false });
         }
       },
     }),
@@ -239,6 +222,16 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 );
 
 // Error handling utility
+async function handleAuthSuccess(user?: UserResponse, accessToken?: string) {
+  if (!user || !accessToken) return;
+  localStorageService.setAccessToken(accessToken);
+  await fetchInitialAppData();
+  useAuthStore.setState({
+    currentUser: user,
+    isAuthenticated: true,
+  });
+}
+
 function handleAuthError(error: unknown): string {
   if (axios.isAxiosError(error)) {
     return error.response?.data?.message || error.message || "Network error";

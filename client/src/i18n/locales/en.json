@@ -142,6 +142,12 @@
     "settings": "Settings"
   },
 
+  "sidebar_well_come": {
+    "well_come": "Well come to",
+    "description": "A simple place to chat, share ideas, and stay connected.",
+    "start_conversation": "Start a conversation now!"
+  },
+
   "sidebar_profile": {
     "title": "My Profile",
     "no_username": "No username",
@@ -158,7 +164,11 @@
   },
 
   "sidebar_new_chat": {
-    "title": "New {{type}} Chat",
+    "title": {
+      "direct": "New Chat",
+      "group": "New Group Chat",
+      "channel": "New Channel Chat"
+    },
     "direct": {
       "placeholder": "@username/email/phoneNumber",
       "find_user": "Find User",

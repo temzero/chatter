@@ -19,7 +19,9 @@ const Login = () => {
     const formData = new FormData(formRef.current);
     const identifier = formData.get("username") as string;
     const password = formData.get("password") as string;
-    
+
+    console.log("identifier:", identifier, " password:", password);
+
     await login(identifier, password);
   };
 

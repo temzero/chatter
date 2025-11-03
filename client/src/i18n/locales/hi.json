@@ -142,6 +142,12 @@
     "settings": "सेटिंग्स"
   },
 
+  "sidebar_well_come": {
+    "well_come": "आपका स्वागत है",
+    "description": "चैट करने, विचार साझा करने और जुड़े रहने के लिए एक सरल स्थान।",
+    "start_conversation": "अब एक बातचीत शुरू करें!"
+  },
+
   "sidebar_profile": {
     "title": "मेरी प्रोफ़ाइल",
     "no_username": "कोई उपयोगकर्ता नाम नहीं",
@@ -158,7 +164,11 @@
   },
 
   "sidebar_new_chat": {
-    "title": "नया {{type}} चैट",
+    "title": {
+      "direct": "नई चैट",
+      "group": "नया ग्रुप चैट",
+      "channel": "नया चैनल चैट"
+    },
     "direct": {
       "placeholder": "@उपयोगकर्तानाम/ईमेल/फोन नंबर",
       "find_user": "उपयोगकर्ता खोजें",

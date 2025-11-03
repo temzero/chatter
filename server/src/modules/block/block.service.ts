@@ -80,19 +80,6 @@ export class BlockService {
       .filter((id) => id !== userId);
   }
 
-  // async getUserIdsWhoIBlocked(userId: string): Promise<string[]> {
-  //   const blocks = await this.blockRepo.find({
-  //     where: [
-  //       { blockerId: userId }, // Users YOU blocked
-  //     ],
-  //   });
-  //   return blocks
-  //     .map((block) =>
-  //       block.blockerId === userId ? block.blockedId : block.blockerId,
-  //     )
-  //     .filter((id) => id !== userId);
-  // }
-
   async getBlockUsersByMe(userId: string): Promise<BlockResponseDto[]> {
     const blocks = await this.blockRepo.find({
       where: { blockerId: userId },

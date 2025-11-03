@@ -7,6 +7,7 @@ import { sidebarAnimations } from "@/common/animations/sidebarAnimations";
 import { useSidebarWidth } from "@/common/hooks/useSidebarWidth";
 
 import SidebarDefault from "@/components/sidebar/SidebarDefault";
+import SidebarWellCome from "@/components/sidebar/SidebarWellCome";
 import SidebarSearch from "@/components/sidebar/SidebarSearch";
 import SidebarNewChat from "@/components/sidebar/SidebarNewChat";
 import SidebarMore from "@/components/sidebar/more/SidebarMore";
@@ -42,6 +43,7 @@ const Sidebar = () => {
 
   const sidebars: Record<SidebarMode, JSX.Element> = {
     [SidebarMode.DEFAULT]: <SidebarDefault />,
+    [SidebarMode.WELL_COME]: <SidebarWellCome />,
     [SidebarMode.NEW_CHAT]: <SidebarNewChat />,
     [SidebarMode.SEARCH]: <SidebarSearch />,
     [SidebarMode.MORE]: <SidebarMore />,
@@ -87,7 +89,7 @@ const Sidebar = () => {
   return (
     <div
       className={clsx(
-        "h-full overflow-x-hidden flex flex-col bg-[var(--sidebar-color)] shadow border-[var(--border-color)] border-r-2 transition-all duration-300 ease-in-out",
+        "h-full overflow-hidden flex flex-col bg-[var(--sidebar-color)] shadow border-[var(--border-color)] border-r-2 transition-all duration-300 ease-in-out",
         sidebarWidthClass
       )}
       style={{ zIndex: 10 }}

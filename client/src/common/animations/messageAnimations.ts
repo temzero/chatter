@@ -36,7 +36,7 @@ export const getMessageAnimation = (
       animate: { opacity: [0.3, 0.6, 0.3] },
       exit: { opacity: 0, scale: 0.1 },
       transition: {
-        duration: 3,
+        duration: 2.5,
         repeat: Infinity,
         repeatType: "loop",
         ease: "easeInOut",

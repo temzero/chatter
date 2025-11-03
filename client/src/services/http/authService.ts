@@ -17,7 +17,6 @@ export const authService = {
   async login(payload: LoginRequest): Promise<AuthResponse> {
     console.log("login");
     const { data } = await API.post<AuthResponse>("/auth/login", payload);
-    localStorageService.setAccessToken(data.accessToken);
     return data;
   },
 

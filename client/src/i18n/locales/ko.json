@@ -142,6 +142,12 @@
     "settings": "설정"
   },
 
+  "sidebar_well_come": {
+    "well_come": "환영합니다",
+    "description": "채팅, 아이디어 공유, 연결을 유지하는 간단한 공간입니다.",
+    "start_conversation": "지금 대화를 시작하세요!"
+  },
+
   "sidebar_profile": {
     "title": "내 프로필",
     "no_username": "사용자 이름 없음",
@@ -158,7 +164,11 @@
   },
 
   "sidebar_new_chat": {
-    "title": "새로운 {{type}} 채팅",
+    "title": {
+      "direct": "새 채팅",
+      "group": "새 그룹 채팅",
+      "channel": "새 채널 채팅"
+    },
     "direct": {
       "placeholder": "@사용자이름/이메일/전화번호",
       "find_user": "사용자 찾기",

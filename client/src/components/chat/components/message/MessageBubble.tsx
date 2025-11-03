@@ -21,7 +21,6 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
   currentUserId,
 }) => {
   const isForwardMessage = message.forwardedFromMessage;
-  // const messageAnimation = getMessageAnimation(isMe);
 
   return (
     <div
@@ -34,8 +33,6 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
           message.status === MessageStatus.FAILED,
         "opacity-100": !message.status || message.status === MessageStatus.SENT,
       })}
-      // layout="position"
-      // {...messageAnimation}
     >
       {/* Attachments */}
       <RenderMultipleAttachments

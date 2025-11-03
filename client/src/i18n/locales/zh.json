@@ -142,6 +142,12 @@
     "settings": "设置"
   },
 
+  "sidebar_well_come": {
+    "well_come": "欢迎来到",
+    "description": "一个简单的地方，可以聊天、分享想法并保持联系。",
+    "start_conversation": "立即开始对话！"
+  },
+
   "sidebar_profile": {
     "title": "我的个人资料",
     "no_username": "无用户名",
@@ -158,7 +164,11 @@
   },
 
   "sidebar_new_chat": {
-    "title": "新建{{type}}聊天",
+    "title": {
+      "direct": "新聊天",
+      "group": "新群组聊天",
+      "channel": "新频道聊天"
+    },
     "direct": {
       "placeholder": "@用户名/邮箱/电话号码",
       "find_user": "查找用户",

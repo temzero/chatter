@@ -7,23 +7,30 @@ import { getMessageAttachments } from "@/stores/messageAttachmentStore";
 interface RenderMultipleAttachmentsProps {
   chatId: string;
   messageId: string;
+  attachments?: AttachmentResponse[];
   className?: string;
 }
 
 const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
   chatId,
   messageId,
+  attachments,
   className = "",
 }) => {
-  const attachments = getMessageAttachments(chatId, messageId);
+  const resolvedAttachments =
+    attachments && attachments.length > 0
+      ? attachments
+      : getMessageAttachments(chatId, messageId);
 
-  if (attachments.length === 0) return null;
+  if (!resolvedAttachments || resolvedAttachments.length === 0) {
+    return null;
+  }
   // Categorize attachments by type
-  const visualMedia = attachments.filter(
+  const visualMedia = resolvedAttachments.filter(
     (m) => m.type === AttachmentType.IMAGE || m.type === AttachmentType.VIDEO
   );
-  const audioMedia = attachments.filter((a) => a.type === AttachmentType.AUDIO);
-  const fileMedia = attachments.filter((a) => a.type === AttachmentType.FILE);
+  const audioMedia = resolvedAttachments.filter((a) => a.type === AttachmentType.AUDIO);
+  const fileMedia = resolvedAttachments.filter((a) => a.type === AttachmentType.FILE);
 
   const RenderAttachmentGrid = (items: AttachmentResponse[], cols: number) => (
     <div

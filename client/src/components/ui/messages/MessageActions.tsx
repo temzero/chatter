@@ -56,6 +56,16 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
         openModal(ModalType.FORWARD_MESSAGE, { message });
       },
     },
+    save: {
+      icon: "bookmark",
+      label: t("common.actions.save"),
+      class: "",
+      action: () => {
+        if (onClose) onClose();
+        chatWebSocketService.saveMessage({ messageId: message.id });
+        closeModal();
+      },
+    },
     pin: {
       icon: isPinned ? "keep_off" : "keep",
       label: isPinned ? t("common.actions.unpin") : t("common.actions.pin"),
@@ -70,16 +80,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
         audioService.playSound(SoundType.PIN);
       },
     },
-    save: {
-      icon: "bookmark",
-      label: t("common.actions.save"),
-      class: "",
-      action: () => {
-        if (onClose) onClose();
-        chatWebSocketService.saveMessage({ messageId: message.id });
-        closeModal();
-      },
-    },
+
     important: {
       icon: "star",
       label: isImportant
@@ -138,7 +139,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
     <div
       onClick={(e) => e.stopPropagation()}
       className={clsx(
-        "flex justify-end rounded-lg bg-[--sidebar-color] custom-border",
+        "flex justify-end rounded-lg bg-[--sidebar-color] custom-border overflow-hidden",
         className
       )}
       style={{ zIndex: 99 }}

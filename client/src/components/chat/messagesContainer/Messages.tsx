@@ -30,6 +30,7 @@ const Messages: React.FC<ChatMessagesProps> = ({
 
   const messagesById = useMessageStore.getState().messagesById;
   const messages = messageIds.map((id) => messagesById[id]).filter(Boolean);
+  console.log("messages", messages);
 
   // ✅ Auto mark last message as read
   useAutoMarkLastMessageRead({
@@ -87,6 +88,7 @@ const Messages: React.FC<ChatMessagesProps> = ({
                       showInfo={showInfo}
                       isRecent={isRecent}
                       chatType={chat.type}
+                      currentUserId={currentUser?.id}
                     />
                     <MessageReadInfo
                       chat={chat}

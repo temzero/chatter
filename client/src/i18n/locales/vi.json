@@ -142,6 +142,12 @@
     "settings": "Cài đặt"
   },
 
+  "sidebar_well_come": {
+    "well_come": "Chào mừng đến với",
+    "description": "Một nơi đơn giản để trò chuyện, chia sẻ ý tưởng và giữ kết nối.",
+    "start_conversation": "Bắt đầu trò chuyện ngay!"
+  },
+
   "sidebar_profile": {
     "title": "Hồ sơ của tôi",
     "no_username": "Chưa có tên người dùng",
@@ -159,7 +165,11 @@
   },
 
   "sidebar_new_chat": {
-    "title": "Tạo {{type}} mới",
+    "title": {
+      "direct": "Trò chuyện Mới",
+      "group": "Trò chuyện Nhóm Mới",
+      "channel": "Trò chuyện Kênh Mới"
+    },
     "direct": {
       "placeholder": "@username/email/ĐT",
       "find_user": "Tìm kiếm",

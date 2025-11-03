@@ -1,20 +1,3 @@
-// import React, { useState } from "react";
-
-// const CreateNewChat: React.FC = () => {
-//   const [query, setQuery] = useState("");
-
-//   return (
-//     <div className="flex flex-col gap-3 p-2 h-full relative overflow-hidden">
-//       <p>{query}</p>
-//       <p className="text-center text-gray-400">
-//         Testing mode: no user search or selection
-//       </p>
-//     </div>
-//   );
-// };
-
-// export default CreateNewChat;
-
 import React, { useState } from "react";
 import ContactInfoItem from "@/components/ui/contact/contactInfoItem";
 import { userService } from "@/services/http/userService";
