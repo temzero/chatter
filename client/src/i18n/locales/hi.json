@@ -158,7 +158,7 @@
     "saved_messages": "सहेजे गए संदेश",
     "calls": "कॉल",
     "contacts": "संपर्क",
-    "friend_requests": "मित्र अनुरोध {{count, plural, =0 {} one { (1)} other { ({{count}})}}",
+    "friend_requests": "मित्र अनुरोध {{count, plural, =0 {} one { (1)} other { ({{count}}",
     "friend_requests_none": "मित्र अनुरोध",
     "folders": "चैट फ़ोल्डर",
     "blocked": "ब्लॉक किए गए",
@@ -535,6 +535,11 @@
       "title": "मित्र अनुरोध भेजें",
       "optional_message": "वैकल्पिक संदेश...",
       "send_request": "मित्र अनुरोध भेजें"
+    },
+    "unfriend": {
+      "title": "मित्रता समाप्त करें",
+      "description": "आप अब इस व्यक्ति के मित्र नहीं रहेंगे, लेकिन आप कभी भी उन्हें फिर से जोड़ सकते हैं।",
+      "success": "आप अब {{name}} के मित्र नहीं हैं"
     },
     "forward_message": {
       "title_message": "संदेश को अग्रेषित करें...",

@@ -97,6 +97,7 @@ export const useAttachmentStore = create<
       return response.items.length;
     } catch (error) {
       set({ isLoading: false });
+      console.warn("Failed to fetch attachments");
       handleError(error, "Failed to fetch attachments");
     }
   },

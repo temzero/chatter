@@ -9,7 +9,7 @@ import { Avatar } from "@/components/ui/avatar/Avatar";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { useActiveChat } from "@/stores/chatStore";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
-import { getOthersActiveChatMembers } from "@/stores/chatMemberStore";
+import { useOthersActiveChatMembers } from "@/stores/chatMemberStore";
 import { useMessageStore } from "@/stores/messageStore";
 import { useMuteControl } from "@/common/hooks/useMuteControl";
 import { SidebarInfoHeaderIcons } from "@/components/ui/icons/SidebarInfoHeaderIcons";
@@ -23,7 +23,7 @@ const DirectChat: React.FC = () => {
   const isMobile = useIsMobile();
 
   const activeChat = useActiveChat() as ChatResponse;
-  const chatPartner = getOthersActiveChatMembers(activeChat.myMemberId)[0];
+  const chatPartner = useOthersActiveChatMembers(activeChat.myMemberId)[0];
   const setSidebarInfo = getSetSidebarInfo();
   const setSidebarInfoVisible =
     useSidebarInfoStore.getState().setSidebarInfoVisible;

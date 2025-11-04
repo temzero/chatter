@@ -29,7 +29,7 @@ export function useNotificationSocketListeners() {
 
     const handleFriendshipUpdate = (data: FriendshipUpdateNotification) => {
       // (i.e., someone else acted on our request)
-      if (data.userId === currentUserId) {
+      if (data.user.id === currentUserId) {
         console.log("Skipping notification about our own action");
         return;
       }
@@ -37,17 +37,31 @@ export function useNotificationSocketListeners() {
       // 3. Only process if we're the affected party
       useChatMemberStore
         .getState()
-        .updateFriendshipStatus(data.userId, data.status);
+        .updateFriendshipStatus(data.user.id, data.status);
       useFriendshipStore.getState().removeRequestLocally(data.friendshipId);
+
+      console.log("data.status", data.status)
 
       // 4. Show notification with correct context
       if (data.status === FriendshipStatus.ACCEPTED) {
+        useChatMemberStore
+          .getState()
+          .updateMemberLocallyByUserId(data.user.id, {
+            firstName: data.user.firstName,
+            username: data.user.username,
+            email: data.user.email,
+            bio: data.user.bio,
+            phoneNumber: data.user.phoneNumber,
+            birthday: data.user.birthday,
+            friendshipStatus: data.status
+          });
+
         toast.success(
-          t("toast.friendship.accepted_by", { name: data.firstName })
+          t("toast.friendship.accepted_by", { name: data.user.firstName })
         );
       } else if (data.status === FriendshipStatus.DECLINED) {
         toast.warning(
-          t("toast.friendship.declined_by", { name: data.firstName })
+          t("toast.friendship.declined_by", { name: data.user.firstName })
         );
       }
     };
@@ -79,5 +93,5 @@ export function useNotificationSocketListeners() {
       // Clean up listeners
       notificationWebSocketService.removeAllListeners();
     };
-  }, [currentUserId]);
+  }, [currentUserId, t]);
 }

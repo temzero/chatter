@@ -1,7 +1,36 @@
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
+import {
+  FriendshipUpdateNotification,
+  UserSummary,
+} from 'src/shared/types/responses/friendship.response';
 
-export class FriendshipUpdateNotificationDto {
+export class UserSummaryDto implements UserSummary {
+  @Expose()
+  id: string;
+
+  @Expose()
+  firstName: string;
+
+  @Expose()
+  username: string;
+
+  @Expose()
+  email: string;
+
+  @Expose()
+  bio?: string;
+
+  @Expose()
+  birthday?: string;
+
+  @Expose()
+  phoneNumber?: string;
+}
+
+export class FriendshipUpdateNotificationDto
+  implements FriendshipUpdateNotification
+{
   @Expose()
   friendshipId: string;
 
@@ -9,11 +38,9 @@ export class FriendshipUpdateNotificationDto {
   status: FriendshipStatus | null;
 
   @Expose()
-  firstName: string;
-
-  @Expose()
-  userId: string;
-
-  @Expose()
   timestamp: string;
+
+  @Expose()
+  @Type(() => UserSummaryDto)
+  user: UserSummaryDto; // 👈 full accepted user's data
 }

@@ -157,7 +157,7 @@
     "saved_messages": "已保存的消息",
     "calls": "通话",
     "contacts": "联系人",
-    "friend_requests": "好友请求 {{count, plural, =0 {} one { (1)} other { ({{count}})}}",
+    "friend_requests": "好友请求 {{count, plural, =0 {} one { (1)} other { ({{count}}",
     "friend_requests_none": "好友请求",
     "folders": "聊天文件夹",
     "blocked": "已屏蔽",
@@ -534,6 +534,11 @@
       "title": "发送好友请求",
       "optional_message": "可选消息...",
       "send_request": "发送好友请求"
+    },
+    "unfriend": {
+      "title": "解除好友",
+      "description": "你将不再与此人是好友关系，但你可以随时再次添加他们。",
+      "success": "你与{{name}}不再是好友关系"
     },
     "forward_message": {
       "title_message": "转发消息至...",

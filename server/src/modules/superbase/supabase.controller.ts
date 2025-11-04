@@ -23,8 +23,6 @@ export class SupabaseController {
     @UploadedFile() avatar: Express.Multer.File,
     @Body() body: { type?: 'user' | 'group'; oldUrl?: string },
   ) {
-    console.log('UPLOAD AVATAR avatar', avatar);
-    console.log('UPLOAD AVATAR Body', body);
     if (!avatar) throw new BadRequestException('File is required');
 
     const type = body.type || 'user'; // Default to 'user' if not specified

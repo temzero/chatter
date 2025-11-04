@@ -74,7 +74,6 @@ export class AttachmentService {
     }
 
     attachmentQuery = attachmentQuery
-      .distinct(true)
       .orderBy('attachment.createdAt', 'DESC')
       .addOrderBy('attachment.id', 'DESC')
       .take(limit + 1);

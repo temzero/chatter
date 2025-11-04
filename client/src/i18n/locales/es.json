@@ -65,7 +65,7 @@
     }
   },
 
-   "toast": {
+  "toast": {
     "friendship": {
       "accepted": "Solicitud de amistad aceptada",
       "declined": "Solicitud de amistad rechazada",
@@ -158,7 +158,7 @@
     "saved_messages": "Mensajes guardados",
     "calls": "Llamadas",
     "contacts": "Contactos",
-    "friend_requests": "Solicitudes de amistad {{count, plural, =0 {} one { (1)} other { ({{count}})}}",
+    "friend_requests": "Solicitudes de amistad {{count, plural, =0 {} one { (1)} other { ({{count}}",
     "friend_requests_none": "Solicitudes de amistad",
     "folders": "Carpetas de chat",
     "blocked": "Bloqueados",
@@ -536,6 +536,11 @@
       "title": "Enviar solicitud de amistad a",
       "optional_message": "Mensaje opcional...",
       "send_request": "Enviar solicitud de amistad"
+    },
+    "unfriend": {
+      "title": "Eliminar amigo",
+      "description": "Ya no serás amigo de esta persona, pero puedes agregarla nuevamente en cualquier momento.",
+      "success": "Ya no eres amigo de {{name}}"
     },
     "forward_message": {
       "title_message": "Reenviar mensaje a...",

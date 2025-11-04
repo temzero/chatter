@@ -158,7 +158,7 @@
     "saved_messages": "ข้อความที่บันทึก",
     "calls": "การโทร",
     "contacts": "รายชื่อติดต่อ",
-    "friend_requests": "คำขอเป็นเพื่อน {{count, plural, =0 {} one { (1)} other { ({{count}})}}",
+    "friend_requests": "คำขอเป็นเพื่อน {{count, plural, =0 {} one { (1)} other { ({{count}}",
     "friend_requests_none": "คำขอเป็นเพื่อน",
     "folders": "โฟลเดอร์แชท",
     "blocked": "ถูกบล็อก",
@@ -535,6 +535,11 @@
       "title": "ส่งคำขอเป็นเพื่อน",
       "optional_message": "ข้อความเสริม...",
       "send_request": "ส่งคำขอเป็นเพื่อน"
+    },
+    "unfriend": {
+      "title": "เลิกเป็นเพื่อน",
+      "description": "คุณและบุคคลนี้จะไม่เป็นเพื่อนกันอีกต่อไป แต่คุณสามารถเพิ่มพวกเขาเป็นเพื่อนใหม่ได้ทุกเมื่อ",
+      "success": "คุณและ{{name}}ไม่ได้เป็นเพื่อนกันอีกต่อไป"
     },
     "forward_message": {
       "title_message": "ส่งต่อข้อความไปยัง...",

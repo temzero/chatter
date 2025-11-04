@@ -28,6 +28,7 @@ const FriendRequestModal: React.FC = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [charCount, setCharCount] = useState(0);
   const [requestMessage, setRequestMessage] = useState("");
+  console.log("requestMessage", requestMessage);
   const maxChar = 200;
 
   const receiver = data?.receiver;
@@ -36,13 +37,9 @@ const FriendRequestModal: React.FC = () => {
   const handleFriendRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     closeModal();
+    console.log("");
     try {
-      await sendFriendRequest(
-        receiver.id,
-        receiver.firstName,
-        currentUserId,
-        requestMessage
-      );
+      await sendFriendRequest(receiver.id, currentUserId, requestMessage);
       toast.success(
         t("toast.friendship.sent_request", { name: receiver.firstName })
       );

@@ -158,7 +158,7 @@
     "saved_messages": "Saved Messages",
     "calls": "Calls",
     "contacts": "Contacts",
-    "friend_requests": "Friend requests {{count, plural, =0 {} one { (1)} other { ({{count}})}}",
+    "friend_requests": "Friend requests {{count, plural, =0 {} one { (1)} other { ({{count}}",
     "friend_requests_none": "Friend requests",
     "folders": "Chat Folders",
     "blocked": "Blocked",
@@ -536,6 +536,11 @@
       "title": "Send Friend Request to",
       "optional_message": "Optional message...",
       "send_request": "Send Friend Request"
+    },
+    "unfriend": {
+      "title": "Unfriend",
+      "description": "You’ll no longer be friends with this person, but you can add them again anytime.",
+      "success": "You are no longer friends with {{name}}"
     },
     "forward_message": {
       "title_message": "Forward Message To...",

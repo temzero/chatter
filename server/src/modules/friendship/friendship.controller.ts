@@ -124,9 +124,17 @@ export class FriendshipController {
     const response = plainToInstance(FriendshipUpdateNotificationDto, {
       friendshipId,
       status: body.status,
-      firstName: receiver.firstName,
       userId: receiverId,
       timestamp: new Date().toISOString(),
+      user: {
+        id: receiver.id,
+        firstName: receiver.firstName,
+        username: receiver.username,
+        email: receiver.email,
+        bio: receiver.bio,
+        birthday: receiver.birthday,
+        phoneNumber: receiver.phoneNumber,
+      },
     });
 
     // 4. Notify if accepted

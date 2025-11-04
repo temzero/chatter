@@ -38,7 +38,7 @@ export class Attachment {
   })
   type: AttachmentType;
 
-  @Column({ length: 512 })
+  @Column({ length: 999 })
   url: string;
 
   @Column({ type: 'varchar', length: 512, nullable: true })

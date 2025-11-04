@@ -158,7 +158,7 @@
     "saved_messages": "保存したメッセージ",
     "calls": "通話",
     "contacts": "連絡先",
-    "friend_requests": "友達リクエスト {{count, plural, =0 {} one { (1)} other { ({{count}})}}",
+    "friend_requests": "友達リクエスト {{count, plural, =0 {} one { (1)} other { ({{count}}",
     "friend_requests_none": "友達リクエスト",
     "folders": "チャットフォルダ",
     "blocked": "ブロック済み",
@@ -535,6 +535,11 @@
       "title": "友達リクエストを送信",
       "optional_message": "任意のメッセージ...",
       "send_request": "友達リクエストを送信"
+    },
+    "unfriend": {
+      "title": "友達解除",
+      "description": "この人と友達ではなくなりますが、いつでも再度追加できます。",
+      "success": "{{name}}さんと友達ではなくなりました"
     },
     "forward_message": {
       "title_message": "メッセージを転送...",

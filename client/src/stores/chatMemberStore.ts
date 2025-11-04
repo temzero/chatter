@@ -22,10 +22,7 @@ interface ChatMemberActions {
     members: ChatMemberResponse[],
     hasMore: boolean
   ) => void;
-  fetchChatMembers: (
-    chatId: string,
-    query?: PaginationQuery
-  ) => Promise<void>;
+  fetchChatMembers: (chatId: string, query?: PaginationQuery) => Promise<void>;
   fetchMoreMembers: (chatId: string) => Promise<number>;
   getChatMemberById: (
     memberId: string,
@@ -47,6 +44,10 @@ interface ChatMemberActions {
   updateMemberLocally: (
     chatId: string,
     memberId: string,
+    updates: Partial<ChatMemberResponse>
+  ) => void;
+  updateMemberLocallyByUserId: (
+    userId: string,
     updates: Partial<ChatMemberResponse>
   ) => void;
   updateMember: (
@@ -307,6 +308,26 @@ export const useChatMemberStore = create<ChatMemberState & ChatMemberActions>(
       });
     },
 
+    updateMemberLocallyByUserId: (
+      userId: string,
+      updates: Partial<ChatMemberResponse>
+    ) => {
+      set((state) => {
+        const updatedChatMembers = { ...state.chatMembers };
+
+        Object.entries(updatedChatMembers).forEach(([chatId, members]) => {
+          updatedChatMembers[chatId] = members.map((member) => {
+            if (member.userId === userId) {
+              return { ...member, ...updates };
+            }
+            return member;
+          });
+        });
+
+        return { chatMembers: updatedChatMembers };
+      });
+    },
+
     updateMember: async (chatId, memberId, updates) => {
       set({ isLoading: true });
       const updatedMember = await chatMemberService.updateMember(
@@ -447,13 +468,16 @@ export const getMyActiveChatMember = (
   return activeMembers.find((m) => m.id === myMemberId) || null;
 };
 
-export const getOthersActiveChatMembers = (
+export const useOthersActiveChatMembers = (
   myMemberId: string
 ): ChatMemberResponse[] => {
-  const activeChatId = useChatStore.getState().activeChatId;
-  if (!activeChatId) return [];
-  const activeMembers =
-    useChatMemberStore.getState().chatMembers[activeChatId] || [];
+  const activeChatId = useChatStore((state) => state.activeChatId);
+
+  const activeMembers = useChatMemberStore(
+    useShallow((state) =>
+      activeChatId ? state.chatMembers[activeChatId] || [] : []
+    )
+  );
 
   return activeMembers.filter((m) => m.id !== myMemberId);
 };

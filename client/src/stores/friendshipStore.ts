@@ -18,7 +18,6 @@ interface FriendshipActions {
   setInitialData: (data: PaginationResponse<FriendRequestResponse>) => void;
   sendFriendRequest: (
     receiverId: string,
-    receiverName: string,
     currentUserId?: string,
     message?: string
   ) => Promise<FriendRequestResponse | undefined>;
@@ -51,11 +50,8 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
       });
     },
 
-    sendFriendRequest: async (
-      receiverId,
-      currentUserId,
-      message
-    ) => {
+    sendFriendRequest: async (receiverId, currentUserId, message) => {
+      console.log("message", message);
       set({ isLoading: true });
       if (!currentUserId) return;
       try {

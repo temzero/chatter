@@ -1,5 +1,4 @@
 import API from "@/services/api/api";
-import { toast } from "react-toastify";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { UpdateChatRequest } from "@/shared/types/requests/update-chat.request";
 import { PaginationQuery } from "@/shared/types/queries/pagination-query";
@@ -26,7 +25,6 @@ export const chatService = {
 
   // Get a specific chat by ID
   async fetchChatById(chatId: string): Promise<ChatResponse> {
-    toast.info("Fetch chat");
     const response = await API.get<ApiSuccessResponse<ChatResponse>>(
       `/chat/${chatId}`
     );

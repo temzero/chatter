@@ -158,7 +158,7 @@
     "saved_messages": "Tin nhắn đã lưu",
     "calls": "Cuộc gọi",
     "contacts": "Danh bạ",
-    "friend_requests": "Lời mời kết bạn {{count, plural, =0 {} one { (1)} other { ({{count}})}}",
+    "friend_requests": "Lời mời kết bạn {{count, plural, =0 {} one { (1)} other { ({{count}}",
     "friend_requests_none": "Lời mời kết bạn",
     "folders": "Thư mục chat",
     "blocked": "Đã chặn",
@@ -539,6 +539,11 @@
       "title": "Gửi Lời mời Kết bạn tới",
       "optional_message": "Lời nhắn tùy chọn...",
       "send_request": "Gửi Lời mời Kết bạn"
+    },
+    "unfriend": {
+      "title": "Hủy kết bạn",
+      "description": "Bạn và người này sẽ không còn là bạn bè, nhưng bạn có thể kết bạn lại bất cứ lúc nào.",
+      "success": "Bạn và {{name}} đã không còn là bạn bè"
     },
     "forward_message": {
       "title_message": "Chuyển tiếp Tin nhắn Tới...",

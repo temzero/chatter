@@ -32,10 +32,19 @@ export interface FriendRequestResponse {
   updatedAt: Date | string; // or Date, depending on how you want to handle it
 }
 
+export interface UserSummary {
+  id: string;
+  firstName: string;
+  username: string;
+  email: string;
+  bio?: string;
+  birthday?: string;
+  phoneNumber?: string;
+}
+
 export interface FriendshipUpdateNotification {
   friendshipId: string;
-  status: FriendshipStatus;
-  firstName: string;
-  userId: string;
+  status: FriendshipStatus | null;
   timestamp: string;
+  user: UserSummary; // Full user data of that person
 }

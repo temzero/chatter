@@ -72,12 +72,14 @@ const SidebarFriendRequests: React.FC = () => {
                     className="flex p-3 gap-4 w-full custom-border-b cursor-pointer"
                     onClick={() => createOrGetDirectChat(request.sender.id)}
                   >
-                    <Avatar
-                      avatarUrl={request.sender.avatarUrl}
-                      name={firstName}
-                      size={12}
-                      className="mt-1"
-                    />
+                    <div className="w-ful">
+                      <Avatar
+                        avatarUrl={request.sender.avatarUrl}
+                        name={firstName}
+                        size={12}
+                        className="mt-1"
+                      />
+                    </div>
 
                     <div className="flex flex-col flex-1 gap-1">
                       <div className="flex justify-between items-center">
@@ -183,7 +185,7 @@ const SidebarFriendRequests: React.FC = () => {
                           handleCancel(request.id, request.receiver.id);
                         }}
                       >
-                        {t("common.action.cancel_request")}
+                        {t("common.actions.cancel_request")}
                       </button>
                     </div>
                   </div>

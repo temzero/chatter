@@ -25,7 +25,7 @@ export interface ChatMemberResponse {
   username: string | null;
   email: string | null;
   phoneNumber: string | null;
-  birthday: Date | null;
+  birthday: Date | string | null;
   bio: string | null;
   friendshipStatus?: FriendshipStatus | null;
 }
