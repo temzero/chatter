@@ -106,13 +106,8 @@ export class Message {
   })
   attachments: Attachment[];
 
-  @Column({
-    name: 'deleted_for_userIds',
-    type: 'jsonb',
-    nullable: true,
-    default: null,
-  })
-  deletedForUserIds: string[] | null;
+  @Column('uuid', { array: true, default: () => 'ARRAY[]::uuid[]' })
+  deletedForUserIds: string[];
 
   @Column({ default: false })
   isImportant: boolean;

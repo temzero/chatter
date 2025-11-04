@@ -42,6 +42,7 @@
     },
     "messages": {
       "success": "Success!",
+      "update_success": "Update successfully",
       "failed": "Failed",
       "unknown": "Unknown",
       "empty": "Empty",
@@ -61,6 +62,28 @@
       "logging_in": "Logging in...",
       "verifying": "Verifying...",
       "processing": "Processing..."
+    }
+  },
+
+  "toast": {
+    "friendship": {
+      "accepted": "Friend request accepted",
+      "declined": "Friend request declined",
+      "canceled": "Friend request cancelled",
+      "new_request": "New friend request from {{name}}",
+      "sent_request": "New friend request sent to {{name}}",
+      "accepted_by": "{{name}} accepted your friend request!",
+      "declined_by": "{{name}} declined your friend request",
+      "invite_link_generated": "Invite link generated!",
+      "invite_link_refreshed": "Invite link refreshed!"
+    },
+    "message": {
+      "saved": "Message saved",
+      "error": "Message failed to send"
+    },
+    "call": {
+      "missed": "You have {{count}} more missed calls",
+      "cannot_start": "Cannot start call - line is busy"
     }
   },
 
@@ -135,7 +158,7 @@
     "saved_messages": "Saved Messages",
     "calls": "Calls",
     "contacts": "Contacts",
-    "friend_requests": "Friend requests {count, plural, =0 {Friend requests} other {Friend requests #}}",
+    "friend_requests": "Friend requests {{count, plural, =0 {} one { (1)} other { ({{count}})}}",
     "friend_requests_none": "Friend requests",
     "folders": "Chat Folders",
     "blocked": "Blocked",
@@ -570,7 +593,9 @@
       "title_group": "Leave {{type}}",
       "chat_type": "{{type}} chat",
       "description_direct": "Are you sure you want to leave this chat?\nYou won’t be able to access it again.",
-      "description_group": "Are you sure you want to leave this {{type}}?\nYou’ll no longer receive messages from it."
+      "description_group": "Are you sure you want to leave this {{type}}?\nYou’ll no longer receive messages from it.",
+      "chat_deleted": "This chat was deleted because no members remained.",
+      "left": "You left the chat"
     },
     "add_member": {
       "title": "Invite Members",

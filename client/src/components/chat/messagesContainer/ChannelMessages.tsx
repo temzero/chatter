@@ -1,8 +1,8 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { AnimatePresence } from "framer-motion";
 import { useMessageStore } from "@/stores/messageStore";
-import { useAutoMarkLastMessageRead } from "@/common/hooks/useAutoMarkMessageRead";
+import { MarkLastMessageRead } from "@/common/utils/message/markMessageRead";
 import ChannelMessage from "../components/message/MessageChannel";
 
 interface ChannelMessagesProps {
@@ -22,12 +22,11 @@ const ChannelMessages: React.FC<ChannelMessagesProps> = ({
   const messagesById = useMessageStore.getState().messagesById;
   const messages = messageIds.map((id) => messagesById[id]).filter(Boolean);
 
-
-  // Send read receipt if the last message is unread and not sent by you
-  useAutoMarkLastMessageRead({
-    chat,
-    messages,
-  });
+  useEffect(() => {
+    if (chat && messages.length > 0) {
+      return MarkLastMessageRead({ chat, messages });
+    }
+  }, [chat, messages]);
 
   // Group messages by date
   const messagesByDate = useMemo(() => {

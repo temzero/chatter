@@ -19,7 +19,10 @@ import MessageBubble from "./MessageBubble";
 import CallMessageBubble from "./CallMessageBubble";
 import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 import { AnimatePresence, motion } from "framer-motion";
-import { getMessageAnimation } from "@/common/animations/messageAnimations";
+import {
+  getMessageAnimation,
+  messageAnimations,
+} from "@/common/animations/messageAnimations";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { useMessageStore } from "@/stores/messageStore";
 
@@ -43,8 +46,6 @@ const Message: React.FC<MessageProps> = ({
   isMe = false,
 }) => {
   const message = useMessageStore((state) => state.messagesById[messageId]);
-
-  console.log('message attachments', message.attachments)
 
   const searchQuery = useMessageStore((state) => state.searchQuery);
   const showImportantOnly = useMessageStore((state) => state.showImportantOnly);
@@ -72,8 +73,7 @@ const Message: React.FC<MessageProps> = ({
   // Safe animation setup
   const messageAnimation = useMemo(() => {
     if (!message) return {};
-    const sending = message.status === MessageStatus.SENDING;
-    return getMessageAnimation(isMe, sending);
+    return getMessageAnimation(isMe);
   }, [message, isMe]);
 
   // Safe content checks
@@ -103,6 +103,7 @@ const Message: React.FC<MessageProps> = ({
   }
 
   const repliedMessage = message.replyToMessage;
+  const sending = message.status === MessageStatus.SENDING;
 
   return (
     <motion.div
@@ -131,7 +132,11 @@ const Message: React.FC<MessageProps> = ({
         </div>
       )}
 
-      <div className="flex flex-col">
+      <motion.div
+        key={sending ? "sending" : "sent"}
+        className="flex flex-col"
+        {...(sending ? messageAnimations.sending : {})}
+      >
         <div
           className={clsx("relative flex flex-col transition-all", {
             "scale-[1.1]": isRelyToThisMessage,
@@ -227,7 +232,7 @@ const Message: React.FC<MessageProps> = ({
             Failed to send message
           </h1>
         )}
-      </div>
+      </motion.div>
     </motion.div>
   );
 };

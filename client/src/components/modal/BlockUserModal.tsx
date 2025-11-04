@@ -30,7 +30,9 @@ const BlockUserModal: React.FC = () => {
         isBlockedByMe: true,
       });
       toast.success(
-        `${userToBlock.username || userToBlock.firstName} has been blocked`
+        t("modal.block_user.success", {
+          username: userToBlock.username || userToBlock.firstName,
+        })
       );
     } catch (error) {
       console.error("Error blocking user:", error);

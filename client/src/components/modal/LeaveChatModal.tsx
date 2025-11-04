@@ -7,6 +7,7 @@ import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useTranslation } from "react-i18next";
 import Button from "../ui/buttons/Button";
 import { handleError } from "@/common/utils/handleError";
+import { toast } from "react-toastify";
 
 interface LeaveChatModalData {
   chat: ChatResponse;
@@ -27,8 +28,13 @@ const LeaveChatModal: React.FC = () => {
 
   const handleLeaveChat = async () => {
     try {
-      await leaveChat(chat.id);
+      const isDeleted = await leaveChat(chat.id);
       closeModal();
+      if (isDeleted) {
+        toast.info(t("modal.leave_chat.chat_deleted"));
+      } else {
+        toast.info(t("modal.leave_chat.left"));
+      }
     } catch (error) {
       handleError(error, "Failed to leave chat");
     }

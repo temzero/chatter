@@ -1,12 +1,10 @@
 import { create } from "zustand";
 import { friendshipService } from "@/services/http/friendshipService";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
-import { handleError } from "@/common/utils/handleError";
 import {
   FriendRequestResponse,
   FriendshipUpdateNotification,
 } from "@/shared/types/responses/friendship.response";
-import { toast } from "react-toastify";
 import { useChatMemberStore } from "./chatMemberStore";
 import { PaginationResponse } from "@/shared/types/responses/pagination.response";
 
@@ -55,7 +53,6 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
 
     sendFriendRequest: async (
       receiverId,
-      receiverName,
       currentUserId,
       message
     ) => {
@@ -76,11 +73,10 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
           pendingRequests: [...state.pendingRequests, newRequest],
           isLoading: false,
         }));
-        toast.success(`New friend request sent to ${receiverName}`);
         return newRequest;
       } catch (error) {
         set({ isLoading: false });
-        handleError(error, "Failed to send friend request");
+        throw error;
       }
     },
 
@@ -98,7 +94,7 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
         return friendship;
       } catch (error) {
         set({ isLoading: false });
-        throw error
+        throw error;
       } finally {
         set((state) => ({
           pendingRequests: state.pendingRequests.filter(
@@ -131,7 +127,7 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
         }));
       } catch (error) {
         set({ isLoading: false });
-        throw error
+        throw error;
       } finally {
         if (userId) {
           useChatMemberStore.getState().updateFriendshipStatus(userId, null);

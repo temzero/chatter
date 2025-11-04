@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useAllChatIds, useChatMap } from "@/stores/chatStore";
+import { useAllChatIds, useChatMap, useSavedChat } from "@/stores/chatStore";
 import { getSetSidebar, useIsCompactSidebar } from "@/stores/sidebarStore";
 import { useFolders } from "@/stores/folderStore";
 import { Logo } from "@/components/ui/icons/Logo";
@@ -73,7 +73,10 @@ const SidebarDefault: React.FC = () => {
     setSelectedFolder(folder);
   };
 
+  const savedChat = useSavedChat()
+
   console.log("chatIds", chatIds);
+  console.log('savedChat', savedChat)
 
   if (chatIds.length === 0 && folders.length === 0) return <SidebarWellCome />;
 

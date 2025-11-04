@@ -6,7 +6,6 @@ import { useMessageStore } from "./messageStore";
 import { useAuthStore } from "./authStore";
 import { useChatMemberStore } from "./chatMemberStore";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
-import { toast } from "react-toastify";
 import { useModalStore } from "./modalStore";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
 import { UpdateChatRequest } from "@/shared/types/requests/update-chat.request";
@@ -65,7 +64,7 @@ interface ChatStoreActions {
   setPinnedMessage: (chatId: string, message: MessageResponse | null) => void;
   generateInviteLink: (chatId: string) => Promise<string>;
   refreshInviteLink: (chatId: string, token: string) => Promise<string>;
-  leaveChat: (chatId: string) => Promise<void>;
+  leaveChat: (chatId: string) => Promise<boolean>;
   deleteChat: (id: string) => Promise<void>;
   cleanupChat: (chatId: string) => void;
   clearChats: () => void;
@@ -426,8 +425,6 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
             pinnedAt: isPinned ? new Date() : null,
           });
         }
-
-        toast.success(isPinned ? "Chat pinned" : "Chat unpinned");
       } catch (error) {
         handleError(error, "Failed to pin/unpin chat");
       }
@@ -528,13 +525,13 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
       get().cleanupChat(chatId);
       window.history.pushState({}, "", "/");
 
-      if (chatDeleted) {
-        toast.info("This chat was deleted because no members remained.");
-      } else {
-        toast.success("You left the chat.");
-      }
-
       set({ isLoading: false });
+
+      if (chatDeleted) {
+        return true;
+      } else {
+        return false;
+      }
     },
 
     deleteChat: async (id) => {
@@ -542,7 +539,6 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
       await chatService.deleteChat(id);
       get().cleanupChat(id);
       window.history.pushState({}, "", "/");
-      toast.success("Chat deleted");
       set({ isLoading: false });
     },
 
@@ -581,6 +577,8 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
 export const useChat = (chatId: string) =>
   useChatStore((state) => state.chats[chatId]);
 
+export const useSavedChat = () => useChatStore((state) => state.savedChat);
+
 export const useActiveChat = () =>
   useChatStore((state) => state.getActiveChat());
 
@@ -615,8 +613,6 @@ export const useChatsForFolderFilter = () =>
     )
   );
 
-export const useSavedChat = () => useChatStore((state) => state.savedChat);
-
 export const useSetActiveSavedChat = () => {
   return async () => {
     const state = useChatStore.getState();
@@ -624,12 +620,12 @@ export const useSetActiveSavedChat = () => {
     console.log("savedChat", savedChat);
 
     if (!savedChat) {
-      toast.warning("Saved chat not found, fetching from server...");
+      console.warn("Saved chat not found, fetching from server...");
       try {
         const fetchedSavedChat = await chatService.fetchSavedChat();
 
         if (!fetchedSavedChat) {
-          toast.error("Saved chat does not exist in the database!");
+          console.error("Saved chat does not exist in the database!");
           return;
         }
         useChatStore.setState({ savedChat: fetchedSavedChat });

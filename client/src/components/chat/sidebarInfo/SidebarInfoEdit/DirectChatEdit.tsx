@@ -79,7 +79,7 @@ const DirectChatEdit = () => {
       }
 
       setSidebarInfo(SidebarInfoMode.DEFAULT);
-      toast.success("Update successfully");
+      toast.success(t("common.messages.update_success"));
     } catch (error) {
       handleError(error, "Failed to update nickname");
     }

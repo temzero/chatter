@@ -12,7 +12,6 @@ import type { UserResponse } from "@/shared/types/responses/user.response";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { localStorageService } from "@/services/storage/localStorageService";
 import { fetchInitialAppData } from "@/common/hooks/app/fetchInitialAppData";
-import { toast } from "react-toastify";
 
 type AuthMessageType = "error" | "success" | "info";
 
@@ -131,7 +130,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           const { user, accessToken } = await authService.register(userData);
 
           await handleAuthSuccess(user, accessToken);
-          toast.success("Account created successfully");
         } catch (error) {
           const errorMessage = handleAuthError(error);
           set({ message: { type: "error", content: errorMessage } });

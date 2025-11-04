@@ -39,41 +39,39 @@ const MuteChatModal: React.FC = () => {
         t("modal.mute_chat.muted_until", { time: formatDateTime(mutedUntil) })
       );
     } catch (error) {
-      handleError(error, t("modal.mute_chat.mute_failed"))
+      handleError(error, t("modal.mute_chat.mute_failed"));
     } finally {
       closeModal();
     }
   };
 
   return (
-    <>
-      <div className="p-4 flex flex-col items-center justify-center">
-        <h2 className="text-2xl flex items-center justify-center gap-2 font-semibold mb-4 text-yellow-500">
-          <span className="material-symbols-outlined text-3xl">
-            notifications_off
-          </span>
-          {t("modal.mute_chat.title")}
-        </h2>
-        <p className="mb-4 text-sm opacity-70">
-          {t("modal.mute_chat.description")}
-        </p>
-        <div className="flex flex-col gap-2 w-full">
-          {MUTE_OPTIONS.map((option) => (
-            <button
-              key={option.label}
-              className="p-1 rounded custom-border w-full hover:bg-[--hover-color]"
-              onClick={() => handleMute(option.value)}
-            >
-              {t(
-                `modal.mute_chat.options.${option.label
-                  .replace(" ", "_")
-                  .toLowerCase()}`
-              )}
-            </button>
-          ))}
-        </div>
+    <div className="p-4 flex flex-col items-center justify-center">
+      <h2 className="text-2xl flex items-center justify-center gap-2 font-semibold mb-4 text-yellow-500">
+        <span className="material-symbols-outlined text-3xl">
+          notifications_off
+        </span>
+        {t("modal.mute_chat.title")}
+      </h2>
+      <p className="mb-4 text-sm opacity-70">
+        {t("modal.mute_chat.description")}
+      </p>
+      <div className="flex flex-col gap-2 w-full">
+        {MUTE_OPTIONS.map((option) => (
+          <button
+            key={option.label}
+            className="p-1 rounded custom-border w-full hover:bg-[--hover-color]"
+            onClick={() => handleMute(option.value)}
+          >
+            {t(
+              `modal.mute_chat.options.${option.label
+                .replace(" ", "_")
+                .toLowerCase()}`
+            )}
+          </button>
+        ))}
       </div>
-    </>
+    </div>
   );
 };
 

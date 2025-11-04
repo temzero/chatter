@@ -1,39 +1,22 @@
-// import React, { useState } from "react";
-
-// const CreateNewChat: React.FC = () => {
-//   const [query, setQuery] = useState("");
-
-//   return (
-//     <div className="flex flex-col gap-3 p-2 h-full relative overflow-hidden">
-//       <p>{query}</p>
-//       <p className="text-center text-gray-400">
-//         Testing mode: no user search or selection
-//       </p>
-//     </div>
-//   );
-// };
-
-// export default CreateNewChat;
-
 import React, { useState } from "react";
 import ContactInfoItem from "@/components/ui/contact/contactInfoItem";
 import { userService } from "@/services/http/userService";
-import { blockService } from "@/services/http/blockService";
 import { getCurrentUser } from "@/stores/authStore";
 import { AnimatePresence, motion } from "framer-motion";
 import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
-import { toast } from "react-toastify";
 import { OnlineDot } from "@/components/ui/icons/OnlineDot";
 import { useUserStatus } from "@/stores/presenceStore";
 import { useTranslation } from "react-i18next";
 import { UserResponse } from "@/shared/types/responses/user.response";
 import FriendshipBtn from "@/components/ui/buttons/FriendshipBtn";
+import { getOpenModal, ModalType } from "@/stores/modalStore";
 
 const CreateNewChat: React.FC = () => {
   const { t } = useTranslation();
   const currentUser = getCurrentUser();
+  const openModal = getOpenModal();
   const createOrGetDirectChat = useChatStore.getState().createOrGetDirectChat;
 
   const [query, setQuery] = useState("");
@@ -57,23 +40,6 @@ const CreateNewChat: React.FC = () => {
       setLoading(false);
     }
   }
-
-  const handleUnblock = async (blockedId: string, name: string) => {
-    try {
-      await blockService.unblockUser(blockedId);
-      setUser((prev) => {
-        if (!prev) return null;
-        return {
-          ...prev,
-          isBlockedByMe: false,
-        };
-      });
-      toast.success(`${name} has been unblocked`);
-    } catch (err) {
-      console.error("Failed to unblock user", err);
-      toast.error("Failed to unblock user");
-    }
-  };
 
   const updateFriendshipStatus = (newStatus: FriendshipStatus | null) => {
     if (!user) return;
@@ -211,7 +177,12 @@ const CreateNewChat: React.FC = () => {
                     {user.isBlockedByMe ? (
                       <button
                         className="w-full py-1 flex gap-1 items-center justify-center hover:bg-[var(--primary-green)] bg-red-500 hover:bg-red-600 text-white"
-                        onClick={() => handleUnblock(user.id, user.firstName)}
+                        // onClick={() => handleUnblock(user.id, user.firstName)}
+                        onClick={() =>
+                          openModal(ModalType.UNBLOCK_USER, {
+                            blockedUser: user,
+                          })
+                        }
                       >
                         <span className="material-symbols-outlined">
                           replay

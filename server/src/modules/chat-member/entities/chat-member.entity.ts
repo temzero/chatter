@@ -64,9 +64,6 @@ export class ChatMember {
   @JoinColumn({ name: 'last_visible_message_id' })
   lastVisibleMessage: Message | null;
 
-  @Column({ name: 'last_visible_message_id', type: 'uuid', nullable: true })
-  lastVisibleMessageId: string | null;
-
   @Column({ name: 'pinned_at', type: 'timestamp', nullable: true })
   pinnedAt: Date | null;
 

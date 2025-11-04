@@ -32,7 +32,7 @@ const SidebarInfo: React.FC = () => {
   return (
     <div
       className={clsx(
-        "relative h-full overflow-hidden bg-[var(--sidebar-color)] border-l-2 border-[var(--border-color)] shadow-lg",
+        "relative h-full overflow-hidden bg-[var(--sidebar-color)] border-l-2 border-[var(--border-color)] shadow-lg select-none",
         sidebarInfoWidthClass
       )}
     >

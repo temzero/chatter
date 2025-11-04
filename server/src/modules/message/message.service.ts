@@ -93,7 +93,7 @@ export class MessageService {
     // ✅ Update last visible message
     await this.chatMemberRepo.update(
       { chatId: dto.chatId },
-      { lastVisibleMessageId: savedMessage.id },
+      { lastVisibleMessage: savedMessage || null },
     );
 
     // ✅ RELOAD with all relations
@@ -163,7 +163,7 @@ export class MessageService {
 
     await this.chatMemberRepo.update(
       { chatId: dto.chatId },
-      { lastVisibleMessageId: savedMessage.id },
+      { lastVisibleMessage: savedMessage },
     );
 
     return await this.getFullMessageById(savedMessage.id);
@@ -210,7 +210,7 @@ export class MessageService {
 
     await this.chatMemberRepo.update(
       { chatId: chat.id },
-      { lastVisibleMessageId: savedMessage.id },
+      { lastVisibleMessage: savedMessage },
     );
 
     return this.getFullMessageById(savedMessage.id);
@@ -258,7 +258,7 @@ export class MessageService {
     // ✅ Update lastVisibleMessageId for all chat members
     await this.chatMemberRepo.update(
       { chatId },
-      { lastVisibleMessageId: savedMessage.id },
+      { lastVisibleMessage: savedMessage },
     );
 
     const fullMessage = await this.getFullMessageById(savedMessage.id);
@@ -481,8 +481,8 @@ export class MessageService {
         .where('message.chat_id = :chatId', { chatId })
         .andWhere('message.is_deleted = false')
         .andWhere(
-          `(message.deletedForUserIds IS NULL OR NOT message.deletedForUserIds @> :userIdJson)`,
-          { userIdJson: JSON.stringify([currentUserId]) },
+          `(message.deletedForUserIds IS NULL OR NOT message.deletedForUserIds @> :userIds)`,
+          { userIds: [currentUserId] },
         );
 
       // Apply lastId for pagination
@@ -518,8 +518,8 @@ export class MessageService {
           .where('message.chat_id = :chatId', { chatId })
           .andWhere('message.is_deleted = false')
           .andWhere(
-            `(message.deletedForUserIds IS NULL OR NOT message.deletedForUserIds @> :userIdJson)`,
-            { userIdJson: JSON.stringify([currentUserId]) },
+            `(message.deletedForUserIds IS NULL OR NOT message.deletedForUserIds @> :userIds)`,
+            { userIds: [currentUserId] },
           )
           .andWhere('message.createdAt < :beforeDate', {
             beforeDate: oldest.createdAt,
@@ -579,7 +579,7 @@ export class MessageService {
       message.deletedAt = new Date();
 
       if (clearDeletedForUsers) {
-        message.deletedForUserIds = null;
+        message.deletedForUserIds = [];
       }
 
       await this.messageRepo.save(message);
@@ -762,24 +762,23 @@ export class MessageService {
     );
 
     for (const member of members) {
-      if (member.lastVisibleMessageId !== messageId) continue;
+      if (member.lastVisibleMessage?.id !== messageId) continue;
 
       const fallback = await this.messageRepo.findOne({
         where: {
           chatId,
           isDeleted: false,
           id: Not(messageId),
-          deletedForUserIds: Raw(
-            (alias) =>
-              `(${alias} IS NULL OR NOT (${alias} @> '["${member.userId}"]'::jsonb))`,
-          ),
+          deletedForUserIds: Raw((alias) => `(:userId <> ALL(${alias}))`, {
+            userId: member.userId,
+          }),
         },
         order: { createdAt: 'DESC' },
       });
 
       await this.chatMemberRepo.update(
         { chatId, userId: member.userId },
-        { lastVisibleMessageId: fallback?.id || null },
+        { lastVisibleMessage: fallback || null },
       );
     }
   }

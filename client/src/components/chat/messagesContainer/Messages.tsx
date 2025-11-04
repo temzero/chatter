@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import {
   groupMessagesByDate,
@@ -9,8 +9,8 @@ import { AnimatePresence } from "framer-motion";
 import { getCurrentUser } from "@/stores/authStore";
 import { MessageReadInfo } from "./MessageReadInfo";
 import { useMessageStore } from "@/stores/messageStore";
+import { MarkLastMessageRead } from "@/common/utils/message/markMessageRead";
 import Message from "../components/message/Message";
-import { useAutoMarkLastMessageRead } from "@/common/hooks/useAutoMarkMessageRead";
 
 interface ChatMessagesProps {
   chat: ChatResponse;
@@ -32,11 +32,18 @@ const Messages: React.FC<ChatMessagesProps> = ({
   const messages = messageIds.map((id) => messagesById[id]).filter(Boolean);
   console.log("messages", messages);
 
+  useEffect(() => {
+    if (chat && messages.length > 0) {
+      return MarkLastMessageRead({chat, messages});
+    }
+  }, [chat, messages]);
   // ✅ Auto mark last message as read
-  useAutoMarkLastMessageRead({
-    chat,
-    messages,
-  });
+  // if (chat && messages.length > 0) {
+  //   MarkLastMessageRead({
+  //     chat,
+  //     messages,
+  //   });
+  // }
 
   // Group messageIds by date
   const groupedIdsByDate = useMemo(() => {

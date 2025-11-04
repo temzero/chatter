@@ -42,6 +42,7 @@
     },
     "messages": {
       "success": "成功！",
+      "update_success": "更新成功",
       "failed": "失败",
       "unknown": "未知",
       "empty": "空",
@@ -61,6 +62,27 @@
       "logging_in": "登录中...",
       "verifying": "验证中...",
       "processing": "处理中..."
+    }
+  },
+  "toast": {
+    "friendship": {
+      "accepted": "好友请求已接受",
+      "declined": "好友请求已拒绝",
+      "canceled": "好友请求已取消",
+      "new_request": "来自{{name}}的新好友请求",
+      "sent_request": "已向{{name}}发送好友请求",
+      "accepted_by": "{{name}}接受了你的好友请求！",
+      "declined_by": "{{name}}拒绝了你的好友请求",
+      "invite_link_generated": "邀请链接已生成！",
+      "invite_link_refreshed": "邀请链接已刷新！"
+    },
+    "message": {
+      "saved": "消息已保存",
+      "error": "消息发送失败"
+    },
+    "call": {
+      "missed": "你还有{{count}}个未接来电",
+      "cannot_start": "无法开始通话 - 线路繁忙"
     }
   },
 
@@ -135,7 +157,7 @@
     "saved_messages": "已保存的消息",
     "calls": "通话",
     "contacts": "联系人",
-    "friend_requests": "好友请求 {count, plural, =0 {好友请求} other {好友请求 #}}",
+    "friend_requests": "好友请求 {{count, plural, =0 {} one { (1)} other { ({{count}})}}",
     "friend_requests_none": "好友请求",
     "folders": "聊天文件夹",
     "blocked": "已屏蔽",
@@ -569,7 +591,9 @@
       "title_group": "离开{{type}}",
       "chat_type": "{{type}}聊天",
       "description_direct": "你确定要离开此聊天吗？\n你将无法再次访问。",
-      "description_group": "你确定要离开此{{type}}吗？\n你将不再收到消息。"
+      "description_group": "你确定要离开此{{type}}吗？\n你将不再收到消息。",
+      "chat_deleted": "此聊天因没有成员剩余而被删除。",
+      "left": "你已离开聊天"
     },
     "add_member": {
       "title": "邀请成员",

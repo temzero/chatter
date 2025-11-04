@@ -96,8 +96,8 @@ const GroupChatEdit = () => {
         description: formData.description,
       });
 
-      setSidebarInfo(SidebarInfoMode.DEFAULT); // Close sidebar on success
-      toast.success("Update successfully");
+      setSidebarInfo(SidebarInfoMode.DEFAULT);
+      toast.success(t("common.messages.update_success"));
     } catch (error) {
       handleError(error, "Update failed!");
     } finally {

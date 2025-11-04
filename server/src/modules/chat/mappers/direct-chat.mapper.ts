@@ -8,7 +8,6 @@ import { MessageMapper } from 'src/modules/message/mappers/message.mapper';
 import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
 import { mapChatMemberToChatMemberLiteDto } from '../../chat-member/mappers/chat-member-lite.mapper';
 import { ChatMemberLiteDto } from '../dto/responses/chat-member-lite.dto';
-// import { mapMessageToLastMessageResDto } from './last-message.mapper';
 
 @Injectable()
 export class DirectChatMapper {
@@ -75,13 +74,6 @@ export class DirectChatMapper {
       mutedUntil,
       pinnedAt: myMember.pinnedAt,
       isDeleted: !!otherMember?.deletedAt,
-      // lastMessage: myMember.lastVisibleMessage
-      //   ? mapMessageToLastMessageResDto(
-      //       myMember.lastVisibleMessage,
-      //       chat.members,
-      //       currentUserId,
-      //     )
-      //   : undefined,
     };
   }
 }

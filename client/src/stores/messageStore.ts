@@ -13,6 +13,7 @@ import {
 } from "@/shared/types/responses/message.response";
 import { useAttachmentStore } from "./messageAttachmentStore";
 import { audioService, SoundType } from "@/services/audio.service";
+import { useShallow } from "zustand/shallow";
 
 // Normalized structure
 type MessagesById = Record<string, MessageResponse>; // messageId -> Message
@@ -126,7 +127,7 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
     },
 
     addMessage: (newMessage) => {
-      console.log('newMessage', newMessage)
+      console.log("newMessage", newMessage);
       const { messagesById, messageIdsByChat } = get();
       const chatId = newMessage.chatId;
 
@@ -410,7 +411,9 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
 // ---------- HOOKS ----------
 
 export const useMessageIds = (chatId: string): string[] => {
-  return useMessageStore((state) => state.messageIdsByChat[chatId] || []);
+  return useMessageStore(
+    useShallow((state) => state.messageIdsByChat[chatId] || [])
+  );
 };
 
 export const useMessagesByChatId = (chatId: string) => {

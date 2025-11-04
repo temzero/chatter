@@ -20,7 +20,7 @@ export const AuthenticationLayout = ({
   };
 
   return (
-    <div className="relative w-full h-screen overflow-hidden">
+    <div className="relative w-full h-screen overflow-hidden select-none">
       <BackgroundContent />
 
       {/* Content */}

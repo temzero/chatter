@@ -12,8 +12,10 @@ import { WsEmitChatMemberResponse } from "@/shared/types/responses/ws-emit-chat-
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { webSocketService } from "@/services/websocket/websocket.service";
 import { handleError } from "@/common/utils/handleError";
+import { useTranslation } from "react-i18next";
 
 export function useChatSocketListeners() {
+  const { t } = useTranslation();
   useEffect(() => {
     // ======== Message Handlers ========
     const handleNewMessage = async (
@@ -34,7 +36,6 @@ export function useChatSocketListeners() {
         });
       } catch (error) {
         console.error("Failed to fetch chat for incoming message:", error);
-        toast.error("New message received but chat not found!");
         return;
       }
 
@@ -59,7 +60,7 @@ export function useChatSocketListeners() {
       try {
         const { payload: message } = wsMessage;
         useMessageStore.getState().addMessage(message);
-        toast.success("Message saved!");
+        toast.error(t("toast.message.saved"));
       } catch (error) {
         handleError(error, "Failed to save message");
       }
@@ -228,14 +229,12 @@ export function useChatSocketListeners() {
             "WebSocket error payload is completely undefined:",
             wsError
           );
-          toast.error("Message failed to send (unknown error)");
           return;
         }
 
         // Then check if messageId exists
         if (!error.messageId) {
           console.error("Message ID is undefined in error response:", error);
-          toast.error(`Message failed: ${error.error || "Unknown error"}`);
           return;
         }
 
@@ -243,7 +242,7 @@ export function useChatSocketListeners() {
           status: MessageStatus.FAILED,
         });
 
-        toast.error(`Message failed to send: ${error.error}`);
+        toast.error(t("toast.message.error"));
       } catch (error) {
         handleError(error, "Error failed!");
       }

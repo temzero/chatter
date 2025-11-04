@@ -1,7 +1,6 @@
 // hooks/chat/useMuteControl.ts
 import { useChatStore } from "@/stores/chatStore";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
-import { toast } from "react-toastify";
 import { handleError } from "../utils/handleError";
 
 export function useMuteControl(chatId: string, myMemberId: string) {
@@ -18,7 +17,6 @@ export function useMuteControl(chatId: string, myMemberId: string) {
   const unmute = async () => {
     try {
       setMute(chatId, myMemberId, null);
-      toast.success("Unmuted successfully");
     } catch (error) {
       handleError(error, "Failed to unmute chat");
     }

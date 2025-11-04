@@ -108,7 +108,6 @@ export const chatService = {
         maxUses: options?.maxUses,
       }
     );
-    toast.success("Invite link created!");
     return response.data.payload;
   },
 
@@ -121,7 +120,6 @@ export const chatService = {
     const response = await API.post<ApiSuccessResponse<string>>(
       `/invite/refresh/${validToken}`
     );
-    toast.success("Invite link refreshed!");
     return response.data.payload;
   },
 };

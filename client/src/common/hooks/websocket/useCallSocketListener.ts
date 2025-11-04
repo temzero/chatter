@@ -18,8 +18,10 @@ import {
   CallError,
   CallErrorResponse,
 } from "@shared/types/call";
+import { useTranslation } from "react-i18next";
 
 export function useCallSocketListeners() {
+  const { t } = useTranslation();
   const currentUserId = getCurrentUserId();
   useCallSounds();
 
@@ -35,7 +37,9 @@ export function useCallSocketListeners() {
           handleIncomingCall(mostRecentCall);
 
           if (pendingCalls.length > 1) {
-            toast.info(`You have ${pendingCalls.length - 1} more missed calls`);
+            toast.info(
+              t("toast.call.missed", { count: pendingCalls.length - 1 })
+            );
           }
         }
       } catch (error) {
@@ -177,7 +181,7 @@ export function useCallSocketListeners() {
       const { reason, callId } = data;
 
       if (reason === CallError.LINE_BUSY) {
-        toast.error("Cannot start call: line is busy");
+        toast.error( t("toast.call.cannot_start"));
         const callStore = useCallStore.getState();
 
         if (callStore.callId !== callId) {

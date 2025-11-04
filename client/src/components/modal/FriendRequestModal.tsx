@@ -5,6 +5,8 @@ import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import { getCurrentUserId } from "@/stores/authStore";
 import { useTranslation } from "react-i18next";
+import { handleError } from "@/common/utils/handleError";
+import { toast } from "react-toastify";
 
 interface FriendRequestModalData {
   receiver: {
@@ -34,12 +36,19 @@ const FriendRequestModal: React.FC = () => {
   const handleFriendRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     closeModal();
-    await sendFriendRequest(
-      receiver.id,
-      receiver.firstName,
-      currentUserId,
-      requestMessage
-    );
+    try {
+      await sendFriendRequest(
+        receiver.id,
+        receiver.firstName,
+        currentUserId,
+        requestMessage
+      );
+      toast.success(
+        t("toast.friendship.sent_request", { name: receiver.firstName })
+      );
+    } catch (error) {
+      handleError(error, "Failed to sent friend request");
+    }
   };
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -48,7 +57,7 @@ const FriendRequestModal: React.FC = () => {
   };
 
   return (
-    <>
+    <div className="p-4">
       <h1 className="font-bold text-center text-xl">
         {t("modal.friend_request.title")}
       </h1>
@@ -93,7 +102,7 @@ const FriendRequestModal: React.FC = () => {
           {t("modal.friend_request.send_request")}
         </button>
       </form>
-    </>
+    </div>
   );
 };
 

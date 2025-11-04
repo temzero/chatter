@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 
 type SearchBarProps = {
   placeholder?: string;
@@ -14,17 +14,6 @@ const SearchBar = ({
   onSearch,
 }: SearchBarProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (!autoFocus) return;
-
-    // Delay autoFocus by 200ms
-    const timer = setTimeout(() => {
-      inputRef.current?.focus();
-    }, 200);
-
-    return () => clearTimeout(timer);
-  }, [autoFocus]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -46,7 +35,7 @@ const SearchBar = ({
         placeholder={placeholder}
         onChange={handleChange}
         className="w-full bg-transparent outline-none"
-        // Remove the native autoFocus attribute
+        autoFocus={autoFocus}
       />
     </div>
   );

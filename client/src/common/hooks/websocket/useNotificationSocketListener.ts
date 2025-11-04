@@ -11,8 +11,10 @@ import {
   FriendRequestResponse,
   FriendshipUpdateNotification,
 } from "@/shared/types/responses/friendship.response";
+import { useTranslation } from "react-i18next";
 
 export function useNotificationSocketListeners() {
+  const { t } = useTranslation();
   const currentUserId = getCurrentUserId();
 
   useEffect(() => {
@@ -20,7 +22,9 @@ export function useNotificationSocketListeners() {
       const isReceiver = request.receiver.id === currentUserId;
       if (!isReceiver) return;
       useFriendshipStore.getState().addPendingRequest(request);
-      toast.info(`New friend request from ${request.sender.name}`);
+      toast.info(
+        t("toast.friendship.new_request", { name: request.sender.name })
+      );
     };
 
     const handleFriendshipUpdate = (data: FriendshipUpdateNotification) => {
@@ -38,9 +42,13 @@ export function useNotificationSocketListeners() {
 
       // 4. Show notification with correct context
       if (data.status === FriendshipStatus.ACCEPTED) {
-        toast.success(`${data.firstName} accepted your friend request!`);
+        toast.success(
+          t("toast.friendship.accepted_by", { name: data.firstName })
+        );
       } else if (data.status === FriendshipStatus.DECLINED) {
-        toast.warning(`${data.firstName} declined your friend request`);
+        toast.warning(
+          t("toast.friendship.declined_by", { name: data.firstName })
+        );
       }
     };
 

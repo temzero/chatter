@@ -8,6 +8,7 @@ import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useTranslation } from "react-i18next";
 import ChatList from "@/components/ui/chat/ChatList";
 import SearchBar from "@/components/ui/SearchBar";
+import clsx from "clsx";
 
 const chatTypes = ["all", ChatType.DIRECT, ChatType.GROUP, ChatType.CHANNEL];
 
@@ -75,7 +76,7 @@ const SidebarSearch: React.FC = () => {
   return (
     <aside className="w-full h-full flex flex-col transition-all duration-300 ease-in-out">
       {/* Header */}
-      <header className="flex w-full items-center h-[var(--header-height)] justify-between px-2">
+      <header className="flex w-full items-center h-[var(--header-height)] justify-between pl-2">
         <SearchBar
           placeholder={t("sidebar_search.placeholder")}
           onSearch={handleSearch}
@@ -97,9 +98,11 @@ const SidebarSearch: React.FC = () => {
             onClick={() => handleChatTypeChange(type)}
           >
             <i
-              className={`material-symbols-outlined ${
-                type === ChatType.GROUP ? "text-[2.1rem]" : ""
-              }`}
+              className={clsx(
+                "material-symbols-outlined",
+                type === selectedType && "filled",
+                type === ChatType.GROUP && "text-[2.1rem]"
+              )}
             >
               {getTypeIcon(type)}
             </i>

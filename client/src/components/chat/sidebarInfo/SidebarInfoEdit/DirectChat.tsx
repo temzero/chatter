@@ -154,7 +154,7 @@ const DirectChat: React.FC = () => {
               icon="alternate_email"
               value={chatPartner.username}
               copyType="username"
-              defaultText={t("common.actions.no_username")}
+              defaultText={t("sidebar_profile.no_username")}
             />
             <ContactInfoItem
               icon="call"

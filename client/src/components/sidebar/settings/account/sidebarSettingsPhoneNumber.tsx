@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { getCurrentUser, useAuthStore } from "@/stores/authStore";
-import { userService } from "@/services/http/userService"
+import { userService } from "@/services/http/userService";
 import { handleError } from "@/common/utils/handleError";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
@@ -13,7 +13,6 @@ const SidebarSettingsPhoneNumber: React.FC = () => {
   const currentUser = getCurrentUser();
 
   const setCurrentUser = useAuthStore.getState().setCurrentUser;
-  const setLoading = useAuthStore.getState().setLoading;
 
   const [phoneNumber, setPhoneNumber] = useState(
     currentUser?.phoneNumber || ""
@@ -68,7 +67,7 @@ const SidebarSettingsPhoneNumber: React.FC = () => {
     }
 
     try {
-      setLoading(true);
+      useAuthStore.setState({ loading: true });
 
       // Check if phone number is the same as current
       if (phoneNumber === currentUser?.phoneNumber) {
@@ -93,7 +92,7 @@ const SidebarSettingsPhoneNumber: React.FC = () => {
         t("account_settings.change_phone.messages.failed_send")
       );
     } finally {
-      setLoading(false);
+      useAuthStore.setState({ loading: false });
     }
   };
 

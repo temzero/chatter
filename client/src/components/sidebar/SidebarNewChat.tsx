@@ -6,6 +6,7 @@ import { SlidingContainer } from "@/components/ui/layout/SlidingContainer";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
+import clsx from "clsx";
 
 const sidebarChatTypes = [ChatType.DIRECT, ChatType.GROUP, ChatType.CHANNEL];
 
@@ -69,12 +70,12 @@ const SidebarNewChat: React.FC = () => {
 
   return (
     <aside className="w-full h-full flex flex-col transition-all duration-300 ease-in-out">
-      <header className="flex w-full items-center h-[var(--header-height)] justify-between px-2">
+      <header className="flex w-full items-center h-[var(--header-height)] justify-between pl-2">
         <h1 className="font-semibold text-xl pl-1">
           {getTypeLabel(selectedType)}
         </h1>
         <i
-          className="material-symbols-outlined text-2xl opacity-60 hover:opacity-100 cursor-pointer"
+          className="material-symbols-outlined text-2xl opacity-60 hover:opacity-100 cursor-pointer p-2"
           onClick={() => setSidebar(SidebarMode.DEFAULT)}
         >
           close
@@ -89,9 +90,11 @@ const SidebarNewChat: React.FC = () => {
             onClick={() => handleChatTypeChange(type)}
           >
             <i
-              className={`material-symbols-outlined ${
-                type === ChatType.GROUP ? "text-[2.1rem]" : ""
-              }`}
+              className={clsx(
+                "material-symbols-outlined",
+                type === selectedType && 'filled',
+                type === ChatType.GROUP && "text-[2.1rem]"
+              )}
             >
               {getTypeIcon(type)}
             </i>
@@ -100,7 +103,7 @@ const SidebarNewChat: React.FC = () => {
       </div>
 
       <SlidingContainer uniqueKey={selectedType} direction={direction}>
-          {NewChatWrapper(selectedType)}
+        {NewChatWrapper(selectedType)}
       </SlidingContainer>
     </aside>
   );

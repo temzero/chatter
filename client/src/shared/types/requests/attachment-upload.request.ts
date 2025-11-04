@@ -12,5 +12,5 @@ export interface AttachmentUploadRequest {
   height?: number;
   duration?: number;
 
-  createdAt: string;
+  createdAt?: string;
 }

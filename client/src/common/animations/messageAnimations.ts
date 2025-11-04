@@ -2,6 +2,16 @@ import { MotionProps } from "framer-motion";
 
 // Shared animation configurations
 export const messageAnimations: Record<string, MotionProps> = {
+  sending: {
+    animate: { opacity: [0.3, 0.6, 0.3] },
+    exit: { opacity: 1, scale: 1 },
+    transition: {
+      duration: 2.5,
+      repeat: Infinity,
+      repeatType: "loop",
+      ease: "easeInOut",
+    },
+  },
   SystemMessage: {
     initial: { scale: 0.5, y: 90 },
     animate: { scale: 1, y: 0 },
@@ -27,23 +37,7 @@ export const messageAnimations: Record<string, MotionProps> = {
   },
 };
 
-export const getMessageAnimation = (
-  isMe: boolean,
-  isSending = false
-): MotionProps => {
-  if (isSending) {
-    return {
-      animate: { opacity: [0.3, 0.6, 0.3] },
-      exit: { opacity: 0, scale: 0.1 },
-      transition: {
-        duration: 2.5,
-        repeat: Infinity,
-        repeatType: "loop",
-        ease: "easeInOut",
-      },
-    };
-  }
-
+export const getMessageAnimation = (isMe: boolean): MotionProps => {
   return {
     initial: { opacity: 0, x: isMe ? 300 : -300 },
     animate: { opacity: 1, scale: 1, x: 0 },

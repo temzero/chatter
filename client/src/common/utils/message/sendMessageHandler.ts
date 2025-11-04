@@ -9,7 +9,6 @@ import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { CreateMessageRequest } from "@/shared/types/requests/send-message.request";
 import { AttachmentUploadRequest } from "@/shared/types/requests/attachment-upload.request";
 import { deleteFilesFromSupabase } from "@/common/utils/supabase/deleteFileFromSupabase";
-import { toast } from "react-toastify";
 
 function toOptimisticAttachmentResponseFromFile(
   file: File,
@@ -58,8 +57,9 @@ export async function handleSendMessage({
   onSuccess?: () => void;
   onError?: (error: unknown) => void;
 }) {
+  
   if (!myUserId || !chatId || !myMemberId) {
-    toast.error("Unable to send message — user not authenticated.");
+    console.error("Unable to send message — user not authenticated.");
     return;
   }
 

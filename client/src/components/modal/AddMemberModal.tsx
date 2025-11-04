@@ -85,7 +85,7 @@ const AddMemberModal: React.FC = () => {
     if (!chat) return;
     try {
       await useChatStore.getState().generateInviteLink(chat.id);
-      toast.success("Invite link generated!");
+       toast.success(t("toast.friendship.invite_link_generated"));
     } catch (error) {
       handleError(error, "Failed to generate invite link");
     }
@@ -99,7 +99,7 @@ const AddMemberModal: React.FC = () => {
         .getState()
         .refreshInviteLink(chat.id, primaryInviteLinkToken);
       setRefreshed(true);
-      toast.success("Invite link refreshed!");
+      toast.success(t("toast.friendship.invite_link_refreshed"));
     } catch (error) {
       handleError(error, "Failed to refresh invite link");
     }

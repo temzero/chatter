@@ -42,6 +42,7 @@
     },
     "messages": {
       "success": "Thành công!",
+      "update_success": "Cập nhật thành công",
       "failed": "Thất bại",
       "unknown": "Không xác định",
       "empty": "Trống",
@@ -61,6 +62,28 @@
       "logging_in": "Đang đăng nhập...",
       "verifying": "Đang xác minh...",
       "processing": "Đang xử lý..."
+    }
+  },
+
+  "toast": {
+    "friendship": {
+      "accepted": "Đã chấp nhận lời mời kết bạn",
+      "declined": "Đã từ chối lời mời kết bạn",
+      "canceled": "Đã hủy lời mời kết bạn",
+      "new_request": "Lời mời kết bạn mới từ {{name}}",
+      "sent_request": "Đã gửi lời mời kết bạn đến {{name}}",
+      "accepted_by": "{{name}} đã chấp nhận lời mời kết bạn của bạn!",
+      "declined_by": "{{name}} đã từ chối lời mời kết bạn của bạn",
+      "invite_link_generated": "Đã tạo liên kết mời!",
+      "invite_link_refreshed": "Đã làm mới liên kết mời!"
+    },
+    "message": {
+      "saved": "Tin nhắn đã được lưu",
+      "error": "Gửi tin nhắn thất bại"
+    },
+    "call": {
+      "missed": "Bạn có thêm {{count}} cuộc gọi nhỡ",
+      "cannot_start": "Không thể bắt đầu cuộc gọi - đường dây đang bận"
     }
   },
 
@@ -135,7 +158,7 @@
     "saved_messages": "Tin nhắn đã lưu",
     "calls": "Cuộc gọi",
     "contacts": "Danh bạ",
-    "friend_requests": "Lời mời kết bạn {count, plural, =0 {Lời mời kết bạn} other {Lời mời kết bạn #}}",
+    "friend_requests": "Lời mời kết bạn {{count, plural, =0 {} one { (1)} other { ({{count}})}}",
     "friend_requests_none": "Lời mời kết bạn",
     "folders": "Thư mục chat",
     "blocked": "Đã chặn",
@@ -573,7 +596,9 @@
       "title_group": "Rời {{type}}",
       "chat_type": "Chat {{type}}",
       "description_direct": "Bạn có chắc chắn muốn rời cuộc trò chuyện này?\nBạn sẽ không thể truy cập lại nó.",
-      "description_group": "Bạn có chắc chắn muốn rời {{type}} này?\nBạn sẽ không còn nhận được tin nhắn từ đây nữa."
+      "description_group": "Bạn có chắc chắn muốn rời {{type}} này?\nBạn sẽ không còn nhận được tin nhắn từ đây nữa.",
+      "chat_deleted": "Cuộc trò chuyện này đã bị xóa vì không còn thành viên nào.",
+      "left": "Bạn đã rời khỏi cuộc trò chuyện"
     },
     "add_member": {
       "title": "Mời Thành viên",

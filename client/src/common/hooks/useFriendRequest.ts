@@ -2,10 +2,13 @@
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { useChatStore } from "@/stores/chatStore";
-import { toast } from "react-toastify";
 import { handleError } from "../utils/handleError";
+import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
 
 export const useFriendRequest = () => {
+  const { t } = useTranslation();
+
   const pendingRequests = useFriendshipStore((state) => state.pendingRequests);
   const respondToRequest = useFriendshipStore.getState().respondToRequest;
   const cancelRequest = useFriendshipStore.getState().cancelRequest;
@@ -31,7 +34,7 @@ export const useFriendRequest = () => {
   ) => {
     try {
       await respondToRequest(requestId, userId, FriendshipStatus.ACCEPTED);
-      toast.success("Friend request accepted");
+      toast.success(t("toast.friendship.accepted"));
       onStatusChange?.(FriendshipStatus.ACCEPTED);
       getDirectChatByUserId(userId);
     } catch (error) {
@@ -47,7 +50,7 @@ export const useFriendRequest = () => {
     try {
       await respondToRequest(requestId, userId, FriendshipStatus.DECLINED);
       onStatusChange?.(null);
-      toast.success("Friend request declined");
+      toast.success(t("toast.friendship.declined"));
     } catch (error) {
       handleError(error, "Failed to decline friend request");
     }
@@ -61,7 +64,7 @@ export const useFriendRequest = () => {
     try {
       await cancelRequest(requestId, userId);
       onStatusChange?.(null);
-      toast.success("Friend request cancelled");
+      toast.success(t("toast.friendship.cancelled"));
     } catch (error) {
       handleError(error, "Failed to cancel friend request");
     }
