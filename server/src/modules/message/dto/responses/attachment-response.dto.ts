@@ -5,10 +5,11 @@ import { AttachmentResponse } from 'src/shared/types/responses/message-attachmen
 @Exclude()
 export class AttachmentResponseDto implements AttachmentResponse {
   @Expose() id: string;
-  @Expose() messageId: string;
-  @Expose() chatId: string;
   @Expose() type: AttachmentType;
   @Expose() url: string;
+
+  @Expose() messageId?: string;
+  @Expose() chatId?: string;
 
   @Expose() thumbnailUrl?: string | null = null;
   @Expose() filename?: string | null = null;

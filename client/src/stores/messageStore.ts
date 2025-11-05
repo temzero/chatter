@@ -113,7 +113,7 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
         if (attachments && attachments.length > 0) {
           useAttachmentStore
             .getState()
-            .addMessageAttachments(m.id, attachments);
+            .addMessageAttachments(m.chatId, m.id, attachments);
         }
 
         return m.id;
@@ -155,7 +155,7 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
       if (attachments && attachments.length > 0) {
         useAttachmentStore
           .getState()
-          .addMessageAttachments(newMessage.id, attachments);
+          .addMessageAttachments(newMessage.chatId, newMessage.id, attachments);
       }
 
       const currentUserId = getCurrentUserId();
@@ -199,7 +199,7 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
           if (attachments && attachments.length > 0) {
             useAttachmentStore
               .getState()
-              .addMessageAttachments(msg.id, attachments);
+              .addMessageAttachments(msg.chatId, msg.id, attachments);
           }
         });
 
@@ -305,7 +305,7 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
         if (attachments && attachments.length > 0) {
           useAttachmentStore
             .getState()
-            .addMessageAttachments(m.id, attachments);
+            .addMessageAttachments(m.chatId, m.id, attachments);
         }
 
         return m.id;

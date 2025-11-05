@@ -12,6 +12,7 @@ import {
   FriendshipUpdateNotification,
 } from "@/shared/types/responses/friendship.response";
 import { useTranslation } from "react-i18next";
+import { useChatStore } from "@/stores/chatStore";
 
 export function useNotificationSocketListeners() {
   const { t } = useTranslation();
@@ -40,7 +41,7 @@ export function useNotificationSocketListeners() {
         .updateFriendshipStatus(data.user.id, data.status);
       useFriendshipStore.getState().removeRequestLocally(data.friendshipId);
 
-      console.log("data.status", data.status)
+      console.log("data.status", data.status);
 
       // 4. Show notification with correct context
       if (data.status === FriendshipStatus.ACCEPTED) {
@@ -53,8 +54,21 @@ export function useNotificationSocketListeners() {
             bio: data.user.bio,
             phoneNumber: data.user.phoneNumber,
             birthday: data.user.birthday,
-            friendshipStatus: data.status
+            friendshipStatus: data.status,
           });
+
+        console.log("OTHER USER ACCEPTED MY REQUEST");
+
+        setTimeout(() => {
+          try {
+            useChatStore.getState().getDirectChatByUserId(data.user.id);
+          } catch (error) {
+            console.error(
+              "Failed to create/get direct chat after friendship accepted:",
+              error
+            );
+          }
+        }, 1000);
 
         toast.success(
           t("toast.friendship.accepted_by", { name: data.user.firstName })

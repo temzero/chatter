@@ -19,10 +19,7 @@ import MessageBubble from "./MessageBubble";
 import CallMessageBubble from "./CallMessageBubble";
 import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  getMessageAnimation,
-  messageAnimations,
-} from "@/common/animations/messageAnimations";
+import { getMessageAnimation } from "@/common/animations/messageAnimations";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { useMessageStore } from "@/stores/messageStore";
 
@@ -103,7 +100,6 @@ const Message: React.FC<MessageProps> = ({
   }
 
   const repliedMessage = message.replyToMessage;
-  const sending = message.status === MessageStatus.SENDING;
 
   return (
     <motion.div
@@ -113,7 +109,7 @@ const Message: React.FC<MessageProps> = ({
         message && handleQuickReaction(messageId, message.chatId)
       }
       onContextMenu={handleContextMenu}
-      className={clsx("flex relative max-w-[60%] pb-1.5", {
+      className={clsx("flex relative max-w-[60%] mb-3", {
         "justify-end": isMe,
         "justify-start": !isMe,
       })}
@@ -132,11 +128,7 @@ const Message: React.FC<MessageProps> = ({
         </div>
       )}
 
-      <motion.div
-        key={sending ? "sending" : "sent"}
-        className="flex flex-col"
-        {...(sending ? messageAnimations.sending : {})}
-      >
+      <div className="flex flex-col">
         <div
           className={clsx("relative flex flex-col transition-all", {
             "scale-[1.1]": isRelyToThisMessage,
@@ -232,7 +224,7 @@ const Message: React.FC<MessageProps> = ({
             Failed to send message
           </h1>
         )}
-      </motion.div>
+      </div>
     </motion.div>
   );
 };

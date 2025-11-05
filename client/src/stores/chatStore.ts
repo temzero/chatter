@@ -19,6 +19,8 @@ import { MessageResponse } from "@/shared/types/responses/message.response";
 import { PaginationResponse } from "@/shared/types/responses/pagination.response";
 import { useShallow } from "zustand/shallow";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 interface ChatStoreState {
   activeChatId: string | null;
@@ -44,12 +46,18 @@ interface ChatStoreActions {
     chatId?: string,
     options?: { fetchFullData?: boolean }
   ) => Promise<ChatResponse>;
-  getDirectChatByUserId: (userId: string) => Promise<ChatResponse | void>;
 
   setActiveChatId: (chatId: string | null) => Promise<void>;
   fetchChatData: (chatId: string) => Promise<void>;
+
+  getDirectChatByUserId: (userId: string) => Promise<ChatResponse | void>;
   getAllUserIdsInChats: () => string[];
-  createOrGetDirectChat: (partnerId: string) => Promise<ChatResponse>;
+  createOrGetDirectChat: (
+    partnerId: string,
+    options?: {
+      activate: boolean;
+    }
+  ) => Promise<ChatResponse>;
   createGroupChat: (payload: {
     name: string;
     userIds: string[];
@@ -271,7 +279,9 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
 
     getDirectChatByUserId: async (userId) => {
       const { chats, chatIds } = get();
-      const existingChat = chatIds.find((chatId) => {
+
+      // 1️⃣ Try to find an existing chat locally
+      const existingChatId = chatIds.find((chatId) => {
         const chat = chats[chatId];
         return (
           chat?.type === ChatType.DIRECT &&
@@ -279,11 +289,25 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
         );
       });
 
-      if (existingChat) {
-        await get().fetchChatById(existingChat);
-        return chats[existingChat];
+      if (existingChatId) {
+        return chats[existingChatId];
       }
-      return;
+
+      // 2️⃣ Otherwise, fetch from server (GET only — no creation)
+      try {
+        const chat = await chatService.fetchDirectChatByUserId(userId);
+        if (!chat) return;
+
+        // 3️⃣ Add to store
+        set((state) => ({
+          chats: { [chat.id]: chat, ...state.chats },
+          chatIds: [chat.id, ...state.chatIds],
+        }));
+
+        return chat;
+      } catch (error) {
+        handleError(error, "Failed to fetch direct chat by userId");
+      }
     },
 
     setActiveChatId: async (chatId) => {
@@ -337,20 +361,24 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
       return Array.from(allUserIds);
     },
 
-    createOrGetDirectChat: async (partnerId) => {
+    createOrGetDirectChat: async (
+      partnerId: string,
+      { activate = true }: { activate?: boolean } = {}
+    ) => {
       set({ isLoading: true });
       try {
         const { payload, wasExisting } =
           await chatService.createOrGetDirectChat(partnerId);
-
+        console.log('payload', payload)
         if (!wasExisting) {
           set((state) => ({
             chats: { [payload.id]: payload, ...state.chats },
             chatIds: [payload.id, ...state.chatIds],
           }));
         }
-
-        await get().setActiveChatId(payload.id);
+        if (activate) {
+          await get().setActiveChatId(payload.id);
+        }
         return payload;
       } catch (error) {
         set({ error: "Failed to create chat" });
@@ -579,8 +607,18 @@ export const useChat = (chatId: string) =>
 
 export const useSavedChat = () => useChatStore((state) => state.savedChat);
 
-export const useActiveChat = () =>
-  useChatStore((state) => state.getActiveChat());
+export const useActiveChat = () => {
+  const navigate = useNavigate();
+  const activeChat = useChatStore((state) => state.getActiveChat());
+
+  useEffect(() => {
+    if (!activeChat) {
+      navigate("/");
+    }
+  }, [activeChat, navigate]);
+
+  return activeChat;
+};
 
 export const useActiveChatId = () =>
   useChatStore((state) => state.activeChatId);

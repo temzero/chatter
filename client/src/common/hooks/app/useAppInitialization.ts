@@ -9,6 +9,7 @@ import { useCleanup } from "@/common/hooks/useCleanup";
 import { useGlobalKeyListeners } from "../keyEvent/useGlobalKeyListener";
 import { useChatStore } from "@/stores/chatStore";
 import { useEffect } from "react";
+import { toast } from "react-toastify";
 
 export const useAppInitialization = () => {
   console.log("useAppInitialization");
@@ -16,7 +17,14 @@ export const useAppInitialization = () => {
 
   useEffect(() => {
     if (chatId) {
-      useChatStore.getState().setActiveChatId(chatId);
+      try {
+        useChatStore.getState().setActiveChatId(chatId);
+      } catch {
+        toast.error("Chat not found or deleted!");
+        window.history.pushState({}, "", "/");
+        // Optionally, reset active chat in store
+        useChatStore.getState().setActiveChatId(null);
+      }
     }
   }, [chatId]);
 

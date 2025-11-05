@@ -164,16 +164,52 @@ export class ChatService {
     }
     return chatDto;
   }
+  async getDirectChatByUserId(
+    myUserId: string,
+    partnerUserId: string,
+  ): Promise<ChatResponseDto> {
+    // Find the direct chat by checking for chats that have exactly these 2 members
+    const chat = await this.chatRepo
+      .createQueryBuilder('chat')
+      .innerJoinAndSelect('chat.members', 'chatMember')
+      .innerJoinAndSelect('chatMember.user', 'user')
+      .where('chat.type = :type', { type: ChatType.DIRECT })
+      .andWhere((qb) => {
+        // Get chat IDs that have both users
+        const subQuery = qb
+          .subQuery()
+          .select('cm1.chatId')
+          .from('chat_member', 'cm1')
+          .innerJoin('chat_member', 'cm2', 'cm1.chatId = cm2.chatId')
+          .where('cm1.userId = :myUserId')
+          .andWhere('cm2.userId = :partnerUserId')
+          .getQuery();
+        return `chat.id IN ${subQuery}`;
+      })
+      .setParameter('myUserId', myUserId)
+      .setParameter('partnerUserId', partnerUserId)
+      .getOne();
+
+    if (!chat) {
+      ErrorResponse.badRequest('No direct chat found between these users');
+    }
+
+    const chatDto = await this.chatMapper.mapChatToChatResDto(chat, myUserId);
+    if (!chatDto) {
+      ErrorResponse.notFound('Failed to map chat to response DTO');
+    }
+    return chatDto;
+  }
 
   async getOrCreateDirectChat(
     myUserId: string,
-    partnerId: string,
+    partnerUserId: string,
   ): Promise<{ chat: ChatResponseDto; wasExisting: boolean }> {
-    if (!myUserId || !partnerId) {
+    if (!myUserId || !partnerUserId) {
       ErrorResponse.badRequest('Missing userId');
     }
 
-    const memberUserIds = [myUserId, partnerId];
+    const memberUserIds = [myUserId, partnerUserId];
     const userCount = await this.userRepo.count({
       where: { id: In(memberUserIds) },
     });
@@ -188,7 +224,7 @@ export class ChatService {
         user1: myUserId,
       })
       .innerJoin('chat.members', 'member2', 'member2.user_id = :user2', {
-        user2: partnerId,
+        user2: partnerUserId,
       })
       .where('chat.type = :type', { type: ChatType.DIRECT })
       // Only consider chats where both members are active (not soft-deleted)

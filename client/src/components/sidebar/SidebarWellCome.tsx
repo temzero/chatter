@@ -40,19 +40,19 @@ const SidebarWellCome: React.FC = () => {
             <Logo className="w-20 h-20" />
           </button>
           {isCompact || (
-            <div className="flex flex-col gap-2">
-              <h1 className="text-2xl font-semibold truncate">
+            <motion.div
+              className="flex flex-col gap-2"
+              initial={{ opacity: 0, scale: 0.6 }}
+              animate={{ opacity: 0.6, scale: 1 }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+            >
+              <h1 className="text-2xl font-semibold">
                 {t("sidebar_well_come.well_come")} {APP_NAME}!
               </h1>
-              <motion.p
-                initial={{ opacity: 0, scale: 0.6 }}
-                animate={{ opacity: 0.6, scale: 1 }}
-                transition={{ duration: 0.4, ease: "easeInOut" }}
-                className="opacity-60 italic"
-              >
+              <motion.p className="opacity-60 italic">
                 {t("sidebar_well_come.description")}
               </motion.p>
-            </div>
+            </motion.div>
           )}
         </div>
 

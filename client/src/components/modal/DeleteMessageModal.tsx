@@ -28,7 +28,7 @@ const DeleteMessageModal: React.FC = () => {
 
   const handleDelete = async (isDeleteForEveryone: boolean = false) => {
     try {
-      await chatWebSocketService.deleteMessage({
+      chatWebSocketService.deleteMessage({
         chatId: message.chatId,
         messageId: message.id,
         isDeleteForEveryone,

@@ -13,7 +13,7 @@ export const useFriendRequest = () => {
   const respondToRequest = useFriendshipStore.getState().respondToRequest;
   const cancelRequest = useFriendshipStore.getState().cancelRequest;
 
-  const getDirectChatByUserId = useChatStore.getState().getDirectChatByUserId;
+  const createOrGetDirectChat = useChatStore.getState().createOrGetDirectChat;
 
   const findReceivedRequest = (userId: string, currentUserId: string) => {
     return pendingRequests.find(
@@ -36,7 +36,7 @@ export const useFriendRequest = () => {
       await respondToRequest(requestId, userId, FriendshipStatus.ACCEPTED);
       toast.success(t("toast.friendship.accepted"));
       onStatusChange?.(FriendshipStatus.ACCEPTED);
-      getDirectChatByUserId(userId);
+      createOrGetDirectChat(userId);
     } catch (error) {
       handleError(error, "Failed to accept friend request");
     }

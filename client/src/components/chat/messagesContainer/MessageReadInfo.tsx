@@ -70,7 +70,7 @@ export const MessageReadInfo: React.FC<MessageReadInfoProps> = React.memo(
     return (
       <div
         ref={containerRef}
-        className={clsx("flex items-center gap-0.5 -mt-4 mb-1 mx-0.5", {
+        className={clsx("flex items-center gap-0.5 -mt-7 mb-2 mx-0.5", {
           "justify-end": isMe,
           "justify-start": !isMe,
         })}

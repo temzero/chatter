@@ -158,7 +158,7 @@
     "saved_messages": "Saved Messages",
     "calls": "Calls",
     "contacts": "Contacts",
-    "friend_requests": "Friend requests {{count, plural, =0 {} one { (1)} other { ({{count}}",
+    "friend_requests": "Friend requests {{count}}",
     "friend_requests_none": "Friend requests",
     "folders": "Chat Folders",
     "blocked": "Blocked",
@@ -575,13 +575,13 @@
       "mute_failed": "Failed to mute chat member"
     },
     "block_user": {
-      "title": "Block User",
+      "title": "Block {{name}}",
       "description": "Blocking will prevent this user from sending you messages or seeing your online status.",
       "success": "{{username}} has been blocked",
       "error": "Failed to block user"
     },
     "unblock_user": {
-      "title": "Unblock User",
+      "title": "Unblock {{name}}",
       "description": "Unblocking will allow this user to send you messages and see your online status.",
       "toast_success": "{{username}} has been unblocked",
       "toast_error": "Failed to unblock user"

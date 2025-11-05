@@ -36,7 +36,10 @@ const SidebarMore: React.FC = () => {
     },
     {
       icon: "person_add",
-      text: t("sidebar.friend_requests", { count: requestsCount }),
+      text:
+        requestsCount > 0
+          ? t("sidebar.friend_requests", { count: requestsCount })
+          : t("sidebar.friend_requests_none"),
       onClick: () => setSidebar(SidebarMode.FRIEND_REQUESTS),
     },
     { type: "divider" },

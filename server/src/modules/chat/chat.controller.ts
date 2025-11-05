@@ -131,6 +131,23 @@ export class ChatController {
     }
   }
 
+  @Get('direct/by-userid/:partnerId')
+  async getDirectChatByUserId(
+    @Param('partnerId') partnerId: string,
+    @CurrentUser('id') userId: string,
+  ): Promise<SuccessResponse<ChatResponseDto>> {
+    try {
+      const chat = await this.chatService.getDirectChatByUserId(
+        userId,
+        partnerId,
+      );
+
+      return new SuccessResponse(chat, 'Direct chat fetched successfully');
+    } catch (error: unknown) {
+      ErrorResponse.throw(error, 'Failed to fetch direct chat by userId');
+    }
+  }
+
   @Post('group')
   async createGroupChat(
     @CurrentUser('id') userId: string,

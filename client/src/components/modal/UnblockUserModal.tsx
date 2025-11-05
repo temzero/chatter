@@ -55,7 +55,7 @@ const UnblockUserModal: React.FC = () => {
           <span className="material-symbols-outlined text-3xl font-bold">
             lock_open_right
           </span>
-          <h2 className="text-2xl">{t("modal.unblock_user.title")}</h2>
+          <h2 className="text-2xl">{t("modal.unblock_user.title", {name: blockedUser.firstName})}</h2>
         </div>
 
         <div className="flex items-center gap-3 mb-6">

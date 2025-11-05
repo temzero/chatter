@@ -25,6 +25,7 @@ interface AttachmentStoreActions {
     type?: AttachmentType
   ) => AttachmentResponse[];
   addMessageAttachments: (
+    chatId: string,
     messageId: string,
     attachments: AttachmentResponse[]
   ) => void;
@@ -107,10 +108,8 @@ export const useAttachmentStore = create<
     return type ? attachments.filter((att) => att.type === type) : attachments;
   },
 
-  addMessageAttachments: (messageId, attachments) => {
-    if (!attachments || attachments.length === 0) return;
-    const chatId = attachments[0]?.chatId;
-    if (!chatId) return;
+  addMessageAttachments: (chatId, messageId, attachments) => {
+    if (!chatId || !attachments || attachments.length === 0) return;
 
     const attachmentsWithMessageId = attachments.map((att) => ({
       ...att,
@@ -191,6 +190,7 @@ export const useActiveChatAttachments = (): AttachmentResponse[] => {
 export const getMessageAttachments = (chatId: string, messageId: string) => {
   const state = useAttachmentStore.getState();
   const attachments = state.attachmentsByChat[chatId] || [];
+  console.log("state", state.attachmentsByChat);
   return attachments.filter((att) => att.messageId === messageId).reverse();
 };
 

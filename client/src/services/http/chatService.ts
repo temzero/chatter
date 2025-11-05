@@ -31,6 +31,13 @@ export const chatService = {
     return response.data.payload;
   },
 
+  async fetchDirectChatByUserId(userId: string): Promise<ChatResponse> {
+    const response = await API.get<ApiSuccessResponse<ChatResponse>>(
+      `chat/direct/by-userid/${userId}`
+    );
+    return response.data.payload;
+  },
+
   async fetchSavedChat(): Promise<ChatResponse> {
     const response = await API.get<ApiSuccessResponse<ChatResponse>>(
       `/chat/saved`

@@ -158,7 +158,7 @@
     "saved_messages": "Tin nhắn đã lưu",
     "calls": "Cuộc gọi",
     "contacts": "Danh bạ",
-    "friend_requests": "Lời mời kết bạn {{count, plural, =0 {} one { (1)} other { ({{count}}",
+    "friend_requests": "Lời mời kết bạn {{count}}",
     "friend_requests_none": "Lời mời kết bạn",
     "folders": "Thư mục chat",
     "blocked": "Đã chặn",
@@ -578,13 +578,13 @@
       "mute_failed": "Không thể tắt thông báo thành viên chat"
     },
     "block_user": {
-      "title": "Chặn Người dùng",
-      "description": "Hành động chặn sẽ ngăn người dùng này gửi tin nhắn cho bạn hoặc xem trạng thái trực tuyến của bạn.",
+      "title": "Chặn {{name}}",
+      "description": "Chặn sẽ ngăn người dùng này gửi tin nhắn cho bạn hoặc xem trạng thái trực tuyến của bạn.",
       "success": "Đã chặn {{username}}",
       "error": "Không thể chặn người dùng"
     },
     "unblock_user": {
-      "title": "Bỏ chặn Người dùng",
+      "title": "Bỏ chặn {{name}}",
       "description": "Bỏ chặn sẽ cho phép người dùng này gửi tin nhắn cho bạn và xem trạng thái trực tuyến của bạn.",
       "toast_success": "Đã bỏ chặn {{username}}",
       "toast_error": "Không thể bỏ chặn người dùng"

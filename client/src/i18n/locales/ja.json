@@ -158,7 +158,7 @@
     "saved_messages": "保存したメッセージ",
     "calls": "通話",
     "contacts": "連絡先",
-    "friend_requests": "友達リクエスト {{count, plural, =0 {} one { (1)} other { ({{count}}",
+    "friend_requests": "友達リクエスト {{count}}",
     "friend_requests_none": "友達リクエスト",
     "folders": "チャットフォルダ",
     "blocked": "ブロック済み",
@@ -574,15 +574,15 @@
       "mute_failed": "チャットメンバーのミュートに失敗しました"
     },
     "block_user": {
-      "title": "ユーザーをブロック",
-      "description": "ブロックすると、このユーザーからのメッセージの受信やオンラインステータスの表示が防止されます。",
-      "success": "{{username}}がブロックされました",
+      "title": "{{name}}をブロック",
+      "description": "ブロックすると、このユーザーはあなたにメッセージを送信したり、オンラインステータスを確認したりできなくなります。",
+      "success": "{{username}}をブロックしました",
       "error": "ユーザーのブロックに失敗しました"
     },
     "unblock_user": {
-      "title": "ユーザーのブロック解除",
-      "description": "ブロック解除すると、このユーザーからのメッセージの受信やオンラインステータスの表示が可能になります。",
-      "toast_success": "{{username}}のブロックが解除されました",
+      "title": "{{name}}のブロックを解除",
+      "description": "ブロックを解除すると、このユーザーはあなたにメッセージを送信したり、オンラインステータスを確認したりできるようになります。",
+      "toast_success": "{{username}}のブロックを解除しました",
       "toast_error": "ユーザーのブロック解除に失敗しました"
     },
     "delete_chat": {

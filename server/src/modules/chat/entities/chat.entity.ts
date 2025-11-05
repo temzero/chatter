@@ -37,14 +37,12 @@ export class Chat {
   @JoinColumn({ name: 'pinned_message_id' })
   pinnedMessage: Message | null;
 
-  /* Group-Specific Fields (nullable) */
   @Column({ type: 'varchar', nullable: true, length: 64 })
   name: string | null;
 
   @Column({ type: 'varchar', nullable: true, length: 512 })
   description: string | null;
 
-  // @Column({ name: 'avatar_url', type: 'varchar', length: 512, nullable: true })
   @Column({ name: 'avatar_url', type: 'text', nullable: true })
   avatarUrl: string | null;
 

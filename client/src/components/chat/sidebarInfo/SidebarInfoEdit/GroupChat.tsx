@@ -1,10 +1,11 @@
 import React from "react";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
-import { useActiveChat } from "@/stores/chatStore";
-import { getSetSidebarInfo, useSidebarInfoStore } from "@/stores/sidebarInfoStore";
+import {
+  getSetSidebarInfo,
+  useSidebarInfoStore,
+} from "@/stores/sidebarInfoStore";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
-import { useActiveMembers } from "@/stores/chatMemberStore";
 import { useMessageStore } from "@/stores/messageStore";
 import { useMuteControl } from "@/common/hooks/useMuteControl";
 import { SidebarInfoHeaderIcons } from "@/components/ui/icons/SidebarInfoHeaderIcons";
@@ -14,12 +15,16 @@ import { ModalType, getOpenModal } from "@/stores/modalStore";
 import { useIsMobile } from "@/stores/deviceStore";
 import { useTranslation } from "react-i18next";
 import MemberItem from "./MemberItem";
+import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
 
-const GroupChat: React.FC = () => {
+interface GroupChatProps {
+  activeChat: ChatResponse;
+  activeMembers: ChatMemberResponse[] | undefined;
+}
+
+const GroupChat: React.FC<GroupChatProps> = ({ activeChat, activeMembers }) => {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
-  const activeChat = useActiveChat() as ChatResponse;
-  const activeMembers = useActiveMembers() || [];
   const setSidebarInfo = getSetSidebarInfo();
   const setSidebarInfoVisible =
     useSidebarInfoStore.getState().setSidebarInfoVisible;
@@ -27,11 +32,14 @@ const GroupChat: React.FC = () => {
   const setDisplaySearchMessage =
     useMessageStore.getState().setDisplaySearchMessage;
   const openModal = getOpenModal();
-  const { mute, unmute } = useMuteControl(activeChat.id, activeChat.myMemberId);
+  const { mute, unmute } = useMuteControl(
+    activeChat?.id,
+    activeChat?.myMemberId
+  );
 
   // Header buttons specific to group chat
   const showEditButton =
-    activeChat.myRole !== undefined &&
+    activeChat?.myRole !== undefined &&
     [ChatMemberRole.ADMIN, ChatMemberRole.OWNER].includes(activeChat.myRole);
 
   const headerIcons: {
@@ -90,7 +98,7 @@ const GroupChat: React.FC = () => {
   }
 
   // Group members by role
-  const groupedMembers = activeMembers.reduce(
+  const groupedMembers = activeMembers?.reduce(
     (acc: Record<ChatMemberRole, typeof activeMembers>, member) => {
       const role: ChatMemberRole = member.role || ChatMemberRole.MEMBER;
       if (!acc[role]) acc[role] = [];
@@ -100,6 +108,7 @@ const GroupChat: React.FC = () => {
     {} as Record<ChatMemberRole, typeof activeMembers>
   );
 
+  if (!groupedMembers || !activeMembers) return;
   // Sort groups by role priority
   const sortedGroups = Object.entries(groupedMembers).sort(
     ([roleA], [roleB]) =>
@@ -120,7 +129,7 @@ const GroupChat: React.FC = () => {
           <p className="text-sm opacity-80 mb-2">{activeChat.description}</p>
         )}
 
-        {activeMembers.length > 0 && (
+        {activeMembers?.length > 0 && (
           <div className="flex flex-col rounded overflow-hidden custom-border w-full">
             {/* Display all members grouped by role */}
             {sortedGroups.map(([role, members]) => (

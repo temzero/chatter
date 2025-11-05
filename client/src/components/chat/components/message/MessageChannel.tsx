@@ -10,7 +10,10 @@ import { formatTime } from "@/common/utils/format/formatTime";
 import { getCurrentUserId } from "@/stores/authStore";
 import { handleQuickReaction } from "@/common/utils/message/quickReaction";
 import { scrollToMessageById } from "@/common/utils/message/scrollToMessageById";
-import { messageAnimations } from "@/common/animations/messageAnimations";
+import {
+  getMessageSendingAnimation,
+  messageAnimations,
+} from "@/common/animations/messageAnimations";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { MessageContextMenu } from "./MessageContextMenu";
@@ -101,12 +104,15 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
           />
         </div>
       )}
-      <div
+      <motion.div
         onDoubleClick={() => handleQuickReaction(message.id, message.chatId)}
         onContextMenu={handleContextMenu}
         className={`rounded-xl overflow-hidden ${
           message.isImportant ? "border-4 border-red-500/80" : "custom-border"
         }`}
+        {...getMessageSendingAnimation(
+          message.status === MessageStatus.SENDING
+        )}
       >
         {message.call && <BroadcastMessage call={message.call} />}
         {attachments.length > 0 && (
@@ -160,7 +166,7 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
             Failed to send message
           </h1>
         )}
-      </div>
+      </motion.div>
     </motion.div>
   );
 };

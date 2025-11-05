@@ -46,7 +46,7 @@ const BlockUserModal: React.FC = () => {
     <>
       <div className="p-4">
         <h2 className="text-2xl font-semibold mb-4 text-red-500">
-          {t("modal.block_user.title")}
+          {t("modal.block_user.title", {name: userToBlock.firstName})}
         </h2>
 
         <div className="flex items-center gap-3 mb-6">

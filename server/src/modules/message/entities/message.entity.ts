@@ -91,7 +91,8 @@ export class Message {
   reactions: Reaction[];
 
   @ManyToMany(() => Attachment, (attachment) => attachment.messages, {
-    cascade: true, // This will handle the join table entries
+    cascade: true,
+    onDelete: 'CASCADE',
   })
   @JoinTable({
     name: 'message_attachments',

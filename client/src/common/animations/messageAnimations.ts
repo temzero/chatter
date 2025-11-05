@@ -4,7 +4,7 @@ import { MotionProps } from "framer-motion";
 export const messageAnimations: Record<string, MotionProps> = {
   sending: {
     animate: { opacity: [0.3, 0.6, 0.3] },
-    exit: { opacity: 1, scale: 1 },
+    exit: { opacity: 1 },
     transition: {
       duration: 2.5,
       repeat: Infinity,
@@ -48,4 +48,23 @@ export const getMessageAnimation = (isMe: boolean): MotionProps => {
       damping: 28,
     },
   };
+};
+
+export const getMessageSendingAnimation = (isSending: boolean): MotionProps => {
+  if (isSending) {
+    return {
+      animate: { opacity: [0.3, 0.6, 0.3] },
+      transition: {
+        duration: 2.5,
+        repeat: Infinity,
+        repeatType: "loop",
+        ease: "easeInOut",
+      },
+    };
+  } else {
+    return {
+      animate: { opacity: 1 },
+      transition: { duration: 0.3, ease: "easeInOut" },
+    };
+  }
 };

@@ -157,7 +157,7 @@
     "saved_messages": "已保存的消息",
     "calls": "通话",
     "contacts": "联系人",
-    "friend_requests": "好友请求 {{count, plural, =0 {} one { (1)} other { ({{count}}",
+    "friend_requests": "好友请求 {{count}}",
     "friend_requests_none": "好友请求",
     "folders": "聊天文件夹",
     "blocked": "已屏蔽",
@@ -573,15 +573,15 @@
       "mute_failed": "静音聊天成员失败"
     },
     "block_user": {
-      "title": "屏蔽用户",
-      "description": "屏蔽将阻止此用户向你发送消息或查看你的在线状态。",
-      "success": "{{username}}已被屏蔽",
+      "title": "屏蔽 {{name}}",
+      "description": "屏蔽将阻止此用户向您发送消息或查看您的在线状态。",
+      "success": "已屏蔽 {{username}}",
       "error": "屏蔽用户失败"
     },
     "unblock_user": {
-      "title": "取消屏蔽用户",
-      "description": "取消屏蔽将允许此用户向你发送消息并查看你的在线状态。",
-      "toast_success": "{{username}}已取消屏蔽",
+      "title": "取消屏蔽 {{name}}",
+      "description": "取消屏蔽将允许此用户向您发送消息并查看您的在线状态。",
+      "toast_success": "已取消屏蔽 {{username}}",
       "toast_error": "取消屏蔽用户失败"
     },
     "delete_chat": {

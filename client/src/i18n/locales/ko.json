@@ -158,7 +158,7 @@
     "saved_messages": "저장된 메시지",
     "calls": "통화",
     "contacts": "연락처",
-    "friend_requests": "친구 요청 {{count, plural, =0 {} one { (1)} other { ({{count}}",
+    "friend_requests": "친구 요청 {{count}}",
     "friend_requests_none": "친구 요청",
     "folders": "채팅 폴더",
     "blocked": "차단됨",
@@ -539,7 +539,7 @@
     "unfriend": {
       "title": "친구 삭제",
       "description": "이 사람과 더 이상 친구가 아니게 되지만, 언제든지 다시 추가할 수 있습니다.",
-       "success": "{{name}}님과 더 이상 친구가 아닙니다"
+      "success": "{{name}}님과 더 이상 친구가 아닙니다"
     },
     "forward_message": {
       "title_message": "메시지 전달...",
@@ -574,16 +574,16 @@
       "mute_failed": "채팅 멤버 음소거에 실패했습니다"
     },
     "block_user": {
-      "title": "사용자 차단",
+      "title": "{{name}} 차단",
       "description": "차단하면 이 사용자가 메시지를 보내거나 온라인 상태를 볼 수 없습니다.",
-      "success": "{{username}}이(가) 차단되었습니다",
-      "error": "사용자 차단에 실패했습니다"
+      "success": "{{username}}을(를) 차단했습니다",
+      "error": "사용자 차단 실패"
     },
     "unblock_user": {
-      "title": "사용자 차단 해제",
-      "description": "차단을 해제하면 이 사용자가 메시지를 보내고 온라인 상태를 볼 수 있습니다.",
-      "toast_success": "{{username}}의 차단이 해제되었습니다",
-      "toast_error": "사용자 차단 해제에 실패했습니다"
+      "title": "{{name}} 차단 해제",
+      "description": "차단 해제하면 이 사용자가 메시지를 보내고 온라인 상태를 볼 수 있습니다.",
+      "toast_success": "{{username}}의 차단을 해제했습니다",
+      "toast_error": "사용자 차단 해제 실패"
     },
     "delete_chat": {
       "title_direct": "채팅 삭제",

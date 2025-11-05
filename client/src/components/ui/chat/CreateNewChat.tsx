@@ -6,7 +6,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
-import { OnlineDot } from "@/components/ui/icons/OnlineDot";
 import { useUserStatus } from "@/stores/presenceStore";
 import { useTranslation } from "react-i18next";
 import { UserResponse } from "@/shared/types/responses/user.response";
@@ -108,22 +107,20 @@ const CreateNewChat: React.FC = () => {
             ) : (
               <>
                 <div className="flex-1 flex flex-col items-center justify-start gap-2 p-2 pt-4 overflow-y-auto">
-                  <div className="relative">
+                  <div
+                    className={`border rounded-full hover:shadow-xl hover:scale-110 transition-all ${
+                      isUserOnline ? "border-2 border-[--primary-green]" : ""
+                    }`}
+                  >
                     <Avatar
                       avatarUrl={user.avatarUrl ?? undefined}
                       name={user.firstName}
-                      className="w-[120px] h-[120px] cursor-pointer hover:border-4 transform transition-transform duration-300 hover:scale-110"
+                      className={`w-[120px] h-[120px] cursor-pointer`}
                       onClick={() =>
                         !user.isBlockedByMe && createOrGetDirectChat(user.id)
                       }
                       isBlocked={user.isBlockedByMe}
                     />
-                    {!user.isBlockedMe && (
-                      <OnlineDot
-                        isOnline={isUserOnline}
-                        className={`absolute top-1/2 left-[3px] -translate-y-1/2`}
-                      />
-                    )}
                   </div>
 
                   <h1 className="font-bold text-xl">

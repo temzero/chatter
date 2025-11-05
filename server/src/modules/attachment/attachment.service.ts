@@ -4,13 +4,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Attachment } from './entity/attachment.entity';
 import { AttachmentResponseDto } from '../message/dto/responses/attachment-response.dto';
+import { AttachmentUploadRequest } from 'src/shared/types/requests/attachment-upload.request';
 import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
 import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
 import { AttachmentType } from 'src/shared/types/enums/attachment-type.enum';
 import { plainToInstance } from 'class-transformer';
 import { Message } from '../message/entities/message.entity';
 import { SupabaseService } from '../superbase/supabase.service';
-import { AttachmentUploadRequest } from 'src/shared/types/requests/attachment-upload.request';
+import { mapAttachmentsToAttachmentResDto } from './mappers/attachment.mapper';
 
 @Injectable()
 export class AttachmentService {
@@ -83,7 +84,7 @@ export class AttachmentService {
     const items = hasMore ? attachments.slice(0, limit) : attachments;
 
     return {
-      items: plainToInstance(AttachmentResponseDto, items),
+      items: mapAttachmentsToAttachmentResDto(items, chatId),
       hasMore,
     };
   }

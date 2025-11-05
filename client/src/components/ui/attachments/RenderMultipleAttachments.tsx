@@ -1,4 +1,5 @@
 import React from "react";
+import clsx from "clsx";
 import RenderAttachment from "./RenderAttachment";
 import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
@@ -17,24 +18,24 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
   attachments,
   className = "",
 }) => {
-  const resolvedAttachments =
-    attachments && attachments.length > 0
-      ? attachments
-      : getMessageAttachments(chatId, messageId);
+  if (!attachments) {
+    attachments = getMessageAttachments(chatId, messageId);
+  }
+  const attachmentLength = attachments.length;
 
-  if (!resolvedAttachments || resolvedAttachments.length === 0) {
+  if (!attachments || attachmentLength === 0) {
     return null;
   }
   // Categorize attachments by type
-  const visualMedia = resolvedAttachments.filter(
+  const visualMedia = attachments.filter(
     (m) => m.type === AttachmentType.IMAGE || m.type === AttachmentType.VIDEO
   );
-  const audioMedia = resolvedAttachments.filter((a) => a.type === AttachmentType.AUDIO);
-  const fileMedia = resolvedAttachments.filter((a) => a.type === AttachmentType.FILE);
+  const audioMedia = attachments.filter((a) => a.type === AttachmentType.AUDIO);
+  const fileMedia = attachments.filter((a) => a.type === AttachmentType.FILE);
 
   const RenderAttachmentGrid = (items: AttachmentResponse[], cols: number) => (
     <div
-      className={`grid gap-[1px] w-full`}
+      className={clsx("grid gap-[1px]")}
       style={{
         gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
       }}

@@ -158,7 +158,7 @@
     "saved_messages": "Mensajes guardados",
     "calls": "Llamadas",
     "contacts": "Contactos",
-    "friend_requests": "Solicitudes de amistad {{count, plural, =0 {} one { (1)} other { ({{count}}",
+    "friend_requests": "Solicitudes de amistad {{count}}",
     "friend_requests_none": "Solicitudes de amistad",
     "folders": "Carpetas de chat",
     "blocked": "Bloqueados",
@@ -575,16 +575,16 @@
       "mute_failed": "Error al silenciar el miembro del chat"
     },
     "block_user": {
-      "title": "Bloquear usuario",
+      "title": "Bloquear {{name}}",
       "description": "Bloquear impedirá que este usuario te envíe mensajes o vea tu estado en línea.",
       "success": "{{username}} ha sido bloqueado",
-      "error": "Error al bloquear al usuario"
+      "error": "Error al bloquear usuario"
     },
     "unblock_user": {
-      "title": "Desbloquear usuario",
+      "title": "Desbloquear {{name}}",
       "description": "Desbloquear permitirá que este usuario te envíe mensajes y vea tu estado en línea.",
       "toast_success": "{{username}} ha sido desbloqueado",
-      "toast_error": "Error al desbloquear al usuario"
+      "toast_error": "Error al desbloquear usuario"
     },
     "delete_chat": {
       "title_direct": "Eliminar chat",

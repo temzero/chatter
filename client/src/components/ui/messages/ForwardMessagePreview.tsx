@@ -23,8 +23,7 @@ const ForwardedMessagePreview: React.FC<ForwardedMessagePreviewProps> = ({
   const isOriginalFromMe = originalSender?.id === currentUserId;
 
   const content = message.forwardedFromMessage?.content ?? message.content;
-  const attachments =
-    message.forwardedFromMessage?.attachments ?? message.attachments;
+  const attachments = message.attachments;
 
   return (
     <>

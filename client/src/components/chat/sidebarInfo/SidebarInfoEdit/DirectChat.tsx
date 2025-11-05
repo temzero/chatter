@@ -7,9 +7,7 @@ import {
 } from "@/stores/sidebarInfoStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
-import { useActiveChat } from "@/stores/chatStore";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
-import { useOthersActiveChatMembers } from "@/stores/chatMemberStore";
 import { useMessageStore } from "@/stores/messageStore";
 import { useMuteControl } from "@/common/hooks/useMuteControl";
 import { SidebarInfoHeaderIcons } from "@/components/ui/icons/SidebarInfoHeaderIcons";
@@ -17,22 +15,36 @@ import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { useIsMobile } from "@/stores/deviceStore";
 import { useTranslation } from "react-i18next";
 import FriendshipBtn from "@/components/ui/buttons/FriendshipBtn";
+import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
 
-const DirectChat: React.FC = () => {
+interface DirectChatProps {
+  activeChat: ChatResponse;
+  activeMembers: ChatMemberResponse[] | undefined;
+}
+
+const DirectChat: React.FC<DirectChatProps> = ({
+  activeChat,
+  activeMembers,
+}) => {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
 
-  const activeChat = useActiveChat() as ChatResponse;
-  const chatPartner = useOthersActiveChatMembers(activeChat.myMemberId)[0];
+  const chatPartner = activeMembers?.filter(
+    (member) => member.id !== activeChat.myMemberId
+  )[0];
+
   const setSidebarInfo = getSetSidebarInfo();
   const setSidebarInfoVisible =
     useSidebarInfoStore.getState().setSidebarInfoVisible;
   const openModal = getOpenModal();
   const setDisplaySearchMessage =
     useMessageStore.getState().setDisplaySearchMessage;
-  const { mute, unmute } = useMuteControl(activeChat.id, activeChat.myMemberId);
+  const { mute, unmute } = useMuteControl(
+    activeChat?.id,
+    activeChat?.myMemberId
+  );
 
-  if (!chatPartner || !activeChat) return null;
+  if (!chatPartner) return null;
 
   const isFriend = chatPartner?.friendshipStatus === FriendshipStatus.ACCEPTED;
 
