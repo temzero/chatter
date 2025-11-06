@@ -23,25 +23,29 @@ import { getMessageAnimation } from "@/common/animations/messageAnimations";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { useMessageStore } from "@/stores/messageStore";
 import { MESSAGE_AVATAR_WIDTH } from "@/common/constants/messageAvatarDimension";
+import { MessageReadInfo } from "../../messagesContainer/MessageReadInfo";
+import { ChatResponse } from "@/shared/types/responses/chat.response";
 
 interface MessageProps {
   messageId: string;
+  currentUserId: string;
   chatType?: ChatType;
   showInfo?: boolean;
   isRecent?: boolean;
   isRead?: boolean;
   readUserAvatars?: string[];
-  currentUserId?: string;
   isMe?: boolean;
+  chat: ChatResponse;
 }
 
 const Message: React.FC<MessageProps> = ({
   messageId,
+  currentUserId,
   chatType = ChatType.DIRECT,
   showInfo = true,
   isRecent = false,
-  currentUserId,
   isMe = false,
+  chat,
 }) => {
   const message = useMessageStore((state) => state.messagesById[messageId]);
 
@@ -110,7 +114,7 @@ const Message: React.FC<MessageProps> = ({
         message && handleQuickReaction(messageId, message.chatId)
       }
       onContextMenu={handleContextMenu}
-      className={clsx("flex relative max-w-[60%] mb-3", {
+      className={clsx("flex relative max-w-[60%]", {
         "justify-end": isMe,
         "justify-start": !isMe,
       })}
@@ -120,7 +124,7 @@ const Message: React.FC<MessageProps> = ({
     >
       {isGroupChat && !isMe && (
         <div
-          className="mt-auto aspect-square"
+          className="mt-auto pb-2"
           style={{
             width: MESSAGE_AVATAR_WIDTH,
             minWidth: MESSAGE_AVATAR_WIDTH,
@@ -210,7 +214,7 @@ const Message: React.FC<MessageProps> = ({
         </div>
 
         {showInfo && isGroupChat && !isMe && (
-          <h1 className="text-sm font-semibold opacity-70 mr-2">
+          <h1 className="text-sm font-semibold opacity-70 mr-2 mt-1">
             {message.sender?.displayName ?? ""}
           </h1>
         )}
@@ -218,14 +222,28 @@ const Message: React.FC<MessageProps> = ({
         {!isRecent &&
           message.status !== MessageStatus.SENDING &&
           message.status !== MessageStatus.FAILED && (
-            <p
-              className={clsx("text-xs opacity-40 px-0.5 pt-1 pb-4", {
+            <div
+              className={clsx("px-0.5 mb-4", {
                 "ml-auto": isMe,
                 "mr-auto": !isMe,
               })}
             >
-              {formatTime(message.createdAt)}
-            </p>
+              <p
+                className={clsx("text-xs opacity-40 py-1", {
+                  "text-right": isMe,
+                  "text-left": !isMe,
+                })}
+              >
+                {formatTime(message.createdAt)}
+              </p>
+              <MessageReadInfo
+                chatId={chat.id}
+                currentUserId={currentUserId}
+                messageId={message.id}
+                isMe={isMe}
+                senderName={message.sender.displayName}
+              />
+            </div>
           )}
 
         {message.status === MessageStatus.FAILED && (

@@ -8,25 +8,26 @@ import React from "react";
 
 interface TypingIndicatorProps {
   chatId: string;
+  isMuted?: boolean;
 }
 
-const TypingIndicator = ({ chatId }: TypingIndicatorProps) => {
+const TypingIndicator = ({ chatId, isMuted }: TypingIndicatorProps) => {
   const { typingMembers, isTyping } = useTypingMembers(chatId);
   const previousTypingCount = useRef(0);
 
   useEffect(() => {
-    // Play typing sound when someone starts typing
+    if (isMuted) return; // 🔇 Skip sounds if muted
+
     if (previousTypingCount.current === 0 && isTyping) {
       audioService.playSound(SoundType.TYPING, 0.9);
     }
-    // Stop typing sound when nobody is typing
     if (!isTyping) {
       audioService.stopSound(SoundType.TYPING);
     }
-    previousTypingCount.current = typingMembers.length;
-  }, [isTyping, typingMembers.length]);
 
-  // Stop sound on unmount
+    previousTypingCount.current = typingMembers.length;
+  }, [isMuted, isTyping, typingMembers.length]);
+
   useEffect(() => {
     return () => audioService.stopSound(SoundType.TYPING);
   }, []);

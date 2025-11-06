@@ -4,12 +4,13 @@ import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useShallow } from "zustand/shallow";
 import { getCurrentUser } from "@/stores/authStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
-import type { ChatResponse } from "@/shared/types/responses/chat.response";
-import { ChatType } from "@/shared/types/enums/chat-type.enum";
-import { MESSAGE_AVATAR_WIDTH } from "@/common/constants/messageAvatarDimension";
+// import { ChatType } from "@/shared/types/enums/chat-type.enum";
+// import { MESSAGE_AVATAR_WIDTH } from "@/common/constants/messageAvatarDimension";
+import { motion } from "framer-motion";
 
 interface MessageReadInfoProps {
-  chat: ChatResponse;
+  chatId: string;
+  currentUserId: string;
   messageId: string;
   isMe: boolean;
   senderName: string;
@@ -18,14 +19,22 @@ interface MessageReadInfoProps {
 }
 
 export const MessageReadInfo: React.FC<MessageReadInfoProps> = React.memo(
-  ({ chat, messageId, isMe, senderName, avatarSize = 4, gap = 0.5 }) => {
+  ({
+    chatId,
+    currentUserId,
+    messageId,
+    isMe,
+    senderName,
+    avatarSize = 4,
+    gap = 0.5,
+  }) => {
     const currentUser = getCurrentUser();
     const containerRef = useRef<HTMLDivElement>(null);
     const [visibleCount, setVisibleCount] = useState<number>(0);
 
     const readMembers = useChatMemberStore(
       useShallow((state) =>
-        (state.chatMembers[chat.id] || []).filter(
+        (state.chatMembers[chatId] || []).filter(
           (m) => m.lastReadMessageId === messageId
         )
       )
@@ -35,20 +44,20 @@ export const MessageReadInfo: React.FC<MessageReadInfoProps> = React.memo(
       const avatars: string[] = [];
 
       // include current user
-      const myMember = readMembers.find((m) => m.id === chat.myMemberId);
-      if (myMember?.id === chat.myMemberId && currentUser?.avatarUrl) {
+      const myMember = readMembers.find((m) => m.userId === currentUserId);
+      if (myMember?.userId === currentUserId && currentUser?.avatarUrl) {
         avatars.push(currentUser.avatarUrl);
       }
 
       // include others
       for (const member of readMembers) {
-        if (member.id !== chat.myMemberId && member.avatarUrl) {
+        if (member.userId !== currentUserId && member.avatarUrl) {
           avatars.push(member.avatarUrl);
         }
       }
 
       return avatars;
-    }, [readMembers, chat.myMemberId, currentUser?.avatarUrl]);
+    }, [readMembers, currentUserId, currentUser?.avatarUrl]);
 
     // Calculate how many avatars fit
     useEffect(() => {
@@ -72,32 +81,38 @@ export const MessageReadInfo: React.FC<MessageReadInfoProps> = React.memo(
     return (
       <div
         ref={containerRef}
-        className={clsx("flex items-center gap-0.5 -mt-6 mb-2 mx-0.5", {
+        className={clsx(`flex items-center gap-${gap}`, {
           "justify-end": isMe,
           "justify-start": !isMe,
         })}
-        style={
-          chat.type === ChatType.GROUP
-            ? { marginLeft: MESSAGE_AVATAR_WIDTH + 12 }
-            : undefined
-        }
       >
         {readUserAvatars.slice(0, visibleCount).map((avatarUrl, index) => (
-          <Avatar
-            key={index}
-            avatarUrl={avatarUrl}
-            name={senderName}
-            size={avatarSize}
-          />
+          <motion.div
+            key={avatarUrl}
+            layout
+            initial={{ opacity: 0, scale: 0.8, y: 5 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 5 }}
+          >
+            <Avatar
+              key={index}
+              avatarUrl={avatarUrl}
+              name={senderName}
+              size={avatarSize}
+            />
+          </motion.div>
         ))}
 
         {extraCount > 0 && (
-          <div
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
             className={`w-${avatarSize} aspect-square p-2 rounded-full bg-[--input-border-color] text-xs flex items-center justify-center text-white`}
             style={{ width: avatarSize, height: avatarSize }}
           >
             +{extraCount}
-          </div>
+          </motion.div>
         )}
       </div>
     );

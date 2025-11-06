@@ -22,6 +22,9 @@ const MessagesContainer: React.FC<ChatBoxProps> = ({ chat }) => {
   const chatId = chat?.id || "";
   const isMessagePinned = chat?.pinnedMessage !== null;
 
+  const isMuted: boolean =
+    chat?.mutedUntil ? new Date(chat.mutedUntil).getTime() > Date.now() : false;
+
   const scrollerRef = useRef<HTMLDivElement | null>(null);
 
   const messageIds = useMessageIds(chatId);
@@ -29,7 +32,7 @@ const MessagesContainer: React.FC<ChatBoxProps> = ({ chat }) => {
   const fetchMoreMessages = useMessageStore.getState().fetchMoreMessages;
 
   const isSearchMessages = useMessageStore((state) => state.isSearchMessages);
-  const isShowImportant = useMessageStore(state => state.showImportantOnly)
+  const isShowImportant = useMessageStore((state) => state.showImportantOnly);
   // Scroll to bottom helper
   const scrollToBottom = useCallback((behavior: ScrollBehavior = "auto") => {
     if (scrollerRef.current) {
@@ -102,7 +105,8 @@ const MessagesContainer: React.FC<ChatBoxProps> = ({ chat }) => {
       }`}
     >
       {renderMessages()}
-      <TypingIndicator chatId={chatId} />
+      <TypingIndicator chatId={chatId} isMuted={isMuted ?? false} />
+      {/* {!isMuted && <TypingIndicator chatId={chatId} />} */}
     </InfiniteScroller>
   );
 };

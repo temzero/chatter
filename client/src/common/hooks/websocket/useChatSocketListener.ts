@@ -50,11 +50,12 @@ export function useChatSocketListeners() {
         }
 
         messageStore.addMessage(message);
+      }
 
-        const activeChatId = chatStore.activeChatId;
-        if (!isMuted && activeChatId !== message.chatId) {
-          audioService.playSound(SoundType.NEW_MESSAGE);
-        }
+      // if (!isMuted && chatStore.activeChatId !== message.chatId) {
+      if (!isMuted) {
+        console.log("PLAY SOUND NEW_MESSAGE");
+        audioService.playSound(SoundType.NEW_MESSAGE);
       }
     };
 

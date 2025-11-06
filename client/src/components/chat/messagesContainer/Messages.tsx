@@ -6,8 +6,7 @@ import {
   shouldShowInfo,
 } from "@/common/utils/message/messageHelpers";
 import { AnimatePresence } from "framer-motion";
-import { getCurrentUser } from "@/stores/authStore";
-import { MessageReadInfo } from "./MessageReadInfo";
+import { getCurrentUserId } from "@/stores/authStore";
 import { useMessageStore } from "@/stores/messageStore";
 import { MarkLastMessageRead } from "@/common/utils/message/markMessageRead";
 import Message from "../components/message/Message";
@@ -26,7 +25,7 @@ const Messages: React.FC<ChatMessagesProps> = ({
   console.log("Messages render:", messageIds.length);
 
   const chatId = chat.id;
-  const currentUser = getCurrentUser();
+  const currentUserId = getCurrentUserId();
 
   const messagesById = useMessageStore.getState().messagesById;
   const messages = messageIds.map((id) => messagesById[id]).filter(Boolean);
@@ -34,7 +33,7 @@ const Messages: React.FC<ChatMessagesProps> = ({
 
   useEffect(() => {
     if (chat && messages.length > 0) {
-      return MarkLastMessageRead({chat, messages});
+      return MarkLastMessageRead({ chat, messages });
     }
   }, [chat, messages]);
 
@@ -42,6 +41,11 @@ const Messages: React.FC<ChatMessagesProps> = ({
   const groupedIdsByDate = useMemo(() => {
     return groupMessagesByDate(messages);
   }, [messages]);
+
+  if (!currentUserId) {
+    console.error("Not authenticated");
+    return;
+  }
 
   if (messageIds.length === 0) {
     return (
@@ -68,7 +72,7 @@ const Messages: React.FC<ChatMessagesProps> = ({
 
             <AnimatePresence initial={false}>
               {group.messages.map((message, index) => {
-                const isMe = message.sender.id === currentUser?.id;
+                const isMe = message.sender.id === currentUserId;
                 const prevMsg = group.messages[index - 1];
                 const nextMsg = group.messages[index + 1];
 
@@ -78,7 +82,7 @@ const Messages: React.FC<ChatMessagesProps> = ({
                 return (
                   <div
                     key={message.id}
-                    className={`flex flex-col ${
+                    className={`flex flex-col mb-2 ${
                       isMe ? "items-end" : "items-start"
                     }`}
                   >
@@ -88,13 +92,8 @@ const Messages: React.FC<ChatMessagesProps> = ({
                       showInfo={showInfo}
                       isRecent={isRecent}
                       chatType={chat.type}
-                      currentUserId={currentUser?.id}
-                    />
-                    <MessageReadInfo
+                      currentUserId={currentUserId}
                       chat={chat}
-                      messageId={message.id}
-                      isMe={isMe}
-                      senderName={message.sender.displayName}
                     />
                   </div>
                 );
