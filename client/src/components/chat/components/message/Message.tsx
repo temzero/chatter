@@ -22,6 +22,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { getMessageAnimation } from "@/common/animations/messageAnimations";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { useMessageStore } from "@/stores/messageStore";
+import { MESSAGE_AVATAR_WIDTH } from "@/common/constants/messageAvatarDimension";
 
 interface MessageProps {
   messageId: string;
@@ -118,11 +119,19 @@ const Message: React.FC<MessageProps> = ({
       {...messageAnimation}
     >
       {isGroupChat && !isMe && (
-        <div className="flex-shrink-0 mt-auto mr-2 h-10 w-10 min-w-10">
+        <div
+          className="mt-auto aspect-square"
+          style={{
+            width: MESSAGE_AVATAR_WIDTH,
+            minWidth: MESSAGE_AVATAR_WIDTH,
+            marginRight: 8,
+          }}
+        >
           {!isRecent && (
             <Avatar
               avatarUrl={message.sender?.avatarUrl}
               name={message.sender?.displayName ?? ""}
+              className="w-full h-full"
             />
           )}
         </div>

@@ -290,7 +290,7 @@ const MemberContextMenu = React.forwardRef<HTMLDivElement, ContextMenuProps>(
               className={`${classes} text-red-500`}
               onClick={handleRemoveMember}
             >
-              {t("common.actions.remove")}
+              {t("common.actions.delete")}
             </div>
           </>
         )}

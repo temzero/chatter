@@ -7,7 +7,7 @@ export const useAllUniqueMembers = (
   excludeChatId?: string
 ): FriendContactResponse[] | null => {
   const currentUserId = getCurrentUserId();
-  const chatMembers = useChatMemberStore.getState().chatMembers;
+  const chatMembers = useChatMemberStore((state) => state.chatMembers);
   if (!currentUserId) return null;
 
   // Get user IDs to exclude (current user + members already in the chat we're adding to)

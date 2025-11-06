@@ -6,7 +6,6 @@
       "add": "añadir",
       "back": "Volver",
       "block": "Bloquear",
-      "blocked_by_user": "Bloqueado por el usuario",
       "cancel": "Cancelar",
       "cancel_request": "Cancelar solicitud",
       "clear_selection": "Borrar selección",
@@ -51,7 +50,9 @@
       "no_contacts": "No se encontraron contactos",
       "error": "Ocurrió un error",
       "required": "Este campo es obligatorio",
-      "invalid_code": "Por favor ingrese un código de 6 dígitos"
+      "invalid_code": "Por favor ingrese un código de 6 dígitos",
+      "blocked": "Bloqueado",
+      "blocked_me": "Has sido bloqueado"
     },
     "loading": {
       "loading": "Cargando...",
@@ -129,6 +130,15 @@
       "invalid_token": "Token de verificación inválido."
     }
   },
+  
+  "invite_page": {
+    "joining": "Uniéndose...",
+    "invalid_token": "Token de invitación no válido",
+    "joined_success": "¡Unido con éxito! Redirigiendo...",
+    "not_found": "Chat no encontrado o el enlace de invitación ha expirado.",
+    "access_denied": "No tienes permiso para unirte a este chat.",
+    "failed": "Error al unirse al chat. Por favor, inténtalo de nuevo más tarde."
+  },
 
   "chat": {
     "all_with_type": "Todos los chats con tipo:",
@@ -136,6 +146,13 @@
     "direct": "Directo",
     "group": "Grupo",
     "channel": "Canal"
+  },
+
+  "chat_box": {
+    "join_channel": "Unirse al canal",
+    "both_blocked": "Tú y este usuario se han bloqueado mutuamente.",
+    "you_blocked_me": "Has sido bloqueado por este usuario.",
+    "you_blocked_them": "Has bloqueado a este usuario."
   },
 
   "chat_bar": {
@@ -262,7 +279,7 @@
       "folder_name_placeholder": "Nombre de la carpeta",
       "folder_name_empty_error": "El nombre de la carpeta no puede estar vacío",
       "chat_selection": {
-        "selected_count": "{count} Chats incluidos",
+        "selected_count": "{{count}} Chats incluidos",
         "search_placeholder": "Buscar chats..."
       },
       "buttons": {
@@ -583,8 +600,8 @@
     "unblock_user": {
       "title": "Desbloquear {{name}}",
       "description": "Desbloquear permitirá que este usuario te envíe mensajes y vea tu estado en línea.",
-      "toast_success": "{{username}} ha sido desbloqueado",
-      "toast_error": "Error al desbloquear usuario"
+      "success": "{{username}} ha sido desbloqueado",
+      "error": "Error al desbloquear usuario"
     },
     "delete_chat": {
       "title_direct": "Eliminar chat",

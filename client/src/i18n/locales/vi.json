@@ -6,7 +6,6 @@
       "add": "Thêm",
       "back": "Quay lại",
       "block": "Chặn",
-      "blocked_by_user": "Đã bị người dùng chặn",
       "cancel": "Hủy",
       "cancel_request": "Hủy yêu cầu",
       "clear_selection": "Xóa lựa chọn",
@@ -51,7 +50,9 @@
       "no_contacts": "Không tìm thấy liên hệ",
       "error": "Đã xảy ra lỗi",
       "required": "Trường này là bắt buộc",
-      "invalid_code": "Vui lòng nhập mã 6 chữ số"
+      "invalid_code": "Vui lòng nhập mã 6 chữ số",
+      "blocked": "Đã chặn",
+      "blocked_me": "Bạn đã bị chặn"
     },
     "loading": {
       "loading": "Đang tải...",
@@ -130,12 +131,28 @@
     }
   },
 
+  "invite_page": {
+    "joining": "Đang tham gia...",
+    "invalid_token": "Mã mời không hợp lệ",
+    "joined_success": "Tham gia thành công! Đang chuyển hướng...",
+    "not_found": "Không tìm thấy trò chuyện hoặc liên kết mời đã hết hạn.",
+    "access_denied": "Bạn không được phép tham gia trò chuyện này.",
+    "failed": "Tham gia trò chuyện thất bại. Vui lòng thử lại sau."
+  },
+
   "chat": {
     "all_with_type": "Tất cả các cuộc trò chuyện theo loại:",
     "label": "Loại trò chuyện",
     "direct": "Trực tiếp",
     "group": "Nhóm",
     "channel": "Kênh"
+  },
+
+  "chat_box": {
+    "join_channel": "Tham gia kênh",
+    "both_blocked": "Bạn và người này đã chặn nhau.",
+    "you_blocked_me": "Bạn đã bị người này chặn.",
+    "you_blocked_them": "Bạn đã chặn người này."
   },
 
   "chat_bar": {
@@ -261,7 +278,7 @@
       "folder_name_placeholder": "Tên thư mục",
       "folder_name_empty_error": "Tên thư mục không được để trống",
       "chat_selection": {
-        "selected_count": "{count} cuộc trò chuyện đã chọn",
+        "selected_count": "{{count}} cuộc trò chuyện đã chọn",
         "search_placeholder": "Tìm kiếm cuộc trò chuyện..."
       },
       "buttons": {
@@ -586,8 +603,8 @@
     "unblock_user": {
       "title": "Bỏ chặn {{name}}",
       "description": "Bỏ chặn sẽ cho phép người dùng này gửi tin nhắn cho bạn và xem trạng thái trực tuyến của bạn.",
-      "toast_success": "Đã bỏ chặn {{username}}",
-      "toast_error": "Không thể bỏ chặn người dùng"
+      "success": "Đã bỏ chặn {{username}}",
+      "error": "Không thể bỏ chặn người dùng"
     },
     "delete_chat": {
       "title_direct": "Xóa Chat",

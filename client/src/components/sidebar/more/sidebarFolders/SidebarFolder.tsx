@@ -4,7 +4,7 @@ import SidebarLayout from "@/layouts/SidebarLayout";
 import { getSetSidebar, useSidebarStore } from "@/stores/sidebarStore";
 import { useFolders } from "@/stores/folderStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
-import { useChatStore } from "@/stores/chatStore";
+import { getChats } from "@/stores/chatStore";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
@@ -14,7 +14,7 @@ type SidebarData = { folderId?: string } | undefined;
 
 const SidebarFolder: React.FC = () => {
   const { t } = useTranslation();
-  const chats = useChatStore((state) => state.chats);
+  const chats = getChats();
   const currentSidebar = useSidebarStore((state) => state.currentSidebar);
   const sidebarData = useSidebarStore(
     (state) => state.sidebarData
@@ -53,12 +53,12 @@ const SidebarFolder: React.FC = () => {
         style={{
           borderColor: folder.color || "",
         }}
-        className={`relative h-full  w-[var(--sidebar-width)] rounded-lg ${
+        className={`relative h-full rounded-lg ${
           folder.color && "border-4"
         }`}
       >
         <div
-          className="px-3 py-2"
+          className="px-3 py-2 custom-border-b"
           style={{
             backgroundColor: folder.color || "",
             color: folder.color ? "black" : "",
@@ -77,7 +77,7 @@ const SidebarFolder: React.FC = () => {
           <h2 className="text-xl font-semibold">{folder.name}</h2>
         </div>
 
-        <div className="p-2">
+        <div className="p-2 overflow-x-hidden">
           {/* <h1>Types</h1> */}
           {folder.types && folder.types.length > 0 && (
             <div className="flex gap-2 mb-2">
@@ -98,7 +98,7 @@ const SidebarFolder: React.FC = () => {
             </div>
           )}
 
-          <div className="space-y-1">
+          <div className="space-y-1 overflow-x-hidden">
             {/* <h1>Chats:</h1> */}
             {folderChats.length === 0 && (
               <p className="text-gray-500 text-center py-4">

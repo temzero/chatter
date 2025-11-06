@@ -6,7 +6,6 @@
       "add": "Add",
       "back": "Back",
       "block": "Block",
-      "blocked_by_user": "Blocked by User",
       "cancel": "Cancel",
       "cancel_request": "Cancel Request",
       "clear_selection": "Clear Selection",
@@ -51,7 +50,9 @@
       "no_contacts": "No contacts Found",
       "error": "An error occurred",
       "required": "This field is required",
-      "invalid_code": "Please enter a 6-digit code"
+      "invalid_code": "Please enter a 6-digit code",
+      "blocked": "Blocked ",
+      "blocked_me": "You has been blocked"
     },
     "loading": {
       "loading": "Loading...",
@@ -130,12 +131,28 @@
     }
   },
 
+  "invite_page": {
+    "joining": "Joining...",
+    "invalid_token": "Invalid invite token",
+    "joined_success": "Joined successfully! Redirecting...",
+    "not_found": "Chat not found or the invite link has expired.",
+    "access_denied": "You are not allowed to join this chat.",
+    "failed": "Failed to join chat. Please try again later."
+  },
+
   "chat": {
     "all_with_type": "All Chats with type:",
     "label": "Chat Types",
     "direct": "Direct",
     "group": "Group",
     "channel": "Channel"
+  },
+
+  "chat_box": {
+    "join_channel": "Join Channel",
+    "both_blocked": "You and this user have blocked each other.",
+    "you_blocked_me": "You have been blocked by this user.",
+    "you_blocked_them": "You have blocked this user."
   },
 
   "chat_bar": {
@@ -262,7 +279,7 @@
       "folder_name_placeholder": "Folder Name",
       "folder_name_empty_error": "Folder name cannot be empty",
       "chat_selection": {
-        "selected_count": "{count} Chats Included",
+        "selected_count": "{{count}} Chats Included",
         "search_placeholder": "Search chats..."
       },
       "buttons": {
@@ -583,8 +600,8 @@
     "unblock_user": {
       "title": "Unblock {{name}}",
       "description": "Unblocking will allow this user to send you messages and see your online status.",
-      "toast_success": "{{username}} has been unblocked",
-      "toast_error": "Failed to unblock user"
+      "success": "{{username}} has been unblocked",
+      "error": "Failed to unblock user"
     },
     "delete_chat": {
       "title_direct": "Delete Chat",

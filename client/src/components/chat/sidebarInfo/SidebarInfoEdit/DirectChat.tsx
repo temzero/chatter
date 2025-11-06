@@ -60,14 +60,21 @@ const DirectChat: React.FC<DirectChatProps> = ({
     headerIcons.push({
       icon: "lock_open_right",
       title: t("common.actions.unblock"),
-      action: () =>
-        openModal(ModalType.UNBLOCK_USER, { blockedUser: chatPartner }),
       className: "text-[--primary-green]",
+      action: () =>
+        openModal(ModalType.UNBLOCK_USER, {
+          blockedUser: {
+            id: chatPartner.userId,
+            username: chatPartner.username,
+            firstName: chatPartner.nickname ?? chatPartner.firstName,
+            avatarUrl: chatPartner.avatarUrl,
+          },
+        }),
     });
   } else if (chatPartner.isBlockedMe) {
     headerIcons.push({
       icon: "block",
-      title: t("common.actions.blocked_by_user"),
+      title: t("common.messages.blocked_me"),
       action: () =>
         openModal(ModalType.BLOCK_USER, { userToBlock: chatPartner }),
     });
@@ -137,14 +144,14 @@ const DirectChat: React.FC<DirectChatProps> = ({
         )}
 
         {chatPartner.isBlockedMe && (
-          <h1 className="text-red-500">{t("common.actions.blocked_me")}</h1>
+          <h1 className="text-red-500">{t("common.messages.blocked_me")}</h1>
         )}
         {chatPartner.isBlockedByMe ? (
           <h1 className="text-red-500">
-            {t("common.actions.you_blocked", {
+            {t("common.messages.blocked", {
               type:
                 chatPartner.friendshipStatus === FriendshipStatus.ACCEPTED
-                  ? t("common.actions.friend")
+                  ? t("sidebar_new_chat.direct.friend")
                   : t("common.actions.user"),
             })}
           </h1>

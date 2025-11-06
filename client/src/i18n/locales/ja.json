@@ -6,7 +6,6 @@
       "add": "追加",
       "back": "戻る",
       "block": "ブロック",
-      "blocked_by_user": "ユーザーによってブロックされました",
       "cancel": "キャンセル",
       "cancel_request": "リクエストをキャンセル",
       "clear_selection": "選択をクリア",
@@ -51,7 +50,9 @@
       "no_contacts": "連絡先が見つかりません",
       "error": "エラーが発生しました",
       "required": "このフィールドは必須です",
-      "invalid_code": "6桁のコードを入力してください"
+      "invalid_code": "6桁のコードを入力してください",
+      "blocked": "ブロック済み",
+      "blocked_me": "あなたはブロックされました"
     },
     "loading": {
       "loading": "読み込み中...",
@@ -130,12 +131,28 @@
     }
   },
 
+  "invite_page": {
+    "joining": "参加中...",
+    "invalid_token": "無効な招待トークン",
+    "joined_success": "参加成功！リダイレクト中...",
+    "not_found": "チャットが見つからないか、招待リンクの有効期限が切れています。",
+    "access_denied": "このチャットに参加することはできません。",
+    "failed": "チャットへの参加に失敗しました。後でもう一度お試しください。"
+  },
+
   "chat": {
     "all_with_type": "タイプ別のすべてのチャット：",
     "label": "チャットタイプ",
     "direct": "ダイレクト",
     "group": "グループ",
     "channel": "チャンネル"
+  },
+
+  "chat_box": {
+    "join_channel": "チャンネルに参加",
+    "both_blocked": "あなたとこのユーザーはお互いにブロックしています。",
+    "you_blocked_me": "あなたはこのユーザーにブロックされています。",
+    "you_blocked_them": "あなたはこのユーザーをブロックしました。"
   },
 
   "chat_bar": {
@@ -261,7 +278,7 @@
       "folder_name_placeholder": "フォルダ名",
       "folder_name_empty_error": "フォルダ名は空にできません",
       "chat_selection": {
-        "selected_count": "{count}件のチャットが含まれています",
+        "selected_count": "{{count}}件のチャットが含まれています",
         "search_placeholder": "チャットを検索..."
       },
       "buttons": {
@@ -582,8 +599,8 @@
     "unblock_user": {
       "title": "{{name}}のブロックを解除",
       "description": "ブロックを解除すると、このユーザーはあなたにメッセージを送信したり、オンラインステータスを確認したりできるようになります。",
-      "toast_success": "{{username}}のブロックを解除しました",
-      "toast_error": "ユーザーのブロック解除に失敗しました"
+      "success": "{{username}}のブロックを解除しました",
+      "error": "ユーザーのブロック解除に失敗しました"
     },
     "delete_chat": {
       "title_direct": "チャットを削除",

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Avatar } from "@/components/ui/avatar/Avatar";
-import { useChatStore } from "@/stores/chatStore";
+import { getChats, useChatStore } from "@/stores/chatStore";
 import { getCurrentUser } from "@/stores/authStore";
 import { getSetSidebar } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
@@ -27,7 +27,7 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
   const [name, setName] = useState("");
   const [searchTerm, setSearchTerm] = useState(""); // Add search state
 
-  const chats = useChatStore((state) => state.chats);
+  const chats = getChats();
 
   // Filter private chats locally with search
   const privateChats = React.useMemo(() => {

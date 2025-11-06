@@ -3,7 +3,7 @@ import { create } from "zustand";
 import { chatService } from "@/services/http/chatService";
 import { chatMemberService } from "@/services/http/chatMemberService";
 import { useMessageStore } from "./messageStore";
-import { useAuthStore } from "./authStore";
+import { getCurrentUserId } from "./authStore";
 import { useChatMemberStore } from "./chatMemberStore";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useModalStore } from "./modalStore";
@@ -543,7 +543,7 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
 
     leaveChat: async (chatId) => {
       set({ isLoading: true });
-      const currentUserId = useAuthStore.getState().currentUser?.id;
+      const currentUserId = getCurrentUserId();
       if (!currentUserId) throw new Error("User not authenticated");
 
       const { chatDeleted } = await chatMemberService.DeleteMember(

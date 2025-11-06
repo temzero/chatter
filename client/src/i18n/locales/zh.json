@@ -6,7 +6,6 @@
       "add": "添加",
       "back": "返回",
       "block": "屏蔽",
-      "blocked_by_user": "被用户屏蔽",
       "cancel": "取消",
       "cancel_request": "取消请求",
       "clear_selection": "清除选择",
@@ -51,7 +50,9 @@
       "no_contacts": "未找到联系人",
       "error": "发生错误",
       "required": "此字段为必填项",
-      "invalid_code": "请输入6位验证码"
+      "invalid_code": "请输入6位验证码",
+      "blocked": "已封锁",
+      "blocked_me": "你已被封锁"
     },
     "loading": {
       "loading": "加载中...",
@@ -129,12 +130,28 @@
     }
   },
 
+  "invite_page": {
+    "joining": "正在加入...",
+    "invalid_token": "无效的邀请令牌",
+    "joined_success": "加入成功！正在重定向...",
+    "not_found": "未找到聊天或邀请链接已过期。",
+    "access_denied": "您不被允许加入此聊天。",
+    "failed": "加入聊天失败。请稍后再试。"
+  },
+
   "chat": {
     "all_with_type": "所有聊天类型：",
     "label": "聊天类型",
     "direct": "直接",
     "group": "群组",
     "channel": "频道"
+  },
+
+  "chat)box": {
+    "join_channel": "加入频道",
+    "both_blocked": "你和此用户已互相封锁。",
+    "you_blocked_me": "你已被此用户封锁。",
+    "you_blocked_them": "你已封锁此用户。"
   },
 
   "chat_bar": {
@@ -260,7 +277,7 @@
       "folder_name_placeholder": "文件夹名称",
       "folder_name_empty_error": "文件夹名称不能为空",
       "chat_selection": {
-        "selected_count": "包含{count}个聊天",
+        "selected_count": "包含{{count}}个聊天",
         "search_placeholder": "搜索聊天..."
       },
       "buttons": {
@@ -581,8 +598,8 @@
     "unblock_user": {
       "title": "取消屏蔽 {{name}}",
       "description": "取消屏蔽将允许此用户向您发送消息并查看您的在线状态。",
-      "toast_success": "已取消屏蔽 {{username}}",
-      "toast_error": "取消屏蔽用户失败"
+      "success": "已取消屏蔽 {{username}}",
+      "error": "取消屏蔽用户失败"
     },
     "delete_chat": {
       "title_direct": "删除聊天",

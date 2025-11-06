@@ -6,7 +6,6 @@
       "add": "เพิ่ม",
       "back": "ย้อนกลับ",
       "block": "บล็อก",
-      "blocked_by_user": "ถูกบล็อกโดยผู้ใช้",
       "cancel": "ยกเลิก",
       "cancel_request": "ยกเลิกคำขอ",
       "clear_selection": "ล้างการเลือก",
@@ -51,7 +50,9 @@
       "no_contacts": "ไม่พบผู้ติดต่อ",
       "error": "เกิดข้อผิดพลาด",
       "required": "จำเป็นต้องกรอกฟิลด์นี้",
-      "invalid_code": "กรุณาใส่รหัส 6 หลัก"
+      "invalid_code": "กรุณาใส่รหัส 6 หลัก",
+      "blocked": "ถูกบล็อก",
+      "blocked_me": "คุณถูกบล็อกแล้ว"
     },
     "loading": {
       "loading": "กำลังโหลด...",
@@ -130,12 +131,28 @@
     }
   },
 
+  "invite_page": {
+    "joining": "กำลังเข้าร่วม...",
+    "invalid_token": "โทเค็นเชิญไม่ถูกต้อง",
+    "joined_success": "เข้าร่วมสำเร็จ! กำลังเปลี่ยนหน้า...",
+    "not_found": "ไม่พบแชทหรือโค้ดเชิญหมดอายุแล้ว",
+    "access_denied": "คุณไม่ได้รับอนุญาตให้เข้าร่วมแชทนี้",
+    "failed": "เข้าร่วมแชทไม่สำเร็จ กรุณาลองใหม่ภายหลัง"
+  },
+
   "chat": {
     "all_with_type": "แชททั้งหมดตามประเภท:",
     "label": "ประเภทแชท",
     "direct": "ตรง",
     "group": "กลุ่ม",
     "channel": "ช่อง"
+  },
+
+  "chat_box": {
+    "join_channel": "เข้าร่วมช่อง",
+    "both_blocked": "คุณและผู้ใช้นี้บล็อกกันและกัน",
+    "you_blocked_me": "คุณถูกบล็อกโดยผู้ใช้นี้",
+    "you_blocked_them": "คุณได้บล็อกผู้ใช้นี้"
   },
 
   "chat_bar": {
@@ -261,7 +278,7 @@
       "folder_name_placeholder": "ชื่อโฟลเดอร์",
       "folder_name_empty_error": "ชื่อโฟลเดอร์ต้องไม่ว่างเปล่า",
       "chat_selection": {
-        "selected_count": "รวม {count} แชท",
+        "selected_count": "รวม {{count}} แชท",
         "search_placeholder": "ค้นหาแชท..."
       },
       "buttons": {
@@ -582,8 +599,8 @@
     "unblock_user": {
       "title": "ยกเลิกการบล็อก {{name}}",
       "description": "การยกเลิกการบล็อกจะอนุญาตให้ผู้ใช้นี้ส่งข้อความถึงคุณและดูสถานะออนไลน์ของคุณ",
-      "toast_success": "ยกเลิกการบล็อก {{username}} แล้ว",
-      "toast_error": "ยกเลิกการบล็อกผู้ใช้ไม่สำเร็จ"
+      "success": "ยกเลิกการบล็อก {{username}} แล้ว",
+      "error": "ยกเลิกการบล็อกผู้ใช้ไม่สำเร็จ"
     },
     "delete_chat": {
       "title_direct": "ลบแชท",

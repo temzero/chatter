@@ -135,8 +135,14 @@ export class Message {
 
   @BeforeInsert()
   validateMessage() {
-    if (!this.content && (!this.attachments || this.attachments.length === 0)) {
-      throw new Error('Message must have either content or attachments');
+    const hasContent = !!this.content?.trim();
+    const hasAttachments = this.attachments && this.attachments.length > 0;
+    const hasCall = !!this.call;
+
+    if (!hasContent && !hasAttachments && !hasCall) {
+      throw new Error(
+        'Message must have either content, attachments, or a call',
+      );
     }
   }
 }

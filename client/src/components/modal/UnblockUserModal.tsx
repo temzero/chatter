@@ -1,87 +1,79 @@
 // components/modals/UnblockUserModal.tsx
 import React from "react";
 import { getCloseModal, getModalData } from "@/stores/modalStore";
-import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
-import { Avatar } from "@/components/ui/avatar/Avatar";
-import { blockService } from "@/services/http/blockService";
-import { useChatMemberStore } from "@/stores/chatMemberStore";
-import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
+import { blockService } from "@/services/http/blockService";
+import { useTranslation } from "react-i18next";
 import Button from "../ui/buttons/Button";
+import { Avatar } from "@/components/ui/avatar/Avatar";
+import { useChatMemberStore } from "@/stores/chatMemberStore";
 
 interface UnblockUserModalData {
-  blockedUser: ChatMemberResponse;
+  blockedUser: {
+    id: string;
+    username?: string;
+    firstName?: string;
+    avatarUrl?: string;
+  };
   onUnblockSuccess?: () => void;
 }
 
 const UnblockUserModal: React.FC = () => {
   const { t } = useTranslation();
   const closeModal = getCloseModal();
-  const data = getModalData() as unknown as UnblockUserModalData | undefined;
-  const updateMemberLocally = useChatMemberStore.getState().updateMemberLocally;
+  const data = getModalData() as unknown as UnblockUserModalData;
+  const updateMemberLocallyByUserId =
+    useChatMemberStore.getState().updateMemberLocallyByUserId;
 
-  // Extract user data from modal props
-  const blockedUser = data?.blockedUser;
-  const onUnblockSuccess = data?.onUnblockSuccess;
+  if (!data?.blockedUser) return null;
 
-  if (!blockedUser) return null;
+  const { blockedUser, onUnblockSuccess } = data;
 
   const handleUnblock = async () => {
     try {
-      console.log("handleUnblock, blockedUser", blockedUser);
-      await blockService.unblockUser(blockedUser.id);
-      updateMemberLocally(blockedUser.chatId, blockedUser.id, {
+      const blockedResponse = await blockService.unblockUser(blockedUser.id);
+      updateMemberLocallyByUserId(blockedResponse.blockedId, {
         isBlockedByMe: false,
       });
+
       onUnblockSuccess?.();
+      closeModal();
+
       toast.success(
-        t("modal.unblock_user.toast_success", {
+        t("modal.unblock_user.success", {
           username: blockedUser.username || blockedUser.firstName,
         })
       );
     } catch (error) {
       console.error("Error unblocking user:", error);
-      toast.error(t("modal.unblock_user.toast_error"));
-    } finally {
-      closeModal();
+      toast.error(t("modal.unblock_user.error"));
     }
   };
 
   return (
     <>
       <div className="p-4">
-        {/* Changed to green color and "Unblock User" title */}
-        <div className="flex gap-2 items-center mb-4 text-[--primary-green] font-semibold">
-          <span className="material-symbols-outlined text-3xl font-bold">
-            lock_open_right
-          </span>
-          <h2 className="text-2xl">{t("modal.unblock_user.title", {name: blockedUser.firstName})}</h2>
-        </div>
+        <h2 className="text-2xl font-semibold mb-4 text-green-500">
+          {t("modal.unblock_user.title", { name: blockedUser.firstName })}
+        </h2>
 
         <div className="flex items-center gap-3 mb-6">
           <Avatar
             avatarUrl={blockedUser.avatarUrl}
-            name={blockedUser.nickname || blockedUser.firstName}
-            isBlocked={true}
+            name={blockedUser.username || blockedUser.firstName}
           />
           <div>
             <h3 className="font-medium">{blockedUser.username}</h3>
-            <p className="text-sm opacity-70">{blockedUser.email}</p>
           </div>
         </div>
 
-        {/* Updated description text */}
         <p className="mb-6 text-sm opacity-70">
           {t("modal.unblock_user.description")}
         </p>
       </div>
+
       <div className="flex custom-border-t">
-        <Button
-          variant="ghost"
-          fullWidth
-          onClick={handleUnblock}
-          className="text-green-500"
-        >
+        <Button variant="ghost" fullWidth onClick={handleUnblock}>
           {t("common.actions.unblock")}
         </Button>
         <Button variant="ghost" fullWidth onClick={closeModal}>

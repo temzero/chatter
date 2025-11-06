@@ -208,9 +208,9 @@ const GroupChatEdit = () => {
           onClick={() => {
             setSidebarInfo(SidebarInfoMode.MEMBERS_EDIT);
           }}
-          className="mt-4 border-2 border-[--border-color] text-lg px-3 py-2 rounded flex justify-start items-center gap-2 w-full hover:bg-[--hover-color]"
+          className="mt-4 bg-[--border-color] text-lg px-3 py-1 rounded flex justify-start items-center gap-2 w-full hover:bg-[--hover-color]"
         >
-          <span className="material-symbols-outlined text-3xl">groups</span>
+          <span className="material-symbols-outlined text-3xl">group_search</span>
           <h1>{t("sidebar_info.group_edit.members")}</h1>
           <h1 className="ml-auto">{activeMembers.length}</h1>
         </button>

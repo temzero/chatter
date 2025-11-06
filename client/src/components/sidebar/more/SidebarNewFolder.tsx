@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 import ChatListItemSelection from "@/components/ui/chat/ChatListItemSelection";
 import SidebarLayout from "@/layouts/SidebarLayout";
+import SearchBar from "@/components/ui/SearchBar";
 
 const COLORS = [
   null,
@@ -190,9 +191,17 @@ const SidebarNewFolder: React.FC = () => {
           </div>
 
           {/* Chat Selection */}
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <h2 className="font-bold">
+          <div className="flex flex-col gap-2">
+            <SearchBar
+              placeholder={t(
+                "sidebar_folders.new_folder.chat_selection.search_placeholder"
+              )}
+              onSearch={(value) => setSearchQuery(value)}
+              autoFocus={false}
+            />
+
+            <div className="flex justify-between items-center p-1 px-2 bg-[--border-color] rounded-full">
+              <h2 className="italic">
                 {selectedChats.length > 0 &&
                   t(
                     "sidebar_folders.new_folder.chat_selection.selected_count",
@@ -209,18 +218,6 @@ const SidebarNewFolder: React.FC = () => {
                   <span className="material-symbols-outlined">delete</span>
                 </button>
               )}
-            </div>
-
-            <div className="mb-2">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t(
-                  "sidebar_folders.new_folder.chat_selection.search_placeholder"
-                )}
-                className="w-full p-2 text-sm rounded border border-[var(--border-color)] bg-transparent"
-              />
             </div>
 
             <div className="overflow-y-auto">

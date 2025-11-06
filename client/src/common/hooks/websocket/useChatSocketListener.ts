@@ -29,6 +29,7 @@ export function useChatSocketListeners() {
 
       const isMuted = meta?.isMuted ?? false;
       const isOwnMessage = meta?.isSender ?? false;
+      const existingMessage = messageStore.getMessageById(message.id);
 
       try {
         await chatStore.getOrFetchChatById(message.chatId, {
@@ -39,12 +40,15 @@ export function useChatSocketListeners() {
         return;
       }
 
-      handleSystemEventMessage(message);
-
-      if (isOwnMessage && messageStore.getMessageById(message.id)) {
+      if (isOwnMessage && existingMessage) {
         messageStore.updateMessageById(message.id, message);
         return;
       } else {
+        if (message.systemEvent) {
+          handleSystemEventMessage(message);
+          return;
+        }
+
         messageStore.addMessage(message);
 
         const activeChatId = chatStore.activeChatId;

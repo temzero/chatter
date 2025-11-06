@@ -7,8 +7,6 @@ import { MessageResponse } from "@/shared/types/responses/message.response";
 import { motion } from "framer-motion";
 import { getMessageSendingAnimation } from "@/common/animations/messageAnimations";
 import { getMessageAttachments } from "@/stores/messageAttachmentStore";
-// import { getMessageAnimation } from "@/common/animations/messageAnimations";
-// import { motion } from "framer-motion";
 
 interface MessageBubbleProps {
   message: MessageResponse;

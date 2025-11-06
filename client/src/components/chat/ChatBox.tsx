@@ -1,34 +1,20 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { chatMemberService } from "@/services/http/chatMemberService";
-import { useChatStore } from "@/stores/chatStore";
+import { useActiveChat } from "@/stores/chatStore";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { useBlockStatus } from "@/common/hooks/useBlockStatus";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import Header from "./Header";
 import ChatBar from "./components/ChatBar";
 import MessagesContainer from "./messagesContainer/MessagesContainer";
-import { useShallow } from "zustand/shallow";
+import { useTranslation } from "react-i18next";
 
 const ChatBox = React.memo(() => {
+  const { t } = useTranslation();
   console.log("ChatBox");
-  const activeChat = useChatStore(
-    useShallow((state) => {
-      const chat = state.getActiveChat?.();
-      if (!chat) return null;
-      return {
-        id: chat.id,
-        name: chat.name,
-        type: chat.type,
-        myRole: chat.myRole,
-        otherMemberUserIds: chat.otherMemberUserIds,
-        pinnedMessage: chat.pinnedMessage,
-        isDeleted: chat.isDeleted,
-        avatarUrl: chat.avatarUrl,
-        myMemberId: chat.myMemberId,
-      };
-    })
-  );
+
+  const activeChat = useActiveChat();
 
   const { isBlockedByMe, isBlockedMe } = useBlockStatus(
     activeChat?.id ?? "",
@@ -46,7 +32,7 @@ const ChatBox = React.memo(() => {
 
   return (
     <section
-      className="h-full flex-1 relative flex flex-col justify-between overflow-hidden transition-all"
+      className="h-full pt-16 flex-1 relative flex flex-col justify-between overflow-hidden transition-all"
       onContextMenu={(e) => e.preventDefault()}
     >
       <Header chat={activeChat} isBlockedByMe={isBlockedByMe} />
@@ -85,20 +71,18 @@ const ChatBox = React.memo(() => {
                     window.location.reload();
                   }}
                 >
-                  Join Channel
+                  {t("chat_box.join_channel")}
                 </button>
               </motion.div>
             )
           ) : (
             <div className="absolute bottom-0 left-0 backdrop-blur-xl w-full flex flex-col items-center p-4 justify-between shadow border-[var(--border-color)]">
-              <h1 className="text-red-500 font-semibold">
+              <h1 className="text-red-500 font-semibold text-center">
+                {isBlockedByMe && isBlockedMe && t("chat_box.both_blocked")}
+                {!isBlockedByMe && isBlockedMe && t("chat_box.you_blocked_me")}
                 {isBlockedByMe &&
-                  isBlockedMe &&
-                  "You and this user have blocked each other."}
-                {!isBlockedByMe &&
-                  isBlockedMe &&
-                  "You have been blocked by this user."}
-                {isBlockedByMe && !isBlockedMe && "You have blocked this user."}
+                  !isBlockedMe &&
+                  t("chat_box.you_blocked_them")}
               </h1>
             </div>
           )}

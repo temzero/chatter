@@ -5,6 +5,8 @@ import { useShallow } from "zustand/shallow";
 import { getCurrentUser } from "@/stores/authStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import type { ChatResponse } from "@/shared/types/responses/chat.response";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
+import { MESSAGE_AVATAR_WIDTH } from "@/common/constants/messageAvatarDimension";
 
 interface MessageReadInfoProps {
   chat: ChatResponse;
@@ -70,11 +72,15 @@ export const MessageReadInfo: React.FC<MessageReadInfoProps> = React.memo(
     return (
       <div
         ref={containerRef}
-        className={clsx("flex items-center gap-0.5 -mt-7 mb-2 mx-0.5", {
+        className={clsx("flex items-center gap-0.5 -mt-6 mb-2 mx-0.5", {
           "justify-end": isMe,
           "justify-start": !isMe,
         })}
-        style={{ maxWidth: "100%" }}
+        style={
+          chat.type === ChatType.GROUP
+            ? { marginLeft: MESSAGE_AVATAR_WIDTH + 12 }
+            : undefined
+        }
       >
         {readUserAvatars.slice(0, visibleCount).map((avatarUrl, index) => (
           <Avatar

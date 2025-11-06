@@ -86,15 +86,30 @@ export class ChatMemberController {
     @Param('chatId') chatId: string,
     @CurrentUser('id') currentUserId: string,
   ) {
-    const member = await this.memberService.addMembers(chatId, [currentUserId]);
+    const members = await this.memberService.addMembers(chatId, [
+      currentUserId,
+    ]);
+
+    if (members.length === 0) {
+      throw new Error('Failed to join chat');
+    }
+
+    const joinedMember = members[0];
 
     await this.messageService.createSystemEventMessage(
       chatId,
-      currentUserId, // The user who joined is the sender
+      currentUserId,
       SystemEventType.MEMBER_JOINED,
+      {
+        targetId: joinedMember.userId,
+        targetName: joinedMember.nickname ?? joinedMember.user.firstName,
+      },
     );
 
-    return new SuccessResponse(member, 'Successfully joined the chat');
+    return new SuccessResponse(
+      mapChatMemberToChatMemberResDto(joinedMember),
+      'Successfully joined the chat',
+    );
   }
 
   @Post()
@@ -306,7 +321,9 @@ export class ChatMemberController {
       chatId,
       currentUserId,
       eventType,
-      !isSelfRemoval ? { targetId: userId } : undefined,
+      {
+        targetId: userId,
+      },
     );
 
     return new SuccessResponse(
@@ -337,12 +354,10 @@ export class ChatMemberController {
       chatId,
       currentUserId,
       eventType,
-      !isSelfRemoval
-        ? {
-            targetId: userId,
-            targetName: member.nickname ?? member.user.firstName,
-          }
-        : undefined,
+      {
+        targetId: userId,
+        targetName: member.nickname ?? member.user.firstName,
+      },
     );
 
     return new SuccessResponse(

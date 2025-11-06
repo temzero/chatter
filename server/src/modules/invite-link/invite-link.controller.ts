@@ -72,13 +72,20 @@ export class InviteLinkController {
         return new SuccessResponse(chatId, 'You already joined this chat');
       }
 
-      await this.chatMemberService.addMembers(chatId, [currentUserId]);
+      const joinedMembers = await this.chatMemberService.addMembers(chatId, [
+        currentUserId,
+      ]);
 
+      const joinedMember = joinedMembers[0]; // Only one member join so just get first from array
       // Emit system event message for MEMBER_JOINED
       await this.messageService.createSystemEventMessage(
         chatId,
         currentUserId,
         SystemEventType.MEMBER_JOINED,
+        {
+          targetId: joinedMember.userId,
+          targetName: joinedMember.nickname ?? joinedMember.user.firstName,
+        },
       );
 
       return new SuccessResponse(chatId, 'You joined the chat successfully');

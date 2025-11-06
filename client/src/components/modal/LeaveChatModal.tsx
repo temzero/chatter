@@ -5,9 +5,9 @@ import { useChatStore } from "@/stores/chatStore";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useTranslation } from "react-i18next";
-import Button from "../ui/buttons/Button";
 import { handleError } from "@/common/utils/handleError";
 import { toast } from "react-toastify";
+import Button from "../ui/buttons/Button";
 
 interface LeaveChatModalData {
   chat: ChatResponse;

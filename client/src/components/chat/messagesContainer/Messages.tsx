@@ -37,13 +37,6 @@ const Messages: React.FC<ChatMessagesProps> = ({
       return MarkLastMessageRead({chat, messages});
     }
   }, [chat, messages]);
-  // ✅ Auto mark last message as read
-  // if (chat && messages.length > 0) {
-  //   MarkLastMessageRead({
-  //     chat,
-  //     messages,
-  //   });
-  // }
 
   // Group messageIds by date
   const groupedIdsByDate = useMemo(() => {

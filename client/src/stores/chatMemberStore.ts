@@ -444,12 +444,10 @@ export const useChatMemberStore = create<ChatMemberState & ChatMemberActions>(
 
 export const useActiveMembers = (): ChatMemberResponse[] | undefined => {
   const activeChatId = useActiveChatId();
-  return useChatMemberStore(
-    useShallow((state) => {
-      if (!activeChatId) return undefined;
-      return state.chatMembers[activeChatId];
-    })
-  );
+  return useChatMemberStore((state) => {
+    if (!activeChatId) return undefined;
+    return state.chatMembers[activeChatId];
+  });
 };
 
 export const getActiveMembers = (): ChatMemberResponse[] | undefined => {

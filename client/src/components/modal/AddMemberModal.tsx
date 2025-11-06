@@ -85,7 +85,7 @@ const AddMemberModal: React.FC = () => {
     if (!chat) return;
     try {
       await useChatStore.getState().generateInviteLink(chat.id);
-       toast.success(t("toast.friendship.invite_link_generated"));
+      toast.success(t("toast.friendship.invite_link_generated"));
     } catch (error) {
       handleError(error, "Failed to generate invite link");
     }
@@ -227,7 +227,7 @@ const AddMemberModal: React.FC = () => {
           <div className="flex items-center bg-[var(--input-bg)] rounded w-full border-2 border-[--border-color]">
             {primaryInviteLink ? (
               <div className="flex items-center w-full h-full overflow-hidden">
-                <p
+                <motion.p
                   onClick={handleCopy}
                   className={`h-full w-full text-sm p-1 px-2 whitespace-nowrap overflow-auto scrollbar-hide cursor-pointer hover:bg-[--hover-color] ${
                     copied ? "text-green-500 font-semibold" : ""
@@ -237,11 +237,14 @@ const AddMemberModal: React.FC = () => {
                       ? t("modal.add_member.link_copied_title")
                       : t("modal.add_member.link_copy_title")
                   }
+                  key={primaryInviteLink}
+                  initial={{ opacity: 0, scale: 1.2 }}
+                  animate={{ opacity: 1, scale: 1 }}
                 >
                   {copied
                     ? t("modal.add_member.link_copied")
                     : primaryInviteLink}
-                </p>
+                </motion.p>
                 {!refreshed && (
                   <button
                     title={t("modal.add_member.refresh_title")}

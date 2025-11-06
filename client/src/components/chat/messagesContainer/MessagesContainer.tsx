@@ -95,7 +95,7 @@ const MessagesContainer: React.FC<ChatBoxProps> = ({ chat }) => {
           <RingLoader color="#777777" size={24} />
         </div>
       }
-      className={`px-6 pb-[calc(3*var(--header-height))] flex-1 h-full w-full flex flex-col overflow-x-hidden ${
+      className={`px-6 pb-[calc(3*var(--header-height))] flex-1 h-full w-full flex flex-col overflow-x-hidden${
         isMessagePinned
           ? "pt-[calc(var(--header-height)+var(--pinned-message-height)+4px)]"
           : "pt-[calc(var(--header-height)+4px)]"
