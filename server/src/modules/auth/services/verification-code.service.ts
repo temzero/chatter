@@ -57,8 +57,10 @@ export class VerificationCodeService {
     // Compare the provided code with the hashed version
     const isValid = await bcrypt.compare(code, verificationCode.hashedCode);
 
-    // Delete the code after verification (whether successful or not)
-    await this.verificationCodeRepository.delete(verificationCode.id);
+    // Only delete if the code is valid
+    if (isValid) {
+      await this.verificationCodeRepository.delete(verificationCode.id);
+    }
 
     return isValid;
   }

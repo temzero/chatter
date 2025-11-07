@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback } from "react";
+import React, { useRef, useEffect, useCallback, useLayoutEffect } from "react";
 import { RingLoader } from "react-spinners";
 import {
   useHasMoreMessages,
@@ -11,6 +11,7 @@ import Messages from "./Messages";
 import ChannelMessages from "./ChannelMessages";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
+import { scrollToBottom } from "@/common/utils/scrollToBottom";
 
 interface ChatBoxProps {
   chat?: ChatResponse;
@@ -22,8 +23,9 @@ const MessagesContainer: React.FC<ChatBoxProps> = ({ chat }) => {
   const chatId = chat?.id || "";
   const isMessagePinned = chat?.pinnedMessage !== null;
 
-  const isMuted: boolean =
-    chat?.mutedUntil ? new Date(chat.mutedUntil).getTime() > Date.now() : false;
+  const isMuted: boolean = chat?.mutedUntil
+    ? new Date(chat.mutedUntil).getTime() > Date.now()
+    : false;
 
   const scrollerRef = useRef<HTMLDivElement | null>(null);
 
@@ -34,33 +36,23 @@ const MessagesContainer: React.FC<ChatBoxProps> = ({ chat }) => {
   const isSearchMessages = useMessageStore((state) => state.isSearchMessages);
   const isShowImportant = useMessageStore((state) => state.showImportantOnly);
   // Scroll to bottom helper
-  const scrollToBottom = useCallback((behavior: ScrollBehavior = "auto") => {
-    if (scrollerRef.current) {
-      scrollerRef.current.scrollTo({
-        top: scrollerRef.current.scrollHeight,
-        behavior,
-      });
-    }
-  }, []);
 
-  // Scroll to bottom once after mount
-  useEffect(() => {
-    scrollToBottom();
-  }, [scrollToBottom, isShowImportant]);
+  useLayoutEffect(() => {
+    scrollToBottom(scrollerRef.current);
+  }, [messageIds, isShowImportant]);
 
   // Auto scroll if near bottom when new message arrives
   useEffect(() => {
     if (messageIds.length === 0) return;
 
-    if (scrollerRef.current) {
-      const el = scrollerRef.current;
-      const nearBottom =
-        el.scrollHeight - (el.scrollTop + el.clientHeight) < 150; // 150px threshold
-      if (nearBottom) {
-        scrollToBottom("smooth");
-      }
+    const el = scrollerRef.current;
+    if (!el) return;
+
+    const nearBottom = el.scrollHeight - (el.scrollTop + el.clientHeight) < 150;
+    if (nearBottom) {
+      scrollToBottom(el, "smooth");
     }
-  }, [messageIds, scrollToBottom]);
+  }, [messageIds]);
 
   const renderMessages = useCallback(() => {
     if (!chat) return null;

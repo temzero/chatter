@@ -13,6 +13,7 @@ import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
 import { FriendshipService } from '../friendship/friendship.service';
 import { ChatService } from '../chat/chat.service';
 import { BlockService } from '../block/block.service';
+import { PasswordMessageCode } from 'src/shared/types/enums/message-code.enum';
 
 @Injectable()
 export class UserService {
@@ -162,11 +163,43 @@ export class UserService {
     }
   }
 
+  // async changePassword(
+  //   userId: string,
+  //   oldPassword: string,
+  //   newPassword: string,
+  // ): Promise<{ isSuccess: boolean; message: string }> {
+  //   try {
+  //     const user = await this.getUserById(userId);
+
+  //     const isMatch = await bcrypt.compare(oldPassword, user.passwordHash);
+  //     if (!isMatch) {
+  //       return {
+  //         isSuccess: false,
+  //         message: 'Current password is incorrect',
+  //       };
+  //     }
+
+  //     user.passwordHash = await this.hashPassword(newPassword);
+  //     await this.userRepo.save(user);
+
+  //     return {
+  //       isSuccess: true,
+  //       message: 'Password updated successfully',
+  //     };
+  //   } catch (error) {
+  //     console.error('Failed to update password:', error);
+  //     return {
+  //       isSuccess: false,
+  //       message: 'An error occurred while updating the password',
+  //     };
+  //   }
+  // }
+
   async changePassword(
     userId: string,
     oldPassword: string,
     newPassword: string,
-  ): Promise<{ isSuccess: boolean; message: string }> {
+  ): Promise<{ isSuccess: boolean; message: PasswordMessageCode }> {
     try {
       const user = await this.getUserById(userId);
 
@@ -174,7 +207,7 @@ export class UserService {
       if (!isMatch) {
         return {
           isSuccess: false,
-          message: 'Current password is incorrect',
+          message: PasswordMessageCode.INCORRECT_CURRENT,
         };
       }
 
@@ -183,13 +216,13 @@ export class UserService {
 
       return {
         isSuccess: true,
-        message: 'Password updated successfully',
+        message: PasswordMessageCode.SUCCESS,
       };
     } catch (error) {
       console.error('Failed to update password:', error);
       return {
         isSuccess: false,
-        message: 'An error occurred while updating the password',
+        message: PasswordMessageCode.SERVER_ERROR,
       };
     }
   }

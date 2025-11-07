@@ -37,7 +37,8 @@
       "update": "Update",
       "verify": "Verify",
       "verify_code": "Verify Code",
-      "sent": "Sent"
+      "sent": "Sent",
+      "enter_code": "Enter code"
     },
     "messages": {
       "success": "Success!",
@@ -48,9 +49,12 @@
       "no_result": "No Result!",
       "no_chats": "No chats Found",
       "no_contacts": "No contacts Found",
+      "no_messages_yet": "No messages yet!",
       "error": "An error occurred",
       "required": "This field is required",
-      "invalid_code": "Please enter a 6-digit code",
+      "invalid_code": "Invalid code",
+      "verified": "Verified",
+      "failed_verify": "verification failed",
       "blocked": "Blocked ",
       "blocked_me": "You has been blocked"
     },
@@ -64,6 +68,16 @@
       "verifying": "Verifying...",
       "processing": "Processing..."
     }
+  },
+
+  "time": {
+    "now": "now",
+    "minute": "m",
+    "hour": "h",
+    "day": "d",
+    "month": "mth",
+    "year": "y",
+    "future": "In the future"
   },
 
   "toast": {
@@ -333,12 +347,14 @@
         "available": "Username is available!",
         "taken": "Username is already taken",
         "success": "Username updated successfully!",
-        "verify_first": "Please verify username availability first"
+        "verify_first": "Please verify username availability first",
+        "invalid": "Invalid username"
       }
     },
 
     "change_email": {
       "title": "Change Email",
+      "add_email": "Add Email",
       "placeholder": "Set New Email",
       "requirements": [
         "Must be a valid email address",
@@ -346,10 +362,10 @@
         "Must be unique (not used by another account)",
         "You need to verify the new email address"
       ],
-      "resend_in": "Resend in {time}",
+      "resend_in": "Resend in {{time}}",
       "messages": {
         "already_current": "This is already your current email",
-        "sent": "Verification code sent to your email: {email}",
+        "sent": "Verification code sent to your email: {{email}}",
         "success": "Email verified and updated successfully",
         "verify_first": "Please verify the new email first",
         "invalid": "Please enter a valid email address",
@@ -361,6 +377,7 @@
 
     "change_phone": {
       "title": "Change Phone Number",
+      "add_phone": "Add Phone Number",
       "placeholder": "Set New Phone Number",
       "requirements": [
         "Must be a valid phone number",
@@ -397,7 +414,11 @@
         "all_required": "All fields are required",
         "invalid_format": "Invalid password format",
         "success": "Password changed successfully",
-        "failed": "Failed to change password"
+        "failed": "Failed to change password",
+
+        "SUCCESS": "Password updated successfully",
+        "INCORRECT_CURRENT": "Current password is incorrect",
+        "SERVER_ERROR": "An error occurred while updating the password"
       },
       "buttons": {
         "change": "Change Password",

@@ -37,7 +37,8 @@
       "update": "更新",
       "verify": "確認",
       "verify_code": "コードを確認",
-      "sent": "送信済み"
+      "sent": "送信済み",
+      "enter_code": "コードを入力"
     },
     "messages": {
       "success": "成功！",
@@ -48,9 +49,12 @@
       "no_result": "結果がありません！",
       "no_chats": "チャットが見つかりません",
       "no_contacts": "連絡先が見つかりません",
+      "no_messages_yet": "まだメッセージはありません！",
       "error": "エラーが発生しました",
       "required": "このフィールドは必須です",
-      "invalid_code": "6桁のコードを入力してください",
+      "invalid_code": "無効なコード",
+      "verified": "確認済み",
+      "failed_verify": "認証に失敗しました",
       "blocked": "ブロック済み",
       "blocked_me": "あなたはブロックされました"
     },
@@ -64,6 +68,16 @@
       "verifying": "認証中...",
       "processing": "処理中..."
     }
+  },
+
+  "time": {
+    "now": "今",
+    "minute": "分",
+    "hour": "時間",
+    "day": "日",
+    "month": "か月",
+    "year": "年",
+    "future": "将来"
   },
 
   "toast": {
@@ -332,12 +346,14 @@
         "available": "ユーザー名は利用可能です！",
         "taken": "ユーザー名はすでに使用されています",
         "success": "ユーザー名が正常に更新されました！",
-        "verify_first": "まずユーザー名の可用性を確認してください"
+        "verify_first": "まずユーザー名の可用性を確認してください",
+        "invalid": "無効なユーザー名"
       }
     },
 
     "change_email": {
       "title": "メールアドレスの変更",
+      "add_email": "メールを追加",
       "placeholder": "新しいメールアドレスを設定",
       "requirements": [
         "有効なメールアドレスである必要があります",
@@ -348,7 +364,7 @@
       "resend_in": "{time}後に再送信",
       "messages": {
         "already_current": "これはすでに現在のメールアドレスです",
-        "sent": "認証コードがあなたのメールに送信されました：{email}",
+        "sent": "認証コードがあなたのメールに送信されました：{{email}}",
         "success": "メールが認証され、正常に更新されました",
         "verify_first": "まず新しいメールを認証してください",
         "invalid": "有効なメールアドレスを入力してください",
@@ -360,6 +376,7 @@
 
     "change_phone": {
       "title": "電話番号の変更",
+      "add_phone": "電話番号を追加",
       "placeholder": "新しい電話番号を設定",
       "requirements": [
         "有効な電話番号である必要があります",
@@ -396,7 +413,11 @@
         "all_required": "すべてのフィールドが必須です",
         "invalid_format": "パスワードの形式が無効です",
         "success": "パスワードが正常に変更されました",
-        "failed": "パスワードの変更に失敗しました"
+        "failed": "パスワードの変更に失敗しました",
+
+        "SUCCESS": "パスワードが正常に更新されました",
+        "INCORRECT_CURRENT": "現在のパスワードが正しくありません",
+        "SERVER_ERROR": "パスワードの更新中にエラーが発生しました"
       },
       "buttons": {
         "change": "パスワードを変更",

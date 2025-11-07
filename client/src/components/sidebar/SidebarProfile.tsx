@@ -66,11 +66,20 @@ const SidebarProfile: React.FC = () => {
                     copyType="phone"
                   />
 
-                  <ContactInfoItem
-                    icon="mail"
-                    value={currentUser?.email}
-                    copyType="email"
-                  />
+                  <div className="flex items-center relative">
+                    <ContactInfoItem
+                      icon="mail"
+                      value={currentUser?.email}
+                      copyType="email"
+                    />
+                    {!currentUser?.emailVerified && (
+                      <div className="flex items-center absolute right-1 top-1/2 -translate-y-1/2 bg-[--sidebar-color] pl-0.5">
+                        <span className="material-symbols-outlined text-yellow-500">
+                          error
+                        </span>
+                      </div>
+                    )}
+                  </div>
 
                   <ContactInfoItem
                     icon="cake"

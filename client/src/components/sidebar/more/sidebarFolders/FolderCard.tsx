@@ -16,6 +16,7 @@ const FolderCard: React.FC<FolderCardProps> = ({
   dragListeners,
 }) => {
   const setSidebar = getSetSidebar();
+  const position = folder.position;
 
   return (
     <div
@@ -31,7 +32,7 @@ const FolderCard: React.FC<FolderCardProps> = ({
         {...dragListeners}
         className="w-8 flex items-center justify-center border-r-2 border-[--sidebar-color] self-stretch hover:cursor-grab active:cursor-grabbing hover:bg-black/20 transition-all"
       >
-        <h1 className="font-bold text-xl">{folder.position}</h1>
+        {position > 0 && <h1 className="font-bold text-xl">{position}</h1>}
       </div>
       <div className="flex-1 truncate p-2">
         <div className="flex items-center justify-between">

@@ -31,6 +31,7 @@ interface AuthActions {
   initialize: () => Promise<boolean>;
   setCurrentUser: (user: UserResponse | null) => void;
   setMessage: (type: AuthMessageType, content: string) => void;
+  setLoading: (loading: boolean) => void;
   login: (identifier: string, password: string) => Promise<void>;
   logout: () => void;
   register: (userData: {
@@ -101,6 +102,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       // Core actions
       setMessage: (type, content) => set({ message: { type, content } }),
+
+      setLoading: (isLoading) => set({ loading: isLoading }),
 
       // Authentication methods
       login: async (identifier, password) => {

@@ -3,16 +3,18 @@ import React, { useState, useEffect } from "react";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useAuthStore } from "@/stores/authStore";
-import { userService } from "@/services/http/userService"
-import { getSetSidebar, } from "@/stores/sidebarStore";
+import { userService } from "@/services/http/userService";
+import { getSetSidebar } from "@/stores/sidebarStore";
 import { toast } from "react-toastify";
 import { handleError } from "@/common/utils/handleError";
 import { useTranslation } from "react-i18next";
+import { validatePassword } from "@/common/utils/validation/passwordValidation";
 
 const SidebarSettingsPassword: React.FC = () => {
   const { t } = useTranslation();
   const loading = useAuthStore((state) => state.loading);
   const setLoading = useAuthStore.getState().setLoading;
+
   const setSidebar = getSetSidebar();
 
   const [currentPassword, setCurrentPassword] = useState("");
@@ -23,41 +25,9 @@ const SidebarSettingsPassword: React.FC = () => {
   const isDisabled =
     loading || !isValid || !currentPassword || !newPassword || !confirmPassword;
 
-  // Validate password whenever it changes
   useEffect(() => {
-    if (!newPassword) {
-      setIsValid(false);
-      return;
-    }
-
-    // Password requirements
-    if (newPassword.length < 8) {
-      setIsValid(false);
-      return;
-    }
-
-    if (!/[A-Z]/.test(newPassword)) {
-      setIsValid(false);
-      return;
-    }
-
-    if (!/[a-z]/.test(newPassword)) {
-      setIsValid(false);
-      return;
-    }
-
-    if (!/[0-9]/.test(newPassword)) {
-      setIsValid(false);
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      setIsValid(false);
-      return;
-    }
-
-    // If all checks pass
-    setIsValid(true);
+    const { isValid } = validatePassword(newPassword, confirmPassword);
+    setIsValid(isValid);
   }, [newPassword, confirmPassword]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,12 +48,12 @@ const SidebarSettingsPassword: React.FC = () => {
     try {
       setLoading(true);
 
-      const response = await userService.changePassword(
+      const { payload, message } = await userService.changePassword(
         currentPassword,
         newPassword
       );
 
-      if (response.payload) {
+      if (payload) {
         toast.success(t("account_settings.change_password.messages.success"));
         // Clear form after successful change
         setCurrentPassword("");
@@ -91,10 +61,11 @@ const SidebarSettingsPassword: React.FC = () => {
         setConfirmPassword("");
         setSidebar(SidebarMode.SETTINGS_ACCOUNT);
       } else {
-        toast.error(
-          response.message ||
-            t("account_settings.change_password.messages.failed")
-        );
+        // toast.error(
+        //   message ||
+        //     t("account_settings.change_password.messages.failed")
+        // );
+        toast.error(t(`account_settings.change_password.messages.${message}`));
       }
     } catch (error) {
       handleError(error, t("account_settings.change_password.messages.failed"));

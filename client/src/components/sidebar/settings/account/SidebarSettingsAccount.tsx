@@ -1,8 +1,8 @@
 import { getCurrentUser } from "@/stores/authStore";
 import { getSetSidebar } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
-import SidebarLayout from "@/layouts/SidebarLayout";
 import { useTranslation } from "react-i18next";
+import SidebarLayout from "@/layouts/SidebarLayout";
 
 const SidebarSettingsAccount: React.FC = () => {
   const { t } = useTranslation();
@@ -16,15 +16,15 @@ const SidebarSettingsAccount: React.FC = () => {
       onClick: () => setSidebar(SidebarMode.SETTINGS_USERNAME),
     },
     {
-      title: t("account_settings.change_email.title"),
+      title: currentUser?.email ? t("account_settings.change_email.title") : t("account_settings.change_email.add_email"),
       subtitle: currentUser?.email ? currentUser.email : "",
       onClick: () => setSidebar(SidebarMode.SETTINGS_EMAIL),
     },
-    {
-      title: t("account_settings.change_phone.title"),
-      subtitle: currentUser?.phoneNumber ? currentUser.phoneNumber : "",
-      onClick: () => setSidebar(SidebarMode.SETTINGS_PHONE),
-    },
+    // {
+    //   title:  currentUser?.phoneNumber ? t("account_settings.change_phone.title") : t("account_settings.change_phone.add_phone"),
+    //   subtitle: currentUser?.phoneNumber ? currentUser.phoneNumber : "",
+    //   onClick: () => setSidebar(SidebarMode.SETTINGS_PHONE),
+    // },
     {
       title: t("account_settings.change_password.title"),
       onClick: () => setSidebar(SidebarMode.SETTINGS_PASSWORD),

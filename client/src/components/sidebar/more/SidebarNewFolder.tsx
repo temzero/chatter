@@ -59,10 +59,10 @@ const SidebarNewFolder: React.FC = () => {
   const filteredChats = chats
     .filter((chat) => {
       const isSelected = selectedChats.includes(chat.id);
-      const isTypeAlreadyIncluded = folderTypes.includes(
-        chat.type as (typeof folderTypes)[number]
-      );
-      return isSelected || !isTypeAlreadyIncluded;
+      const isTypeMatch =
+        folderTypes.length === 0 ||
+        folderTypes.includes(chat.type as (typeof folderTypes)[number]);
+      return isSelected || isTypeMatch;
     })
     .filter((chat) =>
       (chat.name ?? "").toLowerCase().includes(searchQuery.toLowerCase())
@@ -200,25 +200,24 @@ const SidebarNewFolder: React.FC = () => {
               autoFocus={false}
             />
 
-            <div className="flex justify-between items-center p-1 px-2 bg-[--border-color] rounded-full">
-              <h2 className="italic">
-                {selectedChats.length > 0 &&
-                  t(
+            {selectedChats.length > 0 && (
+              <div className="flex justify-between items-center p-1 px-2 bg-[--border-color] rounded-full">
+                <h2 className="italic">
+                  {t(
                     "sidebar_folders.new_folder.chat_selection.selected_count",
                     {
                       count: selectedChats.length,
                     }
                   )}
-              </h2>
-              {selectedChats.length > 0 && (
+                </h2>
                 <button
                   onClick={() => setSelectedChats([])}
                   className="text-xs opacity-70 hover:opacity-100 text-red-400"
                 >
                   <span className="material-symbols-outlined">delete</span>
                 </button>
-              )}
-            </div>
+              </div>
+            )}
 
             <div className="overflow-y-auto">
               {filteredChats.length > 0 && (

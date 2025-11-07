@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import ContactInfoItem from "@/components/ui/contact/contactInfoItem";
 import { userService } from "@/services/http/userService";
 import { getCurrentUser } from "@/stores/authStore";
 import { AnimatePresence, motion } from "framer-motion";
@@ -9,8 +8,10 @@ import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { useUserStatus } from "@/stores/presenceStore";
 import { useTranslation } from "react-i18next";
 import { UserResponse } from "@/shared/types/responses/user.response";
-import FriendshipBtn from "@/components/ui/buttons/FriendshipBtn";
 import { getOpenModal, ModalType } from "@/stores/modalStore";
+import FriendshipBtn from "@/components/ui/buttons/FriendshipBtn";
+import ContactInfoItem from "@/components/ui/contact/contactInfoItem";
+import SearchBar from "../SearchBar";
 
 const CreateNewChat: React.FC = () => {
   const { t } = useTranslation();
@@ -52,37 +53,6 @@ const CreateNewChat: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-3 p-2 h-full relative overflow-hidden">
-      <form onSubmit={handleSubmit} className="space-y-2">
-        <div className="flex w-full items-center gap-1 p-1 px-2 rounded border-2 border-[var(--border-color)] shadow focus-within:border-[var(--primary-color)] focus-within:shadow-md transition-all duration-200">
-          <input
-            type="text"
-            name="userInput"
-            placeholder={t("sidebar_new_chat.direct.placeholder")}
-            required
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="w-full bg-transparent outline-none"
-            autoFocus
-          />
-        </div>
-        <button
-          type="submit"
-          className="bg-[var(--primary-green)] py-1 w-full flex gap-2 items-center justify-center text-white rounded"
-          disabled={loading}
-        >
-          {loading
-            ? t("common.loading.searching")
-            : t("sidebar_new_chat.direct.find_user")}
-          <span className="material-symbols-outlined">person_search</span>
-        </button>
-      </form>
-
-      {error && (
-        <p className="text-red-400 text-center">
-          {t("sidebar_new_chat.direct.user_not_found")}
-        </p>
-      )}
-
       <AnimatePresence mode="wait">
         {user && (
           <motion.div
@@ -218,6 +188,30 @@ const CreateNewChat: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <form onSubmit={handleSubmit} className="space-y-2 mt-auto">
+        {error && (
+          <p className="text-red-400 text-center mb-3">
+            {t("sidebar_new_chat.direct.user_not_found")}
+          </p>
+        )}
+
+        <SearchBar
+          placeholder={t("sidebar_new_chat.direct.placeholder")}
+          autoFocus
+          onSearch={(value) => setQuery(value)}
+        />
+        <button
+          type="submit"
+          className="bg-[var(--primary-green)] py-1 w-full flex gap-2 items-center justify-center text-white rounded"
+          disabled={loading || !query}
+        >
+          {loading
+            ? t("common.loading.searching")
+            : t("sidebar_new_chat.direct.find_user")}
+          <span className="material-symbols-outlined">person_search</span>
+        </button>
+      </form>
     </div>
   );
 };

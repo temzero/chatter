@@ -40,7 +40,7 @@ const DeleteCallModal: React.FC = () => {
 
   const { call } = data;
   const isCaller = call.initiator.userId === currentUserId;
-  const callText = getCallText(call.status, call.startedAt, call.endedAt);
+  const callText = getCallText(call.status, call.startedAt, call.endedAt, t);
   const callColor = getCallColor(call.status);
   const formattedDate = formatDateTime(call.createdAt);
 

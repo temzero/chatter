@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { getCurrentUser, useAuthStore } from "@/stores/authStore";
-import { userService } from "@/services/http/userService"
+import { userService } from "@/services/http/userService";
 import { getSetSidebar } from "@/stores/sidebarStore";
 import { handleError } from "@/common/utils/handleError";
 import { useTranslation } from "react-i18next";
 import SidebarLayout from "@/layouts/SidebarLayout";
+import { validateUsername } from "@/common/utils/validation/usernameValication";
 
 const SidebarSettingsUsername: React.FC = () => {
   const { t } = useTranslation();
@@ -14,10 +15,13 @@ const SidebarSettingsUsername: React.FC = () => {
 
   const setCurrentUser = useAuthStore.getState().setCurrentUser;
   const setSidebar = getSetSidebar();
-  const [loading, setLoading] = useState(false);
+
+  const loading = useAuthStore((state) => state.loading);
+  const setLoading = useAuthStore.getState().setLoading;
+
   const [username, setUsername] = useState(currentUser?.username || "");
   const [isValid, setIsValid] = useState(false);
-  const [ErrorMessage, setErrorMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const [isVerified, setIsVerified] = useState(false);
   const [isAvailable, setIsAvailable] = useState(false);
 
@@ -33,32 +37,7 @@ const SidebarSettingsUsername: React.FC = () => {
       return;
     }
 
-    if (username.length > 30) {
-      setIsValid(false);
-      setErrorMessage(invalidMessage);
-      return;
-    }
-
-    const validChars = /^[a-zA-Z0-9._]+$/;
-    if (!validChars.test(username)) {
-      setIsValid(false);
-      setErrorMessage(invalidMessage);
-      return;
-    }
-
-    if (/\s/.test(username)) {
-      setIsValid(false);
-      setErrorMessage(invalidMessage);
-      return;
-    }
-
-    if (username.endsWith(".")) {
-      setIsValid(false);
-      setErrorMessage(invalidMessage);
-      return;
-    }
-
-    if (/\.{2,}/.test(username)) {
+    if (!validateUsername(username)) {
       setIsValid(false);
       setErrorMessage(invalidMessage);
       return;
@@ -66,7 +45,7 @@ const SidebarSettingsUsername: React.FC = () => {
 
     setIsValid(true);
     setErrorMessage("");
-  }, [invalidMessage, t, username]);
+  }, [username, invalidMessage]);
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,6 +84,7 @@ const SidebarSettingsUsername: React.FC = () => {
     } catch (error) {
       setIsVerified(false);
       setIsAvailable(false);
+      setErrorMessage(t("account_settings.change_username.messages.failed"));
       handleError(error, t("account_settings.change_username.messages.failed"));
     } finally {
       setLoading(false);
@@ -129,6 +109,7 @@ const SidebarSettingsUsername: React.FC = () => {
       toast.success(t("account_settings.change_username.messages.available"));
       setSidebar(SidebarMode.SETTINGS_ACCOUNT);
     } catch (error) {
+      setErrorMessage(t("account_settings.change_username.messages.failed"));
       handleError(error, t("account_settings.change_username.messages.failed"));
     } finally {
       setLoading(false);
@@ -173,24 +154,33 @@ const SidebarSettingsUsername: React.FC = () => {
           />
           {isVerified &&
             (isAvailable ? (
-              <span className="material-symbols-outlined text-green-500 -mr-1">
+              <span className="material-symbols-outlined text-green-500 -mx-1">
                 check_circle
               </span>
             ) : (
-              <span className="material-symbols-outlined text-red-500 -mr-1">
-                cancel
-              </span>
+              <button
+                onClick={() => {
+                  setUsername("");
+                  setErrorMessage("");
+                  setIsVerified(false);
+                  setIsAvailable(false);
+                }}
+              >
+                <span className="material-symbols-outlined text-red-500 -mx-1">
+                  cancel
+                </span>
+              </button>
             ))}
         </div>
 
-        {ErrorMessage && (
-          <div className="text-sm text-red-600">{ErrorMessage}</div>
+        {errorMessage && (
+          <div className="text-sm text-red-600">{errorMessage}</div>
         )}
 
         <button
           type="submit"
           className={`${
-            isDisabled ? "" : "text-green-400 bg-[var(--border-color)]"
+            isDisabled ? "" : "text-white bg-[--primary-green]"
           } p-1 w-full`}
           disabled={isDisabled}
         >

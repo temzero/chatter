@@ -4,6 +4,7 @@ import { AnimatePresence } from "framer-motion";
 import { useMessageStore } from "@/stores/messageStore";
 import { MarkLastMessageRead } from "@/common/utils/message/markMessageRead";
 import ChannelMessage from "../components/message/MessageChannel";
+import { useTranslation } from "react-i18next";
 
 interface ChannelMessagesProps {
   chat: ChatResponse;
@@ -17,6 +18,7 @@ const ChannelMessages: React.FC<ChannelMessagesProps> = ({
   isSearch = false,
 }) => {
   console.log("ChannelMessages render:", messageIds.length);
+  const { t } = useTranslation();
 
   const chatId = chat.id;
   const messagesById = useMessageStore.getState().messagesById;
@@ -48,8 +50,8 @@ const ChannelMessages: React.FC<ChannelMessagesProps> = ({
 
   if (messages.length === 0) {
     return (
-      <div className="h-full w-full flex items-center justify-center opacity-50 italic text-xl">
-        No messages yet!
+      <div className="h-full w-full flex items-center justify-center opacity-50 italic text-xl select-none">
+        {t("common.messages.no_messages_yet")}
       </div>
     );
   }

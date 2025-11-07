@@ -7,6 +7,7 @@ import { getSetSidebar } from "@/stores/sidebarStore";
 import { handleError } from "@/common/utils/handleError";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
+import { validateEmail } from "@/common/utils/validation/emailValidation";
 
 const SidebarSettingsEmail: React.FC = () => {
   const { t } = useTranslation();
@@ -14,7 +15,9 @@ const SidebarSettingsEmail: React.FC = () => {
   const setSidebar = getSetSidebar();
 
   const setCurrentUser = useAuthStore.getState().setCurrentUser;
-  const [loading, setLoading] = useState(false);
+
+  const loading = useAuthStore((state) => state.loading);
+  const setLoading = useAuthStore.getState().setLoading;
 
   const [email, setEmail] = useState(currentUser?.email || "");
   const [verificationCode, setVerificationCode] = useState("");
@@ -23,7 +26,8 @@ const SidebarSettingsEmail: React.FC = () => {
   const [validationError, setValidationError] = useState("");
   const [codeCountdown, setCodeCountdown] = useState(0);
   const isUnchanged = email === currentUser?.email;
-  const isDisabled = loading || !isValid || isUnchanged;
+  const isEmailVerified = currentUser?.emailVerified;
+  const isDisabled = loading || !isValid || (isUnchanged && isEmailVerified);
 
   // Validate email whenever it changes
   useEffect(() => {
@@ -33,16 +37,9 @@ const SidebarSettingsEmail: React.FC = () => {
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!validateEmail(email)) {
       setIsValid(false);
       setValidationError(t("account_settings.change_email.messages.invalid"));
-      return;
-    }
-
-    if (email.length > 254) {
-      setIsValid(false);
-      setValidationError(t("account_settings.change_email.requirements.1"));
       return;
     }
 
@@ -79,7 +76,7 @@ const SidebarSettingsEmail: React.FC = () => {
     try {
       setLoading(true);
 
-      if (email === currentUser?.email) {
+      if (isUnchanged && isEmailVerified) {
         toast.info(t("account_settings.change_email.messages.already_current"));
         return;
       }
@@ -116,11 +113,8 @@ const SidebarSettingsEmail: React.FC = () => {
       setShowCodeInput(false);
       setVerificationCode("");
       setSidebar(SidebarMode.PROFILE);
-    } catch (error) {
-      handleError(
-        error,
-        t("account_settings.change_email.messages.failed_verify")
-      );
+    } catch {
+      toast.error(t("common.messages.invalid_code"));
     } finally {
       setLoading(false);
     }
@@ -169,34 +163,41 @@ const SidebarSettingsEmail: React.FC = () => {
           </ul>
         </div>
 
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value.trim())}
-          disabled={loading || showCodeInput}
-          name="email"
-          placeholder={t("account_settings.change_email.placeholder")}
-          className="input"
-          autoComplete="email"
-          autoFocus
-        />
+        <div className="input flex items-center justify-between">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value.trim())}
+            disabled={loading || showCodeInput}
+            name="email"
+            placeholder={t("account_settings.change_email.placeholder")}
+            className="flex-1"
+            autoComplete="email"
+            autoFocus
+          />
+        </div>
 
-        {validationError && (
-          <div className="text-sm text-red-600">{validationError}</div>
+        {isUnchanged && isEmailVerified && (
+          <div className="flex items-center justify-start gap-1 px-1 py-0.5  text-green-500 rounded">
+            <span className="material-symbols-outlined">check_circle</span>
+            <p>{t("common.messages.verified")}</p>
+          </div>
         )}
 
         {!showCodeInput ? (
-          <button
-            type="submit"
-            className={`${
-              isDisabled ? "" : "primary bg-[var(--border-color)]"
-            } p-1 w-full`}
-            disabled={isDisabled}
-          >
-            {loading
-              ? t("common.actions.sending")
-              : t("common.actions.send_verification")}
-          </button>
+          !isUnchanged && (
+            <button
+              type="submit"
+              className={`${
+                isDisabled ? "" : "primary bg-[var(--border-color)]"
+              } p-1 w-full`}
+              disabled={isDisabled}
+            >
+              {loading
+                ? t("common.loading.sending")
+                : t("common.actions.send_verification")}
+            </button>
+          )
         ) : (
           <div className="flex flex-col gap-2">
             <div className="relative flex items-center gap-2 border-2 border-[var(--input-border-color)] p-2 rounded">
@@ -209,7 +210,7 @@ const SidebarSettingsEmail: React.FC = () => {
                   )
                 }
                 placeholder={t("common.actions.enter_code")}
-                className="border-4 border-bottom text-3xl"
+                className="border-bottom text-3xl"
                 inputMode="numeric"
                 pattern="\d{6}"
                 disabled={loading}
@@ -224,7 +225,7 @@ const SidebarSettingsEmail: React.FC = () => {
                 disabled={loading || verificationCode.length !== 6}
               >
                 {loading
-                  ? t("common.actions.verifying")
+                  ? t("common.loading.verifying")
                   : t("common.actions.verify_code")}
               </button>
               {codeCountdown > 0 ? (

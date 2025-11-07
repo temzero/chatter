@@ -23,42 +23,49 @@ const SidebarSettings: React.FC = () => {
       icon: "lock",
       title: t("settings.privacy_security"),
       onClick: () => setSidebar(SidebarMode.SETTINGS_PRIVACY),
+      isDisabled: true,
+    },
+    {
+      icon: "visibility",
+      title: t("settings.display"),
+      onClick: () => setSidebar(SidebarMode.SETTINGS_DISPLAY),
+      isDisabled: true,
+    },
+    {
+      icon: "keyboard",
+      title: t("settings.keyboard"),
+      onClick: () => setSidebar(SidebarMode.SETTINGS_KEYBOARD),
+      isDisabled: true,
+    },
+    {
+      icon: "message",
+      title: t("settings.messages"),
+      onClick: () => setSidebar(SidebarMode.SETTINGS_MESSAGES),
+      isDisabled: true,
+    },
+    {
+      icon: "folder",
+      title: t("settings.folders"),
+      onClick: () => setSidebar(SidebarMode.SETTINGS_FOLDERS),
+      isDisabled: true,
+    },
+    {
+      icon: "notifications",
+      title: t("settings.notifications"),
+      onClick: () => setSidebar(SidebarMode.SETTINGS_NOTIFICATIONS),
+      isDisabled: true,
+    },
+    {
+      icon: "database",
+      title: t("settings.data_storage"),
+      onClick: () => setSidebar(SidebarMode.SETTINGS_DATA_STORAGE),
+      isDisabled: true,
     },
     {
       icon: "contrast",
       title: t("settings.theme"),
       onClick: () => setSidebar(SidebarMode.SETTINGS_THEME),
       value: t(`settings.theme_options.${themeOption}`),
-    },
-    {
-      icon: "visibility",
-      title: t("settings.display"),
-      onClick: () => setSidebar(SidebarMode.SETTINGS_DISPLAY),
-    },
-    {
-      icon: "keyboard",
-      title: t("settings.keyboard"),
-      onClick: () => setSidebar(SidebarMode.SETTINGS_KEYBOARD),
-    },
-    {
-      icon: "message",
-      title: t("settings.messages"),
-      onClick: () => setSidebar(SidebarMode.SETTINGS_MESSAGES),
-    },
-    {
-      icon: "folder",
-      title: t("settings.folders"),
-      onClick: () => setSidebar(SidebarMode.SETTINGS_FOLDERS),
-    },
-    {
-      icon: "notifications",
-      title: t("settings.notifications"),
-      onClick: () => setSidebar(SidebarMode.SETTINGS_NOTIFICATIONS),
-    },
-    {
-      icon: "database",
-      title: t("settings.data_storage"),
-      onClick: () => setSidebar(SidebarMode.SETTINGS_DATA_STORAGE),
     },
     {
       icon: "translate",
@@ -68,13 +75,39 @@ const SidebarSettings: React.FC = () => {
     },
   ];
 
+  // return (
+  //   <SidebarLayout
+  //     title={t("sidebar.settings")}
+  //     backLocation={SidebarMode.MORE}
+  //   >
+  //     {settingsItems.map((item, index) => (
+  //       <div key={index} className="settings-item" onClick={item.onClick}>
+  //         <div className="flex gap-4 items-center">
+  //           <i className="material-symbols-outlined">{item.icon}</i>
+  //           <h1>{item.title}</h1>
+  //         </div>
+  //         {item.value && (
+  //           <span className="opacity-60 ml-auto">
+  //             {item.value.charAt(0).toUpperCase() +
+  //               item.value.slice(1).toLowerCase()}
+  //           </span>
+  //         )}
+  //       </div>
+  //     ))}
+  //   </SidebarLayout>
+  // );
+
   return (
     <SidebarLayout
       title={t("sidebar.settings")}
       backLocation={SidebarMode.MORE}
     >
       {settingsItems.map((item, index) => (
-        <div key={index} className="settings-item" onClick={item.onClick}>
+        <div
+          key={index}
+          className={`settings-item ${item.isDisabled ? "disabled" : ""}`}
+          onClick={!item.isDisabled ? item.onClick : undefined}
+        >
           <div className="flex gap-4 items-center">
             <i className="material-symbols-outlined">{item.icon}</i>
             <h1>{item.title}</h1>

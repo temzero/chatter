@@ -1,0 +1,5 @@
+export enum PasswordMessageCode {
+  SUCCESS = 'SUCCESS',
+  INCORRECT_CURRENT = 'INCORRECT_CURRENT',
+  SERVER_ERROR = 'SERVER_ERROR',
+}

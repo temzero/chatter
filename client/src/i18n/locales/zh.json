@@ -37,7 +37,8 @@
       "update": "更新",
       "verify": "验证",
       "verify_code": "验证代码",
-      "sent": "已发送"
+      "sent": "已发送",
+      "enter_code": "输入验证码"
     },
     "messages": {
       "success": "成功！",
@@ -48,9 +49,12 @@
       "no_result": "没有结果！",
       "no_chats": "未找到聊天",
       "no_contacts": "未找到联系人",
+      "no_messages_yet": "尚无消息！",
       "error": "发生错误",
       "required": "此字段为必填项",
-      "invalid_code": "请输入6位验证码",
+      "invalid_code": "无效代码",
+      "verified": "已验证",
+      "failed_verify": "验证失败",
       "blocked": "已封锁",
       "blocked_me": "你已被封锁"
     },
@@ -65,6 +69,17 @@
       "processing": "处理中..."
     }
   },
+
+  "time": {
+    "now": "现在",
+    "minute": "分",
+    "hour": "小时",
+    "day": "天",
+    "month": "月",
+    "year": "年",
+    "future": "将来"
+  },
+
   "toast": {
     "friendship": {
       "accepted": "好友请求已接受",
@@ -331,12 +346,14 @@
         "available": "用户名可用！",
         "taken": "用户名已被占用",
         "success": "用户名更新成功！",
-        "verify_first": "请先验证用户名是否可用"
+        "verify_first": "请先验证用户名是否可用",
+        "invalid": "无效的用户名"
       }
     },
 
     "change_email": {
       "title": "更改邮箱",
+      "add_email": "添加电子邮件",
       "placeholder": "设置新邮箱",
       "requirements": [
         "必须是有效的邮箱地址",
@@ -347,7 +364,7 @@
       "resend_in": "{time}后重发",
       "messages": {
         "already_current": "这已经是你的当前邮箱",
-        "sent": "验证码已发送至你的邮箱：{email}",
+        "sent": "验证码已发送至你的邮箱：{{email}}",
         "success": "邮箱验证并更新成功",
         "verify_first": "请先验证新邮箱",
         "invalid": "请输入有效的邮箱地址",
@@ -359,6 +376,7 @@
 
     "change_phone": {
       "title": "更改电话号码",
+      "add_phone": "添加电话号码",
       "placeholder": "设置新电话号码",
       "requirements": [
         "必须是有效的电话号码",
@@ -395,7 +413,11 @@
         "all_required": "所有字段均为必填",
         "invalid_format": "密码格式无效",
         "success": "密码更改成功",
-        "failed": "密码更改失败"
+        "failed": "密码更改失败",
+
+        "SUCCESS": "密码更新成功",
+        "INCORRECT_CURRENT": "当前密码不正确",
+        "SERVER_ERROR": "更新密码时发生错误"
       },
       "buttons": {
         "change": "更改密码",

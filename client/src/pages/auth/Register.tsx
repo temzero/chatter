@@ -6,17 +6,40 @@ import { AuthenticationLayout } from "@/layouts/PublicLayout";
 import { motion } from "framer-motion";
 import { publicLayoutAnimations } from "@/common/animations/publicLayoutAnimations";
 import { useTranslation } from "react-i18next";
+import { validatePassword } from "@/common/utils/validation/passwordValidation";
 
 const Register = () => {
   const { t } = useTranslation();
   const formRef = useRef<HTMLFormElement>(null);
   const firstNameRef = useRef<HTMLInputElement>(null);
   const lastNameRef = useRef<HTMLInputElement>(null);
-  
+
   const loading = useAuthStore((state) => state.loading);
   const register = useAuthStore.getState().register;
   const setMessage = useAuthStore.getState().setMessage;
   const navigate = useNavigate();
+
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   if (!formRef.current) return;
+
+  //   const formData = new FormData(formRef.current);
+  //   const password = formData.get("password") as string;
+  //   const confirmPassword = formData.get("confirmPassword") as string;
+
+  //   if (password !== confirmPassword) {
+  //     return setMessage("error", t("auth.common.password_mismatch"));
+  //   }
+
+  //   await register({
+  //     email: formData.get("email") as string,
+  //     username: formData.get("username") as string,
+  //     firstName: formData.get("firstName") as string,
+  //     lastName: formData.get("lastName") as string,
+  //     password,
+  //   });
+  //   navigate("/");
+  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,8 +49,13 @@ const Register = () => {
     const password = formData.get("password") as string;
     const confirmPassword = formData.get("confirmPassword") as string;
 
-    if (password !== confirmPassword) {
-      return setMessage("error", t("auth.common.password_mismatch"));
+    // Validate password strength
+    const validation = validatePassword(password, confirmPassword);
+    if (!validation.isValid) {
+      return setMessage(
+        "error",
+        validation.message || t("auth.common.invalid_password")
+      );
     }
 
     await register({
@@ -37,6 +65,7 @@ const Register = () => {
       lastName: formData.get("lastName") as string,
       password,
     });
+
     navigate("/");
   };
 

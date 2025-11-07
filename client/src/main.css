@@ -376,6 +376,13 @@ select:focus {
   color: white;
 }
 
+.settings-item.disabled {
+  opacity: 0.4; /* faded look */
+  cursor: not-allowed;
+  pointer-events: none; /* prevent clicks */
+  background-color: transparent; /* no hover effect */
+}
+
 .settings-option {
   display: flex;
   align-items: center;

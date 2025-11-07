@@ -1,11 +1,13 @@
 import { LocalCallStatus } from "@/common/enums/LocalCallStatus";
 import { CallStatus } from "@/shared/types/enums/call-status.enum";
 import { formatDurationByStartAndEnd } from "../format/formatDuration";
+import { TFunction } from "i18next";
 
 export const getCallText = (
   status: CallStatus,
   startedAt?: string | Date,
-  endedAt?: string | Date | null
+  endedAt?: string | Date | null,
+  t?: TFunction
 ) => {
   switch (status) {
     case CallStatus.DIALING:
@@ -14,7 +16,7 @@ export const getCallText = (
       return "In progress";
     case CallStatus.COMPLETED:
       if (startedAt && endedAt) {
-        return `${formatDurationByStartAndEnd(startedAt, endedAt)}`;
+        return `${formatDurationByStartAndEnd(startedAt, endedAt, t)}`;
       }
       return "Completed";
     case CallStatus.MISSED:

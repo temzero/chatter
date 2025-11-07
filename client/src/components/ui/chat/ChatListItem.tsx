@@ -4,20 +4,21 @@ import { useTypingUsersByChatId } from "@/stores/typingStore";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { formatTimeAgo } from "@/common/utils/format/formatTimeAgo";
 import { OnlineDot } from "@/components/ui/icons/OnlineDot";
-import SimpleTypingIndicator from "@/components/ui/typingIndicator/SimpleTypingIndicator";
 import { AnimatePresence, motion } from "framer-motion";
 import { useChat, useChatStore, useIsActiveChat } from "@/stores/chatStore";
 import { useChatStatus } from "@/stores/presenceStore";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useBlockStatus } from "@/common/hooks/useBlockStatus";
-import {
-  SystemMessageContent,
-  SystemMessageJSONContent,
-} from "@/components/ui/messages/SystemMessageContent";
 import { ChatListItemContextMenu } from "./ChatListItem-contextMenu";
 import { calculateContextMenuPosition } from "@/common/utils/contextMenuUtils";
 import { useClickOutside } from "@/common/hooks/keyEvent/useClickOutside";
 import { getAttachmentIcons } from "@/common/utils/getFileIcon";
+import {
+  SystemMessageContent,
+  SystemMessageJSONContent,
+} from "@/components/ui/messages/SystemMessageContent";
+import SimpleTypingIndicator from "@/components/ui/typingIndicator/SimpleTypingIndicator";
+import { useTranslation } from "react-i18next";
 
 // Keep track of open menu globally
 let openMenuSetter: (() => void) | null = null;
@@ -31,6 +32,7 @@ interface ChatListItemProps {
 const ChatListItem: React.FC<ChatListItemProps> = React.memo(
   ({ chatId, isCompact = false, currentUserId = "" }) => {
     // console.log("ChatListItem", chatId);
+    const { t } = useTranslation();
 
     // This now uses the updated useChat hook that works with Record structure
     const chat = useChat(chatId);
@@ -191,7 +193,8 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
                   <p className="whitespace-nowrap opacity-50">
                     {formatTimeAgo(
                       (lastMessage?.createdAt as string | Date | undefined) ??
-                        (chat.updatedAt as string | Date)
+                        (chat.updatedAt as string | Date),
+                      t // pass t here
                     )}
                   </p>
                   <div className="flex items-center absolute top-1.5 right-2">

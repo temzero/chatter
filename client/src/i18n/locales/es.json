@@ -37,7 +37,8 @@
       "update": "Actualizar",
       "verify": "Verificar",
       "verify_code": "Verificar código",
-      "sent": "Enviado"
+      "sent": "Enviado",
+      "enter_code": "Ingresar código"
     },
     "messages": {
       "success": "¡Éxito!",
@@ -48,9 +49,12 @@
       "no_result": "¡Sin resultados!",
       "no_chats": "No se encontraron chats",
       "no_contacts": "No se encontraron contactos",
+      "no_messages_yet": "¡Aún no hay mensajes!",
       "error": "Ocurrió un error",
       "required": "Este campo es obligatorio",
-      "invalid_code": "Por favor ingrese un código de 6 dígitos",
+      "invalid_code": "Código inválido",
+      "verified": "Verificado",
+      "failed_verify": "Verificación fallida",
       "blocked": "Bloqueado",
       "blocked_me": "Has sido bloqueado"
     },
@@ -64,6 +68,16 @@
       "verifying": "Verificando...",
       "processing": "Procesando..."
     }
+  },
+
+  "time": {
+    "now": "ahora",
+    "minute": "m",
+    "hour": "h",
+    "day": "d",
+    "month": "mes",
+    "year": "a",
+    "future": "En el futuro"
   },
 
   "toast": {
@@ -130,7 +144,7 @@
       "invalid_token": "Token de verificación inválido."
     }
   },
-  
+
   "invite_page": {
     "joining": "Uniéndose...",
     "invalid_token": "Token de invitación no válido",
@@ -333,12 +347,14 @@
         "available": "¡El nombre de usuario está disponible!",
         "taken": "El nombre de usuario ya está en uso",
         "success": "¡Nombre de usuario actualizado con éxito!",
-        "verify_first": "Por favor, verifica primero la disponibilidad del nombre de usuario"
+        "verify_first": "Por favor, verifica primero la disponibilidad del nombre de usuario",
+        "invalid": "Nombre de usuario no válido"
       }
     },
 
     "change_email": {
       "title": "Cambiar correo electrónico",
+      "add_email": "Agregar correo electrónico",
       "placeholder": "Establecer nuevo correo electrónico",
       "requirements": [
         "Debe ser una dirección de correo válida",
@@ -349,7 +365,7 @@
       "resend_in": "Reenviar en {time}",
       "messages": {
         "already_current": "Este ya es tu correo electrónico actual",
-        "sent": "Código de verificación enviado a tu correo: {email}",
+        "sent": "Código de verificación enviado a tu correo: {{email}}",
         "success": "Correo verificado y actualizado con éxito",
         "verify_first": "Por favor, verifica primero el nuevo correo",
         "invalid": "Por favor, introduce una dirección de correo válida",
@@ -361,6 +377,7 @@
 
     "change_phone": {
       "title": "Cambiar número de teléfono",
+      "add_phone": "Agregar número de teléfono",
       "placeholder": "Establecer nuevo número de teléfono",
       "requirements": [
         "Debe ser un número de teléfono válido",
@@ -397,7 +414,11 @@
         "all_required": "Todos los campos son obligatorios",
         "invalid_format": "Formato de contraseña inválido",
         "success": "Contraseña cambiada con éxito",
-        "failed": "Error al cambiar la contraseña"
+        "failed": "Error al cambiar la contraseña",
+
+        "SUCCESS": "Contraseña actualizada con éxito",
+        "INCORRECT_CURRENT": "La contraseña actual es incorrecta",
+        "SERVER_ERROR": "Ocurrió un error al actualizar la contraseña"
       },
       "buttons": {
         "change": "Cambiar contraseña",

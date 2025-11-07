@@ -11,6 +11,7 @@ import {
   getCallText,
 } from "@/common/utils/call/callHelpers";
 import { callAnimations } from "@/common/animations/callAnimations";
+import { useTranslation } from "react-i18next";
 
 interface CallMessageBubbleProps {
   message: MessageResponse;
@@ -24,6 +25,8 @@ const CallMessageBubble: React.FC<CallMessageBubbleProps> = ({
   isMe,
   isRelyToThisMessage,
 }) => {
+  const { t } = useTranslation();
+
   const openModal = getOpenModal();
   const call = message.call;
   if (!call) return null;
@@ -78,7 +81,7 @@ const CallMessageBubble: React.FC<CallMessageBubbleProps> = ({
             getCallColor(call.status)
           )}
         >
-          {getCallText(call.status, call.startedAt, call.endedAt)}
+          {getCallText(call.status, call.startedAt, call.endedAt, t)}
         </p>
       </div>
     </div>

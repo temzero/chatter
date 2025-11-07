@@ -37,7 +37,8 @@
       "update": "Cập nhật",
       "verify": "Xác minh",
       "verify_code": "Xác minh mã",
-      "sent": "Đã gửi"
+      "sent": "Đã gửi",
+      "enter_code": "Nhập mã"
     },
     "messages": {
       "success": "Thành công!",
@@ -48,9 +49,12 @@
       "no_result": "Không có kết quả!",
       "no_chats": "Không tìm thấy cuộc trò chuyện",
       "no_contacts": "Không tìm thấy liên hệ",
+      "no_messages_yet": "Chưa có tin nhắn nào!",
       "error": "Đã xảy ra lỗi",
       "required": "Trường này là bắt buộc",
-      "invalid_code": "Vui lòng nhập mã 6 chữ số",
+      "invalid_code": "Mã không hợp lệ",
+      "verified": "Đã xác minh",
+      "failed_verify": "Xác thực thất bại",
       "blocked": "Đã chặn",
       "blocked_me": "Bạn đã bị chặn"
     },
@@ -64,6 +68,16 @@
       "verifying": "Đang xác minh...",
       "processing": "Đang xử lý..."
     }
+  },
+
+  "time": {
+    "now": "bây giờ",
+    "minute": "p",
+    "hour": "g",
+    "day": "n",
+    "month": "th",
+    "year": "năm",
+    "future": "Trong tương lai"
   },
 
   "toast": {
@@ -331,12 +345,14 @@
         "available": "Tên người dùng khả dụng!",
         "taken": "Tên người dùng đã được sử dụng",
         "success": "Cập nhật tên người dùng thành công!",
-        "verify_first": "Vui lòng xác minh tên người dùng trước"
+        "verify_first": "Vui lòng xác minh tên người dùng trước",
+        "invalid": "Tên người dùng không hợp lệ"
       }
     },
 
     "change_email": {
       "title": "Đổi Email",
+      "add_email": "Thêm email",
       "placeholder": "Đặt Email mới",
       "requirements": [
         "Phải là địa chỉ email hợp lệ",
@@ -344,10 +360,10 @@
         "Phải là duy nhất (không được sử dụng bởi tài khoản khác)",
         "Cần xác minh email mới"
       ],
-      "resend_in": "Gửi lại trong {time}",
+      "resend_in": "Gửi lại trong {{time}}",
       "messages": {
         "already_current": "Đây là email hiện tại của bạn",
-        "sent": "Mã xác minh đã gửi đến email: {email}",
+        "sent": "Mã xác minh đã gửi đến email: {{email}}",
         "success": "Email đã được xác minh và cập nhật thành công",
         "verify_first": "Vui lòng xác minh email mới trước",
         "invalid": "Vui lòng nhập email hợp lệ",
@@ -359,6 +375,7 @@
 
     "change_phone": {
       "title": "Đổi số điện thoại",
+      "add_phone": "Thêm số điện thoại",
       "placeholder": "Đặt số điện thoại mới",
       "requirements": [
         "Phải là số điện thoại hợp lệ",
@@ -396,7 +413,11 @@
         "all_required": "Tất cả các trường là bắt buộc",
         "invalid_format": "Định dạng mật khẩu không hợp lệ",
         "success": "Đổi mật khẩu thành công",
-        "failed": "Đổi mật khẩu thất bại"
+        "failed": "Đổi mật khẩu thất bại",
+
+        "SUCCESS": "Cập nhật mật khẩu thành công",
+        "INCORRECT_CURRENT": "Mật khẩu hiện tại không chính xác",
+        "SERVER_ERROR": "Đã xảy ra lỗi khi cập nhật mật khẩu"
       },
       "buttons": {
         "change": "Đổi mật khẩu",

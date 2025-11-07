@@ -6,19 +6,23 @@ import { userService } from "@/services/http/userService";
 import { handleError } from "@/common/utils/handleError";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
+import { validatePhoneNumber } from "@/common/utils/validation/phoneNumberValidation";
 
 const SidebarSettingsPhoneNumber: React.FC = () => {
   const { t } = useTranslation();
-  const loading = useAuthStore((state) => state.loading);
+
   const currentUser = getCurrentUser();
 
   const setCurrentUser = useAuthStore.getState().setCurrentUser;
 
+  const loading = useAuthStore((state) => state.loading);
+  const setLoading = useAuthStore.getState().setLoading;
+
   const [phoneNumber, setPhoneNumber] = useState(
     currentUser?.phoneNumber || ""
   );
+
   const [isValid, setIsValid] = useState(false);
-  const [validationError, setValidationError] = useState("");
   const isUnchanged = phoneNumber === currentUser?.phoneNumber;
   const isDisabled = loading || !isValid || isUnchanged;
 
@@ -26,32 +30,8 @@ const SidebarSettingsPhoneNumber: React.FC = () => {
 
   // Validate phone number whenever it changes
   useEffect(() => {
-    if (!phoneNumber) {
-      setIsValid(false);
-      setValidationError("");
-      return;
-    }
-
-    // Remove all non-digit characters
-    const cleanedPhoneNumber = phoneNumber.replace(/\D/g, "");
-
-    // Check length (adjust based on your requirements)
-    if (cleanedPhoneNumber.length < 10) {
-      setIsValid(false);
-      setValidationError(invalidMessage);
-      return;
-    }
-
-    if (cleanedPhoneNumber.length > 15) {
-      setIsValid(false);
-      setValidationError(invalidMessage);
-      return;
-    }
-
-    // If all checks pass
-    setIsValid(true);
-    setValidationError("");
-  }, [phoneNumber, invalidMessage]);
+    setIsValid(validatePhoneNumber(phoneNumber));
+  }, [phoneNumber]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +47,7 @@ const SidebarSettingsPhoneNumber: React.FC = () => {
     }
 
     try {
-      useAuthStore.setState({ loading: true });
+      setLoading(true);
 
       // Check if phone number is the same as current
       if (phoneNumber === currentUser?.phoneNumber) {
@@ -92,7 +72,7 @@ const SidebarSettingsPhoneNumber: React.FC = () => {
         t("account_settings.change_phone.messages.failed_send")
       );
     } finally {
-      useAuthStore.setState({ loading: false });
+      setLoading(false);
     }
   };
 
@@ -140,10 +120,6 @@ const SidebarSettingsPhoneNumber: React.FC = () => {
             ? t("common.actions.send_verification")
             : t("common.actions.send_verification")}
         </button>
-
-        {validationError && (
-          <div className="text-sm text-red-600">{validationError}</div>
-        )}
       </form>
     </SidebarLayout>
   );

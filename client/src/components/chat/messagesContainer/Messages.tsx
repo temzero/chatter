@@ -10,6 +10,7 @@ import { getCurrentUserId } from "@/stores/authStore";
 import { useMessageStore } from "@/stores/messageStore";
 import { MarkLastMessageRead } from "@/common/utils/message/markMessageRead";
 import Message from "../components/message/Message";
+import { useTranslation } from "react-i18next";
 
 interface ChatMessagesProps {
   chat: ChatResponse;
@@ -23,6 +24,7 @@ const Messages: React.FC<ChatMessagesProps> = ({
   isSearch,
 }) => {
   console.log("Messages render:", messageIds.length);
+  const { t } = useTranslation();
 
   const chatId = chat.id;
   const currentUserId = getCurrentUserId();
@@ -49,8 +51,8 @@ const Messages: React.FC<ChatMessagesProps> = ({
 
   if (messageIds.length === 0) {
     return (
-      <div className="h-full w-full flex items-center justify-center opacity-50 italic text-xl">
-        No messages yet!
+      <div className="h-full w-full flex items-center justify-center opacity-50 italic text-xl select-none">
+        {t("common.messages.no_messages_yet")}
       </div>
     );
   }

@@ -82,7 +82,7 @@ const SidebarNewChat: React.FC = () => {
         </i>
       </header>
 
-      <div className="flex custom-border-t">
+      <div className="flex custom-border-t custom-border-b bg-black/10">
         {sidebarChatTypes.map((type) => (
           <button
             key={type}
@@ -91,7 +91,7 @@ const SidebarNewChat: React.FC = () => {
           >
             <i
               className={clsx(
-                "material-symbols-outlined",
+                "material-symbols-outlined py-1",
                 type === selectedType && 'filled',
                 type === ChatType.GROUP && "text-[2.1rem]"
               )}

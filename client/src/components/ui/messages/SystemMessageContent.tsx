@@ -42,7 +42,7 @@ export const SystemMessageContent = ({
   const callStatus = call?.status;
   let text = "";
   if (callStatus) {
-    text = getCallText(call.status, call.startedAt, call.endedAt);
+    text = getCallText(call.status, call.startedAt, call.endedAt, t);
   } else {
     text = getSystemMessageText({
       t,

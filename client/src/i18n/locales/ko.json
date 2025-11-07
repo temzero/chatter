@@ -37,7 +37,8 @@
       "update": "업데이트",
       "verify": "인증",
       "verify_code": "코드 인증",
-      "sent": "전송됨"
+      "sent": "전송됨",
+      "enter_code": "코드 입력"
     },
     "messages": {
       "success": "성공!",
@@ -48,9 +49,12 @@
       "no_result": "결과가 없습니다!",
       "no_chats": "채팅을 찾을 수 없습니다",
       "no_contacts": "연락처를 찾을 수 없습니다",
+      "no_messages_yet": "아직 메시지가 없습니다!",
       "error": "오류가 발생했습니다",
       "required": "이 필드는 필수입니다",
-      "invalid_code": "6자리 코드를 입력하세요",
+      "invalid_code": "잘못된 코드",
+      "verified": "인증됨",
+      "failed_verify": "인증 실패",
       "blocked": "차단됨",
       "blocked_me": "당신은 차단되었습니다"
     },
@@ -64,6 +68,16 @@
       "verifying": "인증 중...",
       "processing": "처리 중..."
     }
+  },
+
+  "time": {
+    "now": "지금",
+    "minute": "분",
+    "hour": "시간",
+    "day": "일",
+    "month": "개월",
+    "year": "년",
+    "future": "미래에"
   },
 
   "toast": {
@@ -338,6 +352,7 @@
 
     "change_email": {
       "title": "이메일 변경",
+      "add_email": "이메일 추가",
       "placeholder": "새 이메일 설정",
       "requirements": [
         "유효한 이메일 주소여야 함",
@@ -348,7 +363,7 @@
       "resend_in": "{time} 후 재전송",
       "messages": {
         "already_current": "이것은 이미 현재 이메일입니다",
-        "sent": "인증 코드가 당신의 이메일로 전송되었습니다: {email}",
+        "sent": "인증 코드가 당신의 이메일로 전송되었습니다: {{email}}",
         "success": "이메일이 인증되고 성공적으로 업데이트되었습니다",
         "verify_first": "먼저 새 이메일을 인증하세요",
         "invalid": "유효한 이메일 주소를 입력하세요",
@@ -360,6 +375,7 @@
 
     "change_phone": {
       "title": "전화번호 변경",
+      "add_phone": "전화번호 추가",
       "placeholder": "새 전화번호 설정",
       "requirements": [
         "유효한 전화번호여야 함",
@@ -396,7 +412,11 @@
         "all_required": "모든 필드가 필수입니다",
         "invalid_format": "비밀번호 형식이 잘못되었습니다",
         "success": "비밀번호가 성공적으로 변경되었습니다",
-        "failed": "비밀번호 변경에 실패했습니다"
+        "failed": "비밀번호 변경에 실패했습니다",
+
+        "SUCCESS": "비밀번호가 성공적으로 업데이트되었습니다",
+        "INCORRECT_CURRENT": "현재 비밀번호가 올바르지 않습니다",
+        "SERVER_ERROR": "비밀번호 업데이트 중 오류가 발생했습니다"
       },
       "buttons": {
         "change": "비밀번호 변경",
