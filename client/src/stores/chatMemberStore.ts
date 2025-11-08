@@ -388,10 +388,6 @@ export const useChatMemberStore = create<ChatMemberState & ChatMemberActions>(
       get().updateMemberLocally(chatId, memberId, {
         lastReadMessageId: messageId,
       });
-
-      // Also reset unread count in chat store
-      const chatStore = useChatStore.getState();
-      chatStore.updateChatLocally(chatId, { unreadCount: 0 });
     },
 
     addGroupMember: (chatId, member) => {

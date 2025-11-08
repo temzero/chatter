@@ -190,7 +190,6 @@ export const useActiveChatAttachments = (): AttachmentResponse[] => {
 export const getMessageAttachments = (chatId: string, messageId: string) => {
   const state = useAttachmentStore.getState();
   const attachments = state.attachmentsByChat[chatId] || [];
-  console.log("state", state.attachmentsByChat);
   return attachments.filter((att) => att.messageId === messageId).reverse();
 };
 

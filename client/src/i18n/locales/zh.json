@@ -72,6 +72,7 @@
 
   "time": {
     "now": "现在",
+    "second": "秒",
     "minute": "分",
     "hour": "小时",
     "day": "天",
@@ -174,6 +175,38 @@
     "attach_file": "附件"
   },
 
+  "call": {
+    "call": "通话",
+    "dialing": "正在呼叫...",
+    "inProgress": "进行中",
+    "completed": "已完成",
+    "missed": "未接",
+    "failed": "失败",
+    "camera": "摄像头",
+    "start_broadcast": "开始直播",
+    "audient_count": "{{count}} 名观众",
+    "screen_sharing": "屏幕共享",
+    "connecting": {
+      "video": "正在连接视频通话...",
+      "voice": "正在连接语音通话..."
+    },
+    "outgoing": {
+      "video": "视频通话中",
+      "voice": "语音通话中",
+      "switch_to_video": "切换到视频通话",
+      "switch_to_voice": "切换到语音通话"
+    },
+    "incoming": {
+      "video": "来的视频通话",
+      "voice": "来的语音通话",
+      "side_instructions": "上滑接听，下滑拒绝"
+    },
+    "broadcast": {
+      "check_devices": "在直播前检查麦克风、摄像头和屏幕",
+      "share_screen": "共享屏幕"
+    }
+  },
+  
   "emoji": {
     "recently": "最近",
     "smileys_emotion": "笑脸与情感",

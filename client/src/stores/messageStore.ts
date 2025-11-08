@@ -127,7 +127,6 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
     },
 
     addMessage: (newMessage) => {
-      console.log("newMessage", newMessage);
       const { messagesById, messageIdsByChat } = get();
       const chatId = newMessage.chatId;
 

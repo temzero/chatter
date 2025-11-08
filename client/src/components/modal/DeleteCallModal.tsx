@@ -3,7 +3,8 @@ import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { callService } from "@/services/http/callService";
 import { CallResponse } from "@/shared/types/responses/call.response";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
-import { getCallColor, getCallText } from "@/common/utils/call/callHelpers";
+import { getCallColor } from "@/common/utils/call/callHelpers";
+import { getCallText } from "@/common/utils/call/getCallText";
 import { formatDateTime } from "@/common/utils/format/formatDateTime";
 import { useTranslation } from "react-i18next";
 import { getCurrentUserId } from "@/stores/authStore";
@@ -40,7 +41,7 @@ const DeleteCallModal: React.FC = () => {
 
   const { call } = data;
   const isCaller = call.initiator.userId === currentUserId;
-  const callText = getCallText(call.status, call.startedAt, call.endedAt, t);
+  const callText = getCallText(call.status, call.startedAt, call.endedAt);
   const callColor = getCallColor(call.status);
   const formattedDate = formatDateTime(call.createdAt);
 

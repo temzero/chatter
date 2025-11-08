@@ -72,11 +72,12 @@
 
   "time": {
     "now": "ahora",
-    "minute": "m",
+    "second": "s",
+    "minute": "min",
     "hour": "h",
     "day": "d",
     "month": "mes",
-    "year": "a",
+    "year": "año",
     "future": "En el futuro"
   },
 
@@ -172,6 +173,38 @@
   "chat_bar": {
     "placeholder": "Mensaje...",
     "attach_file": "Adjuntar archivo"
+  },
+
+  "call": {
+    "call": "Llamada",
+    "dialing": "Llamando...",
+    "inProgress": "En progreso",
+    "completed": "Completada",
+    "missed": "Perdida",
+    "failed": "Fallida",
+    "camera": "Cámara",
+    "start_broadcast": "Iniciar transmisión",
+    "audient_count": "{{count}} espectadores",
+    "screen_sharing": "Compartir pantalla",
+    "connecting": {
+      "video": "Conectando llamada de video...",
+      "voice": "Conectando llamada de voz..."
+    },
+    "outgoing": {
+      "video": "Llamada de video saliente",
+      "voice": "Llamada de voz saliente",
+      "switch_to_video": "Cambiar a llamada de video",
+      "switch_to_voice": "Cambiar a llamada de voz"
+    },
+    "incoming": {
+      "video": "Llamada de video entrante",
+      "voice": "Llamada de voz entrante",
+      "side_instructions": "Desliza hacia arriba para aceptar, hacia abajo para rechazar"
+    },
+    "broadcast": {
+      "check_devices": "Verifica tu micrófono, cámara y pantalla antes de transmitir",
+      "share_screen": "Compartir pantalla"
+    }
   },
 
   "emoji": {

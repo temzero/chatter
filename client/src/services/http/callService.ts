@@ -21,17 +21,17 @@ export const callService = {
     return data.payload ?? data;
   },
 
-  // async fetchPendingCalls(): Promise<IncomingCallResponse[]> {
-  //   try {
-  //     const { data } = await API.get(`/calls/pending`);
-  //     // Adjust based on your API response structure
-  //     return data.payload ?? data;
-  //   } catch (error) {
-  //     console.error("Failed to fetch pending calls:", error);
-  //     throw error;
-  //   }
-  // },
-  async fetchPendingCalls() {},
+  async fetchPendingCalls(): Promise<IncomingCallResponse[]> {
+    try {
+      const { data } = await API.get(`/calls/pending`);
+      // Adjust based on your API response structure
+      return data.payload ?? data;
+    } catch (error) {
+      console.error("Failed to fetch pending calls:", error);
+      throw error;
+    }
+  },
+  // async fetchPendingCalls() {},
 
   async generateAndFetchLiveKitToken(
     payload: generateLiveKitTokenRequest

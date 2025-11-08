@@ -9,6 +9,7 @@ import { useRemoteTracks } from "@/common/hooks/mediaStreams/useRemoteTracks";
 import { Theme, useTheme } from "@/stores/themeStore";
 import callManDarkImage from "@/assets/image/call-man-dark.png";
 import callManLightImage from "@/assets/image/call-man-light.png";
+import { useTranslation } from "react-i18next";
 
 interface CallMemberProps {
   participant: Participant;
@@ -22,6 +23,8 @@ const CallMember = ({
   className = "",
 }: CallMemberProps) => {
   // Use the custom hook for streams
+  const { t } = useTranslation();
+
   const { videoTrack, audioTrack, screenTrack } = useRemoteTracks(participant);
   const theme = useTheme();
 
@@ -38,7 +41,7 @@ const CallMember = ({
   // Get avatarUrl and name
   const avatarUrl = participantMetadata.avatarUrl;
   const displayName =
-    participant.name || participant.identity || "Unknown User";
+    participant.name || participant.identity || t("common.messages.unknown");
 
   // Derived states
   const hasVideo = !!(videoTrack || screenTrack);
@@ -99,7 +102,7 @@ const CallMember = ({
               className="absolute top-2 left-2 bg-blue-600/80 px-2 py-1 rounded text-xs"
               style={{ zIndex: 1 }}
             >
-              🖥️ Screen Sharing
+              🖥️ {t("call.screen_sharing")}
             </div>
           )}
         </>

@@ -239,6 +239,7 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
 
     fetchChatById: async (chatId, options = { fetchFullData: false }) => {
       const targetChatId = chatId || get().activeChatId;
+      console.log("fetchChatById");
       if (!targetChatId) {
         throw new Error("No chat ID provided and no active chat");
       }
@@ -321,7 +322,6 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
         return;
       }
       set({ activeChatId: chatId });
-      get().updateChatLocally(chatId, { unreadCount: 0 });
       window.history.pushState({}, "", `/${chatId}`);
     },
 
@@ -369,7 +369,7 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
       try {
         const { payload, wasExisting } =
           await chatService.createOrGetDirectChat(partnerId);
-        console.log('payload', payload)
+        console.log("payload", payload);
         if (!wasExisting) {
           set((state) => ({
             chats: { [payload.id]: payload, ...state.chats },
@@ -483,7 +483,9 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
       const currentChat = get().chats[chatId];
       if (!currentChat) return;
 
-      const newUnreadCount = (currentChat.unreadCount || 0) + incrementBy;
+      // Reset to zero if incrementBy is 0, otherwise increment
+      const newUnreadCount =
+        incrementBy === 0 ? 0 : (currentChat.unreadCount || 0) + incrementBy;
       get().updateChatLocally(chatId, { unreadCount: newUnreadCount });
     },
 

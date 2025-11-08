@@ -72,6 +72,7 @@
 
   "time": {
     "now": "now",
+    "second": "s",
     "minute": "m",
     "hour": "h",
     "day": "d",
@@ -172,6 +173,38 @@
   "chat_bar": {
     "placeholder": "Message...",
     "attach_file": "Attach file"
+  },
+
+  "call": {
+    "call": "Call",
+    "dialing": "Calling...",
+    "inProgress": "In progress",
+    "completed": "Completed",
+    "missed": "Missed",
+    "failed": "Failed",
+    "camera": "Camera",
+    "start_broadcast": "Start broadcast",
+    "audient_count": "{{count}} audience",
+    "screen_sharing": "Screen Sharing",
+    "connecting": {
+      "video": "Connecting video call...",
+      "voice": "Connecting voice call..."
+    },
+    "outgoing": {
+      "video": "Outgoing video call",
+      "voice": "Outgoing voice call",
+      "switch_to_video": "Switch to video call",
+      "switch_to_voice": "Switch to voice call"
+    },
+    "incoming": {
+      "video": "Incoming video call",
+      "voice": "Incoming voice call",
+      "side_instructions": "Slide up to accept, slide down to decline"
+    },
+    "broadcast": {
+      "check_devices": "Check your mic, webcam, and screen before broadcasting",
+      "share_screen": "Share screen"
+    }
   },
 
   "emoji": {

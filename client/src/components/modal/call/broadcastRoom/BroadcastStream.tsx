@@ -39,10 +39,7 @@ export const BroadcastStream = ({
     | undefined;
 
   const screenAudioTrack = screenAudioPublication?.track as RemoteTrack | null;
-
-  const hasScreenAudio = !!screenAudioTrack;
-  console.log("hasScreenAudio", hasScreenAudio);
-
+  
   return (
     <div className={`relative w-full h-full ${className}`}>
       {/* Screen or Camera */}

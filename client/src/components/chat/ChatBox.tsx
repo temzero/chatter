@@ -27,6 +27,7 @@ const ChatBox = React.memo(() => {
   }
 
   const isDirectChat = activeChat.type === ChatType.DIRECT;
+  const isDeleted = activeChat.isDeleted;
   const isBlocked = isDirectChat && (isBlockedByMe || isBlockedMe);
   const isMember = Boolean(activeChat.myMemberId);
 
@@ -37,7 +38,7 @@ const ChatBox = React.memo(() => {
     >
       <Header chat={activeChat} isBlockedByMe={isBlockedByMe} />
       <MessagesContainer chat={activeChat} />
-      {!activeChat.isDeleted && (
+      {!isDeleted && (
         <AnimatePresence>
           {!isBlocked ? (
             isMember ? (

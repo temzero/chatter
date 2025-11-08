@@ -11,12 +11,15 @@ import { callWebSocketService } from "@/services/websocket/call.websocket.servic
 import { UpdateCallPayload } from "@shared/types/call";
 import { callAnimations } from "@/common/animations/callAnimations";
 import CallHeader from "./components/CallHeader";
+import { useTranslation } from "react-i18next";
 
 interface CallCallingUIProps {
   chat: ChatResponse;
 }
 
 const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
+  const { t } = useTranslation();
+
   const isVideoCall = useCallStore((state) => state.isVideoCall);
   const callId = useCallStore((state) => state.callId);
   const closeModal = getCloseModal();
@@ -78,13 +81,17 @@ const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
       <div id="calling-title" className="flex flex-col items-center mb-4">
         <CallHeader chat={chat} />
         <motion.p className="mt-1" {...callAnimations.titlePulse}>
-          Outgoing {isVideoCall ? "video" : "voice"} call
+          {t(`call.outgoing.${isVideoCall ? "video" : "voice"}`)}
         </motion.p>
       </div>
       {/* Calling Content */}
       <div className="flex flex-col justify-center items-center gap-4 py-10 select-none">
         <motion.button
-          title={`Switch To ${isVideoCall ? "Voice" : "Video"} Call`}
+          title={
+            isVideoCall
+              ? t("call.outgoing.switch_to_voice")
+              : t("call.outgoing.switch_to_video")
+          }
           onClick={toggleVideoCall}
           onMouseEnter={() => setIsHovering(true)}
           onMouseLeave={() => setIsHovering(false)}
@@ -127,7 +134,7 @@ const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
           isRoundedFull
           className="px-6 py-2"
         >
-          Cancel
+          {t("common.actions.cancel")}
         </Button>
       </div>
     </div>

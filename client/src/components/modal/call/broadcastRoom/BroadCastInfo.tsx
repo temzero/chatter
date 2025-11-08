@@ -1,6 +1,7 @@
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { Timer } from "@/components/ui/Timer";
+import { useTranslation } from "react-i18next";
 
 interface BroadcastInfoProps {
   chat: ChatResponse;
@@ -13,6 +14,8 @@ export const BroadcastInfo: React.FC<BroadcastInfoProps> = ({
   participantCount,
   startedAt,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <>
       {/* Left bottom: audience + chat info */}
@@ -23,7 +26,7 @@ export const BroadcastInfo: React.FC<BroadcastInfoProps> = ({
         <ChatAvatar chat={chat} type="header" />
         <div className="flex flex-col justify-end">
           <h1 className="flex items-center gap-1 text-xs -mb-0.5">
-            {participantCount} audience
+            {t("call.audience", { count: participantCount })}
           </h1>
           <h1 className="text-lg font-semibold">{chat.name}</h1>
         </div>

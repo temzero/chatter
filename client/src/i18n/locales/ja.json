@@ -72,10 +72,11 @@
 
   "time": {
     "now": "今",
+    "second": "秒",
     "minute": "分",
     "hour": "時間",
     "day": "日",
-    "month": "か月",
+    "month": "月",
     "year": "年",
     "future": "将来"
   },
@@ -174,6 +175,38 @@
     "attach_file": "ファイルを添付"
   },
 
+  "call": {
+    "call": "通話",
+    "dialing": "発信中...",
+    "inProgress": "進行中",
+    "completed": "完了",
+    "missed": "不在着信",
+    "failed": "失敗しました",
+    "camera": "カメラ",
+    "start_broadcast": "配信を開始",
+    "audient_count": "{{count}} 人の視聴者",
+    "screen_sharing": "画面共有",
+    "connecting": {
+      "video": "ビデオ通話を接続中...",
+      "voice": "音声通話を接続中..."
+    },
+    "outgoing": {
+      "video": "ビデオ通話の発信",
+      "voice": "音声通話の発信",
+      "switch_to_video": "ビデオ通話に切り替え",
+      "switch_to_voice": "音声通話に切り替え"
+    },
+    "incoming": {
+      "video": "ビデオ通話の着信",
+      "voice": "音声通話の着信",
+      "side_instructions": "上にスライドで応答、下にスライドで拒否"
+    },
+    "broadcast": {
+      "check_devices": "配信前にマイク、カメラ、画面を確認してください",
+      "share_screen": "画面を共有"
+    }
+  },
+  
   "emoji": {
     "recently": "最近",
     "smileys_emotion": "スマイリーと感情",

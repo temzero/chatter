@@ -10,10 +10,13 @@ import { useLocalPreviewVoiceTrack } from "@/common/hooks/mediaStreams/useLocalP
 import { useLocalPreviewVideoTrack } from "@/common/hooks/mediaStreams/useLocalPreviewVideoTrack";
 import { useLocalPreviewScreenTrack } from "@/common/hooks/mediaStreams/useLocalPreviewScreenTrack";
 import { useIsMobile } from "@/stores/deviceStore";
+import { useTranslation } from "react-i18next";
 import CallHeader from "./components/CallHeader";
 import Button from "@/components/ui/buttons/Button";
 
 const BroadcastPreviewModal = ({ chat }: { chat: ChatResponse }) => {
+  const { t } = useTranslation();
+
   const isMobile = useIsMobile();
 
   const startCall = useCallStore.getState().startCall;
@@ -72,7 +75,7 @@ const BroadcastPreviewModal = ({ chat }: { chat: ChatResponse }) => {
           {...callAnimations.titlePulse([1, 0.6, 1])}
         >
           <span className="material-symbols-outlined">info</span>
-          Check your mic, webcam, and screen before broadcasting
+          {t("call.broadcast.check_devices")}
         </motion.p>
 
         <div
@@ -139,7 +142,7 @@ const BroadcastPreviewModal = ({ chat }: { chat: ChatResponse }) => {
             isIconFilled={true}
             onClick={startBroadcast}
           >
-            Start Broadcast
+            {t("call.start_broadcast")}
           </Button>
           <Button
             variant="transparent"
@@ -147,7 +150,7 @@ const BroadcastPreviewModal = ({ chat }: { chat: ChatResponse }) => {
             fullWidth
             onClick={cancelCall}
           >
-            Cancel
+            t{"common.actions.cancel"}
           </Button>
         </div>
       </div>

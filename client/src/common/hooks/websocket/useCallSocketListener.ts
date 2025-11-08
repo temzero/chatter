@@ -91,7 +91,7 @@ export function useCallSocketListeners() {
 
       // ✅ Match on chatId instead of callId
       if (callStore.chatId !== chatId) {
-        console.log("chatId mismatch");
+        console.warn("chatId mismatch");
         return;
       }
 

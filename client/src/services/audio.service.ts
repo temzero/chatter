@@ -1,5 +1,4 @@
 // services/audio.service.ts
-import { handleError } from "@/common/utils/handleError";
 import activeSound from "@/assets/sound/active.mp3";
 import breakSound from "@/assets/sound/break.mp3";
 import card1Sound from "@/assets/sound/card1.mp3";
@@ -114,16 +113,11 @@ class AudioServiceImpl implements AudioService {
     const sound = this.sounds.get(type);
     if (!sound) return;
 
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      sound.currentTime = 0;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    sound.currentTime = 0;
 
-      sound.volume = volume !== undefined ? volume : this.volume;
-
-      await sound.play();
-    } catch (error) {
-      handleError(error, "Failed to play sound");
-    }
+    sound.volume = volume !== undefined ? volume : this.volume;
+    await sound.play();
   }
 
   async playRandomSound(types: SoundType[], volume?: number): Promise<void> {

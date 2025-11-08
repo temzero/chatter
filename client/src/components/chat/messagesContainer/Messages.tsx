@@ -31,7 +31,6 @@ const Messages: React.FC<ChatMessagesProps> = ({
 
   const messagesById = useMessageStore.getState().messagesById;
   const messages = messageIds.map((id) => messagesById[id]).filter(Boolean);
-  console.log("messages", messages);
 
   useEffect(() => {
     if (chat && messages.length > 0) {

@@ -49,8 +49,6 @@ export class MessageService {
     senderId: string,
     dto: CreateMessageDto,
   ): Promise<Message> {
-    console.log('CreateMessageDto', dto);
-
     if (dto.replyToMessageId) {
       ErrorResponse.badRequest('Use createReplyMessage for replying');
     }
@@ -85,10 +83,7 @@ export class MessageService {
       attachments, // Many-to-many relationship
     });
 
-    console.log('message', message);
-
     const savedMessage = await this.messageRepo.save(message);
-    console.log('savedMessage', savedMessage);
 
     // ✅ Update last visible message
     await this.chatMemberRepo.update(

@@ -10,6 +10,7 @@ import { LocalStreamPreview } from "@/components/ui/streams/LocalStreamPreview";
 import { DraggableContainer } from "@/components/ui/layout/DraggableContainer";
 import { useIsMobile } from "@/stores/deviceStore";
 import BroadcastStream from "./BroadcastStream";
+import { useTranslation } from "react-i18next";
 
 const BroadcastRoom = ({
   chat,
@@ -20,8 +21,9 @@ const BroadcastRoom = ({
   isExpanded: boolean;
   onToggleExpand?: () => void;
 }) => {
-  const isMobile = useIsMobile();
+  const { t } = useTranslation();
 
+  const isMobile = useIsMobile();
   const containerRef = useRef<HTMLDivElement>(null);
   const isCaller = useCallStore((state) => state.isCaller);
   const room = useCallStore((state) => state.getLiveKitRoom());
@@ -120,7 +122,7 @@ const BroadcastRoom = ({
             onClick={() => toggleLocalScreenShare()}
             icon="screen_share"
           >
-            Sharing Screen
+            {t("call.room.share_screen")}
           </Button>
           <Button
             variant="transparent"
@@ -129,7 +131,7 @@ const BroadcastRoom = ({
             onClick={() => toggleLocalVideo()}
             icon="video_camera_front"
           >
-            Camera
+            {t("call.camera")}
           </Button>
         </div>
       )}

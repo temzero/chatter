@@ -81,7 +81,7 @@ export const MessageReadInfo: React.FC<MessageReadInfoProps> = React.memo(
     return (
       <div
         ref={containerRef}
-        className={clsx(`flex items-center gap-${gap}`, {
+        className={clsx(`flex items-center pt-1 gap-${gap}`, {
           "justify-end": isMe,
           "justify-start": !isMe,
         })}

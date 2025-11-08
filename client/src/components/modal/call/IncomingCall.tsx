@@ -5,11 +5,14 @@ import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { VideoStream } from "@/components/ui/streams/VideoStream";
 import { useCallStore } from "@/stores/callStore";
 import { useLocalPreviewVideoTrack } from "@/common/hooks/mediaStreams/useLocalPreviewVideoTrack";
-import { CallActionButton } from "./CallActionButton";
+import { CallActionButton } from "./components/CallActionButton";
 import { callAnimations } from "@/common/animations/callAnimations";
+import { useTranslation } from "react-i18next";
 import CallHeader from "./components/CallHeader";
 
 const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
+  const { t } = useTranslation();
+
   const [loaderColor, setLoaderColor] = useState("#8b8b8b");
   const isVideoCall = useCallStore((state) => state.isVideoCall);
   const declineCall = useCallStore.getState().declineCall;
@@ -44,7 +47,7 @@ const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
       <div id="calling-title" className="flex flex-col items-center">
         <CallHeader chat={chat} />
         <motion.p className="mt-1" {...callAnimations.titlePulse}>
-          Incoming {isVideoCall ? "video" : "voice"} call
+          {t(`call.incoming.${isVideoCall ? "video" : "voice"}`)}
         </motion.p>
       </div>
 
@@ -69,7 +72,7 @@ const IncomingCall = ({ chat }: { chat: ChatResponse }) => {
           </div>
         </div>
         <p className="opacity-40 text-sm">
-          Slide up to accept, slide down to decline
+          {t("call.incoming.side_instructions")}
         </p>
       </div>
     </div>

@@ -1,18 +1,19 @@
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import Button from "@/components/ui/buttons/Button";
-import { formatDuration } from "@/common/utils/format/formatDuration";
 import { useCallStore } from "@/stores/callStore";
 import { LocalCallStatus } from "@/common/enums/LocalCallStatus";
 import { useEffect } from "react";
-import { CallError } from "@shared/types/call";
 import CallHeader from "./components/CallHeader";
+import { getCallStatusMessage } from "@/common/utils/call/getCallStatusMessage";
+import { useTranslation } from "react-i18next";
 
 const SummaryCall = ({ chat }: { chat: ChatResponse; duration?: number }) => {
+  const { t } = useTranslation();
+
   const localCallStatus = useCallStore((state) => state.localCallStatus);
   const error = useCallStore((state) => state.error);
   const duration = useCallStore.getState().getCallDuration();
   const closeCallModal = useCallStore.getState().closeCallModal;
-  // console.log("localCallStatus", localCallStatus);
   // Auto-close when call is canceled
   useEffect(() => {
     if (localCallStatus === LocalCallStatus.CANCELED) {
@@ -20,34 +21,13 @@ const SummaryCall = ({ chat }: { chat: ChatResponse; duration?: number }) => {
     }
   }, [localCallStatus, closeCallModal]);
 
-  const getStatusMessage = () => {
-    switch (localCallStatus) {
-      case LocalCallStatus.CANCELED:
-        return "Call canceled";
-      case LocalCallStatus.TIMEOUT:
-        return "No one answered"; // more user-friendly
-      case LocalCallStatus.DECLINED:
-        return "Call declined";
-      case LocalCallStatus.ENDED:
-        return duration ? formatDuration(duration) : "Call ended";
-      case LocalCallStatus.ERROR:
-        if (error === CallError.LINE_BUSY) return "Line is busy";
-        if (error === CallError.PERMISSION_DENIED) return "Permission denied";
-        if (error === CallError.DEVICE_UNAVAILABLE) return "Device unavailable";
-        if (error === CallError.CONNECTION_FAILED) return "Connection failed";
-        if (error === CallError.INITIATION_FAILED)
-          return "Call initiation failed";
-        return "Something went wrong!";
-      default:
-        return null;
-    }
-  };
+  const statusMessage = getCallStatusMessage(localCallStatus, duration, error);
 
   return (
     <div className="w-full h-full p-10 flex flex-col items-center justify-between">
       <div className="flex flex-col items-center">
         <CallHeader chat={chat} />
-        {getStatusMessage() && (
+        {statusMessage && (
           <div
             className={`mt-2 text-lg tabular-nums text-center ${
               localCallStatus === LocalCallStatus.ERROR
@@ -55,7 +35,7 @@ const SummaryCall = ({ chat }: { chat: ChatResponse; duration?: number }) => {
                 : "text-gray-400"
             }`}
           >
-            {getStatusMessage()}
+            {statusMessage}
           </div>
         )}
       </div>
@@ -81,7 +61,7 @@ const SummaryCall = ({ chat }: { chat: ChatResponse; duration?: number }) => {
         className="w-full"
         onClick={() => closeCallModal()}
       >
-        Close
+        {t("common.actions.close")}
       </Button>
     </div>
   );

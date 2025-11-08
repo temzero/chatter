@@ -219,23 +219,25 @@ const Message: React.FC<MessageProps> = ({
           </h1>
         )}
 
-        {!isRecent &&
-          message.status !== MessageStatus.SENDING &&
+        {message.status !== MessageStatus.SENDING &&
           message.status !== MessageStatus.FAILED && (
             <div
-              className={clsx("px-0.5 mb-4", {
+              className={clsx("px-0.5", {
                 "ml-auto": isMe,
                 "mr-auto": !isMe,
+                "mb-5": !isRecent,
               })}
             >
-              <p
-                className={clsx("text-xs opacity-40 py-1", {
-                  "text-right": isMe,
-                  "text-left": !isMe,
-                })}
-              >
-                {formatTime(message.createdAt)}
-              </p>
+              {!isRecent && (
+                <p
+                  className={clsx("text-xs opacity-40 pt-1", {
+                    "text-right": isMe,
+                    "text-left": !isMe,
+                  })}
+                >
+                  {formatTime(message.createdAt)}
+                </p>
+              )}
               <MessageReadInfo
                 chatId={chat.id}
                 currentUserId={currentUserId}

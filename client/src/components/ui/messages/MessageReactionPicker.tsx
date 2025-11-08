@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "framer-motion";
 import { handleReaction } from "@/common/utils/message/handleReaction";
 import { audioService, SoundType } from "@/services/audio.service";
 import { getCloseModal } from "@/stores/modalStore";
@@ -20,13 +21,15 @@ export const MessageReactionPicker: React.FC<ReactionPickerProps> = ({
 
   return (
     <div
-      className={`flex gap-1 rounded-full p-1 bg-[--sidebar-color] custom-border`}
+      className="flex gap-1 rounded-full p-1 bg-[--sidebar-color] custom-border"
       onClick={(e) => e.stopPropagation()}
     >
       {emojis.map((emoji) => (
-        <button
+        <motion.button
           key={emoji}
-          className="text-xl hover:scale-150 transition-transform duration-150"
+          whileTap={{ scale: 2 }}
+          whileHover={{ scale: 1.5 }}
+          className="text-xl"
           onClick={() => {
             audioService.playSound(SoundType.REACTION);
             handleReaction({
@@ -38,7 +41,7 @@ export const MessageReactionPicker: React.FC<ReactionPickerProps> = ({
           }}
         >
           {emoji}
-        </button>
+        </motion.button>
       ))}
     </div>
   );

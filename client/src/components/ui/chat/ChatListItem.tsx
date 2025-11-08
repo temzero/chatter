@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useLayoutEffect } from "react";
 import { useLastMessage, useMessageStore } from "@/stores/messageStore";
 import { useTypingUsersByChatId } from "@/stores/typingStore";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
@@ -18,7 +18,7 @@ import {
   SystemMessageJSONContent,
 } from "@/components/ui/messages/SystemMessageContent";
 import SimpleTypingIndicator from "@/components/ui/typingIndicator/SimpleTypingIndicator";
-import { useTranslation } from "react-i18next";
+import { messageAnimations } from "@/common/animations/messageAnimations";
 
 // Keep track of open menu globally
 let openMenuSetter: (() => void) | null = null;
@@ -32,7 +32,6 @@ interface ChatListItemProps {
 const ChatListItem: React.FC<ChatListItemProps> = React.memo(
   ({ chatId, isCompact = false, currentUserId = "" }) => {
     // console.log("ChatListItem", chatId);
-    const { t } = useTranslation();
 
     // This now uses the updated useChat hook that works with Record structure
     const chat = useChat(chatId);
@@ -40,13 +39,17 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
 
     const typingUsers = useTypingUsersByChatId(chatId);
     const isOnline = useChatStatus(chatId, chat?.type);
-    const unreadCount = chat?.unreadCount || 0;
+    const unreadMessagesCount = chat?.unreadCount || 0;
     // const lastMessage = chat?.lastMessage;
     const lastMessage = useLastMessage(chatId);
     const { isBlockedByMe } = useBlockStatus(chatId, chat?.myMemberId);
 
     const getDraftMessage = useMessageStore.getState().getDraftMessage;
     const setActiveChatId = useChatStore.getState().setActiveChatId;
+
+    useLayoutEffect(() => {
+      useChatStore.getState().setUnreadCount(chatId, 0);
+    }, [chatId, isActive]);
 
     // ======== Context Menu ========
     const [contextMenu, setContextMenu] = useState<{
@@ -128,7 +131,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
       ) : (
         <p
           className={`flex items-center gap-1 text-xs min-h-6 flex-1 min-w-0
-      ${unreadCount > 0 ? "opacity-100" : "opacity-40"}`}
+      ${unreadMessagesCount > 0 ? "opacity-100" : "opacity-40"}`}
         >
           {lastMessage.sender.id === currentUserId ? (
             <strong>Me:</strong>
@@ -193,8 +196,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
                   <p className="whitespace-nowrap opacity-50">
                     {formatTimeAgo(
                       (lastMessage?.createdAt as string | Date | undefined) ??
-                        (chat.updatedAt as string | Date),
-                      t // pass t here
+                        (chat.updatedAt as string | Date)
                     )}
                   </p>
                   <div className="flex items-center absolute top-1.5 right-2">
@@ -267,11 +269,17 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
                   </AnimatePresence>
                 </div>
 
-                {unreadCount > 0 && (
-                  <div className="flex-shrink-0 font-semibold text-white bg-red-500 rounded-full text-xs flex items-center justify-center p-1 h-4">
-                    {unreadCount}
-                  </div>
-                )}
+                <AnimatePresence>
+                  {!isActive && unreadMessagesCount > 0 && (
+                    <motion.div
+                      key="unread-count"
+                      className="flex-shrink-0 font-semibold text-white bg-red-500 rounded-full text-xs flex items-center justify-center p-1 h-4"
+                      {...messageAnimations.messagesCount}
+                    >
+                      {unreadMessagesCount}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
           )}

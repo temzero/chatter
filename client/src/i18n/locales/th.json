@@ -72,6 +72,7 @@
 
   "time": {
     "now": "ตอนนี้",
+    "second": "วินาที",
     "minute": "นาที",
     "hour": "ชั่วโมง",
     "day": "วัน",
@@ -174,6 +175,38 @@
     "attach_file": "แนบไฟล์"
   },
 
+  "call": {
+    "call": "การโทร",
+    "dialing": "กำลังโทร...",
+    "inProgress": "กำลังดำเนินการ",
+    "completed": "เสร็จสิ้น",
+    "missed": "สายที่ไม่ได้รับ",
+    "failed": "ล้มเหลว",
+    "camera": "กล้อง",
+    "start_broadcast": "เริ่มออกอากาศ",
+    "audient_count": "{{count}} ผู้ชม",
+    "screen_sharing": "การแชร์หน้าจอ",
+    "connecting": {
+      "video": "กำลังเชื่อมต่อวิดีโอคอล...",
+      "voice": "กำลังเชื่อมต่อสายเสียง..."
+    },
+    "outgoing": {
+      "video": "วิดีโอคอลขาออก",
+      "voice": "สายเสียงขาออก",
+      "switch_to_video": "สลับไปวิดีโอคอล",
+      "switch_to_voice": "สลับไปสายเสียง"
+    },
+    "incoming": {
+      "video": "วิดีโอคอลขาเข้า",
+      "voice": "สายเสียงขาเข้า",
+      "side_instructions": "ปัดขึ้นเพื่อรับ ปัดลงเพื่อปฏิเสธ"
+    },
+    "broadcast": {
+      "check_devices": "ตรวจสอบไมค์ กล้อง และหน้าจอก่อนออกอากาศ",
+      "share_screen": "แชร์หน้าจอ"
+    }
+  },
+  
   "emoji": {
     "recently": "ล่าสุด",
     "smileys_emotion": "รอยยิ้มและอารมณ์",

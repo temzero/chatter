@@ -72,10 +72,11 @@
 
   "time": {
     "now": "bây giờ",
-    "minute": "p",
-    "hour": "g",
-    "day": "n",
-    "month": "th",
+    "second": "giây",
+    "minute": "phút",
+    "hour": "giờ",
+    "day": "ngày",
+    "month": "tháng",
     "year": "năm",
     "future": "Trong tương lai"
   },
@@ -172,6 +173,38 @@
   "chat_bar": {
     "placeholder": "Nhắn tin...",
     "attach_file": "Đính kèm"
+  },
+
+  "call": {
+    "call": "Cuộc gọi",
+    "dialing": "Đang gọi...",
+    "inProgress": "Đang diễn ra",
+    "completed": "Đã hoàn tất",
+    "missed": "Nhỡ",
+    "failed": "Thất bại",
+    "camera": "Máy ảnh",
+    "start_broadcast": "Bắt đầu phát sóng",
+    "audient_count": "{{count}} khán giả",
+    "screen_sharing": "Chia sẻ màn hình",
+    "connecting": {
+      "video": "Đang kết nối cuộc gọi video...",
+      "voice": "Đang kết nối cuộc gọi thoại..."
+    },
+    "outgoing": {
+      "video": "Cuộc gọi video đi",
+      "voice": "Cuộc gọi thoại đi",
+      "switch_to_video": "Chuyển sang cuộc gọi video",
+      "switch_to_voice": "Chuyển sang cuộc gọi thoại"
+    },
+    "incoming": {
+      "video": "Cuộc gọi video đến",
+      "voice": "Cuộc gọi thoại đến",
+      "side_instructions": "Vuốt lên để chấp nhận, vuốt xuống để từ chối"
+    },
+    "broadcast": {
+      "check_devices": "Kiểm tra mic, webcam và màn hình trước khi phát sóng",
+      "share_screen": "Chia sẻ màn hình"
+    }
   },
 
   "emoji": {

@@ -72,6 +72,7 @@
 
   "time": {
     "now": "지금",
+    "second": "초",
     "minute": "분",
     "hour": "시간",
     "day": "일",
@@ -174,6 +175,38 @@
     "attach_file": "파일 첨부"
   },
 
+  "call": {
+    "call": "통화",
+    "dialing": "전화 중...",
+    "inProgress": "진행 중",
+    "completed": "완료됨",
+    "missed": "부재중",
+    "failed": "실패함",
+    "camera": "카메라",
+    "start_broadcast": "방송 시작",
+    "audient_count": "{{count}} 명의 시청자",
+    "screen_sharing": "화면 공유",
+    "connecting": {
+      "video": "영상 통화 연결 중...",
+      "voice": "음성 통화 연결 중..."
+    },
+    "outgoing": {
+      "video": "영상 통화 발신",
+      "voice": "음성 통화 발신",
+      "switch_to_video": "영상 통화로 전환",
+      "switch_to_voice": "음성 통화로 전환"
+    },
+    "incoming": {
+      "video": "영상 통화 수신",
+      "voice": "음성 통화 수신",
+      "side_instructions": "위로 밀어 수락, 아래로 밀어 거절"
+    },
+    "broadcast": {
+      "check_devices": "방송 전에 마이크, 웹캠, 화면을 확인하세요",
+      "share_screen": "화면 공유"
+    }
+  },
+  
   "emoji": {
     "recently": "최근",
     "smileys_emotion": "스마일리 및 감정",

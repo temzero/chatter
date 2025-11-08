@@ -1,4 +1,4 @@
-import { TFunction } from "i18next";
+import i18n from "@/i18n";
 
 export const formatDuration = (seconds: number) => {
   if (!seconds || seconds <= 0) return "00:00";
@@ -15,16 +15,16 @@ export const formatDuration = (seconds: number) => {
 
 export function formatDurationByStartAndEnd(
   start?: string | Date,
-  end?: string | Date | null,
-  t?: TFunction
+  end?: string | Date | null
 ) {
-  if (!start || !end) return t ? t("time.empty") : "-";
+  const t = i18n.t;
+  if (!start || !end) return "-";
 
   const startDate = new Date(start);
   const endDate = new Date(end);
   const diffMs = endDate.getTime() - startDate.getTime();
 
-  if (diffMs <= 0) return t ? t("time.empty") : "-";
+  if (diffMs <= 0) return "-";
 
   const totalSeconds = Math.floor(diffMs / 1000);
   const hours = Math.floor(totalSeconds / 3600);
@@ -32,9 +32,9 @@ export function formatDurationByStartAndEnd(
   const seconds = totalSeconds % 60;
 
   let result = "";
-  if (hours > 0) result += `${hours}${t ? t("time.hour") : "h"} `;
-  if (minutes > 0) result += `${minutes}${t ? t("time.minute") : "m"} `;
-  if (seconds > 0) result += `${seconds}${t ? t("time.second") : "s"}`;
+  if (hours > 0) result += `${hours} ${t ? t("time.hour") : "h"} `;
+  if (minutes > 0) result += `${minutes} ${t ? t("time.minute") : "m"} `;
+  if (seconds > 0) result += `${seconds} ${t ? t("time.second") : "s"}`;
 
   return result.trim();
 }

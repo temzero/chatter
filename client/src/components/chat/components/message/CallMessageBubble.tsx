@@ -5,14 +5,9 @@ import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { MessageResponse } from "@/shared/types/responses/message.response";
 import { CallStatus } from "@/shared/types/enums/call-status.enum";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
-import {
-  getCallColor,
-  getCallIcon,
-  getCallText,
-} from "@/common/utils/call/callHelpers";
+import { getCallColor, getCallIcon } from "@/common/utils/call/callHelpers";
+import { getCallText } from "@/common/utils/call/getCallText";
 import { callAnimations } from "@/common/animations/callAnimations";
-import { useTranslation } from "react-i18next";
-
 interface CallMessageBubbleProps {
   message: MessageResponse;
   isMe: boolean;
@@ -25,8 +20,6 @@ const CallMessageBubble: React.FC<CallMessageBubbleProps> = ({
   isMe,
   isRelyToThisMessage,
 }) => {
-  const { t } = useTranslation();
-
   const openModal = getOpenModal();
   const call = message.call;
   if (!call) return null;
@@ -43,7 +36,7 @@ const CallMessageBubble: React.FC<CallMessageBubbleProps> = ({
 
   return (
     <div
-      className={clsx("message-bubble flex flex-col", {
+      className={clsx("message-bubble", {
         "border-4 border-red-500/80": message.isImportant,
         "self-message ml-auto": isMe,
         "message-bubble-reply": isRelyToThisMessage,
@@ -62,7 +55,7 @@ const CallMessageBubble: React.FC<CallMessageBubbleProps> = ({
       }
     >
       {/* 🔹 Static row */}
-      <div className="flex gap-1 items-center p-2 pl-3">
+      <div className="flex gap-1 items-center justify-between p-2 pl-3">
         {/* 🔹 Icon animates */}
         <motion.span
           className={clsx(
@@ -81,7 +74,7 @@ const CallMessageBubble: React.FC<CallMessageBubbleProps> = ({
             getCallColor(call.status)
           )}
         >
-          {getCallText(call.status, call.startedAt, call.endedAt, t)}
+          {getCallText(call.status, call.startedAt, call.endedAt)}
         </p>
       </div>
     </div>

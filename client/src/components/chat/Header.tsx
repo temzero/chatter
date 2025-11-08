@@ -21,7 +21,6 @@ import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
 import MessageSearchBar from "@/components/ui/messages/MessageSearchBar";
 import PinnedMessage from "@/components/chat/components/message/PinnedMessage";
-
 interface ChatHeaderProps {
   chat: ChatResponse;
   isBlockedByMe: boolean;
@@ -29,6 +28,7 @@ interface ChatHeaderProps {
 
 const Header: React.FC<ChatHeaderProps> = ({ chat, isBlockedByMe = false }) => {
   console.log("Header");
+
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const toggleSidebarInfo = useSidebarInfoStore.getState().toggleSidebarInfo;

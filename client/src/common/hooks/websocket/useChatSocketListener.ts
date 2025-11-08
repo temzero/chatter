@@ -24,7 +24,6 @@ export function useChatSocketListeners() {
       const { payload: message, meta } = wsMessage;
       console.log("Received new message via WebSocket:", message);
 
-      const chatStore = useChatStore.getState();
       const messageStore = useMessageStore.getState();
 
       const isMuted = meta?.isMuted ?? false;
@@ -32,7 +31,7 @@ export function useChatSocketListeners() {
       const existingMessage = messageStore.getMessageById(message.id);
 
       try {
-        await chatStore.getOrFetchChatById(message.chatId, {
+        await useChatStore.getState().getOrFetchChatById(message.chatId, {
           fetchFullData: true,
         });
       } catch (error) {
@@ -197,25 +196,6 @@ export function useChatSocketListeners() {
     };
 
     // ======== Error ========
-    // const handleMessageError = (
-    //   wsError: WsEmitChatMemberResponse<{
-    //     chatId: string;
-    //     messageId: string;
-    //     error: string;
-    //     code?: string;
-    //   }>
-    // ) => {
-    //   try {
-    //     const { payload: error } = wsError;
-    //     console.log("handleMessageError", error);
-    //     useMessageStore.getState().updateMessageById(error.messageId, {
-    //       status: MessageStatus.FAILED,
-    //     });
-    //   } catch (error) {
-    //     handleError(error, "Error failed!");
-    //   }
-    // };
-
     const handleMessageError = (
       wsError: WsEmitChatMemberResponse<{
         chatId: string;
@@ -273,5 +253,5 @@ export function useChatSocketListeners() {
       if (!socket) return;
       chatWebSocketService.removeAllListeners();
     };
-  }, []);
+  }, [t]);
 }

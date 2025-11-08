@@ -45,7 +45,7 @@ export const BroadcastMessage: React.FC<BroadcastMessageProps> = ({ call }) => {
           <>
             {startedAt && endedAt && (
               <span className="">
-                ⏱️{formatDurationByStartAndEnd(startedAt, endedAt, t)}
+                ⏱️{formatDurationByStartAndEnd(startedAt, endedAt)}
                 <span className="ml-2">|</span>
               </span>
             )}
