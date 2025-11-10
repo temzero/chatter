@@ -186,6 +186,7 @@
     "start_broadcast": "방송 시작",
     "audient_count": "{{count}} 명의 시청자",
     "screen_sharing": "화면 공유",
+    "share_screen": "화면 공유",
     "connecting": {
       "video": "영상 통화 연결 중...",
       "voice": "음성 통화 연결 중..."
@@ -204,9 +205,23 @@
     "broadcast": {
       "check_devices": "방송 전에 마이크, 웹캠, 화면을 확인하세요",
       "share_screen": "화면 공유"
+    },
+    "summary": {
+      "canceled": "통화 취소됨",
+      "no_answer": "응답 없음",
+      "declined": "통화 거절됨",
+      "ended": "통화 종료됨",
+      "error": {
+        "line_busy": "라인이 바쁩니다",
+        "permission_denied": "권한이 거부되었습니다",
+        "device_unavailable": "장치를 사용할 수 없습니다",
+        "connection_failed": "연결 실패",
+        "initiation_failed": "통화 시작 실패",
+        "generic": "문제가 발생했습니다!"
+      }
     }
   },
-  
+
   "emoji": {
     "recently": "최근",
     "smileys_emotion": "스마일리 및 감정",

@@ -1,29 +1,20 @@
-import { CallStatus } from "@/shared/types/enums/call-status.enum";
 import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 
 // Component that renders the icon, now accepting className prop
-export const SystemEventIcon = ({
+export const SystemMessageIcon = ({
   systemEvent,
-  callStatus,
-  isBroadcast = false,
   className = "",
 }: {
   systemEvent: SystemEventType;
-  callStatus?: CallStatus | null;
-  isBroadcast?: boolean;
   className?: string;
 }) => (
   <span className={`material-symbols-outlined text-sm ${className}`}>
-    {getSystemEventIconName(systemEvent, callStatus, isBroadcast)}
+    {getSystemEventIconName(systemEvent)}
   </span>
 );
 
 // Function that returns the icon name string
-const getSystemEventIconName = (
-  systemEvent: SystemEventType,
-  callStatus?: CallStatus | null,
-  isBroadcast?: boolean
-): string => {
+const getSystemEventIconName = (systemEvent: SystemEventType): string => {
   switch (systemEvent) {
     case SystemEventType.MEMBER_JOINED:
     case SystemEventType.MEMBER_ADDED:
@@ -52,21 +43,6 @@ const getSystemEventIconName = (
       return "unpin";
     case SystemEventType.CHAT_DELETED:
       return "delete";
-
-    case SystemEventType.CALL:
-      switch (callStatus) {
-        case CallStatus.DIALING:
-        case CallStatus.IN_PROGRESS:
-          return isBroadcast ? "connected_tv" : "call";
-        case CallStatus.COMPLETED:
-          return isBroadcast ? "connected_tv" : "call_end";
-        case CallStatus.MISSED:
-          return isBroadcast ? "tv_off" : "phone_missed";
-        case CallStatus.FAILED:
-          return isBroadcast ? "tv_off" : "e911_avatar";
-        default:
-          return "call";
-      }
     default:
       return "info";
   }

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useLayoutEffect } from "react";
-import { useLastMessage, useMessageStore } from "@/stores/messageStore";
+import { useLastMessage } from "@/stores/messageStore";
 import { useTypingUsersByChatId } from "@/stores/typingStore";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { formatTimeAgo } from "@/common/utils/format/formatTimeAgo";
@@ -7,18 +7,13 @@ import { OnlineDot } from "@/components/ui/icons/OnlineDot";
 import { AnimatePresence, motion } from "framer-motion";
 import { useChat, useChatStore, useIsActiveChat } from "@/stores/chatStore";
 import { useChatStatus } from "@/stores/presenceStore";
-import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useBlockStatus } from "@/common/hooks/useBlockStatus";
 import { ChatListItemContextMenu } from "./ChatListItem-contextMenu";
 import { calculateContextMenuPosition } from "@/common/utils/contextMenuUtils";
 import { useClickOutside } from "@/common/hooks/keyEvent/useClickOutside";
-import { getAttachmentIcons } from "@/common/utils/getFileIcon";
-import {
-  SystemMessageContent,
-  SystemMessageJSONContent,
-} from "@/components/ui/messages/SystemMessageContent";
-import SimpleTypingIndicator from "@/components/ui/typingIndicator/SimpleTypingIndicator";
 import { messageAnimations } from "@/common/animations/messageAnimations";
+import { ChatListItemMessage } from "./ChatListItemMessage";
+import SimpleTypingIndicator from "@/components/ui/typingIndicator/SimpleTypingIndicator";
 
 // Keep track of open menu globally
 let openMenuSetter: (() => void) | null = null;
@@ -44,7 +39,6 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
     const lastMessage = useLastMessage(chatId);
     const { isBlockedByMe } = useBlockStatus(chatId, chat?.myMemberId);
 
-    const getDraftMessage = useMessageStore.getState().getDraftMessage;
     const setActiveChatId = useChatStore.getState().setActiveChatId;
 
     useLayoutEffect(() => {
@@ -106,65 +100,6 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
         : "hover:bg-[var(--hover-color)]";
       return `${baseClasses} ${activeClasses}`;
     };
-
-    const draft = getDraftMessage(chatId);
-
-    const displayMessage = draft ? (
-      <p className="text-[var(--primary-green)] flex items-center gap-1 overflow-hidden flex-1 min-w-0">
-        <i className="material-symbols-outlined flex items-center justify-center text-[16px] h-3">
-          edit
-        </i>
-        <span className="text-xs truncate">{draft}</span>
-      </p>
-    ) : lastMessage ? (
-      lastMessage.systemEvent ? (
-        <SystemMessageContent
-          systemEvent={lastMessage.systemEvent}
-          call={lastMessage.call}
-          isBroadcast={chat.type === ChatType.CHANNEL}
-          currentUserId={currentUserId}
-          senderId={lastMessage.sender.id}
-          senderDisplayName={lastMessage.sender.displayName}
-          JSONcontent={lastMessage.content as SystemMessageJSONContent}
-          ClassName="gap-1 truncate opacity-60 flex-1 min-w-0"
-        />
-      ) : (
-        <p
-          className={`flex items-center gap-1 text-xs min-h-6 flex-1 min-w-0
-      ${unreadMessagesCount > 0 ? "opacity-100" : "opacity-40"}`}
-        >
-          {lastMessage.sender.id === currentUserId ? (
-            <strong>Me:</strong>
-          ) : chat.type !== ChatType.DIRECT ? (
-            <strong>{lastMessage.sender.displayName.split(" ")[0]}:</strong>
-          ) : null}
-
-          {lastMessage.forwardedFromMessage && (
-            <span className="material-symbols-outlined rotate-90">
-              arrow_warm_up
-            </span>
-          )}
-
-          {lastMessage.attachments?.length ? (
-            <span className="flex gap-1 truncate">
-              {getAttachmentIcons(lastMessage.attachments)?.map(
-                (icon, index) => (
-                  <i
-                    key={index}
-                    className="material-symbols-outlined text-base"
-                    aria-hidden="true"
-                  >
-                    {icon}
-                  </i>
-                )
-              )}
-            </span>
-          ) : (
-            <span className="truncate">{lastMessage.content}</span>
-          )}
-        </p>
-      )
-    ) : null;
 
     return (
       <>
@@ -255,16 +190,13 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
                         />
                       </motion.div>
                     ) : (
-                      <motion.div
-                        key="message"
-                        initial={{ opacity: 0, y: 4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -4 }}
-                        transition={{ duration: 0.2 }}
-                        className="min-w-0"
-                      >
-                        {displayMessage}
-                      </motion.div>
+                      <ChatListItemMessage
+                        chatId={chatId}
+                        lastMessage={lastMessage}
+                        unreadMessagesCount={unreadMessagesCount}
+                        chatType={chat.type}
+                        currentUserId={currentUserId}
+                      />
                     )}
                   </AnimatePresence>
                 </div>

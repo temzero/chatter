@@ -20,7 +20,7 @@ import { useIsMobile } from "@/stores/deviceStore";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
 import MessageSearchBar from "@/components/ui/messages/MessageSearchBar";
-import PinnedMessage from "@/components/chat/components/message/PinnedMessage";
+import PinnedMessage from "./components/message/preview/PinnedMessage";
 interface ChatHeaderProps {
   chat: ChatResponse;
   isBlockedByMe: boolean;

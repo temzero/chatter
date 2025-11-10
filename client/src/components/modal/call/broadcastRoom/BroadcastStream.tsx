@@ -39,14 +39,14 @@ export const BroadcastStream = ({
     | undefined;
 
   const screenAudioTrack = screenAudioPublication?.track as RemoteTrack | null;
-  
+
   return (
     <div className={`relative w-full h-full ${className}`}>
       {/* Screen or Camera */}
       {screenTrack ? (
         <VideoStream stream={screenTrack} objectCover={isObjectCover} />
       ) : videoTrack ? (
-        <VideoStream stream={videoTrack} mirror />
+        <VideoStream stream={videoTrack} objectCover={isObjectCover} mirror />
       ) : null}
 
       {/* Draggable Camera overlay */}

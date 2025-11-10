@@ -186,6 +186,7 @@
     "start_broadcast": "开始直播",
     "audient_count": "{{count}} 名观众",
     "screen_sharing": "屏幕共享",
+    "share_screen": "共享屏幕",
     "connecting": {
       "video": "正在连接视频通话...",
       "voice": "正在连接语音通话..."
@@ -204,9 +205,23 @@
     "broadcast": {
       "check_devices": "在直播前检查麦克风、摄像头和屏幕",
       "share_screen": "共享屏幕"
+    },
+    "summary": {
+      "canceled": "通话已取消",
+      "no_answer": "无人接听",
+      "declined": "通话被拒绝",
+      "ended": "通话结束",
+      "error": {
+        "line_busy": "线路繁忙",
+        "permission_denied": "权限被拒绝",
+        "device_unavailable": "设备不可用",
+        "connection_failed": "连接失败",
+        "initiation_failed": "通话发起失败",
+        "generic": "出错了！"
+      }
     }
   },
-  
+
   "emoji": {
     "recently": "最近",
     "smileys_emotion": "笑脸与情感",

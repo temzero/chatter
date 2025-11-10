@@ -466,3 +466,9 @@ export const useLastMessage = (chatId: string) =>
     const ids = state.messageIdsByChat[chatId] || [];
     return ids.length ? state.messagesById[ids[ids.length - 1]] : null;
   });
+
+export const useDraftMessage = (chatId?: string): string => {
+  return useMessageStore(
+    useShallow((state) => (chatId ? state.drafts[chatId] || "" : ""))
+  );
+};

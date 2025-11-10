@@ -1,11 +1,11 @@
 import { ChatResponse } from "@/shared/types/responses/chat.response";
-import Button from "@/components/ui/buttons/Button";
 import { useCallStore } from "@/stores/callStore";
 import { LocalCallStatus } from "@/common/enums/LocalCallStatus";
 import { useEffect } from "react";
-import CallHeader from "./components/CallHeader";
-import { getCallStatusMessage } from "@/common/utils/call/getCallStatusMessage";
 import { useTranslation } from "react-i18next";
+import { getLocalCallStatusMessage } from "@/common/utils/call/callTextHelpers";
+import CallHeader from "./components/CallHeader";
+import Button from "@/components/ui/buttons/Button";
 
 const SummaryCall = ({ chat }: { chat: ChatResponse; duration?: number }) => {
   const { t } = useTranslation();
@@ -21,7 +21,7 @@ const SummaryCall = ({ chat }: { chat: ChatResponse; duration?: number }) => {
     }
   }, [localCallStatus, closeCallModal]);
 
-  const statusMessage = getCallStatusMessage(localCallStatus, duration, error);
+  const statusMessage = getLocalCallStatusMessage(localCallStatus, duration, error);
 
   return (
     <div className="w-full h-full p-10 flex flex-col items-center justify-between">

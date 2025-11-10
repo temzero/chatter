@@ -29,29 +29,26 @@ export class LiveKitWebhookController {
   async handleWebhook(
     @Body(ValidateWebhookPipe) payload: LiveKitWebhookPayload,
   ) {
-    const roomName = payload.room?.name;
-    if (!roomName) {
+    const chatId = payload.room?.name; // LiveKit chatId is chatId
+    if (!chatId) {
       console.warn('[Webhook] No room info in payload:', payload);
       return;
     }
 
     switch (payload.event) {
       case 'room_started':
-        console.log('[room_started] Room:', roomName);
+        console.log('[room_started] Room:', chatId);
         break;
 
       case 'participant_joined':
         await this.handleParticipantJoined(
-          roomName,
+          chatId,
           payload.participant?.identity,
         );
         break;
 
       case 'participant_left':
-        await this.handleParticipantLeft(
-          roomName,
-          payload.participant?.identity,
-        );
+        await this.handleParticipantLeft(chatId, payload.participant?.identity);
         break;
 
       case 'track_published':
@@ -59,7 +56,7 @@ export class LiveKitWebhookController {
         break;
 
       case 'room_finished':
-        await this.handleRoomFinished(roomName);
+        await this.handleRoomFinished(chatId);
         break;
 
       default:
@@ -71,14 +68,14 @@ export class LiveKitWebhookController {
   // ----------------------
   // Participant Joined
   // ----------------------
-  private async handleParticipantJoined(roomName: string, userId?: string) {
+  private async handleParticipantJoined(chatId: string, userId?: string) {
     if (!userId) {
       console.log('[participant_joined] No participant identity found');
       return;
     }
 
-    const call = await this.callService.getActiveCallByChatId(roomName);
-    const chat = call?.chat ?? (await this.chatService.getChatById(roomName));
+    const call = await this.callService.getActiveCallByChatId(chatId);
+    const chat = call?.chat ?? (await this.chatService.getChatById(chatId));
     const isBroadcast = chat.type === ChatType.CHANNEL;
     const user = await this.userService.getUserById(userId);
 
@@ -86,20 +83,20 @@ export class LiveKitWebhookController {
 
     // Common logic: Handle call creation and participant addition
     if (!call) {
-      await this.handleNewCall(roomName, user, chat, isBroadcast);
+      await this.handleNewCall(chatId, user, chat, isBroadcast);
     } else {
-      await this.handleExistingCall(call, user, roomName, isBroadcast);
+      await this.handleExistingCall(call, user, chatId, isBroadcast);
     }
   }
 
   private async handleNewCall(
-    roomName: string,
+    chatId: string,
     user: User,
     chat: Chat,
     isBroadcast: boolean,
   ) {
     const call = await this.callService.createCall({
-      chatId: roomName,
+      chatId: chatId,
       status: isBroadcast ? CallStatus.IN_PROGRESS : CallStatus.DIALING,
       initiatorUser: user,
       ...(isBroadcast && { startedAt: new Date() }),
@@ -108,7 +105,7 @@ export class LiveKitWebhookController {
     // Always emit incoming call first
     await this.websocketCallService.emitIncomingCall(
       call.id,
-      roomName,
+      chatId,
       user.id,
       chat.type === ChatType.GROUP,
       isBroadcast,
@@ -116,14 +113,14 @@ export class LiveKitWebhookController {
 
     // Start call immediately for broadcast, otherwise wait for participants
     if (isBroadcast) {
-      await this.websocketCallService.emitStartCall(call.id, roomName, user.id);
+      await this.websocketCallService.emitStartCall(call.id, chatId, user.id);
     }
   }
 
   private async handleExistingCall(
     call: Call,
     user: User,
-    roomName: string,
+    chatId: string,
     isBroadcast: boolean,
   ) {
     const existingUserIds = new Set(call.currentUserIds);
@@ -144,7 +141,7 @@ export class LiveKitWebhookController {
 
           await this.websocketCallService.emitStartCall(
             call.id,
-            roomName,
+            chatId,
             call.currentUserIds[0],
           );
         }
@@ -160,40 +157,40 @@ export class LiveKitWebhookController {
   // ----------------------
   // Participant Left
   // ----------------------
-  private async handleParticipantLeft(roomName: string, userId?: string) {
+  private async handleParticipantLeft(chatId: string, userId?: string) {
     if (!userId) return;
 
-    const call = await this.callService.getActiveCallByChatId(roomName);
+    const call = await this.callService.getActiveCallByChatId(chatId);
     if (!call) return;
 
-    const chat = call.chat ?? (await this.chatService.getChatById(roomName));
+    const chat = call.chat ?? (await this.chatService.getChatById(chatId));
     const isBroadcast = chat.type === ChatType.CHANNEL;
 
     // Remove user from current participants
-    await this.callService.removeCurrentUserId(roomName, userId);
+    await this.callService.removeCurrentUserId(chatId, userId);
 
     if (isBroadcast) {
-      await this.handleBroadcastParticipantLeft(call, userId, roomName);
+      await this.handleBroadcastParticipantLeft(call, userId, chatId);
     } else {
-      await this.handleNormalCallParticipantLeft(call, userId, roomName);
+      await this.handleNormalCallParticipantLeft(call, userId, chatId);
     }
   }
 
   private async handleBroadcastParticipantLeft(
     call: Call,
     userId: string,
-    roomName: string,
+    chatId: string,
   ) {
     // End broadcast only if initiator leaves
     if (call.attendedUsers[0]?.id === userId) {
-      await this.endCall(call, roomName, CallStatus.COMPLETED, userId);
+      await this.endCall(call, chatId, CallStatus.COMPLETED, userId);
     }
   }
 
   private async handleNormalCallParticipantLeft(
     call: Call,
     userId: string,
-    roomName: string,
+    chatId: string,
   ) {
     const remainingUsers =
       call.currentUserIds?.filter((id) => id !== userId) ?? [];
@@ -204,13 +201,13 @@ export class LiveKitWebhookController {
       const status =
         attendeeCount <= 1 ? CallStatus.MISSED : CallStatus.COMPLETED;
 
-      await this.endCall(call, roomName, status, userId);
+      await this.endCall(call, chatId, status, userId);
     }
   }
 
   private async endCall(
     call: Call,
-    roomName: string,
+    chatId: string,
     status: CallStatus,
     userId: string,
   ) {
@@ -223,7 +220,7 @@ export class LiveKitWebhookController {
 
     await this.websocketCallService.emitEndedCall(
       call.id,
-      roomName,
+      chatId,
       status,
       userId,
     );
@@ -238,14 +235,14 @@ export class LiveKitWebhookController {
       );
     }
 
-    await this.liveKitService.deleteRoom(roomName);
+    await this.liveKitService.deleteRoom(chatId);
   }
 
   // ----------------------
   // Room Finished
   // ----------------------
-  private async handleRoomFinished(roomName: string) {
-    console.log('[room_finished] Room:', roomName);
-    await this.callService.cleanUpPendingCalls(roomName);
+  private async handleRoomFinished(chatId: string) {
+    console.log('[room_finished] Room:', chatId);
+    await this.callService.cleanUpPendingCalls(chatId);
   }
 }

@@ -1,7 +1,7 @@
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
-import { SystemMessageJSONContent } from "@/components/ui/messages/SystemMessageContent";
 import { parseJsonContent } from "@/common/utils/parseJsonContent";
+import { SystemMessageJSONContent } from "@/components/ui/messages/content/SystemMessageContent";
 
 type GetSystemMessageContentProps = {
   systemEvent?: SystemEventType | null;

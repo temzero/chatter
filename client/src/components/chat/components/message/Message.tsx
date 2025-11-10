@@ -6,7 +6,6 @@ import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { MessageReactionDisplay } from "@/components/ui/messages/MessageReactionsDisplay";
 import { handleQuickReaction } from "@/common/utils/message/quickReaction";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
-import { SystemMessageJSONContent } from "@/components/ui/messages/SystemMessageContent";
 import { MessageContextMenu } from "./MessageContextMenu";
 import {
   useIsMessageFocus,
@@ -15,8 +14,7 @@ import {
 } from "@/stores/modalStore";
 import MessageReplyPreview from "@/components/ui/messages/MessageReplyPreview";
 import SystemMessage from "./SystemMessage";
-import MessageBubble from "./MessageBubble";
-import CallMessageBubble from "./CallMessageBubble";
+import MessageContent from "../../../ui/messages/content/MessageContent";
 import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 import { AnimatePresence, motion } from "framer-motion";
 import { getMessageAnimation } from "@/common/animations/messageAnimations";
@@ -25,6 +23,10 @@ import { useMessageStore } from "@/stores/messageStore";
 import { MESSAGE_AVATAR_WIDTH } from "@/common/constants/messageAvatarDimension";
 import { MessageReadInfo } from "../../messagesContainer/MessageReadInfo";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
+import { getMessageAttachments } from "@/stores/messageAttachmentStore";
+import { SystemMessageJSONContent } from "../../../ui/messages/content/SystemMessageContent";
+import { CallMessageContent } from "../../../ui/messages/content/CallMessageContent";
+import MessageBubbleWrapper from "./wrapper/MessageBubbleWrapper";
 
 interface MessageProps {
   messageId: string;
@@ -48,6 +50,10 @@ const Message: React.FC<MessageProps> = ({
   chat,
 }) => {
   const message = useMessageStore((state) => state.messagesById[messageId]);
+  const call = message.call;
+
+  const attachments = getMessageAttachments(message.chatId, message.id);
+  const attachmentLength = attachments.length;
 
   const searchQuery = useMessageStore((state) => state.searchQuery);
   const showImportantOnly = useMessageStore((state) => state.showImportantOnly);
@@ -160,57 +166,67 @@ const Message: React.FC<MessageProps> = ({
             />
           )}
 
-          <div className="relative">
-            {message.call ? (
-              <CallMessageBubble message={message} isMe={isMe} />
+          <MessageBubbleWrapper
+            message={message}
+            isMe={isMe}
+            isRelyToThisMessage={isRelyToThisMessage}
+            attachmentLength={attachmentLength}
+          >
+            {call ? (
+              <CallMessageContent
+                call={call}
+                className="justify-between p-2 pl-3"
+                iconClassName="text-3xl"
+                textClassName="font-medium"
+              />
             ) : (
-              <MessageBubble
+              <MessageContent
                 message={message}
                 isMe={isMe}
                 isRelyToThisMessage={isRelyToThisMessage}
                 currentUserId={currentUserId ?? ""}
               />
             )}
+          </MessageBubbleWrapper>
 
-            <MessageReactionDisplay
-              isMe={isMe}
-              currentUserId={currentUserId}
-              messageId={messageId}
-              chatId={message.chatId}
-            />
+          <MessageReactionDisplay
+            isMe={isMe}
+            currentUserId={currentUserId}
+            messageId={messageId}
+            chatId={message.chatId}
+          />
 
-            <AnimatePresence>
-              {isFocus && !isRelyToThisMessage && contextMenuMousePos && (
-                <MessageContextMenu
-                  key={messageId}
-                  message={message}
-                  isMe={isMe}
-                  initialMousePosition={contextMenuMousePos}
-                  onClose={closeContextMenu}
-                />
-              )}
-            </AnimatePresence>
-
-            {message.isPinned && (
-              <div
-                className={clsx(
-                  "absolute top-0 text-red-400 rounded-full cursor-pointer hover:scale-110 transition-all",
-                  {
-                    "-left-5 rotate-[-45deg]": isMe,
-                    "-right-5 rotate-45": !isMe,
-                  }
-                )}
-                onClick={() => {
-                  chatWebSocketService.togglePinMessage({
-                    chatId: message.chatId,
-                    messageId: null,
-                  });
-                }}
-              >
-                <span className="material-symbols-outlined filled">keep</span>
-              </div>
+          <AnimatePresence>
+            {isFocus && !isRelyToThisMessage && contextMenuMousePos && (
+              <MessageContextMenu
+                key={messageId}
+                message={message}
+                isMe={isMe}
+                initialMousePosition={contextMenuMousePos}
+                onClose={closeContextMenu}
+              />
             )}
-          </div>
+          </AnimatePresence>
+
+          {message.isPinned && (
+            <div
+              className={clsx(
+                "absolute top-0 text-red-400 rounded-full cursor-pointer hover:scale-110 transition-all",
+                {
+                  "-left-5 rotate-[-45deg]": isMe,
+                  "-right-5 rotate-45": !isMe,
+                }
+              )}
+              onClick={() => {
+                chatWebSocketService.togglePinMessage({
+                  chatId: message.chatId,
+                  messageId: null,
+                });
+              }}
+            >
+              <span className="material-symbols-outlined filled">keep</span>
+            </div>
+          )}
         </div>
 
         {showInfo && isGroupChat && !isMe && (

@@ -186,6 +186,7 @@
     "start_broadcast": "Iniciar transmisión",
     "audient_count": "{{count}} espectadores",
     "screen_sharing": "Compartir pantalla",
+    "share_screen": "Compartir pantalla",
     "connecting": {
       "video": "Conectando llamada de video...",
       "voice": "Conectando llamada de voz..."
@@ -204,6 +205,20 @@
     "broadcast": {
       "check_devices": "Verifica tu micrófono, cámara y pantalla antes de transmitir",
       "share_screen": "Compartir pantalla"
+    },
+    "summary": {
+      "canceled": "Llamada cancelada",
+      "no_answer": "Nadie contestó",
+      "declined": "Llamada rechazada",
+      "ended": "Llamada finalizada",
+      "error": {
+        "line_busy": "Línea ocupada",
+        "permission_denied": "Permiso denegado",
+        "device_unavailable": "Dispositivo no disponible",
+        "connection_failed": "Conexión fallida",
+        "initiation_failed": "Inicio de llamada fallido",
+        "generic": "¡Algo salió mal!"
+      }
     }
   },
 

@@ -5,14 +5,16 @@ import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 import { MessageResponse } from "@/shared/types/responses/message.response";
 import { MessageReactionDisplay } from "@/components/ui/messages/MessageReactionsDisplay";
 import { messageAnimations } from "@/common/animations/messageAnimations";
-import { SystemMessageContent } from "@/components/ui/messages/SystemMessageContent";
-import { SystemMessageJSONContent } from "@/components/ui/messages/SystemMessageContent";
 import {
   useIsMessageFocus,
   useIsReplyToThisMessage,
   setOpenFocusMessageModal,
 } from "@/stores/modalStore";
 import { MessageContextMenu } from "./MessageContextMenu";
+import {
+  SystemMessageContent,
+  SystemMessageJSONContent,
+} from "../../../ui/messages/content/SystemMessageContent";
 
 type Props = {
   message: MessageResponse;
@@ -36,19 +38,6 @@ const SystemMessage = ({
   const isRelyToThisMessage = useIsReplyToThisMessage(messageId);
 
   if (!message || !currentUserId) return;
-
-  const getClass = () => {
-    const classes = [];
-    switch (systemEvent) {
-      case SystemEventType.MEMBER_LEFT:
-      case SystemEventType.MEMBER_KICKED:
-      case SystemEventType.MEMBER_BANNED:
-      case SystemEventType.CHAT_DELETED:
-        classes.push("text-red-400");
-        break;
-    }
-    return classes.join(" ");
-  };
 
   return (
     <motion.div
@@ -84,12 +73,10 @@ const SystemMessage = ({
       <div className="relative">
         <SystemMessageContent
           systemEvent={systemEvent}
-          call={message.call}
           currentUserId={currentUserId}
           senderId={senderId}
           senderDisplayName={senderDisplayName}
           JSONcontent={content}
-          ClassName={`italic truncate text-center opacity-60 ${getClass()}`}
         />
 
         <MessageReactionDisplay

@@ -51,7 +51,6 @@ const DeleteMessageModal: React.FC = () => {
         <p className="mb-6 text-sm text-gray-400">
           {t("modal.delete_message.description")}
         </p>
-        {/* <MessagePreview message={message} /> */}
       </div>
 
       <div className="flex custom-border-t">

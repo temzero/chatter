@@ -26,7 +26,7 @@ export const BroadcastInfo: React.FC<BroadcastInfoProps> = ({
         <ChatAvatar chat={chat} type="header" />
         <div className="flex flex-col justify-end">
           <h1 className="flex items-center gap-1 text-xs -mb-0.5">
-            {t("call.audience", { count: participantCount })}
+            {t("call.audient_count", { count: participantCount })}
           </h1>
           <h1 className="text-lg font-semibold">{chat.name}</h1>
         </div>

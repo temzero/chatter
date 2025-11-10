@@ -13,6 +13,7 @@ import { chatWebSocketService } from "@/services/websocket/chat.websocket.servic
 import { webSocketService } from "@/services/websocket/websocket.service";
 import { handleError } from "@/common/utils/handleError";
 import { useTranslation } from "react-i18next";
+import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 
 export function useChatSocketListeners() {
   const { t } = useTranslation();
@@ -43,7 +44,7 @@ export function useChatSocketListeners() {
         messageStore.updateMessageById(message.id, message);
         return;
       } else {
-        if (message.systemEvent) {
+        if (message.systemEvent && message.systemEvent !== SystemEventType.CALL) {
           handleSystemEventMessage(message);
           return;
         }
@@ -79,12 +80,12 @@ export function useChatSocketListeners() {
       }>
     ) => {
       try {
-        const { payload: data } = wsData;
+        const { payload } = wsData;
         const typingStore = useTypingStore.getState();
-        if (data.isTyping) {
-          typingStore.startTyping(data.chatId, data.userId);
+        if (payload.isTyping) {
+          typingStore.startTyping(payload.chatId, payload.userId);
         } else {
-          typingStore.stopTyping(data.chatId, data.userId);
+          typingStore.stopTyping(payload.chatId, payload.userId);
         }
       } catch (error) {
         handleError(error, "Typing failed");
@@ -100,10 +101,14 @@ export function useChatSocketListeners() {
       }>
     ) => {
       try {
-        const { payload: data } = wsData;
+        const { payload } = wsData;
         useChatMemberStore
           .getState()
-          .updateMemberLastRead(data.chatId, data.memberId, data.messageId);
+          .updateMemberLastRead(
+            payload.chatId,
+            payload.memberId,
+            payload.messageId
+          );
       } catch (error) {
         handleError(error, "Failed update reading");
       }
@@ -117,10 +122,10 @@ export function useChatSocketListeners() {
       }>
     ) => {
       try {
-        const { payload: data } = wsReaction;
+        const { payload } = wsReaction;
         useMessageStore
           .getState()
-          .updateMessageReactions(data.messageId, data.reactions);
+          .updateMessageReactions(payload.messageId, payload.reactions);
       } catch (error) {
         handleError(error, "Reaction failed");
       }
@@ -188,8 +193,10 @@ export function useChatSocketListeners() {
       wsDeleted: WsEmitChatMemberResponse<{ chatId: string; messageId: string }>
     ) => {
       try {
-        const { payload: data } = wsDeleted;
-        useMessageStore.getState().deleteMessage(data.chatId, data.messageId);
+        const { payload } = wsDeleted;
+        useMessageStore
+          .getState()
+          .deleteMessage(payload.chatId, payload.messageId);
       } catch (error) {
         handleError(error, "Can not delete message");
       }

@@ -3,8 +3,8 @@ import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { AnimatePresence } from "framer-motion";
 import { useMessageStore } from "@/stores/messageStore";
 import { MarkLastMessageRead } from "@/common/utils/message/markMessageRead";
-import ChannelMessage from "../components/message/MessageChannel";
 import { useTranslation } from "react-i18next";
+import ChannelMessage from "../components/message/channel/ChannelMessage";
 
 interface ChannelMessagesProps {
   chat: ChatResponse;

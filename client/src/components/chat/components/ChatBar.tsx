@@ -39,6 +39,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
   useEffect(() => {
     if (chatId && inputRef.current) {
       const draft = getDraftMessage(chatId);
+      console.log("DRAFT: ", draft);
       inputRef.current.value = draft || "";
       setHasTextContent(!!draft?.trim());
       requestAnimationFrame(() => {
@@ -50,6 +51,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
 
   useEffect(() => {
     const inputValueAtMount = inputRef.current?.value;
+    console.log("inputValueAtMount", inputValueAtMount);
     return () => {
       if (chatId && inputValueAtMount) {
         setDraftMessage(chatId, inputValueAtMount);
@@ -98,8 +100,14 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
   };
 
   const handleInput = () => {
-    setHasTextContent(!!inputRef.current?.value.trim());
+    const value = inputRef.current?.value || "";
+    setHasTextContent(!!value.trim());
     updateInputHeight();
+
+    // LIVE update the draft in the store
+    if (chatId) {
+      setDraftMessage(chatId, value);
+    }
   };
 
   const handleKeyDown = useCallback(
@@ -128,14 +136,14 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
         });
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       chatId,
       myMemberId,
       attachedFiles,
       replyToMessageId,
-      clearTypingState,
       setDraftMessage,
+      sendMessageAndReset,
+      clearTypingState,
       closeModal,
     ]
   );

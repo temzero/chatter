@@ -10,7 +10,6 @@ import {
 import { CallEvent } from 'src/shared/types/enums/websocket-events.enum';
 import { CallStatus } from 'src/shared/types/call';
 import { CallService } from 'src/modules/call/call.service';
-import { ChatMember } from 'src/modules/chat-member/entities/chat-member.entity';
 
 @Injectable()
 export class WebsocketCallService {
@@ -27,24 +26,25 @@ export class WebsocketCallService {
     isVideoCall: boolean,
     isBroadcast?: boolean,
   ) {
-    // 1. Get chat members
-    const chatMembers = await this.chatMemberService.getChatMembers(chatId);
-    // const otherMembers = chatMembers.filter(
-    //   (m) => m.userId !== initiatorUserId,
-    // );
-
-    // 2. Filter only free members (not in any active call)
-    const freeMembers: ChatMember[] = [];
-    for (const member of chatMembers) {
-      const isInCall = await this.callService.isUserInAnyActiveCall(
-        member.userId,
+    // 1. Get initiator member
+    const initiatorMember =
+      await this.chatMemberService.getMemberByChatIdAndUserId(
+        chatId,
+        initiatorUserId,
       );
-      if (!isInCall) {
-        freeMembers.push(member);
-      }
+
+    if (!initiatorMember) {
+      console.log('⚠️ Initiator member not found!');
+      return { success: false, reason: 'INITIATION_FAILED' };
     }
 
-    if (freeMembers.length === 0) {
+    // 2. Check if any member is free
+    const freeMembersCount = await this.getAvailableMembersCount(
+      chatId,
+      initiatorUserId,
+    );
+
+    if (freeMembersCount === 0) {
       console.log(
         '⚠️ No free members available, sending CALL_ERROR to initiator',
       );
@@ -61,18 +61,7 @@ export class WebsocketCallService {
       return { success: false, reason: CallError.LINE_BUSY };
     }
 
-    // 3. Get initiator member
-    const initiatorMember =
-      await this.chatMemberService.getMemberByChatIdAndUserId(
-        chatId,
-        initiatorUserId,
-      );
-    if (!initiatorMember) {
-      console.log('⚠️ Initiator member not found!');
-      return { success: false, reason: 'INITIATION_FAILED' };
-    }
-
-    // 4. Build response
+    // 3. Build response
     const response: IncomingCallResponse = {
       callId,
       chatId,
@@ -84,26 +73,20 @@ export class WebsocketCallService {
       participantsCount: 1,
     };
 
-    console.log('🔔 Emit INCOMING CALL to free members');
+    console.log(`🔔 Emit INCOMING CALL to chat members (initiator included)`);
 
-    // 5. Emit to free members
-    for (const member of freeMembers) {
-      console.log(`🔹 Emitting INCOMING_CALL to ${member.userId}`);
-      this.websocketNotificationService.emitToUser(
-        member.userId,
-        CallEvent.INCOMING_CALL,
-        response,
-      );
-    }
-
-    // Emit to caller to sync call info
-    this.websocketNotificationService.emitToUser(
-      initiatorUserId,
+    // 4. Emit using the unified method
+    await this.websocketNotificationService.emitToChatMembers(
+      chatId,
       CallEvent.INCOMING_CALL,
       response,
+      {
+        senderId: initiatorUserId,
+        excludeSender: false, // Include initiator for sync
+      },
     );
 
-    return { success: true, chatId };
+    return { success: true, chatId, availableMembersCount: freeMembersCount };
   }
 
   async emitStartCall(callId: string, chatId: string, initiatorUserId: string) {
@@ -161,5 +144,25 @@ export class WebsocketCallService {
       endCallResponse,
       { senderId },
     );
+  }
+
+  // Helper method to check available members count
+  private async getAvailableMembersCount(
+    chatId: string,
+    excludeUserId?: string,
+  ): Promise<number> {
+    const chatMembers = await this.chatMemberService.getChatMembers(chatId);
+    let freeCount = 0;
+
+    for (const member of chatMembers) {
+      if (excludeUserId && member.userId === excludeUserId) continue;
+
+      const isInCall = await this.callService.isUserInAnyActiveCall(
+        member.userId,
+      );
+      if (!isInCall) freeCount++;
+    }
+
+    return freeCount;
   }
 }

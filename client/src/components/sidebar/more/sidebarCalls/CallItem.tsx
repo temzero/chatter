@@ -3,8 +3,8 @@ import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { CallResponse } from "@/shared/types/responses/call.response";
 import { useCallStore } from "@/stores/callStore";
 import { useChatStore } from "@/stores/chatStore";
-import { getCallColor } from "@/common/utils/call/callHelpers";
-import { getCallText } from "@/common/utils/call/getCallText";
+import { getCallStatusColor } from "@/common/utils/call/callHelpers";
+import { getCallStatusText } from "@/common/utils/call/callTextHelpers";
 import { formatDateTime } from "@/common/utils/format/formatDateTime";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import CallIcon from "@/components/ui/icons/CallIcon";
@@ -47,6 +47,8 @@ const CallItem: React.FC<CallItemProps> = ({ call, isCaller, onDelete }) => {
   const roundedClass =
     call.chat.type === ChatType.DIRECT ? "rounded-full" : "rounded-2xl";
 
+  const isChannel = call.chat.type === ChatType.CHANNEL;
+
   return (
     <div
       className={`flex items-center gap-3 p-2 py-3 transition custom-border-b select-none cursor-pointer relative ${
@@ -67,8 +69,8 @@ const CallItem: React.FC<CallItemProps> = ({ call, isCaller, onDelete }) => {
       <>
         <div className="flex-1">
           <p className="font-medium">{chat.name}</p>
-          <p className={`${getCallColor(call.status)}`}>
-            {getCallText(call.status, call.startedAt, call.endedAt)}
+          <p className={`${getCallStatusColor(call.status)}`}>
+            {getCallStatusText(call.status, call.startedAt, call.endedAt)}
           </p>
           <p className="text-xs text-muted-foreground opacity-50">
             {formatDateTime(call.createdAt)}
@@ -94,7 +96,7 @@ const CallItem: React.FC<CallItemProps> = ({ call, isCaller, onDelete }) => {
         >
           <CallIcon
             status={call.status}
-            isCaller={isCaller}
+            isBroadcast={isChannel}
             className="group-hover:hidden"
           />
           <div

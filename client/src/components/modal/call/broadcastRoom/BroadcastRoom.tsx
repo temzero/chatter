@@ -5,12 +5,12 @@ import { RemoteParticipant, RoomEvent } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
 import { CallControls } from "../callRoom/CallControls";
 import { BroadcastInfo } from "./BroadCastInfo";
-import Button from "@/components/ui/buttons/Button";
 import { LocalStreamPreview } from "@/components/ui/streams/LocalStreamPreview";
 import { DraggableContainer } from "@/components/ui/layout/DraggableContainer";
 import { useIsMobile } from "@/stores/deviceStore";
-import BroadcastStream from "./BroadcastStream";
 import { useTranslation } from "react-i18next";
+import Button from "@/components/ui/buttons/Button";
+import BroadcastStream from "./BroadcastStream";
 
 const BroadcastRoom = ({
   chat,
@@ -39,9 +39,10 @@ const BroadcastRoom = ({
   const [participants, setParticipants] = useState<RemoteParticipant[]>([]);
   const [isObjectCover, setObjectCover] = useState<boolean>(false);
 
+  const hasVideo = localScreenStream || !isCaller;
+
   useEffect(() => {
     if (!room) return;
-
     // Get the initiator (should already be in the room)
     const initParticipant = Array.from(room.remoteParticipants.values()).find(
       (p) => p.identity === initiatorUserId
@@ -122,7 +123,7 @@ const BroadcastRoom = ({
             onClick={() => toggleLocalScreenShare()}
             icon="screen_share"
           >
-            {t("call.room.share_screen")}
+            {t("call.share_screen")}
           </Button>
           <Button
             variant="transparent"
@@ -137,14 +138,15 @@ const BroadcastRoom = ({
       )}
 
       <div className="flex gap-2 absolute top-2 right-2">
-        <Button
-          variant="transparent"
-          className="w-8 h-8 opacity-70 text-white"
-          // isIconFilled={true}
-          isRoundedFull
-          onClick={() => setObjectCover((prev) => !prev)}
-          icon={isObjectCover ? "picture_in_picture_center" : "aspect_ratio"}
-        />
+        {hasVideo && (
+          <Button
+            variant="transparent"
+            className="w-8 h-8 opacity-70 text-white"
+            isRoundedFull
+            onClick={() => setObjectCover((prev) => !prev)}
+            icon={isObjectCover ? "picture_in_picture_center" : "aspect_ratio"}
+          />
+        )}
 
         {isMobile || (
           <Button

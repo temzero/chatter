@@ -1,25 +1,17 @@
 import React, { useState, useRef } from "react";
 import clsx from "clsx";
-import { motion } from "framer-motion";
-import RenderMultipleAttachments from "@/components/ui/attachments/RenderMultipleAttachments";
-import { SystemMessageJSONContent } from "@/components/ui/messages/SystemMessageContent";
-import SystemMessage from "./SystemMessage";
-import ForwardedMessagePreview from "@/components/ui/messages/ForwardMessagePreview";
+import { AnimatePresence, motion } from "framer-motion";
+import { useMessageStore } from "@/stores/messageStore";
 import { MessageReactionDisplay } from "@/components/ui/messages/MessageReactionsDisplay";
 import { formatTime } from "@/common/utils/format/formatTime";
 import { getCurrentUserId } from "@/stores/authStore";
 import { handleQuickReaction } from "@/common/utils/message/quickReaction";
 import { scrollToMessageById } from "@/common/utils/message/scrollToMessageById";
-import {
-  getMessageSendingAnimation,
-  messageAnimations,
-} from "@/common/animations/messageAnimations";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
-import { MessageContextMenu } from "./MessageContextMenu";
-import { MessageHorizontalPreview } from "./MessageHorizontalPreview";
+import { MessageContextMenu } from "../MessageContextMenu";
 import { MessageHorizontalPreviewTypes } from "@/common/enums/MessageHorizontalPreviewTypes";
-import { BroadcastMessage } from "./BroadcastMessage";
+import { ChannelCallMessageContent } from "./ChannelCallMessageContent";
 import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 import { useIsMobile } from "@/stores/deviceStore";
 import {
@@ -27,7 +19,12 @@ import {
   useIsReplyToThisMessage,
   setOpenFocusMessageModal,
 } from "@/stores/modalStore";
-import { useMessageStore } from "@/stores/messageStore";
+import { messageAnimations } from "@/common/animations/messageAnimations";
+import SystemMessage from "../SystemMessage";
+import ChannelMessageContent from "./ChannelMessageContent";
+import ChannelMessageBubbleWrapper from "../wrapper/ChannelMessageBubbleWrapper";
+import { SystemMessageJSONContent } from "../../../../ui/messages/content/SystemMessageContent";
+import { MessageHorizontalPreview } from "../preview/MessageHorizontalPreview";
 
 interface ChannelMessageProps {
   messageId: string;
@@ -60,7 +57,6 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
   const closeContextMenu = () => {
     setContextMenuPosition(null);
   };
-  const attachments = message.attachments ?? [];
 
   // Check system message
   const isSystemMessage = !!message.systemEvent;
@@ -104,45 +100,31 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
           />
         </div>
       )}
-      <motion.div
+
+      <ChannelMessageBubbleWrapper
+        message={message}
         onDoubleClick={() => handleQuickReaction(message.id, message.chatId)}
         onContextMenu={handleContextMenu}
-        className={`rounded-xl overflow-hidden ${
-          message.isImportant ? "border-4 border-red-500/80" : "custom-border"
-        }`}
-        {...getMessageSendingAnimation(
-          message.status === MessageStatus.SENDING
-        )}
       >
-        {message.call && <BroadcastMessage call={message.call} />}
-        {attachments.length > 0 && (
-          <div className="rounded overflow-hidden shadow-lg">
-            <RenderMultipleAttachments
-              chatId={message.chatId}
-              messageId={message.id}
-            />
-          </div>
-        )}
-        {message.content && (
-          <p className={clsx("backdrop-blur p-4")}>{message.content}</p>
-        )}
-
-        {message.forwardedFromMessage && (
-          <ForwardedMessagePreview
+        {message.call ? (
+          <ChannelCallMessageContent call={message.call} />
+        ) : (
+          <ChannelMessageContent
             message={message}
-            originalSender={message.forwardedFromMessage?.sender}
-            currentUserId={currentUserId ?? undefined}
+            currentUserId={currentUserId}
             isMe={isMe}
           />
         )}
+      </ChannelMessageBubbleWrapper>
 
-        <MessageReactionDisplay
-          isChannel={true}
-          currentUserId={currentUserId}
-          messageId={message.id}
-          chatId={message.chatId}
-        />
+      <MessageReactionDisplay
+        isChannel={true}
+        currentUserId={currentUserId}
+        messageId={message.id}
+        chatId={message.chatId}
+      />
 
+      <AnimatePresence>
         {isFocus && !isReplyToThisMessage && (
           <MessageContextMenu
             message={message}
@@ -153,20 +135,20 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
             onClose={closeContextMenu}
           />
         )}
+      </AnimatePresence>
 
-        <div
-          className="absolute bottom-1 right-1 text-xs italic opacity-0 group-hover:opacity-80 font-semibold bg-[--sidebar-color] p-0.5 px-1.5 rounded-full backdrop-blur-lg"
-          style={{ zIndex: 1 }}
-        >
-          {formatTime(message.createdAt)}
-        </div>
+      <div
+        className="absolute bottom-1 right-1 text-xs italic opacity-0 group-hover:opacity-80 font-semibold bg-[--sidebar-color] p-0.5 px-1.5 rounded-full backdrop-blur-lg"
+        style={{ zIndex: 1 }}
+      >
+        {formatTime(message.createdAt)}
+      </div>
 
-        {message.status === MessageStatus.FAILED && (
-          <h1 className="text-red-500 text-sm text-center">
-            Failed to send message
-          </h1>
-        )}
-      </motion.div>
+      {message.status === MessageStatus.FAILED && (
+        <h1 className="text-red-500 text-sm text-center">
+          Failed to send message
+        </h1>
+      )}
     </motion.div>
   );
 };

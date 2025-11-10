@@ -1,5 +1,6 @@
 import { webSocketService } from "./websocket.service";
 import { CallEvent } from "@/shared/types/enums/websocket-events.enum";
+import { WsEmitChatMemberResponse } from "@/shared/types/responses/ws-emit-chat-member.response";
 import {
   CallActionRequest,
   CallActionResponse,
@@ -10,18 +11,26 @@ import {
 
 export const callWebSocketService = {
   // INCOMING CALL
-  onIncomingCall(callback: (data: IncomingCallResponse) => void) {
+  onIncomingCall(
+    callback: (data: WsEmitChatMemberResponse<IncomingCallResponse>) => void
+  ) {
     webSocketService.on(CallEvent.INCOMING_CALL, callback);
   },
-  offIncomingCall(callback: (data: CallActionResponse) => void) {
+  offIncomingCall(
+    callback: (data: WsEmitChatMemberResponse<CallActionResponse>) => void
+  ) {
     webSocketService.off(CallEvent.INCOMING_CALL, callback);
   },
 
   // START CALL
-  onStartCall(callback: (data: UpdateCallPayload) => void) {
+  onStartCall(
+    callback: (data: WsEmitChatMemberResponse<UpdateCallPayload>) => void
+  ) {
     webSocketService.on(CallEvent.START_CALL, callback);
   },
-  offStartCall(callback: (data: UpdateCallPayload) => void) {
+  offStartCall(
+    callback: (data: WsEmitChatMemberResponse<UpdateCallPayload>) => void
+  ) {
     webSocketService.off(CallEvent.START_CALL, callback);
   },
 
@@ -30,10 +39,14 @@ export const callWebSocketService = {
     console.log("UpdateCallPayload", payload);
     webSocketService.emit(CallEvent.UPDATE_CALL, payload);
   },
-  onCallUpdated(callback: (data: UpdateCallPayload) => void) {
+  onCallUpdated(
+    callback: (data: WsEmitChatMemberResponse<UpdateCallPayload>) => void
+  ) {
     webSocketService.on(CallEvent.UPDATE_CALL, callback);
   },
-  offCallUpdated(callback: (data: UpdateCallPayload) => void) {
+  offCallUpdated(
+    callback: (data: WsEmitChatMemberResponse<UpdateCallPayload>) => void
+  ) {
     webSocketService.off(CallEvent.UPDATE_CALL, callback);
   },
 
@@ -50,21 +63,25 @@ export const callWebSocketService = {
     webSocketService.emit(CallEvent.DECLINE_CALL, payload);
   },
   onCallDeclined(
-    callback: (data: CallActionResponse & { isCallerCancel?: boolean }) => void
+    callback: (data: WsEmitChatMemberResponse<CallActionResponse>) => void
   ) {
     webSocketService.on(CallEvent.DECLINE_CALL, callback);
   },
   offCallDeclined(
-    callback: (data: CallActionResponse & { isCallerCancel?: boolean }) => void
+    callback: (data: WsEmitChatMemberResponse<CallActionResponse>) => void
   ) {
     webSocketService.off(CallEvent.DECLINE_CALL, callback);
   },
 
   // END CALL
-  onCallEnded(callback: (data: UpdateCallPayload) => void) {
+  onCallEnded(
+    callback: (data: WsEmitChatMemberResponse<UpdateCallPayload>) => void
+  ) {
     webSocketService.on(CallEvent.CALL_ENDED, callback);
   },
-  offCallEnded(callback: (data: UpdateCallPayload) => void) {
+  offCallEnded(
+    callback: (data: WsEmitChatMemberResponse<UpdateCallPayload>) => void
+  ) {
     webSocketService.off(CallEvent.CALL_ENDED, callback);
   },
 

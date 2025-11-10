@@ -186,6 +186,7 @@
     "start_broadcast": "प्रसारण शुरू करें",
     "audient_count": "{{count}} दर्शक",
     "screen_sharing": "स्क्रीन साझा करना",
+    "share_screen": "स्क्रीन साझा करें",
     "connecting": {
       "video": "वीडियो कॉल जोड़ रहे हैं...",
       "voice": "वॉइस कॉल जोड़ रहे हैं..."
@@ -204,6 +205,20 @@
     "broadcast": {
       "check_devices": "प्रसारण से पहले माइक्रोफोन, कैमरा और स्क्रीन जांचें",
       "share_screen": "स्क्रीन साझा करें"
+    },
+    "summary": {
+      "canceled": "कॉल रद्द कर दी गई",
+      "no_answer": "किसी ने जवाब नहीं दिया",
+      "declined": "कॉल अस्वीकार कर दी गई",
+      "ended": "कॉल समाप्त हो गई",
+      "error": {
+        "line_busy": "लाइन व्यस्त है",
+        "permission_denied": "अनुमति अस्वीकृत",
+        "device_unavailable": "डिवाइस अनुपलब्ध",
+        "connection_failed": "कनेक्शन विफल",
+        "initiation_failed": "कॉल आरंभ करने में विफल",
+        "generic": "कुछ गलत हो गया!"
+      }
     }
   },
 

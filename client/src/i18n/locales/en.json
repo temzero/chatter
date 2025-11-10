@@ -186,6 +186,7 @@
     "start_broadcast": "Start broadcast",
     "audient_count": "{{count}} audience",
     "screen_sharing": "Screen Sharing",
+    "share_screen": "Share Screen",
     "connecting": {
       "video": "Connecting video call...",
       "voice": "Connecting voice call..."
@@ -204,6 +205,20 @@
     "broadcast": {
       "check_devices": "Check your mic, webcam, and screen before broadcasting",
       "share_screen": "Share screen"
+    },
+    "summary": {
+      "canceled": "Call canceled",
+      "no_answer": "No one answered",
+      "declined": "Call declined",
+      "ended": "Call ended",
+      "error": {
+        "line_busy": "Line is busy",
+        "permission_denied": "Permission denied",
+        "device_unavailable": "Device unavailable",
+        "connection_failed": "Connection failed",
+        "initiation_failed": "Call initiation failed",
+        "generic": "Something went wrong!"
+      }
     }
   },
 

@@ -186,6 +186,7 @@
     "start_broadcast": "Bắt đầu phát sóng",
     "audient_count": "{{count}} khán giả",
     "screen_sharing": "Chia sẻ màn hình",
+    "share_screen": "Chia sẻ màn hình",
     "connecting": {
       "video": "Đang kết nối cuộc gọi video...",
       "voice": "Đang kết nối cuộc gọi thoại..."
@@ -204,6 +205,20 @@
     "broadcast": {
       "check_devices": "Kiểm tra mic, webcam và màn hình trước khi phát sóng",
       "share_screen": "Chia sẻ màn hình"
+    },
+    "summary": {
+      "canceled": "Cuộc gọi đã hủy",
+      "no_answer": "Không ai trả lời",
+      "declined": "Cuộc gọi bị từ chối",
+      "ended": "Cuộc gọi kết thúc",
+      "error": {
+        "line_busy": "Đường dây bận",
+        "permission_denied": "Quyền bị từ chối",
+        "device_unavailable": "Thiết bị không khả dụng",
+        "connection_failed": "Kết nối thất bại",
+        "initiation_failed": "Khởi tạo cuộc gọi thất bại",
+        "generic": "Đã xảy ra lỗi!"
+      }
     }
   },
 

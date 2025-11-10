@@ -14,6 +14,7 @@ type SystemMessageJSONContent = {
 };
 
 export const handleSystemEventMessage = (message: MessageResponse) => {
+  console.log("handleSystemEventMessage");
   if (!message.systemEvent) {
     return;
   }
@@ -107,13 +108,6 @@ export const handleSystemEventMessage = (message: MessageResponse) => {
     },
 
     [SystemEventType.MEMBER_BANNED]: () => {
-      if (targetId) {
-        memberStore.updateMemberLocally?.(chatId, targetId, {
-          status: ChatMemberStatus.BANNED,
-        });
-      }
-    },
-    [SystemEventType.CALL]: () => {
       if (targetId) {
         memberStore.updateMemberLocally?.(chatId, targetId, {
           status: ChatMemberStatus.BANNED,

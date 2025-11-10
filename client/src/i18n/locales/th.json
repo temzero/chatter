@@ -186,6 +186,7 @@
     "start_broadcast": "เริ่มออกอากาศ",
     "audient_count": "{{count}} ผู้ชม",
     "screen_sharing": "การแชร์หน้าจอ",
+    "share_screen": "แชร์หน้าจอ",
     "connecting": {
       "video": "กำลังเชื่อมต่อวิดีโอคอล...",
       "voice": "กำลังเชื่อมต่อสายเสียง..."
@@ -204,9 +205,23 @@
     "broadcast": {
       "check_devices": "ตรวจสอบไมค์ กล้อง และหน้าจอก่อนออกอากาศ",
       "share_screen": "แชร์หน้าจอ"
+    },
+    "summary": {
+      "canceled": "ยกเลิกการโทร",
+      "no_answer": "ไม่มีผู้ตอบรับ",
+      "declined": "ปฏิเสธการโทร",
+      "ended": "การโทรสิ้นสุดลง",
+      "error": {
+        "line_busy": "สายไม่ว่าง",
+        "permission_denied": "ปฏิเสธการอนุญาต",
+        "device_unavailable": "อุปกรณ์ไม่พร้อมใช้งาน",
+        "connection_failed": "การเชื่อมต่อล้มเหลว",
+        "initiation_failed": "เริ่มการโทรไม่สำเร็จ",
+        "generic": "เกิดข้อผิดพลาด!"
+      }
     }
   },
-  
+
   "emoji": {
     "recently": "ล่าสุด",
     "smileys_emotion": "รอยยิ้มและอารมณ์",

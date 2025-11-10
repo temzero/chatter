@@ -10,7 +10,7 @@ import { getCloseModal } from "@/stores/modalStore";
 import {
   SystemMessageContent,
   SystemMessageJSONContent,
-} from "@/components/ui/messages/SystemMessageContent";
+} from "@/components/ui/messages/content/SystemMessageContent";
 
 interface MessageReplyPreviewProps {
   replyMessage: MessageResponse;
@@ -100,7 +100,7 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
                   senderId={replyMessage.sender.id}
                   senderDisplayName={replyMessage.sender.displayName}
                   JSONcontent={replyMessage.content as SystemMessageJSONContent}
-                  ClassName="gap-1"
+                  className="gap-1"
                 />
               ) : (
                 replyMessage.content && (

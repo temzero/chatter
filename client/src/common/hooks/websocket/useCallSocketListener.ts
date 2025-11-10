@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { toast } from "react-toastify";
 import { LocalCallStatus } from "@/common/enums/LocalCallStatus";
 import { CallStatus } from "@/shared/types/enums/call-status.enum";
-import { handleError } from "@/common/utils/handleError";
 import { ModalType, useModalStore } from "@/stores/modalStore";
 import { useCallStore } from "@/stores/callStore";
 import { useCallSounds } from "@/common/hooks/useCallSound";
@@ -19,6 +18,7 @@ import {
   CallErrorResponse,
 } from "@shared/types/call";
 import { useTranslation } from "react-i18next";
+import { WsEmitChatMemberResponse } from "@/shared/types/responses/ws-emit-chat-member.response";
 
 export function useCallSocketListeners() {
   const { t } = useTranslation();
@@ -33,8 +33,10 @@ export function useCallSocketListeners() {
           await callService.fetchPendingCalls();
 
         if (pendingCalls?.length > 0) {
-          const mostRecentCall = pendingCalls[0];
-          handleIncomingCall(mostRecentCall);
+          const data: WsEmitChatMemberResponse<IncomingCallResponse> = {
+            payload: pendingCalls[0],
+          };
+          handleIncomingCall(data);
 
           if (pendingCalls.length > 1) {
             toast.info(
@@ -43,12 +45,14 @@ export function useCallSocketListeners() {
           }
         }
       } catch (error) {
-        handleError(error, "Failed to load pending calls");
+        console.error(error);
       }
     };
 
-    const handleIncomingCall = (callResponse: IncomingCallResponse) => {
-      // console.log("[INCOMING_CALL]");
+    const handleIncomingCall = (
+      data: WsEmitChatMemberResponse<IncomingCallResponse>
+    ) => {
+      console.log("[INCOMING_CALL]", data);
       const {
         callId,
         chatId,
@@ -57,10 +61,17 @@ export function useCallSocketListeners() {
         initiatorMemberId,
         status,
         isBroadcast,
-      } = callResponse;
+      } = data.payload;
 
       const currentUserId = useAuthStore.getState().currentUser?.id;
       const isCaller = initiatorUserId === currentUserId;
+
+      if (!isCaller && useCallStore.getState().callId) {
+        console.log(
+          "Already have an incoming call, ignoring new incoming call"
+        );
+        return;
+      }
 
       useCallStore.setState({
         callId,
@@ -84,13 +95,17 @@ export function useCallSocketListeners() {
       }
     };
 
-    const handleStartCall = (data: UpdateCallPayload) => {
-      // console.log("[CALL_START]");
-      const { callId, chatId } = data;
+    const handleStartCall = (
+      data: WsEmitChatMemberResponse<UpdateCallPayload>
+    ) => {
+      console.log("[CALL_START]", data);
+      const { callId, chatId, initiatorUserId } = data.payload;
       const callStore = useCallStore.getState();
 
       // ✅ Match on chatId instead of callId
       if (callStore.chatId !== chatId) {
+        console.log("callStore.chatId ", callStore.chatId);
+        console.log("chatId ", chatId);
         console.warn("chatId mismatch");
         return;
       }
@@ -100,7 +115,7 @@ export function useCallSocketListeners() {
         useCallStore.setState({ callId });
       }
 
-      if (data.initiatorUserId === currentUserId) {
+      if (initiatorUserId === currentUserId) {
         useCallStore.setState({
           localCallStatus: LocalCallStatus.CONNECTED,
           callStatus: CallStatus.IN_PROGRESS,
@@ -114,9 +129,11 @@ export function useCallSocketListeners() {
       }
     };
 
-    const handleUpdateCall = (updatedCall: UpdateCallPayload) => {
+    const handleUpdateCall = (
+      updatedCall: WsEmitChatMemberResponse<UpdateCallPayload>
+    ) => {
       // console.log("[UPDATE_CALL]");
-      const { callId, isVideoCall, callStatus } = updatedCall;
+      const { callId, isVideoCall, callStatus } = updatedCall.payload;
       const callStore = useCallStore.getState();
 
       if (callStore.callId !== callId) {
@@ -140,12 +157,16 @@ export function useCallSocketListeners() {
       }
     };
 
-    const handleCallDeclined = (data: CallActionResponse) => {
+    const handleCallDeclined = (
+      data: WsEmitChatMemberResponse<CallActionResponse>
+    ) => {
       // console.log("[CALL_DECLINED]");
-      const { callId, isCallerCancel } = data;
+      const { callId, isCallerCancel } = data.payload;
       const callStore = useCallStore.getState();
 
       if (callStore.callId !== callId) {
+        console.log("callStore.callId", callStore.callId);
+        console.log("callId", callId);
         console.error("callId mismatch");
         return;
       }
@@ -157,9 +178,11 @@ export function useCallSocketListeners() {
       }
     };
 
-    const handleCallEnded = (data: UpdateCallPayload) => {
+    const handleCallEnded = (
+      data: WsEmitChatMemberResponse<UpdateCallPayload>
+    ) => {
       // console.log("CALL_ENDED");
-      const { callId } = data;
+      const { callId } = data.payload;
       const callStore = useCallStore.getState();
 
       if (callStore.callId !== callId) {
@@ -181,7 +204,7 @@ export function useCallSocketListeners() {
       const { reason, callId } = data;
 
       if (reason === CallError.LINE_BUSY) {
-        toast.error( t("toast.call.cannot_start"));
+        toast.error(t("toast.call.cannot_start"));
         const callStore = useCallStore.getState();
 
         if (callStore.callId !== callId) {
@@ -216,5 +239,5 @@ export function useCallSocketListeners() {
       if (!socket) return;
       callWebSocketService.removeAllListeners();
     };
-  }, [currentUserId]);
+  }, [currentUserId, t]);
 }

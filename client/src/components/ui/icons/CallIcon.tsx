@@ -1,46 +1,34 @@
 import React from "react";
+import { motion } from "framer-motion";
 import { CallStatus } from "@/shared/types/enums/call-status.enum";
-import { getCallColor } from "@/common/utils/call/callHelpers";
+import {
+  getCallStatusColor,
+  getCallStatusIcon,
+} from "@/common/utils/call/callHelpers";
+import { callAnimations } from "@/common/animations/callAnimations";
 
 interface CallIconProps {
   status: CallStatus;
-  isCaller: boolean;
-  className?: string; // optional extra classes
+  isBroadcast?: boolean; // optional for broadcast calls
+  className?: string;
 }
 
 const CallIcon: React.FC<CallIconProps> = ({
   status,
-  isCaller,
+  isBroadcast = false,
   className = "",
 }) => {
-  let icon = "call";
-  let iconClasses = getCallColor(status);
-
-  switch (status) {
-    case CallStatus.DIALING:
-      icon = "ring_volume";
-      break;
-    case CallStatus.IN_PROGRESS:
-      icon = "phone_in_talk";
-      break;
-    case CallStatus.COMPLETED:
-      icon = isCaller ? "phone_forwarded" : "phone_callback";
-      break;
-    case CallStatus.MISSED:
-      icon = "phone_missed";
-      if (isCaller) iconClasses += " scale-x-[-1]";
-      break;
-    case CallStatus.FAILED:
-      icon = "e911_avatar";
-      break;
-  }
+  const icon = getCallStatusIcon(status, isBroadcast);
+  const iconColor = getCallStatusColor(status);
+  const motionProps = callAnimations.callIcon(status);
 
   return (
-    <span
-      className={`material-symbols-outlined select-none ${iconClasses} ${className}`}
+    <motion.span
+      className={`material-symbols-outlined filled select-none ${iconColor} ${className}`}
+      {...motionProps}
     >
       {icon}
-    </span>
+    </motion.span>
   );
 };
 

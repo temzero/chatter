@@ -11,7 +11,7 @@ const ConnectingCall = ({ chat }: { chat: ChatResponse }) => {
   const isVideoCall = useCallStore((state) => state.isVideoCall);
 
   return (
-    <div className="w-full h-full p-10 flex flex-col items-center justify-center gap-4">
+    <div className="w-full h-full p-10 flex flex-col items-center justify-between gap-4">
       {/* Header (avatar + chat name) */}
       <CallHeader chat={chat} />
       <div className="flex flex-col items-center gap-2 mt-8">
@@ -25,10 +25,9 @@ const ConnectingCall = ({ chat }: { chat: ChatResponse }) => {
       {/* Optional: hang up button */}
       <button
         onClick={() => useCallStore.getState().endCall()}
-        className="mt-6 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center gap-2"
+        className="mt-6 px-6 py-3 hover:bg-red-500 rounded-full flex items-center gap-2"
       >
-        <span className="material-symbols-outlined">call_end</span>t
-        {"common.actions.cancel"}
+        {t("common.actions.cancel")}
       </button>
     </div>
   );

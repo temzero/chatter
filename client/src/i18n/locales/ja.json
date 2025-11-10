@@ -186,6 +186,7 @@
     "start_broadcast": "配信を開始",
     "audient_count": "{{count}} 人の視聴者",
     "screen_sharing": "画面共有",
+    "share_screen": "画面を共有",
     "connecting": {
       "video": "ビデオ通話を接続中...",
       "voice": "音声通話を接続中..."
@@ -204,9 +205,23 @@
     "broadcast": {
       "check_devices": "配信前にマイク、カメラ、画面を確認してください",
       "share_screen": "画面を共有"
+    },
+    "summary": {
+      "canceled": "通話がキャンセルされました",
+      "no_answer": "応答がありません",
+      "declined": "通話が拒否されました",
+      "ended": "通話が終了しました",
+      "error": {
+        "line_busy": "回線が混雑しています",
+        "permission_denied": "権限が拒否されました",
+        "device_unavailable": "デバイスが利用できません",
+        "connection_failed": "接続に失敗しました",
+        "initiation_failed": "通話の開始に失敗しました",
+        "generic": "問題が発生しました！"
+      }
     }
   },
-  
+
   "emoji": {
     "recently": "最近",
     "smileys_emotion": "スマイリーと感情",

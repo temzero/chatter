@@ -1,99 +1,15 @@
+import i18n from "@/i18n";
 import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
-import { SystemEventIcon } from "@/components/ui/icons/SystemEventIcon";
-import { JSX } from "react";
+import { parseJsonContent } from "../parseJsonContent";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
-import { CallStatus } from "@/shared/types/enums/call-status.enum";
-import { CallLiteResponse } from "@/shared/types/responses/call-lite.response";
-import { parseJsonContent } from "@/common/utils/parseJsonContent";
-import { getCallText } from "@/common/utils/call/getCallText";
-import { useTranslation } from "react-i18next";
-import { TFunction } from "i18next";
+import { SystemMessageJSONContent } from "@/components/ui/messages/content/SystemMessageContent";
 
-export type SystemMessageJSONContent = {
-  oldValue?: string;
-  newValue?: string;
-  targetId?: string;
-  targetName?: string;
-};
-
-type SystemMessageContentProps = {
-  systemEvent?: SystemEventType | null;
-  call?: CallLiteResponse;
-  isBroadcast?: boolean;
-  currentUserId: string;
-  senderId: string;
-  senderDisplayName: string;
-  JSONcontent?: SystemMessageJSONContent | null;
-  ClassName?: string;
-};
-
-export const SystemMessageContent = ({
-  systemEvent,
-  call,
-  isBroadcast = false,
-  currentUserId,
-  senderId,
-  senderDisplayName,
-  JSONcontent,
-  ClassName = "",
-}: SystemMessageContentProps): JSX.Element | null => {
-  const { t } = useTranslation();
-  if (!systemEvent) return null;
-  const callStatus = call?.status;
-  let text = "";
-  if (callStatus) {
-    text = getCallText(call.status, call.startedAt, call.endedAt);
-  } else {
-    text = getSystemMessageText({
-      t,
-      systemEvent,
-      currentUserId,
-      call,
-      senderId,
-      senderDisplayName,
-      JSONcontent,
-    });
-  }
-
-  return (
-    <div
-      className={`flex gap-1 items-center text-sm truncate ${getSystemMessageColor(
-        systemEvent,
-        callStatus
-      )} ${ClassName}`}
-    >
-      <SystemEventIcon
-        systemEvent={systemEvent}
-        callStatus={callStatus}
-        isBroadcast={isBroadcast}
-      />
-      <span className="truncate">{text}</span>
-    </div>
-  );
-};
-
-function getSystemMessageColor(
-  systemEvent?: SystemEventType | null,
-  callStatus?: CallStatus | null
+export function getSystemMessageColor(
+  systemEvent?: SystemEventType | null
 ): string {
   if (!systemEvent) return "";
 
   switch (systemEvent) {
-    case SystemEventType.CALL:
-      if (!callStatus) return "";
-      switch (callStatus) {
-        // case CallStatus.COMPLETED:
-        //   return "text-yellow-500";
-        case CallStatus.FAILED:
-        case CallStatus.MISSED:
-          return "text-red-500";
-        case CallStatus.DIALING:
-        case CallStatus.IN_PROGRESS:
-          return "text-green-500";
-        default:
-          return "text-muted-foreground";
-      }
-
     case SystemEventType.MEMBER_JOINED:
     case SystemEventType.MEMBER_ADDED:
       return "text-green-500";
@@ -118,22 +34,21 @@ function getSystemMessageColor(
   }
 }
 
-function getSystemMessageText({
-  t,
+export function getSystemMessageText({
   systemEvent,
   currentUserId,
   senderId,
   senderDisplayName,
   JSONcontent,
 }: {
-  t: TFunction;
   systemEvent?: SystemEventType | null;
-  call?: CallLiteResponse | null;
   currentUserId: string;
   senderId: string;
   senderDisplayName: string;
   JSONcontent?: SystemMessageJSONContent | null;
 }): string {
+  const t = i18n.t;
+
   if (!systemEvent) return t("system.unknown_event");
 
   const isMe = currentUserId === senderId;
@@ -191,10 +106,7 @@ function getSystemMessageText({
       return t("system.member_update_nickname", { displayName, targetName });
     case SystemEventType.MEMBER_UPDATE_ROLE:
       if (newVal === ChatMemberRole.OWNER)
-        return t("system.member_promote_owner", {
-          displayName,
-          targetName,
-        });
+        return t("system.member_promote_owner", { displayName, targetName });
       return t("system.member_update_role", {
         displayName,
         targetName,

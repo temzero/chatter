@@ -19,13 +19,13 @@ import BroadcastPreviewModal from "@/components/modal/call/BroadcastPreviewModal
 import BroadcastRoom from "@/components/modal/call/broadcastRoom/BroadcastRoom";
 
 const CallModal: React.FC = () => {
-  const isMobile = useIsMobile()
+  const isMobile = useIsMobile();
   const getOrFetchChatById = useChatStore.getState().getOrFetchChatById;
 
   const chatId = useCallStore((state) => state.chatId);
   const localCallStatus = useCallStore((state) => state.localCallStatus);
   const callStatus = useCallStore((state) => state.callStatus);
-  
+
   const [chat, setChat] = React.useState<ChatResponse | null>(null);
   const isBroadcasting: boolean =
     chat?.type === ChatType.CHANNEL && callStatus == CallStatus.IN_PROGRESS;
@@ -36,7 +36,8 @@ const CallModal: React.FC = () => {
 
     let isMounted = true;
 
-    (async () => {
+    // Named async function for clarity
+    const fetchChat = async () => {
       try {
         const result = await getOrFetchChatById(chatId, {
           fetchFullData: true,
@@ -45,10 +46,14 @@ const CallModal: React.FC = () => {
       } catch (err) {
         console.error("Failed to load chat:", err);
       }
-    })();
+    };
+
+    fetchChat();
 
     return () => {
       isMounted = false;
+      useCallStore.getState().clearLiveKitState();
+      useCallStore.getState().clearCallData();
     };
   }, [chatId, getOrFetchChatById]);
 

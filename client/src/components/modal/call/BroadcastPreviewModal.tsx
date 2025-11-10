@@ -150,7 +150,7 @@ const BroadcastPreviewModal = ({ chat }: { chat: ChatResponse }) => {
             fullWidth
             onClick={cancelCall}
           >
-            t{"common.actions.cancel"}
+            {t("common.actions.cancel")}
           </Button>
         </div>
       </div>

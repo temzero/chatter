@@ -3,11 +3,11 @@ import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { callService } from "@/services/http/callService";
 import { CallResponse } from "@/shared/types/responses/call.response";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
-import { getCallColor } from "@/common/utils/call/callHelpers";
-import { getCallText } from "@/common/utils/call/getCallText";
+import { getCallStatusColor } from "@/common/utils/call/callHelpers";
 import { formatDateTime } from "@/common/utils/format/formatDateTime";
 import { useTranslation } from "react-i18next";
-import { getCurrentUserId } from "@/stores/authStore";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
+import { getCallStatusText } from "@/common/utils/call/callTextHelpers";
 import CallIcon from "@/components/ui/icons/CallIcon";
 import Button from "../ui/buttons/Button";
 
@@ -18,7 +18,6 @@ interface DeleteCallModalData {
 
 const DeleteCallModal: React.FC = () => {
   const { t } = useTranslation();
-  const currentUserId = getCurrentUserId();
   const closeModal = getCloseModal();
   const data = getModalData() as unknown as DeleteCallModalData | undefined;
 
@@ -40,10 +39,11 @@ const DeleteCallModal: React.FC = () => {
   if (!data?.call) return null;
 
   const { call } = data;
-  const isCaller = call.initiator.userId === currentUserId;
-  const callText = getCallText(call.status, call.startedAt, call.endedAt);
-  const callColor = getCallColor(call.status);
+  const callText = getCallStatusText(call.status, call.startedAt, call.endedAt);
+  const callColor = getCallStatusColor(call.status);
   const formattedDate = formatDateTime(call.createdAt);
+
+  const isChannel = call.chat.type === ChatType.CHANNEL;
 
   return (
     <>
@@ -68,7 +68,7 @@ const DeleteCallModal: React.FC = () => {
           </div>
           <CallIcon
             status={call.status}
-            isCaller={isCaller}
+            isBroadcast={isChannel}
             className="group-hover:hidden text-4xl flex-shrink-0"
           />
         </div>

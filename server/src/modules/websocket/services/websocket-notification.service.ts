@@ -33,6 +33,14 @@ export class WebsocketNotificationService {
     this.server = server;
   }
 
+  /* General Notification Methods */
+  emitToUser(userId: string, event: string, payload: any) {
+    const socketIds = this.connectionService.getUserSocketIds(userId);
+    for (const socketId of socketIds) {
+      this.server.to(socketId).emit(event, payload);
+    }
+  }
+
   /* Chat/Call Notifications */
   async emitToChatMembers<T extends object>(
     chatId: string,
@@ -72,14 +80,6 @@ export class WebsocketNotificationService {
       };
 
       this.emitToUser(userId, event, enhancedPayload);
-    }
-  }
-
-  /* General Notification Methods */
-  emitToUser(userId: string, event: string, payload: any) {
-    const socketIds = this.connectionService.getUserSocketIds(userId);
-    for (const socketId of socketIds) {
-      this.server.to(socketId).emit(event, payload);
     }
   }
 

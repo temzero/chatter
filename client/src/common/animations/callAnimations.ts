@@ -1,9 +1,11 @@
+import { CallStatus } from "@/shared/types/call";
 import { MotionProps } from "framer-motion";
 
 export const callAnimations: {
   titlePulse: (opacityValues?: number[]) => MotionProps;
   incomingActionButton: (isDragging?: boolean) => MotionProps;
   outgoingActionButton: (isHovering?: boolean) => MotionProps;
+  callIcon: (status: CallStatus) => MotionProps;
 } = {
   titlePulse: (opacityValues = [0.6, 0.2, 0.6]) => ({
     animate: { opacity: opacityValues },
@@ -47,4 +49,18 @@ export const callAnimations: {
       repeatDelay: isHovering ? 0 : 0.5,
     },
   }),
+
+  callIcon: (status: CallStatus): MotionProps => {
+    switch (status) {
+      case CallStatus.DIALING:
+        return callAnimations.incomingActionButton(); // shake + bounce
+      case CallStatus.IN_PROGRESS:
+        return callAnimations.titlePulse(); // pulse
+      default:
+        return {
+          animate: { x: 0, scale: 1, opacity: 1 },
+          transition: { duration: 0 },
+        };
+    }
+  },
 };

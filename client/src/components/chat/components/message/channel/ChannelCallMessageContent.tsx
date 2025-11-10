@@ -9,7 +9,7 @@ interface BroadcastMessageProps {
   call: CallLiteResponse;
 }
 
-export const BroadcastMessage: React.FC<BroadcastMessageProps> = ({ call }) => {
+export const ChannelCallMessageContent: React.FC<BroadcastMessageProps> = ({ call }) => {
   const { t } = useTranslation();
   const { status, startedAt, endedAt } = call;
   const isActive = status === CallStatus.IN_PROGRESS;
