@@ -12,7 +12,6 @@ import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { MessageContextMenu } from "../MessageContextMenu";
 import { MessageHorizontalPreviewTypes } from "@/common/enums/MessageHorizontalPreviewTypes";
 import { ChannelCallMessageContent } from "./ChannelCallMessageContent";
-import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 import { useIsMobile } from "@/stores/deviceStore";
 import {
   useIsMessageFocus,
@@ -25,6 +24,7 @@ import ChannelMessageContent from "./ChannelMessageContent";
 import ChannelMessageBubbleWrapper from "../wrapper/ChannelMessageBubbleWrapper";
 import { SystemMessageJSONContent } from "../../../../ui/messages/content/SystemMessageContent";
 import { MessageHorizontalPreview } from "../preview/MessageHorizontalPreview";
+import { MessageReadInfo } from "@/components/chat/messagesContainer/MessageReadInfo";
 
 interface ChannelMessageProps {
   messageId: string;
@@ -58,9 +58,14 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
     setContextMenuPosition(null);
   };
 
+  if (!currentUserId) {
+    console.error("Not authenticated");
+    return;
+  }
+
   // Check system message
   const isSystemMessage = !!message.systemEvent;
-  if (isSystemMessage && message.systemEvent != SystemEventType.CALL) {
+  if (isSystemMessage) {
     return (
       <SystemMessage
         message={message}
@@ -115,14 +120,20 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
             isMe={isMe}
           />
         )}
-      </ChannelMessageBubbleWrapper>
+        <MessageReactionDisplay
+          isChannel={true}
+          currentUserId={currentUserId}
+          messageId={message.id}
+          chatId={message.chatId}
+        />
 
-      <MessageReactionDisplay
-        isChannel={true}
-        currentUserId={currentUserId}
-        messageId={message.id}
-        chatId={message.chatId}
-      />
+        <div
+          className="absolute bottom-1 right-1 text-xs italic opacity-0 group-hover:opacity-80 font-semibold bg-[--sidebar-color] p-0.5 px-1.5 rounded-full backdrop-blur-lg"
+          style={{ zIndex: 1 }}
+        >
+          {formatTime(message.createdAt)}
+        </div>
+      </ChannelMessageBubbleWrapper>
 
       <AnimatePresence>
         {isFocus && !isReplyToThisMessage && (
@@ -130,19 +141,24 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
             message={message}
             isMe={isMe}
             isChannel={true}
-            isSystemMessage={message.systemEvent === SystemEventType.CALL}
+            isSystemMessage={!!message.call}
             initialMousePosition={contextMenuPosition ?? undefined}
             onClose={closeContextMenu}
           />
         )}
       </AnimatePresence>
 
-      <div
-        className="absolute bottom-1 right-1 text-xs italic opacity-0 group-hover:opacity-80 font-semibold bg-[--sidebar-color] p-0.5 px-1.5 rounded-full backdrop-blur-lg"
-        style={{ zIndex: 1 }}
-      >
-        {formatTime(message.createdAt)}
-      </div>
+      {/* ✅ Added Read Info Section */}
+      {message.status !== MessageStatus.SENDING &&
+        message.status !== MessageStatus.FAILED && (
+          <MessageReadInfo
+            chatId={message.chatId}
+            currentUserId={currentUserId}
+            messageId={message.id}
+            isMe={isMe}
+            senderName={message.sender.displayName}
+          />
+        )}
 
       {message.status === MessageStatus.FAILED && (
         <h1 className="text-red-500 text-sm text-center">

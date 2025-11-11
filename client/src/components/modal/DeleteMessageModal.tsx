@@ -4,33 +4,52 @@ import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { getCurrentUserId } from "@/stores/authStore";
 import { useMessageStore } from "@/stores/messageStore";
-
-import { useTranslation } from "react-i18next";
-import Button from "../ui/buttons/Button";
 import { handleError } from "@/common/utils/handleError";
+import { useChatMemberStore } from "@/stores/chatMemberStore";
+import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
+import Button from "../ui/buttons/Button";
+import i18n from "@/i18n";
 
 interface DeleteMessageModalData {
   messageId: string;
 }
 
 const DeleteMessageModal: React.FC = () => {
-  const { t } = useTranslation();
+  const t = i18n.t;
   const currentUserId = getCurrentUserId();
+  if (!currentUserId) {
+    return;
+  }
   const closeModal = getCloseModal();
   const data = getModalData() as unknown as DeleteMessageModalData | undefined;
 
   const getMessageById = useMessageStore.getState().getMessageById;
   const messageId = data?.messageId;
   const message = messageId ? getMessageById(messageId) : undefined;
+  const chatId = message?.chatId ?? "";
+
 
   if (!message) return null;
-  const isMe = message.sender.id === currentUserId;
+  const isSender = message.sender.id === currentUserId;
+
+  const myMember = useChatMemberStore
+    .getState()
+    .getChatMemberByUserIdAndChatId(chatId, currentUserId);
+
+  const isOwnerOrAdmin =
+    myMember?.role === ChatMemberRole.ADMIN ||
+    myMember?.role === ChatMemberRole.OWNER;
+
+  console.log("isSender", isSender);
+  console.log("isOwnerOrAdmin", isOwnerOrAdmin);
+
+  const canDeleteForEveryone = isSender || isOwnerOrAdmin;
 
   const handleDelete = async (isDeleteForEveryone: boolean = false) => {
     try {
       chatWebSocketService.deleteMessage({
-        chatId: message.chatId,
         messageId: message.id,
+        chatId: chatId,
         isDeleteForEveryone,
       });
       closeModal();
@@ -54,7 +73,7 @@ const DeleteMessageModal: React.FC = () => {
       </div>
 
       <div className="flex custom-border-t">
-        {!isMe && (
+        {!canDeleteForEveryone && (
           <Button
             variant="ghost"
             fullWidth
@@ -64,7 +83,7 @@ const DeleteMessageModal: React.FC = () => {
             {t("modal.delete_message.delete_for_me")}
           </Button>
         )}
-        {isMe && (
+        {canDeleteForEveryone && (
           <Button
             variant="ghost"
             fullWidth

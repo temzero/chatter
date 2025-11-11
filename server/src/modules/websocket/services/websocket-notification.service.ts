@@ -11,11 +11,11 @@ import {
 import { FriendRequestResponseDto } from '../../friendship/dto/responses/friend-request-response.dto';
 import { FriendshipUpdateNotificationDto } from '../../friendship/dto/responses/friendship-update-notification.dto';
 
-export interface WsEmitChatMemberResponse<T = any> {
+export interface WsNotificationResponse<T = any> {
   payload: T;
-  meta?: {
-    isMuted?: boolean;
-    isSender?: boolean;
+  meta: {
+    isMuted: boolean;
+    isSender: boolean;
   };
 }
 
@@ -34,10 +34,29 @@ export class WebsocketNotificationService {
   }
 
   /* General Notification Methods */
-  emitToUser(userId: string, event: string, payload: any) {
+  // emitToUser(userId: string, event: string, payload: any) {
+  //   const socketIds = this.connectionService.getUserSocketIds(userId);
+  //   for (const socketId of socketIds) {
+  //     this.server.to(socketId).emit(event, payload);
+  //   }
+  // }
+
+  emitToUser<T = any>(
+    userId: string,
+    event: string,
+    payload: T,
+    meta: { isMuted: boolean; isSender: boolean } = {
+      isMuted: false,
+      isSender: false,
+    },
+  ) {
     const socketIds = this.connectionService.getUserSocketIds(userId);
+    const enhancedPayload: WsNotificationResponse<T> = {
+      payload,
+      meta,
+    };
     for (const socketId of socketIds) {
-      this.server.to(socketId).emit(event, payload);
+      this.server.to(socketId).emit(event, enhancedPayload);
     }
   }
 
@@ -71,15 +90,10 @@ export class WebsocketNotificationService {
         continue;
       }
 
-      const enhancedPayload: WsEmitChatMemberResponse = {
-        payload,
-        meta: {
-          isMuted,
-          isSender: options.senderId ? userId === options.senderId : false,
-        },
-      };
-
-      this.emitToUser(userId, event, enhancedPayload);
+      this.emitToUser(userId, event, payload, {
+        isMuted,
+        isSender: options.senderId ? userId === options.senderId : false,
+      });
     }
   }
 

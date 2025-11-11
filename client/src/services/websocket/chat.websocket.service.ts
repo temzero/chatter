@@ -4,7 +4,7 @@ import { webSocketService } from "../websocket/websocket.service";
 import { CreateMessageRequest } from "@/shared/types/requests/send-message.request";
 import { ForwardMessageRequest } from "@/shared/types/requests/forward-message.request";
 import { MessageResponse } from "@/shared/types/responses/message.response";
-import { WsEmitChatMemberResponse } from "@/shared/types/responses/ws-emit-chat-member.response";
+import { WsNotificationResponse } from "@/shared/types/responses/ws-emit-chat-member.response";
 
 export const chatWebSocketService = {
   async getChatStatus(chatId: string) {
@@ -91,22 +91,22 @@ export const chatWebSocketService = {
     webSocketService.emit(ChatEvent.DELETE_MESSAGE, payload);
   },
 
-  // ======= On handlers using WsEmitChatMemberResponse =======
+  // ======= On handlers using WsNotificationResponse =======
 
   onNewMessage(
-    callback: (wsData: WsEmitChatMemberResponse<MessageResponse>) => void
+    callback: (wsData: WsNotificationResponse<MessageResponse>) => void
   ) {
     webSocketService.on(ChatEvent.NEW_MESSAGE, callback);
   },
   offNewMessage(
-    callback: (wsData: WsEmitChatMemberResponse<MessageResponse>) => void
+    callback: (wsData: WsNotificationResponse<MessageResponse>) => void
   ) {
     webSocketService.off(ChatEvent.NEW_MESSAGE, callback);
   },
 
   onTyping(
     callback: (
-      wsData: WsEmitChatMemberResponse<{
+      wsData: WsNotificationResponse<{
         chatId: string;
         userId: string;
         isTyping: boolean;
@@ -117,7 +117,7 @@ export const chatWebSocketService = {
   },
   offTyping(
     callback: (
-      wsData: WsEmitChatMemberResponse<{
+      wsData: WsNotificationResponse<{
         chatId: string;
         userId: string;
         isTyping: boolean;
@@ -129,7 +129,7 @@ export const chatWebSocketService = {
 
   onMessagesRead(
     callback: (
-      wsData: WsEmitChatMemberResponse<{
+      wsData: WsNotificationResponse<{
         chatId: string;
         memberId: string;
         messageId: string;
@@ -140,7 +140,7 @@ export const chatWebSocketService = {
   },
   offMessagesRead(
     callback: (
-      wsData: WsEmitChatMemberResponse<{
+      wsData: WsNotificationResponse<{
         chatId: string;
         memberId: string;
         messageId: string;
@@ -152,7 +152,7 @@ export const chatWebSocketService = {
 
   onReaction(
     callback: (
-      wsData: WsEmitChatMemberResponse<{
+      wsData: WsNotificationResponse<{
         messageId: string;
         reactions: { [emoji: string]: string[] };
       }>
@@ -162,7 +162,7 @@ export const chatWebSocketService = {
   },
   offReaction(
     callback: (
-      wsData: WsEmitChatMemberResponse<{
+      wsData: WsNotificationResponse<{
         messageId: string;
         reactions: { [emoji: string]: string[] };
       }>
@@ -173,7 +173,7 @@ export const chatWebSocketService = {
 
   onMessagePin(
     callback: (
-      wsData: WsEmitChatMemberResponse<{
+      wsData: WsNotificationResponse<{
         chatId: string;
         message: MessageResponse | null;
       }>
@@ -183,7 +183,7 @@ export const chatWebSocketService = {
   },
   offMessagePin(
     callback: (
-      wsData: WsEmitChatMemberResponse<{
+      wsData: WsNotificationResponse<{
         chatId: string;
         message: MessageResponse | null;
       }>
@@ -193,19 +193,19 @@ export const chatWebSocketService = {
   },
 
   onSaveMessage(
-    callback: (wsData: WsEmitChatMemberResponse<MessageResponse>) => void
+    callback: (wsData: WsNotificationResponse<MessageResponse>) => void
   ) {
     webSocketService.on(ChatEvent.SAVE_MESSAGE, callback);
   },
   offSaveMessage(
-    callback: (wsData: WsEmitChatMemberResponse<MessageResponse>) => void
+    callback: (wsData: WsNotificationResponse<MessageResponse>) => void
   ) {
     webSocketService.off(ChatEvent.SAVE_MESSAGE, callback);
   },
 
   onImportantMessage(
     callback: (
-      wsData: WsEmitChatMemberResponse<{
+      wsData: WsNotificationResponse<{
         chatId: string;
         messageId: string;
         isImportant: boolean;
@@ -216,7 +216,7 @@ export const chatWebSocketService = {
   },
   offImportantMessage(
     callback: (
-      wsData: WsEmitChatMemberResponse<{
+      wsData: WsNotificationResponse<{
         chatId: string;
         messageId: string;
         isImportant: boolean;
@@ -228,14 +228,14 @@ export const chatWebSocketService = {
 
   onDeleteMessage(
     callback: (
-      wsData: WsEmitChatMemberResponse<{ messageId: string; chatId: string }>
+      wsData: WsNotificationResponse<{ messageId: string; chatId: string }>
     ) => void
   ) {
     webSocketService.on(ChatEvent.MESSAGE_DELETED, callback);
   },
   offDeleteMessage(
     callback: (
-      wsData: WsEmitChatMemberResponse<{ messageId: string; chatId: string }>
+      wsData: WsNotificationResponse<{ messageId: string; chatId: string }>
     ) => void
   ) {
     webSocketService.off(ChatEvent.MESSAGE_DELETED, callback);
@@ -243,7 +243,7 @@ export const chatWebSocketService = {
 
   onMessageError(
     callback: (
-      wsData: WsEmitChatMemberResponse<{
+      wsData: WsNotificationResponse<{
         messageId: string;
         chatId: string;
         error: string;
@@ -255,7 +255,7 @@ export const chatWebSocketService = {
   },
   offMessageError(
     callback?: (
-      wsData: WsEmitChatMemberResponse<{
+      wsData: WsNotificationResponse<{
         messageId: string;
         chatId: string;
         error: string;

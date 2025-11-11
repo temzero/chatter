@@ -5,7 +5,7 @@ import { CreateMessageRequest } from 'src/shared/types/requests/send-message.req
 
 export class CreateMessageDto implements CreateMessageRequest {
   @IsUUID()
-  id: string;
+  id?: string;
 
   @IsUUID()
   chatId: string;

@@ -164,6 +164,7 @@ export class ChatService {
     }
     return chatDto;
   }
+
   async getDirectChatByUserId(
     myUserId: string,
     partnerUserId: string,
@@ -244,7 +245,9 @@ export class ChatService {
       type: ChatType.DIRECT,
       name: null,
     });
-    await this.addMembers(chat.id, memberUserIds);
+
+    await this.addMembers(chat.id, myUserId, memberUserIds, true);
+
     return {
       chat: await this.getUserChat(chat.id, myUserId),
       wasExisting: false,
@@ -298,7 +301,7 @@ export class ChatService {
 
     const chat = await this.chatRepo.save(createDto);
 
-    await this.addMembers(chat.id, allUserIds, userId);
+    await this.addMembers(chat.id, userId, allUserIds);
 
     return this.getUserChat(chat.id, userId);
   }
@@ -580,16 +583,37 @@ export class ChatService {
 
   private async addMembers(
     chatId: string,
-    memberIds: string[],
-    creatorId?: string,
+    creatorUserId: string,
+    userIds: string[],
+    isDirectChat?: boolean,
   ): Promise<void> {
-    const membersToAdd = memberIds.map((userId) => ({
-      chat: { id: chatId },
-      user: { id: userId },
-      role: userId === creatorId ? ChatMemberRole.OWNER : ChatMemberRole.MEMBER,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }));
+    const membersToAdd = userIds.map((userId) => {
+      let role: ChatMemberRole;
+
+      if (isDirectChat) {
+        // In a direct chat:
+        // creator = OWNER, the other = ADMIN
+        role =
+          userId === creatorUserId
+            ? ChatMemberRole.OWNER
+            : ChatMemberRole.ADMIN;
+      } else {
+        // In a group chat:
+        // creator = OWNER, others = MEMBER
+        role =
+          userId === creatorUserId
+            ? ChatMemberRole.OWNER
+            : ChatMemberRole.MEMBER;
+      }
+
+      return {
+        chat: { id: chatId },
+        user: { id: userId },
+        role,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+    });
 
     await this.memberRepo.insert(membersToAdd);
   }

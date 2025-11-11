@@ -4,12 +4,15 @@ import { formatDurationByStartAndEnd } from "@/common/utils/format/formatDuratio
 import { formatTime } from "@/common/utils/format/formatTime";
 import { useTranslation } from "react-i18next";
 import { CallLiteResponse } from "@/shared/types/responses/call-lite.response";
+import CallIcon from "@/components/ui/icons/CallIcon";
 
 interface BroadcastMessageProps {
   call: CallLiteResponse;
 }
 
-export const ChannelCallMessageContent: React.FC<BroadcastMessageProps> = ({ call }) => {
+export const ChannelCallMessageContent: React.FC<BroadcastMessageProps> = ({
+  call,
+}) => {
   const { t } = useTranslation();
   const { status, startedAt, endedAt } = call;
   const isActive = status === CallStatus.IN_PROGRESS;
@@ -23,10 +26,15 @@ export const ChannelCallMessageContent: React.FC<BroadcastMessageProps> = ({ cal
     >
       {/* Icon */}
       <div className="flex gap-2 items-center opacity-70">
-        {isError && <span className="material-symbols-outlined">error</span>}
-        <span className="material-symbols-outlined">connected_tv</span>
-        {t("system.broadcast_message.broadcasted")}{" "}
-        {isError && t("common.messages.failed")}
+        <CallIcon
+          status={call.status}
+          isBroadcast={true}
+          className="text-2xl flex-shrink-0"
+        />
+
+        {isError
+          ? t("common.messages.failed")
+          : t("system.broadcast_message.broadcasted")}
       </div>
 
       {/* Text */}

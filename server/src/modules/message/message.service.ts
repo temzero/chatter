@@ -47,7 +47,7 @@ export class MessageService {
 
   async createMessage(
     senderId: string,
-    dto: CreateMessageDto,
+    dto: CreateMessageDto & { call?: Call },
   ): Promise<Message> {
     if (dto.replyToMessageId) {
       ErrorResponse.badRequest('Use createReplyMessage for replying');
@@ -80,7 +80,8 @@ export class MessageService {
       chatId: dto.chatId,
       senderId,
       content: dto.content,
-      attachments, // Many-to-many relationship
+      attachments,
+      call: dto.call,
     });
 
     const savedMessage = await this.messageRepo.save(message);
@@ -220,7 +221,6 @@ export class MessageService {
       newValue?: string;
       targetId?: string;
       targetName?: string;
-      call?: Call;
     },
   ): Promise<MessageResponseDto> {
     let targetName: string | undefined;
@@ -239,16 +239,9 @@ export class MessageService {
         options?.targetId,
         targetName,
       ),
-      call: options?.call,
     });
 
     const savedMessage = await this.messageRepo.save(message);
-
-    // 🔁 Link the call back to this message if provided
-    if (options?.call) {
-      options.call.message = savedMessage;
-      await this.callRepo.save(options.call);
-    }
 
     // ✅ Update lastVisibleMessageId for all chat members
     await this.chatMemberRepo.update(
@@ -258,7 +251,7 @@ export class MessageService {
 
     const fullMessage = await this.getFullMessageById(savedMessage.id);
     const messageResponse =
-      this.messageMapper.mapMessageToMessageResDto(fullMessage);
+      await this.messageMapper.mapMessageToMessageResDto(fullMessage);
 
     await this.websocketNotificationService.emitToChatMembers(
       chatId,
@@ -524,8 +517,10 @@ export class MessageService {
         hasMore = remainingCount > 0;
       }
 
-      const messagesResponse = sortedMessages.map((message) =>
-        this.messageMapper.mapMessageToMessageResDto(message),
+      const messagesResponse = await Promise.all(
+        sortedMessages.map((message) =>
+          this.messageMapper.mapMessageToMessageResDto(message),
+        ),
       );
 
       return { items: messagesResponse, hasMore };

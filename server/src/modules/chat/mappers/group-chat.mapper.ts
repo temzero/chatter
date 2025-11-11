@@ -57,7 +57,7 @@ export class GroupChatMapper {
       description: chat.description ?? null,
       updatedAt: chat.updatedAt,
       pinnedMessage: chat.pinnedMessage
-        ? this.messageMapper.mapMessageToMessageResDto(chat.pinnedMessage)
+        ? await this.messageMapper.mapMessageToMessageResDto(chat.pinnedMessage)
         : null,
       otherMemberUserIds: otherMembers.map((m) => m.userId),
       previewMembers,

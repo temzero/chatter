@@ -1,5 +1,6 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
+import { useState, useRef } from "react";
 import { getCurrentUserId } from "@/stores/authStore";
 import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 import { MessageResponse } from "@/shared/types/responses/message.response";
@@ -37,19 +38,34 @@ const SystemMessage = ({
   const isFocus = useIsMessageFocus(messageId);
   const isRelyToThisMessage = useIsReplyToThisMessage(messageId);
 
-  if (!message || !currentUserId) return;
+  const messageRef = useRef<HTMLDivElement>(null);
+  const [contextMenuPosition, setContextMenuPosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setOpenFocusMessageModal(message.id);
+    setContextMenuPosition({ x: e.clientX, y: e.clientY });
+  };
+
+  const closeContextMenu = () => setContextMenuPosition(null);
+
+  if (!message || !currentUserId) return null;
 
   return (
     <motion.div
+      ref={messageRef}
       id={`message-${messageId}`}
-      onContextMenu={(e) => {
-        e.preventDefault();
-        setOpenFocusMessageModal(message.id);
-      }}
+      onContextMenu={handleContextMenu}
       className={clsx(
         "cursor-pointer rounded-full mb-2 px-1 mx-auto flex items-center justify-center",
-        message.isImportant &&
-          "border-2 border-red-500/50 bg-[--background-color]"
+        {
+          "border-2 border-red-500/50 bg-[--background-color]":
+            message.isImportant,
+          "opacity-60": !isFocus,
+        }
       )}
       style={{
         zIndex: isFocus || isRelyToThisMessage ? 100 : "auto",
@@ -86,11 +102,17 @@ const SystemMessage = ({
           messageId={messageId}
           chatId={message.chatId}
         />
-
-        {isFocus && !isRelyToThisMessage && (
-          <MessageContextMenu message={message} isSystemMessage={true} />
-        )}
       </div>
+      <AnimatePresence>
+        {isFocus && !isRelyToThisMessage && contextMenuPosition && (
+          <MessageContextMenu
+            message={message}
+            isSystemMessage={true}
+            initialMousePosition={contextMenuPosition}
+            onClose={closeContextMenu}
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };

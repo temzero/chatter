@@ -63,6 +63,7 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
           }
           className={clsx("message-bubble", {
             "self-message": !isChannel && isReplyToMe,
+            "p-1.5 custom-border": isSystemMessage
           })}
         >
           {replyMessage.forwardedFromMessage ? (

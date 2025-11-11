@@ -18,7 +18,7 @@ import {
   CallErrorResponse,
 } from "@shared/types/call";
 import { useTranslation } from "react-i18next";
-import { WsEmitChatMemberResponse } from "@/shared/types/responses/ws-emit-chat-member.response";
+import { WsNotificationResponse } from "@/shared/types/responses/ws-emit-chat-member.response";
 
 export function useCallSocketListeners() {
   const { t } = useTranslation();
@@ -33,7 +33,7 @@ export function useCallSocketListeners() {
           await callService.fetchPendingCalls();
 
         if (pendingCalls?.length > 0) {
-          const data: WsEmitChatMemberResponse<IncomingCallResponse> = {
+          const data: WsNotificationResponse<IncomingCallResponse> = {
             payload: pendingCalls[0],
           };
           handleIncomingCall(data);
@@ -50,7 +50,7 @@ export function useCallSocketListeners() {
     };
 
     const handleIncomingCall = (
-      data: WsEmitChatMemberResponse<IncomingCallResponse>
+      data: WsNotificationResponse<IncomingCallResponse>
     ) => {
       console.log("[INCOMING_CALL]", data);
       const {
@@ -96,7 +96,7 @@ export function useCallSocketListeners() {
     };
 
     const handleStartCall = (
-      data: WsEmitChatMemberResponse<UpdateCallPayload>
+      data: WsNotificationResponse<UpdateCallPayload>
     ) => {
       console.log("[CALL_START]", data);
       const { callId, chatId, initiatorUserId } = data.payload;
@@ -130,7 +130,7 @@ export function useCallSocketListeners() {
     };
 
     const handleUpdateCall = (
-      updatedCall: WsEmitChatMemberResponse<UpdateCallPayload>
+      updatedCall: WsNotificationResponse<UpdateCallPayload>
     ) => {
       // console.log("[UPDATE_CALL]");
       const { callId, isVideoCall, callStatus } = updatedCall.payload;
@@ -158,7 +158,7 @@ export function useCallSocketListeners() {
     };
 
     const handleCallDeclined = (
-      data: WsEmitChatMemberResponse<CallActionResponse>
+      data: WsNotificationResponse<CallActionResponse>
     ) => {
       // console.log("[CALL_DECLINED]");
       const { callId, isCallerCancel } = data.payload;
@@ -179,7 +179,7 @@ export function useCallSocketListeners() {
     };
 
     const handleCallEnded = (
-      data: WsEmitChatMemberResponse<UpdateCallPayload>
+      data: WsNotificationResponse<UpdateCallPayload>
     ) => {
       // console.log("CALL_ENDED");
       const { callId } = data.payload;
@@ -199,9 +199,11 @@ export function useCallSocketListeners() {
       callStore.closeCallModal();
     };
 
-    const handleCallError = (data: CallErrorResponse) => {
+    const handleCallError = (
+      data: WsNotificationResponse<CallErrorResponse>
+    ) => {
       // console.warn("Call error:", data);
-      const { reason, callId } = data;
+      const { reason, callId } = data.payload;
 
       if (reason === CallError.LINE_BUSY) {
         toast.error(t("toast.call.cannot_start"));

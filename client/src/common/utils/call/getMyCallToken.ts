@@ -10,7 +10,7 @@ export async function getMyCallToken(
     if (!currentUserId) return;
     const myChatMember = await useChatMemberStore
       .getState()
-      .getChatMemberByUserIdAndChatId(chatId, currentUserId, true);
+      .getOrFetchChatMemberByUserIdAndChatId(chatId, currentUserId);
     if (!myChatMember?.id) {
       console.warn(
         "[getMyCallToken] No chat member found, returning undefined"

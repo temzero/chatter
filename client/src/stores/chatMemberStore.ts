@@ -30,8 +30,11 @@ interface ChatMemberActions {
   ) => ChatMemberResponse | undefined | Promise<ChatMemberResponse | undefined>;
   getChatMemberByUserIdAndChatId: (
     chatId: string,
-    userId: string,
-    fetchIfMissing?: boolean
+    userId: string
+  ) => ChatMemberResponse | undefined;
+  getOrFetchChatMemberByUserIdAndChatId: (
+    chatId: string,
+    userId: string
   ) => ChatMemberResponse | undefined | Promise<ChatMemberResponse | undefined>;
   getChatMemberUserIds: (chatId: string, type: ChatType) => string[];
   getDirectChatOtherMemberId: (
@@ -181,16 +184,19 @@ export const useChatMemberStore = create<ChatMemberState & ChatMemberActions>(
       return member;
     },
 
-    getChatMemberByUserIdAndChatId: async (
-      chatId: string,
-      userId: string,
-      fetchIfMissing: boolean = false
-    ) => {
-      const { chatMembers } = get();
+    getChatMemberByUserIdAndChatId: (chatId: string, userId: string) => {
+      const { chatMembers } = get(); // get state from store
       const members = chatMembers[chatId] || [];
-      let member = members.find((m) => m.userId === userId);
+      return members.find((m) => m.userId === userId);
+    },
 
-      if (!member && fetchIfMissing) {
+    getOrFetchChatMemberByUserIdAndChatId: async (
+      chatId: string,
+      userId: string
+    ) => {
+      let member = get().getChatMemberByUserIdAndChatId(chatId, userId);
+
+      if (!member) {
         try {
           const fetchedMember =
             await chatMemberService.fetchMemberByChatIdAndUserId(

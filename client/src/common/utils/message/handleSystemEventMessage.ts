@@ -5,13 +5,7 @@ import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { ChatMemberStatus } from "@/shared/types/enums/chat-member-status.enum";
 import { chatMemberService } from "@/services/http/chatMemberService";
 import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
-
-type SystemMessageJSONContent = {
-  oldValue?: string;
-  newValue?: string;
-  targetId?: string;
-  targetName?: string;
-};
+import { SystemMessageJSONContent } from "@/components/ui/messages/content/SystemMessageContent";
 
 export const handleSystemEventMessage = (message: MessageResponse) => {
   console.log("handleSystemEventMessage");

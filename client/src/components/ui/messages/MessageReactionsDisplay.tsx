@@ -59,15 +59,15 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
       className={clsx(
         "message-reaction absolute flex bg-black/50 rounded-full",
         isChannel
-          ? "left-1 -bottom-2"
+          ? "left-2 -bottom-3"
           : isMe && !isSystemMessage
-          ? "-left-4 -bottom-2"
-          : "-right-4 -bottom-4 flex-row-reverse"
+          ? "-left-2 -bottom-3"
+          : "-right-2 -bottom-3 flex-row-reverse"
       )}
       style={{ zIndex: 1 }}
       {...messageAnimations.reaction}
     >
-      <AnimatePresence>
+      <AnimatePresence initial={false}>
         {sortedReactions.map(([emoji, userIds]) => {
           const hasMyReaction =
             currentUserId && userIds.includes(currentUserId);
@@ -82,7 +82,7 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
                 damping: 28,
               }}
               className={clsx(
-                "text-sm flex items-center px-1 py-0.5 cursor-pointer",
+                "text-sm flex items-center p-0.5 cursor-pointer",
                 {
                   "bg-blue-600/80 rounded-full": hasMyReaction,
                 }

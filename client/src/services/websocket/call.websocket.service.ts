@@ -1,6 +1,6 @@
 import { webSocketService } from "./websocket.service";
 import { CallEvent } from "@/shared/types/enums/websocket-events.enum";
-import { WsEmitChatMemberResponse } from "@/shared/types/responses/ws-emit-chat-member.response";
+import { WsNotificationResponse } from "@/shared/types/responses/ws-emit-chat-member.response";
 import {
   CallActionRequest,
   CallActionResponse,
@@ -12,24 +12,24 @@ import {
 export const callWebSocketService = {
   // INCOMING CALL
   onIncomingCall(
-    callback: (data: WsEmitChatMemberResponse<IncomingCallResponse>) => void
+    callback: (data: WsNotificationResponse<IncomingCallResponse>) => void
   ) {
     webSocketService.on(CallEvent.INCOMING_CALL, callback);
   },
   offIncomingCall(
-    callback: (data: WsEmitChatMemberResponse<CallActionResponse>) => void
+    callback: (data: WsNotificationResponse<CallActionResponse>) => void
   ) {
     webSocketService.off(CallEvent.INCOMING_CALL, callback);
   },
 
   // START CALL
   onStartCall(
-    callback: (data: WsEmitChatMemberResponse<UpdateCallPayload>) => void
+    callback: (data: WsNotificationResponse<UpdateCallPayload>) => void
   ) {
     webSocketService.on(CallEvent.START_CALL, callback);
   },
   offStartCall(
-    callback: (data: WsEmitChatMemberResponse<UpdateCallPayload>) => void
+    callback: (data: WsNotificationResponse<UpdateCallPayload>) => void
   ) {
     webSocketService.off(CallEvent.START_CALL, callback);
   },
@@ -40,12 +40,12 @@ export const callWebSocketService = {
     webSocketService.emit(CallEvent.UPDATE_CALL, payload);
   },
   onCallUpdated(
-    callback: (data: WsEmitChatMemberResponse<UpdateCallPayload>) => void
+    callback: (data: WsNotificationResponse<UpdateCallPayload>) => void
   ) {
     webSocketService.on(CallEvent.UPDATE_CALL, callback);
   },
   offCallUpdated(
-    callback: (data: WsEmitChatMemberResponse<UpdateCallPayload>) => void
+    callback: (data: WsNotificationResponse<UpdateCallPayload>) => void
   ) {
     webSocketService.off(CallEvent.UPDATE_CALL, callback);
   },
@@ -63,33 +63,37 @@ export const callWebSocketService = {
     webSocketService.emit(CallEvent.DECLINE_CALL, payload);
   },
   onCallDeclined(
-    callback: (data: WsEmitChatMemberResponse<CallActionResponse>) => void
+    callback: (data: WsNotificationResponse<CallActionResponse>) => void
   ) {
     webSocketService.on(CallEvent.DECLINE_CALL, callback);
   },
   offCallDeclined(
-    callback: (data: WsEmitChatMemberResponse<CallActionResponse>) => void
+    callback: (data: WsNotificationResponse<CallActionResponse>) => void
   ) {
     webSocketService.off(CallEvent.DECLINE_CALL, callback);
   },
 
   // END CALL
   onCallEnded(
-    callback: (data: WsEmitChatMemberResponse<UpdateCallPayload>) => void
+    callback: (data: WsNotificationResponse<UpdateCallPayload>) => void
   ) {
     webSocketService.on(CallEvent.CALL_ENDED, callback);
   },
   offCallEnded(
-    callback: (data: WsEmitChatMemberResponse<UpdateCallPayload>) => void
+    callback: (data: WsNotificationResponse<UpdateCallPayload>) => void
   ) {
     webSocketService.off(CallEvent.CALL_ENDED, callback);
   },
 
   // ERROR
-  onCallError(callback: (data: CallErrorResponse) => void) {
+  onCallError(
+    callback: (data: WsNotificationResponse<CallErrorResponse>) => void
+  ) {
     webSocketService.on(CallEvent.CALL_ERROR, callback);
   },
-  offCallError(callback: (data: CallErrorResponse) => void) {
+  offCallError(
+    callback: (data: WsNotificationResponse<CallErrorResponse>) => void
+  ) {
     webSocketService.off(CallEvent.CALL_ERROR, callback);
   },
 

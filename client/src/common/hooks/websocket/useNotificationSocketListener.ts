@@ -13,24 +13,32 @@ import {
 } from "@/shared/types/responses/friendship.response";
 import { useTranslation } from "react-i18next";
 import { useChatStore } from "@/stores/chatStore";
+import { WsNotificationResponse } from "@/shared/types/responses/ws-emit-chat-member.response";
 
 export function useNotificationSocketListeners() {
   const { t } = useTranslation();
   const currentUserId = getCurrentUserId();
 
   useEffect(() => {
-    const handleNewFriendRequest = (request: FriendRequestResponse) => {
-      const isReceiver = request.receiver.id === currentUserId;
+    const handleNewFriendRequest = (
+      data: WsNotificationResponse<FriendRequestResponse>
+    ) => {
+      const { payload } = data;
+      const isReceiver = payload.receiver.id === currentUserId;
       if (!isReceiver) return;
-      useFriendshipStore.getState().addPendingRequest(request);
+      useFriendshipStore.getState().addPendingRequest(payload);
       toast.info(
-        t("toast.friendship.new_request", { name: request.sender.name })
+        t("toast.friendship.new_request", { name: payload.sender.name })
       );
     };
 
-    const handleFriendshipUpdate = (data: FriendshipUpdateNotification) => {
+    const handleFriendshipUpdate = (
+      data: WsNotificationResponse<FriendshipUpdateNotification>
+    ) => {
       // (i.e., someone else acted on our request)
-      if (data.user.id === currentUserId) {
+      const { payload } = data;
+
+      if (payload.user.id === currentUserId) {
         console.log("Skipping notification about our own action");
         return;
       }
@@ -38,30 +46,30 @@ export function useNotificationSocketListeners() {
       // 3. Only process if we're the affected party
       useChatMemberStore
         .getState()
-        .updateFriendshipStatus(data.user.id, data.status);
-      useFriendshipStore.getState().removeRequestLocally(data.friendshipId);
+        .updateFriendshipStatus(payload.user.id, payload.status);
+      useFriendshipStore.getState().removeRequestLocally(payload.friendshipId);
 
-      console.log("data.status", data.status);
+      console.log("data.status", payload.status);
 
       // 4. Show notification with correct context
-      if (data.status === FriendshipStatus.ACCEPTED) {
+      if (payload.status === FriendshipStatus.ACCEPTED) {
         useChatMemberStore
           .getState()
-          .updateMemberLocallyByUserId(data.user.id, {
-            firstName: data.user.firstName,
-            username: data.user.username,
-            email: data.user.email,
-            bio: data.user.bio,
-            phoneNumber: data.user.phoneNumber,
-            birthday: data.user.birthday,
-            friendshipStatus: data.status,
+          .updateMemberLocallyByUserId(payload.user.id, {
+            firstName: payload.user.firstName,
+            username: payload.user.username,
+            email: payload.user.email,
+            bio: payload.user.bio,
+            phoneNumber: payload.user.phoneNumber,
+            birthday: payload.user.birthday,
+            friendshipStatus: payload.status,
           });
 
         console.log("OTHER USER ACCEPTED MY REQUEST");
 
         setTimeout(() => {
           try {
-            useChatStore.getState().getDirectChatByUserId(data.user.id);
+            useChatStore.getState().getDirectChatByUserId(payload.user.id);
           } catch (error) {
             console.error(
               "Failed to create/get direct chat after friendship accepted:",
@@ -71,25 +79,22 @@ export function useNotificationSocketListeners() {
         }, 1000);
 
         toast.success(
-          t("toast.friendship.accepted_by", { name: data.user.firstName })
+          t("toast.friendship.accepted_by", { name: payload.user.firstName })
         );
-      } else if (data.status === FriendshipStatus.DECLINED) {
+      } else if (payload.status === FriendshipStatus.DECLINED) {
         toast.warning(
-          t("toast.friendship.declined_by", { name: data.user.firstName })
+          t("toast.friendship.declined_by", { name: payload.user.firstName })
         );
       }
     };
 
-    const handleCancelFriendRequest = ({
-      friendshipId,
-      senderId,
-    }: {
-      friendshipId: string;
-      senderId: string;
-    }) => {
+    const handleCancelFriendRequest = (
+      data: WsNotificationResponse<{ friendshipId: string; senderId: string }>
+    ) => {
+      const { payload } = data;
       useFriendshipStore
         .getState()
-        .removeRequestLocally(friendshipId, senderId);
+        .removeRequestLocally(payload.friendshipId, payload.senderId);
     };
 
     const socket = webSocketService.getSocket();

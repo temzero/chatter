@@ -24,7 +24,7 @@ const ChannelMessageBubbleWrapper: React.FC<
       onDoubleClick={onDoubleClick}
       onContextMenu={onContextMenu}
       className={clsx(
-        "rounded-xl overflow-hidden",
+        "relative rounded-xl",
         isImportant || message.isImportant
           ? "border-4 border-red-500/80"
           : "custom-border"

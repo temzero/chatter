@@ -8,19 +8,18 @@ import { useChatStore } from "@/stores/chatStore";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { audioService, SoundType } from "@/services/audio.service";
 import { handleSystemEventMessage } from "@/common/utils/message/handleSystemEventMessage";
-import { WsEmitChatMemberResponse } from "@/shared/types/responses/ws-emit-chat-member.response";
+import { WsNotificationResponse } from "@/shared/types/responses/ws-emit-chat-member.response";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { webSocketService } from "@/services/websocket/websocket.service";
 import { handleError } from "@/common/utils/handleError";
 import { useTranslation } from "react-i18next";
-import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 
 export function useChatSocketListeners() {
   const { t } = useTranslation();
   useEffect(() => {
     // ======== Message Handlers ========
     const handleNewMessage = async (
-      wsMessage: WsEmitChatMemberResponse<MessageResponse>
+      wsMessage: WsNotificationResponse<MessageResponse>
     ) => {
       const { payload: message, meta } = wsMessage;
       console.log("Received new message via WebSocket:", message);
@@ -44,23 +43,22 @@ export function useChatSocketListeners() {
         messageStore.updateMessageById(message.id, message);
         return;
       } else {
-        if (message.systemEvent && message.systemEvent !== SystemEventType.CALL) {
+        if (message.systemEvent) {
           handleSystemEventMessage(message);
-          return;
         }
 
         messageStore.addMessage(message);
       }
 
       // if (!isMuted && chatStore.activeChatId !== message.chatId) {
-      if (!isMuted) {
+      if (!isMuted && !message.call) {
         console.log("PLAY SOUND NEW_MESSAGE");
         audioService.playSound(SoundType.NEW_MESSAGE);
       }
     };
 
     const handleMessageSaved = (
-      wsMessage: WsEmitChatMemberResponse<MessageResponse>
+      wsMessage: WsNotificationResponse<MessageResponse>
     ) => {
       try {
         const { payload: message } = wsMessage;
@@ -73,7 +71,7 @@ export function useChatSocketListeners() {
 
     // ======== Typing ========
     const handleTyping = (
-      wsData: WsEmitChatMemberResponse<{
+      wsData: WsNotificationResponse<{
         chatId: string;
         userId: string;
         isTyping: boolean;
@@ -94,7 +92,7 @@ export function useChatSocketListeners() {
 
     // ======== Mark as read ========
     const handleMessagesRead = (
-      wsData: WsEmitChatMemberResponse<{
+      wsData: WsNotificationResponse<{
         chatId: string;
         memberId: string;
         messageId: string;
@@ -116,7 +114,7 @@ export function useChatSocketListeners() {
 
     // ======== Reactions ========
     const handleReaction = (
-      wsReaction: WsEmitChatMemberResponse<{
+      wsReaction: WsNotificationResponse<{
         messageId: string;
         reactions: { [emoji: string]: string[] };
       }>
@@ -133,7 +131,7 @@ export function useChatSocketListeners() {
 
     // ======== Pin ========
     const handleMessagePinned = (
-      wsPinned: WsEmitChatMemberResponse<{
+      wsPinned: WsNotificationResponse<{
         chatId: string;
         message: MessageResponse | null;
       }>
@@ -171,7 +169,7 @@ export function useChatSocketListeners() {
 
     // ======== Important ========
     const handleMessageMarkedImportant = (
-      wsImportant: WsEmitChatMemberResponse<{
+      wsImportant: WsNotificationResponse<{
         chatId: string;
         messageId: string;
         isImportant: boolean;
@@ -190,8 +188,9 @@ export function useChatSocketListeners() {
 
     // ======== Delete ========
     const handleMessageDeleted = (
-      wsDeleted: WsEmitChatMemberResponse<{ chatId: string; messageId: string }>
+      wsDeleted: WsNotificationResponse<{ chatId: string; messageId: string }>
     ) => {
+      console.log('handleMessageDeleted', wsDeleted)
       try {
         const { payload } = wsDeleted;
         useMessageStore
@@ -204,7 +203,7 @@ export function useChatSocketListeners() {
 
     // ======== Error ========
     const handleMessageError = (
-      wsError: WsEmitChatMemberResponse<{
+      wsError: WsNotificationResponse<{
         chatId: string;
         messageId: string;
         error: string;

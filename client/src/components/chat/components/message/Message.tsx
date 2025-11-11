@@ -15,7 +15,6 @@ import {
 import MessageReplyPreview from "@/components/ui/messages/MessageReplyPreview";
 import SystemMessage from "./SystemMessage";
 import MessageContent from "../../../ui/messages/content/MessageContent";
-import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 import { AnimatePresence, motion } from "framer-motion";
 import { getMessageAnimation } from "@/common/animations/messageAnimations";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
@@ -96,7 +95,7 @@ const Message: React.FC<MessageProps> = ({
   }
 
   // System message check
-  if (message.systemEvent && message.systemEvent !== SystemEventType.CALL) {
+  if (message.systemEvent) {
     return (
       <div className="w-full flex items-center justify-center">
         <SystemMessage
@@ -188,7 +187,7 @@ const Message: React.FC<MessageProps> = ({
               />
             )}
           </MessageBubbleWrapper>
-
+          
           <MessageReactionDisplay
             isMe={isMe}
             currentUserId={currentUserId}
@@ -202,6 +201,7 @@ const Message: React.FC<MessageProps> = ({
                 key={messageId}
                 message={message}
                 isMe={isMe}
+                isSystemMessage={!!message.systemEvent}
                 initialMousePosition={contextMenuMousePos}
                 onClose={closeContextMenu}
               />

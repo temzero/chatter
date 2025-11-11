@@ -8,6 +8,10 @@ import { getCurrentUserId } from "@/stores/authStore";
 import RenderAttachment from "@/components/ui/attachments/RenderAttachment";
 import RenderPinnedAttachment from "@/components/ui/attachments/RenderPinnedAttachment";
 import { MessageHorizontalPreviewTypes } from "@/common/enums/MessageHorizontalPreviewTypes";
+import {
+  SystemMessageContent,
+  SystemMessageJSONContent,
+} from "@/components/ui/messages/content/SystemMessageContent";
 
 interface MessageHorizontalPreviewProps {
   message: MessageResponse;
@@ -20,7 +24,10 @@ export const MessageHorizontalPreview: React.FC<
   MessageHorizontalPreviewProps
 > = ({ message, chatType = ChatType.DIRECT, isBubble = false, type }) => {
   const currentUserId = getCurrentUserId();
+
   const isMe = currentUserId === message.sender.id;
+
+  const isSystemMessage = !!message.systemEvent;
 
   const isGroupChat = chatType === ChatType.GROUP;
   const forwardedMessage = message.forwardedFromMessage;
@@ -46,6 +53,11 @@ export const MessageHorizontalPreview: React.FC<
       type === MessageHorizontalPreviewTypes.REPLY_CHANNEL_MESSAGE,
   });
 
+  if (!currentUserId) {
+    console.error("Not authenticated");
+    return;
+  }
+
   return (
     <div ref={messageRef} className={containerClass}>
       {isGroupChat && !isMe && (
@@ -68,8 +80,18 @@ export const MessageHorizontalPreview: React.FC<
         </div>
       )}
 
-      <p className={messageTextClass}>{message.content}</p>
-
+      {isSystemMessage ? (
+        <SystemMessageContent
+          systemEvent={message.systemEvent}
+          currentUserId={currentUserId}
+          senderId={message.sender.id}
+          senderDisplayName={message.sender.displayName}
+          JSONcontent={message.content as SystemMessageJSONContent}
+          className={messageTextClass}
+        />
+      ) : (
+        <p className={messageTextClass}>{message.content}</p>
+      )}
       {forwardedMessage && (
         <div className="flex items-center gap-1">
           <span className="material-symbols-outlined rotate-90 opacity-60">

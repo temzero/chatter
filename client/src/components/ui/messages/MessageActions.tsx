@@ -103,7 +103,9 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       class: "text-red-400",
       action: () => {
         if (onClose) onClose();
-        openModal(ModalType.DELETE_MESSAGE, { messageId: message.id });
+        openModal(ModalType.DELETE_MESSAGE, {
+          messageId: message.id,
+        });
       },
     },
   };

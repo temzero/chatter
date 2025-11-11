@@ -19,7 +19,7 @@ export const MediaViewerButtons = ({
 }: MediaViewerButtonsProps) => {
   const isMobile = useIsMobile();
   const openModal = getOpenModal();
-  const sender = useSenderByMessageId(attachment.messageId);
+  const sender = useSenderByMessageId(attachment.messageId ?? "");
 
   const handleDownloadClick = useCallback(() => {
     handleDownload(attachment);

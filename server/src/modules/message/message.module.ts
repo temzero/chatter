@@ -13,6 +13,7 @@ import { BlockModule } from '../block/block.module';
 import { WebSocketModule } from '../websocket/websocket.module';
 import { Call } from '../call/entities/call.entity';
 import { AttachmentModule } from '../attachment/attachment.module';
+import { ChatMemberModule } from '../chat-member/chat-member.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { AttachmentModule } from '../attachment/attachment.module';
     forwardRef(() => AttachmentModule),
     forwardRef(() => BlockModule),
     forwardRef(() => WebSocketModule),
+    forwardRef(() => ChatMemberModule),
   ],
   controllers: [MessageController],
   providers: [MessageService, MessageMapper],

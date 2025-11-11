@@ -4,11 +4,22 @@ import { MessageResponseDto } from '../dto/responses/message-response.dto';
 import { plainToInstance } from 'class-transformer';
 import { mapCallToCallLiteResponse } from 'src/modules/call/mappers/callLite.mapper';
 import { mapAttachmentsToAttachmentResDto } from 'src/modules/attachment/mappers/attachment.mapper';
+import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
 
 @Injectable()
 export class MessageMapper {
-  mapMessageToMessageResDto(message: Message): MessageResponseDto {
-    const senderMember = message.chat?.members?.[0];
+  constructor(private readonly chatMemberService: ChatMemberService) {}
+
+  async mapMessageToMessageResDto(
+    message: Message,
+  ): Promise<MessageResponseDto> {
+    const senderMember =
+      await this.chatMemberService.getMemberByChatIdAndUserId(
+        message.chatId,
+        message.senderId,
+      );
+    console.log('senderMember', senderMember);
+
     const groupedReactions = this.groupReactions(message.reactions || []);
 
     const responseData = {

@@ -2,7 +2,6 @@ import { Controller, Post, Body } from '@nestjs/common';
 import { CallService } from './call.service';
 import { CallStatus } from 'src/shared/types/call';
 import { MessageService } from '../message/message.service';
-import { SystemEventType } from 'src/shared/types/enums/system-event-type.enum';
 import { WebsocketCallService } from '../websocket/services/websocket-call.service';
 import { ValidateWebhookPipe } from 'src/common/pipes/validate-webhook.pipe';
 import { ChatType } from 'src/shared/types/enums/chat-type.enum';
@@ -13,6 +12,9 @@ import { ChatService } from '../chat/chat.service';
 import { Call } from './entities/call.entity';
 import { Chat } from '../chat/entities/chat.entity';
 import { User } from '../user/entities/user.entity';
+import { ChatEvent } from 'src/shared/types/enums/websocket-events.enum';
+import { MessageMapper } from '../message/mappers/message.mapper';
+import { WebsocketNotificationService } from '../websocket/services/websocket-notification.service';
 
 @Controller('liveKit/webhook')
 export class LiveKitWebhookController {
@@ -20,9 +22,11 @@ export class LiveKitWebhookController {
     private readonly liveKitService: LiveKitService,
     private readonly callService: CallService,
     private readonly messageService: MessageService,
-    private readonly websocketCallService: WebsocketCallService,
     private readonly userService: UserService,
     private readonly chatService: ChatService,
+    private readonly messageMapper: MessageMapper,
+    private readonly websocketCallService: WebsocketCallService,
+    private readonly websocketNotificationService: WebsocketNotificationService,
   ) {}
 
   @Post()
@@ -212,12 +216,15 @@ export class LiveKitWebhookController {
     userId: string,
   ) {
     const endedAt = new Date();
+
+    // 🟢 Update call record
     const updatedCall = await this.callService.updateCall(call.id, {
       status,
       endedAt,
       currentUserIds: [],
     });
 
+    // 🟢 Notify all participants that the call ended
     await this.websocketCallService.emitEndedCall(
       call.id,
       chatId,
@@ -225,16 +232,25 @@ export class LiveKitWebhookController {
       userId,
     );
 
+    // 🟢 Create and emit a normal message (not a system event)
     const sender = call.attendedUsers?.[0];
     if (sender) {
-      await this.messageService.createSystemEventMessage(
-        call.chat.id,
-        sender.id,
-        SystemEventType.CALL,
-        { call: updatedCall },
+      const message = await this.messageService.createMessage(sender.id, {
+        chatId: call.chat.id,
+        call: updatedCall,
+      });
+
+      const messageResponse =
+        this.messageMapper.mapMessageToMessageResDto(message);
+
+      await this.websocketNotificationService.emitToChatMembers(
+        chatId,
+        ChatEvent.NEW_MESSAGE,
+        messageResponse,
       );
     }
 
+    // 🟢 Clean up LiveKit room
     await this.liveKitService.deleteRoom(chatId);
   }
 
