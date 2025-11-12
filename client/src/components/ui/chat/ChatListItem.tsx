@@ -14,6 +14,7 @@ import { useClickOutside } from "@/common/hooks/keyEvent/useClickOutside";
 import { messageAnimations } from "@/common/animations/messageAnimations";
 import { ChatListItemMessage } from "./ChatListItemMessage";
 import SimpleTypingIndicator from "@/components/ui/typingIndicator/SimpleTypingIndicator";
+import { useTranslation } from "react-i18next";
 
 // Keep track of open menu globally
 let openMenuSetter: (() => void) | null = null;
@@ -26,8 +27,9 @@ interface ChatListItemProps {
 
 const ChatListItem: React.FC<ChatListItemProps> = React.memo(
   ({ chatId, isCompact = false, currentUserId = "" }) => {
-    // console.log("ChatListItem", chatId);
+    // logger.log({ prefix: "MOUNTED" }, "ChatListItem", chatId);
 
+    const { t } = useTranslation();
     // This now uses the updated useChat hook that works with Record structure
     const chat = useChat(chatId);
     const isActive = useIsActiveChat(chatId);
@@ -130,6 +132,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
                 <div className="flex gap-1 text-xs items-center flex-shrink-0 ml-2">
                   <p className="whitespace-nowrap opacity-50">
                     {formatTimeAgo(
+                      t,
                       (lastMessage?.createdAt as string | Date | undefined) ??
                         (chat.updatedAt as string | Date)
                     )}

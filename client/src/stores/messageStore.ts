@@ -14,6 +14,7 @@ import {
 import { useAttachmentStore } from "./messageAttachmentStore";
 import { audioService, SoundType } from "@/services/audio.service";
 import { useShallow } from "zustand/shallow";
+import logger from "@/common/utils/logger";
 
 // Normalized structure
 type MessagesById = Record<string, MessageResponse>; // messageId -> Message
@@ -127,6 +128,7 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
     },
 
     addMessage: (newMessage) => {
+      logger.log('Adding message:', newMessage);
       const { messagesById, messageIdsByChat } = get();
       const chatId = newMessage.chatId;
 
@@ -223,6 +225,7 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
     getMessageById: (messageId) => get().messagesById[messageId],
 
     updateMessageById: (messageId, updatedMessage) => {
+      logger.log('updateMessageById:', messageId, updatedMessage);
       set((state) => ({
         messagesById: {
           ...state.messagesById,
@@ -230,25 +233,6 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
         },
       }));
     },
-
-    // deleteMessage: (chatId, messageId) => {
-    //   const { messagesById, messageIdsByChat } = get();
-    //   const newMessagesById = { ...messagesById };
-    //   delete newMessagesById[messageId];
-    //   const newIds = (messageIdsByChat[chatId] || []).filter(
-    //     (id) => id !== messageId
-    //   );
-
-    //   set({
-    //     messagesById: newMessagesById,
-    //     messageIdsByChat: { ...messageIdsByChat, [chatId]: newIds },
-    //   });
-
-    //   // Also remove from attachment store
-    //   useAttachmentStore.getState().removeMessageAttachments(messageId);
-
-    //   audioService.playSound(SoundType.MESSAGE_REMOVE);
-    // },
 
     deleteMessage: (chatId, messageId) => {
       const { messageIdsByChat } = get();

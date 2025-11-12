@@ -1,3 +1,4 @@
+import logger from "@/common/utils/logger";
 import { useState, useEffect, useRef, useCallback } from "react";
 
 interface LocalPreviewVideoStream {
@@ -35,7 +36,7 @@ export const useLocalPreviewVideoTrack = (
       setLocalVideoStream(stream);
       setIsVideoEnabled(true);
     } catch (err) {
-      console.error("Failed to access camera:", err);
+      logger.error("Failed to access camera:", err);
       setIsVideoEnabled(false);
     }
   }, []);

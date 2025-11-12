@@ -9,7 +9,7 @@ import { MessageMapper } from 'src/modules/message/mappers/message.mapper';
 export class PublicChatMapper {
   constructor(private readonly messageMapper: MessageMapper) {}
 
-  async map(chat: Chat): Promise<ChatResponseDto> {
+  map(chat: Chat): ChatResponseDto {
     return {
       id: chat.id,
       type: ChatType.CHANNEL,
@@ -20,7 +20,7 @@ export class PublicChatMapper {
       description: chat.description ?? null,
       updatedAt: chat.updatedAt,
       pinnedMessage: chat.pinnedMessage
-        ? await this.messageMapper.mapMessageToMessageResDto(chat.pinnedMessage)
+        ? this.messageMapper.mapMessageToMessageResDto(chat.pinnedMessage)
         : null,
       otherMemberUserIds: [],
       unreadCount: 0,

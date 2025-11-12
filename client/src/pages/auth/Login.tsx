@@ -6,6 +6,7 @@ import { AuthenticationLayout } from "@/layouts/PublicLayout";
 import { motion } from "framer-motion";
 import { publicLayoutAnimations } from "@/common/animations/publicLayoutAnimations";
 import { useTranslation } from "react-i18next";
+import logger from "@/common/utils/logger";
 
 const Login = () => {
   const { t } = useTranslation();
@@ -20,7 +21,13 @@ const Login = () => {
     const identifier = formData.get("username") as string;
     const password = formData.get("password") as string;
 
-    console.log("identifier:", identifier, " password:", password);
+    logger.log(
+      { prefix: "LOGIN" },
+      "identifier:",
+      identifier,
+      " password:",
+      password
+    );
 
     await login(identifier, password);
   };

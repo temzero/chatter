@@ -18,7 +18,6 @@ export const userService = {
    */
   async updateProfile(updatedProfile: ProfileFormData) {
     const { data } = await API.put("/user/profile", updatedProfile);
-    console.log("Profile updated successfully:", data.payload);
     return data.payload;
   },
   /**
@@ -36,7 +35,6 @@ export const userService = {
    */
   async updateUsername(username: string): Promise<UserResponse> {
     const { data } = await API.put("/user/username", { username });
-    console.log("updated username data: ", data);
     return data.payload;
   },
 
@@ -58,7 +56,6 @@ export const userService = {
       currentPassword,
       newPassword,
     });
-    console.log("change password Data: ", data);
     return data;
   },
 
@@ -102,8 +99,6 @@ export const userService = {
       email,
       verificationCode,
     });
-
-    console.log("data", data);
 
     return data.payload;
   },

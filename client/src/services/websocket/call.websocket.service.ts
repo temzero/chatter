@@ -36,7 +36,6 @@ export const callWebSocketService = {
 
   // UPDATE CALL
   emitUpdateCall(payload: UpdateCallPayload) {
-    console.log("UpdateCallPayload", payload);
     webSocketService.emit(CallEvent.UPDATE_CALL, payload);
   },
   onCallUpdated(

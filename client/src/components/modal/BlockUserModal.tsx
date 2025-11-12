@@ -8,6 +8,7 @@ import { blockService } from "@/services/http/blockService";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useTranslation } from "react-i18next";
 import Button from "../ui/buttons/Button";
+import logger from "@/common/utils/logger";
 
 interface BlockUserModalData {
   userToBlock: ChatMemberResponse;
@@ -35,7 +36,7 @@ const BlockUserModal: React.FC = () => {
         })
       );
     } catch (error) {
-      console.error("Error blocking user:", error);
+      logger.error("Error blocking user:", error);
       toast.error("Failed to block user");
     } finally {
       closeModal();

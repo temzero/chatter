@@ -11,6 +11,7 @@ import AttachFile from "@/components/ui/attachments/AttachFile";
 import AttachmentImportedPreview from "@/components/ui/attachments/AttachmentImportedPreview";
 import useTypingIndicator from "@/common/hooks/useTypingIndicator";
 import { useKeyDown } from "@/common/hooks/keyEvent/useKeydown";
+import logger from "@/common/utils/logger";
 
 interface ChatBarProps {
   chatId: string;
@@ -39,7 +40,9 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
   useEffect(() => {
     if (chatId && inputRef.current) {
       const draft = getDraftMessage(chatId);
-      console.log("DRAFT: ", draft);
+
+      if (draft) logger.log({ prefix: "DRAFT" }, draft);
+
       inputRef.current.value = draft || "";
       setHasTextContent(!!draft?.trim());
       requestAnimationFrame(() => {
@@ -51,7 +54,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
 
   useEffect(() => {
     const inputValueAtMount = inputRef.current?.value;
-    console.log("inputValueAtMount", inputValueAtMount);
+    logger.log("inputValueAtMount", inputValueAtMount);
     return () => {
       if (chatId && inputValueAtMount) {
         setDraftMessage(chatId, inputValueAtMount);

@@ -10,6 +10,7 @@ import {
 import { useRemoteTracks } from "@/common/hooks/mediaStreams/useRemoteTracks";
 import { DraggableContainer } from "@/components/ui/layout/DraggableContainer";
 import { UserCamera } from "@/components/ui/media/UserCamera";
+import logger from "@/common/utils/logger";
 
 interface BroadcastStreamProps {
   participant: Participant;
@@ -27,7 +28,7 @@ export const BroadcastStream = ({
   const { audioTrack, videoTrack, screenTrack } = useRemoteTracks(participant);
 
   if (!audioTrack && !videoTrack && !screenTrack) {
-    console.warn("No remote tracks");
+    logger.warn("No remote tracks");
     return;
   }
 

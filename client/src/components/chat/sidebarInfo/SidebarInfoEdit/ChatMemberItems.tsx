@@ -88,10 +88,6 @@ export const ChatMemberItems = ({
     setContextMenu({ ...position, member });
   };
 
-  const handleClickMember = (member: ChatMemberResponse) => {
-    console.log("Clicked member:", member);
-  };
-
   const itemClasses =
     "flex items-center p-2 hover:bg-[var(--hover-color)] border-t border-[var(--border-color)] cursor-pointer";
 
@@ -120,7 +116,6 @@ export const ChatMemberItems = ({
           </div>
           <div
             className={itemClasses}
-            onClick={() => handleClickMember(myMember)}
             onContextMenu={(e) => handleRightClick(e, myMember)}
           >
             <div className="flex-shrink-0 mr-3">
@@ -156,7 +151,6 @@ export const ChatMemberItems = ({
             <div
               key={member.userId}
               className={itemClasses}
-              onClick={() => handleClickMember(member)}
               onContextMenu={(e) => handleRightClick(e, member)}
             >
               <div className="flex-shrink-0 mr-3">

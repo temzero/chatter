@@ -2,6 +2,7 @@
 import { io, Socket } from "socket.io-client";
 import { localStorageService } from "@/services/storage/localStorageService";
 import { toast } from "react-toastify";
+import logger from "@/common/utils/logger";
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || "ws://localhost:3000";
 
@@ -24,20 +25,16 @@ export class WebSocketService {
       });
 
       this.socket.on("connect", () => {
-        // console.log("Connected to WebSocket, socketId: ", this.socket?.id);
         resolve(this.socket as Socket);
       });
 
       this.socket.on("connect_error", (error: unknown) => {
-        // console.error("Connection error:", error);
         toast.error("WebSocket connection failed!");
         this.connectionPromise = null;
         reject(error);
       });
 
-      this.socket.on("disconnect", () => {
-        // console.log("Disconnected from WebSocket");
-      });
+      this.socket.on("disconnect", () => {});
     });
 
     return this.connectionPromise;
@@ -48,7 +45,7 @@ export class WebSocketService {
       this.socket.disconnect();
       this.socket = null;
       this.connectionPromise = null;
-      console.log("[WS] 🔌 disconnected ");
+      logger.log({ prefix: "WS" }, "🔌 disconnected ");
     }
   }
 
@@ -59,7 +56,11 @@ export class WebSocketService {
   // Helper method to emit events with proper typing
   emit<T>(event: string, data?: T, callback?: (response: unknown) => void) {
     if (!this.socket) {
-      console.warn("Socket not connected. Cannot emit event:", event);
+      logger.warn(
+        { prefix: "WS" },
+        "Socket not connected. Cannot emit event:",
+        event
+      );
       return;
     }
     if (callback) {
@@ -72,7 +73,11 @@ export class WebSocketService {
   emitWithAck<T = void, D = unknown>(event: string, data: D): Promise<T> {
     return new Promise((resolve, reject) => {
       if (!this.socket) {
-        console.warn("Socket not connected. Cannot emit event:", event);
+        logger.warn(
+          { prefix: "WS" },
+          "Socket not connected. Cannot emit event:",
+          event
+        );
         return reject(new Error("Socket not connected"));
       }
 
@@ -93,7 +98,11 @@ export class WebSocketService {
   // Helper method to listen to events
   on<T>(event: string, callback: (data: T) => void) {
     if (!this.socket) {
-      console.warn("Socket not connected. Cannot listen to event:", event);
+      logger.warn(
+        { prefix: "WS" },
+        "Socket not connected. Cannot listen to event:",
+        event
+      );
       return;
     }
     this.socket.on(event, callback);
@@ -102,7 +111,8 @@ export class WebSocketService {
   // Helper method to remove event listeners
   off<T = unknown>(event: string, callback?: (data: T) => void): void {
     if (!this.socket) {
-      console.warn(
+      logger.warn(
+        { prefix: "WS" },
         "Socket not connected. Cannot remove listener for event:",
         event
       );

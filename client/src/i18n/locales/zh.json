@@ -745,6 +745,35 @@
     }
   },
 
+  "system_message": {
+    "default": "系统事件发生。",
+    "you": "你",
+    "your": "你的",
+    "another_member": "另一位成员",
+    "member_joined": "{{displayName}} 加入了聊天",
+    "member_left": "{{displayName}} 离开了聊天",
+    "member_kicked": "{{displayName}} 将 {{targetName}} 移出了聊天",
+    "member_banned": "{{displayName}} 禁止了 {{targetName}} 进入聊天",
+    "chat_renamed": "{{displayName}} 将聊天{{#if oldVal}}从 \"{{oldVal}}\" {{/if}}重命名为 \"{{newVal}}\"",
+    "chat_renamed_no_values": "{{displayName}} 重命名了聊天",
+    "chat_updated_avatar": "{{displayName}} 更新了聊天头像",
+    "chat_updated_description_from_to": "{{displayName}} 将描述从 \"{{oldVal}}\" 改为 \"{{newVal}}\"",
+    "chat_set_description": "{{displayName}} 设置描述为 \"{{newVal}}\"",
+    "chat_updated_description": "{{displayName}} 更新了聊天描述",
+    "nickname_changed_from_to": "{{displayName}} 将 {{target}} 的昵称从 \"{{oldVal}}\" 改为 \"{{newVal}}\"",
+    "nickname_set": "{{displayName}} 设置了 {{target}} 的昵称为 \"{{newVal}}\"",
+    "nickname_updated": "{{displayName}} 更新了 {{target}} 的昵称",
+    "promoted_to_owner": "{{displayName}} 将 {{target}} 提升为所有者",
+    "role_changed_to": "{{displayName}} 将 {{target}} 的角色改为 {{newVal}}",
+    "role_updated": "{{displayName}} 更新了 {{target}} 的角色",
+    "status_changed_to": "{{displayName}} 将 {{target}} 的状态改为 {{newVal}}",
+    "status_updated": "{{displayName}} 更新了 {{target}} 的状态",
+    "message_pinned_with_content": "{{displayName}} 置顶了消息 \"{{newVal}}\"",
+    "message_pinned": "{{displayName}} 置顶了一条消息",
+    "message_unpinned": "{{displayName}} 取消了消息置顶",
+    "chat_deleted": "{{displayName}} 删除了聊天"
+  },
+
   "messages": {
     "search_bar": {
       "placeholder": "搜索消息",

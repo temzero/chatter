@@ -11,6 +11,7 @@ import { motion } from "framer-motion";
 import { mediaViewerAnimations } from "@/common/animations/mediaViewerAnimations";
 import { ModalImageViewer } from "./ModalImageViewer";
 import { useMediaAttachmentKeys } from "@/common/hooks/keyEvent/useMediaAttachmentKeys";
+import logger from "@/common/utils/logger";
 
 export const RenderModalAttachment = ({
   attachment,
@@ -59,7 +60,7 @@ export const RenderModalAttachment = ({
       try {
         audio.play();
       } catch (err) {
-        console.warn("Audio autoplay blocked:", err);
+        logger.warn("Audio autoplay blocked:", err);
       }
     } else {
       audio.pause();
@@ -75,7 +76,7 @@ export const RenderModalAttachment = ({
       const playPromise = video.play();
       if (playPromise !== undefined) {
         playPromise.catch((error) => {
-          console.warn("Autoplay blocked:", error);
+          logger.warn("Autoplay blocked:", error);
         });
       }
     } else {

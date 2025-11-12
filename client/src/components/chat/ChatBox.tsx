@@ -9,10 +9,11 @@ import Header from "./Header";
 import ChatBar from "./components/ChatBar";
 import MessagesContainer from "./messagesContainer/MessagesContainer";
 import { useTranslation } from "react-i18next";
+import logger from "@/common/utils/logger";
 
 const ChatBox = React.memo(() => {
+  logger.log({prefix: "MOUNTED"},"ChatBox");
   const { t } = useTranslation();
-  console.log("ChatBox");
 
   const activeChat = useActiveChat();
 
@@ -22,7 +23,7 @@ const ChatBox = React.memo(() => {
   );
 
   if (!activeChat) {
-    console.log("No activeChat");
+    logger.error("No activeChat");
     return null;
   }
 

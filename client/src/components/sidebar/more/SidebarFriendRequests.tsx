@@ -85,7 +85,7 @@ const SidebarFriendRequests: React.FC = () => {
                       <div className="flex justify-between items-center">
                         <h1 className="font-semibold">{request.sender.name}</h1>
                         <p className="text-xs opacity-60">
-                          {formatTimeAgo(request.updatedAt)}
+                          {formatTimeAgo(t, request.updatedAt)}
                         </p>
                       </div>
                       {request.mutualFriends > 0 && (
@@ -164,7 +164,7 @@ const SidebarFriendRequests: React.FC = () => {
                     <div className="flex justify-between items-center">
                       <h1 className="font-semibold">{request.receiver.name}</h1>
                       <p className="text-xs opacity-60">
-                        {formatTimeAgo(request.updatedAt)}
+                        {formatTimeAgo(t, request.updatedAt)}
                       </p>
                     </div>
                     <p className="text-sm opacity-40">

@@ -1,8 +1,10 @@
+import logger from "./logger";
+
 export async function copyToClipboard(
   text: string | undefined
 ): Promise<boolean> {
   if (!text?.trim()) {
-    console.warn("Nothing to copy: text is empty or whitespace only");
+    logger.warn("Nothing to copy: text is empty or whitespace only");
     return false;
   }
 
@@ -10,7 +12,7 @@ export async function copyToClipboard(
     await navigator.clipboard.writeText(text);
     return true;
   } catch (err) {
-    console.error("Failed to copy to clipboard", err);
+    logger.error("Failed to copy to clipboard", err);
     return false;
   }
 }

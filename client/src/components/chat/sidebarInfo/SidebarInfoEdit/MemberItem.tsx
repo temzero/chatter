@@ -23,9 +23,8 @@ const MemberItem: React.FC<MemberItemProps> = ({ member }) => {
   const showBlockedContent = hasBlockedMe && !member.firstName;
 
   const handleClick = () => {
-    if (!isBlocked) {
-      createOrGetDirectChat(member.userId);
-    }
+    if (isBlocked || isCurrentUser) return;
+    createOrGetDirectChat(member.userId);
   };
 
   return (

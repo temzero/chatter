@@ -1,3 +1,4 @@
+import logger from "@/common/utils/logger";
 import { useState, useEffect, useRef, useCallback } from "react";
 
 interface LocalPreviewAudioStream {
@@ -42,7 +43,7 @@ export const useLocalPreviewVoiceTrack = (
       setLocalVoiceStream(stream);
       setIsVoiceEnabled(true);
     } catch (err) {
-      console.error("Failed to access microphone:", err);
+      logger.error("Failed to access microphone:", err);
       cleanupStream();
     }
   }, [cleanupStream]);

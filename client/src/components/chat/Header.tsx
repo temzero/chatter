@@ -21,14 +21,17 @@ import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
 import MessageSearchBar from "@/components/ui/messages/MessageSearchBar";
 import PinnedMessage from "./components/message/preview/PinnedMessage";
+import logger from "@/common/utils/logger";
+import { useTranslation } from "react-i18next";
 interface ChatHeaderProps {
   chat: ChatResponse;
   isBlockedByMe: boolean;
 }
 
 const Header: React.FC<ChatHeaderProps> = ({ chat, isBlockedByMe = false }) => {
-  console.log("Header");
+  logger.log({ prefix: "MOUNTED" }, "Header");
 
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const toggleSidebarInfo = useSidebarInfoStore.getState().toggleSidebarInfo;
@@ -137,10 +140,9 @@ const Header: React.FC<ChatHeaderProps> = ({ chat, isBlockedByMe = false }) => {
       <motion.div
         key={chat.id}
         className="flex gap-3 items-center cursor-pointer hover:text-[--primary-green]"
-        initial={{ opacity: 0.2, scale: 0.9 }}
+        initial={{ opacity: 0.6, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0.2, scale: 0.9 }}
-        transition={{ type: "tween", duration: 0.1, ease: "easeInOut" }}
+        exit={{ opacity: 0.6, scale: 0.9 }}
         onClick={toggleSidebarInfo}
       >
         <ChatAvatar chat={chat} type="header" isBlocked={isBlockedByMe} />
@@ -149,7 +151,7 @@ const Header: React.FC<ChatHeaderProps> = ({ chat, isBlockedByMe = false }) => {
         </h1>
         {isDirect && !isOnline && lastSeen && (
           <span className="text-xs text-gray-400">
-            Last seen {formatTimeAgo(lastSeen)}
+            Last seen {formatTimeAgo(t, lastSeen)}
           </span>
         )}
         {chat.isDeleted && (

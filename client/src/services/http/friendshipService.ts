@@ -28,7 +28,6 @@ export const friendshipService = {
    */
   async fetchFriendContacts(): Promise<FriendContactResponse[]> {
     const { data } = await API.get("/friendships/contacts");
-    console.log("Friend contacts", data.payload);
     return data.payload;
   },
 

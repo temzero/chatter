@@ -14,6 +14,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { useChatStore } from "@/stores/chatStore";
 import { WsNotificationResponse } from "@/shared/types/responses/ws-emit-chat-member.response";
+import logger from "@/common/utils/logger";
 
 export function useNotificationSocketListeners() {
   const { t } = useTranslation();
@@ -39,7 +40,7 @@ export function useNotificationSocketListeners() {
       const { payload } = data;
 
       if (payload.user.id === currentUserId) {
-        console.log("Skipping notification about our own action");
+        logger.log("Skipping notification about our own action");
         return;
       }
 
@@ -49,7 +50,7 @@ export function useNotificationSocketListeners() {
         .updateFriendshipStatus(payload.user.id, payload.status);
       useFriendshipStore.getState().removeRequestLocally(payload.friendshipId);
 
-      console.log("data.status", payload.status);
+      logger.log("data.status", payload.status);
 
       // 4. Show notification with correct context
       if (payload.status === FriendshipStatus.ACCEPTED) {
@@ -65,13 +66,13 @@ export function useNotificationSocketListeners() {
             friendshipStatus: payload.status,
           });
 
-        console.log("OTHER USER ACCEPTED MY REQUEST");
+        logger.log("OTHER USER ACCEPTED MY REQUEST");
 
         setTimeout(() => {
           try {
             useChatStore.getState().getDirectChatByUserId(payload.user.id);
           } catch (error) {
-            console.error(
+            logger.error(
               "Failed to create/get direct chat after friendship accepted:",
               error
             );

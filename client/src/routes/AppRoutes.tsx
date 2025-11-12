@@ -5,10 +5,11 @@ import PublicRoutes from "./PublicRoutes";
 import PrivateRoute from "./PrivateRoute";
 import HomePage from "@/pages/HomePage";
 import InvitePage from "@/pages/InvitePage";
+import logger from "@/common/utils/logger";
 
 const AppRoutes: React.FC = () => {
   const isAuthenticated = useIsAuthenticated();
-  console.log("AppRoutes-isAuthenticated ", isAuthenticated);
+  logger.log({ prefix: "AUTH" }, "AppRoutes-isAuthenticated ", isAuthenticated);
 
   return (
     <>

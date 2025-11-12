@@ -12,6 +12,7 @@ import {
   SystemMessageContent,
   SystemMessageJSONContent,
 } from "@/components/ui/messages/content/SystemMessageContent";
+import logger from "@/common/utils/logger";
 
 interface MessageHorizontalPreviewProps {
   message: MessageResponse;
@@ -54,7 +55,7 @@ export const MessageHorizontalPreview: React.FC<
   });
 
   if (!currentUserId) {
-    console.error("Not authenticated");
+    logger.error({ prefix: "AUTH" }, "Not authenticated");
     return;
   }
 

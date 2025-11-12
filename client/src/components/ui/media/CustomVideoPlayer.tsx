@@ -3,6 +3,7 @@ import { useRef, useState, MouseEvent, useEffect } from "react";
 import { formatDuration } from "@/common/utils/format/formatDuration";
 import { ModalType } from "@/common/enums/modalType";
 import { useModalStore } from "@/stores/modalStore";
+import logger from "@/common/utils/logger";
 
 // Video manager implementation
 let currentVideo: HTMLVideoElement | null = null;
@@ -18,7 +19,7 @@ const playVideo = (videoElement: HTMLVideoElement) => {
 
   // Set the new video as current and play it
   currentVideo = videoElement;
-  videoElement.play().catch(console.error);
+  videoElement.play().catch(logger.error);
 };
 
 const stopCurrentVideo = () => {

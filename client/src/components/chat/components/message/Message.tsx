@@ -26,6 +26,7 @@ import { getMessageAttachments } from "@/stores/messageAttachmentStore";
 import { SystemMessageJSONContent } from "../../../ui/messages/content/SystemMessageContent";
 import { CallMessageContent } from "../../../ui/messages/content/CallMessageContent";
 import MessageBubbleWrapper from "./wrapper/MessageBubbleWrapper";
+import { useMessageSender } from "@/stores/chatMemberStore";
 
 interface MessageProps {
   messageId: string;
@@ -49,6 +50,12 @@ const Message: React.FC<MessageProps> = ({
   chat,
 }) => {
   const message = useMessageStore((state) => state.messagesById[messageId]);
+  const sender = useMessageSender(message?.sender.id, message?.chatId);
+  const senderDisplayName =
+    sender?.nickname ||
+    [sender?.firstName, sender?.lastName].filter(Boolean).join(" ") ||
+    message.sender.displayName;
+
   const call = message.call;
 
   const attachments = getMessageAttachments(message.chatId, message.id);
@@ -101,8 +108,8 @@ const Message: React.FC<MessageProps> = ({
         <SystemMessage
           message={message}
           systemEvent={message.systemEvent}
-          senderId={message.sender?.id ?? ""}
-          senderDisplayName={message.sender?.displayName ?? ""}
+          senderId={sender?.id ?? ""}
+          senderDisplayName={senderDisplayName ?? ""}
           content={message.content as SystemMessageJSONContent}
         />
       </div>
@@ -138,8 +145,8 @@ const Message: React.FC<MessageProps> = ({
         >
           {!isRecent && (
             <Avatar
-              avatarUrl={message.sender?.avatarUrl}
-              name={message.sender?.displayName ?? ""}
+              avatarUrl={sender?.avatarUrl}
+              name={senderDisplayName ?? ""}
               className="w-full h-full"
             />
           )}
@@ -160,7 +167,7 @@ const Message: React.FC<MessageProps> = ({
               chatType={chatType}
               isMe={isMe}
               currentUserId={currentUserId ?? ""}
-              senderId={message.sender?.id ?? ""}
+              senderId={sender?.id ?? ""}
               isHidden={isFocus}
             />
           )}
@@ -187,7 +194,7 @@ const Message: React.FC<MessageProps> = ({
               />
             )}
           </MessageBubbleWrapper>
-          
+
           <MessageReactionDisplay
             isMe={isMe}
             currentUserId={currentUserId}
@@ -231,7 +238,7 @@ const Message: React.FC<MessageProps> = ({
 
         {showInfo && isGroupChat && !isMe && (
           <h1 className="text-sm font-semibold opacity-70 mr-2 mt-1">
-            {message.sender?.displayName ?? ""}
+            {senderDisplayName ?? ""}
           </h1>
         )}
 
@@ -259,7 +266,7 @@ const Message: React.FC<MessageProps> = ({
                 currentUserId={currentUserId}
                 messageId={message.id}
                 isMe={isMe}
-                senderName={message.sender.displayName}
+                senderName={senderDisplayName}
               />
             </div>
           )}

@@ -1,14 +1,19 @@
 import { useEffect } from "react";
 import { webSocketService } from "@/services/websocket/websocket.service";
+import logger from "@/common/utils/logger";
 
 export const useWebSocket = () => {
   useEffect(() => {
     // Connect to the server
     webSocketService.connect().then((socket) => {
-      // console.log("[WS] 🔌 Connected? ", socket.connected);
+      logger.log(
+        { prefix: "WS" },
+        "Connected to WebSocket server",
+        socket.connected
+      );
 
       socket.on("error", (error) => {
-        console.error("[WS] ❌ Error received:", error);
+        logger.error({ prefix: "WS" }, error);
       });
     });
 

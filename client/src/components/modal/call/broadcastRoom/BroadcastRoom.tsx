@@ -11,6 +11,7 @@ import { useIsMobile } from "@/stores/deviceStore";
 import { useTranslation } from "react-i18next";
 import Button from "@/components/ui/buttons/Button";
 import BroadcastStream from "./BroadcastStream";
+import logger from "@/common/utils/logger";
 
 const BroadcastRoom = ({
   chat,
@@ -73,7 +74,7 @@ const BroadcastRoom = ({
   const handleLeaveCall = () => {
     [localVideoStream, localAudioStream, localScreenStream].forEach(
       (stream) => {
-        console.log(stream?.getTracks());
+        logger.log({ prefix: "LEAVE CALL" }, stream?.getTracks());
         stream?.getTracks().forEach((track) => track.stop());
       }
     );

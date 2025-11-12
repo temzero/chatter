@@ -9,6 +9,7 @@ import { LiveKitService } from './liveKit.service';
 import { LiveKitWebhookPayload } from '../websocket/constants/LiveKitWebhookPayload.type';
 import { UserService } from '../user/user.service';
 import { ChatService } from '../chat/chat.service';
+import { ChatMemberService } from '../chat-member/chat-member.service';
 import { Call } from './entities/call.entity';
 import { Chat } from '../chat/entities/chat.entity';
 import { User } from '../user/entities/user.entity';
@@ -24,6 +25,7 @@ export class LiveKitWebhookController {
     private readonly messageService: MessageService,
     private readonly userService: UserService,
     private readonly chatService: ChatService,
+    private readonly chatMemberService: ChatMemberService,
     private readonly messageMapper: MessageMapper,
     private readonly websocketCallService: WebsocketCallService,
     private readonly websocketNotificationService: WebsocketNotificationService,
@@ -240,8 +242,16 @@ export class LiveKitWebhookController {
         call: updatedCall,
       });
 
-      const messageResponse =
-        this.messageMapper.mapMessageToMessageResDto(message);
+      const senderMember =
+        await this.chatMemberService.getMemberByChatIdAndUserId(
+          chatId,
+          sender.id,
+        );
+
+      const messageResponse = this.messageMapper.mapMessageToMessageResDto(
+        message,
+        senderMember.nickname || undefined,
+      );
 
       await this.websocketNotificationService.emitToChatMembers(
         chatId,

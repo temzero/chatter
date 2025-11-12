@@ -1,6 +1,7 @@
 import React from "react";
 import type { ChatResponse } from "@/shared/types/responses/chat.response";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
+import logger from "@/common/utils/logger";
 
 
 interface ChatListProps {
@@ -11,7 +12,7 @@ interface ChatListProps {
 
 const ContactList: React.FC<ChatListProps> = ({ chats, isCompact = false }) => {
   function handleContactSelect(chat: ChatResponse) {
-    console.log("chat", chat);
+    logger.log("chat", chat);
     return null;
   }
 

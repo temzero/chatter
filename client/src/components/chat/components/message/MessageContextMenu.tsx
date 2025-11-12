@@ -27,7 +27,6 @@ export const MessageContextMenu: React.FC<MessageContextMenuProps> = ({
   initialMousePosition,
   onClose,
 }) => {
-  console.log('focused message: ', message)
   const menuRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<Position | undefined>(undefined);
   const [transformOrigin, setTransformOrigin] = useState("top left");

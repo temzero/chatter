@@ -3,6 +3,7 @@ import { CallLiteResponse } from "@/shared/types/responses/call-lite.response";
 import { getCallStatusText } from "@/common/utils/call/callTextHelpers";
 import { getCallStatusColor } from "@/common/utils/call/callHelpers";
 import CallIcon from "@/components/ui/icons/CallIcon";
+import { useTranslation } from "react-i18next";
 
 type CallMessageContentProps = {
   call: CallLiteResponse;
@@ -19,7 +20,9 @@ export const CallMessageContent = ({
   iconClassName = "",
   textClassName = "",
 }: CallMessageContentProps): JSX.Element => {
-  const text = getCallStatusText(call.status, call.startedAt, call.endedAt);
+  const { t } = useTranslation();
+
+  const text = getCallStatusText(t, call.status, call.startedAt, call.endedAt);
   const messageColor = getCallStatusColor(call.status);
 
   return (

@@ -22,6 +22,11 @@ import { Call } from '../call/entities/call.entity';
 import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
 import { AttachmentService } from '../attachment/attachment.service';
 import { Attachment } from '../attachment/entity/attachment.entity';
+import { ChatMemberService } from '../chat-member/chat-member.service';
+
+type MessageWithSenderMember = Message & {
+  senderMember?: ChatMember;
+};
 
 @Injectable()
 export class MessageService {
@@ -40,6 +45,7 @@ export class MessageService {
     public readonly callRepo: Repository<Call>,
 
     private readonly attachmentService: AttachmentService,
+    private readonly chatMemberService: ChatMemberService,
     private readonly blockService: BlockService,
     private readonly messageMapper: MessageMapper,
     private readonly websocketNotificationService: WebsocketNotificationService,
@@ -251,7 +257,7 @@ export class MessageService {
 
     const fullMessage = await this.getFullMessageById(savedMessage.id);
     const messageResponse =
-      await this.messageMapper.mapMessageToMessageResDto(fullMessage);
+      this.messageMapper.mapMessageToMessageResDto(fullMessage);
 
     await this.websocketNotificationService.emitToChatMembers(
       chatId,
@@ -492,7 +498,8 @@ export class MessageService {
       messagesQuery.take(Number(limit));
       messagesQuery.skip(Number(offset));
 
-      const messages = await messagesQuery.getMany();
+      const messages =
+        (await messagesQuery.getMany()) as MessageWithSenderMember[];
 
       // Reverse to chronological order (oldest first)
       const sortedMessages = messages.reverse();
@@ -517,11 +524,28 @@ export class MessageService {
         hasMore = remainingCount > 0;
       }
 
-      const messagesResponse = await Promise.all(
-        sortedMessages.map((message) =>
-          this.messageMapper.mapMessageToMessageResDto(message),
-        ),
-      );
+      const messagesResponse = sortedMessages.map((message) => {
+        return this.messageMapper.mapMessageToMessageResDto(message);
+      });
+
+      // response with sender nickname
+      // const messagesResponse = await Promise.all(
+      //   sortedMessages.map(async (message) => {
+      //     const senderMember =
+      //       await this.chatMemberService.getMemberByChatIdAndUserId(
+      //         message.chatId,
+      //         message.senderId,
+      //       );
+      //     console.log(
+      //       'Mapping message with senderMember:',
+      //       senderMember.nickname,
+      //     );
+      //     return this.messageMapper.mapMessageToMessageResDto(
+      //       message,
+      //       senderMember.nickname || undefined,
+      //     );
+      //   }),
+      // );
 
       return { items: messagesResponse, hasMore };
     } catch (error) {

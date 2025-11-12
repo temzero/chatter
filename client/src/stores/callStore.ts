@@ -12,6 +12,7 @@ import { callService } from "@/services/http/callService";
 import { callWebSocketService } from "@/services/websocket/call.websocket.service";
 import { handleError } from "@/common/utils/handleError";
 import { getLocalCallStatus } from "@/common/utils/call/callHelpers";
+import logger from "@/common/utils/logger";
 
 interface CallState {
   liveKitService: LiveKitService | null;
@@ -135,7 +136,10 @@ export const useCallStore = create<CallState & CallActions>()(
 
         const token = await getMyCallToken(chatId);
         if (!token) {
-          console.warn("[startCall] No token available for LiveKit");
+          logger.warn(
+            { prefix: "START CALL" },
+            "No token available for LiveKit"
+          );
           set({
             localCallStatus: LocalCallStatus.ERROR,
             error: CallError.PERMISSION_DENIED,
@@ -157,7 +161,7 @@ export const useCallStore = create<CallState & CallActions>()(
           await liveKitService.toggleScreenShare(true, opts.screenStream);
         }
       } catch (error) {
-        console.error("[startCall] error:", error);
+        logger.error({ prefix: "START CALL" }, error);
         set({
           error: CallError.INITIATION_FAILED,
           localCallStatus: LocalCallStatus.ERROR,
@@ -201,7 +205,10 @@ export const useCallStore = create<CallState & CallActions>()(
 
         const token = await getMyCallToken(chatId);
         if (!token) {
-          console.warn("[joinCall] No token available for LiveKit");
+          logger.error(
+            { prefix: "JOIN CALL" },
+            "No token available for LiveKit"
+          );
           set({
             localCallStatus: LocalCallStatus.ERROR,
             callStatus: CallStatus.FAILED,
@@ -222,7 +229,10 @@ export const useCallStore = create<CallState & CallActions>()(
 
         useModalStore.getState().openModal(ModalType.CALL, { callId, chatId });
 
-        console.log("[joinCall] Successfully connected to LiveKit");
+        logger.log(
+          { prefix: "JOIN CALL" },
+          "Successfully connected to LiveKit"
+        );
       } catch (error) {
         set({
           localCallStatus: LocalCallStatus.ERROR,
@@ -236,7 +246,7 @@ export const useCallStore = create<CallState & CallActions>()(
     declineCall: () => {
       const { chatId, callId, endCall, closeCallModal } = get();
       if (!chatId || !callId) {
-        console.error("Missing CallId or ChatId");
+        logger.error("Missing CallId or ChatId");
         return;
       }
 
@@ -244,7 +254,7 @@ export const useCallStore = create<CallState & CallActions>()(
       try {
         callWebSocketService.declineCall({ chatId, callId });
       } catch (error) {
-        console.error("Failed to send decline call:", error);
+        logger.error("Failed to send decline call:", error);
       }
 
       // Update local state
@@ -356,9 +366,7 @@ export const useCallStore = create<CallState & CallActions>()(
         currentChatId === chatId &&
         callStatus === CallStatus.IN_PROGRESS
       ) {
-        console.log(
-          `[getActiveCall] Already in call for chat ${chatId}, skipping fetch`
-        );
+        logger.log(`Already in call for chat ${chatId}, skipping fetch`);
         return null;
       }
 
@@ -377,7 +385,7 @@ export const useCallStore = create<CallState & CallActions>()(
         }
         return call;
       } catch (error) {
-        console.error("Failed to fetch active call:", error);
+        logger.error("Failed to fetch active call:", error);
         return null;
       }
     },
@@ -433,7 +441,7 @@ export const useCallStore = create<CallState & CallActions>()(
         screen: options?.screen ?? false,
         onError: (error) => {
           set({ localCallStatus: LocalCallStatus.ERROR });
-          console.error("LiveKit error:", error);
+          logger.error({ prefix: "LIVEKIT" }, error);
         },
       });
     },

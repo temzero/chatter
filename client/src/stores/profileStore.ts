@@ -4,6 +4,7 @@ import { userService } from "@/services/http/userService";
 import { localStorageService } from "@/services/storage/localStorageService";
 import { useAuthStore } from "./authStore";
 import { ProfileFormData } from "@/components/sidebar/SidebarProfileEdit";
+import logger from "@/common/utils/logger";
 
 interface ProfileState {
   loading: boolean;
@@ -29,9 +30,8 @@ export const useProfileStore = create<ProfileState & ProfileActions>()(
         set({ loading: true, error: null });
         const updatedUser = await userService.updateProfile(updatedData);
 
-        // Optimized: Avoid unnecessary `console.log` in production
         if (process.env.NODE_ENV === "development") {
-          console.log("updated User: ", updatedUser);
+          logger.log("updated User: ", updatedUser);
         }
 
         // Optimized: Get and update auth store in one operation

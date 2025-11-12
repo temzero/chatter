@@ -1,8 +1,8 @@
-import i18n from "@/i18n";
 import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 import { parseJsonContent } from "../parseJsonContent";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { SystemMessageJSONContent } from "@/components/ui/messages/content/SystemMessageContent";
+import { TFunction } from "i18next";
 
 export function getSystemMessageColor(
   systemEvent?: SystemEventType | null
@@ -19,8 +19,10 @@ export function getSystemMessageColor(
     case SystemEventType.MEMBER_BANNED:
       return "text-red-500";
 
-    case SystemEventType.CHAT_RENAMED:
-      return "text-blue-500";
+    // case SystemEventType.CHAT_RENAMED:
+    // case SystemEventType.CHAT_UPDATE_AVATAR:
+    // case SystemEventType.CHAT_UPDATE_DESCRIPTION:
+    //   return "text-blue-400";
 
     case SystemEventType.CHAT_DELETED:
       return "text-red-600 font-semibold";
@@ -35,96 +37,128 @@ export function getSystemMessageColor(
 }
 
 export function getSystemMessageText({
+  t,
   systemEvent,
   currentUserId,
   senderId,
   senderDisplayName,
   JSONcontent,
 }: {
+  t: TFunction;
   systemEvent?: SystemEventType | null;
   currentUserId: string;
   senderId: string;
   senderDisplayName: string;
   JSONcontent?: SystemMessageJSONContent | null;
 }): string {
-  const t = i18n.t;
-
-  if (!systemEvent) return t("system.unknown_event");
+  if (!systemEvent) return t("system_message.default");
 
   const isMe = currentUserId === senderId;
-  const displayName = isMe ? t("common.you") : senderDisplayName;
+  const displayName = isMe ? t("system_message.you") : senderDisplayName;
   const parsedContent = parseJsonContent<SystemMessageJSONContent>(JSONcontent);
 
   const newVal = parsedContent?.newValue;
   const oldVal = parsedContent?.oldValue;
   const isTargetMe = parsedContent?.targetId === currentUserId;
   const targetName = isTargetMe
-    ? t("common.you")
-    : parsedContent?.targetName || t("system.another_member");
+    ? t("system_message.you")
+    : parsedContent?.targetName || t("system_message.another_member");
 
   switch (systemEvent) {
     case SystemEventType.MEMBER_JOINED:
-      return t("system.member_joined", { displayName });
-    case SystemEventType.MEMBER_ADDED:
-      return t("system.member_added", { displayName, targetName });
+      return t("system_message.member_joined", { displayName });
     case SystemEventType.MEMBER_LEFT:
-      return t("system.member_left", { displayName });
+      return t("system_message.member_left", { displayName });
     case SystemEventType.MEMBER_KICKED:
-      return t("system.member_kicked", { displayName, targetName });
+      return t("system_message.member_kicked", { displayName, targetName });
     case SystemEventType.MEMBER_BANNED:
-      return t("system.member_banned", { displayName, targetName });
+      return t("system_message.member_banned", { displayName, targetName });
     case SystemEventType.CHAT_RENAMED:
-      return newVal
-        ? t("system.chat_renamed_with_values", { displayName, oldVal, newVal })
-        : t("system.chat_renamed", { displayName });
+      if (newVal) {
+        return t("system_message.chat_renamed", {
+          displayName,
+          oldVal,
+          newVal,
+        });
+      }
+      return t("system_message.chat_renamed_no_values", { displayName });
     case SystemEventType.CHAT_UPDATE_AVATAR:
-      return t("system.chat_update_avatar", { displayName });
+      return t("system_message.chat_updated_avatar", { displayName });
     case SystemEventType.CHAT_UPDATE_DESCRIPTION:
-      if (oldVal && newVal)
-        return t("system.chat_update_description_with_values", {
+      if (oldVal && newVal) {
+        return t("system_message.chat_updated_description_from_to", {
           displayName,
           oldVal,
           newVal,
         });
-      if (newVal)
-        return t("system.chat_set_description", { displayName, newVal });
-      return t("system.chat_update_description", { displayName });
+      }
+      if (newVal) {
+        return t("system_message.chat_set_description", {
+          displayName,
+          newVal,
+        });
+      }
+      return t("system_message.chat_updated_description", { displayName });
     case SystemEventType.MEMBER_UPDATE_NICKNAME:
-      if (oldVal && newVal)
-        return t("system.member_update_nickname_with_values", {
+      if (oldVal && newVal) {
+        return t("system_message.nickname_changed_from_to", {
           displayName,
-          targetName,
+          target: isTargetMe ? t("system_message.your") : targetName,
           oldVal,
           newVal,
         });
-      if (newVal)
-        return t("system.member_set_nickname", {
+      }
+      if (newVal) {
+        return t("system_message.nickname_set", {
           displayName,
-          targetName,
+          target: isTargetMe ? t("system_message.your") : targetName,
           newVal,
         });
-      return t("system.member_update_nickname", { displayName, targetName });
+      }
+      return t("system_message.nickname_updated", {
+        displayName,
+        target: isTargetMe ? t("system_message.your") : targetName,
+      });
     case SystemEventType.MEMBER_UPDATE_ROLE:
-      if (newVal === ChatMemberRole.OWNER)
-        return t("system.member_promote_owner", { displayName, targetName });
-      return t("system.member_update_role", {
-        displayName,
-        targetName,
-        newVal,
-      });
+      if (newVal === ChatMemberRole.OWNER) {
+        return t("system_message.promoted_to_owner", {
+          displayName,
+          target: isTargetMe ? t("system_message.you") : targetName,
+        });
+      }
+      return newVal
+        ? t("system_message.role_changed_to", {
+            displayName,
+            target: isTargetMe ? t("system_message.your") : targetName,
+            newVal,
+          })
+        : t("system_message.role_updated", {
+            displayName,
+            target: isTargetMe ? t("system_message.your") : targetName,
+          });
     case SystemEventType.MEMBER_UPDATE_STATUS:
-      return t("system.member_update_status", {
-        displayName,
-        targetName,
-        newVal,
-      });
+      return newVal
+        ? t("system_message.status_changed_to", {
+            displayName,
+            target: isTargetMe ? t("system_message.your") : targetName,
+            newVal,
+          })
+        : t("system_message.status_updated", {
+            displayName,
+            target: isTargetMe ? t("system_message.your") : targetName,
+          });
     case SystemEventType.MESSAGE_PINNED:
-      return t("system.message_pinned", { displayName, newVal });
+      return newVal
+        ? t("system_message.message_pinned_with_content", {
+            displayName,
+            newVal,
+          })
+        : t("system_message.message_pinned", { displayName });
     case SystemEventType.MESSAGE_UNPINNED:
-      return t("system.message_unpinned", { displayName });
+      return t("system_message.message_unpinned", { displayName });
     case SystemEventType.CHAT_DELETED:
-      return t("system.chat_deleted", { displayName });
+      return t("system_message.chat_deleted", { displayName });
     default:
-      return t("system.unknown_event");
+      return t("system_message.default");
   }
 }

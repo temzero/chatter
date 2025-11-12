@@ -8,6 +8,7 @@ import axios, {
 import { localStorageService } from "../storage/localStorageService";
 import { useAuthStore } from "@/stores/authStore";
 import { audioService, SoundType } from "../audio.service";
+import logger from "@/common/utils/logger";
 
 const API: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -42,7 +43,7 @@ API.interceptors.request.use(
 API.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError) => {
-    console.error("API Error:", error.response?.data);
+    logger.error({ prefix: "API" }, error.response?.data);
 
     audioService.stopAllSounds();
     audioService.playSound(SoundType.ERROR);
@@ -57,7 +58,7 @@ API.interceptors.response.use(
       // 1. It's NOT an auth API call AND
       // 2. User is not already on auth page (prevents double redirect)
       if (!isAuthRoute && !isCurrentlyOnAuthPage) {
-        console.warn("Access token invalid, redirecting to login...");
+        logger.warn({ prefix: "API" }, "Access token invalid, redirecting to login...");
         useAuthStore.getState().logout();
         window.location.href = "/auth/login";
       }

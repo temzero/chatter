@@ -4,6 +4,7 @@ import ChatListItem from "./ChatListItem";
 import InfiniteScroller from "@/components/ui/layout/InfiniteScroller";
 import { getCurrentUserId } from "@/stores/authStore";
 import { useChatStore } from "@/stores/chatStore";
+import logger from "@/common/utils/logger";
 interface ChatListProps {
   chatIds: string[]; // Changed from chats to chatIds
   isCompact?: boolean;
@@ -11,13 +12,13 @@ interface ChatListProps {
 
 const ChatList: React.FC<ChatListProps> = React.memo(
   ({ chatIds, isCompact = false }) => {
-    console.log("ChatList", chatIds.length);
+    logger.log({ prefix: "MOUNTED" }, "ChatList", chatIds.length);
     const currentUserId = getCurrentUserId();
     const hasMoreChats = useChatStore((state) => state.hasMoreChats);
     const fetchMoreChats = useChatStore.getState().fetchMoreChats;
 
     if (!currentUserId) {
-      console.error('No User Data')
+      logger.error('No User Data')
       return 
     };
 

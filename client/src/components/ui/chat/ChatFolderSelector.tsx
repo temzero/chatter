@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useIsCompactSidebar } from "@/stores/sidebarStore";
 import { FolderResponse } from "@/shared/types/responses/folder.response";
+import logger from "@/common/utils/logger";
 
 type Props = {
   selectedFolder: FolderResponse;
@@ -13,7 +14,7 @@ const ChatFolderSelector: React.FC<Props> = ({
   onSelectFolder,
   folders,
 }) => {
-  console.log('ChatFolderSelector')
+  logger.log({ prefix: "MOUNTED" }, "ChatFolderSelector");
   const isCompact = useIsCompactSidebar();
 
   const scrollRef = useRef<HTMLDivElement>(null);

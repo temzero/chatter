@@ -66,7 +66,7 @@ export class DirectChatMapper {
       avatarUrl,
       updatedAt: chat.updatedAt,
       pinnedMessage: chat.pinnedMessage
-        ? await this.messageMapper.mapMessageToMessageResDto(chat.pinnedMessage)
+        ? this.messageMapper.mapMessageToMessageResDto(chat.pinnedMessage)
         : null,
       otherMemberUserIds: otherMember ? [otherMember.userId] : [],
       previewMembers,

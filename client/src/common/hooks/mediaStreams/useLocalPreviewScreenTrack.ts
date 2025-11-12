@@ -1,3 +1,4 @@
+import logger from "@/common/utils/logger";
 import { useState, useEffect, useRef, useCallback } from "react";
 
 interface LocalPreviewScreenStream {
@@ -47,7 +48,7 @@ export const useLocalPreviewScreenTrack = (
         track.onended = cleanupStream;
       });
     } catch (err) {
-      console.error("Failed to start screen capture:", err);
+      logger.error("Failed to start screen capture:", err);
       cleanupStream();
     }
   }, [cleanupStream]);

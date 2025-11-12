@@ -8,14 +8,15 @@ import { handleError } from "@/common/utils/handleError";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import Button from "../ui/buttons/Button";
-import i18n from "@/i18n";
+import logger from "@/common/utils/logger";
+import { useTranslation } from "react-i18next";
 
 interface DeleteMessageModalData {
   messageId: string;
 }
 
 const DeleteMessageModal: React.FC = () => {
-  const t = i18n.t;
+   const { t } = useTranslation();
   const currentUserId = getCurrentUserId();
   if (!currentUserId) {
     return;
@@ -40,8 +41,8 @@ const DeleteMessageModal: React.FC = () => {
     myMember?.role === ChatMemberRole.ADMIN ||
     myMember?.role === ChatMemberRole.OWNER;
 
-  console.log("isSender", isSender);
-  console.log("isOwnerOrAdmin", isOwnerOrAdmin);
+  logger.log("isSender", isSender);
+  logger.log("isOwnerOrAdmin", isOwnerOrAdmin);
 
   const canDeleteForEveryone = isSender || isOwnerOrAdmin;
 

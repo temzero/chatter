@@ -12,13 +12,14 @@ import ChannelMessages from "./ChannelMessages";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useMessagesAutoScroll } from "@/common/hooks/useMessagesAutoScroll";
+import logger from "@/common/utils/logger";
 
 interface ChatBoxProps {
   chat?: ChatResponse;
 }
 
 const MessagesContainer: React.FC<ChatBoxProps> = ({ chat }) => {
-  console.log("MessagesContainer");
+  logger.log({ prefix: "MOUNTED" }, "MessagesContainer");
 
   const chatId = chat?.id || "";
   const isMessagePinned = chat?.pinnedMessage !== null;
@@ -40,7 +41,7 @@ const MessagesContainer: React.FC<ChatBoxProps> = ({ chat }) => {
     containerRef: scrollerRef, // pass your scrollable container ref
     items: messageIds, // array of messages
     isImportantOnly: isShowImportant,
-    chatId: chatId
+    chatId: chatId,
   });
 
   const renderMessages = useCallback(() => {

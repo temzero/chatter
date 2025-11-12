@@ -9,6 +9,7 @@ import type { ChatResponse } from "@/shared/types/responses/chat.response";
 import type { ChatType } from "@/shared/types/enums/chat-type.enum";
 import ContactSelectionList from "@/components/ui/contact/ContactSelectionList";
 import SearchBar from "@/components/ui/SearchBar";
+import logger from "@/common/utils/logger";
 
 interface CreateChatProps {
   type: ChatType.GROUP | ChatType.CHANNEL;
@@ -70,7 +71,7 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
   const CreateNewGroup = async () => {
     try {
       if (!currentUser) {
-        console.error(t("sidebar_new_chat.group.user_not_authenticated"));
+        logger.error(t("sidebar_new_chat.group.user_not_authenticated"));
         return;
       }
 
@@ -94,12 +95,12 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
       };
 
       const newChat = await createGroupChat(payload);
-      console.log("Successfully created:", newChat);
+      logger.log("Successfully created:", newChat);
 
       setActiveChatId(newChat.id);
       setSidebar(SidebarMode.DEFAULT);
     } catch (error) {
-      console.error("Failed to create group/channel:", error);
+      logger.error("Failed to create group/channel:", error);
     }
   };
 

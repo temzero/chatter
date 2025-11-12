@@ -8,6 +8,7 @@ import { useShallow } from "zustand/shallow";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { getCurrentUserId } from "./authStore";
 import { PaginationQuery } from "@/shared/types/queries/pagination-query";
+import logger from "@/common/utils/logger";
 
 interface ChatMemberState {
   chatMembers: Record<string, ChatMemberResponse[]>; // chatId -> members
@@ -176,7 +177,7 @@ export const useChatMemberStore = create<ChatMemberState & ChatMemberActions>(
         try {
           return await chatMemberService.fetchMemberById(memberId);
         } catch (error) {
-          console.error("Failed to fetch member:", error);
+          logger.error("Failed to fetch member:", error);
           return undefined;
         }
       }
@@ -215,7 +216,7 @@ export const useChatMemberStore = create<ChatMemberState & ChatMemberActions>(
 
           member = fetchedMember;
         } catch (error) {
-          console.error("Failed to fetch member:", error);
+          logger.error("Failed to fetch member:", error);
           return undefined;
         }
       }
@@ -547,18 +548,6 @@ export const useMemberAvatars = (chatId: string, limit: number = 4) => {
   );
 };
 
-// export const useReadStatuses = (chatId: string) => {
-//   return useChatMemberStore(
-//     useShallow((state) =>
-//       (state.chatMembers[chatId] || []).map((m) => ({
-//         id: m.id,
-//         lastReadMessageId: m.lastReadMessageId,
-//         avatarUrl: m.avatarUrl,
-//       }))
-//     )
-//   );
-// };
-
 export const useReadStatuses = (chatId: string) => {
   return useChatMemberStore(
     useShallow((state) => {
@@ -571,4 +560,19 @@ export const useReadStatuses = (chatId: string) => {
       }));
     })
   );
+};
+
+export const useMessageSender = (
+  userId: string,
+  chatId: string
+): ChatMemberResponse | undefined => {
+  const chatMembers = useChatMemberStore((state) => state.chatMembers);
+
+  // Memoize so it doesn't recompute on every render
+  return useMemo(() => {
+    if (!userId || !chatId) return undefined;
+
+    const members = chatMembers[chatId] || [];
+    return members.find((m) => m.userId === userId);
+  }, [userId, chatId, chatMembers]);
 };

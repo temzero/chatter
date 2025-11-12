@@ -745,6 +745,35 @@
     }
   },
 
+  "system_message": {
+    "default": "เกิดเหตุการณ์ระบบขึ้น",
+    "you": "คุณ",
+    "your": "ของคุณ",
+    "another_member": "สมาชิกคนอื่น",
+    "member_joined": "{{displayName}} เข้าร่วมแชท",
+    "member_left": "{{displayName}} ออกจากแชท",
+    "member_kicked": "{{displayName}} ได้ลบ {{targetName}} ออกจากแชท",
+    "member_banned": "{{displayName}} ได้แบน {{targetName}} ออกจากแชท",
+    "chat_renamed": "{{displayName}} เปลี่ยนชื่อแชท {{#if oldVal}}จาก \"{{oldVal}}\" {{/if}}เป็น \"{{newVal}}\"",
+    "chat_renamed_no_values": "{{displayName}} เปลี่ยนชื่อแชท",
+    "chat_updated_avatar": "{{displayName}} อัปเดตอวาตาร์ของแชท",
+    "chat_updated_description_from_to": "{{displayName}} เปลี่ยนคำอธิบายจาก \"{{oldVal}}\" เป็น \"{{newVal}}\"",
+    "chat_set_description": "{{displayName}} ตั้งคำอธิบายเป็น \"{{newVal}}\"",
+    "chat_updated_description": "{{displayName}} อัปเดตคำอธิบายของแชท",
+    "nickname_changed_from_to": "{{displayName}} เปลี่ยนชื่อเล่นของ {{target}} จาก \"{{oldVal}}\" เป็น \"{{newVal}}\"",
+    "nickname_set": "{{displayName}} ตั้งชื่อเล่นของ {{target}} เป็น \"{{newVal}}\"",
+    "nickname_updated": "{{displayName}} อัปเดตชื่อเล่นของ {{target}}",
+    "promoted_to_owner": "{{displayName}} เลื่อน {{target}} เป็นเจ้าของ",
+    "role_changed_to": "{{displayName}} เปลี่ยนบทบาทของ {{target}} เป็น {{newVal}}",
+    "role_updated": "{{displayName}} อัปเดตบทบาทของ {{target}}",
+    "status_changed_to": "{{displayName}} เปลี่ยนสถานะของ {{target}} เป็น {{newVal}}",
+    "status_updated": "{{displayName}} อัปเดตสถานะของ {{target}}",
+    "message_pinned_with_content": "{{displayName}} ปักหมุดข้อความ \"{{newVal}}\"",
+    "message_pinned": "{{displayName}} ปักหมุดข้อความ",
+    "message_unpinned": "{{displayName}} ยกเลิกการปักหมุดข้อความ",
+    "chat_deleted": "{{displayName}} ลบแชท"
+  },
+
   "messages": {
     "search_bar": {
       "placeholder": "ค้นหาข้อความ",

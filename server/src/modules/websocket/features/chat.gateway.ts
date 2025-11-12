@@ -17,6 +17,7 @@ import { ChatEvent } from 'src/shared/types/enums/websocket-events.enum';
 import { WebsocketNotificationService } from '../services/websocket-notification.service';
 import { WebsocketConnectionService } from '../services/websocket-connection.service';
 import { SupabaseService } from 'src/modules/superbase/supabase.service';
+import { ChatMember } from 'src/modules/chat-member/entities/chat-member.entity';
 
 @WebSocketGateway()
 export class ChatGateway {
@@ -70,7 +71,7 @@ export class ChatGateway {
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: CreateMessageDto,
   ) {
-    console.log('handleMessage', payload);
+    // console.log('handleMessage', payload);
     try {
       const senderId = client.data.userId;
       if (!senderId) {
@@ -83,12 +84,13 @@ export class ChatGateway {
       }
 
       // Resolve memberId if not provided
+      let senderMember: ChatMember | null = null;
       if (!payload.memberId) {
-        const member = await this.chatMemberService.getMemberByChatIdAndUserId(
+        senderMember = await this.chatMemberService.getMemberByChatIdAndUserId(
           payload.chatId,
           senderId,
         );
-        if (!member) {
+        if (!senderMember) {
           client.emit(ChatEvent.MESSAGE_ERROR, {
             messageId: payload.id,
             chatId: payload.chatId,
@@ -96,7 +98,7 @@ export class ChatGateway {
           });
           return;
         }
-        payload.memberId = member.id;
+        payload.memberId = senderMember.id;
       }
 
       // Create the message in database
@@ -105,8 +107,10 @@ export class ChatGateway {
         ? await this.messageService.createReplyMessage(senderId, payload)
         : await this.messageService.createMessage(senderId, payload);
 
-      const messageResponse =
-        this.messageMapper.mapMessageToMessageResDto(message);
+      const messageResponse = this.messageMapper.mapMessageToMessageResDto(
+        message,
+        senderMember?.nickname || undefined,
+      );
 
       // Update last read position
       const updatedMember = await this.chatMemberService.updateLastRead(
@@ -183,24 +187,27 @@ export class ChatGateway {
       );
 
       // Get member of sender in target chat
-      const member = await this.chatMemberService.getMemberByChatIdAndUserId(
-        payload.chatId,
-        senderId,
-      );
+      const senderMember =
+        await this.chatMemberService.getMemberByChatIdAndUserId(
+          payload.chatId,
+          senderId,
+        );
 
-      if (!member) {
-        throw new Error(`User is not a member of chat ${payload.chatId}`);
+      if (!senderMember) {
+        throw new Error(`User is not a senderMember of chat ${payload.chatId}`);
       }
 
       // Update last read
       await this.chatMemberService.updateLastRead(
-        member.id,
+        senderMember.id,
         forwardedMessage.id,
       );
 
       // Convert to DTO
-      const messageResponse =
-        this.messageMapper.mapMessageToMessageResDto(forwardedMessage);
+      const messageResponse = this.messageMapper.mapMessageToMessageResDto(
+        forwardedMessage,
+        senderMember.nickname || undefined,
+      );
 
       // Emit new message to all chat members (including sender)
       await this.websocketNotificationService.emitToChatMembers(
@@ -216,7 +223,7 @@ export class ChatGateway {
         ChatEvent.MESSAGE_READ,
         {
           chatId: payload.chatId,
-          memberId: member.id,
+          memberId: senderMember.id,
           messageId: forwardedMessage.id,
         },
         { senderId },
@@ -261,8 +268,6 @@ export class ChatGateway {
       // Step 3: Format and emit to client
       const messageResponse =
         this.messageMapper.mapMessageToMessageResDto(savedMessage);
-
-      console.log('Saved messageResponse', messageResponse);
 
       await this.websocketNotificationService.emitToChatMembers(
         savedChat.id,

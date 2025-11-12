@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import SwitchBtn from "@/components/ui/buttons/SwitchBtn";
+import logger from "@/common/utils/logger";
 
 interface KeyboardOption {
   code: string;
@@ -36,7 +37,7 @@ const SidebarSettingsKeyboard: React.FC = () => {
       ...prev,
       [code]: !prev[code],
     }));
-    console.log("Toggled:", code, !settings[code]);
+    logger.log("Toggled:", code, !settings[code]);
     // TODO: save to user settings / context
   };
 

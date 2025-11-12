@@ -53,7 +53,7 @@ export const ChannelCallMessageContent: React.FC<BroadcastMessageProps> = ({
           <>
             {startedAt && endedAt && (
               <span className="">
-                ⏱️{formatDurationByStartAndEnd(startedAt, endedAt)}
+                ⏱️{formatDurationByStartAndEnd(t, startedAt, endedAt)}
                 <span className="ml-2">|</span>
               </span>
             )}

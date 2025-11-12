@@ -749,6 +749,35 @@
     }
   },
 
+  "system_message": {
+    "default": "Đã xảy ra sự kiện hệ thống.",
+    "you": "Bạn",
+    "your": "của bạn",
+    "another_member": "thành viên khác",
+    "member_joined": "{{displayName}} đã tham gia trò chuyện",
+    "member_left": "{{displayName}} đã rời khỏi trò chuyện",
+    "member_kicked": "{{displayName}} đã loại bỏ {{targetName}} khỏi trò chuyện",
+    "member_banned": "{{displayName}} đã cấm {{targetName}} khỏi trò chuyện",
+    "chat_renamed": "{{displayName}} đã đổi tên trò chuyện {{#if oldVal}}từ \"{{oldVal}}\" {{/if}}thành \"{{newVal}}\"",
+    "chat_renamed_no_values": "{{displayName}} đã đổi tên trò chuyện",
+    "chat_updated_avatar": "{{displayName}} đã cập nhật ảnh đại diện trò chuyện",
+    "chat_updated_description_from_to": "{{displayName}} đã thay đổi mô tả từ \"{{oldVal}}\" thành \"{{newVal}}\"",
+    "chat_set_description": "{{displayName}} đã đặt mô tả thành \"{{newVal}}\"",
+    "chat_updated_description": "{{displayName}} đã cập nhật mô tả trò chuyện",
+    "nickname_changed_from_to": "{{displayName}} đã thay đổi biệt danh của {{target}} từ \"{{oldVal}}\" thành \"{{newVal}}\"",
+    "nickname_set": "{{displayName}} đã đặt biệt danh của {{target}} thành \"{{newVal}}\"",
+    "nickname_updated": "{{displayName}} đã cập nhật biệt danh của {{target}}",
+    "promoted_to_owner": "{{displayName}} đã thăng {{target}} làm chủ sở hữu",
+    "role_changed_to": "{{displayName}} đã thay đổi vai trò của {{target}} thành {{newVal}}",
+    "role_updated": "{{displayName}} đã cập nhật vai trò của {{target}}",
+    "status_changed_to": "{{displayName}} đã thay đổi trạng thái của {{target}} thành {{newVal}}",
+    "status_updated": "{{displayName}} đã cập nhật trạng thái của {{target}}",
+    "message_pinned_with_content": "{{displayName}} đã ghim tin nhắn \"{{newVal}}\"",
+    "message_pinned": "{{displayName}} đã ghim một tin nhắn",
+    "message_unpinned": "{{displayName}} đã bỏ ghim một tin nhắn",
+    "chat_deleted": "{{displayName}} đã xóa trò chuyện"
+  },
+
   "messages": {
     "search_bar": {
       "placeholder": "Tìm kiếm tin nhắn",

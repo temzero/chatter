@@ -1,6 +1,7 @@
 // components/call/VoiceStream.tsx
 import { useEffect, useRef } from "react";
 import { RemoteTrack } from "livekit-client";
+import logger from "@/common/utils/logger";
 
 type VoiceStreamProps = {
   stream?: MediaStream | RemoteTrack | null;
@@ -34,7 +35,7 @@ export const VoiceStream = ({
     audioEl
       .play()
       .catch((err) =>
-        console.warn("Audio play failed, needs user interaction:", err)
+        logger.warn("Audio play failed, needs user interaction:", err)
       );
 
     return () => {

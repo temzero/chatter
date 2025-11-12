@@ -6,6 +6,7 @@ import { Avatar } from "@/components/ui/avatar/Avatar";
 import { FadeLoader } from "react-spinners";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
 import { useTranslation } from "react-i18next";
+import logger from "@/common/utils/logger";
 
 const SidebarBlockedUsers: React.FC = () => {
   const { t } = useTranslation();
@@ -18,7 +19,7 @@ const SidebarBlockedUsers: React.FC = () => {
       const users = await blockService.fetchAllBlockedUsers();
       setBlockedUsers(users);
     } catch (err) {
-      console.error("Failed to fetch blocked users", err);
+      logger.error("Failed to fetch blocked users", err);
     } finally {
       setLoading(false);
     }

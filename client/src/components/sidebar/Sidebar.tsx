@@ -35,9 +35,10 @@ import SidebarSettingsEmail from "./settings/account/sidebarSettingsEmail";
 import SidebarSettingsUsername from "./settings/account/sidebarSettingsUsername";
 import SidebarSettingsPhoneNumber from "./settings/account/sidebarSettingsPhoneNumber";
 import SidebarNewFolder from "./more/SidebarNewFolder";
+import logger from "@/common/utils/logger";
 
 const Sidebar = () => {
-  console.log("Sidebar");
+  logger.log({ prefix: "MOUNTED" }, "Sidebar");
   const currentSidebar = useCurrentSidebar();
   const sidebarWidthClass = useSidebarWidth();
 

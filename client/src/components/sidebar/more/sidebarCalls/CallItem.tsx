@@ -8,6 +8,7 @@ import { getCallStatusText } from "@/common/utils/call/callTextHelpers";
 import { formatDateTime } from "@/common/utils/format/formatDateTime";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import CallIcon from "@/components/ui/icons/CallIcon";
+import { useTranslation } from "react-i18next";
 
 interface CallItemProps {
   call: CallResponse;
@@ -16,6 +17,8 @@ interface CallItemProps {
 }
 
 const CallItem: React.FC<CallItemProps> = ({ call, isCaller, onDelete }) => {
+  const { t } = useTranslation();
+
   const startCall = useCallStore.getState().startCall;
   const setActiveChatId = useChatStore.getState().setActiveChatId;
 
@@ -70,7 +73,7 @@ const CallItem: React.FC<CallItemProps> = ({ call, isCaller, onDelete }) => {
         <div className="flex-1">
           <p className="font-medium">{chat.name}</p>
           <p className={`${getCallStatusColor(call.status)}`}>
-            {getCallStatusText(call.status, call.startedAt, call.endedAt)}
+            {getCallStatusText(t, call.status, call.startedAt, call.endedAt)}
           </p>
           <p className="text-xs text-muted-foreground opacity-50">
             {formatDateTime(call.createdAt)}

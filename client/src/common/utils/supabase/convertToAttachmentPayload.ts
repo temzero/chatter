@@ -1,6 +1,7 @@
 import { AttachmentUploadRequest } from "@/shared/types/requests/attachment-upload.request";
 import { determineAttachmentType } from "@/common/utils/message/determineAttachmentType";
 import supabase, { attachmentsBucket } from "@/common/utils/supabaseClient";
+import logger from "../logger";
 
 export async function convertToAttachmentPayload(
   file: File
@@ -41,7 +42,7 @@ export async function convertToAttachmentPayload(
       // path // Storing path for future management
     };
   } catch (error) {
-    console.error("File upload failed:", error);
+    logger.error("File upload failed:", error);
     return null;
   }
 }

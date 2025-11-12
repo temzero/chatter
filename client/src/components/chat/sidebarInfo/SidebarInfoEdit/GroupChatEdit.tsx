@@ -14,6 +14,7 @@ import { getCurrentUserId } from "@/stores/authStore";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useTranslation } from "react-i18next";
+import logger from "@/common/utils/logger";
 
 const GroupChatEdit = () => {
   const { t } = useTranslation();
@@ -82,7 +83,7 @@ const GroupChatEdit = () => {
           ChatType.GROUP
         );
 
-        console.log("Uploaded newAvatarUrl", newAvatarUrl);
+        logger.log("Uploaded newAvatarUrl", newAvatarUrl);
 
         // Update form data with new avatar URL
         setFormData((prev) => ({ ...prev, avatarUrl: newAvatarUrl }));

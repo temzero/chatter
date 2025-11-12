@@ -12,6 +12,7 @@ import type { UserResponse } from "@/shared/types/responses/user.response";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { localStorageService } from "@/services/storage/localStorageService";
 import { fetchInitialAppData } from "@/common/hooks/app/fetchInitialAppData";
+import logger from "@/common/utils/logger";
 
 type AuthMessageType = "error" | "success" | "info";
 
@@ -59,11 +60,10 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       ...initialState,
 
       initialize: async (): Promise<boolean> => {
-        console.log("initialize Auth");
         try {
           const token = localStorageService.getAccessToken();
           if (!token) {
-            console.log("No Access-token");
+            logger.error({ prefix: "AUTH" }, "No Access-token");
             // refresh everything
             set({ ...initialState });
             return false;
@@ -107,7 +107,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       // Authentication methods
       login: async (identifier, password) => {
-        console.log("authStore login");
         try {
           set({ loading: true });
           useChatStore.getState().clearChats();

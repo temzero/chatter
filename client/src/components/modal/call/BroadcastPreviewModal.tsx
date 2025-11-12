@@ -13,6 +13,7 @@ import { useIsMobile } from "@/stores/deviceStore";
 import { useTranslation } from "react-i18next";
 import CallHeader from "./components/CallHeader";
 import Button from "@/components/ui/buttons/Button";
+import logger from "@/common/utils/logger";
 
 const BroadcastPreviewModal = ({ chat }: { chat: ChatResponse }) => {
   const { t } = useTranslation();
@@ -39,7 +40,7 @@ const BroadcastPreviewModal = ({ chat }: { chat: ChatResponse }) => {
         screenStream: localScreenStream,
       });
     } catch (err) {
-      console.error("[BroadcastPreviewModal] Failed to start broadcast:", err);
+      logger.error("[BroadcastPreviewModal] Failed to start broadcast:", err);
     }
   };
 

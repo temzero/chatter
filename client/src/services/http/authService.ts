@@ -6,16 +6,15 @@ import {
   LoginRequest,
   RegisterRequest,
 } from "@/shared/types/requests/auth.request";
+import logger from "@/common/utils/logger";
 
 export const authService = {
   async fetchCurrentUser() {
-    console.log("fetchCurrentUser");
     const { data } = await API.get("/user/me");
     return data.payload;
   },
 
   async login(payload: LoginRequest): Promise<AuthResponse> {
-    console.log("login");
     const { data } = await API.post<AuthResponse>("/auth/login", payload);
     return data;
   },
@@ -48,7 +47,7 @@ export const authService = {
   },
 
   async refreshToken(): Promise<string> {
-    console.log("refreshToken");
+    logger.log({ prefix: "AUTH" }, "refreshToken");
     const response = await API.post<AuthResponse>("/auth/refresh");
     return response.data.accessToken;
   },

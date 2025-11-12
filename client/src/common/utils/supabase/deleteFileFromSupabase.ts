@@ -1,10 +1,13 @@
+import logger from "../logger";
 import supabase, { attachmentsBucket } from "../supabaseClient";
-
 
 export async function deleteFilesFromSupabase(urls: string[]) {
   for (const url of urls) {
     try {
-      console.log(`Attempting to delete file from Supabase: ${url}`);
+      logger.log(
+        { prefix: "DATABASE" },
+        `Attempting to delete file from Supabase: ${url}`
+      );
       // Extract the path relative to the bucket
       const path = url.split(`${attachmentsBucket}/`)[1];
       if (!path) continue;
@@ -15,9 +18,9 @@ export async function deleteFilesFromSupabase(urls: string[]) {
 
       if (error) throw error;
 
-      console.log(`Deleted file from Supabase: ${url}`);
+      logger.log({ prefix: "DATABASE" }, `Deleted file from Supabase: ${url}`);
     } catch (error) {
-      console.error(`Failed to delete file ${url}:`, error);
+      logger.error(`Failed to delete file ${url}:`, error);
     }
   }
 }

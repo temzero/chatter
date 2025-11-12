@@ -13,34 +13,34 @@ import { chatWebSocketService } from "@/services/websocket/chat.websocket.servic
 import { webSocketService } from "@/services/websocket/websocket.service";
 import { handleError } from "@/common/utils/handleError";
 import { useTranslation } from "react-i18next";
+import logger from "@/common/utils/logger";
 
 export function useChatSocketListeners() {
   const { t } = useTranslation();
   useEffect(() => {
     // ======== Message Handlers ========
     const handleNewMessage = async (
-      wsMessage: WsNotificationResponse<MessageResponse>
+      data: WsNotificationResponse<MessageResponse>
     ) => {
-      const { payload: message, meta } = wsMessage;
-      console.log("Received new message via WebSocket:", message);
+      const { payload: message, meta } = data;
+      logger.log({ prefix: "EVENT", timestamp: true }, "Received new message via WebSocket:", message);
 
       const messageStore = useMessageStore.getState();
 
       const isMuted = meta?.isMuted ?? false;
       const isOwnMessage = meta?.isSender ?? false;
       const existingMessage = messageStore.getMessageById(message.id);
-
       try {
         await useChatStore.getState().getOrFetchChatById(message.chatId, {
           fetchFullData: true,
         });
       } catch (error) {
-        console.error("Failed to fetch chat for incoming message:", error);
+        logger.error("Failed to fetch chat for incoming message:", error);
         return;
       }
 
       if (isOwnMessage && existingMessage) {
-        messageStore.updateMessageById(message.id, message);
+        messageStore.updateMessageById(message.id, {status: MessageStatus.SENT});
         return;
       } else {
         if (message.systemEvent) {
@@ -52,16 +52,16 @@ export function useChatSocketListeners() {
 
       // if (!isMuted && chatStore.activeChatId !== message.chatId) {
       if (!isMuted && !message.call) {
-        console.log("PLAY SOUND NEW_MESSAGE");
+        logger.log("PLAY SOUND NEW_MESSAGE");
         audioService.playSound(SoundType.NEW_MESSAGE);
       }
     };
 
     const handleMessageSaved = (
-      wsMessage: WsNotificationResponse<MessageResponse>
+      data: WsNotificationResponse<MessageResponse>
     ) => {
       try {
-        const { payload: message } = wsMessage;
+        const { payload: message } = data;
         useMessageStore.getState().addMessage(message);
         toast.success(t("toast.message.saved"));
       } catch (error) {
@@ -71,14 +71,14 @@ export function useChatSocketListeners() {
 
     // ======== Typing ========
     const handleTyping = (
-      wsData: WsNotificationResponse<{
+      data: WsNotificationResponse<{
         chatId: string;
         userId: string;
         isTyping: boolean;
       }>
     ) => {
       try {
-        const { payload } = wsData;
+        const { payload } = data;
         const typingStore = useTypingStore.getState();
         if (payload.isTyping) {
           typingStore.startTyping(payload.chatId, payload.userId);
@@ -92,14 +92,14 @@ export function useChatSocketListeners() {
 
     // ======== Mark as read ========
     const handleMessagesRead = (
-      wsData: WsNotificationResponse<{
+      data: WsNotificationResponse<{
         chatId: string;
         memberId: string;
         messageId: string;
       }>
     ) => {
       try {
-        const { payload } = wsData;
+        const { payload } = data;
         useChatMemberStore
           .getState()
           .updateMemberLastRead(
@@ -114,13 +114,13 @@ export function useChatSocketListeners() {
 
     // ======== Reactions ========
     const handleReaction = (
-      wsReaction: WsNotificationResponse<{
+      data: WsNotificationResponse<{
         messageId: string;
         reactions: { [emoji: string]: string[] };
       }>
     ) => {
       try {
-        const { payload } = wsReaction;
+        const { payload } = data;
         useMessageStore
           .getState()
           .updateMessageReactions(payload.messageId, payload.reactions);
@@ -131,13 +131,13 @@ export function useChatSocketListeners() {
 
     // ======== Pin ========
     const handleMessagePinned = (
-      wsPinned: WsNotificationResponse<{
+      data: WsNotificationResponse<{
         chatId: string;
         message: MessageResponse | null;
       }>
     ) => {
       try {
-        const { payload } = wsPinned;
+        const { payload } = data;
         const { chatId, message } = payload;
         if (!chatId || !message) return null;
 
@@ -169,15 +169,15 @@ export function useChatSocketListeners() {
 
     // ======== Important ========
     const handleMessageMarkedImportant = (
-      wsImportant: WsNotificationResponse<{
+      data: WsNotificationResponse<{
         chatId: string;
         messageId: string;
         isImportant: boolean;
       }>
     ) => {
       try {
-        const { payload: update } = wsImportant;
-        console.log("isImportant", update.isImportant);
+        const { payload: update } = data;
+        logger.log({prefix: "EVENT"},"isImportant", update.isImportant);
         useMessageStore.getState().updateMessageById(update.messageId, {
           isImportant: update.isImportant,
         });
@@ -188,11 +188,10 @@ export function useChatSocketListeners() {
 
     // ======== Delete ========
     const handleMessageDeleted = (
-      wsDeleted: WsNotificationResponse<{ chatId: string; messageId: string }>
+      data: WsNotificationResponse<{ chatId: string; messageId: string }>
     ) => {
-      console.log('handleMessageDeleted', wsDeleted)
       try {
-        const { payload } = wsDeleted;
+        const { payload } = data;
         useMessageStore
           .getState()
           .deleteMessage(payload.chatId, payload.messageId);
@@ -203,7 +202,7 @@ export function useChatSocketListeners() {
 
     // ======== Error ========
     const handleMessageError = (
-      wsError: WsNotificationResponse<{
+      data: WsNotificationResponse<{
         chatId: string;
         messageId: string;
         error: string;
@@ -211,21 +210,20 @@ export function useChatSocketListeners() {
       }>
     ) => {
       try {
-        const { payload: error } = wsError;
-        console.log("handleMessageError", error); // This logs "undefined"
+        const { payload: error } = data;
 
         // FIX: Check if the entire error payload is undefined
         if (!error) {
-          console.error(
+          logger.error(
             "WebSocket error payload is completely undefined:",
-            wsError
+            data
           );
           return;
         }
 
         // Then check if messageId exists
         if (!error.messageId) {
-          console.error("Message ID is undefined in error response:", error);
+          logger.error("Message ID is undefined in error response:", error);
           return;
         }
 

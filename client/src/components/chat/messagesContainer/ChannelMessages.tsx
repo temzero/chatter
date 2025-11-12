@@ -5,6 +5,7 @@ import { useMessageStore } from "@/stores/messageStore";
 import { MarkLastMessageRead } from "@/common/utils/message/markMessageRead";
 import { useTranslation } from "react-i18next";
 import ChannelMessage from "../components/message/channel/ChannelMessage";
+import logger from "@/common/utils/logger";
 
 interface ChannelMessagesProps {
   chat: ChatResponse;
@@ -17,7 +18,11 @@ const ChannelMessages: React.FC<ChannelMessagesProps> = ({
   messageIds,
   isSearch = false,
 }) => {
-  console.log("ChannelMessages render:", messageIds.length);
+  logger.log(
+    { prefix: "MOUNTED" },
+    "ChannelMessages:",
+    messageIds.length
+  );
   const { t } = useTranslation();
 
   const chatId = chat.id;

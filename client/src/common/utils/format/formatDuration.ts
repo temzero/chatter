@@ -1,4 +1,4 @@
-import i18n from "@/i18n";
+import { TFunction } from "i18next";
 
 export const formatDuration = (seconds: number) => {
   if (!seconds || seconds <= 0) return "00:00";
@@ -14,10 +14,10 @@ export const formatDuration = (seconds: number) => {
 };
 
 export function formatDurationByStartAndEnd(
+  t: TFunction,
   start?: string | Date,
   end?: string | Date | null
 ) {
-  const t = i18n.t;
   if (!start || !end) return "-";
 
   const startDate = new Date(start);

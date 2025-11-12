@@ -9,6 +9,8 @@ import {
   SystemMessageContent,
   SystemMessageJSONContent,
 } from "@/components/ui/messages/content/SystemMessageContent";
+import logger from "@/common/utils/logger";
+import { getMessageAttachments } from "@/stores/messageAttachmentStore";
 
 interface ChatListItemMessageProps {
   chatId?: string;
@@ -29,6 +31,8 @@ export const ChatListItemMessage: React.FC<ChatListItemMessageProps> = ({
   chatType,
   currentUserId,
 }) => {
+  logger.log("lastMessage", lastMessage);
+  const attachments = getMessageAttachments(chatId || "", lastMessage?.id || "");
   const draftMessageContent = useDraftMessage(chatId);
 
   let displayMessage: React.ReactNode = null;
@@ -81,9 +85,9 @@ export const ChatListItemMessage: React.FC<ChatListItemMessageProps> = ({
           </span>
         )}
 
-        {lastMessage.attachments?.length ? (
+        {attachments?.length ? (
           <span className="flex gap-1 truncate">
-            {getAttachmentIcons(lastMessage.attachments)?.map((icon, index) => (
+            {getAttachmentIcons(attachments)?.map((icon, index) => (
               <i
                 key={index}
                 className="material-symbols-outlined text-base"

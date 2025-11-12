@@ -21,6 +21,7 @@ import { useShallow } from "zustand/shallow";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import logger from "@/common/utils/logger";
 
 interface ChatStoreState {
   activeChatId: string | null;
@@ -195,7 +196,7 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
     },
 
     fetchMoreChats: async (limit): Promise<number> => {
-      console.log("fetchMore Chat", limit);
+      logger.log({ prefix: "FETCH" }, "more chats", limit);
       const { chats, chatIds, hasMoreChats, isLoading } = get();
       if (isLoading || !hasMoreChats) return 0;
 
@@ -239,7 +240,6 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
 
     fetchChatById: async (chatId, options = { fetchFullData: false }) => {
       const targetChatId = chatId || get().activeChatId;
-      console.log("fetchChatById");
       if (!targetChatId) {
         throw new Error("No chat ID provided and no active chat");
       }
@@ -312,7 +312,6 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
     },
 
     setActiveChatId: async (chatId) => {
-      console.log("setActiveChatId", chatId);
       useSidebarInfoStore.getState().setSidebarInfo(SidebarInfoMode.DEFAULT);
       useMessageStore.getState().setDisplaySearchMessage(false);
       useModalStore.getState().closeModal();
@@ -369,7 +368,6 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
       try {
         const { payload, wasExisting } =
           await chatService.createOrGetDirectChat(partnerId);
-        console.log("payload", payload);
         if (!wasExisting) {
           set((state) => ({
             chats: { [payload.id]: payload, ...state.chats },
@@ -398,7 +396,7 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
         }));
         return newChat;
       } catch (error) {
-        console.error("Failed to create group chat:", error);
+        logger.error("Failed to create group chat:", error);
         set({ error: "Failed to create chat" });
         handleError(error, "Failed to create group chat");
       } finally {
@@ -657,15 +655,14 @@ export const useSetActiveSavedChat = () => {
   return async () => {
     const state = useChatStore.getState();
     let savedChat = state.savedChat;
-    console.log("savedChat", savedChat);
 
     if (!savedChat) {
-      console.warn("Saved chat not found, fetching from server...");
+      logger.warn("Saved chat not found, fetching from server...");
       try {
         const fetchedSavedChat = await chatService.fetchSavedChat();
 
         if (!fetchedSavedChat) {
-          console.error("Saved chat does not exist in the database!");
+          logger.error("Saved chat does not exist in the database!");
           return;
         }
         useChatStore.setState({ savedChat: fetchedSavedChat });

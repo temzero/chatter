@@ -1,9 +1,10 @@
+import { TFunction } from "i18next";
 import { formatDateTime } from "./formatDateTime";
-import i18n from "@/i18n";
 
-export const formatTimeAgo = (dateString: string | Date): string => {
-  const t = i18n.t;
-
+export const formatTimeAgo = (
+  t: TFunction,
+  dateString: string | Date
+): string => {
   const createdAt = new Date(dateString);
   const now = new Date();
 

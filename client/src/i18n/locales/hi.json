@@ -745,6 +745,35 @@
     }
   },
 
+  "system_message": {
+    "default": "सिस्टम इवेंट हुआ।",
+    "you": "आप",
+    "your": "आपका",
+    "another_member": "अन्य सदस्य",
+    "member_joined": "{{displayName}} चैट में शामिल हुए",
+    "member_left": "{{displayName}} चैट छोड़ गए",
+    "member_kicked": "{{displayName}} ने {{targetName}} को चैट से हटाया",
+    "member_banned": "{{displayName}} ने {{targetName}} को चैट से प्रतिबंधित किया",
+    "chat_renamed": "{{displayName}} ने चैट का नाम {{#if oldVal}}\"{{oldVal}}\" से {{/if}}\"{{newVal}}\" में बदल दिया",
+    "chat_renamed_no_values": "{{displayName}} ने चैट का नाम बदल दिया",
+    "chat_updated_avatar": "{{displayName}} ने चैट का अवतार अपडेट किया",
+    "chat_updated_description_from_to": "{{displayName}} ने विवरण \"{{oldVal}}\" से \"{{newVal}}\" में बदल दिया",
+    "chat_set_description": "{{displayName}} ने विवरण \"{{newVal}}\" सेट किया",
+    "chat_updated_description": "{{displayName}} ने चैट विवरण अपडेट किया",
+    "nickname_changed_from_to": "{{displayName}} ने {{target}} का उपनाम \"{{oldVal}}\" से \"{{newVal}}\" में बदल दिया",
+    "nickname_set": "{{displayName}} ने {{target}} का उपनाम \"{{newVal}}\" सेट किया",
+    "nickname_updated": "{{displayName}} ने {{target}} का उपनाम अपडेट किया",
+    "promoted_to_owner": "{{displayName}} ने {{target}} को मालिक बना दिया",
+    "role_changed_to": "{{displayName}} ने {{target}} की भूमिका {{newVal}} में बदल दी",
+    "role_updated": "{{displayName}} ने {{target}} की भूमिका अपडेट की",
+    "status_changed_to": "{{displayName}} ने {{target}} की स्थिति {{newVal}} में बदल दी",
+    "status_updated": "{{displayName}} ने {{target}} की स्थिति अपडेट की",
+    "message_pinned_with_content": "{{displayName}} ने संदेश \"{{newVal}}\" पिन किया",
+    "message_pinned": "{{displayName}} ने संदेश पिन किया",
+    "message_unpinned": "{{displayName}} ने संदेश पिन हटाया",
+    "chat_deleted": "{{displayName}} ने चैट हटा दिया"
+  },
+
   "messages": {
     "search_bar": {
       "placeholder": "संदेश खोजें",

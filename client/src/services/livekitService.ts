@@ -9,6 +9,7 @@ import {
   Track,
 } from "livekit-client";
 import { audioService, SoundType } from "./audio.service";
+import logger from "@/common/utils/logger";
 
 export interface LiveKitServiceOptions {
   audio?: boolean;
@@ -83,7 +84,7 @@ export class LiveKitService {
       }
       return true;
     } catch (error) {
-      console.error("Failed to toggle microphone:", error);
+      logger.error("Failed to toggle microphone:", error);
       return false;
     }
   }
@@ -95,7 +96,7 @@ export class LiveKitService {
       if (enabled) {
         if (stream) {
           const videoTrack = stream.getVideoTracks()[0];
-          console.log("cameraTrack", videoTrack);
+          logger.log({ prefix: "LIVEKIT" }, "cameraTrack", videoTrack);
 
           await local.publishTrack(videoTrack, {
             name: "camera",
@@ -129,7 +130,7 @@ export class LiveKitService {
 
       return true;
     } catch (error) {
-      console.error("Failed to toggle camera:", error);
+      logger.error("Failed to toggle camera:", error);
       return false;
     }
   }
@@ -162,13 +163,13 @@ export class LiveKitService {
         // ✅ publish audio track if available
         const audioTrack = stream.getAudioTracks()[0];
         if (audioTrack) {
-          console.log("Screen share includes audio 🎤");
+          logger.log({ prefix: "LIVEKIT" }, "Screen share includes audio 🎤");
           await local.publishTrack(audioTrack, {
             name: "screen-audio",
             source: Track.Source.ScreenShareAudio,
           });
         } else {
-          console.log("No screen audio available ❌");
+          logger.log("No screen audio available ❌");
         }
       } else {
         // Unpublish both video & audio tracks when stopping
@@ -183,7 +184,7 @@ export class LiveKitService {
 
       return true;
     } catch (err) {
-      console.error("Failed to toggle screen share:", err);
+      logger.error("Failed to toggle screen share:", err);
       return false;
     }
   }
@@ -209,11 +210,16 @@ export class LiveKitService {
   private setupEventListeners() {
     this.room
       .on(RoomEvent.Connected, async () => {
-        console.log("✅ Connected to LiveKit room");
-        console.log("Local participant:", this.room.localParticipant.identity);
+        logger.log({ prefix: "LIVEKIT" }, "✅ Connected to LiveKit room");
+        logger.log(
+          { prefix: "LIVEKIT" },
+          "Local participant:",
+          this.room.localParticipant.identity
+        );
 
         // log remote participants
-        console.log(
+        logger.log(
+          { prefix: "LIVEKIT" },
           "Remote participants:",
           Array.from(this.room.remoteParticipants.values()).map((p) => ({
             id: p.identity,
@@ -241,16 +247,24 @@ export class LiveKitService {
       .on(RoomEvent.ParticipantConnected, (participant) => {
         audioService.playSound(SoundType.USER_CONNECTED); // join sound
         this.options?.onParticipantConnected?.(participant);
-        console.log("[ParticipantConnected]", participant.name);
+        logger.log(
+          { prefix: "LIVEKIT" },
+          "ParticipantConnected",
+          participant.name
+        );
       })
       .on(RoomEvent.ParticipantDisconnected, (participant) => {
         audioService.playSound(SoundType.USER_DISCONNECTED); // leave sound
         this.options?.onParticipantDisconnected?.(participant);
-        console.log("[ParticipantDisconnected]", participant.name);
+        logger.log(
+          { prefix: "LIVEKIT" },
+          "ParticipantDisconnected",
+          participant.name
+        );
       })
       .on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
         this.options?.onTrackSubscribed?.(track, publication, participant);
-        console.log("[TrackSubscribed]", {
+        logger.log({ prefix: "LIVEKIT" }, "TrackSubscribed", {
           participant: participant.name,
           source: publication.source,
           kind: track.kind,
@@ -258,26 +272,31 @@ export class LiveKitService {
       })
       .on(RoomEvent.TrackUnsubscribed, (track, publication, participant) => {
         this.options?.onTrackUnsubscribed?.(track, publication, participant);
-        console.log("[TrackUnsubscribed]", {
+        logger.log({ prefix: "LIVEKIT" }, "TrackUnsubscribed", {
           participant: participant.name,
           source: publication.source,
         });
       })
       .on(RoomEvent.ConnectionStateChanged, (state) => {
-        console.log("🔄 Connection state:", state);
+        logger.log({ prefix: "LIVEKIT" }, "🔄 Connection state:", state);
         this.options?.onConnectionStateChange?.(state);
       })
       .on(RoomEvent.LocalTrackPublished, (publication) => {
         this.options?.onLocalTrackPublished?.(publication);
-        console.log(
-          "[LocalTrackPublished]",
+        logger.log(
+          { prefix: "LIVEKIT" },
+          "LocalTrackPublished",
           publication.source,
           publication.kind
         );
       })
       .on(RoomEvent.LocalTrackUnpublished, (publication) => {
         this.options?.onLocalTrackUnpublished?.(publication);
-        console.log("[LocalTrackUnpublished]", publication.source);
+        logger.log(
+          { prefix: "LIVEKIT" },
+          "LocalTrackUnpublished",
+          publication.source
+        );
       });
   }
 

@@ -9,6 +9,7 @@ import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { CreateMessageRequest } from "@/shared/types/requests/send-message.request";
 import { AttachmentUploadRequest } from "@/shared/types/requests/attachment-upload.request";
 import { deleteFilesFromSupabase } from "@/common/utils/supabase/deleteFileFromSupabase";
+import logger from "../logger";
 
 function toOptimisticAttachmentResponseFromFile(
   file: File,
@@ -59,7 +60,7 @@ export async function handleSendMessage({
 }) {
   
   if (!myUserId || !chatId || !myMemberId) {
-    console.error("Unable to send message — user not authenticated.");
+    logger.error("Unable to send message — user not authenticated.");
     return;
   }
 

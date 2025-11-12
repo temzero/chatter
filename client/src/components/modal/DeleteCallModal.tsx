@@ -10,6 +10,7 @@ import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { getCallStatusText } from "@/common/utils/call/callTextHelpers";
 import CallIcon from "@/components/ui/icons/CallIcon";
 import Button from "../ui/buttons/Button";
+import logger from "@/common/utils/logger";
 
 interface DeleteCallModalData {
   call: CallResponse;
@@ -30,7 +31,7 @@ const DeleteCallModal: React.FC = () => {
       data.onDeleted?.();
       closeModal();
     } catch (err) {
-      console.error("Failed to delete call:", err);
+      logger.error("Failed to delete call:", err);
       alert(t("modal.delete_call.descripfailed"));
     }
   }, [data, closeModal, t]);
@@ -39,7 +40,12 @@ const DeleteCallModal: React.FC = () => {
   if (!data?.call) return null;
 
   const { call } = data;
-  const callText = getCallStatusText(call.status, call.startedAt, call.endedAt);
+  const callText = getCallStatusText(
+    t,
+    call.status,
+    call.startedAt,
+    call.endedAt
+  );
   const callColor = getCallStatusColor(call.status);
   const formattedDate = formatDateTime(call.createdAt);
 

@@ -21,7 +21,12 @@ const SummaryCall = ({ chat }: { chat: ChatResponse; duration?: number }) => {
     }
   }, [localCallStatus, closeCallModal]);
 
-  const statusMessage = getLocalCallStatusMessage(localCallStatus, duration, error);
+  const statusMessage = getLocalCallStatusMessage(
+    t,
+    localCallStatus,
+    duration,
+    error
+  );
 
   return (
     <div className="w-full h-full p-10 flex flex-col items-center justify-between">

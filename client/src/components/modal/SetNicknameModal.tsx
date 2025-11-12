@@ -5,6 +5,7 @@ import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useTranslation } from "react-i18next";
 import Button from "../ui/buttons/Button";
+import logger from "@/common/utils/logger";
 
 interface SetNicknameModalData {
   member: ChatMemberResponse;
@@ -29,7 +30,7 @@ const SetNicknameModal: React.FC = () => {
       await updateMemberNickname(member.chatId, member.id, nickname.trim());
       closeModal();
     } catch (err) {
-      console.error(t("modal.set_nickname.failed"), err);
+      logger.error(t("modal.set_nickname.failed"), err);
     } finally {
       setLoading(false);
     }

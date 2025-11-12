@@ -1,18 +1,17 @@
-import i18n from "@/i18n";
 import { LocalCallStatus } from "@/common/enums/LocalCallStatus";
 import { CallError, CallStatus } from "@/shared/types/call";
 import {
   formatDuration,
   formatDurationByStartAndEnd,
 } from "../format/formatDuration";
+import { TFunction } from "i18next";
 
 export const getLocalCallStatusMessage = (
+  t: TFunction,
   callStatus: LocalCallStatus | null,
   duration: number | null,
   error?: string | null
 ) => {
-  const t = i18n.t;
-
   switch (callStatus) {
     case LocalCallStatus.CANCELED:
       return t("call.summary.canceled");
@@ -40,12 +39,11 @@ export const getLocalCallStatusMessage = (
 };
 
 export const getCallStatusText = (
+  t: TFunction,
   status: CallStatus,
   startedAt?: string | Date,
   endedAt?: string | Date | null
 ) => {
-  const t = i18n.t;
-
   switch (status) {
     case CallStatus.DIALING:
       return t("call.dialing");
@@ -53,7 +51,7 @@ export const getCallStatusText = (
       return t("call.inProgress");
     case CallStatus.COMPLETED:
       if (startedAt && endedAt) {
-        return formatDurationByStartAndEnd(startedAt, endedAt);
+        return formatDurationByStartAndEnd(t, startedAt, endedAt);
       }
       return t("call.completed");
     case CallStatus.MISSED:

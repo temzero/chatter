@@ -1,8 +1,9 @@
 import { JSX } from "react";
 import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
-import { getSystemMessageText } from "@/common/utils/message/getSystemMessageText";
+import { getSystemMessageText } from "@/common/utils/message/systemMessageHelpers";
 import { getSystemMessageColor } from "@/common/utils/message/systemMessageHelpers";
 import { SystemMessageIcon } from "@/components/ui/icons/SystemMessageIcon";
+import { useTranslation } from "react-i18next";
 
 export type SystemMessageJSONContent = {
   oldValue?: string;
@@ -28,9 +29,11 @@ export const SystemMessageContent = ({
   JSONcontent,
   className = "",
 }: SystemMessageContentProps): JSX.Element | null => {
+  const { t } = useTranslation();
   if (!systemEvent) return null;
 
   const text = getSystemMessageText({
+    t,
     systemEvent,
     currentUserId,
     senderId,

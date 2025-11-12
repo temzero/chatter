@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { FriendContactResponse } from "@/shared/types/responses/friend-contact.response";
 import { friendshipService } from "@/services/http/friendshipService";
 import { handleError } from "@/common/utils/handleError";
+import logger from "../utils/logger";
 
 export function useFriendContacts(excludeUserIds: string[] = []) {
   const [contacts, setContacts] = useState<FriendContactResponse[]>([]);
@@ -9,10 +10,9 @@ export function useFriendContacts(excludeUserIds: string[] = []) {
 
   useEffect(() => {
     const fetchContacts = async () => {
-      console.log("Fetching contacts...");
       try {
         const allContacts = await friendshipService.fetchFriendContacts();
-        console.log("All contacts fetched", allContacts);
+        logger.log({ prefix: "FETCHED", timestamp: true }, "All contacts", allContacts);
         const filtered = allContacts.filter(
           (contact) => !excludeUserIds.includes(contact.userId)
         );
@@ -21,7 +21,6 @@ export function useFriendContacts(excludeUserIds: string[] = []) {
         handleError(err, "Failed to load friend contacts");
       } finally {
         setLoading(false);
-        console.log("Set loading to false");
       }
     };
 
