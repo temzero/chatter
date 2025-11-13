@@ -18,7 +18,8 @@ export function mapChatMemberToChatMemberResDto(
       id: member.id,
       chatId: member.chatId,
       userId: member.userId,
-      isBlockedMe: true, // Make it clear this user blocked me
+      isBlockedMe: isBlockedMe,
+      isBlockedByMe: isBlockedByMe,
       // Don't include any other personal information
     };
 
@@ -39,8 +40,8 @@ export function mapChatMemberToChatMemberResDto(
     customTitle: member.customTitle,
     mutedUntil: member.mutedUntil,
     lastReadMessageId: member.lastReadMessageId,
+    isBlockedMe: isBlockedMe,
     isBlockedByMe: isBlockedByMe,
-    isBlockedMe: false,
     pinnedAt: member.pinnedAt,
     createdAt: member.createdAt,
   };

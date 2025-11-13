@@ -50,7 +50,7 @@ const SidebarMore: React.FC = () => {
     },
     {
       icon: "block",
-      text: t("sidebar.blocked"),
+      text: t("common.messages.blocked"),
       onClick: () => setSidebar(SidebarMode.BLOCKED_USERS),
     },
   ];

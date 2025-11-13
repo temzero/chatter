@@ -1,6 +1,7 @@
 {
   "common": {
     "you": "You",
+    "your": "your",
     "actions": {
       "accept": "Accept",
       "add": "Add",
@@ -56,7 +57,9 @@
       "verified": "Verified",
       "failed_verify": "verification failed",
       "blocked": "Blocked ",
-      "blocked_me": "You has been blocked"
+      "blocked_me": "You has been blocked",
+      "blocked_them": "You have blocked this user.",
+      "blocked_each_other": "You and this user have blocked each other"
     },
     "loading": {
       "loading": "Loading...",
@@ -164,10 +167,7 @@
   },
 
   "chat_box": {
-    "join_channel": "Join Channel",
-    "both_blocked": "You and this user have blocked each other.",
-    "you_blocked_me": "You have been blocked by this user.",
-    "you_blocked_them": "You have blocked this user."
+    "join_channel": "Join Channel"
   },
 
   "chat_bar": {
@@ -240,7 +240,6 @@
     "friend_requests": "Friend requests {{count}}",
     "friend_requests_none": "Friend requests",
     "folders": "Chat Folders",
-    "blocked": "Blocked",
     "settings": "Settings"
   },
 
@@ -602,11 +601,7 @@
       "member": "Member",
       "status_left": "Left",
       "status_banned": "Banned",
-      "set_nickname": "Set Nickname",
-      "promote_owner": "Promote to Owner",
-      "set_admin": "Set as Admin",
-      "add_member": "Add Member",
-      "set_member": "Set as Member"
+      "add_member": "Add Member"
     },
     "media_files": {
       "title": "Media & Files",
@@ -748,8 +743,6 @@
 
   "system_message": {
     "default": "System event occurred.",
-    "you": "You",
-    "your": "your",
     "another_member": "another member",
     "member_joined": "{{displayName}} joined the chat",
     "member_left": "{{displayName}} left the chat",
@@ -779,6 +772,25 @@
     "search_bar": {
       "placeholder": "Search for messages",
       "filter_important": "Filter Important"
+    }
+  },
+
+  "context_menu": {
+    "chatlist_item": {
+      "mute": "Mute",
+      "unmute": "Unmute",
+      "mark_as_read": "Mark as Read",
+      "pin_chat": "Pin Chat",
+      "unpin": "Unpin",
+      "add_to_folder": "Add to Folder",
+      "delete_chat": "Delete Chat",
+      "leave_chat": "Leave Chat"
+    },
+    "chat_member": {
+      "set_owner": "Promote to Owner",
+      "set_nickname": "Set Nickname",
+      "set_admin": "Set as Admin",
+      "set_member": "Set as Member"
     }
   }
 }

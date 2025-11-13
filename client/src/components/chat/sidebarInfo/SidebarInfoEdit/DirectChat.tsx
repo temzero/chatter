@@ -48,6 +48,9 @@ const DirectChat: React.FC<DirectChatProps> = ({
 
   const isFriend = chatPartner?.friendshipStatus === FriendshipStatus.ACCEPTED;
 
+  console.log('isBlockedByMe', chatPartner.isBlockedByMe);
+  console.log('isBlockedMe', chatPartner.isBlockedMe);
+
   // Header buttons with title
   const headerIcons: {
     icon: string;
@@ -126,13 +129,22 @@ const DirectChat: React.FC<DirectChatProps> = ({
       <SidebarInfoHeaderIcons icons={headerIcons} />
 
       <div className="flex flex-col items-center gap-4 p-4 w-full h-full overflow-y-auto">
-        <Avatar
-          size={36}
-          textSize="text-6xl"
-          avatarUrl={chatPartner.avatarUrl}
-          name={chatPartner.nickname || chatPartner.firstName}
-          isBlocked={chatPartner.isBlockedByMe}
-        />
+        {chatPartner.isBlockedMe ? (
+          <span
+            className="material-symbols-outlined"
+            style={{ fontSize: "200px" }}
+          >
+            sentiment_dissatisfied
+          </span>
+        ) : (
+          <Avatar
+            size={36}
+            textSize="text-6xl"
+            avatarUrl={chatPartner.avatarUrl}
+            name={chatPartner.nickname || chatPartner.firstName}
+            isBlocked={chatPartner.isBlockedByMe}
+          />
+        )}
         <h1 className="text-xl font-semibold">{activeChat.name}</h1>
         {chatPartner.nickname && (
           <h2 className="text-sm opacity-80 -mt-1">
@@ -143,10 +155,13 @@ const DirectChat: React.FC<DirectChatProps> = ({
           <p className="text-center opacity-80">{chatPartner.bio}</p>
         )}
 
-        {chatPartner.isBlockedMe && (
+        {chatPartner.isBlockedMe && chatPartner.isBlockedByMe ? (
+          <h1 className="text-red-500">
+            {t("common.messages.blocked_each_other")}
+          </h1>
+        ) : chatPartner.isBlockedMe ? (
           <h1 className="text-red-500">{t("common.messages.blocked_me")}</h1>
-        )}
-        {chatPartner.isBlockedByMe ? (
+        ) : chatPartner.isBlockedByMe ? (
           <h1 className="text-red-500">
             {t("common.messages.blocked", {
               type:
@@ -155,7 +170,9 @@ const DirectChat: React.FC<DirectChatProps> = ({
                   : t("common.actions.user"),
             })}
           </h1>
-        ) : (
+        ) : null}
+
+        {!chatPartner.isBlockedMe && !chatPartner.isBlockedByMe && (
           <FriendshipBtn
             userId={chatPartner.userId}
             username={chatPartner.username ?? "No name"}

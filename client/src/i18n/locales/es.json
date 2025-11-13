@@ -1,6 +1,7 @@
 {
   "common": {
     "you": "Tú",
+    "your": "tu",
     "actions": {
       "accept": "Aceptar",
       "add": "añadir",
@@ -56,7 +57,9 @@
       "verified": "Verificado",
       "failed_verify": "Verificación fallida",
       "blocked": "Bloqueado",
-      "blocked_me": "Has sido bloqueado"
+      "blocked_me": "Has sido bloqueado",
+      "blocked_them": "Has bloqueado a este usuario.",
+      "blocked_each_other": "Tú y este usuario se han bloqueado mutuamente"
     },
     "loading": {
       "loading": "Cargando...",
@@ -164,10 +167,7 @@
   },
 
   "chat_box": {
-    "join_channel": "Unirse al canal",
-    "both_blocked": "Tú y este usuario se han bloqueado mutuamente.",
-    "you_blocked_me": "Has sido bloqueado por este usuario.",
-    "you_blocked_them": "Has bloqueado a este usuario."
+    "join_channel": "Unirse al canal"
   },
 
   "chat_bar": {
@@ -240,7 +240,6 @@
     "friend_requests": "Solicitudes de amistad {{count}}",
     "friend_requests_none": "Solicitudes de amistad",
     "folders": "Carpetas de chat",
-    "blocked": "Bloqueados",
     "settings": "Configuración"
   },
 
@@ -602,11 +601,7 @@
       "member": "Miembro",
       "status_left": "Salió",
       "status_banned": "Baneado",
-      "set_nickname": "Establecer apodo",
-      "promote_owner": "Promover a propietario",
-      "set_admin": "Establecer como administrador",
-      "add_member": "Añadir miembro",
-      "set_member": "Establecer como miembro"
+      "add_member": "Añadir miembro"
     },
     "media_files": {
       "title": "Medios y archivos",
@@ -748,8 +743,6 @@
 
   "system_message": {
     "default": "Ocurrió un evento del sistema.",
-    "you": "Tú",
-    "your": "tu",
     "another_member": "otro miembro",
     "member_joined": "{{displayName}} se unió al chat",
     "member_left": "{{displayName}} salió del chat",
@@ -779,6 +772,25 @@
     "search_bar": {
       "placeholder": "Buscar mensajes",
       "filter_important": "Filtrar importantes"
+    }
+  },
+
+  "context_menu": {
+    "chatlist_item": {
+      "mute": "Silenciar",
+      "unmute": "Activar sonido",
+      "mark_as_read": "Marcar como leído",
+      "pin_chat": "Fijar chat",
+      "unpin": "Desfijar",
+      "add_to_folder": "Agregar a carpeta",
+      "delete_chat": "Eliminar chat",
+      "leave_chat": "Salir del chat"
+    },
+    "chat_member": {
+      "set_owner": "Convertir en propietario",
+      "set_nickname": "Establecer apodo",
+      "set_admin": "Convertir en administrador",
+      "set_member": "Convertir en miembro"
     }
   }
 }

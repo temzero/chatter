@@ -8,13 +8,13 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useChat, useChatStore, useIsActiveChat } from "@/stores/chatStore";
 import { useChatStatus } from "@/stores/presenceStore";
 import { useBlockStatus } from "@/common/hooks/useBlockStatus";
-import { ChatListItemContextMenu } from "./ChatListItem-contextMenu";
 import { calculateContextMenuPosition } from "@/common/utils/contextMenuUtils";
 import { useClickOutside } from "@/common/hooks/keyEvent/useClickOutside";
 import { messageAnimations } from "@/common/animations/messageAnimations";
 import { ChatListItemMessage } from "./ChatListItemMessage";
 import SimpleTypingIndicator from "@/components/ui/typingIndicator/SimpleTypingIndicator";
 import { useTranslation } from "react-i18next";
+import ChatListItemContextMenu from "@/components/ui/contextMenu/ChatListItem-contextMenu";
 
 // Keep track of open menu globally
 let openMenuSetter: (() => void) | null = null;

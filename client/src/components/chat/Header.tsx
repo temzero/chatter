@@ -25,10 +25,15 @@ import logger from "@/common/utils/logger";
 import { useTranslation } from "react-i18next";
 interface ChatHeaderProps {
   chat: ChatResponse;
+  isBlocked?: boolean;
   isBlockedByMe: boolean;
 }
 
-const Header: React.FC<ChatHeaderProps> = ({ chat, isBlockedByMe = false }) => {
+const Header: React.FC<ChatHeaderProps> = ({
+  chat,
+  isBlocked = false,
+  isBlockedByMe = false,
+}) => {
   logger.log({ prefix: "MOUNTED" }, "Header");
 
   const { t } = useTranslation();
@@ -175,58 +180,62 @@ const Header: React.FC<ChatHeaderProps> = ({ chat, isBlockedByMe = false }) => {
           ) : (
             <div className="flex items-center gap-1 select-none">
               <div className="flex items-center cursor-pointer rounded-full p-1">
-                {isCalling ? (
-                  <button
-                    onClick={handleJoinCall}
-                    className="hover:shadow-xl hover:border-4 hover:border-[--primary-green] hover:bg-white hover:text-[--primary-green] font-semibold flex items-center gap-1 custom-border rounded-full px-3 bg-[--primary-green] opacity-100 transition"
-                  >
-                    {isChannel ? "Join Broadcast" : "Join Call"}
-                    <i className="material-symbols-outlined text-3xl">
-                      {isDirect && "phone"}
-                      {isVideoCall && "videocam"}
-                      {isChannel && "connected_tv"}
-                    </i>
-                  </button>
-                ) : (
-                  <>
-                    {isDirect && canCall && (
-                      <button
-                        onClick={() => startCall(chat.id)}
-                        className="opacity-60 hover:opacity-100 transition"
-                      >
-                        <i className="material-symbols-outlined text-3xl">
-                          phone_enabled
-                        </i>
-                      </button>
-                    )}
-
-                    {isGroup && (
-                      <button
-                        onClick={() => startCall(chat.id, true)}
-                        className="opacity-60 hover:opacity-100 transition"
-                      >
-                        <i className="material-symbols-outlined text-3xl">
-                          videocam
-                        </i>
-                      </button>
-                    )}
-
-                    {isChannel &&
-                      (chat.myRole === ChatMemberRole.ADMIN ||
-                        chat.myRole === ChatMemberRole.OWNER) && (
+                {!isBlocked &&
+                  !isBlockedByMe &&
+                  (isCalling ? (
+                    <button
+                      onClick={handleJoinCall}
+                      className="hover:shadow-xl hover:border-4 hover:border-[--primary-green] hover:bg-white hover:text-[--primary-green] font-semibold flex items-center gap-1 custom-border rounded-full px-3 bg-[--primary-green] opacity-100 transition"
+                    >
+                      {isChannel ? "Join Broadcast" : "Join Call"}
+                      <i className="material-symbols-outlined text-3xl">
+                        {isDirect && "phone"}
+                        {isVideoCall && "videocam"}
+                        {isChannel && "connected_tv"}
+                      </i>
+                    </button>
+                  ) : (
+                    <>
+                      {isDirect && canCall && (
                         <button
-                          onClick={() => openBroadCastPreview(chat.id)}
+                          onClick={() => startCall(chat.id)}
                           className="opacity-60 hover:opacity-100 transition"
                         >
                           <i className="material-symbols-outlined text-3xl">
-                            connected_tv
+                            phone_enabled
                           </i>
                         </button>
                       )}
-                  </>
-                )}
+
+                      {isGroup && (
+                        <button
+                          onClick={() => startCall(chat.id, true)}
+                          className="opacity-60 hover:opacity-100 transition"
+                        >
+                          <i className="material-symbols-outlined text-3xl">
+                            videocam
+                          </i>
+                        </button>
+                      )}
+
+                      {isChannel &&
+                        (chat.myRole === ChatMemberRole.ADMIN ||
+                          chat.myRole === ChatMemberRole.OWNER) && (
+                          <button
+                            onClick={() => openBroadCastPreview(chat.id)}
+                            className="opacity-60 hover:opacity-100 transition"
+                          >
+                            <i className="material-symbols-outlined text-3xl">
+                              connected_tv
+                            </i>
+                          </button>
+                        )}
+                    </>
+                  ))}
               </div>
-              {!chat.isDeleted && <OnlineDot isOnline={isOnline} />}
+              {!chat.isDeleted && !isBlocked && !isBlockedByMe && (
+                <OnlineDot isOnline={isOnline} />
+              )}
             </div>
           )}
         </motion.div>

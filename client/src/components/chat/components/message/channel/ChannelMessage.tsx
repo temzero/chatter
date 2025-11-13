@@ -9,7 +9,6 @@ import { handleQuickReaction } from "@/common/utils/message/quickReaction";
 import { scrollToMessageById } from "@/common/utils/message/scrollToMessageById";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
-import { MessageContextMenu } from "../MessageContextMenu";
 import { MessageHorizontalPreviewTypes } from "@/common/enums/MessageHorizontalPreviewTypes";
 import { ChannelCallMessageContent } from "./ChannelCallMessageContent";
 import { useIsMobile } from "@/stores/deviceStore";
@@ -26,6 +25,7 @@ import { SystemMessageJSONContent } from "../../../../ui/messages/content/System
 import { MessageHorizontalPreview } from "../preview/MessageHorizontalPreview";
 import { MessageReadInfo } from "@/components/chat/messagesContainer/MessageReadInfo";
 import logger from "@/common/utils/logger";
+import { MessageContextMenu } from "@/components/ui/contextMenu/Message-contextMenu";
 
 interface ChannelMessageProps {
   messageId: string;

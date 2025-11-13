@@ -37,7 +37,7 @@ const ChatBox = React.memo(() => {
       className="h-full pt-16 flex-1 relative flex flex-col justify-between overflow-hidden transition-all"
       onContextMenu={(e) => e.preventDefault()}
     >
-      <Header chat={activeChat} isBlockedByMe={isBlockedByMe} />
+      <Header chat={activeChat} isBlockedByMe={isBlockedByMe} isBlocked={isBlocked}/>
       <MessagesContainer chat={activeChat} />
       {!isDeleted && (
         <AnimatePresence>
@@ -80,11 +80,11 @@ const ChatBox = React.memo(() => {
           ) : (
             <div className="absolute bottom-0 left-0 backdrop-blur-xl w-full flex flex-col items-center p-4 justify-between shadow border-[var(--border-color)]">
               <h1 className="text-red-500 font-semibold text-center">
-                {isBlockedByMe && isBlockedMe && t("chat_box.both_blocked")}
-                {!isBlockedByMe && isBlockedMe && t("chat_box.you_blocked_me")}
+                {isBlockedByMe && isBlockedMe && t("common.messages.blocked_each_other")}
+                {!isBlockedByMe && isBlockedMe && t("common.messages.blocked_me")}
                 {isBlockedByMe &&
                   !isBlockedMe &&
-                  t("chat_box.you_blocked_them")}
+                  t("common.messages.blocked_them")}
               </h1>
             </div>
           )}

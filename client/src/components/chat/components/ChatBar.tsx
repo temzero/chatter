@@ -11,6 +11,7 @@ import AttachFile from "@/components/ui/attachments/AttachFile";
 import AttachmentImportedPreview from "@/components/ui/attachments/AttachmentImportedPreview";
 import useTypingIndicator from "@/common/hooks/useTypingIndicator";
 import { useKeyDown } from "@/common/hooks/keyEvent/useKeydown";
+import { usePasteImage } from "@/common/hooks/keyEvent/usePasteImageListener";
 import logger from "@/common/utils/logger";
 
 interface ChatBarProps {
@@ -185,6 +186,9 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
     });
   }, []);
 
+  usePasteImage({ inputRef, onFileSelect: handleFileSelect });
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   async function sendMessageAndReset({
     chatId,
     myMemberId,

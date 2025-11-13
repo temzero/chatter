@@ -1,6 +1,7 @@
 {
   "common": {
     "you": "당신",
+    "your": "당신의",
     "actions": {
       "accept": "수락",
       "add": "추가",
@@ -56,7 +57,9 @@
       "verified": "인증됨",
       "failed_verify": "인증 실패",
       "blocked": "차단됨",
-      "blocked_me": "당신은 차단되었습니다"
+      "blocked_me": "당신은 차단되었습니다",
+      "blocked_them": "당신은 이 사용자를 차단했습니다.",
+      "blocked_each_other": "당신과 이 사용자는 서로를 차단했습니다"
     },
     "loading": {
       "loading": "로딩 중...",
@@ -164,10 +167,7 @@
   },
 
   "chat_box": {
-    "join_channel": "채널 참가",
-    "both_blocked": "당신과 이 사용자는 서로를 차단했습니다.",
-    "you_blocked_me": "당신은 이 사용자에게 차단되었습니다.",
-    "you_blocked_them": "당신은 이 사용자를 차단했습니다."
+    "join_channel": "채널 참가"
   },
 
   "chat_bar": {
@@ -240,7 +240,6 @@
     "friend_requests": "친구 요청 {{count}}",
     "friend_requests_none": "친구 요청",
     "folders": "채팅 폴더",
-    "blocked": "차단됨",
     "settings": "설정"
   },
 
@@ -600,11 +599,7 @@
       "member": "멤버",
       "status_left": "나감",
       "status_banned": "차단됨",
-      "set_nickname": "별명 설정",
-      "promote_owner": "소유자로 승격",
-      "set_admin": "관리자로 설정",
-      "add_member": "멤버 추가",
-      "set_member": "멤버로 설정"
+      "set_owner": "소유자로 승격"
     },
     "media_files": {
       "title": "미디어 및 파일",
@@ -746,8 +741,7 @@
 
   "system_message": {
     "default": "시스템 이벤트가 발생했습니다.",
-    "you": "당신",
-    "your": "당신의",
+
     "another_member": "다른 멤버",
     "member_joined": "{{displayName}} 님이 채팅에 참여했습니다",
     "member_left": "{{displayName}} 님이 채팅에서 나갔습니다",
@@ -777,6 +771,25 @@
     "search_bar": {
       "placeholder": "메시지 검색",
       "filter_important": "중요 필터"
+    }
+  },
+
+  "context_menu": {
+    "chatlist_item": {
+      "mute": "알림 끄기",
+      "unmute": "알림 켜기",
+      "mark_as_read": "읽은 것으로 표시",
+      "pin_chat": "채팅 고정",
+      "unpin": "고정 해제",
+      "add_to_folder": "폴더에 추가",
+      "delete_chat": "채팅 삭제",
+      "leave_chat": "채팅 나가기"
+    },
+    "chat_member": {
+      "set_owner": "소유자로 승격",
+      "set_nickname": "닉네임 설정",
+      "set_admin": "관리자로 설정",
+      "set_member": "멤버로 설정"
     }
   }
 }

@@ -1,6 +1,7 @@
 {
   "common": {
     "you": "आप",
+    "your": "आपका",
     "actions": {
       "accept": "स्वीकार करें",
       "add": "जोड़ें",
@@ -55,8 +56,10 @@
       "invalid_code": "अमान्य कोड",
       "verified": "सत्यापित",
       "failed_verify": "सत्यापन विफल",
-      "blocked": "अवरोधित",
-      "blocked_me": "आपको अवरोधित कर दिया गया है"
+      "blocked": "ब्लॉक किया गया",
+      "blocked_me": "आपको ब्लॉक कर दिया गया है",
+      "blocked_them": "आपने इस उपयोगकर्ता को ब्लॉक किया है।",
+      "blocked_each_other": "आप और इस उपयोगकर्ता ने एक-दूसरे को ब्लॉक किया है"
     },
     "loading": {
       "loading": "लोड हो रहा है...",
@@ -164,10 +167,7 @@
   },
 
   "chat_box": {
-    "join_channel": "चैनल में शामिल हों",
-    "both_blocked": "आप और इस उपयोगकर्ता ने एक-दूसरे को ब्लॉक किया है।",
-    "you_blocked_me": "आपको इस उपयोगकर्ता द्वारा ब्लॉक किया गया है।",
-    "you_blocked_them": "आपने इस उपयोगकर्ता को ब्लॉक किया है।"
+    "join_channel": "चैनल में शामिल हों"
   },
 
   "chat_bar": {
@@ -240,7 +240,6 @@
     "friend_requests": "मित्र अनुरोध {{count}}",
     "friend_requests_none": "मित्र अनुरोध",
     "folders": "चैट फ़ोल्डर",
-    "blocked": "ब्लॉक किए गए",
     "settings": "सेटिंग्स"
   },
 
@@ -601,11 +600,7 @@
       "member": "सदस्य",
       "status_left": "छोड़ दिया",
       "status_banned": "प्रतिबंधित",
-      "set_nickname": "उपनाम सेट करें",
-      "promote_owner": "मालिक के रूप में पदोन्नति करें",
-      "set_admin": "प्रशासक के रूप में सेट करें",
-      "add_member": "सदस्य जोड़ें",
-      "set_member": "सदस्य के रूप में सेट करें"
+      "add_member": "सदस्य जोड़ें"
     },
     "media_files": {
       "title": "मीडिया और फ़ाइलें",
@@ -747,8 +742,6 @@
 
   "system_message": {
     "default": "सिस्टम इवेंट हुआ।",
-    "you": "आप",
-    "your": "आपका",
     "another_member": "अन्य सदस्य",
     "member_joined": "{{displayName}} चैट में शामिल हुए",
     "member_left": "{{displayName}} चैट छोड़ गए",
@@ -778,6 +771,25 @@
     "search_bar": {
       "placeholder": "संदेश खोजें",
       "filter_important": "महत्वपूर्ण फ़िल्टर करें"
+    }
+  },
+
+  "context_menu": {
+    "chatlist_item": {
+      "mute": "म्यूट करें",
+      "unmute": "अनम्यूट करें",
+      "mark_as_read": "पढ़ा हुआ चिह्नित करें",
+      "pin_chat": "चैट पिन करें",
+      "unpin": "पिन हटाएं",
+      "add_to_folder": "फ़ोल्डर में जोड़ें",
+      "delete_chat": "चैट हटाएं",
+      "leave_chat": "चैट छोड़ें"
+    },
+    "chat_member": {
+      "set_owner": "मालिक बनाएं",
+      "set_nickname": "उपनाम सेट करें",
+      "set_admin": "प्रशासक बनाएं",
+      "set_member": "सदस्य बनाएं"
     }
   }
 }

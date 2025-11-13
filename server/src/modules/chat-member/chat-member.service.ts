@@ -91,34 +91,6 @@ export class ChatMemberService {
     }
   }
 
-  async findByChatIdWithBlockFilter(
-    chatId: string,
-    currentUserId: string,
-  ): Promise<ChatMember[]> {
-    try {
-      return await this.memberRepo
-        .createQueryBuilder('member')
-        .leftJoinAndSelect('member.user', 'user')
-        .leftJoin(
-          'block',
-          'block1',
-          'block1.blockerId = :currentUserId AND block1.blockedId = member.userId',
-          { currentUserId },
-        )
-        .leftJoin(
-          'block',
-          'block2',
-          'block2.blockerId = member.userId AND block2.blockedId = :currentUserId',
-          { currentUserId },
-        )
-        .where('member.chatId = :chatId', { chatId })
-        .andWhere('block1.id IS NULL AND block2.id IS NULL')
-        .getMany();
-    } catch (error) {
-      ErrorResponse.throw(error, 'Failed to retrieve filtered chat members');
-    }
-  }
-
   async findByChatIdWithBlockStatus(
     chatId: string,
     currentUserId: string,

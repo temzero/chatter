@@ -1,6 +1,7 @@
 {
   "common": {
     "you": "คุณ",
+    "your": "ของคุณ",
     "actions": {
       "accept": "ยอมรับ",
       "add": "เพิ่ม",
@@ -56,7 +57,9 @@
       "verified": "ยืนยันแล้ว",
       "failed_verify": "การยืนยันล้มเหลว",
       "blocked": "ถูกบล็อก",
-      "blocked_me": "คุณถูกบล็อกแล้ว"
+      "blocked_me": "คุณถูกบล็อกแล้ว",
+      "blocked_them": "คุณได้บล็อกผู้ใช้นี้แล้ว",
+      "blocked_each_other": "คุณและผู้ใช้นี้ได้บล็อกกันและกัน"
     },
     "loading": {
       "loading": "กำลังโหลด...",
@@ -164,10 +167,7 @@
   },
 
   "chat_box": {
-    "join_channel": "เข้าร่วมช่อง",
-    "both_blocked": "คุณและผู้ใช้นี้บล็อกกันและกัน",
-    "you_blocked_me": "คุณถูกบล็อกโดยผู้ใช้นี้",
-    "you_blocked_them": "คุณได้บล็อกผู้ใช้นี้"
+    "join_channel": "เข้าร่วมช่อง"
   },
 
   "chat_bar": {
@@ -240,7 +240,6 @@
     "friend_requests": "คำขอเป็นเพื่อน {{count}}",
     "friend_requests_none": "คำขอเป็นเพื่อน",
     "folders": "โฟลเดอร์แชท",
-    "blocked": "ถูกบล็อก",
     "settings": "การตั้งค่า"
   },
 
@@ -601,11 +600,7 @@
       "member": "สมาชิก",
       "status_left": "ออกแล้ว",
       "status_banned": "ถูกแบน",
-      "set_nickname": "ตั้งชื่อเล่น",
-      "promote_owner": "เลื่อนขั้นเป็นเจ้าของ",
-      "set_admin": "ตั้งเป็นผู้ดูแล",
-      "add_member": "เพิ่มสมาชิก",
-      "set_member": "ตั้งเป็นสมาชิก"
+      "add_member": "เพิ่มสมาชิก"
     },
     "media_files": {
       "title": "สื่อและไฟล์",
@@ -747,8 +742,7 @@
 
   "system_message": {
     "default": "เกิดเหตุการณ์ระบบขึ้น",
-    "you": "คุณ",
-    "your": "ของคุณ",
+
     "another_member": "สมาชิกคนอื่น",
     "member_joined": "{{displayName}} เข้าร่วมแชท",
     "member_left": "{{displayName}} ออกจากแชท",
@@ -778,6 +772,25 @@
     "search_bar": {
       "placeholder": "ค้นหาข้อความ",
       "filter_important": "กรองข้อความสำคัญ"
+    }
+  },
+
+  "context_menu": {
+    "chatlist_item": {
+      "mute": "ปิดการแจ้งเตือน",
+      "unmute": "เปิดการแจ้งเตือน",
+      "mark_as_read": "ทำเครื่องหมายว่าอ่านแล้ว",
+      "pin_chat": "ปักหมุดแชท",
+      "unpin": "ยกเลิกปักหมุด",
+      "add_to_folder": "เพิ่มไปยังโฟลเดอร์",
+      "delete_chat": "ลบแชท",
+      "leave_chat": "ออกจากแชท"
+    },
+    "chat_member": {
+      "set_owner": "เลื่อนขั้นเป็นเจ้าของ",
+      "set_nickname": "ตั้งชื่อเล่น",
+      "set_admin": "ตั้งเป็นผู้ดูแล",
+      "set_member": "ตั้งเป็นสมาชิก"
     }
   }
 }

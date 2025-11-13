@@ -11,11 +11,11 @@ import {
   useIsReplyToThisMessage,
   setOpenFocusMessageModal,
 } from "@/stores/modalStore";
-import { MessageContextMenu } from "./MessageContextMenu";
 import {
   SystemMessageContent,
   SystemMessageJSONContent,
 } from "../../../ui/messages/content/SystemMessageContent";
+import { MessageContextMenu } from "@/components/ui/contextMenu/Message-contextMenu";
 
 type Props = {
   message: MessageResponse;

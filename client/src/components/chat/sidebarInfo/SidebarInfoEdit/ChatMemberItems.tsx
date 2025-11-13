@@ -1,16 +1,39 @@
 import React, { useState, useRef } from "react";
 import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
-import { ModalType, getOpenModal } from "@/stores/modalStore";
-import { useChatMemberStore } from "@/stores/chatMemberStore";
-import { getCurrentUserId } from "@/stores/authStore";
 import { rolePriority } from "@/shared/types/enums/chat-member-role.enum";
 import { ChatMemberStatus } from "@/shared/types/enums/chat-member-status.enum";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useTranslation } from "react-i18next";
 import { calculateContextMenuPosition } from "@/common/utils/contextMenuUtils";
 import { useClickOutside } from "@/common/hooks/keyEvent/useClickOutside";
-import { handleError } from "@/common/utils/handleError";
+import MemberContextMenu from "../../../ui/contextMenu/ChatMemberItems-contextMenu";
+
+// 🧩 Role icons + i18n key mapping
+const chatMemberRoleMap: Record<
+  ChatMemberRole,
+  {
+    icon: string;
+    labelKey: string;
+  }
+> = {
+  [ChatMemberRole.OWNER]: {
+    icon: "chess_queen",
+    labelKey: "sidebar_info.members_edit.owner",
+  },
+  [ChatMemberRole.ADMIN]: {
+    icon: "badge",
+    labelKey: "sidebar_info.members_edit.admin",
+  },
+  [ChatMemberRole.MEMBER]: {
+    icon: "groups",
+    labelKey: "sidebar_info.members_edit.member",
+  },
+  [ChatMemberRole.GUEST]: {
+    icon: "person_outline",
+    labelKey: "sidebar_info.members_edit.guest",
+  },
+};
 
 interface ChatMemberItemsProps {
   members: ChatMemberResponse[];
@@ -36,16 +59,10 @@ export const ChatMemberItems = ({
   const myRole = myMember?.role;
 
   const getRoleDisplayName = (role: ChatMemberRole) => {
-    switch (role) {
-      case ChatMemberRole.OWNER:
-        return t("sidebar_info.members_edit.owner");
-      case ChatMemberRole.ADMIN:
-        return t("sidebar_info.members_edit.admin");
-      case ChatMemberRole.GUEST:
-        return t("sidebar_info.members_edit.guest");
-      default:
-        return t("sidebar_info.members_edit.member");
-    }
+    const roleInfo = chatMemberRoleMap[role];
+    return roleInfo
+      ? t(roleInfo.labelKey)
+      : t("sidebar_info.members_edit.member");
   };
 
   const getStatusDisplayName = (status: ChatMemberStatus) => {
@@ -109,7 +126,10 @@ export const ChatMemberItems = ({
     <div className="flex flex-col gap-3 rounded overflow-hidden w-full relative">
       {myMember && (
         <div className="custom-border rounded">
-          <div className="p-2 bg-[--hover-color] text-sm font-medium text-[--primary-green]">
+          <div className="flex items-center gap-2 p-2 bg-[--hover-color] text-sm font-medium text-[--primary-green]">
+            <span className="material-symbols-outlined">
+              {chatMemberRoleMap[myMember.role]?.icon}
+            </span>
             {t("sidebar_info.members_edit.you_role", {
               role: getRoleDisplayName(myMember.role),
             })}
@@ -144,7 +164,12 @@ export const ChatMemberItems = ({
       {sortedGroups.map(([role, groupMembers]) => (
         <div key={role} className="custom-border rounded">
           <div className="flex items-center justify-between p-2 bg-[--hover-color] text-sm font-medium">
-            <h1>{getRoleDisplayName(role as ChatMemberRole)}</h1>
+            <div className="flex items-center gap-1">
+              <span className="material-symbols-outlined">
+                {chatMemberRoleMap[role as ChatMemberRole]?.icon}
+              </span>
+              <span>{getRoleDisplayName(role as ChatMemberRole)}</span>
+            </div>
             <p>{groupMembers.length}</p>
           </div>
           {groupMembers.map((member) => (
@@ -185,112 +210,9 @@ export const ChatMemberItems = ({
           currentRole={myRole}
           onClose={() => setContextMenu(null)}
           ref={menuRef}
+          chatMemberRoleMap={chatMemberRoleMap}
         />
       )}
     </div>
   );
 };
-
-interface ContextMenuProps {
-  x: number;
-  y: number;
-  member: ChatMemberResponse;
-  currentRole: ChatMemberRole;
-  onClose: () => void;
-}
-
-const MemberContextMenu = React.forwardRef<HTMLDivElement, ContextMenuProps>(
-  ({ x, y, member, currentRole, onClose }, ref) => {
-    const { t } = useTranslation();
-    const currentUserId = getCurrentUserId();
-    const openModal = getOpenModal();
-    const updateMember = useChatMemberStore.getState().updateMember;
-    const removeMember = useChatMemberStore.getState().removeChatMember;
-
-    const classes =
-      "flex items-center gap-1 px-4 py-2 hover:bg-[--hover-color] cursor-pointer";
-
-    const isMyself = member.userId === currentUserId;
-    const canManageOthers =
-      currentRole === ChatMemberRole.OWNER ||
-      currentRole === ChatMemberRole.ADMIN;
-
-    const handleOpenNicknameModal = () => {
-      openModal(ModalType.SET_NICKNAME, { member });
-      onClose();
-    };
-
-    const handleChangeRole = (role: ChatMemberRole) => {
-      try {
-        updateMember(member.chatId, member.id, { role });
-        onClose();
-      } catch (error) {
-        handleError(error, "failed to change role");
-      }
-    };
-
-    const handleRemoveMember = () => {
-      try {
-        removeMember(member.chatId, member.userId);
-        onClose();
-      } catch (error) {
-        handleError(error, "Remove member failed");
-      }
-    };
-
-    return (
-      <div
-        ref={ref}
-        className="fixed bg-[--background-color] border custom-border rounded shadow-lg w-48"
-        style={{ zIndex: 999, top: `${y}px`, left: `${x}px` }}
-        onContextMenu={(e: React.MouseEvent) => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
-      >
-        {(isMyself || canManageOthers) && (
-          <div className={classes} onClick={handleOpenNicknameModal}>
-            {t("sidebar_info.members_edit.set_nickname")}
-          </div>
-        )}
-
-        {!isMyself && canManageOthers && (
-          <>
-            {currentRole === ChatMemberRole.OWNER && (
-              <>
-                <div
-                  className={classes}
-                  onClick={() => handleChangeRole(ChatMemberRole.OWNER)}
-                >
-                  {t("sidebar_info.members_edit.promote_owner")}
-                </div>
-                <div
-                  className={classes}
-                  onClick={() => handleChangeRole(ChatMemberRole.ADMIN)}
-                >
-                  {t("sidebar_info.members_edit.set_admin")}
-                </div>
-                {member.role !== ChatMemberRole.MEMBER && (
-                  <div
-                    className={classes}
-                    onClick={() => handleChangeRole(ChatMemberRole.MEMBER)}
-                  >
-                    {t("sidebar_info.members_edit.set_member")}
-                  </div>
-                )}
-              </>
-            )}
-            <div
-              className={`${classes} text-red-500`}
-              onClick={handleRemoveMember}
-            >
-              {t("common.actions.delete")}
-            </div>
-          </>
-        )}
-      </div>
-    );
-  }
-);
-
-MemberContextMenu.displayName = "MemberContextMenu";

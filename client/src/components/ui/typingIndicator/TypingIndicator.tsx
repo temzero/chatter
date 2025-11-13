@@ -19,7 +19,7 @@ const TypingIndicator = ({ chatId, isMuted }: TypingIndicatorProps) => {
     if (isMuted) return; // 🔇 Skip sounds if muted
 
     if (previousTypingCount.current === 0 && isTyping) {
-      audioService.playSound(SoundType.TYPING, 0.9);
+      audioService.playSound(SoundType.TYPING, 0.1);
     }
     if (!isTyping) {
       audioService.stopSound(SoundType.TYPING);

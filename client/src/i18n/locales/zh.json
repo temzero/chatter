@@ -1,6 +1,7 @@
 {
   "common": {
     "you": "你",
+    "your": "你的",
     "actions": {
       "accept": "接受",
       "add": "添加",
@@ -55,8 +56,10 @@
       "invalid_code": "无效代码",
       "verified": "已验证",
       "failed_verify": "验证失败",
-      "blocked": "已封锁",
-      "blocked_me": "你已被封锁"
+      "blocked": "已屏蔽",
+      "blocked_me": "你已被屏蔽",
+      "blocked_them": "你已屏蔽该用户。",
+      "blocked_each_other": "你和该用户已互相屏蔽"
     },
     "loading": {
       "loading": "加载中...",
@@ -163,11 +166,8 @@
     "channel": "频道"
   },
 
-  "chat)box": {
-    "join_channel": "加入频道",
-    "both_blocked": "你和此用户已互相封锁。",
-    "you_blocked_me": "你已被此用户封锁。",
-    "you_blocked_them": "你已封锁此用户。"
+  "chat_box": {
+    "join_channel": "加入频道"
   },
 
   "chat_bar": {
@@ -240,7 +240,6 @@
     "friend_requests": "好友请求 {{count}}",
     "friend_requests_none": "好友请求",
     "folders": "聊天文件夹",
-    "blocked": "已屏蔽",
     "settings": "设置"
   },
 
@@ -601,11 +600,7 @@
       "member": "成员",
       "status_left": "已离开",
       "status_banned": "已封禁",
-      "set_nickname": "设置昵称",
-      "promote_owner": "提升为所有者",
-      "set_admin": "设置为管理员",
-      "add_member": "添加成员",
-      "set_member": "设置为成员"
+      "add_member": "添加成员"
     },
     "media_files": {
       "title": "媒体与文件",
@@ -747,8 +742,7 @@
 
   "system_message": {
     "default": "系统事件发生。",
-    "you": "你",
-    "your": "你的",
+
     "another_member": "另一位成员",
     "member_joined": "{{displayName}} 加入了聊天",
     "member_left": "{{displayName}} 离开了聊天",
@@ -778,6 +772,25 @@
     "search_bar": {
       "placeholder": "搜索消息",
       "filter_important": "过滤重要"
+    }
+  },
+
+  "context_menu": {
+    "chatlist_item": {
+      "mute": "静音",
+      "unmute": "取消静音",
+      "mark_as_read": "标记为已读",
+      "pin_chat": "固定聊天",
+      "unpin": "取消固定",
+      "add_to_folder": "添加到文件夹",
+      "delete_chat": "删除聊天",
+      "leave_chat": "退出聊天"
+    },
+    "chat_member": {
+      "set_owner": "设为拥有者",
+      "set_nickname": "设置昵称",
+      "set_admin": "设为管理员",
+      "set_member": "设为成员"
     }
   }
 }

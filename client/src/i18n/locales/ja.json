@@ -1,6 +1,7 @@
 {
   "common": {
     "you": "あなた",
+    "your": "あなたの",
     "actions": {
       "accept": "承認",
       "add": "追加",
@@ -56,7 +57,9 @@
       "verified": "確認済み",
       "failed_verify": "認証に失敗しました",
       "blocked": "ブロック済み",
-      "blocked_me": "あなたはブロックされました"
+      "blocked_me": "あなたはブロックされています",
+      "blocked_them": "あなたはこのユーザーをブロックしました。",
+      "blocked_each_other": "あなたとこのユーザーはお互いをブロックしています"
     },
     "loading": {
       "loading": "読み込み中...",
@@ -164,10 +167,7 @@
   },
 
   "chat_box": {
-    "join_channel": "チャンネルに参加",
-    "both_blocked": "あなたとこのユーザーはお互いにブロックしています。",
-    "you_blocked_me": "あなたはこのユーザーにブロックされています。",
-    "you_blocked_them": "あなたはこのユーザーをブロックしました。"
+    "join_channel": "チャンネルに参加"
   },
 
   "chat_bar": {
@@ -240,7 +240,6 @@
     "friend_requests": "友達リクエスト {{count}}",
     "friend_requests_none": "友達リクエスト",
     "folders": "チャットフォルダ",
-    "blocked": "ブロック済み",
     "settings": "設定"
   },
 
@@ -601,11 +600,7 @@
       "member": "メンバー",
       "status_left": "退出",
       "status_banned": "追放",
-      "set_nickname": "ニックネームを設定",
-      "promote_owner": "オーナーに昇格",
-      "set_admin": "管理者として設定",
-      "add_member": "メンバーを追加",
-      "set_member": "メンバーとして設定"
+      "add_member": "メンバーを追加"
     },
     "media_files": {
       "title": "メディアとファイル",
@@ -747,8 +742,7 @@
 
   "system_message": {
     "default": "システムイベントが発生しました。",
-    "you": "あなた",
-    "your": "あなたの",
+
     "another_member": "他のメンバー",
     "member_joined": "{{displayName}} がチャットに参加しました",
     "member_left": "{{displayName}} がチャットを退出しました",
@@ -778,6 +772,25 @@
     "search_bar": {
       "placeholder": "メッセージを検索",
       "filter_important": "重要をフィルター"
+    }
+  },
+
+  "context_menu": {
+    "chatlist_item": {
+      "mute": "ミュート",
+      "unmute": "ミュート解除",
+      "mark_as_read": "既読にする",
+      "pin_chat": "チャットを固定",
+      "unpin": "固定を解除",
+      "add_to_folder": "フォルダーに追加",
+      "delete_chat": "チャットを削除",
+      "leave_chat": "チャットを退出"
+    },
+    "chat_member": {
+      "set_owner": "所有者に昇格",
+      "set_nickname": "ニックネームを設定",
+      "set_admin": "管理者に設定",
+      "set_member": "メンバーに設定"
     }
   }
 }

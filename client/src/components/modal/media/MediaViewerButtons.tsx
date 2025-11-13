@@ -5,6 +5,10 @@ import { useSenderByMessageId } from "@/stores/messageStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useIsMobile } from "@/stores/deviceStore";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
+import { getCurrentUserId } from "@/stores/authStore";
+import { useTranslation } from "react-i18next";
+import { useActiveChatId } from "@/stores/chatStore";
+import { useMessageSender } from "@/stores/chatMemberStore";
 
 interface MediaViewerButtonsProps {
   attachment: AttachmentResponse;
@@ -17,9 +21,18 @@ export const MediaViewerButtons = ({
   onRotate,
   onClose,
 }: MediaViewerButtonsProps) => {
+  const { t } = useTranslation();
+
   const isMobile = useIsMobile();
   const openModal = getOpenModal();
+
+  const activeChatId = useActiveChatId();
+  const currentUserId = getCurrentUserId();
+
   const sender = useSenderByMessageId(attachment.messageId ?? "");
+  const senderMember = useMessageSender(sender?.id ?? "", activeChatId ?? "");
+  const senderDisplayName = senderMember?.nickname || sender?.displayName;
+  const isMe = currentUserId === sender?.id;
 
   const handleDownloadClick = useCallback(() => {
     handleDownload(attachment);
@@ -48,14 +61,18 @@ export const MediaViewerButtons = ({
         className={`absolute top-2 left-2 flex items-center gap-2`}
         style={{ zIndex: 2 }}
       >
-        <Avatar
-          avatarUrl={sender?.avatarUrl}
-          name={sender?.displayName}
-          size={8}
-        />
-        {isMobile || (
-          <div className="text-white font-medium">
-            {sender?.displayName || "Sender"}
+        {isMe ? (
+          <div className="text-white font-medium">{t("common.you")}</div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <Avatar
+              avatarUrl={sender?.avatarUrl}
+              name={sender?.displayName}
+              size={8}
+            />
+            {!isMobile && (
+              <div className="text-white font-medium">{senderDisplayName}</div>
+            )}
           </div>
         )}
       </div>

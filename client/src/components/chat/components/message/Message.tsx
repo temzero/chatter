@@ -6,7 +6,6 @@ import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { MessageReactionDisplay } from "@/components/ui/messages/MessageReactionsDisplay";
 import { handleQuickReaction } from "@/common/utils/message/quickReaction";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
-import { MessageContextMenu } from "./MessageContextMenu";
 import {
   useIsMessageFocus,
   useIsReplyToThisMessage,
@@ -27,6 +26,7 @@ import { SystemMessageJSONContent } from "../../../ui/messages/content/SystemMes
 import { CallMessageContent } from "../../../ui/messages/content/CallMessageContent";
 import MessageBubbleWrapper from "./wrapper/MessageBubbleWrapper";
 import { useMessageSender } from "@/stores/chatMemberStore";
+import { MessageContextMenu } from "../../../ui/contextMenu/Message-contextMenu";
 
 interface MessageProps {
   messageId: string;

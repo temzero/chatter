@@ -54,14 +54,14 @@ export function getSystemMessageText({
   if (!systemEvent) return t("system_message.default");
 
   const isMe = currentUserId === senderId;
-  const displayName = isMe ? t("system_message.you") : senderDisplayName;
+  const displayName = isMe ? t("common.you") : senderDisplayName;
   const parsedContent = parseJsonContent<SystemMessageJSONContent>(JSONcontent);
 
   const newVal = parsedContent?.newValue;
   const oldVal = parsedContent?.oldValue;
   const isTargetMe = parsedContent?.targetId === currentUserId;
   const targetName = isTargetMe
-    ? t("system_message.you")
+    ? t("common.you")
     : parsedContent?.targetName || t("system_message.another_member");
 
   switch (systemEvent) {
@@ -103,7 +103,7 @@ export function getSystemMessageText({
       if (oldVal && newVal) {
         return t("system_message.nickname_changed_from_to", {
           displayName,
-          target: isTargetMe ? t("system_message.your") : targetName,
+          target: isTargetMe ? t("common.your") : targetName,
           oldVal,
           newVal,
         });
@@ -111,41 +111,41 @@ export function getSystemMessageText({
       if (newVal) {
         return t("system_message.nickname_set", {
           displayName,
-          target: isTargetMe ? t("system_message.your") : targetName,
+          target: isTargetMe ? t("common.your") : targetName,
           newVal,
         });
       }
       return t("system_message.nickname_updated", {
         displayName,
-        target: isTargetMe ? t("system_message.your") : targetName,
+        target: isTargetMe ? t("common.your") : targetName,
       });
     case SystemEventType.MEMBER_UPDATE_ROLE:
       if (newVal === ChatMemberRole.OWNER) {
         return t("system_message.promoted_to_owner", {
           displayName,
-          target: isTargetMe ? t("system_message.you") : targetName,
+          target: isTargetMe ? t("common.you") : targetName,
         });
       }
       return newVal
         ? t("system_message.role_changed_to", {
             displayName,
-            target: isTargetMe ? t("system_message.your") : targetName,
+            target: isTargetMe ? t("common.your") : targetName,
             newVal,
           })
         : t("system_message.role_updated", {
             displayName,
-            target: isTargetMe ? t("system_message.your") : targetName,
+            target: isTargetMe ? t("common.your") : targetName,
           });
     case SystemEventType.MEMBER_UPDATE_STATUS:
       return newVal
         ? t("system_message.status_changed_to", {
             displayName,
-            target: isTargetMe ? t("system_message.your") : targetName,
+            target: isTargetMe ? t("common.your") : targetName,
             newVal,
           })
         : t("system_message.status_updated", {
             displayName,
-            target: isTargetMe ? t("system_message.your") : targetName,
+            target: isTargetMe ? t("common.your") : targetName,
           });
     case SystemEventType.MESSAGE_PINNED:
       return newVal

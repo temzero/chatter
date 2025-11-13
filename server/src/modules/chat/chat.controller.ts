@@ -16,10 +16,6 @@ import { ChatService } from './chat.service';
 import { CreateDirectChatDto } from './dto/requests/create-direct-chat.dto';
 import { CreateGroupChatDto } from './dto/requests/create-group-chat.dto';
 import { UpdateChatDto } from 'src/modules/chat/dto/requests/update-chat.dto';
-import {
-  GetOrCreateResponse,
-  SuccessResponse,
-} from 'src/common/api-response/success';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { ErrorResponse } from 'src/common/api-response/errors';
@@ -30,6 +26,10 @@ import { MessageService } from '../message/message.service';
 import { MessageResponseDto } from '../message/dto/responses/message-response.dto';
 import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
 import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
+import {
+  GetOrCreateResponse,
+  SuccessResponse,
+} from 'src/common/api-response/success';
 
 @Controller('chat')
 @UseGuards(JwtAuthGuard)

@@ -6,6 +6,7 @@ import { useFolders } from "@/stores/folderStore";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useChatStore } from "@/stores/chatStore";
+import { useTranslation } from "react-i18next";
 
 interface ChatContextMenuProps {
   x: number;
@@ -21,10 +22,12 @@ interface MenuAction {
   className?: string;
 }
 
-export const ChatListItemContextMenu = React.forwardRef<
+const ChatListItemContextMenu = React.forwardRef<
   HTMLDivElement,
   ChatContextMenuProps
 >(({ x, y, chat, onClose }, ref) => {
+  const { t } = useTranslation();
+
   const { mute, unmute } = useMuteControl(chat.id, chat.myMemberId);
   const openModal = getOpenModal();
   const updateMemberLastRead =
@@ -41,63 +44,51 @@ export const ChatListItemContextMenu = React.forwardRef<
 
   const menuActions: MenuAction[] = [
     {
-      label: isMuted ? "Unmute" : "Mute",
+      label: isMuted
+        ? t("context_menu.chatlist_item.unmute")
+        : t("context_menu.chatlist_item.mute"),
       icon: isMuted ? "notifications_off" : "notifications",
       onClick: isMuted ? () => unmute() : () => mute(),
     },
-
-    // ✅ Only show if unread
     ...(isUnread
       ? [
           {
-            label: "Mark as Read",
+            label: t("context_menu.chatlist_item.mark_as_read"),
             icon: "check",
             onClick: () => updateMemberLastRead(chat.id, chat.myMemberId, null),
           },
         ]
       : []),
-
     {
-      label: isPinned ? "Unpin" : "Pin Chat",
+      label: isPinned
+        ? t("context_menu.chatlist_item.unpin")
+        : t("context_menu.chatlist_item.pin_chat"),
       icon: isPinned ? "keep_off" : "keep",
       onClick: () => pinChat(chat.myMemberId, !isPinned),
     },
-
-    // ✅ Only show Add to Folder if folder feature exists
     ...(isFolder
       ? [
           {
-            label: "Add to Folder",
+            label: t("context_menu.chatlist_item.add_to_folder"),
             icon: "folder_open",
-            onClick: () =>
-              openModal(ModalType.FOLDER, {
-                chat,
-              }),
+            onClick: () => openModal(ModalType.FOLDER, { chat }),
           },
         ]
       : []),
-
-    // ✅ Direct chat → Delete, group chat → Leave
     ...(isDirect
       ? [
           {
-            label: "Delete Chat",
+            label: t("context_menu.chatlist_item.delete_chat"),
             icon: "delete",
-            onClick: () =>
-              openModal(ModalType.DELETE_CHAT, {
-                chat,
-              }),
+            onClick: () => openModal(ModalType.DELETE_CHAT, { chat }),
             className: "text-red-500",
           },
         ]
       : [
           {
-            label: "Leave Chat",
+            label: t("context_menu.chatlist_item.leave_chat"),
             icon: "logout",
-            onClick: () =>
-              openModal(ModalType.LEAVE_CHAT, {
-                chat,
-              }),
+            onClick: () => openModal(ModalType.LEAVE_CHAT, { chat }),
             className: "text-yellow-500",
           },
         ]),
@@ -132,4 +123,4 @@ export const ChatListItemContextMenu = React.forwardRef<
   );
 });
 
-ChatListItemContextMenu.displayName = "ChatListItemContextMenu";
+export default ChatListItemContextMenu;
