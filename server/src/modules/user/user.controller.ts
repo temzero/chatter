@@ -25,6 +25,7 @@ import { VerifyEmailCodeDto } from './dto/requests/verify-email.dto';
 import { MailService } from '../auth/mail/mail.service';
 import { VerificationCodeService } from '../auth/services/verification-code.service';
 import { ErrorResponse } from 'src/common/api-response/errors';
+import { BadRequestError } from 'src/shared/types/enums/error-message.enum';
 
 @Controller('user')
 @UseGuards(JwtAuthGuard)
@@ -168,7 +169,7 @@ export class UserController {
     @Body() verifyEmailCodeDto: VerifyEmailCodeDto,
   ): Promise<SuccessResponse<UserResponseDto>> {
     if (!/^\d{6}$/.test(verifyEmailCodeDto.verificationCode)) {
-      ErrorResponse.badRequest('Verification code must be 6 digits');
+      ErrorResponse.badRequest(BadRequestError.EMAIL_VERIFICATION_INVALID);
     }
 
     // Verify the code first
@@ -179,7 +180,7 @@ export class UserController {
     );
 
     if (!isValid) {
-      ErrorResponse.badRequest('Email verification failed - invalid code');
+      ErrorResponse.badRequest(BadRequestError.EMAIL_VERIFICATION_INVALID);
     }
 
     // Update user's email and get the updated user
@@ -200,7 +201,7 @@ export class UserController {
     @CurrentUser('id') userId: string,
   ): Promise<SuccessResponse<UserResponseDto>> {
     if (!deviceId) {
-      ErrorResponse.badRequest('Device ID is required');
+      ErrorResponse.badRequest(BadRequestError.DEVICE_ID_MISSING);
     }
     const user = await this.userService.deleteUser(userId, deviceId);
     return new SuccessResponse(

@@ -11,10 +11,9 @@ import ChatList from "@/components/ui/chat/ChatList";
 import ChatFolderSelector from "@/components/ui/chat/ChatFolderSelector";
 import SidebarWellCome from "./SidebarWellCome";
 import { APP_NAME } from "@/common/constants/name";
-import logger from "@/common/utils/logger";
 
 const SidebarDefault: React.FC = () => {
-  logger.log({ prefix: "MOUNTED" }, "SidebarDefault");
+  console.log("[MOUNTED]", "SidebarDefault");
   // Much better approach - stable selectors
   const chatIds = useAllChatIds();
   const chatMap = useChatMap();

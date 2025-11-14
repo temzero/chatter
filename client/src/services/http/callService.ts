@@ -3,7 +3,6 @@ import { CallResponse } from "@/shared/types/responses/call.response";
 import { IncomingCallResponse } from "@shared/types/call";
 import { generateLiveKitTokenRequest } from "@/shared/types/requests/generate-livekit-token.request";
 import { PaginationQuery } from "@/shared/types/queries/pagination-query";
-import logger from "@/common/utils/logger";
 
 export const callService = {
   async fetchCallHistory(
@@ -28,7 +27,7 @@ export const callService = {
       // Adjust based on your API response structure
       return data.payload ?? data;
     } catch (error) {
-      logger.error("Failed to fetch pending calls:", error);
+      console.error("Failed to fetch pending calls:", error);
       throw error;
     }
   },

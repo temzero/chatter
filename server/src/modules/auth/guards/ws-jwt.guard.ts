@@ -1,10 +1,14 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { WsException } from '@nestjs/websockets';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from 'src/modules/user/user.service';
 import { User } from 'src/modules/user/entities/user.entity';
 import type { JwtPayload } from '../types/jwt-payload.type';
+import { ErrorResponse } from 'src/common/api-response/errors';
+import {
+  NotFoundError,
+  UnauthorizedError,
+} from 'src/shared/types/enums/error-message.enum';
 
 interface WsClient {
   handshake: {
@@ -30,7 +34,7 @@ export class WsJwtGuard implements CanActivate {
     const token = this.extractTokenFromAuthPayload(client);
 
     if (!token) {
-      throw new WsException('Unauthorized');
+      ErrorResponse.unauthorized();
     }
 
     try {
@@ -42,15 +46,22 @@ export class WsJwtGuard implements CanActivate {
 
       const user: User = await this.userService.getUserById(payload.sub);
       if (!user) {
-        throw new WsException('User not found');
+        ErrorResponse.notFound(NotFoundError.USER_NOT_FOUND);
       }
 
       console.log('UserData from accessToken: ', user);
 
       client.data = { ...(client.data || {}), user };
       return true;
-    } catch {
-      throw new WsException('Unauthorized');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        if (err.name === 'TokenExpiredError') {
+          ErrorResponse.unauthorized(UnauthorizedError.TOKEN_EXPIRED);
+        } else if (err.name === 'JsonWebTokenError') {
+          ErrorResponse.unauthorized(UnauthorizedError.INVALID_TOKEN);
+        }
+      }
+      ErrorResponse.forbidden();
     }
   }
 

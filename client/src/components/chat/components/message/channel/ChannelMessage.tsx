@@ -24,7 +24,6 @@ import ChannelMessageBubbleWrapper from "../wrapper/ChannelMessageBubbleWrapper"
 import { SystemMessageJSONContent } from "../../../../ui/messages/content/SystemMessageContent";
 import { MessageHorizontalPreview } from "../preview/MessageHorizontalPreview";
 import { MessageReadInfo } from "@/components/chat/messagesContainer/MessageReadInfo";
-import logger from "@/common/utils/logger";
 import { MessageContextMenu } from "@/components/ui/contextMenu/Message-contextMenu";
 
 interface ChannelMessageProps {
@@ -60,7 +59,7 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
   };
 
   if (!currentUserId) {
-    logger.error("Not authenticated");
+    console.error("Not authenticated");
     return;
   }
 

@@ -11,7 +11,6 @@ import { ChatType } from 'src/shared/types/enums/chat-type.enum';
 import { CreateGroupChatDto } from './dto/requests/create-group-chat.dto';
 import { plainToInstance } from 'class-transformer';
 import { ChatMapper } from './mappers/chat.mapper';
-import { MessageService } from '../message/message.service';
 import { Message } from '../message/entities/message.entity';
 import { SystemEventType } from 'src/shared/types/enums/system-event-type.enum';
 import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
@@ -19,6 +18,12 @@ import { ChatResponseDto } from './dto/responses/chat-response.dto';
 import { PublicChatMapper } from './mappers/public-chat.mapper';
 import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
 import { MAX_PINNED } from '../chat-member/chat-member.service';
+import {
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+} from 'src/shared/types/enums/error-message.enum';
+import { MessageService } from '../message/message.service';
 
 @Injectable()
 export class ChatService {
@@ -136,7 +141,7 @@ export class ChatService {
       // ✅ Use unified mapper
       const chatDto = await this.chatMapper.mapChatToChatResDto(chat, userId);
       if (!chatDto) {
-        ErrorResponse.notFound('Failed to map chat to response DTO');
+        ErrorResponse.badRequest(BadRequestError.FAILED_TO_MAP_CHAT);
       }
       return chatDto;
     }
@@ -155,12 +160,12 @@ export class ChatService {
     });
 
     if (!channel) {
-      ErrorResponse.notFound('Chat not found or not accessible');
+      ErrorResponse.notFound(NotFoundError.CHAT_NOT_FOUND);
     }
 
     const chatDto = this.publicChatMapper.map(channel);
     if (!chatDto) {
-      ErrorResponse.notFound('Failed to map chat to response DTO');
+      ErrorResponse.badRequest(BadRequestError.FAILED_TO_MAP_CHAT);
     }
     return chatDto;
   }
@@ -192,12 +197,12 @@ export class ChatService {
       .getOne();
 
     if (!chat) {
-      ErrorResponse.badRequest('No direct chat found between these users');
+      ErrorResponse.notFound(NotFoundError.CHAT_NOT_FOUND);
     }
 
     const chatDto = await this.chatMapper.mapChatToChatResDto(chat, myUserId);
     if (!chatDto) {
-      ErrorResponse.notFound('Failed to map chat to response DTO');
+      ErrorResponse.badRequest(BadRequestError.FAILED_TO_MAP_CHAT);
     }
     return chatDto;
   }
@@ -207,7 +212,7 @@ export class ChatService {
     partnerUserId: string,
   ): Promise<{ chat: ChatResponseDto; wasExisting: boolean }> {
     if (!myUserId || !partnerUserId) {
-      ErrorResponse.badRequest('Missing userId');
+      ErrorResponse.badRequest(BadRequestError.MISSING_USER_ID);
     }
 
     const memberUserIds = [myUserId, partnerUserId];
@@ -215,7 +220,7 @@ export class ChatService {
       where: { id: In(memberUserIds) },
     });
     if (userCount !== memberUserIds.length) {
-      ErrorResponse.badRequest('One or more Users do not exist!');
+      ErrorResponse.notFound(NotFoundError.USER_NOT_FOUND);
     }
 
     // Modified query to check for active or soft-deleted chats
@@ -259,7 +264,7 @@ export class ChatService {
       where: { id: chatId },
       select: ['type'],
     });
-    if (!chat) ErrorResponse.notFound('Chat not found');
+    if (!chat) ErrorResponse.notFound(NotFoundError.CHAT_NOT_FOUND);
     return chat.type;
   }
 
@@ -270,11 +275,11 @@ export class ChatService {
     const allUserIds = [userId, ...createDto.userIds];
 
     if (createDto.type === ChatType.GROUP && allUserIds.length < 2) {
-      ErrorResponse.badRequest('Group must have at least 2 members');
+      ErrorResponse.badRequest(BadRequestError.GROUP_NEEDS_2_MEMBERS);
     }
 
     if (!createDto.name) {
-      ErrorResponse.badRequest('Group or Channel must have a name');
+      ErrorResponse.badRequest(BadRequestError.GROUP_OR_CHANNEL_NEEDS_NAME);
     }
 
     // validate user existence
@@ -282,7 +287,7 @@ export class ChatService {
       where: { id: In(allUserIds) },
     });
     if (userCount !== allUserIds.length) {
-      ErrorResponse.badRequest('One or more Users do not exist!');
+      ErrorResponse.notFound(NotFoundError.USER_NOT_FOUND);
     }
 
     // if type is CHANNEL, override avatar with creator's avatar
@@ -293,7 +298,7 @@ export class ChatService {
       });
 
       if (!creator) {
-        ErrorResponse.badRequest('Creator not found!');
+        ErrorResponse.notFound(NotFoundError.CREATOR_NOT_FOUND);
       }
 
       createDto.avatarUrl = creator?.avatarUrl ?? undefined;
@@ -317,7 +322,7 @@ export class ChatService {
 
   async createSavedChat(userId: string): Promise<Chat> {
     const user = await this.userRepo.findOne({ where: { id: userId } });
-    if (!user) ErrorResponse.notFound('User not found');
+    if (!user) ErrorResponse.notFound(NotFoundError.USER_NOT_FOUND);
 
     const savedChat = await this.chatRepo.save({
       type: ChatType.SAVED,
@@ -344,13 +349,13 @@ export class ChatService {
       ],
     });
 
-    if (!savedChat) ErrorResponse.notFound('Saved savedChat not found');
+    if (!savedChat) ErrorResponse.notFound(NotFoundError.CHAT_NOT_FOUND);
     const savedChatDto = await this.chatMapper.mapChatToChatResDto(
       savedChat,
       userId,
     );
     if (!savedChatDto) {
-      ErrorResponse.notFound('Failed to map chat to response DTO');
+      ErrorResponse.badRequest(BadRequestError.FAILED_TO_MAP_CHAT);
     }
     return savedChatDto;
   }
@@ -362,7 +367,7 @@ export class ChatService {
     const existingChat = await this.chatRepo.findOne({
       where: { id: chat.id },
     });
-    if (!existingChat) ErrorResponse.notFound('Chat not found');
+    if (!existingChat) ErrorResponse.notFound(NotFoundError.CHAT_NOT_FOUND);
 
     Object.assign(existingChat, updateDto);
     const updatedChat = await this.chatRepo.save(existingChat);
@@ -375,7 +380,7 @@ export class ChatService {
     });
 
     if (!chat) {
-      ErrorResponse.notFound('Chat not found');
+      ErrorResponse.notFound(NotFoundError.CHAT_NOT_FOUND);
     }
 
     return chat;
@@ -388,7 +393,7 @@ export class ChatService {
   ): Promise<Message> {
     // 1. Check participant
     if (!(await this.isChatParticipant(chatId, userId))) {
-      ErrorResponse.unauthorized('You are not a member of this chat');
+      ErrorResponse.badRequest(BadRequestError.USER_NOT_IN_CHAT);
     }
 
     // 2. Load chat and current pinned message
@@ -396,11 +401,11 @@ export class ChatService {
       where: { id: chatId },
       relations: ['pinnedMessage'],
     });
-    if (!chat) ErrorResponse.notFound('Chat not found');
+    if (!chat) ErrorResponse.notFound(NotFoundError.CHAT_NOT_FOUND);
 
     // 3. Check if already pinned
     if (chat.pinnedMessage?.id === messageId) {
-      ErrorResponse.badRequest('This message is already pinned');
+      ErrorResponse.conflict(ConflictError.MESSAGE_ALREADY_PINNED);
     }
 
     // 4. Load message
@@ -408,7 +413,7 @@ export class ChatService {
       where: { id: messageId },
       relations: ['sender', 'attachments', 'forwardedFromMessage'],
     });
-    if (!message) ErrorResponse.notFound('Message not found');
+    if (!message) ErrorResponse.notFound(NotFoundError.MESSAGE_NOT_FOUND);
 
     // 5. Unpin existing pinned message (if any)
     if (chat.pinnedMessage) {
@@ -448,12 +453,12 @@ export class ChatService {
   async unpinMessage(chatId: string, userId: string): Promise<Message> {
     // 1. Check participant
     if (!(await this.isChatParticipant(chatId, userId))) {
-      ErrorResponse.unauthorized('You are not a member of this chat');
+      ErrorResponse.badRequest(BadRequestError.USER_NOT_IN_CHAT);
     }
 
     // 2. Load chat
     const chat = await this.chatRepo.findOne({ where: { id: chatId } });
-    if (!chat) ErrorResponse.notFound('Chat not found');
+    if (!chat) ErrorResponse.notFound(NotFoundError.CHAT_NOT_FOUND);
 
     // 3. Load currently pinned message
     const message = await this.messageRepo.findOne({
@@ -462,7 +467,7 @@ export class ChatService {
     });
 
     if (!message) {
-      ErrorResponse.notFound('No pinned message found for this chat');
+      ErrorResponse.notFound(NotFoundError.NO_PINNED_MESSAGE);
     }
 
     // 4. Unpin the message
@@ -483,14 +488,13 @@ export class ChatService {
       where: { id: chatId },
       relations: ['members'],
     });
-    if (!chat) ErrorResponse.notFound('Chat not found');
+    if (!chat) ErrorResponse.notFound(NotFoundError.CHAT_NOT_FOUND);
 
     const member = chat.members.find((m) => m.userId === userId);
-    if (!member)
-      ErrorResponse.unauthorized('You are not a member of this chat');
+    if (!member) ErrorResponse.badRequest(BadRequestError.USER_NOT_IN_CHAT);
 
     if (chat.type !== ChatType.DIRECT && member.role !== ChatMemberRole.OWNER) {
-      ErrorResponse.unauthorized('Only owners can delete group chats');
+      ErrorResponse.badRequest(BadRequestError.ONLY_OWNER_CAN_DELETE_CHAT);
     }
 
     await this.chatRepo.delete(chatId);

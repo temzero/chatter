@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next";
 import Button from "../ui/buttons/Button";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
-import logger from "@/common/utils/logger";
 
 interface UnblockUserModalData {
   blockedUser: {
@@ -46,7 +45,7 @@ const UnblockUserModal: React.FC = () => {
         })
       );
     } catch (error) {
-      logger.error("Error unblocking user:", error);
+      console.error("Error unblocking user:", error);
       toast.error(t("modal.unblock_user.error"));
     }
   };

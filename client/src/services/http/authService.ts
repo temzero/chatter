@@ -6,7 +6,6 @@ import {
   LoginRequest,
   RegisterRequest,
 } from "@/shared/types/requests/auth.request";
-import logger from "@/common/utils/logger";
 
 export const authService = {
   async fetchCurrentUser() {
@@ -46,8 +45,8 @@ export const authService = {
     return data;
   },
 
-  async refreshToken(): Promise<string> {
-    logger.log({ prefix: "AUTH" }, "refreshToken");
+  async refreshAccessToken(): Promise<string> {
+    console.log("[AUTH]", "refreshToken");
     const response = await API.post<AuthResponse>("/auth/refresh");
     return response.data.accessToken;
   },

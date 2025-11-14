@@ -13,7 +13,6 @@ import { MessageResponse } from "@/shared/types/responses/message.response";
 import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import SearchBar from "@/components/ui/SearchBar";
-import logger from "@/common/utils/logger";
 
 interface ForwardMessageModalData {
   message?: MessageResponse;
@@ -21,7 +20,7 @@ interface ForwardMessageModalData {
 }
 
 const ForwardMessageModal: React.FC = () => {
-  logger.log({ prefix: "MOUNTED" }, "ForwardMessageModal");
+  console.log("[MOUNTED]", "ForwardMessageModal");
 
   const { t } = useTranslation();
   const closeModal = getCloseModal();
@@ -52,7 +51,7 @@ const ForwardMessageModal: React.FC = () => {
   const handleForward = async (chatId: string) => {
     try {
       if (message) {
-        logger.log("forward Message", message);
+        console.log("forward Message", message);
         const alreadyForwarded = message.forwardedFromMessage;
         const originalMessageId = alreadyForwarded?.id || message.id;
 
@@ -85,7 +84,7 @@ const ForwardMessageModal: React.FC = () => {
 
       closeModal();
     } catch (error) {
-      logger.error("Failed to forward:", error);
+      console.error("Failed to forward:", error);
     }
   };
 

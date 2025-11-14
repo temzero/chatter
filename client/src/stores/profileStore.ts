@@ -4,7 +4,6 @@ import { userService } from "@/services/http/userService";
 import { localStorageService } from "@/services/storage/localStorageService";
 import { useAuthStore } from "./authStore";
 import { ProfileFormData } from "@/components/sidebar/SidebarProfileEdit";
-import logger from "@/common/utils/logger";
 
 interface ProfileState {
   loading: boolean;
@@ -14,6 +13,8 @@ interface ProfileState {
 interface ProfileActions {
   updateProfile: (updatedData: ProfileFormData) => Promise<void>;
   reset: () => void;
+
+  clearProfileStore: () => void;
 }
 
 const initialState: ProfileState = {
@@ -31,7 +32,7 @@ export const useProfileStore = create<ProfileState & ProfileActions>()(
         const updatedUser = await userService.updateProfile(updatedData);
 
         if (process.env.NODE_ENV === "development") {
-          logger.log("updated User: ", updatedUser);
+          console.log("updated User: ", updatedUser);
         }
 
         // Optimized: Get and update auth store in one operation
@@ -50,6 +51,10 @@ export const useProfileStore = create<ProfileState & ProfileActions>()(
       reset: () => {
         localStorageService.clearAuth();
         set(initialState);
+      },
+
+      clearProfileStore: () => {
+        set({ ...initialState });
       },
     }),
     {

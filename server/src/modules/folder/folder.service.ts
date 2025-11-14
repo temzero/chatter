@@ -8,6 +8,7 @@ import { FolderResponseDto } from './dto/folder-response.dto';
 import { ErrorResponse } from 'src/common/api-response/errors';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
+import { NotFoundError } from 'src/shared/types/enums/error-message.enum';
 
 @Injectable()
 export class FolderService {
@@ -60,7 +61,7 @@ export class FolderService {
       where: { id, user: { id: userId } },
     });
     if (!folder) {
-      ErrorResponse.notFound('Folder not found');
+      ErrorResponse.notFound(NotFoundError.FOLDER_NOT_FOUND);
     }
 
     return this.toDto(folder);
@@ -75,7 +76,7 @@ export class FolderService {
     });
 
     if (!user) {
-      ErrorResponse.notFound('User not found');
+      ErrorResponse.notFound(NotFoundError.USER_NOT_FOUND);
     }
 
     // Use correct column name: user_id (not userId)
@@ -111,7 +112,7 @@ export class FolderService {
       where: { id, user: { id: userId } },
     });
     if (!folder) {
-      ErrorResponse.notFound('Folder not found');
+      ErrorResponse.notFound(NotFoundError.FOLDER_NOT_FOUND);
     }
 
     Object.assign(folder, data);
@@ -130,7 +131,7 @@ export class FolderService {
     });
 
     if (folders.length !== newOrder.length) {
-      ErrorResponse.notFound('Some folders not found');
+      ErrorResponse.notFound(NotFoundError.FOLDER_NOT_FOUND);
     }
 
     // Update positions
@@ -151,7 +152,7 @@ export class FolderService {
       where: { id, user: { id: userId } },
     });
     if (!folder) {
-      ErrorResponse.notFound('Folder not found');
+      ErrorResponse.notFound(NotFoundError.FOLDER_NOT_FOUND);
     }
     await this.folderRepository.remove(folder);
   }
@@ -165,7 +166,7 @@ export class FolderService {
       where: { id: folderId, user: { id: userId } },
     });
     if (!folder) {
-      ErrorResponse.notFound('Folder not found');
+      ErrorResponse.notFound(NotFoundError.FOLDER_NOT_FOUND);
     }
 
     // Filter out duplicates and null/undefined values
@@ -191,7 +192,7 @@ export class FolderService {
       where: { id: folderId, user: { id: userId } },
     });
     if (!folder) {
-      ErrorResponse.notFound('Folder not found');
+      ErrorResponse.notFound(NotFoundError.FOLDER_NOT_FOUND);
     }
 
     folder.chatIds = (folder.chatIds || []).filter((id) => id !== chatId);

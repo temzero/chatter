@@ -8,6 +8,10 @@ import { ErrorResponse } from '../../common/api-response/errors';
 import { FriendRequestResponseDto } from './dto/responses/friend-request-response.dto';
 import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import {
+  ConflictError,
+  NotFoundError,
+} from 'src/shared/types/enums/error-message.enum';
 
 @Injectable()
 export class FriendshipService {
@@ -50,7 +54,7 @@ export class FriendshipService {
           friendship.receiverStatus === FriendshipStatus.ACCEPTED;
 
         if (bothAccepted) {
-          ErrorResponse.unauthorized('You are already friends with this user');
+          ErrorResponse.conflict(ConflictError.ALREADY_FRIENDS);
         }
 
         if (isSentByCurrentUser) {
@@ -58,20 +62,16 @@ export class FriendshipService {
             friendship.receiverStatus === FriendshipStatus.PENDING ||
             friendship.receiverStatus === FriendshipStatus.DECLINED
           ) {
-            ErrorResponse.unauthorized(
-              'You already sent a friend request to this user',
-            );
+            ErrorResponse.conflict(ConflictError.ALREADY_SENT_FRIEND_REQUEST);
           }
         }
 
         if (isSentByOtherUser) {
           if (friendship.senderStatus === FriendshipStatus.PENDING) {
-            ErrorResponse.unauthorized(
-              'You already sent a friend request to this user',
-            );
+            ErrorResponse.conflict(ConflictError.ALREADY_SENT_FRIEND_REQUEST);
           } else if (friendship.receiverStatus === FriendshipStatus.PENDING) {
-            ErrorResponse.unauthorized(
-              'You already received a friend request from this user',
+            ErrorResponse.conflict(
+              ConflictError.ALREADY_RECEIVED_FRIEND_REQUEST,
             );
           }
         }
@@ -127,7 +127,7 @@ export class FriendshipService {
       });
 
       if (!request) {
-        ErrorResponse.notFound('Friend request not found');
+        ErrorResponse.notFound(NotFoundError.FRIEND_REQUEST_NOT_FOUND);
       }
 
       if (status === FriendshipStatus.ACCEPTED) {
@@ -406,7 +406,7 @@ export class FriendshipService {
       });
 
       if (!friendship) {
-        ErrorResponse.unauthorized('Friend request not found');
+        ErrorResponse.notFound(NotFoundError.FRIEND_REQUEST_NOT_FOUND);
       }
 
       // Verify authorization
@@ -414,7 +414,7 @@ export class FriendshipService {
         friendship.senderId !== currentUserId &&
         friendship.receiverId !== currentUserId
       ) {
-        ErrorResponse.unauthorized('Not authorized to cancel this request');
+        ErrorResponse.forbidden();
       }
 
       // Allow cancellation if EITHER side is pending
@@ -445,7 +445,7 @@ export class FriendshipService {
       });
 
       if (!friendships || friendships.length === 0) {
-        ErrorResponse.notFound('Friendship not found');
+        ErrorResponse.notFound(NotFoundError.FRIENDSHIP_NOT_FOUND);
       }
 
       // We'll return the first deleted friendship (for consistency with deleteFriendship)

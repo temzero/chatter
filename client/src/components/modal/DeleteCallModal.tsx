@@ -10,7 +10,6 @@ import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { getCallStatusText } from "@/common/utils/call/callTextHelpers";
 import CallIcon from "@/components/ui/icons/CallIcon";
 import Button from "../ui/buttons/Button";
-import logger from "@/common/utils/logger";
 
 interface DeleteCallModalData {
   call: CallResponse;
@@ -31,7 +30,7 @@ const DeleteCallModal: React.FC = () => {
       data.onDeleted?.();
       closeModal();
     } catch (err) {
-      logger.error("Failed to delete call:", err);
+      console.error("Failed to delete call:", err);
       alert(t("modal.delete_call.descripfailed"));
     }
   }, [data, closeModal, t]);

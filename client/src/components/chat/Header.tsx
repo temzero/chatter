@@ -21,7 +21,6 @@ import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
 import MessageSearchBar from "@/components/ui/messages/MessageSearchBar";
 import PinnedMessage from "./components/message/preview/PinnedMessage";
-import logger from "@/common/utils/logger";
 import { useTranslation } from "react-i18next";
 interface ChatHeaderProps {
   chat: ChatResponse;
@@ -34,7 +33,7 @@ const Header: React.FC<ChatHeaderProps> = ({
   isBlocked = false,
   isBlockedByMe = false,
 }) => {
-  logger.log({ prefix: "MOUNTED" }, "Header");
+  console.log("[MOUNTED]", "Header");
 
   const { t } = useTranslation();
   const isMobile = useIsMobile();

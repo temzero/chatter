@@ -1,6 +1,5 @@
 import { audioService, SoundType } from "@/services/audio.service";
 import { toast } from "react-toastify";
-import logger from "./logger";
 
 export function handleError(error: unknown, defaultMessage: string): never {
   audioService.stopAllSounds();
@@ -28,7 +27,7 @@ export function handleError(error: unknown, defaultMessage: string): never {
   }
 
   toast.error(message);
-  logger.error(error);
+  console.error(error);
 
   throw error; // ensures TypeScript knows this never returns
 }

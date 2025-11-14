@@ -8,6 +8,10 @@ import { CreateBlockDto } from './dto/create-block.dto';
 import { BlockResponseDto } from './dto/block-response.dto';
 import { plainToInstance } from 'class-transformer';
 import { ErrorResponse } from '../../common/api-response/errors';
+import {
+  BadRequestError,
+  NotFoundError,
+} from 'src/shared/types/enums/error-message.enum';
 
 @Injectable()
 export class BlockService {
@@ -24,14 +28,14 @@ export class BlockService {
   ): Promise<BlockResponseDto> {
     // 1. Validate
     if (blockerId === createBlockDto.blockedId) {
-      ErrorResponse.badRequest('Cannot block yourself');
+      ErrorResponse.badRequest(BadRequestError.CANNOT_BLOCK_SELF);
     }
 
     const blockedUser = await this.userRepo.findOneBy({
       id: createBlockDto.blockedId,
     });
     if (!blockedUser) {
-      ErrorResponse.notFound('User not found');
+      ErrorResponse.notFound(NotFoundError.USER_NOT_FOUND);
     }
 
     // 2. Check existing block
@@ -40,7 +44,7 @@ export class BlockService {
       blockedId: createBlockDto.blockedId,
     });
     if (exists) {
-      ErrorResponse.badRequest('User already blocked');
+      ErrorResponse.badRequest(BadRequestError.USER_ALREADY_BLOCKED);
     }
 
     // 3. Create block
@@ -59,7 +63,7 @@ export class BlockService {
   ): Promise<BlockResponseDto> {
     const block = await this.blockRepo.findOneBy({ blockerId, blockedId });
     if (!block) {
-      ErrorResponse.notFound('Block relationship not found');
+      ErrorResponse.notFound(NotFoundError.BLOCK_NOT_FOUND);
     }
 
     await this.blockRepo.delete({ blockerId, blockedId });
@@ -97,7 +101,7 @@ export class BlockService {
       relations: ['blocked'],
     });
     if (!block) {
-      ErrorResponse.notFound('Block not found');
+      ErrorResponse.notFound(NotFoundError.BLOCK_NOT_FOUND);
     }
     return plainToInstance(BlockResponseDto, block);
   }

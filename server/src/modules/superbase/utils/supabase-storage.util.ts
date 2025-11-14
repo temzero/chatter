@@ -1,4 +1,5 @@
 import { ErrorResponse } from 'src/common/api-response/errors';
+import { BadRequestError } from 'src/shared/types/enums/error-message.enum';
 
 // src/utils/supabase-storage.util.ts
 export interface ParsedStorageUrl {
@@ -12,7 +13,7 @@ export function parseSupabaseStorageUrl(url: string): ParsedStorageUrl {
     const pathParts = urlObj.pathname.split('/storage/v1/object/public/');
 
     if (pathParts.length !== 2) {
-      ErrorResponse.unauthorized(`Invalid Supabase storage URL format`);
+      ErrorResponse.badRequest(BadRequestError.INVALID_STORAGE_URL);
     }
 
     // Get everything after '/storage/v1/object/public/'
@@ -21,16 +22,14 @@ export function parseSupabaseStorageUrl(url: string): ParsedStorageUrl {
     // Split into bucket and remaining path
     const firstSlash = fullPath.indexOf('/');
     if (firstSlash === -1) {
-      ErrorResponse.unauthorized(`URL missing file path after bucket`);
+      ErrorResponse.badRequest(BadRequestError.INVALID_STORAGE_URL);
     }
 
     const bucket = fullPath.substring(0, firstSlash);
     const filePath = fullPath.substring(firstSlash + 1);
 
     if (!bucket || !filePath) {
-      ErrorResponse.unauthorized(
-        `Could not extract bucket or file path from URL`,
-      );
+      ErrorResponse.badRequest(BadRequestError.INVALID_STORAGE_URL);
     }
 
     return { bucket, filePath };

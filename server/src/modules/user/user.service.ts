@@ -14,6 +14,10 @@ import { FriendshipService } from '../friendship/friendship.service';
 import { ChatService } from '../chat/chat.service';
 import { BlockService } from '../block/block.service';
 import { PasswordMessageCode } from 'src/shared/types/enums/message-code.enum';
+import {
+  ConflictError,
+  NotFoundError,
+} from 'src/shared/types/enums/error-message.enum';
 
 @Injectable()
 export class UserService {
@@ -60,7 +64,7 @@ export class UserService {
     });
 
     if (!user) {
-      ErrorResponse.notFound('User not found');
+      ErrorResponse.notFound(NotFoundError.USER_NOT_FOUND);
     }
 
     let friendshipStatus: FriendshipStatus | null = null;
@@ -89,7 +93,7 @@ export class UserService {
     try {
       const user = await this.userRepo.findOneBy({ id });
       if (!user) {
-        ErrorResponse.notFound('User not found');
+        ErrorResponse.notFound(NotFoundError.USER_NOT_FOUND);
       }
       return user;
     } catch (error) {
@@ -121,7 +125,7 @@ export class UserService {
     try {
       const existingUser = await this.getUserByIdentifier(registerDto.email);
       if (existingUser) {
-        ErrorResponse.conflict('Email or username already taken');
+        ErrorResponse.conflict(ConflictError.EMAIL_ALREADY_EXISTS);
       }
       // 1. Create and save the user
       const user = this.userRepo.create({
@@ -245,7 +249,7 @@ export class UserService {
       // Check if username is available
       const available = await this.isUsernameAvailable(username);
       if (!available) {
-        ErrorResponse.conflict('Username is already taken');
+        ErrorResponse.conflict(ConflictError.USERNAME_TAKEN);
       }
       // Update the username
       const user = await this.getUserById(userId);
@@ -264,7 +268,7 @@ export class UserService {
       });
 
       if (existingUser && existingUser.id !== userId) {
-        ErrorResponse.conflict('Email is already in use by another account');
+        ErrorResponse.conflict(ConflictError.EMAIL_ALREADY_EXISTS);
       }
 
       // Get the current user

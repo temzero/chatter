@@ -9,7 +9,7 @@ import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { CreateMessageRequest } from "@/shared/types/requests/send-message.request";
 import { AttachmentUploadRequest } from "@/shared/types/requests/attachment-upload.request";
 import { deleteFilesFromSupabase } from "@/common/utils/supabase/deleteFileFromSupabase";
-import logger from "../logger";
+import { getCurrentUserId } from "@/stores/authStore";
 
 function toOptimisticAttachmentResponseFromFile(
   file: File,
@@ -39,7 +39,6 @@ function toOptimisticAttachmentResponseFromFile(
 
 export async function handleSendMessage({
   chatId,
-  myUserId,
   myMemberId,
   inputRef,
   attachments,
@@ -49,7 +48,6 @@ export async function handleSendMessage({
   onError,
 }: {
   chatId: string;
-  myUserId?: string;
   myMemberId: string;
   inputRef: React.RefObject<HTMLTextAreaElement>;
   attachments: File[];
@@ -58,9 +56,10 @@ export async function handleSendMessage({
   onSuccess?: () => void;
   onError?: (error: unknown) => void;
 }) {
-  
-  if (!myUserId || !chatId || !myMemberId) {
-    logger.error("Unable to send message — user not authenticated.");
+  const currentUserId = getCurrentUserId();
+
+  if (!currentUserId || !chatId || !myMemberId) {
+    console.error("Unable to send message — user not authenticated.");
     return;
   }
 
@@ -91,7 +90,7 @@ export async function handleSendMessage({
     id: messageId,
     chatId,
     sender: {
-      id: myUserId,
+      id: currentUserId,
       displayName: "Me",
       avatarUrl: "",
     },

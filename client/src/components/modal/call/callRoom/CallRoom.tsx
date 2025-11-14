@@ -12,7 +12,6 @@ import { UserCamera } from "@/components/ui/media/UserCamera";
 import { Timer } from "@/components/ui/Timer";
 import Button from "@/components/ui/buttons/Button";
 import CallHeader from "@/components/modal/call/components/CallHeader";
-import logger from "@/common/utils/logger";
 
 const CallRoom = ({
   chat,
@@ -56,7 +55,7 @@ const CallRoom = ({
   }, [room]);
 
   if (!room) {
-    logger.warn("LiveKit room is not available");
+    console.warn("LiveKit room is not available");
     return null;
   }
 

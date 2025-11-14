@@ -3,7 +3,6 @@ import { useEffect, useRef, useMemo } from "react";
 import { RemoteTrack } from "livekit-client";
 import { VoiceVisualizerBar } from "@/components/ui/streams/VoiceVisualizerBar";
 import { VoiceVisualizerBorder } from "@/components/ui/streams/VoiceVisualizerBorder"; // import the border visualizer
-import logger from "@/common/utils/logger";
 
 type VoiceStreamProps = {
   stream?: MediaStream | RemoteTrack | null;
@@ -61,7 +60,7 @@ export const VoiceStreamWithVisualizer = ({
     audioEl
       .play()
       .catch((err) =>
-        logger.warn("Audio play failed (needs user interaction):", err)
+        console.warn("Audio play failed (needs user interaction):", err)
       );
 
     return () => {

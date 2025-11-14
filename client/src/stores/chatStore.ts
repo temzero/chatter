@@ -21,7 +21,6 @@ import { useShallow } from "zustand/shallow";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import logger from "@/common/utils/logger";
 
 interface ChatStoreState {
   activeChatId: string | null;
@@ -73,13 +72,13 @@ interface ChatStoreActions {
   setPinnedMessage: (chatId: string, message: MessageResponse | null) => void;
   generateInviteLink: (chatId: string) => Promise<string>;
   refreshInviteLink: (chatId: string, token: string) => Promise<string>;
-  leaveChat: (chatId: string) => Promise<boolean>;
-  deleteChat: (id: string) => Promise<void>;
-  cleanupChat: (chatId: string) => void;
-  clearChats: () => void;
-
   addToGroupPreviewMembers: (chatId: string, member: ChatMemberLite) => void;
   removeFromGroupPreviewMembers: (chatId: string, userId: string) => void;
+  leaveChat: (chatId: string) => Promise<boolean>;
+  deleteChat: (id: string) => Promise<void>;
+
+  cleanupChat: (chatId: string) => void;
+  clearChatStore: () => void;
 }
 
 const initialState: ChatStoreState = {
@@ -196,7 +195,7 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
     },
 
     fetchMoreChats: async (limit): Promise<number> => {
-      logger.log({ prefix: "FETCH" }, "more chats", limit);
+      console.log("[FETCH]", "more chats", limit);
       const { chats, chatIds, hasMoreChats, isLoading } = get();
       if (isLoading || !hasMoreChats) return 0;
 
@@ -396,7 +395,7 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
         }));
         return newChat;
       } catch (error) {
-        logger.error("Failed to create group chat:", error);
+        console.error("Failed to create group chat:", error);
         set({ error: "Failed to create chat" });
         handleError(error, "Failed to create group chat");
       } finally {
@@ -503,6 +502,35 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
       return newInviteLink;
     },
 
+    leaveChat: async (chatId) => {
+      set({ isLoading: true });
+      const currentUserId = getCurrentUserId();
+      if (!currentUserId) throw new Error("User not authenticated");
+
+      const { chatDeleted } = await chatMemberService.DeleteMember(
+        chatId,
+        currentUserId
+      );
+      get().cleanupChat(chatId);
+      window.history.pushState({}, "", "/");
+
+      set({ isLoading: false });
+
+      if (chatDeleted) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+
+    deleteChat: async (id) => {
+      set({ isLoading: true });
+      await chatService.deleteChat(id);
+      get().cleanupChat(id);
+      window.history.pushState({}, "", "/");
+      set({ isLoading: false });
+    },
+
     addToGroupPreviewMembers: (chatId: string, member: ChatMemberLite) => {
       const chat = get().chats[chatId];
       if (!chat || chat.type === ChatType.DIRECT || chat.avatarUrl) return;
@@ -541,39 +569,6 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
       });
     },
 
-    leaveChat: async (chatId) => {
-      set({ isLoading: true });
-      const currentUserId = getCurrentUserId();
-      if (!currentUserId) throw new Error("User not authenticated");
-
-      const { chatDeleted } = await chatMemberService.DeleteMember(
-        chatId,
-        currentUserId
-      );
-      get().cleanupChat(chatId);
-      window.history.pushState({}, "", "/");
-
-      set({ isLoading: false });
-
-      if (chatDeleted) {
-        return true;
-      } else {
-        return false;
-      }
-    },
-
-    deleteChat: async (id) => {
-      set({ isLoading: true });
-      await chatService.deleteChat(id);
-      get().cleanupChat(id);
-      window.history.pushState({}, "", "/");
-      set({ isLoading: false });
-    },
-
-    clearChats: () => {
-      set({ chats: {}, chatIds: [], activeChatId: null });
-    },
-
     cleanupChat: (chatId: string) => {
       useMessageStore.getState().clearChatMessages(chatId);
       useChatMemberStore.getState().clearChatMembers(chatId);
@@ -587,6 +582,10 @@ export const useChatStore = create<ChatStoreState & ChatStoreActions>()(
             state.activeChatId === chatId ? null : state.activeChatId,
         };
       });
+    },
+
+    clearChatStore: () => {
+      set({ ...initialState });
     },
   })
   //   {
@@ -657,12 +656,12 @@ export const useSetActiveSavedChat = () => {
     let savedChat = state.savedChat;
 
     if (!savedChat) {
-      logger.warn("Saved chat not found, fetching from server...");
+      console.warn("Saved chat not found, fetching from server...");
       try {
         const fetchedSavedChat = await chatService.fetchSavedChat();
 
         if (!fetchedSavedChat) {
-          logger.error("Saved chat does not exist in the database!");
+          console.error("Saved chat does not exist in the database!");
           return;
         }
         useChatStore.setState({ savedChat: fetchedSavedChat });

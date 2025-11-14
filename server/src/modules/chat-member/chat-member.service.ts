@@ -13,6 +13,10 @@ import { ChatType } from 'src/shared/types/enums/chat-type.enum';
 import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
 import { ChatMemberStatus } from 'src/shared/types/enums/chat-member-status.enum';
 import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
+import {
+  BadRequestError,
+  NotFoundError,
+} from 'src/shared/types/enums/error-message.enum';
 
 export const MAX_PINNED = 99;
 
@@ -35,7 +39,7 @@ export class ChatMemberService {
       });
 
       if (!member) {
-        ErrorResponse.notFound('Chat member not found');
+        ErrorResponse.notFound(NotFoundError.MEMBER_NOT_FOUND);
       }
 
       return member;
@@ -63,9 +67,7 @@ export class ChatMemberService {
       });
 
       if (!member) {
-        ErrorResponse.notFound(
-          `Chat member not found for userId=${userId} in chatId=${chatId}`,
-        );
+        ErrorResponse.notFound(NotFoundError.MEMBER_NOT_FOUND);
       }
 
       return member.id;
@@ -107,7 +109,7 @@ export class ChatMemberService {
       select: ['id', 'type'], // Only select what we need
     });
     if (!chat) {
-      ErrorResponse.notFound('Chat not found');
+      ErrorResponse.notFound(NotFoundError.CHAT_NOT_FOUND);
     }
     const chatType: ChatType = chat.type;
 
@@ -221,7 +223,7 @@ export class ChatMemberService {
       });
 
       if (!member) {
-        ErrorResponse.notFound('Chat member not found!');
+        ErrorResponse.notFound(NotFoundError.MEMBER_NOT_FOUND);
       }
 
       return member;
@@ -238,7 +240,7 @@ export class ChatMemberService {
       });
 
       if (!member) {
-        ErrorResponse.notFound('Chat member not found');
+        ErrorResponse.notFound(NotFoundError.MEMBER_NOT_FOUND);
       }
 
       return member.id;
@@ -258,9 +260,7 @@ export class ChatMemberService {
       });
 
       if (!members || members.length === 0) {
-        ErrorResponse.notFound(
-          'No members found for this chat or chat does not exist!',
-        );
+        ErrorResponse.notFound(NotFoundError.MEMBER_NOT_FOUND);
       }
 
       return members;
@@ -277,9 +277,7 @@ export class ChatMemberService {
       });
 
       if (!members || members.length === 0) {
-        ErrorResponse.notFound(
-          'No members found for this chat or chat does not exist!',
-        );
+        ErrorResponse.notFound(NotFoundError.MEMBER_NOT_FOUND);
       }
 
       return members.map((member) => member.userId);
@@ -298,9 +296,7 @@ export class ChatMemberService {
       });
 
       if (!members || members.length === 0) {
-        ErrorResponse.notFound(
-          'No members found for this chat or chat does not exist!',
-        );
+        ErrorResponse.notFound(NotFoundError.MEMBER_NOT_FOUND);
       }
 
       return members.map((member) => ({
@@ -320,7 +316,7 @@ export class ChatMemberService {
   async addMembers(chatId: string, userIds: string[]): Promise<ChatMember[]> {
     const chat = await this.chatRepo.findOne({ where: { id: chatId } });
     if (!chat) {
-      ErrorResponse.notFound('Chat does not exist');
+      ErrorResponse.notFound(NotFoundError.CHAT_NOT_FOUND);
     }
 
     const users = await this.userRepo.find({
@@ -328,7 +324,7 @@ export class ChatMemberService {
     });
 
     if (users.length !== userIds.length) {
-      ErrorResponse.notFound('One or more users do not exist');
+      ErrorResponse.badRequest(BadRequestError.ONE_OR_MORE_USER_NOT_FOUND);
     }
 
     const existingMembers = await this.memberRepo.find({
@@ -388,7 +384,7 @@ export class ChatMemberService {
       const result = await this.memberRepo.update({ id: memberId }, updateDto);
 
       if (result.affected === 0) {
-        ErrorResponse.notFound('Chat member not found');
+        ErrorResponse.notFound(NotFoundError.MEMBER_NOT_FOUND);
       }
 
       const member = await this.memberRepo.findOne({
@@ -397,7 +393,7 @@ export class ChatMemberService {
       });
 
       if (!member) {
-        ErrorResponse.notFound('Chat member not found');
+        ErrorResponse.notFound(NotFoundError.MEMBER_NOT_FOUND);
       }
 
       return member;
@@ -431,7 +427,7 @@ export class ChatMemberService {
   }> {
     try {
       if (nickname && nickname.length > 32) {
-        ErrorResponse.badRequest('Nickname must be 32 characters or less');
+        ErrorResponse.badRequest(BadRequestError.NICKNAME_TOO_LONG);
       }
 
       const member = await this.memberRepo.findOne({
@@ -441,7 +437,7 @@ export class ChatMemberService {
       });
 
       if (!member) {
-        ErrorResponse.notFound('Chat member not found');
+        ErrorResponse.notFound(NotFoundError.MEMBER_NOT_FOUND);
       }
 
       const result = await this.memberRepo.update(
@@ -450,7 +446,7 @@ export class ChatMemberService {
       );
 
       if (result.affected === 0) {
-        ErrorResponse.notFound('Failed to update nickname');
+        ErrorResponse.badRequest(BadRequestError.FAILED_TO_UPDATE_NICKNAME);
       }
 
       return {
@@ -477,7 +473,7 @@ export class ChatMemberService {
       });
 
       if (!member) {
-        ErrorResponse.notFound('Chat member not found');
+        ErrorResponse.notFound(NotFoundError.MEMBER_NOT_FOUND);
       }
 
       // Soft delete by setting deletedAt
@@ -511,7 +507,7 @@ export class ChatMemberService {
       const result = await this.memberRepo.restore({ chatId, userId });
 
       if (result.affected === 0) {
-        ErrorResponse.notFound('Chat member not found or already active');
+        ErrorResponse.notFound(NotFoundError.MEMBER_NOT_FOUND);
       }
 
       return await this.memberRepo.findOne({ where: { chatId, userId } });
@@ -532,7 +528,7 @@ export class ChatMemberService {
       });
 
       if (!member) {
-        ErrorResponse.notFound('Member not found');
+        ErrorResponse.notFound(NotFoundError.MEMBER_NOT_FOUND);
       }
 
       // Delete the member
@@ -575,9 +571,7 @@ export class ChatMemberService {
 
       // Throw error if limit exceeded
       if (pinnedCount >= MAX_PINNED) {
-        ErrorResponse.badRequest(
-          'You can only pin up to 20 chats. Please unpin another chat first.',
-        );
+        ErrorResponse.badRequest(BadRequestError.MAX_PINNED_CHATS);
       }
 
       member.pinnedAt = new Date();

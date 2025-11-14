@@ -23,6 +23,11 @@ import { PaginationResponse } from 'src/shared/types/responses/pagination.respon
 import { AttachmentService } from '../attachment/attachment.service';
 import { Attachment } from '../attachment/entity/attachment.entity';
 import { ChatMemberService } from '../chat-member/chat-member.service';
+import {
+  BadRequestError,
+  ForbiddenError,
+  NotFoundError,
+} from 'src/shared/types/enums/error-message.enum';
 
 type MessageWithSenderMember = Message & {
   senderMember?: ChatMember;
@@ -56,21 +61,21 @@ export class MessageService {
     dto: CreateMessageDto & { call?: Call },
   ): Promise<Message> {
     if (dto.replyToMessageId) {
-      ErrorResponse.badRequest('Use createReplyMessage for replying');
+      ErrorResponse.badRequest(BadRequestError.USE_CREATE_REPLY_MESSAGE);
     }
 
     const chat = await this.chatRepo.findOne({
       where: { id: dto.chatId },
       relations: ['members'],
     });
-    if (!chat) ErrorResponse.notFound('Chat not found');
+    if (!chat) ErrorResponse.notFound(NotFoundError.CHAT_NOT_FOUND);
 
     await this.ensureNoBlockingInDirectChat(senderId, chat);
 
     const isMember = await this.chatMemberRepo.exists({
       where: { chatId: dto.chatId, userId: senderId },
     });
-    if (!isMember) ErrorResponse.notFound('You are not a member of this chat');
+    if (!isMember) ErrorResponse.notFound(NotFoundError.MEMBER_NOT_FOUND);
 
     // ✅ Handle attachments first
     let attachments: Attachment[] = [];
@@ -107,34 +112,35 @@ export class MessageService {
     dto: CreateMessageDto,
   ): Promise<Message> {
     if (!dto.replyToMessageId) {
-      ErrorResponse.badRequest('Missing replyToMessageId');
+      ErrorResponse.badRequest(BadRequestError.MISSING_REPLY_TO_MESSAGE_ID);
     }
 
     const chat = await this.chatRepo.findOne({
       where: { id: dto.chatId },
       relations: ['members'],
     });
-    if (!chat) ErrorResponse.notFound('Chat not found');
+    if (!chat) ErrorResponse.notFound(NotFoundError.CHAT_NOT_FOUND);
 
     await this.ensureNoBlockingInDirectChat(senderId, chat);
 
     const isMember = await this.chatMemberRepo.exists({
       where: { chatId: dto.chatId, userId: senderId },
     });
-    if (!isMember) ErrorResponse.notFound('You are not a member of this chat');
+    if (!isMember) ErrorResponse.notFound(NotFoundError.MEMBER_NOT_FOUND);
 
     const replyToMessage = await this.messageRepo.findOne({
       where: { id: dto.replyToMessageId },
     });
-    if (!replyToMessage) ErrorResponse.notFound('Replied message not found');
+    if (!replyToMessage)
+      ErrorResponse.notFound(NotFoundError.MESSAGE_NOT_FOUND);
     if (replyToMessage.chatId !== dto.chatId) {
-      ErrorResponse.badRequest('Replied message is from another chat');
+      ErrorResponse.forbidden(ForbiddenError.REPLIED_MESSAGE_OTHER_CHAT);
     }
     if (replyToMessage.isDeleted) {
-      ErrorResponse.badRequest('Cannot reply to a deleted message');
+      ErrorResponse.forbidden(ForbiddenError.CANNOT_REPLY_TO_DELETED);
     }
     if (replyToMessage.replyToMessageId) {
-      ErrorResponse.badRequest('Cannot reply to a reply');
+      ErrorResponse.forbidden(ForbiddenError.CANNOT_REPLY_TO_REPLY);
     }
 
     let attachments: Attachment[] = [];
@@ -178,7 +184,7 @@ export class MessageService {
   ): Promise<Message> {
     const messageToForward = await this.getFullMessageById(messageId);
     if (!messageToForward) {
-      ErrorResponse.badRequest(`Message ${messageId} not found`);
+      ErrorResponse.notFound(NotFoundError.MESSAGE_NOT_FOUND);
     }
 
     const originalMessage =
@@ -189,12 +195,12 @@ export class MessageService {
       relations: ['members'],
     });
     if (!chat) {
-      ErrorResponse.notFound('Chat not found');
+      ErrorResponse.notFound(NotFoundError.CHAT_NOT_FOUND);
     }
 
     const myMember = chat.members.find((m) => m.userId === senderId);
     if (!myMember) {
-      ErrorResponse.unauthorized('You are not a member of this Chat');
+      ErrorResponse.notFound(NotFoundError.MEMBER_NOT_FOUND);
     }
 
     this.ensureCanForwardInChannel(chat, myMember);
@@ -276,7 +282,7 @@ export class MessageService {
       });
 
       if (!message) {
-        ErrorResponse.notFound('Message not found');
+        ErrorResponse.notFound(NotFoundError.MESSAGE_NOT_FOUND);
       }
 
       return message;
@@ -582,9 +588,7 @@ export class MessageService {
       const message = await this.getMessageById(messageId);
 
       if (message.senderId !== userId) {
-        ErrorResponse.unauthorized(
-          'You do not have permission to soft delete this message',
-        );
+        ErrorResponse.forbidden(ForbiddenError.ACTION_NOT_ALLOWED);
       }
 
       if (message.isDeleted) return message;
@@ -620,9 +624,7 @@ export class MessageService {
       const message = await this.getFullMessageById(messageId);
 
       if (message.senderId !== userId) {
-        ErrorResponse.unauthorized(
-          'You do not have permission to delete this message',
-        );
+        ErrorResponse.forbidden(ForbiddenError.ACTION_NOT_ALLOWED);
       }
 
       // ✅ Single call to handle all attachment deletion + file cleanup
@@ -858,14 +860,12 @@ export class MessageService {
 
     switch (member.role) {
       case ChatMemberRole.GUEST:
-        ErrorResponse.unauthorized(
-          'Guests cannot forward messages in this channel',
-        );
+        ErrorResponse.forbidden(ForbiddenError.USER_CANNOT_FORWARD_IN_CHANNEL);
         break;
       case ChatMemberRole.MEMBER:
         if (chat.is_broadcast_only) {
-          ErrorResponse.unauthorized(
-            'Members cannot forward messages in broadcast-only channels',
+          ErrorResponse.forbidden(
+            ForbiddenError.USER_CANNOT_FORWARD_IN_CHANNEL,
           );
         }
         break;
@@ -874,9 +874,7 @@ export class MessageService {
         // ✅ Allowed
         break;
       default:
-        ErrorResponse.unauthorized(
-          'You do not have permission to forward messages in this channel',
-        );
+        ErrorResponse.forbidden(ForbiddenError.USER_CANNOT_FORWARD_IN_CHANNEL);
     }
   }
 }

@@ -8,7 +8,6 @@ import { useShallow } from "zustand/shallow";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { getCurrentUserId } from "./authStore";
 import { PaginationQuery } from "@/shared/types/queries/pagination-query";
-import logger from "@/common/utils/logger";
 
 interface ChatMemberState {
   chatMembers: Record<string, ChatMemberResponse[]>; // chatId -> members
@@ -77,6 +76,8 @@ interface ChatMemberActions {
   removeChatMember: (chatId: string, userId: string) => void;
   clearChatMember: (chatId: string, userId: string) => void;
   clearChatMembers: (chatId: string) => void;
+
+  clearChatMemberStore: () => void;
 }
 
 const initialState: ChatMemberState = {
@@ -177,7 +178,7 @@ export const useChatMemberStore = create<ChatMemberState & ChatMemberActions>(
         try {
           return await chatMemberService.fetchMemberById(memberId);
         } catch (error) {
-          logger.error("Failed to fetch member:", error);
+          console.error("Failed to fetch member:", error);
           return undefined;
         }
       }
@@ -216,7 +217,7 @@ export const useChatMemberStore = create<ChatMemberState & ChatMemberActions>(
 
           member = fetchedMember;
         } catch (error) {
-          logger.error("Failed to fetch member:", error);
+          console.error("Failed to fetch member:", error);
           return undefined;
         }
       }
@@ -439,6 +440,10 @@ export const useChatMemberStore = create<ChatMemberState & ChatMemberActions>(
           hasMoreMembers: newHasMore,
         };
       });
+    },
+
+    clearChatMemberStore: () => {
+      set({ ...initialState });
     },
   })
 );

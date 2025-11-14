@@ -1,4 +1,3 @@
-import logger from "@/common/utils/logger";
 import React, { useState, useCallback, forwardRef, useRef } from "react";
 
 interface InfiniteScrollerProps {
@@ -45,7 +44,7 @@ const InfiniteScroller = forwardRef<HTMLDivElement, InfiniteScrollerProps>(
           try {
             await onLoadMore(); // call the passed store function
           } catch (error) {
-            logger.error("Error loading more items:", error);
+            console.error("Error loading more items:", error);
             // optionally: handleError(error, "Failed to load more items");
           } finally {
             isFetchingRef.current = false;

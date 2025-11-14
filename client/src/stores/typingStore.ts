@@ -9,6 +9,8 @@ interface TypingStoreActions {
   startTyping: (chatId: string, userId: string) => void;
   stopTyping: (chatId: string, userId: string) => void;
   isTyping: (chatId: string, userId: string) => boolean;
+
+  clearTypingStore: () => void;
 }
 
 const initialState: TypingStoreState = {
@@ -53,6 +55,10 @@ export const useTypingStore = create<TypingStoreState & TypingStoreActions>(
 
     isTyping: (chatId, userId) => {
       return Boolean(get().activeTyping[chatId]?.includes(userId));
+    },
+
+    clearTypingStore: () => {
+      set({ ...initialState });
     },
   })
 );

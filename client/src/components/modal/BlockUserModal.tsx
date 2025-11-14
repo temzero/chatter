@@ -8,7 +8,6 @@ import { blockService } from "@/services/http/blockService";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useTranslation } from "react-i18next";
 import Button from "../ui/buttons/Button";
-import logger from "@/common/utils/logger";
 
 interface BlockUserModalData {
   userToBlock: ChatMemberResponse;
@@ -36,7 +35,7 @@ const BlockUserModal: React.FC = () => {
         })
       );
     } catch (error) {
-      logger.error("Error blocking user:", error);
+      console.error("Error blocking user:", error);
       toast.error("Failed to block user");
     } finally {
       closeModal();
@@ -47,7 +46,7 @@ const BlockUserModal: React.FC = () => {
     <>
       <div className="p-4">
         <h2 className="text-2xl font-semibold mb-4 text-red-500">
-          {t("modal.block_user.title", {name: userToBlock.firstName})}
+          {t("modal.block_user.title", { name: userToBlock.firstName })}
         </h2>
 
         <div className="flex items-center gap-3 mb-6">

@@ -10,10 +10,9 @@ import { useGlobalKeyListeners } from "../keyEvent/useGlobalKeyListener";
 import { useChatStore } from "@/stores/chatStore";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
-import logger from "@/common/utils/logger";
 
 export const useAppInitialization = () => {
-  logger.log({ prefix: "HOOK", timestamp: true }, "useAppInitialization");
+  console.log("[HOOK]", "useAppInitialization");
   const { id: chatId } = useParams();
 
   useEffect(() => {

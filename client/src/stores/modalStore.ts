@@ -12,6 +12,8 @@ interface ModalState {
 interface ModalActions {
   openModal: (type: ModalType, data?: Record<string, unknown>) => void;
   closeModal: () => void;
+
+  clearModalStore: () => void;
 }
 
 const initialState: ModalState = {
@@ -22,18 +24,19 @@ const initialState: ModalState = {
 };
 
 // ---- STORE ----
-export const useModalStore = create<ModalState & ModalActions>((set) => ({
+export const useModalStore = create<ModalState & ModalActions>((set, get) => ({
   ...initialState,
 
   openModal: (type, data = {}) => set({ type, data }),
 
-  closeModal: () =>
-    set({
-      type: null,
-      data: null,
-      focusMessageId: null,
-      replyToMessageId: null,
-    }),
+  closeModal: () => {
+    // ✅ use get() to access actions/state
+    get().clearModalStore();
+  },
+
+  clearModalStore: () => {
+    set({ ...initialState });
+  },
 }));
 
 export { ModalType };
@@ -42,7 +45,7 @@ export { ModalType };
 
 // ---- SELECTORS ----
 export const useModalType = () => useModalStore((state) => state.type);
-export const getModalType = () => useModalStore.getState().type
+export const getModalType = () => useModalStore.getState().type;
 export const getModalData = () => useModalStore.getState().data;
 export const useReplyToMessageId = () =>
   useModalStore((state) => state.replyToMessageId);

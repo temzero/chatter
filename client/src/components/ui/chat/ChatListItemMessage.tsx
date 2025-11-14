@@ -9,7 +9,6 @@ import {
   SystemMessageContent,
   SystemMessageJSONContent,
 } from "@/components/ui/messages/content/SystemMessageContent";
-import logger from "@/common/utils/logger";
 import { getMessageAttachments } from "@/stores/messageAttachmentStore";
 
 interface ChatListItemMessageProps {
@@ -31,8 +30,10 @@ export const ChatListItemMessage: React.FC<ChatListItemMessageProps> = ({
   chatType,
   currentUserId,
 }) => {
-  logger.log("lastMessage", lastMessage);
-  const attachments = getMessageAttachments(chatId || "", lastMessage?.id || "");
+  const attachments = getMessageAttachments(
+    chatId || "",
+    lastMessage?.id || ""
+  );
   const draftMessageContent = useDraftMessage(chatId);
 
   let displayMessage: React.ReactNode = null;

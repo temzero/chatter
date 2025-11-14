@@ -17,6 +17,7 @@ import { MessageResponseDto } from './dto/responses/message-response.dto';
 import { ErrorResponse } from '../../common/api-response/errors';
 import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
 import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
+import { ForbiddenError } from 'src/shared/types/enums/error-message.enum';
 
 @Controller('messages')
 @UseGuards(JwtAuthGuard)
@@ -58,7 +59,7 @@ export class MessageController {
   ): Promise<SuccessResponse<MessageResponseDto>> {
     const message = await this.messageService.getMessageById(messageId);
     if (message.senderId !== currentUserId) {
-      ErrorResponse.unauthorized('Unauthorized to update this message');
+      ErrorResponse.forbidden(ForbiddenError.INSUFFICIENT_PERMISSIONS);
     }
 
     const updatedMessage = await this.messageService.updateMessage(

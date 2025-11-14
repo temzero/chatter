@@ -7,7 +7,6 @@ import {
 } from "@/shared/types/responses/friendship.response";
 import { useChatMemberStore } from "./chatMemberStore";
 import { PaginationResponse } from "@/shared/types/responses/pagination.response";
-import logger from "@/common/utils/logger";
 
 interface FriendshipState {
   pendingRequests: FriendRequestResponse[];
@@ -32,6 +31,8 @@ interface FriendshipActions {
   removeRequestLocally: (friendshipId?: string, senderId?: string) => void;
   deleteFriendship: (userId: string) => Promise<void>;
   clearRequests: () => void;
+
+  clearFriendshipStore: () => void;
 }
 
 const initialState: FriendshipState = {
@@ -176,12 +177,16 @@ export const useFriendshipStore = create<FriendshipState & FriendshipActions>(
           isLoading: false,
         }));
       } catch (error) {
-        logger.error("Failed to delete friendship:", error);
+        console.error("Failed to delete friendship:", error);
         set({ isLoading: false });
         throw error;
       }
     },
 
     clearRequests: () => set({ pendingRequests: [] }),
+
+    clearFriendshipStore: () => {
+      set({ ...initialState });
+    }
   })
 );

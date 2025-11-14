@@ -1,4 +1,11 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
+import {
+  BadRequestError,
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+  UnauthorizedError,
+} from 'src/shared/types/enums/error-message.enum';
 
 export class ErrorResponse {
   static throw(
@@ -9,24 +16,37 @@ export class ErrorResponse {
     if (error instanceof HttpException) {
       throw error;
     }
-
     const message = error instanceof Error ? error.message : defaultMessage;
     throw new HttpException(message, defaultStatus);
   }
 
-  static notFound(message = 'Resource not found'): never {
-    throw new HttpException(message, HttpStatus.NOT_FOUND);
-  }
-
-  static badRequest(message = 'Bad request'): never {
+  // 400 Bad Request
+  static badRequest(
+    message: BadRequestError = BadRequestError.BAD_REQUEST,
+  ): never {
     throw new HttpException(message, HttpStatus.BAD_REQUEST);
   }
 
-  static unauthorized(message = 'Unauthorized'): never {
+  // 401 Unauthorized
+  static unauthorized(
+    message: UnauthorizedError = UnauthorizedError.UNAUTHORIZED,
+  ): never {
     throw new HttpException(message, HttpStatus.UNAUTHORIZED);
   }
 
-  static conflict(message = 'Conflict'): never {
+  static forbidden(message: ForbiddenError = ForbiddenError.FORBIDDEN): never {
+    throw new HttpException(message, HttpStatus.FORBIDDEN);
+  }
+
+  // 404 Not Found
+  static notFound(
+    message: NotFoundError = NotFoundError.RESOURCE_NOT_FOUND,
+  ): never {
+    throw new HttpException(message, HttpStatus.NOT_FOUND);
+  }
+
+  // 409 Conflict
+  static conflict(message: ConflictError = ConflictError.CONFLICT): never {
     throw new HttpException(message, HttpStatus.CONFLICT);
   }
 }

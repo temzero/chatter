@@ -8,6 +8,7 @@ import { InviteLink } from './entities/invite-link.entity';
 import { Repository } from 'typeorm';
 import { Chat } from '../chat/entities/chat.entity';
 import { generateNanoId } from 'src/common/utils/generate-nanoId';
+import { NotFoundError } from 'src/shared/types/enums/error-message.enum';
 
 @Injectable()
 export class InviteLinkService {
@@ -26,7 +27,7 @@ export class InviteLinkService {
     maxUses?: number,
   ): Promise<InviteLink> {
     const chat = await this.chatRepo.findOneBy({ id: chatId });
-    if (!chat) throw new NotFoundException('Chat not found');
+    if (!chat) throw new NotFoundException(NotFoundError.CHAT_NOT_FOUND);
     const token: string = generateNanoId();
 
     const invite = this.inviteLinkRepo.create({

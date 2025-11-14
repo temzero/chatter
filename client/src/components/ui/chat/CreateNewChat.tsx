@@ -12,7 +12,6 @@ import { getOpenModal, ModalType } from "@/stores/modalStore";
 import FriendshipBtn from "@/components/ui/buttons/FriendshipBtn";
 import ContactInfoItem from "@/components/ui/contact/contactInfoItem";
 import SearchBar from "../SearchBar";
-import logger from "@/common/utils/logger";
 
 const CreateNewChat: React.FC = () => {
   const { t } = useTranslation();
@@ -35,7 +34,7 @@ const CreateNewChat: React.FC = () => {
       const foundUser = await userService.fetchUserByIdentifier(query.trim());
       setUser(foundUser);
     } catch (err: unknown) {
-      logger.error("Search for user: ", String(err));
+      console.error("Search for user: ", String(err));
       setError("User not found!");
     } finally {
       setLoading(false);

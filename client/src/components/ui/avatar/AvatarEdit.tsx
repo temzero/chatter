@@ -1,4 +1,3 @@
-import logger from "@/common/utils/logger";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
@@ -103,10 +102,10 @@ export const AvatarEdit: React.FC<AvatarEditProps> = ({
             type: "image/webp",
             lastModified: Date.now(),
           });
-          logger.log("Compressed file size:", croppedFile.size / 1024, "KB");
+          console.log("Compressed file size:", croppedFile.size / 1024, "KB");
           onAvatarChange(croppedUrl, croppedFile);
         } catch (err) {
-          logger.error("Image processing failed:", err);
+          console.error("Image processing failed:", err);
           alert("Failed to process image.");
         } finally {
           URL.revokeObjectURL(img.src); // Clean up

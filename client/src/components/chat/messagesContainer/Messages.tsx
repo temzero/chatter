@@ -11,7 +11,6 @@ import { useMessageStore } from "@/stores/messageStore";
 import { MarkLastMessageRead } from "@/common/utils/message/markMessageRead";
 import Message from "../components/message/Message";
 import { useTranslation } from "react-i18next";
-import logger from "@/common/utils/logger";
 
 interface ChatMessagesProps {
   chat: ChatResponse;
@@ -24,7 +23,7 @@ const Messages: React.FC<ChatMessagesProps> = ({
   messageIds,
   isSearch,
 }) => {
-  logger.log({ prefix: "MOUNTED" }, "Messages:", messageIds.length);
+  console.log("[MOUNTED]", "Messages:", messageIds.length);
   const { t } = useTranslation();
 
   const chatId = chat.id;
@@ -45,7 +44,7 @@ const Messages: React.FC<ChatMessagesProps> = ({
   }, [messages]);
 
   if (!currentUserId) {
-    logger.error({ prefix: "AUTH" }, "Not authenticated");
+    console.error("[AUTH]", "Not authenticated");
     return;
   }
 

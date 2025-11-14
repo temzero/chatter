@@ -30,6 +30,7 @@ import {
   GetOrCreateResponse,
   SuccessResponse,
 } from 'src/common/api-response/success';
+import { ForbiddenError } from 'src/shared/types/enums/error-message.enum';
 
 @Controller('chat')
 @UseGuards(JwtAuthGuard)
@@ -187,7 +188,7 @@ export class ChatController {
           userId,
         );
         if (!isParticipant) {
-          ErrorResponse.unauthorized('Unauthorized to update chat');
+          ErrorResponse.forbidden(ForbiddenError.NOT_CHAT_PARTICIPANT);
         }
       } else {
         const isAdminOrOwner = await this.chatService.isAdminOrOwner(
@@ -195,9 +196,7 @@ export class ChatController {
           userId,
         );
         if (!isAdminOrOwner) {
-          ErrorResponse.unauthorized(
-            'User must be Admin or Owner to update chat',
-          );
+          ErrorResponse.forbidden(ForbiddenError.INSUFFICIENT_PERMISSIONS);
         }
       }
 

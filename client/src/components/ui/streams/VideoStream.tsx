@@ -1,7 +1,6 @@
 // components/call/components/VideoStream.tsx
 import { useEffect, useRef } from "react";
 import { RemoteTrack } from "livekit-client";
-import logger from "@/common/utils/logger";
 
 interface VideoStreamProps {
   stream: MediaStream | RemoteTrack | null;
@@ -38,7 +37,7 @@ export const VideoStream = ({
     if (stream instanceof MediaStream) {
       videoEl.srcObject = stream;
       videoEl.onloadedmetadata = () => {
-        videoEl.play().catch((err) => logger.warn("Video play failed:", err));
+        videoEl.play().catch((err) => console.warn("Video play failed:", err));
       };
     }
   }, [stream]);

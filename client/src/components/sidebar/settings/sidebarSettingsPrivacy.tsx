@@ -5,7 +5,6 @@ import { getCurrentUser, useAuthStore } from "@/stores/authStore";
 import { userService } from "@/services/http/userService";
 import { useTranslation } from "react-i18next";
 import SwitchBtn from "@/components/ui/buttons/SwitchBtn";
-import logger from "@/common/utils/logger";
 
 const SidebarSettingsPrivacy: React.FC = () => {
   const { t } = useTranslation();
@@ -64,7 +63,7 @@ const SidebarSettingsPrivacy: React.FC = () => {
       setCurrentUser(updatedUser);
       setMessage("success", "Privacy settings updated successfully");
     } catch (error) {
-      logger.error(error);
+      console.error(error);
       setMessage(
         "error",
         error instanceof Error

@@ -6,7 +6,6 @@ import { ChatMemberStatus } from "@/shared/types/enums/chat-member-status.enum";
 import { chatMemberService } from "@/services/http/chatMemberService";
 import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
 import { SystemMessageJSONContent } from "@/components/ui/messages/content/SystemMessageContent";
-import logger from "../logger";
 
 export const handleSystemEventMessage = (message: MessageResponse) => {
   if (!message.systemEvent) {
@@ -73,7 +72,7 @@ export const handleSystemEventMessage = (message: MessageResponse) => {
         );
         memberStore.addMemberLocally?.(newMember);
       } catch (error) {
-        logger.error("Failed to fetch new member:", error);
+        console.error("Failed to fetch new member:", error);
       }
     },
     [SystemEventType.MEMBER_JOINED]: async () => {
@@ -85,7 +84,7 @@ export const handleSystemEventMessage = (message: MessageResponse) => {
         );
         memberStore.addMemberLocally?.(newMember);
       } catch (error) {
-        logger.error("Failed to fetch new member:", error);
+        console.error("Failed to fetch new member:", error);
       }
     },
 

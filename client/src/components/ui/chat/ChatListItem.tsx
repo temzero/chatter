@@ -27,7 +27,7 @@ interface ChatListItemProps {
 
 const ChatListItem: React.FC<ChatListItemProps> = React.memo(
   ({ chatId, isCompact = false, currentUserId = "" }) => {
-    // logger.log({ prefix: "MOUNTED" }, "ChatListItem", chatId);
+    // console.log("[MOUNTED]", "ChatListItem", chatId);
 
     const { t } = useTranslation();
     // This now uses the updated useChat hook that works with Record structure

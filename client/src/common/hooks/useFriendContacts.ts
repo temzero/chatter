@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { FriendContactResponse } from "@/shared/types/responses/friend-contact.response";
 import { friendshipService } from "@/services/http/friendshipService";
 import { handleError } from "@/common/utils/handleError";
-import logger from "../utils/logger";
 
 export function useFriendContacts(excludeUserIds: string[] = []) {
   const [contacts, setContacts] = useState<FriendContactResponse[]>([]);
@@ -12,7 +11,7 @@ export function useFriendContacts(excludeUserIds: string[] = []) {
     const fetchContacts = async () => {
       try {
         const allContacts = await friendshipService.fetchFriendContacts();
-        logger.log({ prefix: "FETCHED", timestamp: true }, "All contacts", allContacts);
+        console.log("[FETCHED]", "All contacts", allContacts);
         const filtered = allContacts.filter(
           (contact) => !excludeUserIds.includes(contact.userId)
         );

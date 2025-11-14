@@ -7,7 +7,6 @@ import { getCurrentUserId } from "@/stores/authStore";
 import { useTranslation } from "react-i18next";
 import { handleError } from "@/common/utils/handleError";
 import { toast } from "react-toastify";
-import logger from "@/common/utils/logger";
 
 interface FriendRequestModalData {
   receiver: {
@@ -29,7 +28,6 @@ const FriendRequestModal: React.FC = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [charCount, setCharCount] = useState(0);
   const [requestMessage, setRequestMessage] = useState("");
-  logger.log("requestMessage", requestMessage);
   const maxChar = 200;
 
   const receiver = data?.receiver;

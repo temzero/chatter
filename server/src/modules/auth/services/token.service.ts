@@ -1,20 +1,22 @@
 // src/auth/services/token.service.ts
+import * as jwt from 'jsonwebtoken';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { TokenType } from '../types/token-type.enum';
 import { JwtPayload, JwtRefreshPayload } from '../types/jwt-payload.type';
 import { Request } from 'express';
-import * as jwt from 'jsonwebtoken';
 import { ErrorResponse } from 'src/common/api-response/errors';
 import { VerificationPurpose } from '../mail/constants/verificationPurpose.enum';
-import { VerificationCodeService } from './verification-code.service';
+import {
+  BadRequestError,
+  UnauthorizedError,
+} from 'src/shared/types/enums/error-message.enum';
 
 @Injectable()
 export class TokenService {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly verificationCodeService: VerificationCodeService,
     private readonly configService: ConfigService,
   ) {}
 
@@ -26,18 +28,31 @@ export class TokenService {
     payload: JwtPayload | JwtRefreshPayload,
   ): Promise<string> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { exp, iat, ...cleanPayload } = payload;
+    const { iat, exp, ...cleanPayload } = payload;
     const options = {
       [TokenType.ACCESS]: {
         secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
-        expiresIn: this.configService.get<string>('JWT_ACCESS_EXPIRATION'),
+        expiresIn: '1m',
+        // expiresIn: this.configService.get<string>('JWT_ACCESS_EXPIRATION'),
       },
       [TokenType.REFRESH]: {
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-        expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRATION'),
+        expiresIn: '5m',
+        // expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRATION'),
       },
     }[type];
 
+    console.log(
+      '[DEBUG] ACCESS_EXPIRATION:',
+      this.configService.get<string>('JWT_ACCESS_EXPIRATION'),
+    );
+
+    console.log(
+      '[DEBUG] REFRESH_EXPIRATION:',
+      this.configService.get<string>('JWT_REFRESH_EXPIRATION'),
+    );
+
+    console.log('[DEBUG] options:', options);
     return this.jwtService.signAsync(cleanPayload, options);
   }
 
@@ -55,16 +70,15 @@ export class TokenService {
 
     try {
       return await this.jwtService.verifyAsync<T>(token, { secret });
-    } catch (err) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      if (err.name === 'TokenExpiredError') {
-        ErrorResponse.unauthorized('Token expired');
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      } else if (err.name === 'JsonWebTokenError') {
-        ErrorResponse.unauthorized('Invalid token');
-      } else {
-        ErrorResponse.unauthorized('Token verification failed');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        if (err.name === 'TokenExpiredError') {
+          ErrorResponse.unauthorized(UnauthorizedError.TOKEN_EXPIRED);
+        } else if (err.name === 'JsonWebTokenError') {
+          ErrorResponse.unauthorized(UnauthorizedError.INVALID_TOKEN);
+        }
       }
+      ErrorResponse.forbidden();
     }
   }
 
@@ -100,7 +114,7 @@ export class TokenService {
       !payload.deviceId ||
       !payload.deviceName
     ) {
-      ErrorResponse.badRequest('Missing required fields for token generation');
+      ErrorResponse.badRequest(BadRequestError.MISSING_FIELDS_FOR_TOKEN);
     }
 
     const accessPayload: JwtPayload = {
@@ -151,7 +165,7 @@ export class TokenService {
     const refreshToken = tokenFromHeader || tokenFromCookie;
 
     if (!refreshToken) {
-      ErrorResponse.badRequest('Refresh token is missing');
+      ErrorResponse.badRequest(BadRequestError.REFRESH_TOKEN_MISSING);
     }
 
     return refreshToken;

@@ -14,6 +14,8 @@ interface SidebarInfoStoreActions {
   toggleSidebarInfo: () => void;
   setSidebarInfoVisible: (isVisible: boolean) => void;
   setSidebarInfo: (mode?: SidebarInfoMode) => void;
+
+  clearSidebarInfoStore: () => void;
 }
 
 const initialState: SidebarInfoStoreState = {
@@ -41,7 +43,12 @@ export const useSidebarInfoStore = create<
 
       setSidebarInfo: (mode = SidebarInfoMode.DEFAULT) =>
         set({ currentSidebarInfo: mode }),
+
+      clearSidebarInfoStore: () => {
+        set({ ...initialState });
+      },
     }),
+
     {
       name: "sidebar-info-storage",
       partialize: (state) => ({

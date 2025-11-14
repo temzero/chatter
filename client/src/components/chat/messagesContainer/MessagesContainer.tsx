@@ -12,14 +12,13 @@ import ChannelMessages from "./ChannelMessages";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useMessagesAutoScroll } from "@/common/hooks/useMessagesAutoScroll";
-import logger from "@/common/utils/logger";
 
 interface ChatBoxProps {
   chat?: ChatResponse;
 }
 
 const MessagesContainer: React.FC<ChatBoxProps> = ({ chat }) => {
-  logger.log({ prefix: "MOUNTED" }, "MessagesContainer");
+  console.log("[MOUNTED]", "MessagesContainer");
 
   const chatId = chat?.id || "";
   const isMessagePinned = chat?.pinnedMessage !== null;

@@ -8,8 +8,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
 import InfiniteScroller from "@/components/ui/layout/InfiniteScroller";
 import CallItem from "./CallItem";
-import logger from "@/common/utils/logger";
-
 const PAGE_LIMIT = 10;
 
 const SidebarCalls: React.FC = () => {
@@ -49,7 +47,7 @@ const SidebarCalls: React.FC = () => {
       setHasMore(res.hasMore);
       return newCalls.length;
     } catch (error) {
-      logger.error("Error fetching call history:", error);
+      console.error("Error fetching call history:", error);
       setHasMore(false);
       return 0;
     }
@@ -92,7 +90,7 @@ const SidebarCalls: React.FC = () => {
             </div>
           ) : (
             calls.map((call) => (
-              <motion.div key={call.id} layout='position'>
+              <motion.div key={call.id} layout="position">
                 <CallItem
                   call={call}
                   isCaller={call.initiator.userId === currentUserId}

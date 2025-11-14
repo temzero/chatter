@@ -27,6 +27,8 @@ interface FolderStoreActions {
   updateFolder: (folder: Partial<FolderResponse>) => Promise<void>;
   reorderFolders: (newOrderIds: string[]) => Promise<void>;
   deleteFolder: (folderId?: string) => Promise<void>;
+
+  clearFolderStore: () => void;
 }
 
 // Helper function to sort folders by position
@@ -166,6 +168,10 @@ export const useFolderStore = create<FolderStoreState & FolderStoreActions>(
         handleError(error, "Failed to delete folder");
       }
     },
+
+    clearFolderStore: () => {
+      set({ ...initialState });
+    }
   })
 );
 

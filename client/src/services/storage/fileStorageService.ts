@@ -1,7 +1,6 @@
 // src/services/fileStorageService.ts
 import API from "@/services/api/api";
 import logFormData from "@/common/utils/logFormdata";
-import logger from "@/common/utils/logger";
 
 type UploadResponse = {
   url: string;
@@ -42,7 +41,7 @@ export const fileStorageService = {
       if (!response?.data?.url) throw new Error("No URL returned");
       return response.data.url;
     } catch (error) {
-      logger.error(`[StorageService] Upload failed (${type}):`, error);
+      console.error(`[StorageService] Upload failed (${type}):`, error);
       throw new Error(`Failed to upload ${type}`);
     }
   },
@@ -63,7 +62,7 @@ export const fileStorageService = {
       if (!data?.url) throw new Error("No URL returned");
       return data.url;
     } catch (error) {
-      logger.error(`[StorageService] Upload failed (${type}):`, error);
+      console.error(`[StorageService] Upload failed (${type}):`, error);
       throw new Error(`Failed to upload ${type}`);
     }
   },
@@ -82,7 +81,7 @@ export const fileStorageService = {
         data: { url },
       });
     } catch (error) {
-      logger.error(`[StorageService] Delete failed (${type}):`, error);
+      console.error(`[StorageService] Delete failed (${type}):`, error);
       throw new Error(`Failed to delete ${type}`);
     }
   },
@@ -103,7 +102,7 @@ export const fileStorageService = {
       if (oldUrl) await this.deleteAvatar(oldUrl, type);
       return newUrl;
     } catch (error) {
-      logger.error(`[StorageService] Replace failed (${type}):`, error);
+      console.error(`[StorageService] Replace failed (${type}):`, error);
       throw error; // Re-throw for handling in calling code
     }
   },

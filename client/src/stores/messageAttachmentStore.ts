@@ -32,6 +32,8 @@ interface AttachmentStoreActions {
   removeMessageAttachments: (messageId: string) => void;
   clearChatAttachments: (chatId: string) => void;
   getAttachmentCounts: (chatId: string) => Promise<Record<string, number>>;
+
+  clearAttachmentStore: () => void;
 }
 
 const initialState: AttachmentStoreState = {
@@ -151,6 +153,8 @@ export const useAttachmentStore = create<
       return {};
     }
   },
+  
+  clearAttachmentStore: () => set({ ...initialState }), 
 }));
 
 const addAttachmentsToState = (

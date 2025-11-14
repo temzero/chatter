@@ -6,6 +6,7 @@ import { ErrorResponse } from 'src/common/api-response/errors';
 import { TokenService } from '../services/token.service';
 import { VerificationPurpose } from './constants/verificationPurpose.enum';
 import { VerificationCodeService } from '../services/verification-code.service';
+import { BadRequestError } from 'src/shared/types/enums/error-message.enum';
 
 @Injectable()
 export class MailService {
@@ -37,7 +38,7 @@ export class MailService {
       if (error instanceof Error) {
         ErrorResponse.throw(error, 'Failed to send email');
       } else {
-        ErrorResponse.badRequest('Failed to send email');
+        ErrorResponse.badRequest(BadRequestError.FAILED_TO_SEND_EMAIL);
       }
     }
   }

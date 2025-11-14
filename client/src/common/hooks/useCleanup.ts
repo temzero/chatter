@@ -7,7 +7,7 @@ import { useChatStore } from "@/stores/chatStore";
 
 export const useCleanup = () => {
   // ✅ Only subscribe to the specific actions needed
-  const clearChats = useChatStore.getState().clearChats;
+  const clearChatStore = useChatStore.getState().clearChatStore;
   const endCall = useCallStore.getState().endCall;
   const closeModal = getCloseModal();
 
@@ -21,10 +21,10 @@ export const useCleanup = () => {
         endCall();
       }
       closeModal();
-      clearChats();
+      clearChatStore();
     };
 
     window.addEventListener("beforeunload", handleCleanup);
     return () => window.removeEventListener("beforeunload", handleCleanup);
-  }, [clearChats, endCall, closeModal]);
+  }, [clearChatStore, endCall, closeModal]);
 };

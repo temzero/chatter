@@ -14,7 +14,6 @@ import {
 import { useAttachmentStore } from "./messageAttachmentStore";
 import { audioService, SoundType } from "@/services/audio.service";
 import { useShallow } from "zustand/shallow";
-import logger from "@/common/utils/logger";
 
 // Normalized structure
 type MessagesById = Record<string, MessageResponse>; // messageId -> Message
@@ -74,6 +73,8 @@ interface MessageStoreActions {
   removeReaction: (messageId: string, emoji: string, userId: string) => void;
   setDisplaySearchMessage: (isOpen: boolean) => void;
   setSearchQuery: (query: string) => void;
+
+  clearMessageStore: () => void;
 }
 
 export const getAttachmentsFromMessages = (
@@ -128,7 +129,7 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
     },
 
     addMessage: (newMessage) => {
-      logger.log('Adding message:', newMessage);
+      console.log("Adding message:", newMessage);
       const { messagesById, messageIdsByChat } = get();
       const chatId = newMessage.chatId;
 
@@ -225,7 +226,7 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
     getMessageById: (messageId) => get().messagesById[messageId],
 
     updateMessageById: (messageId, updatedMessage) => {
-      logger.log('updateMessageById:', messageId, updatedMessage);
+      console.log("updateMessageById:", messageId, updatedMessage);
       set((state) => ({
         messagesById: {
           ...state.messagesById,
@@ -388,6 +389,8 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
     setShowImportantOnly: (value) => set({ showImportantOnly: value }),
     setDisplaySearchMessage: (isOpen) => set({ isSearchMessages: isOpen }),
     setSearchQuery: (query) => set({ searchQuery: query }),
+
+    clearMessageStore: () => set({ ...initialState }),
   })
 );
 

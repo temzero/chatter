@@ -1,6 +1,5 @@
 import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 import { audioService, SoundType } from "@/services/audio.service";
-import logger from "./logger";
 
 export const handleDownload = async (attachment: AttachmentResponse) => {
   if (!attachment?.url) return;
@@ -26,7 +25,7 @@ export const handleDownload = async (attachment: AttachmentResponse) => {
     // Clean up the blob URL
     window.URL.revokeObjectURL(url);
   } catch (error) {
-    logger.error("Download failed:", error);
+    console.error("Download failed:", error);
     alert("Download failed. Please try again.");
   }
 };

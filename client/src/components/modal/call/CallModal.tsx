@@ -17,7 +17,6 @@ import ConnectingCall from "@/components/modal/call/ConnectingCall";
 import SummaryCall from "@/components/modal/call/SummaryCall";
 import BroadcastPreviewModal from "@/components/modal/call/BroadcastPreviewModal";
 import BroadcastRoom from "@/components/modal/call/broadcastRoom/BroadcastRoom";
-import logger from "@/common/utils/logger";
 
 const CallModal: React.FC = () => {
   const isMobile = useIsMobile();
@@ -45,7 +44,7 @@ const CallModal: React.FC = () => {
         });
         if (isMounted) setChat(result);
       } catch (err) {
-        logger.error("Failed to load chat:", err);
+        console.error("Failed to load chat:", err);
       }
     };
 

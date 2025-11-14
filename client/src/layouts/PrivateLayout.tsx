@@ -10,14 +10,13 @@ import { useSidebarInfoVisibility } from "@/stores/sidebarInfoStore";
 import { useIsMobile } from "@/stores/deviceStore";
 import { useIsMobileSound } from "@/common/hooks/useIsMobileSound";
 import { useActiveChatId } from "@/stores/chatStore";
-import logger from "@/common/utils/logger";
 
 // Memoize static components to prevent unnecessary rerenders
 const MemoSidebar = React.memo(Sidebar);
 const MemoSidebarInfo = React.memo(SidebarInfo);
 
 const PrivateLayout: React.FC = () => {
-  logger.log({ prefix: "MOUNTED" }, "PrivateLayout");
+  console.log("[MOUNTED]", "PrivateLayout");
 
   const isMobile = useIsMobile();
   const activeChatId = useActiveChatId();

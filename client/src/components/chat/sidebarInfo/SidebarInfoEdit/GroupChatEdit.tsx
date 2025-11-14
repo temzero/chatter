@@ -14,7 +14,6 @@ import { getCurrentUserId } from "@/stores/authStore";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useTranslation } from "react-i18next";
-import logger from "@/common/utils/logger";
 
 const GroupChatEdit = () => {
   const { t } = useTranslation();
@@ -83,7 +82,7 @@ const GroupChatEdit = () => {
           ChatType.GROUP
         );
 
-        logger.log("Uploaded newAvatarUrl", newAvatarUrl);
+        console.log("Uploaded newAvatarUrl", newAvatarUrl);
 
         // Update form data with new avatar URL
         setFormData((prev) => ({ ...prev, avatarUrl: newAvatarUrl }));
@@ -211,7 +210,9 @@ const GroupChatEdit = () => {
           }}
           className="mt-4 bg-[--border-color] text-lg px-3 py-1 rounded flex justify-start items-center gap-2 w-full hover:bg-[--hover-color]"
         >
-          <span className="material-symbols-outlined text-3xl">group_search</span>
+          <span className="material-symbols-outlined text-3xl">
+            group_search
+          </span>
           <h1>{t("sidebar_info.group_edit.members")}</h1>
           <h1 className="ml-auto">{activeMembers.length}</h1>
         </button>

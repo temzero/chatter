@@ -1,6 +1,5 @@
 import { useEffect, useRef, useMemo } from "react";
 import { RemoteTrack } from "livekit-client";
-import logger from "@/common/utils/logger";
 
 type VoiceVisualizerProps = {
   stream: MediaStream | RemoteTrack | null;
@@ -105,7 +104,7 @@ export const VoiceVisualizerBar = ({
 
       drawWaveform();
     } catch (error) {
-      logger.error("Error setting up audio visualization:", error);
+      console.error("Error setting up audio visualization:", error);
     }
 
     return () => {
@@ -119,7 +118,7 @@ export const VoiceVisualizerBar = ({
     };
   }, [mediaStream, isMuted, barColor]);
 
-  logger.log(
+  console.log(
     "VoiceVisualizerBar getAudioTracks",
     mediaStream?.getAudioTracks()
   );

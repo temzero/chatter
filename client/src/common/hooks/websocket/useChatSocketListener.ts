@@ -13,7 +13,6 @@ import { chatWebSocketService } from "@/services/websocket/chat.websocket.servic
 import { webSocketService } from "@/services/websocket/websocket.service";
 import { handleError } from "@/common/utils/handleError";
 import { useTranslation } from "react-i18next";
-import logger from "@/common/utils/logger";
 
 export function useChatSocketListeners() {
   const { t } = useTranslation();
@@ -23,7 +22,7 @@ export function useChatSocketListeners() {
       data: WsNotificationResponse<MessageResponse>
     ) => {
       const { payload: message, meta } = data;
-      logger.log({ prefix: "EVENT", timestamp: true }, "Received new message via WebSocket:", message);
+      console.log("[EVENT]", "Received new message via WebSocket:", message);
 
       const messageStore = useMessageStore.getState();
 
@@ -35,12 +34,14 @@ export function useChatSocketListeners() {
           fetchFullData: true,
         });
       } catch (error) {
-        logger.error("Failed to fetch chat for incoming message:", error);
+        console.error("Failed to fetch chat for incoming message:", error);
         return;
       }
 
       if (isOwnMessage && existingMessage) {
-        messageStore.updateMessageById(message.id, {status: MessageStatus.SENT});
+        messageStore.updateMessageById(message.id, {
+          status: MessageStatus.SENT,
+        });
         return;
       } else {
         if (message.systemEvent) {
@@ -52,7 +53,6 @@ export function useChatSocketListeners() {
 
       // if (!isMuted && chatStore.activeChatId !== message.chatId) {
       if (!isMuted && !message.call) {
-        logger.log("PLAY SOUND NEW_MESSAGE");
         audioService.playSound(SoundType.NEW_MESSAGE);
       }
     };
@@ -177,7 +177,7 @@ export function useChatSocketListeners() {
     ) => {
       try {
         const { payload: update } = data;
-        logger.log({prefix: "EVENT"},"isImportant", update.isImportant);
+        console.log("[EVENT]", "isImportant", update.isImportant);
         useMessageStore.getState().updateMessageById(update.messageId, {
           isImportant: update.isImportant,
         });
@@ -214,7 +214,7 @@ export function useChatSocketListeners() {
 
         // FIX: Check if the entire error payload is undefined
         if (!error) {
-          logger.error(
+          console.error(
             "WebSocket error payload is completely undefined:",
             data
           );
@@ -223,7 +223,7 @@ export function useChatSocketListeners() {
 
         // Then check if messageId exists
         if (!error.messageId) {
-          logger.error("Message ID is undefined in error response:", error);
+          console.error("Message ID is undefined in error response:", error);
           return;
         }
 

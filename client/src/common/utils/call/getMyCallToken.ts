@@ -1,7 +1,6 @@
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { callService } from "@/services/http/callService";
 import { useAuthStore } from "@/stores/authStore";
-import logger from "../logger";
 
 export async function getMyCallToken(
   chatId: string
@@ -13,9 +12,9 @@ export async function getMyCallToken(
       .getState()
       .getOrFetchChatMemberByUserIdAndChatId(chatId, currentUserId);
     if (!myChatMember?.id) {
-      logger.warn(
-        { prefix: "GET MY CALL TOKEN" },
-        " No chat member found, returning undefined"
+      console.warn(
+        "GET MY CALL TOKEN",
+        "No chat member found, returning undefined"
       );
       return undefined;
     }
@@ -32,7 +31,7 @@ export async function getMyCallToken(
 
     return token;
   } catch (err) {
-    logger.error("[getMyCallToken] error:", err);
+    console.error("[getMyCallToken] error:", err);
     return undefined;
   }
 }

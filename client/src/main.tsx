@@ -6,7 +6,6 @@ import ErrorBoundary from "./ErrorBoundary";
 import bootstrapApp from "./common/hooks/app/boostrap.ts";
 import { createRoot } from "react-dom/client";
 import LoadAppErrorPage from "./pages/error/LoadAppErrorPage.tsx";
-import logger from "./common/utils/logger.ts";
 
 // Wait for all stores to initialize before mounting React
 bootstrapApp()
@@ -20,6 +19,6 @@ bootstrapApp()
     );
   })
   .catch((err) => {
-    logger.error({ prefix: "INIT", timestamp: true }, "Failed to initialize app:", err);
+    console.error("[INIT]", "Failed to initialize app:", err);
     createRoot(document.getElementById("root")!).render(<LoadAppErrorPage />);
   });

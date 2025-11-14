@@ -2,9 +2,7 @@ import clsx from "clsx";
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useMessageStore } from "@/stores/messageStore";
 import { AnimatePresence, motion } from "framer-motion";
-import { handleSendMessage } from "@/common/utils/message/sendMessageHandler";
 import { getCloseModal, useReplyToMessageId } from "@/stores/modalStore";
-import { getCurrentUserId } from "@/stores/authStore";
 import { useTranslation } from "react-i18next";
 import EmojiPicker from "@/components/ui/EmojiPicker";
 import AttachFile from "@/components/ui/attachments/AttachFile";
@@ -12,7 +10,7 @@ import AttachmentImportedPreview from "@/components/ui/attachments/AttachmentImp
 import useTypingIndicator from "@/common/hooks/useTypingIndicator";
 import { useKeyDown } from "@/common/hooks/keyEvent/useKeydown";
 import { usePasteImage } from "@/common/hooks/keyEvent/usePasteImageListener";
-import logger from "@/common/utils/logger";
+import { sendMessageAndReset } from "@/common/utils/chat/sendMessageAndResetChatBar";
 
 interface ChatBarProps {
   chatId: string;
@@ -21,7 +19,6 @@ interface ChatBarProps {
 
 const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
   const { t } = useTranslation();
-  const currentUserId = getCurrentUserId();
 
   const closeModal = getCloseModal();
   const setDraftMessage = useMessageStore.getState().setDraftMessage;
@@ -42,7 +39,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
     if (chatId && inputRef.current) {
       const draft = getDraftMessage(chatId);
 
-      if (draft) logger.log({ prefix: "DRAFT" }, draft);
+      if (draft) console.log("DRAFT", draft);
 
       inputRef.current.value = draft || "";
       setHasTextContent(!!draft?.trim());
@@ -55,7 +52,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
 
   useEffect(() => {
     const inputValueAtMount = inputRef.current?.value;
-    logger.log("inputValueAtMount", inputValueAtMount);
+    console.log("inputValueAtMount", inputValueAtMount);
     return () => {
       if (chatId && inputValueAtMount) {
         setDraftMessage(chatId, inputValueAtMount);
@@ -128,6 +125,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
           myMemberId,
           inputRef,
           attachments: attachedFiles,
+          filePreviewUrls,
           replyToMessageId,
           clearTypingState,
           setDraftMessage,
@@ -144,9 +142,9 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
       chatId,
       myMemberId,
       attachedFiles,
+      filePreviewUrls,
       replyToMessageId,
       setDraftMessage,
-      sendMessageAndReset,
       clearTypingState,
       closeModal,
     ]
@@ -187,64 +185,6 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
   }, []);
 
   usePasteImage({ inputRef, onFileSelect: handleFileSelect });
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  async function sendMessageAndReset({
-    chatId,
-    myMemberId,
-    inputRef,
-    attachments,
-    replyToMessageId,
-    clearTypingState,
-    setDraftMessage,
-    setAttachedFiles,
-    setFilePreviewUrls,
-    setHasTextContent,
-    setIsMessageSent,
-    closeModal,
-    updateInputHeight,
-  }: {
-    chatId: string;
-    myMemberId: string;
-    inputRef: React.RefObject<HTMLTextAreaElement>;
-    attachments: File[];
-    replyToMessageId?: string | null;
-    clearTypingState: () => void;
-    setDraftMessage: (chatId: string, message: string) => void;
-    setAttachedFiles: React.Dispatch<React.SetStateAction<File[]>>;
-    setFilePreviewUrls: React.Dispatch<React.SetStateAction<string[]>>;
-    setHasTextContent: React.Dispatch<React.SetStateAction<boolean>>;
-    setIsMessageSent: React.Dispatch<React.SetStateAction<boolean>>;
-    closeModal: () => void;
-    updateInputHeight: () => void;
-  }) {
-    // Send message
-    handleSendMessage({
-      chatId,
-      myUserId: currentUserId,
-      myMemberId,
-      inputRef,
-      attachments,
-      filePreviewUrls,
-      replyToMessageId,
-      onSuccess: () => {
-        clearTypingState();
-        setDraftMessage(chatId, "");
-        setIsMessageSent(true);
-        closeModal();
-        setTimeout(() => setIsMessageSent(false), 200);
-      },
-    });
-
-    // reset UI
-    if (inputRef.current) inputRef.current.value = "";
-    setAttachedFiles([]);
-    setFilePreviewUrls([]);
-    setHasTextContent(false);
-    updateInputHeight();
-
-    inputRef.current?.focus();
-  }
 
   return (
     <div
@@ -334,6 +274,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
                       myMemberId,
                       inputRef,
                       attachments: attachedFiles,
+                      filePreviewUrls,
                       replyToMessageId,
                       clearTypingState,
                       setDraftMessage,

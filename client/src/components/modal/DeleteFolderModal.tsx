@@ -6,7 +6,6 @@ import { getSetSidebar } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
 import Button from "../ui/buttons/Button";
-import logger from "@/common/utils/logger";
 
 interface DeleteFolderModalData {
   folderId: string;
@@ -32,7 +31,7 @@ const DeleteFolderModal: React.FC = () => {
         setSidebar(SidebarMode.FOLDERS);
       })
       .catch((error) => {
-        logger.error("Error deleting folder:", error);
+        console.error("Error deleting folder:", error);
       });
   };
 

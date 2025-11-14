@@ -26,6 +26,7 @@ import { ContactResponseDto } from './dto/responses/friend-contact-response.dto'
 import { mapFriendshipToContactResDto } from './mappers/contact.mapper';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
+import { NotFoundError } from 'src/shared/types/enums/error-message.enum';
 
 @Controller('friendships')
 @UseGuards(JwtAuthGuard)
@@ -117,7 +118,7 @@ export class FriendshipController {
     // 2. Prepare notification data
     const receiver = await this.userService.getUserById(receiverId);
     if (!receiver) {
-      ErrorResponse.notFound('Receiver not found!');
+      ErrorResponse.notFound(NotFoundError.USER_NOT_FOUND);
     }
 
     // 3. Create the response DTO

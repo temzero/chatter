@@ -60,72 +60,56 @@ class Logger {
   }
 
   log(...args: unknown[]) {
-    if (this.isDev) {
-      // Check if first arg is LogOptions
-      if (
-        args[0] &&
-        typeof args[0] === "object" &&
-        args[0] !== null &&
-        "prefix" in args[0]
-      ) {
-        const [options, ...messages] = args as [LogOptions, ...unknown[]];
-        const { style, label } = this.formatLog(options, messages);
+    if (!this.isDev) return;
 
-        if (label) {
-          console.log(`%c${label}`, style, ...messages);
-        } else {
-          console.log(...messages);
-        }
-      } else if (args.length > 1 && typeof args[0] === "string") {
-        // Backward compatibility: string prefix
-        const [prefix, ...messages] = args;
-        console.log(
-          `%c[${prefix}]`,
-          "color: #00ae80; font-weight: bold;",
-          ...messages
-        );
+    if (
+      args[0] &&
+      typeof args[0] === "object" &&
+      args[0] !== null &&
+      "prefix" in args[0]
+    ) {
+      const [options, ...messages] = args as [LogOptions, ...unknown[]];
+      const { style, label } = this.formatLog(options, messages);
+
+      if (label) {
+        console.log(`%c${label}`, style, ...messages);
       } else {
-        console.log(`%c[APP]`, "color: #00ae80; font-weight: bold;", ...args);
-        // Normal log without formatting
-        // console.log(...args);
+        console.log(...messages);
       }
+    } else {
+      // Normal message without prefix
+      console.log(...args);
     }
   }
 
   warn(...args: unknown[]) {
-    if (this.isDev) {
-      if (
-        args[0] &&
-        typeof args[0] === "object" &&
-        args[0] !== null &&
-        "prefix" in args[0]
-      ) {
-        const [options, ...messages] = args as [LogOptions, ...unknown[]];
-        const { style, label } = this.formatLog(
-          { ...options, level: "warn" },
-          messages
-        );
+    if (!this.isDev) return;
 
-        if (label) {
-          console.warn(`%c${label}`, style, ...messages);
-        } else {
-          console.warn(...messages);
-        }
-      } else if (args.length > 1 && typeof args[0] === "string") {
-        const [prefix, ...messages] = args;
-        console.warn(
-          `%c[${prefix} WARNING]`,
-          "color: #ff9800; font-weight: bold;",
-          ...messages
-        );
+    if (
+      args[0] &&
+      typeof args[0] === "object" &&
+      args[0] !== null &&
+      "prefix" in args[0]
+    ) {
+      const [options, ...messages] = args as [LogOptions, ...unknown[]];
+      const { style, label } = this.formatLog(
+        { ...options, level: "warn" },
+        messages
+      );
+
+      if (label) {
+        console.warn(`%c${label}`, style, ...messages);
       } else {
-        console.warn(...args);
+        console.warn(...messages);
       }
+    } else {
+      // Normal message without prefix
+      console.warn(...args);
     }
   }
 
   error(...args: unknown[]) {
-    // show even in prod
+    // Show even in production
     if (
       args[0] &&
       typeof args[0] === "object" &&
@@ -143,14 +127,8 @@ class Logger {
       } else {
         console.error(...messages);
       }
-    } else if (args.length > 1 && typeof args[0] === "string") {
-      const [prefix, ...messages] = args;
-      console.error(
-        `%c[${prefix} ERROR]`,
-        "color: #f44336; font-weight: bold;",
-        ...messages
-      );
     } else {
+      // Normal message without prefix
       console.error(...args);
     }
   }

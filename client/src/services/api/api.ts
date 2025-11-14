@@ -8,7 +8,7 @@ import axios, {
 import { localStorageService } from "../storage/localStorageService";
 import { useAuthStore } from "@/stores/authStore";
 import { audioService, SoundType } from "../audio.service";
-import logger from "@/common/utils/logger";
+import { toast } from "react-toastify";
 
 const API: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -43,7 +43,7 @@ API.interceptors.request.use(
 API.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError) => {
-    logger.error({ prefix: "API" }, error.response?.data);
+    console.error("[API]", error.response?.data);
 
     audioService.stopAllSounds();
     audioService.playSound(SoundType.ERROR);
@@ -54,17 +54,20 @@ API.interceptors.response.use(
     const isCurrentlyOnAuthPage = currentPath.includes("/auth/");
 
     if (error.response?.status === 401) {
-      // Only redirect if:
-      // 1. It's NOT an auth API call AND
-      // 2. User is not already on auth page (prevents double redirect)
+      const isRefreshCall = requestUrl.includes("/auth/refresh");
+
+      if (isRefreshCall) {
+        toast.error("Refresh token expired. Logging out...");
+      } else {
+        toast.info("Access token expired. Redirecting to login...");
+      }
+
+      // Common logout & redirect for both cases
+      useAuthStore.getState().logout();
       if (!isAuthRoute && !isCurrentlyOnAuthPage) {
-        logger.warn({ prefix: "API" }, "Access token invalid, redirecting to login...");
-        useAuthStore.getState().logout();
         window.location.href = "/auth/login";
       }
-      // For auth routes or when already on auth page, just reject
     }
-
     return Promise.reject(error);
   }
 );

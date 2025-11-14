@@ -1,4 +1,3 @@
-import logger from "@/common/utils/logger";
 import { useState, useEffect, useRef, useCallback } from "react";
 
 interface LocalPreviewScreenStream {
@@ -12,7 +11,8 @@ export const useLocalPreviewScreenTrack = (
   startEnabled: boolean = false,
   opts: { stopOnUnmount: boolean } = { stopOnUnmount: true }
 ): LocalPreviewScreenStream => {
-  const [localScreenStream, setLocalScreenStream] = useState<MediaStream | null>(null);
+  const [localScreenStream, setLocalScreenStream] =
+    useState<MediaStream | null>(null);
   const [isScreenEnabled, setIsScreenEnabled] = useState(startEnabled);
   const streamRef = useRef<MediaStream | null>(null);
 
@@ -48,7 +48,7 @@ export const useLocalPreviewScreenTrack = (
         track.onended = cleanupStream;
       });
     } catch (err) {
-      logger.error("Failed to start screen capture:", err);
+      console.error("Failed to start screen capture:", err);
       cleanupStream();
     }
   }, [cleanupStream]);

@@ -14,6 +14,12 @@ import { UserResponseDto } from 'src/modules/user/dto/responses/user-response.dt
 import { RegisterDto } from '../dto/requests/register.dto';
 import { ErrorResponse } from 'src/common/api-response/errors';
 import type { JwtRefreshPayload } from '../types/jwt-payload.type';
+import {
+  BadRequestError,
+  ForbiddenError,
+  NotFoundError,
+  UnauthorizedError,
+} from 'src/shared/types/enums/error-message.enum';
 
 @Injectable()
 export class AuthService {
@@ -30,7 +36,8 @@ export class AuthService {
     try {
       const { identifier, password } = loginDto;
       const user = await this.userService.getUserByIdentifier(identifier);
-      if (!user) ErrorResponse.unauthorized('Invalid credentials');
+      if (!user)
+        ErrorResponse.unauthorized(UnauthorizedError.INVALID_CREDENTIALS);
       const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
       return isPasswordValid ? user : null;
     } catch (error) {
@@ -96,10 +103,10 @@ export class AuthService {
       const storedToken =
         await this.tokenStorageService.findToken(refreshToken);
       if (!storedToken) {
-        ErrorResponse.unauthorized('Refresh token not found');
+        ErrorResponse.unauthorized(UnauthorizedError.INVALID_REFRESH_TOKEN);
       } else if (storedToken.expiresAt < new Date()) {
         await this.tokenStorageService.deleteToken(refreshToken);
-        ErrorResponse.unauthorized('Refresh token expired');
+        ErrorResponse.unauthorized(UnauthorizedError.REFRESH_TOKEN_EXPIRED);
       }
       // 3. Delete old refresh token (security best practice)
       await this.tokenStorageService.deleteDeviceTokens(
@@ -137,9 +144,7 @@ export class AuthService {
     try {
       const user = await this.userService.getUserByIdentifier(email);
       if (!user) {
-        ErrorResponse.badRequest(
-          'If an account exists, a password reset link has been sent',
-        );
+        ErrorResponse.badRequest(BadRequestError.PASSWORD_RESET_SENT);
       }
       // Generate time-limited token with specific purpose
       const resetPasswordToken = this.jwtService.sign(
@@ -176,16 +181,16 @@ export class AuthService {
       }>(token);
       // Validate token purpose
       if (payload.purpose !== 'password_reset') {
-        ErrorResponse.unauthorized('Invalid token type');
+        ErrorResponse.badRequest(BadRequestError.INVALID_TOKEN_PURPOSE);
       }
       // Get user and validate email match
       const user = await this.userService.getUserById(payload.sub);
       if (!user) {
-        ErrorResponse.notFound('User not found');
+        ErrorResponse.notFound(NotFoundError.USER_NOT_FOUND);
       }
       // Verify the email in token matches user's current email
       if (user.email !== payload.email) {
-        ErrorResponse.unauthorized('Email mismatch - token invalid');
+        ErrorResponse.forbidden(ForbiddenError.EMAIL_MISMATCH);
       }
       // Update password and record change time
       await this.userService.updatePassword(payload.sub, newPassword);
@@ -209,7 +214,7 @@ export class AuthService {
       }>(token);
 
       if (payload.purpose !== 'email_verification') {
-        ErrorResponse.unauthorized('Invalid token purpose');
+        ErrorResponse.badRequest(BadRequestError.INVALID_TOKEN_PURPOSE);
       }
 
       userId = payload.sub;
@@ -221,7 +226,7 @@ export class AuthService {
       }
 
       if (payload.email && user.email !== payload.email) {
-        ErrorResponse.unauthorized('Email mismatch');
+        ErrorResponse.forbidden(ForbiddenError.EMAIL_MISMATCH);
       }
 
       // Update with transaction

@@ -15,6 +15,8 @@ interface PresenceStoreActions {
   setMultipleStatuses: (statuses: Record<string, boolean>) => void;
   setLastSeen: (userId: string, timestamp: string) => void;
   getLastSeen: (userId: string) => string | undefined;
+
+  clearPresenceStore: () => void;
 }
 
 const initialState: PresenceStoreState = {
@@ -26,7 +28,7 @@ export const usePresenceStore = create<
   PresenceStoreState & PresenceStoreActions
 >((set, get) => ({
   ...initialState,
-  
+
   setUserStatus: (userId, isOnline, lastSeen) =>
     set((state) => {
       const exists = state.onlineUserIds.includes(userId);
@@ -64,6 +66,10 @@ export const usePresenceStore = create<
     })),
 
   getLastSeen: (userId) => get().lastSeenMap[userId],
+
+  clearPresenceStore: () => {
+    set({ ...initialState });
+  },
 }));
 
 // EXPORT HOOKS

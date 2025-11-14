@@ -1,8 +1,6 @@
 // src/services/websocket/websocket.service.ts
 import { io, Socket } from "socket.io-client";
 import { localStorageService } from "@/services/storage/localStorageService";
-import { toast } from "react-toastify";
-import logger from "@/common/utils/logger";
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || "ws://localhost:3000";
 
@@ -29,7 +27,7 @@ export class WebSocketService {
       });
 
       this.socket.on("connect_error", (error: unknown) => {
-        toast.error("WebSocket connection failed!");
+        console.error("WebSocket connection failed!");
         this.connectionPromise = null;
         reject(error);
       });
@@ -45,7 +43,7 @@ export class WebSocketService {
       this.socket.disconnect();
       this.socket = null;
       this.connectionPromise = null;
-      logger.log({ prefix: "WS" }, "🔌 disconnected ");
+      console.log("[WS]", "🔌 disconnected ");
     }
   }
 
@@ -56,11 +54,7 @@ export class WebSocketService {
   // Helper method to emit events with proper typing
   emit<T>(event: string, data?: T, callback?: (response: unknown) => void) {
     if (!this.socket) {
-      logger.warn(
-        { prefix: "WS" },
-        "Socket not connected. Cannot emit event:",
-        event
-      );
+      console.warn("[WS]", "Socket not connected. Cannot emit event:", event);
       return;
     }
     if (callback) {
@@ -73,11 +67,7 @@ export class WebSocketService {
   emitWithAck<T = void, D = unknown>(event: string, data: D): Promise<T> {
     return new Promise((resolve, reject) => {
       if (!this.socket) {
-        logger.warn(
-          { prefix: "WS" },
-          "Socket not connected. Cannot emit event:",
-          event
-        );
+        console.warn("[WS]", "Socket not connected. Cannot emit event:", event);
         return reject(new Error("Socket not connected"));
       }
 
@@ -98,8 +88,8 @@ export class WebSocketService {
   // Helper method to listen to events
   on<T>(event: string, callback: (data: T) => void) {
     if (!this.socket) {
-      logger.warn(
-        { prefix: "WS" },
+      console.warn(
+        "[WS]",
         "Socket not connected. Cannot listen to event:",
         event
       );
@@ -111,8 +101,8 @@ export class WebSocketService {
   // Helper method to remove event listeners
   off<T = unknown>(event: string, callback?: (data: T) => void): void {
     if (!this.socket) {
-      logger.warn(
-        { prefix: "WS" },
+      console.warn(
+        "[WS]",
         "Socket not connected. Cannot remove listener for event:",
         event
       );

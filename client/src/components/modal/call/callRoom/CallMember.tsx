@@ -10,7 +10,6 @@ import { Theme, useTheme } from "@/stores/themeStore";
 import callManDarkImage from "@/assets/image/call-man-dark.png";
 import callManLightImage from "@/assets/image/call-man-light.png";
 import { useTranslation } from "react-i18next";
-import logger from "@/common/utils/logger";
 
 interface CallMemberProps {
   participant: Participant;
@@ -34,7 +33,7 @@ const CallMember = ({
     try {
       return participant.metadata ? JSON.parse(participant.metadata) : {};
     } catch (error) {
-      logger.error("Failed to parse participant metadata:", error);
+      console.error("Failed to parse participant metadata:", error);
       return {};
     }
   }, [participant.metadata]);

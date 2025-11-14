@@ -19,6 +19,8 @@ interface sidebarStoreState {
 interface sidebarStoreActions {
   setSidebar: (sidebar: SidebarMode, data?: unknown) => void;
   toggleCompact: () => void;
+
+  clearSidebarStore: () => void;
 }
 
 const initialState: sidebarStoreState = {
@@ -48,6 +50,10 @@ export const useSidebarStore = create<
           set({ isCompact: !get().isCompact });
         }
       },
+
+      clearSidebarStore: () => {
+        set({ ...initialState });
+      }
     }),
     {
       name: "sidebar-storage",

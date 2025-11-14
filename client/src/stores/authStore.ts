@@ -3,16 +3,11 @@ import axios from "axios";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { authService } from "@/services/http/authService";
-import { useChatStore } from "@/stores/chatStore";
-import { useSidebarStore } from "./sidebarStore";
-import { useSidebarInfoStore } from "./sidebarInfoStore";
-import { SidebarMode } from "@/common/enums/sidebarMode";
 import { webSocketService } from "@/services/websocket/websocket.service";
-import type { UserResponse } from "@/shared/types/responses/user.response";
-import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { localStorageService } from "@/services/storage/localStorageService";
 import { fetchInitialAppData } from "@/common/hooks/app/fetchInitialAppData";
-import logger from "@/common/utils/logger";
+import { clearAppData } from "@/common/hooks/app/clearAppData";
+import type { UserResponse } from "@/shared/types/responses/user.response";
 
 type AuthMessageType = "error" | "success" | "info";
 
@@ -45,6 +40,8 @@ interface AuthActions {
   sendPasswordResetEmail: (email: string) => Promise<void>;
   resetPasswordWithToken: (token: string, newPassword: string) => Promise<void>;
   verifyEmailWithToken: (token: string) => Promise<void>;
+
+  clearAuthStore: () => void;
 }
 
 const initialState: AuthState = {
@@ -63,9 +60,9 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         try {
           const token = localStorageService.getAccessToken();
           if (!token) {
-            logger.error({ prefix: "AUTH" }, "No Access-token");
+            console.error("[AUTH]", "No Access-token");
             // refresh everything
-            set({ ...initialState });
+            get().clearAuthStore();
             return false;
           }
 
@@ -75,7 +72,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
           if (!user) {
             // refresh everything
-            set({ ...initialState });
+            get().clearAuthStore();
             return false;
           }
 
@@ -109,7 +106,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       login: async (identifier, password) => {
         try {
           set({ loading: true });
-          useChatStore.getState().clearChats();
+          // useChatStore.getState().clearChats();
           const { user, accessToken } = await authService.login({
             identifier,
             password,
@@ -144,12 +141,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       logout: () => {
         authService.logout();
         webSocketService.disconnect();
-        useChatStore.getState().clearChats();
-        useSidebarStore.getState().setSidebar(SidebarMode.DEFAULT);
-        useSidebarInfoStore.getState().setSidebarInfo(SidebarInfoMode.DEFAULT);
-        set({
-          ...initialState,
-        });
+        clearAppData();
       },
 
       // Password recovery
@@ -210,7 +202,12 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           set({ loading: false });
         }
       },
+
+      clearAuthStore: () => {
+        set({ ...initialState });
+      },
     }),
+
     {
       name: "auth-storage",
       partialize: (state) => ({

@@ -19,7 +19,6 @@ import {
 } from "@shared/types/call";
 import { useTranslation } from "react-i18next";
 import { WsNotificationResponse } from "@/shared/types/responses/ws-emit-chat-member.response";
-import logger from "@/common/utils/logger";
 
 export function useCallSocketListeners() {
   const { t } = useTranslation();
@@ -46,14 +45,14 @@ export function useCallSocketListeners() {
           }
         }
       } catch (error) {
-        logger.error({ prefix: "FETCH", timestamp: true }, error);
+        console.error("FETCH", error);
       }
     };
 
     const handleIncomingCall = (
       data: WsNotificationResponse<IncomingCallResponse>
     ) => {
-      logger.log({ prefix: { prefix: "EVENT", timestamp: true }, timestamp: true }, "INCOMING_CALL", data);
+      console.log("[INCOMING_CALL]", data);
       const {
         callId,
         chatId,
@@ -68,7 +67,7 @@ export function useCallSocketListeners() {
       const isCaller = initiatorUserId === currentUserId;
 
       if (!isCaller && useCallStore.getState().callId) {
-        logger.warn(
+        console.warn(
           "Already have an incoming call, ignoring new incoming call"
         );
         return;
@@ -99,13 +98,13 @@ export function useCallSocketListeners() {
     const handleStartCall = (
       data: WsNotificationResponse<UpdateCallPayload>
     ) => {
-      logger.log({ prefix: "EVENT", timestamp: true }, "CALL_START", data);
+      console.log("[EVENT]", "CALL_START", data);
       const { callId, chatId, initiatorUserId } = data.payload;
       const callStore = useCallStore.getState();
 
       // ✅ Match on chatId instead of callId
       if (callStore.chatId !== chatId) {
-        logger.warn("chatId mismatch");
+        console.error("chatId mismatch");
         return;
       }
 
@@ -131,12 +130,12 @@ export function useCallSocketListeners() {
     const handleUpdateCall = (
       updatedCall: WsNotificationResponse<UpdateCallPayload>
     ) => {
-      logger.log({ prefix: "EVENT", timestamp: true }, "UPDATE_CALL", updatedCall);
+      console.log("[EVENT]", "UPDATE_CALL", updatedCall);
       const { callId, isVideoCall, callStatus } = updatedCall.payload;
       const callStore = useCallStore.getState();
 
       if (callStore.callId !== callId) {
-        logger.error("callId miss match");
+        console.error("callId miss match");
         return;
       }
 
@@ -146,25 +145,25 @@ export function useCallSocketListeners() {
       });
 
       if (isVideoCall && !callStore.isVideoCall) {
-        logger.warn("SFU call - video will be handled by LiveKit");
+        console.warn("SFU call - video will be handled by LiveKit");
       }
 
       if (!isVideoCall && callStore.isVideoCall) {
         callStore
           .toggleLocalVideo()
-          .catch((err) => logger.error("Failed to disable SFU video:", err));
+          .catch((err) => console.error("Failed to disable SFU video:", err));
       }
     };
 
     const handleCallDeclined = (
       data: WsNotificationResponse<CallActionResponse>
     ) => {
-      logger.log({ prefix: "EVENT", timestamp: true }, "CALL_DECLINED", data);
+      console.log("[EVENT]", "CALL_DECLINED", data);
       const { callId, isCallerCancel } = data.payload;
       const callStore = useCallStore.getState();
 
       if (callStore.callId !== callId) {
-        logger.error("callId mismatch");
+        console.error("callId mismatch");
         return;
       }
 
@@ -178,12 +177,12 @@ export function useCallSocketListeners() {
     const handleCallEnded = (
       data: WsNotificationResponse<UpdateCallPayload>
     ) => {
-      logger.log({ prefix: "EVENT", timestamp: true }, "CALL_ENDED", data);
+      console.log("[EVENT]", "CALL_ENDED", data);
       const { callId } = data.payload;
       const callStore = useCallStore.getState();
 
       if (callStore.callId !== callId) {
-        logger.error("callId miss match");
+        console.error("callId miss match");
         return;
       }
 
@@ -199,7 +198,7 @@ export function useCallSocketListeners() {
     const handleCallError = (
       data: WsNotificationResponse<CallErrorResponse>
     ) => {
-      logger.error({ prefix: "EVENT", timestamp: true }, "Call error:", data);
+      console.error("[EVENT]", "Call error:", data);
       const { reason, callId } = data.payload;
 
       if (reason === CallError.LINE_BUSY) {
@@ -207,7 +206,7 @@ export function useCallSocketListeners() {
         const callStore = useCallStore.getState();
 
         if (callStore.callId !== callId) {
-          logger.error("callId miss match");
+          console.error("callId miss match");
           return;
         }
 
