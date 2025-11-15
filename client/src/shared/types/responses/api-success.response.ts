@@ -2,7 +2,6 @@ import { ChatResponse } from "./chat.response";
 
 export type ApiSuccessResponse<T> = {
   payload: T;
-  statusCode: number;
   message: string;
 };
 

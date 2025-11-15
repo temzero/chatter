@@ -10,7 +10,7 @@ import { getMyCallToken } from "@/common/utils/call/getMyCallToken";
 import { CallError, IncomingCallResponse } from "@shared/types/call";
 import { callService } from "@/services/http/callService";
 import { callWebSocketService } from "@/services/websocket/call.websocket.service";
-import { handleError } from "@/common/utils/handleError";
+import { handleError } from "@/common/utils/error/handleError";
 import { getLocalCallStatus } from "@/common/utils/call/callHelpers";
 
 interface CallState {

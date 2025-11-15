@@ -4,7 +4,7 @@ import { getSetSidebarInfo } from "@/stores/sidebarInfoStore";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { AvatarEdit } from "@/components/ui/avatar/AvatarEdit";
 import { fileStorageService } from "@/services/storage/fileStorageService";
-import { handleError } from "@/common/utils/handleError";
+import { handleError } from "@/common/utils/error/handleError";
 import { toast } from "react-toastify";
 import { useActiveMembers } from "@/stores/chatMemberStore";
 import { ModalType, getOpenModal } from "@/stores/modalStore";

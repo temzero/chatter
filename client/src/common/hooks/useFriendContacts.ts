@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { FriendContactResponse } from "@/shared/types/responses/friend-contact.response";
 import { friendshipService } from "@/services/http/friendshipService";
-import { handleError } from "@/common/utils/handleError";
+import { handleError } from "@/common/utils/error/handleError";
 
 export function useFriendContacts(excludeUserIds: string[] = []) {
   const [contacts, setContacts] = useState<FriendContactResponse[]>([]);

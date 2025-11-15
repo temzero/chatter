@@ -3,7 +3,7 @@ import SidebarLayout from "@/layouts/SidebarLayout";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { getCurrentUser, useAuthStore } from "@/stores/authStore";
 import { userService } from "@/services/http/userService";
-import { handleError } from "@/common/utils/handleError";
+import { handleError } from "@/common/utils/error/handleError";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 import { validatePhoneNumber } from "@/common/utils/validation/phoneNumberValidation";

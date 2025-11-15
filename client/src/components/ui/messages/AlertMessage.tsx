@@ -29,6 +29,6 @@ export const AlertMessage = ({ className = "" }: AlertMessageProps) => {
   };
 
   return (
-    <div className={`${getMessageColor()} ${className}`}>{message.content}</div>
+    <div className={`${getMessageColor()} ${className} select-all`}>{message.content}</div>
   );
 };

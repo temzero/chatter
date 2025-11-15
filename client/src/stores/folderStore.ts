@@ -4,7 +4,7 @@ import { FolderResponse } from "@/shared/types/responses/folder.response";
 import { folderService } from "@/services/http/folderService";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { PaginationResponse } from "@/shared/types/responses/pagination.response";
-import { handleError } from "@/common/utils/handleError";
+import { handleError } from "@/common/utils/error/handleError";
 
 interface FolderStoreState {
   folders: FolderResponse[];
@@ -171,7 +171,7 @@ export const useFolderStore = create<FolderStoreState & FolderStoreActions>(
 
     clearFolderStore: () => {
       set({ ...initialState });
-    }
+    },
   })
 );
 

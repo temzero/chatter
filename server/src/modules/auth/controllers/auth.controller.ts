@@ -51,7 +51,7 @@ export class AuthController {
       deviceId,
       deviceName,
     );
-    // Optional: Set HTTP-only cookie for web clients
+
     setRefreshTokenCookie(response, refreshToken, this.configService);
     return {
       accessToken,
@@ -136,7 +136,6 @@ export class AuthController {
       user.refreshToken,
     );
 
-    // Optional: set HTTP-only cookie for web clients
     setRefreshTokenCookie(response, refreshToken, this.configService);
 
     return {

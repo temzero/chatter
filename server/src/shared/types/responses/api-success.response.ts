@@ -1,12 +1,11 @@
-import { ChatResponse } from './chat.response';
-
 export type ApiSuccessResponse<T> = {
   payload: T;
-  statusCode: number;
-  message: string;
+  message?: string;
 };
 
 // Specialized response for direct chats
-export type DirectChatApiResponse = ApiSuccessResponse<ChatResponse> & {
+export type DirectChatApiResponse<T> = {
+  payload: T;
   wasExisting: boolean; // Only added for direct chat responses
+  message?: string;
 };

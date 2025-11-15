@@ -7,9 +7,6 @@ import type { BootstrapResponse } from "@/shared/types/responses/bootstrap.respo
 
 export const fetchInitialAppData = async () => {
   const data: BootstrapResponse = await bootstrapService.fetchAppData();
-
-  console.log("[FETCH]", "BootstrapResponse-data", data);
-
   useChatStore.getState().setInitialData(data.chatData);
   useFolderStore.getState().setInitialData(data.folderData);
   useFriendshipStore.getState().setInitialData(data.friendRequestData);

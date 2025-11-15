@@ -2,13 +2,10 @@
 import axios, {
   AxiosError,
   AxiosInstance,
-  AxiosResponse,
   InternalAxiosRequestConfig,
 } from "axios";
 import { localStorageService } from "../storage/localStorageService";
-import { useAuthStore } from "@/stores/authStore";
-import { audioService, SoundType } from "../audio.service";
-import { toast } from "react-toastify";
+import { handleApiError } from "@/common/utils/error/handleApiError";
 
 const API: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -39,37 +36,10 @@ API.interceptors.request.use(
   }
 );
 
-// RESPONSE interceptor
+// Response interceptor
 API.interceptors.response.use(
-  (response: AxiosResponse) => response,
-  async (error: AxiosError) => {
-    console.error("[API]", error.response?.data);
-
-    audioService.stopAllSounds();
-    audioService.playSound(SoundType.ERROR);
-
-    const requestUrl = error.config?.url || "";
-    const currentPath = window.location.pathname;
-    const isAuthRoute = requestUrl.includes("/auth/");
-    const isCurrentlyOnAuthPage = currentPath.includes("/auth/");
-
-    if (error.response?.status === 401) {
-      const isRefreshCall = requestUrl.includes("/auth/refresh");
-
-      if (isRefreshCall) {
-        toast.error("Refresh token expired. Logging out...");
-      } else {
-        toast.info("Access token expired. Redirecting to login...");
-      }
-
-      // Common logout & redirect for both cases
-      useAuthStore.getState().logout();
-      if (!isAuthRoute && !isCurrentlyOnAuthPage) {
-        window.location.href = "/auth/login";
-      }
-    }
-    return Promise.reject(error);
-  }
+  (res) => res,
+  (error) => handleApiError()(error) // call your factory function here
 );
 
 export default API;

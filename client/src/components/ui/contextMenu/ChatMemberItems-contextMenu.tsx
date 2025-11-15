@@ -1,5 +1,5 @@
 import React from "react";
-import { handleError } from "@/common/utils/handleError";
+import { handleError } from "@/common/utils/error/handleError";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
 import { getCurrentUserId } from "@/stores/authStore";

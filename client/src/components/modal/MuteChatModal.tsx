@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { formatDateTime } from "@/common/utils/format/formatDateTime";
 import { useChatStore } from "@/stores/chatStore";
 import { useTranslation } from "react-i18next";
-import { handleError } from "@/common/utils/handleError";
+import { handleError } from "@/common/utils/error/handleError";
 
 interface MuteChatModalData {
   chatId: string;

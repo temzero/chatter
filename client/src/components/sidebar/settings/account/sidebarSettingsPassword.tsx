@@ -6,7 +6,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { userService } from "@/services/http/userService";
 import { getSetSidebar } from "@/stores/sidebarStore";
 import { toast } from "react-toastify";
-import { handleError } from "@/common/utils/handleError";
+import { handleError } from "@/common/utils/error/handleError";
 import { useTranslation } from "react-i18next";
 import { validatePassword } from "@/common/utils/validation/passwordValidation";
 

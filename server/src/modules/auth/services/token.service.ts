@@ -37,22 +37,22 @@ export class TokenService {
       },
       [TokenType.REFRESH]: {
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-        expiresIn: '5m',
+        expiresIn: '15m',
         // expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRATION'),
       },
     }[type];
 
-    console.log(
-      '[DEBUG] ACCESS_EXPIRATION:',
-      this.configService.get<string>('JWT_ACCESS_EXPIRATION'),
-    );
+    // console.log(
+    //   '[DEBUG] ACCESS_EXPIRATION:',
+    //   this.configService.get<string>('JWT_ACCESS_EXPIRATION'),
+    // );
 
-    console.log(
-      '[DEBUG] REFRESH_EXPIRATION:',
-      this.configService.get<string>('JWT_REFRESH_EXPIRATION'),
-    );
+    // console.log(
+    //   '[DEBUG] REFRESH_EXPIRATION:',
+    //   this.configService.get<string>('JWT_REFRESH_EXPIRATION'),
+    // );
 
-    console.log('[DEBUG] options:', options);
+    // console.log('[DEBUG] options:', options);
     return this.jwtService.signAsync(cleanPayload, options);
   }
 
@@ -68,14 +68,24 @@ export class TokenService {
       [TokenType.REFRESH]: this.configService.get<string>('JWT_REFRESH_SECRET'),
     }[type];
 
+    console.log('[DEBUG] Verifying token with secret:', secret);
+
     try {
       return await this.jwtService.verifyAsync<T>(token, { secret });
     } catch (err: unknown) {
       if (err instanceof Error) {
         if (err.name === 'TokenExpiredError') {
-          ErrorResponse.unauthorized(UnauthorizedError.TOKEN_EXPIRED);
+          if (type === TokenType.ACCESS) {
+            ErrorResponse.unauthorized(UnauthorizedError.TOKEN_EXPIRED);
+          } else {
+            ErrorResponse.unauthorized(UnauthorizedError.REFRESH_TOKEN_EXPIRED);
+          }
         } else if (err.name === 'JsonWebTokenError') {
-          ErrorResponse.unauthorized(UnauthorizedError.INVALID_TOKEN);
+          if (type === TokenType.ACCESS) {
+            ErrorResponse.unauthorized(UnauthorizedError.INVALID_TOKEN);
+          } else {
+            ErrorResponse.unauthorized(UnauthorizedError.INVALID_REFRESH_TOKEN);
+          }
         }
       }
       ErrorResponse.forbidden();

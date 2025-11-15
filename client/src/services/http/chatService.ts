@@ -12,15 +12,27 @@ import type {
 export const chatService = {
   // Get all direct and group chats
 
+  // async fetchMoreChats(
+  //   query?: PaginationQuery
+  // ): Promise<PaginationResponse<ChatResponse>> {
+  //   const { data } = await API.get(`/chat/more`, {
+  //     params: query,
+  //   });
+
+  //   const { items, hasMore } = data.payload;
+  //   return { items, hasMore };
+  // },
+
   async fetchMoreChats(
     query?: PaginationQuery
   ): Promise<PaginationResponse<ChatResponse>> {
-    const { data } = await API.get(`/chat/more`, {
-      params: query,
-    });
+    // Type the API response with the success wrapper
+    const { data } = await API.get<
+      ApiSuccessResponse<PaginationResponse<ChatResponse>>
+    >(`/chat/more`, { params: query });
 
-    const { items, hasMore } = data.payload;
-    return { items, hasMore };
+    // Unwrap payload
+    return data.payload; // contains { items, hasMore }
   },
 
   // Get a specific chat by ID

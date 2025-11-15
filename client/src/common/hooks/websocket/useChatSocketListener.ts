@@ -11,7 +11,7 @@ import { handleSystemEventMessage } from "@/common/utils/message/handleSystemEve
 import { WsNotificationResponse } from "@/shared/types/responses/ws-emit-chat-member.response";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { webSocketService } from "@/services/websocket/websocket.service";
-import { handleError } from "@/common/utils/handleError";
+import { handleError } from "@/common/utils/error/handleError";
 import { useTranslation } from "react-i18next";
 
 export function useChatSocketListeners() {

@@ -8,7 +8,7 @@ import { getSetSidebarInfo } from "@/stores/sidebarInfoStore";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { useTranslation } from "react-i18next";
 import Button from "../ui/buttons/Button";
-import { handleError } from "@/common/utils/handleError";
+import { handleError } from "@/common/utils/error/handleError";
 
 interface DeleteChatModalData {
   chat: ChatResponse;

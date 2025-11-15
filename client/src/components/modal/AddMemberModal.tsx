@@ -5,7 +5,7 @@ import { useActiveChat, useChatStore } from "@/stores/chatStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { modalAnimations } from "@/common/animations/modalAnimations";
 import { copyToClipboard } from "@/common/utils/copyToClipboard";
-import { handleError } from "@/common/utils/handleError";
+import { handleError } from "@/common/utils/error/handleError";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { FriendContactResponse } from "@/shared/types/responses/friend-contact.response";
 import { useFriendContacts } from "@/common/hooks/useFriendContacts";

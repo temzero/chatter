@@ -1,7 +1,7 @@
 // bootstrap.ts
 import { useAuthStore } from "@/stores/authStore";
 import { fetchInitialAppData } from "./fetchInitialAppData";
-import { handleError } from "@/common/utils/handleError";
+import { handleError } from "@/common/utils/error/handleError";
 
 const bootstrapApp = async () => {
   try {

@@ -4,7 +4,7 @@ import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { getCurrentUserId } from "@/stores/authStore";
 import { useMessageStore } from "@/stores/messageStore";
-import { handleError } from "@/common/utils/handleError";
+import { handleError } from "@/common/utils/error/handleError";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import Button from "../ui/buttons/Button";

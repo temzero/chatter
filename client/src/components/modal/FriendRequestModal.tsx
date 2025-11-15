@@ -5,7 +5,7 @@ import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import { getCurrentUserId } from "@/stores/authStore";
 import { useTranslation } from "react-i18next";
-import { handleError } from "@/common/utils/handleError";
+import { handleError } from "@/common/utils/error/handleError";
 import { toast } from "react-toastify";
 
 interface FriendRequestModalData {

@@ -748,23 +748,31 @@
     "member_left": "{{displayName}} left the chat",
     "member_kicked": "{{displayName}} removed {{targetName}} from the chat",
     "member_banned": "{{displayName}} banned {{targetName}} from the chat",
-    "chat_renamed": "{{displayName}} renamed chat {{#if oldVal}}from \"{{oldVal}}\" {{/if}}to \"{{newVal}}\"",
+
+    "chat_renamed": "{{displayName}} renamed chat from \"{{oldVal}}\" to \"{{newVal}}\"",
+    "chat_renamed_no_old": "{{displayName}} renamed chat to \"{{newVal}}\"",
     "chat_renamed_no_values": "{{displayName}} renamed the chat",
+
     "chat_updated_avatar": "{{displayName}} updated the chat avatar",
     "chat_updated_description_from_to": "{{displayName}} changed description from \"{{oldVal}}\" to \"{{newVal}}\"",
     "chat_set_description": "{{displayName}} set description to \"{{newVal}}\"",
     "chat_updated_description": "{{displayName}} updated the chat description",
+
     "nickname_changed_from_to": "{{displayName}} changed {{target}} nickname from \"{{oldVal}}\" to \"{{newVal}}\"",
     "nickname_set": "{{displayName}} set {{target}} nickname to \"{{newVal}}\"",
     "nickname_updated": "{{displayName}} updated {{target}} nickname",
+
     "promoted_to_owner": "{{displayName}} promoted {{target}} to owner",
     "role_changed_to": "{{displayName}} changed {{target}} role to {{newVal}}",
     "role_updated": "{{displayName}} updated {{target}} role",
+
     "status_changed_to": "{{displayName}} changed {{target}} status to {{newVal}}",
     "status_updated": "{{displayName}} updated {{target}} status",
+
     "message_pinned_with_content": "{{displayName}} pinned a message \"{{newVal}}\"",
     "message_pinned": "{{displayName}} pinned a message",
     "message_unpinned": "{{displayName}} unpinned a message",
+
     "chat_deleted": "{{displayName}} deleted the chat"
   },
 
@@ -791,6 +799,19 @@
       "set_nickname": "Set Nickname",
       "set_admin": "Set as Admin",
       "set_member": "Set as Member"
+    }
+  },
+
+  "error_message": {
+    "401": {
+      "UNAUTHORIZED": "Unauthorized",
+      "TOKEN_EXPIRED": "Access token expired",
+      "REFRESH_TOKEN_EXPIRED": "Session expired",
+      "INVALID_TOKEN": "Invalid access token",
+      "INVALID_REFRESH_TOKEN": "Invalid refresh token",
+      "INVALID_CREDENTIALS": "Wrong username or password",
+      "SESSION_EXPIRED": "Session expired",
+      "ACCESS_DENIED": "Access denied"
     }
   }
 }

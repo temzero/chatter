@@ -2,7 +2,7 @@
 import { useFriendshipStore } from "@/stores/friendshipStore";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { useChatStore } from "@/stores/chatStore";
-import { handleError } from "../utils/handleError";
+import { handleError } from "@/common/utils/error/handleError";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 

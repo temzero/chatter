@@ -22,31 +22,31 @@ export class ErrorResponse {
 
   // 400 Bad Request
   static badRequest(
-    message: BadRequestError = BadRequestError.BAD_REQUEST,
+    code: BadRequestError = BadRequestError.BAD_REQUEST,
   ): never {
-    throw new HttpException(message, HttpStatus.BAD_REQUEST);
+    throw new HttpException({ code }, HttpStatus.BAD_REQUEST);
   }
 
   // 401 Unauthorized
   static unauthorized(
-    message: UnauthorizedError = UnauthorizedError.UNAUTHORIZED,
+    code: UnauthorizedError = UnauthorizedError.UNAUTHORIZED,
   ): never {
-    throw new HttpException(message, HttpStatus.UNAUTHORIZED);
+    throw new HttpException({ code }, HttpStatus.UNAUTHORIZED);
   }
 
-  static forbidden(message: ForbiddenError = ForbiddenError.FORBIDDEN): never {
-    throw new HttpException(message, HttpStatus.FORBIDDEN);
+  static forbidden(code: ForbiddenError = ForbiddenError.FORBIDDEN): never {
+    throw new HttpException({ code }, HttpStatus.FORBIDDEN);
   }
 
   // 404 Not Found
   static notFound(
-    message: NotFoundError = NotFoundError.RESOURCE_NOT_FOUND,
+    code: NotFoundError = NotFoundError.RESOURCE_NOT_FOUND,
   ): never {
-    throw new HttpException(message, HttpStatus.NOT_FOUND);
+    throw new HttpException({ code }, HttpStatus.NOT_FOUND);
   }
 
   // 409 Conflict
-  static conflict(message: ConflictError = ConflictError.CONFLICT): never {
-    throw new HttpException(message, HttpStatus.CONFLICT);
+  static conflict(code: ConflictError = ConflictError.CONFLICT): never {
+    throw new HttpException({ code }, HttpStatus.CONFLICT);
   }
 }

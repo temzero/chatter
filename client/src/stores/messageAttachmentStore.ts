@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { attachmentService } from "@/services/http/messageAttachmentService";
 import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
-import { handleError } from "@/common/utils/handleError";
+import { handleError } from "@/common/utils/error/handleError";
 import { useActiveChatId } from "./chatStore";
 import { PaginationQuery } from "@/shared/types/queries/pagination-query";
 
@@ -153,8 +153,8 @@ export const useAttachmentStore = create<
       return {};
     }
   },
-  
-  clearAttachmentStore: () => set({ ...initialState }), 
+
+  clearAttachmentStore: () => set({ ...initialState }),
 }));
 
 const addAttachmentsToState = (

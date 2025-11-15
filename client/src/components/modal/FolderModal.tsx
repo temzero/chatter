@@ -9,7 +9,7 @@ import Checkbox from "../ui/buttons/CheckBox";
 import Button from "../ui/buttons/Button";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { ChatAvatar } from "../ui/avatar/ChatAvatar";
-import { handleError } from "@/common/utils/handleError";
+import { handleError } from "@/common/utils/error/handleError";
 
 interface AddChatToFolderModalData {
   chat: ChatResponse;

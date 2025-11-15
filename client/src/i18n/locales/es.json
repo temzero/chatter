@@ -745,26 +745,34 @@
     "default": "Ocurrió un evento del sistema.",
     "another_member": "otro miembro",
     "member_joined": "{{displayName}} se unió al chat",
-    "member_left": "{{displayName}} salió del chat",
+    "member_left": "{{displayName}} abandonó el chat",
     "member_kicked": "{{displayName}} eliminó a {{targetName}} del chat",
-    "member_banned": "{{displayName}} prohibió a {{targetName}} en el chat",
-    "chat_renamed": "{{displayName}} renombró el chat {{#if oldVal}}de \"{{oldVal}}\" {{/if}}a \"{{newVal}}\"",
-    "chat_renamed_no_values": "{{displayName}} renombró el chat",
+    "member_banned": "{{displayName}} bloqueó a {{targetName}} en el chat",
+
+    "chat_renamed": "{{displayName}} cambió el nombre del chat de \"{{oldVal}}\" a \"{{newVal}}\"",
+    "chat_renamed_no_old": "{{displayName}} cambió el nombre del chat a \"{{newVal}}\"",
+    "chat_renamed_no_values": "{{displayName}} cambió el nombre del chat",
+
     "chat_updated_avatar": "{{displayName}} actualizó el avatar del chat",
     "chat_updated_description_from_to": "{{displayName}} cambió la descripción de \"{{oldVal}}\" a \"{{newVal}}\"",
     "chat_set_description": "{{displayName}} estableció la descripción a \"{{newVal}}\"",
     "chat_updated_description": "{{displayName}} actualizó la descripción del chat",
+
     "nickname_changed_from_to": "{{displayName}} cambió el apodo de {{target}} de \"{{oldVal}}\" a \"{{newVal}}\"",
     "nickname_set": "{{displayName}} estableció el apodo de {{target}} a \"{{newVal}}\"",
     "nickname_updated": "{{displayName}} actualizó el apodo de {{target}}",
+
     "promoted_to_owner": "{{displayName}} promovió a {{target}} a propietario",
     "role_changed_to": "{{displayName}} cambió el rol de {{target}} a {{newVal}}",
     "role_updated": "{{displayName}} actualizó el rol de {{target}}",
+
     "status_changed_to": "{{displayName}} cambió el estado de {{target}} a {{newVal}}",
     "status_updated": "{{displayName}} actualizó el estado de {{target}}",
+
     "message_pinned_with_content": "{{displayName}} fijó un mensaje \"{{newVal}}\"",
     "message_pinned": "{{displayName}} fijó un mensaje",
-    "message_unpinned": "{{displayName}} desancló un mensaje",
+    "message_unpinned": "{{displayName}} des-fijó un mensaje",
+
     "chat_deleted": "{{displayName}} eliminó el chat"
   },
 

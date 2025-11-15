@@ -4,7 +4,7 @@ import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useAuthStore, getCurrentUser } from "@/stores/authStore";
 import { userService } from "@/services/http/userService";
 import { getSetSidebar } from "@/stores/sidebarStore";
-import { handleError } from "@/common/utils/handleError";
+import { handleError } from "@/common/utils/error/handleError";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 import { validateEmail } from "@/common/utils/validation/emailValidation";

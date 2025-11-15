@@ -2,7 +2,7 @@ import { AttachmentUploadRequest } from "@/shared/types/requests/attachment-uplo
 import { determineAttachmentType } from "@/common/utils/message/determineAttachmentType";
 import supabase, { attachmentsBucket } from "@/common/utils/supabaseClient";
 import { deleteFilesFromSupabase } from "@/common/utils/supabase/deleteFileFromSupabase";
-import { handleError } from "../handleError";
+import { handleError } from "@/common/utils/error/handleError";
 
 /**
  * Upload multiple files to Supabase and return their metadata

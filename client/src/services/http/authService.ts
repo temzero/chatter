@@ -6,11 +6,17 @@ import {
   LoginRequest,
   RegisterRequest,
 } from "@/shared/types/requests/auth.request";
+import { ApiSuccessResponse } from "@/shared/types/responses/api-success.response";
+import { UserResponse } from "@/shared/types/responses/user.response";
+import { toast } from "react-toastify";
 
 export const authService = {
-  async fetchCurrentUser() {
-    const { data } = await API.get("/user/me");
-    return data.payload;
+  async fetchCurrentUser(): Promise<UserResponse> {
+    console.log("[AUTH]", "fetchCurrentUser");
+    const response = await API.get<ApiSuccessResponse<UserResponse>>(
+      "/user/me"
+    );
+    return response.data.payload; // unwrap payload
   },
 
   async login(payload: LoginRequest): Promise<AuthResponse> {
@@ -46,6 +52,7 @@ export const authService = {
   },
 
   async refreshAccessToken(): Promise<string> {
+    toast.info("[AUTH] RefreshToken");
     console.log("[AUTH]", "refreshToken");
     const response = await API.post<AuthResponse>("/auth/refresh");
     return response.data.accessToken;

@@ -5,7 +5,7 @@ import { useChatStore } from "./chatStore";
 import { messageService } from "@/services/http/messageService";
 import { useChatMemberStore } from "./chatMemberStore";
 import { getCurrentUserId, useAuthStore } from "./authStore";
-import { handleError } from "@/common/utils/handleError";
+import { handleError } from "@/common/utils/error/handleError";
 import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 import {
   MessageResponse,

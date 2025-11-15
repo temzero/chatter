@@ -1,5 +1,4 @@
 // src/stores/authStore.ts
-import axios from "axios";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { authService } from "@/services/http/authService";
@@ -40,6 +39,7 @@ interface AuthActions {
   sendPasswordResetEmail: (email: string) => Promise<void>;
   resetPasswordWithToken: (token: string, newPassword: string) => Promise<void>;
   verifyEmailWithToken: (token: string) => Promise<void>;
+  refreshAccessToken: () => Promise<string>;
 
   clearAuthStore: () => void;
 }
@@ -68,25 +68,33 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
           set({ loading: true });
 
-          const user = await authService.fetchCurrentUser();
+          // First, check persisted state
+          const persistedUser = get().currentUser;
+          if (persistedUser) {
+            set({ isAuthenticated: true, loading: false });
+            return true;
+          }
 
-          if (!user) {
+          const userData: UserResponse = await authService.fetchCurrentUser();
+
+          if (!userData) {
+            console.error("[AUTH]", "fetchCurrentUser failed");
             // refresh everything
             get().clearAuthStore();
             return false;
           }
 
           set({
-            currentUser: user,
+            currentUser: userData,
             isAuthenticated: true,
             loading: false,
             message: null,
           });
 
           return true;
-        } catch (error) {
-          get().logout();
-          throw error;
+        } catch {
+          set({ loading: false });
+          return false;
         }
       },
 
@@ -104,19 +112,14 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       // Authentication methods
       login: async (identifier, password) => {
+        set({ loading: true });
         try {
-          set({ loading: true });
-          // useChatStore.getState().clearChats();
           const { user, accessToken } = await authService.login({
             identifier,
             password,
           });
 
           await handleAuthSuccess(user, accessToken);
-        } catch (error) {
-          const errorMessage = handleAuthError(error);
-          set({ message: { type: "error", content: errorMessage } });
-          throw error;
         } finally {
           set({ loading: false });
         }
@@ -129,10 +132,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           const { user, accessToken } = await authService.register(userData);
 
           await handleAuthSuccess(user, accessToken);
-        } catch (error) {
-          const errorMessage = handleAuthError(error);
-          set({ message: { type: "error", content: errorMessage } });
-          throw error;
         } finally {
           set({ loading: false });
         }
@@ -155,10 +154,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
               content: "Password reset email sent. Please check your inbox.",
             },
           });
-        } catch (error) {
-          const errorMessage = handleAuthError(error);
-          set({ message: { type: "error", content: errorMessage } });
-          throw error;
         } finally {
           set({ loading: false });
         }
@@ -174,10 +169,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
               content: "Password reset successfully. You can now login.",
             },
           });
-        } catch (error) {
-          const errorMessage = handleAuthError(error);
-          set({ message: { type: "error", content: errorMessage } });
-          throw error;
         } finally {
           set({ loading: false });
         }
@@ -194,12 +185,29 @@ export const useAuthStore = create<AuthState & AuthActions>()(
               content: "Email verified successfully!",
             },
           });
-        } catch (error) {
-          const errorMessage = handleAuthError(error);
-          set({ message: { type: "error", content: errorMessage } });
-          throw error;
         } finally {
           set({ loading: false });
+        }
+      },
+
+      refreshAccessToken: async (): Promise<string> => {
+        try {
+          console.info("[AUTH]", "Refreshing access token...");
+          const newAccessToken = await authService.refreshAccessToken();
+
+          // Save new access token to localStorage
+          localStorageService.setAccessToken(newAccessToken);
+
+          // Optionally update any state if needed
+          set({ isAuthenticated: true });
+
+          return newAccessToken;
+        } catch (error) {
+          console.error("[AUTH] Failed to refresh token", error);
+          // Logout if refresh fails
+          get().clearAuthStore();
+          window.location.href = "/auth/login";
+          throw error; // re-throw so caller knows refresh failed
         }
       },
 
@@ -227,13 +235,6 @@ async function handleAuthSuccess(user?: UserResponse, accessToken?: string) {
     currentUser: user,
     isAuthenticated: true,
   });
-}
-
-function handleAuthError(error: unknown): string {
-  if (axios.isAxiosError(error)) {
-    return error.response?.data?.message || error.message || "Network error";
-  }
-  return error instanceof Error ? error.message : "Unknown error occurred";
 }
 
 // EXPORT HOOKS

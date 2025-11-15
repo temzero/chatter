@@ -73,11 +73,26 @@ export function getSystemMessageText({
       return t("system_message.member_kicked", { displayName, targetName });
     case SystemEventType.MEMBER_BANNED:
       return t("system_message.member_banned", { displayName, targetName });
+    // case SystemEventType.CHAT_RENAMED:
+    //   if (newVal) {
+    //     return t("system_message.chat_renamed", {
+    //       displayName,
+    //       oldVal,
+    //       newVal,
+    //     });
+    //   }
+    //   return t("system_message.chat_renamed_no_values", { displayName });
     case SystemEventType.CHAT_RENAMED:
-      if (newVal) {
+      if (oldVal && newVal) {
         return t("system_message.chat_renamed", {
           displayName,
           oldVal,
+          newVal,
+        });
+      }
+      if (newVal) {
+        return t("system_message.chat_renamed_no_old", {
+          displayName,
           newVal,
         });
       }

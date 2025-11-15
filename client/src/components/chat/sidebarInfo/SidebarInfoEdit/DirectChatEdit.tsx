@@ -4,7 +4,7 @@ import { Avatar } from "@/components/ui/avatar/Avatar";
 import { getSetSidebarInfo } from "@/stores/sidebarInfoStore";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
-import { handleError } from "@/common/utils/handleError";
+import { handleError } from "@/common/utils/error/handleError";
 import { toast } from "react-toastify";
 import {
   useChatMemberStore,

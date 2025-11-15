@@ -3,7 +3,7 @@ import { chatWebSocketService } from "@/services/websocket/chat.websocket.servic
 import { useMessageStore } from "@/stores/messageStore";
 import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 import { determineAttachmentType } from "@/common/utils/message/determineAttachmentType";
-import { handleError } from "../handleError";
+import { handleError } from "@/common/utils/error/handleError";
 import { uploadFilesToSupabase } from "@/common/utils/supabase/uploadToSupabase";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { CreateMessageRequest } from "@/shared/types/requests/send-message.request";

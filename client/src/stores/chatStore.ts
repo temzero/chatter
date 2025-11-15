@@ -9,7 +9,7 @@ import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useModalStore } from "./modalStore";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
 import { UpdateChatRequest } from "@/shared/types/requests/update-chat.request";
-import { handleError } from "@/common/utils/handleError";
+import { handleError } from "@/common/utils/error/handleError";
 import {
   ChatResponse,
   ChatDataResponse,
