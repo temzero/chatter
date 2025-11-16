@@ -1,52 +1,16 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// src/hooks/handleApiError.ts
-import { AxiosError } from "axios";
-import { useAuthStore } from "@/stores/authStore";
-import { toast } from "react-toastify";
-import { audioService, SoundType } from "@/services/audio.service";
 import { UnauthorizedError } from "@/shared/types/enums/error-message.enum";
-import i18next from "i18next";
+import { useAuthStore } from "@/stores/authStore";
 import { error } from "console";
+import i18next from "i18next";
+import { toast } from "react-toastify";
 
-export const handleApiError = () => {
-  return (error: AxiosError) => {
-    const status = error.response?.status;
-    const code = (error.response?.data as any)?.code;
-    const message = (error.response?.data as any)?.message || error.message;
-
-    const requestUrl = error.config?.url || "";
-    const currentPath = window.location.pathname;
-
-    toast.error(`${status} - Code: ${code} - Message: ${message}`);
-    console.error(`${status} - Code: ${code} - Message: ${message}`);
-
-    if (status === 401) {
-      handleUnauthorizedError(code, requestUrl, currentPath);
-      return;
-    }
-
-    audioService.stopAllSounds();
-    audioService.playSound(SoundType.ERROR);
-
-    return Promise.reject(error);
-  };
-};
-
-const handleUnauthorizedError = async (
-  code: string,
-  currentPath: string,
-  requestUrl: string
-) => {
+const handleUnauthorizedError = async (code: string) => {
   const t = i18next.t;
-  const isAuthRoute = requestUrl.includes("/auth/");
-  const isOnAuthPage = currentPath.includes("/auth/");
 
   const message = t(`error_message.401.${code}`) || "Unauthorized access.";
 
   const redirectToLogin = () => {
-    console.info("Redirecting to login page...");
     useAuthStore.getState().logout();
-    if (!isAuthRoute && !isOnAuthPage) window.location.href = "/auth/login";
   };
 
   if (code === UnauthorizedError.UNAUTHORIZED) {
@@ -58,7 +22,7 @@ const handleUnauthorizedError = async (
   if (code === UnauthorizedError.TOKEN_EXPIRED) {
     toast.info(message);
     console.info(message);
-    redirectToLogin();
+    // redirectToLogin();
 
     return;
   }
@@ -133,3 +97,5 @@ const handleUnauthorizedError = async (
   // default fallback
   console.warn("Unhandled unauthorized error:", code, message);
 };
+
+export default handleUnauthorizedError;

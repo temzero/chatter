@@ -18,14 +18,7 @@ bootstrapApp()
       // </StrictMode>,
     );
   })
-  .catch((err) => {
-    console.log("Caught error during bootstrap:", err);
-    if (err?.response?.status === 401) {
-      // Ignore 401 errors (unauthenticated)
-      console.info("[INIT]", "Unauthorized, skipping error page.");
-      return;
-    } else {
-      console.error("[INIT]", "Failed to initialize app:", err);
-      createRoot(document.getElementById("root")!).render(<LoadAppErrorPage />);
-    }
+  .catch((error) => {
+    console.error("[BOOTSTRAP] Failed to bootstrap app:", error);
+    createRoot(document.getElementById("root")!).render(<LoadAppErrorPage />);
   });

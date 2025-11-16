@@ -12,7 +12,6 @@ import {
 } from '@nestjs/common';
 import { AuthResponse } from 'src/shared/types/responses/auth.response';
 import { SuccessResponse } from 'src/common/api-response/success';
-import { ConfigService } from '@nestjs/config';
 import { AuthService } from '../services/auth.service';
 import { TokenService } from '../services/token.service';
 import { ErrorResponse } from 'src/common/api-response/errors';
@@ -22,7 +21,10 @@ import { JwtAuthGuard } from '../guards/jwt.guard';
 import { CurrentUser } from '../decorators/user.decorator';
 import { Request, Response } from 'express';
 import { JwtPayload, JwtRefreshPayload } from '../types/jwt-payload.type';
-import { setRefreshTokenCookie } from 'src/common/helpers/set-cookie.helper';
+import {
+  clearRefreshTokenCookie,
+  setRefreshTokenCookie,
+} from 'src/common/helpers/set-cookie.helper';
 import { JwtRefreshGuard } from '../guards/jwt-refresh.guard';
 import { RegisterDto } from '../dto/requests/register.dto';
 import { TokenStorageService } from '../services/token-storage.service';
@@ -31,7 +33,6 @@ import { TokenStorageService } from '../services/token-storage.service';
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly configService: ConfigService,
     private readonly tokenService: TokenService,
     private readonly tokenStorageService: TokenStorageService,
   ) {}
@@ -52,7 +53,7 @@ export class AuthController {
       deviceName,
     );
 
-    setRefreshTokenCookie(response, refreshToken, this.configService);
+    setRefreshTokenCookie(response, refreshToken);
     return {
       accessToken,
       user,
@@ -73,7 +74,7 @@ export class AuthController {
       deviceName,
     );
     // Optional: Set HTTP-only cookie for web clients
-    setRefreshTokenCookie(response, refreshToken, this.configService);
+    setRefreshTokenCookie(response, refreshToken);
     return {
       accessToken,
       user,
@@ -105,7 +106,7 @@ export class AuthController {
     }
 
     await this.authService.logout(decodedToken.sub, decodedToken.deviceId);
-    response.clearCookie('refreshToken');
+    clearRefreshTokenCookie(response);
     return new SuccessResponse(null, 'Logged out successfully');
   }
 
@@ -116,7 +117,7 @@ export class AuthController {
     @CurrentUser() user: User,
   ) {
     await this.authService.logoutAll(user.id);
-    response.clearCookie('refreshToken');
+    clearRefreshTokenCookie(response);
     return new SuccessResponse(
       null,
       'Logged out from all devices successfully',
@@ -136,7 +137,7 @@ export class AuthController {
       user.refreshToken,
     );
 
-    setRefreshTokenCookie(response, refreshToken, this.configService);
+    setRefreshTokenCookie(response, refreshToken);
 
     return {
       accessToken,

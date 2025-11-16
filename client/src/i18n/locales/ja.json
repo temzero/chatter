@@ -59,7 +59,8 @@
       "blocked": "ブロック済み",
       "blocked_me": "あなたはブロックされています",
       "blocked_them": "あなたはこのユーザーをブロックしました。",
-      "blocked_each_other": "あなたとこのユーザーはお互いをブロックしています"
+      "blocked_each_other": "あなたとこのユーザーはお互いをブロックしています",
+      "load_app_error": "アプリを読み込めませんでした。更新してください。"
     },
     "loading": {
       "loading": "読み込み中...",
@@ -127,7 +128,14 @@
     },
 
     "register": {
-      "button_loading": "アカウント作成中..."
+      "button_loading": "アカウントを作成中...",
+      "invalid_password": "パスワードの形式が無効です",
+      "password_required": "パスワードは必須です。",
+      "password_min_length": "パスワードは8文字以上である必要があります。",
+      "password_uppercase": "パスワードには少なくとも1つの大文字を含める必要があります。",
+      "password_lowercase": "パスワードには少なくとも1つの小文字を含める必要があります。",
+      "password_number": "パスワードには少なくとも1つの数字を含める必要があります。",
+      "passwords_do_not_match": "パスワードが一致しません。"
     },
 
     "forgot_password": {
@@ -138,14 +146,16 @@
     "reset_password": {
       "title": "パスワードをリセット",
       "new_password": "新しいパスワード",
-      "invalid_token": "無効なリセットトークン"
+      "invalid_token": "無効なリセットトークン",
+      "password_reset_sent": "パスワードリセットのメールを送信しました。受信トレイを確認してください。",
+      "password_reset_success": "パスワードのリセットに成功しました。ログインできます。"
     },
-
     "verify_email": {
       "title": "メールを確認",
       "greeting": "こんにちは {{name}}！",
-      "confirm_message": "これはあなたのメールアドレスであることを確認してください",
-      "invalid_token": "無効な確認トークンです。"
+      "confirm_message": "このメールアドレスがあなたのものであることを確認してください",
+      "invalid_token": "無効な確認トークンです。",
+      "success": "メールの確認に成功しました！"
     }
   },
 
@@ -798,6 +808,80 @@
       "set_nickname": "ニックネームを設定",
       "set_admin": "管理者に設定",
       "set_member": "メンバーに設定"
+    }
+  },
+
+  "error_message": {
+    "400": {
+      "BAD_REQUEST": "不正なリクエスト",
+      "FAILED_TO_SEND_EMAIL": "メールの送信に失敗しました",
+      "PASSWORD_RESET_SENT": "アカウントが存在する場合、パスワードリセットリンクを送信しました",
+      "MISSING_FIELDS_FOR_TOKEN": "トークン生成に必要なフィールドが不足しています",
+      "REFRESH_TOKEN_MISSING": "リフレッシュトークンがありません",
+      "CANNOT_BLOCK_SELF": "自分自身をブロックできません",
+      "USER_ALREADY_BLOCKED": "ユーザーはすでにブロックされています",
+      "MISSING_USER_ID": "ユーザーIDがありません",
+      "GROUP_NEEDS_2_MEMBERS": "グループには少なくとも2人のメンバーが必要です",
+      "GROUP_OR_CHANNEL_NEEDS_NAME": "グループまたはチャンネルに名前が必要です",
+      "NICKNAME_TOO_LONG": "ニックネームが長すぎます",
+      "MAX_PINNED_CHATS": "固定されたチャットの最大数に達しました",
+      "USE_CREATE_REPLY_MESSAGE": "返信メッセージを作成してください",
+      "MISSING_REPLY_TO_MESSAGE_ID": "返信先メッセージIDが不足しています",
+      "EMAIL_VERIFICATION_INVALID": "メール確認が無効です",
+      "USER_NOT_IN_CHAT": "ユーザーはチャットに参加していません",
+      "ONLY_OWNER_CAN_DELETE_CHAT": "チャットを削除できるのはオーナーのみです",
+      "INVALID_STORAGE_URL": "無効なストレージURL",
+      "INVALID_TOKEN_PURPOSE": "無効なトークンの用途",
+      "FAILED_TO_MAP_CHAT": "チャットのマッピングに失敗しました",
+      "DEVICE_ID_MISSING": "デバイスIDが不足しています",
+      "ONE_OR_MORE_USER_NOT_FOUND": "1人以上のユーザーが見つかりません",
+      "FAILED_TO_UPDATE_NICKNAME": "ニックネームの更新に失敗しました"
+    },
+    "401": {
+      "UNAUTHORIZED": "認証されていません",
+      "TOKEN_EXPIRED": "アクセストークンの有効期限が切れました",
+      "REFRESH_TOKEN_EXPIRED": "セッションが期限切れです",
+      "INVALID_TOKEN": "無効なアクセストークン",
+      "INVALID_REFRESH_TOKEN": "無効なリフレッシュトークン",
+      "INVALID_CREDENTIALS": "ユーザー名またはパスワードが間違っています",
+      "SESSION_EXPIRED": "セッションが期限切れです",
+      "ACCESS_DENIED": "アクセスが拒否されました"
+    },
+    "403": {
+      "FORBIDDEN": "禁止されています",
+      "NOT_CHAT_PARTICIPANT": "チャットの参加者ではありません",
+      "ACTION_NOT_ALLOWED": "許可されていない操作です",
+      "INSUFFICIENT_PERMISSIONS": "権限が不十分です",
+      "USER_NOT_IN_CHAT": "ユーザーはチャットに参加していません",
+      "USER_CANNOT_FORWARD_IN_CHANNEL": "ユーザーはチャンネルで転送できません",
+      "EMAIL_MISMATCH": "メールが一致しません",
+      "REPLIED_MESSAGE_OTHER_CHAT": "返信したメッセージは別のチャットです",
+      "CANNOT_REPLY_TO_DELETED": "削除されたメッセージに返信できません",
+      "CANNOT_REPLY_TO_REPLY": "返信メッセージにさらに返信できません"
+    },
+    "404": {
+      "RESOURCE_NOT_FOUND": "リソースが見つかりません",
+      "USER_NOT_FOUND": "ユーザーが見つかりません",
+      "FILE_NOT_FOUND": "ファイルが見つかりません",
+      "PAGE_NOT_FOUND": "ページが見つかりません",
+      "CHAT_NOT_FOUND": "チャットが見つかりません",
+      "MESSAGE_NOT_FOUND": "メッセージが見つかりません",
+      "FRIEND_REQUEST_NOT_FOUND": "友達リクエストが見つかりません",
+      "FRIENDSHIP_NOT_FOUND": "友達関係が見つかりません",
+      "BLOCK_NOT_FOUND": "ブロックが見つかりません",
+      "NO_PINNED_MESSAGE": "固定メッセージがありません",
+      "MEMBER_NOT_FOUND": "メンバーが見つかりません",
+      "FOLDER_NOT_FOUND": "フォルダが見つかりません",
+      "CREATOR_NOT_FOUND": "作成者が見つかりません"
+    },
+    "409": {
+      "CONFLICT": "競合が発生しました。もう一度お試しください。",
+      "EMAIL_ALREADY_EXISTS": "メールアドレスは既に存在します",
+      "USERNAME_TAKEN": "ユーザー名は既に使用されています",
+      "ALREADY_FRIENDS": "すでに友達です",
+      "ALREADY_SENT_FRIEND_REQUEST": "友達リクエストはすでに送信済みです",
+      "ALREADY_RECEIVED_FRIEND_REQUEST": "友達リクエストはすでに受信済みです",
+      "MESSAGE_ALREADY_PINNED": "メッセージはすでに固定されています"
     }
   }
 }

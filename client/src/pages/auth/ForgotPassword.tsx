@@ -59,7 +59,7 @@ const ForgotPassword = () => {
             className="primary w-full py-1 mt-2"
           >
             {loading
-              ? t("common.action.sending")
+              ? t("common.loading.sending")
               : t("auth.forgot_password.button")}
           </motion.button>
 

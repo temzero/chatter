@@ -1,27 +1,33 @@
 import * as nodemailer from 'nodemailer';
 import { Transporter } from 'nodemailer';
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { ErrorResponse } from 'src/common/api-response/errors';
 import { TokenService } from '../services/token.service';
 import { VerificationPurpose } from './constants/verificationPurpose.enum';
 import { VerificationCodeService } from '../services/verification-code.service';
 import { BadRequestError } from 'src/shared/types/enums/error-message.enum';
+import { formatExpiration } from 'src/common/helpers/formatExpiration';
+import { EnvHelper } from 'src/common/helpers/env.helper';
 
 @Injectable()
 export class MailService {
   private transporter: Transporter;
+  private verificationExpiration: string;
 
   constructor(
-    private readonly configService: ConfigService,
     private readonly verificationCodeService: VerificationCodeService,
     private readonly tokenService: TokenService,
   ) {
+    this.verificationExpiration = formatExpiration(
+      EnvHelper.jwt.verification.expiration,
+    );
+
+    const emailConfig = EnvHelper.email;
     this.transporter = nodemailer.createTransport({
-      service: this.configService.get<string>('EMAIL_SERVICE'),
+      service: emailConfig.service,
       auth: {
-        user: this.configService.get<string>('EMAIL_USER'),
-        pass: this.configService.get<string>('EMAIL_PASS'),
+        user: emailConfig.user,
+        pass: emailConfig.password,
       },
     });
   }
@@ -32,7 +38,7 @@ export class MailService {
         to,
         subject,
         html,
-        from: this.configService.get<string>('EMAIL_USER'),
+        from: EnvHelper.email.user,
       });
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -54,7 +60,7 @@ export class MailService {
     <h1>Email Verification Code</h1>
     <p>Your verification code is:</p>
     <h2>${rawCode}</h2>
-    <p>This code will expire in 10 minutes (${verificationCode.expiresAt.toISOString()}).</p>
+    <p>This code will expire in ${this.verificationExpiration} (${verificationCode.expiresAt.toISOString()}).</p>
   `;
 
     await this.sendMail(email, 'Your Verification Code', html);
@@ -66,7 +72,7 @@ export class MailService {
       <h1>Password Reset Request</h1>
       <p>You requested to reset your password. Click the link below:</p>
       <a href="${url}">Reset Password</a>
-      <p>This link will expire in 1 hour.</p>
+      <p>This link will expire in ${this.verificationExpiration}.</p>
     `;
     await this.sendMail(email, 'Password Reset Request', html);
   }
@@ -80,13 +86,13 @@ export class MailService {
       email,
       VerificationPurpose.EMAIL_VERIFICATION,
     );
-    const verificationUrl = `${this.configService.get('CLIENT_URL')}/verify-email?token=${token}`;
+    const verificationUrl = `${EnvHelper.clientUrl}/verify-email?token=${token}`;
 
     const html = `
     <h1>Email Verification</h1>
     <p>Click the link below to verify your email:</p>
     <a href="${verificationUrl}">Verify Email</a>
-    <p>This link will expire in 10 minutes.</p>
+    <p>This link will expire in ${this.verificationExpiration}.</p>
   `;
 
     await this.sendMail(email, 'Verify Your Email', html);

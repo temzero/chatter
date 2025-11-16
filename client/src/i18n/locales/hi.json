@@ -59,7 +59,8 @@
       "blocked": "ब्लॉक किया गया",
       "blocked_me": "आपको ब्लॉक कर दिया गया है",
       "blocked_them": "आपने इस उपयोगकर्ता को ब्लॉक किया है।",
-      "blocked_each_other": "आप और इस उपयोगकर्ता ने एक-दूसरे को ब्लॉक किया है"
+      "blocked_each_other": "आप और इस उपयोगकर्ता ने एक-दूसरे को ब्लॉक किया है",
+      "load_app_error": "ऐप लोड करने में विफल। कृपया रीफ़्रेश करें।"
     },
     "loading": {
       "loading": "लोड हो रहा है...",
@@ -127,9 +128,15 @@
     },
 
     "register": {
-      "button_loading": "खाता बना रहा है..."
+      "button_loading": "खाता बनाना...",
+      "invalid_password": "अमान्य पासवर्ड फ़ॉर्मेट",
+      "password_required": "पासवर्ड आवश्यक है।",
+      "password_min_length": "पासवर्ड कम से कम 8 वर्ण का होना चाहिए।",
+      "password_uppercase": "पासवर्ड में कम से कम एक बड़ा अक्षर होना चाहिए।",
+      "password_lowercase": "पासवर्ड में कम से कम एक छोटा अक्षर होना चाहिए।",
+      "password_number": "पासवर्ड में कम से कम एक अंक होना चाहिए।",
+      "passwords_do_not_match": "पासवर्ड मेल नहीं खाते।"
     },
-
     "forgot_password": {
       "title": "पासवर्ड भूल गए",
       "button": "रीसेट पासवर्ड लिंक भेजें"
@@ -138,14 +145,16 @@
     "reset_password": {
       "title": "पासवर्ड रीसेट करें",
       "new_password": "नया पासवर्ड",
-      "invalid_token": "अमान्य रीसेट टोकन"
+      "invalid_token": "अमान्य रीसेट टोकन",
+      "password_reset_sent": "पासवर्ड रीसेट ईमेल भेजा गया। कृपया अपने इनबॉक्स की जाँच करें।",
+      "password_reset_success": "पासवर्ड सफलतापूर्वक रीसेट किया गया। अब आप लॉगिन कर सकते हैं।"
     },
-
     "verify_email": {
       "title": "ईमेल सत्यापित करें",
       "greeting": "नमस्ते {{name}}!",
       "confirm_message": "कृपया पुष्टि करें कि यह आपका ईमेल पता है",
-      "invalid_token": "अमान्य सत्यापन टोकन।"
+      "invalid_token": "अमान्य सत्यापन टोकन।",
+      "success": "ईमेल सफलतापूर्वक सत्यापित हुआ!"
     }
   },
 
@@ -798,6 +807,80 @@
       "set_nickname": "उपनाम सेट करें",
       "set_admin": "प्रशासक बनाएं",
       "set_member": "सदस्य बनाएं"
+    }
+  },
+
+  "error_message": {
+    "400": {
+      "BAD_REQUEST": "अमान्य अनुरोध",
+      "FAILED_TO_SEND_EMAIL": "ईमेल भेजने में विफल",
+      "PASSWORD_RESET_SENT": "यदि खाता मौजूद है, तो पासवर्ड रीसेट लिंक भेजा गया है",
+      "MISSING_FIELDS_FOR_TOKEN": "टोकन बनाने के लिए आवश्यक फ़ील्ड गायब हैं",
+      "REFRESH_TOKEN_MISSING": "रिफ्रेश टोकन गायब है",
+      "CANNOT_BLOCK_SELF": "आप स्वयं को ब्लॉक नहीं कर सकते",
+      "USER_ALREADY_BLOCKED": "उपयोगकर्ता पहले से ब्लॉक है",
+      "MISSING_USER_ID": "उपयोगकर्ता ID गायब है",
+      "GROUP_NEEDS_2_MEMBERS": "ग्रुप में कम से कम 2 सदस्य होने चाहिए",
+      "GROUP_OR_CHANNEL_NEEDS_NAME": "ग्रुप या चैनल का नाम आवश्यक है",
+      "NICKNAME_TOO_LONG": "निकनेम बहुत लंबा है",
+      "MAX_PINNED_CHATS": "अधिकतम पिन किए गए चैट्स की संख्या पहुँच गई",
+      "USE_CREATE_REPLY_MESSAGE": "कृपया रिप्लाई मैसेज बनाएं",
+      "MISSING_REPLY_TO_MESSAGE_ID": "रिप्लाई करने के लिए मैसेज ID गायब है",
+      "EMAIL_VERIFICATION_INVALID": "ईमेल सत्यापन अमान्य है",
+      "USER_NOT_IN_CHAT": "उपयोगकर्ता चैट में नहीं है",
+      "ONLY_OWNER_CAN_DELETE_CHAT": "केवल मालिक ही चैट को हटा सकता है",
+      "INVALID_STORAGE_URL": "अमान्य स्टोरेज URL",
+      "INVALID_TOKEN_PURPOSE": "टोकन का उद्देश्य अमान्य है",
+      "FAILED_TO_MAP_CHAT": "चैट मैप करने में विफल",
+      "DEVICE_ID_MISSING": "डिवाइस ID गायब है",
+      "ONE_OR_MORE_USER_NOT_FOUND": "एक या अधिक उपयोगकर्ता नहीं मिले",
+      "FAILED_TO_UPDATE_NICKNAME": "निकनेम अपडेट करने में विफल"
+    },
+    "401": {
+      "UNAUTHORIZED": "अनधिकृत",
+      "TOKEN_EXPIRED": "एक्सेस टोकन की समय सीमा समाप्त",
+      "REFRESH_TOKEN_EXPIRED": "सत्र समाप्त",
+      "INVALID_TOKEN": "अमान्य एक्सेस टोकन",
+      "INVALID_REFRESH_TOKEN": "अमान्य रिफ्रेश टोकन",
+      "INVALID_CREDENTIALS": "गलत उपयोगकर्ता नाम या पासवर्ड",
+      "SESSION_EXPIRED": "सत्र समाप्त",
+      "ACCESS_DENIED": "पहुंच अस्वीकृत"
+    },
+    "403": {
+      "FORBIDDEN": "प्रतिबंधित",
+      "NOT_CHAT_PARTICIPANT": "चैट प्रतिभागी नहीं है",
+      "ACTION_NOT_ALLOWED": "क्रिया की अनुमति नहीं है",
+      "INSUFFICIENT_PERMISSIONS": "अपर्याप्त अनुमतियाँ",
+      "USER_NOT_IN_CHAT": "उपयोगकर्ता चैट में नहीं है",
+      "USER_CANNOT_FORWARD_IN_CHANNEL": "उपयोगकर्ता चैनल में फॉरवर्ड नहीं कर सकता",
+      "EMAIL_MISMATCH": "ईमेल मेल नहीं खाता",
+      "REPLIED_MESSAGE_OTHER_CHAT": "उत्तर दिया गया संदेश अन्य चैट में है",
+      "CANNOT_REPLY_TO_DELETED": "हटाए गए संदेश का उत्तर नहीं दे सकते",
+      "CANNOT_REPLY_TO_REPLY": "उत्तर संदेश का उत्तर नहीं दे सकते"
+    },
+    "404": {
+      "RESOURCE_NOT_FOUND": "संसाधन नहीं मिला",
+      "USER_NOT_FOUND": "उपयोगकर्ता नहीं मिला",
+      "FILE_NOT_FOUND": "फ़ाइल नहीं मिली",
+      "PAGE_NOT_FOUND": "पृष्ठ नहीं मिला",
+      "CHAT_NOT_FOUND": "चैट नहीं मिला",
+      "MESSAGE_NOT_FOUND": "संदेश नहीं मिला",
+      "FRIEND_REQUEST_NOT_FOUND": "मित्र अनुरोध नहीं मिला",
+      "FRIENDSHIP_NOT_FOUND": "मित्रता नहीं मिली",
+      "BLOCK_NOT_FOUND": "ब्लॉक नहीं मिला",
+      "NO_PINNED_MESSAGE": "कोई पिन किए गए संदेश नहीं",
+      "MEMBER_NOT_FOUND": "सदस्य नहीं मिला",
+      "FOLDER_NOT_FOUND": "फ़ोल्डर नहीं मिला",
+      "CREATOR_NOT_FOUND": "निर्माता नहीं मिला"
+    },
+    "409": {
+      "CONFLICT": "संघर्ष हुआ। कृपया पुनः प्रयास करें",
+      "EMAIL_ALREADY_EXISTS": "ईमेल पहले से मौजूद है",
+      "USERNAME_TAKEN": "उपयोगकर्ता नाम पहले से लिया गया है",
+      "ALREADY_FRIENDS": "आप पहले से मित्र हैं",
+      "ALREADY_SENT_FRIEND_REQUEST": "मित्र अनुरोध पहले ही भेजा जा चुका है",
+      "ALREADY_RECEIVED_FRIEND_REQUEST": "मित्र अनुरोध पहले ही प्राप्त हो चुका है",
+      "MESSAGE_ALREADY_PINNED": "संदेश पहले ही पिन किया गया है"
     }
   }
 }

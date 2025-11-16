@@ -1,7 +1,6 @@
 // src/auth/services/token.service.ts
 import * as jwt from 'jsonwebtoken';
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { TokenType } from '../types/token-type.enum';
 import { JwtPayload, JwtRefreshPayload } from '../types/jwt-payload.type';
@@ -12,13 +11,11 @@ import {
   BadRequestError,
   UnauthorizedError,
 } from 'src/shared/types/enums/error-message.enum';
+import { EnvHelper } from 'src/common/helpers/env.helper';
 
 @Injectable()
 export class TokenService {
-  constructor(
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(private readonly jwtService: JwtService) {}
 
   /**
    * Generates a JWT token (access or refresh)
@@ -29,30 +26,18 @@ export class TokenService {
   ): Promise<string> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { iat, exp, ...cleanPayload } = payload;
+
     const options = {
       [TokenType.ACCESS]: {
-        secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
-        expiresIn: '1m',
-        // expiresIn: this.configService.get<string>('JWT_ACCESS_EXPIRATION'),
+        secret: EnvHelper.jwt.access.secret,
+        expiresIn: EnvHelper.jwt.access.expiration,
       },
       [TokenType.REFRESH]: {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-        expiresIn: '15m',
-        // expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRATION'),
+        secret: EnvHelper.jwt.refresh.secret,
+        expiresIn: EnvHelper.jwt.refresh.expiration,
       },
     }[type];
 
-    // console.log(
-    //   '[DEBUG] ACCESS_EXPIRATION:',
-    //   this.configService.get<string>('JWT_ACCESS_EXPIRATION'),
-    // );
-
-    // console.log(
-    //   '[DEBUG] REFRESH_EXPIRATION:',
-    //   this.configService.get<string>('JWT_REFRESH_EXPIRATION'),
-    // );
-
-    // console.log('[DEBUG] options:', options);
     return this.jwtService.signAsync(cleanPayload, options);
   }
 
@@ -64,11 +49,9 @@ export class TokenService {
     token: string,
   ): Promise<T> {
     const secret = {
-      [TokenType.ACCESS]: this.configService.get<string>('JWT_ACCESS_SECRET'),
-      [TokenType.REFRESH]: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      [TokenType.ACCESS]: EnvHelper.jwt.access.secret,
+      [TokenType.REFRESH]: EnvHelper.jwt.refresh.secret,
     }[type];
-
-    console.log('[DEBUG] Verifying token with secret:', secret);
 
     try {
       return await this.jwtService.verifyAsync<T>(token, { secret });
@@ -193,11 +176,8 @@ export class TokenService {
         purpose,
       },
       {
-        secret: this.configService.get<string>('JWT_VERIFICATION_SECRET'),
-        expiresIn: this.configService.get<string>(
-          'JWT_VERIFICATION_EXPIRATION',
-          '15m',
-        ),
+        secret: EnvHelper.jwt.verification.secret,
+        expiresIn: EnvHelper.jwt.verification.expiration,
       },
     );
   }
@@ -216,7 +196,7 @@ export class TokenService {
         email: string;
         purpose: VerificationPurpose;
       }>(token, {
-        secret: this.configService.get<string>('JWT_VERIFICATION_SECRET'),
+        secret: EnvHelper.jwt.verification.secret,
       });
 
       return {

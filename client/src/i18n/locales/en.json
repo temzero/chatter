@@ -59,7 +59,8 @@
       "blocked": "Blocked ",
       "blocked_me": "You has been blocked",
       "blocked_them": "You have blocked this user.",
-      "blocked_each_other": "You and this user have blocked each other"
+      "blocked_each_other": "You and this user have blocked each other",
+      "load_app_error": "Failed to load app. Please refresh"
     },
     "loading": {
       "loading": "Loading...",
@@ -127,7 +128,14 @@
     },
 
     "register": {
-      "button_loading": "Creating account..."
+      "button_loading": "Creating account...",
+      "invalid_password": "Invalid password format",
+      "password_required": "Password is required.",
+      "password_min_length": "Password must be at least 8 characters long.",
+      "password_uppercase": "Password must contain at least one uppercase letter.",
+      "password_lowercase": "Password must contain at least one lowercase letter.",
+      "password_number": "Password must contain at least one number.",
+      "passwords_do_not_match": "Passwords do not match."
     },
 
     "forgot_password": {
@@ -138,14 +146,17 @@
     "reset_password": {
       "title": "Reset Password",
       "new_password": "New Password",
-      "invalid_token": "Invalid reset token"
+      "invalid_token": "Invalid reset token",
+      "password_reset_sent": "Password reset email sent. Please check your inbox.",
+      "password_reset_success": "Password reset successfully. You can now login."
     },
 
     "verify_email": {
       "title": "Verify Email",
       "greeting": "Hi {{name}}!",
       "confirm_message": "Please confirm that this is your email address",
-      "invalid_token": "Invalid verification token."
+      "invalid_token": "Invalid verification token.",
+      "success": "Email verified successfully!"
     }
   },
 
@@ -803,6 +814,31 @@
   },
 
   "error_message": {
+    "400": {
+      "BAD_REQUEST": "Bad request",
+      "FAILED_TO_SEND_EMAIL": "Failed to send email",
+      "PASSWORD_RESET_SENT": "If an account exists, a password reset link has been sent",
+      "MISSING_FIELDS_FOR_TOKEN": "Missing required fields for token generation",
+      "REFRESH_TOKEN_MISSING": "Refresh token is missing",
+      "CANNOT_BLOCK_SELF": "Cannot block yourself",
+      "USER_ALREADY_BLOCKED": "User already blocked",
+      "MISSING_USER_ID": "Missing user ID",
+      "GROUP_NEEDS_2_MEMBERS": "Group needs at least 2 members",
+      "GROUP_OR_CHANNEL_NEEDS_NAME": "Group or channel needs a name",
+      "NICKNAME_TOO_LONG": "Nickname is too long",
+      "MAX_PINNED_CHATS": "Maximum pinned chats reached",
+      "USE_CREATE_REPLY_MESSAGE": "Use create reply message",
+      "MISSING_REPLY_TO_MESSAGE_ID": "Missing reply-to message ID",
+      "EMAIL_VERIFICATION_INVALID": "Email verification is invalid",
+      "USER_NOT_IN_CHAT": "User is not in the chat",
+      "ONLY_OWNER_CAN_DELETE_CHAT": "Only owner can delete chat",
+      "INVALID_STORAGE_URL": "Invalid storage URL",
+      "INVALID_TOKEN_PURPOSE": "Invalid token purpose",
+      "FAILED_TO_MAP_CHAT": "Failed to map chat",
+      "DEVICE_ID_MISSING": "Device ID missing",
+      "ONE_OR_MORE_USER_NOT_FOUND": "One or more users not found",
+      "FAILED_TO_UPDATE_NICKNAME": "Failed to update nickname"
+    },
     "401": {
       "UNAUTHORIZED": "Unauthorized",
       "TOKEN_EXPIRED": "Access token expired",
@@ -812,6 +848,42 @@
       "INVALID_CREDENTIALS": "Wrong username or password",
       "SESSION_EXPIRED": "Session expired",
       "ACCESS_DENIED": "Access denied"
+    },
+    "403": {
+      "FORBIDDEN": "Forbidden",
+      "NOT_CHAT_PARTICIPANT": "Not a chat participant",
+      "ACTION_NOT_ALLOWED": "Action not allowed",
+      "INSUFFICIENT_PERMISSIONS": "Insufficient permissions",
+      "USER_NOT_IN_CHAT": "User is not in the chat",
+      "USER_CANNOT_FORWARD_IN_CHANNEL": "User cannot forward in channel",
+      "EMAIL_MISMATCH": "Email mismatch",
+      "REPLIED_MESSAGE_OTHER_CHAT": "Replied message is from another chat",
+      "CANNOT_REPLY_TO_DELETED": "Cannot reply to deleted message",
+      "CANNOT_REPLY_TO_REPLY": "Cannot reply to a reply message"
+    },
+    "404": {
+      "RESOURCE_NOT_FOUND": "Resource not found",
+      "USER_NOT_FOUND": "User not found",
+      "FILE_NOT_FOUND": "File not found",
+      "PAGE_NOT_FOUND": "Page not found",
+      "CHAT_NOT_FOUND": "Chat not found",
+      "MESSAGE_NOT_FOUND": "Message not found",
+      "FRIEND_REQUEST_NOT_FOUND": "Friend request not found",
+      "FRIENDSHIP_NOT_FOUND": "Friendship not found",
+      "BLOCK_NOT_FOUND": "Block not found",
+      "NO_PINNED_MESSAGE": "No pinned message",
+      "MEMBER_NOT_FOUND": "Member not found",
+      "FOLDER_NOT_FOUND": "Folder not found",
+      "CREATOR_NOT_FOUND": "Creator not found"
+    },
+    "409": {
+      "CONFLICT": "Conflict occurred. Please try again.",
+      "EMAIL_ALREADY_EXISTS": "Email already exists",
+      "USERNAME_TAKEN": "Username is already taken",
+      "ALREADY_FRIENDS": "You are already friends",
+      "ALREADY_SENT_FRIEND_REQUEST": "Friend request already sent",
+      "ALREADY_RECEIVED_FRIEND_REQUEST": "Friend request already received",
+      "MESSAGE_ALREADY_PINNED": "Message already pinned"
     }
   }
 }

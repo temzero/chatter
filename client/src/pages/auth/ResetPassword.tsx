@@ -1,17 +1,32 @@
-import { useRef } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useEffect, useRef } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 import { AlertMessage } from "@/components/ui/messages/AlertMessage";
 import { AuthenticationLayout } from "@/layouts/PublicLayout";
 import { motion } from "framer-motion";
 import { publicLayoutAnimations } from "@/common/animations/publicLayoutAnimations";
 import { useTranslation } from "react-i18next";
+import { validatePassword } from "@/common/utils/validation/passwordValidation";
 
 const ResetPassword = () => {
   const { t } = useTranslation();
 
   const formRef = useRef<HTMLFormElement>(null);
-  const { token } = useParams();
+  // const { token } = useParams();
+  const location = useLocation();
+  const query = new URLSearchParams(location.search);
+  const token = query.get("token");
+
+  useEffect(() => {
+    if (token) {
+      // Use the token
+      console.log("Reset token:", token);
+    } else {
+      console.error("No token provided");
+      // Handle missing token
+    }
+  }, [token]);
+
   const loading = useAuthStore((state) => state.loading);
   const navigate = useNavigate();
   const resetPasswordWithToken = useAuthStore.getState().resetPasswordWithToken;
@@ -26,8 +41,13 @@ const ResetPassword = () => {
     const password = formData.get("password") as string;
     const confirmPassword = formData.get("confirmPassword") as string;
 
-    if (password !== confirmPassword) {
-      return setMessage("error", t("auth.common.password_mismatch"));
+    // Validate password strength
+    const validation = validatePassword(t, password, confirmPassword);
+    if (!validation.isValid) {
+      return setMessage(
+        "error",
+        validation.message || t("auth.register.invalid_password")
+      );
     }
 
     if (!token) {

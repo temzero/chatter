@@ -1,29 +1,29 @@
 // livekit.service.ts
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import {
   AccessToken,
   Room,
   RoomServiceClient,
   VideoGrant,
 } from 'livekit-server-sdk';
+import { EnvHelper } from 'src/common/helpers/env.helper';
 
 @Injectable()
 export class LiveKitService {
-  private readonly roomService: RoomServiceClient;
   private readonly apiKey: string;
   private readonly apiSecret: string;
+  private readonly roomService: RoomServiceClient;
 
-  constructor(private readonly configService: ConfigService) {
-    const url = this.configService.get<string>('LIVEKIT_URL', '');
-    this.apiKey = this.configService.get<string>('LIVEKIT_API_KEY', '');
-    this.apiSecret = this.configService.get<string>('LIVEKIT_API_SECRET', '');
+  constructor() {
+    const { url, apiKey, apiSecret } = EnvHelper.livekit;
 
-    if (!url || !this.apiKey || !this.apiSecret) {
+    if (!url || !apiKey || !apiSecret) {
       throw new Error('Missing LiveKit environment variables');
     }
 
-    this.roomService = new RoomServiceClient(url, this.apiKey, this.apiSecret);
+    this.apiKey = apiKey;
+    this.apiSecret = apiSecret;
+    this.roomService = new RoomServiceClient(url, apiKey, apiSecret);
   }
 
   async generateLiveKitToken(

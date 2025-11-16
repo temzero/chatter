@@ -10,25 +10,21 @@ import { JwtStrategy } from '../strategies/jwt.strategy';
 import { LocalStrategy } from '../strategies/local.strategy';
 import { TokenService } from '../services/token.service';
 import { TokenStorageService } from '../services/token-storage.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RefreshToken } from '../entities/refresh-token.entity';
 import { JwtRefreshGuard } from '../guards/jwt-refresh.guard';
 import { JwtRefreshStrategy } from '../strategies/jwt-refresh.strategy';
 import { VerificationCodeService } from '../services/verification-code.service';
 import { MailService } from '../mail/mail.service';
+import { EnvHelper } from 'src/common/helpers/env.helper';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([RefreshToken]),
     forwardRef(() => UserModule),
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_ACCESS_SECRET'),
-        signOptions: { expiresIn: '1h' },
-      }),
+    JwtModule.register({
+      secret: EnvHelper.jwt.access.secret,
+      signOptions: { expiresIn: EnvHelper.jwt.access.expiration },
     }),
   ],
   controllers: [AuthController],

@@ -5,7 +5,6 @@ import { WebsocketGateway } from './features/websocket.gateway';
 import { WebsocketService } from './websocket.service';
 import { MessageModule } from '../message/message.module';
 import { UserModule } from '../user/user.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { WsJwtGuard } from '../auth/guards/ws-jwt.guard';
 import { ChatMemberModule } from '../chat-member/chat-member.module';
 import { ChatGateway } from './features/chat.gateway';
@@ -18,6 +17,7 @@ import { WebsocketConnectionService } from './services/websocket-connection.serv
 import { WebsocketNotificationService } from './services/websocket-notification.service';
 import { CallGateway } from './features/call.gateway';
 import { CallModule } from '../call/call.module'; // Import CallModule
+import { EnvHelper } from 'src/common/helpers/env.helper';
 
 @Module({
   imports: [
@@ -28,13 +28,11 @@ import { CallModule } from '../call/call.module'; // Import CallModule
     forwardRef(() => BlockModule),
     forwardRef(() => SupabaseModule),
     forwardRef(() => CallModule), // Add CallModule import
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get('JWT_ACCESS_SECRET'),
-        signOptions: { expiresIn: '60m' },
-      }),
-      inject: [ConfigService],
+    JwtModule.register({
+      secret: EnvHelper.jwt.access.secret,
+      signOptions: {
+        expiresIn: EnvHelper.jwt.access.expiration,
+      },
     }),
   ],
   providers: [

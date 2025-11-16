@@ -7,6 +7,7 @@ import { localStorageService } from "@/services/storage/localStorageService";
 import { fetchInitialAppData } from "@/common/hooks/app/fetchInitialAppData";
 import { clearAppData } from "@/common/hooks/app/clearAppData";
 import type { UserResponse } from "@/shared/types/responses/user.response";
+import i18next from "i18next";
 
 type AuthMessageType = "error" | "success" | "info";
 
@@ -58,16 +59,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       initialize: async (): Promise<boolean> => {
         try {
-          const token = localStorageService.getAccessToken();
-          if (!token) {
-            console.error("[AUTH]", "No Access-token");
-            // refresh everything
-            get().clearAuthStore();
-            return false;
-          }
-
-          set({ loading: true });
-
           // First, check persisted state
           const persistedUser = get().currentUser;
           if (persistedUser) {
@@ -75,12 +66,22 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             return true;
           }
 
+          set({ loading: true });
+
+          const token = localStorageService.getAccessToken();
+          if (!token) {
+            console.error("[AUTH]", "No Access-token");
+            // refresh everything
+            // get().clearAuthStore();
+            return false;
+          }
+
           const userData: UserResponse = await authService.fetchCurrentUser();
 
           if (!userData) {
             console.error("[AUTH]", "fetchCurrentUser failed");
             // refresh everything
-            get().clearAuthStore();
+            // get().clearAuthStore();
             return false;
           }
 
@@ -141,6 +142,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         authService.logout();
         webSocketService.disconnect();
         clearAppData();
+        window.location.href = "/auth/login";
       },
 
       // Password recovery
@@ -151,7 +153,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           set({
             message: {
               type: "success",
-              content: "Password reset email sent. Please check your inbox.",
+              content: i18next.t("auth.reset_password.password_reset_sent"),
             },
           });
         } finally {
@@ -166,7 +168,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           set({
             message: {
               type: "success",
-              content: "Password reset successfully. You can now login.",
+              content: i18next.t("auth.reset_password.password_reset_success"),
             },
           });
         } finally {
@@ -182,7 +184,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           set({
             message: {
               type: "success",
-              content: "Email verified successfully!",
+              content: i18next.t("auth.email_verified.success"),
             },
           });
         } finally {

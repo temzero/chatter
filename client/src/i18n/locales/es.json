@@ -59,7 +59,8 @@
       "blocked": "Bloqueado",
       "blocked_me": "Has sido bloqueado",
       "blocked_them": "Has bloqueado a este usuario.",
-      "blocked_each_other": "Tú y este usuario se han bloqueado mutuamente"
+      "blocked_each_other": "Tú y este usuario se han bloqueado mutuamente",
+      "load_app_error": "No se pudo cargar la aplicación. Por favor, actualiza."
     },
     "loading": {
       "loading": "Cargando...",
@@ -127,7 +128,14 @@
     },
 
     "register": {
-      "button_loading": "Creando cuenta..."
+      "button_loading": "Creando cuenta...",
+      "invalid_password": "Formato de contraseña inválido",
+      "password_required": "Se requiere contraseña.",
+      "password_min_length": "La contraseña debe tener al menos 8 caracteres.",
+      "password_uppercase": "La contraseña debe contener al menos una letra mayúscula.",
+      "password_lowercase": "La contraseña debe contener al menos una letra minúscula.",
+      "password_number": "La contraseña debe contener al menos un número.",
+      "passwords_do_not_match": "Las contraseñas no coinciden."
     },
 
     "forgot_password": {
@@ -138,14 +146,16 @@
     "reset_password": {
       "title": "Restablecer contraseña",
       "new_password": "Nueva contraseña",
-      "invalid_token": "Token de restablecimiento inválido"
+      "invalid_token": "Token de restablecimiento inválido",
+      "password_reset_sent": "Correo de restablecimiento enviado. Por favor revisa tu bandeja de entrada.",
+      "password_reset_success": "Contraseña restablecida con éxito. Ahora puedes iniciar sesión."
     },
-
     "verify_email": {
       "title": "Verificar correo electrónico",
       "greeting": "¡Hola {{name}}!",
       "confirm_message": "Por favor confirma que este es tu correo electrónico",
-      "invalid_token": "Token de verificación inválido."
+      "invalid_token": "Token de verificación inválido.",
+      "success": "¡Correo electrónico verificado con éxito!"
     }
   },
 
@@ -799,6 +809,80 @@
       "set_nickname": "Establecer apodo",
       "set_admin": "Convertir en administrador",
       "set_member": "Convertir en miembro"
+    }
+  },
+
+  "error_message": {
+    "400": {
+      "BAD_REQUEST": "Solicitud incorrecta",
+      "FAILED_TO_SEND_EMAIL": "Error al enviar el correo electrónico",
+      "PASSWORD_RESET_SENT": "Si la cuenta existe, se ha enviado un enlace para restablecer la contraseña",
+      "MISSING_FIELDS_FOR_TOKEN": "Faltan campos requeridos para generar el token",
+      "REFRESH_TOKEN_MISSING": "Falta el token de actualización",
+      "CANNOT_BLOCK_SELF": "No puedes bloquearte a ti mismo",
+      "USER_ALREADY_BLOCKED": "Usuario ya bloqueado",
+      "MISSING_USER_ID": "Falta el ID del usuario",
+      "GROUP_NEEDS_2_MEMBERS": "El grupo necesita al menos 2 miembros",
+      "GROUP_OR_CHANNEL_NEEDS_NAME": "El grupo o canal necesita un nombre",
+      "NICKNAME_TOO_LONG": "El apodo es demasiado largo",
+      "MAX_PINNED_CHATS": "Se alcanzó el máximo de chats fijados",
+      "USE_CREATE_REPLY_MESSAGE": "Usa crear mensaje de respuesta",
+      "MISSING_REPLY_TO_MESSAGE_ID": "Falta el ID del mensaje al que se responde",
+      "EMAIL_VERIFICATION_INVALID": "Verificación de correo electrónico no válida",
+      "USER_NOT_IN_CHAT": "El usuario no está en el chat",
+      "ONLY_OWNER_CAN_DELETE_CHAT": "Solo el propietario puede eliminar el chat",
+      "INVALID_STORAGE_URL": "URL de almacenamiento inválida",
+      "INVALID_TOKEN_PURPOSE": "Propósito del token no válido",
+      "FAILED_TO_MAP_CHAT": "Error al mapear el chat",
+      "DEVICE_ID_MISSING": "Falta el ID del dispositivo",
+      "ONE_OR_MORE_USER_NOT_FOUND": "Uno o más usuarios no encontrados",
+      "FAILED_TO_UPDATE_NICKNAME": "Error al actualizar el apodo"
+    },
+    "401": {
+      "UNAUTHORIZED": "No autorizado",
+      "TOKEN_EXPIRED": "Token de acceso expirado",
+      "REFRESH_TOKEN_EXPIRED": "Sesión expirada",
+      "INVALID_TOKEN": "Token de acceso inválido",
+      "INVALID_REFRESH_TOKEN": "Token de actualización inválido",
+      "INVALID_CREDENTIALS": "Usuario o contraseña incorrectos",
+      "SESSION_EXPIRED": "Sesión expirada",
+      "ACCESS_DENIED": "Acceso denegado"
+    },
+    "403": {
+      "FORBIDDEN": "Prohibido",
+      "NOT_CHAT_PARTICIPANT": "No es participante del chat",
+      "ACTION_NOT_ALLOWED": "Acción no permitida",
+      "INSUFFICIENT_PERMISSIONS": "Permisos insuficientes",
+      "USER_NOT_IN_CHAT": "El usuario no está en el chat",
+      "USER_CANNOT_FORWARD_IN_CHANNEL": "El usuario no puede reenviar en el canal",
+      "EMAIL_MISMATCH": "Correo electrónico no coincide",
+      "REPLIED_MESSAGE_OTHER_CHAT": "El mensaje respondido es de otro chat",
+      "CANNOT_REPLY_TO_DELETED": "No se puede responder a un mensaje eliminado",
+      "CANNOT_REPLY_TO_REPLY": "No se puede responder a un mensaje de respuesta"
+    },
+    "404": {
+      "RESOURCE_NOT_FOUND": "Recurso no encontrado",
+      "USER_NOT_FOUND": "Usuario no encontrado",
+      "FILE_NOT_FOUND": "Archivo no encontrado",
+      "PAGE_NOT_FOUND": "Página no encontrada",
+      "CHAT_NOT_FOUND": "Chat no encontrado",
+      "MESSAGE_NOT_FOUND": "Mensaje no encontrado",
+      "FRIEND_REQUEST_NOT_FOUND": "Solicitud de amistad no encontrada",
+      "FRIENDSHIP_NOT_FOUND": "Relación de amistad no encontrada",
+      "BLOCK_NOT_FOUND": "Bloqueo no encontrado",
+      "NO_PINNED_MESSAGE": "No hay mensaje fijado",
+      "MEMBER_NOT_FOUND": "Miembro no encontrado",
+      "FOLDER_NOT_FOUND": "Carpeta no encontrada",
+      "CREATOR_NOT_FOUND": "Creador no encontrado"
+    },
+    "409": {
+      "CONFLICT": "Ocurrió un conflicto. Por favor, inténtalo de nuevo.",
+      "EMAIL_ALREADY_EXISTS": "El correo electrónico ya existe",
+      "USERNAME_TAKEN": "El nombre de usuario ya está en uso",
+      "ALREADY_FRIENDS": "Ya sois amigos",
+      "ALREADY_SENT_FRIEND_REQUEST": "Solicitud de amistad ya enviada",
+      "ALREADY_RECEIVED_FRIEND_REQUEST": "Solicitud de amistad ya recibida",
+      "MESSAGE_ALREADY_PINNED": "Mensaje ya fijado"
     }
   }
 }

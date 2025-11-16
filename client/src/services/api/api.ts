@@ -5,7 +5,7 @@ import axios, {
   InternalAxiosRequestConfig,
 } from "axios";
 import { localStorageService } from "../storage/localStorageService";
-import { handleApiError } from "@/common/utils/error/handleApiError";
+import { handleApiError } from "@/common/utils/error/api/handleApiError";
 
 const API: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,

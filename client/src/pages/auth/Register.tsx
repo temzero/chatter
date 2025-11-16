@@ -50,11 +50,11 @@ const Register = () => {
     const confirmPassword = formData.get("confirmPassword") as string;
 
     // Validate password strength
-    const validation = validatePassword(password, confirmPassword);
+    const validation = validatePassword(t, password, confirmPassword);
     if (!validation.isValid) {
       return setMessage(
         "error",
-        validation.message || t("auth.common.invalid_password")
+        validation.message || t("auth.register.invalid_password")
       );
     }
 

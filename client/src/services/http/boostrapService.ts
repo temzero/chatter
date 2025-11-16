@@ -3,11 +3,16 @@ import { ApiSuccessResponse } from "@/shared/types/responses/api-success.respons
 import { BootstrapResponse } from "@/shared/types/responses/bootstrap.response";
 
 export const bootstrapService = {
-  async fetchAppData(): Promise<BootstrapResponse> {
-    const { data } = await API.get<ApiSuccessResponse<BootstrapResponse>>(
-      "/bootstrap/init"
-    );
-    // console.log("[FETCH]", "BootstrapResponse-data", data);
-    return data.payload || data;
+  async fetchAppData(): Promise<BootstrapResponse | null> {
+    try {
+      const res = await API.get<ApiSuccessResponse<BootstrapResponse>>(
+        "/bootstrap/init"
+      );
+
+      return res.data.payload || null;
+    } catch (error) {
+      console.error("Error fetching bootstrap data:", error);
+      throw error;
+    }
   },
 };

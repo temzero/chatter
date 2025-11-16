@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './modules/user/user.module';
@@ -18,18 +19,32 @@ import { EnvHelper } from './common/helpers/env.helper';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: EnvHelper.database.host,
-      port: EnvHelper.database.port,
-      username: EnvHelper.database.user,
-      password: EnvHelper.database.password,
-      database: EnvHelper.database.name,
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: EnvHelper.nodeEnv !== 'production',
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
     }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
 
-    // App modules
+      useFactory: (configService: ConfigService) => {
+        const db = EnvHelper.database;
+        const isDocker = configService.get('IS_DOCKER') === 'true';
+
+        return {
+          type: 'postgres',
+          host: isDocker
+            ? 'postgres'
+            : configService.get('DB_HOST') || 'localhost',
+          port: configService.get<number>('DB_PORT') || 5432,
+          username: configService.get('POSTGRES_USER') || 'postgres',
+          password: configService.get('POSTGRES_PASSWORD') || 'password',
+          database: configService.get('POSTGRES_DB') || 'chatter',
+          entities: [__dirname + '/**/*.entity{.ts,.js}'],
+          synchronize: EnvHelper.nodeEnv !== 'production',
+        };
+      },
+    }),
     AuthModule,
     BootstrapModule,
     ChatModule,

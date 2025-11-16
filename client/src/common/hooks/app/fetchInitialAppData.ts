@@ -6,8 +6,12 @@ import { useFriendshipStore } from "@/stores/friendshipStore";
 import type { BootstrapResponse } from "@/shared/types/responses/bootstrap.response";
 
 export const fetchInitialAppData = async () => {
-  const data: BootstrapResponse = await bootstrapService.fetchAppData();
-  useChatStore.getState().setInitialData(data.chatData);
-  useFolderStore.getState().setInitialData(data.folderData);
-  useFriendshipStore.getState().setInitialData(data.friendRequestData);
+  const appData: BootstrapResponse | null =
+    await bootstrapService.fetchAppData();
+
+  if (appData) {
+    useChatStore.getState().setInitialData(appData.chatData);
+    useFolderStore.getState().setInitialData(appData.folderData);
+    useFriendshipStore.getState().setInitialData(appData.friendRequestData);
+  }
 };

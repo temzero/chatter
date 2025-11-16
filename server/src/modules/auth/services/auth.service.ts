@@ -2,7 +2,6 @@ import * as bcrypt from 'bcrypt';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../../user/user.service';
-import { ConfigService } from '@nestjs/config';
 import { TokenService } from './token.service';
 import { TokenStorageService } from './token-storage.service';
 import { User } from '../../user/entities/user.entity';
@@ -20,17 +19,20 @@ import {
   NotFoundError,
   UnauthorizedError,
 } from 'src/shared/types/enums/error-message.enum';
+import { EnvHelper } from 'src/common/helpers/env.helper';
 
 @Injectable()
 export class AuthService {
+  private verificationExpire: string | undefined;
   constructor(
-    private readonly configService: ConfigService,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
     private readonly tokenService: TokenService,
     private readonly tokenStorageService: TokenStorageService,
-  ) {}
+  ) {
+    this.verificationExpire = EnvHelper.jwt.verification.expiration;
+  }
 
   async validateUser(loginDto: LoginDto): Promise<User | null> {
     try {
@@ -68,8 +70,8 @@ export class AuthService {
         accessToken: newAccessToken,
         refreshToken: newRefreshToken,
       };
-    } catch (error) {
-      ErrorResponse.throw(error, 'Login failed');
+    } catch {
+      ErrorResponse.unauthorized(UnauthorizedError.ACCESS_DENIED);
     }
   }
 
@@ -153,10 +155,10 @@ export class AuthService {
           purpose: 'password_reset',
           email: user.email, // Include email to prevent token reuse if email changes
         },
-        { expiresIn: '15m' }, // Short-lived token for security
+        { expiresIn: this.verificationExpire },
       );
 
-      const clientUrl = this.configService.get<string>('CLIENT_URL');
+      const clientUrl = EnvHelper.clientUrl;
       const resetUrl = `${clientUrl}/auth/reset-password?token=${encodeURIComponent(resetPasswordToken)}`;
 
       await this.mailService.sendPasswordResetEmail(user.email, resetUrl);

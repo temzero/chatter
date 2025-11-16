@@ -59,7 +59,8 @@
       "blocked": "Đã chặn",
       "blocked_me": "Bạn đã bị chặn",
       "blocked_them": "Bạn đã chặn người dùng này.",
-      "blocked_each_other": "Bạn và người dùng này đã chặn nhau"
+      "blocked_each_other": "Bạn và người dùng này đã chặn nhau",
+      "load_app_error": "Không tải được ứng dụng. Vui lòng tải lại."
     },
     "loading": {
       "loading": "Đang tải...",
@@ -127,7 +128,14 @@
     },
 
     "register": {
-      "button_loading": "Đang tạo tài khoản..."
+      "button_loading": "Đang tạo tài khoản...",
+      "invalid_password": "Định dạng mật khẩu không hợp lệ",
+      "password_required": "Bắt buộc nhập mật khẩu.",
+      "password_min_length": "Mật khẩu phải có ít nhất 8 ký tự.",
+      "password_uppercase": "Mật khẩu phải chứa ít nhất một chữ cái viết hoa.",
+      "password_lowercase": "Mật khẩu phải chứa ít nhất một chữ cái viết thường.",
+      "password_number": "Mật khẩu phải chứa ít nhất một chữ số.",
+      "passwords_do_not_match": "Mật khẩu không khớp."
     },
 
     "forgot_password": {
@@ -138,14 +146,16 @@
     "reset_password": {
       "title": "Đặt lại mật khẩu",
       "new_password": "Mật khẩu mới",
-      "invalid_token": "Mã đặt lại không hợp lệ"
+      "invalid_token": "Mã đặt lại không hợp lệ",
+      "password_reset_sent": "Email đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư đến.",
+      "password_reset_success": "Đặt lại mật khẩu thành công. Bạn có thể đăng nhập ngay."
     },
-
     "verify_email": {
       "title": "Xác minh Email",
-      "greeting": "Xin chào {{name}}!",
+      "greeting": "Chào {{name}}!",
       "confirm_message": "Vui lòng xác nhận đây là địa chỉ email của bạn",
-      "invalid_token": "Mã xác minh không hợp lệ."
+      "invalid_token": "Mã xác minh không hợp lệ.",
+      "success": "Xác minh email thành công!"
     }
   },
 
@@ -803,15 +813,76 @@
   },
 
   "error_message": {
+    "400": {
+      "BAD_REQUEST": "Yêu cầu không hợp lệ",
+      "FAILED_TO_SEND_EMAIL": "Gửi email thất bại",
+      "PASSWORD_RESET_SENT": "Nếu tài khoản tồn tại, liên kết đặt lại mật khẩu đã được gửi",
+      "MISSING_FIELDS_FOR_TOKEN": "Thiếu trường cần thiết để tạo token",
+      "REFRESH_TOKEN_MISSING": "Token làm mới không có",
+      "CANNOT_BLOCK_SELF": "Không thể chặn chính mình",
+      "USER_ALREADY_BLOCKED": "Người dùng đã bị chặn",
+      "MISSING_USER_ID": "Thiếu ID người dùng",
+      "GROUP_NEEDS_2_MEMBERS": "Nhóm cần ít nhất 2 thành viên",
+      "GROUP_OR_CHANNEL_NEEDS_NAME": "Nhóm hoặc kênh cần tên",
+      "NICKNAME_TOO_LONG": "Biệt danh quá dài",
+      "MAX_PINNED_CHATS": "Đã đạt giới hạn chat ghim",
+      "USE_CREATE_REPLY_MESSAGE": "Sử dụng tạo tin nhắn trả lời",
+      "MISSING_REPLY_TO_MESSAGE_ID": "Thiếu ID tin nhắn để trả lời",
+      "EMAIL_VERIFICATION_INVALID": "Xác minh email không hợp lệ",
+      "USER_NOT_IN_CHAT": "Người dùng không có trong chat",
+      "ONLY_OWNER_CAN_DELETE_CHAT": "Chỉ chủ sở hữu có thể xóa chat",
+      "INVALID_STORAGE_URL": "URL lưu trữ không hợp lệ",
+      "INVALID_TOKEN_PURPOSE": "Mục đích token không hợp lệ",
+      "FAILED_TO_MAP_CHAT": "Không thể ánh xạ chat",
+      "DEVICE_ID_MISSING": "Thiếu ID thiết bị",
+      "ONE_OR_MORE_USER_NOT_FOUND": "Một hoặc nhiều người dùng không tìm thấy",
+      "FAILED_TO_UPDATE_NICKNAME": "Cập nhật biệt danh thất bại"
+    },
     "401": {
       "UNAUTHORIZED": "Không được phép",
       "TOKEN_EXPIRED": "Token truy cập đã hết hạn",
-      "REFRESH_TOKEN_EXPIRED": "Phiên đăng nhập đã hết hạn",
+      "REFRESH_TOKEN_EXPIRED": "Phiên làm việc đã hết hạn",
       "INVALID_TOKEN": "Token truy cập không hợp lệ",
       "INVALID_REFRESH_TOKEN": "Token làm mới không hợp lệ",
       "INVALID_CREDENTIALS": "Sai tên đăng nhập hoặc mật khẩu",
-      "SESSION_EXPIRED": "Phiên đăng nhập đã hết hạn",
+      "SESSION_EXPIRED": "Phiên làm việc đã hết hạn",
       "ACCESS_DENIED": "Truy cập bị từ chối"
+    },
+    "403": {
+      "FORBIDDEN": "Bị cấm",
+      "NOT_CHAT_PARTICIPANT": "Không phải thành viên chat",
+      "ACTION_NOT_ALLOWED": "Hành động không được phép",
+      "INSUFFICIENT_PERMISSIONS": "Không đủ quyền",
+      "USER_NOT_IN_CHAT": "Người dùng không có trong chat",
+      "USER_CANNOT_FORWARD_IN_CHANNEL": "Người dùng không thể chuyển tiếp trong kênh",
+      "EMAIL_MISMATCH": "Email không khớp",
+      "REPLIED_MESSAGE_OTHER_CHAT": "Tin nhắn trả lời ở chat khác",
+      "CANNOT_REPLY_TO_DELETED": "Không thể trả lời tin nhắn đã xóa",
+      "CANNOT_REPLY_TO_REPLY": "Không thể trả lời tin nhắn trả lời"
+    },
+    "404": {
+      "RESOURCE_NOT_FOUND": "Không tìm thấy tài nguyên",
+      "USER_NOT_FOUND": "Không tìm thấy người dùng",
+      "FILE_NOT_FOUND": "Không tìm thấy tệp",
+      "PAGE_NOT_FOUND": "Không tìm thấy trang",
+      "CHAT_NOT_FOUND": "Không tìm thấy chat",
+      "MESSAGE_NOT_FOUND": "Không tìm thấy tin nhắn",
+      "FRIEND_REQUEST_NOT_FOUND": "Không tìm thấy yêu cầu kết bạn",
+      "FRIENDSHIP_NOT_FOUND": "Không tìm thấy mối quan hệ bạn bè",
+      "BLOCK_NOT_FOUND": "Không tìm thấy chặn",
+      "NO_PINNED_MESSAGE": "Không có tin nhắn ghim",
+      "MEMBER_NOT_FOUND": "Không tìm thấy thành viên",
+      "FOLDER_NOT_FOUND": "Không tìm thấy thư mục",
+      "CREATOR_NOT_FOUND": "Không tìm thấy người tạo"
+    },
+    "409": {
+      "CONFLICT": "Xung đột xảy ra. Vui lòng thử lại.",
+      "EMAIL_ALREADY_EXISTS": "Email đã tồn tại",
+      "USERNAME_TAKEN": "Tên người dùng đã được sử dụng",
+      "ALREADY_FRIENDS": "Bạn đã là bạn bè",
+      "ALREADY_SENT_FRIEND_REQUEST": "Yêu cầu kết bạn đã gửi",
+      "ALREADY_RECEIVED_FRIEND_REQUEST": "Bạn đã nhận yêu cầu kết bạn",
+      "MESSAGE_ALREADY_PINNED": "Tin nhắn đã được ghim"
     }
   }
 }

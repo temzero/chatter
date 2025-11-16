@@ -59,7 +59,8 @@
       "blocked": "已屏蔽",
       "blocked_me": "你已被屏蔽",
       "blocked_them": "你已屏蔽该用户。",
-      "blocked_each_other": "你和该用户已互相屏蔽"
+      "blocked_each_other": "你和该用户已互相屏蔽",
+      "load_app_error": "无法加载应用。请刷新。"
     },
     "loading": {
       "loading": "加载中...",
@@ -127,7 +128,14 @@
     },
 
     "register": {
-      "button_loading": "正在创建账户..."
+      "button_loading": "正在创建账户...",
+      "invalid_password": "密码格式无效",
+      "password_required": "密码为必填项。",
+      "password_min_length": "密码必须至少包含8个字符。",
+      "password_uppercase": "密码必须至少包含一个大写字母。",
+      "password_lowercase": "密码必须至少包含一个小写字母。",
+      "password_number": "密码必须至少包含一个数字。",
+      "passwords_do_not_match": "密码不匹配。"
     },
 
     "forgot_password": {
@@ -138,14 +146,16 @@
     "reset_password": {
       "title": "重置密码",
       "new_password": "新密码",
-      "invalid_token": "无效的重置令牌"
+      "invalid_token": "重置令牌无效",
+      "password_reset_sent": "重置密码邮件已发送。请检查您的收件箱。",
+      "password_reset_success": "密码已成功重置。您现在可以登录。"
     },
-
     "verify_email": {
       "title": "验证邮箱",
-      "greeting": "你好 {{name}}！",
-      "confirm_message": "请确认这是你的邮箱地址",
-      "invalid_token": "无效的验证令牌。"
+      "greeting": "您好 {{name}}！",
+      "confirm_message": "请确认这是您的邮箱地址",
+      "invalid_token": "验证令牌无效。",
+      "success": "邮箱验证成功！"
     }
   },
 
@@ -798,6 +808,80 @@
       "set_nickname": "设置昵称",
       "set_admin": "设为管理员",
       "set_member": "设为成员"
+    }
+  },
+
+  "error_message": {
+    "400": {
+      "BAD_REQUEST": "请求错误",
+      "FAILED_TO_SEND_EMAIL": "发送电子邮件失败",
+      "PASSWORD_RESET_SENT": "如果账户存在，已发送重置密码链接",
+      "MISSING_FIELDS_FOR_TOKEN": "生成令牌缺少必填字段",
+      "REFRESH_TOKEN_MISSING": "缺少刷新令牌",
+      "CANNOT_BLOCK_SELF": "无法屏蔽自己",
+      "USER_ALREADY_BLOCKED": "用户已被屏蔽",
+      "MISSING_USER_ID": "缺少用户ID",
+      "GROUP_NEEDS_2_MEMBERS": "群组需要至少2名成员",
+      "GROUP_OR_CHANNEL_NEEDS_NAME": "群组或频道需要名称",
+      "NICKNAME_TOO_LONG": "昵称过长",
+      "MAX_PINNED_CHATS": "已达到置顶聊天上限",
+      "USE_CREATE_REPLY_MESSAGE": "使用创建回复消息",
+      "MISSING_REPLY_TO_MESSAGE_ID": "缺少回复消息ID",
+      "EMAIL_VERIFICATION_INVALID": "邮箱验证无效",
+      "USER_NOT_IN_CHAT": "用户不在聊天中",
+      "ONLY_OWNER_CAN_DELETE_CHAT": "只有拥有者可以删除聊天",
+      "INVALID_STORAGE_URL": "存储URL无效",
+      "INVALID_TOKEN_PURPOSE": "令牌用途无效",
+      "FAILED_TO_MAP_CHAT": "映射聊天失败",
+      "DEVICE_ID_MISSING": "缺少设备ID",
+      "ONE_OR_MORE_USER_NOT_FOUND": "一个或多个用户未找到",
+      "FAILED_TO_UPDATE_NICKNAME": "更新昵称失败"
+    },
+    "401": {
+      "UNAUTHORIZED": "未授权",
+      "TOKEN_EXPIRED": "访问令牌已过期",
+      "REFRESH_TOKEN_EXPIRED": "会话已过期",
+      "INVALID_TOKEN": "访问令牌无效",
+      "INVALID_REFRESH_TOKEN": "刷新令牌无效",
+      "INVALID_CREDENTIALS": "用户名或密码错误",
+      "SESSION_EXPIRED": "会话已过期",
+      "ACCESS_DENIED": "访问被拒绝"
+    },
+    "403": {
+      "FORBIDDEN": "禁止访问",
+      "NOT_CHAT_PARTICIPANT": "不是聊天参与者",
+      "ACTION_NOT_ALLOWED": "操作不允许",
+      "INSUFFICIENT_PERMISSIONS": "权限不足",
+      "USER_NOT_IN_CHAT": "用户不在聊天中",
+      "USER_CANNOT_FORWARD_IN_CHANNEL": "用户不能在频道中转发",
+      "EMAIL_MISMATCH": "邮箱不匹配",
+      "REPLIED_MESSAGE_OTHER_CHAT": "回复的消息在另一个聊天中",
+      "CANNOT_REPLY_TO_DELETED": "无法回复已删除消息",
+      "CANNOT_REPLY_TO_REPLY": "无法回复回复消息"
+    },
+    "404": {
+      "RESOURCE_NOT_FOUND": "资源未找到",
+      "USER_NOT_FOUND": "用户未找到",
+      "FILE_NOT_FOUND": "文件未找到",
+      "PAGE_NOT_FOUND": "页面未找到",
+      "CHAT_NOT_FOUND": "聊天未找到",
+      "MESSAGE_NOT_FOUND": "消息未找到",
+      "FRIEND_REQUEST_NOT_FOUND": "好友请求未找到",
+      "FRIENDSHIP_NOT_FOUND": "好友关系未找到",
+      "BLOCK_NOT_FOUND": "屏蔽未找到",
+      "NO_PINNED_MESSAGE": "没有置顶消息",
+      "MEMBER_NOT_FOUND": "成员未找到",
+      "FOLDER_NOT_FOUND": "文件夹未找到",
+      "CREATOR_NOT_FOUND": "创建者未找到"
+    },
+    "409": {
+      "CONFLICT": "发生冲突，请重试。",
+      "EMAIL_ALREADY_EXISTS": "邮箱已存在",
+      "USERNAME_TAKEN": "用户名已被使用",
+      "ALREADY_FRIENDS": "你们已经是好友",
+      "ALREADY_SENT_FRIEND_REQUEST": "好友请求已发送",
+      "ALREADY_RECEIVED_FRIEND_REQUEST": "已收到好友请求",
+      "MESSAGE_ALREADY_PINNED": "消息已置顶"
     }
   }
 }

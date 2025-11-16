@@ -3,13 +3,21 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RefreshToken } from '../entities/refresh-token.entity';
+import { formatExpirationToMs } from 'src/common/helpers/formatExpiration';
+import { EnvHelper } from 'src/common/helpers/env.helper';
 
 @Injectable()
 export class TokenStorageService {
+  private refreshTokenExpirationMs: number;
+
   constructor(
     @InjectRepository(RefreshToken)
     private refreshTokenRepository: Repository<RefreshToken>,
-  ) {}
+  ) {
+    this.refreshTokenExpirationMs = formatExpirationToMs(
+      EnvHelper.jwt.refresh.expiration,
+    );
+  }
 
   createRefreshToken(
     token: string,
@@ -17,10 +25,8 @@ export class TokenStorageService {
     deviceId: string,
     deviceName?: string,
   ) {
-    const expiresAt = new Date(
-      Date.now() +
-        parseInt(process.env.refreshToken_EXPIRATION_MS || '604800000', 10), // 7 days in milliseconds
-    );
+    const expiresAt = new Date(Date.now() + this.refreshTokenExpirationMs);
+
     const tokenData = this.refreshTokenRepository.create({
       token,
       userId,

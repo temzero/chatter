@@ -59,7 +59,8 @@
       "blocked": "ถูกบล็อก",
       "blocked_me": "คุณถูกบล็อกแล้ว",
       "blocked_them": "คุณได้บล็อกผู้ใช้นี้แล้ว",
-      "blocked_each_other": "คุณและผู้ใช้นี้ได้บล็อกกันและกัน"
+      "blocked_each_other": "คุณและผู้ใช้นี้ได้บล็อกกันและกัน",
+      "load_app_error": "ไม่สามารถโหลดแอปได้ กรุณารีเฟรช"
     },
     "loading": {
       "loading": "กำลังโหลด...",
@@ -127,7 +128,14 @@
     },
 
     "register": {
-      "button_loading": "กำลังสร้างบัญชี..."
+      "button_loading": "กำลังสร้างบัญชี...",
+      "invalid_password": "รูปแบบรหัสผ่านไม่ถูกต้อง",
+      "password_required": "ต้องกรอกรหัสผ่าน",
+      "password_min_length": "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร",
+      "password_uppercase": "รหัสผ่านต้องมีตัวอักษรตัวใหญ่อย่างน้อยหนึ่งตัว",
+      "password_lowercase": "รหัสผ่านต้องมีตัวอักษรตัวเล็กอย่างน้อยหนึ่งตัว",
+      "password_number": "รหัสผ่านต้องมีตัวเลขอย่างน้อยหนึ่งตัว",
+      "passwords_do_not_match": "รหัสผ่านไม่ตรงกัน"
     },
 
     "forgot_password": {
@@ -138,14 +146,16 @@
     "reset_password": {
       "title": "รีเซ็ตรหัสผ่าน",
       "new_password": "รหัสผ่านใหม่",
-      "invalid_token": "โทเค็นรีเซ็ตไม่ถูกต้อง"
+      "invalid_token": "รหัสรีเซ็ตไม่ถูกต้อง",
+      "password_reset_sent": "ส่งอีเมลรีเซ็ตรหัสผ่านแล้ว กรุณาตรวจสอบกล่องจดหมายของคุณ",
+      "password_reset_success": "รีเซ็ตรหัสผ่านเรียบร้อยแล้ว ตอนนี้คุณสามารถเข้าสู่ระบบได้"
     },
-
     "verify_email": {
       "title": "ยืนยันอีเมล",
       "greeting": "สวัสดี {{name}}!",
       "confirm_message": "โปรดยืนยันว่านี่คืออีเมลของคุณ",
-      "invalid_token": "โทเค็นยืนยันไม่ถูกต้อง"
+      "invalid_token": "โทเค็นยืนยันไม่ถูกต้อง",
+      "success": "ยืนยันอีเมลเรียบร้อยแล้ว!"
     }
   },
 
@@ -774,7 +784,7 @@
 
     "chat_deleted": "{{displayName}} ลบแชท"
   },
-  
+
   "messages": {
     "search_bar": {
       "placeholder": "ค้นหาข้อความ",
@@ -798,6 +808,80 @@
       "set_nickname": "ตั้งชื่อเล่น",
       "set_admin": "ตั้งเป็นผู้ดูแล",
       "set_member": "ตั้งเป็นสมาชิก"
+    }
+  },
+
+  "error_message": {
+    "400": {
+      "BAD_REQUEST": "คำขอไม่ถูกต้อง",
+      "FAILED_TO_SEND_EMAIL": "ไม่สามารถส่งอีเมลได้",
+      "PASSWORD_RESET_SENT": "หากบัญชีมีอยู่ ระบบได้ส่งลิงก์รีเซ็ตรหัสผ่านแล้ว",
+      "MISSING_FIELDS_FOR_TOKEN": "ข้อมูลที่จำเป็นสำหรับการสร้างโทเค็นขาดหายไป",
+      "REFRESH_TOKEN_MISSING": "ไม่มีรีเฟรชโทเค็น",
+      "CANNOT_BLOCK_SELF": "ไม่สามารถบล็อกตัวเองได้",
+      "USER_ALREADY_BLOCKED": "ผู้ใช้ถูกบล็อกแล้ว",
+      "MISSING_USER_ID": "ขาดรหัสผู้ใช้",
+      "GROUP_NEEDS_2_MEMBERS": "กลุ่มต้องมีสมาชิกอย่างน้อย 2 คน",
+      "GROUP_OR_CHANNEL_NEEDS_NAME": "กลุ่มหรือช่องต้องมีชื่อ",
+      "NICKNAME_TOO_LONG": "ชื่อเล่นยาวเกินไป",
+      "MAX_PINNED_CHATS": "จำนวนแชทที่ปักหมุดสูงสุดถึงแล้ว",
+      "USE_CREATE_REPLY_MESSAGE": "โปรดใช้สร้างข้อความตอบกลับ",
+      "MISSING_REPLY_TO_MESSAGE_ID": "ขาดรหัสข้อความสำหรับตอบกลับ",
+      "EMAIL_VERIFICATION_INVALID": "การยืนยันอีเมลไม่ถูกต้อง",
+      "USER_NOT_IN_CHAT": "ผู้ใช้ไม่ได้อยู่ในแชท",
+      "ONLY_OWNER_CAN_DELETE_CHAT": "สามารถลบแชทได้เฉพาะเจ้าของเท่านั้น",
+      "INVALID_STORAGE_URL": "URL เก็บข้อมูลไม่ถูกต้อง",
+      "INVALID_TOKEN_PURPOSE": "วัตถุประสงค์ของโทเค็นไม่ถูกต้อง",
+      "FAILED_TO_MAP_CHAT": "ไม่สามารถแมปแชทได้",
+      "DEVICE_ID_MISSING": "ขาดรหัสอุปกรณ์",
+      "ONE_OR_MORE_USER_NOT_FOUND": "ไม่พบผู้ใช้อย่างน้อยหนึ่งคน",
+      "FAILED_TO_UPDATE_NICKNAME": "ไม่สามารถอัปเดตชื่อเล่นได้"
+    },
+    "401": {
+      "UNAUTHORIZED": "ไม่ได้รับอนุญาต",
+      "TOKEN_EXPIRED": "โทเค็นการเข้าถึงหมดอายุ",
+      "REFRESH_TOKEN_EXPIRED": "เซสชันหมดอายุ",
+      "INVALID_TOKEN": "โทเค็นการเข้าถึงไม่ถูกต้อง",
+      "INVALID_REFRESH_TOKEN": "รีเฟรชโทเค็นไม่ถูกต้อง",
+      "INVALID_CREDENTIALS": "ชื่อผู้ใช้หรือรหัสผ่านผิด",
+      "SESSION_EXPIRED": "เซสชันหมดอายุ",
+      "ACCESS_DENIED": "ปฏิเสธการเข้าถึง"
+    },
+    "403": {
+      "FORBIDDEN": "ห้ามเข้าถึง",
+      "NOT_CHAT_PARTICIPANT": "ไม่ใช่ผู้เข้าร่วมแชท",
+      "ACTION_NOT_ALLOWED": "การกระทำนี้ไม่ได้รับอนุญาต",
+      "INSUFFICIENT_PERMISSIONS": "สิทธิ์ไม่เพียงพอ",
+      "USER_NOT_IN_CHAT": "ผู้ใช้ไม่ได้อยู่ในแชท",
+      "USER_CANNOT_FORWARD_IN_CHANNEL": "ผู้ใช้ไม่สามารถส่งต่อในช่องได้",
+      "EMAIL_MISMATCH": "อีเมลไม่ตรงกัน",
+      "REPLIED_MESSAGE_OTHER_CHAT": "ข้อความที่ตอบกลับอยู่ในแชทอื่น",
+      "CANNOT_REPLY_TO_DELETED": "ไม่สามารถตอบกลับข้อความที่ถูกลบ",
+      "CANNOT_REPLY_TO_REPLY": "ไม่สามารถตอบกลับข้อความตอบกลับ"
+    },
+    "404": {
+      "RESOURCE_NOT_FOUND": "ไม่พบทรัพยากร",
+      "USER_NOT_FOUND": "ไม่พบผู้ใช้",
+      "FILE_NOT_FOUND": "ไม่พบไฟล์",
+      "PAGE_NOT_FOUND": "ไม่พบหน้า",
+      "CHAT_NOT_FOUND": "ไม่พบแชท",
+      "MESSAGE_NOT_FOUND": "ไม่พบข้อความ",
+      "FRIEND_REQUEST_NOT_FOUND": "ไม่พบคำขอเป็นเพื่อน",
+      "FRIENDSHIP_NOT_FOUND": "ไม่พบความสัมพันธ์เพื่อน",
+      "BLOCK_NOT_FOUND": "ไม่พบการบล็อก",
+      "NO_PINNED_MESSAGE": "ไม่มีข้อความปักหมุด",
+      "MEMBER_NOT_FOUND": "ไม่พบสมาชิก",
+      "FOLDER_NOT_FOUND": "ไม่พบโฟลเดอร์",
+      "CREATOR_NOT_FOUND": "ไม่พบผู้สร้าง"
+    },
+    "409": {
+      "CONFLICT": "เกิดความขัดแย้ง กรุณาลองอีกครั้ง",
+      "EMAIL_ALREADY_EXISTS": "อีเมลมีอยู่แล้ว",
+      "USERNAME_TAKEN": "ชื่อผู้ใช้นี้ถูกใช้งานแล้ว",
+      "ALREADY_FRIENDS": "คุณเป็นเพื่อนกันแล้ว",
+      "ALREADY_SENT_FRIEND_REQUEST": "ได้ส่งคำขอเป็นเพื่อนแล้ว",
+      "ALREADY_RECEIVED_FRIEND_REQUEST": "ได้รับคำขอเป็นเพื่อนแล้ว",
+      "MESSAGE_ALREADY_PINNED": "ข้อความถูกปักหมุดแล้ว"
     }
   }
 }

@@ -4,7 +4,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RegisterDto } from '../auth/dto/requests/register.dto';
 import { UpdateUserDto } from 'src/modules/user/dto/requests/update-user.dto';
-import { ConfigService } from '@nestjs/config';
 import { User } from 'src/modules/user/entities/user.entity';
 import { ErrorResponse } from 'src/common/api-response/errors';
 import { TokenStorageService } from '../auth/services/token-storage.service';
@@ -18,13 +17,13 @@ import {
   ConflictError,
   NotFoundError,
 } from 'src/shared/types/enums/error-message.enum';
+import { EnvHelper } from 'src/common/helpers/env.helper';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
-    private readonly configService: ConfigService,
     private readonly tokenStorageService: TokenStorageService,
     private readonly chatService: ChatService,
     private readonly friendshipService: FriendshipService,
@@ -111,10 +110,7 @@ export class UserService {
 
   async hashPassword(password: string): Promise<string> {
     try {
-      const saltRounds = parseInt(
-        this.configService.get('BCRYPT_SALT_ROUNDS', '10'),
-        10,
-      );
+      const saltRounds = EnvHelper.bcryptSaltRounds;
       return await bcrypt.hash(password, saltRounds);
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to hash password');
@@ -123,10 +119,23 @@ export class UserService {
 
   async createUser(registerDto: RegisterDto): Promise<User> {
     try {
-      const existingUser = await this.getUserByIdentifier(registerDto.email);
-      if (existingUser) {
-        ErrorResponse.conflict(ConflictError.EMAIL_ALREADY_EXISTS);
+      // Check for existing credentials
+      if (registerDto.username) {
+        const existingUserByUsername = await this.userRepo.findOne({
+          where: { username: registerDto.username },
+        });
+        if (existingUserByUsername) {
+          ErrorResponse.conflict(ConflictError.USERNAME_TAKEN);
+        }
+      } else if (registerDto.email) {
+        const existingUserByEmail = await this.getUserByIdentifier(
+          registerDto.email,
+        );
+        if (existingUserByEmail) {
+          ErrorResponse.conflict(ConflictError.EMAIL_ALREADY_EXISTS);
+        }
       }
+
       // 1. Create and save the user
       const user = this.userRepo.create({
         ...registerDto,

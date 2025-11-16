@@ -1,6 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 import { UserService } from 'src/modules/user/user.service';
 import { User } from 'src/modules/user/entities/user.entity';
 import type { JwtPayload } from '../types/jwt-payload.type';
@@ -9,6 +8,7 @@ import {
   NotFoundError,
   UnauthorizedError,
 } from 'src/shared/types/enums/error-message.enum';
+import { EnvHelper } from 'src/common/helpers/env.helper';
 
 interface WsClient {
   handshake: {
@@ -26,7 +26,6 @@ export class WsJwtGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
-    private readonly configService: ConfigService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -39,7 +38,7 @@ export class WsJwtGuard implements CanActivate {
 
     try {
       const payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
-        secret: this.configService.getOrThrow<string>('JWT_ACCESS_SECRET'),
+        secret: EnvHelper.jwt.access.secret,
       });
 
       console.log('payload from accessToken: ', payload);

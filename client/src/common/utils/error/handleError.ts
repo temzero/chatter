@@ -27,7 +27,9 @@ export function handleError(error: unknown, defaultMessage: string): never {
   }
 
   toast.error(message);
-  console.error(error);
+  if (error instanceof Error) {
+    console.error(error);
+  }
 
   throw error; // ensures TypeScript knows this never returns
 }
