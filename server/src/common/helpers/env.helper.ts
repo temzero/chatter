@@ -13,6 +13,10 @@ export class EnvHelper {
     return process.env.SERVER_URL || '';
   }
 
+  static get parseLimit(): string {
+    return process.env.BODY_PARSER_LIMIT || '';
+  }
+
   // ---------------- Database ------------------
   static get database() {
     return {

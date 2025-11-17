@@ -5,6 +5,9 @@ import { audioService, SoundType } from "@/services/audio.service";
 import handleUnauthorizedError from "../api/handleUnauthError";
 import handleConflictError from "../api/handleConflictError";
 import { toast } from "react-toastify";
+import { UnauthorizedError } from "@/shared/types/enums/error-message.enum";
+import { handleRefreshToken } from "./handleRefreshToken";
+import { useAuthStore } from "@/stores/authStore";
 
 export const handleApiError = () => {
   return (error: AxiosError) => {
@@ -15,7 +18,20 @@ export const handleApiError = () => {
     toast.error(`${status} - Code: ${code} - Message: ${message}`);
     console.error(`${status} - Code: ${code} - Message: ${message}`);
 
+    const originalRequest = error.config;
+
+    // // Check if this is a refresh token request that failed
+    // if (originalRequest?.url?.includes("/auth/refresh")) {
+    //   console.error("Refresh token failed - logging out");
+    //   useAuthStore.getState().logout();
+    //   return Promise.reject(error);
+    // }
+
     if (status === 401) {
+      if (code === UnauthorizedError.TOKEN_EXPIRED) {
+        return handleRefreshToken(originalRequest);
+      }
+
       handleUnauthorizedError(code);
       return;
     }
@@ -31,4 +47,3 @@ export const handleApiError = () => {
     return Promise.reject(error);
   };
 };
-

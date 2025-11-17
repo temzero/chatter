@@ -15,6 +15,10 @@ import { CallModule } from './modules/call/call.module';
 import { BootstrapModule } from './modules/bootstrap/bootstrap.module';
 import { AttachmentModule } from './modules/attachment/attachment.module';
 import { EnvHelper } from './common/helpers/env.helper';
+import * as dotenv from 'dotenv';
+
+dotenv.config(); // <-- Load env vars FIRST
+console.log('database:', EnvHelper.database);
 
 @Module({
   imports: [

@@ -130,6 +130,7 @@ export class AuthController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ): Promise<AuthResponse> {
+    console.log('refresh');
     // The guard will validate and add the user info to request.user
     const user = request.user as { refreshToken: string };
 

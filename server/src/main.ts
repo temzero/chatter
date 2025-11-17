@@ -1,6 +1,4 @@
 // src/main.ts
-import * as dotenv from 'dotenv';
-
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
@@ -9,17 +7,17 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
 import { json, urlencoded } from 'express';
 import { JwtIoAdapter } from './jwt.adapter';
-
-dotenv.config({ path: '.env' }); // <-- load env variables first
+import { EnvHelper } from './common/helpers/env.helper';
+import { testEnvHelper } from './common/helpers/test-env.helper';
 
 const DEFAULT_PORT = 3000;
-const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
-const BODY_PARSER_LIMIT = '100mb';
+const CLIENT_URL = EnvHelper.clientUrl;
+const BODY_PARSER_LIMIT = EnvHelper.parseLimit;
 
 async function bootstrap() {
   try {
+    testEnvHelper();
     console.log('1️⃣ Starting NestJS application...');
-    console.log('CLIENT_URL', process.env.CLIENT_URL);
 
     const app = await NestFactory.create<NestExpressApplication>(AppModule, {
       bufferLogs: true,

@@ -11,19 +11,17 @@ export class JwtRefreshGuard extends AuthGuard('jwt-refresh') {
       // Distinguish token expired vs invalid for refresh token
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (info && info.name === 'TokenExpiredError') {
-        return ErrorResponse.unauthorized(
-          UnauthorizedError.REFRESH_TOKEN_EXPIRED,
-        );
+        console.log('REFRESH_TOKEN_EXPIRED');
+        ErrorResponse.unauthorized(UnauthorizedError.REFRESH_TOKEN_EXPIRED);
       }
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (info && info.name === 'JsonWebTokenError') {
-        return ErrorResponse.unauthorized(
-          UnauthorizedError.INVALID_REFRESH_TOKEN,
-        );
+        console.log('INVALID_REFRESH_TOKEN');
+        ErrorResponse.unauthorized(UnauthorizedError.INVALID_REFRESH_TOKEN);
       }
 
       // Generic unauthorized for refresh token
-      return ErrorResponse.unauthorized(UnauthorizedError.UNAUTHORIZED);
+      ErrorResponse.unauthorized(UnauthorizedError.UNAUTHORIZED);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
