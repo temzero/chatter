@@ -116,6 +116,13 @@
   },
 
   "auth": {
+    "failed": "认证失败，请重新登录。",
+    
+    "token": {
+      "session_expired": "会话已过期，请重新登录。",
+      "invalid_session": "检测到无效会话，请重新登录。"
+    },
+
     "common": {
       "back_to_login": "返回登录",
       "password_mismatch": "密码不匹配！",

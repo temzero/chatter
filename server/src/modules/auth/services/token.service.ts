@@ -11,7 +11,7 @@ import {
   BadRequestError,
   UnauthorizedError,
 } from 'src/shared/types/enums/error-message.enum';
-import { EnvHelper } from 'src/common/helpers/env.helper';
+import { EnvConfig } from 'src/common/config/env.config';
 
 @Injectable()
 export class TokenService {
@@ -29,12 +29,12 @@ export class TokenService {
 
     const options = {
       [TokenType.ACCESS]: {
-        secret: EnvHelper.jwt.access.secret,
-        expiresIn: EnvHelper.jwt.access.expiration,
+        secret: EnvConfig.jwt.access.secret,
+        expiresIn: EnvConfig.jwt.access.expiration,
       },
       [TokenType.REFRESH]: {
-        secret: EnvHelper.jwt.refresh.secret,
-        expiresIn: EnvHelper.jwt.refresh.expiration,
+        secret: EnvConfig.jwt.refresh.secret,
+        expiresIn: EnvConfig.jwt.refresh.expiration,
       },
     }[type];
 
@@ -49,8 +49,8 @@ export class TokenService {
     token: string,
   ): Promise<T> {
     const secret = {
-      [TokenType.ACCESS]: EnvHelper.jwt.access.secret,
-      [TokenType.REFRESH]: EnvHelper.jwt.refresh.secret,
+      [TokenType.ACCESS]: EnvConfig.jwt.access.secret,
+      [TokenType.REFRESH]: EnvConfig.jwt.refresh.secret,
     }[type];
 
     try {
@@ -176,8 +176,8 @@ export class TokenService {
         purpose,
       },
       {
-        secret: EnvHelper.jwt.verification.secret,
-        expiresIn: EnvHelper.jwt.verification.expiration,
+        secret: EnvConfig.jwt.verification.secret,
+        expiresIn: EnvConfig.jwt.verification.expiration,
       },
     );
   }
@@ -196,7 +196,7 @@ export class TokenService {
         email: string;
         purpose: VerificationPurpose;
       }>(token, {
-        secret: EnvHelper.jwt.verification.secret,
+        secret: EnvConfig.jwt.verification.secret,
       });
 
       return {

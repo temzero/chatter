@@ -2,12 +2,11 @@
 // src/hooks/handleApiError.ts
 import { AxiosError } from "axios";
 import { audioService, SoundType } from "@/services/audio.service";
-import handleUnauthorizedError from "../api/handleUnauthError";
-import handleConflictError from "../api/handleConflictError";
 import { toast } from "react-toastify";
 import { UnauthorizedError } from "@/shared/types/enums/error-message.enum";
 import { handleRefreshToken } from "./handleRefreshToken";
-import { useAuthStore } from "@/stores/authStore";
+import handleUnauthorizedError from "../api/handleUnauthError";
+import handleConflictError from "../api/handleConflictError";
 
 export const handleApiError = () => {
   return (error: AxiosError) => {
@@ -15,26 +14,19 @@ export const handleApiError = () => {
     const code = (error.response?.data as any)?.code;
     const message = (error.response?.data as any)?.message || error.message;
 
-    toast.error(`${status} - Code: ${code} - Message: ${message}`);
-    console.error(`${status} - Code: ${code} - Message: ${message}`);
-
     const originalRequest = error.config;
-
-    // // Check if this is a refresh token request that failed
-    // if (originalRequest?.url?.includes("/auth/refresh")) {
-    //   console.error("Refresh token failed - logging out");
-    //   useAuthStore.getState().logout();
-    //   return Promise.reject(error);
-    // }
 
     if (status === 401) {
       if (code === UnauthorizedError.TOKEN_EXPIRED) {
         return handleRefreshToken(originalRequest);
+      } else {
+        handleUnauthorizedError(code);
       }
-
-      handleUnauthorizedError(code);
       return;
     }
+
+    toast.error(`${status} - Code: ${code} - Message: ${message}`);
+    console.error(`${status} - Code: ${code} - Message: ${message}`);
 
     if (status === 409) {
       handleConflictError(code);

@@ -15,7 +15,7 @@ import { FolderModule } from './modules/folder/folder.module';
 import { CallModule } from './modules/call/call.module';
 import { BootstrapModule } from './modules/bootstrap/bootstrap.module';
 import { AttachmentModule } from './modules/attachment/attachment.module';
-import { EnvHelper } from './common/helpers/env.helper';
+import { EnvConfig } from './common/config/env.config';
 
 @Module({
   imports: [
@@ -28,7 +28,7 @@ import { EnvHelper } from './common/helpers/env.helper';
       inject: [ConfigService],
 
       useFactory: (configService: ConfigService) => {
-        const db = EnvHelper.database;
+        const db = EnvConfig.database;
         const isDocker = configService.get('IS_DOCKER') === 'true';
 
         return {
@@ -41,7 +41,7 @@ import { EnvHelper } from './common/helpers/env.helper';
           password: configService.get('POSTGRES_PASSWORD') || 'password',
           database: configService.get('POSTGRES_DB') || 'chatter',
           entities: [__dirname + '/**/*.entity{.ts,.js}'],
-          synchronize: EnvHelper.nodeEnv !== 'production',
+          synchronize: EnvConfig.nodeEnv !== 'production',
         };
       },
     }),

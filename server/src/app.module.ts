@@ -14,23 +14,23 @@ import { FolderModule } from './modules/folder/folder.module';
 import { CallModule } from './modules/call/call.module';
 import { BootstrapModule } from './modules/bootstrap/bootstrap.module';
 import { AttachmentModule } from './modules/attachment/attachment.module';
-import { EnvHelper } from './common/helpers/env.helper';
+import { EnvConfig } from './common/config/env.config';
 import * as dotenv from 'dotenv';
 
 dotenv.config(); // <-- Load env vars FIRST
-console.log('database:', EnvHelper.database);
+console.log('database:', EnvConfig.database);
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: EnvHelper.database.host,
-      port: EnvHelper.database.port,
-      username: EnvHelper.database.user,
-      password: EnvHelper.database.password,
-      database: EnvHelper.database.name,
+      host: EnvConfig.database.host,
+      port: EnvConfig.database.port,
+      username: EnvConfig.database.user,
+      password: EnvConfig.database.password,
+      database: EnvConfig.database.name,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: EnvHelper.nodeEnv !== 'production',
+      synchronize: EnvConfig.nodeEnv !== 'production',
     }),
 
     // App modules

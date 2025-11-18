@@ -8,7 +8,6 @@ import {
 } from "@/shared/types/requests/auth.request";
 import { ApiSuccessResponse } from "@/shared/types/responses/api-success.response";
 import { UserResponse } from "@/shared/types/responses/user.response";
-import { toast } from "react-toastify";
 
 export const authService = {
   async fetchCurrentUser(): Promise<UserResponse> {
@@ -52,8 +51,6 @@ export const authService = {
   },
 
   async refreshAccessToken(): Promise<string> {
-    toast.info("[AUTH] RefreshToken");
-    console.log("[AUTH]", "refreshToken");
     const response = await API.post<AuthResponse>("/auth/refresh");
     return response.data.accessToken;
   },

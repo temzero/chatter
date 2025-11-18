@@ -28,7 +28,7 @@
 
 import { Response } from 'express';
 import { formatExpirationToMs } from 'src/common/helpers/formatExpiration';
-import { EnvHelper } from './env.helper';
+import { EnvConfig } from '../config/env.config';
 
 export interface CookieOptions {
   httpOnly?: boolean;
@@ -73,11 +73,11 @@ export const getRefreshTokenCookieOptions = (
   options?: Partial<CookieOptions>,
 ): CookieOptions => {
   // Get expiration from environment with fallback
-  const expirationConfig = EnvHelper.jwt.refresh.expiration;
+  const expirationConfig = EnvConfig.jwt.refresh.expiration;
   const maxAge = formatExpirationToMs(expirationConfig);
 
   // Determine secure flag based on environment
-  const isProduction = EnvHelper.isProd();
+  const isProduction = EnvConfig.isProd();
   const secure = options?.secure ?? isProduction;
 
   const defaultOptions: CookieOptions = {
@@ -100,7 +100,7 @@ export const getRefreshTokenExpirationInfo = (): {
   ms: number;
   humanReadable: string;
 } => {
-  const expirationConfig = EnvHelper.jwt.refresh.expiration;
+  const expirationConfig = EnvConfig.jwt.refresh.expiration;
   const ms = formatExpirationToMs(expirationConfig);
 
   return {

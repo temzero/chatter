@@ -116,6 +116,12 @@
   },
 
   "auth": {
+    "failed": "Authentication failed. Please login again.",
+    "token": {
+      "session_expired": "Your session has expired. Please login again.",
+      "invalid_session": "Invalid session detected. Please login again."
+    },
+
     "common": {
       "back_to_login": "Back to Login",
       "password_mismatch": "Passwords do not match!",

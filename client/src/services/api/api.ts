@@ -6,9 +6,10 @@ import axios, {
 } from "axios";
 import { localStorageService } from "../storage/localStorageService";
 import { handleApiError } from "@/common/utils/error/api/handleApiError";
+import { EnvConfig } from "@/common/config/env.config";
 
 const API: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: EnvConfig.apiUrl,
   headers: {
     "Content-Type": "application/json",
   },

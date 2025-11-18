@@ -17,7 +17,7 @@ import {
   ConflictError,
   NotFoundError,
 } from 'src/shared/types/enums/error-message.enum';
-import { EnvHelper } from 'src/common/helpers/env.helper';
+import { EnvConfig } from 'src/common/config/env.config';
 
 @Injectable()
 export class UserService {
@@ -110,7 +110,7 @@ export class UserService {
 
   async hashPassword(password: string): Promise<string> {
     try {
-      const saltRounds = EnvHelper.bcryptSaltRounds;
+      const saltRounds = EnvConfig.bcryptSaltRounds;
       return await bcrypt.hash(password, saltRounds);
     } catch (error) {
       ErrorResponse.throw(error, 'Failed to hash password');

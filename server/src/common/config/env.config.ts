@@ -1,5 +1,5 @@
 // src/common/helpers/env.helper.ts
-export class EnvHelper {
+export class EnvConfig {
   // -------------------- App --------------------
   static get nodeEnv(): string {
     return process.env.NODE_ENV || 'development';

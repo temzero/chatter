@@ -116,6 +116,13 @@
   },
 
   "auth": {
+    "failed": "Autenticación fallida. Por favor, inicie sesión nuevamente.",
+    
+    "token": {
+      "session_expired": "Tu sesión ha expirado. Por favor, inicia sesión nuevamente.",
+      "invalid_session": "Se detectó una sesión inválida. Por favor, inicia sesión nuevamente."
+    },
+
     "common": {
       "back_to_login": "Volver al inicio de sesión",
       "password_mismatch": "¡Las contraseñas no coinciden!",

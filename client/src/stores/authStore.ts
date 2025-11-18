@@ -58,6 +58,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       ...initialState,
 
       initialize: async (): Promise<boolean> => {
+        console.log("initialize AuthStore");
         try {
           // First, check persisted state
           const persistedUser = get().currentUser;
@@ -193,24 +194,12 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       },
 
       refreshAccessToken: async (): Promise<string> => {
-        try {
-          console.info("[AUTH]", "Refreshing access token...");
-          const newAccessToken = await authService.refreshAccessToken();
-
-          // Save new access token to localStorage
-          localStorageService.setAccessToken(newAccessToken);
-
-          // Optionally update any state if needed
-          set({ isAuthenticated: true });
-
-          return newAccessToken;
-        } catch (error) {
-          console.error("[AUTH] Failed to refresh token", error);
-          // Logout if refresh fails
-          get().clearAuthStore();
-          window.location.href = "/auth/login";
-          throw error; // re-throw so caller knows refresh failed
-        }
+        const newAccessToken = await authService.refreshAccessToken();
+        // Save new access token to localStorage
+        localStorageService.setAccessToken(newAccessToken);
+        // Optionally update any state if needed
+        set({ isAuthenticated: true });
+        return newAccessToken;
       },
 
       clearAuthStore: () => {

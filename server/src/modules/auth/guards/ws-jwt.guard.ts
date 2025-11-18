@@ -8,7 +8,7 @@ import {
   NotFoundError,
   UnauthorizedError,
 } from 'src/shared/types/enums/error-message.enum';
-import { EnvHelper } from 'src/common/helpers/env.helper';
+import { EnvConfig } from 'src/common/config/env.config';
 
 interface WsClient {
   handshake: {
@@ -38,7 +38,7 @@ export class WsJwtGuard implements CanActivate {
 
     try {
       const payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
-        secret: EnvHelper.jwt.access.secret,
+        secret: EnvConfig.jwt.access.secret,
       });
 
       console.log('payload from accessToken: ', payload);

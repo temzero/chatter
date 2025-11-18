@@ -7,7 +7,7 @@ import { VerificationPurpose } from './constants/verificationPurpose.enum';
 import { VerificationCodeService } from '../services/verification-code.service';
 import { BadRequestError } from 'src/shared/types/enums/error-message.enum';
 import { formatExpiration } from 'src/common/helpers/formatExpiration';
-import { EnvHelper } from 'src/common/helpers/env.helper';
+import { EnvConfig } from 'src/common/config/env.config';
 
 @Injectable()
 export class MailService {
@@ -19,10 +19,10 @@ export class MailService {
     private readonly tokenService: TokenService,
   ) {
     this.verificationExpiration = formatExpiration(
-      EnvHelper.jwt.verification.expiration,
+      EnvConfig.jwt.verification.expiration,
     );
 
-    const emailConfig = EnvHelper.email;
+    const emailConfig = EnvConfig.email;
     this.transporter = nodemailer.createTransport({
       service: emailConfig.service,
       auth: {
@@ -38,7 +38,7 @@ export class MailService {
         to,
         subject,
         html,
-        from: EnvHelper.email.user,
+        from: EnvConfig.email.user,
       });
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -86,7 +86,7 @@ export class MailService {
       email,
       VerificationPurpose.EMAIL_VERIFICATION,
     );
-    const verificationUrl = `${EnvHelper.clientUrl}/verify-email?token=${token}`;
+    const verificationUrl = `${EnvConfig.clientUrl}/verify-email?token=${token}`;
 
     const html = `
     <h1>Email Verification</h1>

@@ -1,8 +1,9 @@
 // src/services/websocket/websocket.service.ts
 import { io, Socket } from "socket.io-client";
 import { localStorageService } from "@/services/storage/localStorageService";
+import { EnvConfig } from "@/common/config/env.config";
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || "ws://localhost:3000";
+const SOCKET_URL = EnvConfig.apiUrl;
 
 export class WebSocketService {
   private socket: Socket | null = null;

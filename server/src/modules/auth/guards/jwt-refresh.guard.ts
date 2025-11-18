@@ -21,7 +21,7 @@ export class JwtRefreshGuard extends AuthGuard('jwt-refresh') {
       }
 
       // Generic unauthorized for refresh token
-      ErrorResponse.unauthorized(UnauthorizedError.UNAUTHORIZED);
+      ErrorResponse.unauthorized();
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return

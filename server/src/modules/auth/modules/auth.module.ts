@@ -15,7 +15,7 @@ import { JwtRefreshGuard } from '../guards/jwt-refresh.guard';
 import { JwtRefreshStrategy } from '../strategies/jwt-refresh.strategy';
 import { VerificationCodeService } from '../services/verification-code.service';
 import { MailService } from '../mail/mail.service';
-import { EnvHelper } from 'src/common/helpers/env.helper';
+import { EnvConfig } from 'src/common/config/env.config';
 
 @Module({
   imports: [
@@ -23,8 +23,8 @@ import { EnvHelper } from 'src/common/helpers/env.helper';
     forwardRef(() => UserModule),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
-      secret: EnvHelper.jwt.access.secret,
-      signOptions: { expiresIn: EnvHelper.jwt.access.expiration },
+      secret: EnvConfig.jwt.access.secret,
+      signOptions: { expiresIn: EnvConfig.jwt.access.expiration },
     }),
   ],
   controllers: [AuthController],

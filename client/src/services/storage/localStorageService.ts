@@ -1,15 +1,10 @@
-import { decodeAccessToken } from "@/common/utils/decodeAccessToken";
 import { v4 as uuidv4 } from "uuid";
 
 export const localStorageService = {
   // Token management
   getAccessToken(): string | null {
     const accessToken = localStorage.getItem("accessToken");
-    const decoded = decodeAccessToken(accessToken);
     console.log("[ACCESS TOKEN]", accessToken);
-    console.log("[IAT]", decoded?.iatDate);
-    console.log("[EXP]", decoded?.expDate);
-    console.log("[RAW PAYLOAD]", decoded);
     return accessToken;
     // return localStorage.getItem("accessToken");
   },

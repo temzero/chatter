@@ -6,7 +6,7 @@ import {
   RoomServiceClient,
   VideoGrant,
 } from 'livekit-server-sdk';
-import { EnvHelper } from 'src/common/helpers/env.helper';
+import { EnvConfig } from 'src/common/config/env.config';
 
 @Injectable()
 export class LiveKitService {
@@ -15,7 +15,7 @@ export class LiveKitService {
   private readonly roomService: RoomServiceClient;
 
   constructor() {
-    const { url, apiKey, apiSecret } = EnvHelper.livekit;
+    const { url, apiKey, apiSecret } = EnvConfig.livekit;
 
     if (!url || !apiKey || !apiSecret) {
       throw new Error('Missing LiveKit environment variables');

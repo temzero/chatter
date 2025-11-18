@@ -116,6 +116,12 @@
   },
 
   "auth": {
+    "failed": "Xác thực thất bại. Vui lòng đăng nhập lại.",
+    "token": {
+      "session_expired": "Phiên làm việc của bạn đã hết hạn. Vui lòng đăng nhập lại.",
+      "invalid_session": "Phát hiện phiên làm việc không hợp lệ. Vui lòng đăng nhập lại."
+    },
+
     "common": {
       "back_to_login": "Quay lại đăng nhập",
       "password_mismatch": "Mật khẩu không khớp!",

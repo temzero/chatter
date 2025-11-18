@@ -1,8 +1,9 @@
 // src/services/api/rawApi.ts
+import { EnvConfig } from "@/common/config/env.config";
 import axios from "axios";
 
 const rawAPI = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: EnvConfig.apiUrl,
   headers: {
     "Content-Type": "application/json",
   },

@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RefreshToken } from '../entities/refresh-token.entity';
 import { formatExpirationToMs } from 'src/common/helpers/formatExpiration';
-import { EnvHelper } from 'src/common/helpers/env.helper';
+import { EnvConfig } from 'src/common/config/env.config';
 
 @Injectable()
 export class TokenStorageService {
@@ -15,7 +15,7 @@ export class TokenStorageService {
     private refreshTokenRepository: Repository<RefreshToken>,
   ) {
     this.refreshTokenExpirationMs = formatExpirationToMs(
-      EnvHelper.jwt.refresh.expiration,
+      EnvConfig.jwt.refresh.expiration,
     );
   }
 

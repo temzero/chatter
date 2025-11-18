@@ -116,6 +116,13 @@
   },
 
   "auth": {
+    "failed": "인증에 실패했습니다. 다시 로그인해 주세요.",
+
+    "token": {
+      "session_expired": "세션이 만료되었습니다. 다시 로그인해 주세요.",
+      "invalid_session": "유효하지 않은 세션이 감지되었습니다. 다시 로グ인해 주세요."
+    },
+
     "common": {
       "back_to_login": "로그인으로 돌아가기",
       "password_mismatch": "비밀번호가 일치하지 않습니다!",

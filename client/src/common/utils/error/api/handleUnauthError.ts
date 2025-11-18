@@ -9,25 +9,13 @@ const handleUnauthorizedError = async (code: string) => {
   const message = t(`error_message.401.${code}`) || "Unauthorized access.";
 
   const redirectToLogin = () => {
-    useAuthStore.getState().logout();
+    console.log('redirectToLogin')
+    // useAuthStore.getState().logout();
   };
 
   if (code === UnauthorizedError.UNAUTHORIZED) {
     toast.error(message);
     console.error(message);
-    return;
-  }
-
-  if (code === UnauthorizedError.TOKEN_EXPIRED) {
-    toast.info(message);
-    console.info(message);
-    return;
-  }
-
-  if (code === UnauthorizedError.REFRESH_TOKEN_EXPIRED) {
-    toast.error(message);
-    console.error(message);
-    redirectToLogin();
     return;
   }
 

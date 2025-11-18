@@ -1,22 +1,22 @@
 // test-env-helper.ts
 
-import { EnvHelper } from './env.helper';
+import { EnvConfig } from '../config/env.config';
 
 export function testEnvHelper() {
   console.log('🔧 === Environment Helper Test ===\n');
 
   // Basic App Configuration
   console.log('📱 APP CONFIGURATION:');
-  console.log('   NODE_ENV:', EnvHelper.nodeEnv);
-  console.log('   Client URL:', EnvHelper.clientUrl || '❌ NOT SET');
-  console.log('   Server URL:', EnvHelper.serverUrl || '❌ NOT SET');
-  console.log('   Is Development:', EnvHelper.isDev());
-  console.log('   Is Production:', EnvHelper.isProd());
+  console.log('   NODE_ENV:', EnvConfig.nodeEnv);
+  console.log('   Client URL:', EnvConfig.clientUrl || '❌ NOT SET');
+  console.log('   Server URL:', EnvConfig.serverUrl || '❌ NOT SET');
+  console.log('   Is Development:', EnvConfig.isDev());
+  console.log('   Is Production:', EnvConfig.isProd());
   console.log('');
 
   // Database Configuration
   console.log('🗄️  DATABASE CONFIGURATION:');
-  const dbConfig = EnvHelper.database;
+  const dbConfig = EnvConfig.database;
   console.log('   Host:', dbConfig.host);
   console.log('   Port:', dbConfig.port);
   console.log('   User:', dbConfig.user);
@@ -29,7 +29,7 @@ export function testEnvHelper() {
 
   // JWT Configuration
   console.log('🔐 JWT CONFIGURATION:');
-  const jwtConfig = EnvHelper.jwt;
+  const jwtConfig = EnvConfig.jwt;
   console.log(
     '   Access Secret:',
     jwtConfig.access.secret !== 'default-access-secret'
@@ -56,7 +56,7 @@ export function testEnvHelper() {
 
   // Supabase Configuration
   console.log('☁️  SUPABASE CONFIGURATION:');
-  const supabaseConfig = EnvHelper.supabase;
+  const supabaseConfig = EnvConfig.supabase;
   console.log('   URL:', supabaseConfig.url || '❌ NOT SET');
   console.log('   Anon Key:', supabaseConfig.anonKey ? '✅ SET' : '❌ MISSING');
   console.log(
@@ -69,7 +69,7 @@ export function testEnvHelper() {
 
   // LiveKit Configuration
   console.log('🎥 LIVEKIT CONFIGURATION:');
-  const livekitConfig = EnvHelper.livekit;
+  const livekitConfig = EnvConfig.livekit;
   console.log('   URL:', livekitConfig.url || '❌ NOT SET');
   console.log('   API Key:', livekitConfig.apiKey ? '✅ SET' : '❌ MISSING');
   console.log(
@@ -80,7 +80,7 @@ export function testEnvHelper() {
 
   // Email Configuration
   console.log('📧 EMAIL CONFIGURATION:');
-  const emailConfig = EnvHelper.email;
+  const emailConfig = EnvConfig.email;
   console.log('   Service:', emailConfig.service);
   console.log('   User:', emailConfig.user || '❌ NOT SET');
   console.log('   Password:', emailConfig.password ? '✅ SET' : '❌ MISSING');
@@ -88,7 +88,7 @@ export function testEnvHelper() {
 
   // Utilities
   console.log('⚙️  UTILITIES:');
-  console.log('   Bcrypt Salt Rounds:', EnvHelper.bcryptSaltRounds);
+  console.log('   Bcrypt Salt Rounds:', EnvConfig.bcryptSaltRounds);
   console.log('');
 
   // Environment Variable Check Summary

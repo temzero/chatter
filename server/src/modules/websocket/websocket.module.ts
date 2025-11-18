@@ -16,9 +16,8 @@ import { BlockModule } from '../block/block.module';
 import { WebsocketConnectionService } from './services/websocket-connection.service';
 import { WebsocketNotificationService } from './services/websocket-notification.service';
 import { CallGateway } from './features/call.gateway';
-import { CallModule } from '../call/call.module'; // Import CallModule
-import { EnvHelper } from 'src/common/helpers/env.helper';
-
+import { CallModule } from '../call/call.module';
+import { EnvConfig } from 'src/common/config/env.config';
 @Module({
   imports: [
     forwardRef(() => ChatModule),
@@ -29,9 +28,9 @@ import { EnvHelper } from 'src/common/helpers/env.helper';
     forwardRef(() => SupabaseModule),
     forwardRef(() => CallModule), // Add CallModule import
     JwtModule.register({
-      secret: EnvHelper.jwt.access.secret,
+      secret: EnvConfig.jwt.access.secret,
       signOptions: {
-        expiresIn: EnvHelper.jwt.access.expiration,
+        expiresIn: EnvConfig.jwt.access.expiration,
       },
     }),
   ],

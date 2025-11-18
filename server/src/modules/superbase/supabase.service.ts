@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { ErrorResponse } from 'src/common/api-response/errors';
 import { parseSupabaseStorageUrl } from './utils/supabase-storage.util';
-import { EnvHelper } from 'src/common/helpers/env.helper';
+import { EnvConfig } from 'src/common/config/env.config';
 
 type bucketType = 'avatars' | 'attachments';
 
@@ -12,8 +12,8 @@ export class SupabaseService {
 
   constructor() {
     this.supabase = createClient(
-      EnvHelper.supabase.url,
-      EnvHelper.supabase.serviceRoleKey,
+      EnvConfig.supabase.url,
+      EnvConfig.supabase.serviceRoleKey,
     );
   }
 

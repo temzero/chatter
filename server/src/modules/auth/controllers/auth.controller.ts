@@ -134,9 +134,8 @@ export class AuthController {
     // The guard will validate and add the user info to request.user
     const user = request.user as { refreshToken: string };
 
-    const { accessToken, refreshToken } = await this.authService.refreshTokens(
-      user.refreshToken,
-    );
+    const { accessToken, refreshToken } =
+      await this.authService.refreshTokensFixed(user.refreshToken);
 
     setRefreshTokenCookie(response, refreshToken);
 

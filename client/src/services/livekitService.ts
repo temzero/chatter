@@ -9,6 +9,7 @@ import {
   Track,
 } from "livekit-client";
 import { audioService, SoundType } from "./audio.service";
+import { EnvConfig } from "@/common/config/env.config";
 
 export interface LiveKitServiceOptions {
   audio?: boolean;
@@ -38,7 +39,7 @@ export class LiveKitService {
   }
   private room: Room;
   private options?: LiveKitServiceOptions;
-  private url: string = import.meta.env.VITE_LIVEKIT_WS_URL;
+  private url: string = EnvConfig.livekit.wsUrl;
 
   constructor() {
     this.room = new Room({ adaptiveStream: true, dynacast: true });

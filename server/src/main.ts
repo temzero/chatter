@@ -7,12 +7,12 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
 import { json, urlencoded } from 'express';
 import { JwtIoAdapter } from './jwt.adapter';
-import { EnvHelper } from './common/helpers/env.helper';
 import { testEnvHelper } from './common/helpers/test-env.helper';
+import { EnvConfig } from './common/config/env.config';
 
 const DEFAULT_PORT = 3000;
-const CLIENT_URL = EnvHelper.clientUrl;
-const BODY_PARSER_LIMIT = EnvHelper.parseLimit;
+const CLIENT_URL = EnvConfig.clientUrl;
+const BODY_PARSER_LIMIT = EnvConfig.parseLimit;
 
 async function bootstrap() {
   try {

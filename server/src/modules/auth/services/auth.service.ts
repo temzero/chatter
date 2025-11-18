@@ -19,7 +19,7 @@ import {
   NotFoundError,
   UnauthorizedError,
 } from 'src/shared/types/enums/error-message.enum';
-import { EnvHelper } from 'src/common/helpers/env.helper';
+import { EnvConfig } from 'src/common/config/env.config';
 
 @Injectable()
 export class AuthService {
@@ -31,7 +31,7 @@ export class AuthService {
     private readonly tokenService: TokenService,
     private readonly tokenStorageService: TokenStorageService,
   ) {
-    this.verificationExpire = EnvHelper.jwt.verification.expiration;
+    this.verificationExpire = EnvConfig.jwt.verification.expiration;
   }
 
   async validateUser(loginDto: LoginDto): Promise<User | null> {
@@ -94,7 +94,8 @@ export class AuthService {
     }
   }
 
-  async refreshTokens(refreshToken: string) {
+  // sliding (rolling) refresh token pattern.
+  async refreshTokensWithSlidingExpiry(refreshToken: string) {
     try {
       // 1. Verify JWT signature and decode
       const payload = await this.tokenService.verifyToken<JwtRefreshPayload>(
@@ -142,6 +143,48 @@ export class AuthService {
     }
   }
 
+  // fixed expiry refresh token pattern
+  async refreshTokensFixed(refreshToken: string) {
+    try {
+      // 1. Verify JWT signature and decode
+      const payload = await this.tokenService.verifyToken<JwtRefreshPayload>(
+        TokenType.REFRESH,
+        refreshToken,
+      );
+
+      // 2. Check if token exists in database (prevent reuse)
+      const storedToken =
+        await this.tokenStorageService.findToken(refreshToken);
+      if (!storedToken) {
+        ErrorResponse.unauthorized(UnauthorizedError.INVALID_REFRESH_TOKEN);
+      } else if (storedToken.expiresAt < new Date()) {
+        await this.tokenStorageService.deleteToken(refreshToken);
+        ErrorResponse.unauthorized(UnauthorizedError.REFRESH_TOKEN_EXPIRED);
+      }
+
+      // 3. Only generate a new access token; keep the same refresh token
+      const newAccessToken = await this.tokenService.generateToken(
+        TokenType.ACCESS,
+        {
+          sub: payload.sub,
+          email: payload.email,
+          deviceId: payload.deviceId,
+          deviceName: payload.deviceName,
+        },
+      );
+
+      // 4. Return the same refresh token
+      return {
+        accessToken: newAccessToken,
+        refreshToken, // same refresh token
+        email: payload.email,
+        deviceName: payload.deviceName,
+      };
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to refresh tokens');
+    }
+  }
+
   async sendPasswordResetEmail(email: string): Promise<{ message: string }> {
     try {
       const user = await this.userService.getUserByIdentifier(email);
@@ -158,7 +201,7 @@ export class AuthService {
         { expiresIn: this.verificationExpire },
       );
 
-      const clientUrl = EnvHelper.clientUrl;
+      const clientUrl = EnvConfig.clientUrl;
       const resetUrl = `${clientUrl}/auth/reset-password?token=${encodeURIComponent(resetPasswordToken)}`;
 
       await this.mailService.sendPasswordResetEmail(user.email, resetUrl);
