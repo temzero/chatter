@@ -19,12 +19,16 @@ export const authService = {
   },
 
   async login(payload: LoginRequest): Promise<AuthResponse> {
-    const { data } = await API.post<AuthResponse>("/auth/login", payload);
+    const { data } = await API.post<AuthResponse>("/auth/login", payload, {
+      withCredentials: true, // important for cookie
+    });
     return data;
   },
 
   async register(payload: RegisterRequest): Promise<AuthResponse> {
-    const { data } = await API.post<AuthResponse>("/auth/register", payload);
+    const { data } = await API.post<AuthResponse>("/auth/register", payload, {
+      withCredentials: true, // important for cookie
+    });
     return data;
   },
 
@@ -51,13 +55,25 @@ export const authService = {
   },
 
   async refreshAccessToken(): Promise<string> {
-    const response = await API.post<AuthResponse>("/auth/refresh");
+    const response = await API.post<AuthResponse>(
+      "/auth/refresh",
+      {},
+      { withCredentials: true } // Include COOKIE in request and allow SET COOKIE in response
+    );
     return response.data.accessToken;
   },
 
-  logout: async () => {
+  async logout(): Promise<void> {
+    // Clear local access tokens
     localStorageService.clearAuth();
-    const response = await API.post("/auth/logout");
+
+    // Call server to clear refresh token cookie
+    const response = await API.post(
+      "/auth/logout",
+      {}, // empty body
+      { withCredentials: true } // include cookies in request/response
+    );
+
     return response.data;
   },
 };

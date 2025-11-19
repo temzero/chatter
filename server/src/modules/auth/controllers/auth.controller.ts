@@ -3,7 +3,6 @@ import {
   Post,
   Get,
   Body,
-  BadRequestException,
   Query,
   UseGuards,
   Headers,
@@ -13,27 +12,23 @@ import {
 import { AuthResponse } from 'src/shared/types/responses/auth.response';
 import { SuccessResponse } from 'src/common/api-response/success';
 import { AuthService } from '../services/auth.service';
-import { TokenService } from '../services/token.service';
 import { ErrorResponse } from 'src/common/api-response/errors';
 import { User } from '../../user/entities/user.entity';
 import { LocalGuard } from '../guards/local.guard';
-import { JwtAuthGuard } from '../guards/jwt.guard';
 import { CurrentUser } from '../decorators/user.decorator';
 import { Request, Response } from 'express';
-import { JwtPayload, JwtRefreshPayload } from '../types/jwt-payload.type';
+import { JwtRefreshGuard } from '../guards/jwt-refresh.guard';
+import { RegisterDto } from '../dto/requests/register.dto';
+import { TokenStorageService } from '../services/token-storage.service';
 import {
   clearRefreshTokenCookie,
   setRefreshTokenCookie,
 } from 'src/common/helpers/set-cookie.helper';
-import { JwtRefreshGuard } from '../guards/jwt-refresh.guard';
-import { RegisterDto } from '../dto/requests/register.dto';
-import { TokenStorageService } from '../services/token-storage.service';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly tokenService: TokenService,
     private readonly tokenStorageService: TokenStorageService,
   ) {}
 
@@ -54,6 +49,7 @@ export class AuthController {
     );
 
     setRefreshTokenCookie(response, refreshToken);
+
     return {
       accessToken,
       user,
@@ -73,8 +69,9 @@ export class AuthController {
       deviceId,
       deviceName,
     );
-    // Optional: Set HTTP-only cookie for web clients
+
     setRefreshTokenCookie(response, refreshToken);
+
     return {
       accessToken,
       user,
@@ -82,41 +79,24 @@ export class AuthController {
     };
   }
 
-  @Get('access-token')
-  @UseGuards(JwtAuthGuard)
-  jwtToken(@Headers('authorization') authHeader?: string) {
-    const accessToken = authHeader?.split(' ')[1];
-    if (!accessToken) {
-      throw new BadRequestException('Access token not found');
-    }
-    const decodedToken = this.tokenService.decodeToken<JwtPayload>(accessToken);
-    return new SuccessResponse(decodedToken, 'Token decoded successfully');
-  }
-
   @Post('logout')
   async logout(
-    @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
+    @CurrentUser('id') userId: string,
+    @Headers('x-device-id') deviceId: string,
   ) {
-    const refreshToken = this.tokenService.getRefreshTokenFromRequest(request);
-    const decodedToken =
-      this.tokenService.decodeToken<JwtRefreshPayload>(refreshToken);
-    if (!decodedToken) {
-      throw new BadRequestException('Invalid refresh token');
-    }
-
-    await this.authService.logout(decodedToken.sub, decodedToken.deviceId);
+    await this.tokenStorageService.deleteDeviceTokens(userId, deviceId);
     clearRefreshTokenCookie(response);
+
     return new SuccessResponse(null, 'Logged out successfully');
   }
 
   @Post('logout-all')
-  @UseGuards(JwtAuthGuard)
   async logoutAll(
     @Res({ passthrough: true }) response: Response,
-    @CurrentUser() user: User,
+    @CurrentUser('id') userId: string,
   ) {
-    await this.authService.logoutAll(user.id);
+    await this.tokenStorageService.deleteAllUserTokens(userId);
     clearRefreshTokenCookie(response);
     return new SuccessResponse(
       null,
@@ -130,17 +110,20 @@ export class AuthController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ): Promise<AuthResponse> {
-    console.log('refresh');
     // The guard will validate and add the user info to request.user
-    const user = request.user as { refreshToken: string };
+    const refreshTokenData = request.user as { refreshToken: string };
 
-    const { accessToken, refreshToken } =
-      await this.authService.refreshTokensFixed(user.refreshToken);
+    const payload = await this.authService.refreshTokensFixed(
+      refreshTokenData.refreshToken,
+    );
 
-    setRefreshTokenCookie(response, refreshToken);
+    const newRefreshToken = payload.refreshToken;
+    if (newRefreshToken) {
+      setRefreshTokenCookie(response, newRefreshToken);
+    }
 
     return {
-      accessToken,
+      accessToken: payload.accessToken,
       message: 'Tokens refreshed successfully',
     };
   }

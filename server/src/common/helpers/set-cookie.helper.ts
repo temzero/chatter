@@ -1,31 +1,3 @@
-// import { Response } from 'express';
-// import { ConfigService } from '@nestjs/config';
-// import {
-//   formatExpirationToMs,
-//   isValidExpirationFormat,
-// } from 'src/common/helpers/formatExpiration';
-
-// export const setRefreshTokenCookie = (
-//   response: Response,
-//   refreshToken: string,
-//   configService: ConfigService,
-//   options?: Partial<ReturnType<typeof defaultOptions>>,
-// ) => {
-//   response.cookie('refreshToken', refreshToken, {
-//     ...defaultOptions(configService),
-//     ...options, // allows overriding options if needed
-//   });
-// };
-
-// const defaultOptions = (configService: ConfigService) => ({
-//   httpOnly: true,
-//   secure: true,
-//   sameSite: 'strict' as const,
-//   maxAge:
-//     configService.get<number>('refreshToken_EXPIRATION_MS') ??
-//     7 * 24 * 60 * 60 * 1000,
-// });
-
 import { Response } from 'express';
 import { formatExpirationToMs } from 'src/common/helpers/formatExpiration';
 import { EnvConfig } from '../config/env.config';
@@ -46,6 +18,9 @@ export const setRefreshTokenCookie = (
 ): void => {
   try {
     const cookieOptions = getRefreshTokenCookieOptions(options);
+    // Clear old cookie first
+    clearRefreshTokenCookie(response);
+    // Set new cookie
     response.cookie('refreshToken', refreshToken, cookieOptions);
   } catch (error) {
     console.error('Failed to set refresh token cookie:', error);
@@ -58,11 +33,8 @@ export const clearRefreshTokenCookie = (
   options?: Partial<CookieOptions>,
 ): void => {
   try {
-    const cookieOptions = getRefreshTokenCookieOptions(options);
-    response.clearCookie('refreshToken', {
-      ...cookieOptions,
-      maxAge: 0, // Immediately expire
-    });
+    const cookieOptions = getRefreshTokenCookieOptions(options, true);
+    response.clearCookie('refreshToken', cookieOptions);
   } catch (error) {
     console.error('Failed to clear refresh token cookie:', error);
     throw new Error('Cookie clearance error');
@@ -71,26 +43,27 @@ export const clearRefreshTokenCookie = (
 
 export const getRefreshTokenCookieOptions = (
   options?: Partial<CookieOptions>,
+  clear = false, // new flag to indicate cookie clearing
 ): CookieOptions => {
-  // Get expiration from environment with fallback
-  const expirationConfig = EnvConfig.jwt.refresh.expiration;
-  const maxAge = formatExpirationToMs(expirationConfig);
+  const maxAge = clear
+    ? 0
+    : formatExpirationToMs(EnvConfig.jwt.refresh.expiration);
 
-  // Determine secure flag based on environment
   const isProduction = EnvConfig.isProd();
   const secure = options?.secure ?? isProduction;
+  const sameSite = isProduction ? 'strict' : 'lax';
 
   const defaultOptions: CookieOptions = {
     httpOnly: true,
-    secure: secure,
-    sameSite: isProduction ? 'strict' : 'lax',
-    maxAge: maxAge,
+    secure,
+    sameSite,
+    maxAge,
     path: '/',
   };
 
   return {
     ...defaultOptions,
-    ...options, // Allow overriding any options
+    ...options,
   };
 };
 

@@ -13,7 +13,7 @@ const API: AxiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true, // Include cookies in requests
+  withCredentials: true
 });
 
 // REQUEST interceptor

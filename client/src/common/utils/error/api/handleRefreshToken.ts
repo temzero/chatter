@@ -1,11 +1,7 @@
 // src/hooks/handleRefreshToken.ts
 import API from "@/services/api/api";
 import { useAuthStore } from "@/stores/authStore";
-import {
-  handleRefreshTokenError,
-  RefreshTokenError,
-} from "./handleRefreshTokenError";
-import { toast } from "react-toastify";
+import { handleRefreshTokenError } from "./handleRefreshTokenError";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const handleRefreshToken = async (originalRequest: any) => {
@@ -25,20 +21,13 @@ export const handleRefreshToken = async (originalRequest: any) => {
   try {
     const newAccessToken = await useAuthStore.getState().refreshAccessToken();
 
-    if (!newAccessToken) {
-      // refresh expired → do not retry
-      toast.error('No newAccessToken')
-      // useAuthStore.getState().logout();
-      return Promise.resolve(); // <<< stops loop
-    }
-
     // Explicitly update headers for this request
     originalRequest.headers = originalRequest.headers || {};
     originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
 
     return API(originalRequest);
   } catch (error) {
-    handleRefreshTokenError(error as RefreshTokenError);
+    handleRefreshTokenError();
     return Promise.reject(error);
   }
 };

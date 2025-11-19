@@ -176,7 +176,7 @@ export class AuthService {
       // 4. Return the same refresh token
       return {
         accessToken: newAccessToken,
-        refreshToken, // same refresh token
+        refreshToken: null, // same fixed refresh token
         email: payload.email,
         deviceName: payload.deviceName,
       };
@@ -282,22 +282,6 @@ export class AuthService {
       return { message: 'Email verified successfully' };
     } catch (error) {
       ErrorResponse.throw(error, 'Email verification failed');
-    }
-  }
-
-  async logout(userId: string, deviceId: string): Promise<void> {
-    try {
-      await this.tokenStorageService.deleteDeviceTokens(userId, deviceId);
-    } catch (error) {
-      ErrorResponse.throw(error, 'Failed to logout');
-    }
-  }
-
-  async logoutAll(userId: string): Promise<void> {
-    try {
-      await this.tokenStorageService.deleteAllUserTokens(userId);
-    } catch (error) {
-      ErrorResponse.throw(error, 'Failed to logout from all devices');
     }
   }
 }

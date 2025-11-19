@@ -39,8 +39,7 @@ export const localStorageService = {
     }
 
     // Detect OS
-    if (/Windows NT 10.0/.test(ua)) os = "Windows 10";
-    else if (/Windows NT 6.1/.test(ua)) os = "Windows 7";
+    if (/Windows/.test(ua)) os = "Windows";
     else if (/Android/.test(ua)) os = "Android";
     else if (/iPhone|iPad|iPod/.test(ua)) os = "iOS";
     else if (/Mac OS X/.test(ua)) os = "macOS";

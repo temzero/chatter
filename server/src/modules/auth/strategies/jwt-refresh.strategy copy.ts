@@ -1,3 +1,4 @@
+// src/auth/strategies/jwt-refresh.strategy.ts
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy, StrategyOptionsWithRequest } from 'passport-jwt';
@@ -13,19 +14,19 @@ export class JwtRefreshStrategy extends PassportStrategy(
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
-        // eslint-disable-next-line @typescript-eslint/unbound-method
         JwtRefreshStrategy.getRefreshTokenFromRequest,
       ]),
       secretOrKey: EnvConfig.jwt.refresh.secret,
-      ignoreExpiration: false,
-      passReqToCallback: true,
+      ignoreExpiration: false, // This should be false to catch expiration errors
+      // passReqToCallback: true,
     } as StrategyOptionsWithRequest);
   }
 
   validate(request: Request, payload: JwtRefreshPayload) {
     const refreshToken = JwtRefreshStrategy.getRefreshTokenFromRequest(request);
+
     if (!refreshToken) {
-      throw new UnauthorizedException('Refresh token missing');
+      throw new UnauthorizedException('Refresh token malformed');
     }
 
     return {
@@ -37,8 +38,22 @@ export class JwtRefreshStrategy extends PassportStrategy(
     };
   }
 
-  private static getRefreshTokenFromRequest(request: Request): string | null {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return request.cookies?.refreshToken || null;
+  // Shared utility method
+  private static getRefreshTokenFromRequest(
+    this: void,
+    request: Request,
+  ): string | null {
+    const cookieToken = (request?.cookies as Record<string, string> | undefined)
+      ?.refreshToken;
+
+    if (cookieToken) return cookieToken;
+
+    const authHeader = request.get('Authorization');
+    if (authHeader) {
+      const [type, value] = authHeader.split(' ');
+      if (type === 'Refresh') return value;
+    }
+
+    return null;
   }
 }

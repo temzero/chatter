@@ -71,7 +71,7 @@ export class TokenService {
           }
         }
       }
-      ErrorResponse.forbidden();
+      ErrorResponse.unauthorized();
     }
   }
 
