@@ -7,7 +7,7 @@ services:
       context: ./client
       dockerfile: Dockerfile.dev
     ports:
-      - "5173:5173"
+      - "5173:5173" # host 5173 → container 5173
     volumes:
       - ./client:/app
       - /app/node_modules
@@ -32,7 +32,7 @@ services:
       context: ./server
       dockerfile: Dockerfile.dev
     ports:
-      - "3000:3000"
+      - "3000:3000" # host 3000 → container 3000
     volumes:
       - ./server:/app
       - /app/node_modules
@@ -74,7 +74,7 @@ services:
   livekit:
     image: livekit/livekit-server:latest
     ports:
-      - "7880:7880" # HTTP/WebSocket
+      - "7880:7880" # HTTP/WebSocket # host 7880 → container 7880
       - "7881:7881" # TCP
       - "7882:7882/udp" # UDP
       - "50000-60000:50000-60000/udp" # UDP port range for WebRTC
@@ -84,6 +84,18 @@ services:
     environment:
       - LIVEKIT_HOST=0.0.0.0
     restart: unless-stopped
+
+  # db:
+  # image: postgres:18
+  # restart: always
+  # environment:
+  #   POSTGRES_USER: ${POSTGRES_USER}
+  #   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  #   POSTGRES_DB: ${POSTGRES_DB}
+  # ports:
+  #   - "5432:5432" # host:container
+  # volumes:
+  #   - db_data:/var/lib/postgresql/data
 
 networks:
   default:

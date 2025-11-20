@@ -15,11 +15,12 @@ import { AuthService } from '../services/auth.service';
 import { ErrorResponse } from 'src/common/api-response/errors';
 import { User } from '../../user/entities/user.entity';
 import { LocalGuard } from '../guards/local.guard';
-import { CurrentUser } from '../decorators/user.decorator';
 import { Request, Response } from 'express';
 import { JwtRefreshGuard } from '../guards/jwt-refresh.guard';
 import { RegisterDto } from '../dto/requests/register.dto';
 import { TokenStorageService } from '../services/token-storage.service';
+import { TokenService } from '../services/token.service';
+import { JwtRefreshPayload } from '../types/jwt-payload.type';
 import {
   clearRefreshTokenCookie,
   setRefreshTokenCookie,
@@ -29,6 +30,7 @@ import {
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
+    private readonly tokenService: TokenService,
     private readonly tokenStorageService: TokenStorageService,
   ) {}
 
@@ -81,11 +83,23 @@ export class AuthController {
 
   @Post('logout')
   async logout(
+    @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
-    @CurrentUser('id') userId: string,
-    @Headers('x-device-id') deviceId: string,
   ) {
-    await this.tokenStorageService.deleteDeviceTokens(userId, deviceId);
+    const refreshToken: string = request.cookies?.refreshToken as string;
+
+    if (refreshToken) {
+      const payload =
+        this.tokenService.decodeToken<JwtRefreshPayload>(refreshToken);
+
+      if (payload?.sub && payload.deviceId) {
+        await this.tokenStorageService.deleteDeviceTokens(
+          payload.sub,
+          payload.deviceId,
+        );
+      }
+    }
+
     clearRefreshTokenCookie(response);
 
     return new SuccessResponse(null, 'Logged out successfully');
@@ -93,11 +107,25 @@ export class AuthController {
 
   @Post('logout-all')
   async logoutAll(
+    @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
-    @CurrentUser('id') userId: string,
   ) {
-    await this.tokenStorageService.deleteAllUserTokens(userId);
+    const refreshToken = request.cookies?.refreshToken as string;
+
+    if (refreshToken) {
+      // Decode payload without verifying signature/expiration
+      const payload =
+        this.tokenService.decodeToken<JwtRefreshPayload>(refreshToken);
+
+      if (payload?.sub) {
+        // Delete all tokens for this user
+        await this.tokenStorageService.deleteAllUserTokens(payload.sub);
+      }
+    }
+
+    // Always clear the refresh token cookie
     clearRefreshTokenCookie(response);
+
     return new SuccessResponse(
       null,
       'Logged out from all devices successfully',
@@ -110,10 +138,11 @@ export class AuthController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ): Promise<AuthResponse> {
+    console.log('refresh ACCESS TOKEN');
     // The guard will validate and add the user info to request.user
     const refreshTokenData = request.user as { refreshToken: string };
 
-    const payload = await this.authService.refreshTokensFixed(
+    const payload = await this.authService.refreshTokensWithSlidingExpiry(
       refreshTokenData.refreshToken,
     );
 

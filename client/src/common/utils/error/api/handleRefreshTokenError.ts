@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 
 export const handleRefreshTokenError = (): void => {
   const t = i18next.t;
-  audioService.playSound(SoundType.USER_DISCONNECTED);
+  audioService.playSound(SoundType.LOGOUT);
 
   toast.warn(t("auth.token.session_expired"));
 

@@ -26,8 +26,8 @@ export const handleRefreshToken = async (originalRequest: any) => {
     originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
 
     return API(originalRequest);
-  } catch (error) {
+  } catch {
     handleRefreshTokenError();
-    return Promise.reject(error);
+    return;
   }
 };

@@ -22,6 +22,7 @@ import reactionRemoveSound from "@/assets/sound/reaction-remove.mp3";
 import ringSound from "@/assets/sound/old-telephone-ringing.mp3";
 import messageRemoveSound from "@/assets/sound/remove-message2.mp3";
 import typingSound from "@/assets/sound/typing.mp3";
+import logoutSound from "@/assets/sound/logout.mp3";
 
 // Define the SoundType as an enum
 export enum SoundType {
@@ -48,6 +49,7 @@ export enum SoundType {
   TYPING = "typing",
   BREAK = "break",
   ERROR = "error",
+  LOGOUT = "logout",
 }
 
 export interface AudioService {
@@ -96,6 +98,7 @@ class AudioServiceImpl implements AudioService {
       [SoundType.TYPING]: typingSound,
       [SoundType.BREAK]: breakSound,
       [SoundType.ERROR]: errorSound,
+      [SoundType.LOGOUT]: logoutSound,
     };
 
     Object.entries(soundConfig).forEach(([type, src]) => {

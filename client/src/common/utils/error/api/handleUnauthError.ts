@@ -8,39 +8,34 @@ const handleUnauthorizedError = async (code: string) => {
 
   const message = t(`error_message.401.${code}`) || "Unauthorized access.";
 
-  const redirectToLogin = () => {
-    console.log("redirectToLogin");
-    useAuthStore.getState().logout();
-  };
-
   if (code === UnauthorizedError.UNAUTHORIZED) {
     toast.error("UNAUTHORIZED");
     console.error("UNAUTHORIZED", message);
     return;
   }
 
-  if (code === UnauthorizedError.TOKEN_EXPIRED) {
-    console.error(message);
-    return;
-  }
+  // if (code === UnauthorizedError.TOKEN_EXPIRED) {
+  //   console.error(message);
+  //   return;
+  // }
 
-  if (code === UnauthorizedError.INVALID_TOKEN) {
-    toast.error(message);
-    console.error(message);
-    return;
-  }
+  // if (code === UnauthorizedError.INVALID_TOKEN) {
+  //   toast.error(message);
+  //   console.error(message);
+  //   return;
+  // }
 
-  if (code === UnauthorizedError.REFRESH_TOKEN_EXPIRED) {
-    console.error(message);
-    redirectToLogin();
-    return;
-  }
+  // if (code === UnauthorizedError.REFRESH_TOKEN_EXPIRED) {
+  //   console.error(message);
+  //   useAuthStore.getState().logout();
+  //   return;
+  // }
 
-  if (code === UnauthorizedError.INVALID_REFRESH_TOKEN) {
-    console.error(message);
-    redirectToLogin();
-    return;
-  }
+  // if (code === UnauthorizedError.INVALID_REFRESH_TOKEN) {
+  //   console.error(message);
+  //   useAuthStore.getState().logout();
+  //   return;
+  // }
 
   if (code === UnauthorizedError.INVALID_CREDENTIALS) {
     useAuthStore.getState().setMessage("error", message);
