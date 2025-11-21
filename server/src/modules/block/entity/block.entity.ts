@@ -29,11 +29,10 @@ export class Block {
 
   @Column({ name: 'blocked_id' })
   blockedId: string;
-
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
-
   // Optional: Add reason for blocking
   @Column({ type: 'varchar', nullable: true, length: 200 })
   reason: string | null;
+
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
+  createdAt: Date;
 }

@@ -8,7 +8,10 @@ const handleConflictError = (code: string) => {
   const message =
     t(`error_message.409.${code}`) || "Conflict occurred. Please try again.";
 
-  useAuthStore.getState().setMessage("error", message);
+  useAuthStore.getState().setAuthMessage({
+    type: "error",
+    content: message,
+  });
 
   switch (code) {
     case ConflictError.EMAIL_ALREADY_EXISTS:

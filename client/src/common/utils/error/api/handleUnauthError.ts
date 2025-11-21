@@ -38,9 +38,12 @@ const handleUnauthorizedError = async (code: string) => {
   // }
 
   if (code === UnauthorizedError.INVALID_CREDENTIALS) {
-    useAuthStore.getState().setMessage("error", message);
-    toast.error(message);
-    console.error(message);
+    useAuthStore.getState().setAuthMessage({
+      type: "error",
+      content: message,
+    });
+    // toast.error(message);
+    // console.error(message);
     return;
   }
 

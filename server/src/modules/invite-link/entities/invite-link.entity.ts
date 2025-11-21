@@ -26,7 +26,7 @@ export class InviteLink {
   @Column({ name: 'created_by', type: 'uuid' })
   createdBy: string;
 
-  @Column({ name: 'expires_at', type: 'timestamp', nullable: true })
+  @Column({ name: 'expires_at', nullable: true, type: 'timestamptz' })
   expiresAt: Date | null;
 
   @Column({ name: 'max_uses', type: 'integer', nullable: true })
@@ -38,12 +38,12 @@ export class InviteLink {
   @Column({ name: 'is_revoked', type: 'boolean', default: false })
   isRevoked: boolean;
 
-  @Column({ name: 'revoked_at', type: 'timestamp', nullable: true })
+  @Column({ name: 'revoked_at', nullable: true, type: 'timestamptz' })
   revokedAt: Date | null;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
 }

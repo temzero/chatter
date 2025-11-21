@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
   Column,
   Index,
+  DeleteDateColumn,
 } from 'typeorm';
 import { Chat } from 'src/modules/chat/entities/chat.entity';
 import { User } from '../../user/entities/user.entity';
@@ -54,7 +55,7 @@ export class ChatMember {
   @Column({ name: 'custom_title', type: 'varchar', nullable: true, length: 64 })
   customTitle: string | null;
 
-  @Column({ name: 'muted_until', nullable: true, type: 'timestamp' })
+  @Column({ name: 'muted_until', nullable: true, type: 'timestamptz' })
   mutedUntil: Date | null;
 
   @Column({ name: 'last_read_message_id', type: 'varchar', nullable: true })
@@ -64,15 +65,15 @@ export class ChatMember {
   @JoinColumn({ name: 'last_visible_message_id' })
   lastVisibleMessage: Message | null;
 
-  @Column({ name: 'pinned_at', type: 'timestamp', nullable: true })
+  @Column({ name: 'pinned_at', nullable: true, type: 'timestamptz' })
   pinnedAt: Date | null;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @DeleteDateColumn({ name: 'deleted_at', nullable: true, type: 'timestamptz' })
+  deletedAt: Date | null;
+
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
-
-  @Column({ name: 'deleted_at', type: 'timestamp', nullable: true })
-  deletedAt: Date | null;
 }

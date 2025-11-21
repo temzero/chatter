@@ -90,7 +90,7 @@ export class UserSettings {
   @Column({ default: 'en' })
   language: string;
 
-  @Column({ nullable: true, type: 'timestamp' })
+  @Column({ nullable: true, type: 'timestamptz' })
   timezone: string | null;
 
   // Advanced Settings
@@ -100,10 +100,10 @@ export class UserSettings {
   @Column({ type: 'jsonb', nullable: true })
   customPreferences: Record<string, any> | null;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
 
   // Helper method to get all settings as a plain object

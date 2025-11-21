@@ -71,9 +71,6 @@ export class User {
   @Column({ name: 'phone_verified', default: false })
   phoneVerified: boolean;
 
-  @Column({ name: 'last_active_at', type: 'timestamp', nullable: true })
-  lastActiveAt: Date | null;
-
   @Column({ name: 'meta_data', type: 'jsonb', nullable: true })
   metadata: Record<string, any> | null;
 
@@ -90,15 +87,17 @@ export class User {
   @OneToOne(() => UserSettings, (settings) => settings.user, { cascade: true })
   settings: UserSettings;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @Column({ name: 'last_active_at', nullable: true, type: 'timestamptz' })
+  lastActiveAt: Date | null;
+
+  @DeleteDateColumn({ name: 'deleted_at', nullable: true, type: 'timestamptz' })
+  deletedAt: Date | null;
+
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
-
-  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
-  deletedAt: Date | null;
-  user: any;
 
   @BeforeInsert()
   @BeforeUpdate()

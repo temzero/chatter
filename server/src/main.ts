@@ -7,16 +7,19 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
 import { json, urlencoded } from 'express';
 import { JwtIoAdapter } from './jwt.adapter';
-import { testEnvHelper } from './common/helpers/test-env.helper';
 import { EnvConfig } from './common/config/env.config';
+// import { testEnvHelper } from './common/helpers/test-env.helper';
 
 const DEFAULT_PORT = 3000;
 const CLIENT_URL = EnvConfig.clientUrl;
 const BODY_PARSER_LIMIT = EnvConfig.parseLimit;
 
+const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+console.log('TIMEZONE: ', timezone);
+
 async function bootstrap() {
   try {
-    testEnvHelper();
+    // testEnvHelper();
     console.log('1️⃣ Starting NestJS application...');
 
     const app = await NestFactory.create<NestExpressApplication>(AppModule, {

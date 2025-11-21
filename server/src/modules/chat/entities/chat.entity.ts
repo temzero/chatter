@@ -55,11 +55,11 @@ export class Chat {
   @OneToMany(() => InviteLink, (invite) => invite.chat)
   inviteLinks: InviteLink[];
 
-  /* Timestamps */
-  @CreateDateColumn({ name: 'created_at' })
+  /* Timestamps with timezone */
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
 
   @BeforeInsert()

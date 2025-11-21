@@ -13,7 +13,6 @@ const SidebarSettingsPrivacy: React.FC = () => {
   const setCurrentUser = useAuthStore.getState().setCurrentUser;
   const setMessage = useAuthStore.getState().setMessage;
   const setLoading = useAuthStore.getState().setLoading;
-  const clearMessage = useAuthStore.getState().clearMessage;
 
   const [privacySettings, setPrivacySettings] = useState({
     isPrivateAccount: currentUser?.isPrivateAccount || false,
@@ -49,27 +48,31 @@ const SidebarSettingsPrivacy: React.FC = () => {
     e.preventDefault();
 
     if (!isChanged) {
-      setMessage("info", "No changes detected");
+      setMessage({ type: "info", content: "No changes detected" });
       return;
     }
 
     try {
       setLoading(true);
-      clearMessage();
+      setMessage(null);
 
       const updatedUser = await userService.updatePrivacySettings(
         privacySettings
       );
       setCurrentUser(updatedUser);
-      setMessage("success", "Privacy settings updated successfully");
+      setMessage({
+        type: "success",
+        content: "Privacy settings updated successfully",
+      });
     } catch (error) {
       console.error(error);
-      setMessage(
-        "error",
-        error instanceof Error
-          ? error.message
-          : "Failed to update privacy settings"
-      );
+      setMessage({
+        type: "error",
+        content:
+          error instanceof Error
+            ? error.message
+            : "Failed to update privacy settings",
+      });
     } finally {
       setLoading(false);
     }

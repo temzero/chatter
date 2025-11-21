@@ -13,6 +13,7 @@ import {
   JoinTable,
   ManyToMany,
   BeforeInsert,
+  DeleteDateColumn,
 } from 'typeorm';
 import { Chat } from 'src/modules/chat/entities/chat.entity';
 import { User } from '../../user/entities/user.entity';
@@ -62,7 +63,7 @@ export class Message {
   @Column({ name: 'is_pinned', default: false })
   isPinned: boolean;
 
-  @Column({ name: 'pinned_at', nullable: true, type: 'timestamp' })
+  @Column({ name: 'pinned_at', nullable: true, type: 'timestamptz' })
   pinnedAt: Date | null;
 
   // @Column({ name: 'reply_to_message_id', nullable: true })
@@ -84,7 +85,7 @@ export class Message {
   @Column({ name: 'reply_count', default: 0 })
   replyCount: number;
 
-  @Column({ name: 'edited_at', nullable: true, type: 'timestamp' })
+  @Column({ name: 'edited_at', nullable: true, type: 'timestamptz' })
   editedAt: Date | null;
 
   @OneToMany(() => Reaction, (reaction) => reaction.message)
@@ -124,13 +125,13 @@ export class Message {
   @Column({ name: 'is_deleted', default: false })
   isDeleted: boolean;
 
-  @Column({ name: 'deleted_at', nullable: true, type: 'timestamp' })
+  @DeleteDateColumn({ name: 'deleted_at', nullable: true, type: 'timestamptz' })
   deletedAt: Date | null;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
 
   @BeforeInsert()

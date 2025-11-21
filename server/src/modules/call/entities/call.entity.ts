@@ -45,15 +45,15 @@ export class Call {
   @Column('text', { array: true, default: [] })
   currentUserIds: string[];
 
-  @Column({ type: 'timestamp', nullable: true })
-  startedAt?: Date;
+  @Column({ nullable: true, type: 'timestamptz' })
+  startedAt?: Date | null;
 
-  @Column({ type: 'timestamp', nullable: true })
-  endedAt?: Date;
+  @Column({ nullable: true, type: 'timestamptz' })
+  endedAt?: Date | null;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
 }

@@ -11,6 +11,8 @@ services:
     volumes:
       - ./client:/app
       - /app/node_modules
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     environment:
       - NODE_ENV=${NODE_ENV}
       - VITE_API_URL=http://localhost:3000
@@ -74,15 +76,13 @@ services:
   livekit:
     image: livekit/livekit-server:latest
     ports:
-      - "7880:7880" # HTTP/WebSocket # host 7880 → container 7880
-      - "7881:7881" # TCP
-      - "7882:7882/udp" # UDP
-      - "50000-60000:50000-60000/udp" # UDP port range for WebRTC
+      - "7880:7880" # HTTP/WebSocket
+      - "7881:7881" # TCP (optional, fallback)
+      - "7882:7882/udp" # UDP (optional)
+      - "3478:3478/udp" # TURN UDP (optional)
     volumes:
-      - ./livekit.yaml:/livekit.yaml
-    command: --config /livekit.yaml --bind-all
-    environment:
-      - LIVEKIT_HOST=0.0.0.0
+      - ./livekit-server/livekit.yaml:/livekit.yaml
+    command: --config /livekit.yaml
     restart: unless-stopped
 
   # db:

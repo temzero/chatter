@@ -20,10 +20,10 @@ export class VerificationCode {
   @Column()
   hashedCode: string; // store hashed code for security
 
-  @Column({ type: 'timestamp' })
+  @Column({ name: 'expires_at', type: 'timestamptz' })
   expiresAt: Date;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
   @BeforeInsert()

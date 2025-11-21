@@ -17,8 +17,7 @@ import { AttachmentModule } from './modules/attachment/attachment.module';
 import { EnvConfig } from './common/config/env.config';
 import * as dotenv from 'dotenv';
 
-dotenv.config(); // <-- Load env vars FIRST
-console.log('database:', EnvConfig.database);
+dotenv.config();
 
 @Module({
   imports: [

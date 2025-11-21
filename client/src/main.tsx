@@ -9,6 +9,10 @@ import LoadAppErrorPage from "./pages/error/LoadAppErrorPage.tsx";
 const currentPath = window.location.pathname;
 const isPublicRoute = currentPath.startsWith("/auth/");
 
+const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const now = new Date();
+console.log("Current UTC time:", now.toISOString(), timezone);
+
 const renderApp = () => {
   createRoot(document.getElementById("root")!).render(
     // <StrictMode>

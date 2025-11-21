@@ -30,7 +30,7 @@ const ResetPassword = () => {
   const loading = useAuthStore((state) => state.loading);
   const navigate = useNavigate();
   const resetPasswordWithToken = useAuthStore.getState().resetPasswordWithToken;
-  const setMessage = useAuthStore.getState().setMessage;
+  const setMessage = useAuthStore.getState().setAuthMessage;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,14 +44,17 @@ const ResetPassword = () => {
     // Validate password strength
     const validation = validatePassword(t, password, confirmPassword);
     if (!validation.isValid) {
-      return setMessage(
-        "error",
-        validation.message || t("auth.register.invalid_password")
-      );
+      return setMessage({
+        type: "error",
+        content: validation.message || t("auth.register.invalid_password"),
+      });
     }
 
     if (!token) {
-      return setMessage("error", t("auth.reset_password.invalid_token"));
+      return setMessage({
+        type: "error",
+        content: t("auth.reset_password.invalid_token"),
+      });
     }
 
     await resetPasswordWithToken(token, password);

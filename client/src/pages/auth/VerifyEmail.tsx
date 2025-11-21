@@ -15,14 +15,17 @@ const VerifyEmail = () => {
   const verifyEmailWithToken = useAuthStore(
     (state) => state.verifyEmailWithToken
   );
-  const setMessage = useAuthStore.getState().setMessage;
+  const setMessage = useAuthStore.getState().setAuthMessage;
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!token) {
-      return setMessage("error", t("auth.verify_email.invalid_token"));
+      return setMessage({
+        type: "error",
+        content: t("auth.verify_email.invalid_token"),
+      });
     }
 
     await verifyEmailWithToken(token);

@@ -14,7 +14,7 @@ export class EnvConfig {
   }
 
   static get parseLimit(): string {
-    return process.env.BODY_PARSER_LIMIT || '';
+    return process.env.BODY_PARSER_LIMIT || '100mb';
   }
 
   // ---------------- Database ------------------

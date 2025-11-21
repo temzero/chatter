@@ -16,33 +16,12 @@ const Register = () => {
 
   const loading = useAuthStore((state) => state.loading);
   const register = useAuthStore.getState().register;
-  const setMessage = useAuthStore.getState().setMessage;
+  const setMessage = useAuthStore.getState().setAuthMessage;
   const navigate = useNavigate();
-
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   if (!formRef.current) return;
-
-  //   const formData = new FormData(formRef.current);
-  //   const password = formData.get("password") as string;
-  //   const confirmPassword = formData.get("confirmPassword") as string;
-
-  //   if (password !== confirmPassword) {
-  //     return setMessage("error", t("auth.common.password_mismatch"));
-  //   }
-
-  //   await register({
-  //     email: formData.get("email") as string,
-  //     username: formData.get("username") as string,
-  //     firstName: formData.get("firstName") as string,
-  //     lastName: formData.get("lastName") as string,
-  //     password,
-  //   });
-  //   navigate("/");
-  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setMessage(null);
     if (!formRef.current) return;
 
     const formData = new FormData(formRef.current);
@@ -52,10 +31,10 @@ const Register = () => {
     // Validate password strength
     const validation = validatePassword(t, password, confirmPassword);
     if (!validation.isValid) {
-      return setMessage(
-        "error",
-        validation.message || t("auth.register.invalid_password")
-      );
+      return setMessage({
+        type: "error",
+        content: validation.message || t("auth.register.invalid_password"),
+      });
     }
 
     await register({

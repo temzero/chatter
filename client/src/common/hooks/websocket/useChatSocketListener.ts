@@ -43,11 +43,13 @@ export function useChatSocketListeners() {
           status: MessageStatus.SENT,
         });
         return;
-      } else {
-        if (message.systemEvent) {
-          handleSystemEventMessage(message);
-        }
+      }
 
+      if (message.systemEvent) {
+        handleSystemEventMessage(message);
+      }
+
+      if (!existingMessage) {
         messageStore.addMessage(message);
       }
 

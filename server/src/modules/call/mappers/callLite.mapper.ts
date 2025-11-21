@@ -6,7 +6,7 @@ export function mapCallToCallLiteResponse(call: Call): CallLiteResponseDto {
   return {
     id: call.id,
     status: call.status,
-    startedAt: call.startedAt,
+    startedAt: call.startedAt ?? null,
     endedAt: call.endedAt ?? null,
   };
 }

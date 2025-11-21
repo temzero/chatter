@@ -12,10 +12,12 @@ const Login = () => {
   const formRef = useRef<HTMLFormElement>(null);
   const loading = useAuthStore((state) => state.loading);
   const login = useAuthStore.getState().login;
+  const setMessage = useAuthStore.getState().setAuthMessage;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formRef.current) return;
+    setMessage(null);
     const formData = new FormData(formRef.current);
     const identifier = formData.get("username") as string;
     const password = formData.get("password") as string;

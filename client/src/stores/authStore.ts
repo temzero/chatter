@@ -11,22 +11,22 @@ import i18next from "i18next";
 
 type AuthMessageType = "error" | "success" | "info";
 
-interface Message {
-  type: AuthMessageType;
-  content: string;
+interface AuthMessage {
+  type: AuthMessageType | null;
+  content: string | null;
 }
 
 interface AuthState {
   currentUser: UserResponse | null;
   isAuthenticated: boolean;
   loading: boolean;
-  message: Message | null;
+  message: AuthMessage | null;
 }
 
 interface AuthActions {
   initialize: () => Promise<boolean>;
   setCurrentUser: (user: UserResponse | null) => void;
-  setMessage: (type: AuthMessageType, content: string) => void;
+  setAuthMessage: (authMessage: AuthMessage | null) => void;
   setLoading: (loading: boolean) => void;
   login: (identifier: string, password: string) => Promise<void>;
   logout: () => void;
@@ -108,7 +108,13 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       },
 
       // Core actions
-      setMessage: (type, content) => set({ message: { type, content } }),
+      setAuthMessage: (authMessage: AuthMessage | null) =>
+        set({
+          message:
+            authMessage === null
+              ? null
+              : { type: authMessage.type, content: authMessage.content },
+        }),
 
       setLoading: (isLoading) => set({ loading: isLoading }),
 

@@ -24,14 +24,14 @@ export class RefreshToken {
   @Column({ nullable: true })
   deviceName: string;
 
-  @CreateDateColumn()
+  @Column({ name: 'expires_at', type: 'timestamptz' })
+  expiresAt: Date;
+
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
-
-  @Column({ type: 'timestamp' })
-  expiresAt: Date;
 
   @BeforeInsert()
   setExpiryDate() {

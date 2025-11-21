@@ -9,7 +9,7 @@ export class CallLiteResponseDto implements CallLiteResponse {
 
   @Expose() status: CallStatus;
 
-  @Expose() startedAt?: Date | string;
+  @Expose() startedAt?: Date | string | null;
 
   @Expose() endedAt?: Date | string | null;
 }
