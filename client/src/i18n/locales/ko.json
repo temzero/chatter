@@ -55,6 +55,7 @@
       "required": "이 필드는 필수입니다",
       "invalid_code": "잘못된 코드",
       "verified": "인증됨",
+      "not_verified": "미인증",
       "failed_verify": "인증 실패",
       "blocked": "차단됨",
       "blocked_me": "당신은 차단되었습니다",

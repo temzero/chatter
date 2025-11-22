@@ -17,7 +17,7 @@ const bootstrapApp = async () => {
     await fetchInitialAppData();
   } catch {
     useAuthStore.getState().logout();
-    console.log('[INIT] BootstrapApp Failed')
+    console.log("[INIT] BootstrapApp Failed");
     return;
   }
 };

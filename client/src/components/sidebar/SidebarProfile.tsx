@@ -73,8 +73,11 @@ const SidebarProfile: React.FC = () => {
                       copyType="email"
                     />
                     {!currentUser?.emailVerified && (
-                      <div className="flex items-center absolute right-1 top-1/2 -translate-y-1/2 bg-[--sidebar-color] rounded-full p-0.5">
-                        <span className="material-symbols-outlined text-yellow-500">
+                      <div
+                        title={t("common.messages.not_verified")}
+                        className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center bg-[--sidebar-color] rounded-full cursor-pointer hover:bg-yellow-500 hover:text-white text-yellow-500"
+                      >
+                        <span className="material-symbols-outlined">
                           error
                         </span>
                       </div>

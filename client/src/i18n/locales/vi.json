@@ -55,6 +55,7 @@
       "required": "Trường này là bắt buộc",
       "invalid_code": "Mã không hợp lệ",
       "verified": "Đã xác minh",
+      "not_verified": "Chưa xác minh",
       "failed_verify": "Xác thực thất bại",
       "blocked": "Đã chặn",
       "blocked_me": "Bạn đã bị chặn",

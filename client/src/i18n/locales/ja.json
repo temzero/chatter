@@ -55,6 +55,7 @@
       "required": "このフィールドは必須です",
       "invalid_code": "無効なコード",
       "verified": "確認済み",
+      "not_verified": "未確認",
       "failed_verify": "認証に失敗しました",
       "blocked": "ブロック済み",
       "blocked_me": "あなたはブロックされています",
@@ -122,7 +123,7 @@
       "session_expired": "セッションの有効期限が切れました。再度ログインしてください。",
       "invalid_session": "無効なセッションが検出されました。再度ログインしてください。"
     },
-    
+
     "common": {
       "back_to_login": "ログインに戻る",
       "password_mismatch": "パスワードが一致しません！",

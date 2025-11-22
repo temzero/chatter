@@ -55,6 +55,7 @@
       "required": "此字段为必填项",
       "invalid_code": "无效代码",
       "verified": "已验证",
+      "not_verified": "未验证",
       "failed_verify": "验证失败",
       "blocked": "已屏蔽",
       "blocked_me": "你已被屏蔽",
@@ -117,7 +118,7 @@
 
   "auth": {
     "failed": "认证失败，请重新登录。",
-    
+
     "token": {
       "session_expired": "会话已过期，请重新登录。",
       "invalid_session": "检测到无效会话，请重新登录。"

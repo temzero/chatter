@@ -25,6 +25,8 @@ import {
   clearRefreshTokenCookie,
   setRefreshTokenCookie,
 } from 'src/common/helpers/set-cookie.helper';
+import { getCountryCodeFromRequest } from 'src/common/utils/getCountryFromRequest';
+import { countryToLang } from 'src/common/utils/country-to-language';
 
 @Controller('auth')
 export class AuthController {
@@ -37,17 +39,21 @@ export class AuthController {
   @Post('login')
   @UseGuards(LocalGuard)
   async login(
-    @Req() req: { user: User },
+    @Req() req: Request & { user: User },
     @Res({ passthrough: true }) response: Response,
     @Headers('x-device-id') deviceId: string,
     @Headers('x-device-name') deviceName: string,
   ): Promise<AuthResponse> {
+    const countryCode = getCountryCodeFromRequest(req);
+    const language = countryToLang(countryCode);
+
     await this.tokenStorageService.deleteDeviceTokens(req.user.id, deviceId);
 
     const { user, accessToken, refreshToken } = await this.authService.login(
       req.user,
       deviceId,
       deviceName,
+      language,
     );
 
     setRefreshTokenCookie(response, refreshToken);
@@ -63,6 +69,7 @@ export class AuthController {
   async register(
     @Headers('x-device-id') deviceId: string,
     @Headers('x-device-name') deviceName: string,
+    @Headers('x-client-country') countryCode: string,
     @Res({ passthrough: true }) response: Response,
     @Body() registerDto: RegisterDto,
   ): Promise<AuthResponse> {
@@ -70,6 +77,7 @@ export class AuthController {
       registerDto,
       deviceId,
       deviceName,
+      countryCode,
     );
 
     setRefreshTokenCookie(response, refreshToken);
@@ -167,8 +175,17 @@ export class AuthController {
   }
 
   @Post('send-password-reset-email')
-  async sendVerificationEmail(@Body() body: { email: string }) {
-    const message = await this.authService.sendPasswordResetEmail(body.email);
+  async sendVerificationEmail(
+    @Body() body: { email: string },
+    @Req() req: Request,
+  ) {
+    const countryCode = getCountryCodeFromRequest(req);
+    const language = countryToLang(countryCode);
+
+    const message = await this.authService.sendPasswordResetEmail(
+      body.email,
+      language, // Pass the language
+    );
     return message;
   }
 

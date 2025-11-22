@@ -13,7 +13,7 @@ const API: AxiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true
+  withCredentials: true,
 });
 
 // REQUEST interceptor
@@ -23,6 +23,7 @@ API.interceptors.request.use(
     const accessToken = localStorageService.getAccessToken();
     const deviceId = localStorageService.getDeviceId();
     const deviceName = localStorageService.getDeviceName();
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     if (accessToken && config.headers) {
       config.headers.Authorization = `Bearer ${accessToken}`;
@@ -30,6 +31,8 @@ API.interceptors.request.use(
 
     config.headers["x-device-id"] = deviceId;
     config.headers["x-device-name"] = deviceName;
+    config.headers["x-client-timezone"] = timezone;
+
     return config;
   },
   (error: AxiosError) => {

@@ -145,6 +145,27 @@ const SidebarSettingsEmail: React.FC = () => {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const SendVerificationButton: React.FC<{
+    isDisabled?: boolean;
+    loading?: boolean;
+  }> = ({ isDisabled = false, loading = false }) => {
+    return (
+      <button
+        type="submit"
+        className={`p-1 w-full ${
+          isDisabled
+            ? "opacity-50 cursor-not-allowed"
+            : "primary bg-[var(--border-color)]"
+        }`}
+        disabled={isDisabled}
+      >
+        {loading
+          ? t("common.loading.sending")
+          : t("common.actions.send_verification")}
+      </button>
+    );
+  };
+
   return (
     <SidebarLayout
       title={t("account_settings.change_email.title")}
@@ -177,28 +198,13 @@ const SidebarSettingsEmail: React.FC = () => {
           />
         </div>
 
-        {isUnchanged && isEmailVerified && (
-          <div className="flex items-center justify-start gap-1 px-1 py-0.5  text-green-500 rounded">
-            <span className="material-symbols-outlined">check_circle</span>
-            <p>{t("common.messages.verified")}</p>
-          </div>
+        {/* Show validation error */}
+        {validationError && (
+          <div className="text-red-500 text-sm px-1">{validationError}</div>
         )}
 
-        {!showCodeInput ? (
-          !isUnchanged && (
-            <button
-              type="submit"
-              className={`${
-                isDisabled ? "" : "primary bg-[var(--border-color)]"
-              } p-1 w-full`}
-              disabled={isDisabled}
-            >
-              {loading
-                ? t("common.loading.sending")
-                : t("common.actions.send_verification")}
-            </button>
-          )
-        ) : (
+        {showCodeInput ? (
+          // Verification Code UI
           <div className="flex flex-col gap-2">
             <div className="relative flex items-center gap-2 border-2 border-[var(--input-border-color)] p-2 rounded">
               <input
@@ -220,7 +226,11 @@ const SidebarSettingsEmail: React.FC = () => {
             <div className="flex gap-2">
               <button
                 type="button"
-                className="primary p-1 flex-1 bg-[var(--border-color)]"
+                className={`p-1 flex-1 ${
+                  loading || verificationCode.length !== 6
+                    ? "opacity-50 cursor-not-allowed"
+                    : "primary bg-[var(--border-color)]"
+                }`}
                 onClick={handleVerifyCode}
                 disabled={loading || verificationCode.length !== 6}
               >
@@ -229,7 +239,11 @@ const SidebarSettingsEmail: React.FC = () => {
                   : t("common.actions.verify_code")}
               </button>
               {codeCountdown > 0 ? (
-                <button type="button" className="secondary p-1 flex-1" disabled>
+                <button
+                  type="button"
+                  className="secondary p-1 flex-1 opacity-50 cursor-not-allowed"
+                  disabled
+                >
                   {t("account_settings.change_email.resend_in", {
                     time: formatCountdown(codeCountdown),
                   })}
@@ -237,7 +251,9 @@ const SidebarSettingsEmail: React.FC = () => {
               ) : (
                 <button
                   type="button"
-                  className="secondary p-1 flex-1 bg-[var(--border-color)]"
+                  className={`secondary p-1 flex-1 bg-[var(--border-color)] ${
+                    loading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                   onClick={handleResendCode}
                   disabled={loading}
                 >
@@ -246,6 +262,30 @@ const SidebarSettingsEmail: React.FC = () => {
               )}
             </div>
           </div>
+        ) : // Email Status & Send Button UI
+        isUnchanged ? (
+          isEmailVerified ? (
+            // Verified status
+            <div className="flex items-center justify-start gap-1 px-1 py-0.5 text-green-500 rounded">
+              <span className="material-symbols-outlined">check_circle</span>
+              <p>{t("common.messages.verified")}</p>
+            </div>
+          ) : (
+            // Not verified status with send button
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-start gap-1 px-1 py-0.5 text-yellow-500 rounded">
+                <span className="material-symbols-outlined">error</span>
+                <p>{t("common.messages.not_verified")}</p>
+              </div>
+              <SendVerificationButton
+                isDisabled={isDisabled}
+                loading={loading}
+              />
+            </div>
+          )
+        ) : (
+          // Changed email - send button only
+          <SendVerificationButton isDisabled={isDisabled} loading={loading} />
         )}
       </form>
     </SidebarLayout>

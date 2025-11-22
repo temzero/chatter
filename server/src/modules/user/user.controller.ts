@@ -9,6 +9,7 @@ import {
   UseGuards,
   InternalServerErrorException,
   Delete,
+  Req,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { UserService } from './user.service';
@@ -26,6 +27,9 @@ import { MailService } from '../auth/mail/mail.service';
 import { VerificationCodeService } from '../auth/services/verification-code.service';
 import { ErrorResponse } from 'src/common/api-response/errors';
 import { BadRequestError } from 'src/shared/types/enums/error-message.enum';
+import { getCountryCodeFromRequest } from 'src/common/utils/getCountryFromRequest';
+import { countryToLang } from 'src/common/utils/country-to-language';
+import { Request } from 'express';
 
 @Controller('user')
 @UseGuards(JwtAuthGuard)
@@ -150,10 +154,15 @@ export class UserController {
   async sendEmailVerificationCode(
     @CurrentUser('id') userId: string,
     @Body() verifyEmailDto: VerifyEmailDto,
+    @Req() req: Request,
   ): Promise<SuccessResponse<boolean>> {
+    const countryCode = getCountryCodeFromRequest(req);
+    const language = countryToLang(countryCode);
+
     const isSuccess = await this.mailService.sendEmailVerificationCode(
-      userId,
       verifyEmailDto.email,
+      userId,
+      language,
     );
 
     const message = isSuccess

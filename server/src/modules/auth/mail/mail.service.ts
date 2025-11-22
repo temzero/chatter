@@ -2,12 +2,18 @@ import * as nodemailer from 'nodemailer';
 import { Transporter } from 'nodemailer';
 import { Injectable } from '@nestjs/common';
 import { ErrorResponse } from 'src/common/api-response/errors';
-import { TokenService } from '../services/token.service';
-import { VerificationPurpose } from './constants/verificationPurpose.enum';
 import { VerificationCodeService } from '../services/verification-code.service';
 import { BadRequestError } from 'src/shared/types/enums/error-message.enum';
 import { formatExpiration } from 'src/common/helpers/formatExpiration';
 import { EnvConfig } from 'src/common/config/env.config';
+
+// Bilingual email templates
+import { WelcomeEmailVI } from './template/welcome/welcome.email.vi';
+import { WelcomeEmailEN } from './template/welcome/welcome.email.en';
+import { VerificationEmailEN } from './template/email-verification-code/verification-code.email.en';
+import { VerificationEmailVI } from './template/email-verification-code/verification-code.email.vi';
+import { PasswordResetEmailEN } from './template/password-reset/password-reset.email.en';
+import { PasswordResetEmailVI } from './template/password-reset/password-reset.email.vi';
 
 @Injectable()
 export class MailService {
@@ -16,7 +22,6 @@ export class MailService {
 
   constructor(
     private readonly verificationCodeService: VerificationCodeService,
-    private readonly tokenService: TokenService,
   ) {
     this.verificationExpiration = formatExpiration(
       EnvConfig.jwt.verification.expiration,
@@ -49,52 +54,55 @@ export class MailService {
     }
   }
 
+  async sendWelcomeEmail(
+    userEmail: string,
+    username: string,
+    language?: string,
+  ): Promise<void> {
+    const content = language === 'vi' ? WelcomeEmailVI : WelcomeEmailEN;
+
+    const html = content.html(username, EnvConfig.clientUrl);
+    const subject = content.subject(username);
+
+    await this.sendMail(userEmail, subject, html);
+  }
+
   async sendEmailVerificationCode(
-    userId: string,
     email: string,
+    userId: string,
+    language?: string,
   ): Promise<boolean> {
     const { rawCode, verificationCode } =
       await this.verificationCodeService.generateAndSaveCode(userId, email);
 
-    const html = `
-    <h1>Email Verification Code</h1>
-    <p>Your verification code is:</p>
-    <h2>${rawCode}</h2>
-    <p>This code will expire in ${this.verificationExpiration} (${verificationCode.expiresAt.toISOString()}).</p>
-  `;
+    const content =
+      language === 'vi' ? VerificationEmailVI : VerificationEmailEN;
 
-    await this.sendMail(email, 'Your Verification Code', html);
+    const html = content.html({
+      verificationCode: rawCode,
+      expirationTime: this.verificationExpiration,
+      expiresAt: verificationCode.expiresAt,
+    });
+
+    const subject = content.subject();
+    await this.sendMail(email, subject, html);
     return true;
   }
 
-  async sendPasswordResetEmail(email: string, url: string): Promise<void> {
-    const html = `
-      <h1>Password Reset Request</h1>
-      <p>You requested to reset your password. Click the link below:</p>
-      <a href="${url}">Reset Password</a>
-      <p>This link will expire in ${this.verificationExpiration}.</p>
-    `;
-    await this.sendMail(email, 'Password Reset Request', html);
-  }
-
-  async sendEmailVerificationLink(
-    userId: string,
+  async sendPasswordResetEmail(
     email: string,
+    url: string,
+    language?: string,
   ): Promise<void> {
-    const token = await this.tokenService.generateEmailToken(
-      userId,
-      email,
-      VerificationPurpose.EMAIL_VERIFICATION,
-    );
-    const verificationUrl = `${EnvConfig.clientUrl}/verify-email?token=${token}`;
+    const content =
+      language === 'vi' ? PasswordResetEmailVI : PasswordResetEmailEN;
 
-    const html = `
-    <h1>Email Verification</h1>
-    <p>Click the link below to verify your email:</p>
-    <a href="${verificationUrl}">Verify Email</a>
-    <p>This link will expire in ${this.verificationExpiration}.</p>
-  `;
+    const html = content.html({
+      resetUrl: url,
+      expirationTime: this.verificationExpiration,
+    });
 
-    await this.sendMail(email, 'Verify Your Email', html);
+    const subject = content.subject();
+    await this.sendMail(email, subject, html);
   }
 }

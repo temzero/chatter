@@ -149,7 +149,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         authService.logout();
         webSocketService.disconnect();
         clearAppData();
-        window.location.href = "/auth/login";
+        // window.location.href = "/auth/login";
+        console.log('LOGOUT')
       },
 
       // Password recovery

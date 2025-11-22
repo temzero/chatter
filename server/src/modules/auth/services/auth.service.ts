@@ -47,7 +47,17 @@ export class AuthService {
     }
   }
 
-  async login(user: User, deviceId: string, deviceName: string) {
+  async login(
+    user: User,
+    deviceId: string,
+    deviceName: string,
+    language?: string,
+  ) {
+    await this.mailService.sendWelcomeEmail(
+      user.email,
+      user.firstName,
+      language,
+    );
     try {
       const { newAccessToken, newRefreshToken } =
         await this.tokenService.generateTokenPair({
@@ -79,13 +89,16 @@ export class AuthService {
     registerDto: RegisterDto,
     deviceId: string,
     deviceName: string,
+    countryCode?: string,
   ) {
     try {
       const user = await this.userService.createUser(registerDto);
 
-      // const verifyEmailToken = this.jwtService.sign({ sub: user.id });
-      // const clientUrl = this.configService.get<string>('CLIENT_URL');
-      await this.mailService.sendEmailVerificationLink(user.id, user.email);
+      await this.mailService.sendWelcomeEmail(
+        user.email,
+        user.firstName,
+        countryCode,
+      );
 
       // Automatically login the user
       return this.login(user, deviceId, deviceName);
@@ -185,7 +198,10 @@ export class AuthService {
     }
   }
 
-  async sendPasswordResetEmail(email: string): Promise<{ message: string }> {
+  async sendPasswordResetEmail(
+    email: string,
+    language?: string,
+  ): Promise<{ message: string }> {
     try {
       const user = await this.userService.getUserByIdentifier(email);
       if (!user) {
@@ -204,7 +220,11 @@ export class AuthService {
       const clientUrl = EnvConfig.clientUrl;
       const resetUrl = `${clientUrl}/auth/reset-password?token=${encodeURIComponent(resetPasswordToken)}`;
 
-      await this.mailService.sendPasswordResetEmail(user.email, resetUrl);
+      await this.mailService.sendPasswordResetEmail(
+        user.email,
+        resetUrl,
+        language,
+      );
 
       return { message: 'Password reset link sent if account exists' };
     } catch (error) {
