@@ -28,8 +28,8 @@ import { VerificationCodeService } from '../auth/services/verification-code.serv
 import { ErrorResponse } from 'src/common/api-response/errors';
 import { BadRequestError } from 'src/shared/types/enums/error-message.enum';
 import { getCountryCodeFromRequest } from 'src/common/utils/getCountryFromRequest';
-import { countryToLang } from 'src/common/utils/country-to-language';
 import { Request } from 'express';
+import { countryToLang } from 'src/common/utils/countryToLanguage';
 
 @Controller('user')
 @UseGuards(JwtAuthGuard)

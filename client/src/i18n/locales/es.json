@@ -61,7 +61,8 @@
       "blocked_me": "Has sido bloqueado",
       "blocked_them": "Has bloqueado a este usuario.",
       "blocked_each_other": "Tú y este usuario se han bloqueado mutuamente",
-      "load_app_error": "No se pudo cargar la aplicación. Por favor, actualiza."
+      "load_app_error": "No se pudo cargar la aplicación. Por favor, actualiza.",
+      "upload_failed": "¡Error al subir el archivo!"
     },
     "loading": {
       "loading": "Cargando...",

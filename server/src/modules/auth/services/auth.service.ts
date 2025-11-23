@@ -47,17 +47,7 @@ export class AuthService {
     }
   }
 
-  async login(
-    user: User,
-    deviceId: string,
-    deviceName: string,
-    language?: string,
-  ) {
-    await this.mailService.sendWelcomeEmail(
-      user.email,
-      user.firstName,
-      language,
-    );
+  async login(user: User, deviceId: string, deviceName: string) {
     try {
       const { newAccessToken, newRefreshToken } =
         await this.tokenService.generateTokenPair({
@@ -89,7 +79,7 @@ export class AuthService {
     registerDto: RegisterDto,
     deviceId: string,
     deviceName: string,
-    countryCode?: string,
+    language?: string,
   ) {
     try {
       const user = await this.userService.createUser(registerDto);
@@ -97,7 +87,7 @@ export class AuthService {
       await this.mailService.sendWelcomeEmail(
         user.email,
         user.firstName,
-        countryCode,
+        language,
       );
 
       // Automatically login the user

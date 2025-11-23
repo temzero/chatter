@@ -6,7 +6,7 @@ import { MessageService } from 'src/modules/message/message.service';
 import { MessageMapper } from 'src/modules/message/mappers/message.mapper';
 import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
 import { mapChatMemberToChatMemberLiteDto } from '../../chat-member/mappers/chat-member-lite.mapper';
-import { getActiveInviteLinks } from 'src/common/utils/invite-link.util';
+import { getActiveInviteLinks } from 'src/common/utils/inviteLink.util';
 import { ChatMemberLiteDto } from '../dto/responses/chat-member-lite.dto';
 
 @Injectable()

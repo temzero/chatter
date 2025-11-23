@@ -21,12 +21,12 @@ import { RegisterDto } from '../dto/requests/register.dto';
 import { TokenStorageService } from '../services/token-storage.service';
 import { TokenService } from '../services/token.service';
 import { JwtRefreshPayload } from '../types/jwt-payload.type';
+import { getCountryCodeFromRequest } from 'src/common/utils/getCountryFromRequest';
+import { countryToLang } from 'src/common/utils/countryToLanguage';
 import {
   clearRefreshTokenCookie,
   setRefreshTokenCookie,
 } from 'src/common/helpers/set-cookie.helper';
-import { getCountryCodeFromRequest } from 'src/common/utils/getCountryFromRequest';
-import { countryToLang } from 'src/common/utils/country-to-language';
 
 @Controller('auth')
 export class AuthController {
@@ -44,16 +44,12 @@ export class AuthController {
     @Headers('x-device-id') deviceId: string,
     @Headers('x-device-name') deviceName: string,
   ): Promise<AuthResponse> {
-    const countryCode = getCountryCodeFromRequest(req);
-    const language = countryToLang(countryCode);
-
     await this.tokenStorageService.deleteDeviceTokens(req.user.id, deviceId);
 
     const { user, accessToken, refreshToken } = await this.authService.login(
       req.user,
       deviceId,
       deviceName,
-      language,
     );
 
     setRefreshTokenCookie(response, refreshToken);
@@ -69,15 +65,18 @@ export class AuthController {
   async register(
     @Headers('x-device-id') deviceId: string,
     @Headers('x-device-name') deviceName: string,
-    @Headers('x-client-country') countryCode: string,
     @Res({ passthrough: true }) response: Response,
+    @Req() req: Request,
     @Body() registerDto: RegisterDto,
   ): Promise<AuthResponse> {
+    const countryCode = getCountryCodeFromRequest(req);
+    const language = countryToLang(countryCode);
+
     const { user, accessToken, refreshToken } = await this.authService.register(
       registerDto,
       deviceId,
       deviceName,
-      countryCode,
+      language,
     );
 
     setRefreshTokenCookie(response, refreshToken);

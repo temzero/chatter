@@ -61,7 +61,8 @@
       "blocked_me": "Bạn đã bị chặn",
       "blocked_them": "Bạn đã chặn người dùng này.",
       "blocked_each_other": "Bạn và người dùng này đã chặn nhau",
-      "load_app_error": "Không tải được ứng dụng. Vui lòng tải lại."
+      "load_app_error": "Không tải được ứng dụng. Vui lòng tải lại.",
+      "upload_failed": "Tải tệp lên thất bại!"
     },
     "loading": {
       "loading": "Đang tải...",

@@ -7,8 +7,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { InviteLink } from './entities/invite-link.entity';
 import { Repository } from 'typeorm';
 import { Chat } from '../chat/entities/chat.entity';
-import { generateNanoId } from 'src/common/utils/generate-nanoId';
 import { NotFoundError } from 'src/shared/types/enums/error-message.enum';
+import { generateNanoId } from 'src/common/utils/generateNanoId';
 
 @Injectable()
 export class InviteLinkService {

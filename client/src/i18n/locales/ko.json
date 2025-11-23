@@ -61,7 +61,8 @@
       "blocked_me": "당신은 차단되었습니다",
       "blocked_them": "당신은 이 사용자를 차단했습니다.",
       "blocked_each_other": "당신과 이 사용자는 서로를 차단했습니다",
-      "load_app_error": "앱을 불러오지 못했습니다. 새로고침 해주세요."
+      "load_app_error": "앱을 불러오지 못했습니다. 새로고침 해주세요.",
+      "upload_failed": "파일 업로드 실패!"
     },
     "loading": {
       "loading": "로딩 중...",

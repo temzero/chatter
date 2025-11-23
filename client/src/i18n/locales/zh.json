@@ -61,7 +61,8 @@
       "blocked_me": "你已被屏蔽",
       "blocked_them": "你已屏蔽该用户。",
       "blocked_each_other": "你和该用户已互相屏蔽",
-      "load_app_error": "无法加载应用。请刷新。"
+      "load_app_error": "无法加载应用。请刷新。",
+      "upload_failed": "文件上传失败！"
     },
     "loading": {
       "loading": "加载中...",

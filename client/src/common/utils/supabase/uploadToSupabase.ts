@@ -3,6 +3,8 @@ import { determineAttachmentType } from "@/common/utils/message/determineAttachm
 import supabase, { attachmentsBucket } from "@/common/utils/supabaseClient";
 import { deleteFilesFromSupabase } from "@/common/utils/supabase/deleteFileFromSupabase";
 import { handleError } from "@/common/utils/error/handleError";
+import i18next from "i18next";
+import { toast } from "react-toastify";
 
 /**
  * Upload multiple files to Supabase and return their metadata
@@ -10,6 +12,7 @@ import { handleError } from "@/common/utils/error/handleError";
 export async function uploadFilesToSupabase(
   files: File[]
 ): Promise<AttachmentUploadRequest[]> {
+  const t = i18next.t;
   const uploads: AttachmentUploadRequest[] = [];
 
   try {
@@ -49,6 +52,7 @@ export async function uploadFilesToSupabase(
 
     return uploads;
   } catch (error) {
-    handleError(error, "File upload failed");
+    toast.error(t("common.messages.upload-failed"));
+    handleError(error, t("common.messages.upload-failed"));
   }
 }

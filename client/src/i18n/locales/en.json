@@ -61,7 +61,8 @@
       "blocked_me": "You has been blocked",
       "blocked_them": "You have blocked this user.",
       "blocked_each_other": "You and this user have blocked each other",
-      "load_app_error": "Failed to load app. Please refresh"
+      "load_app_error": "Failed to load app. Please refresh",
+      "upload_failed": "File upload failed!"
     },
     "loading": {
       "loading": "Loading...",
