@@ -5,11 +5,13 @@ export const formatTimeAgo = (
   t: TFunction,
   dateString: string | Date
 ): string => {
+  console.log("dateString", dateString);
   const createdAt = new Date(dateString);
   const now = new Date();
 
   const diffMs = now.getTime() - createdAt.getTime();
-  if (diffMs < 0) return t("time.future");
+  
+  if (diffMs < -60 * 1000) return t("time.future");
 
   const diffSecs = Math.floor(diffMs / 1000);
   if (diffSecs < 60) return t("time.now");

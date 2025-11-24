@@ -3,12 +3,12 @@ import { getSetSidebar } from "@/stores/sidebarStore";
 import { getCurrentUser } from "@/stores/authStore";
 import { useProfileStore } from "@/stores/profileStore";
 import { AvatarEdit } from "@/components/ui/avatar/AvatarEdit";
-import { fileStorageService } from "@/services/storage/fileStorageService";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { handleError } from "@/common/utils/error/handleError";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
+import { uploadAvatarToSupabase } from "@/services/supabase/uploadAvatarToSupabase";
 
 export interface ProfileFormData {
   avatarUrl: string;
@@ -74,17 +74,20 @@ const SidebarProfileEdit: React.FC = () => {
       let newAvatarUrl = formData.avatarUrl;
       if (avatarFile) {
         const oldAvatarUrl = currentUser?.avatarUrl || "";
-        newAvatarUrl = await fileStorageService.uploadAvatar(
-          avatarFile,
-          oldAvatarUrl
-        );
+        newAvatarUrl = await uploadAvatarToSupabase(avatarFile, oldAvatarUrl);
+
+        if (!newAvatarUrl) {
+          toast.error(t("sidebar_profile.edit.avatar_upload_failed"));
+          return;
+        }
+
         setFormData((prev) => ({ ...prev, avatarUrl: newAvatarUrl }));
       }
       await updateProfile({ ...formData, avatarUrl: newAvatarUrl });
       toast.success(t("sidebar_profile.edit.update_success"));
       setSidebar(SidebarMode.PROFILE);
     } catch (error) {
-      handleError(error, t("sidebar_profile.edit.update_error"));
+      handleError(error, t("sidebar_profile.edit.avatar_upload_failed"));
     } finally {
       setIsSubmitting(false);
     }

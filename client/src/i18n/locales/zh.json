@@ -279,7 +279,8 @@
       "bio_placeholder": "描述一下你自己",
       "account_settings": "账户设置",
       "update_success": "个人资料更新成功",
-      "update_error": "个人资料更新失败！"
+      "update_error": "个人资料更新失败！",
+      "avatar_upload_failed": "头像上传失败。请重试。"
     }
   },
 

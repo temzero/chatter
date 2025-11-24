@@ -25,6 +25,7 @@ export class EnvConfig {
       user: process.env.POSTGRES_USER || 'postgres',
       password: process.env.POSTGRES_PASSWORD || '',
       name: process.env.POSTGRES_DB || 'chatter',
+      ssl: process.env.POSTGRES_SSL === 'true',
     };
   }
 

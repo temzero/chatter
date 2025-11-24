@@ -3,7 +3,6 @@ import { useActiveChat, useChatStore } from "@/stores/chatStore";
 import { getSetSidebarInfo } from "@/stores/sidebarInfoStore";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { AvatarEdit } from "@/components/ui/avatar/AvatarEdit";
-import { fileStorageService } from "@/services/storage/fileStorageService";
 import { handleError } from "@/common/utils/error/handleError";
 import { toast } from "react-toastify";
 import { useActiveMembers } from "@/stores/chatMemberStore";
@@ -14,6 +13,7 @@ import { getCurrentUserId } from "@/stores/authStore";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useTranslation } from "react-i18next";
+import { uploadAvatarToSupabase } from "@/services/supabase/uploadAvatarToSupabase";
 
 const GroupChatEdit = () => {
   const { t } = useTranslation();
@@ -76,11 +76,16 @@ const GroupChatEdit = () => {
         const oldAvatarUrl = activeChat?.avatarUrl || "";
 
         // Upload new avatar
-        newAvatarUrl = await fileStorageService.uploadAvatar(
+        newAvatarUrl = await uploadAvatarToSupabase(
           avatarFile,
           oldAvatarUrl,
           ChatType.GROUP
         );
+
+        if (!newAvatarUrl) {
+          toast.error(t("sidebar_profile.edit.avatar_upload_failed"));
+          return;
+        }
 
         console.log("Uploaded newAvatarUrl", newAvatarUrl);
 
@@ -99,7 +104,7 @@ const GroupChatEdit = () => {
       setSidebarInfo(SidebarInfoMode.DEFAULT);
       toast.success(t("common.messages.update_success"));
     } catch (error) {
-      handleError(error, "Update failed!");
+      handleError(error, t("sidebar_profile.edit.avatar_upload_failed"));
     } finally {
       setIsSubmitting(false);
     }

@@ -1,10 +1,9 @@
 import { AttachmentUploadRequest } from "@/shared/types/requests/attachment-upload.request";
 import { determineAttachmentType } from "@/common/utils/message/determineAttachmentType";
-import supabase, { attachmentsBucket } from "@/common/utils/supabaseClient";
-import { deleteFilesFromSupabase } from "@/common/utils/supabase/deleteFileFromSupabase";
 import { handleError } from "@/common/utils/error/handleError";
-import i18next from "i18next";
+import SupabaseService, { attachmentsBucket } from "./supabase.service";
 import { toast } from "react-toastify";
+import i18next from "i18next";
 
 /**
  * Upload multiple files to Supabase and return their metadata
@@ -21,24 +20,13 @@ export async function uploadFilesToSupabase(
       const sanitizedFilename = file.name.replace(/[^a-zA-Z0-9-_.]/g, "_");
       const path = `${type}/${Date.now()}-${sanitizedFilename}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from(attachmentsBucket)
-        .upload(path, file, {
-          contentType: file.type || "application/octet-stream",
-          upsert: false,
-          cacheControl: "3600",
-        });
-
-      if (uploadError) {
-        // If any upload fails, delete all previously uploaded files
-        const uploadedUrls = uploads.map((att) => att.url);
-        if (uploadedUrls.length) await deleteFilesFromSupabase(uploadedUrls);
-        throw uploadError;
-      }
-
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from(attachmentsBucket).getPublicUrl(path);
+      // Use SupabaseService.uploadFile instead of raw supabase.storage.upload
+      const publicUrl = await SupabaseService.uploadFile(
+        file,
+        attachmentsBucket,
+        path,
+        false
+      );
 
       uploads.push({
         url: publicUrl,
@@ -50,8 +38,13 @@ export async function uploadFilesToSupabase(
       });
     }
 
+    console.log("uploaded to supabase storage", uploads);
     return uploads;
   } catch (error) {
+    // Delete any successfully uploaded files if an error occurs
+    const uploadedUrls = uploads.map((att) => att.url);
+    if (uploadedUrls.length) await SupabaseService.deleteFiles(uploadedUrls);
+
     toast.error(t("common.messages.upload-failed"));
     handleError(error, t("common.messages.upload-failed"));
   }

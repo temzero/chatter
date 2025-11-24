@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { userService } from "@/services/http/userService";
-import { getCurrentUser } from "@/stores/authStore";
+import { getCurrentUserId } from "@/stores/authStore";
 import { AnimatePresence, motion } from "framer-motion";
 import { useChatStore } from "@/stores/chatStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
@@ -15,7 +15,7 @@ import SearchBar from "../SearchBar";
 
 const CreateNewChat: React.FC = () => {
   const { t } = useTranslation();
-  const currentUser = getCurrentUser();
+  const currentUserId = getCurrentUserId();
   const openModal = getOpenModal();
   const createOrGetDirectChat = useChatStore.getState().createOrGetDirectChat;
 
@@ -23,6 +23,8 @@ const CreateNewChat: React.FC = () => {
   const [user, setUser] = useState<UserResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const isMe = user?.id === currentUserId;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -93,9 +95,12 @@ const CreateNewChat: React.FC = () => {
                     />
                   </div>
 
-                  <h1 className="font-bold text-xl">
-                    {user.firstName} {user.lastName}
-                  </h1>
+                  <div className="flex flex-col items-center">
+                    <h1 className="font-bold text-xl">
+                      {user.firstName} {user.lastName}
+                    </h1>
+                    {isMe && <h1 className="text-[--primary-green]">Me</h1>}
+                  </div>
 
                   {user.friendshipStatus === FriendshipStatus.ACCEPTED && (
                     <h1
@@ -138,7 +143,7 @@ const CreateNewChat: React.FC = () => {
                   </div>
                 </div>
 
-                {user.id !== currentUser?.id && (
+                {!isMe && (
                   <div className="w-full border-t-2 border-[var(--border-color)]">
                     {/* Unblock button takes priority when user is blocked */}
                     {user.isBlockedByMe ? (

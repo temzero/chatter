@@ -279,7 +279,8 @@
       "bio_placeholder": "자신에 대해 설명하세요",
       "account_settings": "계정 설정",
       "update_success": "프로필이 성공적으로 업데이트되었습니다",
-      "update_error": "프로필 업데이트에 실패했습니다!"
+      "update_error": "프로필 업데이트에 실패했습니다!",
+      "avatar_upload_failed": "아바타 업로드 실패. 다시 시도해 주세요."
     }
   },
 

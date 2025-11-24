@@ -30,7 +30,7 @@ export const fileStorageService = {
     formData.append("type", type);
     logFormData(formData);
 
-    try {
+    // try {
       const endpoint = `/storage/avatar`;
       const response = await API.post<UploadResponse>(endpoint, formData, {
         headers: {
@@ -38,12 +38,15 @@ export const fileStorageService = {
         },
       });
 
-      if (!response?.data?.url) throw new Error("No URL returned");
-      return response.data.url;
-    } catch (error) {
-      console.error(`[StorageService] Upload failed (${type}):`, error);
-      throw new Error(`Failed to upload ${type}`);
-    }
+      const avatarUrl = response?.data?.url;
+
+      console.log("Uploaded avatar url", avatarUrl);
+      // if (!avatarUrl) throw new Error("No URL returned");
+      return avatarUrl;
+    // } catch (error) {
+    //   console.error(`[StorageService] Upload failed (${type}):`, error);
+    //   throw new Error(`Failed to upload ${type}`);
+    // }
   },
 
   async uploadFile(file: File, type: string): Promise<string> {

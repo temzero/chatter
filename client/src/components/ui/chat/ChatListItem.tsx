@@ -12,8 +12,8 @@ import { calculateContextMenuPosition } from "@/common/utils/contextMenuUtils";
 import { useClickOutside } from "@/common/hooks/keyEvent/useClickOutside";
 import { messageAnimations } from "@/common/animations/messageAnimations";
 import { ChatListItemMessage } from "./ChatListItemMessage";
-import SimpleTypingIndicator from "@/components/ui/typingIndicator/SimpleTypingIndicator";
 import { useTranslation } from "react-i18next";
+import SimpleTypingIndicator from "@/components/ui/typingIndicator/SimpleTypingIndicator";
 import ChatListItemContextMenu from "@/components/ui/contextMenu/ChatListItem-contextMenu";
 
 // Keep track of open menu globally
@@ -102,6 +102,8 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
         : "hover:bg-[var(--hover-color)]";
       return `${baseClasses} ${activeClasses}`;
     };
+
+    console.log("lastMessage?.createdAt", lastMessage?.createdAt);
 
     return (
       <>

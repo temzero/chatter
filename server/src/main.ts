@@ -14,9 +14,6 @@ const DEFAULT_PORT = 3000;
 const CLIENT_URL = EnvConfig.clientUrl;
 const BODY_PARSER_LIMIT = EnvConfig.parseLimit;
 
-const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-console.log('TIMEZONE: ', timezone);
-
 async function bootstrap() {
   try {
     // testEnvHelper();

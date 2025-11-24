@@ -279,7 +279,8 @@
       "bio_placeholder": "あなたについて説明してください",
       "account_settings": "アカウント設定",
       "update_success": "プロフィールが正常に更新されました",
-      "update_error": "プロフィールの更新に失敗しました！"
+      "update_error": "プロフィールの更新に失敗しました！",
+      "avatar_upload_failed": "アバターのアップロードに失敗しました。もう一度お試しください。"
     }
   },
 

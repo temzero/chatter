@@ -4,11 +4,10 @@ import { useMessageStore } from "@/stores/messageStore";
 import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 import { determineAttachmentType } from "@/common/utils/message/determineAttachmentType";
 import { handleError } from "@/common/utils/error/handleError";
-import { uploadFilesToSupabase } from "@/common/utils/supabase/uploadToSupabase";
+import { uploadFilesToSupabase } from "@/services/supabase/uploadFilesToSupabase";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { CreateMessageRequest } from "@/shared/types/requests/send-message.request";
 import { AttachmentUploadRequest } from "@/shared/types/requests/attachment-upload.request";
-import { deleteFilesFromSupabase } from "@/common/utils/supabase/deleteFileFromSupabase";
 import { getCurrentUserId } from "@/stores/authStore";
 
 function toOptimisticAttachmentResponseFromFile(
@@ -134,10 +133,6 @@ export async function handleSendMessage({
 
     onSuccess?.();
   } catch (error) {
-    // Delete any uploaded files
-    const uploadedUrls = uploadedAttachments.map((att) => att.url);
-    if (uploadedUrls.length) await deleteFilesFromSupabase(uploadedUrls);
-
     useMessageStore.getState().updateMessageById(messageId, {
       status: MessageStatus.FAILED,
     });

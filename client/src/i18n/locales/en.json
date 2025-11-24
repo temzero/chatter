@@ -279,7 +279,8 @@
       "bio_placeholder": "Describe something about yourself",
       "account_settings": "Account Settings",
       "update_success": "Profile updated successfully",
-      "update_error": "Failed to update profile!"
+      "update_error": "Failed to update profile!",
+      "avatar_upload_failed": "Avatar upload failed. Please try again."
     }
   },
 

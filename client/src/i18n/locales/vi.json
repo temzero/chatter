@@ -279,7 +279,8 @@
       "bio_placeholder": "Hãy mô tả đôi điều về bản thân bạn",
       "account_settings": "Cài đặt tài khoản",
       "update_success": "Cập nhật hồ sơ thành công",
-      "update_error": "Cập nhật hồ sơ thất bại!"
+      "update_error": "Cập nhật hồ sơ thất bại!",
+      "avatar_upload_failed": "Tải lên avatar thất bại. Vui lòng thử lại."
     }
   },
 

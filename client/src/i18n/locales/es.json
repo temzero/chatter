@@ -279,7 +279,8 @@
       "bio_placeholder": "Describe algo sobre ti",
       "account_settings": "Configuración de la cuenta",
       "update_success": "Perfil actualizado con éxito",
-      "update_error": "¡Error al actualizar el perfil!"
+      "update_error": "¡Error al actualizar el perfil!",
+      "avatar_upload_failed": "Error al subir el avatar. Por favor, inténtalo de nuevo."
     }
   },
 

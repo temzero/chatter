@@ -30,6 +30,19 @@ dotenv.config();
       database: EnvConfig.database.name,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: EnvConfig.nodeEnv !== 'production',
+
+      extra: {
+        // This option forces IPv4
+        family: 4,
+        // Connection pool settings
+        max: 20,
+        connectionTimeoutMillis: 30000,
+        idleTimeoutMillis: 30000,
+      },
+
+      ssl: EnvConfig.database.ssl
+        ? { rejectUnauthorized: false } // required for Supabase
+        : false,
     }),
 
     // App modules
