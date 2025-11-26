@@ -1,9 +1,10 @@
 import "./main.css";
 import "@/i18n"; // initializes i18n globally
+// import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import ErrorBoundary from "./ErrorBoundary";
 import bootstrapApp from "./common/hooks/app/boostrap.ts";
-import { createRoot } from "react-dom/client";
 import LoadAppErrorPage from "./pages/error/LoadAppErrorPage.tsx";
 
 const currentPath = window.location.pathname;
@@ -12,10 +13,10 @@ const isPublicRoute = currentPath.startsWith("/auth/");
 const renderApp = () => {
   createRoot(document.getElementById("root")!).render(
     // <StrictMode>
-    <ErrorBoundary>
-      <App />
-    </ErrorBoundary>
-    // </StrictMode>,
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    // </StrictMode>
   );
 };
 

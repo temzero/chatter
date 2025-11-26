@@ -16,26 +16,26 @@ export const callService = {
     return { calls, hasMore };
   },
 
-  // async fetchActiveCall(chatId: string): Promise<IncomingCallResponse> {
-  //   const { data } = await API.get(`/calls/active/${chatId}`);
-  //   return data.payload ?? data;
-  // },
-
-  // async fetchPendingCalls(): Promise<IncomingCallResponse[]> {
-  //   try {
-  //     const { data } = await API.get(`/calls/pending`);
-  //     // Adjust based on your API response structure
-  //     return data.payload ?? data;
-  //   } catch (error) {
-  //     console.error("Failed to fetch pending calls:", error);
-  //     throw error;
-  //   }
-  // },
-
-  async fetchActiveCall(chatId: string): Promise<void> {
-    console.log("Fetching active call for chatId:", chatId);
+  async fetchActiveCall(chatId: string): Promise<IncomingCallResponse> {
+    const { data } = await API.get(`/calls/active/${chatId}`);
+    return data.payload ?? data;
   },
-  async fetchPendingCalls() {},
+
+  async fetchPendingCalls(): Promise<IncomingCallResponse[]> {
+    try {
+      const { data } = await API.get(`/calls/pending`);
+      // Adjust based on your API response structure
+      return data.payload ?? data;
+    } catch (error) {
+      console.error("Failed to fetch pending calls:", error);
+      throw error;
+    }
+  },
+
+  // async fetchActiveCall(chatId: string): Promise<void> {
+  //   console.log("Fetching active call for chatId:", chatId);
+  // },
+  // async fetchPendingCalls() {},
 
   async generateAndFetchLiveKitToken(
     payload: generateLiveKitTokenRequest

@@ -7,20 +7,14 @@ services:
       context: ./client
       dockerfile: Dockerfile.dev
     ports:
-      - "5173:5173" # host 5173 → container 5173
+      - "5173:5173"
     volumes:
       - ./client:/app
       - /app/node_modules
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-    environment:
-      - NODE_ENV=${NODE_ENV}
-      - VITE_API_URL=http://localhost:3000
-      - VITE_SUPABASE_URL=${SUPABASE_URL}
-      - VITE_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
-      - VITE_SUPABASE_AVATAR_BUCKET=${SUPABASE_AVATAR_BUCKET}
-      - VITE_SUPABASE_ATTACHMENTS_BUCKET=${SUPABASE_ATTACHMENTS_BUCKET}
-      - VITE_LIVEKIT_WS_URL=ws://localhost:7880
+    env_file:
+      - ./client/.env
     command: npm run dev -- --host
     stdin_open: true
     tty: true
@@ -31,39 +25,15 @@ services:
   # NestJS Backend
   server:
     build:
-      context: ./server
+      context: ./backend/server
       dockerfile: Dockerfile.dev
     ports:
-      - "3000:3000" # host 3000 → container 3000
+      - "3000:3000"
     volumes:
-      - ./server:/app
+      - ./backend/server:/app
       - /app/node_modules
-    environment:
-      - NODE_ENV=${NODE_ENV}
-      - POSTGRES_HOST=${POSTGRES_HOST}
-      - POSTGRES_PORT=${POSTGRES_PORT}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - CLIENT_URL=${CLIENT_URL}
-      - SERVER_URL=${SERVER_URL}
-      - BCRYPT_SALT_ROUNDS=${BCRYPT_SALT_ROUNDS}
-      - JWT_ACCESS_EXPIRATION=${JWT_ACCESS_EXPIRATION}
-      - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION}
-      - JWT_ALGORITHM=${JWT_ALGORITHM}
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-      - JWT_VERIFICATION_SECRET=${JWT_VERIFICATION_SECRET}
-      - EMAIL_SERVICE=${EMAIL_SERVICE}
-      - EMAIL_USER=${EMAIL_USER}
-      - EMAIL_PASS=${EMAIL_PASS}
-      - SUPABASE_AVATAR_BUCKET=${SUPABASE_AVATAR_BUCKET}
-      - SUPABASE_ATTACHMENTS_BUCKET=${SUPABASE_ATTACHMENTS_BUCKET}
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
-      - LIVEKIT_URL=http://livekit:7880 # Internal Docker network
-      - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
-      - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
+    env_file:
+      - ./backend/server/.env # <-- use env_file instead of huge environment block
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command: npm run start:dev
@@ -76,29 +46,30 @@ services:
   livekit:
     image: livekit/livekit-server:latest
     ports:
-      - "7880:7880" # HTTP/WebSocket
-      - "7881:7881" # TCP (optional, fallback)
-      - "7882:7882/udp" # UDP (optional)
-      - "3478:3478/udp" # TURN UDP (optional)
+      - "7880:7880"
+      - "7881:7881"
+      - "7882:7882/udp"
+      - "3478:3478/udp"
     volumes:
-      - ./livekit-server/livekit.yaml:/livekit.yaml
+      - ./backend/livekit-server/livekit.yaml:/livekit.yaml:ro
     command: --config /livekit.yaml
     restart: unless-stopped
 
-#   db:
-#     image: postgres:16
-#     restart: always
-#     environment:
-#       POSTGRES_USER: ${POSTGRES_USER}
-#       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-#       POSTGRES_DB: ${POSTGRES_DB}
-#     ports:
-#       - "5432:5432" # host:container
-#     volumes:
-#       - db_data:/var/lib/postgresql/data
+# Uncomment if you want a local PostgreSQL database
+#  db:
+#    image: postgres:16
+#    restart: always
+#    environment:
+#      POSTGRES_USER: ${POSTGRES_USER}
+#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#      POSTGRES_DB: ${POSTGRES_DB}
+#    ports:
+#      - "5432:5432"
+#    volumes:
+#      - db_data:/var/lib/postgresql/data
 
-# volumes:
-#   db_data:
+#volumes:
+#  db_data:
 
 networks:
   default:

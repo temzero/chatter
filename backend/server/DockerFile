@@ -26,6 +26,6 @@ RUN adduser -S nestjs -u 1001
 RUN chown -R nestjs:nodejs /app
 USER nestjs
 # Expose port
-EXPOSE 3001
+EXPOSE 3000
 # Start the app
 CMD ["node", "dist/main"]
