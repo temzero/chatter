@@ -12,3 +12,8 @@ services:
       - ./livekit.yaml:/livekit.yaml
     command: --config /livekit.yaml
     restart: unless-stopped
+
+networks:
+  default:
+    external: true
+    name: dualstack_bridge

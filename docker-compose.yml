@@ -5,7 +5,7 @@ services:
   client:
     build:
       context: ./client
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     ports:
       - "5173:5173"
     volumes:
@@ -26,7 +26,7 @@ services:
   server:
     build:
       context: ./backend/server
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"
     volumes:
@@ -73,4 +73,5 @@ services:
 
 networks:
   default:
-    driver: bridge
+    external: true
+    name: dualstack_bridge

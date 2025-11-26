@@ -8,7 +8,7 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - ./server/.env.development
+      - ./server/.env
     depends_on:
       - livekit
     restart: unless-stopped
@@ -24,3 +24,8 @@ services:
       - ./livekit-server/livekit.yaml:/livekit.yaml:ro
     command: --config /livekit.yaml
     restart: unless-stopped
+
+networks:
+  default:
+    external: true
+    name: dualstack_bridge

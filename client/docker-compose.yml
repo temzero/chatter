@@ -1,0 +1,24 @@
+services:
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    env_file:
+      - ./.env
+    command: npm run dev -- --host
+    stdin_open: true
+    tty: true
+    networks:
+      - bridge_network
+
+networks:
+  bridge_network:
+    external: true
+    name: dualstack_bridge

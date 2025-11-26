@@ -35,7 +35,6 @@ dotenv.config();
         : false,
 
       extra: {
-        // Connection pool settings
         max: 20,
         connectionTimeoutMillis: 30000,
         idleTimeoutMillis: 30000,
