@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   # React Frontend
   client:
@@ -25,15 +23,12 @@ services:
   # NestJS Backend
   server:
     build:
-      context: ./backend/server
+      context: ./server
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    volumes:
-      - ./backend/server:/app
-      - /app/node_modules
     env_file:
-      - ./backend/server/.env # <-- use env_file instead of huge environment block
+      - ./server/.env # <-- use env_file instead of huge environment block
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command: npm run start:dev
@@ -51,7 +46,7 @@ services:
       - "7882:7882/udp"
       - "3478:3478/udp"
     volumes:
-      - ./backend/livekit-server/livekit.yaml:/livekit.yaml:ro
+      - ./livekit-server/livekit.yaml:/livekit.yaml:ro
     command: --config /livekit.yaml
     restart: unless-stopped
 
@@ -73,5 +68,5 @@ services:
 
 networks:
   default:
-    external: true
-    name: dualstack_bridge
+    external:
+      name: dualstack_bridge

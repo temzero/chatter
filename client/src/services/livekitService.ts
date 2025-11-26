@@ -39,7 +39,7 @@ export class LiveKitService {
   }
   private room: Room;
   private options?: LiveKitServiceOptions;
-  private url: string = EnvConfig.livekit.wsUrl;
+  private url: string = EnvConfig.livekitWsUrl;
 
   constructor() {
     this.room = new Room({ adaptiveStream: true, dynacast: true });

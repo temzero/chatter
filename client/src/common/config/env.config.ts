@@ -10,13 +10,8 @@ export class EnvConfig {
     return import.meta.env.VITE_API_URL || "";
   }
 
-  // -------------------- LiveKit --------------------
-  static get livekit() {
-    return {
-      url: import.meta.env.VITE_LIVEKIT_URL || "",
-      wsUrl: import.meta.env.VITE_LIVEKIT_WS_URL || "",
-      // No token here - generated at runtime
-    };
+  static get livekitWsUrl(): string {
+    return import.meta.env.VITE_LIVEKIT_WS_URL || "";
   }
 
   // -------------------- Supabase --------------------
@@ -39,8 +34,7 @@ export class EnvConfig {
     if (!this.supabase.url) missing.push("VITE_SUPABASE_URL");
     if (!this.supabase.anonKey) missing.push("VITE_SUPABASE_ANON_KEY");
 
-    if (!this.livekit.url) missing.push("VITE_LIVEKIT_URL");
-    if (!this.livekit.wsUrl) missing.push("VITE_LIVEKIT_WS_URL");
+    if (!this.livekitWsUrl) missing.push("VITE_LIVEKIT_WS_URL");
 
     if (missing.length) {
       throw new Error(`Missing environment variables: ${missing.join(", ")}`);
