@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import ContactInfoItem from "@/components/ui/contact/contactInfoItem";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import {
@@ -48,8 +48,8 @@ const DirectChat: React.FC<DirectChatProps> = ({
 
   const isFriend = chatPartner?.friendshipStatus === FriendshipStatus.ACCEPTED;
 
-  console.log('isBlockedByMe', chatPartner.isBlockedByMe);
-  console.log('isBlockedMe', chatPartner.isBlockedMe);
+  console.log("isBlockedByMe", chatPartner.isBlockedByMe);
+  console.log("isBlockedMe", chatPartner.isBlockedMe);
 
   // Header buttons with title
   const headerIcons: {

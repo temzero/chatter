@@ -1,6 +1,6 @@
 // components/call-room/DraggableContainer.tsx
 import { motion } from "framer-motion";
-import React from "react";
+import * as React from "react";
 
 interface DraggableContainerProps {
   containerRef: React.RefObject<HTMLDivElement | null>;

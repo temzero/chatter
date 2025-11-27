@@ -1,5 +1,5 @@
 // componen@/components/ui/buttons/SwitchBtn.tsx
-import React from "react";
+import * as React from "react";
 import * as Switch from "@radix-ui/react-switch";
 
 interface PrivacySwitchProps {

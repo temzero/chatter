@@ -1,5 +1,5 @@
 // components/ui/Checkbox.tsx
-import React from "react";
+import * as React from "react";
 
 interface CheckboxProps {
   checked: boolean;

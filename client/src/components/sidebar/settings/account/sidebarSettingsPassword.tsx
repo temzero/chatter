@@ -26,9 +26,9 @@ const SidebarSettingsPassword: React.FC = () => {
     loading || !isValid || !currentPassword || !newPassword || !confirmPassword;
 
   useEffect(() => {
-    const { isValid } = validatePassword(newPassword, confirmPassword);
+    const { isValid } = validatePassword(t, newPassword, confirmPassword);
     setIsValid(isValid);
-  }, [newPassword, confirmPassword]);
+  }, [newPassword, confirmPassword, t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

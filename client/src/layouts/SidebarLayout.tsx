@@ -1,5 +1,5 @@
 // components/SidebarLayout.tsx
-import React from "react";
+import * as React from "react";
 import { getSetSidebar } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 

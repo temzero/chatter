@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { determineAttachmentType } from "@/common/utils/message/determineAttachmentType";
 import { getFileIcon } from "@/common/utils/getFileIcon";

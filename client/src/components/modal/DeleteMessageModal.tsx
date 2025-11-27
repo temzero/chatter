@@ -1,5 +1,5 @@
 // components/modals/DeleteMessageModal.tsx
-import React from "react";
+import * as React from "react";
 import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
 import { getCurrentUserId } from "@/stores/authStore";

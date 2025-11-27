@@ -1,5 +1,5 @@
 // PrivateLayout.tsx
-import React from "react";
+import * as React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 import Sidebar from "@/components/sidebar/Sidebar";

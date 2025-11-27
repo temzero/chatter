@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { toast } from "react-toastify";
 import { formatDateTime } from "@/common/utils/format/formatDateTime";

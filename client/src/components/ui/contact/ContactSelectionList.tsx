@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import Checkbox from "../buttons/CheckBox";

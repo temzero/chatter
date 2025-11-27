@@ -1,5 +1,5 @@
 // components/modals/DeleteFolderModal.tsx
-import React from "react";
+import * as React from "react";
 import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { useFolderStore } from "@/stores/folderStore";
 import { getSetSidebar } from "@/stores/sidebarStore";

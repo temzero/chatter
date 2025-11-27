@@ -57,11 +57,9 @@ export const VoiceStreamWithVisualizer = ({
     audioEl.srcObject = mediaStream;
     audioEl.muted = muted;
 
-    audioEl
-      .play()
-      .catch((err) =>
-        console.warn("Audio play failed (needs user interaction):", err)
-      );
+    audioEl.play().catch((err) => {
+      console.warn("Audio play failed (needs user interaction):", err);
+    });
 
     return () => {
       audioEl.pause();

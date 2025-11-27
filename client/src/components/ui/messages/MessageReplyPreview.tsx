@@ -1,9 +1,9 @@
 // components/ui/MessageReplyPreview.tsx
-import React from "react";
+import * as React from "react";
+import clsx from "clsx";
 import { MessageResponse } from "@/shared/types/responses/message.response";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { Avatar } from "@/components/ui/avatar/Avatar";
-import clsx from "clsx";
 import { scrollToMessageById } from "@/common/utils/message/scrollToMessageById";
 import RenderMultipleAttachments from "@/components/ui/attachments/RenderMultipleAttachments";
 import { getCloseModal } from "@/stores/modalStore";
@@ -63,7 +63,7 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
           }
           className={clsx("message-bubble", {
             "self-message": !isChannel && isReplyToMe,
-            "p-1.5 custom-border": isSystemMessage
+            "p-1.5 custom-border": isSystemMessage,
           })}
         >
           {replyMessage.forwardedFromMessage ? (

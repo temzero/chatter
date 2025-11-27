@@ -1,7 +1,6 @@
-import React from "react";
+import * as React from "react";
 import type { ChatResponse } from "@/shared/types/responses/chat.response";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
-
 
 interface ChatListProps {
   chats: ChatResponse[];

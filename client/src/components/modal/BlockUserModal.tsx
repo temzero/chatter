@@ -1,5 +1,5 @@
 // components/modals/BlockUserModal.tsx
-import React from "react";
+import * as React from "react";
 import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
 import { Avatar } from "@/components/ui/avatar/Avatar";

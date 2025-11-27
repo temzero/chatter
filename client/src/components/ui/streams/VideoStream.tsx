@@ -23,23 +23,28 @@ export const VideoStream = ({
     const videoEl = videoRef.current;
     if (!videoEl || !stream) return;
 
-    // Clear previous src
     videoEl.srcObject = null;
 
     if (stream instanceof RemoteTrack) {
-      // Attach with slight delay to ensure video element is ready
       requestAnimationFrame(() => stream.attach(videoEl));
-      return () => {
-        stream.detach(videoEl);
+    } else if (stream instanceof MediaStream) {
+      videoEl.srcObject = stream;
+      videoEl.onloadedmetadata = () => {
+        videoEl.play().catch((err) => {
+          console.warn("Video play failed:", err);
+        });
       };
     }
 
-    if (stream instanceof MediaStream) {
-      videoEl.srcObject = stream;
-      videoEl.onloadedmetadata = () => {
-        videoEl.play().catch((err) => console.warn("Video play failed:", err));
-      };
-    }
+    // Unified cleanup
+    return () => {
+      if (stream instanceof RemoteTrack) {
+        stream.detach(videoEl);
+      } else if (stream instanceof MediaStream) {
+        videoEl.pause();
+        videoEl.srcObject = null;
+      }
+    };
   }, [stream]);
 
   return (

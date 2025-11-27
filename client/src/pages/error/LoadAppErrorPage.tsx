@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { Logo } from "@/components/ui/icons/Logo";
 import { motion } from "framer-motion";
 import { APP_NAME } from "@/common/constants/name";

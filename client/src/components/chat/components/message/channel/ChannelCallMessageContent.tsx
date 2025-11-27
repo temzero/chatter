@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { CallStatus } from "@/shared/types/enums/call-status.enum";
 import { formatDurationByStartAndEnd } from "@/common/utils/format/formatDuration";
 import { formatTime } from "@/common/utils/format/formatTime";

@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useChatStore } from "@/stores/chatStore";

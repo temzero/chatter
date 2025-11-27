@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import {
   getSetSidebarInfo,

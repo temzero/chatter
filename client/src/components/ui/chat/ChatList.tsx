@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { AnimatePresence } from "framer-motion";
 import ChatListItem from "./ChatListItem";
 import InfiniteScroller from "@/components/ui/layout/InfiniteScroller";

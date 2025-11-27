@@ -1,5 +1,5 @@
 // SidebarContacts.tsx
-import React from "react";
+import * as React from "react";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useFriendContacts } from "@/common/hooks/useFriendContacts";

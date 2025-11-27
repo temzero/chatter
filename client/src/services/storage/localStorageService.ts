@@ -6,7 +6,7 @@ export const localStorageService = {
   // ─────────────────────────────────
   getAccessToken(): string | null {
     const accessToken = localStorage.getItem("accessToken");
-    console.log("[ACCESS TOKEN]", accessToken);
+    // console.log("[ACCESS TOKEN]", accessToken);
     return accessToken;
   },
 

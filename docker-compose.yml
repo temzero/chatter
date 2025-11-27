@@ -6,19 +6,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5173:5173"
-    volumes:
-      - ./client:/app
-      - /app/node_modules
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
     env_file:
       - ./client/.env
-    command: npm run dev -- --host
-    stdin_open: true
     tty: true
-    depends_on:
-      - server
-      - livekit
 
   # NestJS Backend
   server:
@@ -28,29 +18,23 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - ./server/.env # <-- use env_file instead of huge environment block
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    command: npm run start:dev
-    stdin_open: true
+      - ./server/.env
+    restart: unless-stopped
     tty: true
-    depends_on:
-      - livekit
 
   # LiveKit Server
-  livekit:
-    image: livekit/livekit-server:latest
-    ports:
-      - "7880:7880"
-      - "7881:7881"
-      - "7882:7882/udp"
-      - "3478:3478/udp"
-    volumes:
-      - ./livekit-server/livekit.yaml:/livekit.yaml:ro
-    command: --config /livekit.yaml
-    restart: unless-stopped
+  # livekit:
+  #   image: livekit/livekit-server:latest
+  #   ports:
+  #     - "7880:7880"
+  #     - "7881:7881"
+  #     - "7882:7882/udp"
+  #     - "50000-50200:50000-50200/udp" # WebRTC media range
+  #   volumes:
+  #     - ./livekit-server/livekit.yaml:/livekit.yaml:ro
+  #   command: --config /livekit.yaml
+  #   restart: unless-stopped
 
-# Uncomment if you want a local PostgreSQL database
 #  db:
 #    image: postgres:16
 #    restart: always

@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { getFileIcon } from "@/common/utils/getFileIcon";

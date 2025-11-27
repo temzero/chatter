@@ -1,5 +1,5 @@
 // components/ui/messages/ChannelMessageBubbleWrapper.tsx
-import React from "react";
+import * as React from "react";
 import { motion } from "framer-motion";
 import clsx from "clsx";
 import { MessageResponse } from "@/shared/types/responses/message.response";

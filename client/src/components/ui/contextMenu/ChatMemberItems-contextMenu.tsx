@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { handleError } from "@/common/utils/error/handleError";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";

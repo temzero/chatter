@@ -53,7 +53,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
           fallbackIconSize: "text-4xl",
           borderWidth: "4px",
           onlineDotClass: "right-[1px] bottom-[1px]",
-          textSize: "text-lg",
+          textSize: "text-xl",
         };
       case "info":
         return {
@@ -83,7 +83,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
           fallbackIconSize: "text-8xl",
           borderWidth: "6px",
           onlineDotClass: "right-0 bottom-0",
-          textSize: "text-xl",
+          textSize: "text-6xl",
         };
       case "sidebar":
       default:

@@ -2,10 +2,10 @@ import "./main.css";
 import "@/i18n"; // initializes i18n globally
 // import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import App from "./App.tsx";
 import ErrorBoundary from "./ErrorBoundary";
-import bootstrapApp from "./common/hooks/app/boostrap.ts";
-import LoadAppErrorPage from "./pages/error/LoadAppErrorPage.tsx";
+import App from "./App";
+import bootstrapApp from "./common/hooks/app/bootstrap";
+import LoadAppErrorPage from "./pages/error/LoadAppErrorPage";
 
 const currentPath = window.location.pathname;
 const isPublicRoute = currentPath.startsWith("/auth/");

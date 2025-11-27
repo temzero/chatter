@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { slidingAnimations } from "@/common/animations/slidingAnimations";
 

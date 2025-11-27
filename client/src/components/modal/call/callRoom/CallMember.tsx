@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { VideoStream } from "@/components/ui/streams/VideoStream";
 import { VoiceStream } from "@/components/ui/streams/VoiceStream";
 import { VoiceStreamWithVisualizer } from "@/components/ui/streams/VoiceStreamWithVisualizer";

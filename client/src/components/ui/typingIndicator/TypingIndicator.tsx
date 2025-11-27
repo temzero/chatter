@@ -1,10 +1,9 @@
-import { useEffect, useRef, useMemo } from "react";
+import React, { useEffect, useRef, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Avatar } from "@/components/ui/avatar/Avatar";
 import { audioService, SoundType } from "@/services/audio.service";
 import { useTypingMembers } from "@/common/hooks/useTypingMembers";
-import "./TypingIndicator.css";
-import React from "react";
+import { Avatar } from "@/components/ui/avatar/Avatar";
+import "./typingIndicator.css";
 
 interface TypingIndicatorProps {
   chatId: string;

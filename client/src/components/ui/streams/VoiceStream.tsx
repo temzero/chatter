@@ -31,11 +31,9 @@ export const VoiceStream = ({
     if (!audioEl || !mediaStream) return;
 
     audioEl.srcObject = mediaStream;
-    audioEl
-      .play()
-      .catch((err) =>
-        console.warn("Audio play failed, needs user interaction:", err)
-      );
+    audioEl.play().catch((err) => {
+      console.warn("Audio play failed, needs user interaction:", err);
+    });
 
     return () => {
       if (audioEl) {

@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import clsx from "clsx";
 import RenderAttachment from "./RenderAttachment";
 import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";

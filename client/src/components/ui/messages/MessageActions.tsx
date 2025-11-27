@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import clsx from "clsx";
 import { MessageResponse } from "@/shared/types/responses/message.response";
 import { ModalType } from "@/common/enums/modalType";

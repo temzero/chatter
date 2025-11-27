@@ -1,5 +1,5 @@
 // componen@/components/ui/FolderCard.tsx
-import React from "react";
+import * as React from "react";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { getSetSidebar } from "@/stores/sidebarStore";
 import { FolderResponse } from "@/shared/types/responses/folder.response";

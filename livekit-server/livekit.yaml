@@ -11,6 +11,11 @@ keys:
 
 turn:
   enabled: false
+# ✅ Enable TURN to match LiveKit Cloud
+# turn:
+#   enabled: true
+#   domain: localhost
+#   udp_port: 3478
 
 room:
   empty_timeout: 0

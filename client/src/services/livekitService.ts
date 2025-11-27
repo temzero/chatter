@@ -211,6 +211,7 @@ export class LiveKitService {
     this.room
       .on(RoomEvent.Connected, async () => {
         console.log("[LIVEKIT]", "✅ Connected to LiveKit room");
+        console.log("[LIVEKIT]", "🌐 Room URL:", this.url);
         console.log(
           "[LIVEKIT]",
           "Local participant:",
@@ -285,6 +286,25 @@ export class LiveKitService {
       .on(RoomEvent.LocalTrackUnpublished, (publication) => {
         this.options?.onLocalTrackUnpublished?.(publication);
         console.log("LIVEKIT", "LocalTrackUnpublished", publication.source);
+      })
+
+      // TESTING listeners:
+      .on(RoomEvent.Reconnecting, () => {
+        console.log("[LIVEKIT]", "⚠️ Reconnecting...");
+      })
+      .on(RoomEvent.Reconnected, () => {
+        console.log("[LIVEKIT]", "✅ Reconnected");
+      })
+      .on(RoomEvent.Disconnected, (reason) => {
+        console.log("[LIVEKIT]", "❌ Disconnected:", reason);
+      })
+      .on(RoomEvent.ConnectionQualityChanged, (quality, participant) => {
+        console.log(
+          "[LIVEKIT]",
+          "📶 Connection quality:",
+          quality,
+          participant?.identity
+        );
       });
   }
 

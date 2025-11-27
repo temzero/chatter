@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { motion } from "framer-motion";
 import { getAttachmentIcons } from "@/common/utils/getFileIcon";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";

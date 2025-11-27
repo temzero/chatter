@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import "./TypingIndicator.css";
+import "./typingIndicator.css";
 
 interface TypingIndicatorProps {
   chatId: string;

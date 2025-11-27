@@ -1,5 +1,5 @@
 // components/call-room/LocalStreamPreview.tsx
-import React from "react";
+import * as React from "react";
 import { UserCamera } from "@/components/ui/media/UserCamera";
 import { VideoStream } from "@/components/ui/streams/VideoStream";
 import { DraggableContainer } from "@/components/ui/layout/DraggableContainer";

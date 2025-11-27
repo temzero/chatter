@@ -1,5 +1,5 @@
 // components/sidebar/SidebarFolder.tsx
-import React from "react";
+import * as React from "react";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { getSetSidebar, useSidebarStore } from "@/stores/sidebarStore";
 import { useFolders } from "@/stores/folderStore";
@@ -53,9 +53,7 @@ const SidebarFolder: React.FC = () => {
         style={{
           borderColor: folder.color || "",
         }}
-        className={`relative h-full rounded-lg ${
-          folder.color && "border-4"
-        }`}
+        className={`relative h-full rounded-lg ${folder.color && "border-4"}`}
       >
         <div
           className="px-3 py-2 custom-border-b"

@@ -92,7 +92,7 @@ const SidebarNewChat: React.FC = () => {
             <i
               className={clsx(
                 "material-symbols-outlined py-1",
-                type === selectedType && 'filled',
+                type === selectedType && "filled",
                 type === ChatType.GROUP && "text-[2.1rem]"
               )}
             >

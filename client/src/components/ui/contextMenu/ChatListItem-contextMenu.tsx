@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useMuteControl } from "@/common/hooks/useMuteControl";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";

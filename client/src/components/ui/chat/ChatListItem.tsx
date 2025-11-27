@@ -1,4 +1,5 @@
-import React, { useState, useRef, useLayoutEffect } from "react";
+import * as React from "react";
+import { useState, useRef, useLayoutEffect } from "react";
 import { useLastMessage } from "@/stores/messageStore";
 import { useTypingUsersByChatId } from "@/stores/typingStore";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";

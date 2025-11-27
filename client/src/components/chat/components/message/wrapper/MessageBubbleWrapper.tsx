@@ -1,5 +1,5 @@
 // components/ui/messages/MessageBubbleWrapper.tsx
-import React from "react";
+import * as React from "react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import { getMessageSendingAnimation } from "@/common/animations/messageAnimations";

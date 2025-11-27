@@ -5,7 +5,6 @@ services:
       - "7880:7880" # HTTP/WebSocket
       - "7881:7881" # TCP (optional, fallback)
       - "7882:7882/udp" # UDP (optional)
-      - "3478:3478/udp" # TURN UDP (optional)
     volumes:
       - ./livekit.yaml:/livekit.yaml
     command: --config /livekit.yaml

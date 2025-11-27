@@ -1,5 +1,5 @@
 // components/ui/messages/content/ChannelMessageContent.tsx
-import React from "react";
+import * as React from "react";
 import clsx from "clsx";
 import RenderMultipleAttachments from "@/components/ui/attachments/RenderMultipleAttachments";
 import ForwardedMessagePreview from "@/components/ui/messages/ForwardMessagePreview";
