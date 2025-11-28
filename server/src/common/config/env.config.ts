@@ -30,20 +30,28 @@ export class EnvConfig {
   }
 
   // -------------------- JWT -------------------
-  static get jwt() {
+  static get jwt(): {
+    access: { secret: string; expiration: number };
+    refresh: { secret: string; expiration: number };
+    verification: { secret: string; expiration: number };
+    algorithm: string;
+  } {
     return {
       access: {
         secret: process.env.JWT_ACCESS_SECRET || 'default-access-secret',
-        expiration: process.env.JWT_ACCESS_EXPIRATION || '15m',
+        expiration: parseInt(process.env.JWT_ACCESS_EXPIRATION || '900', 10),
       },
       refresh: {
         secret: process.env.JWT_REFRESH_SECRET || 'default-refresh-secret',
-        expiration: process.env.JWT_REFRESH_EXPIRATION || '7d',
+        expiration: parseInt(
+          process.env.JWT_REFRESH_EXPIRATION || '604800',
+          10,
+        ),
       },
       verification: {
         secret:
           process.env.JWT_VERIFICATION_SECRET || 'default-verification-secret',
-        expiration: process.env.VERIFICATION_EXPIRATION || '1h',
+        expiration: parseInt(process.env.VERIFICATION_EXPIRATION || '900', 10),
       },
       algorithm: process.env.JWT_ALGORITHM || 'HS256',
     };

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Track } from "livekit-client";
 import { useCallStore } from "@/stores/callStore";
+import { Track } from "livekit-client";
 
 export const useLocalTracks = () => {
   const [localVideoStream, setLocalVideoStream] = useState<MediaStream | null>(
@@ -16,21 +16,25 @@ export const useLocalTracks = () => {
 
   useEffect(() => {
     if (!liveKitService) return;
+    
 
     const localParticipant = liveKitService.getLocalParticipant();
 
+    
     const updateStreams = () => {
       // Camera video tracks
       const videoTracks = Array.from(
         localParticipant.trackPublications.values()
       )
         .filter(
-          (pub) =>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (pub: any) =>
             pub.kind === "video" &&
             pub.track &&
             pub.source === Track.Source.Camera
         )
-        .map((pub) => pub.track!.mediaStreamTrack);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .map((pub: any) => pub.track!.mediaStreamTrack);
       setLocalVideoStream(
         videoTracks.length > 0 ? new MediaStream(videoTracks) : null
       );
@@ -40,12 +44,14 @@ export const useLocalTracks = () => {
         localParticipant.trackPublications.values()
       )
         .filter(
-          (pub) =>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (pub: any) =>
             pub.kind === "audio" &&
             pub.track &&
             pub.source === Track.Source.Microphone
         )
-        .map((pub) => pub.track!.mediaStreamTrack);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .map((pub: any) => pub.track!.mediaStreamTrack);
       setLocalAudioStream(
         audioTracks.length > 0 ? new MediaStream(audioTracks) : null
       );
@@ -55,12 +61,14 @@ export const useLocalTracks = () => {
         localParticipant.trackPublications.values()
       )
         .filter(
-          (pub) =>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (pub: any) =>
             pub.kind === "video" &&
             pub.track &&
             pub.source === Track.Source.ScreenShare
         )
-        .map((pub) => pub.track!.mediaStreamTrack);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .map((pub: any) => pub.track!.mediaStreamTrack);
       setLocalScreenStream(
         screenTracks.length > 0 ? new MediaStream(screenTracks) : null
       );

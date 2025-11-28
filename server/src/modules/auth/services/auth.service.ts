@@ -23,7 +23,7 @@ import { EnvConfig } from 'src/common/config/env.config';
 
 @Injectable()
 export class AuthService {
-  private verificationExpire: string | undefined;
+  private verificationExpire: number | undefined;
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,

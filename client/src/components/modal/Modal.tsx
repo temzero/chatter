@@ -1,26 +1,26 @@
-import { ComponentType } from "react";
+import { ComponentType, lazy } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ModalType } from "@/common/enums/modalType";
 import { modalAnimations } from "@/common/animations/modalAnimations";
 import { getCloseModal, useModalType } from "@/stores/modalStore";
 
 // modal imports...
-import MediaViewer from "./media/MediaViewer";
-import FriendRequestModal from "./FriendRequestModal";
-import ForwardMessageModal from "./ForwardMessageModal";
-import DeleteMessageModal from "./DeleteMessageModal";
-import DeleteFolderModal from "./DeleteFolderModal";
-import BlockUserModal from "./BlockUserModal";
-import UnblockUserModal from "./UnblockUserModal";
-import MuteChatModal from "./MuteChatModal";
-import DeleteChatModal from "./DeleteChatModal";
-import UnfriendModal from "./UnfriendModal";
-import LeaveChatModal from "./LeaveChatModal";
-import AddMemberModal from "./AddMemberModal";
-import SetNicknameModal from "./SetNicknameModal";
-import CallModal from "./call/CallModal";
-import DeleteCallModal from "./DeleteCallModal";
-import FolderModal from "./FolderModal";
+const MediaViewer = lazy(() => import("./media/MediaViewer"));
+const FriendRequestModal = lazy(() => import("./FriendRequestModal"));
+const ForwardMessageModal = lazy(() => import("./ForwardMessageModal"));
+const DeleteMessageModal = lazy(() => import("./DeleteMessageModal"));
+const DeleteFolderModal = lazy(() => import("./DeleteFolderModal"));
+const BlockUserModal = lazy(() => import("./BlockUserModal"));
+const UnblockUserModal = lazy(() => import("./UnblockUserModal"));
+const MuteChatModal = lazy(() => import("./MuteChatModal"));
+const DeleteChatModal = lazy(() => import("./DeleteChatModal"));
+const UnfriendModal = lazy(() => import("./UnfriendModal"));
+const LeaveChatModal = lazy(() => import("./LeaveChatModal"));
+const AddMemberModal = lazy(() => import("./AddMemberModal"));
+const SetNicknameModal = lazy(() => import("./SetNicknameModal"));
+const DeleteCallModal = lazy(() => import("./DeleteCallModal"));
+const FolderModal = lazy(() => import("./FolderModal"));
+const CallModal = lazy(() => import("./call/CallModal"));
 
 // Map modal types to components
 const modalMap: Record<ModalType, ComponentType | null> = {

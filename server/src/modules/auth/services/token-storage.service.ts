@@ -3,8 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RefreshToken } from '../entities/refresh-token.entity';
-import { formatExpirationToMs } from 'src/common/helpers/formatExpiration';
 import { EnvConfig } from 'src/common/config/env.config';
+import { convertSecondsToMilliseconds } from 'src/common/helpers/time.helper';
 
 @Injectable()
 export class TokenStorageService {
@@ -14,7 +14,7 @@ export class TokenStorageService {
     @InjectRepository(RefreshToken)
     private refreshTokenRepository: Repository<RefreshToken>,
   ) {
-    this.refreshTokenExpirationMs = formatExpirationToMs(
+    this.refreshTokenExpirationMs = convertSecondsToMilliseconds(
       EnvConfig.jwt.refresh.expiration,
     );
   }

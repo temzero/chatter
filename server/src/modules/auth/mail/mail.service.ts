@@ -4,7 +4,6 @@ import { Injectable } from '@nestjs/common';
 import { ErrorResponse } from 'src/common/api-response/errors';
 import { VerificationCodeService } from '../services/verification-code.service';
 import { BadRequestError } from 'src/shared/types/enums/error-message.enum';
-import { formatExpiration } from 'src/common/helpers/formatExpiration';
 import { EnvConfig } from 'src/common/config/env.config';
 
 // Bilingual email templates
@@ -14,6 +13,7 @@ import { VerificationEmailEN } from './template/email-verification-code/verifica
 import { VerificationEmailVI } from './template/email-verification-code/verification-code.email.vi';
 import { PasswordResetEmailEN } from './template/password-reset/password-reset.email.en';
 import { PasswordResetEmailVI } from './template/password-reset/password-reset.email.vi';
+import { formatSecondsToString } from 'src/common/helpers/time.helper';
 
 @Injectable()
 export class MailService {
@@ -23,7 +23,7 @@ export class MailService {
   constructor(
     private readonly verificationCodeService: VerificationCodeService,
   ) {
-    this.verificationExpiration = formatExpiration(
+    this.verificationExpiration = formatSecondsToString(
       EnvConfig.jwt.verification.expiration,
     );
 

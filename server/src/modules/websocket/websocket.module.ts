@@ -26,7 +26,7 @@ import { EnvConfig } from 'src/common/config/env.config';
     forwardRef(() => ChatMemberModule),
     forwardRef(() => BlockModule),
     forwardRef(() => SupabaseModule),
-    forwardRef(() => CallModule), // Add CallModule import
+    forwardRef(() => CallModule),
     JwtModule.register({
       secret: EnvConfig.jwt.access.secret,
       signOptions: {

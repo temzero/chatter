@@ -1,6 +1,6 @@
 import { Response } from 'express';
-import { formatExpirationToMs } from 'src/common/helpers/formatExpiration';
 import { EnvConfig } from '../config/env.config';
+import { convertSecondsToMilliseconds } from './time.helper';
 
 export interface CookieOptions {
   httpOnly?: boolean;
@@ -47,7 +47,7 @@ export const getRefreshTokenCookieOptions = (
 ): CookieOptions => {
   const maxAge = clear
     ? 0
-    : formatExpirationToMs(EnvConfig.jwt.refresh.expiration);
+    : convertSecondsToMilliseconds(EnvConfig.jwt.refresh.expiration);
 
   const isProduction = EnvConfig.isProd();
   const secure = options?.secure ?? isProduction;
@@ -69,12 +69,12 @@ export const getRefreshTokenCookieOptions = (
 
 // Utility function to get expiration info for debugging
 export const getRefreshTokenExpirationInfo = (): {
-  original: string;
+  original: number;
   ms: number;
   humanReadable: string;
 } => {
   const expirationConfig = EnvConfig.jwt.refresh.expiration;
-  const ms = formatExpirationToMs(expirationConfig);
+  const ms = convertSecondsToMilliseconds(expirationConfig);
 
   return {
     original: expirationConfig,

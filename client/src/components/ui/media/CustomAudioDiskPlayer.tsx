@@ -8,8 +8,8 @@ import {
 import { useIsMobile } from "@/stores/deviceStore";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { formatDuration } from "@/common/utils/format/formatDuration";
-import musicDiskCover from "@/assets/image/disk.png";
 import { useAudioDiskDrag } from "@/common/hooks/keyEvent/useAudioDiskDrag";
+import musicDiskCover from "@/assets/image/disk.png";
 
 // Audio manager
 let currentAudio: HTMLAudioElement | null = null;

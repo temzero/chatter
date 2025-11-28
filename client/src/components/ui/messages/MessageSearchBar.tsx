@@ -1,7 +1,6 @@
 import React, { useRef, useMemo } from "react";
 import { useMessageStore } from "@/stores/messageStore";
 import { useShallow } from "zustand/shallow";
-import { debounce } from "lodash";
 import { useTranslation } from "react-i18next";
 
 const MessageSearchBar: React.FC = () => {
@@ -23,6 +22,15 @@ const MessageSearchBar: React.FC = () => {
       setShowImportantOnly: state.setShowImportantOnly,
     }))
   );
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function debounce<T extends (...args: any[]) => void>(fn: T, delay: number) {
+    let timer: ReturnType<typeof setTimeout>;
+    return (...args: Parameters<T>) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn(...args), delay);
+    };
+  }
 
   const debouncedSetSearchQuery = useMemo(
     () => debounce((value: string) => setSearchQuery(value), 300),

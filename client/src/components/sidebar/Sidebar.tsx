@@ -1,4 +1,4 @@
-import { JSX } from "react";
+import { JSX, lazy } from "react";
 import { clsx } from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCurrentSidebar } from "@/stores/sidebarStore";
@@ -11,30 +11,69 @@ import SidebarWellCome from "@/components/sidebar/SidebarWellCome";
 import SidebarSearch from "@/components/sidebar/SidebarSearch";
 import SidebarNewChat from "@/components/sidebar/SidebarNewChat";
 import SidebarMore from "@/components/sidebar/more/SidebarMore";
-import SidebarProfile from "@/components/sidebar/SidebarProfile";
-import SidebarProfileEdit from "@/components/sidebar/SidebarProfileEdit";
-import SidebarSettings from "@/components/sidebar/settings/SidebarSettings";
-import SidebarSettingsAccount from "./settings/account/SidebarSettingsAccount";
-import SidebarSettingsPassword from "./settings/account/sidebarSettingsPassword";
-import SidebarSettingsPrivacy from "./settings/sidebarSettingsPrivacy";
-import SidebarSettingsTheme from "./settings/sidebarSettingsTheme";
-import SidebarSettingsDisplay from "./settings/sidebarSettingsDisplay";
-import SidebarSettingsKeyboard from "./settings/sidebarSettingsKeyboard";
-import SidebarSettingsMessages from "./settings/sidebarSettingsMessages";
-import SidebarSettingsFolders from "./settings/sidebarSettingsFolders";
-import SidebarSettingsNotifications from "./settings/sidebarSettingsNotifications";
-import SidebarSettingsData from "./settings/sidebarSettingsData";
-import SidebarSettingsLanguage from "./settings/sidebarSettingsLanguage";
-import SidebarFriendRequests from "./more/SidebarFriendRequests";
-import SidebarCalls from "./more/sidebarCalls/SidebarCalls";
-import SidebarContacts from "./more/SidebarContacts";
-import SidebarFolders from "./more/sidebarFolders/SidebarFolders";
-import SidebarFolder from "./more/sidebarFolders/SidebarFolder";
-import SidebarBlockedUsers from "./more/SidebarBlockedUsers";
-import SidebarSettingsEmail from "./settings/account/sidebarSettingsEmail";
-import SidebarSettingsUsername from "./settings/account/sidebarSettingsUsername";
-import SidebarSettingsPhoneNumber from "./settings/account/sidebarSettingsPhoneNumber";
-import SidebarNewFolder from "./more/SidebarNewFolder";
+
+const SidebarProfile = lazy(
+  () => import("@/components/sidebar/SidebarProfile")
+);
+const SidebarProfileEdit = lazy(
+  () => import("@/components/sidebar/SidebarProfileEdit")
+);
+const SidebarSettings = lazy(
+  () => import("@/components/sidebar/settings/SidebarSettings")
+);
+const SidebarSettingsAccount = lazy(
+  () => import("./settings/account/SidebarSettingsAccount")
+);
+const SidebarSettingsPassword = lazy(
+  () => import("./settings/account/sidebarSettingsPassword")
+);
+const SidebarSettingsPrivacy = lazy(
+  () => import("./settings/sidebarSettingsPrivacy")
+);
+const SidebarSettingsTheme = lazy(
+  () => import("./settings/sidebarSettingsTheme")
+);
+const SidebarSettingsDisplay = lazy(
+  () => import("./settings/sidebarSettingsDisplay")
+);
+const SidebarSettingsKeyboard = lazy(
+  () => import("./settings/sidebarSettingsKeyboard")
+);
+const SidebarSettingsMessages = lazy(
+  () => import("./settings/sidebarSettingsMessages")
+);
+const SidebarSettingsFolders = lazy(
+  () => import("./settings/sidebarSettingsFolders")
+);
+const SidebarSettingsNotifications = lazy(
+  () => import("./settings/sidebarSettingsNotifications")
+);
+const SidebarSettingsData = lazy(
+  () => import("./settings/sidebarSettingsData")
+);
+const SidebarSettingsLanguage = lazy(
+  () => import("./settings/sidebarSettingsLanguage")
+);
+const SidebarFriendRequests = lazy(
+  () => import("./more/SidebarFriendRequests")
+);
+const SidebarCalls = lazy(() => import("./more/sidebarCalls/SidebarCalls"));
+const SidebarContacts = lazy(() => import("./more/SidebarContacts"));
+const SidebarFolders = lazy(
+  () => import("./more/sidebarFolders/SidebarFolders")
+);
+const SidebarFolder = lazy(() => import("./more/sidebarFolders/SidebarFolder"));
+const SidebarBlockedUsers = lazy(() => import("./more/SidebarBlockedUsers"));
+const SidebarSettingsEmail = lazy(
+  () => import("./settings/account/sidebarSettingsEmail")
+);
+const SidebarSettingsUsername = lazy(
+  () => import("./settings/account/sidebarSettingsUsername")
+);
+const SidebarSettingsPhoneNumber = lazy(
+  () => import("./settings/account/sidebarSettingsPhoneNumber")
+);
+const SidebarNewFolder = lazy(() => import("./more/SidebarNewFolder"));
 
 const Sidebar = () => {
   console.log("[MOUNTED]", "Sidebar");

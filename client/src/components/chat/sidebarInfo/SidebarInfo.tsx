@@ -1,13 +1,14 @@
+import { lazy } from "react";
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCurrentSidebarInfo } from "@/stores/sidebarInfoStore";
 import { sidebarInfoAnimations } from "@/common/animations/sidebarInfoAnimations";
 import { useSidebarInfoWidth } from "@/common/hooks/useSidebarInfoWidth";
 import ChatInfoDefault from "./SidebarInfoDefault";
-import ChatInfoMedia from "./sidebarInfoMedia/SidebarInfoMedia";
-import PrivateChatEdit from "./sidebarInfoEdit/DirectChatEdit";
-import GroupChatEdit from "./sidebarInfoEdit/GroupChatEdit";
-import ChatMembersEdit from "./sidebarInfoEdit/ChatMembersEdit";
+const ChatInfoMedia = lazy(() => import("./sidebarInfoMedia/SidebarInfoMedia"));
+const PrivateChatEdit = lazy(() => import("./sidebarInfoEdit/DirectChatEdit"));
+const GroupChatEdit = lazy(() => import("./sidebarInfoEdit/GroupChatEdit"));
+const ChatMembersEdit = lazy(() => import("./sidebarInfoEdit/ChatMembersEdit"));
 
 const SidebarInfo: React.FC = () => {
   const currentSidebarInfo = useCurrentSidebarInfo();
