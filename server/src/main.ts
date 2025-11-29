@@ -59,7 +59,8 @@ async function bootstrap() {
 
     console.log('7️⃣ Starting server...');
     const port = process.env.PORT ?? DEFAULT_PORT;
-    await app.listen(port);
+    // CRITICAL: Listen on 0.0.0.0 for Docker/Render
+    await app.listen(port, '0.0.0.0');
 
     console.log('✅ Server started successfully on port', port);
   } catch (error) {
