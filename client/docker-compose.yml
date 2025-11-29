@@ -2,11 +2,11 @@ services:
   client:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.development
     ports:
       - "5173:5173"
     env_file:
-      - .env
+      - .env.development
     tty: true
 
 networks:
