@@ -15,9 +15,9 @@ import { CurrentUser } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { MessageResponseDto } from './dto/responses/message-response.dto';
 import { ErrorResponse } from '../../common/api-response/errors';
-import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
-import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
-import { ForbiddenError } from 'src/shared/types/enums/error-message.enum';
+import { PaginationQuery } from '@shared/types/queries/pagination-query';
+import { PaginationResponse } from '@shared/types/responses/pagination.response';
+import { ForbiddenError } from '@shared/types/enums/error-message.enum';
 
 @Controller('messages')
 @UseGuards(JwtAuthGuard)

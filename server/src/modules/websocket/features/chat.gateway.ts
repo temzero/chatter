@@ -4,20 +4,20 @@ import {
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets';
-import { MessageService } from 'src/modules/message/message.service';
+import { MessageService } from '@/modules/message/message.service';
 import { AuthenticatedSocket } from '../constants/authenticatedSocket.type';
-import { CreateMessageDto } from 'src/modules/message/dto/requests/create-message.dto';
-import { ForwardMessageDto } from 'src/modules/message/dto/requests/forward-message.dto';
-import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
-import { MessageMapper } from 'src/modules/message/mappers/message.mapper';
-import { ChatService } from 'src/modules/chat/chat.service';
+import { CreateMessageDto } from '@/modules/message/dto/requests/create-message.dto';
+import { ForwardMessageDto } from '@/modules/message/dto/requests/forward-message.dto';
+import { ChatMemberService } from '@/modules/chat-member/chat-member.service';
+import { MessageMapper } from '@/modules/message/mappers/message.mapper';
+import { ChatService } from '@/modules/chat/chat.service';
 import { emitWsError } from '../utils/emitWsError';
-import { Message } from 'src/modules/message/entities/message.entity';
-import { ChatEvent } from 'src/shared/types/enums/websocket-events.enum';
+import { Message } from '@/modules/message/entities/message.entity';
+import { ChatEvent } from '@shared/types/enums/websocket-events.enum';
 import { WebsocketNotificationService } from '../services/websocket-notification.service';
 import { WebsocketConnectionService } from '../services/websocket-connection.service';
-import { SupabaseService } from 'src/modules/superbase/supabase.service';
-import { ChatMember } from 'src/modules/chat-member/entities/chat-member.entity';
+import { SupabaseService } from '@/modules/superbase/supabase.service';
+import { ChatMember } from '@/modules/chat-member/entities/chat-member.entity';
 
 @WebSocketGateway()
 export class ChatGateway {

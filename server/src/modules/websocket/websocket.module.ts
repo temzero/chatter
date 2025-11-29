@@ -17,7 +17,7 @@ import { WebsocketConnectionService } from './services/websocket-connection.serv
 import { WebsocketNotificationService } from './services/websocket-notification.service';
 import { CallGateway } from './features/call.gateway';
 import { CallModule } from '../call/call.module';
-import { EnvConfig } from 'src/common/config/env.config';
+import { EnvConfig } from '@/common/config/env.config';
 @Module({
   imports: [
     forwardRef(() => ChatModule),

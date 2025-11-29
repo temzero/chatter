@@ -1,4 +1,4 @@
-import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
+import { FriendshipStatus } from '@shared/types/enums/friendship-type.enum';
 
 export type Theme = 'light' | 'dark' | 'system';
 export type LastSeenSetting = 'everyone' | 'contacts' | 'nobody';

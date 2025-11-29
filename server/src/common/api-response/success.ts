@@ -1,7 +1,7 @@
 import {
   ApiSuccessResponse,
   DirectChatApiResponse,
-} from 'src/shared/types/responses/api-success.response';
+} from '@shared/types/responses/api-success.response';
 
 export class SuccessResponse<T> implements ApiSuccessResponse<T> {
   constructor(

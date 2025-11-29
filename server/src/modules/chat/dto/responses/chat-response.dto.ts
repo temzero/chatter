@@ -1,9 +1,9 @@
-import { ChatType } from 'src/shared/types/enums/chat-type.enum';
+import { ChatType } from '@shared/types/enums/chat-type.enum';
 import { Exclude, Expose, Type } from 'class-transformer';
-import { ChatMemberRole } from 'src/shared/types/enums/chat-member-role.enum';
-import { MessageResponseDto } from 'src/modules/message/dto/responses/message-response.dto';
+import { ChatMemberRole } from '@shared/types/enums/chat-member-role.enum';
+import { MessageResponseDto } from '@/modules/message/dto/responses/message-response.dto';
 import { ChatMemberLiteDto } from './chat-member-lite.dto';
-import { ChatResponse } from 'src/shared/types/responses/chat.response';
+import { ChatResponse } from '@shared/types/responses/chat.response';
 
 @Exclude()
 export class ChatResponseDto implements ChatResponse {

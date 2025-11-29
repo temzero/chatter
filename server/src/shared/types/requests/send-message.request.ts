@@ -1,4 +1,4 @@
-import { AttachmentUploadRequest } from 'src/shared/types/requests/attachment-upload.request';
+import { AttachmentUploadRequest } from '@shared/types/requests/attachment-upload.request';
 
 export interface CreateMessageRequest {
   id?: string;

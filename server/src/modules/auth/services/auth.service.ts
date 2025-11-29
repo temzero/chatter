@@ -9,17 +9,17 @@ import { MailService } from '../mail/mail.service';
 import { LoginDto } from '../dto/requests/login.dto';
 import { TokenType } from '../types/token-type.enum';
 import { plainToInstance } from 'class-transformer';
-import { UserResponseDto } from 'src/modules/user/dto/responses/user-response.dto';
+import { UserResponseDto } from '@/modules/user/dto/responses/user-response.dto';
 import { RegisterDto } from '../dto/requests/register.dto';
-import { ErrorResponse } from 'src/common/api-response/errors';
+import { ErrorResponse } from '@/common/api-response/errors';
 import type { JwtRefreshPayload } from '../types/jwt-payload.type';
 import {
   BadRequestError,
   ForbiddenError,
   NotFoundError,
   UnauthorizedError,
-} from 'src/shared/types/enums/error-message.enum';
-import { EnvConfig } from 'src/common/config/env.config';
+} from '@shared/types/enums/error-message.enum';
+import { EnvConfig } from '@/common/config/env.config';
 
 @Injectable()
 export class AuthService {

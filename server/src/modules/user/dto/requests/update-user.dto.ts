@@ -14,7 +14,7 @@ import { Transform, Type } from 'class-transformer';
 import { UserRole } from '../../constants/user-role.constants';
 import { UserStatus } from '../../constants/user-status.constants';
 import { PartialType } from '@nestjs/mapped-types';
-import { EmptyStringToNull } from 'src/common/utils/dto.utils';
+import { EmptyStringToNull } from '@/common/utils/dto.utils';
 
 export class UpdateUserDto {
   @IsOptional()

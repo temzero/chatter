@@ -4,8 +4,8 @@ import { ChatMemberService } from '../chat-member/chat-member.service';
 import { MessageService } from '../message/message.service';
 import { FolderService } from '../folder/folder.service';
 import { FriendshipService } from '../friendship/friendship.service';
-import { BootstrapResponse } from 'src/shared/types/responses/bootstrap.response';
-import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
+import { BootstrapResponse } from '@shared/types/responses/bootstrap.response';
+import { PaginationResponse } from '@shared/types/responses/pagination.response';
 import { ChatDataResponseDto } from './dto/chat-data-response.dto';
 
 @Injectable()

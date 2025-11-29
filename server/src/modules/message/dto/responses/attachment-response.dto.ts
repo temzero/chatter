@@ -1,6 +1,6 @@
 import { Exclude, Expose } from 'class-transformer';
-import { AttachmentType } from 'src/shared/types/enums/attachment-type.enum';
-import { AttachmentResponse } from 'src/shared/types/responses/message-attachment.response';
+import { AttachmentType } from '@shared/types/enums/attachment-type.enum';
+import { AttachmentResponse } from '@shared/types/responses/message-attachment.response';
 
 @Exclude()
 export class AttachmentResponseDto implements AttachmentResponse {

@@ -3,7 +3,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { BootstrapService } from './bootstrap.service';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { SuccessResponse } from '../../common/api-response/success';
-import { BootstrapResponse } from 'src/shared/types/responses/bootstrap.response';
+import { BootstrapResponse } from '@shared/types/responses/bootstrap.response';
 
 @Controller('bootstrap')
 @UseGuards(JwtAuthGuard)

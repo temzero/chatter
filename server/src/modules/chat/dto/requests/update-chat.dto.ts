@@ -1,6 +1,6 @@
 import { IsUUID, IsOptional, IsString, MaxLength } from 'class-validator';
-import { UpdateChatRequest } from 'src/shared/types/requests/update-chat.request';
-import { EmptyStringToNull } from 'src/common/utils/dto.utils';
+import { UpdateChatRequest } from '@shared/types/requests/update-chat.request';
+import { EmptyStringToNull } from '@/common/utils/dto.utils';
 
 export class UpdateChatDto implements UpdateChatRequest {
   @IsUUID()

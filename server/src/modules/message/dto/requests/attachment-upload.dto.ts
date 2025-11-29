@@ -5,8 +5,8 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { AttachmentType } from 'src/shared/types/enums/attachment-type.enum';
-import { AttachmentUploadRequest } from 'src/shared/types/requests/attachment-upload.request';
+import { AttachmentType } from '@shared/types/enums/attachment-type.enum';
+import { AttachmentUploadRequest } from '@shared/types/requests/attachment-upload.request';
 
 export class AttachmentUploadDto implements AttachmentUploadRequest {
   // additional field only process in server

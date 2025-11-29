@@ -11,12 +11,12 @@ import { Server } from 'socket.io';
 import { WebsocketService } from '../websocket.service';
 import { emitWsError } from '../utils/emitWsError';
 import { AuthenticatedSocket } from '../constants/authenticatedSocket.type';
-import { PresenceInitEvent } from 'src/shared/types/interfaces/presenceEvent';
+import { PresenceInitEvent } from '@shared/types/interfaces/presenceEvent';
 import { WebsocketConnectionService } from '../services/websocket-connection.service';
 import {
   SystemEvent,
   PresenceEvent,
-} from 'src/shared/types/enums/websocket-events.enum';
+} from '@shared/types/enums/websocket-events.enum';
 
 @WebSocketGateway({
   pingInterval: 10000,

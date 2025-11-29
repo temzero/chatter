@@ -1,5 +1,5 @@
 import { IsUUID } from 'class-validator';
-import { ForwardMessageRequest } from 'src/shared/types/requests/forward-message.request';
+import { ForwardMessageRequest } from '@shared/types/requests/forward-message.request';
 
 export class ForwardMessageDto implements ForwardMessageRequest {
   @IsUUID()

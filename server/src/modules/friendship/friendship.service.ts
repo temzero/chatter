@@ -3,15 +3,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
 import { Friendship } from './entities/friendship.entity';
 import { UserService } from '../user/user.service';
-import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
+import { FriendshipStatus } from '@shared/types/enums/friendship-type.enum';
 import { ErrorResponse } from '../../common/api-response/errors';
 import { FriendRequestResponseDto } from './dto/responses/friend-request-response.dto';
-import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
-import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { PaginationResponse } from '@shared/types/responses/pagination.response';
+import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
 import {
   ConflictError,
   NotFoundError,
-} from 'src/shared/types/enums/error-message.enum';
+} from '@shared/types/enums/error-message.enum';
 
 @Injectable()
 export class FriendshipService {

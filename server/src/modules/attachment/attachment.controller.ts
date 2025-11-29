@@ -13,11 +13,11 @@ import {
 } from '@nestjs/common';
 import { AttachmentService } from './attachment.service';
 import { AttachmentResponseDto } from '../message/dto/responses/attachment-response.dto';
-import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
-import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
-import { AttachmentType } from 'src/shared/types/enums/attachment-type.enum';
-import { SuccessResponse } from 'src/common/api-response/success';
-import { ErrorResponse } from 'src/common/api-response/errors';
+import { PaginationQuery } from '@shared/types/queries/pagination-query';
+import { PaginationResponse } from '@shared/types/responses/pagination.response';
+import { AttachmentType } from '@shared/types/enums/attachment-type.enum';
+import { SuccessResponse } from '@/common/api-response/success';
+import { ErrorResponse } from '@/common/api-response/errors';
 
 @Controller('attachments')
 @UseInterceptors(ClassSerializerInterceptor)

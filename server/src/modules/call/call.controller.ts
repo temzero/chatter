@@ -10,20 +10,20 @@ import {
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { CallService } from './call.service';
-import { SuccessResponse } from 'src/common/api-response/success';
-import { ErrorResponse } from 'src/common/api-response/errors';
+import { SuccessResponse } from '@/common/api-response/success';
+import { ErrorResponse } from '@/common/api-response/errors';
 import { CallResponseDto } from './dto/call-response.dto';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { ChatMemberService } from '../chat-member/chat-member.service';
 import { LiveKitService } from './liveKit.service';
-import { CallStatus } from 'src/shared/types/call';
-import { IncomingCallResponse } from 'src/shared/types/call';
+import { CallStatus } from '@shared/types/call';
+import { IncomingCallResponse } from '@shared/types/call';
 import { ChatService } from '../chat/chat.service';
-import { ChatType } from 'src/shared/types/enums/chat-type.enum';
+import { ChatType } from '@shared/types/enums/chat-type.enum';
 import { GenerateLiveKitTokenDto } from './dto/generate-livekit-token.dto';
 import { UpdateCallData } from './types/update-call-data.type';
-import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
 
 @Controller('calls')
 @UseGuards(JwtAuthGuard)

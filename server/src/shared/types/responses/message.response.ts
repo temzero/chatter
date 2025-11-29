@@ -1,6 +1,6 @@
 // types/message-response.ts
-import { MessageStatus } from 'src/shared/types/enums/message-status.enum';
-import { SystemEventType } from 'src/shared/types/enums/system-event-type.enum';
+import { MessageStatus } from '@shared/types/enums/message-status.enum';
+import { SystemEventType } from '@shared/types/enums/system-event-type.enum';
 import { CallLiteResponse } from './call-lite.response';
 import { AttachmentResponse } from './message-attachment.response';
 

@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { ChatMemberLite } from 'src/shared/types/responses/chat.response';
+import { ChatMemberLite } from '@shared/types/responses/chat.response';
 
 @Exclude()
 export class ChatMemberLiteDto implements ChatMemberLite {

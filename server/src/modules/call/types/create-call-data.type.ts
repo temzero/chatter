@@ -1,6 +1,6 @@
 // types/create-call.type.ts
-import { CallStatus } from 'src/shared/types/call';
-import { User } from 'src/modules/user/entities/user.entity';
+import { CallStatus } from '@shared/types/call';
+import { User } from '@/modules/user/entities/user.entity';
 
 export interface CreateCallData {
   chatId: string;

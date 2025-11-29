@@ -16,9 +16,9 @@ import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { FolderResponseDto } from './dto/folder-response.dto';
 import { Folder } from './entities/folder.entity';
-import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
-import { SuccessResponse } from 'src/common/api-response/success';
-import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
+import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
+import { SuccessResponse } from '@/common/api-response/success';
+import { PaginationResponse } from '@shared/types/responses/pagination.response';
 
 @Controller('folders')
 @UseGuards(JwtAuthGuard)

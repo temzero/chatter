@@ -5,10 +5,10 @@ import { In, Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
 import { plainToInstance } from 'class-transformer';
 import { FolderResponseDto } from './dto/folder-response.dto';
-import { ErrorResponse } from 'src/common/api-response/errors';
-import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
-import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
-import { NotFoundError } from 'src/shared/types/enums/error-message.enum';
+import { ErrorResponse } from '@/common/api-response/errors';
+import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
+import { PaginationResponse } from '@shared/types/responses/pagination.response';
+import { NotFoundError } from '@shared/types/enums/error-message.enum';
 
 @Injectable()
 export class FolderService {

@@ -15,7 +15,7 @@ import { JwtRefreshGuard } from '../guards/jwt-refresh.guard';
 import { JwtRefreshStrategy } from '../strategies/jwt-refresh.strategy';
 import { VerificationCodeService } from '../services/verification-code.service';
 import { MailService } from '../mail/mail.service';
-import { EnvConfig } from 'src/common/config/env.config';
+import { EnvConfig } from '@/common/config/env.config';
 
 @Module({
   imports: [

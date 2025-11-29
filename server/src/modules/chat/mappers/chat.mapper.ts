@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DirectChatMapper } from './direct-chat.mapper';
 import { GroupChatMapper } from './group-chat.mapper';
 import { Chat } from '../entities/chat.entity';
-import { ChatType } from 'src/shared/types/enums/chat-type.enum';
+import { ChatType } from '@shared/types/enums/chat-type.enum';
 import { ChatResponseDto } from '../dto/responses/chat-response.dto';
 import { SavedChatMapper } from './saved-chat.mapper';
 

@@ -10,7 +10,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
-import { SuccessResponse } from 'src/common/api-response/success';
+import { SuccessResponse } from '@/common/api-response/success';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { ChatMemberService } from './chat-member.service';
 import { ChatMemberResponseDto } from './dto/responses/chat-member-response.dto';
@@ -18,12 +18,12 @@ import { UpdateChatMemberDto } from './dto/requests/update-chat-member.dto';
 import { mapChatMemberToChatMemberResDto } from './mappers/chat-member.mapper';
 import { ChatService } from '../chat/chat.service';
 import { CurrentUser } from '../auth/decorators/user.decorator';
-import { SystemEventType } from 'src/shared/types/enums/system-event-type.enum';
+import { SystemEventType } from '@shared/types/enums/system-event-type.enum';
 import { MessageService } from '../message/message.service';
 import { MessageResponseDto } from '../message/dto/responses/message-response.dto';
-import { ErrorResponse } from 'src/common/api-response/errors';
-import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
-import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
+import { ErrorResponse } from '@/common/api-response/errors';
+import { PaginationQuery } from '@shared/types/queries/pagination-query';
+import { PaginationResponse } from '@shared/types/responses/pagination.response';
 
 @Controller('chat-members')
 @UseGuards(JwtAuthGuard)

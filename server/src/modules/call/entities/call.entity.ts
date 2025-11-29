@@ -10,11 +10,11 @@ import {
   ManyToMany,
   JoinTable,
 } from 'typeorm';
-import { ChatMember } from 'src/modules/chat-member/entities/chat-member.entity';
-import { Chat } from 'src/modules/chat/entities/chat.entity';
-import { CallStatus } from 'src/shared/types/call';
-import { Message } from 'src/modules/message/entities/message.entity';
-import { User } from 'src/modules/user/entities/user.entity';
+import { ChatMember } from '@/modules/chat-member/entities/chat-member.entity';
+import { Chat } from '@/modules/chat/entities/chat.entity';
+import { CallStatus } from '@shared/types/call';
+import { Message } from '@/modules/message/entities/message.entity';
+import { User } from '@/modules/user/entities/user.entity';
 
 @Entity('calls')
 export class Call {

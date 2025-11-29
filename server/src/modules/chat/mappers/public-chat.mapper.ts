@@ -2,8 +2,8 @@
 import { Injectable } from '@nestjs/common';
 import { Chat } from '../entities/chat.entity';
 import { ChatResponseDto } from '../dto/responses/chat-response.dto';
-import { ChatType } from 'src/shared/types/enums/chat-type.enum';
-import { MessageMapper } from 'src/modules/message/mappers/message.mapper';
+import { ChatType } from '@shared/types/enums/chat-type.enum';
+import { MessageMapper } from '@/modules/message/mappers/message.mapper';
 
 @Injectable()
 export class PublicChatMapper {

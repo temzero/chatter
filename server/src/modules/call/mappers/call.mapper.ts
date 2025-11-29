@@ -2,9 +2,9 @@
 import { Injectable } from '@nestjs/common';
 import { Call } from '../entities/call.entity';
 import { CallResponseDto } from '../dto/call-response.dto';
-import { ChatMapper } from 'src/modules/chat/mappers/chat.mapper';
-import { mapChatMemberToChatMemberResDto } from 'src/modules/chat-member/mappers/chat-member.mapper';
-import { ChatType } from 'src/shared/types/enums/chat-type.enum';
+import { ChatMapper } from '@/modules/chat/mappers/chat.mapper';
+import { mapChatMemberToChatMemberResDto } from '@/modules/chat-member/mappers/chat-member.mapper';
+import { ChatType } from '@shared/types/enums/chat-type.enum';
 
 @Injectable()
 export class CallMapper {

@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { Message } from '../entities/message.entity';
 import { MessageResponseDto } from '../dto/responses/message-response.dto';
 import { plainToInstance } from 'class-transformer';
-import { mapCallToCallLiteResponse } from 'src/modules/call/mappers/callLite.mapper';
-import { mapAttachmentsToAttachmentResDto } from 'src/modules/attachment/mappers/attachment.mapper';
+import { mapCallToCallLiteResponse } from '@/modules/call/mappers/callLite.mapper';
+import { mapAttachmentsToAttachmentResDto } from '@/modules/attachment/mappers/attachment.mapper';
 
 @Injectable()
 export class MessageMapper {

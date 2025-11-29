@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
+import { ChatMemberService } from '@/modules/chat-member/chat-member.service';
 import { WebsocketNotificationService } from './websocket-notification.service';
 import {
   CallError,
   CallErrorResponse,
   IncomingCallResponse,
   UpdateCallPayload,
-} from 'src/shared/types/call';
-import { CallEvent } from 'src/shared/types/enums/websocket-events.enum';
-import { CallStatus } from 'src/shared/types/call';
-import { CallService } from 'src/modules/call/call.service';
+} from '@shared/types/call';
+import { CallEvent } from '@shared/types/enums/websocket-events.enum';
+import { CallStatus } from '@shared/types/call';
+import { CallService } from '@/modules/call/call.service';
 
 @Injectable()
 export class WebsocketCallService {

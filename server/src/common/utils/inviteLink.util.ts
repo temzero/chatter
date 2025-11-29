@@ -1,4 +1,4 @@
-import { InviteLink } from 'src/modules/invite-link/entities/invite-link.entity';
+import { InviteLink } from '@/modules/invite-link/entities/invite-link.entity';
 
 export function generateInviteLink(link?: InviteLink): string | null {
   if (!link || !link.token) return null;

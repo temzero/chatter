@@ -11,11 +11,11 @@ import {
 import { InviteLinkService } from './invite-link.service';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { ChatMemberService } from '../chat-member/chat-member.service';
-import { generateInviteLink } from 'src/common/utils/inviteLink.util';
-import { SuccessResponse } from 'src/common/api-response/success';
+import { generateInviteLink } from '@/common/utils/inviteLink.util';
+import { SuccessResponse } from '@/common/api-response/success';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
-import { ErrorResponse } from 'src/common/api-response/errors';
-import { SystemEventType } from 'src/shared/types/enums/system-event-type.enum';
+import { ErrorResponse } from '@/common/api-response/errors';
+import { SystemEventType } from '@shared/types/enums/system-event-type.enum';
 import { MessageService } from '../message/message.service';
 
 @UseGuards(JwtAuthGuard)

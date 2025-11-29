@@ -5,13 +5,13 @@ import { JwtService } from '@nestjs/jwt';
 import { TokenType } from '../types/token-type.enum';
 import { JwtPayload, JwtRefreshPayload } from '../types/jwt-payload.type';
 import { Request } from 'express';
-import { ErrorResponse } from 'src/common/api-response/errors';
+import { ErrorResponse } from '@/common/api-response/errors';
 import { VerificationPurpose } from '../mail/constants/verificationPurpose.enum';
 import {
   BadRequestError,
   UnauthorizedError,
-} from 'src/shared/types/enums/error-message.enum';
-import { EnvConfig } from 'src/common/config/env.config';
+} from '@shared/types/enums/error-message.enum';
+import { EnvConfig } from '@/common/config/env.config';
 
 @Injectable()
 export class TokenService {

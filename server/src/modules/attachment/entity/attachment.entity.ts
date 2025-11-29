@@ -9,8 +9,8 @@ import {
   ManyToMany,
   JoinTable,
 } from 'typeorm';
-import { Message } from 'src/modules/message/entities/message.entity';
-import { AttachmentType } from 'src/shared/types/enums/attachment-type.enum';
+import { Message } from '@/modules/message/entities/message.entity';
+import { AttachmentType } from '@shared/types/enums/attachment-type.enum';
 
 @Entity('attachment')
 @Index(['url'])

@@ -1,7 +1,7 @@
 import { IsOptional, IsString, Length, IsDate } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PartialType } from '@nestjs/mapped-types';
-import { EmptyStringToNull } from 'src/common/utils/dto.utils';
+import { EmptyStringToNull } from '@/common/utils/dto.utils';
 
 export class UpdateProfileDto {
   @IsOptional()

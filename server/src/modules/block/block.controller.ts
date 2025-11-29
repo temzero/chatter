@@ -13,8 +13,8 @@ import {
 import { BlockService } from './block.service';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
-import { SuccessResponse } from 'src/common/api-response/success';
-import { ErrorResponse } from 'src/common/api-response/errors';
+import { SuccessResponse } from '@/common/api-response/success';
+import { ErrorResponse } from '@/common/api-response/errors';
 import { CreateBlockDto } from './dto/create-block.dto';
 import { BlockResponseDto } from './dto/block-response.dto';
 

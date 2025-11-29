@@ -1,10 +1,10 @@
 import { Exclude, Expose, Type } from 'class-transformer';
-import { MessageStatus } from 'src/shared/types/enums/message-status.enum';
+import { MessageStatus } from '@shared/types/enums/message-status.enum';
 import { AttachmentResponseDto } from './attachment-response.dto';
 import { SenderResponseDto } from './sender-response.dto';
-import { SystemEventType } from 'src/shared/types/enums/system-event-type.enum';
-import { CallLiteResponseDto } from 'src/modules/call/dto/call-lite-response.dto';
-import { MessageResponse } from 'src/shared/types/responses/message.response';
+import { SystemEventType } from '@shared/types/enums/system-event-type.enum';
+import { CallLiteResponseDto } from '@/modules/call/dto/call-lite-response.dto';
+import { MessageResponse } from '@shared/types/responses/message.response';
 
 @Exclude()
 export class MessageResponseDto implements MessageResponse {

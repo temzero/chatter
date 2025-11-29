@@ -11,7 +11,7 @@ import { ErrorResponse } from '../../common/api-response/errors';
 import {
   BadRequestError,
   NotFoundError,
-} from 'src/shared/types/enums/error-message.enum';
+} from '@shared/types/enums/error-message.enum';
 
 @Injectable()
 export class BlockService {

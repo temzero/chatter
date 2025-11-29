@@ -1,5 +1,5 @@
-import { ErrorResponse } from 'src/common/api-response/errors';
-import { BadRequestError } from 'src/shared/types/enums/error-message.enum';
+import { ErrorResponse } from '@/common/api-response/errors';
+import { BadRequestError } from '@shared/types/enums/error-message.enum';
 
 // src/utils/supabase-storage.util.ts
 export interface ParsedStorageUrl {

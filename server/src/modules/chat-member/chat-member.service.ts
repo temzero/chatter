@@ -9,14 +9,14 @@ import { User } from '../user/entities/user.entity';
 import { Chat } from '../chat/entities/chat.entity';
 import { ChatMemberResponseDto } from './dto/responses/chat-member-response.dto';
 import { mapChatMemberToChatMemberResDto } from './mappers/chat-member.mapper';
-import { ChatType } from 'src/shared/types/enums/chat-type.enum';
-import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
-import { ChatMemberStatus } from 'src/shared/types/enums/chat-member-status.enum';
-import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
+import { ChatType } from '@shared/types/enums/chat-type.enum';
+import { FriendshipStatus } from '@shared/types/enums/friendship-type.enum';
+import { ChatMemberStatus } from '@shared/types/enums/chat-member-status.enum';
+import { PaginationQuery } from '@shared/types/queries/pagination-query';
 import {
   BadRequestError,
   NotFoundError,
-} from 'src/shared/types/enums/error-message.enum';
+} from '@shared/types/enums/error-message.enum';
 
 export const MAX_PINNED = 99;
 

@@ -1,4 +1,4 @@
-import { CallStatus } from 'src/shared/types/enums/call-status.enum';
+import { CallStatus } from '@shared/types/enums/call-status.enum';
 import { ChatResponse } from './chat.response';
 import { ChatMemberResponse } from './chat-member.response';
 

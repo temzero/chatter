@@ -2,7 +2,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
-import { User } from 'src/modules/user/entities/user.entity';
+import { User } from '@/modules/user/entities/user.entity';
 import { RefreshToken } from '../auth/entities/refresh-token.entity';
 import { SupabaseModule } from '../superbase/supabase.module';
 import { FriendshipModule } from '../friendship/friendship.module';

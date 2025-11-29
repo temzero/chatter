@@ -8,7 +8,7 @@ import { ChatMember } from '../chat-member/entities/chat-member.entity';
 import { User } from '../user/entities/user.entity';
 import { MessageMapper } from './mappers/message.mapper';
 import { Reaction } from './entities/reaction.entity';
-import { Attachment } from 'src/modules/attachment/entity/attachment.entity';
+import { Attachment } from '@/modules/attachment/entity/attachment.entity';
 import { BlockModule } from '../block/block.module';
 import { WebSocketModule } from '../websocket/websocket.module';
 import { Call } from '../call/entities/call.entity';

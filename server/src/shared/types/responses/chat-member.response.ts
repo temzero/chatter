@@ -1,6 +1,6 @@
-import { ChatMemberRole } from 'src/shared/types/enums/chat-member-role.enum';
-import { ChatMemberStatus } from 'src/shared/types/enums/chat-member-status.enum';
-import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
+import { ChatMemberRole } from '@shared/types/enums/chat-member-role.enum';
+import { ChatMemberStatus } from '@shared/types/enums/chat-member-status.enum';
+import { FriendshipStatus } from '@shared/types/enums/friendship-type.enum';
 
 export interface ChatMemberResponse {
   // Common fields for both direct and group chats

@@ -1,7 +1,7 @@
 // dto/call-lite-response.dto.ts
 import { Exclude, Expose } from 'class-transformer';
-import { CallStatus } from 'src/shared/types/call';
-import { CallLiteResponse } from 'src/shared/types/responses/call-lite.response';
+import { CallStatus } from '@shared/types/call';
+import { CallLiteResponse } from '@shared/types/responses/call-lite.response';
 
 @Exclude()
 export class CallLiteResponseDto implements CallLiteResponse {

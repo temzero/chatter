@@ -1,9 +1,9 @@
 import { Expose, Type } from 'class-transformer';
-import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
+import { FriendshipStatus } from '@shared/types/enums/friendship-type.enum';
 import {
   FriendshipUpdateNotification,
   UserSummary,
-} from 'src/shared/types/responses/friendship.response';
+} from '@shared/types/responses/friendship.response';
 
 export class UserSummaryDto implements UserSummary {
   @Expose()
@@ -28,9 +28,7 @@ export class UserSummaryDto implements UserSummary {
   phoneNumber?: string;
 }
 
-export class FriendshipUpdateNotificationDto
-  implements FriendshipUpdateNotification
-{
+export class FriendshipUpdateNotificationDto implements FriendshipUpdateNotification {
   @Expose()
   friendshipId: string;
 

@@ -9,10 +9,10 @@ import {
   Req,
   Res,
 } from '@nestjs/common';
-import { AuthResponse } from 'src/shared/types/responses/auth.response';
-import { SuccessResponse } from 'src/common/api-response/success';
+import { AuthResponse } from '@shared/types/responses/auth.response';
+import { SuccessResponse } from '@/common/api-response/success';
 import { AuthService } from '../services/auth.service';
-import { ErrorResponse } from 'src/common/api-response/errors';
+import { ErrorResponse } from '@/common/api-response/errors';
 import { User } from '../../user/entities/user.entity';
 import { LocalGuard } from '../guards/local.guard';
 import { Request, Response } from 'express';
@@ -21,12 +21,12 @@ import { RegisterDto } from '../dto/requests/register.dto';
 import { TokenStorageService } from '../services/token-storage.service';
 import { TokenService } from '../services/token.service';
 import { JwtRefreshPayload } from '../types/jwt-payload.type';
-import { getCountryCodeFromRequest } from 'src/common/utils/getCountryFromRequest';
-import { countryToLang } from 'src/common/utils/countryToLanguage';
+import { getCountryCodeFromRequest } from '@/common/utils/getCountryFromRequest';
+import { countryToLang } from '@/common/utils/countryToLanguage';
 import {
   clearRefreshTokenCookie,
   setRefreshTokenCookie,
-} from 'src/common/helpers/set-cookie.helper';
+} from '@/common/helpers/set-cookie.helper';
 
 @Controller('auth')
 export class AuthController {

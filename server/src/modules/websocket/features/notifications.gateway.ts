@@ -6,10 +6,10 @@ import {
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { UseGuards } from '@nestjs/common';
-import { WsJwtGuard } from 'src/modules/auth/guards/ws-jwt.guard';
+import { WsJwtGuard } from '@/modules/auth/guards/ws-jwt.guard';
 import { AuthenticatedSocket } from '../constants/authenticatedSocket.type';
-import { NotificationEvent } from 'src/shared/types/enums/websocket-events.enum';
-import { FriendRequestResponseDto } from 'src/modules/friendship/dto/responses/friend-request-response.dto';
+import { NotificationEvent } from '@shared/types/enums/websocket-events.enum';
+import { FriendRequestResponseDto } from '@/modules/friendship/dto/responses/friend-request-response.dto';
 import { WebsocketNotificationService } from '../services/websocket-notification.service';
 
 @WebSocketGateway()

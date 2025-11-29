@@ -1,14 +1,14 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from 'src/modules/user/user.service';
-import { User } from 'src/modules/user/entities/user.entity';
+import { UserService } from '@/modules/user/user.service';
+import { User } from '@/modules/user/entities/user.entity';
 import type { JwtPayload } from '../types/jwt-payload.type';
-import { ErrorResponse } from 'src/common/api-response/errors';
+import { ErrorResponse } from '@/common/api-response/errors';
 import {
   NotFoundError,
   UnauthorizedError,
-} from 'src/shared/types/enums/error-message.enum';
-import { EnvConfig } from 'src/common/config/env.config';
+} from '@shared/types/enums/error-message.enum';
+import { EnvConfig } from '@/common/config/env.config';
 
 interface WsClient {
   handshake: {

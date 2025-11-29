@@ -15,13 +15,13 @@ import {
   BeforeInsert,
   DeleteDateColumn,
 } from 'typeorm';
-import { Chat } from 'src/modules/chat/entities/chat.entity';
+import { Chat } from '@/modules/chat/entities/chat.entity';
 import { User } from '../../user/entities/user.entity';
-import { Call } from 'src/modules/call/entities/call.entity';
+import { Call } from '@/modules/call/entities/call.entity';
 import { Reaction } from './reaction.entity';
-import { Attachment } from 'src/modules/attachment/entity/attachment.entity';
-import { MessageStatus } from 'src/shared/types/enums/message-status.enum';
-import { SystemEventType } from 'src/shared/types/enums/system-event-type.enum';
+import { Attachment } from '@/modules/attachment/entity/attachment.entity';
+import { MessageStatus } from '@shared/types/enums/message-status.enum';
+import { SystemEventType } from '@shared/types/enums/system-event-type.enum';
 
 @Entity('message')
 @Index(['chatId']) // Index for faster chat message queries

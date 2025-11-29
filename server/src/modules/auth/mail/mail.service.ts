@@ -1,10 +1,10 @@
 import * as nodemailer from 'nodemailer';
 import { Transporter } from 'nodemailer';
 import { Injectable } from '@nestjs/common';
-import { ErrorResponse } from 'src/common/api-response/errors';
+import { ErrorResponse } from '@/common/api-response/errors';
 import { VerificationCodeService } from '../services/verification-code.service';
-import { BadRequestError } from 'src/shared/types/enums/error-message.enum';
-import { EnvConfig } from 'src/common/config/env.config';
+import { BadRequestError } from '@shared/types/enums/error-message.enum';
+import { EnvConfig } from '@/common/config/env.config';
 
 // Bilingual email templates
 import { WelcomeEmailVI } from './template/welcome/welcome.email.vi';
@@ -13,7 +13,7 @@ import { VerificationEmailEN } from './template/email-verification-code/verifica
 import { VerificationEmailVI } from './template/email-verification-code/verification-code.email.vi';
 import { PasswordResetEmailEN } from './template/password-reset/password-reset.email.en';
 import { PasswordResetEmailVI } from './template/password-reset/password-reset.email.vi';
-import { formatSecondsToString } from 'src/common/helpers/time.helper';
+import { formatSecondsToString } from '@/common/helpers/time.helper';
 
 @Injectable()
 export class MailService {

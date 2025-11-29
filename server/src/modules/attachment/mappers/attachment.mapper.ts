@@ -1,7 +1,7 @@
 // src/modules/attachment/mappers/attachment.mapper.ts
 import { plainToInstance } from 'class-transformer';
 import { Attachment } from '../entity/attachment.entity';
-import { AttachmentResponseDto } from 'src/modules/message/dto/responses/attachment-response.dto';
+import { AttachmentResponseDto } from '@/modules/message/dto/responses/attachment-response.dto';
 
 export const mapAttachmentsToAttachmentResDto = (
   attachments: Attachment[],

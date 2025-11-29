@@ -1,6 +1,6 @@
 // pagination-query.dto.ts
 import { IsOptional, IsInt, IsString, Min, Max } from 'class-validator';
-import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
+import { PaginationQuery } from '@shared/types/queries/pagination-query';
 import { Type } from 'class-transformer';
 
 export class PaginationQueryDto implements PaginationQuery {

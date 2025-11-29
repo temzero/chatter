@@ -2,8 +2,8 @@
 import { plainToInstance } from 'class-transformer';
 import { ChatMember } from '../entities/chat-member.entity';
 import { ChatMemberResponseDto } from '../dto/responses/chat-member-response.dto';
-import { ChatType } from 'src/shared/types/enums/chat-type.enum';
-import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
+import { ChatType } from '@shared/types/enums/chat-type.enum';
+import { FriendshipStatus } from '@shared/types/enums/friendship-type.enum';
 
 export function mapChatMemberToChatMemberResDto(
   member: ChatMember,

@@ -9,11 +9,11 @@ import {
   Index,
   DeleteDateColumn,
 } from 'typeorm';
-import { Chat } from 'src/modules/chat/entities/chat.entity';
+import { Chat } from '@/modules/chat/entities/chat.entity';
 import { User } from '../../user/entities/user.entity';
-import { ChatMemberRole } from 'src/shared/types/enums/chat-member-role.enum';
-import { ChatMemberStatus } from 'src/shared/types/enums/chat-member-status.enum';
-import { Message } from 'src/modules/message/entities/message.entity';
+import { ChatMemberRole } from '@shared/types/enums/chat-member-role.enum';
+import { ChatMemberStatus } from '@shared/types/enums/chat-member-status.enum';
+import { Message } from '@/modules/message/entities/message.entity';
 
 @Entity('chat_member')
 @Index(['chatId', 'userId'], { unique: true })

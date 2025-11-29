@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Server } from 'socket.io';
-import { PresenceUpdateEvent } from 'src/shared/types/interfaces/presenceEvent';
-import { PresenceEvent } from 'src/shared/types/enums/websocket-events.enum';
+import { PresenceUpdateEvent } from '@shared/types/interfaces/presenceEvent';
+import { PresenceEvent } from '@shared/types/enums/websocket-events.enum';
 
 @Injectable()
 export class WebsocketConnectionService {

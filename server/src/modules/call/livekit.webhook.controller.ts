@@ -1,10 +1,10 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { CallService } from './call.service';
-import { CallStatus } from 'src/shared/types/call';
+import { CallStatus } from '@shared/types/call';
 import { MessageService } from '../message/message.service';
 import { WebsocketCallService } from '../websocket/services/websocket-call.service';
-import { ValidateWebhookPipe } from 'src/common/pipes/validate-webhook.pipe';
-import { ChatType } from 'src/shared/types/enums/chat-type.enum';
+import { ValidateWebhookPipe } from '@/common/pipes/validate-webhook.pipe';
+import { ChatType } from '@shared/types/enums/chat-type.enum';
 import { LiveKitService } from './liveKit.service';
 import { LiveKitWebhookPayload } from '../websocket/constants/LiveKitWebhookPayload.type';
 import { UserService } from '../user/user.service';
@@ -13,7 +13,7 @@ import { ChatMemberService } from '../chat-member/chat-member.service';
 import { Call } from './entities/call.entity';
 import { Chat } from '../chat/entities/chat.entity';
 import { User } from '../user/entities/user.entity';
-import { ChatEvent } from 'src/shared/types/enums/websocket-events.enum';
+import { ChatEvent } from '@shared/types/enums/websocket-events.enum';
 import { MessageMapper } from '../message/mappers/message.mapper';
 import { WebsocketNotificationService } from '../websocket/services/websocket-notification.service';
 

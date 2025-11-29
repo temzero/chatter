@@ -5,7 +5,7 @@ import {
   Length,
   Matches,
 } from 'class-validator';
-import { RegisterRequest } from 'src/shared/types/requests/auth.request';
+import { RegisterRequest } from '@shared/types/requests/auth.request';
 
 export class RegisterDto implements RegisterRequest {
   @IsString()

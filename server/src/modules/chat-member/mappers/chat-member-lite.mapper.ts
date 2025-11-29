@@ -1,5 +1,5 @@
 // mappers/memberPreviewMapper.ts
-import { ChatMember } from 'src/modules/chat-member/entities/chat-member.entity';
+import { ChatMember } from '@/modules/chat-member/entities/chat-member.entity';
 import { ChatMemberLiteDto } from '../../chat/dto/responses/chat-member-lite.dto';
 
 export function mapChatMemberToChatMemberLiteDto(

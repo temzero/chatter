@@ -1,6 +1,6 @@
 import { Exclude, Expose } from 'class-transformer';
-import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
-import { UserResponse } from 'src/shared/types/responses/user.response';
+import { FriendshipStatus } from '@shared/types/enums/friendship-type.enum';
+import { UserResponse } from '@shared/types/responses/user.response';
 
 @Exclude()
 export class UserResponseDto implements UserResponse {

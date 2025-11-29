@@ -1,8 +1,8 @@
 import { Exclude, Expose, Type } from 'class-transformer';
-import { CallStatus } from 'src/shared/types/call';
-import { ChatResponseDto } from 'src/modules/chat/dto/responses/chat-response.dto';
-import { ChatMemberResponseDto } from 'src/modules/chat-member/dto/responses/chat-member-response.dto';
-import { CallResponse } from 'src/shared/types/responses/call.response';
+import { CallStatus } from '@shared/types/call';
+import { ChatResponseDto } from '@/modules/chat/dto/responses/chat-response.dto';
+import { ChatMemberResponseDto } from '@/modules/chat-member/dto/responses/chat-member-response.dto';
+import { CallResponse } from '@shared/types/responses/call.response';
 
 @Exclude()
 export class CallResponseDto implements CallResponse {

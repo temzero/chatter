@@ -14,19 +14,19 @@ import { FriendshipService } from './friendship.service';
 import { SuccessResponse } from '../../common/api-response/success';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
-import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
+import { FriendshipStatus } from '@shared/types/enums/friendship-type.enum';
 import { RespondToRequestDto } from './dto/requests/response-to-request.dto';
 import { FriendRequestResponseDto } from './dto/responses/friend-request-response.dto';
 import { Friendship } from './entities/friendship.entity';
 import { UserService } from '../user/user.service';
-import { ErrorResponse } from 'src/common/api-response/errors';
+import { ErrorResponse } from '@/common/api-response/errors';
 import { FriendshipUpdateNotificationDto } from './dto/responses/friendship-update-notification.dto';
 import { WebsocketNotificationService } from '../websocket/services/websocket-notification.service';
 import { ContactResponseDto } from './dto/responses/friend-contact-response.dto';
 import { mapFriendshipToContactResDto } from './mappers/contact.mapper';
-import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
-import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
-import { NotFoundError } from 'src/shared/types/enums/error-message.enum';
+import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
+import { PaginationResponse } from '@shared/types/responses/pagination.response';
+import { NotFoundError } from '@shared/types/enums/error-message.enum';
 
 @Controller('friendships')
 @UseGuards(JwtAuthGuard)

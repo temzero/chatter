@@ -1,7 +1,7 @@
 import { Exclude, Expose } from 'class-transformer';
-import { ChatMemberRole } from 'src/shared/types/enums/chat-member-role.enum';
-import { ChatMemberStatus } from 'src/shared/types/enums/chat-member-status.enum';
-import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
+import { ChatMemberRole } from '@shared/types/enums/chat-member-role.enum';
+import { ChatMemberStatus } from '@shared/types/enums/chat-member-status.enum';
+import { FriendshipStatus } from '@shared/types/enums/friendship-type.enum';
 
 @Exclude()
 export class ChatMemberResponseDto {

@@ -3,8 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-local'; // Note: using local strategy now
 import { AuthService } from '../services/auth.service';
-import { ErrorResponse } from 'src/common/api-response/errors';
-import { UnauthorizedError } from 'src/shared/types/enums/error-message.enum';
+import { ErrorResponse } from '@/common/api-response/errors';
+import { UnauthorizedError } from '@shared/types/enums/error-message.enum';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {

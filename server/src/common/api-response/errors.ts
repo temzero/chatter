@@ -5,7 +5,7 @@ import {
   ForbiddenError,
   NotFoundError,
   UnauthorizedError,
-} from 'src/shared/types/enums/error-message.enum';
+} from '@shared/types/enums/error-message.enum';
 
 export class ErrorResponse {
   static throw(

@@ -1,6 +1,6 @@
-import { ChatType } from 'src/shared/types/enums/chat-type.enum';
+import { ChatType } from '@shared/types/enums/chat-type.enum';
 import { Exclude, Expose, Type } from 'class-transformer';
-import { FolderResponse } from 'src/shared/types/responses/folder.response';
+import { FolderResponse } from '@shared/types/responses/folder.response';
 
 @Exclude()
 export class FolderResponseDto implements FolderResponse {

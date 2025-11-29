@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { UserService } from './user.service';
-import { SuccessResponse } from 'src/common/api-response/success';
+import { SuccessResponse } from '@/common/api-response/success';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { UserResponseDto } from './dto/responses/user-response.dto';
@@ -25,11 +25,11 @@ import { VerifyEmailDto } from './dto/requests/verify-email.dto';
 import { VerifyEmailCodeDto } from './dto/requests/verify-email.dto';
 import { MailService } from '../auth/mail/mail.service';
 import { VerificationCodeService } from '../auth/services/verification-code.service';
-import { ErrorResponse } from 'src/common/api-response/errors';
-import { BadRequestError } from 'src/shared/types/enums/error-message.enum';
-import { getCountryCodeFromRequest } from 'src/common/utils/getCountryFromRequest';
+import { ErrorResponse } from '@/common/api-response/errors';
+import { BadRequestError } from '@shared/types/enums/error-message.enum';
+import { getCountryCodeFromRequest } from '@/common/utils/getCountryFromRequest';
 import { Request } from 'express';
-import { countryToLang } from 'src/common/utils/countryToLanguage';
+import { countryToLang } from '@/common/utils/countryToLanguage';
 
 @Controller('user')
 @UseGuards(JwtAuthGuard)

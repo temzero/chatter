@@ -15,22 +15,22 @@ import { plainToInstance } from 'class-transformer';
 import { ChatService } from './chat.service';
 import { CreateDirectChatDto } from './dto/requests/create-direct-chat.dto';
 import { CreateGroupChatDto } from './dto/requests/create-group-chat.dto';
-import { UpdateChatDto } from 'src/modules/chat/dto/requests/update-chat.dto';
+import { UpdateChatDto } from '@/modules/chat/dto/requests/update-chat.dto';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
-import { ErrorResponse } from 'src/common/api-response/errors';
+import { ErrorResponse } from '@/common/api-response/errors';
 import { ChatResponseDto } from './dto/responses/chat-response.dto';
-import { ChatType } from 'src/shared/types/enums/chat-type.enum';
-import { SystemEventType } from 'src/shared/types/enums/system-event-type.enum';
+import { ChatType } from '@shared/types/enums/chat-type.enum';
+import { SystemEventType } from '@shared/types/enums/system-event-type.enum';
 import { MessageService } from '../message/message.service';
 import { MessageResponseDto } from '../message/dto/responses/message-response.dto';
-import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
-import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
+import { PaginationQuery } from '@shared/types/queries/pagination-query';
+import { PaginationResponse } from '@shared/types/responses/pagination.response';
 import {
   GetOrCreateResponse,
   SuccessResponse,
-} from 'src/common/api-response/success';
-import { ForbiddenError } from 'src/shared/types/enums/error-message.enum';
+} from '@/common/api-response/success';
+import { ForbiddenError } from '@shared/types/enums/error-message.enum';
 
 @Controller('chat')
 @UseGuards(JwtAuthGuard)

@@ -4,12 +4,12 @@ import { DeepPartial, In, Repository } from 'typeorm';
 import { Call } from './entities/call.entity';
 import { CreateCallData } from './types/create-call-data.type';
 import { UpdateCallData } from './types/update-call-data.type';
-import { CallStatus } from 'src/shared/types/call';
+import { CallStatus } from '@shared/types/call';
 import { ChatMemberService } from '../chat-member/chat-member.service';
 import { CallResponseDto } from './dto/call-response.dto';
 import { UserService } from '../user/user.service';
 import { CallMapper } from './mappers/call.mapper';
-import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
+import { PaginationQuery } from '@shared/types/queries/pagination-query';
 
 @Injectable()
 export class CallService {

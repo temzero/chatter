@@ -11,13 +11,13 @@ import {
   DeleteDateColumn,
   OneToOne,
 } from 'typeorm';
-import { Message } from 'src/modules/message/entities/message.entity';
-import { Reaction } from 'src/modules/message/entities/reaction.entity';
+import { Message } from '@/modules/message/entities/message.entity';
+import { Reaction } from '@/modules/message/entities/reaction.entity';
 import * as bcrypt from 'bcrypt';
 import { UserRole } from '../constants/user-role.constants';
 import { UserStatus } from '../constants/user-status.constants';
 import { UserSettings } from './user-settings.entity';
-import { Folder } from 'src/modules/folder/entities/folder.entity';
+import { Folder } from '@/modules/folder/entities/folder.entity';
 
 @Entity('user')
 @Index(['email'], { unique: true })

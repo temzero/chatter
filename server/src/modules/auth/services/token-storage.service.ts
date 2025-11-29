@@ -3,8 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RefreshToken } from '../entities/refresh-token.entity';
-import { EnvConfig } from 'src/common/config/env.config';
-import { convertSecondsToMilliseconds } from 'src/common/helpers/time.helper';
+import { EnvConfig } from '@/common/config/env.config';
+import { convertSecondsToMilliseconds } from '@/common/helpers/time.helper';
 
 @Injectable()
 export class TokenStorageService {

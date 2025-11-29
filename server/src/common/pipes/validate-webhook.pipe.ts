@@ -1,5 +1,5 @@
 import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
-import { LiveKitWebhookPayload } from 'src/modules/websocket/constants/LiveKitWebhookPayload.type';
+import { LiveKitWebhookPayload } from '@/modules/websocket/constants/LiveKitWebhookPayload.type';
 
 @Injectable()
 export class ValidateWebhookPipe implements PipeTransform {

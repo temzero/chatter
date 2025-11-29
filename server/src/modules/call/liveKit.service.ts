@@ -6,7 +6,7 @@ import {
   RoomServiceClient,
   VideoGrant,
 } from 'livekit-server-sdk';
-import { EnvConfig } from 'src/common/config/env.config';
+import { EnvConfig } from '@/common/config/env.config';
 
 @Injectable()
 export class LiveKitService {

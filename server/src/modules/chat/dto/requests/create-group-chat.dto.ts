@@ -1,4 +1,4 @@
-import { ChatType } from 'src/shared/types/enums/chat-type.enum';
+import { ChatType } from '@shared/types/enums/chat-type.enum';
 import {
   ArrayMinSize,
   IsArray,

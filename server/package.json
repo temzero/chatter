@@ -6,10 +6,12 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "nest build",
     "start": "nest start",
+    "start:dev": "nest start --watch",
     "dev": "nest start --watch",
-    "prod": "node dist/main"
+    "start:prod": "node -r tsconfig-paths/register dist/main",
+    "prod": "node -r tsconfig-paths/register dist/main"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.9",
@@ -65,6 +67,7 @@
     "@types/supertest": "^6.0.3",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-prettier": "^5.5.4",
     "globals": "^16.5.0",
     "jest": "^30.2.0",

@@ -1,4 +1,4 @@
-import { UserResponse } from 'src/shared/types/responses/user.response';
+import { UserResponse } from '@shared/types/responses/user.response';
 
 export interface BlockResponse {
   id: string;

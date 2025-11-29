@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { SenderResponse } from 'src/shared/types/responses/message.response';
+import { SenderResponse } from '@shared/types/responses/message.response';
 
 @Exclude()
 export class SenderResponseDto implements SenderResponse {

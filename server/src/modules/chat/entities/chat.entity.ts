@@ -11,9 +11,9 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Message } from '../../message/entities/message.entity';
-import { ChatType } from 'src/shared/types/enums/chat-type.enum';
-import { ChatMember } from 'src/modules/chat-member/entities/chat-member.entity';
-import { InviteLink } from 'src/modules/invite-link/entities/invite-link.entity';
+import { ChatType } from '@shared/types/enums/chat-type.enum';
+import { ChatMember } from '@/modules/chat-member/entities/chat-member.entity';
+import { InviteLink } from '@/modules/invite-link/entities/invite-link.entity';
 
 @Entity('chat')
 export class Chat {

@@ -1,5 +1,5 @@
-import { ChatType } from 'src/shared/types/enums/chat-type.enum';
-import { ChatMemberRole } from 'src/shared/types/enums/chat-member-role.enum';
+import { ChatType } from '@shared/types/enums/chat-type.enum';
+import { ChatMemberRole } from '@shared/types/enums/chat-member-role.enum';
 import { MessageResponse } from './message.response';
 import { ChatMemberResponse } from './chat-member.response';
 import { PaginationResponse } from './pagination.response';

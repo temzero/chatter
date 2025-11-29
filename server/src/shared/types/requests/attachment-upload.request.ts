@@ -1,4 +1,4 @@
-import { AttachmentType } from 'src/shared/types/enums/attachment-type.enum';
+import { AttachmentType } from '@shared/types/enums/attachment-type.enum';
 
 export interface AttachmentUploadRequest {
   url: string;

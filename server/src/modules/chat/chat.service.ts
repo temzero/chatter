@@ -1,28 +1,28 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
-import { Chat } from 'src/modules/chat/entities/chat.entity';
-import { UpdateChatDto } from 'src/modules/chat/dto/requests/update-chat.dto';
-import { User } from 'src/modules/user/entities/user.entity';
-import { ChatMember } from 'src/modules/chat-member/entities/chat-member.entity';
-import { ChatMemberRole } from 'src/shared/types/enums/chat-member-role.enum';
-import { ErrorResponse } from 'src/common/api-response/errors';
-import { ChatType } from 'src/shared/types/enums/chat-type.enum';
+import { Chat } from '@/modules/chat/entities/chat.entity';
+import { UpdateChatDto } from '@/modules/chat/dto/requests/update-chat.dto';
+import { User } from '@/modules/user/entities/user.entity';
+import { ChatMember } from '@/modules/chat-member/entities/chat-member.entity';
+import { ChatMemberRole } from '@shared/types/enums/chat-member-role.enum';
+import { ErrorResponse } from '@/common/api-response/errors';
+import { ChatType } from '@shared/types/enums/chat-type.enum';
 import { CreateGroupChatDto } from './dto/requests/create-group-chat.dto';
 import { plainToInstance } from 'class-transformer';
 import { ChatMapper } from './mappers/chat.mapper';
 import { Message } from '../message/entities/message.entity';
-import { SystemEventType } from 'src/shared/types/enums/system-event-type.enum';
-import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
+import { SystemEventType } from '@shared/types/enums/system-event-type.enum';
+import { PaginationQuery } from '@shared/types/queries/pagination-query';
 import { ChatResponseDto } from './dto/responses/chat-response.dto';
 import { PublicChatMapper } from './mappers/public-chat.mapper';
-import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
+import { PaginationResponse } from '@shared/types/responses/pagination.response';
 import { MAX_PINNED } from '../chat-member/chat-member.service';
 import {
   BadRequestError,
   ConflictError,
   NotFoundError,
-} from 'src/shared/types/enums/error-message.enum';
+} from '@shared/types/enums/error-message.enum';
 import { MessageService } from '../message/message.service';
 
 @Injectable()

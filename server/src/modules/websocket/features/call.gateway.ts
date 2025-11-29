@@ -6,13 +6,13 @@ import {
   WebSocketGateway,
 } from '@nestjs/websockets';
 import { AuthenticatedSocket } from '../constants/authenticatedSocket.type';
-import { CallEvent } from 'src/shared/types/enums/websocket-events.enum';
+import { CallEvent } from '@shared/types/enums/websocket-events.enum';
 import {
   CallActionRequest,
   CallActionResponse,
   UpdateCallPayload,
-} from 'src/shared/types/call';
-import { ChatMemberService } from 'src/modules/chat-member/chat-member.service';
+} from '@shared/types/call';
+import { ChatMemberService } from '@/modules/chat-member/chat-member.service';
 import { WebsocketNotificationService } from '../services/websocket-notification.service';
 
 @WebSocketGateway()

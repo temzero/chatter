@@ -9,17 +9,17 @@ import { UpdateMessageDto } from './dto/requests/update-message.dto';
 import { ErrorResponse } from '../../common/api-response/errors';
 import { Reaction } from './entities/reaction.entity';
 import { BlockService } from '../block/block.service';
-import { ChatType } from 'src/shared/types/enums/chat-type.enum';
-import { SystemEventType } from 'src/shared/types/enums/system-event-type.enum';
+import { ChatType } from '@shared/types/enums/chat-type.enum';
+import { SystemEventType } from '@shared/types/enums/system-event-type.enum';
 import { MessageMapper } from './mappers/message.mapper';
 import { MessageResponseDto } from './dto/responses/message-response.dto';
 import { User } from '../user/entities/user.entity';
-import { ChatEvent } from 'src/shared/types/enums/websocket-events.enum';
-import { ChatMemberRole } from 'src/shared/types/enums/chat-member-role.enum';
-import { PaginationQuery } from 'src/shared/types/queries/pagination-query';
+import { ChatEvent } from '@shared/types/enums/websocket-events.enum';
+import { ChatMemberRole } from '@shared/types/enums/chat-member-role.enum';
+import { PaginationQuery } from '@shared/types/queries/pagination-query';
 import { WebsocketNotificationService } from '../websocket/services/websocket-notification.service';
 import { Call } from '../call/entities/call.entity';
-import { PaginationResponse } from 'src/shared/types/responses/pagination.response';
+import { PaginationResponse } from '@shared/types/responses/pagination.response';
 import { AttachmentService } from '../attachment/attachment.service';
 import { Attachment } from '../attachment/entity/attachment.entity';
 import { ChatMemberService } from '../chat-member/chat-member.service';
@@ -27,7 +27,7 @@ import {
   BadRequestError,
   ForbiddenError,
   NotFoundError,
-} from 'src/shared/types/enums/error-message.enum';
+} from '@shared/types/enums/error-message.enum';
 
 type MessageWithSenderMember = Message & {
   senderMember?: ChatMember;

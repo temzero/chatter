@@ -3,21 +3,21 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RegisterDto } from '../auth/dto/requests/register.dto';
-import { UpdateUserDto } from 'src/modules/user/dto/requests/update-user.dto';
-import { User } from 'src/modules/user/entities/user.entity';
-import { ErrorResponse } from 'src/common/api-response/errors';
+import { UpdateUserDto } from '@/modules/user/dto/requests/update-user.dto';
+import { User } from '@/modules/user/entities/user.entity';
+import { ErrorResponse } from '@/common/api-response/errors';
 import { TokenStorageService } from '../auth/services/token-storage.service';
 import { UserResponseDto } from './dto/responses/user-response.dto';
-import { FriendshipStatus } from 'src/shared/types/enums/friendship-type.enum';
+import { FriendshipStatus } from '@shared/types/enums/friendship-type.enum';
 import { FriendshipService } from '../friendship/friendship.service';
 import { ChatService } from '../chat/chat.service';
 import { BlockService } from '../block/block.service';
-import { PasswordMessageCode } from 'src/shared/types/enums/message-code.enum';
+import { PasswordMessageCode } from '@shared/types/enums/message-code.enum';
 import {
   ConflictError,
   NotFoundError,
-} from 'src/shared/types/enums/error-message.enum';
-import { EnvConfig } from 'src/common/config/env.config';
+} from '@shared/types/enums/error-message.enum';
+import { EnvConfig } from '@/common/config/env.config';
 
 @Injectable()
 export class UserService {

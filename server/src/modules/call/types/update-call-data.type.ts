@@ -1,4 +1,4 @@
-import { CallStatus } from 'src/shared/types/call';
+import { CallStatus } from '@shared/types/call';
 
 export interface UpdateCallData {
   isVideoCall?: boolean;
