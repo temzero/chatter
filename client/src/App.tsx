@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { Theme, useTheme, useThemeStore } from "./stores/themeStore";
 import { ToastContainer } from "react-toastify";
 import AppRoutes from "@/routes/AppRoutes";
-import "react-toastify/dist/ReactToastify.css";
 
 const App: React.FC = () => {
   const initializeTheme = useThemeStore.getState().initialize;

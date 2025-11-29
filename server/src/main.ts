@@ -1,14 +1,13 @@
 // src/main.ts
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { JwtIoAdapter } from './jwt.adapter';
+import { EnvConfig } from './common/config/env.config';
 import { ValidationPipe } from '@nestjs/common';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import cookieParser from 'cookie-parser';
 import { json, urlencoded } from 'express';
-import { JwtIoAdapter } from './jwt.adapter';
-import { EnvConfig } from './common/config/env.config';
-// import { testEnvHelper } from './common/helpers/test-env.helper';
+import cookieParser from 'cookie-parser';
+import { AppModule } from './app.module';
 
 const DEFAULT_PORT = 3000;
 const CLIENT_URL = EnvConfig.clientUrl;
@@ -16,7 +15,6 @@ const BODY_PARSER_LIMIT = EnvConfig.parseLimit;
 
 async function bootstrap() {
   try {
-    // testEnvHelper();
     console.log('1️⃣ Starting NestJS application...');
 
     const app = await NestFactory.create<NestExpressApplication>(AppModule, {
