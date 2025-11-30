@@ -38,6 +38,7 @@ dotenv.config();
         max: 20,
         connectionTimeoutMillis: 30000,
         idleTimeoutMillis: 30000,
+        family: 4, // Force IPv4 at driver level (may or may not work)
       },
     }),
 
