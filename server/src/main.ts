@@ -6,8 +6,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { json, urlencoded } from 'express';
-import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
+import cookieParser from 'cookie-parser';
 
 const DEFAULT_PORT = 3000;
 const CLIENT_URL = EnvConfig.clientUrl;
