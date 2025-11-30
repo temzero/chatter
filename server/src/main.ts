@@ -8,10 +8,6 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { json, urlencoded } from 'express';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
-import * as dns from 'dns';
-
-// CRITICAL: Force IPv4 DNS resolution BEFORE anything else
-dns.setDefaultResultOrder('ipv4first');
 
 const DEFAULT_PORT = 3000;
 const CLIENT_URL = EnvConfig.clientUrl;
