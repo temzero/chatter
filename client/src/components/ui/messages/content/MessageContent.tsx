@@ -34,7 +34,7 @@ const MessageContent: React.FC<MessageBubbleProps> = ({
 
       {/* Text Content */}
       {message.content && !isForwardMessage && (
-        <p className="break-words max-w-full cursor-pointer transition-all duration-200 shadow-xl rounded-b-xl">
+        <p className="wrap-break-word max-w-full cursor-pointer transition-all duration-200 shadow-xl rounded-b-xl">
           {message.content}
         </p>
       )}

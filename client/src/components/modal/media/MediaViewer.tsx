@@ -14,10 +14,10 @@ export const MediaViewer: React.FC = () => {
   const isMobile = useIsMobile();
   const closeModal = getCloseModal();
 
-  // derive mediaId from data
   const currentAttachmentId = useMediaModalData();
   const activeAttachments = useActiveChatAttachments();
 
+  // ✅ Calculate initial index inline
   const getInitialIndex = () => {
     if (!currentAttachmentId || !activeAttachments) return 0;
     const index = activeAttachments.findIndex(
@@ -27,26 +27,33 @@ export const MediaViewer: React.FC = () => {
   };
 
   const hasMounted = useRef(false);
-  const [currentIndex, setCurrentIndex] = useState(getInitialIndex());
+  
+  // ✅ Initialize with the function
+  const [currentIndex, setCurrentIndex] = useState(getInitialIndex);
   const [rotation, setRotation] = useState(0);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const [isReady, setIsReady] = useState(false);
   const controls = useAnimationControls();
 
+  // ✅ Track previous attachmentId to detect changes
+  const prevAttachmentIdRef = useRef(currentAttachmentId);
+
+  // ✅ Update index when attachmentId changes (without setState in effect body)
   useEffect(() => {
-    if (
-      currentAttachmentId &&
-      activeAttachments &&
-      activeAttachments.length > 0
-    ) {
-      const index = activeAttachments.findIndex(
-        (media) => media.id === currentAttachmentId
-      );
-      if (index !== -1) {
-        setCurrentIndex(index);
-        setRotation(0);
-        setIsReady(true);
-      }
+    if (prevAttachmentIdRef.current !== currentAttachmentId) {
+      prevAttachmentIdRef.current = currentAttachmentId;
+      
+      // Use setTimeout to move setState out of synchronous effect execution
+      setTimeout(() => {
+        if (currentAttachmentId && activeAttachments && activeAttachments.length > 0) {
+          const index = activeAttachments.findIndex(
+            (media) => media.id === currentAttachmentId
+          );
+          if (index !== -1) {
+            setCurrentIndex(index);
+            setRotation(0);
+          }
+        }
+      }, 0);
     }
   }, [currentAttachmentId, activeAttachments]);
 
@@ -140,7 +147,8 @@ export const MediaViewer: React.FC = () => {
     return () => window.removeEventListener("resize", resizeHandler);
   }, [containerRef, currentIndex, controls]);
 
-  if (!isReady) return null;
+  // ✅ Remove isReady check - just check if we have data
+  if (!activeAttachments?.length) return null;
 
   const currentMedia =
     currentIndex >= 0 && currentIndex < activeAttachments.length
@@ -177,7 +185,7 @@ export const MediaViewer: React.FC = () => {
         {activeAttachments.map((attachment, index) => (
           <motion.div
             key={`${attachment.id}-${index}`}
-            className="w-full h-full flex-shrink-0 flex items-center justify-center"
+            className="w-full h-full shrink-0 flex items-center justify-center"
             initial={{ scale: 0.2, opacity: 0 }}
             animate={{
               opacity: index === currentIndex ? 1 : 0.2,
@@ -190,7 +198,6 @@ export const MediaViewer: React.FC = () => {
               attachment={attachment}
               rotation={index === currentIndex ? rotation : 0}
               isCurrent={index === currentIndex}
-              // onMediaEnd={goNext}
             />
           </motion.div>
         ))}

@@ -32,7 +32,7 @@ export const MediaViewerNavigationButtons = ({
     <>
       {currentIndex > 0 && (
         <button
-          className="h-full w-10 flex items-center justify-center absolute left-0 top-1/2 -translate-y-1/2 text-white/60 hover:text-white hover:bg-gradient-to-r hover:from-[rgba(255,255,255,0.1)] hover:to-[rgba(0,0,0,0)] select-none"
+          className="h-full w-10 flex items-center justify-center absolute left-0 top-1/2 -translate-y-1/2 text-white/60 hover:text-white hover:bg-linear-to-r hover:from-[rgba(255,255,255,0.1)] hover:to-[rgba(0,0,0,0)] select-none"
           onClick={handlePrev}
           style={{ zIndex: 1 }}
         >
@@ -41,7 +41,7 @@ export const MediaViewerNavigationButtons = ({
       )}
       {attachmentLength > 1 && currentIndex < attachmentLength - 1 && (
         <button
-          className="h-full w-10 flex items-center justify-center absolute right-0 top-1/2 -translate-y-1/2 text-white/60 hover:text-white hover:bg-gradient-to-l hover:from-[rgba(255,255,255,0.1)] hover:to-[rgba(0,0,0,0)] select-none"
+          className="h-full w-10 flex items-center justify-center absolute right-0 top-1/2 -translate-y-1/2 text-white/60 hover:text-white hover:bg-linear-to-l hover:from-[rgba(255,255,255,0.1)] hover:to-[rgba(0,0,0,0)] select-none"
           onClick={handleNext}
           style={{ zIndex: 1 }}
         >

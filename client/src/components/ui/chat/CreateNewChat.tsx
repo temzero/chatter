@@ -67,7 +67,7 @@ const CreateNewChat: React.FC = () => {
               damping: 12,
               mass: 0.6,
             }}
-            className="bg-[var(--card-bg-color)] custom-border rounded-lg flex flex-col justify-between h-full overflow-hidden"
+            className="bg-(--card-bg-color) custom-border rounded-lg flex flex-col justify-between h-full overflow-hidden"
           >
             {user.isBlockedMe ? (
               <div className="flex-1 flex flex-col gap-2 items-center justify-center text-center text-red-500 p-6">
@@ -107,7 +107,7 @@ const CreateNewChat: React.FC = () => {
                       className={`-mt-1 ${
                         user.isBlockedByMe
                           ? "text-red-500"
-                          : "text-[var(--primary-green)]"
+                          : "text-(--primary-green)"
                       }`}
                     >
                       {user.isBlockedByMe
@@ -144,11 +144,11 @@ const CreateNewChat: React.FC = () => {
                 </div>
 
                 {!isMe && (
-                  <div className="w-full border-t-2 border-[var(--border-color)]">
+                  <div className="w-full border-t-2 border-(--border-color)">
                     {/* Unblock button takes priority when user is blocked */}
                     {user.isBlockedByMe ? (
                       <button
-                        className="w-full py-1 flex gap-1 items-center justify-center hover:bg-[var(--primary-green)] bg-red-500 hover:bg-red-600 text-white"
+                        className="w-full py-1 flex gap-1 items-center justify-center hover:bg-(--primary-green) bg-red-500 hover:bg-red-600 text-white"
                         // onClick={() => handleUnblock(user.id, user.firstName)}
                         onClick={() =>
                           openModal(ModalType.UNBLOCK_USER, {
@@ -175,7 +175,7 @@ const CreateNewChat: React.FC = () => {
                           />
                         ) : (
                           <button
-                            className="w-full py-1 flex gap-1 items-center justify-center hover:bg-[var(--primary-green)]"
+                            className="w-full py-1 flex gap-1 items-center justify-center hover:bg-(--primary-green)"
                             onClick={() => createOrGetDirectChat(user.id)}
                           >
                             {t("sidebar_new_chat.direct.start_chat")}
@@ -208,7 +208,7 @@ const CreateNewChat: React.FC = () => {
         />
         <button
           type="submit"
-          className="bg-[var(--primary-green)] py-1 w-full flex gap-2 items-center justify-center text-white rounded"
+          className="bg-(--primary-green) py-1 w-full flex gap-2 items-center justify-center text-white rounded"
           disabled={loading || !query}
         >
           {loading

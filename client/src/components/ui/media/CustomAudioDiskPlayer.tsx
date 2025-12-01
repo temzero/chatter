@@ -115,6 +115,7 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
         }
       },
       togglePlayPause: () => {
+        // eslint-disable-next-line react-hooks/immutability
         togglePlayPause(); // just call the function above
       },
     }));
@@ -282,7 +283,7 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
           </div>
 
           <button
-            className="aspect-square absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full border-[16px] border-[--border-color]"
+            className="aspect-square absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full border-16 border-[--border-color]"
             style={{ width: diskHoleSize, zIndex: 1 }}
             onClick={(e) => {
               e.stopPropagation();

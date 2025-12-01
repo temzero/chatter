@@ -97,7 +97,7 @@ const SidebarProfile: React.FC = () => {
 
         <div
           title={t("common.actions.logout")}
-          className="absolute bottom-0 flex items-center justify-center custom-border-t hover:bg-[var(--hover-color)] gap-2 p-2 cursor-pointer w-full text-red-400"
+          className="absolute bottom-0 flex items-center justify-center custom-border-t hover:bg-(--hover-color) gap-2 p-2 cursor-pointer w-full text-red-400"
           onClick={logout}
         >
           {!isCompact && (

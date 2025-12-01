@@ -1,4 +1,4 @@
-// componen@/components/ui/buttons/SwitchBtn.tsx
+// @/component/components/ui/buttons/SwitchBtn.tsx
 import * as React from "react";
 import * as Switch from "@radix-ui/react-switch";
 
@@ -12,7 +12,7 @@ const SwitchBtn: React.FC<PrivacySwitchProps> = ({
   onCheckedChange,
 }) => {
   return (
-    <div className="flex-shrink-0">
+    <div className="shrink-0">
       <Switch.Root
         checked={checked}
         onCheckedChange={onCheckedChange}

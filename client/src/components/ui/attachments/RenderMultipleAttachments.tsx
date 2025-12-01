@@ -35,7 +35,7 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
 
   const RenderAttachmentGrid = (items: AttachmentResponse[], cols: number) => (
     <div
-      className={clsx("grid gap-[1px]")}
+      className={clsx("grid gap-px")}
       style={{
         gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
       }}
@@ -58,7 +58,7 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
         return <RenderAttachment attachment={visualMedia[0]} />;
       case 3:
         return (
-          <div className={`grid grid-cols-6 grid-rows-2 gap-[1px] `}>
+          <div className={`grid grid-cols-6 grid-rows-2 gap-px `}>
             <div className="col-span-4 row-span-2">
               <RenderAttachment attachment={visualMedia[0]} />
             </div>
@@ -72,7 +72,7 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
         );
       case 4:
         return (
-          <div className="grid grid-cols-4 grid-rows-1 gap-[1px]">
+          <div className="grid grid-cols-4 grid-rows-1 gap-px">
             <div className="col-span-3 row-span-1">
               <RenderAttachment
                 attachment={visualMedia[0]}

@@ -132,7 +132,7 @@ const SidebarNewFolder: React.FC = () => {
                 onClick={() => setSelectedColor(color)}
                 className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${
                   selectedColor === color
-                    ? "ring-4 -ring-offset-4 ring-offset-[var(--sidebar-color)] ring-[--border-color]"
+                    ? "ring-4 -ring-offset-4 ring-offset-(--sidebar-color) ring-[--border-color]"
                     : ""
                 }`}
                 style={{ backgroundColor: color ?? "transparent" }}
@@ -172,7 +172,7 @@ const SidebarNewFolder: React.FC = () => {
                             : [...prev, type as (typeof folderTypes)[number]]
                         )
                       }
-                      className={`flex-1 py-1 rounded border-2 border-[var(--border-color)] text-sm capitalize transition-colors duration-200 ${
+                      className={`flex-1 py-1 rounded border-2 border-(--border-color) text-sm capitalize transition-colors duration-200 ${
                         isSelected ? "bg-[--primary-green] font-semibold" : ""
                       }`}
                     >
@@ -221,7 +221,7 @@ const SidebarNewFolder: React.FC = () => {
 
             <div className="overflow-y-auto">
               {filteredChats.length > 0 && (
-                <ul className="divide-y divide-[var(--border-color)]">
+                <ul className="divide-y divide-(--border-color)">
                   {filteredChats.map((chat) => (
                     <ChatListItemSelection
                       key={chat.id}

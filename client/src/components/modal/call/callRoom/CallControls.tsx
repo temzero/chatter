@@ -33,7 +33,7 @@ export const CallControls = ({
         <Button
           variant="ghost"
           className={`w-12 h-12 bg-black/20 ${
-            isScreenshare ? "!bg-[--primary-green]" : ""
+            isScreenshare ? "bg-[--primary-green]!" : ""
           }`}
           icon={isScreenshare ? "screen_share" : "stop_screen_share"}
           isIconFilled={isScreenshare}
@@ -45,7 +45,7 @@ export const CallControls = ({
       <Button
         variant="ghost"
         className={`w-12 h-12 bg-black/20 ${
-          isVideoEnabled ? "!bg-[--primary-green]" : ""
+          isVideoEnabled ? "bg-[--primary-green]!" : ""
         }`}
         icon={isVideoEnabled ? "videocam" : "videocam_off"}
         isIconFilled={isVideoEnabled}

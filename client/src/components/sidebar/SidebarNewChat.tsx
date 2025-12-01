@@ -70,7 +70,7 @@ const SidebarNewChat: React.FC = () => {
 
   return (
     <aside className="w-full h-full flex flex-col transition-all duration-300 ease-in-out">
-      <header className="flex w-full items-center h-[var(--header-height)] justify-between pl-2">
+      <header className="flex w-full items-center h-(--header-height) justify-between pl-2">
         <h1 className="font-semibold text-xl pl-1">
           {getTypeLabel(selectedType)}
         </h1>

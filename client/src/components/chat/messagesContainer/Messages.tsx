@@ -64,8 +64,8 @@ const Messages: React.FC<ChatMessagesProps> = ({
           <React.Fragment key={groupKey}>
             {/* Sticky Date Header */}
             {!isSearch && (
-              <div className="sticky top-0 flex justify-center z-[1]">
-                <div className="bg-[var(--background-color)] text-xs p-1 rounded">
+              <div className="sticky top-0 flex justify-center z-1">
+                <div className="bg-(--background-color) text-xs p-1 rounded">
                   {group.date || "Today"}
                 </div>
               </div>

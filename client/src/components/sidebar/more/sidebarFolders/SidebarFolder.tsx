@@ -26,7 +26,7 @@ const SidebarFolder: React.FC = () => {
 
   if (!folder) {
     return (
-      <div className="p-4 opacity-70 flex flex-col gap-4 items-center justify-center w-[var(--sidebar-width)]">
+      <div className="p-4 opacity-70 flex flex-col gap-4 items-center justify-center w-(--sidebar-width)">
         <span className="material-symbols-outlined">folder_open</span>
         <h1>{t("sidebar_folders.detail.folder_not_found")}</h1>
       </div>

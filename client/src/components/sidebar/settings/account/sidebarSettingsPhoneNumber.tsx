@@ -82,7 +82,7 @@ const SidebarSettingsPhoneNumber: React.FC = () => {
       backLocation={SidebarMode.SETTINGS_ACCOUNT}
     >
       <form onSubmit={handleSubmit} className="p-2 flex flex-col gap-2">
-        <div className="w-full p-4 rounded-lg bg-[var(--hover-color)]">
+        <div className="w-full p-4 rounded-lg bg-(--hover-color)">
           <ul className="space-y-1 dark:text-gray-300">
             {(
               t("account_settings.change_phone.requirements", {

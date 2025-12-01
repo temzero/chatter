@@ -74,7 +74,7 @@ const DeleteCallModal: React.FC = () => {
           <CallIcon
             status={call.status}
             isBroadcast={isChannel}
-            className="group-hover:hidden text-4xl flex-shrink-0"
+            className="group-hover:hidden text-4xl shrink-0"
           />
         </div>
 

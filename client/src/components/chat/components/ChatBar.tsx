@@ -188,7 +188,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
 
   return (
     <div
-      className="absolute bottom-0 left-0 backdrop-blur-xl w-full flex flex-col items-start p-4 shadow border-[var(--border-color)]"
+      className="absolute bottom-0 left-0 backdrop-blur-xl w-full flex flex-col items-start p-4 shadow border-(--border-color)"
       style={{ zIndex: replyToMessageId ? 100 : 2 }}
     >
       {filePreviewUrls.length > 0 && (
@@ -260,7 +260,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
 
                 <button
                   className={clsx(
-                    "rounded bg-[var(--primary-green)] border-2 border-green-400 flex items-center justify-center text-white transition-all duration-300",
+                    "rounded bg-(--primary-green) border-2 border-green-400 flex items-center justify-center text-white transition-all duration-300",
                     {
                       "w-[30px] opacity-100 ml-0 pointer-events-auto":
                         shouldShowSendButton,

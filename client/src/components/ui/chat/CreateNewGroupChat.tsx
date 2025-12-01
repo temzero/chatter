@@ -180,7 +180,7 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
           className={`flex items-center justify-center gap-2 py-1 w-full ${
             (type === "channel" && name.trim()) ||
             (type === "group" && selectedContacts.length > 0 && name.trim())
-              ? "bg-[var(--primary-green)]"
+              ? "bg-(--primary-green)"
               : "bg-gray-300 cursor-not-allowed"
           }`}
         >

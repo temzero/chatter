@@ -29,7 +29,7 @@ export const ChannelCallMessageContent: React.FC<BroadcastMessageProps> = ({
         <CallIcon
           status={call.status}
           isBroadcast={true}
-          className="text-2xl flex-shrink-0"
+          className="text-2xl shrink-0"
         />
 
         {isError

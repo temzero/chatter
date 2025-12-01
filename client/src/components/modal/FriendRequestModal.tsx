@@ -92,7 +92,7 @@ const FriendRequestModal: React.FC = () => {
 
         <button
           type="submit"
-          className="bg-[var(--primary-green)] text-white w-full py-1 flex gap-2 justify-center"
+          className="bg-(--primary-green) text-white w-full py-1 flex gap-2 justify-center"
         >
           {t("modal.friend_request.send_request")}
         </button>

@@ -144,7 +144,7 @@ export const RenderModalAttachment = ({
     case AttachmentType.FILE:
       return (
         <motion.div
-          className="mx-auto my-auto rounded-lg flex flex-col items-center border-4 border-[var(--border-color)]"
+          className="mx-auto my-auto rounded-lg flex flex-col items-center border-4 border-(--border-color)"
           animate={mediaViewerAnimations.rotation(rotation)}
         >
           <div className="flex flex-col justify-center items-center px-4">
@@ -162,7 +162,7 @@ export const RenderModalAttachment = ({
           </div>
           <button
             onClick={() => handleDownload(attachment)}
-            className="mt-4 w-full py-2 text-blue-500 hover:underline font-semibold rounded-none border-t-2 border-[var(--border-color)]"
+            className="mt-4 w-full py-2 text-blue-500 hover:underline font-semibold rounded-none border-t-2 border-(--border-color)"
           >
             Download
           </button>

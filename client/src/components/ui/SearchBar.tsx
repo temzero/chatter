@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 
 type SearchBarProps = {
   placeholder?: string;
@@ -14,11 +14,11 @@ const SearchBar = ({
   onSearch,
 }: SearchBarProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [hasValue, setHasValue] = useState(false); // ✅ Track with state
 
   useEffect(() => {
     if (!autoFocus) return;
 
-    // Delay autoFocus by 200ms
     const timer = setTimeout(() => {
       inputRef.current?.focus();
     }, 200);
@@ -28,14 +28,15 @@ const SearchBar = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    setHasValue(!!value); // ✅ Update state
     onSearch?.(value);
   };
 
   return (
-    <div className="flex w-full items-center gap-1 p-1 rounded border-2 border-[var(--border-color)] shadow focus-within:border-[var(--primary-color)] focus-within:shadow-md transition-all duration-200">
+    <div className="flex w-full items-center gap-1 p-1 rounded border-2 border-(--border-color) shadow focus-within:border-(--primary-color) focus-within:shadow-md transition-all duration-200">
       <i
         className={`material-symbols-outlined transition-opacity duration-200 ${
-          inputRef.current?.value ? "opacity-100" : "opacity-40"
+          hasValue ? "opacity-100" : "opacity-40" // ✅ Use state instead
         }`}
       >
         {type === "add" ? "add" : "search"}
@@ -46,7 +47,6 @@ const SearchBar = ({
         placeholder={placeholder}
         onChange={handleChange}
         className="w-full bg-transparent outline-none"
-        // Remove the native autoFocus attribute
       />
     </div>
   );

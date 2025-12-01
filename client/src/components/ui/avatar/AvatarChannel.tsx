@@ -32,7 +32,7 @@ export const ChannelAvatar: React.FC<ChannelAvatarProps> = ({
 
   return (
     <div
-      className={`group overflow-hidden bg-[var(--border-color)] flex items-center justify-center ${parentScaleClass} ${styles.size} ${styles.rounded}`}
+      className={`group overflow-hidden bg-(--border-color) flex items-center justify-center ${parentScaleClass} ${styles.size} ${styles.rounded}`}
     >
       {chat.avatarUrl ? (
         <img

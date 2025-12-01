@@ -122,7 +122,7 @@ const Header: React.FC<ChatHeaderProps> = ({
 
   return (
     <header
-      className="w-full absolute top-0 left-0 hover:shadow-2xl flex items-center justify-between min-h-[var(--header-height)] max-h-[var(--header-height)] px-3 backdrop-blur-xl shadow select-none"
+      className="w-full absolute top-0 left-0 hover:shadow-2xl flex items-center justify-between min-h-(--header-height) max-h-(--header-height) px-3 backdrop-blur-xl shadow select-none"
       style={{ zIndex: 2 }}
     >
       {chat.pinnedMessage && (

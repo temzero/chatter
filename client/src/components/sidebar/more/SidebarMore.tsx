@@ -60,7 +60,7 @@ const SidebarMore: React.FC = () => {
       className={`relative h-full w-full flex flex-col justify-between transition-all duration-300 ease-in-out select-none`}
     >
       {/* Header */}
-      <header className="flex w-full justify-between items-center min-h-[var(--header-height)] custom-border-b">
+      <header className="flex w-full justify-between items-center min-h-(--header-height) custom-border-b">
         <i
           className="material-symbols-outlined nav-btn"
           onClick={() => setSidebar(SidebarMode.DEFAULT)}
@@ -78,7 +78,7 @@ const SidebarMore: React.FC = () => {
 
       {/* User Info */}
       <div
-        className="flex items-center p-4 gap-4 w-full custom-border-b cursor-pointer hover:bg-[var(--hover-color)]"
+        className="flex items-center p-4 gap-4 w-full custom-border-b cursor-pointer hover:bg-(--hover-color)"
         onClick={() => setSidebar(SidebarMode.PROFILE)}
       >
         <div className="relative w-16 h-16">
@@ -131,7 +131,7 @@ const SidebarMore: React.FC = () => {
         }`}
       >
         <div
-          className={`flex items-center cursor-pointer hover:bg-[var(--hover-color)] w-full p-1 px-4 ${
+          className={`flex items-center cursor-pointer hover:bg-(--hover-color) w-full p-1 px-4 ${
             isCompact ? "justify-center" : "gap-3"
           }`}
           onClick={() => setSidebar(SidebarMode.SETTINGS)}

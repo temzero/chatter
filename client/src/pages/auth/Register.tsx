@@ -60,7 +60,7 @@ const Register = () => {
     <AuthenticationLayout>
       <motion.div
         {...publicLayoutAnimations.container}
-        className="flex items-center rounded-lg custom-border backdrop-blur-md bg-[var(--card-bg-color)] mt-20"
+        className="flex items-center rounded-lg custom-border backdrop-blur-md bg-(--card-bg-color) mt-20"
       >
         <form
           ref={formRef}

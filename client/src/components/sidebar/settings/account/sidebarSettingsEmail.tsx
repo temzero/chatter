@@ -155,7 +155,7 @@ const SidebarSettingsEmail: React.FC = () => {
         className={`p-1 w-full ${
           isDisabled
             ? "opacity-50 cursor-not-allowed"
-            : "primary bg-[var(--border-color)]"
+            : "primary bg-(--border-color)"
         }`}
         disabled={isDisabled}
       >
@@ -172,7 +172,7 @@ const SidebarSettingsEmail: React.FC = () => {
       backLocation={SidebarMode.SETTINGS_ACCOUNT}
     >
       <form onSubmit={handleSubmit} className="p-2 flex flex-col gap-2">
-        <div className="w-full p-4 rounded-lg bg-[var(--hover-color)]">
+        <div className="w-full p-4 rounded-lg bg-(--hover-color)">
           <ul className="space-y-1 dark:text-gray-300">
             {(
               t("account_settings.change_email.requirements", {
@@ -206,7 +206,7 @@ const SidebarSettingsEmail: React.FC = () => {
         {showCodeInput ? (
           // Verification Code UI
           <div className="flex flex-col gap-2">
-            <div className="relative flex items-center gap-2 border-2 border-[var(--input-border-color)] p-2 rounded">
+            <div className="relative flex items-center gap-2 border-2 border-(--input-border-color) p-2 rounded">
               <input
                 type="text"
                 value={verificationCode}
@@ -229,7 +229,7 @@ const SidebarSettingsEmail: React.FC = () => {
                 className={`p-1 flex-1 ${
                   loading || verificationCode.length !== 6
                     ? "opacity-50 cursor-not-allowed"
-                    : "primary bg-[var(--border-color)]"
+                    : "primary bg-(--border-color)"
                 }`}
                 onClick={handleVerifyCode}
                 disabled={loading || verificationCode.length !== 6}
@@ -251,7 +251,7 @@ const SidebarSettingsEmail: React.FC = () => {
               ) : (
                 <button
                   type="button"
-                  className={`secondary p-1 flex-1 bg-[var(--border-color)] ${
+                  className={`secondary p-1 flex-1 bg-(--border-color) ${
                     loading ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                   onClick={handleResendCode}

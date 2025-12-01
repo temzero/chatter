@@ -222,7 +222,7 @@ const Message: React.FC<MessageProps> = ({
               className={clsx(
                 "absolute top-0 text-red-400 rounded-full cursor-pointer hover:scale-110 transition-all",
                 {
-                  "-left-5 rotate-[-45deg]": isMe,
+                  "-left-5 -rotate-45": isMe,
                   "-right-5 rotate-45": !isMe,
                 }
               )}

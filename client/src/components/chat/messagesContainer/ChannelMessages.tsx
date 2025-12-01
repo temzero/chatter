@@ -69,7 +69,7 @@ const ChannelMessages: React.FC<ChannelMessagesProps> = ({
               className="sticky top-0 flex justify-center my-2"
               style={{ zIndex: 1 }}
             >
-              <div className="bg-[var(--background-color)] text-xs p-1 rounded">
+              <div className="bg-(--background-color) text-xs p-1 rounded">
                 {group.date || "Today"}
               </div>
             </div>

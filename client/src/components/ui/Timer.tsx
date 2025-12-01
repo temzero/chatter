@@ -6,18 +6,15 @@ interface TimerProps {
 }
 
 export const Timer = ({ startTime }: TimerProps) => {
-  const [seconds, setSeconds] = useState(0);
+  // ✅ Initialize state with the calculation
+  const [seconds, setSeconds] = useState(() => {
+    if (!startTime) return 0;
+    return Math.floor((Date.now() - new Date(startTime).getTime()) / 1000);
+  });
 
   useEffect(() => {
-    if (startTime) {
-      setSeconds(
-        Math.floor(
-          (Date.now() - new Date(startTime).getTime()) / 1000
-        )
-      );
-    } else {
-      setSeconds(0);
-    }
+    // ✅ NO setState here at all!
+    if (!startTime) return;
 
     const interval = setInterval(() => {
       setSeconds((prev) => prev + 1);

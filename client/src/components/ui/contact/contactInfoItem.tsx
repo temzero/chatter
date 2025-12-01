@@ -47,7 +47,7 @@ const ContactInfoItem: React.FC<ContactInfoItemProps> = ({
 
   return (
     <div
-      className={`flex cursor-pointer p-2 opacity-80 hover:bg-[var(--hover-color)] w-full justify-between ${className}`}
+      className={`flex cursor-pointer p-2 opacity-80 hover:bg-(--hover-color) w-full justify-between ${className}`}
       onClick={handleCopy}
     >
       <i className="material-symbols-outlined">{icon}</i>

@@ -58,7 +58,7 @@ export const VoiceVisualizerButton = ({
         isIconFilled={!isMuted}
         isRoundedFull
         className={`w-full h-full ${
-          isMuted ? "bg-red-500/50" : "!text-[--primary-green]"
+          isMuted ? "bg-red-500/50" : "text-[--primary-green]!"
         }`}
         style={{ zIndex: 10 }}
       />

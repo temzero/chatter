@@ -132,7 +132,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
                   {chat.name}
                 </h1>
 
-                <div className="flex gap-1 text-xs items-center flex-shrink-0 ml-2">
+                <div className="flex gap-1 text-xs items-center shrink-0 ml-2">
                   <p className="whitespace-nowrap opacity-50">
                     {formatTimeAgo(
                       t,
@@ -211,7 +211,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
                   {!isActive && unreadMessagesCount > 0 && (
                     <motion.div
                       key="unread-count"
-                      className="flex-shrink-0 font-semibold text-white bg-red-500 rounded-full text-xs flex items-center justify-center p-1 h-4"
+                      className="shrink-0 font-semibold text-white bg-red-500 rounded-full text-xs flex items-center justify-center p-1 h-4"
                       {...messageAnimations.messagesCount}
                     >
                       {unreadMessagesCount}

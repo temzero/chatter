@@ -180,7 +180,7 @@ const DirectChat: React.FC<DirectChatProps> = ({
             lastName={chatPartner.lastName}
             avatarUrl={chatPartner.avatarUrl ?? undefined}
             friendshipStatus={chatPartner.friendshipStatus}
-            className="bg-[var(--primary-green)]"
+            className="bg-(--primary-green)"
           />
         )}
 

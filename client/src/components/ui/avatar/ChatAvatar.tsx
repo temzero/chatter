@@ -26,7 +26,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
   if (!chat) {
     return (
       <div
-        className={`bg-[var(--border-color)] flex items-center justify-center overflow-hidden ${
+        className={`bg-(--border-color) flex items-center justify-center overflow-hidden ${
           type === "header"
             ? "h-11 w-11 rounded-[10px]"
             : type === "info"
@@ -156,7 +156,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
     default:
       return (
         <div
-          className={`bg-[var(--border-color)] select-none ${parentScaleClass} ${styles.size} flex flex-1 items-center justify-center`}
+          className={`bg-(--border-color) select-none ${parentScaleClass} ${styles.size} flex flex-1 items-center justify-center`}
         >
           <i
             className={`material-symbols-outlined ${styles.fallbackIconSize} opacity-20`}

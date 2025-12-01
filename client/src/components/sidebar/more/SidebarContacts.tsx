@@ -39,7 +39,7 @@ const ContactItem: React.FC<ContactItemProps> = ({
   };
 
   return (
-    <div className="flex gap-3 items-center justify-between custom-border-b p-3 hover:bg-[var(--hover-color)] cursor-pointer">
+    <div className="flex gap-3 items-center justify-between custom-border-b p-3 hover:bg-(--hover-color) cursor-pointer">
       <div className="flex items-center gap-3">
         <Avatar
           avatarUrl={contact.avatarUrl}

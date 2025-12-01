@@ -31,7 +31,7 @@ const MemberItem: React.FC<MemberItemProps> = ({ member }) => {
     <div
       className={`flex items-center justify-between p-2 ${
         !isBlocked
-          ? "hover:bg-[var(--hover-color)] cursor-pointer"
+          ? "hover:bg-(--hover-color) cursor-pointer"
           : "opacity-70"
       }`}
       onClick={handleClick}

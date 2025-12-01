@@ -26,12 +26,12 @@ const ThemeSelector = () => {
             className={`w-4 h-4 rounded-full border-2 flex items-center justify-center 
             ${
               themeOption === option
-                ? "border-[var(--primary-green)]"
+                ? "border-(--primary-green)"
                 : "border-gray-400"
             }`}
           >
             {themeOption === option && (
-              <div className="w-2 h-2 rounded-full bg-[var(--primary-green)]"></div>
+              <div className="w-2 h-2 rounded-full bg-(--primary-green)"></div>
             )}
           </div>
           <span>{t(`settings.theme_options.${option}`)}</span>

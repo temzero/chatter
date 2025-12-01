@@ -138,7 +138,7 @@ export const ChatMemberItems = ({
             className={itemClasses}
             onContextMenu={(e) => handleRightClick(e, myMember)}
           >
-            <div className="flex-shrink-0 mr-3">
+            <div className="shrink-0 mr-3">
               <Avatar
                 avatarUrl={myMember.avatarUrl}
                 name={myMember.firstName}
@@ -146,7 +146,7 @@ export const ChatMemberItems = ({
                 textSize="sm"
               />
             </div>
-            <div className="flex-grow">
+            <div className="grow">
               <div className="font-semibold">
                 {myMember.firstName} {myMember.lastName}
               </div>
@@ -178,7 +178,7 @@ export const ChatMemberItems = ({
               className={itemClasses}
               onContextMenu={(e) => handleRightClick(e, member)}
             >
-              <div className="flex-shrink-0 mr-3">
+              <div className="shrink-0 mr-3">
                 <Avatar
                   avatarUrl={member.avatarUrl}
                   name={member.firstName}
@@ -186,7 +186,7 @@ export const ChatMemberItems = ({
                   textSize="sm"
                 />
               </div>
-              <div className="flex-grow">
+              <div className="grow">
                 <div className="font-semibold">
                   {member.firstName} {member.lastName}
                 </div>

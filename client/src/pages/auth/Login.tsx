@@ -29,7 +29,7 @@ const Login = () => {
     <AuthenticationLayout loading={loading}>
       <motion.div
         {...publicLayoutAnimations.container}
-        className="flex items-center rounded-lg custom-border backdrop-blur-md bg-[var(--card-bg-color)] overflow-hidden"
+        className="flex items-center rounded-lg custom-border backdrop-blur-md bg-(--card-bg-color) overflow-hidden"
       >
         <form
           ref={formRef}

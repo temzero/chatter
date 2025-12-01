@@ -79,7 +79,7 @@ const SidebarDefault: React.FC = () => {
     <aside
       className={`h-full flex flex-col transition-all duration-300 ease-in-out`}
     >
-      <header className="relative flex w-full items-center h-[var(--header-height)] justify-between">
+      <header className="relative flex w-full items-center h-(--header-height) justify-between">
         <motion.a
           className="flex items-center cursor-pointer -ml-[64px]"
           onClick={() => setSidebar(SidebarMode.MORE)}

@@ -113,7 +113,7 @@ const SidebarProfileEdit: React.FC = () => {
         </button>
       )}
       <button
-        className="flex items-center rounded-full p-2 cursor-pointer opacity-70 hover:opacity-80 h-10 w-10 hover:bg-[var(--hover-color)] mr-1"
+        className="flex items-center rounded-full p-2 cursor-pointer opacity-70 hover:opacity-80 h-10 w-10 hover:bg-(--hover-color) mr-1"
         onClick={() => setSidebar(SidebarMode.DEFAULT)}
       >
         <i className="material-symbols-outlined">close</i>

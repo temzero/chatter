@@ -29,7 +29,7 @@ export const Avatar: React.FC<AvatarProps> = ({
       key={id}
       title={name}
       className={`relative w-${size} h-${size} aspect-square flex items-center justify-center overflow-hidden rounded-full border-2 bg-[--input-border-color] ${
-        isBlocked ? "border-red-500/60" : "border-[var(--border-color)]"
+        isBlocked ? "border-red-500/60" : "border-(--border-color)"
       } ${className}`}
       onClick={onClick}
     >

@@ -36,7 +36,7 @@ export const GroupAvatar: React.FC<GroupAvatarProps> = ({
 
   return (
     <div
-      className={`relative group overflow-hidden bg-[var(--border-color)] flex items-center justify-center ${parentScaleClass} ${styles.size} ${styles.rounded} `}
+      className={`relative group overflow-hidden bg-(--border-color) flex items-center justify-center ${parentScaleClass} ${styles.size} ${styles.rounded} `}
     >
       {chat.avatarUrl ? (
         <img
@@ -46,7 +46,7 @@ export const GroupAvatar: React.FC<GroupAvatarProps> = ({
         />
       ) : (
         <div
-          className={`bg-[var(--border-color)] cursor-pointer h-full w-full ${styles.rounded}`}
+          className={`bg-(--border-color) cursor-pointer h-full w-full ${styles.rounded}`}
         >
           <GroupAvatarLayout members={displayMembers} />
         </div>
@@ -94,7 +94,7 @@ export const GroupAvatarLayout: React.FC<{
   if (length === 2) {
     return (
       <div className="relative h-full w-full overflow-hidden">
-        <div className="absolute top-0 left-0 w-1/2 h-full -mr-[1px] flex items-center">
+        <div className="absolute top-0 left-0 w-1/2 h-full -mr-px flex items-center">
           <Avatar
             avatarUrl={members[0].avatarUrl}
             name={members[0].nickname ?? members[0].firstName ?? undefined}
@@ -102,7 +102,7 @@ export const GroupAvatarLayout: React.FC<{
             textSize={textSize}
           />
         </div>
-        <div className="absolute top-0 right-0 w-1/2 h-full -ml-[1px] flex items-center">
+        <div className="absolute top-0 right-0 w-1/2 h-full -ml-px flex items-center">
           <Avatar
             avatarUrl={members[1].avatarUrl}
             name={members[1].nickname ?? members[1].firstName ?? undefined}
@@ -117,7 +117,7 @@ export const GroupAvatarLayout: React.FC<{
   if (length === 3) {
     return (
       <div className="relative h-full w-full overflow-hidden">
-        <div className="absolute top-0 left-0 w-1/2 h-full -mr-[1px] flex items-center">
+        <div className="absolute top-0 left-0 w-1/2 h-full -mr-px flex items-center">
           <Avatar
             avatarUrl={members[0].avatarUrl}
             name={members[0].nickname ?? members[0].firstName ?? undefined}
@@ -125,7 +125,7 @@ export const GroupAvatarLayout: React.FC<{
             textSize={textSize}
           />
         </div>
-        <div className="absolute top-0 right-0 w-1/2 h-1/2 -ml-[1px] -mb-[1px]">
+        <div className="absolute top-0 right-0 w-1/2 h-1/2 -ml-px -mb-px">
           <Avatar
             avatarUrl={members[1].avatarUrl}
             name={members[1].nickname ?? members[1].firstName ?? undefined}
@@ -133,7 +133,7 @@ export const GroupAvatarLayout: React.FC<{
             textSize={textSize}
           />
         </div>
-        <div className="absolute bottom-0 right-0 w-1/2 h-1/2 -ml-[1px] -mt-[1px]">
+        <div className="absolute bottom-0 right-0 w-1/2 h-1/2 -ml-px -mt-px">
           <Avatar
             avatarUrl={members[2].avatarUrl}
             name={members[2].nickname ?? members[2].firstName ?? undefined}

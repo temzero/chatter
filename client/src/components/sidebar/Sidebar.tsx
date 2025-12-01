@@ -128,7 +128,7 @@ const Sidebar = () => {
   return (
     <div
       className={clsx(
-        "h-full overflow-hidden flex flex-col bg-[var(--sidebar-color)] shadow border-[var(--border-color)] border-r-2 transition-all duration-300 ease-in-out select-none",
+        "h-full overflow-hidden flex flex-col bg-(--sidebar-color) shadow border-(--border-color) border-r-2 transition-all duration-300 ease-in-out select-none",
         sidebarWidthClass
       )}
       style={{ zIndex: 10 }}

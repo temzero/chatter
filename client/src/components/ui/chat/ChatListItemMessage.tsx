@@ -41,7 +41,7 @@ export const ChatListItemMessage: React.FC<ChatListItemMessageProps> = ({
   // Draft message (highest priority)
   if (draftMessageContent) {
     displayMessage = (
-      <p className="text-[var(--primary-green)] flex items-center gap-1 overflow-hidden flex-1 min-w-0">
+      <p className="text-(--primary-green) flex items-center gap-1 overflow-hidden flex-1 min-w-0">
         <i className="material-symbols-outlined flex items-center justify-center text-[16px] h-3">
           edit
         </i>

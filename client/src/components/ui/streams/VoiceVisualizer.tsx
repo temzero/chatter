@@ -21,9 +21,8 @@ export const VoiceVisualizer = ({
 }: VoiceVisualizerProps) => {
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyzerRef = useRef<AnalyserNode | null>(null);
-  const [scale, setScale] = useState(0);
 
-  // Convert RemoteTrack to MediaStream if needed
+  // ✅ Move function declaration BEFORE using it
   const getMediaStream = (
     s: MediaStream | RemoteTrack | null | undefined
   ): MediaStream | null => {
@@ -33,6 +32,13 @@ export const VoiceVisualizer = ({
     return null;
   };
 
+  // ✅ Now you can use it here
+  const [scale, setScale] = useState(() => {
+    if (isMuted) return 0;
+    const mediaStream = getMediaStream(stream);
+    return !mediaStream || !mediaStream.getAudioTracks().length ? 0 : 1;
+  });
+
   useEffect(() => {
     const mediaStream = getMediaStream(stream);
 
@@ -40,7 +46,7 @@ export const VoiceVisualizer = ({
       if (audioContextRef.current?.state !== "closed") {
         audioContextRef.current?.close();
       }
-      setScale(0);
+      // ✅ Remove setScale(0) from here
       return;
     }
 
@@ -72,7 +78,7 @@ export const VoiceVisualizer = ({
       const normalized = Math.min(rms / 50, 1);
       const newScale = normalized * 5;
 
-      setScale(newScale);
+      setScale(newScale); // ✅ This is fine - it's in a callback
       requestAnimationFrame(update);
     };
 
@@ -85,7 +91,22 @@ export const VoiceVisualizer = ({
     };
   }, [stream, isMuted]);
 
-  if (isMuted) return null;
+  // ✅ Derive visibility from isMuted instead of returning null
+  if (isMuted) {
+    return (
+      <div
+        className={`absolute rounded-full transition-transform duration-75 ${className}`}
+        style={{
+          width: size,
+          height: size,
+          backgroundColor: circleColor,
+          transform: `scale(0)`,
+          opacity: opacity,
+          zIndex: 0,
+        }}
+      />
+    );
+  }
 
   return (
     <div

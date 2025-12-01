@@ -67,7 +67,7 @@ const ChatBox = React.memo(() => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="backdrop-blur-xl w-full flex flex-col items-center p-1 justify-between shadow border-[var(--border-color)]"
+                className="backdrop-blur-xl w-full flex flex-col items-center p-1 justify-between shadow border-(--border-color)"
               >
                 <button
                   className="text-[--primary-green] font-semibold rounded hover:text-white hover:bg-[--primary-green] px-2 py-1 text-lg"
@@ -81,7 +81,7 @@ const ChatBox = React.memo(() => {
               </motion.div>
             )
           ) : (
-            <div className="absolute bottom-0 left-0 backdrop-blur-xl w-full flex flex-col items-center p-4 justify-between shadow border-[var(--border-color)]">
+            <div className="absolute bottom-0 left-0 backdrop-blur-xl w-full flex flex-col items-center p-4 justify-between shadow border-(--border-color)">
               <h1 className="text-red-500 font-semibold text-center">
                 {isBlockedByMe &&
                   isBlockedMe &&

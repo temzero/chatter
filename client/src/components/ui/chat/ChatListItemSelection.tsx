@@ -15,7 +15,7 @@ const ChatListItemSelection: React.FC<ChatListItemSelectionProps> = ({
 }) => {
   return (
     <li
-      className="flex items-center justify-between p-2 hover:bg-[var(--hover-color)] cursor-pointer"
+      className="flex items-center justify-between p-2 hover:bg-(--hover-color) cursor-pointer"
       onClick={() => toggleChatSelection(chat.id)}
     >
       <div className="flex items-center gap-2">
@@ -29,7 +29,7 @@ const ChatListItemSelection: React.FC<ChatListItemSelectionProps> = ({
           checked={isSelected}
           onChange={() => toggleChatSelection(chat.id)}
           onClick={(e) => e.stopPropagation()}
-          className="w-4 h-4 rounded border-[var(--border-color)] accent-[var(--primary-green)]"
+          className="w-4 h-4 rounded border-(--border-color) accent-(--primary-green)"
         />
       </div>
     </li>

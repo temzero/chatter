@@ -31,22 +31,31 @@ const ForwardMessageModal: React.FC = () => {
   const message = data?.message;
   const attachment = data?.attachment;
 
-  // Memoized filtering for better performance
   const forwardChats = useMemo(() => {
-    return chats
-      .filter(
-        (chat) =>
-          // Search filter - only apply if searchTerm is not empty
-          !searchTerm ||
-          chat.name?.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-      .filter(
-        (chat) =>
-          // Forward-specific filters
-          (message ? chat.id !== message.chatId : true) &&
-          chat.type !== ChatType.CHANNEL
-      );
-  }, [chats, searchTerm, message]);
+    const filtered = chats.filter((chat) => {
+      // Search filter
+      if (
+        searchTerm &&
+        !chat.name?.toLowerCase().includes(searchTerm.toLowerCase())
+      ) {
+        return false;
+      }
+
+      // Forward-specific filters
+      if (chat.id === message?.chatId) {
+        return false;
+      }
+
+      if (chat.type === ChatType.CHANNEL) {
+        return false;
+      }
+
+      return true;
+    });
+
+    return filtered;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chats, searchTerm]);
 
   const handleForward = async (chatId: string) => {
     try {
@@ -126,7 +135,7 @@ const ForwardMessageModal: React.FC = () => {
               <ChatAvatar chat={chat} type="header" />
               <h2 className="font-medium">{chat.name}</h2>
               <button
-                className="ml-auto w-10 h-8 opacity-60 hover:opacity-100 rounded hover:bg-[var(--primary-green)] hover:border-2 hover:border-green-400 flex items-center justify-center text-white transition-all duration-300"
+                className="ml-auto w-10 h-8 opacity-60 hover:opacity-100 rounded hover:bg-(--primary-green) hover:border-2 hover:border-green-400 flex items-center justify-center text-white transition-all duration-300"
                 onClick={() => handleForward(chat.id)}
                 title={t("common.actions.send")}
               >

@@ -49,7 +49,7 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
     >
       <div
         className={clsx("opacity-50 transition-all w-full", {
-          "[&>*]:pointer-events-none": isHidden,
+          "*:pointer-events-none": isHidden,
           "hover:opacity-90 hover:scale-100 ": !isHidden,
           "ml-auto origin-bottom-right": isReplyToMe,
           "origin-bottom-left": !isReplyToMe,

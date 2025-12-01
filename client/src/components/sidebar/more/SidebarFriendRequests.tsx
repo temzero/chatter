@@ -107,7 +107,7 @@ const SidebarFriendRequests: React.FC = () => {
 
                       <div className="flex gap-2 mt-2">
                         <button
-                          className="bg-[var(--primary-green)] px-3 py-1 rounded text-sm"
+                          className="bg-(--primary-green) px-3 py-1 rounded text-sm"
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();

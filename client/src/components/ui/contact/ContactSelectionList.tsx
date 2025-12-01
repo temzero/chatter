@@ -20,7 +20,7 @@ const ContactSelectionList: React.FC<ChatListProps> = ({
         return (
           <React.Fragment key={chat.id}>
             <div
-              className="relative flex items-center w-full h-20 gap-3 p-3 transition-all duration-300 ease-in-out cursor-pointer hover:bg-[var(--hover-color)]"
+              className="relative flex items-center w-full h-20 gap-3 p-3 transition-all duration-300 ease-in-out cursor-pointer hover:bg-(--hover-color)"
               onClick={() => onContactToggle(chat.id)}
             >
               <ChatAvatar chat={chat} type="sidebar" />

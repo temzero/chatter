@@ -30,7 +30,7 @@ const ForgotPassword = () => {
     <AuthenticationLayout>
       <motion.div
         {...publicLayoutAnimations.container}
-        className="flex items-center rounded-lg custom-border backdrop-blur-md bg-[var(--card-bg-color)]"
+        className="flex items-center rounded-lg custom-border backdrop-blur-md bg-(--card-bg-color)"
       >
         <form
           ref={formRef}

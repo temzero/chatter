@@ -102,7 +102,7 @@ const DirectChatEdit = () => {
 
   return (
     <aside className="relative w-full h-full overflow-hidden flex flex-col">
-      <header className="flex w-full justify-between px-2 items-center min-h-[var(--header-height)] custom-border-b">
+      <header className="flex w-full justify-between px-2 items-center min-h-(--header-height) custom-border-b">
         <h1 className="text-xl font-semibold ml-2">
           {t("sidebar_info.edit.title")}
         </h1>
@@ -116,7 +116,7 @@ const DirectChatEdit = () => {
             </button>
           )}
           <button
-            className="flex items-center rounded-full p-2 cursor-pointer opacity-70 hover:opacity-80 h-10 w-10 hover:bg-[var(--hover-color)]"
+            className="flex items-center rounded-full p-2 cursor-pointer opacity-70 hover:opacity-80 h-10 w-10 hover:bg-(--hover-color)"
             onClick={() => setSidebarInfo(SidebarInfoMode.DEFAULT)}
           >
             <i className="material-symbols-outlined">close</i>

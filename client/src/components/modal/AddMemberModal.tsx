@@ -119,7 +119,7 @@ const AddMemberModal: React.FC = () => {
   return (
     <motion.div
       {...modalAnimations.children}
-      className="bg-[var(--sidebar-color)] text-[var(--text-color)] rounded p-4 max-w-xl w-[400px] custom-border"
+      className="bg-(--sidebar-color) text-(--text-color) rounded p-4 max-w-xl w-[400px] custom-border"
     >
       <h1 className="font-bold text-center text-xl mb-4 flex items-center justify-center gap-2">
         <span className="material-symbols-outlined font-bold text-3xl">
@@ -142,7 +142,7 @@ const AddMemberModal: React.FC = () => {
           filteredContacts.map((contact) => (
             <div
               key={contact.userId}
-              className="flex items-center w-full select-none gap-3 p-2 text-left transition custom-border-b hover:bg-[var(--hover-color)] cursor-pointer"
+              className="flex items-center w-full select-none gap-3 p-2 text-left transition custom-border-b hover:bg-(--hover-color) cursor-pointer"
               onClick={() => handleContactToggle(contact.userId)}
             >
               <div className="flex items-center gap-3 flex-1">
@@ -157,8 +157,8 @@ const AddMemberModal: React.FC = () => {
               <div
                 className={`w-4 h-4 rounded border-2 select-none ${
                   selectedContacts.includes(contact.userId)
-                    ? "bg-[var(--primary-green)] border-[var(--primary-green)]"
-                    : "border-[var(--border-color)]"
+                    ? "bg-(--primary-green) border-(--primary-green)"
+                    : "border-(--border-color)"
                 } flex items-center justify-center`}
               >
                 {selectedContacts.includes(contact.userId) && (
@@ -214,7 +214,7 @@ const AddMemberModal: React.FC = () => {
       <div className="h-8 flex">
         {selectedContacts.length > 0 ? (
           <button
-            className="w-full bg-[var(--primary-green)] p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-(--primary-green) p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handleAddMembers}
           >
             {selectedContacts.length === 1
@@ -224,7 +224,7 @@ const AddMemberModal: React.FC = () => {
                 })}
           </button>
         ) : (
-          <div className="flex items-center bg-[var(--input-bg)] rounded w-full border-2 border-[--border-color]">
+          <div className="flex items-center bg-(--input-bg) rounded w-full border-2 border-[--border-color]">
             {primaryInviteLink ? (
               <div className="flex items-center w-full h-full overflow-hidden">
                 <motion.p

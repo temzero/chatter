@@ -120,7 +120,7 @@ const CallModal: React.FC = () => {
     <motion.div
       {...animationProps}
       className={clsx(
-        "relative flex flex-col items-center justify-between overflow-hidden transition-all select-none bg-[var(--sidebar-color)]",
+        "relative flex flex-col items-center justify-between overflow-hidden transition-all select-none bg-(--sidebar-color)",
         getSizeClasses()
       )}
     >

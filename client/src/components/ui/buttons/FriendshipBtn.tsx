@@ -59,7 +59,7 @@ const FriendshipBtn: React.FC<FriendshipBtnProps> = ({
         <p className="opacity-80 mt-1 mb-3">{receivedRequest.requestMessage}</p>
         <div className="flex gap-2 w-full">
           <button
-            className="flex-1 bg-[var(--primary-green)] px-3 py-1 text-sm"
+            className="flex-1 bg-(--primary-green) px-3 py-1 text-sm"
             onClick={() =>
               handleAccept(receivedRequest.id, userId, onStatusChange)
             }
@@ -95,7 +95,7 @@ const FriendshipBtn: React.FC<FriendshipBtnProps> = ({
     case undefined:
       return (
         <button
-          className={`w-full py-1 flex gap-1 justify-center hover:bg-[var(--primary-green)] ${className}`}
+          className={`w-full py-1 flex gap-1 justify-center hover:bg-(--primary-green) ${className}`}
           onClick={handleOpenFriendRequest}
         >
           <span className="material-symbols-outlined">person_add</span>
@@ -106,7 +106,7 @@ const FriendshipBtn: React.FC<FriendshipBtnProps> = ({
     case FriendshipStatus.DECLINED:
       return (
         <button
-          className={`w-full py-1 flex gap-1 justify-center hover:bg-[var(--primary-green)] custom-border`}
+          className={`w-full py-1 flex gap-1 justify-center hover:bg-(--primary-green) custom-border`}
           onClick={handleOpenFriendRequest}
         >
           <span className="material-symbols-outlined">person_add</span>
