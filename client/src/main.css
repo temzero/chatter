@@ -1,6 +1,8 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/preflight";
+@import "tailwindcss/utilities";
+
+@plugin "tailwind-scrollbar-hide";
+@variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @layer utilities {
   /* Custom Scrollbar */

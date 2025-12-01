@@ -39,12 +39,4 @@ export class SupabaseController {
       throw new BadRequestException('Could not delete file');
     }
   }
-
-  private async handleOldAvatarDeletion(oldUrl: string): Promise<void> {
-    try {
-      await this.supabaseService.deleteFileByUrl(oldUrl);
-    } catch (error) {
-      console.warn('Silent failure - could not delete old avatar:', error);
-    }
-  }
 }
