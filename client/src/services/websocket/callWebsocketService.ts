@@ -1,4 +1,4 @@
-import { webSocketService } from "./websocket.service";
+import { webSocketService } from "@/services/websocket/websocketService";
 import { CallEvent } from "@/shared/types/enums/websocket-events.enum";
 import { WsNotificationResponse } from "@/shared/types/responses/ws-emit-chat-member.response";
 import {

@@ -2,10 +2,10 @@ import * as React from "react";
 import clsx from "clsx";
 import { MessageResponse } from "@/shared/types/responses/message.response";
 import { ModalType } from "@/common/enums/modalType";
-import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
+import { chatWebSocketService } from "@/services/websocket/chatWebsocketService";
 import { scrollToMessageById } from "@/common/utils/message/scrollToMessageById";
 import { useTranslation } from "react-i18next";
-import { audioService, SoundType } from "@/services/audio.service";
+import { audioService, SoundType } from "@/services/audioService";
 import {
   getCloseModal,
   getOpenModal,

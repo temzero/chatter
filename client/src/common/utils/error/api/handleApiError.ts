@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/hooks/handleApiError.ts
 import { AxiosError } from "axios";
-import { audioService, SoundType } from "@/services/audio.service";
+import { audioService, SoundType } from "@/services/audioService";
 import { toast } from "react-toastify";
 import { UnauthorizedError } from "@/shared/types/enums/error-message.enum";
 import { handleRefreshToken } from "./handleRefreshToken";

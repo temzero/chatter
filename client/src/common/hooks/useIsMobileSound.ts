@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { audioService, SoundType } from "@/services/audio.service";
+import { audioService, SoundType } from "@/services/audioService";
 
 export const useIsMobileSound = (isMobile: boolean) => {
   const firstRenderRef = useRef(true);

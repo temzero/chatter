@@ -5,8 +5,8 @@ import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { toast } from "react-toastify";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { getCurrentUserId } from "@/stores/authStore";
-import { notificationWebSocketService } from "@/services/websocket/notification.service";
-import { webSocketService } from "@/services/websocket/websocket.service";
+import { notificationWebSocketService } from "@/services/websocket/notificationService";
+import { webSocketService } from "@/services/websocket/websocketService";
 import {
   FriendRequestResponse,
   FriendshipUpdateNotification,

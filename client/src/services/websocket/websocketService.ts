@@ -1,4 +1,3 @@
-// src/services/websocket/websocket.service.ts
 import { io, Socket } from "socket.io-client";
 import { localStorageService } from "@/services/storage/localStorageService";
 import { EnvConfig } from "@/common/config/env.config";

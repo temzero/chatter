@@ -1,7 +1,7 @@
 // components/modals/DeleteMessageModal.tsx
 import * as React from "react";
 import { getCloseModal, getModalData } from "@/stores/modalStore";
-import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
+import { chatWebSocketService } from "@/services/websocket/chatWebsocketService";
 import { getCurrentUserId } from "@/stores/authStore";
 import { useMessageStore } from "@/stores/messageStore";
 import { handleError } from "@/common/utils/error/handleError";

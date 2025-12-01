@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { webSocketService } from "@/services/websocket/websocket.service";
+import { webSocketService } from "@/services/websocket/websocketService";
 
 export const useWebSocket = () => {
   useEffect(() => {

@@ -1,5 +1,5 @@
 // src/hooks/chat/useAutoMarkLastMessageRead.ts
-import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
+import { chatWebSocketService } from "@/services/websocket/chatWebsocketService";
 import { getCurrentUser } from "@/stores/authStore";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { MessageResponse } from "@/shared/types/responses/message.response"; // adjust path if needed

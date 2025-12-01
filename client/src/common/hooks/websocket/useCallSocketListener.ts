@@ -8,8 +8,8 @@ import { useCallStore } from "@/stores/callStore";
 import { useCallSounds } from "@/common/hooks/useCallSound";
 import { callService } from "@/services/http/callService";
 import { getCurrentUserId, useAuthStore } from "@/stores/authStore";
-import { webSocketService } from "@/services/websocket/websocket.service";
-import { callWebSocketService } from "@/services/websocket/call.websocket.service";
+import { webSocketService } from "@/services/websocket/websocketService";
+import { callWebSocketService } from "@/services/websocket/callWebsocketService";
 import {
   CallActionResponse,
   UpdateCallPayload,

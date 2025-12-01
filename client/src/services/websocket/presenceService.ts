@@ -1,4 +1,4 @@
-import { webSocketService } from "./websocket.service";
+import { webSocketService } from "@/services/websocket/websocketService";
 import { PresenceEvent } from "@/shared/types/enums/websocket-events.enum";
 import {
   PresenceInitEvent,

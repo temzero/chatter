@@ -1,6 +1,6 @@
 // src/services/friendship.websocket.service.ts
 import { FriendRequestResponse } from "@/shared/types/responses/friendship.response";
-import { webSocketService } from "./websocket.service";
+import { webSocketService } from "@/services/websocket/websocketService";
 import { FriendshipUpdateNotification } from "@/shared/types/responses/friendship.response";
 import { NotificationEvent } from "@/shared/types/enums/websocket-events.enum";
 import { WsNotificationResponse } from "@/shared/types/responses/ws-emit-chat-member.response";

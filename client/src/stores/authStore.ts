@@ -2,7 +2,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { authService } from "@/services/http/authService";
-import { webSocketService } from "@/services/websocket/websocket.service";
+import { webSocketService } from "@/services/websocket/websocketService";
 import { localStorageService } from "@/services/storage/localStorageService";
 import { fetchInitialAppData } from "@/common/hooks/app/fetchInitialAppData";
 import { clearAppData } from "@/common/hooks/app/clearAppData";

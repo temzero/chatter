@@ -1,7 +1,7 @@
 import { AttachmentUploadRequest } from "@/shared/types/requests/attachment-upload.request";
 import { determineAttachmentType } from "@/common/utils/message/determineAttachmentType";
 import { handleError } from "@/common/utils/error/handleError";
-import SupabaseService, { attachmentsBucket } from "./supabase.service";
+import SupabaseService, { attachmentsBucket } from "./supabaseService";
 import { toast } from "react-toastify";
 import i18next from "i18next";
 

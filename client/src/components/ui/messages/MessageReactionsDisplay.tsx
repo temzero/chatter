@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
 import { handleReaction } from "@/common/utils/message/handleReaction";
 import { useMessageReactions } from "@/stores/messageStore";
-import { audioService, SoundType } from "@/services/audio.service";
+import { audioService, SoundType } from "@/services/audioService";
 import { messageAnimations } from "@/common/animations/messageAnimations";
 
 interface MessageReactionDisplayProps {

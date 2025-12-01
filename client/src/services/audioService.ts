@@ -1,4 +1,4 @@
-// services/audio.service.ts
+// services/audioService.ts
 import activeSound from "@/assets/sound/active.mp3";
 import breakSound from "@/assets/sound/break.mp3";
 import card1Sound from "@/assets/sound/card1.mp3";

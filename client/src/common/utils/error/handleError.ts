@@ -1,4 +1,4 @@
-import { audioService, SoundType } from "@/services/audio.service";
+import { audioService, SoundType } from "@/services/audioService";
 import { toast } from "react-toastify";
 
 export function handleError(error: unknown, defaultMessage: string): never {

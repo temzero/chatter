@@ -1,4 +1,4 @@
-import SupabaseService, { avatarBucket } from "./supabase.service";
+import SupabaseService, { avatarBucket } from "./supabaseService";
 
 /**
  * Upload avatar directly to Supabase

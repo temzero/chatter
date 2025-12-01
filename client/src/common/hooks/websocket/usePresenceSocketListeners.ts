@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { usePresenceStore } from "@/stores/presenceStore";
 import { useChatStore } from "@/stores/chatStore";
-import { presenceWebSocketService } from "@/services/websocket/presence.service";
-import { webSocketService } from "@/services/websocket/websocket.service";
+import { presenceWebSocketService } from "@/services/websocket/presenceService";
+import { webSocketService } from "@/services/websocket/websocketService";
 import {
   PresenceInitEvent,
   PresenceUpdateEvent,

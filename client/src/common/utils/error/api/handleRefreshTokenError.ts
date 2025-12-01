@@ -1,5 +1,5 @@
 // src/hooks/handleRefreshTokenError.ts
-import { audioService, SoundType } from "@/services/audio.service";
+import { audioService, SoundType } from "@/services/audioService";
 import { useAuthStore } from "@/stores/authStore";
 import i18next from "i18next";
 import { toast } from "react-toastify";

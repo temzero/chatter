@@ -12,7 +12,7 @@ import {
   SenderResponse,
 } from "@/shared/types/responses/message.response";
 import { useAttachmentStore } from "./messageAttachmentStore";
-import { audioService, SoundType } from "@/services/audio.service";
+import { audioService, SoundType } from "@/services/audioService";
 import { useShallow } from "zustand/shallow";
 
 // Normalized structure

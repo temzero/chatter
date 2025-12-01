@@ -9,7 +9,7 @@ import { LiveKitService } from "@/services/liveKitService";
 import { getMyCallToken } from "@/common/utils/call/getMyCallToken";
 import { CallError, IncomingCallResponse } from "@shared/types/call";
 import { callService } from "@/services/http/callService";
-import { callWebSocketService } from "@/services/websocket/call.websocket.service";
+import { callWebSocketService } from "@/services/websocket/callWebsocketService";
 import { handleError } from "@/common/utils/error/handleError";
 import { getLocalCallStatus } from "@/common/utils/call/callHelpers";
 

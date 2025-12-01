@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { audioService, SoundType } from "@/services/audio.service";
+import { audioService, SoundType } from "@/services/audioService";
 import { useTypingMembers } from "@/common/hooks/useTypingMembers";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import "./typingIndicator.css";

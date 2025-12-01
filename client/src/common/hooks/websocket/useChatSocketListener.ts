@@ -6,11 +6,11 @@ import { useTypingStore } from "@/stores/typingStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useChatStore } from "@/stores/chatStore";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
-import { audioService, SoundType } from "@/services/audio.service";
+import { audioService, SoundType } from "@/services/audioService";
 import { handleSystemEventMessage } from "@/common/utils/message/handleSystemEventMessage";
 import { WsNotificationResponse } from "@/shared/types/responses/ws-emit-chat-member.response";
-import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
-import { webSocketService } from "@/services/websocket/websocket.service";
+import { chatWebSocketService } from "@/services/websocket/chatWebsocketService";
+import { webSocketService } from "@/services/websocket/websocketService";
 import { handleError } from "@/common/utils/error/handleError";
 import { useTranslation } from "react-i18next";
 

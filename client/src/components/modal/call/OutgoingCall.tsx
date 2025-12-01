@@ -7,7 +7,7 @@ import { VideoStream } from "@/components/ui/streams/VideoStream";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { getCloseModal } from "@/stores/modalStore";
 import { useLocalTracks } from "@/common/hooks/mediaStreams/useLocalTracks";
-import { callWebSocketService } from "@/services/websocket/call.websocket.service";
+import { callWebSocketService } from "@/services/websocket/callWebsocketService";
 import { UpdateCallPayload } from "@shared/types/call";
 import { callAnimations } from "@/common/animations/callAnimations";
 import CallHeader from "./components/CallHeader";

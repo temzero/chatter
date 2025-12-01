@@ -5,7 +5,7 @@ import {
   Delete,
   Body,
 } from '@nestjs/common';
-import { SupabaseService } from './supabase.service';
+import { SupabaseService } from './supabaseService';
 
 @Controller('storage')
 export class SupabaseController {

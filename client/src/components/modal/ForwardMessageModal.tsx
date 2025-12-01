@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from "react";
 import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { getChats } from "@/stores/chatStore";
-import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
+import { chatWebSocketService } from "@/services/websocket/chatWebsocketService";
 import { ForwardMessageRequest } from "@/shared/types/requests/forward-message.request";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";

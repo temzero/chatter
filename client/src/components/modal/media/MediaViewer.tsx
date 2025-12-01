@@ -3,7 +3,7 @@ import { motion, useAnimationControls } from "framer-motion";
 import { MediaViewerNavigationButtons } from "./MediaViewerNavigationButtons";
 import { MediaViewerBottomInfo } from "./MediaViewerBottomInfo";
 import { RenderModalAttachment } from "./RenderModalAttachment";
-import { audioService, SoundType } from "@/services/audio.service";
+import { audioService, SoundType } from "@/services/audioService";
 import { useIsMobile } from "@/stores/deviceStore";
 import { MediaViewerButtons } from "./MediaViewerButtons";
 import { getCloseModal, useMediaModalData } from "@/stores/modalStore";

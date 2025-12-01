@@ -16,7 +16,7 @@ import SystemMessage from "./SystemMessage";
 import MessageContent from "../../../ui/messages/content/MessageContent";
 import { AnimatePresence, motion } from "framer-motion";
 import { getMessageAnimation } from "@/common/animations/messageAnimations";
-import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
+import { chatWebSocketService } from "@/services/websocket/chatWebsocketService";
 import { useMessageStore } from "@/stores/messageStore";
 import { MESSAGE_AVATAR_WIDTH } from "@/common/constants/messageAvatarDimension";
 import { MessageReadInfo } from "../../messagesContainer/MessageReadInfo";

@@ -8,7 +8,7 @@ import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { MessageHorizontalPreview } from "./MessageHorizontalPreview";
 import { messageAnimations } from "@/common/animations/messageAnimations";
 import { MessageHorizontalPreviewTypes } from "@/common/enums/MessageHorizontalPreviewTypes";
-import { chatWebSocketService } from "@/services/websocket/chat.websocket.service";
+import { chatWebSocketService } from "@/services/websocket/chatWebsocketService";
 
 interface MessageProps {
   message: MessageResponse;
