@@ -15,7 +15,7 @@ const ThemeSelector = () => {
      }`;
 
   return (
-    <div id="theme-switcher" className="flex flex-col gap-1">
+    <div id="theme-switcher" className="flex flex-col">
       {[ThemeOption.Light, ThemeOption.Dark, ThemeOption.Auto].map((option) => (
         <div
           key={option}
