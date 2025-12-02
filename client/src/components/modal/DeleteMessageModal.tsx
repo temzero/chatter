@@ -61,7 +61,7 @@ const DeleteMessageModal: React.FC = () => {
     <>
       <div className="p-4">
         <div className="flex gap-2 items-center mb-3">
-          <span className="material-symbols-outlined text-3xl">chat_error</span>
+          <span className="material-symbols-outlined text-3xl!">chat_error</span>
           <h1 className="text-2xl font-semibold">
             {t("modal.delete_message.title")}
           </h1>

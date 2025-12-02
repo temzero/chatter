@@ -32,7 +32,6 @@ export class CallController {
     private readonly liveKitService: LiveKitService,
     private readonly callService: CallService,
     private readonly chatService: ChatService,
-    private readonly chatMemberService: ChatMemberService,
   ) {}
 
   @Get('history')
@@ -55,64 +54,64 @@ export class CallController {
     }
   }
 
-  @Get('pending')
-  async getPendingCalls(
-    @CurrentUser('id') userId: string,
-  ): Promise<SuccessResponse<IncomingCallResponse[]>> {
-    try {
-      // 1. Get all chatIds this user belongs to
-      const chatIds = await this.chatMemberService.getChatIdsByUserId(userId);
-      if (chatIds.length === 0) {
-        return new SuccessResponse([], 'No chats found for user');
-      }
+  // @Get('pending')
+  // async getPendingCalls(
+  //   @CurrentUser('id') userId: string,
+  // ): Promise<SuccessResponse<IncomingCallResponse[]>> {
+  //   try {
+  //     // 1. Get all chatIds this user belongs to
+  //     const chatIds = await this.chatMemberService.getChatIdsByUserId(userId);
+  //     if (chatIds.length === 0) {
+  //       return new SuccessResponse([], 'No chats found for user');
+  //     }
 
-      // 2. Get active rooms from LiveKit that match those chatIds
-      const activeRooms = await this.liveKitService.getActiveRoomsForUser(
-        userId,
-        chatIds,
-      );
+  //     // 2. Get active rooms from LiveKit that match those chatIds
+  //     const activeRooms = await this.liveKitService.getActiveRoomsForUser(
+  //       userId,
+  //       chatIds,
+  //     );
 
-      // 3. Map active rooms into IncomingCallResponse shape
-      const pendingCalls: IncomingCallResponse[] = await Promise.all(
-        activeRooms.map(async (room) => {
-          // 1. Fetch chat data for this room/chatId
-          const chat = await this.chatService.getChatById(room.name);
-          const callId = await this.callService.getActiveCallIdByChatId(
-            room.name,
-          );
+  //     // 3. Map active rooms into IncomingCallResponse shape
+  //     const pendingCalls: IncomingCallResponse[] = await Promise.all(
+  //       activeRooms.map(async (room) => {
+  //         // 1. Fetch chat data for this room/chatId
+  //         const chat = await this.chatService.getChatById(room.name);
+  //         const callId = await this.callService.getActiveCallIdByChatId(
+  //           room.name,
+  //         );
 
-          // 2. Determine call type
-          const isVideoCall = chat.type !== ChatType.DIRECT;
-          const isBroadcast = chat.type === ChatType.CHANNEL;
+  //         // 2. Determine call type
+  //         const isVideoCall = chat.type !== ChatType.DIRECT;
+  //         const isBroadcast = chat.type === ChatType.CHANNEL;
 
-          const status =
-            room.numParticipants <= 1
-              ? CallStatus.DIALING
-              : CallStatus.IN_PROGRESS;
+  //         const status =
+  //           room.numParticipants <= 1
+  //             ? CallStatus.DIALING
+  //             : CallStatus.IN_PROGRESS;
 
-          return {
-            callId: callId ?? 'empty',
-            chatId: room.name, // roomName = chatId
-            status,
-            participantsCount: room.numParticipants,
-            isVideoCall,
-            isBroadcast,
-            startedAt: room.creationTime
-              ? new Date(Number(room.creationTime) * 1000)
-              : undefined,
-          };
-        }),
-      );
+  //         return {
+  //           callId: callId ?? 'empty',
+  //           chatId: room.name, // roomName = chatId
+  //           status,
+  //           participantsCount: room.numParticipants,
+  //           isVideoCall,
+  //           isBroadcast,
+  //           startedAt: room.creationTime
+  //             ? new Date(Number(room.creationTime) * 1000)
+  //             : undefined,
+  //         };
+  //       }),
+  //     );
 
-      return new SuccessResponse(
-        pendingCalls,
-        'Pending calls retrieved successfully',
-      );
-    } catch (error: unknown) {
-      console.error('[getPendingCalls] Error:', error);
-      ErrorResponse.throw(error, 'Failed to retrieve pending calls');
-    }
-  }
+  //     return new SuccessResponse(
+  //       pendingCalls,
+  //       'Pending calls retrieved successfully',
+  //     );
+  //   } catch (error: unknown) {
+  //     console.error('[getPendingCalls] Error:', error);
+  //     ErrorResponse.throw(error, 'Failed to retrieve pending calls');
+  //   }
+  // }
 
   @Get('active/:chatId')
   async getActiveCall(

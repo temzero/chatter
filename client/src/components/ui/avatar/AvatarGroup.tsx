@@ -71,7 +71,7 @@ export const GroupAvatarLayout: React.FC<{
   if (length === 0) {
     return (
       <div className="flex items-center justify-center h-full w-full">
-        <span className="material-symbols-outlined opacity-50 text-3xl">
+        <span className="material-symbols-outlined text-3xl! opacity-50">
           groups
         </span>
       </div>

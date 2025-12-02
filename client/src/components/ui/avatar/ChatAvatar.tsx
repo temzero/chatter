@@ -38,7 +38,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
             : "h-16 w-16 rounded-xl"
         }`}
       >
-        <i className="material-symbols-outlined text-2xl opacity-20">error</i>
+        <i className="material-symbols-outlined text-2xl! opacity-20">error</i>
       </div>
     );
   }
@@ -59,17 +59,17 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
         return {
           size: "h-32 w-32",
           rounded: "rounded-[30px]",
-          iconSize: "text-6xl",
+          iconSize: "text-6xl!",
           fallbackIconSize: "text-8xl",
           borderWidth: "6px",
           onlineDotClass: "right-4 bottom-4",
-          textSize: "text-6xl",
+          textSize: "text-6xl!",
         };
       case "contact":
         return {
           size: "h-12 w-12",
           rounded: "rounded-[30px]",
-          iconSize: "text-6xl",
+          iconSize: "text-6xl!",
           fallbackIconSize: "text-8xl",
           borderWidth: "6px",
           onlineDotClass: "right-0 bottom-0",
@@ -79,11 +79,11 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
         return {
           size: "h-32 w-32",
           rounded: "rounded-[28px]",
-          iconSize: "text-6xl",
+          iconSize: "text-6xl!",
           fallbackIconSize: "text-8xl",
           borderWidth: "6px",
           onlineDotClass: "right-0 bottom-0",
-          textSize: "text-6xl",
+          textSize: "text-6xl!",
         };
       case "sidebar":
       default:
@@ -91,7 +91,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
           size: "h-16 w-16",
           rounded: "rounded-2xl",
           iconSize: "text-2xl",
-          fallbackIconSize: "text-6xl",
+          fallbackIconSize: "text-6xl!",
           borderWidth: "4px",
           onlineDotClass: "right-[5px] bottom-[5px]",
           textSize: "text-4xl",
@@ -150,7 +150,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
 
     case ChatType.SAVED:
       return (
-        <span className="material-symbols-outlined filled text-4xl">bookmark</span>
+        <span className="material-symbols-outlined text-4xl! filled">bookmark</span>
       );
 
     default:

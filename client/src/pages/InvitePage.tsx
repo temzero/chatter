@@ -57,7 +57,7 @@ function InvitePage() {
       <div className="flex flex-col items-center gap-3">
         {isSuccess !== null && (
           <span
-            className={`material-symbols-outlined text-6xl ${
+            className={`material-symbols-outlined text-6xl! ${
               isSuccess ? "text-green-500" : "text-red-500"
             }`}
           >

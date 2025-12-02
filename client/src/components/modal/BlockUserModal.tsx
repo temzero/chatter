@@ -56,7 +56,7 @@ const BlockUserModal: React.FC = () => {
               name={userToBlock.nickname || userToBlock.firstName}
             />
             <span className="absolute inset-0 flex items-center justify-center text-red-500 opacity-50 hover:opacity-100 cursor-pointer transition-opacity duration-200">
-              <i className="material-symbols-outlined text-6xl rotate-90">
+              <i className="material-symbols-outlined text-6xl! rotate-90">
                 block
               </i>
             </span>

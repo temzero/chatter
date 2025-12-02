@@ -63,7 +63,7 @@ const SidebarFolder: React.FC = () => {
           }}
         >
           <div className="flex items-center justify-between">
-            <span className="material-symbols-outlined font-semibold text-4xl">
+            <span className="material-symbols-outlined text-4xl! font-semibold">
               folder
             </span>
             <button onClick={handleEdit}>

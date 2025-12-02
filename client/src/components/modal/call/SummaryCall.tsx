@@ -47,7 +47,7 @@ const SummaryCall = ({ chat }: { chat: ChatResponse; duration?: number }) => {
 
       <div className="py-10 flex justify-center">
         <span
-          className={`material-symbols-outlined text-6xl ${
+          className={`material-symbols-outlined text-6xl! ${
             localCallStatus === LocalCallStatus.CANCELED
               ? "text-gray-400"
               : localCallStatus === LocalCallStatus.ERROR

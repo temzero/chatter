@@ -39,7 +39,7 @@ const UnfriendModal: React.FC = () => {
     <>
       <div className="p-4">
         <div className="flex gap-2 items-center mb-4 text-yellow-500 font-semibold">
-          <span className="material-symbols-outlined text-3xl font-bold">
+          <span className="material-symbols-outlined text-3xl! font-bold">
             person_cancel
           </span>
           <h2 className="text-2xl">{t("modal.unfriend.title")}</h2>

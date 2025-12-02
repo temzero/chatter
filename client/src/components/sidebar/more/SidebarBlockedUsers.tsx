@@ -43,7 +43,7 @@ const SidebarBlockedUsers: React.FC = () => {
         </div>
       ) : blockedUsers.length === 0 ? (
         <div className="flex flex-col items-center justify-center w-full p-10 opacity-70 text-center space-y-4">
-          <span className="material-symbols-outlined text-6xl text-gray-400">
+          <span className="material-symbols-outlined text-6xl! text-gray-400">
             folder_off
           </span>
           <p className="text-base text-gray-500">

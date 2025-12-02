@@ -148,11 +148,11 @@ const GroupChatEdit = () => {
               aria-label="Save changes"
             >
               {isSubmitting ? (
-                <i className="material-symbols-outlined text-3xl animate-spin">
+                <i className="material-symbols-outlined text-3xl! animate-spin">
                   progress_activity
                 </i>
               ) : (
-                <i className="material-symbols-outlined text-3xl">check</i>
+                <i className="material-symbols-outlined text-3xl!">check</i>
               )}
             </button>
           )}
@@ -215,7 +215,7 @@ const GroupChatEdit = () => {
           }}
           className="mt-4 bg-[--border-color] text-lg px-3 py-1 rounded flex justify-start items-center gap-2 w-full hover:bg-[--hover-color]"
         >
-          <span className="material-symbols-outlined text-3xl">
+          <span className="material-symbols-outlined text-3xl!">
             group_search
           </span>
           <h1>{t("sidebar_info.group_edit.members")}</h1>

@@ -12,6 +12,7 @@ import { callService } from "@/services/http/callService";
 import { callWebSocketService } from "@/services/websocket/callWebsocketService";
 import { handleError } from "@/common/utils/error/handleError";
 import { getLocalCallStatus } from "@/common/utils/call/callHelpers";
+import { getCurrentUserId } from "./authStore";
 
 interface CallState {
   liveKitService: LiveKitService | null;
@@ -42,6 +43,7 @@ interface CallActions {
       screenStream?: MediaStream | null;
     }
   ) => Promise<void>;
+  setIncomingCall: (payload: IncomingCallResponse) => void;
   openBroadCastPreview: (chatId: string) => Promise<void>;
   joinCall: (options: {
     isVoiceEnabled?: boolean;
@@ -165,6 +167,48 @@ export const useCallStore = create<CallState & CallActions>()(
           localCallStatus: LocalCallStatus.ERROR,
         });
         handleError(error, "Failed to start call");
+      }
+    },
+
+    setIncomingCall: (payload) => {
+      const {
+        callId,
+        chatId,
+        isVideoCall,
+        initiatorUserId,
+        initiatorMemberId,
+        status,
+        isBroadcast,
+      } = payload;
+
+      const currentUserId = getCurrentUserId();
+      const isCaller = initiatorUserId === currentUserId;
+
+      // Prevent duplicate incoming call if already handling one
+      if (!isCaller && get().callId) {
+        console.warn("Already have an incoming call, ignoring new one");
+        return;
+      }
+
+      set({
+        callId,
+        chatId,
+        isCaller,
+        isVideoCall: isBroadcast ? false : isVideoCall,
+        initiatorUserId,
+        initiatorMemberId,
+        ...(isBroadcast
+          ? {}
+          : {
+              localCallStatus: isCaller
+                ? LocalCallStatus.OUTGOING
+                : LocalCallStatus.INCOMING,
+            }),
+        callStatus: isBroadcast ? CallStatus.IN_PROGRESS : status,
+      });
+
+      if (!isCaller && !isBroadcast) {
+        useModalStore.getState().openModal(ModalType.CALL);
       }
     },
 

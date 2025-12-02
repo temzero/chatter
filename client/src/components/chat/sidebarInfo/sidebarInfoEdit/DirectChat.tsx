@@ -139,7 +139,7 @@ const DirectChat: React.FC<DirectChatProps> = ({
         ) : (
           <Avatar
             size={36}
-            textSize="text-6xl"
+            textSize="text-6xl!"
             avatarUrl={chatPartner.avatarUrl}
             name={chatPartner.nickname || chatPartner.firstName}
             isBlocked={chatPartner.isBlockedByMe}

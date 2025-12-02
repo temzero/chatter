@@ -122,7 +122,7 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center my-auto opacity-40">
-          <i className="material-symbols-outlined text-6xl">search_off</i>
+          <i className="material-symbols-outlined text-6xl!">search_off</i>
           <p>
             {searchTerm
               ? t("common.messages.no_result")

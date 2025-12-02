@@ -3,11 +3,9 @@ import { useEffect } from "react";
 import { toast } from "react-toastify";
 import { LocalCallStatus } from "@/common/enums/LocalCallStatus";
 import { CallStatus } from "@/shared/types/enums/call-status.enum";
-import { ModalType, useModalStore } from "@/stores/modalStore";
 import { useCallStore } from "@/stores/callStore";
 import { useCallSounds } from "@/common/hooks/useCallSound";
-import { callService } from "@/services/http/callService";
-import { getCurrentUserId, useAuthStore } from "@/stores/authStore";
+import { getCurrentUserId } from "@/stores/authStore";
 import { webSocketService } from "@/services/websocket/websocketService";
 import { callWebSocketService } from "@/services/websocket/callWebsocketService";
 import {
@@ -27,73 +25,79 @@ export function useCallSocketListeners() {
 
   useEffect(() => {
     if (!currentUserId) return; // guard inside
-    const fetchPendingCalls = async () => {
-      try {
-        const pendingCalls: IncomingCallResponse[] =
-          await callService.fetchPendingCalls();
+    // const fetchPendingCalls = async () => {
+    //   try {
+    //     const pendingCalls: IncomingCallResponse[] =
+    //       await callService.fetchPendingCalls();
 
-        if (pendingCalls?.length > 0) {
-          const data: WsNotificationResponse<IncomingCallResponse> = {
-            payload: pendingCalls[0],
-          };
-          handleIncomingCall(data);
+    //     if (pendingCalls?.length > 0) {
+    //       const data: WsNotificationResponse<IncomingCallResponse> = {
+    //         payload: pendingCalls[0],
+    //       };
+    //       handleIncomingCall(data);
 
-          if (pendingCalls.length > 1) {
-            toast.info(
-              t("toast.call.missed", { count: pendingCalls.length - 1 })
-            );
-          }
-        }
-      } catch (error) {
-        console.error("FETCH", error);
-      }
-    };
+    //       if (pendingCalls.length > 1) {
+    //         toast.info(
+    //           t("toast.call.missed", { count: pendingCalls.length - 1 })
+    //         );
+    //       }
+    //     }
+    //   } catch (error) {
+    //     console.error("FETCH", error);
+    //   }
+    // };
 
     const handleIncomingCall = (
       data: WsNotificationResponse<IncomingCallResponse>
     ) => {
-      console.log("[INCOMING_CALL]", data);
-      const {
-        callId,
-        chatId,
-        isVideoCall,
-        initiatorUserId,
-        initiatorMemberId,
-        status,
-        isBroadcast,
-      } = data.payload;
-
-      const currentUserId = useAuthStore.getState().currentUser?.id;
-      const isCaller = initiatorUserId === currentUserId;
-
-      if (!isCaller && useCallStore.getState().callId) {
-        console.warn(
-          "Already have an incoming call, ignoring new incoming call"
-        );
-        return;
-      }
-
-      useCallStore.setState({
-        callId,
-        chatId,
-        isCaller,
-        isVideoCall: isBroadcast ? false : isVideoCall,
-        initiatorUserId,
-        initiatorMemberId,
-        ...(isBroadcast
-          ? {}
-          : {
-              localCallStatus: isCaller
-                ? LocalCallStatus.OUTGOING
-                : LocalCallStatus.INCOMING,
-            }),
-        callStatus: isBroadcast ? CallStatus.IN_PROGRESS : status,
-      });
-
-      if (!isCaller && !isBroadcast) {
-        useModalStore.getState().openModal(ModalType.CALL);
-      }
+      useCallStore.getState().setIncomingCall(data.payload);
     };
+
+    // const handleIncomingCall = (
+    //   data: WsNotificationResponse<IncomingCallResponse>
+    // ) => {
+    //   console.log("[INCOMING_CALL]", data);
+    //   const {
+    //     callId,
+    //     chatId,
+    //     isVideoCall,
+    //     initiatorUserId,
+    //     initiatorMemberId,
+    //     status,
+    //     isBroadcast,
+    //   } = data.payload;
+
+    //   const currentUserId = useAuthStore.getState().currentUser?.id;
+    //   const isCaller = initiatorUserId === currentUserId;
+
+    //   if (!isCaller && useCallStore.getState().callId) {
+    //     console.warn(
+    //       "Already have an incoming call, ignoring new incoming call"
+    //     );
+    //     return;
+    //   }
+
+    //   useCallStore.setState({
+    //     callId,
+    //     chatId,
+    //     isCaller,
+    //     isVideoCall: isBroadcast ? false : isVideoCall,
+    //     initiatorUserId,
+    //     initiatorMemberId,
+    //     ...(isBroadcast
+    //       ? {}
+    //       : {
+    //           localCallStatus: isCaller
+    //             ? LocalCallStatus.OUTGOING
+    //             : LocalCallStatus.INCOMING,
+    //         }),
+    //     callStatus: isBroadcast ? CallStatus.IN_PROGRESS : status,
+    //   });
+
+    //   if (!isCaller && !isBroadcast) {
+    //     useModalStore.getState().openModal(ModalType.CALL);
+    //   }
+    // };
 
     const handleStartCall = (
       data: WsNotificationResponse<UpdateCallPayload>
@@ -230,7 +234,7 @@ export function useCallSocketListeners() {
     callWebSocketService.onCallEnded(handleCallEnded);
     callWebSocketService.onCallError(handleCallError);
 
-    fetchPendingCalls();
+    // fetchPendingCalls();
 
     return () => {
       const socket = webSocketService.getSocket();

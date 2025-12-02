@@ -60,7 +60,7 @@ const AttachmentImportedPreview: React.FC<AttachmentImportedPreviewProps> = ({
               </div>
             ) : (
               <div className={`${baseClass} p-1 flex flex-col justify-between`}>
-                <i className={`material-symbols-outlined text-3xl -mt-1`}>
+                <i className={`material-symbols-outlined text-3xl! -mt-1`}>
                   {getFileIcon(file.name)}
                 </i>
                 <span className={textClass}>{file.name}</span>

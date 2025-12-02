@@ -42,7 +42,7 @@ const DeleteChatModal: React.FC = () => {
     <>
       <div className="p-4">
         <div className="flex gap-2 items-center mb-4 text-red-500 font-semibold">
-          <span className="material-symbols-outlined text-3xl font-bold">
+          <span className="material-symbols-outlined text-3xl! font-bold">
             delete
           </span>
           <h2 className="text-2xl">

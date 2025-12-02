@@ -112,7 +112,7 @@ const DirectChatEdit = () => {
               className="flex items-center justify-center rounded-full cursor-pointer hover:opacity-100 text-green-400 h-10 w-10 hover:bg-green-500 hover:text-white"
               onClick={handleSubmit}
             >
-              <i className="material-symbols-outlined text-3xl">check</i>
+              <i className="material-symbols-outlined text-3xl!">check</i>
             </button>
           )}
           <button

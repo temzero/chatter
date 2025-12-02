@@ -135,13 +135,13 @@ export const AvatarEdit: React.FC<AvatarEditProps> = ({
           className="h-full w-full object-cover"
         />
       ) : (
-        <i className="material-symbols-outlined text-8xl opacity-20">
+        <i className="material-symbols-outlined text-8xl! opacity-20">
           {DEFAULT_AVATAR_ICONS[type]}
         </i>
       )}
 
       <label className="absolute inset-0 flex items-center justify-center text-white bg-black/50 cursor-pointer opacity-0 hover:opacity-100 transition-opacity">
-        <i className="material-symbols-outlined text-2xl">edit</i>
+        <i className="material-symbols-outlined text-2xl!">edit</i>
         <input
           ref={fileInputRef}
           type="file"

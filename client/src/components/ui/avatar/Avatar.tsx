@@ -47,7 +47,7 @@ export const Avatar: React.FC<AvatarProps> = ({
           {nameInitial}
         </h1>
       ) : (
-        <span className="material-symbols-outlined text-4xl">
+        <span className="material-symbols-outlined text-4xl!">
           sentiment_satisfied
         </span>
       )}

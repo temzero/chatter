@@ -152,7 +152,7 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
               handleDownload(attachment);
             }}
           >
-            <i className="material-symbols-outlined text-3xl transition-all group-hover:scale-110 group-hover:font-bold">
+            <i className="material-symbols-outlined text-3xl! transition-all group-hover:scale-110 group-hover:font-bold">
               {getFileIcon(attachment.filename)}
             </i>
             <h1 className="truncate transition-all group-hover:font-bold">
@@ -167,7 +167,7 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
 
     default:
       return (
-        <div className="flex items-center p-2 rounded text-6xl ">
+        <div className="flex items-center p-2 rounded text-6xl!">
           <span className="material-symbols-outlined">attach_file</span>
           <p className="text-lg">Type not supported</p>
         </div>

@@ -36,7 +36,7 @@ export const MediaViewerNavigationButtons = ({
           onClick={handlePrev}
           style={{ zIndex: 1 }}
         >
-          <i className="material-symbols-outlined text-5xl">chevron_left</i>
+          <i className="material-symbols-outlined text-5xl!">chevron_left</i>
         </button>
       )}
       {attachmentLength > 1 && currentIndex < attachmentLength - 1 && (
@@ -45,7 +45,7 @@ export const MediaViewerNavigationButtons = ({
           onClick={handleNext}
           style={{ zIndex: 1 }}
         >
-          <i className="material-symbols-outlined text-5xl">chevron_right</i>
+          <i className="material-symbols-outlined text-5xl!">chevron_right</i>
         </button>
       )}
     </>

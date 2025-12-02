@@ -211,7 +211,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
               animate={{ opacity: 1, x: 0 }}
               style={{ transformOrigin: "top left" }}
             >
-              <span className="material-symbols-outlined text-3xl rotate-180 mr-2 mb-1 pointer-events-none">
+              <span className="material-symbols-outlined text-3xl! rotate-180 mr-2 mb-1 pointer-events-none">
                 reply
               </span>
             </motion.div>

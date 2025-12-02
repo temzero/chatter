@@ -83,7 +83,7 @@ const SidebarCalls: React.FC = () => {
         <AnimatePresence initial={false}>
           {calls.length === 0 && !hasMore ? (
             <div className="flex flex-col items-center justify-center mt-8 opacity-60">
-              <i className="material-symbols-outlined text-6xl mb-4 scale-x-[-1]">
+              <i className="material-symbols-outlined text-6xl! mb-4 scale-x-[-1]">
                 phone_enabled
               </i>
               <p>{t("sidebar_calls.no_calls")}</p>

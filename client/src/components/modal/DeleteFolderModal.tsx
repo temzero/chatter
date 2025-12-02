@@ -45,7 +45,7 @@ const DeleteFolderModal: React.FC = () => {
           style={{ color: folder.color ? folder.color : "" }}
           className="flex items-center gap-2 text-2xl font-semibold"
         >
-          <span className="material-symbols-outlined text-3xl">
+          <span className="material-symbols-outlined text-3xl!">
             folder_delete
           </span>
           {folder.name}

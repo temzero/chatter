@@ -113,7 +113,7 @@ const SidebarMore: React.FC = () => {
               onClick={button.onClick || undefined}
             >
               <div className="flex items-center justify-center h-10 w-10">
-                <i className="material-symbols-outlined text-3xl">
+                <i className="material-symbols-outlined text-3xl!">
                   {button.icon}
                 </i>
               </div>
@@ -137,7 +137,7 @@ const SidebarMore: React.FC = () => {
           onClick={() => setSidebar(SidebarMode.SETTINGS)}
         >
           <div className="flex items-center justify-center h-10 w-10">
-            <i className="material-symbols-outlined text-3xl">settings</i>
+            <i className="material-symbols-outlined text-3xl!">settings</i>
           </div>
           {!isCompact && (
             <p className="whitespace-nowrap text-ellipsis">

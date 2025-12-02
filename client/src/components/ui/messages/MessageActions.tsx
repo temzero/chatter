@@ -161,7 +161,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
           title={action.label}
         >
           <i
-            className={clsx("material-symbols-outlined text-2xl", action.class)}
+            className={clsx("material-symbols-outlined text-2xl!", action.class)}
           >
             {action.icon}
           </i>

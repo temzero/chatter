@@ -138,7 +138,7 @@ const ChatFolderSelector: React.FC<Props> = ({
           className="bg-[input-border-color] custom-border-r shadow-lg backdrop-blur-sm rounded-none flex items-center justify-center overflow-hidden h-full w-6 absolute left-0 top-0 select-none"
           style={{ zIndex: 10 }}
         >
-          <i className="material-symbols-outlined text-sm font-bold pl-1.5">
+          <i className="material-symbols-outlined text-sm! font-bold pl-1.5">
             arrow_back_ios
           </i>
         </button>
@@ -150,7 +150,7 @@ const ChatFolderSelector: React.FC<Props> = ({
           className="bg-[input-border-color] custom-border-l shadow-lg backdrop-blur-sm rounded-none flex items-center justify-center overflow-hidden h-full w-6 absolute right-0 top-0 select-none"
           style={{ zIndex: 10 }}
         >
-          <i className="material-symbols-outlined text-sm font-bold pl-0.5">
+          <i className="material-symbols-outlined text-sm! font-bold pl-0.5">
             arrow_forward_ios
           </i>
         </button>

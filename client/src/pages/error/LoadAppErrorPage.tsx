@@ -24,7 +24,7 @@ const LoadAppErrorPage: React.FC = () => {
         transition={{ type: "spring", stiffness: 200, damping: 15 }}
         className="flex flex-col items-center justify-center gap-1"
       >
-        <span className="material-symbols-outlined text-6xl  select-none">
+        <span className="material-symbols-outlined text-6xl! select-none">
           warning
         </span>
         <h1 className="text-lg font-medium">

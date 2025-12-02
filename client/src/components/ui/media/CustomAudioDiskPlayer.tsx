@@ -290,7 +290,7 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
               togglePlayPause();
             }}
           >
-            <i className="material-symbols-outlined filled text-6xl opacity-80">
+            <i className="material-symbols-outlined filled text-6xl! opacity-80">
               {state.isPlaying ? "pause" : "play_arrow"}
             </i>
           </button>

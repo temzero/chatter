@@ -99,7 +99,7 @@ const SidebarContacts: React.FC<SidebarContactsProps> = ({
         ))
       ) : (
         <div className="flex flex-col items-center justify-center mt-8 opacity-60">
-          <i className="material-symbols-outlined text-6xl mb-4">contacts</i>
+          <i className="material-symbols-outlined text-6xl! mb-4">contacts</i>
           <p>{t("sidebar_contacts.no_contacts")}</p>
         </div>
       )}

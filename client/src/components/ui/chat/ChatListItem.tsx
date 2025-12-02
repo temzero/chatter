@@ -151,7 +151,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
                           exit={{ opacity: 0, scale: 0.1 }}
                           transition={{ duration: 0.3 }}
                         >
-                          <span className="material-symbols-outlined filled text-[18px] text-yellow-500">
+                          <span className="material-symbols-outlined filled text-[18px]! text-yellow-500">
                             notifications_off
                           </span>
                         </motion.div>
@@ -167,7 +167,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
                             exit={{ opacity: 0, scale: 0.1 }}
                             transition={{ duration: 0.3 }}
                           >
-                            <span className="material-symbols-outlined filled text-[20px] rotate-45 text-red-500">
+                            <span className="material-symbols-outlined filled text-[20px]! rotate-45 text-red-500">
                               keep
                             </span>
                           </motion.div>

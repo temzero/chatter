@@ -75,7 +75,7 @@ const SidebarNewChat: React.FC = () => {
           {getTypeLabel(selectedType)}
         </h1>
         <i
-          className="material-symbols-outlined text-2xl opacity-60 hover:opacity-100 cursor-pointer p-2"
+          className="material-symbols-outlined text-2xl! opacity-60 hover:opacity-100 cursor-pointer p-2"
           onClick={() => setSidebar(SidebarMode.DEFAULT)}
         >
           close
@@ -93,7 +93,7 @@ const SidebarNewChat: React.FC = () => {
               className={clsx(
                 "material-symbols-outlined py-1",
                 type === selectedType && "filled",
-                type === ChatType.GROUP && "text-[2.1rem]"
+                type === ChatType.GROUP && "text-[2.1rem]!"
               )}
             >
               {getTypeIcon(type)}

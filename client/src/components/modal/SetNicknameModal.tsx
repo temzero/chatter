@@ -39,7 +39,7 @@ const SetNicknameModal: React.FC = () => {
     <>
       <div className="p-4">
         <div className="flex gap-2 items-center mb-4 font-semibold">
-          <span className="material-symbols-outlined text-3xl font-bold">
+          <span className="material-symbols-outlined text-3xl! font-bold">
             edit
           </span>
           <h2 className="text-2xl">{t("modal.set_nickname.title")}</h2>

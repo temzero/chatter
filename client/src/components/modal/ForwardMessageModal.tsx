@@ -139,7 +139,7 @@ const ForwardMessageModal: React.FC = () => {
                 onClick={() => handleForward(chat.id)}
                 title={t("common.actions.send")}
               >
-                <span className="material-symbols-outlined text-3xl">send</span>
+                <span className="material-symbols-outlined text-3xl!">send</span>
               </button>
             </div>
           ))

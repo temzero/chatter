@@ -107,7 +107,7 @@ export const CallActionButton: React.FC<CallActionButtonProps> = ({
                 : "call"
             }
             onClick={isVideoCall ? toggleVideo : undefined}
-            className="material-symbols-outlined filled text-6xl"
+            className="material-symbols-outlined filled text-6xl!"
             style={{ color: textColor, rotate: rotateOnDrag }}
             {...callAnimations.incomingActionButton(isDragging)}
           >

@@ -8,7 +8,7 @@ export const SystemMessageIcon = ({
   systemEvent: SystemEventType;
   className?: string;
 }) => (
-  <span className={`material-symbols-outlined text-sm ${className}`}>
+  <span className={`material-symbols-outlined text-sm! ${className}`}>
     {getSystemEventIconName(systemEvent)}
   </span>
 );

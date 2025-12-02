@@ -9,6 +9,7 @@ import { ChatMemberModule } from '../chat-member/chat-member.module';
 import { MessageModule } from '../message/message.module';
 import { FolderModule } from '../folder/folder.module';
 import { FriendshipModule } from '../friendship/friendship.module';
+import { CallModule } from '../call/call.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { FriendshipModule } from '../friendship/friendship.module';
     MessageModule,
     FolderModule,
     FriendshipModule,
+    CallModule
   ],
   controllers: [BootstrapController],
   providers: [BootstrapService],

@@ -245,7 +245,7 @@ const SidebarNewFolder: React.FC = () => {
             }}
             className="inline-block z-10 bg-[--background-color] rounded-t-lg px-4 pt-1 pb-0 border-t-4 border-l-4 border-black/30 -mb-4 select-none"
           >
-            <span className="material-symbols-outlined font-bold text-4xl">
+            <span className="material-symbols-outlined text-4xl! font-bold">
               {isEditMode ? "bookmark_manager" : "create_new_folder"}
             </span>
           </div>

@@ -148,7 +148,7 @@ export const RenderModalAttachment = ({
           animate={mediaViewerAnimations.rotation(rotation)}
         >
           <div className="flex flex-col justify-center items-center px-4">
-            <i className="material-symbols-outlined text-8xl px-4">
+            <i className="material-symbols-outlined text-8xl! px-4">
               {getFileIcon(attachment.filename)}
             </i>
             <div className="text-lg font-medium text-center">
@@ -171,7 +171,7 @@ export const RenderModalAttachment = ({
 
     default:
       return (
-        <div className="flex items-center p-2 rounded text-6xl ">
+        <div className="flex items-center p-2 rounded text-6xl!">
           <span className="material-symbols-outlined">attach_file</span>
           <p className="text-lg">Type not supported</p>
         </div>

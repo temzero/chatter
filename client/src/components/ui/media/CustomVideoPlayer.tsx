@@ -206,7 +206,7 @@ const CustomVideoPlayer = ({
               handleClick(e);
             }}
           >
-            <span className="material-symbols-outlined filled text-6xl">
+            <span className="material-symbols-outlined filled text-6xl!">
               play_arrow
             </span>
           </button>
@@ -231,11 +231,11 @@ const CustomVideoPlayer = ({
           aria-label={isMuted ? "Mute" : "Unmute"}
         >
           {isMuted ? (
-            <span className="material-symbols-outlined text-lg">
+            <span className="material-symbols-outlined text-lg!">
               volume_off
             </span>
           ) : (
-            <span className="material-symbols-outlined text-lg">volume_up</span>
+            <span className="material-symbols-outlined text-lg!">volume_up</span>
           )}
         </button>
       )}

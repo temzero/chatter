@@ -110,7 +110,7 @@ const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
                   ? "videocam"
                   : "call"
               }
-              className="material-symbols-outlined filled text-6xl flex items-center justify-center"
+              className="material-symbols-outlined filled text-6xl! flex items-center justify-center"
               {...callAnimations.outgoingActionButton(isHovering)}
             >
               {isHovering

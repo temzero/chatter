@@ -82,7 +82,7 @@ const SidebarSearch: React.FC = () => {
           onSearch={handleSearch}
         />
         <span
-          className="material-symbols-outlined text-2xl opacity-60 hover:opacity-100 p-2 cursor-pointer"
+          className="material-symbols-outlined text-2xl! opacity-60 hover:opacity-100 p-2 cursor-pointer"
           onClick={() => setSidebar(SidebarMode.DEFAULT)}
         >
           close
@@ -101,7 +101,7 @@ const SidebarSearch: React.FC = () => {
               className={clsx(
                 "material-symbols-outlined",
                 type === selectedType && "filled",
-                type === ChatType.GROUP && "text-[2.1rem]"
+                type === ChatType.GROUP && "text-[2.1rem]!"
               )}
             >
               {getTypeIcon(type)}
@@ -116,7 +116,7 @@ const SidebarSearch: React.FC = () => {
           <ChatList chatIds={filteredChatIds} />
         ) : (
           <div className="flex flex-col items-center justify-center my-auto opacity-40 py-10">
-            <i className="material-symbols-outlined text-6xl">search_off</i>
+            <i className="material-symbols-outlined text-6xl!">search_off</i>
             <p>
               {searchTerm
                 ? t("common.messages.no_result")

@@ -104,11 +104,11 @@ const SidebarProfileEdit: React.FC = () => {
           disabled={isSubmitting}
         >
           {isSubmitting ? (
-            <i className="material-symbols-outlined text-3xl animate-spin">
+            <i className="material-symbols-outlined text-3xl! animate-spin">
               progress_activity
             </i>
           ) : (
-            <i className="material-symbols-outlined text-3xl">check</i>
+            <i className="material-symbols-outlined text-3xl!">check</i>
           )}
         </button>
       )}

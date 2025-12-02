@@ -29,7 +29,7 @@ export class EnvConfig {
   static validate() {
     const missing: string[] = [];
 
-    if (!this.apiUrl) missing.push("VITE_API_URL");
+    if (!this.apiUrl) missing.push("VITE_SERVER_URL");
 
     if (!this.supabase.url) missing.push("VITE_SUPABASE_URL");
     if (!this.supabase.anonKey) missing.push("VITE_SUPABASE_ANON_KEY");

@@ -133,7 +133,7 @@ const SidebarFriendRequests: React.FC = () => {
               })
             ) : (
               <div className="flex flex-col items-center justify-center mt-8 opacity-60">
-                <i className="material-symbols-outlined text-6xl mb-4">
+                <i className="material-symbols-outlined text-6xl! mb-4">
                   person_add
                 </i>
                 <p>
@@ -194,7 +194,7 @@ const SidebarFriendRequests: React.FC = () => {
             })
           ) : (
             <div className="flex flex-col items-center justify-center mt-8 opacity-60">
-              <i className="material-symbols-outlined text-6xl mb-4">send</i>
+              <i className="material-symbols-outlined text-6xl! mb-4">send</i>
               <p>{t("sidebar_friend_requests.messages.no_sent_requests")}</p>
             </div>
           )}

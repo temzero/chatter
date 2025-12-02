@@ -7,6 +7,7 @@ import { FriendshipService } from '../friendship/friendship.service';
 import { BootstrapResponse } from '@shared/types/responses/bootstrap.response';
 import { PaginationResponse } from '@shared/types/responses/pagination.response';
 import { ChatDataResponseDto } from './dto/chat-data-response.dto';
+import { CallService } from '../call/call.service';
 
 @Injectable()
 export class BootstrapService {
@@ -16,6 +17,7 @@ export class BootstrapService {
     private readonly messageService: MessageService,
     private readonly folderService: FolderService,
     private readonly friendshipService: FriendshipService,
+    private readonly callService: CallService,
   ) {}
 
   async getAppInitiationData(userId: string): Promise<BootstrapResponse> {
@@ -25,7 +27,7 @@ export class BootstrapService {
     const FOLDER_LIMIT = 20;
     const FRIEND_REQUEST_LIMIT = 50;
 
-    const [chatData, folderData, friendRequestData] = await Promise.all([
+    const [chatData, folderData, friendRequestData, pendingCall] = await Promise.all([
       this.getInitialChatsWithData(
         userId,
         CHAT_LIMIT,
@@ -36,9 +38,10 @@ export class BootstrapService {
       this.friendshipService.getPendingRequests(userId, {
         limit: FRIEND_REQUEST_LIMIT,
       }),
+      this.callService.getPendingCall(userId),
     ]);
 
-    return { userId, chatData, folderData, friendRequestData };
+    return { userId, chatData, folderData, friendRequestData, pendingCall };
   }
 
   async getInitialChatsWithData(

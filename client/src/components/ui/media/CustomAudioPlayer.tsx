@@ -154,7 +154,7 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
           <i
             className={clsx(
               "material-symbols-outlined",
-              isCompact ? "text-3xl" : "text-4xl"
+              isCompact ? "text-3xl!" : "text-4xl!"
             )}
           >
             {isPlaying ? "pause_circle" : "play_circle"}
@@ -171,7 +171,7 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
                 <i
                   className={clsx(
                     "material-symbols-outlined",
-                    isCompact && "text-xl"
+                    isCompact && "text-xl!"
                   )}
                 >
                   music_note

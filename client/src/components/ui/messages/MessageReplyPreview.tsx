@@ -131,10 +131,10 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
             {isSelfReply ? (
               <span
                 className={clsx(
-                  "material-symbols-outlined text-2xl rotate-180 absolute",
+                  "material-symbols-outlined text-2xl! rotate-180 absolute",
                   {
-                    "-bottom-[16px] -right-[20px] scale-x-[-1]": isMe,
-                    "-bottom-[16px] -left-[20px]": !isMe,
+                    "-bottom-4 -right-5 scale-x-[-1]": isMe,
+                    "-bottom-4 -left-5": !isMe,
                   }
                 )}
               >
@@ -143,10 +143,10 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
             ) : (
               <span
                 className={clsx(
-                  "material-symbols-outlined text-2xl absolute rotate-180",
+                  "material-symbols-outlined text-2xl! absolute rotate-180",
                   {
-                    "-bottom-[16px] -left-[5px]": isMe,
-                    "-bottom-[16px] -right-[5px] scale-x-[-1]": !isMe,
+                    "-bottom-4 -left-[5px]": isMe,
+                    "-bottom-4 -right-[5px] scale-x-[-1]": !isMe,
                   }
                 )}
                 style={{ zIndex: 10 }}

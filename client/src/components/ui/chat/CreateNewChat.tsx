@@ -71,7 +71,7 @@ const CreateNewChat: React.FC = () => {
           >
             {user.isBlockedMe ? (
               <div className="flex-1 flex flex-col gap-2 items-center justify-center text-center text-red-500 p-6">
-                <i className="material-symbols-outlined text-8xl rotate-90 opacity-60 select-none">
+                <i className="material-symbols-outlined text-8xl! rotate-90 opacity-60 select-none">
                   block
                 </i>
                 <p>{t("sidebar_new_chat.direct.blocked_by_user_message")}</p>

@@ -48,7 +48,7 @@ const MuteChatModal: React.FC = () => {
   return (
     <div className="p-4 flex flex-col items-center justify-center">
       <h2 className="text-2xl flex items-center justify-center gap-2 font-semibold mb-4 text-yellow-500">
-        <span className="material-symbols-outlined text-3xl">
+        <span className="material-symbols-outlined text-3xl!">
           notifications_off
         </span>
         {t("modal.mute_chat.title")}

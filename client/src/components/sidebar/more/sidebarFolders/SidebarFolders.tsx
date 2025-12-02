@@ -72,7 +72,7 @@ const SidebarFolders: React.FC = () => {
           onClick={() => setSidebar(SidebarMode.NEW_FOLDER)}
           className="primary gap-2 h-8 w-full flex items-center justify-center border rounded"
         >
-          <span className="material-symbols-outlined text-3xl">
+          <span className="material-symbols-outlined text-3xl!">
             create_new_folder
           </span>
           <h2 className="flex items-center">

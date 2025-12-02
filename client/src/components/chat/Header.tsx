@@ -137,7 +137,7 @@ const Header: React.FC<ChatHeaderProps> = ({
           }}
           className="flex items-center justify-center opacity-40 hover:opacity-100 w-[--header-height] h-[--header-height] -ml-3"
         >
-          <i className="material-symbols-outlined text-2xl">arrow_back_ios</i>
+          <i className="material-symbols-outlined text-2xl!">arrow_back_ios</i>
         </button>
       )}
 
@@ -187,7 +187,7 @@ const Header: React.FC<ChatHeaderProps> = ({
                       className="hover:shadow-xl hover:border-4 hover:border-[--primary-green] hover:bg-white hover:text-[--primary-green] font-semibold flex items-center gap-1 custom-border rounded-full px-3 bg-[--primary-green] opacity-100 transition"
                     >
                       {isChannel ? "Join Broadcast" : "Join Call"}
-                      <i className="material-symbols-outlined text-3xl">
+                      <i className="material-symbols-outlined text-3xl!">
                         {isDirect && "phone"}
                         {isVideoCall && "videocam"}
                         {isChannel && "connected_tv"}
@@ -200,7 +200,7 @@ const Header: React.FC<ChatHeaderProps> = ({
                           onClick={() => startCall(chat.id)}
                           className="opacity-60 hover:opacity-100 transition"
                         >
-                          <i className="material-symbols-outlined text-3xl">
+                          <i className="material-symbols-outlined text-3xl!">
                             phone_enabled
                           </i>
                         </button>
@@ -211,7 +211,7 @@ const Header: React.FC<ChatHeaderProps> = ({
                           onClick={() => startCall(chat.id, true)}
                           className="opacity-60 hover:opacity-100 transition"
                         >
-                          <i className="material-symbols-outlined text-3xl">
+                          <i className="material-symbols-outlined text-3xl!">
                             videocam
                           </i>
                         </button>
@@ -224,7 +224,7 @@ const Header: React.FC<ChatHeaderProps> = ({
                             onClick={() => openBroadCastPreview(chat.id)}
                             className="opacity-60 hover:opacity-100 transition"
                           >
-                            <i className="material-symbols-outlined text-3xl">
+                            <i className="material-symbols-outlined text-3xl!">
                               connected_tv
                             </i>
                           </button>

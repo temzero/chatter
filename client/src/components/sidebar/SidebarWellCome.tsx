@@ -61,7 +61,7 @@ const SidebarWellCome: React.FC = () => {
             className="mt-8 w-12 h-12 rounded-full flex items-center justify-center select-none text-white bg-[--primary-green] hover:border-2 border-white/50 shadow-xl"
             onClick={() => setSidebar(SidebarMode.NEW_CHAT)}
           >
-            <i className="material-symbols-outlined text-4xl">add</i>
+            <i className="material-symbols-outlined text-4xl!">add</i>
           </button>
 
           {isCompact || (

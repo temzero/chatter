@@ -91,7 +91,7 @@ export const ChatListItemMessage: React.FC<ChatListItemMessageProps> = ({
             {getAttachmentIcons(attachments)?.map((icon, index) => (
               <i
                 key={index}
-                className="material-symbols-outlined text-base"
+                className="material-symbols-outlined text-base!"
                 aria-hidden="true"
               >
                 {icon}

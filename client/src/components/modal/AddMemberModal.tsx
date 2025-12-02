@@ -122,7 +122,7 @@ const AddMemberModal: React.FC = () => {
       className="bg-(--sidebar-color) text-(--text-color) rounded p-4 max-w-xl w-[400px] custom-border"
     >
       <h1 className="font-bold text-center text-xl mb-4 flex items-center justify-center gap-2">
-        <span className="material-symbols-outlined font-bold text-3xl">
+        <span className="material-symbols-outlined text-3xl! font-bold">
           person_add
         </span>
         {t("modal.add_member.title")}
@@ -171,7 +171,7 @@ const AddMemberModal: React.FC = () => {
           ))
         ) : (
           <div className="flex flex-col items-center justify-center my-auto opacity-40 w-full">
-            <i className="material-symbols-outlined text-6xl">search_off</i>
+            <i className="material-symbols-outlined text-6xl!">search_off</i>
             <p>{t("modal.add_member.no_contacts")}</p>
           </div>
         )}

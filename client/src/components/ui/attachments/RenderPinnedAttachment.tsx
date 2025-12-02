@@ -58,7 +58,7 @@ const RenderPinnedAttachment: React.FC<RenderPinnedAttachmentProps> = ({
       ) : attachment.type === AttachmentType.VIDEO ? (
         <>
           <div className="flex items-center justify-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full aspect-square w-8 h-8 overflow-hidden">
-            <i className="material-symbols-outlined size-xs">videocam</i>
+            <i className="material-symbols-outlined size-xs!">videocam</i>
           </div>
           {/* <p className="two-line-truncate text-xs break-words absolute bottom-0 left-1">
             {attachment.filename}
@@ -86,7 +86,7 @@ const RenderPinnedAttachment: React.FC<RenderPinnedAttachmentProps> = ({
       ) : (
         <div className="w-full h-full p-1 flex flex-col justify-between items-center">
           <div className="flex items-center justify-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full aspect-square w-8 h-8 overflow-hidden">
-            <i className="material-symbols-outlined size-xs">{icon}</i>
+            <i className="material-symbols-outlined size-xs!">{icon}</i>
           </div>
         </div>
       )}

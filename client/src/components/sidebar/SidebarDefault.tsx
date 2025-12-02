@@ -107,14 +107,14 @@ const SidebarDefault: React.FC = () => {
               className="cursor-pointer select-none nav-btn"
               onClick={() => setSidebar(SidebarMode.NEW_CHAT)}
             >
-              <i className="material-symbols-outlined text-2xl">add</i>
+              <i className="material-symbols-outlined text-2xl!">add</i>
             </a>
 
             <a
               className="cursor-pointer select-none nav-btn -ml-2"
               onClick={() => setSidebar(SidebarMode.SEARCH)}
             >
-              <i className="material-symbols-outlined text-2xl">search</i>
+              <i className="material-symbols-outlined text-2xl!">search</i>
             </a>
           </div>
         )}
