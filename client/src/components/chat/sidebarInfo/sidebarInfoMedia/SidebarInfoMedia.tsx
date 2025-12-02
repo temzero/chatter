@@ -71,7 +71,7 @@ const SidebarInfoMedia: React.FC = () => {
 
   return (
     <aside className="relative w-full h-full overflow-hidden flex flex-col">
-      <header className="flex p-4 w-full items-center min-h-[var(--header-height)] custom-border-b">
+      <header className="flex p-4 w-full items-center min-h-(--header-height) custom-border-b">
         <h1 className="text-xl font-semibold">
           {t("sidebar_info.media_files.title")}
         </h1>

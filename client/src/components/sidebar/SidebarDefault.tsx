@@ -81,7 +81,7 @@ const SidebarDefault: React.FC = () => {
     >
       <header className="relative flex w-full items-center h-(--header-height) justify-between">
         <motion.a
-          className="flex items-center cursor-pointer -ml-[64px]"
+          className="flex items-center cursor-pointer -ml-16"
           onClick={() => setSidebar(SidebarMode.MORE)}
           whileHover={{ x: 33 }}
           transition={{ type: "spring", stiffness: 600, damping: 30 }}

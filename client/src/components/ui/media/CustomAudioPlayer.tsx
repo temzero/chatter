@@ -62,11 +62,11 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
     const [currentTime, setCurrentTime] = useState(0);
-    const durationRef = useRef(0);
+    const [duration, setDuration] = useState(0); // Changed from useRef to useState
 
     const handleLoadedMetadata = () => {
       if (audioRef.current) {
-        durationRef.current = audioRef.current.duration;
+        setDuration(audioRef.current.duration); // Use setState instead of ref assignment
         handleTimeUpdate(); // update progress and currentTime after duration is known
       }
     };
@@ -126,14 +126,14 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
     const handleTimeUpdate = () => {
       if (!audioRef.current) return;
       const current = audioRef.current.currentTime;
-      const dur = audioRef.current.duration || durationRef.current;
+      const dur = audioRef.current.duration || duration; // Use state instead of ref
       setCurrentTime(current);
       setProgress((current / dur) * 100);
     };
 
     const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (audioRef.current) {
-        const newTime = (Number(e.target.value) / 100) * durationRef.current;
+        const newTime = (Number(e.target.value) / 100) * duration; // Use state instead of ref
         audioRef.current.currentTime = newTime;
         setCurrentTime(newTime);
         setProgress(Number(e.target.value));
@@ -218,7 +218,7 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
                     <span className="px-0.5">/</span>
                   </span>
                 )}
-                {durationRef.current > 0 && formatDuration(durationRef.current)}
+                {duration > 0 && formatDuration(duration)}
               </div>
             </div>
           )}

@@ -34,7 +34,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
             : type === "contact"
             ? "h-12 w-12 rounded-[30px]"
             : type === "call"
-            ? "h-14 w-14 rounded-[16px]"
+            ? "h-14 w-14 rounded-2xl"
             : "h-16 w-16 rounded-xl"
         }`}
       >

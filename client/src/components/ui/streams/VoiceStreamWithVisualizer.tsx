@@ -88,7 +88,7 @@ export const VoiceStreamWithVisualizer = ({
             width={visualizerWidth}
             height={visualizerHeight}
             barColor={color}
-            className="w-full h-[32px] opacity-40"
+            className="w-full h-8 opacity-40"
           />
         ))}
     </div>

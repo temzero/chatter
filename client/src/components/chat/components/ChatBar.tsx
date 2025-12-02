@@ -247,7 +247,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
             disabled={!chatId}
           />
 
-          <div className="flex items-center justify-between gap-2 h-[24px]">
+          <div className="flex items-center justify-between gap-2 h-6">
             {chatId && (
               <>
                 <div className="flex gap-1 items-center">

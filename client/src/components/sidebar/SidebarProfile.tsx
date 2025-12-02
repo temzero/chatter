@@ -47,7 +47,7 @@ const SidebarProfile: React.FC = () => {
 
           {!isCompact && (
             <>
-              <p className="text-sm text-center font-light opacity-80 w-full min-w-[240px] text-ellipsis">
+              <p className="text-sm text-center font-light opacity-80 w-full min-w-60 text-ellipsis">
                 {currentUser?.bio || ""}
               </p>
 

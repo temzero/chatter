@@ -10,7 +10,7 @@ import { PaginationResponse } from '@shared/types/responses/pagination.response'
 import { AttachmentType } from '@shared/types/enums/attachment-type.enum';
 import { plainToInstance } from 'class-transformer';
 import { Message } from '../message/entities/message.entity';
-import { SupabaseService } from '../superbase/supabaseService';
+import { SupabaseService } from '../superbase/supabase.service';
 import { mapAttachmentsToAttachmentResDto } from './mappers/attachment.mapper';
 
 @Injectable()

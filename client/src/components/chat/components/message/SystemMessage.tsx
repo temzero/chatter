@@ -78,7 +78,7 @@ const SystemMessage = ({
           <img
             src={content.newValue}
             alt="Chat Avatar"
-            className="aspect-square w-[200px] h-[200px] rounded-[32px] border-4 border-[--border-color]"
+            className="aspect-square w-[200px] h-[200px] rounded-4xl border-4 border-[--border-color]"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.style.display = "none";

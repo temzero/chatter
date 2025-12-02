@@ -27,7 +27,7 @@ const OpenAttachmentBtn: React.FC = () => {
           ease: "easeOut", // Quick acceleration, smooth stop
         },
       }}
-      className="absolute -bottom-[36px] left-0 flex flex-col border-2 border-b-0 border-[--border-color] rounded-t-xl overflow-hidden w-full opacity-60 select-none"
+      className="absolute -bottom-9 left-0 flex flex-col border-2 border-b-0 border-[--border-color] rounded-t-xl overflow-hidden w-full opacity-60 select-none"
     >
       <div
         className="flex flex-col p-1 pb-10 items-center justify-between w-full cursor-pointer shadow-xl hover:bg-linear-to-b from-[--hover-color] to-transparent"

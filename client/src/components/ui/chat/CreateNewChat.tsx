@@ -148,7 +148,7 @@ const CreateNewChat: React.FC = () => {
                     {/* Unblock button takes priority when user is blocked */}
                     {user.isBlockedByMe ? (
                       <button
-                        className="w-full py-1 flex gap-1 items-center justify-center hover:bg-(--primary-green) bg-red-500 hover:bg-red-600 text-white"
+                        className="w-full py-1 flex gap-1 items-center justify-center hover:bg-(--primary-green) bg-red-500 text-white"
                         // onClick={() => handleUnblock(user.id, user.firstName)}
                         onClick={() =>
                           openModal(ModalType.UNBLOCK_USER, {

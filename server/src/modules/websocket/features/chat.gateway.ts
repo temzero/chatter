@@ -16,7 +16,7 @@ import { Message } from '@/modules/message/entities/message.entity';
 import { ChatEvent } from '@shared/types/enums/websocket-events.enum';
 import { WebsocketNotificationService } from '../services/websocket-notification.service';
 import { WebsocketConnectionService } from '../services/websocket-connection.service';
-import { SupabaseService } from '@/modules/superbase/supabaseService';
+import { SupabaseService } from '@/modules/superbase/supabase.service';
 import { ChatMember } from '@/modules/chat-member/entities/chat-member.entity';
 
 @WebSocketGateway()
