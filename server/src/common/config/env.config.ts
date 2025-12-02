@@ -9,10 +9,6 @@ export class EnvConfig {
     return process.env.CLIENT_URL || '';
   }
 
-  static get serverUrl(): string {
-    return process.env.SERVER_URL || '';
-  }
-
   static get parseLimit(): string {
     return process.env.BODY_PARSER_LIMIT || '100mb';
   }

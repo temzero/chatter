@@ -9,7 +9,6 @@ export function testEnvHelper() {
   console.log('📱 APP CONFIGURATION:');
   console.log('   NODE_ENV:', EnvConfig.nodeEnv);
   console.log('   Client URL:', EnvConfig.clientUrl || '❌ NOT SET');
-  console.log('   Server URL:', EnvConfig.serverUrl || '❌ NOT SET');
   console.log('   Is Development:', EnvConfig.isDev());
   console.log('   Is Production:', EnvConfig.isProd());
   console.log('');
@@ -96,7 +95,6 @@ export function testEnvHelper() {
   const envVars = [
     'NODE_ENV',
     'CLIENT_URL',
-    'SERVER_URL',
     'POSTGRES_HOST',
     'POSTGRES_USER',
     'POSTGRES_PASSWORD',
