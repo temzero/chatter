@@ -302,7 +302,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
               animate={{ opacity: 1, scale: 1 }}
             >
               <button
-                className="aspect-square overflow-hidden rounded-full opacity-70 hover:opacity-100 hover:bg-red-500 ml-2 mb-1.5"
+                className="aspect-square overflow-hidden rounded-full! opacity-70 hover:opacity-100 hover:bg-red-500 ml-2 mb-1.5"
                 onClick={closeModal}
               >
                 <span className="material-symbols-outlined">close</span>

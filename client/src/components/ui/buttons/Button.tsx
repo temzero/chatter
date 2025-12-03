@@ -74,7 +74,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       "font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
     const widthClass = fullWidth ? "w-full" : "";
     const iconOnly = icon && !children;
-    const roundedClass = isRoundedFull ? "rounded-full" : "rounded-md";
+    const roundedClass = isRoundedFull ? "rounded-full!" : "rounded-md";
     const iconSize = iconSizeMap[size];
 
     return (

@@ -75,11 +75,9 @@ const SidebarProfile: React.FC = () => {
                     {!currentUser?.emailVerified && (
                       <div
                         title={t("common.messages.not_verified")}
-                        className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full cursor-pointer bg-yellow-500 hover:scale-125 transition-all"
+                        className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full! cursor-pointer bg-yellow-500 hover:scale-125 transition-all"
                       >
-                        <span className="material-symbols-outlined">
-                          error
-                        </span>
+                        <span className="material-symbols-outlined">error</span>
                       </div>
                     )}
                   </div>

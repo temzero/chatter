@@ -36,7 +36,7 @@ const ChatMembersEdit = () => {
           {t("sidebar_info.group_edit.members")} ({activeMembers.length})
         </h1>
         <button
-          className="flex items-center rounded-full p-2 cursor-pointer opacity-70 hover:opacity-80 h-10 w-10 hover:bg-(--hover-color)"
+          className="flex items-center rounded-full! p-2 cursor-pointer opacity-70 hover:opacity-80 h-10 w-10 hover:bg-(--hover-color)"
           onClick={() => setSidebarInfo(SidebarInfoMode.DEFAULT)}
           aria-label="Close editor"
         >

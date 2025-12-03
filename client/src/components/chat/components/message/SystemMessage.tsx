@@ -60,7 +60,7 @@ const SystemMessage = ({
       id={`message-${messageId}`}
       onContextMenu={handleContextMenu}
       className={clsx(
-        "cursor-pointer rounded-full mb-2 px-1 mx-auto flex items-center justify-center",
+        "cursor-pointer rounded-full! mb-2 px-1 mx-auto flex items-center justify-center",
         {
           "border-2 border-red-500/50 bg-(--background-color)":
             message.isImportant,

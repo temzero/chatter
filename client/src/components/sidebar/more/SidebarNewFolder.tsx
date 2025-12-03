@@ -130,7 +130,7 @@ const SidebarNewFolder: React.FC = () => {
               <button
                 key={color ?? "none"}
                 onClick={() => setSelectedColor(color)}
-                className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${
+                className={`w-6 h-6 rounded-full! flex items-center justify-center text-sm font-bold ${
                   selectedColor === color
                     ? "ring-4 -ring-offset-4 ring-offset-(--sidebar-color) ring-(--border-color)"
                     : ""
@@ -201,7 +201,7 @@ const SidebarNewFolder: React.FC = () => {
             />
 
             {selectedChats.length > 0 && (
-              <div className="flex justify-between items-center p-1 px-2 bg-(--border-color) rounded-full">
+              <div className="flex justify-between items-center p-1 px-2 bg-(--border-color) rounded-full!">
                 <h2 className="italic">
                   {t(
                     "sidebar_folders.new_folder.chat_selection.selected_count",

@@ -45,7 +45,7 @@ const AttachmentImportedPreview: React.FC<AttachmentImportedPreviewProps> = ({
               />
             ) : type === "video" ? (
               <div className={`${baseClass} relative overflow-hidden`}>
-                <div className="flex items-center justify-center absolute top-1 left-1 rounded-full backdrop-blur-lg aspect-square w-8 h-8 overflow-hidden">
+                <div className="flex items-center justify-center absolute top-1 left-1 rounded-full! backdrop-blur-lg aspect-square w-8 h-8 overflow-hidden">
                   <i className="material-symbols-outlined">videocam</i>
                 </div>
                 <p className={`${textClass} absolute bottom-0 left-1`}>

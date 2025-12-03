@@ -108,7 +108,7 @@ const EmojiPicker = ({ onSelect }: CustomEmojiPickerProps) => {
       <motion.a
         whileTap={{ scale: 0.88 }}
         onClick={() => setIsOpen(!isOpen)}
-        className={`hover:opacity-90 rounded-full cursor-pointer flex items-center select-none focus:outline-none ${
+        className={`hover:opacity-90 rounded-full! cursor-pointer flex items-center select-none focus:outline-none ${
           isOpen ? "bg-(--border-color) opacity-100" : "opacity-50"
         }`}
         aria-label="Open emoji picker"

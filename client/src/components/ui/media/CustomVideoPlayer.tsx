@@ -200,7 +200,7 @@ const CustomVideoPlayer = ({
           onClick={onOpenModal}
         >
           <button
-            className="  bg-black/70 rounded-full opacity-70 hover:opacity-100 hover:scale-125 transition-all"
+            className="  bg-black/70 rounded-full! opacity-70 hover:opacity-100 hover:scale-125 transition-all"
             onClick={(e) => {
               e.stopPropagation();
               handleClick(e);
@@ -223,7 +223,7 @@ const CustomVideoPlayer = ({
       {/* Mute button */}
       {previewMode && isPlaying && (
         <button
-          className="absolute bottom-1 left-1 bg-black/50 text-white px-1 rounded-full hover:bg-black/70 transition"
+          className="absolute bottom-1 left-1 bg-black/50 text-white px-1 rounded-full! hover:bg-black/70 transition"
           onClick={(e) => {
             e.stopPropagation();
             toggleLocalVoice();
@@ -235,7 +235,9 @@ const CustomVideoPlayer = ({
               volume_off
             </span>
           ) : (
-            <span className="material-symbols-outlined text-lg!">volume_up</span>
+            <span className="material-symbols-outlined text-lg!">
+              volume_up
+            </span>
           )}
         </button>
       )}

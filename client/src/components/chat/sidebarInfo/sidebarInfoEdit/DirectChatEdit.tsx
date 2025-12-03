@@ -109,14 +109,14 @@ const DirectChatEdit = () => {
         <div className="flex gap-1">
           {hasChanges && (
             <button
-              className="flex items-center justify-center rounded-full cursor-pointer hover:opacity-100 text-green-400 h-10 w-10 hover:bg-green-500 hover:text-white"
+              className="flex items-center justify-center rounded-full! cursor-pointer hover:opacity-100 text-green-400 h-10 w-10 hover:bg-green-500 hover:text-white"
               onClick={handleSubmit}
             >
               <i className="material-symbols-outlined text-3xl!">check</i>
             </button>
           )}
           <button
-            className="flex items-center rounded-full p-2 cursor-pointer opacity-70 hover:opacity-80 h-10 w-10 hover:bg-(--hover-color)"
+            className="flex items-center rounded-full! p-2 cursor-pointer opacity-70 hover:opacity-80 h-10 w-10 hover:bg-(--hover-color)"
             onClick={() => setSidebarInfo(SidebarInfoMode.DEFAULT)}
           >
             <i className="material-symbols-outlined">close</i>

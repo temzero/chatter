@@ -178,13 +178,13 @@ const Header: React.FC<ChatHeaderProps> = ({
             <MessageSearchBar />
           ) : (
             <div className="flex items-center gap-1 select-none">
-              <div className="flex items-center cursor-pointer rounded-full p-1">
+              <div className="flex items-center cursor-pointer rounded-full! p-1">
                 {!isBlocked &&
                   !isBlockedByMe &&
                   (isCalling ? (
                     <button
                       onClick={handleJoinCall}
-                      className="hover:shadow-xl hover:border-4 hover:border-(--primary-green) hover:bg-white hover:text-(--primary-green) font-semibold flex items-center gap-1 custom-border rounded-full px-3 bg-(--primary-green) opacity-100 transition"
+                      className="hover:shadow-xl hover:border-4 hover:border-(--primary-green) hover:bg-white hover:text-(--primary-green) font-semibold flex items-center gap-1 custom-border rounded-full! px-3 bg-(--primary-green) opacity-100 transition"
                     >
                       {isChannel ? "Join Broadcast" : "Join Call"}
                       <i className="material-symbols-outlined text-3xl!">

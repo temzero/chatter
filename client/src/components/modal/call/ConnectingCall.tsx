@@ -25,7 +25,7 @@ const ConnectingCall = ({ chat }: { chat: ChatResponse }) => {
       {/* Optional: hang up button */}
       <button
         onClick={() => useCallStore.getState().endCall()}
-        className="mt-6 px-6 py-3 hover:bg-red-500 rounded-full flex items-center gap-2"
+        className="mt-6 px-6 py-3 hover:bg-red-500 rounded-full! flex items-center gap-2"
       >
         {t("common.actions.cancel")}
       </button>

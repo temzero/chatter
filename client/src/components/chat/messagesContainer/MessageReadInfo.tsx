@@ -108,7 +108,7 @@ export const MessageReadInfo: React.FC<MessageReadInfoProps> = React.memo(
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className={`w-${avatarSize} aspect-square p-2 rounded-full bg-(--input-border-color) text-xs flex items-center justify-center text-white`}
+            className={`w-${avatarSize} aspect-square p-2 rounded-full! bg-(--input-border-color) text-xs flex items-center justify-center text-white`}
             style={{ width: avatarSize, height: avatarSize }}
           >
             +{extraCount}

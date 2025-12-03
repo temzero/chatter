@@ -80,7 +80,7 @@ const CreateNewChat: React.FC = () => {
               <>
                 <div className="flex-1 flex flex-col items-center justify-start gap-2 p-2 pt-4 overflow-y-auto">
                   <div
-                    className={`border rounded-full hover:shadow-xl hover:scale-110 transition-all ${
+                    className={`border rounded-full! hover:shadow-xl hover:scale-110 transition-all ${
                       isUserOnline ? "border-2 border-(--primary-green)" : ""
                     }`}
                   >

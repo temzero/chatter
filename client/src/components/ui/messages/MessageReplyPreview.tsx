@@ -43,14 +43,13 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
   if (!attachments) {
     attachments = getMessageAttachments(replyMessage.chatId ,replyMessage.id);
   }
-  console.log("replyMessage attachments", attachments);
   const attachmentLength = attachments?.length || 0;
 
   return (
     <div
       onClick={closeModal}
       className={clsx(
-        "relative flex -mb-2 mx-3 text-xs w-full opacity-60 hover:opacity-90",
+        "relative flex -mb-2 mx-5 text-xs opacity-60 hover:opacity-90",
         {
           "opacity-30": isHidden,
           "max-w-[50%]": attachmentLength === 1,

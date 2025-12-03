@@ -217,7 +217,7 @@ export const GroupAvatarLayout: React.FC<{
             return (
               <div
                 key={member.id ?? idx}
-                className="relative flex items-center justify-center overflow-hidden rounded-full w-full h-full"
+                className="relative flex items-center justify-center overflow-hidden rounded-full! w-full h-full"
               >
                 <Avatar
                   avatarUrl={member.avatarUrl}
@@ -226,7 +226,7 @@ export const GroupAvatarLayout: React.FC<{
                   textSize="text-xs"
                 />
                 {isLastAndMore && (
-                  <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center rounded-full text-white text-xl font-bold">
+                  <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center rounded-full! text-white text-xl font-bold">
                     ...
                   </div>
                 )}

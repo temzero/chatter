@@ -78,7 +78,7 @@ export const CallActionButton: React.FC<CallActionButtonProps> = ({
     <div className="relative flex items-center justify-center my-12">
       {isDragging && (
         <motion.div
-          className="absolute rounded-full pointer-events-none border-2"
+          className="absolute rounded-full! pointer-events-none border-2"
           style={{
             borderColor: boundaryColor,
             width: `${DRAG_THRESHOLD * 2}px`,
@@ -95,7 +95,7 @@ export const CallActionButton: React.FC<CallActionButtonProps> = ({
         style={{ y, backgroundColor: buttonColor, zIndex: 3 }}
         onDragStart={() => setIsDragging(true)}
         onDragEnd={handleDragEnd}
-        className="relative w-24 h-24 rounded-full flex items-center justify-center cursor-grab select-none shadow-xl custom-border"
+        className="relative w-24 h-24 rounded-full! flex items-center justify-center cursor-grab select-none shadow-xl custom-border"
       >
         <AnimatePresence mode="wait">
           <motion.span

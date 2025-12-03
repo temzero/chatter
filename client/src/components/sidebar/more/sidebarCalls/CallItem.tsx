@@ -48,7 +48,7 @@ const CallItem: React.FC<CallItemProps> = ({ call, isCaller, onDelete }) => {
   };
 
   const roundedClass =
-    call.chat.type === ChatType.DIRECT ? "rounded-full" : "rounded-2xl";
+    call.chat.type === ChatType.DIRECT ? "rounded-full!" : "rounded-2xl";
 
   const isChannel = call.chat.type === ChatType.CHANNEL;
 
@@ -86,7 +86,7 @@ const CallItem: React.FC<CallItemProps> = ({ call, isCaller, onDelete }) => {
               e.stopPropagation();
               onDelete?.();
             }}
-            className={`w-8 h-8 flex items-center justify-center bg-(--sidebar-color) opacity-60 hover:opacity-100 hover:bg-red-500 rounded-full custom-border`}
+            className={`w-8 h-8 flex items-center justify-center bg-(--sidebar-color) opacity-60 hover:opacity-100 hover:bg-red-500 rounded-full! custom-border`}
             title="Delete Call"
           >
             <span className="material-symbols-outlined text-2xl!">delete</span>
@@ -95,7 +95,7 @@ const CallItem: React.FC<CallItemProps> = ({ call, isCaller, onDelete }) => {
 
         <button
           onClick={handleStartCall}
-          className="group overflow-hidden relative flex items-center justify-center rounded-full w-12 h-12 text-2xl hover:custom-border hover:bg-(--hover-color) hover:opacity-100"
+          className="group overflow-hidden relative flex items-center justify-center rounded-full! w-12 h-12 text-2xl hover:custom-border hover:bg-(--hover-color) hover:opacity-100"
         >
           <CallIcon
             status={call.status}

@@ -95,7 +95,7 @@ export const VoiceVisualizer = ({
   if (isMuted) {
     return (
       <div
-        className={`absolute rounded-full transition-transform duration-75 ${className}`}
+        className={`absolute rounded-full! transition-transform duration-75 ${className}`}
         style={{
           width: size,
           height: size,
@@ -110,7 +110,7 @@ export const VoiceVisualizer = ({
 
   return (
     <div
-      className={`absolute rounded-full transition-transform duration-75 ${className}`}
+      className={`absolute rounded-full! transition-transform duration-75 ${className}`}
       style={{
         width: size,
         height: size,

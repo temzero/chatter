@@ -27,7 +27,7 @@ export const CallControls = ({
     <div
       className="flex justify-center gap-4 p-2 
              bg-black/10 shadow-2xl border-4 border-white/5 backdrop-blur-lg 
-             rounded-full"
+             rounded-full!"
     >
       {isEnableScreenshare && (
         <Button
@@ -59,7 +59,7 @@ export const CallControls = ({
         stream={audioStream}
         onClick={() => toggleLocalVoice()}
         circleColor="var(--primary-green)"
-        className={`w-12 h-12 rounded-full ${!isMuted && "bg-black/20"} `}
+        className={`w-12 h-12 rounded-full! ${!isMuted && "bg-black/20"} `}
       />
 
       <Button

@@ -149,7 +149,7 @@
 //       >
 //         <button
 //           onClick={togglePlayPause}
-//           className="rounded-full hover:opacity-70"
+//           className="rounded-full! hover:opacity-70"
 //         >
 //           <i
 //             className={clsx(
@@ -206,7 +206,7 @@
 //                 type="range"
 //                 value={progress}
 //                 onChange={handleSeek}
-//                 className="w-full h-1 rounded-full cursor-pointer appearance-none custom-slider"
+//                 className="w-full h-1 rounded-full! cursor-pointer appearance-none custom-slider"
 //                 style={{
 //                   background: `linear-gradient(to right, var(--primary-green) ${progress}%, gray ${progress}%)`,
 //                 }}

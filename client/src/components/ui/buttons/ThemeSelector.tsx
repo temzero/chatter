@@ -23,7 +23,7 @@ const ThemeSelector = () => {
           onClick={() => setTheme(option)}
         >
           <div
-            className={`w-4 h-4 rounded-full border-2 flex items-center justify-center 
+            className={`w-4 h-4 rounded-full! border-2 flex items-center justify-center 
             ${
               themeOption === option
                 ? "border-(--primary-green)"
@@ -31,7 +31,7 @@ const ThemeSelector = () => {
             }`}
           >
             {themeOption === option && (
-              <div className="w-2 h-2 rounded-full bg-(--primary-green)"></div>
+              <div className="w-2 h-2 rounded-full! bg-(--primary-green)"></div>
             )}
           </div>
           <span>{t(`settings.theme_options.${option}`)}</span>

@@ -211,7 +211,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
                   {!isActive && unreadMessagesCount > 0 && (
                     <motion.div
                       key="unread-count"
-                      className="shrink-0 font-semibold text-white bg-red-500 rounded-full text-xs flex items-center justify-center p-1 h-4"
+                      className="shrink-0 font-semibold text-white bg-red-500 rounded-full! text-xs flex items-center justify-center p-1 h-4"
                       {...messageAnimations.messagesCount}
                     >
                       {unreadMessagesCount}

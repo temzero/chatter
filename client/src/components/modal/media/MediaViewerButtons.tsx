@@ -53,7 +53,7 @@ export const MediaViewerButtons = ({
     : "top-2 right-2";
 
   const buttonClasses =
-    "opacity-60 hover:opacity-100 rounded-full p-2 select-none focus:outline-none";
+    "opacity-60 hover:opacity-100 rounded-full! p-2 select-none focus:outline-none";
 
   return (
     <>

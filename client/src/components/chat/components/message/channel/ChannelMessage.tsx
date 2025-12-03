@@ -128,7 +128,7 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
         />
 
         <div
-          className="absolute bottom-1 right-1 text-xs italic opacity-0 group-hover:opacity-80 font-semibold bg-(--sidebar-color) p-0.5 px-1.5 rounded-full backdrop-blur-lg"
+          className="absolute bottom-1 right-1 text-xs italic opacity-0 group-hover:opacity-80 font-semibold bg-(--sidebar-color) p-0.5 px-1.5 rounded-full! backdrop-blur-lg"
           style={{ zIndex: 1 }}
         >
           {formatTime(message.createdAt)}

@@ -95,7 +95,7 @@ const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
           onClick={toggleVideoCall}
           onMouseEnter={() => setIsHovering(true)}
           onMouseLeave={() => setIsHovering(false)}
-          className="p-4 rounded-full hover:bg-(--primary-green) transition-colors relative hover:custom-border"
+          className="p-4 rounded-full! hover:bg-(--primary-green) transition-colors relative hover:custom-border"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
         >

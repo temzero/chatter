@@ -1,10 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Theme,
-  ThemeOption,
-  getSetTheme,
-  useTheme,
-} from "@/stores/themeStore";
+import { Theme, ThemeOption, getSetTheme, useTheme } from "@/stores/themeStore";
 
 const ThemeSwitcher = () => {
   const theme = useTheme();
@@ -23,7 +18,7 @@ const ThemeSwitcher = () => {
   return (
     <motion.div
       id="theme-switcher"
-      className="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer opacity-80 hover:opacity-100"
+      className="flex items-center justify-center w-10 h-10 rounded-full! cursor-pointer opacity-80 hover:opacity-100"
       onClick={toggleTheme}
       aria-label={`Toggle ${
         theme === Theme.Light ? Theme.Dark : Theme.Light

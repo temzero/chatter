@@ -183,7 +183,7 @@ const AddMemberModal: React.FC = () => {
           {getSelectedContacts().map((contact) => (
             <div key={contact.userId} className="flex items-center gap-2">
               <div
-                className="relative w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 cursor-pointer group"
+                className="relative w-8 h-8 rounded-full! flex items-center justify-center hover:opacity-80 cursor-pointer group"
                 onClick={() => handleRemoveContact(contact.userId)}
               >
                 <div className="relative">
@@ -193,7 +193,7 @@ const AddMemberModal: React.FC = () => {
                     size={8}
                     textSize="text-sm"
                   />
-                  <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full! flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <i className="material-symbols-outlined text-white">
                       close
                     </i>

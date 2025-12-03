@@ -57,7 +57,7 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
   return (
     <motion.div
       className={clsx(
-        "absolute flex bg-black/50 rounded-full custom-border",
+        "absolute flex bg-black/50 rounded-full! custom-border",
         isChannel
           ? "left-2 -bottom-3"
           : isMe && !isSystemMessage

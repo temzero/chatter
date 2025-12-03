@@ -91,7 +91,7 @@ const MessageSearchBar: React.FC = () => {
 
       <button
         onClick={handleClose}
-        className="rounded-full flex items-center justify-center w-6 h-6 -ml-2 opacity-70 hover:opacity-100 hover:bg-red-500/30"
+        className="rounded-full! flex items-center justify-center w-6 h-6 -ml-2 opacity-70 hover:opacity-100 hover:bg-red-500/30"
       >
         <span className="material-symbols-outlined">close_small</span>
       </button>

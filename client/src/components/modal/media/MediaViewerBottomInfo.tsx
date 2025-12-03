@@ -42,7 +42,7 @@ export const MediaViewerBottomInfo = ({
         {Array.from({ length: mediaLength }).map((_, index) => (
           <span
             key={index}
-            className={`w-1 h-1 rounded-full transition-all duration-300 ${
+            className={`w-1 h-1 rounded-full! transition-all duration-300 ${
               index === currentIndex ? "bg-white scale-150" : "bg-white/40"
             }`}
           />

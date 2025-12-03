@@ -225,7 +225,7 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
           <div
             id="disk"
             ref={diskRef}
-            className="relative aspect-square rounded-full overflow-hidden border-4 border-(--border-color) flex items-center justify-center text-white cursor-grab"
+            className="relative aspect-square rounded-full! overflow-hidden border-4 border-(--border-color) flex items-center justify-center text-white cursor-grab"
             style={{
               width: diskSize,
               transform: `rotate(${(state.progress / 100) * 360}deg)`,
@@ -253,7 +253,7 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
             <img
               src={cdImageUrl ?? musicDiskCover}
               alt="CD"
-              className="w-full h-full object-cover rounded-full"
+              className="w-full h-full object-cover rounded-full!"
             />
 
             {fileName && (
@@ -283,7 +283,7 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
           </div>
 
           <button
-            className="aspect-square absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full border-16 border-(--border-color)"
+            className="aspect-square absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full! border-16 border-(--border-color)"
             style={{ width: diskHoleSize, zIndex: 1 }}
             onClick={(e) => {
               e.stopPropagation();

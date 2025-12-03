@@ -71,7 +71,7 @@ const BroadcastPreviewModal = ({ chat }: { chat: ChatResponse }) => {
         {/* Header */}
         <CallHeader chat={chat} />
         <motion.p
-          className="flex items-center gap-1 opacity-60 mt-2 mb-4 bg-(--border-color) rounded-full p-1 pr-2"
+          className="flex items-center gap-1 opacity-60 mt-2 mb-4 bg-(--border-color) rounded-full! p-1 pr-2"
           {...callAnimations.titlePulse([1, 0.6, 1])}
         >
           <span className="material-symbols-outlined">info</span>
@@ -94,7 +94,7 @@ const BroadcastPreviewModal = ({ chat }: { chat: ChatResponse }) => {
 
           {/* Local Video Preview (not background) */}
           {!isMobile && isVideoEnabled && localVideoStream && (
-            <div className="h-full aspect-square rounded-full overflow-hidden custom-border z-10">
+            <div className="h-full aspect-square rounded-full! overflow-hidden custom-border z-10">
               <VideoStream stream={localVideoStream} objectCover mirror />
             </div>
           )}
@@ -127,7 +127,7 @@ const BroadcastPreviewModal = ({ chat }: { chat: ChatResponse }) => {
             stream={localVoiceStream ?? null}
             onClick={() => toggleVoice()}
             circleColor="var(--primary-green)"
-            className={`w-12 h-12 rounded-full ${
+            className={`w-12 h-12 rounded-full! ${
               isVoiceEnabled ? "bg-black/20" : ""
             }`}
           />
