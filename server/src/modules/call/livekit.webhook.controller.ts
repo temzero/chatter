@@ -35,6 +35,13 @@ export class LiveKitWebhookController {
   async handleWebhook(
     @Body(ValidateWebhookPipe) payload: LiveKitWebhookPayload,
   ) {
+    console.log('=== LiveKit Webhook Received ===');
+    console.log('Event:', payload.event);
+    console.log('Room:', payload.room?.name);
+    console.log('Participant:', payload.participant?.identity);
+    console.log('Full Payload:', JSON.stringify(payload, null, 2));
+    console.log('================================');
+
     const chatId = payload.room?.name; // LiveKit chatId is chatId
     if (!chatId) {
       console.warn('[Webhook] No room info in payload:', payload);
