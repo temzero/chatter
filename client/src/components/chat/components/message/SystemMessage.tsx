@@ -62,7 +62,7 @@ const SystemMessage = ({
       className={clsx(
         "cursor-pointer rounded-full mb-2 px-1 mx-auto flex items-center justify-center",
         {
-          "border-2 border-red-500/50 bg-[--background-color]":
+          "border-2 border-red-500/50 bg-(--background-color)":
             message.isImportant,
           "opacity-60": !isFocus,
         }
@@ -78,7 +78,7 @@ const SystemMessage = ({
           <img
             src={content.newValue}
             alt="Chat Avatar"
-            className="aspect-square w-[200px] h-[200px] rounded-4xl border-4 border-[--border-color]"
+            className="aspect-square w-[200px] h-[200px] rounded-4xl border-4 border-(--border-color)"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.style.display = "none";

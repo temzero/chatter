@@ -57,7 +57,7 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
   return (
     <motion.div
       className={clsx(
-        "message-reaction absolute flex bg-black/50 rounded-full custom-border",
+        "absolute flex bg-black/50 rounded-full custom-border",
         isChannel
           ? "left-2 -bottom-3"
           : isMe && !isSystemMessage
@@ -82,9 +82,9 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
                 damping: 28,
               }}
               className={clsx(
-                "text-sm flex items-center p-0.5 cursor-pointer",
+                "rounded-full! overflow-hidden text-sm flex items-center p-0.5 cursor-pointer",
                 {
-                  "bg-blue-600/80 rounded-full": hasMyReaction,
+                  "bg-blue-600/50": hasMyReaction,
                 }
               )}
               onClick={() => handleClick(emoji)}

@@ -99,8 +99,8 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
       const baseClasses =
         "relative flex items-center w-full h-24 gap-3 p-3 transition-all duration-300 ease-in-out custom-border-b cursor-pointer";
       const activeClasses = isActive
-        ? "bg-[var(--active-chat-color)]"
-        : "hover:bg-[var(--hover-color)]";
+        ? "bg-(--active-chat-color)"
+        : "hover:bg-(--hover-color)";
       return `${baseClasses} ${activeClasses}`;
     };
 

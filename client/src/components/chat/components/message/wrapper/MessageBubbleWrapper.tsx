@@ -20,7 +20,6 @@ const MessageBubbleWrapper: React.FC<MessageBubbleWrapperProps> = ({
   message,
   isMe,
   isRelyToThisMessage,
-  attachmentLength,
   children,
   className,
   onClick,
@@ -37,7 +36,6 @@ const MessageBubbleWrapper: React.FC<MessageBubbleWrapperProps> = ({
           "self-message ml-auto": isMe,
           "message-bubble-reply": isRelyToThisMessage,
           "opacity-60 border-2 border-red-500": isFailed,
-          "w-[70%]": attachmentLength === 1,
           "cursor-pointer": !!onClick,
         },
         className

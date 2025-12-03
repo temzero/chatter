@@ -71,7 +71,7 @@ const BroadcastPreviewModal = ({ chat }: { chat: ChatResponse }) => {
         {/* Header */}
         <CallHeader chat={chat} />
         <motion.p
-          className="flex items-center gap-1 opacity-60 mt-2 mb-4 bg-[--border-color] rounded-full p-1 pr-2"
+          className="flex items-center gap-1 opacity-60 mt-2 mb-4 bg-(--border-color) rounded-full p-1 pr-2"
           {...callAnimations.titlePulse([1, 0.6, 1])}
         >
           <span className="material-symbols-outlined">info</span>
@@ -104,7 +104,7 @@ const BroadcastPreviewModal = ({ chat }: { chat: ChatResponse }) => {
           <Button
             variant="ghost"
             className={`w-12 h-12 bg-black/20 ${
-              isScreenEnabled ? "bg-[--primary-green]!" : ""
+              isScreenEnabled ? "bg-(--primary-green)!" : ""
             }`}
             icon={isScreenEnabled ? "tv" : "tv_off"}
             isIconFilled={isScreenEnabled}
@@ -114,7 +114,7 @@ const BroadcastPreviewModal = ({ chat }: { chat: ChatResponse }) => {
           <Button
             variant="ghost"
             className={`w-12 h-12 bg-black/20 ${
-              isVideoEnabled ? "bg-[--primary-green]!" : ""
+              isVideoEnabled ? "bg-(--primary-green)!" : ""
             }`}
             icon={isVideoEnabled ? "videocam" : "videocam_off"}
             isIconFilled={isVideoEnabled}

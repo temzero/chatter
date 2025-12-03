@@ -36,14 +36,14 @@ export const MessageHorizontalPreview: React.FC<
 
   const messageRef = useRef<HTMLDivElement | null>(null);
 
-  const containerClass = clsx("flex items-center gap-2", {
-    "bg-[--message-color] py-1 px-2 rounded": isBubble,
-    "bg-[--primary-green]": isBubble && isMe,
+  const containerClass = clsx("flex items-center", {
+    "bg-(--message-color) py-1 px-2 rounded": isBubble,
+    "bg-(--primary-green)": isBubble && isMe,
   });
 
   const nestedMessageClass = clsx("flex gap-2 items-center", {
-    "bg-[--message-color] p-1 rounded": isBubble,
-    "bg-[--primary-green]": isBubble && isForwardedFromMe,
+    "bg-(--message-color) p-1 rounded": isBubble,
+    "bg-(--primary-green)": isBubble && isForwardedFromMe,
   });
 
   const messageTextClass = clsx("overflow-hidden", {

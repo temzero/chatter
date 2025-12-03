@@ -130,7 +130,7 @@ const GroupChat: React.FC<GroupChatProps> = ({ activeChat, activeMembers }) => {
         )}
 
         {activeMembers?.length > 0 && (
-          <div className="flex flex-col rounded overflow-hidden border-2 border-[--border-color] w-full">
+          <div className="flex flex-col rounded overflow-hidden border-2 border-(--border-color) w-full">
             {/* Display all members grouped by role */}
             {sortedGroups.map(([role, members]) => (
               <div key={role}>

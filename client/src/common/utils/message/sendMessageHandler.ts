@@ -57,6 +57,14 @@ export async function handleSendMessage({
 }) {
   const currentUserId = getCurrentUserId();
 
+  let replyToMessage = null;
+  if (replyToMessageId) {
+    replyToMessage = useMessageStore
+      .getState()
+      .getMessageById(replyToMessageId);
+    console.log("replyToMessage", replyToMessage);
+  }
+
   if (!currentUserId || !chatId || !myMemberId) {
     console.error("Unable to send message — user not authenticated.");
     return;
@@ -98,7 +106,7 @@ export async function handleSendMessage({
     isPinned: false,
     pinnedAt: null,
     replyToMessageId: replyToMessageId || null,
-    replyToMessage: null,
+    replyToMessage: replyToMessage || null,
     replyCount: 0,
     forwardedFromMessageId: null,
     forwardedFromMessage: null,

@@ -57,7 +57,7 @@ const MessageSearchBar: React.FC = () => {
 
   return (
     <div
-      className="border-4 border-[--input-border-color] p-1 rounded flex items-center gap-1 w-full"
+      className="border-4 border-(--input-border-color) p-1 rounded flex items-center gap-1 w-full"
       onClick={handleClick}
     >
       <span className="material-symbols-outlined select-none">

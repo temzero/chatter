@@ -135,7 +135,7 @@ const Header: React.FC<ChatHeaderProps> = ({
             e.stopPropagation();
             handleGoHome();
           }}
-          className="flex items-center justify-center opacity-40 hover:opacity-100 w-[--header-height] h-[--header-height] -ml-3"
+          className="flex items-center justify-center opacity-40 hover:opacity-100 w-(--header-height) h-(--header-height) -ml-3"
         >
           <i className="material-symbols-outlined text-2xl!">arrow_back_ios</i>
         </button>
@@ -143,7 +143,7 @@ const Header: React.FC<ChatHeaderProps> = ({
 
       <motion.div
         key={chat.id}
-        className="flex gap-3 items-center cursor-pointer hover:text-[--primary-green]"
+        className="flex gap-3 items-center cursor-pointer hover:text-(--primary-green)"
         initial={{ opacity: 0.6, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0.6, scale: 0.9 }}
@@ -184,7 +184,7 @@ const Header: React.FC<ChatHeaderProps> = ({
                   (isCalling ? (
                     <button
                       onClick={handleJoinCall}
-                      className="hover:shadow-xl hover:border-4 hover:border-[--primary-green] hover:bg-white hover:text-[--primary-green] font-semibold flex items-center gap-1 custom-border rounded-full px-3 bg-[--primary-green] opacity-100 transition"
+                      className="hover:shadow-xl hover:border-4 hover:border-(--primary-green) hover:bg-white hover:text-(--primary-green) font-semibold flex items-center gap-1 custom-border rounded-full px-3 bg-(--primary-green) opacity-100 transition"
                     >
                       {isChannel ? "Join Broadcast" : "Join Call"}
                       <i className="material-symbols-outlined text-3xl!">

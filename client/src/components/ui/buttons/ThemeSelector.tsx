@@ -10,8 +10,8 @@ const ThemeSelector = () => {
     `flex items-center gap-4 p-4 w-full cursor-pointer transition-colors custom-border-b
      ${
        themeOption === value
-         ? "bg-[var(--primary-green)]/20"
-         : "hover:bg-[var(--primary-green)]/10"
+         ? "bg-(--primary-green)/20"
+         : "hover:bg-(--primary-green)/10"
      }`;
 
   return (

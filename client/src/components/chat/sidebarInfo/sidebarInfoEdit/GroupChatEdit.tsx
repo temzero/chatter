@@ -213,7 +213,7 @@ const GroupChatEdit = () => {
           onClick={() => {
             setSidebarInfo(SidebarInfoMode.MEMBERS_EDIT);
           }}
-          className="mt-4 bg-[--border-color] text-lg px-3 py-1 rounded flex justify-start items-center gap-2 w-full hover:bg-[--hover-color]"
+          className="mt-4 bg-(--border-color) text-lg px-3 py-1 rounded flex justify-start items-center gap-2 w-full hover:bg-(--hover-color)"
         >
           <span className="material-symbols-outlined text-3xl!">
             group_search

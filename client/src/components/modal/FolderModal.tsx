@@ -77,7 +77,7 @@ const AddChatToFolderModal: React.FC = () => {
           {folders.map((folder) => (
             <label
               key={folder.id}
-              className={`flex items-center gap-2 p-2 rounded cursor-pointer hover:bg-[--hover-color]`}
+              className={`flex items-center gap-2 p-2 rounded cursor-pointer hover:bg-(--hover-color`}
             >
               <Checkbox
                 checked={selectedFolderIds.includes(folder.id)}

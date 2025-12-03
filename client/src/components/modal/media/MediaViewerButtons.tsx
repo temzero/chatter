@@ -62,12 +62,15 @@ export const MediaViewerButtons = ({
         style={{ zIndex: 2 }}
       >
         {isMe ? (
-          <div className="text-white font-medium">{t("common.you")}</div>
+          <div className="text-(--primary-green) font-semibold">
+            {t("common.you")}
+          </div>
         ) : (
           <div className="flex items-center gap-2">
             <Avatar
               avatarUrl={sender?.avatarUrl}
               name={sender?.displayName}
+              textSize="text-xl"
               size={8}
             />
             {!isMobile && (

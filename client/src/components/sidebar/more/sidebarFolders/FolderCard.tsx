@@ -20,7 +20,7 @@ const FolderCard: React.FC<FolderCardProps> = ({
 
   return (
     <div
-      className="flex overflow-hidden select-none border-2 border-[--border-color] hover:shadow-xl transition-all rounded cursor-pointer"
+      className="flex overflow-hidden select-none border-2 border-(--border-color) hover:shadow-xl transition-all rounded cursor-pointer"
       onClick={() => setSidebar(SidebarMode.FOLDER, { folderId: folder.id })}
       style={{
         backgroundColor: folder.color || "var(--background-color)",
@@ -30,7 +30,7 @@ const FolderCard: React.FC<FolderCardProps> = ({
       <div
         {...dragAttributes}
         {...dragListeners}
-        className="w-8 flex items-center justify-center border-r-2 border-[--sidebar-color] self-stretch hover:cursor-grab active:cursor-grabbing hover:bg-black/20 transition-all"
+        className="w-8 flex items-center justify-center border-r-2 border-(--sidebar-color) self-stretch hover:cursor-grab active:cursor-grabbing hover:bg-black/20 transition-all"
       >
         {position > 0 && <h1 className="font-bold text-xl">{position}</h1>}
       </div>

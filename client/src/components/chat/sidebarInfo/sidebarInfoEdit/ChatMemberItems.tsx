@@ -106,7 +106,7 @@ export const ChatMemberItems = ({
   };
 
   const itemClasses =
-    "flex items-center p-2 hover:bg-[var(--hover-color)] border-t border-[var(--border-color)] cursor-pointer";
+    "flex items-center p-2 hover:bg-(--hover-color) border-t border-(--border-color) cursor-pointer";
 
   const otherMembers = members.filter((m) => m.userId !== currentUserId);
   const grouped = otherMembers.reduce((acc, m) => {
@@ -126,7 +126,7 @@ export const ChatMemberItems = ({
     <div className="flex flex-col gap-3 rounded overflow-hidden w-full relative">
       {myMember && (
         <div className="custom-border rounded">
-          <div className="flex items-center gap-2 p-2 bg-[--hover-color] text-sm font-medium text-[--primary-green]">
+          <div className="flex items-center gap-2 p-2 bg-(--hover-color) text-sm font-medium text-(--primary-green)">
             <span className="material-symbols-outlined">
               {chatMemberRoleMap[myMember.role]?.icon}
             </span>
@@ -163,7 +163,7 @@ export const ChatMemberItems = ({
 
       {sortedGroups.map(([role, groupMembers]) => (
         <div key={role} className="custom-border rounded">
-          <div className="flex items-center justify-between p-2 bg-[--hover-color] text-sm font-medium">
+          <div className="flex items-center justify-between p-2 bg-(--hover-color) text-sm font-medium">
             <div className="flex items-center gap-1">
               <span className="material-symbols-outlined">
                 {chatMemberRoleMap[role as ChatMemberRole]?.icon}

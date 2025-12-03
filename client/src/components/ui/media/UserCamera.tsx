@@ -18,7 +18,7 @@ export const UserCamera = ({ videoStream, audioStream }: UserCameraProps) => {
     <div
       className={`relative group transition-all ${
         isLarge ? "w-[360px] h-[360px]" : "w-40 h-40"
-      } rounded-full overflow-hidden border-4 border-[--input-border-color] shadow-xl`}
+      } rounded-full overflow-hidden border-4 border-(--input-border-color) shadow-xl`}
     >
       <VideoStream
         stream={videoStream}

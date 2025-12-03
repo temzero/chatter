@@ -81,7 +81,7 @@ const CreateNewChat: React.FC = () => {
                 <div className="flex-1 flex flex-col items-center justify-start gap-2 p-2 pt-4 overflow-y-auto">
                   <div
                     className={`border rounded-full hover:shadow-xl hover:scale-110 transition-all ${
-                      isUserOnline ? "border-2 border-[--primary-green]" : ""
+                      isUserOnline ? "border-2 border-(--primary-green)" : ""
                     }`}
                   >
                     <Avatar
@@ -99,7 +99,7 @@ const CreateNewChat: React.FC = () => {
                     <h1 className="font-bold text-xl">
                       {user.firstName} {user.lastName}
                     </h1>
-                    {isMe && <h1 className="text-[--primary-green]">Me</h1>}
+                    {isMe && <h1 className="text-(--primary-green)">Me</h1>}
                   </div>
 
                   {user.friendshipStatus === FriendshipStatus.ACCEPTED && (

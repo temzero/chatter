@@ -57,7 +57,7 @@ const ChatMembersEdit = () => {
           {(myMember.role === ChatMemberRole.ADMIN ||
             myMember.role === ChatMemberRole.OWNER) && (
             <button
-              className="flex gap-2 justify-center items-center p-2 text-[--primary-green] w-full font-medium custom-border-t"
+              className="flex gap-2 justify-center items-center p-2 text-(--primary-green) w-full font-medium custom-border-t"
               onClick={handleOpenAddMemberModal}
             >
               <span className="material-symbols-outlined">person_add</span>

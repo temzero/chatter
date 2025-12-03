@@ -25,7 +25,7 @@ const MemberContextMenu = React.forwardRef<HTMLDivElement, ContextMenuProps>(
     const removeMember = useChatMemberStore.getState().removeChatMember;
 
     const classes =
-      "flex items-center gap-2 p-2 hover:bg-[--hover-color] cursor-pointer";
+      "flex items-center gap-2 p-2 hover:bg-(--hover-color) cursor-pointer";
 
     const isMyself = member.userId === currentUserId;
     const canManageOthers =
@@ -65,7 +65,7 @@ const MemberContextMenu = React.forwardRef<HTMLDivElement, ContextMenuProps>(
     return (
       <div
         ref={ref}
-        className="fixed bg-[--background-color] border custom-border rounded shadow-lg"
+        className="fixed bg-(--background-color) border custom-border rounded shadow-lg"
         style={{ zIndex: 999, top: `${y}px`, left: `${x}px` }}
         onContextMenu={(e: React.MouseEvent) => {
           e.preventDefault();

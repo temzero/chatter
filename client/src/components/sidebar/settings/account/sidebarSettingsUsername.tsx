@@ -180,7 +180,7 @@ const SidebarSettingsUsername: React.FC = () => {
         <button
           type="submit"
           className={`${
-            isDisabled ? "" : "text-white bg-[--primary-green]"
+            isDisabled ? "" : "text-white bg-(--primary-green)"
           } p-1 w-full`}
           disabled={isDisabled}
         >

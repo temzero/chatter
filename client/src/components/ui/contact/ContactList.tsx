@@ -17,7 +17,7 @@ const ContactList: React.FC<ChatListProps> = ({ chats, isCompact = false }) => {
   const getUserItemClass = () => {
     const baseClasses =
       "relative flex items-center w-full h-22 gap-3 p-3 transition-all duration-300 ease-in-out cursor-pointer";
-    const selectedClasses = "hover:bg-[var(--hover-color)]";
+    const selectedClasses = "hover:bg-(--hover-color)";
     return `${baseClasses} ${selectedClasses}`;
   };
 

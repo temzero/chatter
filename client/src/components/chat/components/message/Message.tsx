@@ -4,7 +4,6 @@ import { formatTime } from "@/common/utils/format/formatTime";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { MessageReactionDisplay } from "@/components/ui/messages/MessageReactionsDisplay";
-import { handleQuickReaction } from "@/common/utils/message/quickReaction";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import {
   useIsMessageFocus,
@@ -57,8 +56,6 @@ const Message: React.FC<MessageProps> = ({
     message.sender.displayName;
 
   const call = message.call;
-
-  // console.log("message.createdAt", message.createdAt);
 
   const attachments = getMessageAttachments(message.chatId, message.id);
   const attachmentLength = attachments.length;
@@ -124,13 +121,12 @@ const Message: React.FC<MessageProps> = ({
     <motion.div
       id={`message-${messageId}`}
       ref={messageRef}
-      onDoubleClick={() =>
-        message && handleQuickReaction(messageId, message.chatId)
-      }
       onContextMenu={handleContextMenu}
-      className={clsx("flex relative max-w-[60%]", {
-        "justify-end": isMe,
-        "justify-start": !isMe,
+      className={clsx("relative", {
+        "ml-auto": isMe,
+        "mr-auto": !isMe,
+        "max-w-[40%]": attachmentLength === 1,
+        "max-w-[60%]": attachmentLength !== 1,
       })}
       style={{ zIndex: isFocus || isRelyToThisMessage ? 100 : "auto" }}
       layout="position"
@@ -158,7 +154,7 @@ const Message: React.FC<MessageProps> = ({
       <div className="flex flex-col">
         <div
           className={clsx("relative flex flex-col transition-all", {
-            "scale-[1.1]": isRelyToThisMessage,
+            "scale-(1.1)": isRelyToThisMessage,
             "origin-bottom-right items-end": isMe,
             "origin-bottom-left items-start": !isMe,
           })}
@@ -180,9 +176,11 @@ const Message: React.FC<MessageProps> = ({
             isRelyToThisMessage={isRelyToThisMessage}
             attachmentLength={attachmentLength}
           >
+            {/* <div className="overflow-hidden rounded-lg"> */}
             {call ? (
               <CallMessageContent
                 call={call}
+                message={message}
                 className="justify-between p-2 pl-3"
                 iconClassName="text-3xl"
                 textClassName="font-medium"
@@ -195,27 +193,14 @@ const Message: React.FC<MessageProps> = ({
                 currentUserId={currentUserId ?? ""}
               />
             )}
+            {/* </div> */}
           </MessageBubbleWrapper>
-
           <MessageReactionDisplay
             isMe={isMe}
             currentUserId={currentUserId}
             messageId={messageId}
             chatId={message.chatId}
           />
-
-          <AnimatePresence>
-            {isFocus && !isRelyToThisMessage && contextMenuMousePos && (
-              <MessageContextMenu
-                key={messageId}
-                message={message}
-                isMe={isMe}
-                isSystemMessage={!!message.systemEvent}
-                initialMousePosition={contextMenuMousePos}
-                onClose={closeContextMenu}
-              />
-            )}
-          </AnimatePresence>
 
           {message.isPinned && (
             <div
@@ -236,6 +221,19 @@ const Message: React.FC<MessageProps> = ({
               <span className="material-symbols-outlined filled">keep</span>
             </div>
           )}
+
+          <AnimatePresence>
+            {isFocus && !isRelyToThisMessage && contextMenuMousePos && (
+              <MessageContextMenu
+                key={messageId}
+                message={message}
+                isMe={isMe}
+                isSystemMessage={!!message.systemEvent}
+                initialMousePosition={contextMenuMousePos}
+                onClose={closeContextMenu}
+              />
+            )}
+          </AnimatePresence>
         </div>
 
         {showInfo && isGroupChat && !isMe && (

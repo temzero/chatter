@@ -89,7 +89,7 @@ const BroadcastRoom = ({
     <div
       ref={containerRef}
       className={`relative w-full h-full flex flex-col items-center rounded-lg overflow-hidden text-white border-4 ${
-        isCaller ? "border-[--primary-green]" : "border-[--border-color]"
+        isCaller ? "border-(--primary-green)" : "border-(--border-color)"
       }`}
     >
       {isCaller ? (

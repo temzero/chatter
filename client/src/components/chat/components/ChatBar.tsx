@@ -222,7 +222,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
           ref={containerRef}
           id="input-container"
           className={clsx(
-            "flex gap-2 items-end w-full transition-[height] duration-200 ease-in-out",
+            "flex gap-2 items-end w-full transition-(height) duration-200 ease-in-out",
             {
               "chat-input": !replyToMessageId,
               "chat-input-reply": replyToMessageId,

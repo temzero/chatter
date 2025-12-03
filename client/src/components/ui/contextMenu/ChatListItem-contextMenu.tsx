@@ -97,7 +97,7 @@ const ChatListItemContextMenu = React.forwardRef<
   return (
     <div
       ref={ref}
-      className="fixed bg-[--background-color] border-2 border-[--border-color] rounded shadow-xl w-48"
+      className="fixed bg-(--background-color) border-2 border-(--border-color) rounded shadow-xl w-48"
       style={{ zIndex: 999, top: `${y}px`, left: `${x}px` }}
       onContextMenu={(e) => {
         e.preventDefault();
@@ -107,7 +107,7 @@ const ChatListItemContextMenu = React.forwardRef<
       {menuActions.map((action) => (
         <div
           key={action.label}
-          className={`flex items-center gap-3 p-2 hover:bg-[--hover-color] opacity-70 hover:opacity-100 cursor-pointer ${
+          className={`flex items-center gap-3 p-2 hover:bg-(--hover-color) opacity-70 hover:opacity-100 cursor-pointer ${
             action.className || ""
           }`}
           onClick={() => {

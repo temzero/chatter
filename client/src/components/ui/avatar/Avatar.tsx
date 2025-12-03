@@ -28,7 +28,7 @@ export const Avatar: React.FC<AvatarProps> = ({
     <div
       key={id}
       title={name}
-      className={`relative w-${size} h-${size} aspect-square flex items-center justify-center overflow-hidden rounded-full border-2 bg-[--input-border-color] ${
+      className={`relative w-${size} h-${size} aspect-square flex items-center justify-center overflow-hidden rounded-full border-2 bg-(--input-border-color) ${
         isBlocked ? "border-red-500/60" : "border-(--border-color)"
       } ${className}`}
       onClick={onClick}
@@ -42,7 +42,7 @@ export const Avatar: React.FC<AvatarProps> = ({
         />
       ) : nameInitial ? (
         <h1
-          className={`h-full w-full font-light flex items-center justify-center bg-[--input-color] select-none ${textSize}`}
+          className={`h-full w-full font-light flex items-center justify-center bg-(--input-color) select-none ${textSize}`}
         >
           {nameInitial}
         </h1>

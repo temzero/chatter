@@ -123,7 +123,7 @@ export const RenderModalAttachment = ({
     case AttachmentType.AUDIO:
       return (
         // <motion.div
-        //   className="max-w-md rounded-lg border-4 border-[var(--border-color)]"
+        //   className="max-w-md rounded-lg border-4 border-(--border-color)"
         //   animate={mediaViewerAnimations.rotation(rotation)}
         // >
         //   {/* <div className="p-4 custom-border-b flex items-center gap-1">

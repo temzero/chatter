@@ -132,7 +132,7 @@ const SidebarNewFolder: React.FC = () => {
                 onClick={() => setSelectedColor(color)}
                 className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${
                   selectedColor === color
-                    ? "ring-4 -ring-offset-4 ring-offset-(--sidebar-color) ring-[--border-color]"
+                    ? "ring-4 -ring-offset-4 ring-offset-(--sidebar-color) ring-(--border-color)"
                     : ""
                 }`}
                 style={{ backgroundColor: color ?? "transparent" }}
@@ -173,7 +173,7 @@ const SidebarNewFolder: React.FC = () => {
                         )
                       }
                       className={`flex-1 py-1 rounded border-2 border-(--border-color) text-sm capitalize transition-colors duration-200 ${
-                        isSelected ? "bg-[--primary-green] font-semibold" : ""
+                        isSelected ? "bg-(--primary-green) font-semibold" : ""
                       }`}
                     >
                       <span className="material-symbols-outlined opacity-50 ml-1">
@@ -201,7 +201,7 @@ const SidebarNewFolder: React.FC = () => {
             />
 
             {selectedChats.length > 0 && (
-              <div className="flex justify-between items-center p-1 px-2 bg-[--border-color] rounded-full">
+              <div className="flex justify-between items-center p-1 px-2 bg-(--border-color) rounded-full">
                 <h2 className="italic">
                   {t(
                     "sidebar_folders.new_folder.chat_selection.selected_count",
@@ -243,7 +243,7 @@ const SidebarNewFolder: React.FC = () => {
               color: selectedColor ? "black" : "var(--text-color)",
               backgroundColor: selectedColor || "",
             }}
-            className="inline-block z-10 bg-[--background-color] rounded-t-lg px-4 pt-1 pb-0 border-t-4 border-l-4 border-black/30 -mb-4 select-none"
+            className="inline-block z-10 bg-(--background-color) rounded-t-lg px-4 pt-1 pb-0 border-t-4 border-l-4 border-black/30 -mb-4 select-none"
           >
             <span className="material-symbols-outlined text-4xl! font-bold">
               {isEditMode ? "bookmark_manager" : "create_new_folder"}
@@ -254,7 +254,7 @@ const SidebarNewFolder: React.FC = () => {
               color: selectedColor ? "black" : "var(--text-color)",
               backgroundColor: selectedColor || "",
             }}
-            className="z-20 p-3 bg-[--background-color] border-t-4 border-l-4 border-black/30 shadow-4xl rounded-tr-lg"
+            className="z-20 p-3 bg-(--background-color) border-t-4 border-l-4 border-black/30 shadow-4xl rounded-tr-lg"
           >
             <div>
               <div className="mb-3">
@@ -276,7 +276,7 @@ const SidebarNewFolder: React.FC = () => {
 
             <button
               onClick={handleSubmit}
-              className="border-t-2 border-l-2 border-black/30 w-full py-2 rounded flex items-center justify-center gap-2 shadow-xl bg-[--primary-green] hover:bg-[--primary-green-dark)]"
+              className="border-t-2 border-l-2 border-black/30 w-full py-2 rounded flex items-center justify-center gap-2 shadow-xl bg-(--primary-green) hover:bg-(--primary-green-dark)"
             >
               {isEditMode
                 ? t("common.actions.save_changes")

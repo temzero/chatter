@@ -123,7 +123,7 @@ export const AvatarEdit: React.FC<AvatarEditProps> = ({
       : type === "channel"
       ? "rounded-[28px]"
       : "rounded-full",
-    "border-2 border-[var(--border-color)]",
+    "border-2 border-(--border-color)",
   ].join(" ");
 
   return (

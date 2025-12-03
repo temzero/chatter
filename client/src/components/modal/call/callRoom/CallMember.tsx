@@ -53,10 +53,10 @@ const CallMember = ({
 
   return (
     <div
-      className={`relative w-full h-full overflow-hidden bg-[--border-color] text-[--text-color] flex items-center justify-center ${className}`}
+      className={`relative w-full h-full overflow-hidden bg-(--border-color) text-(--text-color) flex items-center justify-center ${className}`}
     >
       <div
-        className="absolute inset-0 w-full h-full flex items-center justify-center bg-[--border-color]"
+        className="absolute inset-0 w-full h-full flex items-center justify-center bg-(--border-color)"
         style={{ zIndex: 0 }}
       >
         {avatarUrl && !hasVideo ? (
@@ -129,7 +129,7 @@ const CallMember = ({
               avatarUrl={avatarUrl}
               name={displayName}
               size={24}
-              className="z-10 relative bg-[--message-color]"
+              className="z-10 relative bg-(--message-color)"
             />
           </div>
 

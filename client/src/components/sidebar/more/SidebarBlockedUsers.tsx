@@ -81,7 +81,7 @@ const SidebarBlockedUsers: React.FC = () => {
                       onUnblockSuccess: () => removeBlockedUserFromList(id),
                     })
                   }
-                  className="opacity-0 custom-border p-1.5 rounded-full hover:bg-[--primary-green] hover:text-[--sidebar-color] group-hover:opacity-100 text-[--primary-green] text-sm font-semibold"
+                  className="opacity-0 custom-border p-1.5 rounded-full hover:bg-(--primary-green) hover:text-(--sidebar-color) group-hover:opacity-100 text-(--primary-green) text-sm font-semibold"
                 >
                   <span className="material-symbols-outlined">
                     lock_open_right

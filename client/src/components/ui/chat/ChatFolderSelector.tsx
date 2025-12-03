@@ -135,7 +135,7 @@ const ChatFolderSelector: React.FC<Props> = ({
       {!isCompact && canScrollLeft && (
         <button
           onClick={scrollLeft}
-          className="bg-[input-border-color] custom-border-r shadow-lg backdrop-blur-sm rounded-none flex items-center justify-center overflow-hidden h-full w-6 absolute left-0 top-0 select-none"
+          className="bg-(--input-border-color) custom-border-r shadow-lg backdrop-blur-sm rounded-none flex items-center justify-center overflow-hidden h-full w-6 absolute left-0 top-0 select-none"
           style={{ zIndex: 10 }}
         >
           <i className="material-symbols-outlined text-sm! font-bold pl-1.5">
@@ -147,7 +147,7 @@ const ChatFolderSelector: React.FC<Props> = ({
       {!isCompact && canScrollRight && (
         <button
           onClick={scrollRight}
-          className="bg-[input-border-color] custom-border-l shadow-lg backdrop-blur-sm rounded-none flex items-center justify-center overflow-hidden h-full w-6 absolute right-0 top-0 select-none"
+          className="bg-(--input-border-color) custom-border-l shadow-lg backdrop-blur-sm rounded-none flex items-center justify-center overflow-hidden h-full w-6 absolute right-0 top-0 select-none"
           style={{ zIndex: 10 }}
         >
           <i className="material-symbols-outlined text-sm! font-bold pl-0.5">

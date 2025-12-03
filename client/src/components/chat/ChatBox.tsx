@@ -70,7 +70,7 @@ const ChatBox = React.memo(() => {
                 className="backdrop-blur-xl w-full flex flex-col items-center p-1 justify-between shadow border-(--border-color)"
               >
                 <button
-                  className="text-[--primary-green] font-semibold rounded hover:text-white hover:bg-[--primary-green] px-2 py-1 text-lg"
+                  className="text-(--primary-green) font-semibold rounded hover:text-white hover:bg-(--primary-green )px-2 py-1 text-lg"
                   onClick={async () => {
                     await chatMemberService.joinChat(activeChat.id);
                     window.location.reload();

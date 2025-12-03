@@ -22,7 +22,7 @@ const AttachmentImportedPreview: React.FC<AttachmentImportedPreviewProps> = ({
   }));
 
   const baseClass =
-    "w-full h-full border-2 border-[var(--input-border-color)] rounded";
+    "w-full h-full border-2 border-(--input-border-color) rounded";
   const textClass = "two-line-truncate text-xs break-words";
 
   return (
@@ -31,7 +31,7 @@ const AttachmentImportedPreview: React.FC<AttachmentImportedPreviewProps> = ({
         {filesWithMeta.map(({ file, url, type, originalIndex }) => (
           <motion.div
             key={originalIndex}
-            className="relative w-[80px] h-[80px] group overflow-hidden"
+            className="relative w-20 h-20 group overflow-hidden"
             initial={{ opacity: 0, x: 52 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ type: "spring", stiffness: 360, damping: 28 }}

@@ -63,7 +63,7 @@ const DirectChat: React.FC<DirectChatProps> = ({
     headerIcons.push({
       icon: "lock_open_right",
       title: t("common.actions.unblock"),
-      className: "text-[--primary-green]",
+      className: "text-(--primary-green)",
       action: () =>
         openModal(ModalType.UNBLOCK_USER, {
           blockedUser: {

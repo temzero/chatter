@@ -224,12 +224,12 @@ const AddMemberModal: React.FC = () => {
                 })}
           </button>
         ) : (
-          <div className="flex items-center bg-(--input-bg) rounded w-full border-2 border-[--border-color]">
+          <div className="flex items-center bg-(--input-bg) rounded w-full border-2 border-(--border-color)">
             {primaryInviteLink ? (
               <div className="flex items-center w-full h-full overflow-hidden">
                 <motion.p
                   onClick={handleCopy}
-                  className={`h-full w-full text-sm p-1 px-2 whitespace-nowrap overflow-auto scrollbar-hide cursor-pointer hover:bg-[--hover-color] ${
+                  className={`h-full w-full text-sm p-1 px-2 whitespace-nowrap overflow-auto scrollbar-hide cursor-pointer hover:bg-(--hover-color) ${
                     copied ? "text-green-500 font-semibold" : ""
                   }`}
                   title={
@@ -248,10 +248,10 @@ const AddMemberModal: React.FC = () => {
                 {!refreshed && (
                   <button
                     title={t("modal.add_member.refresh_title")}
-                    className={`border-l-2 border-[--border-color] p-1 px-2 opacity-60 hover:opacity-100 select-none ${
+                    className={`border-l-2 border-(--border-color) p-1 px-2 opacity-60 hover:opacity-100 select-none ${
                       refreshed
                         ? "cursor-not-allowed"
-                        : "hover:bg-[--hover-color]"
+                        : "hover:bg-(--hover-color)"
                     }`}
                     onClick={handleRefreshInviteLink}
                     disabled={refreshed}
@@ -268,7 +268,7 @@ const AddMemberModal: React.FC = () => {
               </div>
             ) : (
               <button
-                className="w-full p-1 px-2 select-none hover:bg-[--hover-color] hover:text-green-400"
+                className="w-full p-1 px-2 select-none hover:bg-(--hover-color) hover:text-green-400"
                 onClick={generateInviteLink}
               >
                 <span className="material-symbols-outlined mr-1">

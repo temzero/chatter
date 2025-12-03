@@ -27,10 +27,10 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: "bg-[--primary-green] hover:bg-[--primary-green-glow] text-white",
+  primary: "bg-(--primary-green) hover:bg-(--primary-green-glow) text-white",
   secondary: "bg-gray-200 hover:bg-gray-300 text-gray-800",
-  transparent: "bg-[--input-border-color] hover:bg-gray-300 text-gray-800",
-  success: "bg-[--primary-green] hover:bg-[--primary-green-50] text-white",
+  transparent: "bg-(--input-border-color) hover:bg-gray-300 text-gray-800",
+  success: "bg-(--primary-green) hover:bg-(--primary-green-50) text-white",
   danger: "bg-red-500 hover:bg-red-600 text-white",
   ghost: "bg-transparent hover:bg-gray-100/10 text-current",
   link: "bg-transparent hover:underline text-blue-600 p-0",

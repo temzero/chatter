@@ -20,7 +20,7 @@ export const ChannelCallMessageContent: React.FC<BroadcastMessageProps> = ({
 
   return (
     <div
-      className={`w-full bg-[--message-color] flex items-center justify-between gap-3 p-2 rounded-lg shadow-sm truncate ${
+      className={`w-full bg-(--message-color) flex items-center justify-between gap-3 p-2 rounded-lg shadow-sm truncate ${
         isError && "text-red-500"
       }`}
     >

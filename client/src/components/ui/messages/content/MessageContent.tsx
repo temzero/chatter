@@ -4,6 +4,7 @@ import RenderMultipleAttachments from "@/components/ui/attachments/RenderMultipl
 import ForwardedMessagePreview from "@/components/ui/messages/ForwardMessagePreview";
 import { MessageResponse } from "@/shared/types/responses/message.response";
 import { getMessageAttachments } from "@/stores/messageAttachmentStore";
+import { handleQuickReaction } from "@/common/utils/message/quickReaction";
 
 interface MessageBubbleProps {
   message: MessageResponse;
@@ -34,7 +35,12 @@ const MessageContent: React.FC<MessageBubbleProps> = ({
 
       {/* Text Content */}
       {message.content && !isForwardMessage && (
-        <p className="wrap-break-word max-w-full cursor-pointer transition-all duration-200 shadow-xl rounded-b-xl">
+        <p
+          className="wrap-break-word max-w-full cursor-pointer transition-all duration-200 shadow-xl rounded-b-xl"
+          onDoubleClick={() =>
+            message && handleQuickReaction(message.id, message.chatId)
+          }
+        >
           {message.content}
         </p>
       )}
