@@ -13,7 +13,7 @@
     "start:prod": "node -r tsconfig-paths/register dist/main",
     "prod": "node -r tsconfig-paths/register dist/main"
   },
-   "dependencies": {
+  "dependencies": {
     "@nestjs/cli": "^11.0.14",
     "@nestjs/common": "^11.1.9",
     "@nestjs/config": "^4.0.2",
@@ -58,6 +58,7 @@
     "@swc/core": "^1.15.3",
     "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.10",
+    "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.10.1",
     "@types/nodemailer": "^7.0.4",

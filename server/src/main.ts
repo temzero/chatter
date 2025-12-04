@@ -5,7 +5,7 @@ import { EnvConfig } from './common/config/env.config';
 import { ValidationPipe } from '@nestjs/common';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { json, urlencoded } from 'express';
+import { json, urlencoded, raw } from 'express';
 import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
 
@@ -22,6 +22,9 @@ async function bootstrap() {
     });
 
     console.log('2️⃣ App created, setting up middleware...');
+
+    // RAW BODY FOR LIVEKIT WEBHOOK
+    app.use('/webhook/livekit', raw({ type: 'application/webhook+json' }));
 
     app.use(
       json({
