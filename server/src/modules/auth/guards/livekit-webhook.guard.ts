@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import * as crypto from 'crypto';
+import { EnvConfig } from '@/common/config/env.config';
 
 @Injectable()
 export class LiveKitWebhookGuard implements CanActivate {
@@ -18,7 +19,7 @@ export class LiveKitWebhookGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
 
     // Skip verification if no secret is set (for development)
-    const webhookSecret = process.env.LIVEKIT_WEBHOOK_SECRET;
+    const webhookSecret = EnvConfig.livekit.apiSecret;
     if (!webhookSecret) {
       console.warn(
         '⚠️ LIVEKIT_WEBHOOK_SECRET not set, skipping webhook verification',
