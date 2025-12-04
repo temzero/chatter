@@ -24,6 +24,20 @@ async function bootstrap() {
     console.log('2️⃣ App created, setting up middleware...');
 
     // RAW BODY FOR LIVEKIT WEBHOOK
+    app.use('/webhook/livekit', (req: any, res: any, next: any) => {
+      console.log('🚨 WEBHOOK REQUEST ARRIVED!');
+      console.log('📅 Time:', new Date().toISOString());
+      console.log('request:', req);
+      console.log('response:', res);
+      console.log('next:', next);
+      console.log('🌐 Method:', req.method);
+      console.log('🔗 URL:', req.url);
+      console.log('📋 Content-Type:', req.headers['content-type']);
+      console.log('👤 User-Agent:', req.headers['user-agent']);
+      console.log('---');
+    });
+
+    // RAW BODY FOR LIVEKIT WEBHOOK - KEEP AS IS
     app.use('/webhook/livekit', raw({ type: 'application/webhook+json' }));
 
     app.use(
