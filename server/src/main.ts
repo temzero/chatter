@@ -28,7 +28,6 @@ async function bootstrap() {
       console.log('🚨 WEBHOOK REQUEST ARRIVED!');
       console.log('📅 Time:', new Date().toISOString());
       console.log('🌐 Method:', req.method);
-      console.log('🔗 URL:', req.url);
       console.log('📋 Content-Type:', req.headers['content-type']);
 
       // Log Authorization header (masked for security)
