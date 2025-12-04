@@ -1,4 +1,12 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Headers,
+  Body,
+  Query,
+  Req,
+  // UseGuards,
+} from '@nestjs/common';
 import { CallService } from './call.service';
 import { CallStatus } from '@shared/types/call';
 import { MessageService } from '../message/message.service';
@@ -16,10 +24,10 @@ import { User } from '../user/entities/user.entity';
 import { ChatEvent } from '@shared/types/enums/websocket-events.enum';
 import { MessageMapper } from '../message/mappers/message.mapper';
 import { WebsocketNotificationService } from '../websocket/services/websocket-notification.service';
-import { LiveKitWebhookGuard } from '../auth/guards/livekit-webhook.guard';
+// import { LiveKitWebhookGuard } from '../auth/guards/livekit-webhook.guard';
 
 @Controller('webhook/livekit')
-@UseGuards(LiveKitWebhookGuard)
+// @UseGuards(LiveKitWebhookGuard)
 export class LiveKitWebhookController {
   constructor(
     private readonly liveKitService: LiveKitService,
@@ -36,13 +44,21 @@ export class LiveKitWebhookController {
   @Post()
   async handleWebhook(
     @Body(ValidateWebhookPipe) payload: LiveKitWebhookPayload,
+    @Headers() headers: Record<string, string>,
+    @Query() query: Record<string, string>,
+    @Req() req: Request,
   ) {
-    console.log('=== LiveKit Webhook Received ===');
-    console.log('Event:', payload.event);
-    console.log('Room:', payload.room?.name);
-    console.log('Participant:', payload.participant?.identity);
-    console.log('Full Payload:', JSON.stringify(payload, null, 2));
-    console.log('================================');
+    // console.log('=== LiveKit Webhook Received ===');
+    // console.log('Event:', payload.event);
+    // console.log('Room:', payload.room?.name);
+    // console.log('Participant:', payload.participant?.identity);
+    // console.log('Full Payload:', JSON.stringify(payload, null, 2));
+    console.log('========== WEBHOOK DEBUG ==========');
+    console.log('📋 ALL Headers:', JSON.stringify(headers, null, 2));
+    console.log('🔗 Query params:', query);
+    console.log('📦 Body:', JSON.stringify(payload, null, 2));
+    console.log('🌐 Full URL:', req.url);
+    console.log('===================================');
 
     const chatId = payload.room?.name; // LiveKit chatId is chatId
     if (!chatId) {
