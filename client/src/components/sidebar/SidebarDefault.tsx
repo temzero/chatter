@@ -87,7 +87,7 @@ const SidebarDefault: React.FC = () => {
           transition={{ type: "spring", stiffness: 600, damping: 30 }}
         >
           <span
-            className={`material-symbols-outlined text-6xl! cursor-pointer ${
+            className={`material-symbols-outlined text-6xl! cursor-pointer text-(--primary-green) ${
               isCompact ? "mr-9" : "mr-3"
             }`}
           >

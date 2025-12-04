@@ -3,10 +3,10 @@ import { NestFactory } from '@nestjs/core';
 import { JwtIoAdapter } from './jwt.adapter';
 import { EnvConfig } from './common/config/env.config';
 import { ValidationPipe } from '@nestjs/common';
-import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { json, urlencoded, raw } from 'express';
 import { AppModule } from './app.module';
+import { join } from 'path';
 import cookieParser from 'cookie-parser';
 
 const DEFAULT_PORT = 3000;

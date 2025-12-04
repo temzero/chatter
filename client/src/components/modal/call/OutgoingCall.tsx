@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCallStore } from "@/stores/callStore";
-import Button from "@/components/ui/buttons/Button";
 import { VideoStream } from "@/components/ui/streams/VideoStream";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { getCloseModal } from "@/stores/modalStore";
@@ -10,8 +9,10 @@ import { useLocalTracks } from "@/common/hooks/mediaStreams/useLocalTracks";
 import { callWebSocketService } from "@/services/websocket/callWebsocketService";
 import { UpdateCallPayload } from "@shared/types/call";
 import { callAnimations } from "@/common/animations/callAnimations";
-import CallHeader from "./components/CallHeader";
 import { useTranslation } from "react-i18next";
+import CallHeader from "./components/CallHeader";
+import Button from "@/components/ui/buttons/Button";
+import { BeatLoader } from "react-spinners";
 
 interface CallCallingUIProps {
   chat: ChatResponse;
@@ -110,7 +111,7 @@ const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
                   ? "videocam"
                   : "call"
               }
-              className="material-symbols-outlined filled text-6xl! flex items-center justify-center"
+              className="material-symbols-outlined filled text-7xl! flex items-center justify-center"
               {...callAnimations.outgoingActionButton(isHovering)}
             >
               {isHovering
@@ -124,6 +125,8 @@ const OutgoingCall: React.FC<CallCallingUIProps> = ({ chat }) => {
           </AnimatePresence>
         </motion.button>
       </div>
+
+      <BeatLoader color="#959595" size={12} className="-mt-2" />
 
       {/* Cancel Button */}
       <div className="flex gap-4 mt-4" style={{ zIndex: 2 }}>

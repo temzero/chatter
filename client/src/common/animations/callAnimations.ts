@@ -37,12 +37,11 @@ export const callAnimations: {
   outgoingActionButton: (isHovering = false) => ({
     initial: { scale: 0.8, opacity: 0 },
     animate: {
-      scale: [1, 1.5, 1],
-      opacity: isHovering ? 1 : [0.4, 0.8, 0.8, 0.4],
-      rotate: isHovering ? 0 : [0, 15, -15, 0],
+      opacity: isHovering ? 1 : [0.4, 0.8, 0.4],
+      // rotate: isHovering ? 0 : [0, 15, -15, 0],
     },
     transition: {
-      duration: isHovering ? 0.3 : 0.5,
+      duration: isHovering ? 0.3 : 1,
       repeat: isHovering ? 0 : Infinity,
       repeatType: isHovering ? undefined : "loop",
       ease: "easeInOut",

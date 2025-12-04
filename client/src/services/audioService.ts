@@ -110,7 +110,11 @@ class AudioServiceImpl implements AudioService {
     });
   }
 
-  async playSound(type: SoundType, volume?: number): Promise<void> {
+  async playSound(
+    type: SoundType,
+    volume?: number,
+    isLoop: boolean = false
+  ): Promise<void> {
     if (this.isMuted) return;
 
     const sound = this.sounds.get(type);
@@ -120,6 +124,7 @@ class AudioServiceImpl implements AudioService {
     sound.currentTime = 0;
 
     sound.volume = volume !== undefined ? volume : this.volume;
+    sound.loop = isLoop; // 👈 enable or disable looping
     await sound.play();
   }
 

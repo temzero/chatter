@@ -16,17 +16,17 @@ export const DraggableContainer = ({
   position = "bottom-middle",
 }: DraggableContainerProps) => {
   const positionClasses = {
-    "bottom-middle": "bottom-3 left-1/2 -translate-x-1/2",
-    "bottom-right": "bottom-3 right-3",
+    "bottom-middle": "bottom-3! left-1/2! -translate-x-1/2!",
+    "bottom-right": "bottom-3! right-3!",
   };
-  const initialX = position === "bottom-middle" ? { x: "-50%" } : { x: 0 };
+  const initialX = position === "bottom-middle" ? { x: "-50%!" } : { x: 0 };
 
   return (
     <motion.div
       initial={{ scale: 0.2, opacity: 0, ...initialX }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ type: "spring", stiffness: 500, damping: 25 }}
-      className={`absolute cursor-grab active:cursor-grabbing ${positionClasses[position]} ${className} ${className}`}
+      className={`absolute! cursor-grab active:cursor-grabbing ${positionClasses[position]} ${className} ${className}`}
       drag
       dragConstraints={containerRef}
       dragElastic={0.8}

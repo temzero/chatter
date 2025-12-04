@@ -52,11 +52,15 @@ const SummaryCall = ({ chat }: { chat: ChatResponse; duration?: number }) => {
               ? "text-gray-400"
               : localCallStatus === LocalCallStatus.ERROR
               ? "text-red-500 animate-pulse"
+              : localCallStatus === LocalCallStatus.TIMEOUT
+              ? "text-yellow-400 animate-pulse"
               : "text-red-400"
           }`}
         >
           {localCallStatus === LocalCallStatus.ERROR
             ? "e911_avatar"
+            : localCallStatus === LocalCallStatus.TIMEOUT
+            ? "hourglass"
             : "call_end"}
         </span>
       </div>

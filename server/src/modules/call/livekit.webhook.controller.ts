@@ -1,8 +1,6 @@
 import {
   Controller,
   Post,
-  Headers,
-  Body,
   Query,
   Req,
   UseGuards,
@@ -12,10 +10,8 @@ import { CallService } from './call.service';
 import { CallStatus } from '@shared/types/call';
 import { MessageService } from '../message/message.service';
 import { WebsocketCallService } from '../websocket/services/websocket-call.service';
-import { ValidateWebhookPipe } from '@/common/pipes/validate-webhook.pipe';
 import { ChatType } from '@shared/types/enums/chat-type.enum';
 import { LiveKitService } from './liveKit.service';
-import { LiveKitWebhookPayload } from '../websocket/constants/LiveKitWebhookPayload.type';
 import { UserService } from '../user/user.service';
 import { ChatService } from '../chat/chat.service';
 import { ChatMemberService } from '../chat-member/chat-member.service';
@@ -48,7 +44,6 @@ export class LiveKitWebhookController {
   @Post()
   async handleWebhook(
     @Req() req: Request & { webhookEvent: WebhookEvent },
-    @Headers() headers: Record<string, string>,
     @Query() query: Record<string, string>,
   ) {
     // Get the verified event from the guard
@@ -58,7 +53,6 @@ export class LiveKitWebhookController {
     this.logger.log('📋 Event:', payload.event);
     this.logger.log('🏠 Room:', payload.room?.name);
     this.logger.log('👤 Participant:', payload.participant?.identity);
-    this.logger.log('headers:', headers);
     this.logger.log('query:', query);
     this.logger.log('===================================');
 

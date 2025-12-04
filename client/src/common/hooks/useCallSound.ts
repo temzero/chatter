@@ -15,10 +15,10 @@ export const useCallSounds = () => {
     const timer = setTimeout(() => {
       switch (localCallStatus) {
         case LocalCallStatus.OUTGOING:
-          audioService.playSound(SoundType.OUTGOING_CALL);
+          audioService.playSound(SoundType.OUTGOING_CALL, undefined, true);
           break;
         case LocalCallStatus.INCOMING:
-          audioService.playSound(SoundType.INCOMING_CALL);
+          audioService.playSound(SoundType.INCOMING_CALL, undefined, true);
           break;
         // case LocalCallStatus.CONNECTED:
         //   audioService.playSound(SoundType.CALL_CONNECTED);
@@ -26,6 +26,7 @@ export const useCallSounds = () => {
         // case LocalCallStatus.ENDED:
         case LocalCallStatus.DECLINED:
         case LocalCallStatus.CANCELED:
+        case LocalCallStatus.TIMEOUT:
           audioService.playSound(SoundType.CALL_END);
           break;
         case LocalCallStatus.ERROR:
