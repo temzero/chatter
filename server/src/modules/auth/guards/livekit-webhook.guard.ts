@@ -1,83 +1,58 @@
-// // src/common/guards/livekit-webhook.guard.ts
-// import {
-//   Injectable,
-//   CanActivate,
-//   ExecutionContext,
-//   HttpException,
-//   HttpStatus,
-// } from '@nestjs/common';
-// import { Observable } from 'rxjs';
-// import * as crypto from 'crypto';
-// import { EnvConfig } from '@/common/config/env.config';
+// src/common/guards/livekit-webhook.guard.ts
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
+import * as jwt from 'jsonwebtoken';
+import { EnvConfig } from '@/common/config/env.config';
 
-// @Injectable()
-// export class LiveKitWebhookGuard implements CanActivate {
-//   canActivate(
-//     context: ExecutionContext,
-//   ): boolean | Promise<boolean> | Observable<boolean> {
-//     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-//     const request = context.switchToHttp().getRequest();
+@Injectable()
+export class LiveKitWebhookGuard implements CanActivate {
+  canActivate(context: ExecutionContext): boolean {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const request = context.switchToHttp().getRequest();
 
-//     // Skip verification if no secret is set (for development)
-//     const webhookSecret = EnvConfig.livekit.apiSecret;
-//     if (!webhookSecret) {
-//       console.warn(
-//         '⚠️ LIVEKIT_WEBHOOK_SECRET not set, skipping webhook verification',
-//       );
-//       return true;
-//     }
+    // Get JWT token from Authorization header
+    const authHeader = request.headers['authorization'];
+    if (!authHeader) {
+      console.error('❌ LiveKit webhook: No Authorization header');
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
 
-//     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-//     const signature = request.headers['livekit-signature'];
-//     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-//     const rawBody = request.rawBody; // Available because of your middleware
+    // Extract token
+    const token = authHeader.startsWith('Bearer ')
+      ? authHeader.substring(7)
+      : authHeader;
 
-//     if (!signature) {
-//       console.error('❌ No LiveKit signature provided');
-//       throw new HttpException(
-//         'Invalid webhook signature',
-//         HttpStatus.UNAUTHORIZED,
-//       );
-//     }
+    try {
+      // ⚠️ Verify with LIVEKIT_API_SECRET (NOT webhook secret)
+      const apiSecret = EnvConfig.livekit.apiSecret;
 
-//     if (!rawBody) {
-//       console.error('❌ No raw body available');
-//       throw new HttpException('No request body', HttpStatus.BAD_REQUEST);
-//     }
+      if (!apiSecret) {
+        console.warn('⚠️ LIVEKIT_API_SECRET not set, allowing webhook');
+        return true; // Allow in development
+      }
 
-//     const isValid = this.verifySignature(rawBody, signature, webhookSecret);
+      // Verify the JWT
+      const decoded = jwt.verify(token, apiSecret, {
+        algorithms: ['HS256'],
+      });
 
-//     if (!isValid) {
-//       console.error('❌ Invalid LiveKit webhook signature');
-//       throw new HttpException(
-//         'Invalid webhook signature',
-//         HttpStatus.UNAUTHORIZED,
-//       );
-//     }
+      console.log('✅ LiveKit webhook JWT verified');
+      return true;
+    } catch (error) {
+      console.error('❌ LiveKit webhook JWT invalid:', error.message);
 
-//     console.log('✅ LiveKit webhook signature verified');
-//     return true;
-//   }
+      // For development/testing, you can allow it
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn('⚠️ Development mode: Allowing unverified webhook');
+        return true;
+      }
 
-//   private verifySignature(
-//     rawBody: Buffer,
-//     signature: string,
-//     secret: string,
-//   ): boolean {
-//     try {
-//       const computedSignature = crypto
-//         .createHmac('sha256', secret)
-//         .update(rawBody)
-//         .digest('base64');
-
-//       // Use timing-safe comparison
-//       return crypto.timingSafeEqual(
-//         Buffer.from(signature),
-//         Buffer.from(computedSignature),
-//       );
-//     } catch (error) {
-//       console.error('Signature verification error:', error);
-//       return false;
-//     }
-//   }
-// }
+      throw new HttpException('Invalid webhook token', HttpStatus.UNAUTHORIZED);
+    }
+  }
+}

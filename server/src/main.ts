@@ -24,17 +24,21 @@ async function bootstrap() {
     console.log('2️⃣ App created, setting up middleware...');
 
     // RAW BODY FOR LIVEKIT WEBHOOK
-    app.use('/webhook/livekit', (req: any, res: any, next: any) => {
+    app.use('/webhook/livekit', function (req, res, next) {
       console.log('🚨 WEBHOOK REQUEST ARRIVED!');
       console.log('📅 Time:', new Date().toISOString());
-      console.log('request:', req);
-      console.log('response:', res);
-      console.log('next:', next);
       console.log('🌐 Method:', req.method);
       console.log('🔗 URL:', req.url);
       console.log('📋 Content-Type:', req.headers['content-type']);
-      console.log('👤 User-Agent:', req.headers['user-agent']);
-      console.log('---');
+
+      // Log Authorization header (masked for security)
+      if (req.headers['authorization']) {
+        const auth = req.headers['authorization'];
+        console.log('🔑 Authorization:', auth.substring(0, 30) + '...');
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      next(); // ⚠️ IMPORTANT: Allow request to continue to guard and controller
     });
 
     // RAW BODY FOR LIVEKIT WEBHOOK - KEEP AS IS

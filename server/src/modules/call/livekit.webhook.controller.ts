@@ -5,7 +5,7 @@ import {
   Body,
   Query,
   Req,
-  // UseGuards,
+  UseGuards,
 } from '@nestjs/common';
 import { CallService } from './call.service';
 import { CallStatus } from '@shared/types/call';
@@ -24,10 +24,10 @@ import { User } from '../user/entities/user.entity';
 import { ChatEvent } from '@shared/types/enums/websocket-events.enum';
 import { MessageMapper } from '../message/mappers/message.mapper';
 import { WebsocketNotificationService } from '../websocket/services/websocket-notification.service';
-// import { LiveKitWebhookGuard } from '../auth/guards/livekit-webhook.guard';
+import { LiveKitWebhookGuard } from '../auth/guards/livekit-webhook.guard';
 
 @Controller('webhook/livekit')
-// @UseGuards(LiveKitWebhookGuard)
+@UseGuards(LiveKitWebhookGuard)
 export class LiveKitWebhookController {
   constructor(
     private readonly liveKitService: LiveKitService,
