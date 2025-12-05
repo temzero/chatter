@@ -16,6 +16,17 @@ export const SystemMessageIcon = ({
 // Function that returns the icon name string
 const getSystemEventIconName = (systemEvent: SystemEventType): string => {
   switch (systemEvent) {
+    case SystemEventType.CHAT_CREATED:
+      return "add_circle";
+    case SystemEventType.CHAT_RENAMED:
+      return "edit";
+    case SystemEventType.CHAT_UPDATE_AVATAR:
+      return "image";
+    case SystemEventType.CHAT_UPDATE_DESCRIPTION:
+      return "notes";
+    case SystemEventType.CHAT_DELETED:
+      return "delete";
+
     case SystemEventType.MEMBER_JOINED:
     case SystemEventType.MEMBER_ADDED:
       return "person_add";
@@ -25,12 +36,7 @@ const getSystemEventIconName = (systemEvent: SystemEventType): string => {
       return "person_off";
     case SystemEventType.MEMBER_BANNED:
       return "block";
-    case SystemEventType.CHAT_RENAMED:
-      return "edit";
-    case SystemEventType.CHAT_UPDATE_AVATAR:
-      return "image";
-    case SystemEventType.CHAT_UPDATE_DESCRIPTION:
-      return "notes";
+
     case SystemEventType.MEMBER_UPDATE_NICKNAME:
       return "badge";
     case SystemEventType.MEMBER_UPDATE_ROLE:
@@ -41,8 +47,7 @@ const getSystemEventIconName = (systemEvent: SystemEventType): string => {
       return "push_pin";
     case SystemEventType.MESSAGE_UNPINNED:
       return "unpin";
-    case SystemEventType.CHAT_DELETED:
-      return "delete";
+
     default:
       return "info";
   }

@@ -732,19 +732,23 @@
   },
 
   "system": {
-    "another_member": "otro miembro",
-    "unknown_event": "Ocurrió un evento del sistema.",
-    "member_joined": "{{displayName}} se unió al chat",
-    "member_added": "{{displayName}} añadió a {{targetName}} al chat",
-    "member_left": "{{displayName}} salió del chat",
-    "member_kicked": "{{displayName}} eliminó a {{targetName}} del chat",
-    "member_banned": "{{displayName}} baneó a {{targetName}} del chat",
+    "unknown": "Ocurrió un evento del sistema.",
+    
+    "chat_created": "{{displayName}} creó la conversación",
     "chat_renamed": "{{displayName}} renombró el chat",
     "chat_renamed_with_values": "{{displayName}} renombró el chat de \"{{oldVal}}\" a \"{{newVal}}\"",
     "chat_update_avatar": "{{displayName}} actualizó el avatar del chat",
     "chat_update_description": "{{displayName}} actualizó la descripción del chat",
     "chat_update_description_with_values": "{{displayName}} cambió la descripción de \"{{oldVal}}\" a \"{{newVal}}\"",
     "chat_set_description": "{{displayName}} estableció la descripción como \"{{newVal}}\"",
+    "chat_deleted": "{{displayName}} eliminó el chat",
+
+    "another_member": "otro miembro",
+    "member_joined": "{{displayName}} se unió al chat",
+    "member_added": "{{displayName}} añadió a {{targetName}} al chat",
+    "member_left": "{{displayName}} salió del chat",
+    "member_kicked": "{{displayName}} eliminó a {{targetName}} del chat",
+    "member_banned": "{{displayName}} baneó a {{targetName}} del chat",
     "member_update_nickname": "{{displayName}} actualizó el apodo de {{targetName}}",
     "member_update_nickname_with_values": "{{displayName}} cambió el apodo de {{targetName}} de \"{{oldVal}}\" a \"{{newVal}}\"",
     "member_set_nickname": "{{displayName}} estableció el apodo de {{targetName}} como \"{{newVal}}\"",
@@ -753,7 +757,6 @@
     "member_update_status": "{{displayName}} cambió el estado de {{targetName}} a {{newVal}}",
     "message_pinned": "{{displayName}} fijó un mensaje \"{{newVal}}\"",
     "message_unpinned": "{{displayName}} desfijó un mensaje",
-    "chat_deleted": "{{displayName}} eliminó el chat",
     "broadcast_message": {
       "broadcasted": "Transmitido",
       "live_now": "Ahora en vivo",

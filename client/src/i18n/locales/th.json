@@ -731,19 +731,23 @@
   },
 
   "system": {
-    "another_member": "สมาชิกอื่น",
-    "unknown_event": "เกิดเหตุการณ์ของระบบ",
-    "member_joined": "{{displayName}} เข้าร่วมแชท",
-    "member_added": "{{displayName}} เพิ่ม {{targetName}} เข้าแชท",
-    "member_left": "{{displayName}} ออกจากแชท",
-    "member_kicked": "{{displayName}} ลบ {{targetName}} ออกจากแชท",
-    "member_banned": "{{displayName}} แบน {{targetName}} จากแชท",
+    "unknown": "เกิดเหตุการณ์ของระบบ",
+    
+    "chat_created": "{{displayName}} สร้างการสนทนา",
     "chat_renamed": "{{displayName}} เปลี่ยนชื่อแชท",
     "chat_renamed_with_values": "{{displayName}} เปลี่ยนชื่อแชทจาก \"{{oldVal}}\" เป็น \"{{newVal}}\"",
     "chat_update_avatar": "{{displayName}} อัปเดตอวตารแชท",
     "chat_update_description": "{{displayName}} อัปเดตคำอธิบายแชท",
     "chat_update_description_with_values": "{{displayName}} เปลี่ยนคำอธิบายจาก \"{{oldVal}}\" เป็น \"{{newVal}}\"",
     "chat_set_description": "{{displayName}} ตั้งคำอธิบายเป็น \"{{newVal}}\"",
+    "chat_deleted": "{{displayName}} ลบแชท",
+
+    "another_member": "สมาชิกอื่น",
+    "member_joined": "{{displayName}} เข้าร่วมแชท",
+    "member_added": "{{displayName}} เพิ่ม {{targetName}} เข้าแชท",
+    "member_left": "{{displayName}} ออกจากแชท",
+    "member_kicked": "{{displayName}} ลบ {{targetName}} ออกจากแชท",
+    "member_banned": "{{displayName}} แบน {{targetName}} จากแชท",
     "member_update_nickname": "{{displayName}} อัปเดตชื่อเล่นของ {{targetName}}",
     "member_update_nickname_with_values": "{{displayName}} เปลี่ยนชื่อเล่นของ {{targetName}} จาก \"{{oldVal}}\" เป็น \"{{newVal}}\"",
     "member_set_nickname": "{{displayName}} ตั้งชื่อเล่นของ {{targetName}} เป็น \"{{newVal}}\"",
@@ -752,7 +756,6 @@
     "member_update_status": "{{displayName}} เปลี่ยนสถานะของ {{targetName}} เป็น {{newVal}}",
     "message_pinned": "{{displayName}} ปักหมุดข้อความ \"{{newVal}}\"",
     "message_unpinned": "{{displayName}} ยกเลิกการปักหมุดข้อความ",
-    "chat_deleted": "{{displayName}} ลบแชท",
     "broadcast_message": {
       "broadcasted": "ออกอากาศแล้ว",
       "live_now": "กำลังถ่ายทอดสด",

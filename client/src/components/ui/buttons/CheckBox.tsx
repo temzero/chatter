@@ -6,7 +6,7 @@ interface CheckboxProps {
   onChange: () => void;
   className?: string;
   size?: number;
-  color?: Text;
+  color?: string;
 }
 
 const Checkbox: React.FC<CheckboxProps> = ({
@@ -21,7 +21,8 @@ const Checkbox: React.FC<CheckboxProps> = ({
       type="checkbox"
       checked={checked}
       onChange={onChange}
-      className={`w-${size} aspect-square accent-[${color}] ${className ?? ""}`}
+      style={{ accentColor: color }}
+      className={`w-${size} aspect-square ${className ?? ""}`}
     />
   );
 };

@@ -17,46 +17,50 @@ import { useTranslation } from "react-i18next";
 export function useChatSocketListeners() {
   const { t } = useTranslation();
   useEffect(() => {
-    // ======== Message Handlers ========
     const handleNewMessage = async (
       data: WsNotificationResponse<MessageResponse>
     ) => {
       const { payload: message, meta } = data;
-      console.log("[EVENT]", "Received new message via WebSocket:", message);
-
       const messageStore = useMessageStore.getState();
+      const chatStore = useChatStore.getState();
 
-      const isMuted = meta?.isMuted ?? false;
-      const isOwnMessage = meta?.isSender ?? false;
+      if (!meta?.isMuted && !message.call) {
+        audioService.playSound(SoundType.NEW_MESSAGE);
+      }
+
+      // Exit early if message already exists
       const existingMessage = messageStore.getMessageById(message.id);
-      try {
-        await useChatStore.getState().getOrFetchChatById(message.chatId, {
-          fetchFullData: true,
-        });
-      } catch (error) {
-        console.error("Failed to fetch chat for incoming message:", error);
+      if (existingMessage) {
+        if (meta?.isSender) {
+          messageStore.updateMessageById(message.id, {
+            status: MessageStatus.SENT,
+          });
+        }
         return;
       }
 
-      if (isOwnMessage && existingMessage) {
-        messageStore.updateMessageById(message.id, {
-          status: MessageStatus.SENT,
-        });
-        return;
+      // Exit early if chat does not exist and needs to be fetched
+      const existingChat = chatStore.getChatById(message.chatId);
+      if (!existingChat) {
+        try {
+          await chatStore.fetchChatById(message.chatId, {
+            fetchFullData: true,
+          });
+          // Chat fetched, message will be included with fetched messages
+          return;
+        } catch (error) {
+          console.error("Failed to fetch chat for incoming message:", error);
+          return;
+        }
       }
 
+      // Handle system events
       if (message.systemEvent) {
         handleSystemEventMessage(message);
       }
 
-      if (!existingMessage) {
-        messageStore.addMessage(message);
-      }
-
-      // if (!isMuted && chatStore.activeChatId !== message.chatId) {
-      if (!isMuted && !message.call) {
-        audioService.playSound(SoundType.NEW_MESSAGE);
-      }
+      // Add message only if chat exists
+      messageStore.addMessage(message);
     };
 
     const handleMessageSaved = (

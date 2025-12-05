@@ -105,13 +105,21 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
     ...initialState,
 
     // ---------- CORE ACTIONS ----------
-    setInitialData: (chatId, messages, hasMore) => {
+    setInitialData: (
+      chatId: string,
+      messages: MessageResponse[],
+      hasMore: boolean
+    ) => {
       const messagesById = { ...get().messagesById };
+
+      // Map through all messages
       const messageIds = messages.map((m) => {
-        // Store message WITHOUT attachments
         const { attachments, ...messageWithoutAttachments } = m;
+
+        // update if exists, otherwise insert.
         messagesById[m.id] = messageWithoutAttachments as MessageResponse;
-        // Save attachments to attachment store
+
+        // Add attachments if any
         if (attachments && attachments.length > 0) {
           useAttachmentStore
             .getState()
@@ -121,6 +129,7 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
         return m.id;
       });
 
+      // Update store
       set({
         messagesById,
         messageIdsByChat: { ...get().messageIdsByChat, [chatId]: messageIds },

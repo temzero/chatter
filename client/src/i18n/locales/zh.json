@@ -731,19 +731,23 @@
   },
 
   "system": {
-    "another_member": "另一位成员",
-    "unknown_event": "发生系统事件。",
-    "member_joined": "{{displayName}}加入了聊天",
-    "member_added": "{{displayName}}将{{targetName}}添加到聊天",
-    "member_left": "{{displayName}}离开了聊天",
-    "member_kicked": "{{displayName}}将{{targetName}}从聊天中移除",
-    "member_banned": "{{displayName}}将{{targetName}}从聊天中封禁",
+    "unknown": "发生系统事件。",
+
+    "chat_created": "{{displayName}} 创建了会话",
     "chat_renamed": "{{displayName}}重命名了聊天",
     "chat_renamed_with_values": "{{displayName}}将聊天从“{{oldVal}}”重命名为“{{newVal}}”",
     "chat_update_avatar": "{{displayName}}更新了聊天头像",
     "chat_update_description": "{{displayName}}更新了聊天描述",
     "chat_update_description_with_values": "{{displayName}}将描述从“{{oldVal}}”更改为“{{newVal}}”",
     "chat_set_description": "{{displayName}}将描述设置为“{{newVal}}”",
+    "chat_deleted": "{{displayName}}删除了聊天",
+    
+    "another_member": "另一位成员",
+    "member_joined": "{{displayName}}加入了聊天",
+    "member_added": "{{displayName}}将{{targetName}}添加到聊天",
+    "member_left": "{{displayName}}离开了聊天",
+    "member_kicked": "{{displayName}}将{{targetName}}从聊天中移除",
+    "member_banned": "{{displayName}}将{{targetName}}从聊天中封禁",
     "member_update_nickname": "{{displayName}}更新了{{targetName}}的昵称",
     "member_update_nickname_with_values": "{{displayName}}将{{targetName}}的昵称从“{{oldVal}}”更改为“{{newVal}}”",
     "member_set_nickname": "{{displayName}}将{{targetName}}的昵称设置为“{{newVal}}”",
@@ -752,7 +756,6 @@
     "member_update_status": "{{displayName}}将{{targetName}}的状态更改为{{newVal}}",
     "message_pinned": "{{displayName}}置顶了消息“{{newVal}}”",
     "message_unpinned": "{{displayName}}取消了消息置顶",
-    "chat_deleted": "{{displayName}}删除了聊天",
     "broadcast_message": {
       "broadcasted": "已广播",
       "live_now": "正在直播",

@@ -51,7 +51,7 @@ export function getSystemMessageText({
   senderDisplayName: string;
   JSONcontent?: SystemMessageJSONContent | null;
 }): string {
-  if (!systemEvent) return t("system_message.default");
+  if (!systemEvent) return t("system_message.unknown");
 
   const isMe = currentUserId === senderId;
   const displayName = isMe ? t("common.you") : senderDisplayName;
@@ -65,23 +65,10 @@ export function getSystemMessageText({
     : parsedContent?.targetName || t("system_message.another_member");
 
   switch (systemEvent) {
-    case SystemEventType.MEMBER_JOINED:
-      return t("system_message.member_joined", { displayName });
-    case SystemEventType.MEMBER_LEFT:
-      return t("system_message.member_left", { displayName });
-    case SystemEventType.MEMBER_KICKED:
-      return t("system_message.member_kicked", { displayName, targetName });
-    case SystemEventType.MEMBER_BANNED:
-      return t("system_message.member_banned", { displayName, targetName });
-    // case SystemEventType.CHAT_RENAMED:
-    //   if (newVal) {
-    //     return t("system_message.chat_renamed", {
-    //       displayName,
-    //       oldVal,
-    //       newVal,
-    //     });
-    //   }
-    //   return t("system_message.chat_renamed_no_values", { displayName });
+    case SystemEventType.CHAT_CREATED:
+      return t("system_message.chat_created", {
+        displayName,
+      });
     case SystemEventType.CHAT_RENAMED:
       if (oldVal && newVal) {
         return t("system_message.chat_renamed", {
@@ -114,6 +101,19 @@ export function getSystemMessageText({
         });
       }
       return t("system_message.chat_updated_description", { displayName });
+
+    case SystemEventType.CHAT_DELETED:
+      return t("system_message.chat_deleted", { displayName });
+
+    case SystemEventType.MEMBER_JOINED:
+      return t("system_message.member_joined", { displayName });
+    case SystemEventType.MEMBER_LEFT:
+      return t("system_message.member_left", { displayName });
+    case SystemEventType.MEMBER_KICKED:
+      return t("system_message.member_kicked", { displayName, targetName });
+    case SystemEventType.MEMBER_BANNED:
+      return t("system_message.member_banned", { displayName, targetName });
+
     case SystemEventType.MEMBER_UPDATE_NICKNAME:
       if (oldVal && newVal) {
         return t("system_message.nickname_changed_from_to", {
@@ -171,9 +171,7 @@ export function getSystemMessageText({
         : t("system_message.message_pinned", { displayName });
     case SystemEventType.MESSAGE_UNPINNED:
       return t("system_message.message_unpinned", { displayName });
-    case SystemEventType.CHAT_DELETED:
-      return t("system_message.chat_deleted", { displayName });
     default:
-      return t("system_message.default");
+      return t("system_message.unknown");
   }
 }

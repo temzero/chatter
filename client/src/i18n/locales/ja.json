@@ -731,19 +731,23 @@
   },
 
   "system": {
-    "another_member": "他のメンバー",
-    "unknown_event": "システムイベントが発生しました。",
-    "member_joined": "{{displayName}}がチャットに参加しました",
-    "member_added": "{{displayName}}が{{targetName}}をチャットに追加しました",
-    "member_left": "{{displayName}}がチャットを退出しました",
-    "member_kicked": "{{displayName}}が{{targetName}}をチャットから削除しました",
-    "member_banned": "{{displayName}}が{{targetName}}をチャットから追放しました",
+    "unknown": "システムイベントが発生しました。",
+
+    "chat_created": "{{displayName}} が会話を作成しました",
     "chat_renamed": "{{displayName}}がチャットの名前を変更しました",
     "chat_renamed_with_values": "{{displayName}}がチャット名を「{{oldVal}}」から「{{newVal}}」に変更しました",
     "chat_update_avatar": "{{displayName}}がチャットのアバターを更新しました",
     "chat_update_description": "{{displayName}}がチャットの説明を更新しました",
     "chat_update_description_with_values": "{{displayName}}が説明を「{{oldVal}}」から「{{newVal}}」に変更しました",
     "chat_set_description": "{{displayName}}が説明を「{{newVal}}」に設定しました",
+    "chat_deleted": "{{displayName}}がチャットを削除しました",
+
+    "another_member": "他のメンバー",
+    "member_joined": "{{displayName}}がチャットに参加しました",
+    "member_added": "{{displayName}}が{{targetName}}をチャットに追加しました",
+    "member_left": "{{displayName}}がチャットを退出しました",
+    "member_kicked": "{{displayName}}が{{targetName}}をチャットから削除しました",
+    "member_banned": "{{displayName}}が{{targetName}}をチャットから追放しました",
     "member_update_nickname": "{{displayName}}が{{targetName}}のニックネームを更新しました",
     "member_update_nickname_with_values": "{{displayName}}が{{targetName}}のニックネームを「{{oldVal}}」から「{{newVal}}」に変更しました",
     "member_set_nickname": "{{displayName}}が{{targetName}}のニックネームを「{{newVal}}」に設定しました",
@@ -752,7 +756,6 @@
     "member_update_status": "{{displayName}}が{{targetName}}のステータスを{{newVal}}に変更しました",
     "message_pinned": "{{displayName}}がメッセージ「{{newVal}}」をピン留めしました",
     "message_unpinned": "{{displayName}}がメッセージのピン留めを解除しました",
-    "chat_deleted": "{{displayName}}がチャットを削除しました",
     "broadcast_message": {
       "broadcasted": "ブロードキャスト済み",
       "live_now": "現在ライブ中",

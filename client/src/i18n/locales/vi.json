@@ -761,13 +761,9 @@
   },
 
   "system_message": {
-    "default": "Đã xảy ra sự kiện hệ thống.",
-    "another_member": "một thành viên khác",
-    "member_joined": "{{displayName}} đã tham gia cuộc trò chuyện",
-    "member_left": "{{displayName}} đã rời cuộc trò chuyện",
-    "member_kicked": "{{displayName}} đã loại bỏ {{targetName}} khỏi cuộc trò chuyện",
-    "member_banned": "{{displayName}} đã chặn {{targetName}} khỏi cuộc trò chuyện",
+    "unknown": "Đã xảy ra sự kiện hệ thống.",
 
+    "chat_created": "{{displayName}} đã tạo cuộc trò chuyện",
     "chat_renamed": "{{displayName}} đã đổi tên cuộc trò chuyện từ \"{{oldVal}}\" thành \"{{newVal}}\"",
     "chat_renamed_no_old": "{{displayName}} đã đổi tên cuộc trò chuyện thành \"{{newVal}}\"",
     "chat_renamed_no_values": "{{displayName}} đã đổi tên cuộc trò chuyện",
@@ -776,6 +772,13 @@
     "chat_updated_description_from_to": "{{displayName}} đã đổi mô tả từ \"{{oldVal}}\" thành \"{{newVal}}\"",
     "chat_set_description": "{{displayName}} đã đặt mô tả thành \"{{newVal}}\"",
     "chat_updated_description": "{{displayName}} đã cập nhật mô tả của cuộc trò chuyện",
+    "chat_deleted": "{{displayName}} đã xóa cuộc trò chuyện",
+
+    "another_member": "một thành viên khác",
+    "member_joined": "{{displayName}} đã tham gia cuộc trò chuyện",
+    "member_left": "{{displayName}} đã rời cuộc trò chuyện",
+    "member_kicked": "{{displayName}} đã loại bỏ {{targetName}} khỏi cuộc trò chuyện",
+    "member_banned": "{{displayName}} đã chặn {{targetName}} khỏi cuộc trò chuyện",
 
     "nickname_changed_from_to": "{{displayName}} đã đổi biệt danh của {{target}} từ \"{{oldVal}}\" thành \"{{newVal}}\"",
     "nickname_set": "{{displayName}} đã đặt biệt danh của {{target}} là \"{{newVal}}\"",
@@ -790,9 +793,7 @@
 
     "message_pinned_with_content": "{{displayName}} đã ghim tin nhắn: \"{{newVal}}\"",
     "message_pinned": "{{displayName}} đã ghim một tin nhắn",
-    "message_unpinned": "{{displayName}} đã bỏ ghim một tin nhắn",
-
-    "chat_deleted": "{{displayName}} đã xóa cuộc trò chuyện"
+    "message_unpinned": "{{displayName}} đã bỏ ghim một tin nhắn"
   },
 
   "messages": {

@@ -139,8 +139,9 @@ export class Message {
     const hasContent = !!this.content?.trim();
     const hasAttachments = this.attachments && this.attachments.length > 0;
     const hasCall = !!this.call;
+    const isSystemEvent = !!this.systemEvent;
 
-    if (!hasContent && !hasAttachments && !hasCall) {
+    if (!hasContent && !hasAttachments && !hasCall && !isSystemEvent) {
       throw new Error(
         'Message must have either content, attachments, or a call',
       );

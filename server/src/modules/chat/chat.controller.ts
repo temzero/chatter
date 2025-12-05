@@ -160,6 +160,12 @@ export class ChatController {
         createGroupChatDto,
       );
 
+      await this.messageService.createSystemEventMessage(
+        chat.id,
+        userId,
+        SystemEventType.CHAT_CREATED,
+      );
+
       return new SuccessResponse(
         plainToInstance(ChatResponseDto, chat),
         'Group chat created successfully',
