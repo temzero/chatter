@@ -24,10 +24,6 @@ export function useChatSocketListeners() {
       const messageStore = useMessageStore.getState();
       const chatStore = useChatStore.getState();
 
-      if (!meta?.isMuted && !message.call) {
-        audioService.playSound(SoundType.NEW_MESSAGE);
-      }
-
       // Exit early if message already exists
       const existingMessage = messageStore.getMessageById(message.id);
       if (existingMessage) {
@@ -39,6 +35,9 @@ export function useChatSocketListeners() {
         return;
       }
 
+      if (!meta?.isMuted && !message.call) {
+        audioService.playSound(SoundType.NEW_MESSAGE);
+      }
       // Exit early if chat does not exist and needs to be fetched
       const existingChat = chatStore.getChatById(message.chatId);
       if (!existingChat) {
