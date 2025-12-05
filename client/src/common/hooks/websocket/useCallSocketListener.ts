@@ -135,11 +135,11 @@ export function useCallSocketListeners() {
       updatedCall: WsNotificationResponse<UpdateCallPayload>
     ) => {
       console.log("[EVENT]", "UPDATE_CALL", updatedCall);
-      const { callId, isVideoCall, callStatus } = updatedCall.payload;
+      const { chatId, isVideoCall, callStatus } = updatedCall.payload;
       const callStore = useCallStore.getState();
 
-      if (callStore.callId !== callId) {
-        console.error("callId miss match");
+      if (callStore.chatId !== chatId) {
+        console.error("chatId miss match");
         return;
       }
 
@@ -163,11 +163,11 @@ export function useCallSocketListeners() {
       data: WsNotificationResponse<CallActionResponse>
     ) => {
       console.log("[EVENT]", "CALL_DECLINED", data);
-      const { callId, isCallerCancel } = data.payload;
+      const { chatId, isCallerCancel } = data.payload;
       const callStore = useCallStore.getState();
 
-      if (callStore.callId !== callId) {
-        console.error("callId mismatch");
+      if (callStore.chatId !== chatId) {
+        console.error("chatId mismatch");
         return;
       }
 
@@ -182,11 +182,11 @@ export function useCallSocketListeners() {
       data: WsNotificationResponse<UpdateCallPayload>
     ) => {
       console.log("[EVENT]", "CALL_ENDED", data);
-      const { callId } = data.payload;
+      const { chatId } = data.payload;
       const callStore = useCallStore.getState();
 
-      if (callStore.callId !== callId) {
-        console.error("callId miss match");
+      if (callStore.chatId !== chatId) {
+        console.error("chatId miss match");
         return;
       }
 
@@ -203,14 +203,14 @@ export function useCallSocketListeners() {
       data: WsNotificationResponse<CallErrorResponse>
     ) => {
       console.error("[EVENT]", "Call error:", data);
-      const { reason, callId } = data.payload;
+      const { reason, chatId } = data.payload;
 
       if (reason === CallError.LINE_BUSY) {
         toast.error(t("toast.call.cannot_start"));
         const callStore = useCallStore.getState();
 
-        if (callStore.callId !== callId) {
-          console.error("callId miss match");
+        if (callStore.chatId !== chatId) {
+          console.error("chatId miss match");
           return;
         }
 
