@@ -53,7 +53,7 @@ const SummaryCall = ({ chat }: { chat: ChatResponse; duration?: number }) => {
               : localCallStatus === LocalCallStatus.ERROR
               ? "text-red-500 animate-pulse"
               : localCallStatus === LocalCallStatus.TIMEOUT
-              ? "text-yellow-400 animate-pulse"
+              ? "text-yellow-300 animate-pulse"
               : "text-red-400"
           }`}
         >
