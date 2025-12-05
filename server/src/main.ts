@@ -24,18 +24,15 @@ async function bootstrap() {
     console.log('2️⃣ App created, setting up middleware...');
 
     // RAW BODY FOR LIVEKIT WEBHOOK
+    app.use('/webhook/livekit', raw({ type: 'application/webhook+json' }));
     app.use('/webhook/livekit', function (req, res, next) {
       console.log('🚨 WEBHOOK REQUEST ARRIVED!');
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       console.log('📋 Content-Type:', req.headers['content-type']);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      console.log('response:', req.res);
+      console.log('response:', res);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       next(); // ⚠️ IMPORTANT: Allow request to continue to guard and controller
     });
-
-    // RAW BODY FOR LIVEKIT WEBHOOK
-    app.use('/webhook/livekit', raw({ type: 'application/webhook+json' }));
 
     app.use(
       json({
