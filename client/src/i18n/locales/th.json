@@ -730,72 +730,46 @@
     }
   },
 
-  "system": {
+  "system_message": {
     "unknown": "เกิดเหตุการณ์ของระบบ",
-    
-    "chat_created": "{{displayName}} สร้างการสนทนา",
-    "chat_renamed": "{{displayName}} เปลี่ยนชื่อแชท",
-    "chat_renamed_with_values": "{{displayName}} เปลี่ยนชื่อแชทจาก \"{{oldVal}}\" เป็น \"{{newVal}}\"",
-    "chat_update_avatar": "{{displayName}} อัปเดตอวตารแชท",
-    "chat_update_description": "{{displayName}} อัปเดตคำอธิบายแชท",
-    "chat_update_description_with_values": "{{displayName}} เปลี่ยนคำอธิบายจาก \"{{oldVal}}\" เป็น \"{{newVal}}\"",
-    "chat_set_description": "{{displayName}} ตั้งคำอธิบายเป็น \"{{newVal}}\"",
-    "chat_deleted": "{{displayName}} ลบแชท",
 
-    "another_member": "สมาชิกอื่น",
-    "member_joined": "{{displayName}} เข้าร่วมแชท",
-    "member_added": "{{displayName}} เพิ่ม {{targetName}} เข้าแชท",
-    "member_left": "{{displayName}} ออกจากแชท",
-    "member_kicked": "{{displayName}} ลบ {{targetName}} ออกจากแชท",
-    "member_banned": "{{displayName}} แบน {{targetName}} จากแชท",
-    "member_update_nickname": "{{displayName}} อัปเดตชื่อเล่นของ {{targetName}}",
-    "member_update_nickname_with_values": "{{displayName}} เปลี่ยนชื่อเล่นของ {{targetName}} จาก \"{{oldVal}}\" เป็น \"{{newVal}}\"",
-    "member_set_nickname": "{{displayName}} ตั้งชื่อเล่นของ {{targetName}} เป็น \"{{newVal}}\"",
-    "member_promote_owner": "{{displayName}} เลื่อนขั้น {{targetName}} เป็นเจ้าของ",
-    "member_update_role": "{{displayName}} เปลี่ยนบทบาทของ {{targetName}} เป็น {{newVal}}",
-    "member_update_status": "{{displayName}} เปลี่ยนสถานะของ {{targetName}} เป็น {{newVal}}",
-    "message_pinned": "{{displayName}} ปักหมุดข้อความ \"{{newVal}}\"",
-    "message_unpinned": "{{displayName}} ยกเลิกการปักหมุดข้อความ",
+    "chat_created": "{{displayName}} ได้สร้างการสนทนา",
+    "chat_renamed": "{{displayName}} ได้เปลี่ยนชื่อแชทจาก \"{{oldVal}}\" เป็น \"{{newVal}}\"",
+    "chat_renamed_no_old": "{{displayName}} ได้เปลี่ยนชื่อแชทเป็น \"{{newVal}}\"",
+    "chat_renamed_no_values": "{{displayName}} ได้เปลี่ยนชื่อแชท",
+    "chat_updated_avatar": "{{displayName}} ได้อัปเดตรูปโปรไฟล์ของแชท",
+    "chat_updated_description_from_to": "{{displayName}} ได้เปลี่ยนคำอธิบายจาก \"{{oldVal}}\" เป็น \"{{newVal}}\"",
+    "chat_set_description": "{{displayName}} ได้ตั้งคำอธิบายเป็น \"{{newVal}}\"",
+    "chat_updated_description": "{{displayName}} ได้อัปเดตคำอธิบายของแชท",
+    "chat_deleted": "{{displayName}} ได้ลบแชท",
+
+    "another_member": "สมาชิกคนอื่น",
+    "member_joined": "{{displayName}} ได้เข้าร่วมแชท",
+    "member_added": "{{displayName}} ได้เพิ่ม {{targetName}} เข้าสู่แชท",
+    "member_left": "{{displayName}} ได้ออกจากแชท",
+    "member_kicked": "{{displayName}} ได้ลบ {{targetName}} ออกจากแชท",
+    "member_banned": "{{displayName}} ได้แบน {{targetName}} ออกจากแชท",
+
+    "nickname_changed_from_to": "{{displayName}} ได้เปลี่ยนชื่อเล่นของ {{target}} จาก \"{{oldVal}}\" เป็น \"{{newVal}}\"",
+    "nickname_set": "{{displayName}} ได้ตั้งชื่อเล่นของ {{target}} เป็น \"{{newVal}}\"",
+    "nickname_updated": "{{displayName}} ได้อัปเดตชื่อเล่นของ {{target}}",
+
+    "promoted_to_owner": "{{displayName}} ได้เลื่อนตำแหน่ง {{target}} เป็นเจ้าของแชท",
+    "role_changed_to": "{{displayName}} ได้เปลี่ยนบทบาทของ {{target}} เป็น {{newVal}}",
+    "role_updated": "{{displayName}} ได้อัปเดตบทบาทของ {{target}}",
+
+    "status_changed_to": "{{displayName}} ได้เปลี่ยนสถานะของ {{target}} เป็น {{newVal}}",
+    "status_updated": "{{displayName}} ได้อัปเดตสถานะของ {{target}}",
+
+    "message_pinned_with_content": "{{displayName}} ได้ปักหมุดข้อความ \"{{newVal}}\"",
+    "message_pinned": "{{displayName}} ได้ปักหมุดข้อความ",
+    "message_unpinned": "{{displayName}} ได้ยกเลิกการปักหมุดข้อความ",
+
     "broadcast_message": {
-      "broadcasted": "ออกอากาศแล้ว",
+      "broadcasted": "ถ่ายทอดแล้ว",
       "live_now": "กำลังถ่ายทอดสด",
       "started_at": "เริ่มเมื่อ {{time}}"
     }
-  },
-
-  "system_message": {
-    "default": "เกิดเหตุการณ์ระบบ",
-    "another_member": "สมาชิกคนอื่น",
-    "member_joined": "{{displayName}} เข้าร่วมแชท",
-    "member_left": "{{displayName}} ออกจากแชท",
-    "member_kicked": "{{displayName}} ลบ {{targetName}} ออกจากแชท",
-    "member_banned": "{{displayName}} บล็อก {{targetName}} ในแชท",
-
-    "chat_renamed": "{{displayName}} เปลี่ยนชื่อแชทจาก \"{{oldVal}}\" เป็น \"{{newVal}}\"",
-    "chat_renamed_no_old": "{{displayName}} เปลี่ยนชื่อแชทเป็น \"{{newVal}}\"",
-    "chat_renamed_no_values": "{{displayName}} เปลี่ยนชื่อแชท",
-
-    "chat_updated_avatar": "{{displayName}} อัปเดตอวาตาร์แชท",
-    "chat_updated_description_from_to": "{{displayName}} เปลี่ยนคำอธิบายจาก \"{{oldVal}}\" เป็น \"{{newVal}}\"",
-    "chat_set_description": "{{displayName}} ตั้งค่าคำอธิบายเป็น \"{{newVal}}\"",
-    "chat_updated_description": "{{displayName}} อัปเดตคำอธิบายแชท",
-
-    "nickname_changed_from_to": "{{displayName}} เปลี่ยนชื่อเล่นของ {{target}} จาก \"{{oldVal}}\" เป็น \"{{newVal}}\"",
-    "nickname_set": "{{displayName}} ตั้งชื่อเล่นของ {{target}} เป็น \"{{newVal}}\"",
-    "nickname_updated": "{{displayName}} อัปเดตชื่อเล่นของ {{target}}",
-
-    "promoted_to_owner": "{{displayName}} เลื่อน {{target}} เป็นเจ้าของ",
-    "role_changed_to": "{{displayName}} เปลี่ยนบทบาทของ {{target}} เป็น \"{{newVal}}\"",
-    "role_updated": "{{displayName}} อัปเดตบทบาทของ {{target}}",
-
-    "status_changed_to": "{{displayName}} เปลี่ยนสถานะของ {{target}} เป็น \"{{newVal}}\"",
-    "status_updated": "{{displayName}} อัปเดตสถานะของ {{target}}",
-
-    "message_pinned_with_content": "{{displayName}} ปักหมุดข้อความ \"{{newVal}}\"",
-    "message_pinned": "{{displayName}} ปักหมุดข้อความ",
-    "message_unpinned": "{{displayName}} ยกเลิกการปักหมุดข้อความ",
-
-    "chat_deleted": "{{displayName}} ลบแชท"
   },
 
   "messages": {

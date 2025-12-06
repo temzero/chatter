@@ -107,6 +107,8 @@ export function getSystemMessageText({
 
     case SystemEventType.MEMBER_JOINED:
       return t("system_message.member_joined", { displayName });
+    case SystemEventType.MEMBER_ADDED:
+      return t("system_message.member_added", { displayName, targetName });
     case SystemEventType.MEMBER_LEFT:
       return t("system_message.member_left", { displayName });
     case SystemEventType.MEMBER_KICKED:

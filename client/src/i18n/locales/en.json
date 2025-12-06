@@ -731,56 +731,25 @@
     }
   },
 
-  "system": {
+  "system_message": {
     "unknown": "System event occurred.",
-    
+
     "chat_created": "{{displayName}} created the conversation",
-    "chat_renamed": "{{displayName}} renamed the chat",
-    "chat_renamed_with_values": "{{displayName}} renamed chat from \"{{oldVal}}\" to \"{{newVal}}\"",
-    "chat_update_avatar": "{{displayName}} updated the chat avatar",
-    "chat_update_description": "{{displayName}} updated the chat description",
-    "chat_update_description_with_values": "{{displayName}} changed description from \"{{oldVal}}\" to \"{{newVal}}\"",
+    "chat_renamed": "{{displayName}} renamed chat from \"{{oldVal}}\" to \"{{newVal}}\"",
+    "chat_renamed_no_old": "{{displayName}} renamed chat to \"{{newVal}}\"",
+    "chat_renamed_no_values": "{{displayName}} renamed the chat",
+    "chat_updated_avatar": "{{displayName}} updated the chat avatar",
+    "chat_updated_description_from_to": "{{displayName}} changed description from \"{{oldVal}}\" to \"{{newVal}}\"",
     "chat_set_description": "{{displayName}} set description to \"{{newVal}}\"",
+    "chat_updated_description": "{{displayName}} updated the chat description",
     "chat_deleted": "{{displayName}} deleted the chat",
-    
+
     "another_member": "another member",
     "member_joined": "{{displayName}} joined the chat",
     "member_added": "{{displayName}} added {{targetName}} to the chat",
     "member_left": "{{displayName}} left the chat",
     "member_kicked": "{{displayName}} removed {{targetName}} from the chat",
     "member_banned": "{{displayName}} banned {{targetName}} from the chat",
-
-    "member_update_nickname": "{{displayName}} updated {{targetName}}'s nickname",
-    "member_update_nickname_with_values": "{{displayName}} changed {{targetName}}'s nickname from \"{{oldVal}}\" to \"{{newVal}}\"",
-    "member_set_nickname": "{{displayName}} set {{targetName}}'s nickname to \"{{newVal}}\"",
-    "member_promote_owner": "{{displayName}} promoted {{targetName}} to owner",
-    "member_update_role": "{{displayName}} changed {{targetName}}'s role to {{newVal}}",
-    "member_update_status": "{{displayName}} changed {{targetName}}'s status to {{newVal}}",
-    "message_pinned": "{{displayName}} pinned a message \"{{newVal}}\"",
-    "message_unpinned": "{{displayName}} unpinned a message",
-    "broadcast_message": {
-      "broadcasted": "Broadcasted",
-      "live_now": "Live now",
-      "started_at": "Started {{time}}"
-    }
-  },
-
-  "system_message": {
-    "default": "System event occurred.",
-    "another_member": "another member",
-    "member_joined": "{{displayName}} joined the chat",
-    "member_left": "{{displayName}} left the chat",
-    "member_kicked": "{{displayName}} removed {{targetName}} from the chat",
-    "member_banned": "{{displayName}} banned {{targetName}} from the chat",
-
-    "chat_renamed": "{{displayName}} renamed chat from \"{{oldVal}}\" to \"{{newVal}}\"",
-    "chat_renamed_no_old": "{{displayName}} renamed chat to \"{{newVal}}\"",
-    "chat_renamed_no_values": "{{displayName}} renamed the chat",
-
-    "chat_updated_avatar": "{{displayName}} updated the chat avatar",
-    "chat_updated_description_from_to": "{{displayName}} changed description from \"{{oldVal}}\" to \"{{newVal}}\"",
-    "chat_set_description": "{{displayName}} set description to \"{{newVal}}\"",
-    "chat_updated_description": "{{displayName}} updated the chat description",
 
     "nickname_changed_from_to": "{{displayName}} changed {{target}} nickname from \"{{oldVal}}\" to \"{{newVal}}\"",
     "nickname_set": "{{displayName}} set {{target}} nickname to \"{{newVal}}\"",
@@ -797,7 +766,11 @@
     "message_pinned": "{{displayName}} pinned a message",
     "message_unpinned": "{{displayName}} unpinned a message",
 
-    "chat_deleted": "{{displayName}} deleted the chat"
+    "broadcast_message": {
+      "broadcasted": "Broadcasted",
+      "live_now": "Live now",
+      "started_at": "Started {{time}}"
+    }
   },
 
   "messages": {

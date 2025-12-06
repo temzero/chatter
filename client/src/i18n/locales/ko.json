@@ -729,72 +729,46 @@
     }
   },
 
-  "system": {
-    "unknown": "시스템 이벤트가 발생했습니다.",
-    
-    "chat_created": "{{displayName}}님이 대화를 만들었습니다",
-    "chat_renamed": "{{displayName}}이(가) 채팅 이름을 변경했습니다",
-    "chat_renamed_with_values": "{{displayName}}이(가) 채팅 이름을 \"{{oldVal}}\"에서 \"{{newVal}}\"로 변경했습니다",
-    "chat_update_avatar": "{{displayName}}이(가) 채팅 아바타를 업데이트했습니다",
-    "chat_update_description": "{{displayName}}이(가) 채팅 설명을 업데이트했습니다",
-    "chat_update_description_with_values": "{{displayName}}이(가) 설명을 \"{{oldVal}}\"에서 \"{{newVal}}\"로 변경했습니다",
-    "chat_set_description": "{{displayName}}이(가) 설명을 \"{{newVal}}\"로 설정했습니다",
-    "chat_deleted": "{{displayName}}이(가) 채팅을 삭제했습니다",
-    
-    "another_member": "다른 멤버",
-    "member_joined": "{{displayName}}이(가) 채팅에 참여했습니다",
-    "member_added": "{{displayName}}이(가) {{targetName}}을(를) 채팅에 추가했습니다",
-    "member_left": "{{displayName}}이(가) 채팅을 나갔습니다",
-    "member_kicked": "{{displayName}}이(가) {{targetName}}을(를) 채팅에서 제거했습니다",
-    "member_banned": "{{displayName}}이(가) {{targetName}}을(를) 채팅에서 차단했습니다",
-    "member_update_nickname": "{{displayName}}이(가) {{targetName}}의 별명을 업데이트했습니다",
-    "member_update_nickname_with_values": "{{displayName}}이(가) {{targetName}}의 별명을 \"{{oldVal}}\"에서 \"{{newVal}}\"로 변경했습니다",
-    "member_set_nickname": "{{displayName}}이(가) {{targetName}}의 별명을 \"{{newVal}}\"로 설정했습니다",
-    "member_promote_owner": "{{displayName}}이(가) {{targetName}}을(를) 소유자로 승격했습니다",
-    "member_update_role": "{{displayName}}이(가) {{targetName}}의 역할을 {{newVal}}로 변경했습니다",
-    "member_update_status": "{{displayName}}이(가) {{targetName}}의 상태를 {{newVal}}로 변경했습니다",
-    "message_pinned": "{{displayName}}이(가) 메시지 \"{{newVal}}\"을(를) 고정했습니다",
-    "message_unpinned": "{{displayName}}이(가) 메시지 고정을 해제했습니다",
-    "broadcast_message": {
-      "broadcasted": "방송됨",
-      "live_now": "지금 라이브",
-      "started_at": "{{time}}에 시작"
-    }
-  },
-
   "system_message": {
-    "default": "시스템 이벤트가 발생했습니다.",
-    "another_member": "다른 멤버",
-    "member_joined": "{{displayName}}님이 채팅에 참여했습니다",
-    "member_left": "{{displayName}}님이 채팅을 나갔습니다",
-    "member_kicked": "{{displayName}}님이 {{targetName}}님을 채팅에서 제거했습니다",
-    "member_banned": "{{displayName}}님이 {{targetName}}님을 채팅에서 차단했습니다",
+    "unknown": "시스템 이벤트가 발생했습니다.",
 
+    "chat_created": "{{displayName}}님이 대화를 생성했습니다",
     "chat_renamed": "{{displayName}}님이 채팅 이름을 \"{{oldVal}}\"에서 \"{{newVal}}\"로 변경했습니다",
     "chat_renamed_no_old": "{{displayName}}님이 채팅 이름을 \"{{newVal}}\"로 변경했습니다",
     "chat_renamed_no_values": "{{displayName}}님이 채팅 이름을 변경했습니다",
-
     "chat_updated_avatar": "{{displayName}}님이 채팅 아바타를 업데이트했습니다",
     "chat_updated_description_from_to": "{{displayName}}님이 설명을 \"{{oldVal}}\"에서 \"{{newVal}}\"로 변경했습니다",
     "chat_set_description": "{{displayName}}님이 설명을 \"{{newVal}}\"로 설정했습니다",
     "chat_updated_description": "{{displayName}}님이 채팅 설명을 업데이트했습니다",
+    "chat_deleted": "{{displayName}}님이 채팅을 삭제했습니다",
+
+    "another_member": "다른 멤버",
+    "member_joined": "{{displayName}}님이 채팅에 참여했습니다",
+    "member_added": "{{displayName}}님이 {{targetName}}님을 채팅에 추가했습니다",
+    "member_left": "{{displayName}}님이 채팅을 나갔습니다",
+    "member_kicked": "{{displayName}}님이 {{targetName}}님을 채팅에서 제거했습니다",
+    "member_banned": "{{displayName}}님이 {{targetName}}님을 채팅에서 차단했습니다",
 
     "nickname_changed_from_to": "{{displayName}}님이 {{target}}님의 닉네임을 \"{{oldVal}}\"에서 \"{{newVal}}\"로 변경했습니다",
     "nickname_set": "{{displayName}}님이 {{target}}님의 닉네임을 \"{{newVal}}\"로 설정했습니다",
     "nickname_updated": "{{displayName}}님이 {{target}}님의 닉네임을 업데이트했습니다",
 
-    "promoted_to_owner": "{{displayName}}님이 {{target}}님을 소유자로 승격시켰습니다",
-    "role_changed_to": "{{displayName}}님이 {{target}}님의 역할을 \"{{newVal}}\"로 변경했습니다",
+    "promoted_to_owner": "{{displayName}}님이 {{target}}님을 오너로 승격했습니다",
+    "role_changed_to": "{{displayName}}님이 {{target}}님의 역할을 {{newVal}}로 변경했습니다",
     "role_updated": "{{displayName}}님이 {{target}}님의 역할을 업데이트했습니다",
 
-    "status_changed_to": "{{displayName}}님이 {{target}}님의 상태를 \"{{newVal}}\"로 변경했습니다",
+    "status_changed_to": "{{displayName}}님이 {{target}}님의 상태를 {{newVal}}로 변경했습니다",
     "status_updated": "{{displayName}}님이 {{target}}님의 상태를 업데이트했습니다",
 
-    "message_pinned_with_content": "{{displayName}}님이 메시지 \"{{newVal}}\"를 고정했습니다",
+    "message_pinned_with_content": "{{displayName}}님이 \"{{newVal}}\" 메시지를 고정했습니다",
     "message_pinned": "{{displayName}}님이 메시지를 고정했습니다",
     "message_unpinned": "{{displayName}}님이 메시지 고정을 해제했습니다",
 
-    "chat_deleted": "{{displayName}}님이 채팅을 삭제했습니다"
+    "broadcast_message": {
+      "broadcasted": "전송됨",
+      "live_now": "현재 라이브",
+      "started_at": "{{time}}에 시작됨"
+    }
   },
 
   "messages": {

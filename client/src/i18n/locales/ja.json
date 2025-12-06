@@ -730,72 +730,46 @@
     }
   },
 
-  "system": {
+  "system_message": {
     "unknown": "システムイベントが発生しました。",
 
-    "chat_created": "{{displayName}} が会話を作成しました",
-    "chat_renamed": "{{displayName}}がチャットの名前を変更しました",
-    "chat_renamed_with_values": "{{displayName}}がチャット名を「{{oldVal}}」から「{{newVal}}」に変更しました",
-    "chat_update_avatar": "{{displayName}}がチャットのアバターを更新しました",
-    "chat_update_description": "{{displayName}}がチャットの説明を更新しました",
-    "chat_update_description_with_values": "{{displayName}}が説明を「{{oldVal}}」から「{{newVal}}」に変更しました",
-    "chat_set_description": "{{displayName}}が説明を「{{newVal}}」に設定しました",
-    "chat_deleted": "{{displayName}}がチャットを削除しました",
-
-    "another_member": "他のメンバー",
-    "member_joined": "{{displayName}}がチャットに参加しました",
-    "member_added": "{{displayName}}が{{targetName}}をチャットに追加しました",
-    "member_left": "{{displayName}}がチャットを退出しました",
-    "member_kicked": "{{displayName}}が{{targetName}}をチャットから削除しました",
-    "member_banned": "{{displayName}}が{{targetName}}をチャットから追放しました",
-    "member_update_nickname": "{{displayName}}が{{targetName}}のニックネームを更新しました",
-    "member_update_nickname_with_values": "{{displayName}}が{{targetName}}のニックネームを「{{oldVal}}」から「{{newVal}}」に変更しました",
-    "member_set_nickname": "{{displayName}}が{{targetName}}のニックネームを「{{newVal}}」に設定しました",
-    "member_promote_owner": "{{displayName}}が{{targetName}}をオーナーに昇格しました",
-    "member_update_role": "{{displayName}}が{{targetName}}の役割を{{newVal}}に変更しました",
-    "member_update_status": "{{displayName}}が{{targetName}}のステータスを{{newVal}}に変更しました",
-    "message_pinned": "{{displayName}}がメッセージ「{{newVal}}」をピン留めしました",
-    "message_unpinned": "{{displayName}}がメッセージのピン留めを解除しました",
-    "broadcast_message": {
-      "broadcasted": "ブロードキャスト済み",
-      "live_now": "現在ライブ中",
-      "started_at": "{{time}}に開始"
-    }
-  },
-
-  "system_message": {
-    "default": "システムイベントが発生しました。",
-    "another_member": "他のメンバー",
-    "member_joined": "{{displayName}} がチャットに参加しました",
-    "member_left": "{{displayName}} がチャットから退出しました",
-    "member_kicked": "{{displayName}} が {{targetName}} をチャットから削除しました",
-    "member_banned": "{{displayName}} が {{targetName}} をチャットから追放しました",
-
+    "chat_created": "{{displayName}} がチャットを作成しました",
     "chat_renamed": "{{displayName}} がチャット名を \"{{oldVal}}\" から \"{{newVal}}\" に変更しました",
     "chat_renamed_no_old": "{{displayName}} がチャット名を \"{{newVal}}\" に変更しました",
     "chat_renamed_no_values": "{{displayName}} がチャット名を変更しました",
-
     "chat_updated_avatar": "{{displayName}} がチャットのアバターを更新しました",
     "chat_updated_description_from_to": "{{displayName}} が説明を \"{{oldVal}}\" から \"{{newVal}}\" に変更しました",
     "chat_set_description": "{{displayName}} が説明を \"{{newVal}}\" に設定しました",
     "chat_updated_description": "{{displayName}} がチャットの説明を更新しました",
+    "chat_deleted": "{{displayName}} がチャットを削除しました",
+
+    "another_member": "別のメンバー",
+    "member_joined": "{{displayName}} がチャットに参加しました",
+    "member_added": "{{displayName}} が {{targetName}} をチャットに追加しました",
+    "member_left": "{{displayName}} がチャットを退出しました",
+    "member_kicked": "{{displayName}} が {{targetName}} をチャットから削除しました",
+    "member_banned": "{{displayName}} が {{targetName}} をチャットから禁止しました",
 
     "nickname_changed_from_to": "{{displayName}} が {{target}} のニックネームを \"{{oldVal}}\" から \"{{newVal}}\" に変更しました",
     "nickname_set": "{{displayName}} が {{target}} のニックネームを \"{{newVal}}\" に設定しました",
     "nickname_updated": "{{displayName}} が {{target}} のニックネームを更新しました",
 
     "promoted_to_owner": "{{displayName}} が {{target}} をオーナーに昇格させました",
-    "role_changed_to": "{{displayName}} が {{target}} の役割を \"{{newVal}}\" に変更しました",
+    "role_changed_to": "{{displayName}} が {{target}} の役割を {{newVal}} に変更しました",
     "role_updated": "{{displayName}} が {{target}} の役割を更新しました",
 
-    "status_changed_to": "{{displayName}} が {{target}} のステータスを \"{{newVal}}\" に変更しました",
+    "status_changed_to": "{{displayName}} が {{target}} のステータスを {{newVal}} に変更しました",
     "status_updated": "{{displayName}} が {{target}} のステータスを更新しました",
 
-    "message_pinned_with_content": "{{displayName}} がメッセージ \"{{newVal}}\" を固定しました",
-    "message_pinned": "{{displayName}} がメッセージを固定しました",
-    "message_unpinned": "{{displayName}} がメッセージの固定を解除しました",
+    "message_pinned_with_content": "{{displayName}} がメッセージ \"{{newVal}}\" をピン留めしました",
+    "message_pinned": "{{displayName}} がメッセージをピン留めしました",
+    "message_unpinned": "{{displayName}} がメッセージのピン留めを解除しました",
 
-    "chat_deleted": "{{displayName}} がチャットを削除しました"
+    "broadcast_message": {
+      "broadcasted": "配信済み",
+      "live_now": "ライブ中",
+      "started_at": "{{time}} に開始"
+    }
   },
 
   "messages": {

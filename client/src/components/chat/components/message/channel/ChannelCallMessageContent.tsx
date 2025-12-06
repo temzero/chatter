@@ -34,17 +34,17 @@ export const ChannelCallMessageContent: React.FC<BroadcastMessageProps> = ({
 
         {isError
           ? t("common.messages.failed")
-          : t("system.broadcast_message.broadcasted")}
+          : t("system_message.broadcast_message.broadcasted")}
       </div>
 
       {/* Text */}
       <div className="flex items-center text-sm opacity-70 gap-2">
         {isActive ? (
           <span className="font-medium text-red-600">
-            🔴 {t("system.broadcast_message.live_now")}
+            🔴 {t("system_message.broadcast_message.live_now")}
             <span className="ml-1">
               •{" "}
-              {t("system.broadcast_message.started_at", {
+              {t("system_message.broadcast_message.started_at", {
                 time: new Date(startedAt).toLocaleTimeString(),
               })}
             </span>

@@ -731,61 +731,31 @@
     }
   },
 
-  "system": {
+  "system_message": {
     "unknown": "Ocurrió un evento del sistema.",
-    
+
     "chat_created": "{{displayName}} creó la conversación",
-    "chat_renamed": "{{displayName}} renombró el chat",
-    "chat_renamed_with_values": "{{displayName}} renombró el chat de \"{{oldVal}}\" a \"{{newVal}}\"",
-    "chat_update_avatar": "{{displayName}} actualizó el avatar del chat",
-    "chat_update_description": "{{displayName}} actualizó la descripción del chat",
-    "chat_update_description_with_values": "{{displayName}} cambió la descripción de \"{{oldVal}}\" a \"{{newVal}}\"",
-    "chat_set_description": "{{displayName}} estableció la descripción como \"{{newVal}}\"",
+    "chat_renamed": "{{displayName}} renombró el chat de \"{{oldVal}}\" a \"{{newVal}}\"",
+    "chat_renamed_no_old": "{{displayName}} renombró el chat a \"{{newVal}}\"",
+    "chat_renamed_no_values": "{{displayName}} renombró el chat",
+    "chat_updated_avatar": "{{displayName}} actualizó el avatar del chat",
+    "chat_updated_description_from_to": "{{displayName}} cambió la descripción de \"{{oldVal}}\" a \"{{newVal}}\"",
+    "chat_set_description": "{{displayName}} estableció la descripción a \"{{newVal}}\"",
+    "chat_updated_description": "{{displayName}} actualizó la descripción del chat",
     "chat_deleted": "{{displayName}} eliminó el chat",
 
     "another_member": "otro miembro",
     "member_joined": "{{displayName}} se unió al chat",
     "member_added": "{{displayName}} añadió a {{targetName}} al chat",
     "member_left": "{{displayName}} salió del chat",
-    "member_kicked": "{{displayName}} eliminó a {{targetName}} del chat",
-    "member_banned": "{{displayName}} baneó a {{targetName}} del chat",
-    "member_update_nickname": "{{displayName}} actualizó el apodo de {{targetName}}",
-    "member_update_nickname_with_values": "{{displayName}} cambió el apodo de {{targetName}} de \"{{oldVal}}\" a \"{{newVal}}\"",
-    "member_set_nickname": "{{displayName}} estableció el apodo de {{targetName}} como \"{{newVal}}\"",
-    "member_promote_owner": "{{displayName}} promovió a {{targetName}} a propietario",
-    "member_update_role": "{{displayName}} cambió el rol de {{targetName}} a {{newVal}}",
-    "member_update_status": "{{displayName}} cambió el estado de {{targetName}} a {{newVal}}",
-    "message_pinned": "{{displayName}} fijó un mensaje \"{{newVal}}\"",
-    "message_unpinned": "{{displayName}} desfijó un mensaje",
-    "broadcast_message": {
-      "broadcasted": "Transmitido",
-      "live_now": "Ahora en vivo",
-      "started_at": "Comenzó a las {{time}}"
-    }
-  },
-
-  "system_message": {
-    "default": "Ocurrió un evento del sistema.",
-    "another_member": "otro miembro",
-    "member_joined": "{{displayName}} se unió al chat",
-    "member_left": "{{displayName}} abandonó el chat",
-    "member_kicked": "{{displayName}} eliminó a {{targetName}} del chat",
-    "member_banned": "{{displayName}} bloqueó a {{targetName}} en el chat",
-
-    "chat_renamed": "{{displayName}} cambió el nombre del chat de \"{{oldVal}}\" a \"{{newVal}}\"",
-    "chat_renamed_no_old": "{{displayName}} cambió el nombre del chat a \"{{newVal}}\"",
-    "chat_renamed_no_values": "{{displayName}} cambió el nombre del chat",
-
-    "chat_updated_avatar": "{{displayName}} actualizó el avatar del chat",
-    "chat_updated_description_from_to": "{{displayName}} cambió la descripción de \"{{oldVal}}\" a \"{{newVal}}\"",
-    "chat_set_description": "{{displayName}} estableció la descripción a \"{{newVal}}\"",
-    "chat_updated_description": "{{displayName}} actualizó la descripción del chat",
+    "member_kicked": "{{displayName}} expulsó a {{targetName}} del chat",
+    "member_banned": "{{displayName}} prohibió a {{targetName}} del chat",
 
     "nickname_changed_from_to": "{{displayName}} cambió el apodo de {{target}} de \"{{oldVal}}\" a \"{{newVal}}\"",
     "nickname_set": "{{displayName}} estableció el apodo de {{target}} a \"{{newVal}}\"",
     "nickname_updated": "{{displayName}} actualizó el apodo de {{target}}",
 
-    "promoted_to_owner": "{{displayName}} promovió a {{target}} a propietario",
+    "promoted_to_owner": "{{displayName}} ascendió a {{target}} a propietario",
     "role_changed_to": "{{displayName}} cambió el rol de {{target}} a {{newVal}}",
     "role_updated": "{{displayName}} actualizó el rol de {{target}}",
 
@@ -794,9 +764,13 @@
 
     "message_pinned_with_content": "{{displayName}} fijó un mensaje \"{{newVal}}\"",
     "message_pinned": "{{displayName}} fijó un mensaje",
-    "message_unpinned": "{{displayName}} des-fijó un mensaje",
+    "message_unpinned": "{{displayName}} desfixó un mensaje",
 
-    "chat_deleted": "{{displayName}} eliminó el chat"
+    "broadcast_message": {
+      "broadcasted": "Transmitido",
+      "live_now": "En vivo ahora",
+      "started_at": "Iniciado a las {{time}}"
+    }
   },
 
   "messages": {

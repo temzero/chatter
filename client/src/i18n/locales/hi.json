@@ -729,70 +729,46 @@
     }
   },
 
-  "system": {
-    "unknown": "सिस्टम इवेंट हुआ।",
-    "chat_created": "{{displayName}} ने वार्ता बनाई",
-    "chat_renamed": "{{displayName}} ने चैट का नाम बदला",
-    "chat_renamed_with_values": "{{displayName}} ने चैट का नाम \"{{oldVal}}\" से \"{{newVal}}\" में बदला",
-    "chat_update_avatar": "{{displayName}} ने चैट अवतार अपडेट किया",
-    "chat_update_description": "{{displayName}} ने चैट विवरण अपडेट किया",
-    "chat_update_description_with_values": "{{displayName}} ने विवरण को \"{{oldVal}}\" से \"{{newVal}}\" में बदला",
-    "chat_set_description": "{{displayName}} ने विवरण को \"{{newVal}}\" पर सेट किया",
-    "chat_deleted": "{{displayName}} ने चैट हटा दिया",
-    "another_member": "एक अन्य सदस्य",
-    "member_joined": "{{displayName}} चैट में शामिल हुआ",
-    "member_added": "{{displayName}} ने {{targetName}} को चैट में जोड़ा",
-    "member_left": "{{displayName}} चैट से बाहर निकला",
-    "member_kicked": "{{displayName}} ने {{targetName}} को चैट से हटाया",
-    "member_banned": "{{displayName}} ने {{targetName}} को चैट से प्रतिबंधित किया",
-    "member_update_nickname": "{{displayName}} ने {{targetName}} का उपनाम अपडेट किया",
-    "member_update_nickname_with_values": "{{displayName}} ने {{targetName}} का उपनाम \"{{oldVal}}\" से \"{{newVal}}\" में बदला",
-    "member_set_nickname": "{{displayName}} ने {{targetName}} का उपनाम \"{{newVal}}\" पर सेट किया",
-    "member_promote_owner": "{{displayName}} ने {{targetName}} को मालिक बनाया",
-    "member_update_role": "{{displayName}} ने {{targetName}} की भूमिका को {{newVal}} में बदला",
-    "member_update_status": "{{displayName}} ने {{targetName}} की स्थिति को {{newVal}} में बदला",
-    "message_pinned": "{{displayName}} ने संदेश \"{{newVal}}\" को पिन किया",
-    "message_unpinned": "{{displayName}} ने संदेश को अनपिन किया",
-    "broadcast_message": {
-      "broadcasted": "प्रसारित",
-      "live_now": "अब लाइव",
-      "started_at": "{{time}} पर शुरू हुआ"
-    }
-  },
-
   "system_message": {
-    "default": "सिस्टम इवेंट हुआ।",
-    "another_member": "एक और सदस्य",
-    "member_joined": "{{displayName}} ने चैट में शामिल हुआ",
-    "member_left": "{{displayName}} ने चैट छोड़ दी",
-    "member_kicked": "{{displayName}} ने {{targetName}} को चैट से हटाया",
-    "member_banned": "{{displayName}} ने {{targetName}} को चैट से प्रतिबंधित किया",
+    "unknown": "एक सिस्टम घटना हुई।",
 
-    "chat_renamed": "{{displayName}} ने चैट का नाम \"{{oldVal}}\" से \"{{newVal}}\" में बदल दिया",
-    "chat_renamed_no_old": "{{displayName}} ने चैट का नाम \"{{newVal}}\" में बदल दिया",
-    "chat_renamed_no_values": "{{displayName}} ने चैट का नाम बदल दिया",
-
-    "chat_updated_avatar": "{{displayName}} ने चैट अवतार अपडेट किया",
-    "chat_updated_description_from_to": "{{displayName}} ने विवरण \"{{oldVal}}\" से \"{{newVal}}\" में बदल दिया",
+    "chat_created": "{{displayName}} ने बातचीत बनाई",
+    "chat_renamed": "{{displayName}} ने चैट का नाम \"{{oldVal}}\" से \"{{newVal}}\" में बदला",
+    "chat_renamed_no_old": "{{displayName}} ने चैट का नाम \"{{newVal}}\" कर दिया",
+    "chat_renamed_no_values": "{{displayName}} ने चैट का नाम बदला",
+    "chat_updated_avatar": "{{displayName}} ने चैट का अवतार अपडेट किया",
+    "chat_updated_description_from_to": "{{displayName}} ने विवरण \"{{oldVal}}\" से \"{{newVal}}\" में बदला",
     "chat_set_description": "{{displayName}} ने विवरण \"{{newVal}}\" सेट किया",
     "chat_updated_description": "{{displayName}} ने चैट विवरण अपडेट किया",
+    "chat_deleted": "{{displayName}} ने चैट हटाई",
 
-    "nickname_changed_from_to": "{{displayName}} ने {{target}} का उपनाम \"{{oldVal}}\" से \"{{newVal}}\" में बदल दिया",
+    "another_member": "अन्य सदस्य",
+    "member_joined": "{{displayName}} चैट में शामिल हुआ",
+    "member_added": "{{displayName}} ने {{targetName}} को चैट में जोड़ा",
+    "member_left": "{{displayName}} चैट से निकल गया",
+    "member_kicked": "{{displayName}} ने {{targetName}} को चैट से हटाया",
+    "member_banned": "{{displayName}} ने {{targetName}} को चैट से प्रतिबंधित किया",
+
+    "nickname_changed_from_to": "{{displayName}} ने {{target}} का उपनाम \"{{oldVal}}\" से \"{{newVal}}\" में बदला",
     "nickname_set": "{{displayName}} ने {{target}} का उपनाम \"{{newVal}}\" सेट किया",
     "nickname_updated": "{{displayName}} ने {{target}} का उपनाम अपडेट किया",
 
-    "promoted_to_owner": "{{displayName}} ने {{target}} को मालिक बनाया",
-    "role_changed_to": "{{displayName}} ने {{target}} की भूमिका \"{{newVal}}\" में बदल दी",
+    "promoted_to_owner": "{{displayName}} ने {{target}} को मालिक पद पर पदोन्नत किया",
+    "role_changed_to": "{{displayName}} ने {{target}} की भूमिका {{newVal}} में बदली",
     "role_updated": "{{displayName}} ने {{target}} की भूमिका अपडेट की",
 
-    "status_changed_to": "{{displayName}} ने {{target}} की स्थिति \"{{newVal}}\" में बदल दी",
+    "status_changed_to": "{{displayName}} ने {{target}} की स्थिति {{newVal}} में बदली",
     "status_updated": "{{displayName}} ने {{target}} की स्थिति अपडेट की",
 
-    "message_pinned_with_content": "{{displayName}} ने संदेश \"{{newVal}}\" पिन किया",
-    "message_pinned": "{{displayName}} ने संदेश पिन किया",
-    "message_unpinned": "{{displayName}} ने संदेश पिन हटाया",
+    "message_pinned_with_content": "{{displayName}} ने संदेश \"{{newVal}}\" को पिन किया",
+    "message_pinned": "{{displayName}} ने एक संदेश पिन किया",
+    "message_unpinned": "{{displayName}} ने संदेश का पिन हटाया",
 
-    "chat_deleted": "{{displayName}} ने चैट हटाई"
+    "broadcast_message": {
+      "broadcasted": "प्रसारित किया गया",
+      "live_now": "अभी लाइव",
+      "started_at": "{{time}} पर शुरू हुआ"
+    }
   },
 
   "messages": {
