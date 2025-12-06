@@ -139,7 +139,7 @@ export function useCallSocketListeners() {
       const callStore = useCallStore.getState();
 
       if (callStore.chatId !== chatId) {
-        console.error("chatId miss match");
+        console.log("chatId miss match");
         return;
       }
 
@@ -186,7 +186,7 @@ export function useCallSocketListeners() {
       const callStore = useCallStore.getState();
 
       if (callStore.chatId !== chatId) {
-        console.error("chatId miss match");
+        console.log("chatId miss match");
         return;
       }
 
@@ -210,7 +210,7 @@ export function useCallSocketListeners() {
         const callStore = useCallStore.getState();
 
         if (callStore.chatId !== chatId) {
-          console.error("chatId miss match");
+          console.log("chatId miss match");
           return;
         }
 

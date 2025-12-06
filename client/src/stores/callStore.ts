@@ -37,9 +37,9 @@ interface CallActions {
   // lifecycle
   startCall: (
     chatId: string,
-    videoCall?: boolean,
-    opts?: {
-      videoStream?: MediaStream | null;
+    options?: {
+      isVoiceEnabled?: boolean;
+      isVideoCall?: boolean;
       screenStream?: MediaStream | null;
     }
   ) => Promise<void>;
@@ -51,7 +51,7 @@ interface CallActions {
   }) => Promise<void>;
   declineCall: () => void;
   leaveCall: () => void;
-  endCall: (opt?: {
+  endCall: (options?: {
     isCancel?: boolean;
     isDeclined?: boolean;
     isTimeout?: boolean;
@@ -107,17 +107,23 @@ export const useCallStore = create<CallState & CallActions>()(
 
     startCall: async (
       chatId: string,
-      videoCall?: boolean,
-      opts?: {
-        videoStream?: MediaStream;
-        screenStream?: MediaStream;
+      options?: {
+        isVoiceEnabled?: boolean;
+        isVideoCall?: boolean;
+        screenStream?: MediaStream | null;
       }
     ) => {
+      // Clear previous call data
       get().clearCallData();
-      const isVideoCall = !!videoCall;
-      // const isScreenShare = !!screenShare;
+
+      const {
+        isVoiceEnabled = true,
+        isVideoCall = false,
+        screenStream = null,
+      } = options ?? {};
 
       try {
+        // Set initial state
         set({
           chatId,
           isVideoCall,
@@ -126,6 +132,7 @@ export const useCallStore = create<CallState & CallActions>()(
 
         useModalStore.getState().openModal(ModalType.CALL);
 
+        // Timeout if call not answered
         const timeoutRef = setTimeout(() => {
           if (get().localCallStatus === LocalCallStatus.OUTGOING) {
             get().endCall({ isTimeout: true });
@@ -133,13 +140,13 @@ export const useCallStore = create<CallState & CallActions>()(
         }, 45000);
         set({ timeoutRef });
 
-        // init LiveKit
+        // Initialize LiveKit
         const liveKitService = new LiveKitService();
         set({ liveKitService });
 
         const token = await getMyCallToken(chatId);
         if (!token) {
-          console.warn("[START CALL]", "No token available for LiveKit");
+          console.warn("[START CALL] No token available for LiveKit");
           set({
             localCallStatus: LocalCallStatus.ERROR,
             error: CallError.PERMISSION_DENIED,
@@ -147,18 +154,15 @@ export const useCallStore = create<CallState & CallActions>()(
           return;
         }
 
-        // connect with requested options
+        // Connect to LiveKit using preview settings
         await get().connectToLiveKitRoom(token, {
-          audio: true,
-          video: opts?.videoStream ? false : isVideoCall,
+          audio: isVoiceEnabled,
+          video: isVideoCall,
         });
 
-        // 👇 if screenShare is enabled and user already picked a screen in preview
-        if (opts?.videoStream) {
-          await liveKitService.toggleCamera(true, opts.screenStream);
-        }
-        if (opts?.screenStream) {
-          await liveKitService.toggleScreenShare(true, opts.screenStream);
+        // Attach screen share if provided
+        if (screenStream) {
+          await liveKitService.toggleScreenShare(true, screenStream);
         }
       } catch (error) {
         console.error("[START CALL]", error);
@@ -237,6 +241,8 @@ export const useCallStore = create<CallState & CallActions>()(
       const { callId, chatId } = get();
       if (!callId || !chatId) return;
 
+      const { isVoiceEnabled = true, isVideoEnabled = false } = options ?? {};
+
       set({
         localCallStatus: LocalCallStatus.CONNECTING,
       });
@@ -257,8 +263,8 @@ export const useCallStore = create<CallState & CallActions>()(
         }
 
         await get().connectToLiveKitRoom(token, {
-          audio: options?.isVoiceEnabled ?? true,
-          video: options?.isVideoEnabled ?? get().isVideoCall,
+          audio: isVoiceEnabled ?? true,
+          video: isVideoEnabled ?? get().isVideoCall,
         });
 
         set({
@@ -325,7 +331,7 @@ export const useCallStore = create<CallState & CallActions>()(
     },
 
     endCall: async (
-      opt: {
+      options: {
         isDeclined?: boolean;
         isCancel?: boolean;
         isTimeout?: boolean;
@@ -338,11 +344,11 @@ export const useCallStore = create<CallState & CallActions>()(
       let localCallStatus: LocalCallStatus;
       let endedAt: Date | undefined;
 
-      if (opt.isDeclined) {
+      if (options.isDeclined) {
         localCallStatus = LocalCallStatus.DECLINED;
-      } else if (opt.isCancel) {
+      } else if (options.isCancel) {
         localCallStatus = LocalCallStatus.CANCELED;
-      } else if (opt.isTimeout) {
+      } else if (options.isTimeout) {
         localCallStatus = LocalCallStatus.TIMEOUT;
       } else {
         localCallStatus = LocalCallStatus.ENDED;
@@ -459,10 +465,12 @@ export const useCallStore = create<CallState & CallActions>()(
       const { liveKitService } = get();
       if (!liveKitService) return;
 
+      const { audio = true, video = false, screen = false } = options ?? {};
+
       await liveKitService.connect(token, {
-        audio: options?.audio ?? true,
-        video: options?.video ?? false,
-        screen: options?.screen ?? false,
+        audio,
+        video,
+        screen,
         onError: (error) => {
           set({ localCallStatus: LocalCallStatus.ERROR });
           console.error("[LIVEKIT]", error);

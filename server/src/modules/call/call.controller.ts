@@ -15,7 +15,6 @@ import { ErrorResponse } from '@/common/api-response/errors';
 import { CallResponseDto } from './dto/call-response.dto';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
-import { ChatMemberService } from '../chat-member/chat-member.service';
 import { LiveKitService } from './liveKit.service';
 import { CallStatus } from '@shared/types/call';
 import { IncomingCallResponse } from '@shared/types/call';

@@ -23,7 +23,7 @@ export class CallService {
     private readonly userService: UserService,
     private readonly callMapper: CallMapper,
     private readonly liveKitService: LiveKitService,
-    private readonly chatService: ChatService,    
+    private readonly chatService: ChatService,
   ) {}
 
   async getCallHistory(
@@ -281,51 +281,49 @@ export class CallService {
     return await this.callRepository.save(call);
   }
 
-  async getPendingCall(
-  userId: string,
-): Promise<IncomingCallResponse | null> {
-  // 1. Get chatIds where this user is a member
-  const chatIds = await this.chatMemberService.getChatIdsByUserId(userId);
-  if (chatIds.length === 0) return null;
+  async getPendingCall(userId: string): Promise<IncomingCallResponse | null> {
+    // 1. Get chatIds where this user is a member
+    const chatIds = await this.chatMemberService.getChatIdsByUserId(userId);
+    if (chatIds.length === 0) return null;
 
-  // 2. Get active rooms by these chatIds
-  const activeRooms = await this.liveKitService.getActiveRoomsForUser(
-    userId,
-    chatIds,
-  );
+    // 2. Get active rooms by these chatIds
+    const activeRooms = await this.liveKitService.getActiveRoomsForUser(
+      userId,
+      chatIds,
+    );
 
-  // 3. Map each active room → IncomingCallResponse
-  const pendingCalls: IncomingCallResponse[] = await Promise.all(
-    activeRooms.map(async (room) => {
-      const chat = await this.chatService.getChatById(room.name);
-      const callId = await this.getActiveCallIdByChatId(room.name);
+    // 3. Map each active room → IncomingCallResponse
+    const pendingCalls: IncomingCallResponse[] = await Promise.all(
+      activeRooms.map(async (room) => {
+        const chat = await this.chatService.getChatById(room.name);
+        const callId = await this.getActiveCallIdByChatId(room.name);
 
-      const isVideoCall = chat.type !== ChatType.DIRECT;
-      const isBroadcast = chat.type === ChatType.CHANNEL;
+        const isVideoCall = chat.type !== ChatType.DIRECT;
+        const isBroadcast = chat.type === ChatType.CHANNEL;
 
-      const status =
-        room.numParticipants <= 1
-          ? CallStatus.DIALING
-          : CallStatus.IN_PROGRESS;
+        const status =
+          room.numParticipants <= 1
+            ? CallStatus.DIALING
+            : CallStatus.IN_PROGRESS;
 
-      return {
-        callId: callId ?? 'empty',
-        chatId: room.name,
-        status,
-        participantsCount: room.numParticipants,
-        isVideoCall,
-        isBroadcast,
-        startedAt: room.creationTime
-          ? new Date(Number(room.creationTime) * 1000)
-          : undefined,
-      };
-    }),
-  );
+        return {
+          callId: callId ?? 'empty',
+          chatId: room.name,
+          status,
+          participantsCount: room.numParticipants,
+          isVideoCall,
+          isBroadcast,
+          startedAt: room.creationTime
+            ? new Date(Number(room.creationTime) * 1000)
+            : undefined,
+        };
+      }),
+    );
 
-  const latestCall = pendingCalls[0] 
-
-  return latestCall;
-}
+    const latestCall =
+      pendingCalls.filter((call) => !call.isBroadcast)[0] ?? null;
+    return latestCall;
+  }
 
   async deleteCall(id: string): Promise<void> {
     const result = await this.callRepository.delete(id);

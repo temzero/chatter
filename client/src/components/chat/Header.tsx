@@ -208,7 +208,11 @@ const Header: React.FC<ChatHeaderProps> = ({
 
                       {isGroup && (
                         <button
-                          onClick={() => startCall(chat.id, true)}
+                          onClick={() =>
+                            startCall(chat.id, {
+                              isVideoCall: true,
+                            })
+                          }
                           className="opacity-60 hover:opacity-100 transition"
                         >
                           <i className="material-symbols-outlined text-3xl!">

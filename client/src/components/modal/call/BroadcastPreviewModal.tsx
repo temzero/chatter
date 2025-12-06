@@ -35,7 +35,9 @@ const BroadcastPreviewModal = ({ chat }: { chat: ChatResponse }) => {
 
   const startBroadcast = async () => {
     try {
-      await startCall(chat.id, isVideoEnabled, {
+      await startCall(chat.id, {
+        isVoiceEnabled,
+        isVideoCall: isVideoEnabled,
         screenStream: localScreenStream,
       });
     } catch (err) {

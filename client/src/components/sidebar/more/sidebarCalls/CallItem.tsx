@@ -44,7 +44,7 @@ const CallItem: React.FC<CallItemProps> = ({ call, isCaller, onDelete }) => {
 
   const handleStartCall = (e: React.MouseEvent) => {
     e.stopPropagation();
-    startCall(chat.id, call.isVideoCall);
+    startCall(chat.id, { isVideoCall: call.isVideoCall });
   };
 
   const roundedClass =

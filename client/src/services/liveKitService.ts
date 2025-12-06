@@ -210,43 +210,22 @@ export class LiveKitService {
   private setupEventListeners() {
     this.room
       .on(RoomEvent.Connected, async () => {
-        console.log("[LIVEKIT]", "✅ Connected to LiveKit room");
-        console.log("[LIVEKIT]", "🌐 Room URL:", this.url);
-        console.log(
-          "[LIVEKIT]",
-          "Local participant:",
-          this.room.localParticipant.identity
-        );
-
-        // log remote participants
-        console.log(
-          "[LIVEKIT]",
-          "Remote participants:",
-          Array.from(this.room.remoteParticipants.values()).map((p) => ({
-            id: p.identity,
-            name: p.name,
-            tracks: Array.from(p.trackPublications.values()).map((pub) => ({
-              source: pub.source,
-              kind: pub.kind,
-              isSubscribed: pub.isSubscribed,
-            })),
-          }))
-        );
-
         this.handleExistingParticipants();
 
-        // if (this.options?.audio) {
-        await this.toggleMicrophone(true);
-        // }
-        if (this.options?.video) {
-          await this.toggleCamera(true);
-        }
-        if (this.options?.screen) {
-          await this.toggleScreenShare(true);
-        }
+        const {
+          audio = true,
+          video = false,
+          screen = false,
+        } = this.options ?? {};
+
+        await Promise.all([
+          audio ? this.toggleMicrophone(true) : Promise.resolve(),
+          video ? this.toggleCamera(true) : Promise.resolve(),
+          screen ? this.toggleScreenShare(true) : Promise.resolve(),
+        ]);
       })
       .on(RoomEvent.ParticipantConnected, (participant) => {
-        audioService.playSound(SoundType.USER_CONNECTED); // join sound
+        audioService.playSound(SoundType.USER_CONNECTED);
         this.options?.onParticipantConnected?.(participant);
         console.log("LIVEKIT", "ParticipantConnected", participant.name);
       })
