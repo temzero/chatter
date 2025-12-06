@@ -6,7 +6,7 @@ import { SlidingContainer } from "@/components/ui/layout/SlidingContainer";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
-import clsx from "clsx";
+import { SelectionBar } from "../ui/SelectionBar";
 
 const sidebarChatTypes = [ChatType.DIRECT, ChatType.GROUP, ChatType.CHANNEL];
 
@@ -15,13 +15,6 @@ const SidebarNewChat: React.FC = () => {
   const setSidebar = getSetSidebar();
   const [selectedType, setSelectedType] = useState<ChatType>(ChatType.DIRECT);
   const [direction, setDirection] = useState<number>(1);
-
-  const getTypeClass = (type: ChatType) =>
-    `flex items-center justify-center gap-1 cursor-pointer rounded w-full ${
-      selectedType === type
-        ? "opacity-100 font-bold text-green-400"
-        : "opacity-40 hover:opacity-80"
-    }`;
 
   const handleChatTypeChange = (type: ChatType) => {
     if (type === selectedType) return;
@@ -82,25 +75,12 @@ const SidebarNewChat: React.FC = () => {
         </i>
       </header>
 
-      <div className="flex custom-border-t custom-border-b bg-black/10">
-        {sidebarChatTypes.map((type) => (
-          <button
-            key={type}
-            className={getTypeClass(type)}
-            onClick={() => handleChatTypeChange(type)}
-          >
-            <i
-              className={clsx(
-                "material-symbols-outlined py-1",
-                type === selectedType && "filled",
-                type === ChatType.GROUP && "text-[2.1rem]!"
-              )}
-            >
-              {getTypeIcon(type)}
-            </i>
-          </button>
-        ))}
-      </div>
+      <SelectionBar
+        options={sidebarChatTypes}
+        selected={selectedType}
+        onSelect={handleChatTypeChange}
+        getIcon={getTypeIcon}
+      />
 
       <SlidingContainer uniqueKey={selectedType} direction={direction}>
         {NewChatWrapper(selectedType)}

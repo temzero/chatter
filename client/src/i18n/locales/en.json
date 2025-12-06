@@ -88,6 +88,11 @@
   },
 
   "toast": {
+    "chat": {
+      "deleted": "\"{{name}}\" deleted",
+      "group_deleted": "\"{{name}}\" group deleted",
+      "channel_deleted": "\"{{name}}\" channel deleted"
+    },
     "friendship": {
       "accepted": "Friend request accepted",
       "declined": "Friend request declined",
@@ -105,7 +110,11 @@
     },
     "call": {
       "missed": "You have {{count}} more missed calls",
-      "cannot_start": "Cannot start call - line is busy"
+      "cannot_start": "Cannot start call - line is busy",
+      "deleted": "Call deleted"
+    },
+    "folder": {
+      "deleted": "\"{{name}}\" folder has been deleted"
     }
   },
 

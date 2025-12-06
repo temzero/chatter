@@ -88,24 +88,33 @@
   },
 
   "toast": {
+    "chat": {
+      "deleted": "\"{{name}}\"を削除しました",
+      "group_deleted": "\"{{name}}\"グループを削除しました",
+      "channel_deleted": "\"{{name}}\"チャンネルを削除しました"
+    },
     "friendship": {
-      "accepted": "友達リクエストが承認されました",
-      "declined": "友達リクエストが拒否されました",
-      "canceled": "友達リクエストがキャンセルされました",
-      "new_request": "{{name}}からの新しい友達リクエスト",
-      "sent_request": "{{name}}に友達リクエストを送信しました",
-      "accepted_by": "{{name}}があなたの友達リクエストを承認しました！",
-      "declined_by": "{{name}}があなたの友達リクエストを拒否しました",
-      "invite_link_generated": "招待リンクが生成されました！",
-      "invite_link_refreshed": "招待リンクが更新されました！"
+      "accepted": "フレンドリクエストを承認しました",
+      "declined": "フレンドリクエストを拒否しました",
+      "canceled": "フレンドリクエストをキャンセルしました",
+      "new_request": "{{name}}さんからの新しいフレンドリクエスト",
+      "sent_request": "{{name}}さんにフレンドリクエストを送信しました",
+      "accepted_by": "{{name}}さんがあなたのフレンドリクエストを承認しました！",
+      "declined_by": "{{name}}さんがあなたのフレンドリクエストを拒否しました",
+      "invite_link_generated": "招待リンクを生成しました！",
+      "invite_link_refreshed": "招待リンクを更新しました！"
     },
     "message": {
       "saved": "メッセージを保存しました",
       "error": "メッセージの送信に失敗しました"
     },
     "call": {
-      "missed": "未着信がさらに{{count}}件あります",
-      "cannot_start": "通話を開始できません - 回線がビジーです"
+      "missed": "未接続の通話が{{count}}件あります",
+      "cannot_start": "通話を開始できません - 回線が使用中です",
+      "deleted": "通話を削除しました"
+    },
+    "folder": {
+      "deleted": "\"{{name}}\"フォルダーを削除しました"
     }
   },
 

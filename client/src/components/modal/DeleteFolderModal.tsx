@@ -5,6 +5,7 @@ import { useFolderStore } from "@/stores/folderStore";
 import { getSetSidebar } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
 import Button from "../ui/buttons/Button";
 
 interface DeleteFolderModalData {
@@ -24,15 +25,16 @@ const DeleteFolderModal: React.FC = () => {
 
   if (!folder) return null;
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     closeModal();
-    deleteFolder(folderId)
+    await deleteFolder(folderId)
       .then(() => {
         setSidebar(SidebarMode.FOLDERS);
       })
       .catch((error) => {
         console.error("Error deleting folder:", error);
       });
+    toast.success(t("toast.folder.deleted", { name: folder.name }));
   };
 
   return (

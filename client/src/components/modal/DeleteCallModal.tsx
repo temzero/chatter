@@ -8,6 +8,7 @@ import { formatDateTime } from "@/common/utils/format/formatDateTime";
 import { useTranslation } from "react-i18next";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { getCallStatusText } from "@/common/utils/call/callTextHelpers";
+import { toast } from "react-toastify";
 import CallIcon from "@/components/ui/icons/CallIcon";
 import Button from "../ui/buttons/Button";
 
@@ -29,6 +30,7 @@ const DeleteCallModal: React.FC = () => {
       await callService.deleteCall(data.call.id);
       data.onDeleted?.();
       closeModal();
+      toast.success(t("toast.call.deleted"));
     } catch (err) {
       console.error("Failed to delete call:", err);
       alert(t("modal.delete_call.descripfailed"));

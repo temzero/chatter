@@ -7,8 +7,9 @@ import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { getSetSidebarInfo } from "@/stores/sidebarInfoStore";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { useTranslation } from "react-i18next";
-import Button from "../ui/buttons/Button";
 import { handleError } from "@/common/utils/error/handleError";
+import { toast } from "react-toastify";
+import Button from "../ui/buttons/Button";
 
 interface DeleteChatModalData {
   chat: ChatResponse;
@@ -33,6 +34,15 @@ const DeleteChatModal: React.FC = () => {
       closeModal();
       setSidebarInfo(SidebarInfoMode.DEFAULT);
       await deleteChat(chat.id);
+
+      // Pick correct translation key based on chat type
+      let toastKey = "toast.chat.deleted"; // default
+      if (chat.type === ChatType.GROUP) {
+        toastKey = "toast.chat.group_deleted";
+      } else if (chat.type === ChatType.CHANNEL) {
+        toastKey = "toast.chat.channel_deleted";
+      }
+      toast.success(t(toastKey, { name: chat.name }));
     } catch (error) {
       handleError(error, "Delete chat failed");
     }

@@ -16,7 +16,7 @@ export const SlidingContainer: React.FC<SlidingContainerProps> = ({
   className = "",
 }) => {
   return (
-    <div className="w-full h-full overflow-hidden relative">
+    <div className="flex-1 overflow-hidden relative">
       <AnimatePresence initial={false} custom={direction}>
         <motion.div
           key={uniqueKey}

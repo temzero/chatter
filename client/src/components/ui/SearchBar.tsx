@@ -21,7 +21,7 @@ const SearchBar = ({
 
     const timer = setTimeout(() => {
       inputRef.current?.focus();
-    }, 200);
+    }, 250);
 
     return () => clearTimeout(timer);
   }, [autoFocus]);

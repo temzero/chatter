@@ -6,9 +6,9 @@ import { filterChatsByType } from "@/common/utils/chat/filterChatsByType";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useTranslation } from "react-i18next";
+import { SelectionBar } from "../ui/SelectionBar";
 import ChatList from "@/components/ui/chat/ChatList";
 import SearchBar from "@/components/ui/SearchBar";
-import clsx from "clsx";
 
 const chatTypes = ["all", ChatType.DIRECT, ChatType.GROUP, ChatType.CHANNEL];
 
@@ -40,14 +40,7 @@ const SidebarSearch: React.FC = () => {
     () => filteredChatsByType.map((chat) => chat.id),
     [filteredChatsByType]
   );
-
-  const getTypeClass = (type: ChatType | string) =>
-    `flex flex-col items-center justify-center gap-0.5 cursor-pointer py-2 flex-1 transition ${
-      selectedType === type
-        ? "opacity-100 font-semibold text-green-400"
-        : "opacity-50 hover:opacity-80"
-    }`;
-
+  
   const handleChatTypeChange = (type: ChatType | string) => {
     if (type === selectedType) return;
     const currentIndex = chatTypes.indexOf(selectedType);
@@ -89,26 +82,12 @@ const SidebarSearch: React.FC = () => {
         </span>
       </header>
 
-      {/* Chat Type Selector */}
-      <div className="flex justify-around items-center custom-border-t custom-border-b w-full shadow">
-        {chatTypes.map((type) => (
-          <a
-            key={type}
-            className={getTypeClass(type)}
-            onClick={() => handleChatTypeChange(type)}
-          >
-            <i
-              className={clsx(
-                "material-symbols-outlined",
-                type === selectedType && "filled",
-                type === ChatType.GROUP && "text-[2.1rem]!"
-              )}
-            >
-              {getTypeIcon(type)}
-            </i>
-          </a>
-        ))}
-      </div>
+      <SelectionBar
+        options={chatTypes}
+        selected={selectedType}
+        onSelect={handleChatTypeChange}
+        getIcon={getTypeIcon}
+      />
 
       {/* Chat List Container */}
       <SlidingContainer uniqueKey={selectedType} direction={direction}>

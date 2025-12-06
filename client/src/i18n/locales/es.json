@@ -88,6 +88,11 @@
   },
 
   "toast": {
+    "chat": {
+      "deleted": "\"{{name}}\" eliminado",
+      "group_deleted": "Grupo \"{{name}}\" eliminado",
+      "channel_deleted": "Canal \"{{name}}\" eliminado"
+    },
     "friendship": {
       "accepted": "Solicitud de amistad aceptada",
       "declined": "Solicitud de amistad rechazada",
@@ -105,10 +110,14 @@
     },
     "call": {
       "missed": "Tienes {{count}} llamadas perdidas más",
-      "cannot_start": "No se puede iniciar la llamada - línea ocupada"
+      "cannot_start": "No se puede iniciar la llamada - línea ocupada",
+      "deleted": "Llamada eliminada"
+    },
+    "folder": {
+      "deleted": "La carpeta \"{{name}}\" ha sido eliminada"
     }
   },
-
+  
   "account": {
     "first_name": "Nombre",
     "last_name": "Apellido",

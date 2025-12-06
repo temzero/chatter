@@ -132,7 +132,7 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
       )}
 
       <form
-        className="flex flex-col p-3 gap-2 border-2 border-b-0 border-(--border-color) rounded-t-xl"
+        className="flex flex-col p-3 gap-2 border-2 border-b-0 border-(--border-color) bg-(--card-bg-color) rounded-t-xl"
         onSubmit={(e) => {
           e.preventDefault();
           CreateNewGroup();

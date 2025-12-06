@@ -88,14 +88,19 @@
   },
 
   "toast": {
+    "chat": {
+      "deleted": "\"{{name}}\" 已删除",
+      "group_deleted": "\"{{name}}\" 群组已删除",
+      "channel_deleted": "\"{{name}}\" 频道已删除"
+    },
     "friendship": {
       "accepted": "好友请求已接受",
       "declined": "好友请求已拒绝",
       "canceled": "好友请求已取消",
-      "new_request": "来自{{name}}的新好友请求",
-      "sent_request": "已向{{name}}发送好友请求",
-      "accepted_by": "{{name}}接受了你的好友请求！",
-      "declined_by": "{{name}}拒绝了你的好友请求",
+      "new_request": "来自 {{name}} 的新好友请求",
+      "sent_request": "已向 {{name}} 发送好友请求",
+      "accepted_by": "{{name}} 接受了您的好友请求！",
+      "declined_by": "{{name}} 拒绝了您的好友请求",
       "invite_link_generated": "邀请链接已生成！",
       "invite_link_refreshed": "邀请链接已刷新！"
     },
@@ -104,8 +109,12 @@
       "error": "消息发送失败"
     },
     "call": {
-      "missed": "你还有{{count}}个未接来电",
-      "cannot_start": "无法开始通话 - 线路繁忙"
+      "missed": "您还有 {{count}} 个未接来电",
+      "cannot_start": "无法开始通话 - 线路忙",
+      "deleted": "通话已删除"
+    },
+    "folder": {
+      "deleted": "\"{{name}}\" 文件夹已被删除"
     }
   },
 

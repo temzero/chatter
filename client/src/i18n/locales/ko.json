@@ -88,24 +88,33 @@
   },
 
   "toast": {
+    "chat": {
+      "deleted": "\"{{name}}\" 삭제됨",
+      "group_deleted": "\"{{name}}\" 그룹 삭제됨",
+      "channel_deleted": "\"{{name}}\" 채널 삭제됨"
+    },
     "friendship": {
-      "accepted": "친구 요청이 수락되었습니다",
-      "declined": "친구 요청이 거절되었습니다",
-      "canceled": "친구 요청이 취소되었습니다",
-      "new_request": "{{name}}님의 새 친구 요청",
+      "accepted": "친구 요청 수락됨",
+      "declined": "친구 요청 거절됨",
+      "canceled": "친구 요청 취소됨",
+      "new_request": "{{name}}님의 새로운 친구 요청",
       "sent_request": "{{name}}님에게 친구 요청을 보냈습니다",
       "accepted_by": "{{name}}님이 친구 요청을 수락했습니다!",
       "declined_by": "{{name}}님이 친구 요청을 거절했습니다",
-      "invite_link_generated": "초대 링크가 생성되었습니다!",
-      "invite_link_refreshed": "초대 링크가 갱신되었습니다!"
+      "invite_link_generated": "초대 링크 생성됨!",
+      "invite_link_refreshed": "초대 링크 갱신됨!"
     },
     "message": {
-      "saved": "메시지가 저장되었습니다",
+      "saved": "메시지 저장됨",
       "error": "메시지 전송 실패"
     },
     "call": {
-      "missed": "부재중 전화가 {{count}}건 더 있습니다",
-      "cannot_start": "통화를 시작할 수 없습니다 - 회선이 바쁩니다"
+      "missed": "{{count}}개의 부재중 전화가 더 있습니다",
+      "cannot_start": "통화를 시작할 수 없습니다 - 회선이 사용 중입니다",
+      "deleted": "통화 삭제됨"
+    },
+    "folder": {
+      "deleted": "\"{{name}}\" 폴더가 삭제되었습니다"
     }
   },
 

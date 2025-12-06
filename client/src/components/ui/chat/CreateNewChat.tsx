@@ -54,147 +54,153 @@ const CreateNewChat: React.FC = () => {
   const isUserOnline = useUserStatus(user?.id);
 
   return (
-    <div className="flex flex-col gap-3 p-2 h-full relative overflow-hidden">
-      <AnimatePresence mode="wait">
-        {user && (
-          <motion.div
-            key={user.id}
-            initial={{ opacity: 0, scale: 1.1 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{
-              type: "spring",
-              stiffness: 300,
-              damping: 12,
-              mass: 0.6,
-            }}
-            className="bg-(--card-bg-color) custom-border rounded-lg flex flex-col justify-between h-full overflow-hidden"
-          >
-            {user.isBlockedMe ? (
-              <div className="flex-1 flex flex-col gap-2 items-center justify-center text-center text-red-500 p-6">
-                <i className="material-symbols-outlined text-8xl! rotate-90 opacity-60 select-none">
-                  block
-                </i>
-                <p>{t("sidebar_new_chat.direct.blocked_by_user_message")}</p>
-              </div>
-            ) : (
-              <>
-                <div className="flex-1 flex flex-col items-center justify-start gap-2 p-2 pt-4 overflow-y-auto">
-                  <div
-                    className={`border rounded-full! hover:shadow-xl hover:scale-110 transition-all ${
-                      isUserOnline ? "border-2 border-(--primary-green)" : ""
-                    }`}
-                  >
-                    <Avatar
-                      avatarUrl={user.avatarUrl ?? undefined}
-                      name={user.firstName}
-                      className={`w-[120px] h-[120px] cursor-pointer`}
-                      onClick={() =>
-                        !user.isBlockedByMe && createOrGetDirectChat(user.id)
-                      }
-                      isBlocked={user.isBlockedByMe}
-                    />
-                  </div>
-
-                  <div className="flex flex-col items-center">
-                    <h1 className="font-bold text-xl">
-                      {user.firstName} {user.lastName}
-                    </h1>
-                    {isMe && <h1 className="text-(--primary-green)">Me</h1>}
-                  </div>
-
-                  {user.friendshipStatus === FriendshipStatus.ACCEPTED && (
-                    <h1
-                      className={`-mt-1 ${
-                        user.isBlockedByMe
-                          ? "text-red-500"
-                          : "text-(--primary-green)"
+    <div className="flex flex-col justify-between w-full h-full relative overflow-hidden">
+      <div className="w-full h-full p-2">
+        <AnimatePresence mode="wait">
+          {user && (
+            <motion.div
+              key={user.id}
+              initial={{ opacity: 0, scale: 1.1 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{
+                type: "spring",
+                stiffness: 300,
+                damping: 12,
+                mass: 0.6,
+              }}
+              className="bg-(--card-bg-color) custom-border rounded-lg flex flex-col justify-between h-full overflow-hidden  p-2"
+            >
+              {user.isBlockedMe ? (
+                <div className="flex-1 flex flex-col gap-2 items-center justify-center text-center text-red-500 p-6">
+                  <i className="material-symbols-outlined text-8xl! rotate-90 opacity-60 select-none">
+                    block
+                  </i>
+                  <p>{t("sidebar_new_chat.direct.blocked_by_user_message")}</p>
+                </div>
+              ) : (
+                <>
+                  <div className="flex-1 flex flex-col items-center justify-start gap-2 p-2 pt-4 overflow-y-auto">
+                    <div
+                      className={`border rounded-full! hover:shadow-xl hover:scale-110 transition-all ${
+                        isUserOnline ? "border-2 border-(--primary-green)" : ""
                       }`}
                     >
-                      {user.isBlockedByMe
-                        ? t("sidebar_new_chat.direct.friend_but_blocked")
-                        : t("sidebar_new_chat.direct.friend")}
-                    </h1>
-                  )}
-
-                  <h1>{user.bio}</h1>
-
-                  <div className="w-full flex flex-col font-light my-2 custom-border-t custom-border-b">
-                    <ContactInfoItem
-                      icon="alternate_email"
-                      value={user.username}
-                      copyType="username"
-                      defaultText={t("sidebar_new_chat.direct.no_username")}
-                    />
-                    <ContactInfoItem
-                      icon="call"
-                      value={user.phoneNumber}
-                      copyType="phone"
-                    />
-                    <ContactInfoItem
-                      icon="mail"
-                      value={user.email}
-                      copyType="email"
-                    />
-                    <ContactInfoItem
-                      icon="cake"
-                      value={user.birthday}
-                      copyType="birthday"
-                    />
-                  </div>
-                </div>
-
-                {!isMe && (
-                  <div className="w-full border-t-2 border-(--border-color)">
-                    {/* Unblock button takes priority when user is blocked */}
-                    {user.isBlockedByMe ? (
-                      <button
-                        className="w-full py-1 flex gap-1 items-center justify-center hover:bg-(--primary-green) bg-red-500 text-white"
-                        // onClick={() => handleUnblock(user.id, user.firstName)}
+                      <Avatar
+                        avatarUrl={user.avatarUrl ?? undefined}
+                        name={user.firstName}
+                        className={`w-[120px] h-[120px] cursor-pointer`}
                         onClick={() =>
-                          openModal(ModalType.UNBLOCK_USER, {
-                            blockedUser: user,
-                          })
+                          !user.isBlockedByMe && createOrGetDirectChat(user.id)
                         }
-                      >
-                        <span className="material-symbols-outlined">
-                          replay
-                        </span>
-                        {t("common.actions.unblock")}
-                      </button>
-                    ) : (
-                      <>
-                        {user.friendshipStatus !== FriendshipStatus.ACCEPTED ? (
-                          <FriendshipBtn
-                            userId={user.id}
-                            username={user.username}
-                            firstName={user.firstName}
-                            lastName={user.lastName}
-                            avatarUrl={user.avatarUrl ?? undefined}
-                            friendshipStatus={user.friendshipStatus}
-                            onStatusChange={updateFriendshipStatus}
-                          />
-                        ) : (
-                          <button
-                            className="w-full py-1 flex gap-1 items-center justify-center hover:bg-(--primary-green)"
-                            onClick={() => createOrGetDirectChat(user.id)}
-                          >
-                            {t("sidebar_new_chat.direct.start_chat")}
-                            <span className="material-symbols-outlined">
-                              arrow_right_alt
-                            </span>
-                          </button>
-                        )}
-                      </>
-                    )}
-                  </div>
-                )}
-              </>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+                        isBlocked={user.isBlockedByMe}
+                      />
+                    </div>
 
-      <form onSubmit={handleSubmit} className="space-y-2 mt-auto">
+                    <div className="flex flex-col items-center">
+                      <h1 className="font-bold text-xl">
+                        {user.firstName} {user.lastName}
+                      </h1>
+                      {isMe && <h1 className="text-(--primary-green)">Me</h1>}
+                    </div>
+
+                    {user.friendshipStatus === FriendshipStatus.ACCEPTED && (
+                      <h1
+                        className={`-mt-1 ${
+                          user.isBlockedByMe
+                            ? "text-red-500"
+                            : "text-(--primary-green)"
+                        }`}
+                      >
+                        {user.isBlockedByMe
+                          ? t("sidebar_new_chat.direct.friend_but_blocked")
+                          : t("sidebar_new_chat.direct.friend")}
+                      </h1>
+                    )}
+
+                    <h1>{user.bio}</h1>
+
+                    <div className="w-full flex flex-col font-light my-2 custom-border-t custom-border-b">
+                      <ContactInfoItem
+                        icon="alternate_email"
+                        value={user.username}
+                        copyType="username"
+                        defaultText={t("sidebar_new_chat.direct.no_username")}
+                      />
+                      <ContactInfoItem
+                        icon="call"
+                        value={user.phoneNumber}
+                        copyType="phone"
+                      />
+                      <ContactInfoItem
+                        icon="mail"
+                        value={user.email}
+                        copyType="email"
+                      />
+                      <ContactInfoItem
+                        icon="cake"
+                        value={user.birthday}
+                        copyType="birthday"
+                      />
+                    </div>
+                  </div>
+
+                  {!isMe && (
+                    <div className="w-full border-t-2 border-(--border-color)">
+                      {/* Unblock button takes priority when user is blocked */}
+                      {user.isBlockedByMe ? (
+                        <button
+                          className="w-full py-1 flex gap-1 items-center justify-center hover:bg-(--primary-green) bg-red-500 text-white"
+                          // onClick={() => handleUnblock(user.id, user.firstName)}
+                          onClick={() =>
+                            openModal(ModalType.UNBLOCK_USER, {
+                              blockedUser: user,
+                            })
+                          }
+                        >
+                          <span className="material-symbols-outlined">
+                            replay
+                          </span>
+                          {t("common.actions.unblock")}
+                        </button>
+                      ) : (
+                        <>
+                          {user.friendshipStatus !==
+                          FriendshipStatus.ACCEPTED ? (
+                            <FriendshipBtn
+                              userId={user.id}
+                              username={user.username}
+                              firstName={user.firstName}
+                              lastName={user.lastName}
+                              avatarUrl={user.avatarUrl ?? undefined}
+                              friendshipStatus={user.friendshipStatus}
+                              onStatusChange={updateFriendshipStatus}
+                            />
+                          ) : (
+                            <button
+                              className="w-full py-1 flex gap-1 items-center justify-center hover:bg-(--primary-green)"
+                              onClick={() => createOrGetDirectChat(user.id)}
+                            >
+                              {t("sidebar_new_chat.direct.start_chat")}
+                              <span className="material-symbols-outlined">
+                                arrow_right_alt
+                              </span>
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col p-3 gap-2 border-2 border-b-0 border-(--border-color) bg-(--card-bg-color) rounded-t-xl"
+      >
         {error && (
           <p className="text-red-400 text-center mb-3">
             {t("sidebar_new_chat.direct.user_not_found")}
