@@ -68,7 +68,7 @@ const CreateNewChat: React.FC = () => {
                 damping: 12,
                 mass: 0.6,
               }}
-              className="bg-(--card-bg-color) custom-border rounded-lg flex flex-col justify-between h-full overflow-hidden  p-2"
+              className="bg-(--card-bg-color) custom-border rounded-lg flex flex-col justify-between h-full overflow-hidden p-2"
             >
               {user.isBlockedMe ? (
                 <div className="flex-1 flex flex-col gap-2 items-center justify-center text-center text-red-500 p-6">
@@ -202,7 +202,7 @@ const CreateNewChat: React.FC = () => {
         className="flex flex-col p-3 gap-2 border-2 border-b-0 border-(--border-color) bg-(--card-bg-color) rounded-t-xl"
       >
         {error && (
-          <p className="text-red-400 text-center mb-3">
+          <p className="text-red-400 text-center mb-2">
             {t("sidebar_new_chat.direct.user_not_found")}
           </p>
         )}

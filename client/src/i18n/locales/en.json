@@ -300,7 +300,7 @@
       "channel": "New Channel Chat"
     },
     "direct": {
-      "placeholder": "@username/email/phoneNumber",
+      "placeholder": "@username/email/phone",
       "find_user": "Find User",
       "user_not_found": "User not found!",
       "blocked_by_user_message": "This user has blocked you. You cannot view their profile or interact with them.",

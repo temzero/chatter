@@ -103,23 +103,92 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
     }
   };
 
+  const hasPrivateChats = privateChats.length > 0;
+
   return (
     <div className="flex flex-col h-full">
-      <div className="p-2">
-        <SearchBar
-          placeholder={t("sidebar_new_chat.group.search_placeholder")}
-          onSearch={handleSearch}
-        />
-      </div>
+      {hasPrivateChats ? (
+        <>
+          <div className="p-2">
+            <SearchBar
+              placeholder={t("sidebar_new_chat.group.search_placeholder")}
+              onSearch={handleSearch}
+            />
+          </div>
 
-      {privateChats.length > 0 ? (
-        <div className="flex-1 overflow-y-auto">
-          <ContactSelectionList
-            chats={privateChats}
-            selectedContacts={selectedContacts}
-            onContactToggle={handleContactToggle}
-          />
-        </div>
+          <div className="flex-1 overflow-y-auto">
+            <ContactSelectionList
+              chats={privateChats}
+              selectedContacts={selectedContacts}
+              onContactToggle={handleContactToggle}
+            />
+          </div>
+
+          <form
+            className="flex flex-col p-3 gap-2 border-2 border-b-0 border-(--border-color) bg-(--card-bg-color) rounded-t-xl"
+            onSubmit={(e) => {
+              e.preventDefault();
+              CreateNewGroup();
+            }}
+          >
+            {getSelectedChats().length > 0 && (
+              <div className="flex flex-wrap gap-1 items-center">
+                {getSelectedChats().map((chat) => (
+                  <div
+                    key={chat.id}
+                    className="relative w-8 h-8 rounded-full! flex items-center justify-center hover:opacity-80 cursor-pointer group"
+                    onClick={() => handleRemoveContact(chat.id)}
+                  >
+                    <Avatar
+                      avatarUrl={chat.avatarUrl}
+                      name={chat.name || ""}
+                      size={8}
+                      textSize="text-sm"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full! flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <i className="material-symbols-outlined text-white">
+                        close
+                      </i>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full p-1 text-lg"
+              placeholder={t("sidebar_new_chat.group.enter_name")}
+              maxLength={50}
+              required
+            />
+
+            <button
+              disabled={
+                (type === "group" &&
+                  (selectedContacts.length === 0 || !name.trim())) ||
+                (type === "channel" && !name.trim()) ||
+                isLoading
+              }
+              className={`flex items-center justify-center gap-2 py-1 w-full ${
+                (type === "channel" && name.trim()) ||
+                (type === "group" && selectedContacts.length > 0 && name.trim())
+                  ? "bg-(--primary-green)"
+                  : "bg-gray-300 cursor-not-allowed"
+              }`}
+            >
+              {isLoading
+                ? t("common.loading.creating")
+                : t(
+                    type === "group"
+                      ? "sidebar_new_chat.group.create_group"
+                      : "sidebar_new_chat.group.create_channel"
+                  )}
+            </button>
+          </form>
+        </>
       ) : (
         <div className="flex flex-col items-center justify-center my-auto opacity-40">
           <i className="material-symbols-outlined text-6xl!">search_off</i>
@@ -130,69 +199,6 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
           </p>
         </div>
       )}
-
-      <form
-        className="flex flex-col p-3 gap-2 border-2 border-b-0 border-(--border-color) bg-(--card-bg-color) rounded-t-xl"
-        onSubmit={(e) => {
-          e.preventDefault();
-          CreateNewGroup();
-        }}
-      >
-        {getSelectedChats().length > 0 && (
-          <div className="flex flex-wrap gap-1 items-center">
-            {getSelectedChats().map((chat) => (
-              <div
-                key={chat.id}
-                className="relative w-8 h-8 rounded-full! flex items-center justify-center hover:opacity-80 cursor-pointer group"
-                onClick={() => handleRemoveContact(chat.id)}
-              >
-                <Avatar
-                  avatarUrl={chat.avatarUrl}
-                  name={chat.name || ""}
-                  size={8}
-                  textSize="text-sm"
-                />
-                <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full! flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <i className="material-symbols-outlined text-white">close</i>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full p-1 text-lg"
-          placeholder={t("sidebar_new_chat.group.enter_name")}
-          maxLength={50}
-          required
-        />
-
-        <button
-          disabled={
-            (type === "group" &&
-              (selectedContacts.length === 0 || !name.trim())) ||
-            (type === "channel" && !name.trim()) ||
-            isLoading
-          }
-          className={`flex items-center justify-center gap-2 py-1 w-full ${
-            (type === "channel" && name.trim()) ||
-            (type === "group" && selectedContacts.length > 0 && name.trim())
-              ? "bg-(--primary-green)"
-              : "bg-gray-300 cursor-not-allowed"
-          }`}
-        >
-          {isLoading
-            ? t("common.loading.creating")
-            : t(
-                type === "group"
-                  ? "sidebar_new_chat.group.create_group"
-                  : "sidebar_new_chat.group.create_channel"
-              )}
-        </button>
-      </form>
     </div>
   );
 };

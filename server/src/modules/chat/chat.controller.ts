@@ -110,11 +110,22 @@ export class ChatController {
     @Body() createDirectChatDto: CreateDirectChatDto,
     @CurrentUser('id') userId: string,
   ): Promise<GetOrCreateResponse<ChatResponseDto>> {
+    let chat: ChatResponseDto | null = null;
+
     try {
       const result = await this.chatService.getOrCreateDirectChat(
         userId,
         createDirectChatDto.partnerId,
       );
+
+      chat = result.chat;
+
+      // If you plan to create a system message for direct chat:
+      // await this.messageService.createSystemEventMessage(
+      //   chat.id,
+      //   userId,
+      //   SystemEventType.CHAT_CREATED,
+      // );
 
       return new GetOrCreateResponse(
         plainToInstance(ChatResponseDto, result.chat),
@@ -124,6 +135,18 @@ export class ChatController {
           : 'Direct chat created successfully',
       );
     } catch (error: unknown) {
+      // rollback only if a new chat was created
+      if (chat?.id) {
+        try {
+          await this.chatService.deleteChat(chat.id, userId);
+        } catch (rollbackError) {
+          console.error(
+            'Failed to rollback direct chat creation:',
+            rollbackError,
+          );
+        }
+      }
+
       ErrorResponse.throw(
         error,
         'Failed to process direct chat request',
@@ -154,11 +177,10 @@ export class ChatController {
     @CurrentUser('id') userId: string,
     @Body() createGroupChatDto: CreateGroupChatDto,
   ): Promise<SuccessResponse<ChatResponseDto>> {
+    let chat: ChatResponseDto | null = null; // define chat outside try
+
     try {
-      const chat = await this.chatService.createGroupChat(
-        userId,
-        createGroupChatDto,
-      );
+      chat = await this.chatService.createGroupChat(userId, createGroupChatDto);
 
       await this.messageService.createSystemEventMessage(
         chat.id,
@@ -171,6 +193,15 @@ export class ChatController {
         'Group chat created successfully',
       );
     } catch (error: unknown) {
+      // rollback only if chat was created
+      if (chat?.id) {
+        try {
+          await this.chatService.deleteChat(chat.id, userId);
+        } catch (rollbackError) {
+          console.error('Failed to rollback chat creation:', rollbackError);
+        }
+      }
+
       ErrorResponse.throw(
         error,
         'Failed to create group chat',

@@ -240,7 +240,7 @@ export class UserService {
     }
   }
 
-  async deleteUser(userId: string, deviceId: string): Promise<User> {
+  async deleteUser(userId: string, deviceId?: string): Promise<User> {
     try {
       const user = await this.getUserById(userId);
       await this.userRepo.remove(user);

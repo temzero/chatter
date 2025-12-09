@@ -8,6 +8,7 @@ import {
   Headers,
   Req,
   Res,
+  HttpStatus,
 } from '@nestjs/common';
 import { AuthResponse } from '@shared/types/responses/auth.response';
 import { SuccessResponse } from '@/common/api-response/success';
@@ -27,11 +28,14 @@ import {
   clearRefreshTokenCookie,
   setRefreshTokenCookie,
 } from '@/common/helpers/set-cookie.helper';
+import { UserService } from '@/modules/user/user.service';
+import { UserResponseDto } from '@/modules/user/dto/responses/user-response.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
+    private readonly userService: UserService,
     private readonly tokenService: TokenService,
     private readonly tokenStorageService: TokenStorageService,
   ) {}
@@ -44,21 +48,25 @@ export class AuthController {
     @Headers('x-device-id') deviceId: string,
     @Headers('x-device-name') deviceName: string,
   ): Promise<AuthResponse> {
-    await this.tokenStorageService.deleteDeviceTokens(req.user.id, deviceId);
+    try {
+      await this.tokenStorageService.deleteDeviceTokens(req.user.id, deviceId);
 
-    const { user, accessToken, refreshToken } = await this.authService.login(
-      req.user,
-      deviceId,
-      deviceName,
-    );
+      const { user, accessToken, refreshToken } = await this.authService.login(
+        req.user,
+        deviceId,
+        deviceName,
+      );
 
-    setRefreshTokenCookie(response, refreshToken);
+      setRefreshTokenCookie(response, refreshToken);
 
-    return {
-      accessToken,
-      user,
-      message: `Login successful, welcome back ${user.firstName}`,
-    };
+      return {
+        accessToken,
+        user,
+        message: `Login successful, welcome back ${user.firstName}`,
+      };
+    } catch (error: unknown) {
+      ErrorResponse.throw(error, 'Login failed', HttpStatus.UNAUTHORIZED);
+    }
   }
 
   @Post('register')
@@ -72,20 +80,41 @@ export class AuthController {
     const countryCode = getCountryCodeFromRequest(req);
     const language = countryToLang(countryCode);
 
-    const { user, accessToken, refreshToken } = await this.authService.register(
-      registerDto,
-      deviceId,
-      deviceName,
-      language,
-    );
+    let user: UserResponseDto | null = null;
 
-    setRefreshTokenCookie(response, refreshToken);
+    try {
+      const result = await this.authService.register(
+        registerDto,
+        deviceId,
+        deviceName,
+        language,
+      );
 
-    return {
-      accessToken,
-      user,
-      message: `User ${user.firstName} registered and logged in successfully. Please verify your email.`,
-    };
+      user = result.user;
+
+      setRefreshTokenCookie(response, result.refreshToken);
+
+      return {
+        accessToken: result.accessToken,
+        user,
+        message: `User ${user.firstName} registered and logged in successfully. Please verify your email.`,
+      };
+    } catch (error: unknown) {
+      // rollback: delete the partially created user
+      if (user?.id) {
+        try {
+          await this.userService.deleteUser(user.id);
+        } catch (rollbackError) {
+          console.error('Failed to rollback user creation:', rollbackError);
+        }
+      }
+
+      ErrorResponse.throw(
+        error,
+        'Failed to register user',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
   @Post('logout')
@@ -93,23 +122,33 @@ export class AuthController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const refreshToken: string = request.cookies?.refreshToken as string;
+    try {
+      const refreshToken: string = request.cookies?.refreshToken as string;
 
-    if (refreshToken) {
-      const payload =
-        this.tokenService.decodeToken<JwtRefreshPayload>(refreshToken);
+      if (refreshToken) {
+        const payload =
+          this.tokenService.decodeToken<JwtRefreshPayload>(refreshToken);
 
-      if (payload?.sub && payload.deviceId) {
-        await this.tokenStorageService.deleteDeviceTokens(
-          payload.sub,
-          payload.deviceId,
-        );
+        if (payload?.sub && payload.deviceId) {
+          await this.tokenStorageService.deleteDeviceTokens(
+            payload.sub,
+            payload.deviceId,
+          );
+        }
       }
+
+      clearRefreshTokenCookie(response);
+
+      return new SuccessResponse(null, 'Logged out successfully');
+    } catch (error: unknown) {
+      // Still clear cookies even if token deletion fails
+      clearRefreshTokenCookie(response);
+      ErrorResponse.throw(
+        error,
+        'Logout failed',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-
-    clearRefreshTokenCookie(response);
-
-    return new SuccessResponse(null, 'Logged out successfully');
   }
 
   @Post('logout-all')
@@ -117,26 +156,32 @@ export class AuthController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const refreshToken = request.cookies?.refreshToken as string;
+    try {
+      const refreshToken = request.cookies?.refreshToken as string;
 
-    if (refreshToken) {
-      // Decode payload without verifying signature/expiration
-      const payload =
-        this.tokenService.decodeToken<JwtRefreshPayload>(refreshToken);
+      if (refreshToken) {
+        const payload =
+          this.tokenService.decodeToken<JwtRefreshPayload>(refreshToken);
 
-      if (payload?.sub) {
-        // Delete all tokens for this user
-        await this.tokenStorageService.deleteAllUserTokens(payload.sub);
+        if (payload?.sub) {
+          await this.tokenStorageService.deleteAllUserTokens(payload.sub);
+        }
       }
+
+      clearRefreshTokenCookie(response);
+
+      return new SuccessResponse(
+        null,
+        'Logged out from all devices successfully',
+      );
+    } catch (error: unknown) {
+      clearRefreshTokenCookie(response);
+      ErrorResponse.throw(
+        error,
+        'Logout from all devices failed',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-
-    // Always clear the refresh token cookie
-    clearRefreshTokenCookie(response);
-
-    return new SuccessResponse(
-      null,
-      'Logged out from all devices successfully',
-    );
   }
 
   @Post('refresh')
@@ -145,22 +190,31 @@ export class AuthController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ): Promise<AuthResponse> {
-    // The guard will validate and add the user info to request.user
-    const refreshTokenData = request.user as { refreshToken: string };
+    try {
+      const refreshTokenData = request.user as { refreshToken: string };
 
-    const payload = await this.authService.refreshTokensWithSlidingExpiry(
-      refreshTokenData.refreshToken,
-    );
+      const payload = await this.authService.refreshTokensWithSlidingExpiry(
+        refreshTokenData.refreshToken,
+      );
 
-    const newRefreshToken = payload.refreshToken;
-    if (newRefreshToken) {
-      setRefreshTokenCookie(response, newRefreshToken);
+      const newRefreshToken = payload.refreshToken;
+      if (newRefreshToken) {
+        setRefreshTokenCookie(response, newRefreshToken);
+      }
+
+      return {
+        accessToken: payload.accessToken,
+        message: 'Tokens refreshed successfully',
+      };
+    } catch (error: unknown) {
+      // Clear invalid refresh token cookie
+      clearRefreshTokenCookie(response);
+      ErrorResponse.throw(
+        error,
+        'Token refresh failed',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
-
-    return {
-      accessToken: payload.accessToken,
-      message: 'Tokens refreshed successfully',
-    };
   }
 
   @Get('verify-email')

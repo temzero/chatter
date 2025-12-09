@@ -66,7 +66,7 @@ export const GroupAvatarLayout: React.FC<{
   members: ChatMemberLite[];
 }> = ({ members }) => {
   const length = members.length;
-  const textSize = "text-xl";
+  const textSize = "text-lg";
 
   if (length === 0) {
     return (

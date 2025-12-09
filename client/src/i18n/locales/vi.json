@@ -295,9 +295,9 @@
 
   "sidebar_new_chat": {
     "title": {
-      "direct": "Trò chuyện Mới",
-      "group": "Trò chuyện Nhóm Mới",
-      "channel": "Trò chuyện Kênh Mới"
+      "direct": "Trò chuyện mới",
+      "group": "Tạo nhóm mới",
+      "channel": "Tạo kênh mới"
     },
     "direct": {
       "placeholder": "@username/email/ĐT",

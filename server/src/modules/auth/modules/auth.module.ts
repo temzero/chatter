@@ -45,8 +45,8 @@ import { EnvConfig } from '@/common/config/env.config';
     JwtModule,
     PassportModule,
     TokenService,
-    VerificationCodeService, // Add this to exports
-    MailService, // Add this if it's needed in other modules
+    VerificationCodeService,
+    MailService,
     TokenStorageService,
   ],
 })
