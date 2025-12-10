@@ -674,3 +674,11 @@ export const useSetActiveSavedChat = () => {
     await state.setActiveChatId(savedChat.id);
   };
 };
+
+export const useIsSavedChatActive = () => {
+  return useChatStore((state) => {
+    const activeId = state.activeChatId;
+    const savedId = state.savedChat?.id;
+    return activeId !== null && activeId === savedId;
+  });
+};

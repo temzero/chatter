@@ -1,7 +1,10 @@
 import { getSetSidebar, useIsCompactSidebar } from "@/stores/sidebarStore";
 import { getCurrentUser } from "@/stores/authStore";
 import { useFriendshipStore } from "@/stores/friendshipStore";
-import { useSetActiveSavedChat } from "@/stores/chatStore";
+import {
+  useIsSavedChatActive,
+  useSetActiveSavedChat,
+} from "@/stores/chatStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
@@ -16,13 +19,15 @@ const SidebarMore: React.FC = () => {
   const pendingRequests = useFriendshipStore((state) => state.pendingRequests);
   const requestsCount = pendingRequests.length;
   const setActiveSavedChat = useSetActiveSavedChat();
+  const isSavedChatActive = useIsSavedChatActive();
+
+  const savedChatButton = {
+    icon: "bookmark",
+    text: t("sidebar.saved_messages"),
+    onClick: () => setActiveSavedChat(),
+  };
 
   const sidebarButtons = [
-    {
-      icon: "bookmark",
-      text: t("sidebar.saved_messages"),
-      onClick: () => setActiveSavedChat(),
-    },
     { type: "divider" },
     {
       icon: "call",
@@ -34,6 +39,7 @@ const SidebarMore: React.FC = () => {
       text: t("sidebar.contacts"),
       onClick: () => setSidebar(SidebarMode.CONTACTS),
     },
+    { type: "divider" },
     {
       icon: "person_add",
       text:
@@ -42,7 +48,6 @@ const SidebarMore: React.FC = () => {
           : t("sidebar.friend_requests_none"),
       onClick: () => setSidebar(SidebarMode.FRIEND_REQUESTS),
     },
-    { type: "divider" },
     {
       icon: "folder",
       text: t("sidebar.folders"),
@@ -100,6 +105,32 @@ const SidebarMore: React.FC = () => {
       </div>
 
       <div className="overflow-x-hidden overflow-y-auto">
+        <div
+          key={savedChatButton.text}
+          className={`sidebar-button ${isCompact ? "justify-center" : ""} ${
+            isSavedChatActive
+              ? "bg-(--primary-green) hover:none!"
+              : "hover:bg-(--hover-color)!"
+          }`}
+          onClick={savedChatButton.onClick || undefined}
+        >
+          <div className="flex items-center justify-center h-10 w-10">
+            <i className="material-symbols-outlined filled text-3xl!">
+              {savedChatButton.icon}
+            </i>
+          </div>
+          {!isCompact && (
+            <>
+              <p className="whitespace-nowrap text-ellipsis">
+                {savedChatButton.text}
+              </p>
+              <span className="material-symbols-outlined ml-auto text-lg! opacity-50">
+                arrow_forward_ios
+              </span>
+            </>
+          )}
+        </div>
+
         {sidebarButtons.map((button, index) =>
           button.type === "divider" ? (
             <div
@@ -109,7 +140,9 @@ const SidebarMore: React.FC = () => {
           ) : (
             <div
               key={button.text}
-              className={`sidebar-button ${isCompact ? "justify-center" : ""}`}
+              className={`sidebar-button hover:bg-(--hover-color) ${
+                isCompact ? "justify-center" : ""
+              }`}
               onClick={button.onClick || undefined}
             >
               <div className="flex items-center justify-center h-10 w-10">

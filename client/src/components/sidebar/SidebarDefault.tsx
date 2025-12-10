@@ -104,14 +104,14 @@ const SidebarDefault: React.FC = () => {
         {!isCompact && (
           <div className="flex">
             <a
-              className="cursor-pointer select-none nav-btn"
+              className="cursor-pointer select-none nav-btn hover:scale-125 hover:text-(--primary-green) transition-all"
               onClick={() => setSidebar(SidebarMode.NEW_CHAT)}
             >
               <i className="material-symbols-outlined text-2xl!">add</i>
             </a>
 
             <a
-              className="cursor-pointer select-none nav-btn -ml-2"
+              className="cursor-pointer select-none nav-btn hover:scale-125 hover:text-(--primary-green) transition-all -ml-2"
               onClick={() => setSidebar(SidebarMode.SEARCH)}
             >
               <i className="material-symbols-outlined text-2xl!">search</i>
