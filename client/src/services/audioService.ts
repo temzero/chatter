@@ -13,6 +13,7 @@ import endCallSound from "@/assets/sound/end-call.mp3";
 import errorSound from "@/assets/sound/error.mp3";
 import messageSound from "@/assets/sound/message-bubble.mp3";
 import notificationSound from "@/assets/sound/bell.mp3";
+import notFoundSound from "@/assets/sound/not-found.mp3";
 import pageSound from "@/assets/sound/paper.mp3";
 import pop1Sound from "@/assets/sound/pop1.mp3";
 import pop2Sound from "@/assets/sound/pop2.mp3";
@@ -38,6 +39,7 @@ export enum SoundType {
   REACTION = "reaction",
   REACTION_REMOVE = "reaction-remove",
   MESSAGE_REMOVE = "message-remove",
+  NOT_FOUND = "not-found",
   CARD1 = "card1",
   CARD2 = "card2",
   CARD3 = "card3",
@@ -87,6 +89,7 @@ class AudioServiceImpl implements AudioService {
       [SoundType.REACTION]: reactionSound,
       [SoundType.REACTION_REMOVE]: reactionRemoveSound,
       [SoundType.MESSAGE_REMOVE]: messageRemoveSound,
+      [SoundType.NOT_FOUND]: notFoundSound,
       [SoundType.CARD1]: card1Sound,
       [SoundType.CARD2]: card2Sound,
       [SoundType.CARD3]: card3Sound,

@@ -62,7 +62,9 @@
       "blocked_them": "Has bloqueado a este usuario.",
       "blocked_each_other": "Tú y este usuario se han bloqueado mutuamente",
       "load_app_error": "No se pudo cargar la aplicación. Por favor, actualiza.",
-      "upload_failed": "¡Error al subir el archivo!"
+      "upload_failed": "¡Error al subir el archivo!",
+      "from_me": "de Mí",
+      "from_user": "de {{name}}"
     },
     "loading": {
       "loading": "Cargando...",
@@ -117,7 +119,7 @@
       "deleted": "La carpeta \"{{name}}\" ha sido eliminada"
     }
   },
-  
+
   "account": {
     "first_name": "Nombre",
     "last_name": "Apellido",
@@ -300,7 +302,7 @@
       "channel": "Nuevo Chat de Canal"
     },
     "direct": {
-      "placeholder": "@nombredeusuario/correo/teléfono",
+      "placeholder": "nombredeusuario/correo/teléfono",
       "find_user": "Buscar usuario",
       "user_not_found": "¡Usuario no encontrado!",
       "blocked_by_user_message": "Este usuario te ha bloqueado. No puedes ver su perfil ni interactuar con él.",

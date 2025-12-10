@@ -62,7 +62,9 @@
       "blocked_them": "あなたはこのユーザーをブロックしました。",
       "blocked_each_other": "あなたとこのユーザーはお互いをブロックしています",
       "load_app_error": "アプリを読み込めませんでした。更新してください。",
-      "upload_failed": "ファイルのアップロードに失敗しました！"
+      "upload_failed": "ファイルのアップロードに失敗しました！",
+      "from_me": "自分から",
+      "from_user": "{{name}}から"
     },
     "loading": {
       "loading": "読み込み中...",
@@ -300,7 +302,7 @@
       "channel": "新しいチャンネルチャット"
     },
     "direct": {
-      "placeholder": "@ユーザー名/メール/電話番号",
+      "placeholder": "ユーザー名/メール/電話番号",
       "find_user": "ユーザーを見つける",
       "user_not_found": "ユーザーが見つかりません！",
       "blocked_by_user_message": "このユーザーにブロックされています。プロフィールの閲覧ややり取りはできません。",

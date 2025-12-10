@@ -62,7 +62,10 @@
       "blocked_them": "You have blocked this user.",
       "blocked_each_other": "You and this user have blocked each other",
       "load_app_error": "Failed to load app. Please refresh",
-      "upload_failed": "File upload failed!"
+      "upload_failed": "File upload failed!",
+      "from_you": "from you",
+      "from_me": "from Me",
+      "from_user": "from {{name}}"
     },
     "loading": {
       "loading": "Loading...",
@@ -300,7 +303,7 @@
       "channel": "New Channel Chat"
     },
     "direct": {
-      "placeholder": "@username/email/phone",
+      "placeholder": "username/email/phone",
       "find_user": "Find User",
       "user_not_found": "User not found!",
       "blocked_by_user_message": "This user has blocked you. You cannot view their profile or interact with them.",

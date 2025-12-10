@@ -62,7 +62,9 @@
       "blocked_them": "Bạn đã chặn người dùng này.",
       "blocked_each_other": "Bạn và người dùng này đã chặn nhau",
       "load_app_error": "Không tải được ứng dụng. Vui lòng tải lại.",
-      "upload_failed": "Tải tệp lên thất bại!"
+      "upload_failed": "Tải tệp lên thất bại!",
+      "from_me": "từ Tôi",
+      "from_user": "từ {{name}}"
     },
     "loading": {
       "loading": "Đang tải...",
@@ -300,7 +302,7 @@
       "channel": "Tạo kênh mới"
     },
     "direct": {
-      "placeholder": "@username/email/ĐT",
+      "placeholder": "username/email/ĐT",
       "find_user": "Tìm kiếm",
       "user_not_found": "Không tìm thấy người dùng!",
       "blocked_by_user_message": "Người dùng này đã chặn bạn. Bạn không thể xem trang cá nhân hoặc tương tác với họ.",

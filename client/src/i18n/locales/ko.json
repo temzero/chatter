@@ -62,7 +62,9 @@
       "blocked_them": "당신은 이 사용자를 차단했습니다.",
       "blocked_each_other": "당신과 이 사용자는 서로를 차단했습니다",
       "load_app_error": "앱을 불러오지 못했습니다. 새로고침 해주세요.",
-      "upload_failed": "파일 업로드 실패!"
+      "upload_failed": "파일 업로드 실패!",
+      "from_me": "나에게서",
+      "from_user": "{{name}}에게서"
     },
     "loading": {
       "loading": "로딩 중...",
@@ -300,7 +302,7 @@
       "channel": "새 채널 채팅"
     },
     "direct": {
-      "placeholder": "@사용자이름/이메일/전화번호",
+      "placeholder": "사용자이름/이메일/전화번호",
       "find_user": "사용자 찾기",
       "user_not_found": "사용자를 찾을 수 없습니다!",
       "blocked_by_user_message": "이 사용자가 당신을 차단했습니다. 프로필을 보거나 상호작용할 수 없습니다.",

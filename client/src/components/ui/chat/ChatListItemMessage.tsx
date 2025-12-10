@@ -1,5 +1,6 @@
 import * as React from "react";
 import { motion } from "framer-motion";
+import { clsx } from "clsx";
 import { getAttachmentIcons } from "@/common/utils/getFileIcon";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { MessageResponse } from "@/shared/types/responses/message.response";
@@ -10,6 +11,7 @@ import {
   SystemMessageJSONContent,
 } from "@/components/ui/messages/content/SystemMessageContent";
 import { getMessageAttachments } from "@/stores/messageAttachmentStore";
+import { useTranslation } from "react-i18next";
 
 interface ChatListItemMessageProps {
   chatId?: string;
@@ -19,10 +21,6 @@ interface ChatListItemMessageProps {
   currentUserId: string;
 }
 
-/**
- * Handles rendering of the chat preview message
- * inside the ChatListItem (last message, system event, etc.)
- */
 export const ChatListItemMessage: React.FC<ChatListItemMessageProps> = ({
   chatId,
   lastMessage,
@@ -30,6 +28,7 @@ export const ChatListItemMessage: React.FC<ChatListItemMessageProps> = ({
   chatType,
   currentUserId,
 }) => {
+  const { t } = useTranslation();
   const attachments = getMessageAttachments(
     chatId || "",
     lastMessage?.id || ""
@@ -38,25 +37,38 @@ export const ChatListItemMessage: React.FC<ChatListItemMessageProps> = ({
 
   let displayMessage: React.ReactNode = null;
 
-  // Draft message (highest priority)
+  // Draft message
   if (draftMessageContent) {
     displayMessage = (
-      <p className="text-(--primary-green) flex items-center gap-1 overflow-hidden flex-1 min-w-0">
+      <p
+        className={clsx(
+          "text-(--primary-green) italic",
+          "flex items-center gap-1",
+          "overflow-hidden flex-1 min-w-0"
+        )}
+      >
         <i className="material-symbols-outlined flex items-center justify-center text-[16px] h-3">
           edit
         </i>
         <span className="text-xs truncate">{draftMessageContent}</span>
       </p>
     );
-  } else if (lastMessage?.call) {
+  }
+
+  // Call message
+  else if (lastMessage?.call) {
     displayMessage = (
       <CallMessageContent
         call={lastMessage.call}
+        message={lastMessage}
         isBroadcast={chatType === ChatType.CHANNEL}
         className="opacity-60 flex-1 min-w-0"
       />
     );
-  } else if (lastMessage?.systemEvent) {
+  }
+
+  // System message
+  else if (lastMessage?.systemEvent) {
     displayMessage = (
       <SystemMessageContent
         systemEvent={lastMessage.systemEvent}
@@ -67,15 +79,20 @@ export const ChatListItemMessage: React.FC<ChatListItemMessageProps> = ({
         className="gap-1 truncate opacity-60 flex-1 min-w-0"
       />
     );
-  } else if (lastMessage) {
+  }
+
+  // Normal message
+  else if (lastMessage) {
     displayMessage = (
       <p
-        className={`flex items-center gap-1 text-xs min-h-6 flex-1 min-w-0 ${
-          unreadMessagesCount > 0 ? "opacity-100" : "opacity-40"
-        }`}
+        className={clsx(
+          "flex items-center gap-1 text-xs min-h-6 flex-1 min-w-0",
+          unreadMessagesCount > 0 ? "opacity-100" : "opacity-40",
+          lastMessage.sender.id === currentUserId && "italic"
+        )}
       >
         {lastMessage.sender.id === currentUserId ? (
-          <strong>Me:</strong>
+          <strong>{t("common.you")}:</strong>
         ) : chatType !== ChatType.DIRECT ? (
           <strong>{lastMessage.sender.displayName.split(" ")[0]}:</strong>
         ) : null}
@@ -105,10 +122,8 @@ export const ChatListItemMessage: React.FC<ChatListItemMessageProps> = ({
     );
   }
 
-  // Nothing to show
   if (!displayMessage) return null;
 
-  // Wrap all in motion for consistent animation
   return (
     <motion.div
       key="message"

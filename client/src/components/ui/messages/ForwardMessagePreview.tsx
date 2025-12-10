@@ -1,6 +1,7 @@
 import * as React from "react";
 import clsx from "clsx";
 import RenderMultipleAttachments from "@/components/ui/attachments/RenderMultipleAttachments";
+import { useTranslation } from "react-i18next";
 import type {
   MessageResponse,
   SenderResponse,
@@ -19,6 +20,7 @@ const ForwardedMessagePreview: React.FC<ForwardedMessagePreviewProps> = ({
   currentUserId,
   isMe,
 }) => {
+  const { t } = useTranslation();
   if (!message) return null;
   const isOriginalFromMe = originalSender?.id === currentUserId;
 
@@ -49,8 +51,10 @@ const ForwardedMessagePreview: React.FC<ForwardedMessagePreviewProps> = ({
           <div className="opacity-60 text-sm px-2 pb-1 flex items-center justify-between gap-2 bg-black/50">
             <h1>
               {isOriginalFromMe
-                ? "from me"
-                : `from ${originalSender.displayName}`}
+                ? t("common.messages.from_you")
+                : t("common.messages.from_user", {
+                    name: originalSender.displayName,
+                  })}
             </h1>
             <span className="material-symbols-outlined -rotate-90">
               arrow_warm_up
@@ -63,8 +67,10 @@ const ForwardedMessagePreview: React.FC<ForwardedMessagePreviewProps> = ({
             </span>
             <h1>
               {isOriginalFromMe
-                ? "from Me"
-                : `from ${originalSender.displayName}`}
+                ? t("forwarded.from_you")
+                : t("forwarded.from_user", {
+                    name: originalSender.displayName,
+                  })}
             </h1>
           </div>
         ))}

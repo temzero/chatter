@@ -2,9 +2,9 @@
 // src/hooks/handleApiError.ts
 import { AxiosError } from "axios";
 import { audioService, SoundType } from "@/services/audioService";
-import { toast } from "react-toastify";
 import { UnauthorizedError } from "@/shared/types/enums/error-message.enum";
 import { handleRefreshToken } from "./handleRefreshToken";
+// import { toast } from "react-toastify";
 import handleUnauthorizedError from "../api/handleUnauthError";
 import handleConflictError from "../api/handleConflictError";
 
@@ -25,13 +25,18 @@ export const handleApiError = () => {
       return;
     }
 
-    toast.error(`${status} - Code: ${code} - Message: ${message}`);
-    console.error(`${status} - Code: ${code} - Message: ${message}`);
-
     if (status === 409) {
       handleConflictError(code);
       return;
     }
+
+    if (status === 404) {
+      audioService.playSound(SoundType.NOT_FOUND, 0.5);
+      return;
+    }
+
+    // toast.error(`${status} - Code: ${code} - Message: ${message}`);
+    console.error(`${status} - Code: ${code} - Message: ${message}`);
 
     audioService.stopAllSounds();
     audioService.playSound(SoundType.ERROR);

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { clsx } from "clsx";
 import { userService } from "@/services/http/userService";
 import { getCurrentUserId } from "@/stores/authStore";
 import { AnimatePresence, motion } from "framer-motion";
@@ -35,8 +36,7 @@ const CreateNewChat: React.FC = () => {
     try {
       const foundUser = await userService.fetchUserByIdentifier(query.trim());
       setUser(foundUser);
-    } catch (err: unknown) {
-      console.error("Search for user: ", String(err));
+    } catch {
       setError("User not found!");
     } finally {
       setLoading(false);
@@ -54,7 +54,11 @@ const CreateNewChat: React.FC = () => {
   const isUserOnline = useUserStatus(user?.id);
 
   return (
-    <div className="flex flex-col justify-between w-full h-full relative overflow-hidden">
+    <div
+      className={clsx(
+        "flex flex-col justify-between w-full h-full relative overflow-hidden"
+      )}
+    >
       <div className="w-full h-full p-2">
         <AnimatePresence mode="wait">
           {user && (
@@ -68,10 +72,20 @@ const CreateNewChat: React.FC = () => {
                 damping: 12,
                 mass: 0.6,
               }}
-              className="bg-(--card-bg-color) custom-border rounded-lg flex flex-col justify-between h-full overflow-hidden p-2"
+              className={clsx(
+                "bg-(--card-bg-color)",
+                "custom-border rounded-lg",
+                "flex flex-col justify-between",
+                "h-full overflow-hidden p-2"
+              )}
             >
               {user.isBlockedMe ? (
-                <div className="flex-1 flex flex-col gap-2 items-center justify-center text-center text-red-500 p-6">
+                <div
+                  className={clsx(
+                    "flex-1 flex flex-col gap-2 items-center justify-center text-center",
+                    "text-red-500 p-6"
+                  )}
+                >
                   <i className="material-symbols-outlined text-8xl! rotate-90 opacity-60 select-none">
                     block
                   </i>
@@ -79,16 +93,21 @@ const CreateNewChat: React.FC = () => {
                 </div>
               ) : (
                 <>
-                  <div className="flex-1 flex flex-col items-center justify-start gap-2 p-2 pt-4 overflow-y-auto">
+                  <div
+                    className={clsx(
+                      "flex-1 flex flex-col items-center justify-start gap-2 p-2 pt-4 overflow-y-auto"
+                    )}
+                  >
                     <div
-                      className={`border rounded-full! hover:shadow-xl hover:scale-110 transition-all ${
-                        isUserOnline ? "border-2 border-(--primary-green)" : ""
-                      }`}
+                      className={clsx(
+                        "border rounded-full! hover:shadow-xl hover:scale-110 transition-all",
+                        isUserOnline && "border-2 border-(--primary-green)"
+                      )}
                     >
                       <Avatar
                         avatarUrl={user.avatarUrl ?? undefined}
                         name={user.firstName}
-                        className={`w-[120px] h-[120px] cursor-pointer`}
+                        className={clsx("w-[120px] h-[120px] cursor-pointer")}
                         onClick={() =>
                           !user.isBlockedByMe && createOrGetDirectChat(user.id)
                         }
@@ -100,16 +119,22 @@ const CreateNewChat: React.FC = () => {
                       <h1 className="font-bold text-xl">
                         {user.firstName} {user.lastName}
                       </h1>
-                      {isMe && <h1 className="text-(--primary-green)">Me</h1>}
+
+                      {isMe && (
+                        <h1 className="text-(--primary-green)">
+                          {t("common.you")}
+                        </h1>
+                      )}
                     </div>
 
                     {user.friendshipStatus === FriendshipStatus.ACCEPTED && (
                       <h1
-                        className={`-mt-1 ${
+                        className={clsx(
+                          "-mt-1",
                           user.isBlockedByMe
                             ? "text-red-500"
                             : "text-(--primary-green)"
-                        }`}
+                        )}
                       >
                         {user.isBlockedByMe
                           ? t("sidebar_new_chat.direct.friend_but_blocked")
@@ -119,23 +144,31 @@ const CreateNewChat: React.FC = () => {
 
                     <h1>{user.bio}</h1>
 
-                    <div className="w-full flex flex-col font-light my-2 custom-border-t custom-border-b">
+                    <div
+                      className={clsx(
+                        "w-full flex flex-col font-light my-2",
+                        "custom-border-t custom-border-b"
+                      )}
+                    >
                       <ContactInfoItem
                         icon="alternate_email"
                         value={user.username}
                         copyType="username"
                         defaultText={t("sidebar_new_chat.direct.no_username")}
                       />
+
                       <ContactInfoItem
                         icon="call"
                         value={user.phoneNumber}
                         copyType="phone"
                       />
+
                       <ContactInfoItem
                         icon="mail"
                         value={user.email}
                         copyType="email"
                       />
+
                       <ContactInfoItem
                         icon="cake"
                         value={user.birthday}
@@ -145,12 +178,18 @@ const CreateNewChat: React.FC = () => {
                   </div>
 
                   {!isMe && (
-                    <div className="w-full border-t-2 border-(--border-color)">
-                      {/* Unblock button takes priority when user is blocked */}
+                    <div
+                      className={clsx(
+                        "w-full border-t-2 border-(--border-color)"
+                      )}
+                    >
                       {user.isBlockedByMe ? (
                         <button
-                          className="w-full py-1 flex gap-1 items-center justify-center hover:bg-(--primary-green) bg-red-500 text-white"
-                          // onClick={() => handleUnblock(user.id, user.firstName)}
+                          className={clsx(
+                            "w-full py-1 flex gap-1 items-center justify-center",
+                            "hover:bg-(--primary-green)",
+                            "bg-red-500 text-white"
+                          )}
                           onClick={() =>
                             openModal(ModalType.UNBLOCK_USER, {
                               blockedUser: user,
@@ -177,7 +216,10 @@ const CreateNewChat: React.FC = () => {
                             />
                           ) : (
                             <button
-                              className="w-full py-1 flex gap-1 items-center justify-center hover:bg-(--primary-green)"
+                              className={clsx(
+                                "w-full py-1 flex gap-1 items-center justify-center",
+                                "hover:bg-(--primary-green)"
+                              )}
                               onClick={() => createOrGetDirectChat(user.id)}
                             >
                               {t("sidebar_new_chat.direct.start_chat")}
@@ -199,12 +241,17 @@ const CreateNewChat: React.FC = () => {
 
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col p-3 gap-2 border-2 border-b-0 border-(--border-color) bg-(--card-bg-color) rounded-t-xl"
+        className={clsx(
+          "flex flex-col p-3 gap-2",
+          "border-2 border-b-0 border-(--border-color)",
+          "bg-(--card-bg-color) rounded-t-xl"
+        )}
       >
         {error && (
-          <p className="text-red-400 text-center mb-2">
+          <div className="flex gap-1 mb-1 items-center text-red-400">
+            <span className="material-symbols-outlined">search_off</span>
             {t("sidebar_new_chat.direct.user_not_found")}
-          </p>
+          </div>
         )}
 
         <SearchBar
@@ -212,9 +259,14 @@ const CreateNewChat: React.FC = () => {
           autoFocus
           onSearch={(value) => setQuery(value)}
         />
+
         <button
           type="submit"
-          className="bg-(--primary-green) py-1 w-full flex gap-2 items-center justify-center text-white rounded"
+          className={clsx(
+            "bg-(--primary-green) py-1 w-full",
+            "flex gap-2 items-center justify-center",
+            "text-white rounded"
+          )}
           disabled={loading || !query}
         >
           {loading
