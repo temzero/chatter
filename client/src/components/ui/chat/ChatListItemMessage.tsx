@@ -47,7 +47,7 @@ export const ChatListItemMessage: React.FC<ChatListItemMessageProps> = ({
           "overflow-hidden flex-1 min-w-0"
         )}
       >
-        <i className="material-symbols-outlined flex items-center justify-center text-[16px] h-3">
+        <i className="material-symbols-outlined flex items-center justify-center text-[16px]! h-3">
           edit
         </i>
         <span className="text-xs truncate">{draftMessageContent}</span>

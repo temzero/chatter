@@ -28,7 +28,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
       <div
         className={`bg-(--border-color) flex items-center justify-center overflow-hidden ${
           type === "header"
-            ? "h-11 w-11 rounded-[10px]"
+            ? "h-10 w-10 rounded-[10px]"
             : type === "info"
             ? "h-32 w-32 rounded-[30px]"
             : type === "contact"

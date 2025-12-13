@@ -28,16 +28,19 @@ export function useChatSocketListeners() {
       const existingMessage = messageStore.getMessageById(message.id);
       if (existingMessage) {
         if (meta?.isSender) {
-          messageStore.updateMessageById(message.id, {
-            status: MessageStatus.SENT,
-          });
+          messageStore.updateMessageById(message.id, message);
+        }
+
+        if (!meta?.isMuted && !message.call && !message.systemEvent) {
+          audioService.playSound(SoundType.MY_MESSAGE);
         }
         return;
       }
 
-      if (!meta?.isMuted && !message.call) {
+      if (!meta?.isMuted && !message.call && !message.systemEvent) {
         audioService.playSound(SoundType.NEW_MESSAGE);
       }
+
       // Exit early if chat does not exist and needs to be fetched
       const existingChat = chatStore.getChatById(message.chatId);
       if (!existingChat) {

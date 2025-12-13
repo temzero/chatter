@@ -11,8 +11,6 @@ import useTypingIndicator from "@/common/hooks/useTypingIndicator";
 import { useKeyDown } from "@/common/hooks/keyEvent/useKeydown";
 import { usePasteImage } from "@/common/hooks/keyEvent/usePasteImageListener";
 import { sendMessageAndReset } from "@/common/utils/chat/sendMessageAndResetChatBar";
-import PreviewLinkCard from "@/components/ui/messages/LinkPreviewCard";
-import extractFirstUrl from "@/common/utils/message/extractFirstUrl";
 
 interface ChatBarProps {
   chatId: string;
@@ -34,11 +32,6 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
   const [filePreviewUrls, setFilePreviewUrls] = useState<string[]>([]);
   const [hasTextContent, setHasTextContent] = useState(false);
 
-  // NEW: State for link preview
-  const [detectedUrl, setDetectedUrl] = useState<string | null>(null);
-  const [showPreview, setShowPreview] = useState(false);
-  const previewTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
   const { clearTypingState } = useTypingIndicator(inputRef, chatId ?? null);
   const shouldShowSendButton = hasTextContent || attachedFiles.length > 0;
 
@@ -53,6 +46,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
       requestAnimationFrame(() => {
         updateInputHeight();
       });
+      // updateInputHeight();
     }
   }, [chatId, getDraftMessage]);
 
@@ -73,15 +67,6 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
     }
   }, [replyToMessageId]);
 
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (previewTimeoutRef.current) {
-        clearTimeout(previewTimeoutRef.current);
-      }
-    };
-  }, []);
-
   // Replace this useEffect for "/" focus
   useKeyDown(
     (e) => {
@@ -93,7 +78,6 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
     ["/"],
     { preventDefault: false } // will not block default typing
   );
-
   // Replace this useEffect for ContextMenu key to open file input
   useKeyDown(() => {
     if (document.activeElement === inputRef.current) {
@@ -121,29 +105,6 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
     setHasTextContent(!!value.trim());
     updateInputHeight();
 
-    // Clear any existing timeout
-    if (previewTimeoutRef.current) {
-      clearTimeout(previewTimeoutRef.current);
-    }
-
-    // Detect URLs in the input - FIXED: extractFirstUrl now returns string | null
-    const url = extractFirstUrl(value);
-
-    // Debug log (remove after fixing)
-    console.log("URL detected:", url, "Type:", typeof url);
-
-    if (url) {
-      // ✅ Now this will work because url is string | null
-      setDetectedUrl(url);
-      // Show preview after a short delay (debounce)
-      previewTimeoutRef.current = setTimeout(() => {
-        setShowPreview(true);
-      }, 800);
-    } else {
-      setShowPreview(false);
-      setDetectedUrl(null);
-    }
-
     // LIVE update the draft in the store
     if (chatId) {
       setDraftMessage(chatId, value);
@@ -156,13 +117,9 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
         if (inputRef.current) inputRef.current.value = "";
         if (chatId) setDraftMessage(chatId, "");
         setHasTextContent(false);
-        setShowPreview(false);
-        setDetectedUrl(null);
         updateInputHeight();
       } else if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
-        setShowPreview(false);
-        setDetectedUrl(null);
         sendMessageAndReset({
           chatId,
           myMemberId,
@@ -234,7 +191,6 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
       className="absolute bottom-0 left-0 backdrop-blur-xl w-full flex flex-col items-start p-4 shadow border-(--border-color)"
       style={{ zIndex: replyToMessageId ? 100 : 2 }}
     >
-      {/* File Attachment Previews */}
       {filePreviewUrls.length > 0 && (
         <AttachmentImportedPreview
           files={attachedFiles}
@@ -245,16 +201,6 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
           }}
         />
       )}
-
-      {/* Link Preview Card */}
-      <PreviewLinkCard
-        url={detectedUrl || ""}
-        isVisible={showPreview}
-        onClose={() => {
-          setShowPreview(false);
-          setDetectedUrl(null);
-        }}
-      />
 
       <div className="flex w-full items-end">
         <AnimatePresence>
@@ -322,9 +268,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
                         !shouldShowSendButton,
                     }
                   )}
-                  onClick={() => {
-                    setShowPreview(false);
-                    setDetectedUrl(null);
+                  onClick={() =>
                     sendMessageAndReset({
                       chatId,
                       myMemberId,
@@ -340,8 +284,8 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
                       setIsMessageSent,
                       closeModal,
                       updateInputHeight,
-                    });
-                  }}
+                    })
+                  }
                   aria-label="Send message"
                 >
                   <span className="material-symbols-outlined">send</span>

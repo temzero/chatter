@@ -121,6 +121,15 @@ video:focus {
   box-shadow: none;
 }
 
+select {
+  border: none !important;
+  background-color: transparent !important;
+}
+select:focus {
+  border-radius: 4px !important;
+  background-color: var(--bg-color) !important;
+}
+
 input,
 textarea {
   outline: none;
@@ -151,6 +160,24 @@ input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
 }
 
+.microlink_card {
+  width: 100% !important;
+  max-width: 100% !important;
+  background-color: transparent !important;
+  border: none !important;
+  color: var(--text-color) !important;
+  border-radius: 8px !important;
+}
+
+.microlink_card .microlink_media {
+  border-radius: 8px !important;
+  overflow: hidden !important;
+}
+
+.microlink_card .microlink_image {
+  border-radius: 8px !important;
+}
+
 .input {
   height: 36px;
   width: 100%;
@@ -178,15 +205,6 @@ input[type="number"]::-webkit-inner-spin-button {
 .chat-input-reply {
   border: 2px solid var(--primary-green-glow);
   box-shadow: 0 0 8px var(--primary-green-glow);
-}
-
-select {
-  border: none !important;
-  background-color: transparent !important;
-}
-select:focus {
-  border-radius: 4px !important;
-  background-color: var(--bg-color) !important;
 }
 
 /* icon */

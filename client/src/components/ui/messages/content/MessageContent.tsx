@@ -1,5 +1,6 @@
 import * as React from "react";
 import clsx from "clsx";
+import Linkify from "linkify-react";
 import RenderMultipleAttachments from "@/components/ui/attachments/RenderMultipleAttachments";
 import ForwardedMessagePreview from "@/components/ui/messages/ForwardMessagePreview";
 import { MessageResponse } from "@/shared/types/responses/message.response";
@@ -41,7 +42,19 @@ const MessageContent: React.FC<MessageBubbleProps> = ({
             message && handleQuickReaction(message.id, message.chatId)
           }
         >
-          {message.content}
+          <Linkify
+            options={{
+              target: "_blank",
+              rel: "noopener noreferrer",
+              className: "underline! hover:opacity-80 italic break-all",
+              attributes: {
+                onClick: (e: React.MouseEvent<HTMLAnchorElement>) =>
+                  e.stopPropagation(),
+              },
+            }}
+          >
+            {message.content}
+          </Linkify>
         </p>
       )}
 

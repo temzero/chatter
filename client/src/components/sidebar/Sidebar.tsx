@@ -11,13 +11,17 @@ import SidebarWellCome from "@/components/sidebar/SidebarWellCome";
 import SidebarSearch from "@/components/sidebar/SidebarSearch";
 import SidebarNewChat from "@/components/sidebar/SidebarNewChat";
 import SidebarMore from "@/components/sidebar/more/SidebarMore";
+import SidebarProfile from "@/components/sidebar/SidebarProfile";
+import SidebarProfileEdit from "@/components/sidebar/SidebarProfileEdit";
 
-const SidebarProfile = lazy(
-  () => import("@/components/sidebar/SidebarProfile")
-);
-const SidebarProfileEdit = lazy(
-  () => import("@/components/sidebar/SidebarProfileEdit")
-);
+import SidebarFolder from "./more/sidebarFolders/SidebarFolder";
+import SidebarNewFolder from "./more/SidebarNewFolder";
+import SidebarCalls from "./more/sidebarCalls/SidebarCalls";
+import SidebarBlockedUsers from "./more/SidebarBlockedUsers";
+import SidebarContacts from "./more/SidebarContacts";
+import SidebarFolders from "./more/sidebarFolders/SidebarFolders";
+import SidebarFriendRequests from "./more/SidebarFriendRequests";
+
 const SidebarSettings = lazy(
   () => import("@/components/sidebar/settings/SidebarSettings")
 );
@@ -54,16 +58,6 @@ const SidebarSettingsData = lazy(
 const SidebarSettingsLanguage = lazy(
   () => import("./settings/sidebarSettingsLanguage")
 );
-const SidebarFriendRequests = lazy(
-  () => import("./more/SidebarFriendRequests")
-);
-const SidebarCalls = lazy(() => import("./more/sidebarCalls/SidebarCalls"));
-const SidebarContacts = lazy(() => import("./more/SidebarContacts"));
-const SidebarFolders = lazy(
-  () => import("./more/sidebarFolders/SidebarFolders")
-);
-const SidebarFolder = lazy(() => import("./more/sidebarFolders/SidebarFolder"));
-const SidebarBlockedUsers = lazy(() => import("./more/SidebarBlockedUsers"));
 const SidebarSettingsEmail = lazy(
   () => import("./settings/account/sidebarSettingsEmail")
 );
@@ -73,7 +67,6 @@ const SidebarSettingsUsername = lazy(
 const SidebarSettingsPhoneNumber = lazy(
   () => import("./settings/account/sidebarSettingsPhoneNumber")
 );
-const SidebarNewFolder = lazy(() => import("./more/SidebarNewFolder"));
 
 const Sidebar = () => {
   console.log("[MOUNTED]", "Sidebar");

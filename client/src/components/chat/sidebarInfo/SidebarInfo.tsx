@@ -1,23 +1,14 @@
-import { lazy } from "react";
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCurrentSidebarInfo } from "@/stores/sidebarInfoStore";
 import { sidebarInfoAnimations } from "@/common/animations/sidebarInfoAnimations";
 import { useSidebarInfoWidth } from "@/common/hooks/useSidebarInfoWidth";
 import ChatInfoDefault from "@/components/chat/sidebarInfo/SidebarInfoDefault";
-const ChatInfoMedia = lazy(
-  () =>
-    import("@/components/chat/sidebarInfo/sidebarInfoMedia/SidebarInfoMedia")
-);
-const DirectChatEdit = lazy(
-  () => import("@/components/chat/sidebarInfo/sidebarInfoEdit/DirectChatEdit")
-);
-const GroupChatEdit = lazy(
-  () => import("@/components/chat/sidebarInfo/sidebarInfoEdit/GroupChatEdit")
-);
-const ChatMembersEdit = lazy(
-  () => import("@/components/chat/sidebarInfo/sidebarInfoEdit/ChatMembersEdit")
-);
+import SidebarInfoMedia from "./sidebarInfoMedia/SidebarInfoMedia";
+import DirectChatEdit from "@/components/chat/sidebarInfo/sidebarInfoEdit/DirectChatEdit";
+import ChatMembersEdit from "@/components/chat/sidebarInfo/sidebarInfoEdit/ChatMembersEdit";
+import GroupChatEdit from "@/components/chat/sidebarInfo/sidebarInfoEdit/GroupChatEdit";
+
 
 const SidebarInfo: React.FC = () => {
   const currentSidebarInfo = useCurrentSidebarInfo();
@@ -26,7 +17,7 @@ const SidebarInfo: React.FC = () => {
   // Define your chat info components
   const chatInfoComponents = {
     default: <ChatInfoDefault />,
-    media: <ChatInfoMedia />,
+    media: <SidebarInfoMedia />,
     directEdit: <DirectChatEdit />,
     groupEdit: <GroupChatEdit />,
     membersEdit: <ChatMembersEdit />,
