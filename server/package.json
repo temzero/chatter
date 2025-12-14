@@ -34,6 +34,7 @@
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "link-preview-js": "^4.0.0",
     "livekit-server-sdk": "^2.14.2",
     "multer": "^2.0.2",
     "nodemailer": "^7.0.11",

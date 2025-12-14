@@ -65,6 +65,29 @@ export function useChatSocketListeners() {
       messageStore.addMessage(message);
     };
 
+    // ======== Update Message (Async changes like link preview) ========
+    const handleMessageUpdated = (
+      data: WsNotificationResponse<Partial<MessageResponse>>
+    ) => {
+      try {
+        const { payload: updatedMessage } = data;
+        const messageStore = useMessageStore.getState();
+
+        if (!updatedMessage.id) {
+          console.error("Updated message payload missing ID:", updatedMessage);
+          return;
+        }
+
+        // Update the message in store
+        messageStore.updateMessageById(updatedMessage.id, updatedMessage);
+
+        // Optional: show toast if needed
+        // toast.info(t("toast.message.updated"));
+      } catch (error) {
+        handleError(error, "Failed to update message");
+      }
+    };
+
     const handleMessageSaved = (
       data: WsNotificationResponse<MessageResponse>
     ) => {
@@ -250,6 +273,7 @@ export function useChatSocketListeners() {
     if (!socket) return;
 
     chatWebSocketService.onNewMessage(handleNewMessage);
+    chatWebSocketService.onMessageUpdate(handleMessageUpdated);
     chatWebSocketService.onSaveMessage(handleMessageSaved);
     chatWebSocketService.onReaction(handleReaction);
     chatWebSocketService.onTyping(handleTyping);

@@ -1,6 +1,6 @@
 // types/message-response.ts
-import { MessageStatus } from "@/shared/types/enums/message-status.enum";
-import { SystemEventType } from "@/shared/types/enums/system-event-type.enum";
+import { MessageStatus } from "@shared/types/enums/message-status.enum";
+import { SystemEventType } from "@shared/types/enums/system-event-type.enum";
 import { CallLiteResponse } from "./call-lite.response";
 import { AttachmentResponse } from "./message-attachment.response";
 
@@ -11,26 +11,28 @@ export interface MessageResponse {
   content?: string | null;
   status: MessageStatus;
   isPinned: boolean;
-  pinnedAt?: string | null;
+  pinnedAt?: Date | string | null;
 
   replyToMessageId?: string | null;
-  replyToMessage: MessageResponse | null;
+  replyToMessage?: MessageResponse | null;
   replyCount: number;
 
   forwardedFromMessageId?: string | null;
-  forwardedFromMessage: MessageResponse | null;
+  forwardedFromMessage?: MessageResponse | null;
 
   isImportant?: boolean;
   systemEvent?: SystemEventType | null;
-  editedAt?: string | null;
+  editedAt?: Date | string | null;
   isDeleted: boolean;
-  deletedAt?: string | null;
-  createdAt: string;
-  updatedAt: string;
+  deletedAt?: Date | string | null;
+  createdAt: Date | string;
+  updatedAt: Date | string;
   reactions?: Record<string, string[]>;
   attachments?: AttachmentResponse[];
 
   call?: CallLiteResponse;
+
+  linkPreview?: LinkPreviewResponse | null;
 
   isMuted?: boolean;
   shouldAnimate?: boolean;
@@ -42,4 +44,12 @@ export interface SenderResponse {
   displayName: string;
 }
 
-
+export interface LinkPreviewResponse {
+  url: string;
+  title?: string;
+  description?: string;
+  image?: string;
+  mediaType?: string; // video, article, website, etc.
+  site_name?: string;
+  favicon?: string;
+}

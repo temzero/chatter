@@ -11,8 +11,8 @@ import useTypingIndicator from "@/common/hooks/useTypingIndicator";
 import { useKeyDown } from "@/common/hooks/keyEvent/useKeydown";
 import { usePasteImage } from "@/common/hooks/keyEvent/usePasteImageListener";
 import { sendMessageAndReset } from "@/common/utils/chat/sendMessageAndResetChatBar";
-import PreviewLinkCard from "@/components/ui/messages/LinkPreviewCard";
-import extractFirstUrl from "@/common/utils/message/extractFirstUrl";
+import PreviewLinkCard from "@/components/ui/messages/PreviewLinkCard";
+import extractFirstUrl from "@/shared/extractFirstUrl";
 
 interface ChatBarProps {
   chatId: string;

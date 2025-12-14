@@ -23,6 +23,11 @@ export const messageAnimations: Record<string, MotionProps> = {
     exit: { opacity: 0, scale: 2 },
     transition: { type: "spring", stiffness: 300, damping: 29 },
   },
+  linkPreview: {
+    initial: { opacity: 0, y: 12, scale: 0.9 },
+    animate: { opacity: 1, y: 0, scale: 1 },
+    exit: { opacity: 0, y: 8, scale: 0.9 },
+  },
   reaction: {
     initial: { scale: 0.5, opacity: 0, y: 12 },
     animate: { scale: 1, opacity: 1, y: 0 },

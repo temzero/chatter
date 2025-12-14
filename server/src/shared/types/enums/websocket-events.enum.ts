@@ -26,6 +26,7 @@ export const enum ChatEvent {
   REACT_TO_MESSAGE = 'chat:react-to-message',
   TOGGLE_PIN_MESSAGE = 'chat:toggle-pin-message',
   SAVE_MESSAGE = 'chat:save-message',
+  UPDATE_MESSAGE = 'chat:update-message',
   DELETE_MESSAGE = 'chat:delete-message',
   MESSAGE_ERROR = 'chat:message-error',
 }

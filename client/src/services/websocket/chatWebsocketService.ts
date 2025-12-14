@@ -104,6 +104,18 @@ export const chatWebSocketService = {
     webSocketService.off(ChatEvent.NEW_MESSAGE, callback);
   },
 
+  onMessageUpdate(
+    callback: (wsData: WsNotificationResponse<MessageResponse>) => void
+  ) {
+    webSocketService.on(ChatEvent.UPDATE_MESSAGE, callback);
+  },
+  offMessageUpdate(
+    callback?: (wsData: WsNotificationResponse<MessageResponse>) => void
+  ) {
+    if (callback) webSocketService.off(ChatEvent.UPDATE_MESSAGE, callback);
+    else webSocketService.off(ChatEvent.UPDATE_MESSAGE);
+  },
+
   onTyping(
     callback: (
       wsData: WsNotificationResponse<{
@@ -271,6 +283,7 @@ export const chatWebSocketService = {
     const events = [
       ChatEvent.STATUS_CHANGED,
       ChatEvent.NEW_MESSAGE,
+      ChatEvent.UPDATE_MESSAGE,
       ChatEvent.USER_TYPING,
       ChatEvent.MESSAGE_READ,
       ChatEvent.MESSAGE_REACTION,

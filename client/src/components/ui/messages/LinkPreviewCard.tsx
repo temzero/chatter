@@ -1,89 +1,93 @@
-// components/ui/PreviewLinkCard.tsx
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import mql from "@microlink/mql";
+import clsx from "clsx";
+import { motion } from "framer-motion";
+import { LinkPreviewResponse } from "@/shared/types/responses/message.response";
+import { messageAnimations } from "@/common/animations/messageAnimations";
 
-interface PreviewLinkCardProps {
-  url: string;
-  isVisible: boolean;
-  onClose: () => void;
+interface Props {
+  preview: LinkPreviewResponse;
+  className?: string;
 }
 
-const PreviewLinkCard: React.FC<PreviewLinkCardProps> = ({
-  url,
-  isVisible,
-  onClose,
-}) => {
-  const [data, setData] = React.useState<any>(null);
-
-  console.log("PreviewLinkCard data", data);
-
-  React.useEffect(() => {
-    if (!url || !isVisible) return;
-
-    mql(url)
-      .then((res) => setData(res.data))
-      .catch(() => setData(null));
-  }, [url, isVisible]);
-
-  const containerVariants = {
-    hidden: { opacity: 0, y: -10, height: 0, marginBottom: 0 },
-    visible: { opacity: 1, y: 0, height: "auto", marginBottom: 12 },
-    exit: { opacity: 0, y: -5, height: 0, marginBottom: 0 },
-  };
-
-  const getPreviewTitle = (data: any) => {
-    return data?.ogTitle || data?.meta?.title || data?.title || "Untitled";
-  };
-
-  if (!isVisible) return null;
+export const LinkPreviewCard: React.FC<Props> = ({ preview, className }) => {
+  const { url, title, description, image, site_name, favicon, mediaType } =
+    preview;
 
   return (
-    <AnimatePresence>
-      <motion.a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="relative flex gap-2 w-full custom-border rounded-lg overflow-hidden bg-(--card-bg-color) shadow-md cursor-pointer"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
+    <motion.a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={clsx(
+        "block overflow-hidden rounded-lg p-1 shadow-xl",
+        "bg-black/20 transition-all",
+        className
+      )}
+      {...messageAnimations.linkPreview}
+    >
+      <motion.div
+        whileHover={{
+          scale: 1.1,
+          transition: { type: "spring", stiffness: 300, damping: 14 },
+        }}
+        animate={{
+          transition: { type: "spring", stiffness: 300, damping: 14 },
+        }}
       >
-        {/* Image */}
-        {data?.image?.url && (
-          <img
-            src={data.image.url}
-            alt={data.title}
-            className="w-20 h-20 object-cover rounded-lg"
-          />
+        {image && (
+          <div className="relative w-full aspect-video bg-black/5 shadow rounded overflow-hidden">
+            <img
+              src={image}
+              alt={title ?? site_name ?? "Link preview"}
+              className="h-full w-full object-cover"
+              loading="lazy"
+            />
+
+            {mediaType === "video" && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="rounded-full bg-black/60 px-3 py-1 text-xs text-white">
+                  ▶ Video
+                </div>
+              </div>
+            )}
+          </div>
         )}
 
-        {/* Text */}
-        <div className="w-full h-20 p-1 flex flex-col justify-between">
-          <div className="text-xs opacity-60">
-            {data?.publisher || data?.author || "Website"}
-          </div>
+        {/* Content */}
+        <div className="p-2 space-y-1">
+          {/* Site info */}
+          {(site_name || favicon) && (
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              {favicon && (
+                <img
+                  src={favicon}
+                  alt={site_name ?? "favicon"}
+                  className="h-4 w-4 rounded-sm"
+                  loading="lazy"
+                />
+              )}
+              {site_name && <span>{site_name}</span>}
+            </div>
+          )}
 
-          <div className="font-semibold mt-0.5 line-clamp-2">
-            {getPreviewTitle(data)}
-          </div>
-          <div className="font-light italic text-xs opacity-60">{url}</div>
-        </div>
+          {/* Title */}
+          {title && (
+            <div className="text-sm font-medium line-clamp-1">{title}</div>
+          )}
 
-        {/* Close */}
-        <div
-          onClick={(e) => {
-            e.stopPropagation();
-            onClose();
-          }}
-          className="absolute top-0 right-0 flex items-center justify-center p-1 bg-(--card-bg-color) cursor-pointer rounded hover:text-red-400 hover:scale-125 transition-all"
-        >
-          <span className="material-symbols-outlined opacity-80">close</span>
+          {/* Description */}
+          {description && (
+            <div className="text-xs opacity-70 italic line-clamp-2">
+              {description}
+            </div>
+          )}
+
+          {/* URL fallback */}
+          {!title && !description && (
+            <div className="text-xs text-muted-foreground break-all">{url}</div>
+          )}
         </div>
-      </motion.a>
-    </AnimatePresence>
+      </motion.div>
+    </motion.a>
   );
 };
-
-export default PreviewLinkCard;

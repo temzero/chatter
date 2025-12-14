@@ -14,6 +14,7 @@ import { WebSocketModule } from '../websocket/websocket.module';
 import { Call } from '../call/entities/call.entity';
 import { AttachmentModule } from '../attachment/attachment.module';
 import { ChatMemberModule } from '../chat-member/chat-member.module';
+import { LinkPreviewService } from './linkPreview.service';
 
 @Module({
   imports: [
@@ -32,7 +33,7 @@ import { ChatMemberModule } from '../chat-member/chat-member.module';
     forwardRef(() => ChatMemberModule),
   ],
   controllers: [MessageController],
-  providers: [MessageService, MessageMapper],
+  providers: [MessageService, MessageMapper, LinkPreviewService],
   exports: [MessageService, MessageMapper, TypeOrmModule, AttachmentModule],
 })
 export class MessageModule {}

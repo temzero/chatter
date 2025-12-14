@@ -20,6 +20,7 @@ import { ChatMemberService } from '../chat-member/chat-member.service';
 import { MessageService } from '../message/message.service';
 import { SupabaseModule } from '../superbase/supabase.module';
 import { SavedChatMapper } from './mappers/saved-chat.mapper';
+import { LinkPreviewService } from '../message/linkPreview.service';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { SavedChatMapper } from './mappers/saved-chat.mapper';
     MessageMapper,
     ChatMemberService,
     MessageService,
+    LinkPreviewService,
   ],
   exports: [ChatService, ChatMapper, TypeOrmModule],
 })

@@ -20,9 +20,9 @@ import { PaginationQuery } from '@shared/types/queries/pagination-query';
 import { WebsocketNotificationService } from '../websocket/services/websocket-notification.service';
 import { Call } from '../call/entities/call.entity';
 import { PaginationResponse } from '@shared/types/responses/pagination.response';
+import { LinkPreviewService } from './linkPreview.service';
 import { AttachmentService } from '../attachment/attachment.service';
 import { Attachment } from '../attachment/entity/attachment.entity';
-import { ChatMemberService } from '../chat-member/chat-member.service';
 import {
   BadRequestError,
   ForbiddenError,
@@ -50,10 +50,10 @@ export class MessageService {
     public readonly callRepo: Repository<Call>,
 
     private readonly attachmentService: AttachmentService,
-    private readonly chatMemberService: ChatMemberService,
     private readonly blockService: BlockService,
     private readonly messageMapper: MessageMapper,
     private readonly websocketNotificationService: WebsocketNotificationService,
+    private readonly linkPreviewService: LinkPreviewService,
   ) {}
 
   async createMessage(
@@ -104,7 +104,36 @@ export class MessageService {
     );
 
     // ✅ RELOAD with all relations
-    return await this.getFullMessageById(savedMessage.id);
+    // Reload full message with relations
+    const fullMessage = await this.getFullMessageById(savedMessage.id);
+
+    // 🔹 Start async link preview (do not await)
+    void this.handleAsyncLinkPreview(fullMessage);
+
+    return fullMessage;
+  }
+
+  private async handleAsyncLinkPreview(message: Message) {
+    if (!message.content) return;
+
+    try {
+      const preview = await this.linkPreviewService.fetchFirstUrlPreview(
+        message.content,
+      );
+
+      if (!preview) return;
+
+      await this.messageRepo.update(message.id, { linkPreview: preview });
+
+      await this.websocketNotificationService.emitToChatMembers<
+        Partial<MessageResponseDto>
+      >(message.chatId, ChatEvent.UPDATE_MESSAGE, {
+        id: message.id,
+        linkPreview: preview,
+      });
+    } catch (err) {
+      console.warn('Async link preview failed for message', message.id, err);
+    }
   }
 
   async createReplyMessage(
@@ -265,7 +294,7 @@ export class MessageService {
     const messageResponse =
       this.messageMapper.mapMessageToMessageResDto(fullMessage);
 
-    await this.websocketNotificationService.emitToChatMembers(
+    await this.websocketNotificationService.emitToChatMembers<MessageResponseDto>(
       chatId,
       ChatEvent.NEW_MESSAGE,
       messageResponse,
@@ -717,6 +746,9 @@ export class MessageService {
         .leftJoinAndSelect('forwardedFromMessage.sender', 'forwardedSender')
         .select([
           'message',
+          'message.linkPreview',
+
+          // Sender
           'sender.id',
           'sender.firstName',
           'sender.lastName',
