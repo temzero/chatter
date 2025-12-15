@@ -1,6 +1,7 @@
 // components/ui/PreviewLinkCard.tsx
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import clsx from "clsx";
 import mql from "@microlink/mql";
 
 interface PreviewLinkCardProps {
@@ -16,8 +17,6 @@ const PreviewLinkCard: React.FC<PreviewLinkCardProps> = ({
 }) => {
   const [data, setData] = React.useState<any>(null);
 
-  console.log("PreviewLinkCard data", data);
-
   React.useEffect(() => {
     if (!url || !isVisible) return;
 
@@ -27,14 +26,13 @@ const PreviewLinkCard: React.FC<PreviewLinkCardProps> = ({
   }, [url, isVisible]);
 
   const containerVariants = {
-    hidden: { opacity: 0, y: -10, height: 0, marginBottom: 0 },
-    visible: { opacity: 1, y: 0, height: "auto", marginBottom: 12 },
-    exit: { opacity: 0, y: -5, height: 0, marginBottom: 0 },
+    hidden: { opacity: 0, y: -10, height: 0, marginBottom: -20 },
+    visible: { opacity: 1, y: 0, height: "auto", marginBottom: -2 },
+    exit: { opacity: 0, y: -5, height: 0, marginBottom: -20 },
   };
 
-  const getPreviewTitle = (data: any) => {
-    return data?.ogTitle || data?.meta?.title || data?.title || "Untitled";
-  };
+  const previewTitle: string = data?.meta?.title || data?.title || "";
+  const site_name: string = data?.publisher || data?.author || "";
 
   if (!isVisible) return null;
 
@@ -44,40 +42,60 @@ const PreviewLinkCard: React.FC<PreviewLinkCardProps> = ({
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="relative flex gap-2 w-full custom-border rounded-lg overflow-hidden bg-(--card-bg-color) shadow-md cursor-pointer"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
         exit="exit"
+        className={clsx(
+          "relative flex gap-2 w-full p-1 pb-2 overflow-hidden cursor-pointer",
+          "rounded-t-lg shadow-md bg-(--card-bg-color)",
+          "hover:custom-border-t",
+          // "bg-linear-to-b from-transparent to-black/80",
+          "hover:bg-blue-500/30 hover:custom-border-t",
+          "group"
+        )}
+        style={{ zIndex: -1 }}
       >
         {/* Image */}
         {data?.image?.url && (
-          <img
-            src={data.image.url}
-            alt={data.title}
-            className="w-20 h-20 object-cover rounded-lg"
-          />
+          <div className={clsx("h-14 aspect-video rounded border-2 border-(--border-color) overflow-hidden")}>
+            <img
+              src={data.image.url}
+              className={clsx(
+                "w-full h-full object-cover",
+                "transition-transform duration-300",
+                "group-hover:scale-200"
+              )}
+            />
+          </div>
         )}
 
         {/* Text */}
-        <div className="w-full h-20 p-1 flex flex-col justify-between">
-          <div className="text-xs opacity-60">
-            {data?.publisher || data?.author || "Website"}
-          </div>
+        <div className="w-full flex flex-col justify-between">
+          <div className="font-semibold line-clamp-2">{previewTitle}</div>
 
-          <div className="font-semibold mt-0.5 line-clamp-2">
-            {getPreviewTitle(data)}
+          {previewTitle !== site_name && (
+            <div className="text-xs opacity-60">{site_name}</div>
+          )}
+
+          <div className="font-light italic text-xs opacity-60 truncate">
+            {url}
           </div>
-          <div className="font-light italic text-xs opacity-60">{url}</div>
         </div>
 
-        {/* Close */}
+        {/* Close button */}
         <div
           onClick={(e) => {
             e.stopPropagation();
             onClose();
           }}
-          className="absolute top-0 right-0 flex items-center justify-center p-1 bg-(--card-bg-color) cursor-pointer rounded hover:text-red-400 hover:scale-125 transition-all"
+          className={clsx(
+            "absolute top-0 right-0 p-1 rounded-full text-(--text-color)",
+            "flex items-center justify-center",
+            "cursor-pointer",
+            "transition-all",
+            "hover:text-red-400 hover:scale-125"
+          )}
         >
           <span className="material-symbols-outlined opacity-80">close</span>
         </div>

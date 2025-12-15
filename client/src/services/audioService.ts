@@ -25,6 +25,7 @@ import ringSound from "@/assets/sound/old-telephone-ringing.mp3";
 import messageRemoveSound from "@/assets/sound/remove-message2.mp3";
 import typingSound from "@/assets/sound/typing.mp3";
 import logoutSound from "@/assets/sound/logout.mp3";
+import waterPopSound from "@/assets/sound/water-pop.mp3";
 
 // Define the SoundType as an enum
 export enum SoundType {
@@ -42,6 +43,7 @@ export enum SoundType {
   REACTION_REMOVE = "reaction-remove",
   MESSAGE_REMOVE = "message-remove",
   NOT_FOUND = "not-found",
+  LINK_HOVER = "link-hover",
   CARD1 = "card1",
   CARD2 = "card2",
   CARD3 = "card3",
@@ -93,6 +95,7 @@ class AudioServiceImpl implements AudioService {
       [SoundType.REACTION_REMOVE]: reactionRemoveSound,
       [SoundType.MESSAGE_REMOVE]: messageRemoveSound,
       [SoundType.NOT_FOUND]: notFoundSound,
+      [SoundType.LINK_HOVER]: waterPopSound,
       [SoundType.CARD1]: card1Sound,
       [SoundType.CARD2]: card2Sound,
       [SoundType.CARD3]: card3Sound,
