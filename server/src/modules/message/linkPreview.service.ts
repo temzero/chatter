@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // link-preview.service.ts
-import extractFirstUrl from '@/shared/extractFirstUrl';
 import { LinkPreviewResponse } from '@/shared/types/responses/message.response';
 import { Injectable, Logger } from '@nestjs/common';
 import { getLinkPreview } from 'link-preview-js';
@@ -35,15 +33,5 @@ export class LinkPreviewService {
       this.logger.warn(`Failed to fetch link preview for ${url}: ${err}`);
       return null;
     }
-  }
-
-  // Detect first URL in text and fetch preview
-  async fetchFirstUrlPreview(
-    text: string,
-  ): Promise<LinkPreviewResponse | null> {
-    const url = extractFirstUrl(text);
-    if (!url) return null;
-
-    return this.fetchPreview(url);
   }
 }

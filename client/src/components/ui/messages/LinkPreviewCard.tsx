@@ -22,14 +22,13 @@ export const LinkPreviewCard: React.FC<Props> = ({ preview, className }) => {
       target="_blank"
       rel="noopener noreferrer"
       className={clsx(
-        "relative overflow-hidden rounded-lg shadow-xl flex items-end",
-        "bg-black/30 hover:bg-blue-500 border-black/20 border-3 hover:border-4 transition-all",
+        "relative overflow-hidden rounded-lg shadow-xl flex flex-col gap-1 justify-between",
+        "bg-black/30 hover:bg-blue-500 border-transparent border-4 hover:border-5 transition-all",
         "group",
         { "aspect-video": hasBothImageAndFavicon },
         className
       )}
       {...messageAnimations.linkPreview}
-      style={{ position: "relative" }}
     >
       {/* Image container with z-index 0 */}
       {(image || favicon) && (
@@ -42,18 +41,18 @@ export const LinkPreviewCard: React.FC<Props> = ({ preview, className }) => {
             transition: { type: "spring", stiffness: 250, damping: 15 },
           }}
           whileHover={{
-            scale: 1.35,
+            scale: 1.5,
             transition: { type: "spring", stiffness: 300, damping: 15 },
           }}
           onHoverStart={(e) => {
             e.stopPropagation();
-            audioService.playSound(SoundType.LINK_HOVER, 0.1);
+            audioService.playSound(SoundType.POP1, 0.1);
           }}
         >
           <img
             src={image ?? favicon}
             className="h-full w-full object-cover rounded"
-            loading="lazy"
+            // loading="lazy"
           />
 
           {mediaType === "video" && (
@@ -66,16 +65,32 @@ export const LinkPreviewCard: React.FC<Props> = ({ preview, className }) => {
         </motion.div>
       )}
 
+      <div
+        className={clsx(
+          "w-full p-1 pointer-events-none text-white flex items-start gap-1",
+          // base gradient
+          "bg-linear-to-t",
+          // hover gradient
+          "group-hover:from-transparent group-hover:to-blue-800"
+        )}
+        style={{ zIndex: 1 }}
+      >
+        <span className="material-symbols-outlined custom-border rounded-full bg-(--sidebar-color) text-blue-500 group-hover:bg-blue-500 group-hover:text-white">
+          link
+        </span>
+        <h1 className="italic underline text-xs hidden group-hover:block">
+          {url}
+        </h1>
+      </div>
+
       {/* Content overlay with z-index 1 */}
       <div
         className={clsx(
-          "w-full p-2 pointer-events-none text-white",
+          "w-full p-2 mt-auto pointer-events-none text-white",
           // base gradient
-          "bg-linear-to-b from-transparent via-black/70 to-black/80",
+          "bg-linear-to-b from-transparent via-black/70 to-black",
           // hover gradient
-          "group-hover:from-transparent group-hover:via-blue-700/70 group-hover:to-blue-700/80",
-          // smooth transition
-          "transition-all duration-300 ease-out"
+          "group-hover:from-transparent group-hover:via-blue-800/70 group-hover:to-blue-800"
         )}
         style={{ zIndex: 1 }}
       >
@@ -88,7 +103,7 @@ export const LinkPreviewCard: React.FC<Props> = ({ preview, className }) => {
                   src={favicon ?? image}
                   alt={site_name ?? "favicon"}
                   className="h-5 w-5 rounded"
-                  loading="lazy"
+                  // loading="lazy"
                 />
               )}
               {site_name && (
@@ -108,7 +123,7 @@ export const LinkPreviewCard: React.FC<Props> = ({ preview, className }) => {
                     src={favicon}
                     alt={site_name ?? "favicon"}
                     className="h-5 w-5"
-                    loading="lazy"
+                    // loading="lazy"
                   />
                 )}
               </div>
@@ -127,14 +142,7 @@ export const LinkPreviewCard: React.FC<Props> = ({ preview, className }) => {
         )}
 
         {/* URL fallback */}
-        {!title && (
-          <div className="w-full flex gap-1.5 items-end">
-            <h1 className="italic opacity-80 text-xs">{url}</h1>
-            <span className="material-symbols-outlined opacity-60 ml-auto">
-              link
-            </span>
-          </div>
-        )}
+        {/* {!title && <h1 className="italic opacity-80 text-xs pt-1">{url}</h1>} */}
       </div>
     </motion.a>
   );

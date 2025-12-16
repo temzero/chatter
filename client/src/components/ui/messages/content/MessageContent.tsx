@@ -49,7 +49,7 @@ const MessageContent: React.FC<MessageBubbleProps> = ({
             options={{
               target: "_blank",
               rel: "noopener noreferrer",
-              className: "underline! hover:text-blue-600 italic break-all",
+              className: "underline! opacity-70 hover:opacity-100 hover:text-blue-600 italic break-all",
               attributes: {
                 onClick: (e: React.MouseEvent<HTMLAnchorElement>) =>
                   e.stopPropagation(),

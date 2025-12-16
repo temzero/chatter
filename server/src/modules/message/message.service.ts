@@ -28,6 +28,7 @@ import {
   ForbiddenError,
   NotFoundError,
 } from '@shared/types/enums/error-message.enum';
+import { extractFirstUrl, removeUrlFromText } from '@/shared/extractFirstUrl';
 
 type MessageWithSenderMember = Message & {
   senderMember?: ChatMember;
@@ -117,18 +118,27 @@ export class MessageService {
     if (!message.content) return;
 
     try {
-      const preview = await this.linkPreviewService.fetchFirstUrlPreview(
-        message.content,
-      );
+      const url = extractFirstUrl(message.content);
+      if (!url) return;
 
+      const preview = await this.linkPreviewService.fetchPreview(url);
       if (!preview) return;
 
-      await this.messageRepo.update(message.id, { linkPreview: preview });
+      // 🧹 Remove URL from message content
+      const cleanedContent = removeUrlFromText(message.content, url);
 
+      // ✅ Persist both content & preview
+      await this.messageRepo.update(message.id, {
+        content: cleanedContent || null,
+        linkPreview: preview,
+      });
+
+      // 🔔 Notify clients
       await this.websocketNotificationService.emitToChatMembers<
         Partial<MessageResponseDto>
       >(message.chatId, ChatEvent.UPDATE_MESSAGE, {
         id: message.id,
+        content: cleanedContent || null,
         linkPreview: preview,
       });
     } catch (err) {
@@ -771,8 +781,9 @@ export class MessageService {
           // Reply
           'replyToMessage.id',
           'replyToMessage.content',
-          'replyToMessage.createdAt',
+          'replyToMessage.linkPreview',
           'replyToMessage.systemEvent',
+          'replyToMessage.createdAt',
           'replySender.id',
           'replySender.firstName',
           'replySender.lastName',
@@ -783,6 +794,7 @@ export class MessageService {
           // Reply's forwarded message
           'replyForwarded.id',
           'replyForwarded.content',
+          'replyForwarded.linkPreview',
           'replyForwarded.createdAt',
           'replyForwardedSender.id',
           'replyForwardedSender.firstName',
@@ -791,6 +803,7 @@ export class MessageService {
 
           // Forwarded from current message
           'forwardedFromMessage.id',
+          'forwardedFromMessage.linkPreview',
           'forwardedFromMessage.createdAt',
           'forwardedSender.id',
           'forwardedSender.firstName',

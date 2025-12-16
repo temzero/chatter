@@ -41,6 +41,7 @@ const ChatBox = React.memo(() => {
         isBlockedByMe={isBlockedByMe}
         isBlocked={isBlocked}
       />
+
       <MessagesContainer chat={activeChat} />
       {!isDeleted && (
         <AnimatePresence>

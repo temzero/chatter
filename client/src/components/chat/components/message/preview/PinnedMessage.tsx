@@ -30,19 +30,20 @@ const PinnedMessage: React.FC<MessageProps> = ({
         e.stopPropagation();
         scrollToMessageById(message.id, { smooth: false });
       }}
-      className={`absolute custom-border w-full h-(--pinned-message-height) top-(--header-height) left-1/2 -translate-x-1/2 flex gap-4 p-1 px-2 items-center justify-between cursor-pointer
-          ${
-            isMe
-              ? "bg-[linear-gradient(to_right,var(--primary-green-50)_0%,var(--primary-green)_50%,var(--primary-green-50)_100%)]"
-              : "bg-[linear-gradient(to_right,var(--message-color-50)_0%,var(--message-color)_50%,var(--message-color-50)_100%)]"
-          }
-        `}
+      className={`w-full flex gap-2 p-1 px-2 items-center cursor-pointer custom-border
+    ${
+      isMe
+        ? "bg-[linear-gradient(to_right,var(--primary-green-50)_0%,var(--primary-green)_50%,var(--primary-green-50)_100%)]"
+        : "bg-[linear-gradient(to_right,var(--message-color-50)_0%,var(--message-color)_50%,var(--message-color-50)_100%)]"
+    }
+  `}
       {...animationProps}
     >
+      {/* Pin button – fixed */}
       <button
-        className={`group custom-border hover:bg-red-500 p-1 rounded-full! -rotate-30
-            ${isMe ? "bg-(--primary-green)" : "bg-(--message-color)"}
-          `}
+        className={`shrink-0 group custom-border hover:bg-red-500 p-1 rounded-full! -rotate-30
+      ${isMe ? "bg-(--primary-green)" : "bg-(--message-color)"}
+    `}
         onClick={(e) => {
           e.stopPropagation();
           chatWebSocketService.togglePinMessage({
@@ -59,7 +60,8 @@ const PinnedMessage: React.FC<MessageProps> = ({
         </span>
       </button>
 
-      <div className="max-w-[80%]">
+      {/* Message preview – ONLY this can shrink */}
+      <div className="flex-1 min-w-0 overflow-hidden">
         <MessageHorizontalPreview
           message={message}
           chatType={chatType}
@@ -67,11 +69,12 @@ const PinnedMessage: React.FC<MessageProps> = ({
         />
       </div>
 
-      <p className="text-sm font-light italic truncate">
+      {/* Date – fixed */}
+      <div className="shrink-0 text-sm text-end font-light italic whitespace-nowrap">
         {message.pinnedAt
-          ? `${formatDateTime(message.pinnedAt)}`
+          ? formatDateTime(message.pinnedAt)
           : `Sent at ${formatDateTime(message.createdAt)}`}
-      </p>
+      </div>
     </motion.div>
   );
 };

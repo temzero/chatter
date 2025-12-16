@@ -77,7 +77,9 @@ export class MessageMapper {
         ? mapCallToCallLiteResponse(nestedMessage.call)
         : undefined,
 
-      // call: nestedMessage.call,
+      ...(nestedMessage.linkPreview
+        ? { linkPreview: nestedMessage.linkPreview }
+        : {}),
 
       replyToMessage: this.mapNestedMessage(
         nestedMessage.replyToMessage,

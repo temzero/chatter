@@ -18,15 +18,21 @@ export const messageAnimations: Record<string, MotionProps> = {
     exit: { opacity: 0, scale: 1.5 },
   },
   pinMessage: {
-    initial: { opacity: 0, scale: 1.1, y: 50 },
-    animate: { opacity: 1, scale: 1, y: 0 },
+    initial: { opacity: 0, scale: 1.5 },
+    animate: { opacity: 1, scale: 1},
     exit: { opacity: 0, scale: 2 },
     transition: { type: "spring", stiffness: 300, damping: 29 },
   },
   linkPreview: {
-    initial: { opacity: 0, y: 12, scale: 0.9 },
+    initial: { opacity: 0, scale: 2 },
+    animate: { opacity: 1, scale: 1 },
+    exit: { opacity: 0, scale: 2 },
+    transition: { duration: 0.25, ease: "easeOut" },
+  },
+  linkPreviewChatBar: {
+    initial: { opacity: 0, y: 10, scale: 0.8 },
     animate: { opacity: 1, y: 0, scale: 1 },
-    exit: { opacity: 0, y: 8, scale: 0.9 },
+    exit: { opacity: 0, y: 10, scale: 0.8 },
   },
   reaction: {
     initial: { scale: 0.5, opacity: 0, y: 12 },

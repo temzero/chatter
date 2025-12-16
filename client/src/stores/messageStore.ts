@@ -14,6 +14,7 @@ import {
 import { useAttachmentStore } from "./messageAttachmentStore";
 import { audioService, SoundType } from "@/services/audioService";
 import { useShallow } from "zustand/shallow";
+import { useSidebarInfoStore } from "./sidebarInfoStore";
 
 // Normalized structure
 type MessagesById = Record<string, MessageResponse>; // messageId -> Message
@@ -28,7 +29,8 @@ interface MessageStoreState {
   hasMoreMessages: HasMoreMessages;
   drafts: Drafts;
   searchQuery: string;
-  showImportantOnly: boolean;
+  filterImportantMessages: boolean;
+  filterLinkMessages: boolean;
   isSearchMessages: boolean;
   isLoading: boolean;
 }
@@ -69,9 +71,10 @@ interface MessageStoreActions {
     newReactions: Record<string, string[]>
   ) => void;
   setShowImportantOnly: (value: boolean) => void;
+  setShowLinkOnly: (value: boolean) => void;
   addReaction: (messageId: string, emoji: string, userId: string) => void;
   removeReaction: (messageId: string, emoji: string, userId: string) => void;
-  setDisplaySearchMessage: (isOpen: boolean) => void;
+  setDisplaySearchMessage: (isOpen: boolean, isMobile?: boolean) => void;
   setSearchQuery: (query: string) => void;
 
   clearMessageStore: () => void;
@@ -95,7 +98,8 @@ const initialState: MessageStoreState = {
   hasMoreMessages: {},
   drafts: {},
   searchQuery: "",
-  showImportantOnly: false,
+  filterImportantMessages: false,
+  filterLinkMessages: false,
   isSearchMessages: false,
   isLoading: false,
 };
@@ -395,8 +399,15 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
       get().updateMessageReactions(messageId, newReactions);
     },
 
-    setShowImportantOnly: (value) => set({ showImportantOnly: value }),
-    setDisplaySearchMessage: (isOpen) => set({ isSearchMessages: isOpen }),
+    setShowImportantOnly: (value) => set({ filterImportantMessages: value }),
+    setShowLinkOnly: (value) => set({ filterLinkMessages: value }),
+
+    setDisplaySearchMessage: (isOpen, isMobile = false) => {
+      set({ isSearchMessages: isOpen });
+      if (isMobile) {
+        useSidebarInfoStore.getState().setSidebarInfoVisible(false);
+      }
+    },
     setSearchQuery: (query) => set({ searchQuery: query }),
 
     clearMessageStore: () => set({ ...initialState }),
@@ -417,7 +428,12 @@ export const useMessagesByChatId = (chatId: string) => {
   );
   const messagesById = useMessageStore((state) => state.messagesById);
   const searchQuery = useMessageStore((state) => state.searchQuery);
-  const showImportantOnly = useMessageStore((state) => state.showImportantOnly);
+  const filterImportantMessages = useMessageStore(
+    (state) => state.filterImportantMessages
+  );
+  const filterLinkMessages = useMessageStore(
+    (state) => state.filterLinkMessages
+  );
   const currentUserId = useAuthStore.getState().currentUser?.id;
 
   return useMemo(() => {
@@ -435,14 +451,20 @@ export const useMessagesByChatId = (chatId: string) => {
           !searchQuery ||
           msg.content?.toLowerCase().includes(searchQuery.toLowerCase())
       )
-      .filter((msg) => !showImportantOnly || msg.isImportant);
+      .filter((msg) => !filterImportantMessages || msg.isImportant)
+      .filter(
+        (msg) =>
+          !filterLinkMessages ||
+          (msg.linkPreview !== null && msg.linkPreview !== undefined)
+      );
   }, [
     chatId,
     messageIds,
     currentUserId,
     messagesById,
     searchQuery,
-    showImportantOnly,
+    filterImportantMessages,
+    filterLinkMessages,
   ]);
 };
 
@@ -456,6 +478,9 @@ export const useMessageReactions = (messageId: string) =>
 
 export const useHasMoreMessages = (chatId: string) =>
   useMessageStore((state) => state.hasMoreMessages[chatId] ?? true);
+
+export const useIsSearchMessages = (): boolean =>
+  useMessageStore((state) => state.isSearchMessages ?? false);
 
 export const useLastMessage = (chatId: string) =>
   useMessageStore((state) => {

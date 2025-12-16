@@ -26,6 +26,7 @@ import { CallMessageContent } from "../../../ui/messages/content/CallMessageCont
 import MessageBubbleWrapper from "./wrapper/MessageBubbleWrapper";
 import { useMessageSender } from "@/stores/chatMemberStore";
 import { MessageContextMenu } from "../../../ui/contextMenu/Message-contextMenu";
+import { useMessageFilter } from "@/common/hooks/useMessageFilter";
 
 interface MessageProps {
   messageId: string;
@@ -57,13 +58,10 @@ const Message: React.FC<MessageProps> = ({
 
   const call = message.call;
 
-  console.log('message', message)
+  console.log("message", message);
 
   const attachments = getMessageAttachments(message.chatId, message.id);
   const attachmentLength = attachments.length;
-
-  const searchQuery = useMessageStore((state) => state.searchQuery);
-  const showImportantOnly = useMessageStore((state) => state.showImportantOnly);
 
   const isFocus = useIsMessageFocus(messageId);
   const isRelyToThisMessage = useIsReplyToThisMessage(messageId);
@@ -91,14 +89,9 @@ const Message: React.FC<MessageProps> = ({
     return getMessageAnimation(isMe);
   }, [message, isMe]);
 
-  // Safe content checks
-  const contentText = message?.content?.toString().toLowerCase() ?? "";
-  const notMatchingSearch =
-    searchQuery.trim() !== "" &&
-    !contentText.includes(searchQuery.toLowerCase());
-  const notImportant = showImportantOnly && !message?.isImportant;
+  const isVisible = useMessageFilter({ message });
 
-  if (!message || notMatchingSearch || notImportant) {
+  if (!isVisible) {
     return null;
   }
 

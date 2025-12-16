@@ -100,7 +100,7 @@ const DirectChat: React.FC<DirectChatProps> = ({
       {
         icon: "search",
         title: t("common.actions.search"),
-        action: () => setDisplaySearchMessage(true),
+        action: () => setDisplaySearchMessage(true, isMobile),
       },
       {
         icon: "block",

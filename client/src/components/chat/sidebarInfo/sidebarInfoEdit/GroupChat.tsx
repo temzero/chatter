@@ -52,7 +52,7 @@ const GroupChat: React.FC<GroupChatProps> = ({ activeChat, activeMembers }) => {
       icon: "search",
       title: t("common.actions.search"),
       action: () => {
-        setDisplaySearchMessage(true);
+        setDisplaySearchMessage(true, isMobile);
       },
     },
     ...(showEditButton

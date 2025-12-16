@@ -1,4 +1,4 @@
-function extractFirstUrl(text: string): string | null {
+export function extractFirstUrl(text: string): string | null {
   if (!text) return null;
 
   const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -14,4 +14,12 @@ function extractFirstUrl(text: string): string | null {
   }
 }
 
-export default extractFirstUrl;
+export function removeUrlFromText(text: string, url: string): string {
+  // Escape special regex chars in URL
+  const escapedUrl = url.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  return text
+    .replace(new RegExp(`\\s*${escapedUrl}\\s*`, "i"), " ")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}

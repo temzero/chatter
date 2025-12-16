@@ -32,7 +32,9 @@ const MessagesContainer: React.FC<ChatBoxProps> = ({ chat }) => {
   const fetchMoreMessages = useMessageStore.getState().fetchMoreMessages;
 
   const isSearchMessages = useMessageStore((state) => state.isSearchMessages);
-  const isShowImportant = useMessageStore((state) => state.showImportantOnly);
+  const isShowImportant = useMessageStore(
+    (state) => state.filterImportantMessages
+  );
 
   const scrollerRef = useRef<HTMLDivElement | null>(null);
 

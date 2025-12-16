@@ -6,7 +6,6 @@ import { FriendshipStatus } from "@/shared/types/enums/friendship-type.enum";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { OnlineDot } from "@/components/ui/icons/OnlineDot";
 import { useChatStatus } from "@/stores/presenceStore";
-import { useMessageStore } from "@/stores/messageStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useUserLastSeen } from "@/stores/presenceStore";
 import { formatTimeAgo } from "@/common/utils/format/formatTimeAgo";
@@ -19,9 +18,10 @@ import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/stores/deviceStore";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
-import MessageSearchBar from "@/components/ui/messages/MessageSearchBar";
-import PinnedMessage from "./components/message/preview/PinnedMessage";
 import { useTranslation } from "react-i18next";
+import { useIsSearchMessages } from "@/stores/messageStore";
+import MessageSearchBar from "../ui/messages/MessageSearchBar";
+import PinnedMessage from "./components/message/preview/PinnedMessage";
 interface ChatHeaderProps {
   chat: ChatResponse;
   isBlocked?: boolean;
@@ -70,8 +70,8 @@ const Header: React.FC<ChatHeaderProps> = ({
   }, [chat?.id, getActiveCall]);
 
   const isOnline = useChatStatus(chat?.id, chat.type);
+  const isSearchMessages = useIsSearchMessages();
   const chatListMembers = useChatMemberStore.getState().chatMembers[chat.id];
-  const isSearchMessages = useMessageStore((state) => state.isSearchMessages);
 
   const isChannel = chat.type === ChatType.CHANNEL;
   const isDirect = chat.type === ChatType.DIRECT;
@@ -122,61 +122,56 @@ const Header: React.FC<ChatHeaderProps> = ({
 
   return (
     <header
-      className="w-full absolute top-0 left-0 hover:shadow-2xl flex items-center justify-between min-h-(--header-height) max-h-(--header-height) px-3 backdrop-blur-xl shadow select-none"
+      className="w-full absolute top-0 left-0 hover:shadow-2xl  backdrop-blur-xl shadow select-none"
       style={{ zIndex: 2 }}
     >
-      {chat.pinnedMessage && (
-        <PinnedMessage message={chat.pinnedMessage} chatType={chat.type} />
-      )}
-
-      {isMobile && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleGoHome();
-          }}
-          className="flex items-center justify-center opacity-40 hover:opacity-100 hover:scale-125 transition-all p-2 -ml-2"
-        >
-          <i className="material-symbols-outlined filled text-2xl!">arrow_back_ios</i>
-        </button>
-      )}
-
-      <motion.div
-        key={chat.id}
-        className="flex gap-2 items-center cursor-pointer hover:text-(--primary-green)"
-        initial={{ opacity: 0.6, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0.6, scale: 0.9 }}
-        onClick={toggleSidebarInfo}
-      >
-        <ChatAvatar chat={chat} type="header" isBlocked={isBlockedByMe} />
-        <h1 className="text-xl font-medium">
-          {chat.type === ChatType.SAVED ? "Saved" : chat.name}
-        </h1>
-        {isDirect && !isOnline && lastSeen && (
-          <span className="text-xs text-gray-400">
-            Last seen {formatTimeAgo(t, lastSeen)}
-          </span>
+      <div className="flex items-center justify-between px-3 min-h-(--header-height) max-h-(--header-height)">
+        {isMobile && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleGoHome();
+            }}
+            className="flex items-center justify-center opacity-40 hover:opacity-100 hover:scale-125 transition-all p-2 -ml-2"
+          >
+            <i className="material-symbols-outlined filled text-2xl!">
+              arrow_back_ios
+            </i>
+          </button>
         )}
-        {chat.isDeleted && (
-          <h1 className="text-yellow-500/80">Has left the chat</h1>
-        )}
-      </motion.div>
-
-      <AnimatePresence mode="wait">
         <motion.div
-          key={isSearchMessages ? "search" : "buttons"}
-          initial={{ opacity: 0, x: 25 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: 25 }}
-          className={`flex justify-end items-center ${
-            isSearchMessages ? "w-[49%]" : "w-auto"
-          }`}
-          onClick={(e) => e.stopPropagation()}
+          key={chat.id}
+          className="flex gap-2 items-center cursor-pointer hover:text-(--primary-green)"
+          initial={{ opacity: 0.6, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0.6, scale: 0.9 }}
+          onClick={toggleSidebarInfo}
         >
-          {isSearchMessages ? (
+          <ChatAvatar chat={chat} type="header" isBlocked={isBlockedByMe} />
+          <h1 className="text-xl font-medium">
+            {chat.type === ChatType.SAVED ? "Saved" : chat.name}
+          </h1>
+          {isDirect && !isOnline && lastSeen && (
+            <span className="text-xs text-gray-400">
+              Last seen {formatTimeAgo(t, lastSeen)}
+            </span>
+          )}
+          {chat.isDeleted && (
+            <h1 className="text-yellow-500/80">Has left the chat</h1>
+          )}
+        </motion.div>
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            initial={{ opacity: 0, x: 25 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 25 }}
+            className={`flex justify-end items-center`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* {isSearchMessages ? (
             <MessageSearchBar />
-          ) : (
+          ) : ( */}
             <div className="flex items-center gap-1 select-none">
               <div className="flex items-center cursor-pointer rounded-full! p-1">
                 {!isBlocked &&
@@ -240,9 +235,18 @@ const Header: React.FC<ChatHeaderProps> = ({
                 <OnlineDot isOnline={isOnline} />
               )}
             </div>
-          )}
-        </motion.div>
+            {/* )} */}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      <AnimatePresence>
+        {chat.pinnedMessage && (
+          <PinnedMessage message={chat.pinnedMessage} chatType={chat.type} />
+        )}
       </AnimatePresence>
+
+      {isSearchMessages && <MessageSearchBar />}
     </header>
   );
 };

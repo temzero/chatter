@@ -12,6 +12,7 @@ import {
   SystemMessageJSONContent,
 } from "@/components/ui/messages/content/SystemMessageContent";
 import { getMessageAttachments } from "@/stores/messageAttachmentStore";
+import { MessageReplyLinkPreview } from "./MessageReplyLinkPreview";
 
 interface MessageReplyPreviewProps {
   replyMessage: MessageResponse;
@@ -33,15 +34,18 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
   const closeModal = getCloseModal();
   if (!replyMessage) return null;
 
+  console.log("replyMessage", replyMessage);
+
   const isSelfReply = replyMessage.sender.id === senderId;
   const isReplyToMe = replyMessage.sender.id === currentUserId;
   const isNotDirectChat = chatType !== ChatType.DIRECT;
   const isSystemMessage = !!replyMessage.systemEvent;
   const isChannel = (chatType = ChatType.CHANNEL);
+  const linkPreview = replyMessage.linkPreview;
 
   let attachments = replyMessage.attachments;
   if (!attachments) {
-    attachments = getMessageAttachments(replyMessage.chatId ,replyMessage.id);
+    attachments = getMessageAttachments(replyMessage.chatId, replyMessage.id);
   }
   const attachmentLength = attachments?.length || 0;
 
@@ -102,7 +106,12 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
               />
             ) : (
               replyMessage.content && (
-                <p className="truncate reply-text">{replyMessage.content}</p>
+                <div>
+                  {linkPreview && (
+                    <MessageReplyLinkPreview linkPreview={linkPreview} />
+                  )}
+                  <p className="truncate reply-text">{replyMessage.content}</p>
+                </div>
               )
             )}
           </div>
