@@ -61,7 +61,7 @@ const PinnedMessage: React.FC<MessageProps> = ({
       </button>
 
       {/* Message preview – ONLY this can shrink */}
-      <div className="flex-1 min-w-0 overflow-hidden">
+      <div className="flex-1 min-w-0 overflow-hidden flex items-center justify-center">
         <MessageHorizontalPreview
           message={message}
           chatType={chatType}

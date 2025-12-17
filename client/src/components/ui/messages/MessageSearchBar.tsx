@@ -76,7 +76,7 @@ const MessageSearchBar: React.FC = () => {
       icon: "star",
       active: filterImportantMessages,
       onToggle: () => setShowImportantOnly(!filterImportantMessages),
-      activeClass: "bg-yellow-500",
+      activeClass: "bg-yellow-400",
       title: t("messages.search_bar.filter_important"),
     },
   ] as const;
@@ -114,7 +114,7 @@ const MessageSearchBar: React.FC = () => {
           <span
             className={`material-symbols-outlined text-white rounded-full opacity-60 hover:opacity-90 ${
               filter.active
-                ? `filled ${filter.activeClass} opacity-100`
+                ? `${filter.activeClass} opacity-100`
                 : "bg-(--input-border-color)"
             }`}
           >

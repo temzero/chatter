@@ -15,7 +15,7 @@ export const MessageHorizontalLinkPreview: React.FC<
   const title = linkPreview.title;
 
   return (
-    <div className="flex items-center bg-blue-600 text-white custom-border rounded max-w-[50%]">
+    <div className="flex items-center pr-1 bg-blue-600 text-white border-2 border-(--input-border-color) rounded">
       <span className="material-symbols-outlined text-sm text-white rotate-90">
         link
       </span>

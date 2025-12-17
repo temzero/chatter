@@ -46,7 +46,7 @@ export const LinkPreviewCard: React.FC<Props> = ({ preview, className }) => {
           }}
           onHoverStart={(e) => {
             e.stopPropagation();
-            audioService.playSound(SoundType.POP1, 0.1);
+            audioService.playSound(SoundType.LINK_HOVER, 0.2);
           }}
         >
           <img
@@ -67,7 +67,7 @@ export const LinkPreviewCard: React.FC<Props> = ({ preview, className }) => {
 
       <div
         className={clsx(
-          "w-full p-1 pointer-events-none text-white flex items-start gap-1",
+          "w-full pointer-events-none text-white flex items-start p-1 gap-1",
           // base gradient
           "bg-linear-to-t",
           // hover gradient
@@ -78,7 +78,7 @@ export const LinkPreviewCard: React.FC<Props> = ({ preview, className }) => {
         <span className="material-symbols-outlined custom-border rounded-full bg-(--sidebar-color) text-blue-500 group-hover:bg-blue-500 group-hover:text-white">
           link
         </span>
-        <h1 className="italic underline text-xs hidden group-hover:block">
+        <h1 className="italic underline text-xs hidden group-hover:block opacity-90">
           {url}
         </h1>
       </div>
@@ -103,7 +103,7 @@ export const LinkPreviewCard: React.FC<Props> = ({ preview, className }) => {
                   src={favicon ?? image}
                   alt={site_name ?? "favicon"}
                   className="h-5 w-5 rounded"
-                  // loading="lazy"
+                  loading="lazy"
                 />
               )}
               {site_name && (
@@ -123,7 +123,7 @@ export const LinkPreviewCard: React.FC<Props> = ({ preview, className }) => {
                     src={favicon}
                     alt={site_name ?? "favicon"}
                     className="h-5 w-5"
-                    // loading="lazy"
+                    loading="lazy"
                   />
                 )}
               </div>
