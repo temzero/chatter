@@ -65,7 +65,8 @@
       "upload_failed": "File upload failed!",
       "from_you": "from you",
       "from_me": "from Me",
-      "from_user": "from {{name}}"
+      "from_user": "from {{name}}",
+      "sent_at": "Sent at {{date}}"
     },
     "loading": {
       "loading": "Loading...",

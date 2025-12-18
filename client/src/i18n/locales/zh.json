@@ -64,7 +64,8 @@
       "load_app_error": "无法加载应用。请刷新。",
       "upload_failed": "文件上传失败！",
       "from_me": "来自我",
-      "from_user": "来自{{name}}"
+      "from_user": "来自{{name}}",
+      "sent_at": "发送于 {{date}}"
     },
     "loading": {
       "loading": "加载中...",

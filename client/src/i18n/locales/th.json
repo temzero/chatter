@@ -64,7 +64,8 @@
       "load_app_error": "ไม่สามารถโหลดแอปได้ กรุณารีเฟรช",
       "upload_failed": "อัปโหลดไฟล์ล้มเหลว!",
       "from_me": "จากฉัน",
-      "from_user": "จาก{{name}}"
+      "from_user": "จาก{{name}}",
+      "sent_at": "ส่งเมื่อ {{date}}"
     },
     "loading": {
       "loading": "กำลังโหลด...",

@@ -64,7 +64,8 @@
       "load_app_error": "No se pudo cargar la aplicación. Por favor, actualiza.",
       "upload_failed": "¡Error al subir el archivo!",
       "from_me": "de Mí",
-      "from_user": "de {{name}}"
+      "from_user": "de {{name}}",
+      "sent_at": "Enviado el {{date}}"
     },
     "loading": {
       "loading": "Cargando...",

@@ -64,7 +64,8 @@
       "load_app_error": "앱을 불러오지 못했습니다. 새로고침 해주세요.",
       "upload_failed": "파일 업로드 실패!",
       "from_me": "나에게서",
-      "from_user": "{{name}}에게서"
+      "from_user": "{{name}}에게서",
+      "sent_at": "{{date}}에 전송됨"
     },
     "loading": {
       "loading": "로딩 중...",

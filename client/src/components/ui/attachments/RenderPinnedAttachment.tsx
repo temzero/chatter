@@ -34,7 +34,7 @@ const RenderPinnedAttachment: React.FC<RenderPinnedAttachmentProps> = ({
 
   return (
     <div
-      className={`rounded overflow-hidden relative ${
+      className={`rounded overflow-hidden relative hover:scale-110 ${
         attachment.type !== AttachmentType.AUDIO
           ? `flex items-center justify-center ${sizeClass}`
           : ""

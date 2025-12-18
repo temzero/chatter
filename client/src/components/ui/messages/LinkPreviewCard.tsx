@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { LinkPreviewResponse } from "@/shared/types/responses/message.response";
 import { messageAnimations } from "@/common/animations/messageAnimations";
 import { audioService, SoundType } from "@/services/audioService";
+import { useIsMobile } from "@/stores/deviceStore";
 
 interface Props {
   preview: LinkPreviewResponse;
@@ -11,13 +12,17 @@ interface Props {
 }
 
 export const LinkPreviewCard: React.FC<Props> = ({ preview, className }) => {
+  const isMobile = useIsMobile();
   const { url, title, description, image, site_name, favicon, mediaType } =
     preview;
 
   const hasBothImageAndFavicon = Boolean(image && favicon);
 
+  const iconClass = "h-8 w-8";
+
   return (
     <motion.a
+      title={url}
       href={url}
       target="_blank"
       rel="noopener noreferrer"
@@ -67,10 +72,15 @@ export const LinkPreviewCard: React.FC<Props> = ({ preview, className }) => {
 
       <div
         className={clsx(
-          "w-full pointer-events-none text-white flex items-start p-1 gap-1",
+          "w-full pointer-events-none flex items-start p-1 pb-10 gap-1",
           // base gradient
           "bg-linear-to-t",
           // hover gradient
+          {
+            "from-transparent to-black text-blue-400 group-hover:text-white":
+              isMobile,
+            " text-white": !isMobile,
+          },
           "group-hover:from-transparent group-hover:to-blue-800"
         )}
         style={{ zIndex: 1 }}
@@ -78,7 +88,12 @@ export const LinkPreviewCard: React.FC<Props> = ({ preview, className }) => {
         <span className="material-symbols-outlined custom-border rounded-full bg-(--sidebar-color) text-blue-500 group-hover:bg-blue-500 group-hover:text-white">
           link
         </span>
-        <h1 className="italic underline text-xs hidden group-hover:block opacity-90">
+        <h1
+          className={clsx(
+            "italic underline text-xs  opacity-90 group-hover:block",
+            { hidden: !isMobile }
+          )}
+        >
           {url}
         </h1>
       </div>
@@ -97,12 +112,12 @@ export const LinkPreviewCard: React.FC<Props> = ({ preview, className }) => {
         {/* Site info */}
         {site_name && title ? (
           <div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 -mb-1">
               {(favicon || image) && (
                 <img
                   src={favicon ?? image}
                   alt={site_name ?? "favicon"}
-                  className="h-5 w-5 rounded"
+                  className={iconClass}
                   loading="lazy"
                 />
               )}
@@ -122,7 +137,7 @@ export const LinkPreviewCard: React.FC<Props> = ({ preview, className }) => {
                   <img
                     src={favicon}
                     alt={site_name ?? "favicon"}
-                    className="h-5 w-5"
+                    className={iconClass}
                     loading="lazy"
                   />
                 )}

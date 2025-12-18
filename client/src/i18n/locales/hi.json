@@ -64,7 +64,8 @@
       "load_app_error": "ऐप लोड करने में विफल। कृपया रीफ़्रेश करें।",
       "upload_failed": "फ़ाइल अपलोड विफल!",
       "from_me": "मेरी ओर से",
-      "from_user": "{{name}} की ओर से"
+      "from_user": "{{name}} की ओर से",
+      "sent_at": "{{date}} पर भेजा गया"
     },
     "loading": {
       "loading": "लोड हो रहा है...",

@@ -1,7 +1,8 @@
 import * as React from "react";
 import { motion } from "framer-motion";
+import clsx from "clsx";
 import { useIsMe } from "@/stores/authStore";
-import { formatDateTime } from "@/common/utils/format/formatDateTime";
+import { formatSmartDate } from "@/common/utils/format/formatDateTime";
 import { scrollToMessageById } from "@/common/utils/message/scrollToMessageById";
 import type { MessageResponse } from "@/shared/types/responses/message.response";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
@@ -9,6 +10,7 @@ import { MessageHorizontalPreview } from "./MessageHorizontalPreview";
 import { messageAnimations } from "@/common/animations/messageAnimations";
 import { MessageHorizontalPreviewTypes } from "@/common/enums/MessageHorizontalPreviewTypes";
 import { chatWebSocketService } from "@/services/websocket/chatWebsocketService";
+import { useTranslation } from "react-i18next";
 
 interface MessageProps {
   message: MessageResponse;
@@ -21,6 +23,7 @@ const PinnedMessage: React.FC<MessageProps> = ({
   chatType = ChatType.DIRECT,
   shouldAnimate = false,
 }) => {
+  const { t } = useTranslation();
   const isMe = useIsMe(message.sender.id);
   const animationProps = shouldAnimate ? messageAnimations.pinMessage : {};
 
@@ -30,20 +33,20 @@ const PinnedMessage: React.FC<MessageProps> = ({
         e.stopPropagation();
         scrollToMessageById(message.id, { smooth: false });
       }}
-      className={`w-full flex gap-2 p-1 px-2 items-center cursor-pointer custom-border
-    ${
-      isMe
-        ? "bg-[linear-gradient(to_right,var(--primary-green-50)_0%,var(--primary-green)_50%,var(--primary-green-50)_100%)]"
-        : "bg-[linear-gradient(to_right,var(--message-color-50)_0%,var(--message-color)_50%,var(--message-color-50)_100%)]"
-    }
-  `}
+      className={clsx(
+        "relative w-full flex gap-2 py-1 pl-1 items-center cursor-pointer custom-border",
+        isMe
+          ? "bg-[linear-gradient(to_right,var(--primary-green-50)_0%,var(--primary-green)_50%,var(--primary-green-50)_100%)]"
+          : "bg-[linear-gradient(to_right,var(--message-color-50)_0%,var(--message-color)_50%,var(--message-color-50)_100%)]"
+      )}
       {...animationProps}
     >
-      {/* Pin button – fixed */}
       <button
-        className={`shrink-0 group custom-border hover:bg-red-500 p-1 rounded-full! -rotate-30
-      ${isMe ? "bg-(--primary-green)" : "bg-(--message-color)"}
-    `}
+        className={clsx(
+          "group shrink-0 p-1 rounded-full! -rotate-30",
+          " bg-red-500 hover:bg-red-700 text-white",
+          "border-2 border-white/40"
+        )}
         onClick={(e) => {
           e.stopPropagation();
           chatWebSocketService.togglePinMessage({
@@ -51,29 +54,37 @@ const PinnedMessage: React.FC<MessageProps> = ({
             messageId: null,
           });
         }}
+        style={{ zIndex: 99 }}
       >
-        <span className="material-symbols-outlined filled block! group-hover:hidden">
+        <span className="material-symbols-outlined filled block! group-hover:hidden!">
           keep
         </span>
-        <span className="material-symbols-outlined filled hidden! group-hover:block">
+        <span className="material-symbols-outlined filled hidden! group-hover:block!">
           keep_off
         </span>
       </button>
 
-      {/* Message preview – ONLY this can shrink */}
-      <div className="flex-1 min-w-0 overflow-hidden flex items-center justify-center">
-        <MessageHorizontalPreview
-          message={message}
-          chatType={chatType}
-          type={MessageHorizontalPreviewTypes.PIN}
-        />
-      </div>
+      <MessageHorizontalPreview
+        message={message}
+        chatType={chatType}
+        type={MessageHorizontalPreviewTypes.PIN}
+      />
 
-      {/* Date – fixed */}
-      <div className="shrink-0 text-sm text-end font-light italic whitespace-nowrap">
+      <div
+        className={clsx(
+          "absolute right-0 top-1/2 -translate-y-1/2",
+          "h-full flex items-center p-2 pl-32",
+          "text-sm italic hover:font-semibold whitespace-nowrap",
+          "bg-linear-to-r from-transparent",
+          isMe ? "to-(--primary-green)" : "to-(--message-color)"
+        )}
+        style={{ zIndex: 98 }}
+      >
         {message.pinnedAt
-          ? formatDateTime(message.pinnedAt)
-          : `Sent at ${formatDateTime(message.createdAt)}`}
+          ? formatSmartDate(message.pinnedAt)
+          : t("message.sentAt", {
+              date: formatSmartDate(message.createdAt),
+            })}
       </div>
     </motion.div>
   );

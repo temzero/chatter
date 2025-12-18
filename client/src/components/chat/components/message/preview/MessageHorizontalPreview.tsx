@@ -49,6 +49,7 @@ export const MessageHorizontalPreview: React.FC<
 
   const messageTextClass = clsx("overflow-hidden", {
     "font-semibold opacity-70": !!forwardedMessage,
+    "text-white": isMe,
     truncate: type === MessageHorizontalPreviewTypes.PIN,
     "line-clamp-2":
       type === MessageHorizontalPreviewTypes.REPLY_CHANNEL_MESSAGE,
@@ -93,7 +94,15 @@ export const MessageHorizontalPreview: React.FC<
       ) : (
         <div className="flex items-center gap-1">
           {message.linkPreview && (
-            <MessageHorizontalLinkPreview linkPreview={message.linkPreview} />
+            <>
+              <span className="material-symbols-outlined text-sm text-blue-500 rotate-90 -mr-2">
+                link
+              </span>
+              <MessageHorizontalLinkPreview
+                linkPreview={message.linkPreview}
+                isCrop={!!message.content}
+              />
+            </>
           )}
           <p className={messageTextClass}>{message.content}</p>
         </div>

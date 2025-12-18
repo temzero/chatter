@@ -58,7 +58,7 @@ const Message: React.FC<MessageProps> = ({
 
   const call = message.call;
 
-  console.log("message", message);
+  // console.log("message", message);
 
   const attachments = getMessageAttachments(message.chatId, message.id);
   const attachmentLength = attachments.length;

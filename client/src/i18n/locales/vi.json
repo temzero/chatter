@@ -64,7 +64,8 @@
       "load_app_error": "Không tải được ứng dụng. Vui lòng tải lại.",
       "upload_failed": "Tải tệp lên thất bại!",
       "from_me": "từ Tôi",
-      "from_user": "từ {{name}}"
+      "from_user": "từ {{name}}",
+      "sent_at": "Gửi lúc {{date}}"
     },
     "loading": {
       "loading": "Đang tải...",
