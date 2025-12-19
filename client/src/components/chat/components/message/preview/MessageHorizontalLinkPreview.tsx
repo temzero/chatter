@@ -49,7 +49,7 @@ export const MessageHorizontalLinkPreview: React.FC<
       <img
         src={imageUrl}
         className={clsx(
-          "h-10 object-cover rounded mr-1",
+          "h-9 object-cover rounded mr-1",
           "transition-transform duration-300",
           "hover:scale-200 group-hover:scale-125"
         )}

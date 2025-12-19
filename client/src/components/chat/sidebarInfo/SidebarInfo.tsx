@@ -4,7 +4,7 @@ import { useCurrentSidebarInfo } from "@/stores/sidebarInfoStore";
 import { sidebarInfoAnimations } from "@/common/animations/sidebarInfoAnimations";
 import { useSidebarInfoWidth } from "@/common/hooks/useSidebarInfoWidth";
 import ChatInfoDefault from "@/components/chat/sidebarInfo/SidebarInfoDefault";
-import SidebarInfoMedia from "./sidebarInfoMedia/SidebarInfoMedia";
+import SidebarInfoAttachments from "./sidebarInfoMedia/SidebarInfoAttachments";
 import DirectChatEdit from "@/components/chat/sidebarInfo/sidebarInfoEdit/DirectChatEdit";
 import ChatMembersEdit from "@/components/chat/sidebarInfo/sidebarInfoEdit/ChatMembersEdit";
 import GroupChatEdit from "@/components/chat/sidebarInfo/sidebarInfoEdit/GroupChatEdit";
@@ -17,7 +17,7 @@ const SidebarInfo: React.FC = () => {
   // Define your chat info components
   const chatInfoComponents = {
     default: <ChatInfoDefault />,
-    media: <SidebarInfoMedia />,
+    media: <SidebarInfoAttachments />,
     directEdit: <DirectChatEdit />,
     groupEdit: <GroupChatEdit />,
     membersEdit: <ChatMembersEdit />,

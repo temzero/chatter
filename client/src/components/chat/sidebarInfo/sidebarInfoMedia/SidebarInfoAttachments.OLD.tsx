@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { getSetSidebarInfo } from "@/stores/sidebarInfoStore";
 import { SlidingContainer } from "@/components/ui/layout/SlidingContainer";
-import { SidebarInfoMediaAttachmentTypes } from "@/common/constants/sidebarInfoMediaAttachmentTypes";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { useTranslation } from "react-i18next";
 import {
@@ -11,8 +10,9 @@ import {
 } from "@/stores/messageAttachmentStore";
 import { useActiveChatId } from "@/stores/chatStore";
 import RenderMediaAttachments from "./RenderMediaAttachments";
+import { SidebarInfoAttachmentTypes } from "@/common/constants/sidebarInfoAttachmentTypes";
 
-const SidebarInfoMedia: React.FC = () => {
+const SidebarInfoAttachments: React.FC = () => {
   const { t } = useTranslation();
   const setSidebarInfo = getSetSidebarInfo();
   const activeChatId = useActiveChatId();
@@ -20,7 +20,7 @@ const SidebarInfoMedia: React.FC = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [direction, setDirection] = useState(1);
 
-  const selectedAttachmentType = SidebarInfoMediaAttachmentTypes[selectedIndex];
+  const selectedAttachmentType = SidebarInfoAttachmentTypes[selectedIndex];
   const attachments = useActiveChatAttachments();
 
   // Track hasMore per type
@@ -78,14 +78,14 @@ const SidebarInfoMedia: React.FC = () => {
       </header>
 
       <div className="flex justify-around items-center custom-border-b w-full backdrop-blur-[120px]">
-        {SidebarInfoMediaAttachmentTypes.map((_, index) => (
+        {SidebarInfoAttachmentTypes.map((_, index) => (
           <a
             key={index}
             className={getTypeClass(index)}
             onClick={() => handleTypeChange(index)}
           >
             {t(
-              `sidebar_info.media_files.${SidebarInfoMediaAttachmentTypes[
+              `sidebar_info.media_files.${SidebarInfoAttachmentTypes[
                 index
               ].toLowerCase()}`
             )}
@@ -96,7 +96,7 @@ const SidebarInfoMedia: React.FC = () => {
       <SlidingContainer uniqueKey={selectedIndex} direction={direction}>
         <RenderMediaAttachments
           attachments={filteredAttachments}
-          selectedType={SidebarInfoMediaAttachmentTypes[selectedIndex]}
+          selectedType={SidebarInfoAttachmentTypes[selectedIndex]}
           onLoadMore={handleLoadMore}
           hasMore={hasMoreAttachments}
         />
@@ -112,4 +112,4 @@ const SidebarInfoMedia: React.FC = () => {
   );
 };
 
-export default SidebarInfoMedia;
+export default SidebarInfoAttachments;
