@@ -636,12 +636,13 @@
       "status_banned": "Banned",
       "add_member": "Add Member"
     },
-    "media_files": {
+    "attachments": {
       "title": "Media & Files",
       "image": "Images",
       "video": "Videos",
       "audio": "Audio",
-      "file": "Files"
+      "file": "Files",
+      "link": "Links"
     }
   },
 

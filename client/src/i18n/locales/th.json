@@ -634,12 +634,13 @@
       "status_banned": "ถูกแบน",
       "add_member": "เพิ่มสมาชิก"
     },
-    "media_files": {
+    "attachments": {
       "title": "สื่อและไฟล์",
       "image": "รูปภาพ",
       "video": "วิดีโอ",
       "audio": "เสียง",
-      "file": "ไฟล์"
+      "file": "ไฟล์",
+      "link": "ลิงก์"
     }
   },
 

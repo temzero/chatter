@@ -16,14 +16,14 @@ export const SelectionBar = <T extends string>({
   getClassName,
 }: SelectionBarProps<T>) => {
   const defaultClass = (value: T) =>
-    `w-full ${
+    `w-full py-1 ${
       selected === value
         ? "bg-(--primary-green) text-white"
         : "opacity-40 hover:opacity-80"
     }`;
 
   return (
-    <div className="flex m-2 border-2 border-(--border-color) bg-(--card-bg-color) rounded-lg overflow-hidden shadow-xl">
+    <div className="flex mb-3 mx-1.5 border-2 border-(--border-color) bg-(--card-bg-color) rounded-lg overflow-hidden shadow-xl">
       {options.map((value) => (
         <button
           key={value}
@@ -38,7 +38,7 @@ export const SelectionBar = <T extends string>({
                 "material-symbols-outlined",
                 value === selected && "filled",
                 // optional example for GROUP type icon size adjustment
-                value === "group" && "text-[2.1rem]!"
+                // value === "group" && "text-[2.1rem]!"
               )}
             >
               {getIcon(value)}

@@ -5,7 +5,7 @@ import { ModalType } from "@/common/enums/modalType";
 import { chatWebSocketService } from "@/services/websocket/chatWebsocketService";
 import { scrollToMessageById } from "@/common/utils/message/scrollToMessageById";
 import { useTranslation } from "react-i18next";
-import { audioService, SoundType } from "@/services/audioService";
+import { audioManager, SoundType } from "@/services/audioManager";
 import {
   getCloseModal,
   getOpenModal,
@@ -77,7 +77,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
         });
         if (onClose) onClose();
         closeModal();
-        audioService.playSound(SoundType.PIN);
+        audioManager.playSound(SoundType.PIN);
       },
     },
 
@@ -161,7 +161,10 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
           title={action.label}
         >
           <i
-            className={clsx("material-symbols-outlined text-2xl!", action.class)}
+            className={clsx(
+              "material-symbols-outlined text-2xl!",
+              action.class
+            )}
           >
             {action.icon}
           </i>

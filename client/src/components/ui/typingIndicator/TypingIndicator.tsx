@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { audioService, SoundType } from "@/services/audioService";
+import { audioManager, SoundType } from "@/services/audioManager";
 import { useTypingMembers } from "@/common/hooks/useTypingMembers";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import "./typingIndicator.css";
@@ -18,17 +18,17 @@ const TypingIndicator = ({ chatId, isMuted }: TypingIndicatorProps) => {
     if (isMuted) return; // 🔇 Skip sounds if muted
 
     if (previousTypingCount.current === 0 && isTyping) {
-      audioService.playSound(SoundType.TYPING, 0.1);
+      audioManager.playSound(SoundType.TYPING, 0.1);
     }
     if (!isTyping) {
-      audioService.stopSound(SoundType.TYPING);
+      audioManager.stopSound(SoundType.TYPING);
     }
 
     previousTypingCount.current = typingMembers.length;
   }, [isMuted, isTyping, typingMembers.length]);
 
   useEffect(() => {
-    return () => audioService.stopSound(SoundType.TYPING);
+    return () => audioManager.stopSound(SoundType.TYPING);
   }, []);
 
   const displayAvatars = useMemo(() => {

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
 import mql from "@microlink/mql";
 import { messageAnimations } from "@/common/animations/messageAnimations";
-import { audioService, SoundType } from "@/services/audioService";
+import { audioManager, SoundType } from "@/services/audioManager";
 
 interface LinkPreviewChatBarProps {
   url: string;
@@ -25,7 +25,7 @@ const LinkPreviewChatBar: React.FC<LinkPreviewChatBarProps> = ({
       .then((res) => setData(res.data))
       .catch(() => setData(null));
 
-    audioService.playSound(SoundType.POP1, 0.1);
+    audioManager.playSound(SoundType.POP1, 0.1);
   }, [url]);
 
   const previewTitle: string = data?.meta?.title || data?.title || "";

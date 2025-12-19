@@ -109,7 +109,7 @@ const CreateNewGroupChat: React.FC<CreateChatProps> = ({ type }) => {
     <div className="flex flex-col h-full">
       {hasPrivateChats ? (
         <>
-          <div className="p-2">
+          <div className="px-2 pb-3 pt-1">
             <SearchBar
               placeholder={t("sidebar_new_chat.group.search_placeholder")}
               onSearch={handleSearch}

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { motion } from "framer-motion";
 import { handleReaction } from "@/common/utils/message/handleReaction";
-import { audioService, SoundType } from "@/services/audioService";
+import { audioManager, SoundType } from "@/services/audioManager";
 import { getCloseModal } from "@/stores/modalStore";
 
 const emojis = ["👍", "❤️", "😂", "😮", "😢", "🙏", "🎉", "🔥", "💯"];
@@ -31,7 +31,7 @@ export const MessageReactionPicker: React.FC<ReactionPickerProps> = ({
           whileHover={{ scale: 1.5 }}
           className="text-xl"
           onClick={() => {
-            audioService.playSound(SoundType.REACTION);
+            audioManager.playSound(SoundType.REACTION);
             handleReaction({
               emoji,
               messageId,

@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { motion } from "framer-motion";
 import { LinkPreviewResponse } from "@/shared/types/responses/message.response";
 import { messageAnimations } from "@/common/animations/messageAnimations";
-import { audioService, SoundType } from "@/services/audioService";
+import { audioManager, SoundType } from "@/services/audioManager";
 import { useIsMobile } from "@/stores/deviceStore";
 
 interface Props {
@@ -51,7 +51,7 @@ export const LinkPreviewCard: React.FC<Props> = ({ preview, className }) => {
           }}
           onHoverStart={(e) => {
             e.stopPropagation();
-            audioService.playSound(SoundType.LINK_HOVER, 0.2);
+            audioManager.playSound(SoundType.LINK_HOVER, 0.2);
           }}
         >
           <img

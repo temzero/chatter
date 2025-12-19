@@ -1,9 +1,9 @@
-import { audioService, SoundType } from "@/services/audioService";
+import { audioManager, SoundType } from "@/services/audioManager";
 // import { toast } from "react-toastify";
 
 export function handleError(error: unknown, defaultMessage: string): never {
-  audioService.stopAllSounds();
-  audioService.playSound(SoundType.ERROR);
+  audioManager.stopAllSounds();
+  audioManager.playSound(SoundType.ERROR);
 
   let message = defaultMessage;
 

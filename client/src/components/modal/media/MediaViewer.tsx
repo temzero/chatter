@@ -3,7 +3,7 @@ import { motion, useAnimationControls } from "framer-motion";
 import { MediaViewerNavigationButtons } from "./MediaViewerNavigationButtons";
 import { MediaViewerBottomInfo } from "./MediaViewerBottomInfo";
 import { RenderModalAttachment } from "./RenderModalAttachment";
-import { audioService, SoundType } from "@/services/audioService";
+import { audioManager, SoundType } from "@/services/audioManager";
 import { useIsMobile } from "@/stores/deviceStore";
 import { MediaViewerButtons } from "./MediaViewerButtons";
 import { getCloseModal, useMediaModalData } from "@/stores/modalStore";
@@ -27,7 +27,7 @@ export const MediaViewer: React.FC = () => {
   };
 
   const hasMounted = useRef(false);
-  
+
   // ✅ Initialize with the function
   const [currentIndex, setCurrentIndex] = useState(getInitialIndex);
   const [rotation, setRotation] = useState(0);
@@ -41,10 +41,14 @@ export const MediaViewer: React.FC = () => {
   useEffect(() => {
     if (prevAttachmentIdRef.current !== currentAttachmentId) {
       prevAttachmentIdRef.current = currentAttachmentId;
-      
+
       // Use setTimeout to move setState out of synchronous effect execution
       setTimeout(() => {
-        if (currentAttachmentId && activeAttachments && activeAttachments.length > 0) {
+        if (
+          currentAttachmentId &&
+          activeAttachments &&
+          activeAttachments.length > 0
+        ) {
           const index = activeAttachments.findIndex(
             (media) => media.id === currentAttachmentId
           );
@@ -82,7 +86,7 @@ export const MediaViewer: React.FC = () => {
       setCurrentIndex(newIndex);
       scrollToMedia(newIndex, true);
       setRotation(0);
-      audioService.playRandomSound([
+      audioManager.playRandomSound([
         SoundType.CARD1,
         SoundType.CARD2,
         SoundType.CARD3,
@@ -97,7 +101,7 @@ export const MediaViewer: React.FC = () => {
       setCurrentIndex(newIndex);
       scrollToMedia(newIndex, true);
       setRotation(0);
-      audioService.playRandomSound([
+      audioManager.playRandomSound([
         SoundType.CARD1,
         SoundType.CARD2,
         SoundType.CARD3,

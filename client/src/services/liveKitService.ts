@@ -8,7 +8,7 @@ import {
   LocalTrackPublication,
   Track,
 } from "livekit-client";
-import { audioService, SoundType } from "./audioService";
+import { audioManager, SoundType } from "./audioManager";
 import { EnvConfig } from "@/common/config/env.config";
 
 export interface LiveKitServiceOptions {
@@ -225,12 +225,12 @@ export class LiveKitService {
         ]);
       })
       .on(RoomEvent.ParticipantConnected, (participant) => {
-        audioService.playSound(SoundType.USER_CONNECTED);
+        audioManager.playSound(SoundType.USER_CONNECTED);
         this.options?.onParticipantConnected?.(participant);
         console.log("LIVEKIT", "ParticipantConnected", participant.name);
       })
       .on(RoomEvent.ParticipantDisconnected, (participant) => {
-        audioService.playSound(SoundType.USER_DISCONNECTED); // leave sound
+        audioManager.playSound(SoundType.USER_DISCONNECTED); // leave sound
         this.options?.onParticipantDisconnected?.(participant);
         console.log("LIVEKIT", "ParticipantDisconnected", participant.name);
       })

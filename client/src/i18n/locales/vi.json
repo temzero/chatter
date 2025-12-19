@@ -633,13 +633,13 @@
       "status_banned": "Đã bị chặn",
       "add_member": "Thêm thành viên"
     },
-    "media_files": {
+    "attachments": {
       "title": "Ảnh & Đính kèm",
       "image": "Ảnh",
       "video": "Video",
       "audio": "Âm thanh",
       "file": "Tệp tin",
-      "no_media": "Không có {{type}} nào"
+      "link": "Liên kết"
     }
   },
 

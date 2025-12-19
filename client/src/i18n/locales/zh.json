@@ -634,12 +634,13 @@
       "status_banned": "已封禁",
       "add_member": "添加成员"
     },
-    "media_files": {
+    "attachments": {
       "title": "媒体与文件",
       "image": "图片",
       "video": "视频",
       "audio": "音频",
-      "file": "文件"
+      "file": "文件",
+      "link": "链接"
     }
   },
 

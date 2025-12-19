@@ -10,8 +10,8 @@ import {
 } from "@/stores/messageAttachmentStore";
 import { useActiveChatId } from "@/stores/chatStore";
 import RenderMediaAttachments from "./RenderMediaAttachments";
-import AttachmentSelector from "./AttachmentSelector";
-import { SidebarInfoAttachmentTypes } from "@/common/constants/sidebarInfoAttachmentTypes";
+import { SIDEBAR_INFO_ATTACHMENT_ITEMS } from "@/common/constants/sidebarInfoAttachmentTypes";
+import { SelectionBar } from "@/components/ui/SelectionBar";
 
 const SidebarInfoAttachments: React.FC = () => {
   const { t } = useTranslation();
@@ -21,7 +21,8 @@ const SidebarInfoAttachments: React.FC = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [direction, setDirection] = useState(1);
 
-  const selectedAttachmentType = SidebarInfoAttachmentTypes[selectedIndex];
+  const selectedAttachmentType =
+    SIDEBAR_INFO_ATTACHMENT_ITEMS[selectedIndex].id;
   const attachments = useActiveChatAttachments();
 
   // Track hasMore per type
@@ -54,29 +55,38 @@ const SidebarInfoAttachments: React.FC = () => {
     fetchAttachments,
   ]);
 
+  const getTypeIcon = (type: string) => {
+    const item = SIDEBAR_INFO_ATTACHMENT_ITEMS.find((i) => i.id === type);
+    return item?.icon || "";
+  };
+
   return (
     <aside className="relative w-full h-full overflow-hidden flex flex-col">
-      <header className="flex p-4 w-full items-center min-h-(--header-height) custom-border-b">
+      <header className="flex p-4 w-full items-center min-h-(--header-height)">
         <h1 className="text-xl font-semibold">
-          {t("sidebar_info.media_files.title")}
+          {t("sidebar_info.attachments.title")}
         </h1>
       </header>
 
-      <AttachmentSelector
-        selectedType={selectedAttachmentType}
-        onSelectType={(type) => {
-          const index = SidebarInfoAttachmentTypes.indexOf(type);
+      <SelectionBar
+        options={SIDEBAR_INFO_ATTACHMENT_ITEMS.map((i) => i.id)}
+        selected={selectedAttachmentType}
+        onSelect={(type) => {
+          const index = SIDEBAR_INFO_ATTACHMENT_ITEMS.findIndex(
+            (item) => item.id === type
+          );
           if (index === selectedIndex) return;
 
           setDirection(index > selectedIndex ? 1 : -1);
           setSelectedIndex(index);
         }}
+        getIcon={getTypeIcon}
       />
 
       <SlidingContainer uniqueKey={selectedIndex} direction={direction}>
         <RenderMediaAttachments
           attachments={filteredAttachments}
-          selectedType={SidebarInfoAttachmentTypes[selectedIndex]}
+          selectedType={SIDEBAR_INFO_ATTACHMENT_ITEMS[selectedIndex].id}
           onLoadMore={handleLoadMore}
           hasMore={hasMoreAttachments}
         />

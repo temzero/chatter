@@ -12,7 +12,7 @@ import {
   SenderResponse,
 } from "@/shared/types/responses/message.response";
 import { useAttachmentStore } from "./messageAttachmentStore";
-import { audioService, SoundType } from "@/services/audioService";
+import { audioManager, SoundType } from "@/services/audioManager";
 import { useShallow } from "zustand/shallow";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
 
@@ -274,7 +274,7 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
       }, 1000);
 
       // 3️⃣ Play sound immediately
-      audioService.playSound(SoundType.MESSAGE_REMOVE);
+      audioManager.playSound(SoundType.MESSAGE_REMOVE);
     },
 
     getChatMessages: (chatId) => {

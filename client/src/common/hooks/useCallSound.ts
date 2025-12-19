@@ -2,35 +2,35 @@
 import { useEffect } from "react";
 import { useCallStore } from "@/stores/callStore";
 import { LocalCallStatus } from "@/common/enums/LocalCallStatus";
-import { audioService, SoundType } from "@/services/audioService";
+import { audioManager, SoundType } from "@/services/audioManager";
 
 export const useCallSounds = () => {
   const localCallStatus = useCallStore((state) => state.localCallStatus);
 
   useEffect(() => {
     // Stop all previous sounds first
-    audioService.stopAllSounds();
+    audioManager.stopAllSounds();
 
     // Delay a tick to let browser reset audio state
     const timer = setTimeout(() => {
       switch (localCallStatus) {
         case LocalCallStatus.OUTGOING:
-          audioService.playSound(SoundType.OUTGOING_CALL, undefined, true);
+          audioManager.playSound(SoundType.OUTGOING_CALL, undefined, true);
           break;
         case LocalCallStatus.INCOMING:
-          audioService.playSound(SoundType.INCOMING_CALL, undefined, true);
+          audioManager.playSound(SoundType.INCOMING_CALL, undefined, true);
           break;
         // case LocalCallStatus.CONNECTED:
-        //   audioService.playSound(SoundType.CALL_CONNECTED);
+        //   audioManager.playSound(SoundType.CALL_CONNECTED);
         //   break;
         // case LocalCallStatus.ENDED:
         case LocalCallStatus.DECLINED:
         case LocalCallStatus.CANCELED:
         case LocalCallStatus.TIMEOUT:
-          audioService.playSound(SoundType.CALL_END);
+          audioManager.playSound(SoundType.CALL_END);
           break;
         case LocalCallStatus.ERROR:
-          audioService.playSound(SoundType.ERROR);
+          audioManager.playSound(SoundType.ERROR);
           break;
         default:
           break;
@@ -39,7 +39,7 @@ export const useCallSounds = () => {
 
     return () => {
       clearTimeout(timer);
-      audioService.stopAllSounds();
+      audioManager.stopAllSounds();
     };
   }, [localCallStatus]);
 };

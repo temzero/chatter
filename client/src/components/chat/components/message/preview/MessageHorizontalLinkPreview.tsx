@@ -1,7 +1,7 @@
 import React from "react";
 import clsx from "clsx";
 import { LinkPreviewResponse } from "@/shared/types/responses/message.response";
-import { audioService, SoundType } from "@/services/audioService";
+import { audioManager, SoundType } from "@/services/audioManager";
 import { useIsMobile } from "@/stores/deviceStore";
 
 interface MessageHorizontalLinkPreviewProps {
@@ -40,7 +40,7 @@ export const MessageHorizontalLinkPreview: React.FC<
       className={linkClass}
       onMouseEnter={(e) => {
         e.stopPropagation();
-        audioService.playSound(SoundType.LINK_HOVER, 0.2);
+        audioManager.playSound(SoundType.LINK_HOVER, 0.2);
       }}
       onClick={(e) => {
         e.stopPropagation();

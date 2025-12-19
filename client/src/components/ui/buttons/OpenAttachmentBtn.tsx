@@ -40,7 +40,7 @@ const OpenAttachmentBtn: React.FC = () => {
           {/* <span className="flex flex-col justify-center items-center cursor-pointer">
             <i className="material-symbols-outlined">attach_file</i>
           </span> */}
-          <h1>{t("sidebar_info.media_files.title")}</h1>
+          <h1>{t("sidebar_info.attachments.title")}</h1>
         </div>
       </div>
     </motion.div>

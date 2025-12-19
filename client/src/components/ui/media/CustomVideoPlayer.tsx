@@ -3,30 +3,7 @@ import { useRef, useState, MouseEvent, useEffect } from "react";
 import { formatDuration } from "@/common/utils/format/formatDuration";
 import { ModalType } from "@/common/enums/modalType";
 import { useModalStore } from "@/stores/modalStore";
-
-// Video manager implementation
-let currentVideo: HTMLVideoElement | null = null;
-
-const playVideo = (videoElement: HTMLVideoElement) => {
-  // Pause the currently playing video if it exists
-  if (currentVideo && currentVideo !== videoElement) {
-    currentVideo.pause();
-    // Dispatch pause event to sync other players
-    const event = new Event("pause");
-    currentVideo.dispatchEvent(event);
-  }
-
-  // Set the new video as current and play it
-  currentVideo = videoElement;
-  videoElement.play().catch(console.error);
-};
-
-const stopCurrentVideo = () => {
-  if (currentVideo) {
-    currentVideo.pause();
-    currentVideo = null;
-  }
-};
+import { mediaManager } from "@/services/mediaManager"; // ✅ use mediaManager
 
 interface CustomVideoPlayerProps {
   videoAttachment: AttachmentResponse;
@@ -44,6 +21,7 @@ const CustomVideoPlayer = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const rafId = useRef<number>(0);
   const displayRef = useRef<HTMLDivElement>(null);
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [totalDuration, setTotalDuration] = useState(
@@ -64,13 +42,11 @@ const CustomVideoPlayer = ({
     }
   };
 
-  // Handle play/pause events from other video players
+  // Pause video if another video plays (mediaManager handles this)
   useEffect(() => {
     const handleExternalPause = () => {
       setIsPlaying(false);
-      if (rafId.current) {
-        cancelAnimationFrame(rafId.current);
-      }
+      if (rafId.current) cancelAnimationFrame(rafId.current);
     };
 
     const videoElement = videoRef.current;
@@ -81,37 +57,26 @@ const CustomVideoPlayer = ({
     return () => {
       if (videoElement) {
         videoElement.removeEventListener("pause", handleExternalPause);
-        if (currentVideo === videoElement) {
-          stopCurrentVideo();
-        }
-        if (rafId.current) {
-          cancelAnimationFrame(rafId.current);
-        }
+        if (rafId.current) cancelAnimationFrame(rafId.current);
       }
     };
   }, []);
 
   const togglePlayPause = () => {
-    if (videoRef.current) {
-      if (videoRef.current.paused) {
-        playVideo(videoRef.current);
-        setIsPlaying(true);
-        rafId.current = requestAnimationFrame(updateTimeDisplay);
-      } else {
-        videoRef.current.pause();
-        setIsPlaying(false);
-        if (rafId.current) {
-          cancelAnimationFrame(rafId.current);
-        }
-        if (displayRef.current) {
-          const total = videoRef.current.duration || totalDuration;
-          displayRef.current.textContent = formatDuration(total);
-        }
-      }
+    if (!videoRef.current) return;
+
+    if (isPlaying) {
+      mediaManager.stop(videoRef.current);
+      setIsPlaying(false);
+      if (rafId.current) cancelAnimationFrame(rafId.current);
+    } else {
+      mediaManager.play(videoRef.current);
+      setIsPlaying(true);
+      rafId.current = requestAnimationFrame(updateTimeDisplay);
     }
   };
 
-  const toggleLocalVoice = () => {
+  const toggleMute = () => {
     if (videoRef.current) {
       videoRef.current.muted = !videoRef.current.muted;
       setIsMuted(videoRef.current.muted);
@@ -120,11 +85,8 @@ const CustomVideoPlayer = ({
 
   const handleClick = (e: MouseEvent) => {
     e.preventDefault();
-    if (previewMode) {
-      togglePlayPause();
-    } else if (onOpenModal) {
-      onOpenModal();
-    }
+    if (previewMode) togglePlayPause();
+    else if (onOpenModal) onOpenModal();
   };
 
   const handleRightClick = (e: MouseEvent) => {
@@ -132,21 +94,16 @@ const CustomVideoPlayer = ({
     e.preventDefault();
     e.stopPropagation();
     if (videoRef.current?.play) {
-      videoRef.current.pause();
+      mediaManager.stop(videoRef.current);
       setIsPlaying(false);
     }
-    if (onOpenModal) {
-      // togglePlayPause();
-      onOpenModal();
-    }
+    if (onOpenModal) onOpenModal();
   };
 
   const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLVideoElement>) => {
-    const video = e.target as HTMLVideoElement;
+    const video = e.currentTarget;
     setTotalDuration(video.duration || videoAttachment.duration || 0);
-    if (onLoadedMetadata) {
-      onLoadedMetadata(e);
-    }
+    if (onLoadedMetadata) onLoadedMetadata(e);
     if (displayRef.current) {
       displayRef.current.textContent = formatDuration(video.duration);
     }
@@ -168,12 +125,8 @@ const CustomVideoPlayer = ({
           rafId.current = requestAnimationFrame(updateTimeDisplay);
         }}
         onPause={() => {
-          if (videoRef.current !== currentVideo) {
-            setIsPlaying(false);
-          }
-          if (rafId.current) {
-            cancelAnimationFrame(rafId.current);
-          }
+          setIsPlaying(false);
+          if (rafId.current) cancelAnimationFrame(rafId.current);
           if (videoRef.current && displayRef.current) {
             const total = videoRef.current.duration || totalDuration;
             displayRef.current.textContent = formatDuration(total);
@@ -181,12 +134,7 @@ const CustomVideoPlayer = ({
         }}
         onEnded={() => {
           setIsPlaying(false);
-          if (videoRef.current === currentVideo) {
-            currentVideo = null;
-          }
-          if (rafId.current) {
-            cancelAnimationFrame(rafId.current);
-          }
+          if (rafId.current) cancelAnimationFrame(rafId.current);
         }}
         onLoadedMetadata={handleLoadedMetadata}
       >
@@ -200,7 +148,7 @@ const CustomVideoPlayer = ({
           onClick={onOpenModal}
         >
           <button
-            className="  bg-black/70 rounded-full! opacity-70 hover:opacity-100 hover:scale-125 transition-all"
+            className="bg-black/70 rounded-full! opacity-70 hover:opacity-100 hover:scale-125 transition-all"
             onClick={(e) => {
               e.stopPropagation();
               handleClick(e);
@@ -220,13 +168,12 @@ const CustomVideoPlayer = ({
         {formatDuration(totalDuration)}
       </div>
 
-      {/* Mute button */}
       {previewMode && isPlaying && (
         <button
           className="absolute bottom-1 left-1 bg-black/50 text-white px-1 rounded-full! hover:bg-black/70 transition"
           onClick={(e) => {
             e.stopPropagation();
-            toggleLocalVoice();
+            toggleMute();
           }}
           aria-label={isMuted ? "Mute" : "Unmute"}
         >

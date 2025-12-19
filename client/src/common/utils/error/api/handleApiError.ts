@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/hooks/handleApiError.ts
 import { AxiosError } from "axios";
-import { audioService, SoundType } from "@/services/audioService";
+import { audioManager, SoundType } from "@/services/audioManager";
 import { UnauthorizedError } from "@/shared/types/enums/error-message.enum";
 import { handleRefreshToken } from "./handleRefreshToken";
 // import { toast } from "react-toastify";
@@ -31,15 +31,15 @@ export const handleApiError = () => {
     }
 
     if (status === 404) {
-      audioService.playSound(SoundType.NOT_FOUND, 0.5);
+      audioManager.playSound(SoundType.NOT_FOUND, 0.5);
       return;
     }
 
     // toast.error(`${status} - Code: ${code} - Message: ${message}`);
     console.error(`${status} - Code: ${code} - Message: ${message}`);
 
-    audioService.stopAllSounds();
-    audioService.playSound(SoundType.ERROR);
+    audioManager.stopAllSounds();
+    audioManager.playSound(SoundType.ERROR);
 
     return Promise.reject(error);
   };

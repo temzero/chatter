@@ -635,12 +635,13 @@
       "status_banned": "Baneado",
       "add_member": "Añadir miembro"
     },
-    "media_files": {
+    "attachments": {
       "title": "Medios y archivos",
       "image": "Imágenes",
       "video": "Videos",
       "audio": "Audio",
-      "file": "Archivos"
+      "file": "Archivos",
+      "link": "Enlaces"
     }
   },
 

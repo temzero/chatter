@@ -633,12 +633,13 @@
       "status_banned": "차단됨",
       "set_owner": "소유자로 승격"
     },
-    "media_files": {
+    "attachments": {
       "title": "미디어 및 파일",
       "image": "이미지",
       "video": "비디오",
       "audio": "오디오",
-      "file": "파일"
+      "file": "파일",
+      "link": "링크"
     }
   },
 

@@ -4,6 +4,7 @@ import { getSystemMessageText } from "@/common/utils/message/systemMessageHelper
 import { getSystemMessageColor } from "@/common/utils/message/systemMessageHelpers";
 import { SystemMessageIcon } from "@/components/ui/icons/SystemMessageIcon";
 import { useTranslation } from "react-i18next";
+import { useIsMobile } from "@/stores/deviceStore";
 
 export type SystemMessageJSONContent = {
   oldValue?: string;
@@ -30,6 +31,8 @@ export const SystemMessageContent = ({
   className = "",
 }: SystemMessageContentProps): JSX.Element | null => {
   const { t } = useTranslation();
+
+  const isMobile = useIsMobile();
   if (!systemEvent) return null;
 
   const text = getSystemMessageText({
@@ -39,6 +42,7 @@ export const SystemMessageContent = ({
     senderId,
     senderDisplayName,
     JSONcontent,
+    isMobile,
   });
 
   const messageColor = getSystemMessageColor(systemEvent);

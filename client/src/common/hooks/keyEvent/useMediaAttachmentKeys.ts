@@ -1,3 +1,4 @@
+import { mediaManager } from "@/services/mediaManager";
 import { useEffect, RefObject } from "react";
 
 interface UseMediaAttachmentKeysProps {
@@ -19,21 +20,19 @@ export const useMediaAttachmentKeys = ({
     if (!isCurrent) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isCurrent) return;
+
       switch (e.code) {
         case "Space":
           e.preventDefault();
           e.stopPropagation();
 
           if (attachmentType === "video" && videoRef?.current) {
-            if (videoRef.current.paused) {
-              videoRef.current.play();
-            } else {
-              videoRef.current.pause();
-            }
+            mediaManager.play(videoRef.current); // use mediaManager
           }
 
           if (attachmentType === "audio" && audioPlayerRef?.current) {
-            audioPlayerRef.current.togglePlayPause();
+            audioPlayerRef.current.togglePlayPause(); // already uses mediaManager internally
           }
           break;
 

@@ -1,4 +1,4 @@
-// services/audioService.ts
+// services/audioManager.ts
 import activeSound from "@/assets/sound/active.mp3";
 import breakSound from "@/assets/sound/break.mp3";
 import card1Sound from "@/assets/sound/card1.mp3";
@@ -196,4 +196,4 @@ class AudioServiceImpl implements AudioService {
 }
 
 // Singleton instance
-export const audioService = new AudioServiceImpl();
+export const audioManager = new AudioServiceImpl();

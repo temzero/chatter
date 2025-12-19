@@ -634,12 +634,13 @@
       "status_banned": "追放",
       "add_member": "メンバーを追加"
     },
-    "media_files": {
+    "attachments": {
       "title": "メディアとファイル",
       "image": "画像",
       "video": "ビデオ",
       "audio": "オーディオ",
-      "file": "ファイル"
+      "file": "ファイル",
+      "link": "リンク"
     }
   },
 

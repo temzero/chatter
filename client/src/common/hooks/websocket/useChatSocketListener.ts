@@ -6,7 +6,7 @@ import { useTypingStore } from "@/stores/typingStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useChatStore } from "@/stores/chatStore";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
-import { audioService, SoundType } from "@/services/audioService";
+import { audioManager, SoundType } from "@/services/audioManager";
 import { handleSystemEventMessage } from "@/common/utils/message/handleSystemEventMessage";
 import { WsNotificationResponse } from "@/shared/types/responses/ws-emit-chat-member.response";
 import { chatWebSocketService } from "@/services/websocket/chatWebsocketService";
@@ -32,13 +32,13 @@ export function useChatSocketListeners() {
         }
 
         if (!meta?.isMuted && !message.call && !message.systemEvent) {
-          audioService.playSound(SoundType.MY_MESSAGE);
+          audioManager.playSound(SoundType.MY_MESSAGE);
         }
         return;
       }
 
       if (!meta?.isMuted && !message.call && !message.systemEvent) {
-        audioService.playSound(SoundType.NEW_MESSAGE);
+        audioManager.playSound(SoundType.NEW_MESSAGE);
       }
 
       // Exit early if chat does not exist and needs to be fetched

@@ -43,6 +43,7 @@ export function getSystemMessageText({
   senderId,
   senderDisplayName,
   JSONcontent,
+  isMobile,
 }: {
   t: TFunction;
   systemEvent?: SystemEventType | null;
@@ -50,15 +51,26 @@ export function getSystemMessageText({
   senderId: string;
   senderDisplayName: string;
   JSONcontent?: SystemMessageJSONContent | null;
+  isMobile?: boolean;
 }): string {
   if (!systemEvent) return t("system_message.unknown");
-
   const isMe = currentUserId === senderId;
   const displayName = isMe ? t("common.you") : senderDisplayName;
   const parsedContent = parseJsonContent<SystemMessageJSONContent>(JSONcontent);
 
-  const newVal = parsedContent?.newValue;
-  const oldVal = parsedContent?.oldValue;
+  const MAX_VALUE_LENGTH = isMobile ? 12 : 36;
+
+  const newVal = parsedContent?.newValue
+    ? parsedContent.newValue.length > MAX_VALUE_LENGTH
+      ? parsedContent.newValue.slice(0, MAX_VALUE_LENGTH) + "…"
+      : parsedContent.newValue
+    : "";
+
+  const oldVal = parsedContent?.oldValue
+    ? parsedContent.oldValue.length > MAX_VALUE_LENGTH
+      ? parsedContent.oldValue.slice(0, MAX_VALUE_LENGTH) + "…"
+      : parsedContent.oldValue
+    : "";
   const isTargetMe = parsedContent?.targetId === currentUserId;
   const targetName = isTargetMe
     ? t("common.you")

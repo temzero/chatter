@@ -1,12 +1,12 @@
 // src/hooks/handleRefreshTokenError.ts
-import { audioService, SoundType } from "@/services/audioService";
+import { audioManager, SoundType } from "@/services/audioManager";
 import { useAuthStore } from "@/stores/authStore";
 import i18next from "i18next";
 import { toast } from "react-toastify";
 
 export const handleRefreshTokenError = (): void => {
   const t = i18next.t;
-  audioService.playSound(SoundType.LOGOUT);
+  audioManager.playSound(SoundType.LOGOUT);
 
   toast.warn(t("auth.token.session_expired"));
 

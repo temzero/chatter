@@ -4,12 +4,13 @@ import { useIsCompactSidebar } from "@/stores/sidebarStore";
 
 export type SelectorItem = {
   id: string;
-  name: string;
+  name?: string;
+  icon?: string;
   color?: string;
 };
 
 type Props<T extends SelectorItem> = {
-  items: T[];
+  items: readonly T[];
   selected: T;
   onSelect: (item: T) => void;
 };
@@ -75,7 +76,11 @@ const HorizontalSelector = <T extends SelectorItem>({
               item.color ? { color: item.color, borderColor: item.color } : {}
             }
           >
-            {item.name}
+            {item.icon ? (
+              <span className="material-symbols-outlined">{item.icon}</span>
+            ) : (
+              item.name
+            )}
           </a>
         ))}
       </div>
@@ -87,7 +92,9 @@ const HorizontalSelector = <T extends SelectorItem>({
           }
           className={buttonBaseClass + " left-0"}
         >
-          <i className="material-symbols-outlined rotate-180  hover:scale-125 text-(--primary-green) transition-all">arrow_forward_ios</i>
+          <i className="material-symbols-outlined rotate-180  hover:scale-125 text-(--primary-green) transition-all">
+            arrow_forward_ios
+          </i>
         </div>
       )}
 
@@ -98,7 +105,9 @@ const HorizontalSelector = <T extends SelectorItem>({
           }
           className={buttonBaseClass + " right-0"}
         >
-          <i className="material-symbols-outlined text-xs hover:scale-125 text-(--primary-green) transition-all">arrow_forward_ios</i>
+          <i className="material-symbols-outlined text-xs hover:scale-125 text-(--primary-green) transition-all">
+            arrow_forward_ios
+          </i>
         </div>
       )}
     </div>

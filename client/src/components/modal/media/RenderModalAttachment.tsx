@@ -11,6 +11,7 @@ import { motion } from "framer-motion";
 import { mediaViewerAnimations } from "@/common/animations/mediaViewerAnimations";
 import { ModalImageViewer } from "./ModalImageViewer";
 import { useMediaAttachmentKeys } from "@/common/hooks/keyEvent/useMediaAttachmentKeys";
+import { mediaManager } from "@/services/mediaManager";
 
 export const RenderModalAttachment = ({
   attachment,
@@ -38,48 +39,27 @@ export const RenderModalAttachment = ({
     scrollContainerRef,
   });
 
-  // Pause media when it's not the current one
-  useEffect(() => {
-    if (!isCurrent) {
-      if (attachment.type === "video" && videoRef.current) {
-        videoRef.current.pause();
-      }
-      if (attachment.type === "audio" && audioPlayerRef.current) {
-        audioPlayerRef.current.pause();
-      }
-    }
-  }, [isCurrent, attachment.type]);
-
-  // ✅ Ensure audio autoplay when visible
-  useEffect(() => {
-    const audio = audioPlayerRef.current;
-    if (!audio) return;
-
-    if (isCurrent) {
-      try {
-        audio.play();
-      } catch (err) {
-        console.warn("Audio autoplay blocked:", err);
-      }
-    } else {
-      audio.pause();
-    }
-  }, [isCurrent]);
-
-  // Ensure video autoplay when visible
+  // Video playback
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
     if (isCurrent) {
-      const playPromise = video.play();
-      if (playPromise !== undefined) {
-        playPromise.catch((error) => {
-          console.warn("Autoplay blocked:", error);
-        });
-      }
+      mediaManager.play(video);
     } else {
-      video.pause();
+      mediaManager.stop(video);
+    }
+  }, [isCurrent]);
+
+  // Audio playback
+  useEffect(() => {
+    const audio = audioPlayerRef.current;
+    if (!audio) return;
+
+    if (isCurrent) {
+      mediaManager.play(audio);
+    } else {
+      mediaManager.stop(audio);
     }
   }, [isCurrent]);
 

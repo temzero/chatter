@@ -8,27 +8,7 @@ import React, {
   useImperativeHandle,
   useEffect,
 } from "react";
-
-// Audio manager
-let currentAudio: HTMLAudioElement | null = null;
-
-const playAudio = (audioElement: HTMLAudioElement) => {
-  if (currentAudio && currentAudio !== audioElement) {
-    currentAudio.pause();
-    currentAudio.currentTime = 0;
-    currentAudio.dispatchEvent(new Event("pause"));
-  }
-  currentAudio = audioElement;
-  audioElement.play();
-};
-
-const stopCurrentAudio = () => {
-  if (currentAudio) {
-    currentAudio.pause();
-    currentAudio.currentTime = 0;
-    currentAudio = null;
-  }
-};
+import { mediaManager } from "@/services/mediaManager"; // ✅ use mediaManager
 
 interface CustomAudioPlayerProps {
   mediaUrl: string;
@@ -62,15 +42,32 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
     const [currentTime, setCurrentTime] = useState(0);
-    const [duration, setDuration] = useState(0); // Changed from useRef to useState
+    const [duration, setDuration] = useState(0);
 
     const handleLoadedMetadata = () => {
       if (audioRef.current) {
-        setDuration(audioRef.current.duration); // Use setState instead of ref assignment
-        handleTimeUpdate(); // update progress and currentTime after duration is known
+        setDuration(audioRef.current.duration);
+        handleTimeUpdate();
       }
     };
 
+    const handleTimeUpdate = () => {
+      if (!audioRef.current) return;
+      const current = audioRef.current.currentTime;
+      const dur = audioRef.current.duration || duration;
+      setCurrentTime(current);
+      setProgress((current / dur) * 100);
+    };
+
+    const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (!audioRef.current) return;
+      const newTime = (Number(e.target.value) / 100) * duration;
+      audioRef.current.currentTime = newTime;
+      setCurrentTime(newTime);
+      setProgress(Number(e.target.value));
+    };
+
+    // Stop audio if another audio starts (mediaManager handles this)
     useEffect(() => {
       const handleExternalPause = () => setIsPlaying(false);
       const audioElement = audioRef.current;
@@ -80,8 +77,7 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
       return () => {
         if (audioElement) {
           audioElement.removeEventListener("pause", handleExternalPause);
-          if (currentAudio === audioElement) stopCurrentAudio();
-          audioElement.pause();
+          mediaManager.stop(audioElement);
         }
       };
     }, []);
@@ -89,23 +85,23 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
     useImperativeHandle(ref, () => ({
       play: () => {
         if (audioRef.current) {
-          playAudio(audioRef.current);
+          mediaManager.play(audioRef.current);
           setIsPlaying(true);
         }
       },
       pause: () => {
         if (audioRef.current) {
-          audioRef.current.pause();
+          mediaManager.stop(audioRef.current);
           setIsPlaying(false);
         }
       },
       togglePlayPause: () => {
         if (!audioRef.current) return;
         if (isPlaying) {
-          audioRef.current.pause();
+          mediaManager.stop(audioRef.current);
           setIsPlaying(false);
         } else {
-          playAudio(audioRef.current);
+          mediaManager.play(audioRef.current);
           setIsPlaying(true);
         }
       },
@@ -115,28 +111,11 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
       e.stopPropagation();
       if (!audioRef.current) return;
       if (isPlaying) {
-        audioRef.current.pause();
+        mediaManager.stop(audioRef.current);
         setIsPlaying(false);
       } else {
-        playAudio(audioRef.current);
+        mediaManager.play(audioRef.current);
         setIsPlaying(true);
-      }
-    };
-
-    const handleTimeUpdate = () => {
-      if (!audioRef.current) return;
-      const current = audioRef.current.currentTime;
-      const dur = audioRef.current.duration || duration; // Use state instead of ref
-      setCurrentTime(current);
-      setProgress((current / dur) * 100);
-    };
-
-    const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (audioRef.current) {
-        const newTime = (Number(e.target.value) / 100) * duration; // Use state instead of ref
-        audioRef.current.currentTime = newTime;
-        setCurrentTime(newTime);
-        setProgress(Number(e.target.value));
       }
     };
 
@@ -188,12 +167,8 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
             className="hidden"
             onTimeUpdate={handleTimeUpdate}
             onLoadedMetadata={handleLoadedMetadata}
-            onPause={() => {
-              if (audioRef.current !== currentAudio) setIsPlaying(false);
-            }}
             onEnded={() => {
               setIsPlaying(false);
-              if (audioRef.current === currentAudio) currentAudio = null;
             }}
           >
             <source src={mediaUrl} type={getAudioType(fileName || "")} />

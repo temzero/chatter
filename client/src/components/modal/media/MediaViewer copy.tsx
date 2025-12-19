@@ -3,7 +3,7 @@
 // import { MediaViewerNavigationButtons } from "./MediaViewerNavigationButtons";
 // import { MediaViewerBottomInfo } from "./MediaViewerBottomInfo";
 // import { RenderModalAttachment } from "./RenderModalAttachment";
-// import { audioService, SoundType } from "@/services/audioService";
+// import { audioManager, SoundType } from "@/services/audioManager";
 // import { useIsMobile } from "@/stores/deviceStore";
 // import { MediaViewerButtons } from "./MediaViewerButtons";
 // import { getCloseModal, useMediaModalData } from "@/stores/modalStore";
@@ -75,7 +75,7 @@
 //       setCurrentIndex(newIndex);
 //       scrollToMedia(newIndex, true);
 //       setRotation(0);
-//       audioService.playRandomSound([
+//       audioManager.playRandomSound([
 //         SoundType.CARD1,
 //         SoundType.CARD2,
 //         SoundType.CARD3,
@@ -90,7 +90,7 @@
 //       setCurrentIndex(newIndex);
 //       scrollToMedia(newIndex, true);
 //       setRotation(0);
-//       audioService.playRandomSound([
+//       audioManager.playRandomSound([
 //         SoundType.CARD1,
 //         SoundType.CARD2,
 //         SoundType.CARD3,

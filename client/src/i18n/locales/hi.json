@@ -633,12 +633,13 @@
       "status_banned": "प्रतिबंधित",
       "add_member": "सदस्य जोड़ें"
     },
-    "media_files": {
+    "attachments": {
       "title": "मीडिया और फ़ाइलें",
       "image": "छवियाँ",
       "video": "वीडियो",
       "audio": "ऑडियो",
-      "file": "फ़ाइलें"
+      "file": "फ़ाइलें",
+      "link": "ลิงก์"
     }
   },
 

@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
 import { handleReaction } from "@/common/utils/message/handleReaction";
 import { useMessageReactions } from "@/stores/messageStore";
-import { audioService, SoundType } from "@/services/audioService";
+import { audioManager, SoundType } from "@/services/audioManager";
 import { messageAnimations } from "@/common/animations/messageAnimations";
 
 interface MessageReactionDisplayProps {
@@ -42,9 +42,9 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
       currentUserId && reactions[emoji]?.includes(currentUserId);
 
     if (hasMyReaction) {
-      audioService.playSound(SoundType.REACTION_REMOVE);
+      audioManager.playSound(SoundType.REACTION_REMOVE);
     } else {
-      audioService.playSound(SoundType.REACTION);
+      audioManager.playSound(SoundType.REACTION);
     }
 
     handleReaction({

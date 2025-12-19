@@ -357,7 +357,7 @@ export const useCallStore = create<CallState & CallActions>()(
       // Update local state
       set({ localCallStatus, endedAt });
 
-      // audioService.playSound(SoundType.CALL_END);
+      // audioManager.playSound(SoundType.CALL_END);
     },
 
     // ========== MEDIA ==========
