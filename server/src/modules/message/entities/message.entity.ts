@@ -122,17 +122,6 @@ export class Message {
   @JoinColumn({ name: 'call_id' })
   call?: Call;
 
-  @Column({ name: 'link_preview', type: 'jsonb', nullable: true })
-  linkPreview?: {
-    url: string;
-    title?: string;
-    description?: string;
-    image?: string;
-    mediaType?: string; // video, website, etc.
-    site_name?: string;
-    favicon?: string;
-  };
-
   @Column({ name: 'is_deleted', default: false })
   isDeleted: boolean;
 

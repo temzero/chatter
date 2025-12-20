@@ -4,6 +4,7 @@ import RenderAttachment from "./RenderAttachment";
 import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { getMessageAttachments } from "@/stores/messageAttachmentStore";
+import { LinkPreviewAttachment } from "../attachments/LinkPreviewAttachment";
 
 interface RenderMultipleAttachmentsProps {
   chatId: string;
@@ -26,7 +27,11 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
   if (!attachments || attachmentLength === 0) {
     return null;
   }
+
   // Categorize attachments by type
+  const linkPreviews = attachments.filter(
+    (a) => a.type === AttachmentType.LINK
+  );
   const visualMedia = attachments.filter(
     (m) => m.type === AttachmentType.IMAGE || m.type === AttachmentType.VIDEO
   );
@@ -112,6 +117,10 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
 
   return (
     <div className={`flex flex-col ${className}`}>
+      {linkPreviews.map((attachment) => (
+        <LinkPreviewAttachment attachment={attachment} />
+      ))}
+
       {renderVisualMedia()}
 
       {/* Non-visual attachment */}

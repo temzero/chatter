@@ -27,19 +27,20 @@ export class BootstrapService {
     const FOLDER_LIMIT = 20;
     const FRIEND_REQUEST_LIMIT = 50;
 
-    const [chatData, folderData, friendRequestData, pendingCall] = await Promise.all([
-      this.getInitialChatsWithData(
-        userId,
-        CHAT_LIMIT,
-        MESSAGES_PER_CHAT_LIMIT,
-        MEMBERS_PER_CHAT_LIMIT,
-      ),
-      this.folderService.getFolders(userId, { limit: FOLDER_LIMIT }),
-      this.friendshipService.getPendingRequests(userId, {
-        limit: FRIEND_REQUEST_LIMIT,
-      }),
-      this.callService.getPendingCall(userId),
-    ]);
+    const [chatData, folderData, friendRequestData, pendingCall] =
+      await Promise.all([
+        this.getInitialChatsWithData(
+          userId,
+          CHAT_LIMIT,
+          MESSAGES_PER_CHAT_LIMIT,
+          MEMBERS_PER_CHAT_LIMIT,
+        ),
+        this.folderService.getFolders(userId, { limit: FOLDER_LIMIT }),
+        this.friendshipService.getPendingRequests(userId, {
+          limit: FRIEND_REQUEST_LIMIT,
+        }),
+        this.callService.getPendingCall(userId),
+      ]);
 
     return { userId, chatData, folderData, friendRequestData, pendingCall };
   }

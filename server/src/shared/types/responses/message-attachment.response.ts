@@ -1,4 +1,5 @@
 import { AttachmentType } from '../enums/attachment-type.enum';
+import { AttachmentMetadata } from './message-attachment-metadata.response';
 
 export interface AttachmentResponse {
   id: string;
@@ -16,7 +17,7 @@ export interface AttachmentResponse {
   width?: number | null;
   height?: number | null;
   duration?: number | null;
-  metadata?: Record<string, unknown> | null;
+  metadata?: AttachmentMetadata | null;
 
   createdAt: Date | string;
   updatedAt: Date | string;

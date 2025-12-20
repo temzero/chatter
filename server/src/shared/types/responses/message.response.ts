@@ -32,8 +32,6 @@ export interface MessageResponse {
 
   call?: CallLiteResponse;
 
-  linkPreview?: LinkPreviewResponse | null;
-
   isMuted?: boolean;
   shouldAnimate?: boolean;
 }
@@ -42,14 +40,4 @@ export interface SenderResponse {
   id: string;
   avatarUrl?: string | null;
   displayName: string;
-}
-
-export interface LinkPreviewResponse {
-  url: string;
-  title?: string;
-  description?: string;
-  image?: string;
-  mediaType?: string; // video, article, website, etc.
-  site_name?: string;
-  favicon?: string;
 }

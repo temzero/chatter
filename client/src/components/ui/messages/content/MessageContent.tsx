@@ -6,7 +6,6 @@ import ForwardedMessagePreview from "@/components/ui/messages/ForwardMessagePrev
 import { MessageResponse } from "@/shared/types/responses/message.response";
 import { getMessageAttachments } from "@/stores/messageAttachmentStore";
 import { handleQuickReaction } from "@/common/utils/message/quickReaction";
-import { LinkPreviewCard } from "../LinkPreviewCard";
 
 interface MessageBubbleProps {
   message: MessageResponse;
@@ -34,8 +33,6 @@ const MessageContent: React.FC<MessageBubbleProps> = ({
           // "w-[60%] h-[60%]": attachmentLength === 1
         })}
       />
-
-      {message.linkPreview && <LinkPreviewCard preview={message.linkPreview} />}
 
       {/* Text Content */}
       {message.content && !isForwardMessage && (

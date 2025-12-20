@@ -29,6 +29,8 @@ import {
   NotFoundError,
 } from '@shared/types/enums/error-message.enum';
 import { extractFirstUrl, removeUrlFromText } from '@/shared/extractFirstUrl';
+import { mapAttachmentsToAttachmentResDto } from '../attachment/mappers/attachment.mapper';
+import { LinkPreviewResponseDto } from './dto/responses/link-preview-response';
 
 type MessageWithSenderMember = Message & {
   senderMember?: ChatMember;
@@ -121,17 +123,25 @@ export class MessageService {
       const url = extractFirstUrl(message.content);
       if (!url) return;
 
-      const preview = await this.linkPreviewService.fetchPreview(url);
-      if (!preview) return;
+      const metadata: LinkPreviewResponseDto | null =
+        await this.linkPreviewService.fetchPreview(url);
+      if (!metadata) return;
 
       // 🧹 Remove URL from message content
       const cleanedContent = removeUrlFromText(message.content, url);
 
-      // ✅ Persist both content & preview
+      // ✅ Update message content only
       await this.messageRepo.update(message.id, {
         content: cleanedContent || null,
-        linkPreview: preview,
       });
+
+      // ✅ Create LINK attachment with metadata
+      const attachment =
+        await this.attachmentService.createLinkPreviewAttachment({
+          url,
+          metadata,
+          message,
+        });
 
       // 🔔 Notify clients
       await this.websocketNotificationService.emitToChatMembers<
@@ -139,7 +149,9 @@ export class MessageService {
       >(message.chatId, ChatEvent.UPDATE_MESSAGE, {
         id: message.id,
         content: cleanedContent || null,
-        linkPreview: preview,
+        attachments: [
+          mapAttachmentsToAttachmentResDto([attachment], message.chatId)[0],
+        ],
       });
     } catch (err) {
       console.warn('Async link preview failed for message', message.id, err);
@@ -756,7 +768,6 @@ export class MessageService {
         .leftJoinAndSelect('forwardedFromMessage.sender', 'forwardedSender')
         .select([
           'message',
-          'message.linkPreview',
 
           // Sender
           'sender.id',
@@ -781,7 +792,6 @@ export class MessageService {
           // Reply
           'replyToMessage.id',
           'replyToMessage.content',
-          'replyToMessage.linkPreview',
           'replyToMessage.systemEvent',
           'replyToMessage.createdAt',
           'replySender.id',
@@ -794,7 +804,6 @@ export class MessageService {
           // Reply's forwarded message
           'replyForwarded.id',
           'replyForwarded.content',
-          'replyForwarded.linkPreview',
           'replyForwarded.createdAt',
           'replyForwardedSender.id',
           'replyForwardedSender.firstName',
@@ -803,7 +812,6 @@ export class MessageService {
 
           // Forwarded from current message
           'forwardedFromMessage.id',
-          'forwardedFromMessage.linkPreview',
           'forwardedFromMessage.createdAt',
           'forwardedSender.id',
           'forwardedSender.firstName',

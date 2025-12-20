@@ -1,23 +1,34 @@
 import React from "react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { LinkPreviewResponse } from "@/shared/types/responses/message.response";
+import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 import { messageAnimations } from "@/common/animations/messageAnimations";
 import { audioManager, SoundType } from "@/services/audioManager";
 import { useIsMobile } from "@/stores/deviceStore";
+import { LinkMetadata } from "@/shared/types/responses/message-attachment-metadata.response";
 
 interface Props {
-  preview: LinkPreviewResponse;
+  attachment: AttachmentResponse;
   className?: string;
 }
 
-export const LinkPreviewCard: React.FC<Props> = ({ preview, className }) => {
+export const LinkPreviewAttachment: React.FC<Props> = ({ attachment, className }) => {
   const isMobile = useIsMobile();
-  const { url, title, description, image, site_name, favicon, mediaType } =
-    preview;
+
+  // 🔁 derive preview fields directly from attachment
+  const url = attachment.url;
+  const title = attachment.filename ?? undefined;
+  const image = attachment.thumbnailUrl ?? undefined;
+
+  const metadata = (attachment.metadata as LinkMetadata) ?? null;
+  const description = metadata?.description;
+  const site_name = metadata?.site_name;
+  const favicon = metadata?.favicon;
+  const mediaType = attachment.mimeType?.startsWith("video")
+    ? "video"
+    : undefined;
 
   const hasBothImageAndFavicon = Boolean(image && favicon);
-
   const iconClass = "h-8 w-8";
 
   return (
@@ -35,7 +46,7 @@ export const LinkPreviewCard: React.FC<Props> = ({ preview, className }) => {
       )}
       {...messageAnimations.linkPreview}
     >
-      {/* Image container with z-index 0 */}
+      {/* Image container */}
       {(image || favicon) && (
         <motion.div
           className="absolute inset-0 rounded-lg overflow-hidden"
@@ -57,7 +68,6 @@ export const LinkPreviewCard: React.FC<Props> = ({ preview, className }) => {
           <img
             src={image ?? favicon}
             className="h-full w-full object-cover rounded"
-            // loading="lazy"
           />
 
           {mediaType === "video" && (
@@ -70,16 +80,15 @@ export const LinkPreviewCard: React.FC<Props> = ({ preview, className }) => {
         </motion.div>
       )}
 
+      {/* URL bar */}
       <div
         className={clsx(
           "w-full pointer-events-none flex items-start p-1 pb-10 gap-1",
-          // base gradient
           "bg-linear-to-t",
-          // hover gradient
           {
             "from-transparent to-black text-blue-400 group-hover:text-white":
               isMobile,
-            " text-white": !isMobile,
+            "text-white": !isMobile,
           },
           "group-hover:from-transparent group-hover:to-blue-800"
         )}
@@ -90,7 +99,7 @@ export const LinkPreviewCard: React.FC<Props> = ({ preview, className }) => {
         </span>
         <h1
           className={clsx(
-            "italic underline text-xs  opacity-90 group-hover:block",
+            "italic underline text-xs opacity-90 group-hover:block",
             { hidden: !isMobile }
           )}
         >
@@ -98,52 +107,43 @@ export const LinkPreviewCard: React.FC<Props> = ({ preview, className }) => {
         </h1>
       </div>
 
-      {/* Content overlay with z-index 1 */}
+      {/* Content overlay */}
       <div
         className={clsx(
           "w-full p-2 mt-auto pointer-events-none text-white",
-          // base gradient
           "bg-linear-to-b from-transparent via-black/70 to-black",
-          // hover gradient
           "group-hover:from-transparent group-hover:via-blue-800/70 group-hover:to-blue-800"
         )}
         style={{ zIndex: 1 }}
       >
-        {/* Site info */}
         {site_name && title ? (
           <div>
             <div className="flex items-center gap-1 -mb-1">
               {(favicon || image) && (
                 <img
                   src={favicon ?? image}
+                  alt={site_name}
+                  className={iconClass}
+                  loading="lazy"
+                />
+              )}
+              <span className="line-clamp-1 text-xs">{site_name}</span>
+            </div>
+            <div className="text-sm font-semibold line-clamp-2">{title}</div>
+          </div>
+        ) : (
+          <div>
+            <div className="flex items-end gap-1">
+              {favicon && (
+                <img
+                  src={favicon}
                   alt={site_name ?? "favicon"}
                   className={iconClass}
                   loading="lazy"
                 />
               )}
-              {site_name && (
-                <span className="line-clamp-1 text-xs">{site_name}</span>
-              )}
-            </div>
-            {title && (
-              <div className="text-sm font-semibold line-clamp-2">{title}</div>
-            )}
-          </div>
-        ) : (
-          <div>
-            <div className="flex items-end gap-1">
-              <div className="flex items-center gap-1">
-                {favicon && (
-                  <img
-                    src={favicon}
-                    alt={site_name ?? "favicon"}
-                    className={iconClass}
-                    loading="lazy"
-                  />
-                )}
-              </div>
               {title && (
-                <div className="text-sm font-semibold line-clamp-1 text-white">
+                <div className="text-sm font-semibold line-clamp-1">
                   {title}
                 </div>
               )}
@@ -155,9 +155,6 @@ export const LinkPreviewCard: React.FC<Props> = ({ preview, className }) => {
             )}
           </div>
         )}
-
-        {/* URL fallback */}
-        {/* {!title && <h1 className="italic opacity-80 text-xs pt-1">{url}</h1>} */}
       </div>
     </motion.a>
   );

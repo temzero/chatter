@@ -12,7 +12,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { AttachmentService } from './attachment.service';
-import { AttachmentResponseDto } from '../message/dto/responses/attachment-response.dto';
+import { AttachmentResponseDto } from './dto/responses/attachment-response.dto';
 import { PaginationQuery } from '@shared/types/queries/pagination-query';
 import { PaginationResponse } from '@shared/types/responses/pagination.response';
 import { AttachmentType } from '@shared/types/enums/attachment-type.enum';

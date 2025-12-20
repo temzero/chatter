@@ -3,7 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Attachment } from './entity/attachment.entity';
-import { AttachmentResponseDto } from '../message/dto/responses/attachment-response.dto';
+import { AttachmentResponseDto } from './dto/responses/attachment-response.dto';
 import { AttachmentUploadRequest } from '@shared/types/requests/attachment-upload.request';
 import { PaginationQuery } from '@shared/types/queries/pagination-query';
 import { PaginationResponse } from '@shared/types/responses/pagination.response';
@@ -12,6 +12,7 @@ import { plainToInstance } from 'class-transformer';
 import { Message } from '../message/entities/message.entity';
 import { SupabaseService } from '../superbase/supabase.service';
 import { mapAttachmentsToAttachmentResDto } from './mappers/attachment.mapper';
+import { LinkPreviewResponseDto } from '../message/dto/responses/link-preview-response';
 
 @Injectable()
 export class AttachmentService {
@@ -154,6 +155,31 @@ export class AttachmentService {
       })),
     );
     return await this.attachmentRepo.save(attachments);
+  }
+
+  async createLinkPreviewAttachment(params: {
+    url: string;
+    metadata: LinkPreviewResponseDto;
+    message?: Message;
+  }): Promise<Attachment> {
+    const { url, metadata, message } = params;
+
+    const attachment = this.attachmentRepo.create({
+      type: AttachmentType.LINK,
+      // ✅ promoted fields
+      url,
+      filename: metadata.title?.slice(0, 255) ?? null,
+      thumbnailUrl: metadata.image ?? null,
+      // ✅ de-duplicated metadata
+      metadata: {
+        description: metadata.description,
+        site_name: metadata.site_name,
+        favicon: metadata.favicon,
+      },
+      messages: message ? [message] : [],
+    });
+
+    return await this.attachmentRepo.save(attachment);
   }
 
   async deleteAttachmentsByMessageId(messageId: string): Promise<void> {

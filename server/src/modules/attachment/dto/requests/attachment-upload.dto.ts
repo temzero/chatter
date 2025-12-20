@@ -9,8 +9,12 @@ import { AttachmentType } from '@shared/types/enums/attachment-type.enum';
 import { AttachmentUploadRequest } from '@shared/types/requests/attachment-upload.request';
 
 export class AttachmentUploadDto implements AttachmentUploadRequest {
-  // additional field only process in server
-  @IsOptional()
+  @IsEnum(AttachmentType)
+  type: AttachmentType;
+
+  @IsString()
+  filename: string;
+
   @IsString()
   url: string;
 
@@ -18,14 +22,9 @@ export class AttachmentUploadDto implements AttachmentUploadRequest {
   @IsString()
   thumbnailUrl?: string;
 
-  @IsEnum(AttachmentType)
-  type: AttachmentType;
-
-  @IsString()
-  filename: string;
-
+  @IsOptional()
   @IsInt()
-  size: number;
+  size?: number;
 
   @IsOptional()
   @IsString()
@@ -43,6 +42,7 @@ export class AttachmentUploadDto implements AttachmentUploadRequest {
   @IsInt()
   duration?: number;
 
+  @IsOptional()
   @IsISO8601()
-  createdAt: string;
+  createdAt?: string;
 }

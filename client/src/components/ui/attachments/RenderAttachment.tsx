@@ -7,6 +7,7 @@ import { handleDownload } from "@/common/utils/handleDownload";
 import { getFileIcon } from "@/common/utils/getFileIcon";
 import CustomAudioPlayer from "@/components/ui/media/CustomAudioPlayer";
 import CustomVideoPlayer from "@/components/ui/media/CustomVideoPlayer";
+import { PinnedLinkPreview } from "@/components/chat/components/message/preview/PinnedLinkPreview";
 
 // Helper function to calculate greatest common divisor (GCD)
 const gcd = (a: number, b: number): number => {
@@ -165,6 +166,9 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
         </div>
       );
 
+    case AttachmentType.LINK:
+      return <PinnedLinkPreview attachment={attachment} />;
+      
     default:
       return (
         <div className="flex items-center p-2 rounded text-6xl!">

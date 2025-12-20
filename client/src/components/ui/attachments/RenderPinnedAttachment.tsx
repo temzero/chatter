@@ -4,6 +4,7 @@ import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { getFileIcon } from "@/common/utils/getFileIcon";
 import { setOpenMediaModal } from "@/stores/modalStore";
 import CustomAudioPlayer from "@/components/ui/media/CustomAudioPlayer";
+import { PinnedLinkPreview } from "@/components/chat/components/message/preview/PinnedLinkPreview";
 
 interface RenderPinnedAttachmentProps {
   attachment: AttachmentResponse;
@@ -31,6 +32,10 @@ const RenderPinnedAttachment: React.FC<RenderPinnedAttachmentProps> = ({
     attachment.type === AttachmentType.AUDIO
       ? "music_note"
       : getFileIcon(attachment.filename);
+
+  if (attachment.type === AttachmentType.LINK) {
+    return <PinnedLinkPreview attachment={attachment} isCrop={true} />;
+  }
 
   return (
     <div

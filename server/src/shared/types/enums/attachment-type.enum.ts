@@ -3,6 +3,7 @@ export enum AttachmentType {
   VIDEO = 'video',
   AUDIO = 'audio',
   VOICE = 'voice',
+  LINK = 'link',
   LOCATION = 'location',
   FILE = 'file',
 }

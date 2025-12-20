@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// components/ui/LinkPreviewChatBar.tsx
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
@@ -12,7 +11,7 @@ interface LinkPreviewChatBarProps {
   onClose: () => void;
 }
 
-const LinkPreviewChatBar: React.FC<LinkPreviewChatBarProps> = ({
+export const LinkPreviewCard: React.FC<LinkPreviewChatBarProps> = ({
   url,
   onClose,
 }) => {
@@ -104,5 +103,3 @@ const LinkPreviewChatBar: React.FC<LinkPreviewChatBarProps> = ({
     </AnimatePresence>
   );
 };
-
-export default LinkPreviewChatBar;

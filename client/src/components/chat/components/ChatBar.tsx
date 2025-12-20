@@ -11,8 +11,8 @@ import useTypingIndicator from "@/common/hooks/useTypingIndicator";
 import { useKeyDown } from "@/common/hooks/keyEvent/useKeydown";
 import { usePasteImage } from "@/common/hooks/keyEvent/usePasteImageListener";
 import { sendMessageAndReset } from "@/common/utils/chat/sendMessageAndResetChatBar";
-import PreviewLinkCard from "@/components/ui/messages/LinkPreviewChatBar";
 import { extractFirstUrl } from "@/shared/extractFirstUrl";
+import { LinkPreviewCard } from "./LinkPreviewCard";
 
 interface ChatBarProps {
   chatId: string;
@@ -249,7 +249,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
       {/* Link Preview Card */}
       <AnimatePresence>
         {showPreview && detectedUrl && (
-          <PreviewLinkCard
+          <LinkPreviewCard
             url={detectedUrl || ""}
             onClose={() => {
               setShowPreview(false);

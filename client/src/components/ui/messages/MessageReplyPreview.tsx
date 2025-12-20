@@ -12,7 +12,6 @@ import {
   SystemMessageJSONContent,
 } from "@/components/ui/messages/content/SystemMessageContent";
 import { getMessageAttachments } from "@/stores/messageAttachmentStore";
-import { MessageReplyLinkPreview } from "./MessageReplyLinkPreview";
 
 interface MessageReplyPreviewProps {
   replyMessage: MessageResponse;
@@ -41,7 +40,6 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
   const isNotDirectChat = chatType !== ChatType.DIRECT;
   const isSystemMessage = !!replyMessage.systemEvent;
   const isChannel = (chatType = ChatType.CHANNEL);
-  const linkPreview = replyMessage.linkPreview;
 
   let attachments = replyMessage.attachments;
   if (!attachments) {
@@ -106,12 +104,7 @@ const MessageReplyPreview: React.FC<MessageReplyPreviewProps> = ({
               />
             ) : (
               replyMessage.content && (
-                <div>
-                  {linkPreview && (
-                    <MessageReplyLinkPreview linkPreview={linkPreview} />
-                  )}
-                  <p className="truncate reply-text">{replyMessage.content}</p>
-                </div>
+                <p className="truncate reply-text">{replyMessage.content}</p>
               )
             )}
           </div>

@@ -1,13 +1,10 @@
 import { Exclude, Expose, Type } from 'class-transformer';
 import { MessageStatus } from '@shared/types/enums/message-status.enum';
-import { AttachmentResponseDto } from './attachment-response.dto';
 import { SenderResponseDto } from './sender-response.dto';
 import { SystemEventType } from '@shared/types/enums/system-event-type.enum';
 import { CallLiteResponseDto } from '@/modules/call/dto/call-lite-response.dto';
-import {
-  LinkPreviewResponse,
-  MessageResponse,
-} from '@shared/types/responses/message.response';
+import { MessageResponse } from '@shared/types/responses/message.response';
+import { AttachmentResponseDto } from '@/modules/attachment/dto/responses/attachment-response.dto';
 
 @Exclude()
 export class MessageResponseDto implements MessageResponse {
@@ -38,9 +35,6 @@ export class MessageResponseDto implements MessageResponse {
   @Type(() => CallLiteResponseDto)
   @Expose()
   call?: CallLiteResponseDto;
-
-  @Expose()
-  linkPreview?: LinkPreviewResponse | null;
 
   @Expose() isImportant?: boolean;
   @Expose() systemEvent?: SystemEventType | null;

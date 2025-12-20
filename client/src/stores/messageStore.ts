@@ -238,12 +238,33 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
 
     getMessageById: (messageId) => get().messagesById[messageId],
 
-    updateMessageById: (messageId, updatedMessage) => {
+    updateMessageById: (
+      messageId: string,
+      updatedMessage: Partial<MessageResponse>
+    ) => {
       console.log("updateMessageById:", messageId, updatedMessage);
+
+      const { attachments, ...messageWithoutAttachments } = updatedMessage;
+
+      // 1️⃣ Store attachments separately (same as initial load)
+      if (attachments && attachments.length > 0) {
+        useAttachmentStore
+          .getState()
+          .addMessageAttachments(
+            updatedMessage.chatId!,
+            messageId,
+            attachments
+          );
+      }
+
+      // 2️⃣ Patch message data
       set((state) => ({
         messagesById: {
           ...state.messagesById,
-          [messageId]: { ...state.messagesById[messageId], ...updatedMessage },
+          [messageId]: {
+            ...state.messagesById[messageId],
+            ...messageWithoutAttachments,
+          },
         },
       }));
     },
@@ -431,9 +452,6 @@ export const useMessagesByChatId = (chatId: string) => {
   const filterImportantMessages = useMessageStore(
     (state) => state.filterImportantMessages
   );
-  const filterLinkMessages = useMessageStore(
-    (state) => state.filterLinkMessages
-  );
   const currentUserId = useAuthStore.getState().currentUser?.id;
 
   return useMemo(() => {
@@ -451,21 +469,8 @@ export const useMessagesByChatId = (chatId: string) => {
           !searchQuery ||
           msg.content?.toLowerCase().includes(searchQuery.toLowerCase())
       )
-      .filter((msg) => !filterImportantMessages || msg.isImportant)
-      .filter(
-        (msg) =>
-          !filterLinkMessages ||
-          (msg.linkPreview !== null && msg.linkPreview !== undefined)
-      );
-  }, [
-    chatId,
-    messageIds,
-    currentUserId,
-    messagesById,
-    searchQuery,
-    filterImportantMessages,
-    filterLinkMessages,
-  ]);
+      .filter((msg) => !filterImportantMessages || msg.isImportant);
+  }, [chatId, messageIds, currentUserId, messagesById, searchQuery, filterImportantMessages]);
 };
 
 export const useSenderByMessageId = (

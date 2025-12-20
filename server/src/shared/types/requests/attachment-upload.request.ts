@@ -5,12 +5,12 @@ export interface AttachmentUploadRequest {
 
   type: AttachmentType;
   filename: string;
-  size: number;
+  size?: number;
 
   mimeType?: string;
   width?: number;
   height?: number;
   duration?: number;
 
-  createdAt: string;
+  createdAt?: string;
 }

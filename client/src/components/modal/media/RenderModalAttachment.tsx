@@ -12,6 +12,7 @@ import { mediaViewerAnimations } from "@/common/animations/mediaViewerAnimations
 import { ModalImageViewer } from "./ModalImageViewer";
 import { useMediaAttachmentKeys } from "@/common/hooks/keyEvent/useMediaAttachmentKeys";
 import { mediaManager } from "@/services/mediaManager";
+import { LinkPreviewAttachment } from "@/components/ui/attachments/LinkPreviewAttachment";
 
 export const RenderModalAttachment = ({
   attachment,
@@ -148,6 +149,9 @@ export const RenderModalAttachment = ({
           </button>
         </motion.div>
       );
+
+    case AttachmentType.LINK:
+      return <LinkPreviewAttachment attachment={attachment} />;
 
     default:
       return (

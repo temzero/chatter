@@ -1,14 +1,14 @@
 // link-preview.service.ts
-import { LinkPreviewResponse } from '@/shared/types/responses/message.response';
 import { Injectable, Logger } from '@nestjs/common';
 import { getLinkPreview } from 'link-preview-js';
+import { LinkPreviewResponseDto } from './dto/responses/link-preview-response';
 
 @Injectable()
 export class LinkPreviewService {
   private readonly logger = new Logger(LinkPreviewService.name);
 
   // Fetch preview for a single URL
-  async fetchPreview(url: string): Promise<LinkPreviewResponse | null> {
+  async fetchPreview(url: string): Promise<LinkPreviewResponseDto | null> {
     try {
       const data = await getLinkPreview(url);
 

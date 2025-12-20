@@ -12,7 +12,6 @@ import {
   SystemMessageContent,
   SystemMessageJSONContent,
 } from "@/components/ui/messages/content/SystemMessageContent";
-import { MessageHorizontalLinkPreview } from "./MessageHorizontalLinkPreview";
 
 interface MessageHorizontalPreviewProps {
   message: MessageResponse;
@@ -92,20 +91,9 @@ export const MessageHorizontalPreview: React.FC<
           className={messageTextClass}
         />
       ) : (
-        <div className="flex items-center gap-1">
-          {message.linkPreview && (
-            <>
-              <span className="material-symbols-outlined text-sm text-blue-500 rotate-90 -mr-2">
-                link
-              </span>
-              <MessageHorizontalLinkPreview
-                linkPreview={message.linkPreview}
-                isCrop={!!message.content}
-              />
-            </>
-          )}
+        message.content && (
           <p className={messageTextClass}>{message.content}</p>
-        </div>
+        )
       )}
       {forwardedMessage && (
         <div className="flex items-center gap-1">
