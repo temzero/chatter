@@ -67,9 +67,6 @@ export class MessageController {
       updateMessageDto,
     );
 
-    return new SuccessResponse(
-      plainToInstance(MessageResponseDto, updatedMessage),
-      'Message updated successfully',
-    );
+    return new SuccessResponse(updatedMessage, 'Message updated successfully');
   }
 }

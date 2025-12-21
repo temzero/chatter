@@ -135,17 +135,7 @@ export class AttachmentService {
     await this.attachmentRepo.delete(id);
   }
 
-  async createAttachment(
-    createDto: AttachmentUploadRequest,
-  ): Promise<Attachment> {
-    const attachment = this.attachmentRepo.create({
-      ...createDto,
-      createdAt: createDto.createdAt || new Date(),
-    });
-    return await this.attachmentRepo.save(attachment);
-  }
-
-  async createAttachmentsBulk(
+  async createAttachments(
     createDtos: AttachmentUploadRequest[],
   ): Promise<Attachment[]> {
     const attachments = this.attachmentRepo.create(
@@ -160,26 +150,33 @@ export class AttachmentService {
   async createLinkPreviewAttachment(params: {
     url: string;
     metadata: LinkPreviewResponseDto;
-    message?: Message;
+    messageId: string;
   }): Promise<Attachment> {
-    const { url, metadata, message } = params;
+    const { url, metadata, messageId } = params;
 
+    // 1. Save attachment WITHOUT message reference
     const attachment = this.attachmentRepo.create({
       type: AttachmentType.LINK,
-      // ✅ promoted fields
       url,
       filename: metadata.title?.slice(0, 255) ?? null,
       thumbnailUrl: metadata.image ?? null,
-      // ✅ de-duplicated metadata
       metadata: {
         description: metadata.description,
         site_name: metadata.site_name,
         favicon: metadata.favicon,
       },
-      messages: message ? [message] : [],
     });
 
-    return await this.attachmentRepo.save(attachment);
+    const savedAttachment = await this.attachmentRepo.save(attachment);
+
+    // 2. Link to message using query builder
+    await this.messageRepo
+      .createQueryBuilder()
+      .relation(Message, 'attachments')
+      .of(messageId)
+      .add(savedAttachment.id);
+
+    return savedAttachment;
   }
 
   async deleteAttachmentsByMessageId(messageId: string): Promise<void> {

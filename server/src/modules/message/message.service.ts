@@ -29,7 +29,6 @@ import {
   NotFoundError,
 } from '@shared/types/enums/error-message.enum';
 import { extractFirstUrl, removeUrlFromText } from '@/shared/extractFirstUrl';
-import { mapAttachmentsToAttachmentResDto } from '../attachment/mappers/attachment.mapper';
 import { LinkPreviewResponseDto } from './dto/responses/link-preview-response';
 
 type MessageWithSenderMember = Message & {
@@ -83,7 +82,7 @@ export class MessageService {
     // ✅ Handle attachments first
     let attachments: Attachment[] = [];
     if (dto.attachments?.length) {
-      attachments = await this.attachmentService.createAttachmentsBulk(
+      attachments = await this.attachmentService.createAttachments(
         dto.attachments,
       );
     }
@@ -117,44 +116,57 @@ export class MessageService {
   }
 
   private async handleAsyncLinkPreview(message: Message) {
-    if (!message.content) return;
+    const messageId = message.id;
+    const messageContent = message.content;
+
+    if (!messageId || !messageContent) return;
 
     try {
-      const url = extractFirstUrl(message.content);
+      const url = extractFirstUrl(messageContent);
       if (!url) return;
 
       const metadata: LinkPreviewResponseDto | null =
         await this.linkPreviewService.fetchPreview(url);
       if (!metadata) return;
 
-      // 🧹 Remove URL from message content
-      const cleanedContent = removeUrlFromText(message.content, url);
-
-      // ✅ Update message content only
-      await this.messageRepo.update(message.id, {
-        content: cleanedContent || null,
+      // ✅ Create LINK attachment with metadata
+      await this.attachmentService.createLinkPreviewAttachment({
+        url,
+        metadata,
+        messageId,
       });
 
-      // ✅ Create LINK attachment with metadata
-      const attachment =
-        await this.attachmentService.createLinkPreviewAttachment({
-          url,
-          metadata,
-          message,
-        });
+      // 🧹 Remove URL from message content
+      const cleanedContent = removeUrlFromText(messageContent, url);
+
+      const messageResponse = await this.updateMessage(messageId, {
+        content: cleanedContent || null,
+      });
 
       // 🔔 Notify clients
       await this.websocketNotificationService.emitToChatMembers<
         Partial<MessageResponseDto>
-      >(message.chatId, ChatEvent.UPDATE_MESSAGE, {
-        id: message.id,
-        content: cleanedContent || null,
-        attachments: [
-          mapAttachmentsToAttachmentResDto([attachment], message.chatId)[0],
-        ],
-      });
+      >(message.chatId, ChatEvent.UPDATE_MESSAGE, messageResponse);
     } catch (err) {
-      console.warn('Async link preview failed for message', message.id, err);
+      console.warn('Async link preview failed for message', messageId, err);
+    }
+  }
+
+  async updateMessage(
+    id: string,
+    updateMessageDto: UpdateMessageDto,
+  ): Promise<MessageResponseDto> {
+    try {
+      // 1. Update the message
+      await this.messageRepo.update(id, updateMessageDto);
+
+      // 2. Fetch the updated message
+      const updatedMessage = await this.getMessageById(id);
+
+      // 3. Map to response DTO
+      return this.messageMapper.mapMessageToMessageResDto(updatedMessage);
+    } catch (error) {
+      ErrorResponse.throw(error, 'Failed to update message');
     }
   }
 
@@ -196,7 +208,7 @@ export class MessageService {
 
     let attachments: Attachment[] = [];
     if (dto.attachments?.length) {
-      attachments = await this.attachmentService.createAttachmentsBulk(
+      attachments = await this.attachmentService.createAttachments(
         dto.attachments,
       );
     }
@@ -436,24 +448,6 @@ export class MessageService {
     } catch (error) {
       console.error('Failed to count unread messages:', error);
       return 0;
-    }
-  }
-
-  async updateMessage(
-    id: string,
-    updateMessageDto: UpdateMessageDto,
-  ): Promise<Message> {
-    try {
-      const message = await this.getMessageById(id);
-
-      if (updateMessageDto.content) {
-        message.content = updateMessageDto.content;
-        message.updatedAt = new Date();
-      }
-
-      return await this.messageRepo.save(message);
-    } catch (error) {
-      ErrorResponse.throw(error, 'Failed to update message');
     }
   }
 
