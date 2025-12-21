@@ -35,6 +35,8 @@ export function getAttachmentIcons(
     const icon: string =
       att.type === AttachmentType.LOCATION
         ? "location_on"
+        : att.type === AttachmentType.LINK
+        ? "link"
         : getFileIcon(fileName);
 
     if (!seen.has(icon)) {

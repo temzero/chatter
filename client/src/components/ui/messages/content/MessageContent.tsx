@@ -1,5 +1,4 @@
 import * as React from "react";
-import clsx from "clsx";
 import Linkify from "linkify-react";
 import RenderMultipleAttachments from "@/components/ui/attachments/RenderMultipleAttachments";
 import ForwardedMessagePreview from "@/components/ui/messages/ForwardMessagePreview";
@@ -29,9 +28,6 @@ const MessageContent: React.FC<MessageBubbleProps> = ({
         chatId={message.chatId}
         messageId={message.id}
         attachments={attachments}
-        className={clsx({
-          // "w-[60%] h-[60%]": attachmentLength === 1
-        })}
       />
 
       {/* Text Content */}

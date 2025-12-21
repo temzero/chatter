@@ -75,10 +75,10 @@ const AttachmentImportedPreview: React.FC<AttachmentImportedPreviewProps> = ({
                 }
                 onRemove(originalIndex);
               }}
-              className="absolute inset-0 flex items-center justify-center bg-black/50 text-white text-3xl rounded opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute inset-0 flex items-center justify-center bg-red-800/50 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity"
               aria-label="Remove file"
             >
-              ×
+              <span className="material-symbols-outlined text-3xl!">close</span>
             </button>
           </motion.div>
         ))}

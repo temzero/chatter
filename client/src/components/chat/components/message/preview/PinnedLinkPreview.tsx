@@ -35,11 +35,11 @@ export const PinnedLinkPreview: React.FC<MessageHorizontalLinkPreviewProps> = ({
 
   const linkClass = clsx(
     "group",
-    "flex items-center pr-1",
+    "flex items-center",
     "bg-blue-800 hover:bg-blue-600",
     "text-white",
     "border-2 hover:border-4 border-(--input-border-color)",
-    "rounded",
+    "rounded-lg",
     {
       "max-w-[45vw]": isCrop,
     }
@@ -52,7 +52,6 @@ export const PinnedLinkPreview: React.FC<MessageHorizontalLinkPreviewProps> = ({
       rel="noopener noreferrer"
       title={url}
       className={linkClass}
-      whileHover={{ scale: 1.02 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
       onMouseEnter={(e) => {
         e.stopPropagation();
@@ -64,9 +63,9 @@ export const PinnedLinkPreview: React.FC<MessageHorizontalLinkPreviewProps> = ({
     >
       {(imageUrl || favicon) && (
         <motion.div
-          className="h-9 w-9 shrink-0 overflow-hidden rounded mr-1"
+          className="h-9 shrink-0 overflow-hidden rounded mr-1"
           style={{ zIndex: 999 }}
-          whileHover={{ scale: 1.2 }}
+          whileHover={{ scale: 2 }}
           transition={{ type: "spring", stiffness: 300, damping: 15 }}
         >
           <img
@@ -78,7 +77,7 @@ export const PinnedLinkPreview: React.FC<MessageHorizontalLinkPreviewProps> = ({
         </motion.div>
       )}
 
-      <div className="flex-1 min-w-0 overflow-hidden">
+      <div className="flex-1 min-w-0 overflow-hidden px-1">
         {displayTitle ? (
           <div>
             {siteName && (
@@ -91,12 +90,13 @@ export const PinnedLinkPreview: React.FC<MessageHorizontalLinkPreviewProps> = ({
                     loading="lazy"
                   />
                 )}
-                <span className="text-xs text-white/80 truncate">
+                {/* <span className="text-xs text-white/80 truncate">
                   {siteName}
-                </span>
+                </span> */}
               </div>
             )}
             <h1 className="font-semibold truncate line-clamp-1">
+              {/* {siteName && <span className="font-light text-sm mr-1">{siteName}</span>} */}
               {displayTitle}
             </h1>
             {isMobile && (
@@ -110,8 +110,8 @@ export const PinnedLinkPreview: React.FC<MessageHorizontalLinkPreviewProps> = ({
         )}
 
         {metadata?.description && !isMobile && (
-          <div className="text-xs text-white/70 line-clamp-1 mt-0.5">
-            {metadata.description}
+          <div className="text-xs text-white/70 line-clamp-1">
+            {siteName}
           </div>
         )}
       </div>

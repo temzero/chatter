@@ -28,7 +28,9 @@ export function useChatSocketListeners() {
       const existingMessage = messageStore.getMessageById(message.id);
       if (existingMessage) {
         if (meta?.isSender) {
-          messageStore.updateMessageById(message.id, message);
+          messageStore.updateMessageById(message.id, {
+            status: MessageStatus.SENT,
+          });
         }
 
         if (!meta?.isMuted && !message.call && !message.systemEvent) {

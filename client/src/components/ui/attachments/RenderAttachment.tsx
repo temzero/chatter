@@ -7,7 +7,7 @@ import { handleDownload } from "@/common/utils/handleDownload";
 import { getFileIcon } from "@/common/utils/getFileIcon";
 import CustomAudioPlayer from "@/components/ui/media/CustomAudioPlayer";
 import CustomVideoPlayer from "@/components/ui/media/CustomVideoPlayer";
-import { PinnedLinkPreview } from "@/components/chat/components/message/preview/PinnedLinkPreview";
+import { LinkPreviewAttachment } from "./LinkPreviewAttachment";
 
 // Helper function to calculate greatest common divisor (GCD)
 const gcd = (a: number, b: number): number => {
@@ -69,9 +69,9 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
 
   if (!attachment) return null;
 
-  const renderContainer = (content: React.ReactNode, extraClass = "") => (
+  const renderContainer = (content: React.ReactNode) => (
     <div
-      className={`relative w-full h-full cursor-pointer overflow-hidden ${className} ${extraClass}`}
+      className={`relative w-full h-full cursor-pointer overflow-hidden ${className}`}
     >
       {content}
     </div>
@@ -167,10 +167,14 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
       );
 
     case AttachmentType.LINK:
-      return <PinnedLinkPreview attachment={attachment} />;
-      
-    default:
       return (
+        <div className="px-1 pb-1">
+          <LinkPreviewAttachment attachment={attachment} />
+        </div>
+      );
+
+    default:
+      return renderContainer(
         <div className="flex items-center p-2 rounded text-6xl!">
           <span className="material-symbols-outlined">attach_file</span>
           <p className="text-lg">Type not supported</p>

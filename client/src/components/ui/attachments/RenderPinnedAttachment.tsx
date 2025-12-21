@@ -8,6 +8,7 @@ import { PinnedLinkPreview } from "@/components/chat/components/message/preview/
 
 interface RenderPinnedAttachmentProps {
   attachment: AttachmentResponse;
+  isCrop?: boolean;
   className?: string;
   index?: number;
 }
@@ -16,6 +17,7 @@ const sizeClass = "w-8 h-8";
 
 const RenderPinnedAttachment: React.FC<RenderPinnedAttachmentProps> = ({
   attachment,
+  isCrop,
   className = "",
   index,
 }) => {
@@ -34,7 +36,7 @@ const RenderPinnedAttachment: React.FC<RenderPinnedAttachmentProps> = ({
       : getFileIcon(attachment.filename);
 
   if (attachment.type === AttachmentType.LINK) {
-    return <PinnedLinkPreview attachment={attachment} isCrop={true} />;
+    return <PinnedLinkPreview attachment={attachment} isCrop={isCrop} />;
   }
 
   return (

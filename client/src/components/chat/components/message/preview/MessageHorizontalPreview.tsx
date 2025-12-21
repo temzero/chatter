@@ -36,7 +36,7 @@ export const MessageHorizontalPreview: React.FC<
 
   const messageRef = useRef<HTMLDivElement | null>(null);
 
-  const containerClass = clsx("flex items-center", {
+  const containerClass = clsx("flex items-center gap-1", {
     "bg-(--message-color) py-1 px-2 rounded": isBubble,
     "bg-(--primary-green)": isBubble && isMe,
   });
@@ -74,6 +74,7 @@ export const MessageHorizontalPreview: React.FC<
           {message.attachments.map((attachment, index) => (
             <RenderPinnedAttachment
               index={index}
+              isCrop={!!message.content}
               key={attachment.id}
               attachment={attachment}
             />

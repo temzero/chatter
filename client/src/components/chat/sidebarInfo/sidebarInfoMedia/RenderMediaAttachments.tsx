@@ -5,10 +5,11 @@ import { AttachmentResponse } from "@/shared/types/responses/message-attachment.
 import InfiniteScroller from "@/components/ui/layout/InfiniteScroller";
 import RenderAttachment from "@/components/ui/attachments/RenderAttachment";
 import Button from "@/components/ui/buttons/Button";
+import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 
 interface RenderMediaAttachmentsProps {
   attachments: AttachmentResponse[];
-  selectedType: string;
+  selectedType: AttachmentType;
   onLoadMore: () => Promise<number>;
   hasMore: boolean;
 }
@@ -29,6 +30,10 @@ const RenderMediaAttachments: React.FC<RenderMediaAttachmentsProps> = ({
     );
   }
 
+  const isGridLayout =
+    selectedType === AttachmentType.IMAGE ||
+    selectedType === AttachmentType.VIDEO;
+
   return (
     <InfiniteScroller
       onLoadMore={onLoadMore}
@@ -42,18 +47,16 @@ const RenderMediaAttachments: React.FC<RenderMediaAttachmentsProps> = ({
     >
       <div
         className={clsx(
-          selectedType === "files" || selectedType === "audio"
-            ? "flex flex-col items-center"
-            : "grid grid-cols-3"
+          isGridLayout ? "grid grid-cols-3" : "flex flex-col items-center"
         )}
       >
         {attachments.map((media, index) => (
           <div
             key={`${media.id}-${index}`}
             className={
-              selectedType === "files" || selectedType === "audio"
-                ? "w-full"
-                : "overflow-hidden aspect-square custom-border"
+              isGridLayout
+                ? "overflow-hidden aspect-square custom-border"
+                : "w-full"
             }
           >
             <RenderAttachment
@@ -61,9 +64,8 @@ const RenderMediaAttachments: React.FC<RenderMediaAttachmentsProps> = ({
               type="info"
               className={clsx(
                 "cursor-pointer w-full",
-                selectedType === "files" || selectedType === "audio"
-                  ? ""
-                  : "h-full hover:scale-125 transition-transform duration-300 ease-in-out"
+                isGridLayout &&
+                  "h-full hover:scale-125 transition-transform duration-300 ease-in-out"
               )}
               previewMode={false}
             />

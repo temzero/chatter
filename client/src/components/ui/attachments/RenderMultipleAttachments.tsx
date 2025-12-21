@@ -118,7 +118,7 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
   return (
     <div className={`flex flex-col ${className}`}>
       {linkPreviews.map((attachment) => (
-        <LinkPreviewAttachment attachment={attachment} />
+        <LinkPreviewAttachment attachment={attachment} isInitAnimation={true} />
       ))}
 
       {renderVisualMedia()}

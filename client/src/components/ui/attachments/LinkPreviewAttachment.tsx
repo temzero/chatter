@@ -10,9 +10,14 @@ import { LinkMetadata } from "@/shared/types/responses/message-attachment-metada
 interface Props {
   attachment: AttachmentResponse;
   className?: string;
+  isInitAnimation?: boolean;
 }
 
-export const LinkPreviewAttachment: React.FC<Props> = ({ attachment, className }) => {
+export const LinkPreviewAttachment: React.FC<Props> = ({
+  attachment,
+  className,
+  isInitAnimation,
+}) => {
   const isMobile = useIsMobile();
 
   // 🔁 derive preview fields directly from attachment
@@ -29,7 +34,9 @@ export const LinkPreviewAttachment: React.FC<Props> = ({ attachment, className }
     : undefined;
 
   const hasBothImageAndFavicon = Boolean(image && favicon);
-  const iconClass = "h-8 w-8";
+  const iconClass = "h-6 w-6";
+
+  const animationProps = isInitAnimation ? messageAnimations.linkPreview : {};
 
   return (
     <motion.a
@@ -39,12 +46,12 @@ export const LinkPreviewAttachment: React.FC<Props> = ({ attachment, className }
       rel="noopener noreferrer"
       className={clsx(
         "relative overflow-hidden rounded-lg shadow-xl flex flex-col gap-1 justify-between",
-        "bg-black/30 hover:bg-blue-500 border-transparent border-4 hover:border-5 transition-all",
+        "bg-black/30 hover:bg-blue-500 border-transparent border-2 hover:border-5 transition-all",
         "group",
         { "aspect-video": hasBothImageAndFavicon },
         className
       )}
-      {...messageAnimations.linkPreview}
+      {...animationProps}
     >
       {/* Image container */}
       {(image || favicon) && (
@@ -118,7 +125,7 @@ export const LinkPreviewAttachment: React.FC<Props> = ({ attachment, className }
       >
         {site_name && title ? (
           <div>
-            <div className="flex items-center gap-1 -mb-1">
+            <div className="flex items-center gap-1">
               {(favicon || image) && (
                 <img
                   src={favicon ?? image}
