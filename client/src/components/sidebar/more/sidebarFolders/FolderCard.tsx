@@ -3,6 +3,7 @@ import * as React from "react";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { getSetSidebar } from "@/stores/sidebarStore";
 import { FolderResponse } from "@/shared/types/responses/folder.response";
+import { getColorFromPreset } from "@/common/constants/folderColor";
 
 type FolderCardProps = {
   folder: FolderResponse;
@@ -15,6 +16,7 @@ const FolderCard: React.FC<FolderCardProps> = ({
   dragAttributes,
   dragListeners,
 }) => {
+  console.log("folder", folder);
   const setSidebar = getSetSidebar();
   const position = folder.position;
 
@@ -23,14 +25,14 @@ const FolderCard: React.FC<FolderCardProps> = ({
       className="flex overflow-hidden select-none border-2 border-(--border-color) hover:shadow-xl transition-all rounded cursor-pointer"
       onClick={() => setSidebar(SidebarMode.FOLDER, { folderId: folder.id })}
       style={{
-        backgroundColor: folder.color || "var(--background-color)",
-        color: folder.color ? "black" : "",
+        backgroundColor:
+          getColorFromPreset(folder.color) || "var(--background-color)",
       }}
     >
       <div
         {...dragAttributes}
         {...dragListeners}
-        className="w-8 flex items-center justify-center border-r-2 border-(--sidebar-color) self-stretch hover:cursor-grab active:cursor-grabbing hover:bg-black/20 transition-all"
+        className="w-8 flex items-center justify-center border-r-2 border-(--border-color) self-stretch hover:cursor-grab active:cursor-grabbing hover:bg-black/20 transition-all"
       >
         {position > 0 && <h1 className="font-bold text-xl">{position}</h1>}
       </div>

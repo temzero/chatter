@@ -1,12 +1,12 @@
-// components/common/HorizontalSelector.tsx
 import { useRef, useEffect, useState, useCallback } from "react";
 import { useIsCompactSidebar } from "@/stores/sidebarStore";
+import { type ColorPreset } from "@/common/constants/folderColor";
 
 export type SelectorItem = {
   id: string;
   name?: string;
   icon?: string;
-  color?: string;
+  color?: ColorPreset | string; // Accept both ColorPreset and custom strings
 };
 
 type Props<T extends SelectorItem> = {
@@ -52,17 +52,17 @@ const HorizontalSelector = <T extends SelectorItem>({
   }, [updateScrollButtons]);
 
   const getClass = (id: string) =>
-    `flex items-center justify-center cursor-pointer p-2 px-2.5 whitespace-nowrap ${
-      selected.id === id
-        ? "opacity-100 font-bold border-b-2"
-        : "opacity-70 hover:opacity-100"
+    `flex items-center justify-center cursor-pointer p-2 px-2.5 whitespace-nowrap hover:opacity-80 ${
+      selected.id === id ? "opacity-100 font-bold border-b-3" : ""
     }`;
 
   const buttonBaseClass =
-    "absolute h-full flex items-center justify-center bg-(--sidebar-color) custom-border overflow-hidden cursor-pointer";
+    "group absolute h-full flex items-center justify-center bg-(--sidebar-color) custom-border overflow-hidden cursor-pointer";
+  const buttonIconClass =
+    "material-symbols-outlined opacity-60 group-hover:opacity-100 group-hover:scale-125 transition-all";
 
   return (
-    <div className="relative w-full flex items-center px-2 custom-border-b select-none  no-scrollbar!">
+    <div className="relative w-full flex items-center custom-border-t custom-border-b select-none no-scrollbar!">
       <div
         ref={scrollRef}
         className="flex items-center overflow-x-auto no-scrollbar scrollbar-hide"
@@ -72,9 +72,10 @@ const HorizontalSelector = <T extends SelectorItem>({
             key={item.id}
             className={getClass(item.id)}
             onClick={() => onSelect(item)}
-            style={
-              item.color ? { color: item.color, borderColor: item.color } : {}
-            }
+            style={{
+              borderColor: item.color || undefined,
+              color: item.color || undefined,
+            }}
           >
             {item.icon ? (
               <span className="material-symbols-outlined">{item.icon}</span>
@@ -92,9 +93,7 @@ const HorizontalSelector = <T extends SelectorItem>({
           }
           className={buttonBaseClass + " left-0"}
         >
-          <i className="material-symbols-outlined rotate-180  hover:scale-125 text-(--primary-green) transition-all">
-            arrow_forward_ios
-          </i>
+          <i className={buttonIconClass + " rotate-180"}>arrow_forward_ios</i>
         </div>
       )}
 
@@ -105,9 +104,7 @@ const HorizontalSelector = <T extends SelectorItem>({
           }
           className={buttonBaseClass + " right-0"}
         >
-          <i className="material-symbols-outlined text-xs hover:scale-125 text-(--primary-green) transition-all">
-            arrow_forward_ios
-          </i>
+          <i className={buttonIconClass}>arrow_forward_ios</i>
         </div>
       )}
     </div>

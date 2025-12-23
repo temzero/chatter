@@ -45,6 +45,7 @@ export const LinkPreviewAttachment: React.FC<Props> = ({
       target="_blank"
       rel="noopener noreferrer"
       className={clsx(
+        "w-full flex-1",
         "relative overflow-hidden rounded-lg shadow-xl flex flex-col gap-1 justify-between",
         "bg-black/30 hover:bg-blue-500 border-transparent border-2 hover:border-5 transition-all",
         "group",

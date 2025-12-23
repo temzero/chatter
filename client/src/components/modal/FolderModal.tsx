@@ -10,6 +10,7 @@ import Button from "../ui/buttons/Button";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { ChatAvatar } from "../ui/avatar/ChatAvatar";
 import { handleError } from "@/common/utils/error/handleError";
+import { getColorFromPreset } from "@/common/constants/folderColor";
 
 interface AddChatToFolderModalData {
   chat: ChatResponse;
@@ -84,7 +85,7 @@ const AddChatToFolderModal: React.FC = () => {
                 onChange={() => handleToggleFolder(folder.id)}
               />
               <span
-                style={{ color: folder.color || "" }}
+                style={{ color: getColorFromPreset(folder.color) ?? undefined }}
                 className="material-symbols-outlined filled"
               >
                 folder_open

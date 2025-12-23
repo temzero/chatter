@@ -1,5 +1,3 @@
-import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
-import { formatDuration } from "@/common/utils/format/formatDuration";
 import clsx from "clsx";
 import React, {
   useState,
@@ -8,7 +6,9 @@ import React, {
   useImperativeHandle,
   useEffect,
 } from "react";
-import { mediaManager } from "@/services/mediaManager"; // ✅ use mediaManager
+import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
+import { formatDuration } from "@/common/utils/format/formatDuration";
+import { mediaManager } from "@/services/mediaManager";
 
 interface CustomAudioPlayerProps {
   mediaUrl: string;
@@ -143,20 +143,26 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
         <div className="flex flex-col gap-2 flex-1 min-w-0 cursor-pointer">
           {isDisplayName && (
             <div
-              className="flex items-center hover:opacity-80"
+              className="flex items-center hover:opacity-80 min-w-0" // Added min-w-0
               onClick={onOpenModal}
             >
               {attachmentType === AttachmentType.AUDIO && (
                 <i
                   className={clsx(
-                    "material-symbols-outlined",
+                    "material-symbols-outlined flex-shrink-0", // Added flex-shrink-0
                     isCompact && "text-xl!"
                   )}
                 >
                   music_note
                 </i>
               )}
-              <h1 className={clsx("truncate", isCompact && "text-xs")}>
+              <h1
+                className={clsx(
+                  "truncate whitespace-nowrap min-w-0", // Added truncate, whitespace-nowrap, min-w-0
+                  isCompact && "text-xs"
+                )}
+                title={fileName} // Add title for tooltip on hover
+              >
                 {fileName || "Audio file"}
               </h1>
             </div>
@@ -186,7 +192,7 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
                   background: `linear-gradient(to right, var(--primary-green) ${progress}%, gray ${progress}%)`,
                 }}
               />
-              <div className="flex text-xs opacity-50 whitespace-nowrap">
+              <div className="flex text-xs opacity-50 whitespace-nowrap flex-shrink-0">
                 {currentTime > 0 && (
                   <span>
                     {formatDuration(currentTime)}

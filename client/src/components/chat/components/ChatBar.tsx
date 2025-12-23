@@ -4,15 +4,16 @@ import { useMessageStore } from "@/stores/messageStore";
 import { AnimatePresence, motion } from "framer-motion";
 import { getCloseModal, useReplyToMessageId } from "@/stores/modalStore";
 import { useTranslation } from "react-i18next";
-import EmojiPicker from "@/components/ui/EmojiPicker";
-import AttachFile from "@/components/ui/attachments/AttachFile";
-import AttachmentImportedPreview from "@/components/ui/attachments/AttachmentImportedPreview";
-import useTypingIndicator from "@/common/hooks/useTypingIndicator";
 import { useKeyDown } from "@/common/hooks/keyEvent/useKeydown";
 import { usePasteImage } from "@/common/hooks/keyEvent/usePasteImageListener";
 import { sendMessageAndReset } from "@/common/utils/chat/sendMessageAndResetChatBar";
 import { extractFirstUrl } from "@/shared/extractFirstUrl";
 import { LinkPreviewCard } from "./LinkPreviewCard";
+import { useIsMobile } from "@/stores/deviceStore";
+import EmojiPicker from "@/components/ui/EmojiPicker";
+import AttachFile from "@/components/ui/attachments/AttachFile";
+import AttachmentImportedPreview from "@/components/ui/attachments/AttachmentImportedPreview";
+import useTypingIndicator from "@/common/hooks/useTypingIndicator";
 
 interface ChatBarProps {
   chatId: string;
@@ -21,6 +22,8 @@ interface ChatBarProps {
 
 const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
   const { t } = useTranslation();
+
+  const isMobile = useIsMobile();
 
   const closeModal = getCloseModal();
   const setDraftMessage = useMessageStore.getState().setDraftMessage;
@@ -308,7 +311,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
             {chatId && (
               <>
                 <div className="flex gap-1 items-center">
-                  <EmojiPicker onSelect={handleEmojiSelect} />
+                  {!isMobile && <EmojiPicker onSelect={handleEmojiSelect} />}
 
                   {!replyToMessageId && (
                     <AttachFile onFileSelect={handleFileSelect} />

@@ -9,6 +9,7 @@ import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { ModalType, getOpenModal } from "@/stores/modalStore";
 import { useTranslation } from "react-i18next";
+import { getColorFromPreset } from "@/common/constants/folderColor";
 
 type SidebarData = { folderId?: string } | undefined;
 
@@ -44,6 +45,8 @@ const SidebarFolder: React.FC = () => {
     setSidebar(SidebarMode.NEW_FOLDER, { folderToEdit: folder });
   };
 
+  const folderColor = getColorFromPreset(folder.color);
+
   return (
     <SidebarLayout
       title={t("sidebar_folders.detail.title")}
@@ -51,15 +54,15 @@ const SidebarFolder: React.FC = () => {
     >
       <div
         style={{
-          borderColor: folder.color || "",
+          borderColor: folderColor || "",
         }}
-        className={`relative h-full rounded-lg ${folder.color && "border-4"}`}
+        className={`relative h-full rounded-lg ${folderColor && "border-4"}`}
       >
         <div
           className="px-3 py-2 custom-border-b"
           style={{
-            backgroundColor: folder.color || "",
-            color: folder.color ? "black" : "",
+            backgroundColor: folderColor || "",
+            color: folderColor ? "black" : "",
           }}
         >
           <div className="flex items-center justify-between">

@@ -7,6 +7,7 @@ import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import Button from "../ui/buttons/Button";
+import { getColorFromPreset } from "@/common/constants/folderColor";
 
 interface DeleteFolderModalData {
   folderId: string;
@@ -37,6 +38,8 @@ const DeleteFolderModal: React.FC = () => {
     toast.success(t("toast.folder.deleted", { name: folder.name }));
   };
 
+  const folderColor = getColorFromPreset(folder.color);
+
   return (
     <>
       <div className="p-4">
@@ -44,7 +47,7 @@ const DeleteFolderModal: React.FC = () => {
           {t("modal.delete_folder.title")}
         </h2>
         <h1
-          style={{ color: folder.color ? folder.color : "" }}
+          style={{ color: folderColor || "" }}
           className="flex items-center gap-2 text-2xl font-semibold"
         >
           <span className="material-symbols-outlined text-3xl!">

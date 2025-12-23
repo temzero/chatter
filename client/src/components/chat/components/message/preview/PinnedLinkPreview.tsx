@@ -36,9 +36,9 @@ export const PinnedLinkPreview: React.FC<MessageHorizontalLinkPreviewProps> = ({
   const linkClass = clsx(
     "group",
     "flex items-center",
-    "bg-blue-800 hover:bg-blue-600",
+    "bg-blue-800 hover:bg-blue-600 shadow-xl",
     "text-white",
-    "border-2 hover:border-4 border-(--input-border-color)",
+    "border-2 border-(--input-border-color)",
     "rounded-lg",
     {
       "max-w-[45vw]": isCrop,

@@ -104,8 +104,6 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
       return `${baseClasses} ${activeClasses}`;
     };
 
-    console.log("lastMessage?.createdAt", lastMessage?.createdAt);
-
     return (
       <>
         <div

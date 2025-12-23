@@ -27,6 +27,8 @@ import MessageBubbleWrapper from "./wrapper/MessageBubbleWrapper";
 import { useMessageSender } from "@/stores/chatMemberStore";
 import { MessageContextMenu } from "../../../ui/contextMenu/Message-contextMenu";
 import { useMessageFilter } from "@/common/hooks/useMessageFilter";
+import { useIsMobile } from "@/stores/deviceStore";
+import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 
 interface MessageProps {
   messageId: string;
@@ -49,6 +51,7 @@ const Message: React.FC<MessageProps> = ({
   isMe = false,
   chat,
 }) => {
+  const isMobile = useIsMobile();
   const message = useMessageStore((state) => state.messagesById[messageId]);
   const sender = useMessageSender(message?.sender.id, message?.chatId);
   const senderDisplayName =
@@ -112,17 +115,40 @@ const Message: React.FC<MessageProps> = ({
 
   const repliedMessage = message.replyToMessage;
 
+  const hasLinkPreview = attachments.some(
+    (a) => a.type === AttachmentType.LINK
+  );
+
+  const getMessageWidth = (
+    isMobile: boolean,
+    hasLinkPreview: boolean,
+    attachmentLength: number
+  ): string => {
+    if (isMobile) {
+      return hasLinkPreview
+        ? "w-[80%]"
+        : attachmentLength === 1
+        ? "w-[60%]"
+        : "w-[80%]";
+    }
+    return hasLinkPreview
+      ? "w-[60%]"
+      : attachmentLength === 1
+      ? "w-[40%]"
+      : "w-[60%]";
+  };
+
   return (
     <motion.div
       id={`message-${messageId}`}
       ref={messageRef}
       onContextMenu={handleContextMenu}
-      className={clsx("relative", {
-        "ml-auto": isMe,
-        "mr-auto": !isMe,
-        "max-w-[40%]": attachmentLength === 1,
-        "max-w-[60%]": attachmentLength !== 1,
-      })}
+      className={clsx(
+        "relative overflow-hidden",
+        isMe ? "ml-auto" : "mr-auto",
+
+       getMessageWidth(isMobile, hasLinkPreview, attachmentLength)
+      )}
       style={{ zIndex: isFocus || isRelyToThisMessage ? 100 : "auto" }}
       layout="position"
       {...messageAnimation}
@@ -170,6 +196,7 @@ const Message: React.FC<MessageProps> = ({
             isMe={isMe}
             isRelyToThisMessage={isRelyToThisMessage}
             attachmentLength={attachmentLength}
+            className={hasLinkPreview ? "w-full" : undefined}
           >
             {/* <div className="overflow-hidden rounded-lg"> */}
             {call ? (
