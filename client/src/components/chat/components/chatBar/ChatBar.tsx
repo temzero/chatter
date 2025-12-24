@@ -1,39 +1,44 @@
 import clsx from "clsx";
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useMessageStore } from "@/stores/messageStore";
-import { AnimatePresence, motion } from "framer-motion";
-import { getCloseModal, useReplyToMessageId } from "@/stores/modalStore";
-import { useTranslation } from "react-i18next";
-import EmojiPicker from "@/components/ui/EmojiPicker";
-import AttachFile from "@/components/ui/attachments/AttachFile";
-import AttachmentImportedPreview from "@/components/ui/attachments/AttachmentImportedPreview";
-import useTypingIndicator from "@/common/hooks/useTypingIndicator";
+import { AnimatePresence } from "framer-motion";
+import { useReplyToMessageId } from "@/stores/modalStore";
 import { useKeyDown } from "@/common/hooks/keyEvent/useKeydown";
 import { usePasteImage } from "@/common/hooks/keyEvent/usePasteImageListener";
 import { sendMessageAndReset } from "@/common/utils/chat/sendMessageAndResetChatBar";
+import { LinkPreviewCard } from "./LinkPreviewCard";
+import { useIsMobile } from "@/stores/deviceStore";
+import { useDetectUrl } from "@/common/hooks/useDetectUrl";
+import AttachmentImportedPreview from "@/components/ui/attachments/AttachmentImportedPreview";
+import useTypingIndicator from "@/common/hooks/useTypingIndicator";
+import ChatBarLeftIcon from "./ChatBarLeftIcon";
+import ChatBarInput from "./ChatBarInput";
+import ChatBarSendButton from "./ChatBarSendButton";
 
 interface ChatBarProps {
   chatId: string;
   myMemberId: string;
 }
 
-const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
-  const { t } = useTranslation();
+const height = 38;
 
-  const closeModal = getCloseModal();
+const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
+  const isMobile = useIsMobile();
+
   const setDraftMessage = useMessageStore.getState().setDraftMessage;
   const getDraftMessage = useMessageStore.getState().getDraftMessage;
   const replyToMessageId = useReplyToMessageId();
 
   const inputRef = useRef<HTMLTextAreaElement>(null!);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null!);
   const [isMessageSent, setIsMessageSent] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [filePreviewUrls, setFilePreviewUrls] = useState<string[]>([]);
   const [hasTextContent, setHasTextContent] = useState(false);
 
   const { clearTypingState } = useTypingIndicator(inputRef, chatId ?? null);
-  const shouldShowSendButton = hasTextContent || attachedFiles.length > 0;
+  const hasAttachment = attachedFiles.length > 0;
+  const showSendButton = hasTextContent || hasAttachment;
 
   useEffect(() => {
     if (chatId && inputRef.current) {
@@ -46,7 +51,6 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
       requestAnimationFrame(() => {
         updateInputHeight();
       });
-      // updateInputHeight();
     }
   }, [chatId, getDraftMessage]);
 
@@ -78,6 +82,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
     ["/"],
     { preventDefault: false } // will not block default typing
   );
+
   // Replace this useEffect for ContextMenu key to open file input
   useKeyDown(() => {
     if (document.activeElement === inputRef.current) {
@@ -91,6 +96,9 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
     }
   }, ["ContextMenu"]);
 
+  const { detectedUrl, showPreview, detectFromText, resetPreview } =
+    useDetectUrl(400);
+
   const updateInputHeight = () => {
     if (inputRef.current && containerRef.current) {
       inputRef.current.style.height = "auto";
@@ -102,10 +110,13 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
 
   const handleInput = () => {
     const value = inputRef.current?.value || "";
+
     setHasTextContent(!!value.trim());
     updateInputHeight();
 
-    // LIVE update the draft in the store
+    // 🔥 Let the hook handle URL detection + debounce
+    detectFromText(value);
+
     if (chatId) {
       setDraftMessage(chatId, value);
     }
@@ -117,9 +128,11 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
         if (inputRef.current) inputRef.current.value = "";
         if (chatId) setDraftMessage(chatId, "");
         setHasTextContent(false);
+        resetPreview();
         updateInputHeight();
       } else if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
+        resetPreview();
         sendMessageAndReset({
           chatId,
           myMemberId,
@@ -133,20 +146,19 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
           setFilePreviewUrls,
           setHasTextContent,
           setIsMessageSent,
-          closeModal,
           updateInputHeight,
         });
       }
     },
     [
       chatId,
+      setDraftMessage,
+      resetPreview,
       myMemberId,
       attachedFiles,
       filePreviewUrls,
       replyToMessageId,
-      setDraftMessage,
       clearTypingState,
-      closeModal,
     ]
   );
 
@@ -188,9 +200,12 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
 
   return (
     <div
-      className="absolute bottom-0 left-0 backdrop-blur-xl w-full flex flex-col items-start p-4 shadow border-(--border-color)"
+      className={clsx(
+        "absolute bottom-0 left-0 backdrop-blur-xl w-full flex flex-col items-start p-3 shadow border-(--border-color)"
+      )}
       style={{ zIndex: replyToMessageId ? 100 : 2 }}
     >
+      {/* File Attachment Previews */}
       {filePreviewUrls.length > 0 && (
         <AttachmentImportedPreview
           files={attachedFiles}
@@ -202,114 +217,61 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
         />
       )}
 
-      <div className="flex w-full items-end">
-        <AnimatePresence>
-          {replyToMessageId && (
-            <motion.div
-              key="reply-indicator"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              style={{ transformOrigin: "top left" }}
-            >
-              <span className="material-symbols-outlined text-3xl! rotate-180 mr-2 mb-1 pointer-events-none">
-                reply
-              </span>
-            </motion.div>
-          )}
-        </AnimatePresence>
+      <div className="flex w-full gap-1 items-end">
+        <ChatBarLeftIcon
+          replyToMessageId={replyToMessageId}
+          height={height}
+          hasAttachment={hasAttachment}
+          onFileSelect={handleFileSelect}
+        />
 
-        <div
-          ref={containerRef}
-          id="input-container"
-          className={clsx(
-            "flex gap-2 items-end w-full transition-(height) duration-200 ease-in-out",
-            {
-              "chat-input": !replyToMessageId,
-              "chat-input-reply": replyToMessageId,
-            }
-          )}
-        >
-          <textarea
-            ref={inputRef}
-            defaultValue=""
+        <div className="w-full">
+          <AnimatePresence>
+            {showPreview && detectedUrl && (
+              <div className="px-1">
+                <LinkPreviewCard
+                  url={detectedUrl || ""}
+                  onClose={resetPreview}
+                />
+              </div>
+            )}
+          </AnimatePresence>
+          <ChatBarInput
+            inputRef={inputRef}
+            containerRef={containerRef}
+            showSendButton={showSendButton}
+            replyToMessageId={replyToMessageId}
+            isMessageSent={isMessageSent}
+            isMobile={isMobile}
+            chatId={chatId}
             onInput={handleInput}
             onKeyDown={handleKeyDown}
-            className={clsx(
-              "w-full outline-none bg-transparent resize-none overflow-hidden",
-              {
-                "opacity-10 transition-opacity duration-100 ease-in-out":
-                  isMessageSent,
-              }
-            )}
-            placeholder={t("chat_bar.placeholder")}
-            aria-label="Message"
-            rows={1}
-            disabled={!chatId}
+            onEmojiSelect={handleEmojiSelect}
           />
-
-          <div className="flex items-center justify-between gap-2 h-6">
-            {chatId && (
-              <>
-                <div className="flex gap-1 items-center">
-                  <EmojiPicker onSelect={handleEmojiSelect} />
-
-                  {!replyToMessageId && (
-                    <AttachFile onFileSelect={handleFileSelect} />
-                  )}
-                </div>
-
-                <button
-                  className={clsx(
-                    "rounded bg-(--primary-green) border-2 border-green-400 flex items-center justify-center text-white transition-all duration-300",
-                    {
-                      "w-[30px] opacity-100 ml-0 pointer-events-auto":
-                        shouldShowSendButton,
-                      "w-0 opacity-0 -ml-2 pointer-events-none":
-                        !shouldShowSendButton,
-                    }
-                  )}
-                  onClick={() =>
-                    sendMessageAndReset({
-                      chatId,
-                      myMemberId,
-                      inputRef,
-                      attachments: attachedFiles,
-                      filePreviewUrls,
-                      replyToMessageId,
-                      clearTypingState,
-                      setDraftMessage,
-                      setAttachedFiles,
-                      setFilePreviewUrls,
-                      setHasTextContent,
-                      setIsMessageSent,
-                      closeModal,
-                      updateInputHeight,
-                    })
-                  }
-                  aria-label="Send message"
-                >
-                  <span className="material-symbols-outlined">send</span>
-                </button>
-              </>
-            )}
-          </div>
         </div>
-        <AnimatePresence>
-          {replyToMessageId && (
-            <motion.div
-              key="close-reply"
-              initial={{ opacity: 0, scale: 0.1 }}
-              animate={{ opacity: 1, scale: 1 }}
-            >
-              <button
-                className="aspect-square overflow-hidden rounded-full! opacity-70 hover:opacity-100 hover:bg-red-500 ml-2 mb-1.5"
-                onClick={closeModal}
-              >
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+
+        <ChatBarSendButton
+          visible={showSendButton}
+          height={height}
+          onClick={() => {
+            resetPreview();
+            sendMessageAndReset({
+              chatId,
+              myMemberId,
+              inputRef,
+              attachments: attachedFiles,
+              filePreviewUrls,
+              replyToMessageId,
+              clearTypingState,
+              setDraftMessage,
+              setAttachedFiles,
+              setFilePreviewUrls,
+              setHasTextContent,
+              setIsMessageSent,
+              updateInputHeight,
+            });
+          }}
+        />
       </div>
     </div>
   );

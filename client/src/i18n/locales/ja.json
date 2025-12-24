@@ -275,7 +275,8 @@
   },
 
   "sidebar_well_come": {
-    "well_come": "ようこそ",
+    "greeting": "こんにちは、{{name}}さん 👋",
+    "welcome": "{{appName}}へようこそ",
     "description": "チャット、アイデアの共有、つながりを保つためのシンプルな場所です。",
     "start_conversation": "今すぐ会話を始めましょう！"
   },

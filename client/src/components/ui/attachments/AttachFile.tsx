@@ -1,19 +1,26 @@
 import { motion } from "framer-motion";
 import React, { useRef } from "react";
 import { useTranslation } from "react-i18next";
+import clsx from "clsx";
 
 interface AttachFileProps {
   onFileSelect: (files: FileList) => void;
+  height: number;
+  hasAttachment: boolean;
 }
 
-const AttachFile: React.FC<AttachFileProps> = ({ onFileSelect }) => {
+const AttachFile: React.FC<AttachFileProps> = ({
+  onFileSelect,
+  height,
+  hasAttachment = false,
+}) => {
   const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleRightClick = (event: React.MouseEvent) => {
-    event.preventDefault(); // Prevent default right-click menu
+    event.preventDefault();
     if (fileInputRef.current) {
-      fileInputRef.current.accept = "image/*, video/*"; // Restrict to image and video
+      fileInputRef.current.accept = "image/*, video/*";
       fileInputRef.current.click();
     }
   };
@@ -22,32 +29,47 @@ const AttachFile: React.FC<AttachFileProps> = ({ onFileSelect }) => {
     const files = event.target.files;
     if (files && files.length > 0) {
       onFileSelect(files);
-      event.target.value = ""; // allow re-selecting the same file
+      event.target.value = "";
     }
   };
 
   const handleNormalClick = () => {
     if (fileInputRef.current) {
-      fileInputRef.current.accept = "*"; // Allow all files
+      fileInputRef.current.accept = "*";
       fileInputRef.current.click();
     }
   };
 
   return (
-    <div title={t("chat_bar.attach_file")} className="flex items-center">
+    <div
+      title={t("chat_bar.attach_file")}
+      className={clsx(
+        "flex items-center justify-center",
+        "hover:opacity-80 transition-all",
+        "rounded-full",
+        {
+          "bg-(--primary-green) text-white": hasAttachment,
+          "opacity-60": !hasAttachment,
+        }
+      )}
+      style={{ height }}
+    >
       <motion.span
-        whileTap={{ scale: 0.88 }}
-        className="material-symbols-outlined opacity-50 hover:opacity-90 cursor-pointer rounded select-none focus:outline-none"
+        whileTap={{ scale: 1.2 }}
+        className={clsx(
+          "material-symbols-outlined text-3xl!",
+          "cursor-pointer rounded select-none focus:outline-none"
+        )}
         aria-label="Attach file"
-        onClick={handleNormalClick} // Left click to allow all files
-        onContextMenu={handleRightClick} // Right click to allow only image and video
+        onClick={handleNormalClick}
+        onContextMenu={handleRightClick}
       >
         attach_file
       </motion.span>
 
       <input
         type="file"
-        accept="*" // Default to accept all files
+        accept="*"
         multiple
         ref={fileInputRef}
         onChange={handleChange}

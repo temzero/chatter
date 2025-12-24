@@ -5,10 +5,10 @@ import { useActiveChat } from "@/stores/chatStore";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import { useBlockStatus } from "@/common/hooks/useBlockStatus";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
-import Header from "./Header";
-import ChatBar from "./components/ChatBar";
-import MessagesContainer from "./messagesContainer/MessagesContainer";
 import { useTranslation } from "react-i18next";
+import Header from "./Header";
+import MessagesContainer from "./messagesContainer/MessagesContainer";
+import ChatBar from "./components/chatBar/ChatBar";
 
 const ChatBox = React.memo(() => {
   console.log("[MOUNTED]", "ChatBox");

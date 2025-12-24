@@ -1,5 +1,6 @@
 // --- helper function outside component ---
 import { handleSendMessage } from "@/common/utils/message/sendMessageHandler";
+import { getCloseModal } from "@/stores/modalStore";
 
 interface SendMessageAndResetParams {
   chatId: string;
@@ -14,7 +15,6 @@ interface SendMessageAndResetParams {
   setFilePreviewUrls: React.Dispatch<React.SetStateAction<string[]>>;
   setHasTextContent: React.Dispatch<React.SetStateAction<boolean>>;
   setIsMessageSent: React.Dispatch<React.SetStateAction<boolean>>;
-  closeModal: () => void;
   updateInputHeight: () => void;
 }
 
@@ -31,9 +31,10 @@ export async function sendMessageAndReset({
   setFilePreviewUrls,
   setHasTextContent,
   setIsMessageSent,
-  closeModal,
   updateInputHeight,
 }: SendMessageAndResetParams) {
+  const closeModal = getCloseModal();
+
   try {
     handleSendMessage({
       chatId,

@@ -11,9 +11,12 @@ import { SidebarMode } from "@/common/enums/sidebarMode";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { APP_NAME } from "@/common/constants/name";
+import { getCurrentUser } from "@/stores/authStore";
 
 const SidebarWellCome: React.FC = () => {
   const { t } = useTranslation();
+
+  const currentUser = getCurrentUser();
 
   const isCompact = useIsCompactSidebar();
   const setSidebar = getSetSidebar();
@@ -41,14 +44,19 @@ const SidebarWellCome: React.FC = () => {
           </button>
           {isCompact || (
             <motion.div
-              className="flex flex-col gap-2"
+              className="flex flex-col gap-1"
               initial={{ opacity: 0, scale: 0.6 }}
               animate={{ opacity: 0.6, scale: 1 }}
               transition={{ duration: 0.4, ease: "easeInOut" }}
             >
-              <h1 className="text-2xl font-semibold">
-                {t("sidebar_well_come.well_come")} {APP_NAME}!
+              <h1 className="text-2xl font-semibold mb-4">
+                {t("sidebar_well_come.greeting", {
+                  name: currentUser?.firstName,
+                })}
               </h1>
+              <motion.p className="opacity-60 italic">
+                {t("sidebar_well_come.welcome", { appName: APP_NAME })}
+              </motion.p>
               <motion.p className="opacity-60 italic">
                 {t("sidebar_well_come.description")}
               </motion.p>

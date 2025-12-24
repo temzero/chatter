@@ -276,7 +276,8 @@
   },
 
   "sidebar_well_come": {
-    "well_come": "Well come to",
+    "greeting": "Hi, {{name}} 👋",
+    "welcome": "Welcome to {{appName}}",
     "description": "A simple place to chat, share ideas, and stay connected.",
     "start_conversation": "Start a conversation now!"
   },

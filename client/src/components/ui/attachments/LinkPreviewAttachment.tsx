@@ -44,6 +44,8 @@ export const LinkPreviewAttachment: React.FC<Props> = ({
       href={url}
       target="_blank"
       rel="noopener noreferrer"
+      id={attachment.id}
+      key={attachment.id}
       className={clsx(
         "w-full flex-1",
         "relative overflow-hidden rounded-lg shadow-xl flex flex-col gap-1 justify-between",

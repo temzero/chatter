@@ -275,7 +275,8 @@
   },
 
   "sidebar_well_come": {
-    "well_come": "환영합니다",
+    "greeting": "안녕하세요, {{name}}님 👋",
+    "welcome": "{{appName}}에 오신 것을 환영합니다",
     "description": "채팅, 아이디어 공유, 연결을 유지하는 간단한 공간입니다.",
     "start_conversation": "지금 대화를 시작하세요!"
   },

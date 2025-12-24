@@ -8,12 +8,12 @@ import { useKeyDown } from "@/common/hooks/keyEvent/useKeydown";
 import { usePasteImage } from "@/common/hooks/keyEvent/usePasteImageListener";
 import { sendMessageAndReset } from "@/common/utils/chat/sendMessageAndResetChatBar";
 import { extractFirstUrl } from "@/shared/extractFirstUrl";
-import { LinkPreviewCard } from "./LinkPreviewCard";
 import { useIsMobile } from "@/stores/deviceStore";
 import EmojiPicker from "@/components/ui/EmojiPicker";
 import AttachFile from "@/components/ui/attachments/AttachFile";
 import AttachmentImportedPreview from "@/components/ui/attachments/AttachmentImportedPreview";
 import useTypingIndicator from "@/common/hooks/useTypingIndicator";
+import { LinkPreviewCard } from "./LinkPreviewCard";
 
 interface ChatBarProps {
   chatId: string;

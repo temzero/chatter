@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { messageAnimations } from "@/common/animations/messageAnimations";
 import { buttonAnimation } from "@/common/animations/buttonAnimations";
+import { debounce } from "@/common/utils/debounce";
 
 const MessageSearchBar: React.FC = () => {
   const { t } = useTranslation();
@@ -31,15 +32,6 @@ const MessageSearchBar: React.FC = () => {
   );
 
   console.log("filterLinkMessages", filterLinkMessages);
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function debounce<T extends (...args: any[]) => void>(fn: T, delay: number) {
-    let timer: ReturnType<typeof setTimeout>;
-    return (...args: Parameters<T>) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => fn(...args), delay);
-    };
-  }
 
   const debouncedSetSearchQuery = useMemo(
     () => debounce((value: string) => setSearchQuery(value), 300),

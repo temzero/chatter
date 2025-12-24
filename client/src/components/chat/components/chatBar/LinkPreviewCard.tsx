@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
 import mql from "@microlink/mql";
+import { motion, AnimatePresence } from "framer-motion";
 import { messageAnimations } from "@/common/animations/messageAnimations";
 import { audioManager, SoundType } from "@/services/audioManager";
 
@@ -21,7 +21,7 @@ export const LinkPreviewCard: React.FC<LinkPreviewChatBarProps> = ({
     if (!url) return;
 
     mql(url)
-      .then((res) => setData(res.data))
+      .then((res) => setData((res as any).data))
       .catch(() => setData(null));
 
     audioManager.playSound(SoundType.POP1, 0.1);
@@ -36,16 +36,16 @@ export const LinkPreviewCard: React.FC<LinkPreviewChatBarProps> = ({
         className={clsx(
           "relative flex gap-2 w-full overflow-hidden cursor-pointer",
           "rounded-t-lg shadow-md bg-(--card-bg-color)",
-          "hover:custom-border-t",
+          "custom-border",
           "group"
         )}
         {...messageAnimations.linkPreviewChatBar}
-        style={{ zIndex: -1 }}
+        // style={{ zIndex: -1 }}
       >
         <a
           href={url}
           target="_blank"
-          className="hover:bg-blue-500/50 w-full p-1 pb-2 flex gap-2"
+          className="hover:bg-blue-500/50 w-full p-1 flex gap-2"
         >
           {/* Image */}
           {data?.image?.url && (
