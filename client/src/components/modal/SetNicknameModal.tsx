@@ -60,7 +60,7 @@ const SetNicknameModal: React.FC = () => {
           type="text"
           value={nickname}
           onChange={(e) => setNickname(e.target.value)}
-          className="input"
+          className="input-container"
           placeholder={t("modal.set_nickname.placeholder")}
           maxLength={32}
           autoFocus

@@ -4,13 +4,11 @@ import { chatBarAnimations } from "@/common/animations/chatBarAnimations";
 
 interface ChatBarSendButtonProps {
   visible: boolean;
-  height: number;
   onClick: () => void;
 }
 
 const ChatBarSendButton: React.FC<ChatBarSendButtonProps> = ({
   visible,
-  height,
   onClick,
 }) => {
   return (
@@ -18,20 +16,23 @@ const ChatBarSendButton: React.FC<ChatBarSendButtonProps> = ({
       {visible && (
         <motion.button
           key="send-button"
+          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.1 }}
           className={clsx(
+            "-mr-2",
+            "h-(--chat-input-container-height)",
+            "text-(--primary-green-glow)",
             // "text-(--primary-green) hover:text-(--primary-green-glow)",
-            "scale-95",
-            "text-white hover:text-(--primary-green)",
-            "bg-(--primary-green) hover:bg-(--primary-green-glow)",
-            "rounded-md! border-3! border-black/50",
-            "flex px-4! items-center justify-center overflow-hidden"
+            // "text-white hover:text-(--primary-green)",
+            // "bg-(--primary-green) hover:bg-(--primary-green-glow)",
+            // "rounded-md! border-3! border-black/50",
+            "flex items-center justify-center overflow-hidden"
           )}
-          style={{ height, width: height }}
           onClick={onClick}
           {...chatBarAnimations.sendButton}
         >
           <motion.span
-            className="material-symbols-outlined filled text-4xl!"
+            className="material-symbols-outlined filled text-5xl! pb-0.5"
             {...chatBarAnimations.sendButtonIcon}
           >
             send

@@ -30,7 +30,7 @@ const ThemeSwitcher = () => {
           {theme === Theme.Light ? (
             <motion.i
               key={Theme.Light}
-              className="material-symbols-outlined absolute inset-0"
+              className="material-symbols-outlined filled absolute inset-0"
               variants={iconVariants}
               initial="initial"
               animate="animate"
@@ -42,7 +42,7 @@ const ThemeSwitcher = () => {
           ) : (
             <motion.i
               key={Theme.Dark}
-              className="material-symbols-outlined absolute inset-0"
+              className="material-symbols-outlined filled absolute inset-0"
               variants={iconVariants}
               initial="initial"
               animate="animate"

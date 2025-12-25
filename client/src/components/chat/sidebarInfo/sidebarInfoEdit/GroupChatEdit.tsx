@@ -192,7 +192,7 @@ const GroupChatEdit = () => {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="input"
+                className="input-container"
               />
             </div>
             <div className="flex flex-col gap-1">
@@ -203,7 +203,7 @@ const GroupChatEdit = () => {
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                className="input min-h-[120px]"
+                className="input-container min-h-[120px]"
               />
             </div>
           </div>

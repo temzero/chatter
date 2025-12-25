@@ -5,11 +5,8 @@ import { useTranslation } from "react-i18next";
 interface ChatBarInputProps {
   inputRef: React.RefObject<HTMLTextAreaElement>;
   containerRef: React.RefObject<HTMLDivElement>;
-  showSendButton: boolean;
-  replyToMessageId: string | null;
   isMessageSent: boolean;
   isMobile: boolean;
-  chatId?: string;
   onInput: () => void;
   onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   onEmojiSelect: (emoji: string) => void;
@@ -18,11 +15,8 @@ interface ChatBarInputProps {
 const ChatBarInput: React.FC<ChatBarInputProps> = ({
   inputRef,
   containerRef,
-  showSendButton,
-  replyToMessageId,
   isMessageSent,
   isMobile,
-  chatId,
   onInput,
   onKeyDown,
   onEmojiSelect,
@@ -33,10 +27,7 @@ const ChatBarInput: React.FC<ChatBarInputProps> = ({
     <div
       ref={containerRef}
       id="input-container"
-      className={clsx(
-        "chat-input",
-        (showSendButton || replyToMessageId) && "is-reply"
-      )}
+      className={clsx("bg-(--sidebar-color)!", "chat-input-container")}
     >
       <textarea
         ref={inputRef}
@@ -51,14 +42,9 @@ const ChatBarInput: React.FC<ChatBarInputProps> = ({
         )}
         placeholder={t("chat_bar.placeholder")}
         rows={1}
-        disabled={!chatId}
       />
 
-      {chatId && (
-        <div className="flex gap-1 items-center">
-          {!isMobile && <EmojiPicker onSelect={onEmojiSelect} />}
-        </div>
-      )}
+      {!isMobile && <EmojiPicker onSelect={onEmojiSelect} />}
     </div>
   );
 };

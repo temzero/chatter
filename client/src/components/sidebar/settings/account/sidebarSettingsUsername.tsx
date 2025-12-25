@@ -134,7 +134,7 @@ const SidebarSettingsUsername: React.FC = () => {
           </ul>
         </div>
 
-        <div className="input flex items-center justify-between">
+        <div className="input-container">
           <input
             type="text"
             value={username}

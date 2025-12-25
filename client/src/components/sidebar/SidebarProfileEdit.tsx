@@ -148,7 +148,7 @@ const SidebarProfileEdit: React.FC = () => {
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
-                className="input text-lg"
+                className="input-container text-lg"
                 placeholder={t("account.first_name")}
               />
             </div>
@@ -162,7 +162,7 @@ const SidebarProfileEdit: React.FC = () => {
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
-                className="input text-lg"
+                className="input-container text-lg"
                 placeholder={t("account.last_name")}
               />
             </div>
@@ -189,7 +189,7 @@ const SidebarProfileEdit: React.FC = () => {
                       : undefined,
                   }))
                 }
-                className="input text-lg"
+                className="input-container text-lg"
               />
             </div>
 
@@ -201,7 +201,7 @@ const SidebarProfileEdit: React.FC = () => {
                 name="bio"
                 value={formData.bio}
                 onChange={handleChange}
-                className="input min-h-[120px]"
+                className="input-container min-h-[120px]"
                 placeholder={t("sidebar_profile.edit.bio_placeholder")}
                 maxLength={150}
               />

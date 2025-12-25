@@ -157,7 +157,7 @@ const DirectChatEdit = () => {
                 name="partnerNickname"
                 value={formData.partnerNickname}
                 onChange={handleChange}
-                className="input"
+                className="input-container"
               />
             </div>
 
@@ -170,7 +170,7 @@ const DirectChatEdit = () => {
                 name="myNickname"
                 value={formData.myNickname}
                 onChange={handleChange}
-                className="input"
+                className="input-container"
               />
             </div>
           </div>

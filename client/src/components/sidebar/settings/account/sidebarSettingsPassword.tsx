@@ -101,7 +101,7 @@ const SidebarSettingsPassword: React.FC = () => {
           placeholder={t(
             "account_settings.change_password.placeholder.current"
           )}
-          className="input"
+          className="input-container"
           autoComplete="current-password"
           autoFocus
         />
@@ -113,7 +113,7 @@ const SidebarSettingsPassword: React.FC = () => {
           disabled={loading}
           name="newPassword"
           placeholder={t("account_settings.change_password.placeholder.new")}
-          className="input"
+          className="input-container"
           autoComplete="new-password"
         />
 
@@ -126,7 +126,7 @@ const SidebarSettingsPassword: React.FC = () => {
           placeholder={t(
             "account_settings.change_password.placeholder.confirm"
           )}
-          className="input"
+          className="input-container"
           autoComplete="new-password"
         />
 

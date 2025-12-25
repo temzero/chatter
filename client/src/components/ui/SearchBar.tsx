@@ -33,7 +33,7 @@ const SearchBar = ({
   };
 
   return (
-    <div className="flex w-full items-center gap-1 p-1 rounded border-2 border-(--border-color) shadow focus-within:border-(--primary-color) focus-within:shadow-md transition-all duration-200">
+    <div className="input-container">
       <i
         className={`material-symbols-outlined transition-opacity duration-200 ${
           hasValue ? "opacity-100" : "opacity-40" // ✅ Use state instead

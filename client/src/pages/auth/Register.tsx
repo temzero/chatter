@@ -76,7 +76,7 @@ const Register = () => {
             name="username"
             placeholder={t("account.username")}
             required
-            className="input"
+            className="input-field"
             autoComplete="username"
             autoFocus
           />
@@ -87,7 +87,7 @@ const Register = () => {
               name="firstName"
               placeholder={t("account.first_name")}
               required
-              className="input"
+              className="input-field"
               ref={firstNameRef}
               onChange={capitalizeFirstLetter}
             />
@@ -96,7 +96,7 @@ const Register = () => {
               name="lastName"
               placeholder={t("account.last_name")}
               required
-              className="input"
+              className="input-field"
               ref={lastNameRef}
               onChange={capitalizeFirstLetter}
             />
@@ -107,7 +107,7 @@ const Register = () => {
             name="email"
             placeholder={t("account.email")}
             required
-            className="input"
+            className="input-field"
           />
 
           <input
@@ -115,7 +115,7 @@ const Register = () => {
             name="password"
             placeholder={t("account.password")}
             required
-            className="input"
+            className="input-field"
           />
 
           <input
@@ -123,7 +123,7 @@ const Register = () => {
             name="confirmPassword"
             placeholder={t("auth.common.confirm_password")}
             required
-            className="input"
+            className="input-field"
           />
 
           <AlertMessage className="-mb-1" />

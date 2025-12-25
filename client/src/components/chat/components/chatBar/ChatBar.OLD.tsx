@@ -284,8 +284,8 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
           className={clsx(
             "flex gap-2 items-end w-full transition-(height) duration-200 ease-in-out",
             {
-              "chat-input": !replyToMessageId,
-              "chat-input-reply": replyToMessageId,
+              "chat-input-container": !replyToMessageId,
+              "chat-input-container-reply": replyToMessageId,
             }
           )}
         >

@@ -20,8 +20,6 @@ interface ChatBarProps {
   myMemberId: string;
 }
 
-const height = 38;
-
 const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
   const isMobile = useIsMobile();
 
@@ -217,15 +215,14 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
         />
       )}
 
-      <div className="flex w-full gap-1 items-end">
+      <div className="flex w-full items-end">
         <ChatBarLeftIcon
           replyToMessageId={replyToMessageId}
-          height={height}
           hasAttachment={hasAttachment}
           onFileSelect={handleFileSelect}
         />
-
-        <div className="w-full">
+        {/* avoid ChatBarInput expand beyond send button */}
+        <div className="flex flex-col flex-1 min-w-0">
           <AnimatePresence>
             {showPreview && detectedUrl && (
               <div className="px-1">
@@ -236,14 +233,12 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
               </div>
             )}
           </AnimatePresence>
+
           <ChatBarInput
             inputRef={inputRef}
             containerRef={containerRef}
-            showSendButton={showSendButton}
-            replyToMessageId={replyToMessageId}
             isMessageSent={isMessageSent}
             isMobile={isMobile}
-            chatId={chatId}
             onInput={handleInput}
             onKeyDown={handleKeyDown}
             onEmojiSelect={handleEmojiSelect}
@@ -252,7 +247,6 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
 
         <ChatBarSendButton
           visible={showSendButton}
-          height={height}
           onClick={() => {
             resetPreview();
             sendMessageAndReset({

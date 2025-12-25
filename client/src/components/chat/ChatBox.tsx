@@ -43,6 +43,7 @@ const ChatBox = React.memo(() => {
       />
 
       <MessagesContainer chat={activeChat} />
+      
       {!isDeleted && (
         <AnimatePresence>
           {!isBlocked ? (

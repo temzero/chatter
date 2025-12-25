@@ -5,13 +5,11 @@ import clsx from "clsx";
 
 interface AttachFileProps {
   onFileSelect: (files: FileList) => void;
-  height: number;
   hasAttachment: boolean;
 }
 
 const AttachFile: React.FC<AttachFileProps> = ({
   onFileSelect,
-  height,
   hasAttachment = false,
 }) => {
   const { t } = useTranslation();
@@ -44,15 +42,15 @@ const AttachFile: React.FC<AttachFileProps> = ({
     <div
       title={t("chat_bar.attach_file")}
       className={clsx(
+        "h-(--chat-input-container-height) w-(--chat-input-container-height)",
         "flex items-center justify-center",
         "hover:opacity-80 transition-all",
         "rounded-full",
         {
-          "bg-(--primary-green) text-white": hasAttachment,
+          "text-(--primary-green-glow)": hasAttachment,
           "opacity-60": !hasAttachment,
         }
       )}
-      style={{ height }}
     >
       <motion.span
         whileTap={{ scale: 1.2 }}

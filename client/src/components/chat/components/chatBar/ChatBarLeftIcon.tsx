@@ -2,31 +2,34 @@ import { AnimatePresence, motion } from "framer-motion";
 import AttachFile from "@/components/ui/attachments/AttachFile";
 import { chatBarAnimations } from "@/common/animations/chatBarAnimations";
 import { getCloseModal } from "@/stores/modalStore";
+import clsx from "clsx";
 
 interface ChatBarLeftIconProps {
   replyToMessageId: string | null;
-  height: number;
   hasAttachment: boolean;
   onFileSelect: (files: FileList) => void;
 }
 
 const ChatBarLeftIcon: React.FC<ChatBarLeftIconProps> = ({
   replyToMessageId,
-  height,
   hasAttachment,
   onFileSelect,
 }) => {
   const closeModal = getCloseModal();
+  const marginLeft = "-ml-2";
 
   return (
     <AnimatePresence mode="wait" initial={false}>
       {replyToMessageId ? (
         <motion.button
           key="reply-indicator"
-          style={{ height: height, width: height }}
           {...chatBarAnimations.leftIcon}
           onClick={closeModal}
-          className="group flex items-center justify-center -ml-1"
+          className={clsx(
+            { marginLeft },
+            "h-(--chat-input-container-height) w-(--chat-input-container-height)",
+            "group flex items-center justify-center"
+          )}
         >
           {/* Reply icon */}
           <span className="material-symbols-outlined text-3xl! rotate-180 group-hover:hidden!">
@@ -39,10 +42,9 @@ const ChatBarLeftIcon: React.FC<ChatBarLeftIconProps> = ({
           </span>
         </motion.button>
       ) : (
-        <motion.div key="attach-file" className="-ml-1" {...chatBarAnimations.leftIcon}>
+        <motion.div key="attach-file" {...chatBarAnimations.leftIcon} className={marginLeft}>
           <AttachFile
             onFileSelect={onFileSelect}
-            height={height}
             hasAttachment={hasAttachment}
           />
         </motion.div>

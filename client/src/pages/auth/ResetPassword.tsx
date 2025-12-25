@@ -81,7 +81,7 @@ const ResetPassword = () => {
             name="password"
             placeholder={t("auth.reset_password.new_password")}
             required
-            className="input"
+            className="input-field"
             autoFocus
           />
 
@@ -90,7 +90,7 @@ const ResetPassword = () => {
             name="confirmPassword"
             placeholder={t("auth.common.confirm_password")}
             required
-            className="input"
+            className="input-field"
           />
 
           <AlertMessage className="-mb-1" />

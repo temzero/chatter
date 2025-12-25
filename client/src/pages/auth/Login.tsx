@@ -46,7 +46,7 @@ const Login = () => {
             type="text"
             placeholder={t("auth.login.username_placeholder")}
             required
-            className="input"
+            className="input-field"
             autoComplete="username"
             autoFocus
           />
@@ -57,7 +57,7 @@ const Login = () => {
             name="password"
             placeholder={t("account.password")}
             required
-            className="input"
+            className="input-field"
             autoComplete="current-password"
           />
 

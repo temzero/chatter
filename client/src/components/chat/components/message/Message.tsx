@@ -150,6 +150,7 @@ const Message: React.FC<MessageProps> = ({
        getMessageWidth(isMobile, hasLinkPreview, attachmentLength)
       )}
       style={{ zIndex: isFocus || isRelyToThisMessage ? 100 : "auto" }}
+      // style={{ zIndex: 999 }}
       layout="position"
       {...messageAnimation}
     >

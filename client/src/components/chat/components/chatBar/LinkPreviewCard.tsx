@@ -40,12 +40,11 @@ export const LinkPreviewCard: React.FC<LinkPreviewChatBarProps> = ({
           "group"
         )}
         {...messageAnimations.linkPreviewChatBar}
-        // style={{ zIndex: -1 }}
       >
         <a
           href={url}
           target="_blank"
-          className="hover:bg-blue-500/50 w-full p-1 flex gap-2"
+          className="hover:bg-blue-500/50 p-1 flex gap-2"
         >
           {/* Image */}
           {data?.image?.url && (
@@ -75,7 +74,7 @@ export const LinkPreviewCard: React.FC<LinkPreviewChatBarProps> = ({
 
             <div className="flex items-center text-blue-500">
               <span className="material-symbols-outlined">link</span>
-              <div className="font-semibold  group-hover:font-bold italic text-xs truncate">
+              <div className="font-semibold group-hover:underline italic text-xs truncate">
                 {url}
               </div>
             </div>

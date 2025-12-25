@@ -104,7 +104,7 @@ const SidebarSettingsPhoneNumber: React.FC = () => {
           disabled={loading}
           name="phoneNumber"
           placeholder={t("account_settings.change_phone.placeholder")}
-          className="input"
+          className="input-container"
           autoComplete="tel"
           autoFocus
           inputMode="numeric"

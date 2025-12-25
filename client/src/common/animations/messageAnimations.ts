@@ -1,4 +1,4 @@
-import { MotionProps } from "framer-motion";
+import { easeInOut, MotionProps } from "framer-motion";
 
 // Shared animation configurations
 export const messageAnimations: Record<string, MotionProps> = {
@@ -19,7 +19,7 @@ export const messageAnimations: Record<string, MotionProps> = {
   },
   pinMessage: {
     initial: { opacity: 0, scale: 1.5 },
-    animate: { opacity: 1, scale: 1},
+    animate: { opacity: 1, scale: 1 },
     exit: { opacity: 0, scale: 2 },
     transition: { type: "spring", stiffness: 300, damping: 29 },
   },
@@ -53,10 +53,34 @@ export const messageAnimations: Record<string, MotionProps> = {
   },
 };
 
+// export const getMessageAnimation = (isMe: boolean): MotionProps => {
+//   return {
+//     initial: { opacity: 0, x: isMe ? 300 : -300 },
+//     animate: { opacity: 1, scale: 1, x: 0 },
+//     exit: { opacity: 0, scale: 2 },
+//     transition: {
+//       type: "spring",
+//       stiffness: 300,
+//       damping: 28,
+//     },
+//   };
+// };
+
 export const getMessageAnimation = (isMe: boolean): MotionProps => {
+  if (isMe) {
+    // ME → slide from bottom up
+    return {
+      initial: { opacity: 0, y: 300 },
+      animate: { opacity: 1, y: 0 },
+      exit: { opacity: 0, scale: 2 },
+      transition: { duration: 0.4, ease: easeInOut },
+    };
+  }
+
+  // NOT ME → slide from left
   return {
-    initial: { opacity: 0, x: isMe ? 300 : -300 },
-    animate: { opacity: 1, scale: 1, x: 0 },
+    initial: { opacity: 0, x: -300 },
+    animate: { opacity: 1, x: 0 },
     exit: { opacity: 0, scale: 2 },
     transition: {
       type: "spring",
