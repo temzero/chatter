@@ -1,15 +1,14 @@
 import { useRef } from "react";
-import { Link } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 import { AlertMessage } from "@/components/ui/messages/AlertMessage";
 import { AuthenticationLayout } from "@/layouts/PublicLayout";
 import { motion } from "framer-motion";
-import { publicLayoutAnimations } from "@/common/animations/publicLayoutAnimations";
 import { useTranslation } from "react-i18next";
+import { BackToLoginButton } from "@/components/ui/buttons/BackToLoginButton";
 
 const ForgotPassword = () => {
   const { t } = useTranslation();
-  
+
   const loading = useAuthStore((state) => state.loading);
   const formRef = useRef<HTMLFormElement>(null);
   const sendPasswordResetEmail = useAuthStore(
@@ -28,51 +27,39 @@ const ForgotPassword = () => {
 
   return (
     <AuthenticationLayout>
-      <motion.div
-        {...publicLayoutAnimations.container}
-        className="flex items-center rounded-lg custom-border backdrop-blur-md bg-(--card-bg-color)"
+      <form
+        ref={formRef}
+        onSubmit={handleSubmit}
+        className="w-full h-full flex flex-col justify-center gap-2 px-8 py-6"
       >
-        <form
-          ref={formRef}
-          onSubmit={handleSubmit}
-          className="flex flex-col justify-center w-[400px] gap-2 p-8"
+        <h2 className="text-4xl font-semibold text-center mb-6">
+          {t("auth.forgot_password.title")}
+        </h2>
+
+        <input
+          type="email"
+          name="email"
+          placeholder={t("account.email")}
+          required
+          className="input-field backdrop-blur-lg"
+          autoFocus
+        />
+
+        <AlertMessage className="-mb-1" />
+
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          type="submit"
+          disabled={loading}
+          className="primary w-full py-1 mt-2"
         >
-          <h2 className="text-4xl font-semibold text-center mb-6">
-            {t("auth.forgot_password.title")}
-          </h2>
+          {loading
+            ? t("common.loading.sending")
+            : t("auth.forgot_password.button")}
+        </motion.button>
 
-          <input
-            type="email"
-            name="email"
-            placeholder={t("account.email")}
-            required
-            className="input-field backdrop-blur-lg"
-            autoFocus
-          />
-
-          <AlertMessage className="-mb-1" />
-
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            type="submit"
-            disabled={loading}
-            className="primary w-full py-1 mt-2"
-          >
-            {loading
-              ? t("common.loading.sending")
-              : t("auth.forgot_password.button")}
-          </motion.button>
-
-          <div className="flex items-center gap-4 mt-2">
-            <Link
-              to="/auth/login"
-              className="opacity-40 hover:opacity-100 hover:text-green-400"
-            >
-              {t("auth.common.back_to_login")}
-            </Link>
-          </div>
-        </form>
-      </motion.div>
+        <BackToLoginButton label={t("auth.common.back_to_login")} />
+      </form>
     </AuthenticationLayout>
   );
 };

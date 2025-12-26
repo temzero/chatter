@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { motion, useMotionValue } from "framer-motion";
+import { animate, motion, useMotionValue } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
 interface SelectionBarProps<T = string> {
@@ -52,55 +52,52 @@ export const SelectionBar = <T extends string>({
     }
   }, [selected, selectedIndex, buttonWidthPercentage, x]);
 
-  // Handle drag to update which option the slider is currently over
   const handleDrag = () => {
-    if (containerRef.current && buttonWidthPx > 0) {
-      const containerWidth = containerRef.current.offsetWidth;
-      const currentX = x.get();
+    if (!containerRef.current || buttonWidthPx === 0) return;
 
-      // Constrain within container boundaries
-      const minX = 0;
-      const maxX = containerWidth - buttonWidthPx;
+    const containerWidth = containerRef.current.offsetWidth;
+    const currentX = x.get();
 
-      if (currentX < minX) x.set(minX);
-      if (currentX > maxX) x.set(maxX);
+    const overshoot = buttonWidthPx * 0.3;
 
-      // Determine which button the slider is currently over
-      const hoveredIndex = Math.floor(
-        (currentX + buttonWidthPx / 2) / buttonWidthPx
-      );
-      const boundedIndex = Math.max(
-        0,
-        Math.min(hoveredIndex, options.length - 1)
-      );
+    const minX = -overshoot;
+    const maxX = containerWidth - buttonWidthPx + overshoot;
 
-      // Update the hovered index
-      setSliderHoveredIndex(boundedIndex);
-    }
+    if (currentX < minX) x.set(minX);
+    if (currentX > maxX) x.set(maxX);
+
+    const hoveredIndex = Math.floor(
+      (Math.max(0, Math.min(currentX, containerWidth - buttonWidthPx)) +
+        buttonWidthPx / 2) /
+        buttonWidthPx
+    );
+
+    setSliderHoveredIndex(
+      Math.max(0, Math.min(hoveredIndex, options.length - 1))
+    );
   };
 
-  // Handle drag end to select the nearest option
   const handleDragEnd = () => {
-    if (containerRef.current && buttonWidthPx > 0) {
-      const currentX = x.get();
+    if (buttonWidthPx === 0) return;
 
-      // Find the closest option based on drag position
-      const closestIndex = Math.round(currentX / buttonWidthPx);
-      const boundedIndex = Math.max(
-        0,
-        Math.min(closestIndex, options.length - 1)
-      );
+    const currentX = x.get();
 
-      // Select the option
-      onSelect(options[boundedIndex]);
+    const closestIndex = Math.round(currentX / buttonWidthPx);
+    const boundedIndex = Math.max(
+      0,
+      Math.min(closestIndex, options.length - 1)
+    );
 
-      // Clear the drag hover state
-      setSliderHoveredIndex(null);
+    onSelect(options[boundedIndex]);
+    setSliderHoveredIndex(null);
 
-      // Animate to the exact position of the selected option
-      const targetX = boundedIndex * buttonWidthPx;
-      x.set(targetX);
-    }
+    const targetX = boundedIndex * buttonWidthPx;
+
+    animate(x, targetX, {
+      type: "spring",
+      stiffness: 500,
+      damping: 30,
+    });
   };
 
   // Reset hover state when drag starts (optional, can be removed if not needed)
@@ -114,9 +111,7 @@ export const SelectionBar = <T extends string>({
     const isSliderOver = sliderHoveredIndex === index;
 
     return `w-full py-1 transition-all ease-in-out ${
-      isSelected || isSliderOver
-        ? "scale-125"
-        : "opacity-40 hover:opacity-80"
+      isSelected || isSliderOver ? "scale-125" : "opacity-40 hover:opacity-80"
     }`;
   };
 
@@ -175,7 +170,7 @@ export const SelectionBar = <T extends string>({
               : `${100 / options.length}%`,
         }}
         drag="x"
-        dragConstraints={containerRef}
+        // dragConstraints={containerRef}
         dragElastic={0}
         dragMomentum={false}
         onDragStart={handleDragStart}

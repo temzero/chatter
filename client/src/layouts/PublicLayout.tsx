@@ -1,40 +1,99 @@
 import { ReactNode } from "react";
+import clsx from "clsx";
 import { Logo } from "@/components/ui/icons/Logo";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/common/constants/routes";
 import { APP_NAME } from "@/common/constants/name";
 import BackgroundContent from "@/components/ui/layout/BackgroundContent";
+import { useIsMobile } from "@/stores/deviceStore";
+import { motion } from "framer-motion";
+import { publicLayoutAnimations } from "@/common/animations/publicLayoutAnimations";
 
 interface AuthenticationLayoutProps {
   children: ReactNode;
-  loading?: boolean;
+  childrenClassName?: string;
 }
 
 export const AuthenticationLayout = ({
   children,
 }: AuthenticationLayoutProps) => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const handleLogoClick = () => {
     navigate(ROUTES.PUBLIC.LOGIN);
   };
 
+  const containerClass =
+    "overflow-hidden border-3 border-(--border-color) shadow-xl backdrop-blur-md";
+
   return (
-    <div className="relative w-full h-screen overflow-hidden select-none">
-      <BackgroundContent />
-
-      {/* Content */}
-      <div className="relative w-full h-full flex items-center justify-center">
+    <div className={clsx("w-full h-screen overflow-hidden select-none")}>
+      {isMobile ? (
         <div
-          className="flex gap-1 items-center absolute top-20 z-10 select-none cursor-pointer"
-          onClick={handleLogoClick}
+          className={clsx(
+            "w-full h-full flex flex-col items-center",
+            "pt-20 gap-6"
+          )}
         >
-          <Logo className="w-[50px] text-white" />
-          <h1 className="text-5xl text-white">{APP_NAME}</h1>
-        </div>
+          <BackgroundContent />
 
-        {children}
-      </div>
+          <div
+            onClick={handleLogoClick}
+            className={clsx(
+              "flex gap-1 items-center",
+              "select-none cursor-pointer"
+            )}
+          >
+            <Logo className={clsx("w-10 text-white")} />
+            <h1 className={clsx("text-4xl text-white")}>{APP_NAME}</h1>
+          </div>
+
+          <motion.div
+            {...publicLayoutAnimations.mobileContainer}
+            className={clsx(
+              containerClass,
+              "w-full max-w-[460px]!",
+              "px-2 not-only:h-full flex justify-center items-start",
+              "rounded-t-2xl border-b-0"
+            )}
+          >
+            <div className={clsx("w-full")}>{children}</div>
+          </motion.div>
+        </div>
+      ) : (
+        <div
+          className={clsx(
+            "relative w-full h-full",
+            "flex flex-col items-center justify-center"
+          )}
+        >
+          <BackgroundContent />
+
+          <div
+            onClick={handleLogoClick}
+            className={clsx(
+              "flex gap-1 items-center",
+              "absolute top-16 z-10",
+              "select-none cursor-pointer"
+            )}
+          >
+            <Logo className={clsx("w-[50px] text-white")} />
+            <h1 className={clsx("text-5xl text-white")}>{APP_NAME}</h1>
+          </div>
+
+          <motion.div
+            {...publicLayoutAnimations.container}
+            className={clsx(
+              containerClass,
+              "w-[400px]",
+              "rounded-lg flex items-center"
+            )}
+          >
+            {children}
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };

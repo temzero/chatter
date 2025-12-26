@@ -4,7 +4,6 @@ import { useAuthStore } from "@/stores/authStore";
 import { AlertMessage } from "@/components/ui/messages/AlertMessage";
 import { AuthenticationLayout } from "@/layouts/PublicLayout";
 import { motion } from "framer-motion";
-import { publicLayoutAnimations } from "@/common/animations/publicLayoutAnimations";
 import { useTranslation } from "react-i18next";
 
 const Login = () => {
@@ -26,15 +25,11 @@ const Login = () => {
   };
 
   return (
-    <AuthenticationLayout loading={loading}>
-      <motion.div
-        {...publicLayoutAnimations.container}
-        className="flex items-center rounded-lg custom-border backdrop-blur-md bg-(--card-bg-color) overflow-hidden"
-      >
+    <AuthenticationLayout>
         <form
           ref={formRef}
           onSubmit={handleSubmit}
-          className="flex flex-col justify-center w-[400px] gap-2 p-8"
+          className="w-full h-full flex flex-col justify-center gap-2 px-8 py-6"
         >
           <h2 className="text-4xl font-semibold mb-4">
             {t("common.actions.login")}
@@ -109,7 +104,6 @@ const Login = () => {
             <QRCode className="w-[200px]" />
           )}
         </motion.div> */}
-      </motion.div>
     </AuthenticationLayout>
   );
 };

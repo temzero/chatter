@@ -9,6 +9,8 @@ import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
 import Button from "../ui/buttons/Button";
 import { useTranslation } from "react-i18next";
+import { getChatTypeById } from "@/stores/chatStore";
+import { ChatType } from "@/shared/types/enums/chat-type.enum";
 
 interface DeleteMessageModalData {
   messageId: string;
@@ -27,6 +29,9 @@ const DeleteMessageModal: React.FC = () => {
   const messageId = data?.messageId;
   const message = messageId ? getMessageById(messageId) : undefined;
   const chatId = message?.chatId ?? "";
+  const chatType = getChatTypeById(chatId);
+
+  const isDirectChat = chatType === ChatType.DIRECT;
 
   if (!message) return null;
   const isSender = message.sender.id === currentUserId;
@@ -42,8 +47,6 @@ const DeleteMessageModal: React.FC = () => {
   console.log("isSender", isSender);
   console.log("isOwnerOrAdmin", isOwnerOrAdmin);
 
-  const canDeleteForEveryone = isSender || isOwnerOrAdmin;
-
   const handleDelete = async (isDeleteForEveryone: boolean = false) => {
     try {
       chatWebSocketService.deleteMessage({
@@ -57,11 +60,17 @@ const DeleteMessageModal: React.FC = () => {
     }
   };
 
+  const isHardDelete: boolean = isDirectChat
+    ? isSender
+    : isSender || isOwnerOrAdmin;
+
   return (
     <>
       <div className="p-4">
         <div className="flex gap-2 items-center mb-3">
-          <span className="material-symbols-outlined text-3xl!">chat_error</span>
+          <span className="material-symbols-outlined text-3xl!">
+            chat_error
+          </span>
           <h1 className="text-2xl font-semibold">
             {t("modal.delete_message.title")}
           </h1>
@@ -72,7 +81,7 @@ const DeleteMessageModal: React.FC = () => {
       </div>
 
       <div className="flex custom-border-t">
-        {!canDeleteForEveryone && (
+        {!isHardDelete && (
           <Button
             variant="ghost"
             fullWidth
@@ -82,7 +91,7 @@ const DeleteMessageModal: React.FC = () => {
             {t("modal.delete_message.delete_for_me")}
           </Button>
         )}
-        {canDeleteForEveryone && (
+        {isHardDelete && (
           <Button
             variant="ghost"
             fullWidth

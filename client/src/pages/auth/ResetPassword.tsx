@@ -1,12 +1,12 @@
 import { useEffect, useRef } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 import { AlertMessage } from "@/components/ui/messages/AlertMessage";
 import { AuthenticationLayout } from "@/layouts/PublicLayout";
 import { motion } from "framer-motion";
-import { publicLayoutAnimations } from "@/common/animations/publicLayoutAnimations";
 import { useTranslation } from "react-i18next";
 import { validatePassword } from "@/common/utils/validation/passwordValidation";
+import { BackToLoginButton } from "@/components/ui/buttons/BackToLoginButton";
 
 const ResetPassword = () => {
   const { t } = useTranslation();
@@ -63,59 +63,47 @@ const ResetPassword = () => {
 
   return (
     <AuthenticationLayout>
-      <motion.div
-        {...publicLayoutAnimations.container}
-        className="flex items-center rounded-lg custom-border backdrop-blur-md bg-(--card-bg-color)"
+      <form
+        ref={formRef}
+        onSubmit={handleSubmit}
+        className="w-full h-full flex flex-col justify-center gap-2 px-8 py-6"
       >
-        <form
-          ref={formRef}
-          onSubmit={handleSubmit}
-          className="flex flex-col justify-center w-[400px] gap-2 p-8"
+        <h2 className="text-4xl font-semibold mb-4 text-center">
+          {t("auth.reset_password.title")}
+        </h2>
+
+        <input
+          type="password"
+          name="password"
+          placeholder={t("auth.reset_password.new_password")}
+          required
+          className="input-field"
+          autoFocus
+        />
+
+        <input
+          type="password"
+          name="confirmPassword"
+          placeholder={t("auth.common.confirm_password")}
+          required
+          className="input-field"
+        />
+
+        <AlertMessage className="-mb-1" />
+
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          type="submit"
+          disabled={loading}
+          className="primary w-full py-1 mt-2"
         >
-          <h2 className="text-4xl font-semibold mb-4 text-center">
-            {t("auth.reset_password.title")}
-          </h2>
+          {loading
+            ? t("common.loading.processing")
+            : t("auth.reset_password.title")}
+        </motion.button>
 
-          <input
-            type="password"
-            name="password"
-            placeholder={t("auth.reset_password.new_password")}
-            required
-            className="input-field"
-            autoFocus
-          />
-
-          <input
-            type="password"
-            name="confirmPassword"
-            placeholder={t("auth.common.confirm_password")}
-            required
-            className="input-field"
-          />
-
-          <AlertMessage className="-mb-1" />
-
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            type="submit"
-            disabled={loading}
-            className="primary w-full py-1 mt-2"
-          >
-            {loading
-              ? t("common.loading.processing")
-              : t("auth.reset_password.title")}
-          </motion.button>
-
-          <div className="flex items-center gap-4 mt-2">
-            <Link
-              to="/auth/login"
-              className="opacity-40 hover:opacity-100 hover:text-green-400"
-            >
-              {t("auth.common.back_to_login")}
-            </Link>
-          </div>
-        </form>
-      </motion.div>
+        <BackToLoginButton label={t("auth.common.back_to_login")} />
+      </form>
     </AuthenticationLayout>
   );
 };

@@ -143,7 +143,7 @@
     },
 
     "login": {
-      "username_placeholder": "Tên người dùng, Email hoặc số điện thoại",
+      "username_placeholder": "Tên người dùng, Email hoặc SĐT",
       "forgot_password": "Quên mật khẩu?"
     },
 

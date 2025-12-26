@@ -682,3 +682,20 @@ export const useIsSavedChatActive = () => {
     return activeId !== null && activeId === savedId;
   });
 };
+
+export const getChatTypeById = (chatId?: string): ChatType | undefined => {
+  if (!chatId) return undefined;
+
+  const state = useChatStore.getState();
+
+  // normal chats
+  const chat = state.chats[chatId];
+  if (chat) return chat.type;
+
+  // saved chat fallback
+  if (state.savedChat?.id === chatId) {
+    return state.savedChat.type;
+  }
+
+  return undefined;
+};

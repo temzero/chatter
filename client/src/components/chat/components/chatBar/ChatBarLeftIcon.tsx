@@ -16,7 +16,7 @@ const ChatBarLeftIcon: React.FC<ChatBarLeftIconProps> = ({
   onFileSelect,
 }) => {
   const closeModal = getCloseModal();
-  const marginLeft = "-ml-2";
+  const marginClass = "-ml-2 mr-0.5";
 
   return (
     <AnimatePresence mode="wait" initial={false}>
@@ -26,7 +26,7 @@ const ChatBarLeftIcon: React.FC<ChatBarLeftIconProps> = ({
           {...chatBarAnimations.leftIcon}
           onClick={closeModal}
           className={clsx(
-            { marginLeft },
+            { marginClass },
             "h-(--chat-input-container-height) w-(--chat-input-container-height)",
             "group flex items-center justify-center"
           )}
@@ -42,7 +42,7 @@ const ChatBarLeftIcon: React.FC<ChatBarLeftIconProps> = ({
           </span>
         </motion.button>
       ) : (
-        <motion.div key="attach-file" {...chatBarAnimations.leftIcon} className={marginLeft}>
+        <motion.div key="attach-file" {...chatBarAnimations.leftIcon} className={marginClass}>
           <AttachFile
             onFileSelect={onFileSelect}
             hasAttachment={hasAttachment}

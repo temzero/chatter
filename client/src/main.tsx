@@ -10,6 +10,7 @@ import LoadAppErrorPage from "./pages/error/LoadAppErrorPage";
 const currentPath = window.location.pathname;
 const isPublicRoute = currentPath.startsWith("/auth/");
 
+
 const renderApp = () => {
   createRoot(document.getElementById("root")!).render(
     // <StrictMode>

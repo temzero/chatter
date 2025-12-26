@@ -4,9 +4,9 @@ import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useShallow } from "zustand/shallow";
 import { getCurrentUser } from "@/stores/authStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
-// import { ChatType } from "@/shared/types/enums/chat-type.enum";
-// import { MESSAGE_AVATAR_WIDTH } from "@/common/constants/messageAvatarDimension";
 import { motion } from "framer-motion";
+
+const SHOW_CURRENT_USER = false;
 
 interface MessageReadInfoProps {
   chatId: string;
@@ -41,22 +41,12 @@ export const MessageReadInfo: React.FC<MessageReadInfoProps> = React.memo(
     );
 
     const readUserAvatars = useMemo(() => {
-      const avatars: string[] = [];
-
-      // include current user
-      const myMember = readMembers.find((m) => m.userId === currentUserId);
-      if (myMember?.userId === currentUserId && currentUser?.avatarUrl) {
-        avatars.push(currentUser.avatarUrl);
-      }
-
-      // include others
-      for (const member of readMembers) {
-        if (member.userId !== currentUserId && member.avatarUrl) {
-          avatars.push(member.avatarUrl);
-        }
-      }
-
-      return avatars;
+      return readMembers
+        .filter((m) => (SHOW_CURRENT_USER ? true : m.userId !== currentUserId))
+        .map((m) =>
+          m.userId === currentUserId ? currentUser?.avatarUrl : m.avatarUrl
+        )
+        .filter(Boolean) as string[];
     }, [readMembers, currentUserId, currentUser?.avatarUrl]);
 
     // Calculate how many avatars fit

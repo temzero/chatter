@@ -1,12 +1,12 @@
 import { useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 import { AlertMessage } from "@/components/ui/messages/AlertMessage";
 import { AuthenticationLayout } from "@/layouts/PublicLayout";
 import { motion } from "framer-motion";
-import { publicLayoutAnimations } from "@/common/animations/publicLayoutAnimations";
 import { useTranslation } from "react-i18next";
 import { validatePassword } from "@/common/utils/validation/passwordValidation";
+import { BackToLoginButton } from "@/components/ui/buttons/BackToLoginButton";
 
 const Register = () => {
   const { t } = useTranslation();
@@ -57,98 +57,86 @@ const Register = () => {
   };
 
   return (
-    <AuthenticationLayout>
-      <motion.div
-        {...publicLayoutAnimations.container}
-        className="flex items-center rounded-lg custom-border backdrop-blur-md bg-(--card-bg-color) mt-20"
+    <AuthenticationLayout childrenClassName="mt-20">
+      <form
+        ref={formRef}
+        onSubmit={handleSubmit}
+        className="w-full h-full flex flex-col justify-center gap-2 px-8 py-6"
       >
-        <form
-          ref={formRef}
-          onSubmit={handleSubmit}
-          className="flex flex-col justify-center w-[400px] gap-2 p-8"
-        >
-          <h2 className="text-4xl font-semibold mb-4">
-            {t("common.actions.register")}
-          </h2>
+        <h2 className="text-4xl font-semibold mb-4">
+          {t("common.actions.register")}
+        </h2>
 
+        <input
+          type="text"
+          name="username"
+          placeholder={t("account.username")}
+          required
+          className="input-field"
+          autoComplete="username"
+          autoFocus
+        />
+
+        <div className="flex gap-2">
           <input
             type="text"
-            name="username"
-            placeholder={t("account.username")}
+            name="firstName"
+            placeholder={t("account.first_name")}
             required
             className="input-field"
-            autoComplete="username"
-            autoFocus
+            ref={firstNameRef}
+            onChange={capitalizeFirstLetter}
           />
-
-          <div className="flex gap-2">
-            <input
-              type="text"
-              name="firstName"
-              placeholder={t("account.first_name")}
-              required
-              className="input-field"
-              ref={firstNameRef}
-              onChange={capitalizeFirstLetter}
-            />
-            <input
-              type="text"
-              name="lastName"
-              placeholder={t("account.last_name")}
-              required
-              className="input-field"
-              ref={lastNameRef}
-              onChange={capitalizeFirstLetter}
-            />
-          </div>
-
           <input
-            type="email"
-            name="email"
-            placeholder={t("account.email")}
+            type="text"
+            name="lastName"
+            placeholder={t("account.last_name")}
             required
             className="input-field"
+            ref={lastNameRef}
+            onChange={capitalizeFirstLetter}
           />
+        </div>
 
-          <input
-            type="password"
-            name="password"
-            placeholder={t("account.password")}
-            required
-            className="input-field"
-          />
+        <input
+          type="email"
+          name="email"
+          placeholder={t("account.email")}
+          required
+          className="input-field"
+        />
 
-          <input
-            type="password"
-            name="confirmPassword"
-            placeholder={t("auth.common.confirm_password")}
-            required
-            className="input-field"
-          />
+        <input
+          type="password"
+          name="password"
+          placeholder={t("account.password")}
+          required
+          className="input-field"
+        />
 
-          <AlertMessage className="-mb-1" />
+        <input
+          type="password"
+          name="confirmPassword"
+          placeholder={t("auth.common.confirm_password")}
+          required
+          className="input-field"
+        />
 
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            type="submit"
-            disabled={loading}
-            className="primary w-full py-1 mt-2"
-          >
-            {loading
-              ? t("auth.register.button_loading")
-              : t("common.actions.register")}
-          </motion.button>
+        <AlertMessage className="-mb-1" />
 
-          <div className="flex items-center gap-4 mt-2">
-            <Link
-              to="/auth/login"
-              className="opacity-40 hover:opacity-100 hover:text-green-400"
-            >
-              {t("auth.common.back_to_login")}
-            </Link>
-          </div>
-        </form>
-      </motion.div>
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          type="submit"
+          disabled={loading}
+          className="primary w-full py-1 mt-2"
+        >
+          {loading
+            ? t("auth.register.button_loading")
+            : t("common.actions.register")}
+        </motion.button>
+
+        <BackToLoginButton label={t("auth.common.back_to_login")} />
+      </form>
     </AuthenticationLayout>
   );
 };

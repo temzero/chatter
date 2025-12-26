@@ -4,7 +4,6 @@ import { useNotificationSocketListeners } from "@/common/hooks/websocket/useNoti
 import { useChatSocketListeners } from "@/common/hooks/websocket/useChatSocketListener";
 import { usePresenceSocketListeners } from "@/common/hooks/websocket/usePresenceSocketListeners";
 import { useCallSocketListeners } from "@/common/hooks/websocket/useCallSocketListener";
-import { useDevice } from "@/common/hooks/useDevice";
 import { useCleanup } from "@/common/hooks/useCleanup";
 import { useGlobalKeyListeners } from "../keyEvent/useGlobalKeyListener";
 import { useChatStore } from "@/stores/chatStore";
@@ -29,7 +28,7 @@ export const useAppInitialization = () => {
   }, [chatId]);
 
   // 🧩 Socket + device setup
-  useDevice();
+  // useDevice();
   useWebSocket();
   useNotificationSocketListeners();
   usePresenceSocketListeners();

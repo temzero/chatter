@@ -22,10 +22,6 @@ const ChatBarSendButton: React.FC<ChatBarSendButtonProps> = ({
             "-mr-2",
             "h-(--chat-input-container-height)",
             "text-(--primary-green-glow)",
-            // "text-(--primary-green) hover:text-(--primary-green-glow)",
-            // "text-white hover:text-(--primary-green)",
-            // "bg-(--primary-green) hover:bg-(--primary-green-glow)",
-            // "rounded-md! border-3! border-black/50",
             "flex items-center justify-center overflow-hidden"
           )}
           onClick={onClick}

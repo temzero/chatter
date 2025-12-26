@@ -1,4 +1,4 @@
-import { easeInOut, MotionProps } from "framer-motion";
+import { MotionProps } from "framer-motion";
 
 // Shared animation configurations
 export const messageAnimations: Record<string, MotionProps> = {
@@ -70,10 +70,15 @@ export const getMessageAnimation = (isMe: boolean): MotionProps => {
   if (isMe) {
     // ME → slide from bottom up
     return {
-      initial: { opacity: 0, y: 300 },
-      animate: { opacity: 1, y: 0 },
-      exit: { opacity: 0, scale: 2 },
-      transition: { duration: 0.4, ease: easeInOut },
+      initial: { opacity: 0, y: 150, scale: 3 },
+      animate: { opacity: 1, y: 0, scale: 1 },
+      exit: { opacity: 0, x: 0, y: 0, scale: 2 },
+      // transition: { duration: 0.3, ease: easeOut },
+      transition: {
+        type: "spring",
+        stiffness: 250,
+        damping: 22,
+      },
     };
   }
 

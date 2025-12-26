@@ -3,7 +3,6 @@ import { useAuthStore } from "@/stores/authStore";
 import { AlertMessage } from "@/components/ui/messages/AlertMessage";
 import { AuthenticationLayout } from "@/layouts/PublicLayout";
 import { motion } from "framer-motion";
-import { publicLayoutAnimations } from "@/common/animations/publicLayoutAnimations";
 import { useTranslation } from "react-i18next";
 
 const VerifyEmail = () => {
@@ -34,41 +33,34 @@ const VerifyEmail = () => {
 
   return (
     <AuthenticationLayout>
-      <motion.div
-        {...publicLayoutAnimations.container}
-        className="flex items-center rounded-lg custom-border backdrop-blur-md bg-(--card-bg-color)"
+      <form
+        onSubmit={handleSubmit}
+        className="w-full h-full flex flex-col justify-center gap-2 px-8 py-6"
       >
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col justify-center w-[400px] gap-2 p-8"
-        >
-          <h2 className="text-4xl font-semibold mb-4 text-center">
-            {t("auth.verify_email.title")}
-          </h2>
+        <h2 className="text-4xl font-semibold mb-4 text-center">
+          {t("auth.verify_email.title")}
+        </h2>
 
-          <div className="opacity-80 py-2 flex flex-col items-center justify-center">
-            <p>{t("auth.verify_email.greeting", { name: firstName })}</p>
-            <p>{t("auth.verify_email.confirm_message")}</p>
-            <div className="text-green-400 flex items-center gap-1 font-semibold mt-2">
-              <span className="material-symbols-outlined">mail</span>
-              {email}
-            </div>
+        <div className="opacity-80 py-2 flex flex-col items-center justify-center">
+          <p>{t("auth.verify_email.greeting", { name: firstName })}</p>
+          <p>{t("auth.verify_email.confirm_message")}</p>
+          <div className="text-green-400 flex items-center gap-1 font-semibold mt-2">
+            <span className="material-symbols-outlined">mail</span>
+            {email}
           </div>
+        </div>
 
-          <AlertMessage className="-mb-1 text-center" />
+        <AlertMessage className="-mb-1 text-center" />
 
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            type="submit"
-            disabled={loading}
-            className="primary w-full py-1 mt-2"
-          >
-            {loading
-              ? t("common.loading.verifying")
-              : t("common.actions.verify")}
-          </motion.button>
-        </form>
-      </motion.div>
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          type="submit"
+          disabled={loading}
+          className="primary w-full py-1 mt-2"
+        >
+          {loading ? t("common.loading.verifying") : t("common.actions.verify")}
+        </motion.button>
+      </form>
     </AuthenticationLayout>
   );
 };
