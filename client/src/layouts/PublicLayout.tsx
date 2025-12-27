@@ -33,7 +33,7 @@ export const AuthenticationLayout = ({
         <div
           className={clsx(
             "w-full h-full flex flex-col items-center",
-            "pt-20 gap-6"
+            "pt-16 gap-6"
           )}
         >
           <BackgroundContent />
@@ -53,9 +53,9 @@ export const AuthenticationLayout = ({
             {...publicLayoutAnimations.mobileContainer}
             className={clsx(
               containerClass,
-              "w-full max-w-[460px]!",
-              "px-2 not-only:h-full flex justify-center items-start",
-              "rounded-t-2xl border-b-0"
+              "w-full max-w-[460px]! min-h-screen",
+              "px-2 flex justify-center items-start",
+              "rounded-t-4xl"
             )}
           >
             <div className={clsx("w-full")}>{children}</div>

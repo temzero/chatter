@@ -22,6 +22,12 @@ const removeConsolePlugin = () => {
 
 // Vite configuration
 export default defineConfig({
+  server: {
+    host: "0.0.0.0", // force IPv4 + LAN
+    port: 5173,
+    strictPort: true,
+  },
+
   plugins: [
     react(),
     // Only run removeConsolePlugin in production builds

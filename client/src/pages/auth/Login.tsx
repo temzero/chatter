@@ -5,6 +5,7 @@ import { AlertMessage } from "@/components/ui/messages/AlertMessage";
 import { AuthenticationLayout } from "@/layouts/PublicLayout";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { PasswordField } from "@/components/ui/form/PasswordField";
 
 const Login = () => {
   const { t } = useTranslation();
@@ -26,65 +27,60 @@ const Login = () => {
 
   return (
     <AuthenticationLayout>
-        <form
-          ref={formRef}
-          onSubmit={handleSubmit}
-          className="w-full h-full flex flex-col justify-center gap-2 px-8 py-6"
+      <form
+        ref={formRef}
+        onSubmit={handleSubmit}
+        className="w-full h-full flex flex-col justify-center gap-2 px-8 py-6"
+      >
+        <h2 className="text-4xl font-semibold mb-4">
+          {t("common.actions.login")}
+        </h2>
+
+        <input
+          id="username"
+          name="username"
+          type="text"
+          placeholder={t("auth.login.username_placeholder")}
+          required
+          className="input-field"
+          autoComplete="username"
+          autoFocus
+        />
+
+        <PasswordField
+          id="password"
+          name="password"
+          placeholder={t("account.password")}
+          autoComplete="current-password"
+        />
+
+        <AlertMessage className="-mb-1" />
+
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          type="submit"
+          disabled={loading}
+          className="primary w-full py-1 mt-2"
         >
-          <h2 className="text-4xl font-semibold mb-4">
-            {t("common.actions.login")}
-          </h2>
+          {loading ? t("common.loading.logging_in") : t("common.actions.login")}
+        </motion.button>
 
-          <input
-            id="username"
-            name="username"
-            type="text"
-            placeholder={t("auth.login.username_placeholder")}
-            required
-            className="input-field"
-            autoComplete="username"
-            autoFocus
-          />
-
-          <input
-            id="password"
-            type="password"
-            name="password"
-            placeholder={t("account.password")}
-            required
-            className="input-field"
-            autoComplete="current-password"
-          />
-
-          <AlertMessage className="-mb-1" />
-
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            type="submit"
-            disabled={loading}
-            className="primary w-full py-1 mt-2"
+        <div className="flex items-center justify-between gap-4 mt-2">
+          <Link
+            to="/auth/register"
+            className="opacity-40 hover:opacity-100 hover:text-green-400"
           >
-            {loading
-              ? t("common.loading.logging_in")
-              : t("common.actions.login")}
-          </motion.button>
-
-          <div className="flex items-center justify-between gap-4 mt-2">
-            <Link
-              to="/auth/register"
-              className="opacity-40 hover:opacity-100 hover:text-green-400"
-            >
-              {t("common.actions.register")}
-            </Link>
-            <Link
-              to="/auth/forgot-password"
-              className="opacity-40 hover:opacity-100 hover:text-green-400"
-            >
-              {t("auth.login.forgot_password")}
-            </Link>
-          </div>
-        </form>
-        {/* 
+            {t("common.actions.register")}
+          </Link>
+          <Link
+            to="/auth/forgot-password"
+            className="opacity-40 hover:opacity-100 hover:text-green-400"
+          >
+            {t("auth.login.forgot_password")}
+          </Link>
+        </div>
+      </form>
+      {/* 
         <motion.div
           className="h-full p-6 flex flex-1 flex-col gap-3 justify-end custom-border-l cursor-pointer select-none"
           onClick={toggleQrCode}

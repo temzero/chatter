@@ -8,6 +8,9 @@ export class EnvConfig {
   static get clientUrl(): string {
     return process.env.CLIENT_URL || '';
   }
+  static get clientUrlNetwork(): string {
+    return process.env.CLIENT_URL_NETWORK || '';
+  }
 
   static get parseLimit(): string {
     return process.env.BODY_PARSER_LIMIT || '100mb';

@@ -5,12 +5,9 @@ import { Theme, useTheme, useThemeStore } from "./stores/themeStore";
 import { ToastContainer } from "react-toastify";
 import AppRoutes from "@/routes/AppRoutes";
 import { useDevice } from "./common/hooks/useDevice";
-import { useVirtualKeyboard } from "./common/hooks/useVirtualKeyboard";
-import { motion } from "framer-motion";
 
 const App: React.FC = () => {
   useDevice();
-  const keyboardHeight = useVirtualKeyboard();
   const initializeTheme = useThemeStore.getState().initialize;
   const theme = useTheme();
 
@@ -20,16 +17,7 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      {/* <AppRoutes /> */}
-
-      {/* Global app wrapper support virtual keyboard*/}
-      <motion.div
-        animate={{ y: -keyboardHeight }}
-        transition={{ type: "spring", stiffness: 300, damping: 35 }}
-        className="h-dvh w-full overflow-hidden"
-      >
-        <AppRoutes />
-      </motion.div>
+      <AppRoutes />
 
       <ToastContainer
         position="bottom-right"

@@ -7,7 +7,24 @@ export class EnvConfig {
   }
 
   static get apiUrl(): string {
-    return import.meta.env.VITE_SERVER_URL || "";
+    // If we're running on a phone/network IP, use network URL
+    const currentHost = window.location.hostname;
+
+    // List of localhost variations
+    const isLocalDev =
+      currentHost === "localhost" ||
+      currentHost === "127.0.0.1" ||
+      currentHost === "";
+
+    if (isLocalDev) {
+      return import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
+    } else {
+      // For network access, use the network URL
+      return (
+        import.meta.env.VITE_SERVER_URL_NETWORK ||
+        `http://${currentHost.split(":")[0]}:3000`
+      );
+    }
   }
 
   static get livekitWsUrl(): string {

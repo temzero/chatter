@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { validatePassword } from "@/common/utils/validation/passwordValidation";
 import { BackToLoginButton } from "@/components/ui/buttons/BackToLoginButton";
+import { PasswordField } from "@/components/ui/form/PasswordField";
 
 const Register = () => {
   const { t } = useTranslation();
@@ -106,7 +107,7 @@ const Register = () => {
           className="input-field"
         />
 
-        <input
+        {/* <input
           type="password"
           name="password"
           placeholder={t("account.password")}
@@ -120,6 +121,18 @@ const Register = () => {
           placeholder={t("auth.common.confirm_password")}
           required
           className="input-field"
+        /> */}
+
+        <PasswordField
+          name="password"
+          placeholder={t("account.password")}
+          autoComplete="new-password"
+        />
+
+        <PasswordField
+          name="confirmPassword"
+          placeholder={t("auth.common.confirm_password")}
+          autoComplete="new-password"
         />
 
         <AlertMessage className="-mb-1" />

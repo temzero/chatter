@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import { handleError } from "@/common/utils/error/handleError";
 import { useTranslation } from "react-i18next";
 import { validatePassword } from "@/common/utils/validation/passwordValidation";
+import { PasswordField } from "@/components/ui/form/PasswordField";
 
 const SidebarSettingsPassword: React.FC = () => {
   const { t } = useTranslation();
@@ -92,7 +93,7 @@ const SidebarSettingsPassword: React.FC = () => {
           </ul>
         </div>
 
-        <input
+        {/* <input
           type="password"
           value={currentPassword}
           onChange={(e) => setCurrentPassword(e.target.value)}
@@ -127,6 +128,38 @@ const SidebarSettingsPassword: React.FC = () => {
             "account_settings.change_password.placeholder.confirm"
           )}
           className="input-container"
+          autoComplete="new-password"
+        /> */}
+
+        <PasswordField
+          value={currentPassword}
+          onChange={(e) => setCurrentPassword(e.target.value)}
+          disabled={loading}
+          name="currentPassword"
+          placeholder={t(
+            "account_settings.change_password.placeholder.current"
+          )}
+          autoComplete="current-password"
+          autoFocus
+        />
+
+        <PasswordField
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          disabled={loading}
+          name="newPassword"
+          placeholder={t("account_settings.change_password.placeholder.new")}
+          autoComplete="new-password"
+        />
+
+        <PasswordField
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          disabled={loading}
+          name="confirmPassword"
+          placeholder={t(
+            "account_settings.change_password.placeholder.confirm"
+          )}
           autoComplete="new-password"
         />
 

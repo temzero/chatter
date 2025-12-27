@@ -14,6 +14,7 @@ import useTypingIndicator from "@/common/hooks/useTypingIndicator";
 import ChatBarLeftIcon from "./ChatBarLeftIcon";
 import ChatBarInput from "./ChatBarInput";
 import ChatBarSendButton from "./ChatBarSendButton";
+import { useVirtualKeyboard } from "@/common/hooks/useVirtualKeyboard";
 
 interface ChatBarProps {
   chatId: string;
@@ -22,6 +23,7 @@ interface ChatBarProps {
 
 const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
   const isMobile = useIsMobile();
+  const keyboardHeight = useVirtualKeyboard();
 
   const setDraftMessage = useMessageStore.getState().setDraftMessage;
   const getDraftMessage = useMessageStore.getState().getDraftMessage;
@@ -201,7 +203,14 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
       className={clsx(
         "absolute bottom-0 left-0 backdrop-blur-xl w-full flex flex-col items-start p-3 shadow border-(--border-color)"
       )}
-      style={{ zIndex: replyToMessageId ? 100 : 2 }}
+      style={{
+        zIndex: replyToMessageId ? 100 : 2,
+        // SIMPLE: If keyboardHeight > 0, push it up by that amount
+        // transform:
+        //   keyboardHeight > 0 ? `translateY(-${keyboardHeight}px)` : "none",
+        // // Smooth transition
+        // transition: "transform 0.2s ease-out",
+      }}
     >
       {/* File Attachment Previews */}
       {filePreviewUrls.length > 0 && (

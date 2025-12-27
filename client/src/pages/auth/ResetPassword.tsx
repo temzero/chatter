@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { validatePassword } from "@/common/utils/validation/passwordValidation";
 import { BackToLoginButton } from "@/components/ui/buttons/BackToLoginButton";
+import { PasswordField } from "@/components/ui/form/PasswordField";
 
 const ResetPassword = () => {
   const { t } = useTranslation();
@@ -72,7 +73,7 @@ const ResetPassword = () => {
           {t("auth.reset_password.title")}
         </h2>
 
-        <input
+        {/* <input
           type="password"
           name="password"
           placeholder={t("auth.reset_password.new_password")}
@@ -87,6 +88,19 @@ const ResetPassword = () => {
           placeholder={t("auth.common.confirm_password")}
           required
           className="input-field"
+        /> */}
+
+        <PasswordField
+          name="password"
+          placeholder={t("auth.reset_password.new_password")}
+          autoComplete="new-password"
+          autoFocus
+        />
+
+        <PasswordField
+          name="confirmPassword"
+          placeholder={t("auth.common.confirm_password")}
+          autoComplete="new-password"
         />
 
         <AlertMessage className="-mb-1" />

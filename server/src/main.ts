@@ -10,7 +10,6 @@ import { join } from 'path';
 import cookieParser from 'cookie-parser';
 
 const DEFAULT_PORT = 3000;
-const CLIENT_URL = EnvConfig.clientUrl;
 const BODY_PARSER_LIMIT = EnvConfig.parseLimit;
 
 async function bootstrap() {
@@ -37,7 +36,8 @@ async function bootstrap() {
     console.log('3️⃣ Middleware configured, setting up CORS...');
 
     app.enableCors({
-      origin: CLIENT_URL,
+      // origin: [CLIENT_URL, CLIENT_URL_NETWORK],
+      origin: true,
       credentials: true,
     });
 
