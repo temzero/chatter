@@ -43,15 +43,24 @@
   /* light theme defaults */
   --text-color: black;
   --avatar-background: rgb(200, 200, 200);
-  --background-color: #ffffff;
+
+  --background-color-light: white;
+  --background-color-dark: black;
+
+  --background-color: var(--background-color-light);
+
   --sidebar-color: #eee;
   --active-chat-color: #00cf98d2; /* or any color you prefer */
   --input-color: rgba(150, 150, 150, 0.1);
   --input-border-color: rgba(0, 0, 0, 0.3);
   --border-color: rgba(0, 0, 0, 0.2);
   --hover-color: #ddd;
-  --message-color: #eee;
+
+  --message-light-color: #c1c1c1;
+  --message-dark-color: #303030;
+  --message-color: var(--message-light-color);
   --message-color-50: #eeeeee74;
+
   --scrollbar-color: #c1c1c1;
   --scrollbar-hover-color: #a8a8a8;
 
@@ -64,13 +73,13 @@ html[data-theme="dark"] {
 
   --text-color: white;
   --avatar-background: rgb(60, 60, 60);
-  --background-color: #121212;
+  --background-color: var(--background-color-dark);
   --sidebar-color: #222;
   --border-color: rgba(255, 255, 255, 0.1);
   --input-color: rgba(0, 0, 0, 0.1);
   --input-border-color: rgba(255, 255, 255, 0.2);
   --hover-color: rgba(122, 122, 122, 0.2);
-  --message-color: #303030;
+  --message-color: var(--message-dark-color);
   --message-color-50: #303030ac;
   --scrollbar-color: #5f5f5f;
   --scrollbar-hover-color: #d0d0d0;

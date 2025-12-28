@@ -4,7 +4,6 @@ import { Logo } from "@/components/ui/icons/Logo";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/common/constants/routes";
 import { APP_NAME } from "@/common/constants/name";
-import BackgroundContent from "@/components/ui/layout/BackgroundContent";
 import { useIsMobile } from "@/stores/deviceStore";
 import { motion } from "framer-motion";
 import { publicLayoutAnimations } from "@/common/animations/publicLayoutAnimations";
@@ -33,11 +32,9 @@ export const AuthenticationLayout = ({
         <div
           className={clsx(
             "w-full h-full flex flex-col items-center",
-            "pt-16 gap-6"
+            "pt-10 gap-5"
           )}
         >
-          <BackgroundContent />
-
           <div
             onClick={handleLogoClick}
             className={clsx(
@@ -68,8 +65,6 @@ export const AuthenticationLayout = ({
             "flex flex-col items-center justify-center"
           )}
         >
-          <BackgroundContent />
-
           <div
             onClick={handleLogoClick}
             className={clsx(

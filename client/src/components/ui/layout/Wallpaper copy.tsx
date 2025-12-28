@@ -1,9 +1,9 @@
-// src/components/common/BackgroundContent.tsx
+// src/components/common/BackgroundWallpaper.tsx
 import backgroundLight from "@/assets/image/backgroundSky.jpg";
 import backgroundDark from "@/assets/image/backgroundDark.jpg";
 import { Theme, useTheme } from "@/stores/themeStore";
 
-const BackgroundContent = () => {
+const BackgroundWallpaper = () => {
   const theme = useTheme();
 
   return (
@@ -24,4 +24,4 @@ const BackgroundContent = () => {
   );
 };
 
-export default BackgroundContent;
+export default BackgroundWallpaper;

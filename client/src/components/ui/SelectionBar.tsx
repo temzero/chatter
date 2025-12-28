@@ -7,6 +7,7 @@ interface SelectionBarProps<T = string> {
   selected: T;
   onSelect: (value: T) => void;
   getIcon?: (value: T) => string;
+  className?: string;
 }
 
 export const SelectionBar = <T extends string>({
@@ -14,6 +15,7 @@ export const SelectionBar = <T extends string>({
   selected,
   onSelect,
   getIcon,
+  className,
 }: SelectionBarProps<T>) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const sliderRef = useRef<HTMLDivElement>(null);
@@ -130,7 +132,7 @@ export const SelectionBar = <T extends string>({
   return (
     <div
       ref={containerRef}
-      className="relative flex mb-3 mx-1.5 border-2 border-(--border-color) bg-(--card-bg-color) rounded-lg overflow-hidden shadow-xl"
+      className={`relative flex mb-3 mx-1.5 border-2 border-(--border-color) bg-(--card-bg-color) rounded-lg overflow-hidden shadow-xl ${className}`}
     >
       {options.map((value, index) => (
         <button

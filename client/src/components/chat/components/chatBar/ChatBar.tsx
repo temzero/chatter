@@ -14,7 +14,6 @@ import useTypingIndicator from "@/common/hooks/useTypingIndicator";
 import ChatBarLeftIcon from "./ChatBarLeftIcon";
 import ChatBarInput from "./ChatBarInput";
 import ChatBarSendButton from "./ChatBarSendButton";
-import { useVirtualKeyboard } from "@/common/hooks/useVirtualKeyboard";
 
 interface ChatBarProps {
   chatId: string;
@@ -23,7 +22,6 @@ interface ChatBarProps {
 
 const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
   const isMobile = useIsMobile();
-  const keyboardHeight = useVirtualKeyboard();
 
   const setDraftMessage = useMessageStore.getState().setDraftMessage;
   const getDraftMessage = useMessageStore.getState().getDraftMessage;

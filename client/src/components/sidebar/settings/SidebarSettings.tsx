@@ -68,6 +68,11 @@ const SidebarSettings: React.FC = () => {
       value: t(`settings.theme_options.${themeOption}`),
     },
     {
+      icon: "wallpaper",
+      title: t("settings.wallpaper"),
+      onClick: () => setSidebar(SidebarMode.SETTINGS_WALLPAPER),
+    },
+    {
       icon: "translate",
       title: t("settings.language"),
       onClick: () => setSidebar(SidebarMode.SETTINGS_LANGUAGE),

@@ -37,6 +37,9 @@ const SidebarSettingsPrivacy = lazy(
 const SidebarSettingsTheme = lazy(
   () => import("./settings/sidebarSettingsTheme")
 );
+const SidebarSettingsWallpaper = lazy(
+  () => import("./settings/sidebarSettingsWallpaper")
+);
 const SidebarSettingsDisplay = lazy(
   () => import("./settings/sidebarSettingsDisplay")
 );
@@ -102,6 +105,7 @@ const Sidebar = () => {
 
     // settings
     [SidebarMode.SETTINGS_THEME]: <SidebarSettingsTheme />,
+    [SidebarMode.SETTINGS_WALLPAPER]: <SidebarSettingsWallpaper />,
     [SidebarMode.SETTINGS_DISPLAY]: <SidebarSettingsDisplay />,
     [SidebarMode.SETTINGS_KEYBOARD]: <SidebarSettingsKeyboard />,
     [SidebarMode.SETTINGS_MESSAGES]: <SidebarSettingsMessages />,

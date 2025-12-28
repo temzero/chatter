@@ -28,6 +28,7 @@ export enum SidebarMode {
 
   // settings
   SETTINGS_THEME = "settingsTheme",
+  SETTINGS_WALLPAPER = "settingsWallpaper",
   SETTINGS_DISPLAY = "settingsDisplay",
   SETTINGS_KEYBOARD = "settingsKeyboard",
   SETTINGS_MESSAGES = "settingsMessages",

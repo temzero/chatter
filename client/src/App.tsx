@@ -3,8 +3,9 @@ import { BrowserRouter as Router } from "react-router-dom";
 import { useEffect } from "react";
 import { Theme, useTheme, useThemeStore } from "./stores/themeStore";
 import { ToastContainer } from "react-toastify";
-import AppRoutes from "@/routes/AppRoutes";
 import { useDevice } from "./common/hooks/useDevice";
+import AppRoutes from "@/routes/AppRoutes";
+import BackgroundWallpaper from "./components/ui/layout/BackgroundWallpaper";
 
 const App: React.FC = () => {
   useDevice();
@@ -18,6 +19,8 @@ const App: React.FC = () => {
   return (
     <Router>
       <AppRoutes />
+
+      <BackgroundWallpaper />
 
       <ToastContainer
         position="bottom-right"
