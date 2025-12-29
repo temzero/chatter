@@ -1,31 +1,21 @@
+import { ResolvedTheme, ThemeMode } from "@/shared/types/enums/theme.enum";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export enum ThemeOption {
-  Light = "light",
-  Dark = "dark",
-  Auto = "auto",
-}
-
-export enum Theme {
-  Light = "light",
-  Dark = "dark",
-}
-
 interface ThemeState {
-  themeOption: ThemeOption;
-  theme: Theme;
+  themeMode: ThemeMode; // User's selection: AUTO, LIGHT, DARK
+  resolvedTheme: ResolvedTheme; // Actually applied theme: LIGHT or DARK
 }
 
 interface ThemeActions {
-  setTheme: (themeOption: ThemeOption) => void;
-  detectSystemTheme: () => Theme;
+  setThemeMode: (themeMode: ThemeMode) => void;
+  detectSystemTheme: () => ResolvedTheme;
   initialize: () => void;
 }
 
 const initialState: ThemeState = {
-  themeOption: ThemeOption.Auto,
-  theme: Theme.Light,
+  themeMode: ThemeMode.AUTO,
+  resolvedTheme: ResolvedTheme.LIGHT,
 };
 
 export const useThemeStore = create<ThemeState & ThemeActions>()(
@@ -35,51 +25,54 @@ export const useThemeStore = create<ThemeState & ThemeActions>()(
 
       detectSystemTheme: () => {
         return window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? Theme.Dark
-          : Theme.Light;
+          ? ResolvedTheme.DARK
+          : ResolvedTheme.LIGHT;
       },
 
       initialize: () => {
-        const { themeOption, detectSystemTheme } = get();
-        const resolved: Theme =
-          themeOption === ThemeOption.Auto
+        const { themeMode, detectSystemTheme } = get();
+        const resolved: ResolvedTheme =
+          themeMode === ThemeMode.AUTO
             ? detectSystemTheme()
-            : themeOption === ThemeOption.Light
-            ? Theme.Light
-            : Theme.Dark;
+            : themeMode === ThemeMode.LIGHT
+            ? ResolvedTheme.LIGHT
+            : ResolvedTheme.DARK;
 
         document.documentElement.setAttribute("data-theme", resolved);
-        set({ theme: resolved });
+        set({ resolvedTheme: resolved });
       },
 
-      setTheme: (newTheme) => {
+      setThemeMode: (newThemeMode) => {
         const { detectSystemTheme } = get();
-        const resolved: Theme =
-          newTheme === ThemeOption.Auto
+        const resolved: ResolvedTheme =
+          newThemeMode === ThemeMode.AUTO
             ? detectSystemTheme()
-            : newTheme === ThemeOption.Light
-            ? Theme.Light
-            : Theme.Dark;
+            : newThemeMode === ThemeMode.LIGHT
+            ? ResolvedTheme.LIGHT
+            : ResolvedTheme.DARK;
 
         document.documentElement.setAttribute("data-theme", resolved);
-        set({ themeOption: newTheme, theme: resolved });
+        set({ themeMode: newThemeMode, resolvedTheme: resolved });
 
-        if (newTheme === ThemeOption.Auto) {
+        // Setup system theme listener for AUTO mode
+        if (newThemeMode === ThemeMode.AUTO) {
           const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
           const handler = (e: MediaQueryListEvent) => {
-            const theme: Theme = e.matches ? Theme.Dark : Theme.Light; // <- use enum
-            document.documentElement.setAttribute("data-theme", theme);
-            set({ theme });
+            const resolvedTheme: ResolvedTheme = e.matches
+              ? ResolvedTheme.DARK
+              : ResolvedTheme.LIGHT;
+            document.documentElement.setAttribute("data-theme", resolvedTheme);
+            set({ resolvedTheme });
           };
           mediaQuery.addEventListener("change", handler);
         }
       },
     }),
     {
-      name: "themeOption-storage",
+      name: "theme-storage",
       partialize: (state) => ({
-        themeOption: state.themeOption,
-        theme: state.theme,
+        themeMode: state.themeMode,
+        resolvedTheme: state.resolvedTheme,
       }),
       onRehydrateStorage: () => (state) => {
         state?.initialize();
@@ -89,7 +82,7 @@ export const useThemeStore = create<ThemeState & ThemeActions>()(
 );
 
 // EXPORT HOOKS
-
-export const useTheme = () => useThemeStore((state) => state.theme);
-export const useThemeOption = () => useThemeStore((state) => state.themeOption);
-export const getSetTheme = () => useThemeStore.getState().setTheme;
+export const useResolvedTheme = () =>
+  useThemeStore((state) => state.resolvedTheme);
+export const useThemeMode = () => useThemeStore((state) => state.themeMode);
+export const getSetTheme = () => useThemeStore.getState().setThemeMode;

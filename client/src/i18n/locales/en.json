@@ -403,7 +403,7 @@
     "language": "Language",
     "wallpaper": "Background wallpaper",
     "theme": "Theme",
-    "theme_options": {
+    "theme_mode": {
       "light": "Light",
       "dark": "Dark",
       "auto": "Auto"

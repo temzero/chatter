@@ -1,13 +1,13 @@
 import { getSetSidebar } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import SidebarLayout from "@/layouts/SidebarLayout";
-import { useThemeOption } from "@/stores/themeStore";
+import { useThemeMode } from "@/stores/themeStore";
 import { useTranslation } from "react-i18next";
 import { languages } from "@/i18n/languages";
 
 const SidebarSettings: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const themeOption = useThemeOption();
+  const themeMode = useThemeMode();
   const setSidebar = getSetSidebar();
   const currentLanguage =
     languages.find((lang) => lang.code === i18n.language)?.label ||
@@ -65,12 +65,7 @@ const SidebarSettings: React.FC = () => {
       icon: "contrast",
       title: t("settings.theme"),
       onClick: () => setSidebar(SidebarMode.SETTINGS_THEME),
-      value: t(`settings.theme_options.${themeOption}`),
-    },
-    {
-      icon: "wallpaper",
-      title: t("settings.wallpaper"),
-      onClick: () => setSidebar(SidebarMode.SETTINGS_WALLPAPER),
+      value: t(`settings.theme_mode.${themeMode}`),
     },
     {
       icon: "translate",

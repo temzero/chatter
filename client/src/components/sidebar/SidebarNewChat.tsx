@@ -4,7 +4,7 @@ import { SlidingContainer } from "@/components/ui/layout/SlidingContainer";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
-import { SelectionBar } from "../ui/SelectionBar";
+import { SelectionBar } from "../ui/selectionBar/SelectionBar";
 import CreateNewChat from "@/components/ui/chat/CreateNewChat";
 import CreateNewGroupChat from "@/components/ui/chat/CreateNewGroupChat";
 

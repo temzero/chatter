@@ -1,11 +1,12 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Theme, ThemeOption, getSetTheme, useTheme } from "@/stores/themeStore";
+import { getSetTheme, useResolvedTheme } from "@/stores/themeStore";
+import { ThemeMode, ResolvedTheme } from "@/shared/types/enums/theme.enum";
 
 const ThemeSwitcher = () => {
-  const theme = useTheme();
+  const resolvedTheme = useResolvedTheme();
   const setTheme = getSetTheme();
   const toggleTheme = () => {
-    setTheme(theme === Theme.Light ? ThemeOption.Dark : ThemeOption.Light);
+    setTheme(resolvedTheme === ResolvedTheme.LIGHT ? ThemeMode.DARK : ThemeMode.LIGHT);
   };
 
   // Animation variants
@@ -21,15 +22,15 @@ const ThemeSwitcher = () => {
       className="flex items-center justify-center w-10 h-10 rounded-full! cursor-pointer opacity-80 hover:opacity-100"
       onClick={toggleTheme}
       aria-label={`Toggle ${
-        theme === Theme.Light ? Theme.Dark : Theme.Light
+        resolvedTheme === ResolvedTheme.LIGHT ? ResolvedTheme.DARK : ResolvedTheme.LIGHT
       } mode`}
       whileTap={{ scale: 0.9 }}
     >
       <div className="relative w-6 h-6">
         <AnimatePresence mode="wait">
-          {theme === Theme.Light ? (
+          {resolvedTheme === ResolvedTheme.LIGHT ? (
             <motion.i
-              key={Theme.Light}
+              key={ResolvedTheme.LIGHT}
               className="material-symbols-outlined filled absolute inset-0"
               variants={iconVariants}
               initial="initial"
@@ -41,7 +42,7 @@ const ThemeSwitcher = () => {
             </motion.i>
           ) : (
             <motion.i
-              key={Theme.Dark}
+              key={ResolvedTheme.DARK}
               className="material-symbols-outlined filled absolute inset-0"
               variants={iconVariants}
               initial="initial"

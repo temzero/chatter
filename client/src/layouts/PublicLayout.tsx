@@ -24,7 +24,7 @@ export const AuthenticationLayout = ({
   };
 
   const containerClass =
-    "overflow-hidden border-3 border-(--border-color) shadow-xl backdrop-blur-md";
+    "overflow-hidden border-3 border-(--border-color) backdrop-blur-xl shadow-xl";
 
   return (
     <div className={clsx("w-full h-screen overflow-hidden select-none")}>
@@ -32,7 +32,7 @@ export const AuthenticationLayout = ({
         <div
           className={clsx(
             "w-full h-full flex flex-col items-center",
-            "pt-10 gap-5"
+            "pt-12 gap-8"
           )}
         >
           <div
@@ -42,8 +42,8 @@ export const AuthenticationLayout = ({
               "select-none cursor-pointer"
             )}
           >
-            <Logo className={clsx("w-10 text-white")} />
-            <h1 className={clsx("text-4xl text-white")}>{APP_NAME}</h1>
+            <Logo />
+            <h1 className={clsx("text-4xl")}>{APP_NAME}</h1>
           </div>
 
           <motion.div
@@ -73,8 +73,8 @@ export const AuthenticationLayout = ({
               "select-none cursor-pointer"
             )}
           >
-            <Logo className={clsx("w-[50px] text-white")} />
-            <h1 className={clsx("text-5xl text-white")}>{APP_NAME}</h1>
+            <Logo className={clsx("w-[50px]")} />
+            <h1 className={clsx("text-5xl")}>{APP_NAME}</h1>
           </div>
 
           <motion.div

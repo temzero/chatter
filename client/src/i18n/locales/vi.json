@@ -399,7 +399,7 @@
     "language": "Ngôn ngữ",
     "wallpaper": "Hình nền",
     "theme": "Giao diện",
-    "theme_options": {
+    "theme_mode": {
       "light": "Sáng",
       "dark": "Tối",
       "auto": "Tự động"

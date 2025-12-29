@@ -1,7 +1,8 @@
 // src/App.tsx
 import { BrowserRouter as Router } from "react-router-dom";
 import { useEffect } from "react";
-import { Theme, useTheme, useThemeStore } from "./stores/themeStore";
+import { useResolvedTheme, useThemeStore } from "./stores/themeStore";
+import { ResolvedTheme } from "./shared/types/enums/theme.enum";
 import { ToastContainer } from "react-toastify";
 import { useDevice } from "./common/hooks/useDevice";
 import AppRoutes from "@/routes/AppRoutes";
@@ -10,7 +11,7 @@ import BackgroundWallpaper from "./components/ui/layout/BackgroundWallpaper";
 const App: React.FC = () => {
   useDevice();
   const initializeTheme = useThemeStore.getState().initialize;
-  const theme = useTheme();
+  const resolvedTheme = useResolvedTheme();
 
   useEffect(() => {
     initializeTheme();
@@ -32,10 +33,10 @@ const App: React.FC = () => {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme={theme}
+        theme={resolvedTheme}
         toastStyle={{
           padding: "12px",
-          ...(theme === Theme.Dark
+          ...(resolvedTheme === ResolvedTheme.DARK
             ? {
                 backgroundColor: "#222",
                 color: "#fff",

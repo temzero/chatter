@@ -401,7 +401,7 @@
     "language": "语言",
     "wallpaper": "壁纸",
     "theme": "主题",
-    "theme_options": {
+    "theme_mode": {
       "light": "浅色",
       "dark": "深色",
       "auto": "自动"

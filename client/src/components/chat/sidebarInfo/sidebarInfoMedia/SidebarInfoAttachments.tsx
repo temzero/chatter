@@ -11,7 +11,7 @@ import {
 import { useActiveChatId } from "@/stores/chatStore";
 import RenderMediaAttachments from "./RenderMediaAttachments";
 import { SIDEBAR_INFO_ATTACHMENT_ITEMS } from "@/common/constants/sidebarInfoAttachmentTypes";
-import { SelectionBar } from "@/components/ui/SelectionBar";
+import { SelectionBar } from "@/components/ui/selectionBar/SelectionBar";
 
 const SidebarInfoAttachments: React.FC = () => {
   const { t } = useTranslation();

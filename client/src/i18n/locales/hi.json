@@ -400,7 +400,7 @@
     "language": "भाषा",
     "wallpaper": "वॉलपेपर",
     "theme": "थीम",
-    "theme_options": {
+    "theme_mode": {
       "light": "हल्का",
       "dark": "गहरा",
       "auto": "स्वचालित"

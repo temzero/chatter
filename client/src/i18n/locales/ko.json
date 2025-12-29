@@ -401,7 +401,7 @@
     "language": "언어",
     "wallpaper": "배경화면",
     "theme": "테마",
-    "theme_options": {
+    "theme_mode": {
       "light": "라이트",
       "dark": "다크",
       "auto": "자동"

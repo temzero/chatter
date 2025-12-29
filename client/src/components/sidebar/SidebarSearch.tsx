@@ -6,7 +6,7 @@ import { filterChatsByType } from "@/common/utils/chat/filterChatsByType";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useTranslation } from "react-i18next";
-import { SelectionBar } from "../ui/SelectionBar";
+import { SelectionBar } from "../ui/selectionBar/SelectionBar";
 import ChatList from "@/components/ui/chat/ChatList";
 import SearchBar from "@/components/ui/SearchBar";
 

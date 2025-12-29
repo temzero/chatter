@@ -402,7 +402,7 @@
     "language": "Idioma",
     "wallpaper": "Fondo de pantalla",
     "theme": "Tema",
-    "theme_options": {
+    "theme_mode": {
       "light": "Claro",
       "dark": "Oscuro",
       "auto": "Automático"

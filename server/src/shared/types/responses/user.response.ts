@@ -1,9 +1,5 @@
 import { FriendshipStatus } from '@shared/types/enums/friendship-type.enum';
 
-export type Theme = 'light' | 'dark' | 'system';
-export type LastSeenSetting = 'everyone' | 'contacts' | 'nobody';
-export type FontSize = 'small' | 'medium' | 'large';
-
 export interface UserResponse {
   id: string;
   username: string;

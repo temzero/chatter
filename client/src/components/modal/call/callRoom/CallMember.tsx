@@ -6,10 +6,11 @@ import { Avatar } from "@/components/ui/avatar/Avatar";
 import { VoiceVisualizer } from "@/components/ui/streams/VoiceVisualizer";
 import { Participant } from "livekit-client";
 import { useRemoteTracks } from "@/common/hooks/mediaStreams/useRemoteTracks";
-import { Theme, useTheme } from "@/stores/themeStore";
+import { useResolvedTheme } from "@/stores/themeStore";
+import { ResolvedTheme } from "@/shared/types/enums/theme.enum";
+import { useTranslation } from "react-i18next";
 import callManDarkImage from "@/assets/image/call-man-dark.png";
 import callManLightImage from "@/assets/image/call-man-light.png";
-import { useTranslation } from "react-i18next";
 
 interface CallMemberProps {
   participant: Participant;
@@ -26,7 +27,7 @@ const CallMember = ({
   const { t } = useTranslation();
 
   const { videoTrack, audioTrack, screenTrack } = useRemoteTracks(participant);
-  const theme = useTheme();
+  const resolvedTheme = useResolvedTheme();
 
   // Parse metadata from participant
   const participantMetadata = React.useMemo(() => {
@@ -49,7 +50,7 @@ const CallMember = ({
   const isShowingScreen = !!screenTrack;
 
   const callManImage =
-    theme === Theme.Dark ? callManDarkImage : callManLightImage;
+    resolvedTheme === ResolvedTheme.DARK ? callManDarkImage : callManLightImage;
 
   return (
     <div

@@ -1,12 +1,13 @@
 // src/stores/wallpaperStore.ts
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { ResolvedTheme } from "@/shared/types/enums/theme.enum";
 import {
   lightWallpaperOptions,
   darkWallpaperOptions,
   WallpaperOption,
 } from "@/common/constants/wallpaperOptions";
-import { Theme } from "./themeStore";
+import { useResolvedTheme } from "./themeStore";
 
 interface WallpaperState {
   // Current selections
@@ -16,10 +17,10 @@ interface WallpaperState {
   // Actions
   setLightWallpaper: (id: string) => void;
   setDarkWallpaper: (id: string) => void;
-  setWallpaper: (theme: Theme, id: string) => void;
+  setWallpaper: (theme: ResolvedTheme, id: string) => void;
 
   // Getters
-  getWallpaper: (theme: Theme) => WallpaperOption;
+  getWallpaper: (theme: ResolvedTheme) => WallpaperOption;
   getAllOptions: () => {
     light: WallpaperOption[];
     dark: WallpaperOption[];
@@ -29,8 +30,8 @@ interface WallpaperState {
 export const useWallpaperStore = create<WallpaperState>()(
   persist(
     (set, get) => ({
-      lightWallpaperId: "default_light",
-      darkWallpaperId: "default_dark",
+      lightWallpaperId: "default",
+      darkWallpaperId: "default",
 
       setLightWallpaper: (id: string) => {
         set({ lightWallpaperId: id });
@@ -40,21 +41,25 @@ export const useWallpaperStore = create<WallpaperState>()(
         set({ darkWallpaperId: id });
       },
 
-      setWallpaper: (theme: Theme, id: string) => {
-        if (theme === Theme.Light) {
+      setWallpaper: (theme: ResolvedTheme, id: string) => {
+        if (theme === ResolvedTheme.LIGHT) {
           set({ lightWallpaperId: id });
         } else {
           set({ darkWallpaperId: id });
         }
       },
 
-      getWallpaper: (theme: Theme): WallpaperOption => {
+      getWallpaper: (theme: ResolvedTheme): WallpaperOption => {
         const state = get();
         const wallpaperId =
-          theme === Theme.Light ? state.lightWallpaperId : state.darkWallpaperId;
+          theme === ResolvedTheme.LIGHT
+            ? state.lightWallpaperId
+            : state.darkWallpaperId;
 
         const options =
-          theme === Theme.Light ? lightWallpaperOptions : darkWallpaperOptions;
+          theme === ResolvedTheme.LIGHT
+            ? lightWallpaperOptions
+            : darkWallpaperOptions;
 
         // Find the wallpaper option
         const wallpaper = options.find((w) => w.id === wallpaperId);
@@ -78,3 +83,8 @@ export const useWallpaperStore = create<WallpaperState>()(
     }
   )
 );
+
+export const useCurrentWallpaper = () => {
+  const resolvedTheme = useResolvedTheme();
+  return useWallpaperStore().getWallpaper(resolvedTheme);
+};
