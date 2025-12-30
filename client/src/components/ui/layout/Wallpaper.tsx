@@ -22,11 +22,6 @@ const Wallpaper = ({ wallpaper, className }: WallpaperProps) => {
       style.backgroundImage = `url(${background})`;
       break;
 
-    case WallpaperType.PATTERN:
-      style.backgroundImage = background;
-      // Pattern might include fallback color, e.g.: "linear-gradient(45deg, #888 25%, transparent 25%), #000"
-      break;
-
     case WallpaperType.GRADIENT:
       style.backgroundImage = background;
       break;
@@ -41,7 +36,6 @@ const Wallpaper = ({ wallpaper, className }: WallpaperProps) => {
   return (
     <div className={`w-full h-full ${className}`} aria-hidden="true">
       <div className="w-full h-full z-1" style={style}></div>
-      <div className="-z-1 absolute inset-0 bg-(--background-color)"></div>
     </div>
   );
 };

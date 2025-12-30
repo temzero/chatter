@@ -8,40 +8,41 @@ import {
   WallpaperOption,
 } from "@/common/constants/wallpaperOptions";
 import { useResolvedTheme } from "./themeStore";
+import {
+  WallpaperPatternOption,
+  wallpaperPatternOptions,
+} from "@/common/constants/wallpaperPatternOptions";
+import { audioManager, SoundType } from "@/services/audioManager";
 
 interface WallpaperState {
   // Current selections
-  lightWallpaperId: string;
-  darkWallpaperId: string;
+  lightPatternId: string | null;
+  darkPatternId: string | null;
+
+  lightWallpaperId: string | null;
+  darkWallpaperId: string | null;
 
   // Actions
-  setLightWallpaper: (id: string) => void;
-  setDarkWallpaper: (id: string) => void;
-  setWallpaper: (theme: ResolvedTheme, id: string) => void;
+  setPattern: (theme: ResolvedTheme, id: string | null) => void;
+  setWallpaper: (theme: ResolvedTheme, id: string | null) => void;
 
   // Getters
   getWallpaper: (theme: ResolvedTheme) => WallpaperOption;
-  getAllOptions: () => {
-    light: WallpaperOption[];
-    dark: WallpaperOption[];
-  };
+  getPattern: (theme: ResolvedTheme) => WallpaperPatternOption;
 }
 
 export const useWallpaperStore = create<WallpaperState>()(
   persist(
     (set, get) => ({
-      lightWallpaperId: "default",
-      darkWallpaperId: "default",
+      lightPatternId: null,
+      darkPatternId: null,
+      lightWallpaperId: null,
+      darkWallpaperId: null,
 
-      setLightWallpaper: (id: string) => {
-        set({ lightWallpaperId: id });
-      },
-
-      setDarkWallpaper: (id: string) => {
-        set({ darkWallpaperId: id });
-      },
-
-      setWallpaper: (theme: ResolvedTheme, id: string) => {
+      setWallpaper: (theme, id) => {
+        if (id) {
+          audioManager.playSound(SoundType.TAP1);
+        }
         if (theme === ResolvedTheme.LIGHT) {
           set({ lightWallpaperId: id });
         } else {
@@ -49,7 +50,18 @@ export const useWallpaperStore = create<WallpaperState>()(
         }
       },
 
-      getWallpaper: (theme: ResolvedTheme): WallpaperOption => {
+      setPattern: (theme, id) => {
+        if (id) {
+          audioManager.playSound(SoundType.TAP2);
+        }
+        if (theme === ResolvedTheme.LIGHT) {
+          set({ lightPatternId: id });
+        } else {
+          set({ darkPatternId: id });
+        }
+      },
+
+      getWallpaper: (theme): WallpaperOption => {
         const state = get();
         const wallpaperId =
           theme === ResolvedTheme.LIGHT
@@ -68,21 +80,34 @@ export const useWallpaperStore = create<WallpaperState>()(
         return wallpaper || options[0];
       },
 
-      getAllOptions: () => ({
-        light: lightWallpaperOptions,
-        dark: darkWallpaperOptions,
-      }),
+      getPattern: (theme): WallpaperPatternOption => {
+        const state = get();
+        const patternId =
+          theme === ResolvedTheme.LIGHT
+            ? state.lightPatternId
+            : state.darkPatternId;
+
+        const pattern = wallpaperPatternOptions.find((w) => w.id === patternId);
+        return pattern || wallpaperPatternOptions[0];
+      },
     }),
     {
       name: "wallpaper-storage",
       // Only save essential data
       partialize: (state) => ({
+        lightPatternId: state.lightPatternId,
+        darkPatternId: state.darkPatternId,
         lightWallpaperId: state.lightWallpaperId,
         darkWallpaperId: state.darkWallpaperId,
       }),
     }
   )
 );
+
+export const useCurrentPattern = () => {
+  const resolvedTheme = useResolvedTheme();
+  return useWallpaperStore().getPattern(resolvedTheme);
+};
 
 export const useCurrentWallpaper = () => {
   const resolvedTheme = useResolvedTheme();

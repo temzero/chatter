@@ -24,7 +24,7 @@ export const AuthenticationLayout = ({
   };
 
   const containerClass =
-    "overflow-hidden border-3 border-(--border-color) backdrop-blur-xl shadow-xl";
+    "overflow-hidden border-3 border-(--border-color) backdrop-blur shadow-xl";
 
   return (
     <div className={clsx("w-full h-screen overflow-hidden select-none")}>

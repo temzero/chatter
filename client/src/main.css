@@ -24,6 +24,10 @@
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
 
+  
+  --pattern-bg-start: #f0f0f0;
+  --pattern-bg-end: #ffffff;
+
   --header-height: 60px;
   --chat-input-container-height: 36px;
 

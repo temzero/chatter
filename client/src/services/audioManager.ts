@@ -25,6 +25,8 @@ import ringSound from "@/assets/sound/old-telephone-ringing.mp3";
 import messageRemoveSound from "@/assets/sound/remove-message2.mp3";
 import typingSound from "@/assets/sound/typing.mp3";
 import logoutSound from "@/assets/sound/logout.mp3";
+import tapSound1 from "@/assets/sound/confirm-tap.mp3";
+import tapSound2 from "@/assets/sound/pattern.mp3";
 import waterPopSound from "@/assets/sound/water-pop.mp3";
 
 // Define the SoundType as an enum
@@ -53,6 +55,8 @@ export enum SoundType {
   POP2 = "pop2",
   PIN = "pin",
   TYPING = "typing",
+  TAP1 = "tap1",
+  TAP2 = "tap2",
   BREAK = "break",
   ERROR = "error",
   LOGOUT = "logout",
@@ -105,6 +109,8 @@ class AudioServiceImpl implements AudioService {
       [SoundType.POP2]: pop2Sound,
       [SoundType.PIN]: pinSound,
       [SoundType.TYPING]: typingSound,
+      [SoundType.TAP1]: tapSound1,
+      [SoundType.TAP2]: tapSound2,
       [SoundType.BREAK]: breakSound,
       [SoundType.ERROR]: errorSound,
       [SoundType.LOGOUT]: logoutSound,
