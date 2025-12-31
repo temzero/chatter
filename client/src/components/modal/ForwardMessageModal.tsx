@@ -20,8 +20,6 @@ interface ForwardMessageModalData {
 }
 
 const ForwardMessageModal: React.FC = () => {
-  console.log("[MOUNTED]", "ForwardMessageModal");
-
   const { t } = useTranslation();
   const closeModal = getCloseModal();
   const chats = getChats() as ChatResponse[];

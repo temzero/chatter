@@ -3,7 +3,6 @@ import clsx from "clsx";
 import { motion } from "framer-motion";
 import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 import { LinkMetadata } from "@/shared/types/responses/message-attachment-metadata.response";
-import { audioManager, SoundType } from "@/services/audioManager";
 import { useIsMobile } from "@/stores/deviceStore";
 
 interface MessageHorizontalLinkPreviewProps {
@@ -53,10 +52,6 @@ export const PinnedLinkPreview: React.FC<MessageHorizontalLinkPreviewProps> = ({
       title={url}
       className={linkClass}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      onMouseEnter={(e) => {
-        e.stopPropagation();
-        audioManager.playSound(SoundType.LINK_HOVER, 0.2);
-      }}
       onClick={(e) => {
         e.stopPropagation();
       }}

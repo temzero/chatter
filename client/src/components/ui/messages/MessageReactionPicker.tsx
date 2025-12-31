@@ -21,7 +21,7 @@ export const MessageReactionPicker: React.FC<ReactionPickerProps> = ({
 
   return (
     <div
-      className="panel-glass flex gap-1 rounded-full! p-1 custom-border"
+      className="glass-panel flex gap-1 rounded-full! p-1 custom-border"
       onClick={(e) => e.stopPropagation()}
     >
       {emojis.map((emoji) => (

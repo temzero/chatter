@@ -19,7 +19,7 @@ const LeaveChatModal = lazy(() => import("./LeaveChatModal"));
 const AddMemberModal = lazy(() => import("./AddMemberModal"));
 const SetNicknameModal = lazy(() => import("./SetNicknameModal"));
 const DeleteCallModal = lazy(() => import("./DeleteCallModal"));
-const FolderModal = lazy(() => import("./FolderModal"));
+const AddChatToFolderModal = lazy(() => import("./AddChatToFolderModal"));
 const CallModal = lazy(() => import("./call/CallModal"));
 
 // Map modal types to components
@@ -30,7 +30,7 @@ const modalMap: Record<ModalType, ComponentType | null> = {
   [ModalType.FRIEND_REQUEST]: FriendRequestModal,
   [ModalType.FORWARD_MESSAGE]: ForwardMessageModal,
   [ModalType.DELETE_MESSAGE]: DeleteMessageModal,
-  [ModalType.FOLDER]: FolderModal,
+  [ModalType.FOLDER]: AddChatToFolderModal,
   [ModalType.DELETE_FOLDER]: DeleteFolderModal,
   [ModalType.MUTE]: MuteChatModal,
   [ModalType.BLOCK_USER]: BlockUserModal,
@@ -69,7 +69,7 @@ const ModalContent = ({
         ) : (
           <motion.div
             {...modalAnimations.children}
-            className="bg-(--panel-color) rounded-lg w-[400px] custom-border"
+            className=" w-[400px] bg-(--panel-color) rounded-lg overflow-hidden custom-border"
           >
             <Component />
           </motion.div>

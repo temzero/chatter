@@ -80,6 +80,7 @@ export const ChatMemberItems = ({
     e: React.MouseEvent,
     member: ChatMemberResponse
   ) => {
+    console.log("handleRightClick");
     e.preventDefault();
     e.stopPropagation();
 
@@ -123,7 +124,7 @@ export const ChatMemberItems = ({
   );
 
   return (
-    <div className="flex flex-col gap-3 rounded overflow-hidden w-full relative">
+    <div className="relative flex flex-col gap-3 rounded overflow-hidden w-full">
       {myMember && (
         <div className="custom-border rounded">
           <div className="flex items-center gap-2 p-2 bg-(--hover-color) text-sm font-medium text-(--primary-green)">

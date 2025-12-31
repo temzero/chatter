@@ -23,7 +23,7 @@ export const AuthenticationLayout = ({
     navigate(ROUTES.PUBLIC.LOGIN);
   };
 
-  const containerClass = "panel-glass border-3";
+  const containerClass = "glass-panel border-3";
 
   return (
     <div className={clsx("w-full h-screen overflow-hidden select-none")}>

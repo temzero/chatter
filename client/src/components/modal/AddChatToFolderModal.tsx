@@ -1,4 +1,3 @@
-// components/modals/AddChatToFolderModal.tsx
 import React, { useState, useEffect } from "react";
 import { useFolders, useFolderStore } from "@/stores/folderStore";
 import { getCloseModal, getModalData } from "@/stores/modalStore";
@@ -6,11 +5,11 @@ import { getSetSidebar } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
 import Checkbox from "../ui/buttons/CheckBox";
-import Button from "../ui/buttons/Button";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { ChatAvatar } from "../ui/avatar/ChatAvatar";
 import { handleError } from "@/common/utils/error/handleError";
 import { getColorFromPreset } from "@/common/constants/folderColor";
+import ConfirmDialog from "./layout/ConfirmDialog";
 
 interface AddChatToFolderModalData {
   chat: ChatResponse;
@@ -24,7 +23,6 @@ const AddChatToFolderModal: React.FC = () => {
   const folders = useFolders();
   const data = getModalData() as unknown as
     | AddChatToFolderModalData
-    | undefined;
 
   const chat = data?.chat;
   const chatId = chat?.id;
@@ -64,52 +62,53 @@ const AddChatToFolderModal: React.FC = () => {
     }
   };
 
-  return (
-    <>
-      <div className="p-4">
-        <h2 className="text-2xl font-semibold">{t("modal.folder.title")}</h2>
+  const folderIcon = (
+    <span className="material-symbols-outlined text-3xl! font-bold text-blue-500">
+      folder_open
+    </span>
+  );
 
-        <div className="flex items-center gap-3 my-2">
-          <ChatAvatar chat={chat} />
-          <h3 className="text-2xl font-semibold">{chat?.name}</h3>
-        </div>
+  const chatInfo = (
+    <div className="flex items-center gap-3 mb-4">
+      <ChatAvatar chat={chat} />
+      <h3 className="text-2xl font-semibold">{chat?.name}</h3>
+    </div>
+  );
 
-        <div className="flex flex-col max-h-60 overflow-y-auto">
-          {folders.map((folder) => (
-            <label
-              key={folder.id}
-              className={`flex items-center gap-2 p-2 rounded cursor-pointer hover:bg-(--hover-color`}
-            >
-              <Checkbox
-                checked={selectedFolderIds.includes(folder.id)}
-                onChange={() => handleToggleFolder(folder.id)}
-              />
-              <span
-                style={{ color: getColorFromPreset(folder.color) ?? undefined }}
-                className="material-symbols-outlined filled"
-              >
-                folder_open
-              </span>
-              {folder.name}
-            </label>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex custom-border-t">
-        <Button
-          variant="ghost"
-          fullWidth
-          onClick={handleUpdateFolder}
-          className="text-green-500"
+  const folderList = (
+    <div className="flex flex-col max-h-60 overflow-y-auto mb-4">
+      {folders.map((folder) => (
+        <label
+          key={folder.id}
+          className={`flex items-center gap-2 p-2 rounded cursor-pointer hover:bg-(--hover-color`}
         >
-          {t("common.actions.save")}
-        </Button>
-        <Button variant="ghost" fullWidth onClick={closeModal}>
-          {t("common.actions.cancel")}
-        </Button>
-      </div>
-    </>
+          <Checkbox
+            checked={selectedFolderIds.includes(folder.id)}
+            onChange={() => handleToggleFolder(folder.id)}
+          />
+          <span
+            style={{ color: getColorFromPreset(folder.color) ?? undefined }}
+            className="material-symbols-outlined filled"
+          >
+            folder_open
+          </span>
+          {folder.name}
+        </label>
+      ))}
+    </div>
+  );
+
+  return (
+    <ConfirmDialog
+      title={t("modal.folder.title")}
+      icon={folderIcon}
+      confirmText={t("common.actions.save")}
+      onGreenAction={handleUpdateFolder}
+      onCancel={closeModal}
+    >
+      {chatInfo}
+      {folderList}
+    </ConfirmDialog>
   );
 };
 

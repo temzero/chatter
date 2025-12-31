@@ -19,18 +19,25 @@ const SidebarSettings: React.FC = () => {
       title: t("settings.account"),
       onClick: () => setSidebar(SidebarMode.SETTINGS_ACCOUNT),
     },
-    {
-      icon: "lock",
-      title: t("settings.privacy_security"),
-      onClick: () => setSidebar(SidebarMode.SETTINGS_PRIVACY),
-      isDisabled: true,
-    },
+
     {
       icon: "visibility",
       title: t("settings.display"),
       onClick: () => setSidebar(SidebarMode.SETTINGS_DISPLAY),
-      isDisabled: true,
     },
+    {
+      icon: "contrast",
+      title: t("settings.theme"),
+      onClick: () => setSidebar(SidebarMode.SETTINGS_THEME),
+      value: t(`settings.theme_mode.${themeMode}`),
+    },
+    {
+      icon: "translate",
+      title: t("settings.language"),
+      onClick: () => setSidebar(SidebarMode.SETTINGS_LANGUAGE),
+      value: currentLanguage,
+    },
+
     {
       icon: "keyboard",
       title: t("settings.keyboard"),
@@ -62,40 +69,12 @@ const SidebarSettings: React.FC = () => {
       isDisabled: true,
     },
     {
-      icon: "contrast",
-      title: t("settings.theme"),
-      onClick: () => setSidebar(SidebarMode.SETTINGS_THEME),
-      value: t(`settings.theme_mode.${themeMode}`),
-    },
-    {
-      icon: "translate",
-      title: t("settings.language"),
-      onClick: () => setSidebar(SidebarMode.SETTINGS_LANGUAGE),
-      value: currentLanguage,
+      icon: "lock",
+      title: t("settings.privacy_security"),
+      onClick: () => setSidebar(SidebarMode.SETTINGS_PRIVACY),
+      isDisabled: true,
     },
   ];
-
-  // return (
-  //   <SidebarLayout
-  //     title={t("sidebar.settings")}
-  //     backLocation={SidebarMode.MORE}
-  //   >
-  //     {settingsItems.map((item, index) => (
-  //       <div key={index} className="settings-item" onClick={item.onClick}>
-  //         <div className="flex gap-4 items-center">
-  //           <i className="material-symbols-outlined">{item.icon}</i>
-  //           <h1>{item.title}</h1>
-  //         </div>
-  //         {item.value && (
-  //           <span className="opacity-60 ml-auto">
-  //             {item.value.charAt(0).toUpperCase() +
-  //               item.value.slice(1).toLowerCase()}
-  //           </span>
-  //         )}
-  //       </div>
-  //     ))}
-  //   </SidebarLayout>
-  // );
 
   return (
     <SidebarLayout

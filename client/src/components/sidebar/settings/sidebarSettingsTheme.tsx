@@ -61,7 +61,7 @@ const SidebarSettingsTheme: React.FC = () => {
       title={`${t("settings.theme")}: ${t(
         `settings.theme_mode.${themeMode.toLowerCase()}`
       )}`}
-      backLocation={SidebarMode.SETTINGS_THEME}
+      backLocation={SidebarMode.SETTINGS}
     >
       <div className="p-3 pb-[250px]!">
         <SelectionGrid
@@ -84,27 +84,26 @@ const SidebarSettingsTheme: React.FC = () => {
 
       <div
         style={{ zIndex: 99 }}
-        className="absolute bottom-0 left-0 right-0 border-4 border-b-0 border-(--message-color) overflow-hidden space-y-2 rounded-t-4xl shadow-4xl"
+        className="absolute bottom-0 left-0 right-0 p-2 border-4 border-b-0 border-(--message-color) overflow-hidden space-y-2 rounded-t-4xl shadow-4xl"
       >
-        {/* Preview */}
-        <div className="p-2">
-          <div className="w-3/4 h-10 rounded-full custom-border bg-(--message-color) hover:scale-110 origin-bottom-left transition-all" />
-          <div className="w-1/2 h-10 rounded-full custom-border ml-auto bg-(--primary-green) hover:scale-110 origin-bottom-right transition-all mt-2 mb-4" />
-          <Wallpaper
-            wallpaper={currentWallpaper}
-            className="absolute inset-0 -z-9"
-          />
-          {currentPattern && currentPattern.id !== null && (
-            <WallpaperPattern
-              pattern={currentPattern}
-              className="absolute inset-0 -z-8"
-              opacity={0.7}
-              blendMode="overlay"
-            />
-          )}
 
-          <ThemeSelectionBar />
+        <div className="p-2">
+                  <Wallpaper
+          wallpaper={currentWallpaper}
+          className="absolute inset-0 -z-9"
+        />
+        {currentPattern && currentPattern.id !== null && (
+          <WallpaperPattern
+            pattern={currentPattern}
+            className="absolute inset-0 -z-8"
+            opacity={0.7}
+            blendMode="overlay"
+          />
+        )}
+          <div className="w-3/4 h-8 rounded-lg custom-border bg-(--message-color) hover:scale-110 origin-bottom-left transition-all" />
+          <div className="w-1/2 h-8 rounded-lg custom-border ml-auto bg-(--primary-green) hover:scale-110 origin-bottom-right transition-all mt-2" />
         </div>
+        <ThemeSelectionBar />
       </div>
     </SidebarLayout>
   );

@@ -9,7 +9,7 @@ import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
 import { useTranslation } from "react-i18next";
 import { handleError } from "@/common/utils/error/handleError";
 import { toast } from "react-toastify";
-import Button from "../ui/buttons/Button";
+import ConfirmDialog from "./layout/ConfirmDialog";
 
 interface DeleteChatModalData {
   chat: ChatResponse;
@@ -26,8 +26,7 @@ const DeleteChatModal: React.FC = () => {
   if (!chat) return null;
 
   const isDirectChat = chat.type === ChatType.DIRECT;
-  const capitalizedChatType =
-    chat.type.charAt(0).toUpperCase() + chat.type.slice(1);
+  const capitalizedChatType = chat.type.charAt(0).toUpperCase() + chat.type.slice(1);
 
   const handleDeleteChat = async () => {
     try {
@@ -48,48 +47,45 @@ const DeleteChatModal: React.FC = () => {
     }
   };
 
+  const getTitle = () => {
+    if (isDirectChat) {
+      return t("modal.delete_chat.title_direct");
+    }
+    return t("modal.delete_chat.title_group", {
+      type: capitalizedChatType,
+    });
+  };
+
+  const getDescription = () => {
+    return t("modal.delete_chat.description_group", {
+      type: chat.type.toLowerCase(),
+    });
+  };
+
+  const deleteIcon = (
+    <span className="material-symbols-outlined text-3xl! font-bold text-red-500">
+      delete
+    </span>
+  );
+
+  const chatInfo = (
+    <div className="flex items-center gap-2">
+      <ChatAvatar chat={chat} />
+      <h3 className="text-2xl font-semibold">{chat.name}</h3>
+    </div>
+  );
+
   return (
-    <>
-      <div className="p-4">
-        <div className="flex gap-2 items-center mb-4 text-red-500 font-semibold">
-          <span className="material-symbols-outlined text-3xl! font-bold">
-            delete
-          </span>
-          <h2 className="text-2xl">
-            {isDirectChat
-              ? t("modal.delete_chat.title_direct")
-              : t("modal.delete_chat.title_group", {
-                  type: capitalizedChatType,
-                })}
-          </h2>
-        </div>
-
-        <div className="flex items-center gap-3 mb-6">
-          <ChatAvatar chat={chat} />
-          <h3 className="text-2xl font-semibold">{chat.name}</h3>
-        </div>
-
-        <p className="mb-6 text-sm opacity-70">
-          {t("modal.delete_chat.description_group", {
-            type: chat.type.toLowerCase(),
-          })}
-        </p>
-      </div>
-
-      <div className="flex custom-border-t">
-        <Button
-          variant="ghost"
-          fullWidth
-          onClick={handleDeleteChat}
-          className="text-red-500"
-        >
-          {t("common.actions.delete")}
-        </Button>
-        <Button variant="ghost" fullWidth onClick={closeModal}>
-          {t("common.actions.cancel")}
-        </Button>
-      </div>
-    </>
+    <ConfirmDialog
+      title={getTitle()}
+      description={getDescription()}
+      icon={deleteIcon}
+      confirmText={t("common.actions.delete")}
+      onRedAction={handleDeleteChat}
+      onCancel={closeModal}
+    >
+      {chatInfo}
+    </ConfirmDialog>
   );
 };
 

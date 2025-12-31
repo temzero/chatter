@@ -65,8 +65,8 @@ const MemberContextMenu = React.forwardRef<HTMLDivElement, ContextMenuProps>(
     return (
       <div
         ref={ref}
-        className="fixed bg-(--background-color) border custom-border rounded shadow-lg"
-        style={{ zIndex: 999, top: `${y}px`, left: `${x}px` }}
+        className="context-menu"
+        style={{ zIndex: 999!, top: `${y}px`, left: `${x}px` }}
         onContextMenu={(e: React.MouseEvent) => {
           e.preventDefault();
           e.stopPropagation();

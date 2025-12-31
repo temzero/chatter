@@ -464,6 +464,12 @@ export const darkWallpaperOptions: WallpaperOption[] = [
 
   // 🟢 GREEN
   {
+    id: "green_fern",
+    name: "Fern Green",
+    type: WallpaperType.GRADIENT,
+    background: "linear-gradient(135deg, #2d5740 0%, #0d1b1e 100%)",
+  },
+  {
     id: "green_forest",
     name: "Forest Green",
     type: WallpaperType.GRADIENT,
@@ -474,12 +480,6 @@ export const darkWallpaperOptions: WallpaperOption[] = [
     name: "Deep Moss",
     type: WallpaperType.GRADIENT,
     background: "linear-gradient(135deg, #142a22 0%, #0a1511 100%)",
-  },
-  {
-    id: "green_abyss",
-    name: "Green Abyss",
-    type: WallpaperType.GRADIENT,
-    background: "linear-gradient(135deg, #0c1a15 0%, #050d0a 100%)",
   },
 
   // 🔵 BLUE

@@ -122,7 +122,7 @@ const Sidebar = () => {
   return (
     <div
       className={clsx(
-        "panel-glass h-full flex flex-col",
+        "glass-panel h-full flex flex-col",
         !isMobile && "border-r-2",
         sidebarWidthClass
       )}

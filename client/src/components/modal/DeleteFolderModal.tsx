@@ -6,8 +6,8 @@ import { getSetSidebar } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import Button from "../ui/buttons/Button";
 import { getColorFromPreset } from "@/common/constants/folderColor";
+import ConfirmDialog from "./layout/ConfirmDialog";
 
 interface DeleteFolderModalData {
   folderId: string;
@@ -41,40 +41,20 @@ const DeleteFolderModal: React.FC = () => {
   const folderColor = getColorFromPreset(folder.color);
 
   return (
-    <>
-      <div className="p-4">
-        <h2 className="text-2xl font-semibold mb-3">
-          {t("modal.delete_folder.title")}
-        </h2>
-        <h1
-          style={{ color: folderColor || "" }}
-          className="flex items-center gap-2 text-2xl font-semibold"
+    <ConfirmDialog
+      title={t("modal.delete_folder.title")}
+      description={t("modal.delete_folder.description")}
+      icon={
+        <span
+          style={{ color: folderColor ?? "" }}
+          className="material-symbols-outlined text-3xl!"
         >
-          <span className="material-symbols-outlined text-3xl!">
-            folder_delete
-          </span>
-          {folder.name}
-        </h1>
-
-        <p className="mb-6 mt-4 text-sm opacity-70">
-          {t("modal.delete_folder.description")}
-        </p>
-      </div>
-
-      <div className="flex custom-border-t">
-        <Button
-          variant="ghost"
-          fullWidth
-          onClick={handleDelete}
-          className="text-red-500"
-        >
-          {t("common.actions.delete")}
-        </Button>
-        <Button variant="ghost" fullWidth onClick={closeModal}>
-          {t("common.actions.cancel")}
-        </Button>
-      </div>
-    </>
+          folder_delete
+        </span>
+      }
+      confirmText={t("common.actions.delete")}
+      onRedAction={handleDelete}
+    />
   );
 };
 

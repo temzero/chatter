@@ -41,7 +41,7 @@ const ForgotPassword = () => {
           name="email"
           placeholder={t("account.email")}
           required
-          className="input-field backdrop-blur-lg"
+          className="input-field"
           autoFocus
         />
 

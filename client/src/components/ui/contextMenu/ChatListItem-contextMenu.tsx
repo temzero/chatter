@@ -97,7 +97,7 @@ const ChatListItemContextMenu = React.forwardRef<
   return (
     <div
       ref={ref}
-      className="fixed bg-(--background-color) border-2 border-(--border-color) rounded shadow-xl w-48"
+      className="context-menu"
       style={{ zIndex: 999, top: `${y}px`, left: `${x}px` }}
       onContextMenu={(e) => {
         e.preventDefault();

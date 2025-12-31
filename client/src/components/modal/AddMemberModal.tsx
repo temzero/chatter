@@ -3,7 +3,6 @@ import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import { useActiveChat, useChatStore } from "@/stores/chatStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
-import { modalAnimations } from "@/common/animations/modalAnimations";
 import { copyToClipboard } from "@/common/utils/copyToClipboard";
 import { handleError } from "@/common/utils/error/handleError";
 import { SidebarInfoMode } from "@/common/enums/sidebarInfoMode";
@@ -117,10 +116,7 @@ const AddMemberModal: React.FC = () => {
   };
 
   return (
-    <motion.div
-      {...modalAnimations.children}
-      className="bg-(--panel-color) text-(--text-color) rounded p-4 max-w-xl w-[400px] custom-border"
-    >
+    <div className="bg-(--panel-color) text-(--text-color) rounded p-4 max-w-xl w-[400px] custom-border">
       <h1 className="font-bold text-center text-xl mb-4 flex items-center justify-center gap-2">
         <span className="material-symbols-outlined text-3xl! font-bold">
           person_add
@@ -280,7 +276,7 @@ const AddMemberModal: React.FC = () => {
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 };
 

@@ -30,7 +30,7 @@ const ChatMembersEdit = () => {
   };
 
   return (
-    <aside className="relative w-full h-full overflow-hidden flex flex-col">
+    <aside className="relative w-full h-full flex flex-col overflow-hidden">
       <header className="flex w-full justify-between px-2 items-center min-h-(--header-height) custom-border-b">
         <h1 className="text-xl font-semibold ml-2">
           {t("sidebar_info.group_edit.members")} ({activeMembers.length})

@@ -4,9 +4,9 @@ import { getCloseModal, getModalData } from "@/stores/modalStore";
 import { toast } from "react-toastify";
 import { blockService } from "@/services/http/blockService";
 import { useTranslation } from "react-i18next";
-import Button from "../ui/buttons/Button";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
+import ConfirmDialog from "./layout/ConfirmDialog";
 
 interface UnblockUserModalData {
   blockedUser: {
@@ -22,6 +22,7 @@ const UnblockUserModal: React.FC = () => {
   const { t } = useTranslation();
   const closeModal = getCloseModal();
   const data = getModalData() as unknown as UnblockUserModalData;
+
   const updateMemberLocallyByUserId =
     useChatMemberStore.getState().updateMemberLocallyByUserId;
 
@@ -31,8 +32,9 @@ const UnblockUserModal: React.FC = () => {
 
   const handleUnblock = async () => {
     try {
-      const blockedResponse = await blockService.unblockUser(blockedUser.id);
-      updateMemberLocallyByUserId(blockedResponse.blockedId, {
+      const response = await blockService.unblockUser(blockedUser.id);
+
+      updateMemberLocallyByUserId(response.blockedId, {
         isBlockedByMe: false,
       });
 
@@ -51,36 +53,27 @@ const UnblockUserModal: React.FC = () => {
   };
 
   return (
-    <>
-      <div className="p-4">
-        <h2 className="text-2xl font-semibold mb-4 text-green-500">
-          {t("modal.unblock_user.title", { name: blockedUser.firstName })}
-        </h2>
-
-        <div className="flex items-center gap-3 mb-6">
-          <Avatar
-            avatarUrl={blockedUser.avatarUrl}
-            name={blockedUser.username || blockedUser.firstName}
-          />
-          <div>
-            <h3 className="font-medium">{blockedUser.username}</h3>
-          </div>
+    <ConfirmDialog
+      title={t("modal.unblock_user.title", {
+        name: blockedUser.firstName,
+      })}
+      description={t("modal.unblock_user.description")}
+      confirmText={t("common.actions.unblock")}
+      onGreenAction={handleUnblock}
+    >
+      {/* 👇 custom body */}
+      <div className="flex items-center gap-3 mt-3">
+        <Avatar
+          avatarUrl={blockedUser.avatarUrl}
+          name={blockedUser.username || blockedUser.firstName}
+        />
+        <div>
+          <h3 className="font-medium">
+            {blockedUser.username || blockedUser.firstName}
+          </h3>
         </div>
-
-        <p className="mb-6 text-sm opacity-70">
-          {t("modal.unblock_user.description")}
-        </p>
       </div>
-
-      <div className="flex custom-border-t">
-        <Button variant="ghost" fullWidth onClick={handleUnblock}>
-          {t("common.actions.unblock")}
-        </Button>
-        <Button variant="ghost" fullWidth onClick={closeModal}>
-          {t("common.actions.cancel")}
-        </Button>
-      </div>
-    </>
+    </ConfirmDialog>
   );
 };
 

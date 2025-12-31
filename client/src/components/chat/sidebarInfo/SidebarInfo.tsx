@@ -34,7 +34,7 @@ const SidebarInfo: React.FC = () => {
   return (
     <div
       className={clsx(
-        "panel-glass h-full",
+        "glass-panel h-full",
         !isMobile && "border-l-2",
         sidebarInfoWidthClass
       )}

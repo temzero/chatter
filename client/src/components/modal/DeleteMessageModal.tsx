@@ -7,10 +7,10 @@ import { useMessageStore } from "@/stores/messageStore";
 import { handleError } from "@/common/utils/error/handleError";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { ChatMemberRole } from "@/shared/types/enums/chat-member-role.enum";
-import Button from "../ui/buttons/Button";
 import { useTranslation } from "react-i18next";
 import { getChatTypeById } from "@/stores/chatStore";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
+import ConfirmDialog from "./layout/ConfirmDialog";
 
 interface DeleteMessageModalData {
   messageId: string;
@@ -19,21 +19,19 @@ interface DeleteMessageModalData {
 const DeleteMessageModal: React.FC = () => {
   const { t } = useTranslation();
   const currentUserId = getCurrentUserId();
-  if (!currentUserId) {
-    return;
-  }
+  if (!currentUserId) return null;
+
   const closeModal = getCloseModal();
-  const data = getModalData() as unknown as DeleteMessageModalData | undefined;
+  const data = getModalData() as unknown as DeleteMessageModalData;
 
   const getMessageById = useMessageStore.getState().getMessageById;
-  const messageId = data?.messageId;
-  const message = messageId ? getMessageById(messageId) : undefined;
-  const chatId = message?.chatId ?? "";
-  const chatType = getChatTypeById(chatId);
-
-  const isDirectChat = chatType === ChatType.DIRECT;
+  const message = data?.messageId ? getMessageById(data.messageId) : undefined;
 
   if (!message) return null;
+
+  const chatId = message.chatId;
+  const chatType = getChatTypeById(chatId);
+  const isDirectChat = chatType === ChatType.DIRECT;
   const isSender = message.sender.id === currentUserId;
 
   const myMember = useChatMemberStore
@@ -44,14 +42,13 @@ const DeleteMessageModal: React.FC = () => {
     myMember?.role === ChatMemberRole.ADMIN ||
     myMember?.role === ChatMemberRole.OWNER;
 
-  console.log("isSender", isSender);
-  console.log("isOwnerOrAdmin", isOwnerOrAdmin);
+  const isHardDelete = isDirectChat ? isSender : isSender || isOwnerOrAdmin;
 
-  const handleDelete = async (isDeleteForEveryone: boolean = false) => {
+  const handleDelete = async (isDeleteForEveryone: boolean) => {
     try {
       chatWebSocketService.deleteMessage({
         messageId: message.id,
-        chatId: chatId,
+        chatId,
         isDeleteForEveryone,
       });
       closeModal();
@@ -60,49 +57,30 @@ const DeleteMessageModal: React.FC = () => {
     }
   };
 
-  const isHardDelete: boolean = isDirectChat
-    ? isSender
-    : isSender || isOwnerOrAdmin;
-
   return (
-    <>
-      <div className="p-4">
-        <div className="flex gap-2 items-center mb-3">
-          <span className="material-symbols-outlined text-3xl!">
-            chat_error
-          </span>
-          <h1 className="text-2xl font-semibold">
-            {t("modal.delete_message.title")}
-          </h1>
-        </div>
-        <p className="mb-6 text-sm text-gray-400">
-          {t("modal.delete_message.description")}
-        </p>
-      </div>
-
-      <div className="flex custom-border-t">
-        {!isHardDelete && (
-          <Button
-            variant="ghost"
-            fullWidth
-            onClick={() => handleDelete(false)}
-            className="text-yellow-500"
-          >
-            {t("modal.delete_message.delete_for_me")}
-          </Button>
-        )}
-        {isHardDelete && (
-          <Button
-            variant="ghost"
-            fullWidth
-            onClick={() => handleDelete(true)}
-            className="text-red-500"
-          >
-            {t("common.actions.delete")}
-          </Button>
-        )}
-      </div>
-    </>
+    <ConfirmDialog
+      title={t("modal.delete_message.title")}
+      description={t("modal.delete_message.description")}
+      icon={
+        <span className="material-symbols-outlined text-3xl!">chat_error</span>
+      }
+      confirmText={
+        isHardDelete
+          ? t("common.actions.delete")
+          : t("modal.delete_message.delete_for_me")
+      }
+      onRedAction={
+        isHardDelete
+          ? () => handleDelete(true) // 🔴 delete for everyone
+          : undefined
+      }
+      onYellowAction={
+        !isHardDelete
+          ? () => handleDelete(false) // 🟡 delete for me
+          : undefined
+      }
+      disableCancel={false}
+    />
   );
 };
 
