@@ -6,6 +6,7 @@ import { getCurrentUserId } from "@/stores/authStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { getOpenModal, ModalType } from "@/stores/modalStore";
 import { useTranslation } from "react-i18next";
+import { Portal } from "../Portal";
 
 interface ContextMenuProps {
   x: number;
@@ -25,7 +26,7 @@ const MemberContextMenu = React.forwardRef<HTMLDivElement, ContextMenuProps>(
     const removeMember = useChatMemberStore.getState().removeChatMember;
 
     const classes =
-      "flex items-center gap-2 p-2 hover:bg-(--hover-color) cursor-pointer";
+      "flex items-center gap-2 p-2 hover:bg-(--hover-color) truncate cursor-pointer z-99";
 
     const isMyself = member.userId === currentUserId;
     const canManageOthers =
@@ -63,53 +64,57 @@ const MemberContextMenu = React.forwardRef<HTMLDivElement, ContextMenuProps>(
         : [];
 
     return (
-      <div
-        ref={ref}
-        className="context-menu"
-        style={{ zIndex: 999!, top: `${y}px`, left: `${x}px` }}
-        onContextMenu={(e: React.MouseEvent) => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
-      >
-        {(isMyself || canManageOthers) && (
-          <div className={classes} onClick={handleOpenNicknameModal}>
-            <span className="material-symbols-outlined">edit</span>
-            {t("context_menu.chat_member.set_nickname")}
-          </div>
-        )}
-
-        {!isMyself && canManageOthers && (
-          <>
-            {availableRoles
-              .filter((role) => role !== member.role) // skip current role
-              .map((role) => {
-                const roleInfo = chatMemberRoleMap[role];
-
-                return (
-                  <div
-                    key={role}
-                    className={classes}
-                    onClick={() => handleChangeRole(role)}
-                  >
-                    <span className="material-symbols-outlined">
-                      {roleInfo.icon}
-                    </span>
-                    {t(`context_menu.chat_member.set_${role.toLowerCase()}`)}
-                  </div>
-                );
-              })}
-
-            <div
-              className={`${classes} text-red-500`}
-              onClick={handleRemoveMember}
-            >
-              <span className="material-symbols-outlined">delete_forever</span>
-              {t("common.actions.delete")}
+      <Portal>
+        <div
+          ref={ref}
+          className="context-menu"
+          style={{ zIndex: 999!, top: `${y}px`, left: `${x}px` }}
+          onContextMenu={(e: React.MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        >
+          {(isMyself || canManageOthers) && (
+            <div className={classes} onClick={handleOpenNicknameModal}>
+              <span className="material-symbols-outlined">edit</span>
+              {t("context_menu.chat_member.set_nickname")}
             </div>
-          </>
-        )}
-      </div>
+          )}
+
+          {!isMyself && canManageOthers && (
+            <>
+              {availableRoles
+                .filter((role) => role !== member.role) // skip current role
+                .map((role) => {
+                  const roleInfo = chatMemberRoleMap[role];
+
+                  return (
+                    <div
+                      key={role}
+                      className={classes}
+                      onClick={() => handleChangeRole(role)}
+                    >
+                      <span className="material-symbols-outlined">
+                        {roleInfo.icon}
+                      </span>
+                      {t(`context_menu.chat_member.set_${role.toLowerCase()}`)}
+                    </div>
+                  );
+                })}
+
+              <div
+                className={`${classes} text-red-500`}
+                onClick={handleRemoveMember}
+              >
+                <span className="material-symbols-outlined">
+                  delete_forever
+                </span>
+                {t("common.actions.delete")}
+              </div>
+            </>
+          )}
+        </div>
+      </Portal>
     );
   }
 );

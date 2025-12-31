@@ -44,7 +44,7 @@ const ChatMembersEdit = () => {
         </button>
       </header>
 
-      <div className="overflow-y-auto h-screen p-4">
+      <div className="p-4">
         {activeMembers.length > 0 && (
           <ChatMemberItems
             chatId={activeChatId}

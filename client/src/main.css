@@ -82,7 +82,7 @@
   --panel-color: rgb(238, 238, 238);
   --glass-panel-color: rgba(255, 255, 255, 0.6);
   --active-chat-color: rgba(0, 207, 152, 0.82);
-  --input-color: rgba(150, 150, 150, 0.1);
+  --input-color: rgba(255, 255, 255, 0.3);
   --input-border-color: rgba(0, 0, 0, 0.3);
   --border-color: rgba(0, 0, 0, 0.2);
   --hover-color: rgb(221, 221, 221);
@@ -107,7 +107,7 @@ html[data-theme="dark"] {
   --panel-color: rgba(34, 34, 34, 1);
   --glass-panel-color: rgba(0, 0, 0, 0.5);
   --border-color: rgba(255, 255, 255, 0.1);
-  --input-color: rgba(0, 0, 0, 0.1);
+  --input-color: rgba(0, 0, 0, 0.3);
   --input-border-color: rgba(255, 255, 255, 0.2);
   --hover-color: rgba(122, 122, 122, 0.2);
   --message-color: rgb(48, 48, 48);
@@ -206,13 +206,13 @@ input[type="number"]::-webkit-inner-spin-button {
   border-color: var(--border-color);
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
 
-  backdrop-filter: blur(10px);
-  /* -webkit-backdrop-filter: blur(10px); */
+  backdrop-filter: blur(12px);
+  /* -webkit-backdrop-filter: blur(12px); */
 }
 
 .context-menu {
-  position: fixed;
-  width: 13rem;
+  position: fixed; /* Use fixed instead of absolute */
+  z-index: 9999 !important; /* Much higher z-index */
   border-radius: 0.5rem;
   overflow: hidden;
   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1),
@@ -231,6 +231,7 @@ input[type="number"]::-webkit-inner-spin-button {
   border: 2px solid var(--input-border-color);
   background-color: var(--input-color);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  /* backdrop-filter: blur(8px); */
 }
 
 .input-container {

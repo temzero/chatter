@@ -7,6 +7,7 @@ import { ModalType, getOpenModal } from "@/stores/modalStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useChatStore } from "@/stores/chatStore";
 import { useTranslation } from "react-i18next";
+import { Portal } from "../Portal";
 
 interface ChatContextMenuProps {
   x: number;
@@ -95,31 +96,33 @@ const ChatListItemContextMenu = React.forwardRef<
   ];
 
   return (
-    <div
-      ref={ref}
-      className="context-menu"
-      style={{ zIndex: 999, top: `${y}px`, left: `${x}px` }}
-      onContextMenu={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-      }}
-    >
-      {menuActions.map((action) => (
-        <div
-          key={action.label}
-          className={`flex items-center gap-3 p-2 hover:bg-(--hover-color) opacity-70 hover:opacity-100 cursor-pointer ${
-            action.className || ""
-          }`}
-          onClick={() => {
-            action.onClick();
-            onClose();
-          }}
-        >
-          <span className="material-symbols-outlined">{action.icon}</span>
-          {action.label}
-        </div>
-      ))}
-    </div>
+    <Portal>
+      <div
+        ref={ref}
+        className="context-menu"
+        style={{ zIndex: 999, top: `${y}px`, left: `${x}px` }}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+      >
+        {menuActions.map((action) => (
+          <div
+            key={action.label}
+            className={`flex items-center gap-3 p-2 hover:bg-(--hover-color) opacity-70 hover:opacity-100 cursor-pointer truncate ${
+              action.className || ""
+            }`}
+            onClick={() => {
+              action.onClick();
+              onClose();
+            }}
+          >
+            <span className="material-symbols-outlined">{action.icon}</span>
+            {action.label}
+          </div>
+        ))}
+      </div>
+    </Portal>
   );
 });
 

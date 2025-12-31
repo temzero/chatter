@@ -199,7 +199,8 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
   return (
     <div
       className={clsx(
-        "absolute bottom-0 left-0 backdrop-blur-xl w-full flex flex-col items-start p-3 shadow border-(--border-color)"
+        "absolute bottom-0 left-0 w-full flex flex-col items-start p-3 ",
+        "shadow-xl backdrop-blur"
       )}
       style={{
         zIndex: replyToMessageId ? 100 : 2,

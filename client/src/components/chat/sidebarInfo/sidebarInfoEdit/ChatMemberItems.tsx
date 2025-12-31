@@ -124,84 +124,86 @@ export const ChatMemberItems = ({
   );
 
   return (
-    <div className="relative flex flex-col gap-3 rounded overflow-hidden w-full">
-      {myMember && (
-        <div className="custom-border rounded">
-          <div className="flex items-center gap-2 p-2 bg-(--hover-color) text-sm font-medium text-(--primary-green)">
-            <span className="material-symbols-outlined">
-              {chatMemberRoleMap[myMember.role]?.icon}
-            </span>
-            {t("sidebar_info.members_edit.you_role", {
-              role: getRoleDisplayName(myMember.role),
-            })}
-          </div>
-          <div
-            className={itemClasses}
-            onContextMenu={(e) => handleRightClick(e, myMember)}
-          >
-            <div className="shrink-0 mr-3">
-              <Avatar
-                avatarUrl={myMember.avatarUrl}
-                name={myMember.firstName}
-                size={10}
-                textSize="sm"
-              />
-            </div>
-            <div className="grow">
-              <div className="font-semibold">
-                {myMember.firstName} {myMember.lastName}
-              </div>
-              {myMember.nickname && (
-                <div className="opacity-50">{myMember.nickname}</div>
-              )}
-              <div className="text-sm opacity-50 mt-1">
-                {getStatusDisplayName(myMember.status)}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {sortedGroups.map(([role, groupMembers]) => (
-        <div key={role} className="custom-border rounded">
-          <div className="flex items-center justify-between p-2 bg-(--hover-color) text-sm font-medium">
-            <div className="flex items-center gap-1">
+    <>
+      <div className="relative flex flex-col gap-3 rounded overflow-hidden w-full">
+        {myMember && (
+          <div className="custom-border rounded">
+            <div className="flex items-center gap-2 p-2 bg-(--hover-color) text-sm font-medium text-(--primary-green)">
               <span className="material-symbols-outlined">
-                {chatMemberRoleMap[role as ChatMemberRole]?.icon}
+                {chatMemberRoleMap[myMember.role]?.icon}
               </span>
-              <span>{getRoleDisplayName(role as ChatMemberRole)}</span>
+              {t("sidebar_info.members_edit.you_role", {
+                role: getRoleDisplayName(myMember.role),
+              })}
             </div>
-            <p>{groupMembers.length}</p>
-          </div>
-          {groupMembers.map((member) => (
             <div
-              key={member.userId}
               className={itemClasses}
-              onContextMenu={(e) => handleRightClick(e, member)}
+              onContextMenu={(e) => handleRightClick(e, myMember)}
             >
               <div className="shrink-0 mr-3">
                 <Avatar
-                  avatarUrl={member.avatarUrl}
-                  name={member.firstName}
+                  avatarUrl={myMember.avatarUrl}
+                  name={myMember.firstName}
                   size={10}
                   textSize="sm"
                 />
               </div>
               <div className="grow">
                 <div className="font-semibold">
-                  {member.firstName} {member.lastName}
+                  {myMember.firstName} {myMember.lastName}
                 </div>
-                {member.nickname && (
-                  <div className="opacity-50">{member.nickname}</div>
+                {myMember.nickname && (
+                  <div className="opacity-50">{myMember.nickname}</div>
                 )}
                 <div className="text-sm opacity-50 mt-1">
-                  {getStatusDisplayName(member.status)}
+                  {getStatusDisplayName(myMember.status)}
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-      ))}
+          </div>
+        )}
+
+        {sortedGroups.map(([role, groupMembers]) => (
+          <div key={role} className="custom-border rounded">
+            <div className="flex items-center justify-between p-2 bg-(--hover-color) text-sm font-medium">
+              <div className="flex items-center gap-1">
+                <span className="material-symbols-outlined">
+                  {chatMemberRoleMap[role as ChatMemberRole]?.icon}
+                </span>
+                <span>{getRoleDisplayName(role as ChatMemberRole)}</span>
+              </div>
+              <p>{groupMembers.length}</p>
+            </div>
+            {groupMembers.map((member) => (
+              <div
+                key={member.userId}
+                className={itemClasses}
+                onContextMenu={(e) => handleRightClick(e, member)}
+              >
+                <div className="shrink-0 mr-3">
+                  <Avatar
+                    avatarUrl={member.avatarUrl}
+                    name={member.firstName}
+                    size={10}
+                    textSize="text-3xl"
+                  />
+                </div>
+                <div className="grow">
+                  <div className="font-semibold">
+                    {member.firstName} {member.lastName}
+                  </div>
+                  {member.nickname && (
+                    <div className="opacity-50">{member.nickname}</div>
+                  )}
+                  <div className="text-sm opacity-50 mt-1">
+                    {getStatusDisplayName(member.status)}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
 
       {contextMenu?.member && myRole && (
         <MemberContextMenu
@@ -214,6 +216,6 @@ export const ChatMemberItems = ({
           chatMemberRoleMap={chatMemberRoleMap}
         />
       )}
-    </div>
+    </>
   );
 };

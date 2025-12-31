@@ -34,11 +34,21 @@ const SidebarInfo: React.FC = () => {
   return (
     <div
       className={clsx(
-        "glass-panel h-full",
+        "glass-panel",
+        "h-full",
         !isMobile && "border-l-2",
         sidebarInfoWidthClass
       )}
     >
+      {isMobile && (
+        <div
+          className={clsx(
+            "fixed w-full h-full backdrop-blur-2xl -z-1",
+            // "bg-(--panel-color)",
+          )}
+        />
+      )}
+
       <AnimatePresence mode="wait">
         {CurrentComponent && (
           <motion.div
