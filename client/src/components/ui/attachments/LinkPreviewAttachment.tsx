@@ -104,7 +104,7 @@ export const LinkPreviewAttachment: React.FC<Props> = ({
         )}
         style={{ zIndex: 1 }}
       >
-        <span className="material-symbols-outlined custom-border rounded-full bg-(--sidebar-color) text-blue-500 group-hover:bg-blue-500 group-hover:text-white">
+        <span className="material-symbols-outlined custom-border rounded-full bg-(--panel-color) text-blue-500 group-hover:bg-blue-500 group-hover:text-white">
           link
         </span>
         <h1

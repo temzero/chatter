@@ -8,9 +8,10 @@ import SidebarInfoAttachments from "./sidebarInfoMedia/SidebarInfoAttachments";
 import DirectChatEdit from "@/components/chat/sidebarInfo/sidebarInfoEdit/DirectChatEdit";
 import ChatMembersEdit from "@/components/chat/sidebarInfo/sidebarInfoEdit/ChatMembersEdit";
 import GroupChatEdit from "@/components/chat/sidebarInfo/sidebarInfoEdit/GroupChatEdit";
-
+import { useIsMobile } from "@/stores/deviceStore";
 
 const SidebarInfo: React.FC = () => {
+  const isMobile = useIsMobile();
   const currentSidebarInfo = useCurrentSidebarInfo();
   const sidebarInfoWidthClass = useSidebarInfoWidth();
 
@@ -33,7 +34,8 @@ const SidebarInfo: React.FC = () => {
   return (
     <div
       className={clsx(
-        "relative h-full overflow-hidden bg-(--sidebar-color) border-l-2 border-(--border-color) shadow-lg select-none",
+        "panel-glass h-full",
+        !isMobile && "border-l-2",
         sidebarInfoWidthClass
       )}
     >

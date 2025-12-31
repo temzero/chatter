@@ -21,6 +21,7 @@ import SidebarBlockedUsers from "./more/SidebarBlockedUsers";
 import SidebarContacts from "./more/SidebarContacts";
 import SidebarFolders from "./more/sidebarFolders/SidebarFolders";
 import SidebarFriendRequests from "./more/SidebarFriendRequests";
+import { useIsMobile } from "@/stores/deviceStore";
 
 const SidebarSettings = lazy(
   () => import("@/components/sidebar/settings/SidebarSettings")
@@ -69,7 +70,7 @@ const SidebarSettingsPhoneNumber = lazy(
 );
 
 const Sidebar = () => {
-  console.log("[MOUNTED]", "Sidebar");
+  const isMobile = useIsMobile();
   const currentSidebar = useCurrentSidebar();
   const sidebarWidthClass = useSidebarWidth();
 
@@ -121,7 +122,8 @@ const Sidebar = () => {
   return (
     <div
       className={clsx(
-        "h-full overflow-hidden flex flex-col bg-(--sidebar-color) shadow border-(--border-color) border-r-2 transition-all duration-300 ease-in-out select-none",
+        "panel-glass h-full flex flex-col",
+        !isMobile && "border-r-2",
         sidebarWidthClass
       )}
       style={{ zIndex: 10 }}

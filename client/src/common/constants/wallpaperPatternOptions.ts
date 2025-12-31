@@ -216,21 +216,6 @@ export const wallpaperPatternOptions: WallpaperPatternOption[] = [
     backgroundRepeat: "repeat",
   },
 
-  // Isometric
-  {
-    id: "pattern_isometric",
-    name: "Isometric",
-    background: `
-      linear-gradient(30deg, var(--text-color, #e6e6e6) 12.5%, transparent 12.5%, transparent 87.5%, var(--text-color, #e6e6e6) 87.5%),
-      linear-gradient(150deg, var(--text-color, #e6e6e6) 12.5%, transparent 12.5%, transparent 87.5%, var(--text-color, #e6e6e6) 87.5%),
-      linear-gradient(30deg, var(--text-color, #e6e6e6) 12.5%, transparent 12.5%, transparent 87.5%, var(--text-color, #e6e6e6) 87.5%),
-      linear-gradient(150deg, var(--text-color, #e6e6e6) 12.5%, transparent 12.5%, transparent 87.5%, var(--text-color, #e6e6e6) 87.5%),
-      linear-gradient(60deg, var(--pattern-grid-fill, #ededed) 25%, transparent 25%, transparent 75%, var(--pattern-grid-fill, #ededed) 75%)
-    `,
-    backgroundSize: "80px 140px",
-    backgroundPosition: "0 0, 0 0, 40px 70px, 40px 70px, 0 0",
-    backgroundRepeat: "repeat",
-  },
   {
     id: "pattern_hex_grid",
     name: "Hex Grid",
@@ -257,7 +242,22 @@ export const wallpaperPatternOptions: WallpaperPatternOption[] = [
       var(--text-color, rgba(0, 0, 0, 0.08)) 97.5%
     )
   `,
-    backgroundSize: "48px 28px",
+    backgroundSize: "40px 24px",
+    backgroundRepeat: "repeat",
+  },
+  // Isometric
+  {
+    id: "pattern_isometric",
+    name: "Isometric",
+    background: `
+      linear-gradient(30deg, var(--text-color, #e6e6e6) 12.5%, transparent 12.5%, transparent 87.5%, var(--text-color, #e6e6e6) 87.5%),
+      linear-gradient(150deg, var(--text-color, #e6e6e6) 12.5%, transparent 12.5%, transparent 87.5%, var(--text-color, #e6e6e6) 87.5%),
+      linear-gradient(30deg, var(--text-color, #e6e6e6) 12.5%, transparent 12.5%, transparent 87.5%, var(--text-color, #e6e6e6) 87.5%),
+      linear-gradient(150deg, var(--text-color, #e6e6e6) 12.5%, transparent 12.5%, transparent 87.5%, var(--text-color, #e6e6e6) 87.5%),
+      linear-gradient(60deg, var(--pattern-grid-fill, #ededed) 25%, transparent 25%, transparent 75%, var(--pattern-grid-fill, #ededed) 75%)
+    `,
+    backgroundSize: "80px 140px",
+    backgroundPosition: "0 0, 0 0, 40px 70px, 40px 70px, 0 0",
     backgroundRepeat: "repeat",
   },
   {

@@ -130,6 +130,7 @@ const Register = () => {
         />
 
         <PasswordField
+          id="confirmPassword"
           name="confirmPassword"
           placeholder={t("auth.common.confirm_password")}
           autoComplete="new-password"

@@ -119,7 +119,7 @@ const AddMemberModal: React.FC = () => {
   return (
     <motion.div
       {...modalAnimations.children}
-      className="bg-(--sidebar-color) text-(--text-color) rounded p-4 max-w-xl w-[400px] custom-border"
+      className="bg-(--panel-color) text-(--text-color) rounded p-4 max-w-xl w-[400px] custom-border"
     >
       <h1 className="font-bold text-center text-xl mb-4 flex items-center justify-center gap-2">
         <span className="material-symbols-outlined text-3xl! font-bold">

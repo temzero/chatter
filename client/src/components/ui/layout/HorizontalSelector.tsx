@@ -57,7 +57,7 @@ const HorizontalSelector = <T extends SelectorItem>({
     }`;
 
   const buttonBaseClass =
-    "group absolute h-full flex items-center justify-center bg-(--sidebar-color) custom-border overflow-hidden cursor-pointer";
+    "group absolute h-full flex items-center justify-center bg-(--glass-panel-color) backdrop-blur custom-border overflow-hidden cursor-pointer";
   const buttonIconClass =
     "material-symbols-outlined opacity-60 group-hover:opacity-100 group-hover:scale-125 transition-all";
 

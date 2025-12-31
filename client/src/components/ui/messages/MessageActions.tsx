@@ -141,7 +141,8 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
     <div
       onClick={(e) => e.stopPropagation()}
       className={clsx(
-        "flex justify-end rounded-lg bg-(--sidebar-color) custom-border overflow-hidden",
+        "panel-glass",
+        "flex justify-end rounded-lg custom-border",
         className
       )}
       style={{ zIndex: 99 }}

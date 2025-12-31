@@ -108,8 +108,10 @@ const EmojiPicker = ({ onSelect }: CustomEmojiPickerProps) => {
       <motion.a
         whileTap={{ scale: 0.88 }}
         onClick={() => setIsOpen(!isOpen)}
-        className={`hover:opacity-90 rounded-full! cursor-pointer flex items-center select-none focus:outline-none ${
-          isOpen ? "bg-(--border-color) text-(--primary-green-glow) opacity-100" : "opacity-50"
+        className={`hover:opacity-90 rounded-full! cursor-pointer flex items-center select-none focus:outline-none -mr-0.5 ${
+          isOpen
+            ? "bg-(--border-color) text-(--primary-green-glow) opacity-100"
+            : "opacity-50"
         }`}
         aria-label="Open emoji picker"
       >
@@ -125,7 +127,7 @@ const EmojiPicker = ({ onSelect }: CustomEmojiPickerProps) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 25 }}
             transition={{ duration: 0.1, ease: "easeOut" }}
-            className="absolute right-4 bottom-12 mb-3 w-80 bg-(--sidebar-color) rounded-lg shadow-lg border custom-border overflow-x-hidden"
+            className="absolute right-4 bottom-12 mb-3 w-80 rounded-lg custom-border overflow-x-hidden bg-(--panel-color)!"
             style={{ zIndex: 99 }}
           >
             <div className="h-80 overflow-y-auto overflow-x-hidden pt-0">
@@ -135,7 +137,7 @@ const EmojiPicker = ({ onSelect }: CustomEmojiPickerProps) => {
                     id={`category-${category.name
                       .toLowerCase()
                       .replace(/ /g, "-")}`}
-                    className={`font-semibold bg-(--sidebar-color) custom-border-b p-1 px-3`}
+                    className={`font-semibold custom-border-b p-1 px-3`}
                   >
                     {category.name}
                   </h3>

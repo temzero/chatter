@@ -44,7 +44,7 @@ export const CallActionButton: React.FC<CallActionButtonProps> = ({
 
   // 🔹 MotionValues
   const buttonColor = useTransform(y, (val) =>
-    getColor(val, "var(--sidebar-color)")
+    getColor(val, "var(--panel-color)")
   );
   const boundaryColor = useTransform(y, (val) =>
     getColor(val, "var(--border-color)")

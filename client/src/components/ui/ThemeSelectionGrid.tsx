@@ -21,7 +21,7 @@ export const SelectionGrid = <T extends { id: string | null; name: string }>({
 }: SelectionGridProps<T>) => {
   return (
     <div
-      className={`grid gap-3 overflow-auto mb-6 ${className}`}
+      className={`grid gap-3 mb-6 ${className}`}
       style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
     >
       {items.map((item) => (
@@ -71,11 +71,10 @@ export const SelectionGridItem = <
     <button
       onClick={() => onSelect(item.id)}
       className={clsx(
-        "relative aspect-square border-2 transition-all hover:scale-90 overflow-hidden",
+        "relative aspect-square border-2 transition-all hover:scale-110 overflow-hidden",
         // ===== Selected border =====
         isSelected && !isNullItem && "border-(--primary-green-glow)! border-4",
         isNullSelected && "border-red-500! border-4",
-        !isSelected && "hover:border-4",
         {
           "rounded-full! border-(--input-border-color)!": isRound || isNullItem,
           "rounded-lg! border-(--border-color)!": !isRound && !isNullItem,
@@ -96,7 +95,9 @@ export const SelectionGridItem = <
           <div
             className={clsx(
               "absolute top-1/2 left-[-25%] w-[150%] -rotate-45",
-              isNullSelected ? "bg-red-500 h-1" : "bg-(--input-border-color) h-0.5"
+              isNullSelected
+                ? "bg-red-500 h-1"
+                : "bg-(--input-border-color) h-0.5"
             )}
           />
         </div>

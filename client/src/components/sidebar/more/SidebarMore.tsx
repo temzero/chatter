@@ -159,7 +159,7 @@ const SidebarMore: React.FC = () => {
       </div>
 
       <div
-        className={`w-full flex custom-border-t backdrop-blur-[20px] shadow mt-auto ${
+        className={`w-full flex custom-border-t shadow mt-auto ${
           isCompact ? "justify-center" : "justify-between"
         }`}
       >

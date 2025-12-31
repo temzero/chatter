@@ -27,7 +27,7 @@ const ChatBarInput: React.FC<ChatBarInputProps> = ({
     <div
       ref={containerRef}
       id="input-container"
-      className={clsx("bg-(--sidebar-color)!", "chat-input-container")}
+      className={clsx("chat-input-container")}
     >
       <textarea
         ref={inputRef}

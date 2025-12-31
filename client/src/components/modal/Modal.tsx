@@ -69,7 +69,7 @@ const ModalContent = ({
         ) : (
           <motion.div
             {...modalAnimations.children}
-            className="bg-(--sidebar-color) w-[400px] rounded custom-border"
+            className="bg-(--panel-color) rounded-lg w-[400px] custom-border"
           >
             <Component />
           </motion.div>

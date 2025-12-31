@@ -96,7 +96,7 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
       {repliedMessage && (
         <div
           onClick={() => scrollToMessageById(repliedMessage.id)}
-          className="w-[90%] mx-auto bg-(--sidebar-color) text-xs rounded-t-xl cursor-pointer p-2 pb-0 opacity-80 hover:opacity-100 custom-border"
+          className="w-[90%] mx-auto bg-(--panel-color) text-xs rounded-t-xl cursor-pointer p-2 pb-0 opacity-80 hover:opacity-100 custom-border"
         >
           <MessageHorizontalPreview
             message={repliedMessage}
@@ -128,7 +128,7 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
         />
 
         <div
-          className="absolute bottom-1 right-1 text-xs italic opacity-0 group-hover:opacity-80 font-semibold bg-(--sidebar-color) p-0.5 px-1.5 rounded-full! backdrop-blur-lg"
+          className="absolute bottom-1 right-1 text-xs italic opacity-0 group-hover:opacity-80 font-semibold bg-(--panel-color) p-0.5 px-1.5 rounded-full! backdrop-blur-lg"
           style={{ zIndex: 1 }}
         >
           {formatTime(message.createdAt)}

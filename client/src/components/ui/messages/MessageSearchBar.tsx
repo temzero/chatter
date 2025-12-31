@@ -75,7 +75,7 @@ const MessageSearchBar: React.FC = () => {
 
   return (
     <motion.div
-      className="w-full border-4 bg-(--sidebar-color) border-(--input-border-color) p-1 flex items-center gap-1"
+      className="w-full border-4 bg-(--glass-panel-color) border-(--input-border-color) p-1 flex items-center gap-1"
       style={{ zIndex: 99 }}
       onClick={handleClick}
       {...messageAnimations.pinMessage}

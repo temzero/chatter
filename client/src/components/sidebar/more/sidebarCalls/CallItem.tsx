@@ -86,7 +86,7 @@ const CallItem: React.FC<CallItemProps> = ({ call, isCaller, onDelete }) => {
               e.stopPropagation();
               onDelete?.();
             }}
-            className={`w-8 h-8 flex items-center justify-center bg-(--sidebar-color) opacity-60 hover:opacity-100 hover:bg-red-500 rounded-full! custom-border`}
+            className={`w-8 h-8 flex items-center justify-center bg-(--panel-color) opacity-60 hover:opacity-100 hover:bg-red-500 rounded-full! custom-border`}
             title="Delete Call"
           >
             <span className="material-symbols-outlined text-2xl!">delete</span>
