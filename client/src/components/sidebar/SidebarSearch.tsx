@@ -87,6 +87,7 @@ const SidebarSearch: React.FC = () => {
         selected={selectedType}
         onSelect={handleChatTypeChange}
         getIcon={getTypeIcon}
+        className="mb-3 mx-1.5"
       />
 
       {/* Chat List Container */}

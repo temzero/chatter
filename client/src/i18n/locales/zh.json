@@ -546,10 +546,10 @@
   "display_settings": {
     "title": "显示",
     "options": {
-      "animations": "启用动画",
       "reduce_motion": "减少动态效果",
+      "reduce_transparency": "降低透明度",
       "high_contrast": "高对比度模式",
-      "text_size_large": "大文本尺寸"
+      "text_size": "文字大小"
     }
   },
 

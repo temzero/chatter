@@ -7,6 +7,7 @@ interface SelectionBarProps<T = string> {
   selected: T;
   onSelect: (value: T) => void;
   getIcon?: (value: T) => string;
+  getLabel?: (value: T) => string;
   className?: string;
 }
 
@@ -15,6 +16,7 @@ export const SelectionBar = <T extends string>({
   selected,
   onSelect,
   getIcon,
+  getLabel,
   className,
 }: SelectionBarProps<T>) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -132,7 +134,7 @@ export const SelectionBar = <T extends string>({
   return (
     <div
       ref={containerRef}
-      className={`relative flex mb-3 mx-1.5 border-2 border-(--border-color) bg-(--card-bg-color) rounded-lg overflow-hidden shadow-xl ${className}`}
+      className={`relative flex border-2 border-(--input-border-color) bg-(--card-bg-color) rounded-lg overflow-hidden shadow-2xl! ${className}`}
     >
       {options.map((value, index) => (
         <button
@@ -156,12 +158,14 @@ export const SelectionBar = <T extends string>({
               {getIcon(value)}
             </i>
           )}
+
+          {getLabel && <span className="truncate">{getLabel(value)}</span>}
         </button>
       ))}
       <motion.div
         ref={sliderRef}
         id="slider"
-        className="absolute bg-(--primary-green)/40 h-full rounded cursor-grab active:cursor-grabbing"
+        className="absolute bg-(--primary-green)/40 h-full rounded cursor-pointer active:cursor-grabbing"
         style={{
           zIndex: 2,
           x,

@@ -45,7 +45,7 @@ const ThemeSelectionBar: React.FC<ThemeSelectionBarProps> = ({ className }) => {
       selected={themeMode}
       onSelect={handleThemeSelect}
       getIcon={getThemeIcon}
-      className={`mx-0! mb-0! ${className}`} 
+      className={className}
     />
   );
 };

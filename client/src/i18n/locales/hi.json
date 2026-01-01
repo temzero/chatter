@@ -545,10 +545,10 @@
   "display_settings": {
     "title": "प्रदर्शन",
     "options": {
-      "animations": "एनीमेशन सक्षम करें",
       "reduce_motion": "गति कम करें",
+      "reduce_transparency": "पारदर्शिता कम करें",
       "high_contrast": "उच्च कंट्रास्ट मोड",
-      "text_size_large": "बड़ा पाठ आकार"
+      "text_size": "पाठ आकार"
     }
   },
 

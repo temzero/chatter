@@ -545,10 +545,10 @@
   "display_settings": {
     "title": "디스플레이",
     "options": {
-      "animations": "애니메이션 활성화",
       "reduce_motion": "모션 감소",
+      "reduce_transparency": "투명도 낮추기",
       "high_contrast": "고대비 모드",
-      "text_size_large": "큰 텍스트 크기"
+      "text_size": "글자 크기"
     }
   },
 

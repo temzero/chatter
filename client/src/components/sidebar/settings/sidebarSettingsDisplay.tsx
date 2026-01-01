@@ -1,42 +1,38 @@
-import React, { useState } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { SidebarMode } from "@/common/enums/sidebarMode";
+import { TextSizeSelectionBar } from "@/components/ui/settings/textSizeSelectionBar";
 import SwitchBtn from "@/components/ui/buttons/SwitchBtn";
+import { useSettingsStore } from "@/stores/settingsStore"; // Import the store
 
 interface DisplayOption {
-  code: string;
+  code: keyof {
+    reduceMotion: boolean;
+    reduceTransparency: boolean;
+    highContrast: boolean;
+  };
   labelKey: string;
 }
 
 const displayOptions: DisplayOption[] = [
-  { code: "animations", labelKey: "display_settings.options.animations" },
-  { code: "reduce-motion", labelKey: "display_settings.options.reduce_motion" },
-  { code: "high-contrast", labelKey: "display_settings.options.high_contrast" },
-  {
-    code: "text-size-large",
-    labelKey: "display_settings.options.text_size_large",
-  },
+  { code: "reduceMotion", labelKey: "display_settings.options.reduce_motion" },
+  { code: "reduceTransparency", labelKey: "display_settings.options.reduce_transparency" },
+  { code: "highContrast", labelKey: "display_settings.options.high_contrast" },
 ];
 
 const SidebarSettingsDisplay: React.FC = () => {
   const { t } = useTranslation();
+  
+  // Use the Zustand store instead of local state
+  const displaySettings = useSettingsStore((state) => state.displaySettings);
+  const updateDisplaySettings = useSettingsStore((state) => state.updateDisplaySettings);
 
-  // State to track which options are enabled
-  const [settings, setSettings] = useState<Record<string, boolean>>(() => {
-    // Initialize all options to false by default
-    const initialState: Record<string, boolean> = {};
-    displayOptions.forEach((opt) => (initialState[opt.code] = false));
-    return initialState;
-  });
-
-  const handleToggle = (code: string) => {
-    setSettings((prev) => ({
-      ...prev,
-      [code]: !prev[code],
-    }));
-    console.log("Toggled:", code, !settings[code]);
-    // TODO: save to user settings / context
+  const handleToggle = (code: DisplayOption["code"]) => {
+    // Update the specific setting in the store
+    updateDisplaySettings({
+      [code]: !displaySettings[code]
+    });
   };
 
   return (
@@ -44,17 +40,19 @@ const SidebarSettingsDisplay: React.FC = () => {
       title={t("display_settings.title")}
       backLocation={SidebarMode.SETTINGS}
     >
-      <div className="">
-        {displayOptions.map((option) => (
-          <div key={option.code} className="settings-option">
-            <span>{t(option.labelKey)}</span>
-            <SwitchBtn
-              checked={settings[option.code]}
-              onCheckedChange={() => handleToggle(option.code)}
-            />
-          </div>
-        ))}
+      <div className="settings-option flex-col gap-2.5 items-start!">
+        <h1>{t("display_settings.options.text_size")}</h1>
+        <TextSizeSelectionBar />
       </div>
+      {displayOptions.map((option) => (
+        <div key={option.code} className="settings-option">
+          <span>{t(option.labelKey)}</span>
+          <SwitchBtn
+            checked={displaySettings[option.code]}
+            onCheckedChange={() => handleToggle(option.code)}
+          />
+        </div>
+      ))}
     </SidebarLayout>
   );
 };

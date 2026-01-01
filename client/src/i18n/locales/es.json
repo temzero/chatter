@@ -547,10 +547,10 @@
   "display_settings": {
     "title": "Pantalla",
     "options": {
-      "animations": "Habilitar animaciones",
       "reduce_motion": "Reducir movimiento",
+      "reduce_transparency": "Reducir transparencia",
       "high_contrast": "Modo de alto contraste",
-      "text_size_large": "Tamaño de texto grande"
+      "text_size": "Tamaño de texto"
     }
   },
 

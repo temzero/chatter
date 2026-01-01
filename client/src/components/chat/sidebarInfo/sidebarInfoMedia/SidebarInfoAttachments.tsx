@@ -81,6 +81,7 @@ const SidebarInfoAttachments: React.FC = () => {
           setSelectedIndex(index);
         }}
         getIcon={getTypeIcon}
+        className="mb-3 mx-1.5"
       />
 
       <SlidingContainer uniqueKey={selectedIndex} direction={direction}>

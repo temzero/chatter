@@ -546,10 +546,10 @@
   "display_settings": {
     "title": "表示",
     "options": {
-      "animations": "アニメーションを有効にする",
       "reduce_motion": "モーションを減らす",
+      "reduce_transparency": "透明度を下げる",
       "high_contrast": "高コントラストモード",
-      "text_size_large": "大きなテキストサイズ"
+      "text_size": "文字サイズ"
     }
   },
 

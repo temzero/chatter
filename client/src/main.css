@@ -57,6 +57,7 @@
 
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --font-size: 16px;
 
   /* Spacing & Sizing */
   --header-height: 60px;
@@ -97,6 +98,22 @@
   --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+:root[data-text-size="S"] {
+  --font-size: 14px;
+}
+
+:root[data-text-size="M"] {
+  --font-size: 16px;
+}
+
+:root[data-text-size="L"] {
+  --font-size: 18px;
+}
+
+:root[data-text-size="XL"] {
+  --font-size: 20px;
+}
+
 /* Dark mode styles */
 html[data-theme="dark"] {
   color-scheme: dark;
@@ -117,7 +134,29 @@ html[data-theme="dark"] {
   --card-bg-color: rgb(20, 20, 20);
 }
 
+/* Reduce transparency accessibility */
+html[data-reduce-transparency="true"] .glass-panel {
+  background: var(--panel-color) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html[data-reduce-transparency="true"] .input-field,
+html[data-reduce-transparency="true"] .input-container,
+html[data-reduce-transparency="true"] .chat-input-container {
+  background-color: var(--panel-color) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* html[data-reduce-transparency="true"] .blur-bg {
+  background: var(--panel-color) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+} */
+
 html {
+  font-size: var(--font-size);
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
@@ -221,6 +260,13 @@ input[type="number"]::-webkit-inner-spin-button {
   border: 2px solid var(--border-color);
 }
 
+/* Blur */
+.blur-bg {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+}
+
 /* Input Fields */
 .input-field,
 .input-container,
@@ -262,17 +308,6 @@ input[type="number"]::-webkit-inner-spin-button {
 /* Icons */
 .material-symbols-outlined.filled {
   font-variation-settings: "FILL" 1;
-}
-
-/* Blur Card */
-.blur-card {
-  color: white;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
 }
 
 /* Sidebar */

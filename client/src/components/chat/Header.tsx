@@ -122,7 +122,7 @@ const Header: React.FC<ChatHeaderProps> = ({
 
   return (
     <header
-      className="w-full absolute top-0 left-0 hover:shadow-2xl  backdrop-blur-xl shadow select-none"
+      className="w-full absolute top-0 left-0 select-none blur-bg"
       style={{ zIndex: 2 }}
     >
       <div className="flex items-center justify-between px-3 min-h-(--header-height) max-h-(--header-height)">

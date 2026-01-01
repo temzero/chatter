@@ -546,10 +546,10 @@
   "display_settings": {
     "title": "การแสดงผล",
     "options": {
-      "animations": "เปิดใช้งานแอนิเมชัน",
       "reduce_motion": "ลดการเคลื่อนไหว",
+      "reduce_transparency": "ลดความโปร่งใส",
       "high_contrast": "โหมดคอนทราสต์สูง",
-      "text_size_large": "ขนาดตัวอักษรใหญ่"
+      "text_size": "ขนาดข้อความ"
     }
   },
 

@@ -80,6 +80,7 @@ const SidebarNewChat: React.FC = () => {
         selected={selectedType}
         onSelect={handleChatTypeChange}
         getIcon={getTypeIcon}
+        className="mb-3 mx-1.5"
       />
 
       <SlidingContainer uniqueKey={selectedType} direction={direction}>

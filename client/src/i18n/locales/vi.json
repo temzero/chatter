@@ -545,10 +545,10 @@
   "display_settings": {
     "title": "Hiển thị",
     "options": {
-      "animations": "Bật hiệu ứng động",
       "reduce_motion": "Giảm chuyển động",
+      "reduce_transparency": "Giảm độ trong suốt",
       "high_contrast": "Chế độ tương phản cao",
-      "text_size_large": "Kích thước chữ lớn"
+      "text_size": "Cỡ chữ"
     }
   },
 

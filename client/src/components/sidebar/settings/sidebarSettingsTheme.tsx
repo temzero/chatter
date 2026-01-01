@@ -1,5 +1,6 @@
 // SidebarSettingsTheme.tsx
 import React from "react";
+import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import SidebarLayout from "@/layouts/SidebarLayout";
@@ -19,9 +20,12 @@ import {
   lightWallpaperOptions,
 } from "@/common/constants/wallpaperOptions";
 import { SelectionGrid } from "@/components/ui/ThemeSelectionGrid";
+import { useIsMobile } from "@/stores/deviceStore";
 
 const SidebarSettingsTheme: React.FC = () => {
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
+
   const resolvedTheme = useResolvedTheme();
   const themeMode = useThemeMode();
   const currentWallpaper = useCurrentWallpaper();
@@ -81,28 +85,35 @@ const SidebarSettingsTheme: React.FC = () => {
           columns={3}
         />
       </div>
-
       <div
         style={{ zIndex: 99 }}
-        className="absolute bottom-0 left-0 right-0 p-2 border-4 border-b-0 border-(--message-color) overflow-hidden space-y-2 rounded-t-4xl shadow-4xl"
-      >
-
-        <div className="p-2">
-                  <Wallpaper
-          wallpaper={currentWallpaper}
-          className="absolute inset-0 -z-9"
-        />
-        {currentPattern && currentPattern.id !== null && (
-          <WallpaperPattern
-            pattern={currentPattern}
-            className="absolute inset-0 -z-8"
-            opacity={0.7}
-            blendMode="overlay"
-          />
+        className={clsx(
+          "absolute bottom-0 left-0 right-0 p-2",
+          "overflow-hidden space-y-2",
+          "rounded-t-4xl", {
+            "border-4 border-b-0 border-(--message-color) shadow-4xl": isMobile
+          }
         )}
-          <div className="w-3/4 h-8 rounded-lg custom-border bg-(--message-color) hover:scale-110 origin-bottom-left transition-all" />
-          <div className="w-1/2 h-8 rounded-lg custom-border ml-auto bg-(--primary-green) hover:scale-110 origin-bottom-right transition-all mt-2" />
-        </div>
+      >
+        {isMobile && (
+          <div className="p-2">
+            <Wallpaper
+              wallpaper={currentWallpaper}
+              className="absolute inset-0 -z-9"
+            />
+            {currentPattern && currentPattern.id !== null && (
+              <WallpaperPattern
+                pattern={currentPattern}
+                className="absolute inset-0 -z-8"
+                opacity={0.7}
+                blendMode="overlay"
+              />
+            )}
+            <div className="w-3/4 h-8 rounded-lg custom-border bg-(--message-color) hover:scale-110 origin-bottom-left transition-all" />
+            <div className="w-1/2 h-8 rounded-lg custom-border ml-auto bg-(--primary-green) hover:scale-110 origin-bottom-right transition-all mt-2" />
+          </div>
+        )}
+
         <ThemeSelectionBar />
       </div>
     </SidebarLayout>
