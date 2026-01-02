@@ -13,12 +13,14 @@ type Props<T extends SelectorItem> = {
   items: readonly T[];
   selected: T;
   onSelect: (item: T) => void;
+  expandFull?: boolean;
 };
 
 const HorizontalSelector = <T extends SelectorItem>({
   items,
   selected,
   onSelect,
+  expandFull = false,
 }: Props<T>) => {
   const isCompact = useIsCompactSidebar();
 
@@ -65,7 +67,7 @@ const HorizontalSelector = <T extends SelectorItem>({
     <div className="relative w-full flex items-center custom-border-t custom-border-b select-none no-scrollbar!">
       <div
         ref={scrollRef}
-        className="flex items-center overflow-x-auto no-scrollbar scrollbar-hide"
+        className="flex flex-1 items-center overflow-x-auto no-scrollbar scrollbar-hide"
       >
         {(isCompact ? [selected] : items).map((item) => (
           <a
@@ -75,10 +77,17 @@ const HorizontalSelector = <T extends SelectorItem>({
             style={{
               borderColor: item.color || undefined,
               color: item.color || undefined,
+              ...(expandFull && { flexBasis: `${100 / items.length}%` }),
             }}
           >
             {item.icon ? (
-              <span className="material-symbols-outlined">{item.icon}</span>
+              <span
+                className={`material-symbols-outlined ${
+                  selected.id === item.id && "filled"
+                }`}
+              >
+                {item.icon}
+              </span>
             ) : (
               item.name
             )}

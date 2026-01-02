@@ -5,6 +5,7 @@ import { SidebarMode } from "@/common/enums/sidebarMode";
 import { TextSizeSelectionBar } from "@/components/ui/settings/textSizeSelectionBar";
 import SwitchBtn from "@/components/ui/buttons/SwitchBtn";
 import { useSettingsStore } from "@/stores/settingsStore"; // Import the store
+import { FontStyleSelectionBar } from "@/components/ui/settings/fontStyleSelectionBar";
 
 interface DisplayOption {
   code: keyof {
@@ -43,6 +44,10 @@ const SidebarSettingsDisplay: React.FC = () => {
       <div className="settings-option flex-col gap-2.5 items-start!">
         <h1>{t("display_settings.options.text_size")}</h1>
         <TextSizeSelectionBar />
+      </div>
+      <div className="settings-option flex-col gap-2.5 items-start!">
+        <h1>{t("display_settings.options.font_style")}</h1>
+        <FontStyleSelectionBar />
       </div>
       {displayOptions.map((option) => (
         <div key={option.code} className="settings-option">

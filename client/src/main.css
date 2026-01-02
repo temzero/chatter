@@ -59,6 +59,15 @@
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   --font-size: 16px;
 
+  /* Font family variables */
+  --font-family-system: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, sans-serif;
+  --font-family-sans: "Inter", "SF Pro Display", -apple-system,
+    BlinkMacSystemFont, sans-serif;
+  --font-family-serif: "Georgia", "Times New Roman", "Cambria", serif;
+  --font-family-mono: "SF Mono", "Monaco", "Cascadia Code", monospace;
+  --font-family-rounded: "SF Pro Rounded", "Nunito", "Circular", sans-serif;
+
   /* Spacing & Sizing */
   --header-height: 60px;
   --chat-input-container-height: 40px;
@@ -134,6 +143,23 @@ html[data-theme="dark"] {
   --card-bg-color: rgb(20, 20, 20);
 }
 
+/* Font Style Application */
+html[data-font-style="system"] {
+  font-family: var(--font-family-system);
+}
+html[data-font-style="sans"] {
+  font-family: var(--font-family-sans);
+}
+html[data-font-style="serif"] {
+  font-family: var(--font-family-serif);
+}
+html[data-font-style="mono"] {
+  font-family: var(--font-family-mono);
+}
+html[data-font-style="rounded"] {
+  font-family: var(--font-family-rounded);
+}
+
 /* Reduce transparency accessibility */
 html[data-reduce-transparency="true"] .glass-panel {
   background: var(--panel-color) !important;
@@ -149,11 +175,17 @@ html[data-reduce-transparency="true"] .chat-input-container {
   -webkit-backdrop-filter: none !important;
 }
 
-/* html[data-reduce-transparency="true"] .blur-bg {
-  background: var(--panel-color) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-} */
+/* Light mode + High Contrast */
+html[data-theme="light"][data-high-contrast="true"] {
+  --panel-color: rgb(255, 255, 255);
+  --message-color: rgb(255, 255, 255);
+}
+
+/* Dark mode + High Contrast */
+html[data-theme="dark"][data-high-contrast="true"] {
+  --panel-color: rgb(0, 0, 0);
+  --message-color: rgb(0, 0, 0);
+}
 
 html {
   font-size: var(--font-size);

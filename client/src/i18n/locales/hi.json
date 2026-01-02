@@ -399,7 +399,9 @@
     "data_storage": "डेटा और संग्रहण",
     "language": "भाषा",
     "wallpaper": "वॉलपेपर",
+    "pattern": "पैटर्न",
     "theme": "थीम",
+    "theme_and_background": "थीम और पृष्ठभूमि",
     "theme_mode": {
       "light": "हल्का",
       "dark": "गहरा",
@@ -548,7 +550,8 @@
       "reduce_motion": "गति कम करें",
       "reduce_transparency": "पारदर्शिता कम करें",
       "high_contrast": "उच्च कंट्रास्ट मोड",
-      "text_size": "पाठ आकार"
+      "text_size": "पाठ आकार",
+      "font_style": "फ़ॉन्ट शैली"
     }
   },
 

@@ -26,18 +26,11 @@ const SidebarSettings: React.FC = () => {
       onClick: () => setSidebar(SidebarMode.SETTINGS_DISPLAY),
     },
     {
-      icon: "contrast",
-      title: t("settings.theme"),
+      icon: "image",
+      title: t("settings.theme_and_background"),
       onClick: () => setSidebar(SidebarMode.SETTINGS_THEME),
       value: t(`settings.theme_mode.${themeMode}`),
     },
-    {
-      icon: "translate",
-      title: t("settings.language"),
-      onClick: () => setSidebar(SidebarMode.SETTINGS_LANGUAGE),
-      value: currentLanguage,
-    },
-
     {
       icon: "keyboard",
       title: t("settings.keyboard"),
@@ -73,6 +66,12 @@ const SidebarSettings: React.FC = () => {
       title: t("settings.privacy_security"),
       onClick: () => setSidebar(SidebarMode.SETTINGS_PRIVACY),
       isDisabled: true,
+    },
+        {
+      icon: "translate",
+      title: t("settings.language"),
+      onClick: () => setSidebar(SidebarMode.SETTINGS_LANGUAGE),
+      value: currentLanguage,
     },
   ];
 

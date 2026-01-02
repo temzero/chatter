@@ -22,8 +22,4 @@ export const SIDEBAR_INFO_ATTACHMENT_ITEMS = [
     id: AttachmentType.LINK,
     icon: "link",
   },
-  // {
-  //   id: AttachmentType.LOCATION,
-  //   icon: "location_on",
-  // },
 ] as const;

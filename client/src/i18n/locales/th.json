@@ -400,7 +400,9 @@
     "data_storage": "ข้อมูลและที่เก็บข้อมูล",
     "language": "ภาษา",
     "wallpaper": "ภาพพื้นหลัง",
+    "pattern": "ลวดลาย",
     "theme": "ธีม",
+    "theme_and_background": "ธีมและพื้นหลัง",
     "theme_mode": {
       "light": "สว่าง",
       "dark": "มืด",
@@ -549,7 +551,8 @@
       "reduce_motion": "ลดการเคลื่อนไหว",
       "reduce_transparency": "ลดความโปร่งใส",
       "high_contrast": "โหมดคอนทราสต์สูง",
-      "text_size": "ขนาดข้อความ"
+      "text_size": "ขนาดข้อความ",
+      "font_style": "รูปแบบฟอนต์"
     }
   },
 

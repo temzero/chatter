@@ -402,7 +402,9 @@
     "data_storage": "Data & Storage",
     "language": "Language",
     "wallpaper": "Background wallpaper",
+    "pattern": "Pattern",
     "theme": "Theme",
+    "theme_and_background": "Theme & Background",
     "theme_mode": {
       "light": "Light",
       "dark": "Dark",
@@ -551,7 +553,8 @@
       "reduce_motion": "Reduce motion",
       "reduce_transparency": "Reduce transparency",
       "high_contrast": "High contrast mode",
-      "text_size": "Text size"
+      "text_size": "Text size",
+      "font_style": "Font Style"
     }
   },
 

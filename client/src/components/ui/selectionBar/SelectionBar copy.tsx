@@ -3,26 +3,25 @@ import clsx from "clsx";
 import { animate, motion, useMotionValue } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
-export interface SelectionBarOption<T = string> {
-  value: T;
-  id?: string;
-  label?: string;
-  icon?: string;
-  fontClass?: string;
-  textSize?: string;
-}
-
 interface SelectionBarProps<T = string> {
-  options: SelectionBarOption<T>[];
+  options: T[];
   selected: T;
   onSelect: (value: T) => void;
+  getIcon?: (value: T) => string;
+  getLabel?: (value: T) => string;
+  getFontClass?: (value: T) => string; // Apply font class if provided
+  getTextSize?: (value: T) => string; // Apply text size if provided
   className?: string;
 }
 
-export const SelectionBar = <T extends string | number | symbol>({
+export const SelectionBar = <T extends string>({
   options,
   selected,
   onSelect,
+  getIcon,
+  getLabel,
+  getFontClass,
+  getTextSize,
   className,
 }: SelectionBarProps<T>) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -43,9 +42,7 @@ export const SelectionBar = <T extends string | number | symbol>({
   const buttonWidthPercentage = 100 / options.length;
 
   // Find index of selected option
-  const selectedIndex = options.findIndex(
-    (option) => option.value === selected
-  );
+  const selectedIndex = options.indexOf(selected);
 
   // Calculate target position and slider width
   useEffect(() => {
@@ -100,7 +97,7 @@ export const SelectionBar = <T extends string | number | symbol>({
       Math.min(closestIndex, options.length - 1)
     );
 
-    onSelect(options[boundedIndex].value);
+    onSelect(options[boundedIndex]);
     setSliderHoveredIndex(null);
 
     const targetX = boundedIndex * buttonWidthPx;
@@ -116,8 +113,8 @@ export const SelectionBar = <T extends string | number | symbol>({
     setSliderHoveredIndex(null);
   };
 
-  const buttonClass = (index: number) => {
-    const isSelected = options[index].value === selected;
+  const buttonClass = (value: T, index: number) => {
+    const isSelected = selected === value;
     const isSliderOver = sliderHoveredIndex === index;
 
     return `transition-all ease-in-out ${
@@ -140,44 +137,50 @@ export const SelectionBar = <T extends string | number | symbol>({
       ref={containerRef}
       className={`relative min-h-10 flex items-center justify-between border-2 border-(--input-border-color) bg-(--card-bg-color) rounded-lg overflow-hidden shadow-lg ${className}`}
     >
-      {options.map((option, index) => (
-        <button
-          key={String(option.value)} // Convert to string for React key
-          className={buttonClass(index)}
-          onClick={() => handleButtonClick(option.value, index)}
-          style={{
-            zIndex: 1,
-            width: `${buttonWidthPercentage}%`,
-            height: "100%",
-          }}
-        >
-          <div className="flex flex-col items-center justify-center gap-1">
-            {option.icon && (
-              <i
-                className={clsx(
-                  "material-symbols-outlined",
-                  option.value === selected && "filled",
-                  option.fontClass,
-                  option.textSize
-                )}
-              >
-                {option.icon}
-              </i>
-            )}
-
-            <span
-              className={clsx(
-                "truncate text-center px-1",
-                option.fontClass,
-                option.textSize
+      {options.map((value, index) => {
+        const fontClass = getFontClass ? getFontClass(value) : "";
+        const textSize = getTextSize ? getTextSize(value) : "";
+        
+        return (
+          <button
+            key={value}
+            className={buttonClass(value, index)}
+            onClick={() => handleButtonClick(value, index)}
+            style={{
+              zIndex: 1,
+              width: `${buttonWidthPercentage}%`,
+              height: "100%"
+            }}
+          >
+            <div className="flex flex-col items-center justify-center gap-1">
+              {getIcon && (
+                <i
+                  className={clsx(
+                    "material-symbols-outlined",
+                    value === selected && "filled",
+                    fontClass,
+                    textSize
+                  )}
+                >
+                  {getIcon(value)}
+                </i>
               )}
-            >
-              {option.label}
-            </span>
-          </div>
-        </button>
-      ))}
 
+              {getLabel && (
+                <span 
+                  className={clsx(
+                    "truncate text-center px-1",
+                    fontClass,  // Apply font class if provided
+                    textSize    // Apply text size if provided
+                  )}
+                >
+                  {getLabel(value)}
+                </span>
+              )}
+            </div>
+          </button>
+        );
+      })}
       <motion.div
         ref={sliderRef}
         id="slider"

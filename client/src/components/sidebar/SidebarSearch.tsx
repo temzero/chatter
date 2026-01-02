@@ -6,11 +6,32 @@ import { filterChatsByType } from "@/common/utils/chat/filterChatsByType";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { useTranslation } from "react-i18next";
-import { SelectionBar } from "../ui/selectionBar/SelectionBar";
+import {
+  SelectionBar,
+  SelectionBarOption,
+} from "../ui/selectionBar/SelectionBar";
 import ChatList from "@/components/ui/chat/ChatList";
 import SearchBar from "@/components/ui/SearchBar";
 
-const chatTypes = ["all", ChatType.DIRECT, ChatType.GROUP, ChatType.CHANNEL];
+// Create the options array with all data
+const chatTypeOptions: SelectionBarOption<string>[] = [
+  {
+    value: "all",
+    icon: "menu",
+  },
+  {
+    value: ChatType.DIRECT,
+    icon: "person",
+  },
+  {
+    value: ChatType.GROUP,
+    icon: "groups",
+  },
+  {
+    value: ChatType.CHANNEL,
+    icon: "tv",
+  },
+];
 
 const SidebarSearch: React.FC = () => {
   const { t } = useTranslation();
@@ -18,7 +39,7 @@ const SidebarSearch: React.FC = () => {
   const setSidebar = getSetSidebar();
 
   const [selectedType, setSelectedType] = useState("all");
-  const [searchTerm, setSearchTerm] = useState(""); // Local search state
+  const [searchTerm, setSearchTerm] = useState("");
   const [direction, setDirection] = useState<number>(1);
 
   // Filter chats locally based on search term
@@ -40,26 +61,17 @@ const SidebarSearch: React.FC = () => {
     () => filteredChatsByType.map((chat) => chat.id),
     [filteredChatsByType]
   );
-  
-  const handleChatTypeChange = (type: ChatType | string) => {
+
+  const handleChatTypeChange = (type: string) => {
     if (type === selectedType) return;
-    const currentIndex = chatTypes.indexOf(selectedType);
-    const newIndex = chatTypes.indexOf(type);
+
+    // Get current and new indices for animation direction
+    const currentIndex = chatTypeOptions.findIndex(
+      (opt) => opt.value === selectedType
+    );
+    const newIndex = chatTypeOptions.findIndex((opt) => opt.value === type);
     setDirection(newIndex > currentIndex ? 1 : -1);
     setSelectedType(type);
-  };
-
-  const getTypeIcon = (type: ChatType | string) => {
-    switch (type) {
-      case ChatType.DIRECT:
-        return "person";
-      case ChatType.GROUP:
-        return "groups";
-      case ChatType.CHANNEL:
-        return "tv";
-      default:
-        return "menu";
-    }
   };
 
   const handleSearch = (term: string) => {
@@ -83,10 +95,9 @@ const SidebarSearch: React.FC = () => {
       </header>
 
       <SelectionBar
-        options={chatTypes}
+        options={chatTypeOptions}
         selected={selectedType}
         onSelect={handleChatTypeChange}
-        getIcon={getTypeIcon}
         className="mb-3 mx-1.5"
       />
 

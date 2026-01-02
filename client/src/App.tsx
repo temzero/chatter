@@ -8,6 +8,7 @@ import { useDevice } from "./common/hooks/useDevice";
 import AppRoutes from "@/routes/AppRoutes";
 import BackgroundWallpaper from "./components/ui/layout/BackgroundWallpaper";
 import { SettingsEffects } from "./components/ui/settings/SettingsEffect";
+import { MotionConfigProvider } from "./components/chat/components/providers/MotionConfigProvider";
 
 const App: React.FC = () => {
   useDevice();
@@ -21,8 +22,10 @@ const App: React.FC = () => {
   return (
     <Router>
       <SettingsEffects />
-      
-      <AppRoutes />
+
+      <MotionConfigProvider>
+        <AppRoutes />
+      </MotionConfigProvider>
 
       <BackgroundWallpaper />
 

@@ -11,7 +11,11 @@ import {
 import { useActiveChatId } from "@/stores/chatStore";
 import RenderMediaAttachments from "./RenderMediaAttachments";
 import { SIDEBAR_INFO_ATTACHMENT_ITEMS } from "@/common/constants/sidebarInfoAttachmentTypes";
-import { SelectionBar } from "@/components/ui/selectionBar/SelectionBar";
+import {
+  SelectionBar,
+  SelectionBarOption,
+} from "@/components/ui/selectionBar/SelectionBar";
+import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 
 const SidebarInfoAttachments: React.FC = () => {
   const { t } = useTranslation();
@@ -21,8 +25,15 @@ const SidebarInfoAttachments: React.FC = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [direction, setDirection] = useState(1);
 
-  const selectedAttachmentType =
-    SIDEBAR_INFO_ATTACHMENT_ITEMS[selectedIndex].id;
+  // Fix: Map 'id' to 'value'
+  const attachmentOptions: SelectionBarOption<string>[] =
+    SIDEBAR_INFO_ATTACHMENT_ITEMS.map((item) => ({
+      value: item.id, // This is correct since item has 'id' property
+      icon: item.icon,
+    }));
+
+  const selectedAttachmentType = attachmentOptions[selectedIndex]
+    ?.value as AttachmentType;
   const attachments = useActiveChatAttachments();
 
   // Track hasMore per type
@@ -55,9 +66,12 @@ const SidebarInfoAttachments: React.FC = () => {
     fetchAttachments,
   ]);
 
-  const getTypeIcon = (type: string) => {
-    const item = SIDEBAR_INFO_ATTACHMENT_ITEMS.find((i) => i.id === type);
-    return item?.icon || "";
+  const handleTypeSelect = (type: string) => {
+    const index = attachmentOptions.findIndex((item) => item.value === type);
+    if (index === selectedIndex || index === -1) return;
+
+    setDirection(index > selectedIndex ? 1 : -1);
+    setSelectedIndex(index);
   };
 
   return (
@@ -69,28 +83,21 @@ const SidebarInfoAttachments: React.FC = () => {
       </header>
 
       <SelectionBar
-        options={SIDEBAR_INFO_ATTACHMENT_ITEMS.map((i) => i.id)}
+        options={attachmentOptions}
         selected={selectedAttachmentType}
-        onSelect={(type) => {
-          const index = SIDEBAR_INFO_ATTACHMENT_ITEMS.findIndex(
-            (item) => item.id === type
-          );
-          if (index === selectedIndex) return;
-
-          setDirection(index > selectedIndex ? 1 : -1);
-          setSelectedIndex(index);
-        }}
-        getIcon={getTypeIcon}
+        onSelect={handleTypeSelect}
         className="mb-3 mx-1.5"
       />
 
       <SlidingContainer uniqueKey={selectedIndex} direction={direction}>
-        <RenderMediaAttachments
-          attachments={filteredAttachments}
-          selectedType={SIDEBAR_INFO_ATTACHMENT_ITEMS[selectedIndex].id}
-          onLoadMore={handleLoadMore}
-          hasMore={hasMoreAttachments}
-        />
+        {selectedAttachmentType && (
+          <RenderMediaAttachments
+            attachments={filteredAttachments}
+            selectedType={selectedAttachmentType}
+            onLoadMore={handleLoadMore}
+            hasMore={hasMoreAttachments}
+          />
+        )}
       </SlidingContainer>
 
       <a

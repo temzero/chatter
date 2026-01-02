@@ -400,7 +400,9 @@
     "data_storage": "データとストレージ",
     "language": "言語",
     "wallpaper": "壁紙",
+    "pattern": "模様",
     "theme": "テーマ",
+    "theme_and_background": "テーマと背景",
     "theme_mode": {
       "light": "ライト",
       "dark": "ダーク",
@@ -549,7 +551,8 @@
       "reduce_motion": "モーションを減らす",
       "reduce_transparency": "透明度を下げる",
       "high_contrast": "高コントラストモード",
-      "text_size": "文字サイズ"
+      "text_size": "文字サイズ",
+      "font_style": "フォントスタイル"
     }
   },
 
