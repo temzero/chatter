@@ -67,6 +67,12 @@
       "from_user": "từ {{name}}",
       "sent_at": "Gửi lúc {{date}}"
     },
+    "options": {
+      "you": "bạn",
+      "all": "tất cả",
+      "other": "khác",
+      "none": "không"
+    },
     "loading": {
       "loading": "Đang tải...",
       "searching": "Đang tìm...",
@@ -568,10 +574,10 @@
   "message_settings": {
     "title": "Tin nhắn",
     "options": {
-      "read_receipts": "Biên nhận đã đọc",
-      "typing_indicators": "Hiển thị đang nhập",
-      "auto_download_media": "Tự động tải media",
-      "desktop_notifications": "Thông báo trên máy tính"
+      "read_info": "Hiện thị đã đọc",
+      "hide_typing_indicator": "Ẩn hiển thị đang gõ",
+      "message_bubble_style": "Kiểu bong bóng tin nhắn",
+      "message_style": "Kiểu tin nhắn"
     }
   },
 

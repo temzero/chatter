@@ -29,6 +29,8 @@ import { MessageContextMenu } from "../../../ui/contextMenu/Message-contextMenu"
 import { useMessageFilter } from "@/common/hooks/useMessageFilter";
 import { useIsMobile } from "@/stores/deviceStore";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
+import { useReadInfo } from "@/stores/settingsStore";
+import { MessageReadInfoOptions } from "@/shared/types/enums/message-setting.enum";
 
 interface MessageProps {
   messageId: string;
@@ -53,6 +55,7 @@ const Message: React.FC<MessageProps> = ({
 }) => {
   const isMobile = useIsMobile();
   const message = useMessageStore((state) => state.messagesById[messageId]);
+  console.log('message', message)
   const sender = useMessageSender(message?.sender.id, message?.chatId);
   const senderDisplayName =
     sender?.nickname ||
@@ -61,7 +64,7 @@ const Message: React.FC<MessageProps> = ({
 
   const call = message.call;
 
-  // console.log("message", message);
+  const readInfoSetting = useReadInfo();
 
   const attachments = getMessageAttachments(message.chatId, message.id);
   const attachmentLength = attachments.length;
@@ -144,10 +147,10 @@ const Message: React.FC<MessageProps> = ({
       ref={messageRef}
       onContextMenu={handleContextMenu}
       className={clsx(
-        "relative overflow-hidden",
-        isMe ? "ml-auto" : "mr-auto",
+        "relative overflow-hidden flex",
+        isMe ? "justify-end" : "justify-start",
 
-       getMessageWidth(isMobile, hasLinkPreview, attachmentLength)
+        getMessageWidth(isMobile, hasLinkPreview, attachmentLength)
       )}
       style={{ zIndex: isFocus || isRelyToThisMessage ? 100 : "auto" }}
       // style={{ zIndex: 999 }}
@@ -156,7 +159,7 @@ const Message: React.FC<MessageProps> = ({
     >
       {isGroupChat && !isMe && (
         <div
-          className="mt-auto pb-2"
+          className="mt-auto pb-4"
           style={{
             width: MESSAGE_AVATAR_WIDTH,
             minWidth: MESSAGE_AVATAR_WIDTH,
@@ -259,38 +262,63 @@ const Message: React.FC<MessageProps> = ({
           </AnimatePresence>
         </div>
 
-        {showInfo && isGroupChat && !isMe && (
-          <h1 className="text-sm font-semibold opacity-70 mr-2 mt-1">
-            {senderDisplayName ?? ""}
-          </h1>
-        )}
-
         {message.status !== MessageStatus.SENDING &&
           message.status !== MessageStatus.FAILED && (
             <div
-              className={clsx("px-0.5", {
+              className={clsx({
                 "ml-auto": isMe,
                 "mr-auto": !isMe,
                 "mb-5": !isRecent,
               })}
             >
               {!isRecent && (
-                <p
-                  className={clsx("text-xs opacity-40 pt-1", {
-                    "text-right": isMe,
-                    "text-left": !isMe,
+                <div
+                  className={clsx("flex flex-col", {
+                    "items-end": isMe,
+                    "items-start": !isMe,
                   })}
                 >
-                  {formatTime(message.createdAt)}
-                </p>
+                  {/* <div
+                    id="message-tail"
+                    className={clsx("message-tail -mt-2", {
+                      "bg-(--primary-green)": isMe,
+                      "bg-(--message-color) scale-x-[-1]": !isMe,
+                    })}
+                  /> */}
+                  <div
+                    id="message-tail"
+                    className={clsx("message-tail", {
+                      "bg-(--primary-green) self-message": isMe,
+                      "bg-(--message-color)": !isMe,
+                    })}
+                  />
+
+                  {showInfo && isGroupChat && !isMe && (
+                    <h1 className="text-sm font-semibold opacity-70 mr-2">
+                      {senderDisplayName ?? ""}
+                    </h1>
+                  )}
+
+                  <p
+                    className={clsx("text-xs opacity-40", {
+                      "text-right": isMe,
+                      "text-left": !isMe,
+                    })}
+                  >
+                    {formatTime(message.createdAt)}
+                  </p>
+                </div>
               )}
-              <MessageReadInfo
-                chatId={chat.id}
-                currentUserId={currentUserId}
-                messageId={message.id}
-                isMe={isMe}
-                senderName={senderDisplayName}
-              />
+
+              {readInfoSetting !== MessageReadInfoOptions.NONE && (
+                <MessageReadInfo
+                  chatId={chat.id}
+                  currentUserId={currentUserId}
+                  messageId={message.id}
+                  isMe={isMe}
+                  senderName={senderDisplayName}
+                />
+              )}
             </div>
           )}
 

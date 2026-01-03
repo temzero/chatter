@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import "./typingIndicator.css";
+import { useIsHideTypingIndicator } from "@/stores/settingsStore";
 
 interface TypingIndicatorProps {
   chatId: string;
@@ -7,6 +8,8 @@ interface TypingIndicatorProps {
 }
 
 const SimpleTypingIndicator = ({ chatId, userIds }: TypingIndicatorProps) => {
+  const isHideTypingIndicator = useIsHideTypingIndicator();
+  if (isHideTypingIndicator) return null
 
   return (
     <AnimatePresence>

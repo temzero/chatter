@@ -3,47 +3,42 @@ import { useTranslation } from "react-i18next";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import SwitchBtn from "@/components/ui/buttons/SwitchBtn";
+import { MessageReadInfoSelectionBar } from "@/components/ui/selectionBar/MessageReadInfoSelectionBar";
+import { useSettingsStore, MessageSettings } from "@/stores/settingsStore";
+import MessageStyleSelector from "@/components/ui/settings/MessageStyleSelector";
+import MessageTailSelector from "@/components/ui/settings/MessageTailSelector";
 
 interface MessageOption {
-  code: string;
-  labelKey: string; // key for translation
+  code: keyof MessageSettings; // Use the actual keys from MessageSettings
+  label: string;
 }
 
 const messageOptions: MessageOption[] = [
-  { code: "read-receipts", labelKey: "message_settings.options.read_receipts" },
   {
-    code: "typing-indicators",
-    labelKey: "message_settings.options.typing_indicators",
-  },
-  {
-    code: "auto-download-media",
-    labelKey: "message_settings.options.auto_download_media",
-  },
-  {
-    code: "desktop-notifications",
-    labelKey: "message_settings.options.desktop_notifications",
+    code: "hideTypingIndicator",
+    label: "message_settings.options.hide_typing_indicator",
   },
 ];
 
 const SidebarSettingsMessages: React.FC = () => {
   const { t } = useTranslation();
 
-  // State to track which options are enabled
-  const [settings, setSettings] = React.useState<Record<string, boolean>>(
-    () => {
-      const initialState: Record<string, boolean> = {};
-      messageOptions.forEach((opt) => (initialState[opt.code] = false));
-      return initialState;
-    }
+  // Get the toggle function and current state from Zustand
+  const toggleTypingIndicator = useSettingsStore(
+    (state) => state.toggleTypingIndicator
+  );
+  const hideTypingIndicator = useSettingsStore(
+    (state) => state.messageSettings.hideTypingIndicator
   );
 
-  const handleToggle = (code: string) => {
-    setSettings((prev) => ({
-      ...prev,
-      [code]: !prev[code],
-    }));
-    console.log("Toggled:", code, !settings[code]);
-    // TODO: save to user settings / context
+  // Or use the custom hook you already created:
+  // const hideTypingIndicator = useIsHideTypingIndicator();
+
+  const handleToggle = (code: keyof MessageSettings) => {
+    if (code === "hideTypingIndicator") {
+      toggleTypingIndicator();
+      console.log("Toggled hideTypingIndicator to:", !hideTypingIndicator);
+    }
   };
 
   return (
@@ -51,16 +46,31 @@ const SidebarSettingsMessages: React.FC = () => {
       title={t("message_settings.title")}
       backLocation={SidebarMode.SETTINGS}
     >
+      <div className="settings-option flex-col gap-2.5 items-start!">
+        <h1>{t("message_settings.options.read_info")}</h1>
+        <MessageReadInfoSelectionBar />
+      </div>
       <div className="flex flex-col">
         {messageOptions.map((option) => (
           <div key={option.code} className="settings-option">
-            <span>{t(option.labelKey)}</span>
+            <span>{t(option.label)}</span>
             <SwitchBtn
-              checked={settings[option.code]}
+              checked={
+                option.code === "hideTypingIndicator"
+                  ? hideTypingIndicator
+                  : false
+              }
               onCheckedChange={() => handleToggle(option.code)}
             />
           </div>
         ))}
+      </div>
+
+      <div className="settings-option flex-col gap-3 items-start!">
+        <h1>{t("message_settings.options.message_bubble_style")}</h1>
+        <MessageStyleSelector />
+        {/* <div className="w-full h-px my-2 bg-(--border-color)"/> */}
+        <MessageTailSelector />
       </div>
     </SidebarLayout>
   );

@@ -1,8 +1,13 @@
 // stores/settingsStore.ts
-import { FontStyle } from "@/shared/types/enums/font-style.enum";
-import { TextSize } from "@/shared/types/enums/text-size.enum";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { TextSize } from "@/shared/types/enums/text-size.enum";
+import { FontStyle } from "@/shared/types/enums/font-style.enum";
+import {
+  MessageReadInfoOptions,
+  MessageStyle,
+  MessageTail,
+} from "@/shared/types/enums/message-setting.enum";
 
 export interface DisplaySettings {
   textSize: TextSize;
@@ -12,12 +17,30 @@ export interface DisplaySettings {
   highContrast: boolean;
 }
 
+export interface MessageSettings {
+  hideTypingIndicator: boolean;
+  readInfo: MessageReadInfoOptions;
+  messageStyle: MessageStyle;
+  messageTail: MessageTail;
+}
+
 interface SettingsStore {
   displaySettings: DisplaySettings;
+  messageSettings: MessageSettings;
+
+  // Display actions
   updateDisplaySettings: (updates: Partial<DisplaySettings>) => void;
   setTextSize: (size: TextSize) => void;
   setFontStyle: (style: FontStyle) => void;
-  toggleSetting: (setting: keyof Omit<DisplaySettings, "textSize">) => void;
+  toggleDisplay: (
+    key: keyof Omit<DisplaySettings, "textSize" | "fontStyle">
+  ) => void;
+
+  // Message actions
+  toggleTypingIndicator: () => void;
+  setReadDisplay: (value: MessageReadInfoOptions) => void;
+  setMessageStyle: (style: MessageStyle) => void;
+  setMessageTail: (style: MessageTail) => void;
 }
 
 export const useSettingsStore = create<SettingsStore>()(
@@ -29,6 +52,13 @@ export const useSettingsStore = create<SettingsStore>()(
         reduceMotion: false,
         reduceTransparency: false,
         highContrast: false,
+      },
+
+      messageSettings: {
+        hideTypingIndicator: false,
+        readInfo: MessageReadInfoOptions.OTHER,
+        messageStyle: MessageStyle.CURVED,
+        messageTail: MessageTail.CURVED,
       },
 
       updateDisplaySettings: (updates) =>
@@ -46,18 +76,49 @@ export const useSettingsStore = create<SettingsStore>()(
           displaySettings: { ...state.displaySettings, fontStyle: style },
         })),
 
-      toggleSetting: (setting) =>
+      toggleDisplay: (key) =>
         set((state) => ({
           displaySettings: {
             ...state.displaySettings,
-            [setting]: !state.displaySettings[setting],
+            [key]: !state.displaySettings[key],
           },
+        })),
+
+      toggleTypingIndicator: () =>
+        set((state) => ({
+          messageSettings: {
+            ...state.messageSettings,
+            hideTypingIndicator: !state.messageSettings.hideTypingIndicator,
+          },
+        })),
+
+      setReadDisplay: (value) =>
+        set((state) => ({
+          messageSettings: { ...state.messageSettings, readInfo: value },
+        })),
+
+      setMessageStyle: (style) =>
+        set((state) => ({
+          messageSettings: { ...state.messageSettings, messageStyle: style },
+        })),
+      setMessageTail: (style) =>
+        set((state) => ({
+          messageSettings: { ...state.messageSettings, messageTail: style },
         })),
     }),
     {
-      name: "chat-app-settings",
-      // Optional: Only persist certain fields
-      partialize: (state) => ({ displaySettings: state.displaySettings }),
+      name: "chatter-settings",
+      partialize: (state) => ({
+        displaySettings: state.displaySettings,
+        messageSettings: state.messageSettings,
+      }),
     }
   )
 );
+
+export const useReadInfo = (): MessageReadInfoOptions => {
+  return useSettingsStore((state) => state.messageSettings.readInfo);
+};
+export const useIsHideTypingIndicator = (): boolean => {
+  return useSettingsStore((state) => state.messageSettings.hideTypingIndicator);
+};

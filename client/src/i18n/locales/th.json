@@ -67,6 +67,12 @@
       "from_user": "จาก{{name}}",
       "sent_at": "ส่งเมื่อ {{date}}"
     },
+    "options": {
+      "you": "คุณ",
+      "all": "ทั้งหมด",
+      "other": "อื่นๆ",
+      "none": "ไม่มี"
+    },
     "loading": {
       "loading": "กำลังโหลด...",
       "searching": "กำลังค้นหา...",
@@ -548,11 +554,10 @@
   "display_settings": {
     "title": "การแสดงผล",
     "options": {
-      "reduce_motion": "ลดการเคลื่อนไหว",
-      "reduce_transparency": "ลดความโปร่งใส",
-      "high_contrast": "โหมดคอนทราสต์สูง",
-      "text_size": "ขนาดข้อความ",
-      "font_style": "รูปแบบฟอนต์"
+      "read_info": "ซ่อนตัวบ่งชี้การพิมพ์",
+      "hide_typing_indicator": "ซ่อนตัวบ่งชี้การพิมพ์",
+      "message_bubble_style": "สไตล์บับเบิ้ลข้อความ",
+      "message_style": "สไตล์ข้อความ"
     }
   },
 

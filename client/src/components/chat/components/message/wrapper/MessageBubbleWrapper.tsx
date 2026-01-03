@@ -32,8 +32,8 @@ const MessageBubbleWrapper: React.FC<MessageBubbleWrapperProps> = ({
       className={clsx(
         "message-bubble opacity-100 object-cover",
         {
+        "self-message ml-auto": isMe,
           "border-6 rounded-xl! border-yellow-400": message.isImportant,
-          "self-message ml-auto": isMe,
           "message-bubble-reply": isRelyToThisMessage,
           "opacity-60 border-2 border-red-500": isFailed,
           "cursor-pointer": !!onClick,

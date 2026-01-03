@@ -32,17 +32,17 @@ const SidebarSettings: React.FC = () => {
       value: t(`settings.theme_mode.${themeMode}`),
     },
     {
+      icon: "message",
+      title: t("settings.messages"),
+      onClick: () => setSidebar(SidebarMode.SETTINGS_MESSAGES),
+    },
+    {
       icon: "keyboard",
       title: t("settings.keyboard"),
       onClick: () => setSidebar(SidebarMode.SETTINGS_KEYBOARD),
       isDisabled: true,
     },
-    {
-      icon: "message",
-      title: t("settings.messages"),
-      onClick: () => setSidebar(SidebarMode.SETTINGS_MESSAGES),
-      isDisabled: true,
-    },
+
     {
       icon: "folder",
       title: t("settings.folders"),
@@ -67,7 +67,7 @@ const SidebarSettings: React.FC = () => {
       onClick: () => setSidebar(SidebarMode.SETTINGS_PRIVACY),
       isDisabled: true,
     },
-        {
+    {
       icon: "translate",
       title: t("settings.language"),
       onClick: () => setSidebar(SidebarMode.SETTINGS_LANGUAGE),

@@ -2,11 +2,10 @@ import React, { useMemo, useRef, useState, useEffect } from "react";
 import clsx from "clsx";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useShallow } from "zustand/shallow";
-import { getCurrentUser } from "@/stores/authStore";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { motion } from "framer-motion";
-
-const SHOW_CURRENT_USER = false;
+import { useReadInfo } from "@/stores/settingsStore";
+import { MessageReadInfoOptions } from "@/shared/types/enums/message-setting.enum";
 
 interface MessageReadInfoProps {
   chatId: string;
@@ -19,18 +18,11 @@ interface MessageReadInfoProps {
 }
 
 export const MessageReadInfo: React.FC<MessageReadInfoProps> = React.memo(
-  ({
-    chatId,
-    currentUserId,
-    messageId,
-    isMe,
-    senderName,
-    avatarSize = 4,
-    gap = 0.5,
-  }) => {
-    const currentUser = getCurrentUser();
+  ({ chatId, currentUserId, messageId, isMe, avatarSize = 4, gap = 0.5 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [visibleCount, setVisibleCount] = useState<number>(0);
+
+    const readInfoSetting = useReadInfo();
 
     const readMembers = useChatMemberStore(
       useShallow((state) =>
@@ -40,33 +32,49 @@ export const MessageReadInfo: React.FC<MessageReadInfoProps> = React.memo(
       )
     );
 
-    const readUserAvatars = useMemo(() => {
-      return readMembers
-        .filter((m) => (SHOW_CURRENT_USER ? true : m.userId !== currentUserId))
-        .map((m) =>
-          m.userId === currentUserId ? currentUser?.avatarUrl : m.avatarUrl
-        )
-        .filter(Boolean) as string[];
-    }, [readMembers, currentUserId, currentUser?.avatarUrl]);
+    console.log("readMembers", readMembers);
 
+    // Filter read members based on readInfo setting
+    const filteredReadMembers = useMemo(() => {
+      if (readInfoSetting === MessageReadInfoOptions.NONE) {
+        return [];
+      }
+
+      if (readInfoSetting === MessageReadInfoOptions.YOU) {
+        // Only show current user if they've read the message
+        return readMembers.filter((m) => m.userId === currentUserId);
+      }
+
+      if (readInfoSetting === MessageReadInfoOptions.OTHER) {
+        // Show other users but not current user
+        return readMembers.filter((m) => m.userId !== currentUserId);
+      }
+
+      // MessageReadInfo.ALL - show all users
+      return readMembers;
+    }, [readMembers, readInfoSetting, currentUserId]);
+
+    const readMemberCount = filteredReadMembers.length;
+    console.log('filteredReadMembers', filteredReadMembers)
     // Calculate how many avatars fit
     useEffect(() => {
       const calculateVisible = () => {
-        if (!containerRef.current) return;
+        if (!containerRef.current || readMemberCount === 0) return;
         const containerWidth = containerRef.current.offsetWidth;
         const totalWidth = avatarSize + gap; // avatar + gap
         const maxVisible = Math.floor(containerWidth / totalWidth);
-        setVisibleCount(Math.min(maxVisible, readUserAvatars.length));
+        setVisibleCount(Math.min(maxVisible, readMemberCount));
       };
 
       calculateVisible();
       window.addEventListener("resize", calculateVisible);
       return () => window.removeEventListener("resize", calculateVisible);
-    }, [readUserAvatars.length, avatarSize, gap]);
+    }, [readMemberCount, avatarSize, gap]);
 
-    if (readUserAvatars.length === 0) return null;
+    // Return null if no avatars to show or setting is NONE
+    if (readMemberCount === 0) return null;
 
-    const extraCount = readUserAvatars.length - visibleCount;
+    const extraCount = readMemberCount - visibleCount;
 
     return (
       <div
@@ -76,19 +84,19 @@ export const MessageReadInfo: React.FC<MessageReadInfoProps> = React.memo(
           "justify-start": !isMe,
         })}
       >
-        {readUserAvatars.slice(0, visibleCount).map((avatarUrl, index) => (
+        {filteredReadMembers.slice(0, visibleCount).map((member, index) => (
           <motion.div
-            key={avatarUrl}
+            key={`read-member-${index}`}
             layout
             initial={{ opacity: 0, scale: 0.8, y: 5 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 5 }}
           >
             <Avatar
-              key={index}
-              avatarUrl={avatarUrl}
-              name={senderName}
+              avatarUrl={member.avatarUrl}
+              name={member.firstName}
               size={avatarSize}
+              textSize="text-[12px]"
             />
           </motion.div>
         ))}
@@ -108,3 +116,5 @@ export const MessageReadInfo: React.FC<MessageReadInfoProps> = React.memo(
     );
   }
 );
+
+MessageReadInfo.displayName = "MessageReadInfo";

@@ -67,6 +67,12 @@
       "from_user": "{{name}} की ओर से",
       "sent_at": "{{date}} पर भेजा गया"
     },
+    "options": {
+      "you": "आप",
+      "all": "सभी",
+      "other": "अन्य",
+      "none": "कोई नहीं"
+    },
     "loading": {
       "loading": "लोड हो रहा है...",
       "searching": "खोज रहा है...",
@@ -568,10 +574,10 @@
   "message_settings": {
     "title": "संदेश",
     "options": {
-      "read_receipts": "पढ़ने की पुष्टि",
-      "typing_indicators": "टाइपिंग संकेतक दिखाएं",
-      "auto_download_media": "मीडिया स्वचालित डाउनलोड",
-      "desktop_notifications": "डेस्कटॉप सूचनाएँ"
+      "read_info": "टाइपिंग संकेतक छुपाएं",
+      "hide_typing_indicator": "टाइपिंग संकेतक छुपाएं",
+      "message_bubble_style": "संदेश बबल शैली",
+      "message_style": "संदेश शैली"
     }
   },
 

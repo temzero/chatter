@@ -12,6 +12,7 @@ import ChannelMessages from "./ChannelMessages";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { useMessagesAutoScroll } from "@/common/hooks/useMessagesAutoScroll";
+import { useIsHideTypingIndicator } from "@/stores/settingsStore";
 
 interface ChatBoxProps {
   chat?: ChatResponse;
@@ -22,6 +23,7 @@ const MessagesContainer: React.FC<ChatBoxProps> = ({ chat }) => {
 
   const chatId = chat?.id || "";
   const isMessagePinned = chat?.pinnedMessage !== null;
+  const isHideTypingIndicator = useIsHideTypingIndicator();
 
   const isMuted: boolean = chat?.mutedUntil
     ? new Date(chat.mutedUntil).getTime() > Date.now()
@@ -88,7 +90,10 @@ const MessagesContainer: React.FC<ChatBoxProps> = ({ chat }) => {
       }`}
     >
       {renderMessages()}
-      <TypingIndicator chatId={chatId} isMuted={isMuted ?? false} />
+      
+      {!isHideTypingIndicator && (
+        <TypingIndicator chatId={chatId} isMuted={isMuted ?? false} />
+      )}
     </InfiniteScroller>
   );
 };

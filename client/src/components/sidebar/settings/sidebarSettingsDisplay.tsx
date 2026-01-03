@@ -2,17 +2,13 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { SidebarMode } from "@/common/enums/sidebarMode";
-import { TextSizeSelectionBar } from "@/components/ui/settings/textSizeSelectionBar";
 import SwitchBtn from "@/components/ui/buttons/SwitchBtn";
-import { useSettingsStore } from "@/stores/settingsStore"; // Import the store
-import { FontStyleSelectionBar } from "@/components/ui/settings/fontStyleSelectionBar";
+import { DisplaySettings, useSettingsStore } from "@/stores/settingsStore"; // Import the store
+import { TextSizeSelectionBar } from "@/components/ui/selectionBar/TextSizeSelectionBar";
+import { FontStyleSelectionBar } from "@/components/ui/selectionBar/FontStyleSelectionBar";
 
 interface DisplayOption {
-  code: keyof {
-    reduceMotion: boolean;
-    reduceTransparency: boolean;
-    highContrast: boolean;
-  };
+  code: keyof DisplaySettings;
   labelKey: string;
 }
 
@@ -53,7 +49,7 @@ const SidebarSettingsDisplay: React.FC = () => {
         <div key={option.code} className="settings-option">
           <span>{t(option.labelKey)}</span>
           <SwitchBtn
-            checked={displaySettings[option.code]}
+            checked={displaySettings[option.code] as boolean}
             onCheckedChange={() => handleToggle(option.code)}
           />
         </div>

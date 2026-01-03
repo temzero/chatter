@@ -151,7 +151,7 @@ export const SelectionBar = <T extends string | number | symbol>({
             height: "100%",
           }}
         >
-          <div className="flex flex-col items-center justify-center gap-1">
+          <div className="flex flex-col items-center justify-center -mb-1 gap-1">
             {option.icon && (
               <i
                 className={clsx(

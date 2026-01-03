@@ -2,8 +2,16 @@ import { useSettingsStore } from "@/stores/settingsStore";
 import { useEffect } from "react";
 
 export function SettingsEffects() {
-  const { textSize, fontStyle, reduceMotion, reduceTransparency, highContrast } =
-    useSettingsStore((s) => s.displaySettings);
+  const { displaySettings, messageSettings } = useSettingsStore((s) => s);
+  const {
+    textSize,
+    fontStyle,
+    reduceMotion,
+    reduceTransparency,
+    highContrast,
+  } = displaySettings;
+
+  const { messageStyle, messageTail } = messageSettings;
 
   useEffect(() => {
     const html = document.documentElement;
@@ -13,7 +21,9 @@ export function SettingsEffects() {
     html.dataset.reduceMotion = String(reduceMotion);
     html.dataset.reduceTransparency = String(reduceTransparency);
     html.dataset.highContrast = String(highContrast);
-  }, [textSize, fontStyle, reduceMotion, reduceTransparency, highContrast]);
+    html.dataset.messageStyle = String(messageStyle);
+    html.dataset.messageTail = String(messageTail);
+  }, [textSize, fontStyle, reduceMotion, reduceTransparency, highContrast, messageStyle, messageTail]);
 
   return null;
 }

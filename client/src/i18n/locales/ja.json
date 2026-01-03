@@ -67,6 +67,12 @@
       "from_user": "{{name}}から",
       "sent_at": "{{date}} に送信"
     },
+    "options": {
+      "you": "あなた",
+      "all": "すべて",
+      "other": "その他",
+      "none": "なし"
+    },
     "loading": {
       "loading": "読み込み中...",
       "searching": "検索中...",
@@ -569,10 +575,10 @@
   "message_settings": {
     "title": "メッセージ",
     "options": {
-      "read_receipts": "既読レシート",
-      "typing_indicators": "入力インジケーターを表示",
-      "auto_download_media": "メディアを自動ダウンロード",
-      "desktop_notifications": "デスクトップ通知"
+      "read_info": "タイピングインジケーターを非表示",
+      "hide_typing_indicator": "タイピングインジケーターを非表示",
+      "message_bubble_style": "メッセージバブルスタイル",
+      "message_style": "メッセージスタイル"
     }
   },
 

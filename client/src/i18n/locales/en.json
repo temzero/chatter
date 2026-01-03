@@ -68,6 +68,12 @@
       "from_user": "from {{name}}",
       "sent_at": "Sent at {{date}}"
     },
+    "options": {
+      "you": "you",
+      "all": "all",
+      "other": "other",
+      "none": "none"
+    },
     "loading": {
       "loading": "Loading...",
       "searching": "Searching...",
@@ -580,10 +586,10 @@
   "message_settings": {
     "title": "Messages",
     "options": {
-      "read_receipts": "Read Receipts",
-      "typing_indicators": "Show Typing Indicators",
-      "auto_download_media": "Auto-download Media",
-      "desktop_notifications": "Desktop Notifications"
+      "read_info": "Hide Typing Indicators",
+      "hide_typing_indicator": "Hide Typing Indicators",
+      "message_bubble_style": "Message bubble style",
+      "message_style": "Message style"
     }
   },
 
