@@ -40,7 +40,7 @@ const MessageStyleSelector: React.FC = () => {
 
           <div
             id="message-bubble"
-            className={`w-[80%]! h-8 bg-(--primary-green-glow) custom-border`}
+            className={`w-[70%]! h-8 bg-(--primary-green-glow) custom-border`}
             style={{
               borderRadius: style.previewClass,
             }}

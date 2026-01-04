@@ -13,6 +13,7 @@ interface SidebarLayoutProps {
   children?: React.ReactNode;
   backLocation?: SidebarMode | BackLocation;
   rightButton?: React.ReactNode;
+  padding?: boolean;
 }
 
 const SidebarLayout: React.FC<SidebarLayoutProps> = ({
@@ -20,6 +21,7 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({
   children,
   backLocation = SidebarMode.MORE,
   rightButton,
+  padding = false,
 }) => {
   const setSidebar = getSetSidebar();
 
@@ -52,7 +54,7 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({
         )}
       </header>
 
-      <div className="flex-1 overflow-y-auto">{children}</div>
+      <div className={`flex-1 overflow-y-auto ${padding && "p-3"}`}>{children}</div>
     </aside>
   );
 };

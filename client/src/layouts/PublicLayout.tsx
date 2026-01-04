@@ -7,6 +7,7 @@ import { APP_NAME } from "@/common/constants/name";
 import { useIsMobile } from "@/stores/deviceStore";
 import { motion } from "framer-motion";
 import { publicLayoutAnimations } from "@/common/animations/publicLayoutAnimations";
+import { EndToEndEncryption } from "@/components/ui/EndtoEndEncryption";
 
 interface AuthenticationLayoutProps {
   children: ReactNode;
@@ -50,7 +51,7 @@ export const AuthenticationLayout = ({
             className={clsx(
               containerClass,
               "w-full max-w-[460px]! min-h-screen",
-              "px-2 flex justify-center items-start",
+              "p-2 flex justify-center items-start",
               "rounded-t-4xl"
             )}
           >
@@ -88,6 +89,8 @@ export const AuthenticationLayout = ({
           </motion.div>
         </div>
       )}
+
+      <EndToEndEncryption isCompact={true} />
     </div>
   );
 };

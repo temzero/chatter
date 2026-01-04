@@ -56,14 +56,12 @@
 }
 
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: var(--font-family-system);
   --font-size: 16px;
 
   /* Font family variables */
-  --font-family-system: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, sans-serif;
-  --font-family-sans: "Inter", "SF Pro Display", -apple-system,
-    BlinkMacSystemFont, sans-serif;
+  --font-family-system: system-ui, "Segoe UI", -apple-system, ;
+  --font-family-sans: "Segoe UI", -apple-system, sans-serif;
   --font-family-serif: "Georgia", "Times New Roman", "Cambria", serif;
   --font-family-mono: "SF Mono", "Monaco", "Cascadia Code", monospace;
   --font-family-rounded: "SF Pro Rounded", "Nunito", "Circular", sans-serif;
@@ -82,7 +80,21 @@
   --message-tail-clip-path-curved: ellipse(100% 100% at 0% 0%);
   /* --message-tail-clip-path-curved: polygon(100% 0%, 93% 30%, 83% 51%, 69% 69%, 52% 82%, 28% 93%, 0% 100%, 12% 86%, 25% 65%, 33% 45%, 36% 25%, 37% 0%); */
   /* --message-tail-clip-path-curved: polygon(100% 0%, 97% 29%, 89% 54%, 79% 72%, 60% 85%, 36% 94%, 0% 100%, 25% 81%, 37% 64%, 48% 37%, 50% 21%, 50% 0%); */
-  --message-tail-clip-path-curved: polygon(100% 0%, 92% 27%, 82% 50%, 69% 66%, 53% 81%, 33% 92%, 0% 100%, 12% 87%, 20% 75%, 27% 58%, 31% 39%, 33% 21%, 31% 0);
+  --message-tail-clip-path-curved: polygon(
+    100% 0%,
+    92% 27%,
+    82% 50%,
+    69% 66%,
+    53% 81%,
+    33% 92%,
+    0% 100%,
+    12% 87%,
+    20% 75%,
+    27% 58%,
+    31% 39%,
+    33% 21%,
+    31% 0
+  );
   --message-tail-clip-path-circle: ellipse(30% 30% at 50% 50%);
 
   --message-tail-clip-path: var(--message-tail-curved);

@@ -85,6 +85,12 @@
     }
   },
 
+  "encryption": {
+    "title": "Cifrado de Extremo a Extremo",
+    "short_description": "Solo tú y el destinatario pueden leer los mensajes",
+    "description": "Los mensajes se cifran en tu dispositivo y solo el destinatario previsto puede descifrarlos. Nadie más (incluida esta aplicación, los proveedores de servicios o terceros) puede leer o acceder a tus conversaciones."
+  },
+
   "time": {
     "now": "ahora",
     "second": "s",

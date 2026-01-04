@@ -48,7 +48,7 @@ const MessageTailSelector: React.FC = () => {
           <RadioDot isSelected={messageTailSetting === style.value} />
 
           {/* Preview */}
-          <div className="flex flex-col w-[70%] items-end">
+          <div className="flex flex-col w-[60%] items-end">
             <div className="w-full h-8 message-bubble bg-(--primary-green-glow)!" />
             <div
               className="message-tail bg-(--primary-green-glow)!"

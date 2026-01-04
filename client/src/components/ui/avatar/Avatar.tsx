@@ -42,9 +42,9 @@ export const Avatar: React.FC<AvatarProps> = ({
         />
       ) : nameInitial ? (
         <h1
-          className={`h-full w-full font-light flex items-center justify-center bg-white/50 text-black select-none ${textSize}`}
+          className={`font-light tracking-tight leading-none w-full h-full flex items-center justify-center bg-white/50 text-black select-none ${textSize}`}
         >
-          {nameInitial}
+          <span className="-mb-1">{nameInitial}</span>
         </h1>
       ) : (
         <span className="material-symbols-outlined text-4xl!">

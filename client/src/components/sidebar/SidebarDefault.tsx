@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useAllChatIds, useChatMap } from "@/stores/chatStore";
 import { getSetSidebar, useIsCompactSidebar } from "@/stores/sidebarStore";
 import { useFolders } from "@/stores/folderStore";
-import { Logo } from "@/components/ui/icons/Logo";
 import { SlidingContainer } from "@/components/ui/layout/SlidingContainer";
 import { motion } from "framer-motion";
 import { SidebarMode } from "@/common/enums/sidebarMode";
@@ -10,7 +9,7 @@ import { FolderResponse } from "@/shared/types/responses/folder.response";
 import ChatList from "@/components/ui/chat/ChatList";
 import ChatFolderSelector from "@/components/ui/chat/ChatFolderSelector";
 import SidebarWellCome from "./SidebarWellCome";
-import { APP_NAME } from "@/common/constants/name";
+import { LogoWithText } from "../ui/icons/LogoWithText";
 
 const SidebarDefault: React.FC = () => {
   console.log("[MOUNTED]", "SidebarDefault");
@@ -83,22 +82,18 @@ const SidebarDefault: React.FC = () => {
         <motion.a
           className="flex items-center cursor-pointer -ml-16"
           onClick={() => setSidebar(SidebarMode.MORE)}
-          whileHover={{ x: 33 }}
+          whileHover={{ x: 39 }}
           transition={{ type: "spring", stiffness: 600, damping: 30 }}
         >
           <span
-            className={`material-symbols-outlined text-6xl! cursor-pointer text-(--primary-green) ${
+            className={`material-symbols-outlined text-6xl! cursor-pointer text-(--primary-green-glow) ${
               isCompact ? "mr-9" : "mr-3"
             }`}
           >
             trending_flat
           </span>
-          <div className="w-8 h-8 flex items-center justify-center">
-            <Logo className="h-full w-full" />
-          </div>
-          {!isCompact && (
-            <span className="text-2xl font-semibold px-1">{APP_NAME}</span>
-          )}
+
+<LogoWithText/>
         </motion.a>
 
         {!isCompact && (

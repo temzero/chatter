@@ -86,6 +86,12 @@
     }
   },
 
+  "encryption": {
+    "title": "End-to-End Encryption",
+    "short_description": "Only you and the recipient can read messages",
+    "description": "Messages are encrypted on your device and can only be decrypted by the intended recipient. No one else (including this app, service providers, or third parties) can read or access your conversations."
+  },
+
   "time": {
     "now": "now",
     "second": "s",

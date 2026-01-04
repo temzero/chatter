@@ -85,6 +85,12 @@
     }
   },
 
+  "encryption": {
+    "title": "Mã hóa đầu ⇌ cuối",
+    "short_description": "Chỉ bạn và người nhận có thể đọc tin nhắn",
+    "description": "Tin nhắn được mã hóa trên thiết bị của bạn và chỉ người nhận dự định mới có thể giải mã. Không ai khác (kể cả ứng dụng này, nhà cung cấp dịch vụ hoặc bên thứ ba) có thể đọc hoặc truy cập cuộc trò chuyện của bạn."
+  },
+
   "time": {
     "now": "bây giờ",
     "second": "giây",
