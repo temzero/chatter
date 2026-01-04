@@ -69,10 +69,10 @@
       "sent_at": "Sent at {{date}}"
     },
     "options": {
-      "you": "you",
-      "all": "all",
-      "other": "other",
-      "none": "none"
+      "all": "All",
+      "only_you": "Only you",
+      "other": "Other",
+      "none": "None"
     },
     "loading": {
       "loading": "Loading...",

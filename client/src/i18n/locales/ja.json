@@ -68,9 +68,9 @@
       "sent_at": "{{date}} に送信"
     },
     "options": {
-      "you": "あなた",
       "all": "すべて",
-      "other": "その他",
+      "only_you": "あなたのみ",
+      "other": "あなた以外の他人",
       "none": "なし"
     },
     "loading": {

@@ -68,10 +68,10 @@
       "sent_at": "Enviado el {{date}}"
     },
     "options": {
-      "you": "tú",
-      "all": "todo",
-      "other": "otro",
-      "none": "ninguno"
+      "all": "Todo",
+      "only_you": "Solo tú",
+      "other": "Otros pero no tú",
+      "none": "Ninguno"
     },
     "loading": {
       "loading": "Cargando...",

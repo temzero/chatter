@@ -67,10 +67,10 @@
       "from_user": "来自{{name}}",
       "sent_at": "发送于 {{date}}"
     },
-     "options": {
-      "you": "你",
-      "all": "全部",
-      "other": "其他",
+    "options": {
+      "all": "所有",
+      "only_you": "仅你",
+      "other": "他人非你",
       "none": "无"
     },
     "loading": {

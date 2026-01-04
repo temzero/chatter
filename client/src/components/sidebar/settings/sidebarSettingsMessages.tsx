@@ -1,12 +1,12 @@
 import * as React from "react";
 import { useTranslation } from "react-i18next";
-import SidebarLayout from "@/layouts/SidebarLayout";
 import { SidebarMode } from "@/common/enums/sidebarMode";
-import SwitchBtn from "@/components/ui/buttons/SwitchBtn";
-import { MessageReadInfoSelectionBar } from "@/components/ui/selectionBar/MessageReadInfoSelectionBar";
 import { useSettingsStore, MessageSettings } from "@/stores/settingsStore";
+import { MessageReadInfoSelectionDots } from "@/components/ui/selectionDots/MessageReadInfoSelectionDots";
 import MessageStyleSelector from "@/components/ui/settings/MessageStyleSelector";
 import MessageTailSelector from "@/components/ui/settings/MessageTailSelector";
+import SwitchBtn from "@/components/ui/buttons/SwitchBtn";
+import SidebarLayout from "@/layouts/SidebarLayout";
 
 interface MessageOption {
   code: keyof MessageSettings; // Use the actual keys from MessageSettings
@@ -46,10 +46,6 @@ const SidebarSettingsMessages: React.FC = () => {
       title={t("message_settings.title")}
       backLocation={SidebarMode.SETTINGS}
     >
-      <div className="settings-option flex-col gap-2.5 items-start!">
-        <h1>{t("message_settings.options.read_info")}</h1>
-        <MessageReadInfoSelectionBar />
-      </div>
       <div className="flex flex-col">
         {messageOptions.map((option) => (
           <div key={option.code} className="settings-option">
@@ -64,6 +60,11 @@ const SidebarSettingsMessages: React.FC = () => {
             />
           </div>
         ))}
+      </div>
+
+      <div className="settings-option flex-col gap-2.5 items-start!">
+        <h1>{t("message_settings.options.read_info")}</h1>
+        <MessageReadInfoSelectionDots />
       </div>
 
       <div className="settings-option flex-col gap-3 items-start!">

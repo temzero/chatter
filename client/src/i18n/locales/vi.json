@@ -68,10 +68,10 @@
       "sent_at": "Gửi lúc {{date}}"
     },
     "options": {
-      "you": "bạn",
-      "all": "tất cả",
-      "other": "khác",
-      "none": "không"
+      "all": "Tất cả",
+      "only_you": "Chỉ bạn",
+      "other": "Người khác",
+      "none": "Không"
     },
     "loading": {
       "loading": "Đang tải...",

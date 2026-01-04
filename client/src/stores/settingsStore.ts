@@ -5,8 +5,8 @@ import { TextSize } from "@/shared/types/enums/text-size.enum";
 import { FontStyle } from "@/shared/types/enums/font-style.enum";
 import {
   MessageReadInfoOptions,
-  MessageStyle,
-  MessageTail,
+  MessageStyleOptions,
+  MessageTailOptions,
 } from "@/shared/types/enums/message-setting.enum";
 
 export interface DisplaySettings {
@@ -20,8 +20,8 @@ export interface DisplaySettings {
 export interface MessageSettings {
   hideTypingIndicator: boolean;
   readInfo: MessageReadInfoOptions;
-  messageStyle: MessageStyle;
-  messageTail: MessageTail;
+  messageStyle: MessageStyleOptions;
+  messageTail: MessageTailOptions;
 }
 
 interface SettingsStore {
@@ -39,8 +39,8 @@ interface SettingsStore {
   // Message actions
   toggleTypingIndicator: () => void;
   setReadDisplay: (value: MessageReadInfoOptions) => void;
-  setMessageStyle: (style: MessageStyle) => void;
-  setMessageTail: (style: MessageTail) => void;
+  setMessageStyle: (style: MessageStyleOptions) => void;
+  setMessageTail: (style: MessageTailOptions) => void;
 }
 
 export const useSettingsStore = create<SettingsStore>()(
@@ -57,8 +57,8 @@ export const useSettingsStore = create<SettingsStore>()(
       messageSettings: {
         hideTypingIndicator: false,
         readInfo: MessageReadInfoOptions.OTHER,
-        messageStyle: MessageStyle.CURVED,
-        messageTail: MessageTail.CURVED,
+        messageStyle: MessageStyleOptions.CURVED,
+        messageTail: MessageTailOptions.CURVED,
       },
 
       updateDisplaySettings: (updates) =>

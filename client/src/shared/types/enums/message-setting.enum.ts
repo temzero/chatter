@@ -5,15 +5,16 @@ export enum MessageReadInfoOptions {
   ALL = "all",
 }
 
-export enum MessageStyle {
+export enum MessageStyleOptions {
   CURVED = "curved",
   ROUNDED = "rounded",
   STRAIGHT = "straight",
 }
 
-export enum MessageTail {
+export enum MessageTailOptions {
   NONE = "none",
   STRAIGHT = "straight",
   POINTED = "pointed",
   CURVED = "curved",
+  CIRCLE = "circle",
 }

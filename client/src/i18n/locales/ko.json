@@ -68,9 +68,9 @@
       "sent_at": "{{date}}에 전송됨"
     },
     "options": {
-      "you": "당신",
       "all": "모두",
-      "other": "기타",
+      "only_you": "당신만",
+      "other": "당신을 제외한 다른 사람",
       "none": "없음"
     },
     "loading": {

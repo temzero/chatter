@@ -53,23 +53,6 @@
     overflow-wrap: break-word;
     word-break: break-word;
   }
-
-  /* Added to @layer utilities: */
-  .message-style-none {
-    border-radius: 0 !important;
-  }
-
-  .message-style-straight {
-    border-radius: 4px !important;
-  }
-
-  .message-style-rounded {
-    border-radius: 12px !important;
-  }
-
-  .message-style-curved {
-    border-radius: 18px !important;
-  }
 }
 
 :root {
@@ -85,14 +68,24 @@
   --font-family-mono: "SF Mono", "Monaco", "Cascadia Code", monospace;
   --font-family-rounded: "SF Pro Rounded", "Nunito", "Circular", sans-serif;
 
-  --message-border-radius: 8px;
+  --message-border-radius: var(--message-border-radius-curved);
 
-  --message-tail-none: none;
---message-tail-straight: polygon(0% 100%, 0% 0%, 100% 0%);
---message-tail-pointed: polygon(0% 100%, 0% 0%, 100% 0%);
---message-tail-curved: ellipse(100% 100% at 0% 0%);
+  --message-border-radius-none: 0;
+  --message-border-radius-straight: 3px;
+  --message-border-radius-curved: 9px;
+  --message-border-radius-rounded: 24px;
 
-  --message-tail-style: var(--message-tail-curved);
+  --message-tail-dimension: 25px;
+  --message-tail-clip-path-none: none;
+  --message-tail-clip-path-straight: polygon(0% 100%, 0% 0%, 100% 0%);
+  --message-tail-clip-path-pointed: polygon(100% 0, 20% 0, 0 100%);
+  --message-tail-clip-path-curved: ellipse(100% 100% at 0% 0%);
+  /* --message-tail-clip-path-curved: polygon(100% 0%, 93% 30%, 83% 51%, 69% 69%, 52% 82%, 28% 93%, 0% 100%, 12% 86%, 25% 65%, 33% 45%, 36% 25%, 37% 0%); */
+  /* --message-tail-clip-path-curved: polygon(100% 0%, 97% 29%, 89% 54%, 79% 72%, 60% 85%, 36% 94%, 0% 100%, 25% 81%, 37% 64%, 48% 37%, 50% 21%, 50% 0%); */
+  --message-tail-clip-path-curved: polygon(100% 0%, 92% 27%, 82% 50%, 69% 66%, 53% 81%, 33% 92%, 0% 100%, 12% 87%, 20% 75%, 27% 58%, 31% 39%, 33% 21%, 31% 0);
+  --message-tail-clip-path-circle: ellipse(30% 30% at 50% 50%);
+
+  --message-tail-clip-path: var(--message-tail-curved);
 
   /* Spacing & Sizing */
   --header-height: 60px;
@@ -214,27 +207,33 @@ html[data-theme="dark"][data-high-contrast="true"] {
 
 /* Added Message Style Settings: */
 html[data-message-style="none"] {
-  --message-border-radius: 0;
+  --message-border-radius: var(--message-border-radius-none);
 }
 html[data-message-style="straight"] {
-  --message-border-radius: 4px;
+  --message-border-radius: var(--message-border-radius-straight);
+}
+html[data-message-style="curved"] {
+  --message-border-radius: var(--message-border-radius-curved);
 }
 html[data-message-style="rounded"] {
-  --message-border-radius: 22px;
+  --message-border-radius: var(--message-border-radius-rounded);
 }
 
 /* Added Message Tail Settings: */
 html[data-message-tail="none"] {
-  --message-tail-style: var(--message-tail-none);
+  --message-tail-clip-path: var(--message-tail-clip-path-none);
 }
 html[data-message-tail="straight"] {
-  --message-tail-style: var(--message-tail-straight);
+  --message-tail-clip-path: var(--message-tail-clip-path-straight);
 }
 html[data-message-tail="pointed"] {
-  --message-tail-style: var(--message-tail-pointed);
+  --message-tail-clip-path: var(--message-tail-clip-path-pointed);
 }
 html[data-message-tail="curved"] {
-  --message-tail-style: var(--message-tail-curved);
+  --message-tail-clip-path: var(--message-tail-clip-path-curved);
+}
+html[data-message-tail="circle"] {
+  --message-tail-clip-path: var(--message-tail-clip-path-circle);
 }
 
 html {
@@ -407,7 +406,10 @@ input[type="number"]::-webkit-inner-spin-button {
 .message-bubble-wrapper,
 .message-forward-bubble {
   position: relative;
-  min-width: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 36px;
   border-radius: var(--message-border-radius);
   background-color: var(--message-color);
   word-break: break-word;
@@ -441,12 +443,13 @@ input[type="number"]::-webkit-inner-spin-button {
 
 .message-tail {
   z-index: -1;
-  width: 18px;
-  height: 18px;
-  clip-path: var(--message-tail-style);
-  margin-top: -8px;
-  margin-left: 8px;
-  margin-right: 8px;
+  width: var(--message-tail-dimension);
+  height: var(--message-tail-dimension);
+  clip-path: var(--message-tail-clip-path);
+  margin-top: -18px;
+  /* margin-left: 2px;
+  margin-right: 2px; */
+  /* background: white; */
 }
 
 .message-tail.self-message {

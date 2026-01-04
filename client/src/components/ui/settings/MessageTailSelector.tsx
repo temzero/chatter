@@ -1,32 +1,39 @@
 // components/message-tail-selector.tsx
 import React from "react";
-import { MessageTail } from "@/shared/types/enums/message-setting.enum";
+import { MessageTailOptions } from "@/shared/types/enums/message-setting.enum";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { RadioDot } from "../selectionDots/SelectionDots";
 
 const MessageTailSelector: React.FC = () => {
   const { messageSettings, setMessageTail } = useSettingsStore();
+  const messageTailSetting = messageSettings.messageTail;
 
   const messageTails = [
     {
-      value: MessageTail.NONE,
+      value: MessageTailOptions.NONE,
       label: "None",
-      cssVar: "var(--message-tail-none)",
+      cssVar: "var(--message-tail-clip-path-none)",
     },
     {
-      value: MessageTail.STRAIGHT,
-      label: "Straight",
-      cssVar: "var(--message-tail-straight)",
-    },
-    {
-      value: MessageTail.POINTED,
+      value: MessageTailOptions.POINTED,
       label: "Pointed",
-      cssVar: "var(--message-tail-pointed)",
+      cssVar: "var(--message-tail-clip-path-pointed)",
     },
     {
-      value: MessageTail.CURVED,
-      label: "Curved",
-      cssVar: "var(--message-tail-curved)",
+      value: MessageTailOptions.STRAIGHT,
+      label: "Straight",
+      cssVar: "var(--message-tail-clip-path-straight)",
     },
+    {
+      value: MessageTailOptions.CURVED,
+      label: "Curved",
+      cssVar: "var(--message-tail-clip-path-curved)",
+    },
+    // {
+    //   value: MessageTailOptions.CIRCLE,
+    //   label: "Circle",
+    //   cssVar: "var(--message-tail-clip-path-circle)",
+    // },
   ];
 
   return (
@@ -38,27 +45,18 @@ const MessageTailSelector: React.FC = () => {
           onClick={() => setMessageTail(style.value)}
         >
           {/* Radio */}
-          <div
-            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-              messageSettings.messageTail === style.value
-                ? "border-(--primary-green)"
-                : "border-(--border-color)"
-            }`}
-          >
-            {messageSettings.messageTail === style.value && (
-              <div className="w-2.5 h-2.5 rounded-full bg-(--primary-green)" />
-            )}
-          </div>
+          <RadioDot isSelected={messageTailSetting === style.value} />
 
           {/* Preview */}
-          <div className="flex flex-col w-[80%] items-end">
+          <div className="flex flex-col w-[70%] items-end">
             <div className="w-full h-8 message-bubble bg-(--primary-green-glow)!" />
             <div
               className="message-tail bg-(--primary-green-glow)!"
               style={{
                 transform: "scaleX(-1)",
                 clipPath: style.cssVar,
-                display: style.value === MessageTail.NONE ? "none" : "block",
+                display:
+                  style.value === MessageTailOptions.NONE ? "none" : "block",
               }}
             />
           </div>
@@ -68,4 +66,4 @@ const MessageTailSelector: React.FC = () => {
   );
 };
 
-export default MessageTailSelector
+export default MessageTailSelector;

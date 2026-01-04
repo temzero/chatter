@@ -31,6 +31,7 @@ import { useIsMobile } from "@/stores/deviceStore";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { useReadInfo } from "@/stores/settingsStore";
 import { MessageReadInfoOptions } from "@/shared/types/enums/message-setting.enum";
+import { MessageTail } from "./messageTail";
 
 interface MessageProps {
   messageId: string;
@@ -55,7 +56,7 @@ const Message: React.FC<MessageProps> = ({
 }) => {
   const isMobile = useIsMobile();
   const message = useMessageStore((state) => state.messagesById[messageId]);
-  console.log('message', message)
+  console.log("message", message);
   const sender = useMessageSender(message?.sender.id, message?.chatId);
   const senderDisplayName =
     sender?.nickname ||
@@ -278,35 +279,24 @@ const Message: React.FC<MessageProps> = ({
                     "items-start": !isMe,
                   })}
                 >
-                  {/* <div
-                    id="message-tail"
-                    className={clsx("message-tail -mt-2", {
-                      "bg-(--primary-green)": isMe,
-                      "bg-(--message-color) scale-x-[-1]": !isMe,
-                    })}
-                  /> */}
-                  <div
-                    id="message-tail"
-                    className={clsx("message-tail", {
-                      "bg-(--primary-green) self-message": isMe,
-                      "bg-(--message-color)": !isMe,
-                    })}
-                  />
+                  <MessageTail isMe={isMe} />
 
-                  {showInfo && isGroupChat && !isMe && (
-                    <h1 className="text-sm font-semibold opacity-70 mr-2">
-                      {senderDisplayName ?? ""}
-                    </h1>
-                  )}
+                  <div className="mt-1">
+                    {showInfo && isGroupChat && !isMe && senderDisplayName && (
+                      <h1 className="text-sm font-semibold opacity-70">
+                        {senderDisplayName}
+                      </h1>
+                    )}
 
-                  <p
-                    className={clsx("text-xs opacity-40", {
-                      "text-right": isMe,
-                      "text-left": !isMe,
-                    })}
-                  >
-                    {formatTime(message.createdAt)}
-                  </p>
+                    <p
+                      className={clsx("text-xs opacity-40", {
+                        "text-right": isMe,
+                        "text-left": !isMe,
+                      })}
+                    >
+                      {formatTime(message.createdAt)}
+                    </p>
+                  </div>
                 </div>
               )}
 
