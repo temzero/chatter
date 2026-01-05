@@ -33,7 +33,7 @@ const MessageContent: React.FC<MessageBubbleProps> = ({
       {/* Text Content */}
       {message.content && !isForwardMessage && (
         <p
-          className="wrap-break-word max-w-full cursor-pointer transition-all duration-200 shadow-xl rounded-b-xl"
+          className="break-words overflow-wrap-break"
           onDoubleClick={() =>
             message && handleQuickReaction(message.id, message.chatId)
           }
@@ -42,7 +42,8 @@ const MessageContent: React.FC<MessageBubbleProps> = ({
             options={{
               target: "_blank",
               rel: "noopener noreferrer",
-              className: "underline! opacity-70 hover:opacity-100 hover:text-blue-600 italic break-all",
+              className:
+                "underline! opacity-70 hover:opacity-100 hover:text-blue-600 italic break-all",
               attributes: {
                 onClick: (e: React.MouseEvent<HTMLAnchorElement>) =>
                   e.stopPropagation(),

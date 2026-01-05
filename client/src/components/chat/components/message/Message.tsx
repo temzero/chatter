@@ -1,24 +1,11 @@
 import React, { useState, useRef, useMemo } from "react";
 import clsx from "clsx";
-import { formatTime } from "@/common/utils/format/formatTime";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
-import { MessageReactionDisplay } from "@/components/ui/messages/MessageReactionsDisplay";
-import { MessageStatus } from "@/shared/types/enums/message-status.enum";
-import {
-  useIsMessageFocus,
-  useIsReplyToThisMessage,
-  setOpenFocusMessageModal,
-} from "@/stores/modalStore";
-import MessageReplyPreview from "@/components/ui/messages/MessageReplyPreview";
-import SystemMessage from "./SystemMessage";
-import MessageContent from "../../../ui/messages/content/MessageContent";
 import { AnimatePresence, motion } from "framer-motion";
 import { getMessageAnimation } from "@/common/animations/messageAnimations";
-import { chatWebSocketService } from "@/services/websocket/chatWebsocketService";
 import { useMessageStore } from "@/stores/messageStore";
 import { MESSAGE_AVATAR_WIDTH } from "@/common/constants/messageAvatarDimension";
-import { MessageReadInfo } from "../../messagesContainer/MessageReadInfo";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { getMessageAttachments } from "@/stores/messageAttachmentStore";
 import { SystemMessageJSONContent } from "../../../ui/messages/content/SystemMessageContent";
@@ -30,8 +17,15 @@ import { useMessageFilter } from "@/common/hooks/useMessageFilter";
 import { useIsMobile } from "@/stores/deviceStore";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { useReadInfo } from "@/stores/settingsStore";
-import { MessageReadInfoOptions } from "@/shared/types/enums/message-setting.enum";
-import { MessageTail } from "./messageTail";
+import MessageReplyPreview from "@/components/ui/messages/MessageReplyPreview";
+import SystemMessage from "./SystemMessage";
+import MessageContent from "../../../ui/messages/content/MessageContent";
+import {
+  useIsMessageFocus,
+  useIsReplyToThisMessage,
+  setOpenFocusMessageModal,
+} from "@/stores/modalStore";
+import MessageInfo from "./MessageInfo";
 
 interface MessageProps {
   messageId: string;
@@ -148,7 +142,7 @@ const Message: React.FC<MessageProps> = ({
       ref={messageRef}
       onContextMenu={handleContextMenu}
       className={clsx(
-        "relative overflow-hidden flex",
+        "relative flex",
         isMe ? "justify-end" : "justify-start",
 
         getMessageWidth(isMobile, hasLinkPreview, attachmentLength)
@@ -202,52 +196,27 @@ const Message: React.FC<MessageProps> = ({
             isRelyToThisMessage={isRelyToThisMessage}
             attachmentLength={attachmentLength}
             className={hasLinkPreview ? "w-full" : undefined}
+            idDisplayTail={!isRecent}
           >
-            {/* <div className="overflow-hidden rounded-lg"> */}
-            {call ? (
-              <CallMessageContent
-                call={call}
-                message={message}
-                className="justify-between p-2 pl-3"
-                iconClassName="text-3xl"
-                textClassName="font-medium"
-              />
-            ) : (
-              <MessageContent
-                message={message}
-                isMe={isMe}
-                isRelyToThisMessage={isRelyToThisMessage}
-                currentUserId={currentUserId ?? ""}
-              />
-            )}
-            {/* </div> */}
-          </MessageBubbleWrapper>
-          <MessageReactionDisplay
-            isMe={isMe}
-            currentUserId={currentUserId}
-            messageId={messageId}
-            chatId={message.chatId}
-          />
-
-          {message.isPinned && (
-            <div
-              className={clsx(
-                "absolute top-0 text-red-400 rounded-full! cursor-pointer hover:scale-110 transition-all",
-                {
-                  "-left-5 -rotate-45": isMe,
-                  "-right-5 rotate-45": !isMe,
-                }
+            <div className="">
+              {call ? (
+                <CallMessageContent
+                  call={call}
+                  message={message}
+                  className="justify-between p-2 pl-3"
+                  iconClassName="text-3xl"
+                  textClassName="font-medium"
+                />
+              ) : (
+                <MessageContent
+                  message={message}
+                  isMe={isMe}
+                  isRelyToThisMessage={isRelyToThisMessage}
+                  currentUserId={currentUserId ?? ""}
+                />
               )}
-              onClick={() => {
-                chatWebSocketService.togglePinMessage({
-                  chatId: message.chatId,
-                  messageId: null,
-                });
-              }}
-            >
-              <span className="material-symbols-outlined filled">keep</span>
             </div>
-          )}
+          </MessageBubbleWrapper>
 
           <AnimatePresence>
             {isFocus && !isRelyToThisMessage && contextMenuMousePos && (
@@ -263,60 +232,17 @@ const Message: React.FC<MessageProps> = ({
           </AnimatePresence>
         </div>
 
-        {message.status !== MessageStatus.SENDING &&
-          message.status !== MessageStatus.FAILED && (
-            <div
-              className={clsx({
-                "ml-auto": isMe,
-                "mr-auto": !isMe,
-                "mb-5": !isRecent,
-              })}
-            >
-              {!isRecent && (
-                <div
-                  className={clsx("flex flex-col", {
-                    "items-end": isMe,
-                    "items-start": !isMe,
-                  })}
-                >
-                  <MessageTail isMe={isMe} />
-
-                  <div className="mt-1">
-                    {showInfo && isGroupChat && !isMe && senderDisplayName && (
-                      <h1 className="text-sm font-semibold opacity-70">
-                        {senderDisplayName}
-                      </h1>
-                    )}
-
-                    <p
-                      className={clsx("text-xs opacity-40", {
-                        "text-right": isMe,
-                        "text-left": !isMe,
-                      })}
-                    >
-                      {formatTime(message.createdAt)}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {readInfoSetting !== MessageReadInfoOptions.NONE && (
-                <MessageReadInfo
-                  chatId={chat.id}
-                  currentUserId={currentUserId}
-                  messageId={message.id}
-                  isMe={isMe}
-                  senderName={senderDisplayName}
-                />
-              )}
-            </div>
-          )}
-
-        {message.status === MessageStatus.FAILED && (
-          <h1 className="text-red-500 text-sm text-right">
-            Failed to send message
-          </h1>
-        )}
+        <MessageInfo
+          message={message}
+          isMe={isMe}
+          isRecent={isRecent}
+          isGroupChat={isGroupChat}
+          senderDisplayName={senderDisplayName}
+          showInfo={showInfo}
+          readInfoSetting={readInfoSetting}
+          chat={chat}
+          currentUserId={currentUserId}
+        />
       </div>
     </motion.div>
   );

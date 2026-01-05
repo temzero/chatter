@@ -47,7 +47,7 @@ const ContactInfoItem: React.FC<ContactInfoItemProps> = ({
 
   return (
     <div
-      className={`flex cursor-pointer p-2 opacity-80 hover:bg-(--hover-color) w-full justify-between ${className}`}
+      className={`flex cursor-pointer p-2 opacity-80 hover:bg-(--hover-color) w-full justify-between overflow-hidden ${className}`}
       onClick={handleCopy}
     >
       <i className="material-symbols-outlined">{icon}</i>
@@ -56,11 +56,14 @@ const ContactInfoItem: React.FC<ContactInfoItemProps> = ({
           {copyType.charAt(0).toUpperCase() + copyType.slice(1)} copied!
         </span>
       ) : (
-        typeof formattedValue === "string" || typeof formattedValue === "number"
-          ? formattedValue
-          : formattedValue
-          ? String(formattedValue)
-          : defaultText
+        <p>
+          {typeof formattedValue === "string" ||
+          typeof formattedValue === "number"
+            ? formattedValue
+            : formattedValue
+            ? String(formattedValue)
+            : defaultText}
+        </p>
       )}
     </div>
   );

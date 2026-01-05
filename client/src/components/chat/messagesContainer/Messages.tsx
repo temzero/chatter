@@ -83,7 +83,7 @@ const Messages: React.FC<ChatMessagesProps> = ({
                 return (
                   <div
                     key={message.id}
-                    className={`flex flex-col mb-2 ${
+                    className={`flex flex-col my-0.5 ${
                       isMe ? "items-end" : "items-start"
                     }`}
                   >

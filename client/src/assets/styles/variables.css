@@ -1,0 +1,106 @@
+/* CSS Custom Properties */
+:root {
+  font-family: var(--font-family-system);
+  --font-size: 16px;
+
+  /* Font family variables */
+  --font-family-system: system-ui, "Segoe UI", -apple-system;
+  --font-family-sans: "Segoe UI", -apple-system, sans-serif;
+  --font-family-serif: "Cambria", "Times New Roman", serif;
+  --font-family-mono: "Cascadia Code", "SF Mono", "Monaco", monospace;
+  --font-family-rounded: "SF Pro Rounded", "Nunito", "Circular", sans-serif;
+
+  --message-border-radius: var(--message-border-radius-curved);
+
+  --message-border-radius-none: 0;
+  --message-border-radius-straight: 3px;
+  --message-border-radius-curved: 9px;
+  --message-border-radius-rounded: 24px;
+
+  --message-tail-dimension: 28px;
+
+  /* Spacing & Sizing */
+  --header-height: 60px;
+  --chat-input-container-height: 40px;
+  --sidebar-width: 300px;
+  --sidebar-width-small: 96px;
+  --sidebar-width-large: 400px;
+  --attachment-width: 300px;
+  --attachment-width-large: 450px;
+  --attachment-height: 420px;
+  --pinned-message-height: 44px;
+
+  /* Colors - Primary */
+  --primary-color: rgb(36, 124, 255);
+  --primary-green: rgb(0, 174, 128);
+  --primary-green-50: rgba(0, 174, 128, 0.54);
+  --primary-green-glow: rgb(134, 239, 172);
+
+  /* Colors - Light Theme */
+  --text-color: rgb(0, 0, 0);
+  --avatar-background: rgb(200, 200, 200);
+  --background-color: rgb(222, 222, 222);
+  --panel-color: rgb(238, 238, 238);
+  --glass-panel-color: rgba(255, 255, 255, 0.6);
+  --input-color: rgba(255, 255, 255, 0.3);
+  --input-border-color: rgba(0, 0, 0, 0.3);
+  --border-color: rgba(0, 0, 0, 0.2);
+  --hover-color: rgb(221, 221, 221);
+  --message-color: rgb(221, 221, 221);
+  --message-color: white;
+  --message-color-50: rgba(238, 238, 238, 0.45);
+  --scrollbar-color: rgb(193, 193, 193);
+  --scrollbar-hover-color: rgb(168, 168, 168);
+  --card-bg-color: rgb(255, 255, 255);
+
+  /* Transitions */
+  --transition-default: 0.2s ease;
+  --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Text size variants */
+:root[data-text-size="S"] {
+  --font-size: 14px;
+}
+:root[data-text-size="M"] {
+  --font-size: 16px;
+}
+:root[data-text-size="L"] {
+  --font-size: 18px;
+}
+:root[data-text-size="XL"] {
+  --font-size: 20px;
+}
+
+/* Dark mode styles */
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --text-color: rgb(255, 255, 255);
+  --avatar-background: rgb(60, 60, 60);
+  --background-color: rgb(0, 0, 0);
+  --panel-color: rgba(34, 34, 34, 1);
+  --glass-panel-color: rgba(0, 0, 0, 0.5);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --input-color: rgba(0, 0, 0, 0.3);
+  --input-border-color: rgba(255, 255, 255, 0.2);
+  --hover-color: rgba(122, 122, 122, 0.2);
+  --message-color: rgb(48, 48, 48);
+  --message-color-50: rgba(48, 48, 48, 0.67);
+  --scrollbar-color: rgb(95, 95, 95);
+  --scrollbar-hover-color: rgb(208, 208, 208);
+  --card-bg-color: rgb(20, 20, 20);
+}
+
+/* Message Style Settings */
+html[data-message-style="none"] {
+  --message-border-radius: var(--message-border-radius-none);
+}
+html[data-message-style="straight"] {
+  --message-border-radius: var(--message-border-radius-straight);
+}
+html[data-message-style="curved"] {
+  --message-border-radius: var(--message-border-radius-curved);
+}
+html[data-message-style="rounded"] {
+  --message-border-radius: var(--message-border-radius-rounded);
+}

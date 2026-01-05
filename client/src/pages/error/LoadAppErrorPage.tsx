@@ -1,9 +1,8 @@
 import * as React from "react";
-import { Logo } from "@/components/ui/icons/Logo";
 import { motion } from "framer-motion";
-import { APP_NAME } from "@/common/constants/name";
 import { useAuthStore } from "@/stores/authStore";
 import { useTranslation } from "react-i18next";
+import { LogoWithText } from "@/components/ui/icons/LogoWithText";
 
 const LoadAppErrorPage: React.FC = () => {
   const { t } = useTranslation();
@@ -14,10 +13,7 @@ const LoadAppErrorPage: React.FC = () => {
 
   return (
     <div className="relative flex flex-col p-6 items-center justify-between h-screen bg-red-500 text-white">
-      <div className="flex gap-1 items-center  select-none">
-        <Logo className="h-8 w-8" />
-        <h1 className="text-2xl font-semibold">{APP_NAME}</h1>
-      </div>
+      <LogoWithText/>
       <motion.span
         initial={{ scale: 1.6, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}

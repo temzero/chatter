@@ -11,9 +11,9 @@ const MessageStyleSelector: React.FC = () => {
   // Define all available message styles with their display names
   const messageStyles = [
     {
-      value: MessageStyleOptions.STRAIGHT,
-      label: "Straight",
-      previewClass: "var(--message-border-radius-straight)",
+      value: MessageStyleOptions.ROUNDED,
+      label: "Curved",
+      previewClass: "var(--message-border-radius-rounded)",
     },
     {
       value: MessageStyleOptions.CURVED,
@@ -21,9 +21,9 @@ const MessageStyleSelector: React.FC = () => {
       previewClass: "var(--message-border-radius-curved)",
     },
     {
-      value: MessageStyleOptions.ROUNDED,
-      label: "Curved",
-      previewClass: "var(--message-border-radius-rounded)",
+      value: MessageStyleOptions.STRAIGHT,
+      label: "Straight",
+      previewClass: "var(--message-border-radius-straight)",
     },
   ];
 
@@ -40,7 +40,7 @@ const MessageStyleSelector: React.FC = () => {
 
           <div
             id="message-bubble"
-            className={`w-[70%]! h-8 bg-(--primary-green-glow) custom-border`}
+            className={`w-[60%]! h-10 bg-(--primary-green-glow) border-3 border-(--primary-green)`}
             style={{
               borderRadius: style.previewClass,
             }}

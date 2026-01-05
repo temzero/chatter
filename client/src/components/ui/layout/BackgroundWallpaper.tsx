@@ -13,7 +13,7 @@ const BackgroundWallpaper = memo(function BackgroundWallpaper() {
   const isNoneWallpaper = currentWallpaper.id === null;
 
   return (
-    <div className="fixed inset-0 -z-50">
+    <div className="fixed inset-0 -z-50 bg-(--background-color)">
       {/* Pattern overlay on top */}
       <WallpaperPattern
         pattern={currentPattern}

@@ -6,16 +6,13 @@ import { getMessageSendingAnimation } from "@/common/animations/messageAnimation
 import { MessageResponse } from "@/shared/types/responses/message.response";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { MessageTail } from "../messageTail";
-import { MessageReactionDisplay } from "@/components/ui/messages/MessageReactionsDisplay";
-import MessagePinnedIcon from "../MessagePinnedIcon";
 
 interface MessageBubbleWrapperProps {
   message: MessageResponse;
   isMe: boolean;
+  isRelyToThisMessage?: boolean;
   attachmentLength: number;
   children: React.ReactNode;
-  idDisplayTail?: boolean;
-  isRelyToThisMessage?: boolean;
   className?: string;
   onClick?: () => void;
 }
@@ -23,7 +20,6 @@ interface MessageBubbleWrapperProps {
 const MessageBubbleWrapper: React.FC<MessageBubbleWrapperProps> = ({
   message,
   isMe,
-  idDisplayTail = false,
   isRelyToThisMessage,
   children,
   className,
@@ -34,18 +30,25 @@ const MessageBubbleWrapper: React.FC<MessageBubbleWrapperProps> = ({
 
   return (
     <motion.div
+      className={clsx(
+        "message-bubble opacity-100 object-cover",
+        {
+          "self-message ml-auto": isMe,
+          "border-6 rounded-xl! border-yellow-400": message.isImportant,
+          "message-bubble-reply": isRelyToThisMessage,
+          "opacity-60 border-2 border-red-500": isFailed,
+          "cursor-pointer": !!onClick,
+        },
+        className
+      )}
       onClick={onClick}
       {...getMessageSendingAnimation(isSending)}
-      className={clsx(
-        "relative flex flex-col",
-        isMe ? "items-end" : "items-start"
-      )}
     >
       <div
         className={clsx(
           "message-bubble opacity-100 object-cover",
           {
-            "self-message": isMe,
+            "self-message ml-auto": isMe,
             "border-6 rounded-xl! border-yellow-400": message.isImportant,
             "message-bubble-reply": isRelyToThisMessage,
             "opacity-60 border-2 border-red-500": isFailed,
@@ -56,16 +59,7 @@ const MessageBubbleWrapper: React.FC<MessageBubbleWrapperProps> = ({
       >
         {children}
       </div>
-      {idDisplayTail && <MessageTail isMe={isMe} />}
-
-      {message.isPinned && (
-        <MessagePinnedIcon chatId={message.chatId} isMe={isMe} />
-      )}
-      <MessageReactionDisplay
-        isMe={isMe}
-        messageId={message.id}
-        chatId={message.chatId}
-      />
+      <MessageTail isMe={isMe} />
     </motion.div>
   );
 };

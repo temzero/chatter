@@ -181,11 +181,11 @@ const SidebarSettingsTheme: React.FC = () => {
           </SlidingContainer>
         </div>
 
-        {/* Preview section */}
         <div
+          id="preview-section"
           style={{ zIndex: 99 }}
           className={clsx(
-            "fixed bottom-0 left-0 right-0 p-2",
+            "absolute bottom-0 left-0 right-0 p-2",
             "overflow-hidden space-y-2",
             "rounded-t-4xl",
             {

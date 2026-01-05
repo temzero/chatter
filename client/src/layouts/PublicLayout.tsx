@@ -1,13 +1,12 @@
 import { ReactNode } from "react";
 import clsx from "clsx";
-import { Logo } from "@/components/ui/icons/Logo";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/common/constants/routes";
-import { APP_NAME } from "@/common/constants/name";
 import { useIsMobile } from "@/stores/deviceStore";
 import { motion } from "framer-motion";
 import { publicLayoutAnimations } from "@/common/animations/publicLayoutAnimations";
 import { EndToEndEncryption } from "@/components/ui/EndtoEndEncryption";
+import { LogoWithText } from "@/components/ui/icons/LogoWithText";
 
 interface AuthenticationLayoutProps {
   children: ReactNode;
@@ -35,16 +34,10 @@ export const AuthenticationLayout = ({
             "pt-12 gap-8"
           )}
         >
-          <div
+          <LogoWithText
             onClick={handleLogoClick}
-            className={clsx(
-              "flex gap-1 items-center",
-              "select-none cursor-pointer"
-            )}
-          >
-            <Logo />
-            <h1 className={clsx("text-4xl")}>{APP_NAME}</h1>
-          </div>
+            size="lg" // You can adjust the size if needed
+          />
 
           <motion.div
             {...publicLayoutAnimations.mobileContainer}
@@ -65,17 +58,11 @@ export const AuthenticationLayout = ({
             "flex flex-col items-center justify-center"
           )}
         >
-          <div
+          <LogoWithText
             onClick={handleLogoClick}
-            className={clsx(
-              "flex gap-1 items-center",
-              "absolute top-16 z-10",
-              "select-none cursor-pointer"
-            )}
-          >
-            <Logo className={clsx("w-[50px]")} />
-            <h1 className={clsx("text-5xl")}>{APP_NAME}</h1>
-          </div>
+            size="xl" // You can adjust the size if needed
+            className="absolute top-16 z-10"
+          />
 
           <motion.div
             {...publicLayoutAnimations.container}

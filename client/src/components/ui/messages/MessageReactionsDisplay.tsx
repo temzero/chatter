@@ -5,12 +5,12 @@ import { handleReaction } from "@/common/utils/message/handleReaction";
 import { useMessageReactions } from "@/stores/messageStore";
 import { audioManager, SoundType } from "@/services/audioManager";
 import { messageAnimations } from "@/common/animations/messageAnimations";
+import { getCurrentUserId } from "@/stores/authStore";
 
 interface MessageReactionDisplayProps {
   isMe?: boolean;
   isChannel?: boolean;
   isSystemMessage?: boolean;
-  currentUserId?: string;
   messageId: string;
   chatId: string;
 }
@@ -19,11 +19,11 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
   isMe = false,
   isChannel = false,
   isSystemMessage = false,
-  currentUserId,
   messageId,
   chatId,
 }) => {
   const reactions = useMessageReactions(messageId);
+  const currentUserId = getCurrentUserId()
 
   if (!reactions || Object.keys(reactions).length === 0) return null;
 

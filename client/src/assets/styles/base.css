@@ -1,0 +1,53 @@
+/* Base styles and global elements */
+html {
+  font-size: var(--font-size);
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Font Style Application */
+html[data-font-style="system"] {
+  font-family: var(--font-family-system);
+}
+html[data-font-style="sans"] {
+  font-family: var(--font-family-sans);
+}
+html[data-font-style="serif"] {
+  font-family: var(--font-family-serif);
+}
+html[data-font-style="mono"] {
+  font-family: var(--font-family-mono);
+}
+html[data-font-style="rounded"] {
+  font-family: var(--font-family-rounded);
+}
+
+/* Accessibility */
+html[data-reduce-transparency="true"] .glass-panel {
+  background: var(--panel-color) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html[data-reduce-transparency="true"] .input-field,
+html[data-reduce-transparency="true"] .input-container,
+html[data-reduce-transparency="true"] .chat-input-container {
+  background-color: var(--panel-color) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* High Contrast */
+html[data-theme="light"][data-high-contrast="true"] {
+  --panel-color: rgb(255, 255, 255);
+  --message-color: rgb(255, 255, 255);
+}
+
+html[data-theme="dark"][data-high-contrast="true"] {
+  --panel-color: rgb(0, 0, 0);
+  --message-color: rgb(0, 0, 0);
+}

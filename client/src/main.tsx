@@ -1,4 +1,5 @@
-import "./main.css";
+// import "./main.css";
+import "./assets/styles/main.css"
 import "@/i18n"; // initializes i18n globally
 // import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";

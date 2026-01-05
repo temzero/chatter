@@ -5,8 +5,9 @@ import { APP_NAME } from "@/common/constants/name";
 interface LogoComponentProps {
   isCompact?: boolean;
   showText?: boolean;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
   className?: string;
+  onClick?: () => void;
 }
 
 export const LogoWithText = ({
@@ -14,6 +15,7 @@ export const LogoWithText = ({
   showText = true,
   size = "md",
   className,
+  onClick,
 }: LogoComponentProps) => {
   // Size configurations
   const sizeConfig = {
@@ -27,14 +29,21 @@ export const LogoWithText = ({
     },
     lg: {
       container: "w-12 h-12",
-      text: "text-3xl",
+      text: "text-4xl",
+    },
+    xl: {
+      container: "w-[56px] h-[56px]",
+      text: "text-5xl",
     },
   };
 
   const shouldShowText = showText && !isCompact;
 
   return (
-    <div className={clsx("flex items-center  gap-1", className)}>
+    <div
+      onClick={onClick}
+      className={clsx("flex items-center gap-1 cursor-pointer", className)}
+    >
       {/* Logo Container */}
       <div
         className={clsx(
@@ -42,7 +51,7 @@ export const LogoWithText = ({
           sizeConfig[size].container
         )}
       >
-        <Logo />
+        <Logo className="w-full h-full" />
       </div>
 
       {/* App Name Text */}

@@ -22,7 +22,7 @@ const FolderCard: React.FC<FolderCardProps> = ({
 
   return (
     <div
-      className="flex overflow-hidden select-none border-2 border-(--border-color) hover:shadow-xl transition-all rounded cursor-pointer"
+      className="flex overflow-hidden select-none border-2 border-(--border-color) hover:shadow-xl transition-all rounded cursor-pointer active:scale-125 origin-left"
       onClick={() => setSidebar(SidebarMode.FOLDER, { folderId: folder.id })}
       style={{
         backgroundColor:

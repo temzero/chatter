@@ -123,11 +123,12 @@ const SidebarNewFolder: React.FC = () => {
           ? { mode: SidebarMode.FOLDER, data: { folderId: folderToEdit.id } }
           : SidebarMode.FOLDERS
       }
+      padding
     >
       <div className="flex flex-col h-full">
-        <div className="flex flex-col gap-4 p-2 overflow-y-auto pb-48 flex-1">
+        <div className="flex flex-col gap-4 overflow-y-auto pb-48 flex-1">
           {/* Color Selection */}
-          <div className="grid grid-cols-9 gap-2 mt-2">
+          <div className="grid grid-cols-9 gap-2 p-1">
             {COLORS_ARRAY.map((color) => {
               const bgColor = getColorFromPreset(color);
 
@@ -252,7 +253,7 @@ const SidebarNewFolder: React.FC = () => {
               backgroundColor:
                 getColorFromPreset(selectedColor) ?? "var(--background-color)",
             }}
-            className="z-20 p-3 border-t-4 border-black/30 shadow-4xl rounded-tr-lg"
+            className="z-20 p-3 border-t-4 border-black/30 shadow-4xl rounded-t-xl"
           >
             <div className="flex gap-2 mb-3">
               <span className="material-symbols-outlined text-4xl! font-bold">
