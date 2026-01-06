@@ -1,4 +1,4 @@
-import { audioManager, SoundType } from "@/services/audioManager";
+import { audioManager, SoundType } from "@/services/media/audioManager";
 // import { toast } from "react-toastify";
 
 export function handleError(error: unknown, defaultMessage: string): never {

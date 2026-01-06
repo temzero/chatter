@@ -1,7 +1,7 @@
 import * as React from "react";
 import { motion } from "framer-motion";
 import { handleReaction } from "@/common/utils/message/handleReaction";
-import { audioManager, SoundType } from "@/services/audioManager";
+import { audioManager, SoundType } from "@/services/media/audioManager";
 import { getCloseModal } from "@/stores/modalStore";
 
 const emojis = ["👍", "❤️", "😂", "😮", "😢", "🙏", "🎉", "🔥", "💯"];

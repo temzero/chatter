@@ -1,4 +1,4 @@
-import { mediaManager } from "@/services/mediaManager";
+import mediaManager from "@/services/media/mediaManager";
 import { useEffect, RefObject } from "react";
 
 interface UseMediaAttachmentKeysProps {

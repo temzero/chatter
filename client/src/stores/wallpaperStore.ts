@@ -12,7 +12,7 @@ import {
   WallpaperPatternOption,
   wallpaperPatternOptions,
 } from "@/common/constants/wallpaperPatternOptions";
-import { audioManager, SoundType } from "@/services/audioManager";
+import { audioManager, SoundType } from "@/services/media/audioManager";
 
 interface WallpaperState {
   // Current selections

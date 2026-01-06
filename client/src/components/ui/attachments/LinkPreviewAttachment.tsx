@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { motion } from "framer-motion";
 import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 import { messageAnimations } from "@/common/animations/messageAnimations";
-import { audioManager, SoundType } from "@/services/audioManager";
+import { audioManager, SoundType } from "@/services/media/audioManager";
 import { useIsMobile } from "@/stores/deviceStore";
 import { LinkMetadata } from "@/shared/types/responses/message-attachment-metadata.response";
 
@@ -49,7 +49,7 @@ export const LinkPreviewAttachment: React.FC<Props> = ({
       className={clsx(
         "w-full flex-1",
         "relative overflow-hidden rounded-lg shadow-xl flex flex-col gap-1 justify-between",
-        "bg-black/30 hover:bg-blue-500 border-transparent border-2 hover:border-5 transition-all",
+        "bg-black/30 hover:bg-blue-500 border-3 border-transparent transition-all",
         "group",
         { "aspect-video": hasBothImageAndFavicon },
         className

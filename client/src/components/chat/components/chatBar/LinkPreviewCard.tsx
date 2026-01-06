@@ -4,7 +4,7 @@ import clsx from "clsx";
 import mql from "@microlink/mql";
 import { motion, AnimatePresence } from "framer-motion";
 import { messageAnimations } from "@/common/animations/messageAnimations";
-import { audioManager, SoundType } from "@/services/audioManager";
+import { audioManager, SoundType } from "@/services/media/audioManager";
 
 interface LinkPreviewChatBarProps {
   url: string;

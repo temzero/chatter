@@ -2,9 +2,9 @@ import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 
 export interface AttachmentUploadRequest {
   url: string;
-
-  type: AttachmentType;
   filename: string;
+  
+  type: AttachmentType;
   size: number;
 
   mimeType?: string;

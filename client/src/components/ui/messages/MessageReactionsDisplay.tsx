@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
 import { handleReaction } from "@/common/utils/message/handleReaction";
 import { useMessageReactions } from "@/stores/messageStore";
-import { audioManager, SoundType } from "@/services/audioManager";
+import { audioManager, SoundType } from "@/services/media/audioManager";
 import { messageAnimations } from "@/common/animations/messageAnimations";
 import { getCurrentUserId } from "@/stores/authStore";
 
@@ -23,7 +23,7 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
   chatId,
 }) => {
   const reactions = useMessageReactions(messageId);
-  const currentUserId = getCurrentUserId()
+  const currentUserId = getCurrentUserId();
 
   if (!reactions || Object.keys(reactions).length === 0) return null;
 

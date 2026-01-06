@@ -6,7 +6,7 @@ import { useTypingStore } from "@/stores/typingStore";
 import { useChatMemberStore } from "@/stores/chatMemberStore";
 import { useChatStore } from "@/stores/chatStore";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
-import { audioManager, SoundType } from "@/services/audioManager";
+import { audioManager, SoundType } from "@/services/media/audioManager";
 import { handleSystemEventMessage } from "@/common/utils/message/handleSystemEventMessage";
 import { WsNotificationResponse } from "@/shared/types/responses/ws-emit-chat-member.response";
 import { chatWebSocketService } from "@/services/websocket/chatWebsocketService";

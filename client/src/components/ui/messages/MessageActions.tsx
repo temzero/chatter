@@ -5,7 +5,7 @@ import { ModalType } from "@/common/enums/modalType";
 import { chatWebSocketService } from "@/services/websocket/chatWebsocketService";
 import { scrollToMessageById } from "@/common/utils/message/scrollToMessageById";
 import { useTranslation } from "react-i18next";
-import { audioManager, SoundType } from "@/services/audioManager";
+import { audioManager, SoundType } from "@/services/media/audioManager";
 import {
   getCloseModal,
   getOpenModal,

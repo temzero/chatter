@@ -4,7 +4,7 @@ export interface CreateMessageRequest {
   id?: string;
   chatId: string;
   memberId?: string;
-  content?: string;
   replyToMessageId?: string | null;
+  content?: string;
   attachments?: AttachmentUploadRequest[];
 }

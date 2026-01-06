@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { audioManager, SoundType } from "@/services/audioManager";
+import { audioManager, SoundType } from "@/services/media/audioManager";
 import { useTypingMembers } from "@/common/hooks/useTypingMembers";
 import { Avatar } from "@/components/ui/avatar/Avatar";
 import "./typingIndicator.css";
@@ -35,14 +35,19 @@ const TypingIndicator = ({ chatId, isMuted }: TypingIndicatorProps) => {
   const displayAvatars = useMemo(() => {
     return typingMembers.map((member) => (
       <div key={member.userId}>
-        <Avatar avatarUrl={member.avatarUrl} name={member.firstName} size={8} textSize="text-2xl" />
+        <Avatar
+          avatarUrl={member.avatarUrl}
+          name={member.firstName}
+          size={8}
+          textSize="text-2xl"
+        />
       </div>
     ));
   }, [typingMembers]);
 
   const isHideTypingIndicator = useIsHideTypingIndicator();
   if (isHideTypingIndicator) return null;
-  
+
   return (
     <AnimatePresence>
       {isTyping && (

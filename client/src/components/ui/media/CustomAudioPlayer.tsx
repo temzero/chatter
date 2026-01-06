@@ -8,7 +8,8 @@ import React, {
 } from "react";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { formatDuration } from "@/common/utils/format/formatDuration";
-import { mediaManager } from "@/services/mediaManager";
+import mediaManager from "@/services/media/mediaManager";
+
 
 interface CustomAudioPlayerProps {
   mediaUrl: string;

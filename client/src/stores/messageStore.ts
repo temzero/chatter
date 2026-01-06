@@ -12,7 +12,7 @@ import {
   SenderResponse,
 } from "@/shared/types/responses/message.response";
 import { useAttachmentStore } from "./messageAttachmentStore";
-import { audioManager, SoundType } from "@/services/audioManager";
+import { audioManager, SoundType } from "@/services/media/audioManager";
 import { useShallow } from "zustand/shallow";
 import { useSidebarInfoStore } from "./sidebarInfoStore";
 
@@ -470,7 +470,14 @@ export const useMessagesByChatId = (chatId: string) => {
           msg.content?.toLowerCase().includes(searchQuery.toLowerCase())
       )
       .filter((msg) => !filterImportantMessages || msg.isImportant);
-  }, [chatId, messageIds, currentUserId, messagesById, searchQuery, filterImportantMessages]);
+  }, [
+    chatId,
+    messageIds,
+    currentUserId,
+    messagesById,
+    searchQuery,
+    filterImportantMessages,
+  ]);
 };
 
 export const useSenderByMessageId = (

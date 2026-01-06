@@ -1,7 +1,7 @@
 // import React from "react";
 // import clsx from "clsx";
 // import { LinkPreviewResponse } from "@/shared/types/responses/message.response";
-// import { audioManager, SoundType } from "@/services/audioManager";
+// import { audioManager, SoundType } from "@/services/media/audioManager";
 // import { useIsMobile } from "@/stores/deviceStore";
 
 // interface MessageHorizontalLinkPreviewProps {

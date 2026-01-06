@@ -13,7 +13,7 @@ import { getSetSidebar } from "@/stores/sidebarStore";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useFolders, useFolderStore } from "@/stores/folderStore";
 import { FolderResponse } from "@/shared/types/responses/folder.response";
-import { audioManager, SoundType } from "@/services/audioManager";
+import { audioManager, SoundType } from "@/services/media/audioManager";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import FolderCard from "./FolderCard";
 

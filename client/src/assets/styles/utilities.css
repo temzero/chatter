@@ -49,18 +49,7 @@
 
   .message-tail-straight-curved {
     margin-top: calc(var(--message-tail-dimension) * -1) !important;
-    clip-path: polygon(
-      0% 100%,
-      13% 91%,
-      22% 81%,
-      29% 70%,
-      34% 58%,
-      37% 43%,
-      39% 23%,
-      40% 0,
-      100% 0%,
-      100% 100%
-    );
+clip-path: polygon(0% 100%, 20% 92%, 31% 82%, 35% 66%, 33% 50%, 32% 30%, 40% 0, 100% 0%, 100% 100%);
   }
 
   .message-tail-pointed {

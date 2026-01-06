@@ -3,7 +3,8 @@ import { useRef, useState, MouseEvent, useEffect } from "react";
 import { formatDuration } from "@/common/utils/format/formatDuration";
 import { ModalType } from "@/common/enums/modalType";
 import { useModalStore } from "@/stores/modalStore";
-import { mediaManager } from "@/services/mediaManager"; // ✅ use mediaManager
+import mediaManager from "@/services/media/mediaManager";
+
 
 interface CustomVideoPlayerProps {
   videoAttachment: AttachmentResponse;

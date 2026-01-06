@@ -3,7 +3,7 @@ type MediaPlayer = HTMLMediaElement | { pause: () => void };
 
 let currentMedia: MediaPlayer | null = null;
 
-export const mediaManager = {
+const mediaManager = {
   /**
    * Play the given media element, pausing any previous one
    */
@@ -37,3 +37,5 @@ export const mediaManager = {
     }
   },
 };
+
+export default mediaManager

@@ -11,8 +11,8 @@ import { motion } from "framer-motion";
 import { mediaViewerAnimations } from "@/common/animations/mediaViewerAnimations";
 import { ModalImageViewer } from "./ModalImageViewer";
 import { useMediaAttachmentKeys } from "@/common/hooks/keyEvent/useMediaAttachmentKeys";
-import { mediaManager } from "@/services/mediaManager";
 import { LinkPreviewAttachment } from "@/components/ui/attachments/LinkPreviewAttachment";
+import mediaManager from "@/services/media/mediaManager";
 
 export const RenderModalAttachment = ({
   attachment,

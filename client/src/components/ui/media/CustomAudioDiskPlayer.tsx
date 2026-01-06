@@ -11,7 +11,8 @@ import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { formatDuration } from "@/common/utils/format/formatDuration";
 import { useAudioDiskDrag } from "@/common/hooks/keyEvent/useAudioDiskDrag";
 import musicDiskCover from "@/assets/image/disk.png";
-import { mediaManager } from "@/services/mediaManager";
+import mediaManager from "@/services/media/mediaManager";
+
 
 // -------------------- useReducer --------------------
 interface AudioState {

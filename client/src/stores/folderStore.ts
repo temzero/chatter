@@ -5,7 +5,7 @@ import { folderService } from "@/services/http/folderService";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { PaginationResponse } from "@/shared/types/responses/pagination.response";
 import { handleError } from "@/common/utils/error/handleError";
-import { audioManager, SoundType } from "@/services/audioManager";
+import { audioManager, SoundType } from "@/services/media/audioManager";
 
 interface FolderStoreState {
   folders: FolderResponse[];
@@ -144,7 +144,12 @@ export const useFolderStore = create<FolderStoreState & FolderStoreActions>(
         // API call
         await folderService.reorderFolders(positionUpdates);
 
-        audioManager.playRandomSound([SoundType.CARD1, SoundType.CARD2, SoundType.CARD3, SoundType.CARD4])
+        audioManager.playRandomSound([
+          SoundType.CARD1,
+          SoundType.CARD2,
+          SoundType.CARD3,
+          SoundType.CARD4,
+        ]);
         set({ isLoading: false });
       } catch (error) {
         // Revert on error

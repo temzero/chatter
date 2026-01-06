@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { useCallStore } from "@/stores/callStore";
 import { LocalCallStatus } from "@/common/enums/LocalCallStatus";
-import { audioManager, SoundType } from "@/services/audioManager";
+import { audioManager, SoundType } from "@/services/media/audioManager";
 
 export const useCallSounds = () => {
   const localCallStatus = useCallStore((state) => state.localCallStatus);

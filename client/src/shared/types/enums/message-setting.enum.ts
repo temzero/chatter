@@ -23,8 +23,8 @@ export enum MessageTailOptions {
 export const messageTailClasses: Record<MessageTailOptions, string> = {
   [MessageTailOptions.NONE]: "",
   [MessageTailOptions.STRAIGHT]: "message-tail-straight",
-  [MessageTailOptions.STRAIGHT_CURVED]: "message-tail-straight-curved",
   [MessageTailOptions.POINTED]: "message-tail-pointed",
+  [MessageTailOptions.STRAIGHT_CURVED]: "message-tail-straight-curved",
   [MessageTailOptions.CURVED]: "message-tail-pointed-curved",
   // [MessageTailOptions.CIRCLE]: "message-tail-circle",
 } as const;

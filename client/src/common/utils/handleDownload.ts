@@ -1,5 +1,5 @@
 import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
-import { audioManager, SoundType } from "@/services/audioManager";
+import { audioManager, SoundType } from "@/services/media/audioManager";
 
 export const handleDownload = async (attachment: AttachmentResponse) => {
   if (!attachment?.url) return;
