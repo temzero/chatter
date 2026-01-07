@@ -1,7 +1,7 @@
-import { motion } from "framer-motion";
 import React, { useRef } from "react";
-import { useTranslation } from "react-i18next";
-import clsx from "clsx";
+import { motion } from "framer-motion";
+import { SizeEnum } from "@/shared/types/enums/size.enum";
+import GlassButton from "../buttons/GlassButton";
 
 interface AttachFileProps {
   onFileSelect: (files: FileList) => void;
@@ -12,7 +12,6 @@ const AttachFile: React.FC<AttachFileProps> = ({
   onFileSelect,
   hasAttachment = false,
 }) => {
-  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleRightClick = (event: React.MouseEvent) => {
@@ -39,28 +38,16 @@ const AttachFile: React.FC<AttachFileProps> = ({
   };
 
   return (
-    <div
-      title={t("chat_bar.attach_file")}
-      className={clsx(
-        "h-(--chat-input-container-height) w-(--chat-input-container-height)",
-        "flex items-center justify-center",
-        "hover:opacity-80 transition-all",
-        "rounded-full",
-        {
-          "text-(--primary-green-glow)": hasAttachment,
-          "opacity-60": !hasAttachment,
-        }
-      )}
+    <GlassButton
+      size={SizeEnum.S}
+      onClick={handleNormalClick}
+      onContextMenu={handleRightClick}
+      active={hasAttachment}
     >
       <motion.span
         whileTap={{ scale: 1.2 }}
-        className={clsx(
-          "material-symbols-outlined text-3xl!",
-          "cursor-pointer rounded select-none focus:outline-none"
-        )}
+        className="material-symbols-outlined text-3xl!"
         aria-label="Attach file"
-        onClick={handleNormalClick}
-        onContextMenu={handleRightClick}
       >
         attach_file
       </motion.span>
@@ -73,7 +60,7 @@ const AttachFile: React.FC<AttachFileProps> = ({
         onChange={handleChange}
         style={{ display: "none" }}
       />
-    </div>
+    </GlassButton>
   );
 };
 

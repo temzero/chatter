@@ -50,7 +50,7 @@ const Message: React.FC<MessageProps> = ({
 }) => {
   const isMobile = useIsMobile();
   const message = useMessageStore((state) => state.messagesById[messageId]);
-  console.log("message", message);
+  // console.log("message", message);
   const sender = useMessageSender(message?.sender.id, message?.chatId);
   const senderDisplayName =
     sender?.nickname ||

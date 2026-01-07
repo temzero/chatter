@@ -198,18 +198,10 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
 
   return (
     <div
-      className={clsx(
-        "absolute bottom-0 left-0 w-full flex flex-col items-start p-3",
-        "blur-bg"
-      )}
-      style={{
-        zIndex: replyToMessageId ? 100 : 2,
-        // SIMPLE: If keyboardHeight > 0, push it up by that amount
-        // transform:
-        //   keyboardHeight > 0 ? `translateY(-${keyboardHeight}px)` : "none",
-        // // Smooth transition
-        // transition: "transform 0.2s ease-out",
-      }}
+      className={clsx("chat-bottom", replyToMessageId && "has-reply", {
+        mobile: isMobile,
+        desktop: !isMobile,
+      })}
     >
       {/* File Attachment Previews */}
       {filePreviewUrls.length > 0 && (

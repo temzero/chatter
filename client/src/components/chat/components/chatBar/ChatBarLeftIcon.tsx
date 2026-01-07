@@ -16,7 +16,7 @@ const ChatBarLeftIcon: React.FC<ChatBarLeftIconProps> = ({
   onFileSelect,
 }) => {
   const closeModal = getCloseModal();
-  const marginClass = "-ml-2 mr-0.5";
+  const marginClass = "-ml-1 mr-2 -mb-[1px]";
 
   return (
     <AnimatePresence mode="wait" initial={false}>

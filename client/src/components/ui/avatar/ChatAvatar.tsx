@@ -53,7 +53,7 @@ export const ChatAvatar: React.FC<ChatAvatarProps> = ({
           fallbackIconSize: "text-4xl",
           borderWidth: "4px",
           onlineDotClass: "right-[1px] bottom-[1px]",
-          textSize: "text-xl",
+          textSize: "text-4xl",
         };
       case "info":
         return {

@@ -21,7 +21,7 @@ const ChatBarSendButton: React.FC<ChatBarSendButtonProps> = ({
           className={clsx(
             "-mr-2",
             "h-(--chat-input-container-height)",
-            "text-(--primary-green-glow)",
+            "text-(--primary-color)",
             "flex items-center justify-center overflow-hidden"
           )}
           onClick={onClick}

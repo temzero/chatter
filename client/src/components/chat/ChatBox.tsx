@@ -33,7 +33,7 @@ const ChatBox = React.memo(() => {
 
   return (
     <section
-      className="h-full pt-16 flex-1 relative flex flex-col justify-between overflow-hidden transition-all"
+      className="h-full flex-1 relative flex flex-col justify-between overflow-hidden transition-all"
       onContextMenu={(e) => e.preventDefault()}
     >
       <Header

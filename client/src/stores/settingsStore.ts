@@ -1,7 +1,7 @@
 // stores/settingsStore.ts
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { TextSize } from "@/shared/types/enums/text-size.enum";
+import { SizeEnum } from "@/shared/types/enums/size.enum";
 import { FontStyle } from "@/shared/types/enums/font-style.enum";
 import {
   MessageReadInfoOptions,
@@ -10,7 +10,7 @@ import {
 } from "@/shared/types/enums/message-setting.enum";
 
 export interface DisplaySettings {
-  textSize: TextSize;
+  textSize: SizeEnum;
   fontStyle: FontStyle;
   reduceMotion: boolean;
   reduceTransparency: boolean;
@@ -30,7 +30,7 @@ interface SettingsStore {
 
   // Display actions
   updateDisplaySettings: (updates: Partial<DisplaySettings>) => void;
-  setTextSize: (size: TextSize) => void;
+  setTextSize: (size: SizeEnum) => void;
   setFontStyle: (style: FontStyle) => void;
   toggleDisplay: (
     key: keyof Omit<DisplaySettings, "textSize" | "fontStyle">
@@ -47,7 +47,7 @@ export const useSettingsStore = create<SettingsStore>()(
   persist(
     (set) => ({
       displaySettings: {
-        textSize: TextSize.M,
+        textSize: SizeEnum.M,
         fontStyle: FontStyle.SANS,
         reduceMotion: false,
         reduceTransparency: false,

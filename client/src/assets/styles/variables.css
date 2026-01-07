@@ -21,7 +21,15 @@
 
   /* Spacing & Sizing */
   --header-height: 60px;
-  --chat-input-container-height: 40px;
+
+  --glass-button-height-xs: 36px;
+  --glass-button-height-s: 38px;
+  --glass-button-height-m: 42px;
+  --glass-button-height-l: 46px;
+  --glass-button-height-xl: 50px;
+  --glass-button-height-xXl: 56px;
+
+  --chat-input-container-height: 37px;
   --sidebar-width: 300px;
   --sidebar-width-small: 96px;
   --sidebar-width-large: 400px;
@@ -31,10 +39,11 @@
   --pinned-message-height: 44px;
 
   /* Colors - Primary */
-  --primary-color: rgb(36, 124, 255);
   --primary-green: rgb(0, 174, 128);
-  --primary-green-50: rgba(0, 174, 128, 0.54);
+  --primary-green-50: rgba(0, 174, 128, 0.5);
   --primary-green-glow: rgb(134, 239, 172);
+  --primary-color: var(--primary-green);
+
 
   /* Colors - Light Theme */
   --text-color: rgb(0, 0, 0);
@@ -75,6 +84,7 @@
 /* Dark mode styles */
 html[data-theme="dark"] {
   color-scheme: dark;
+  --primary-color: var(--primary-green-glow);
   --text-color: rgb(255, 255, 255);
   --avatar-background: rgb(60, 60, 60);
   --background-color: rgb(0, 0, 0);

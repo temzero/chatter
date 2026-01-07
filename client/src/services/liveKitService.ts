@@ -8,7 +8,7 @@ import {
   LocalTrackPublication,
   Track,
 } from "livekit-client";
-import { audioManager, SoundType } from "./audioManager";
+import { audioManager, SoundType } from "./media/audioManager";
 import { EnvConfig } from "@/common/config/env.config";
 
 export interface LiveKitServiceOptions {

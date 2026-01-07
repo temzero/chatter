@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
 import { useSidebarInfoStore } from "@/stores/sidebarInfoStore";
@@ -22,6 +23,7 @@ import { useTranslation } from "react-i18next";
 import { useIsSearchMessages } from "@/stores/messageStore";
 import MessageSearchBar from "../ui/messages/MessageSearchBar";
 import PinnedMessage from "./components/message/preview/PinnedMessage";
+import GlassButton from "../ui/buttons/GlassButton";
 interface ChatHeaderProps {
   chat: ChatResponse;
   isBlocked?: boolean;
@@ -122,43 +124,61 @@ const Header: React.FC<ChatHeaderProps> = ({
 
   return (
     <header
-      className="w-full absolute top-0 left-0 select-none blur-bg"
+      className={clsx("chat-header", {
+        desktop: !isMobile,
+        mobile: isMobile,
+      })}
       style={{ zIndex: 2 }}
     >
-      <div className="flex items-center justify-between px-3 min-h-(--header-height) max-h-(--header-height)">
+      {isSearchMessages && <MessageSearchBar />}
+
+      <AnimatePresence>
+        {chat.pinnedMessage && (
+          <PinnedMessage message={chat.pinnedMessage} chatType={chat.type} />
+        )}
+      </AnimatePresence>
+
+      <div
+        id="chat-header"
+        className="flex items-center justify-between px-3 min-h-(--header-height) max-h-(--header-height)"
+      >
         {isMobile && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleGoHome();
-            }}
-            className="flex items-center justify-center opacity-40 hover:opacity-100 hover:scale-125 transition-all p-2 -ml-2"
-          >
-            <i className="material-symbols-outlined filled text-2xl!">
+          <GlassButton onClick={handleGoHome}>
+            <i className="material-symbols-outlined filled ml-2">
               arrow_back_ios
             </i>
-          </button>
+          </GlassButton>
         )}
         <motion.div
           key={chat.id}
-          className="flex gap-2 items-center cursor-pointer hover:text-(--primary-green)"
+          className={clsx(
+            "flex gap-2 items-center cursor-pointer hover:text-(--primary-green-glow)"
+          )}
           initial={{ opacity: 0.6, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0.6, scale: 0.9 }}
           onClick={toggleSidebarInfo}
         >
           <ChatAvatar chat={chat} type="header" isBlocked={isBlockedByMe} />
-          <h1 className="text-xl font-medium">
-            {chat.type === ChatType.SAVED ? "Saved" : chat.name}
-          </h1>
-          {isDirect && !isOnline && lastSeen && (
-            <span className="text-xs text-gray-400">
-              Last seen {formatTimeAgo(t, lastSeen)}
-            </span>
-          )}
-          {chat.isDeleted && (
-            <h1 className="text-yellow-500/80">Has left the chat</h1>
-          )}
+          <div
+            id="chat-name"
+            // className="glass-panel p-0.5 rounded-xl"
+            className={clsx({
+              "glass-panel px-1 rounded-xl": isMobile,
+            })}
+          >
+            <h1 className="text-xl font-medium">
+              {chat.type === ChatType.SAVED ? "Saved" : chat.name}
+            </h1>
+            {isDirect && !isOnline && lastSeen && (
+              <span className="text-xs text-gray-400">
+                Last seen {formatTimeAgo(t, lastSeen)}
+              </span>
+            )}
+            {chat.isDeleted && (
+              <h1 className="text-yellow-500/80">Has left the chat</h1>
+            )}
+          </div>
         </motion.div>
 
         <AnimatePresence mode="wait">
@@ -169,9 +189,6 @@ const Header: React.FC<ChatHeaderProps> = ({
             className={`flex justify-end items-center`}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* {isSearchMessages ? (
-            <MessageSearchBar />
-          ) : ( */}
             <div className="flex items-center gap-1 select-none">
               <div className="flex items-center cursor-pointer rounded-full! p-1">
                 {!isBlocked &&
@@ -191,42 +208,38 @@ const Header: React.FC<ChatHeaderProps> = ({
                   ) : (
                     <>
                       {isDirect && canCall && (
-                        <button
-                          onClick={() => startCall(chat.id)}
-                          className="opacity-60 hover:opacity-100 hover:scale-125 transition"
-                        >
+                        <GlassButton onClick={() => startCall(chat.id)}>
                           <i className="material-symbols-outlined filled text-3xl!">
                             phone_enabled
                           </i>
-                        </button>
+                        </GlassButton>
                       )}
 
                       {isGroup && (
-                        <button
+                        <GlassButton
                           onClick={() =>
                             startCall(chat.id, {
                               isVideoCall: true,
                             })
                           }
-                          className="opacity-60 hover:opacity-100 hover:scale-125 transition"
                         >
                           <i className="material-symbols-outlined filled text-3xl!">
                             videocam
                           </i>
-                        </button>
+                        </GlassButton>
                       )}
 
                       {isChannel &&
                         (chat.myRole === ChatMemberRole.ADMIN ||
                           chat.myRole === ChatMemberRole.OWNER) && (
-                          <button
+                          <GlassButton
                             onClick={() => openBroadCastPreview(chat.id)}
-                            className="opacity-60 hover:opacity-100 hover:scale-125 transition"
+                            className="opacity-60 hover:opacity-100"
                           >
                             <i className="material-symbols-outlined filled text-3xl!">
                               connected_tv
                             </i>
-                          </button>
+                          </GlassButton>
                         )}
                     </>
                   ))}
@@ -235,18 +248,9 @@ const Header: React.FC<ChatHeaderProps> = ({
                 <OnlineDot isOnline={isOnline} />
               )}
             </div>
-            {/* )} */}
           </motion.div>
         </AnimatePresence>
       </div>
-
-      <AnimatePresence>
-        {chat.pinnedMessage && (
-          <PinnedMessage message={chat.pinnedMessage} chatType={chat.type} />
-        )}
-      </AnimatePresence>
-
-      {isSearchMessages && <MessageSearchBar />}
     </header>
   );
 };

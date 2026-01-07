@@ -146,7 +146,6 @@ const EmojiPicker = ({ onSelect }: CustomEmojiPickerProps) => {
                       <motion.button
                         key={emoji}
                         onClick={() => handleEmojiClick(emoji)}
-                        className="text-2xl"
                         aria-label={`Select ${emoji} emoji`}
                         whileHover={{ scale: 1.6 }}
                         whileTap={{ scale: 1.3, rotate: 10 }}

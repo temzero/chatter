@@ -44,7 +44,7 @@ export const Avatar: React.FC<AvatarProps> = ({
         <h1
           className={`font-light tracking-tight leading-none w-full h-full flex items-center justify-center bg-white/50 text-black select-none ${textSize}`}
         >
-          <span className="-mb-1">{nameInitial}</span>
+          {nameInitial}
         </h1>
       ) : (
         <span className="material-symbols-outlined text-4xl!">

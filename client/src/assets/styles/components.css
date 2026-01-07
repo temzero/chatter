@@ -70,7 +70,81 @@ input[type="number"]::-webkit-inner-spin-button {
   background: var(--glass-panel-color);
   border-color: var(--border-color);
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+/* GlassButton.css */
+.glass-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px !important;
+  transition: all 200ms ease;
+
+  background: var(--glass-panel-color);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(12px);
+
+}
+
+.glass-button.active{
+  background: var(--primary-color) !important;
+  color: var(--background-color)
+}
+
+.glass-button:hover {
+  transform: scale(1.1);
+}
+
+.glass-button:active {
+  transform: scale(0.9);
+}
+
+/* Mobile styles */
+.glass-button.mobile {
+  background: var(--glass-panel-color);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.chat-header {
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  user-select: none;
+  z-index: 2;
+}
+
+.chat-bottom {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0.75rem;
+  user-select: none;
+  z-index: 2;
+}
+
+.chat-bottom.has-reply {
+  z-index: 100 !important;
+}
+
+.chat-bottom.desktop,
+.chat-header.desktop {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.chat-bottom.mobile {
+  background: linear-gradient(to top, var(--background-color), transparent);
+}
+.chat-header.mobile {
+  background: linear-gradient(to bottom, var(--background-color), transparent);
 }
 
 /* Context Menu */
@@ -114,9 +188,11 @@ input[type="number"]::-webkit-inner-spin-button {
 .chat-input-container {
   display: flex;
   align-items: flex-end;
-  height: var(--chat-input-container-height);
+  /* min-height: 100px; */
+  min-height: var(--chat-input-container-height);
   border-width: 3px;
-  padding: 4px 3px;
+  /* padding: 4px!important; */
+  backdrop-filter: blur(10px);
 }
 
 .input-container:focus-within,

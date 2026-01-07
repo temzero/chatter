@@ -1,27 +1,27 @@
 import { useSettingsStore } from "@/stores/settingsStore";
 import { SelectionBar, SelectionBarOption } from "../selectionBar/SelectionBar";
-import { TextSize } from "../../../shared/types/enums/text-size.enum";
+import { SizeEnum } from "../../../shared/types/enums/size.enum";
 
 export const TextSizeSelectionBar = () => {
-  const options: SelectionBarOption<TextSize>[] = [
+  const options: SelectionBarOption<SizeEnum>[] = [
     {
-      value: TextSize.S,
-      label: TextSize.S,
+      value: SizeEnum.S,
+      label: SizeEnum.S,
       textSize: "text-sm",
     },
     {
-      value: TextSize.M,
-      label: TextSize.M,
+      value: SizeEnum.M,
+      label: SizeEnum.M,
       textSize: "text-base",
     },
     {
-      value: TextSize.L,
-      label: TextSize.L,
+      value: SizeEnum.L,
+      label: SizeEnum.L,
       textSize: "text-lg",
     },
     {
-      value: TextSize.XL,
-      label: TextSize.XL,
+      value: SizeEnum.XL,
+      label: SizeEnum.XL,
       textSize: "text-xl",
     },
   ];
@@ -30,7 +30,7 @@ export const TextSizeSelectionBar = () => {
   const setTextSize = useSettingsStore((state) => state.setTextSize);
 
   return (
-    <SelectionBar<TextSize>
+    <SelectionBar<SizeEnum>
       options={options}
       selected={textSize}
       onSelect={setTextSize}
