@@ -5,7 +5,6 @@ import { ROUTES } from "@/common/constants/routes";
 import { useIsMobile } from "@/stores/deviceStore";
 import { motion } from "framer-motion";
 import { publicLayoutAnimations } from "@/common/animations/publicLayoutAnimations";
-import { EndToEndEncryption } from "@/components/ui/EndtoEndEncryption";
 import { LogoWithText } from "@/components/ui/icons/LogoWithText";
 
 interface AuthenticationLayoutProps {
@@ -77,7 +76,6 @@ export const AuthenticationLayout = ({
         </div>
       )}
 
-      <EndToEndEncryption isCompact={true} />
     </div>
   );
 };

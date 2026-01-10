@@ -51,15 +51,15 @@ export const chatWebSocketService = {
     webSocketService.emit(ChatEvent.SEND_MESSAGE, message);
   },
 
-  // async sendMessage(message: CreateMessageRequest) {
-  //   try {
-  //     const encrypted = await encryptMessage(message.chatId, message);
-  //     webSocketService.emit(ChatEvent.SEND_MESSAGE, encrypted);
-  //   } catch (error) {
-  //     console.log("No encryption key, sending plain message:", error);
-  //     webSocketService.emit(ChatEvent.SEND_MESSAGE, message);
-  //   }
-  // },
+  async e2eeSendMessage(message: CreateMessageRequest) {
+    try {
+      const encrypted = await encryptMessage(message.chatId, message);
+      webSocketService.emit(ChatEvent.SEND_MESSAGE, encrypted);
+    } catch (error) {
+      console.log("No encryption key, sending plain message:", error);
+      webSocketService.emit(ChatEvent.SEND_MESSAGE, message);
+    }
+  },
 
   forwardMessage(message: ForwardMessageRequest) {
     webSocketService.emit(ChatEvent.FORWARD_MESSAGE, message);
@@ -112,29 +112,31 @@ export const chatWebSocketService = {
   ) {
     webSocketService.on(ChatEvent.NEW_MESSAGE, callback);
   },
-  // onNewMessage(
-  //   callback: (wsData: WsNotificationResponse<MessageResponse>) => void
-  // ) {
-  //   webSocketService.on(ChatEvent.NEW_MESSAGE, async (wsData: unknown) => {
-  //     try {
-  //       // Cast to the expected type
-  //       const typedData = wsData as WsNotificationResponse<MessageResponse>;
 
-  //       const decrypted = await decryptMessage(
-  //         typedData.payload.chatId,
-  //         typedData.payload
-  //       );
+  onE2eeNewMessage(
+    callback: (wsData: WsNotificationResponse<MessageResponse>) => void
+  ) {
+    webSocketService.on(ChatEvent.NEW_MESSAGE, async (wsData: unknown) => {
+      try {
+        // Cast to the expected type
+        const typedData = wsData as WsNotificationResponse<MessageResponse>;
 
-  //       callback({
-  //         ...typedData,
-  //         payload: decrypted,
-  //       });
-  //     } catch (error) {
-  //       console.log("Could not decrypt, sending as-is:", error);
-  //       callback(wsData as WsNotificationResponse<MessageResponse>);
-  //     }
-  //   });
-  // },
+        const decrypted = await decryptMessage(
+          typedData.payload.chatId,
+          typedData.payload
+        );
+
+        callback({
+          ...typedData,
+          payload: decrypted,
+        });
+      } catch (error) {
+        console.log("Could not decrypt, sending as-is:", error);
+        callback(wsData as WsNotificationResponse<MessageResponse>);
+      }
+    });
+  },
+  
   offNewMessage(
     callback: (wsData: WsNotificationResponse<MessageResponse>) => void
   ) {

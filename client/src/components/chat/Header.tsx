@@ -153,6 +153,7 @@ const Header: React.FC<ChatHeaderProps> = ({
           key={chat.id}
           className={clsx(
             "flex gap-2 items-center cursor-pointer hover:text-(--primary-green-glow)"
+
           )}
           initial={{ opacity: 0.6, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}

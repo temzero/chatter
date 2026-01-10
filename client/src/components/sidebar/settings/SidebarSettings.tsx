@@ -65,7 +65,7 @@ const SidebarSettings: React.FC = () => {
       icon: "lock",
       title: t("settings.privacy_security"),
       onClick: () => setSidebar(SidebarMode.SETTINGS_PRIVACY),
-      isDisabled: false,
+      isDisabled: true,
     },
     {
       icon: "translate",
