@@ -38,6 +38,7 @@
       "update": "업데이트",
       "verify": "인증",
       "verify_code": "코드 인증",
+      "send": "보내기",
       "sent": "전송됨",
       "enter_code": "코드 입력"
     },
@@ -65,7 +66,9 @@
       "upload_failed": "파일 업로드 실패!",
       "from_me": "나에게서",
       "from_user": "{{name}}에게서",
-      "sent_at": "{{date}}에 전송됨"
+      "sent_at": "{{date}}에 전송됨",
+      "report": "보고서",
+      "feedback": "피드백"
     },
     "options": {
       "all": "모두",
@@ -756,6 +759,20 @@
       "title": "통화 기록 삭제",
       "description": "이 통화를 삭제하시겠습니까?\n이 작업은 영구적이며 관련된 모든 메시지가 제거됩니다.",
       "failed": "통화 삭제에 실패했습니다"
+    },
+    "feedback": {
+      "title": "피드백",
+      "type": {
+        "bug": "버그",
+        "interface": "인터페이스",
+        "improvement": "개선",
+        "feature": "기능 제안",
+        "performance": "성능",
+        "security": "보안",
+        "other": "기타"
+      },
+      "message_placeholder": "피드백을 입력해주세요...",
+      "via_email": "또는 이메일을 보내주세요:"
     }
   },
 

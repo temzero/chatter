@@ -21,6 +21,7 @@ import SidebarBlockedUsers from "./more/SidebarBlockedUsers";
 import SidebarContacts from "./more/SidebarContacts";
 import SidebarFolders from "./more/sidebarFolders/SidebarFolders";
 import SidebarFriendRequests from "./more/SidebarFriendRequests";
+import SidebarFeedback from "./more/SidebarFeedback";
 import { useIsMobile } from "@/stores/deviceStore";
 
 const SidebarSettings = lazy(
@@ -91,6 +92,7 @@ const Sidebar = () => {
     [SidebarMode.FOLDER]: <SidebarFolder />,
     [SidebarMode.NEW_FOLDER]: <SidebarNewFolder />,
     [SidebarMode.BLOCKED_USERS]: <SidebarBlockedUsers />,
+    [SidebarMode.FEEDBACK]: <SidebarFeedback />,
 
     // Settings
     [SidebarMode.SETTINGS]: <SidebarSettings />,

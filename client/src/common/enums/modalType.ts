@@ -16,4 +16,5 @@ export enum ModalType {
   LEAVE_CHAT = "leave-chat",
   CALL = "call",
   DELETE_CALL = "DELETE_CALL",
+  FEEDBACK = "feedback",
 }

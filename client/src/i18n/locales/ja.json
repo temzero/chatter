@@ -38,6 +38,7 @@
       "update": "更新",
       "verify": "確認",
       "verify_code": "コードを確認",
+      "send": "送信",
       "sent": "送信済み",
       "enter_code": "コードを入力"
     },
@@ -65,7 +66,9 @@
       "upload_failed": "ファイルのアップロードに失敗しました！",
       "from_me": "自分から",
       "from_user": "{{name}}から",
-      "sent_at": "{{date}} に送信"
+      "sent_at": "{{date}} に送信",
+      "report": "レポート",
+      "feedback": "フィードバック"
     },
     "options": {
       "all": "すべて",
@@ -757,6 +760,20 @@
       "title": "通話履歴を削除",
       "description": "この通話を削除してもよろしいですか？\nこの操作は永久的で、関連するすべてのメッセージが削除されます。",
       "failed": "通話の削除に失敗しました"
+    },
+    "feedback": {
+      "title": "フィードバック",
+      "type": {
+        "bug": "バグ",
+        "interface": "インターフェース",
+        "improvement": "改善",
+        "feature": "機能提案",
+        "performance": "パフォーマンス",
+        "security": "セキュリティ",
+        "other": "その他"
+      },
+      "message_placeholder": "フィードバックを入力してください...",
+      "via_email": "または、メールでお問い合わせください:"
     }
   },
 

@@ -1,26 +1,44 @@
-import { ComponentType, lazy } from "react";
+import { ComponentType } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ModalType } from "@/common/enums/modalType";
 import { modalAnimations } from "@/common/animations/modalAnimations";
 import { getCloseModal, useModalType } from "@/stores/modalStore";
 
 // modal imports...
-const MediaViewer = lazy(() => import("./media/MediaViewer"));
-const FriendRequestModal = lazy(() => import("./FriendRequestModal"));
-const ForwardMessageModal = lazy(() => import("./ForwardMessageModal"));
-const DeleteMessageModal = lazy(() => import("./DeleteMessageModal"));
-const DeleteFolderModal = lazy(() => import("./DeleteFolderModal"));
-const BlockUserModal = lazy(() => import("./BlockUserModal"));
-const UnblockUserModal = lazy(() => import("./UnblockUserModal"));
-const MuteChatModal = lazy(() => import("./MuteChatModal"));
-const DeleteChatModal = lazy(() => import("./DeleteChatModal"));
-const UnfriendModal = lazy(() => import("./UnfriendModal"));
-const LeaveChatModal = lazy(() => import("./LeaveChatModal"));
-const AddMemberModal = lazy(() => import("./AddMemberModal"));
-const SetNicknameModal = lazy(() => import("./SetNicknameModal"));
-const DeleteCallModal = lazy(() => import("./DeleteCallModal"));
-const AddChatToFolderModal = lazy(() => import("./AddChatToFolderModal"));
-const CallModal = lazy(() => import("./call/CallModal"));
+// const MediaViewer = lazy(() => import("./media/MediaViewer"));
+// const FriendRequestModal = lazy(() => import("./FriendRequestModal"));
+// const ForwardMessageModal = lazy(() => import("./ForwardMessageModal"));
+// const DeleteMessageModal = lazy(() => import("./DeleteMessageModal"));
+// const DeleteFolderModal = lazy(() => import("./DeleteFolderModal"));
+// const BlockUserModal = lazy(() => import("./BlockUserModal"));
+// const UnblockUserModal = lazy(() => import("./UnblockUserModal"));
+// const MuteChatModal = lazy(() => import("./MuteChatModal"));
+// const DeleteChatModal = lazy(() => import("./DeleteChatModal"));
+// const UnfriendModal = lazy(() => import("./UnfriendModal"));
+// const LeaveChatModal = lazy(() => import("./LeaveChatModal"));
+// const AddMemberModal = lazy(() => import("./AddMemberModal"));
+// const SetNicknameModal = lazy(() => import("./SetNicknameModal"));
+// const DeleteCallModal = lazy(() => import("./DeleteCallModal"));
+// const AddChatToFolderModal = lazy(() => import("./AddChatToFolderModal"));
+// const CallModal = lazy(() => import("./call/CallModal"));
+import MediaViewer from "./media/MediaViewer";
+import FriendRequestModal from "./FriendRequestModal";
+import ForwardMessageModal from "./ForwardMessageModal";
+import DeleteMessageModal from "./DeleteMessageModal";
+import DeleteFolderModal from "./DeleteFolderModal";
+import BlockUserModal from "./BlockUserModal";
+import UnblockUserModal from "./UnblockUserModal";
+import MuteChatModal from "./MuteChatModal";
+import DeleteChatModal from "./DeleteChatModal";
+import UnfriendModal from "./UnfriendModal";
+import LeaveChatModal from "./LeaveChatModal";
+import AddMemberModal from "./AddMemberModal";
+import SetNicknameModal from "./SetNicknameModal";
+import DeleteCallModal from "./DeleteCallModal";
+import AddChatToFolderModal from "./AddChatToFolderModal";
+import CallModal from "./call/CallModal";
+
+import FeedbackModal from "./FeedbackModal";
 
 // Map modal types to components
 const modalMap: Record<ModalType, ComponentType | null> = {
@@ -41,6 +59,7 @@ const modalMap: Record<ModalType, ComponentType | null> = {
   [ModalType.ADD_MEMBER]: AddMemberModal,
   [ModalType.SET_NICKNAME]: SetNicknameModal,
   [ModalType.DELETE_CALL]: DeleteCallModal,
+  [ModalType.FEEDBACK]: FeedbackModal,
 };
 
 const ModalContent = ({

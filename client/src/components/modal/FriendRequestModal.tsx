@@ -69,10 +69,13 @@ const FriendRequestModal: React.FC = () => {
   );
 
   const messageForm = (
-    <form className="w-full" onSubmit={(e) => {
-      e.preventDefault();
-      handleFriendRequest();
-    }}>
+    <form
+      className="w-full"
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleFriendRequest();
+      }}
+    >
       <textarea
         id="friend-request-message"
         ref={textareaRef}

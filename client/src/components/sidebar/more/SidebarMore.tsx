@@ -9,12 +9,14 @@ import { Avatar } from "@/components/ui/avatar/Avatar";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
 import ThemeSwitcher from "@/components/ui/buttons/ThemeSwitcher";
+import { getOpenModal, ModalType } from "@/stores/modalStore";
 
 const SidebarMore: React.FC = () => {
   const { t } = useTranslation();
   const currentUser = getCurrentUser();
   const isCompact = useIsCompactSidebar();
   const setSidebar = getSetSidebar();
+  const openModal = getOpenModal();
 
   const pendingRequests = useFriendshipStore((state) => state.pendingRequests);
   const requestsCount = pendingRequests.length;
@@ -57,6 +59,11 @@ const SidebarMore: React.FC = () => {
       icon: "block",
       text: t("common.messages.blocked"),
       onClick: () => setSidebar(SidebarMode.BLOCKED_USERS),
+    },
+    {
+      icon: "feedback",
+      text: t("common.messages.feedback"),
+      onClick: () => openModal(ModalType.FEEDBACK),
     },
   ];
 

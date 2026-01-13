@@ -38,6 +38,7 @@
       "update": "Actualizar",
       "verify": "Verificar",
       "verify_code": "Verificar código",
+      "send": "Enviar",
       "sent": "Enviado",
       "enter_code": "Ingresar código"
     },
@@ -65,7 +66,9 @@
       "upload_failed": "¡Error al subir el archivo!",
       "from_me": "de Mí",
       "from_user": "de {{name}}",
-      "sent_at": "Enviado el {{date}}"
+      "sent_at": "Enviado el {{date}}",
+      "report": "Informe",
+      "feedback": "Comentarios"
     },
     "options": {
       "all": "Todo",
@@ -758,6 +761,20 @@
       "title": "Eliminar historial de llamadas",
       "description": "¿Estás seguro de que quieres eliminar esta llamada?\nEsta acción es permanente y todos los mensajes relacionados serán eliminados.",
       "failed": "Error al eliminar la llamada"
+    },
+    "feedback": {
+      "title": "Comentarios",
+      "type": {
+        "bug": "Error",
+        "interface": "Interfaz",
+        "improvement": "Mejora",
+        "feature": "Sugerencia de función",
+        "performance": "Rendimiento",
+        "security": "Seguridad",
+        "other": "Otro"
+      },
+      "message_placeholder": "Por favor ingrese sus comentarios...",
+      "via_email": "O envíenos un correo electrónico a:"
     }
   },
 

@@ -38,6 +38,7 @@
       "update": "Cập nhật",
       "verify": "Xác minh",
       "verify_code": "Xác minh mã",
+      "send": "Gửi",
       "sent": "Đã gửi",
       "enter_code": "Nhập mã"
     },
@@ -65,7 +66,9 @@
       "upload_failed": "Tải tệp lên thất bại!",
       "from_me": "từ Tôi",
       "from_user": "từ {{name}}",
-      "sent_at": "Gửi lúc {{date}}"
+      "sent_at": "Gửi lúc {{date}}",
+      "report": "Báo cáo",
+      "feedback": "Phản hồi"
     },
     "options": {
       "all": "Tất cả",
@@ -756,6 +759,20 @@
       "title": "Xóa Lịch sử Cuộc gọi của Bạn",
       "description": "Bạn có chắc chắn muốn xóa cuộc gọi này?\nHành động này là vĩnh viễn và tất cả tin nhắn liên quan sẽ bị xóa.",
       "failed": "Không thể xóa cuộc gọi"
+    },
+    "feedback": {
+      "title": "Phản hồi",
+      "type": {
+        "bug": "Lỗi",
+        "interface": "Giao diện",
+        "improvement": "Cải tiến",
+        "feature": "Đề xuất tính năng",
+        "performance": "Hiệu suất",
+        "security": "Bảo mật",
+        "other": "Khác"
+      },
+      "message_placeholder": "Vui lòng nhập phản hồi...",
+      "via_email": "Hoặc gửi email cho chúng tôi tại:"
     }
   },
 

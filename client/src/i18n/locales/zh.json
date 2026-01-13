@@ -38,6 +38,7 @@
       "update": "更新",
       "verify": "验证",
       "verify_code": "验证代码",
+      "send": "发送",
       "sent": "已发送",
       "enter_code": "输入验证码"
     },
@@ -65,7 +66,9 @@
       "upload_failed": "文件上传失败！",
       "from_me": "来自我",
       "from_user": "来自{{name}}",
-      "sent_at": "发送于 {{date}}"
+      "sent_at": "发送于 {{date}}",
+      "report": "报告",
+      "feedback": "反馈"
     },
     "options": {
       "all": "所有",
@@ -756,6 +759,20 @@
       "title": "删除通话记录",
       "description": "你确定要删除此通话吗？\n此操作是永久的，所有相关消息将被移除。",
       "failed": "删除通话失败"
+    },
+    "feedback": {
+      "title": "反馈",
+      "type": {
+        "bug": "错误",
+        "interface": "界面",
+        "improvement": "改进",
+        "feature": "功能建议",
+        "performance": "性能",
+        "security": "安全性",
+        "other": "其他"
+      },
+      "message_placeholder": "请输入您的反馈...",
+      "via_email": "或发送电子邮件至:"
     }
   },
 
