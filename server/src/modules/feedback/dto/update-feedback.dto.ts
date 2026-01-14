@@ -1,17 +1,68 @@
 // update-feedback.dto.ts
-import { IsOptional, IsBoolean, IsString, IsDate } from 'class-validator';
-import { UpdateFeedbackRequest } from '@/shared/types/requests/update-feedback.request';
+import {
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsArray,
+  Min,
+  Max,
+  IsObject,
+  IsUrl,
+} from 'class-validator';
+import {
+  FeedbackCategory,
+  FeedbackPriority,
+  FeedbackStatus,
+} from '@/shared/types/enums/feedback.enum';
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateFeedbackDto } from './create-feedback.dto';
+import { Type } from 'class-transformer';
 
-export class UpdateFeedbackDto implements UpdateFeedbackRequest {
+// Using PartialType to inherit all fields as optional
+export class UpdateFeedbackDto extends PartialType(CreateFeedbackDto) {
+  // Override certain fields with additional validation or restrictions
   @IsOptional()
-  @IsBoolean()
-  markAsResponded?: boolean;
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  @Type(() => Number)
+  rating?: number;
+
+  @IsOptional()
+  @IsEnum(FeedbackCategory)
+  category?: FeedbackCategory;
 
   @IsOptional()
   @IsString()
-  adminResponse?: string;
+  message?: string;
 
   @IsOptional()
-  @IsDate()
-  respondedAt?: Date;
+  @IsString()
+  @IsUrl({ require_protocol: true })
+  imageUrl?: string;
+
+  @IsOptional()
+  @IsEnum(FeedbackStatus)
+  status?: FeedbackStatus;
+
+  @IsOptional()
+  @IsEnum(FeedbackPriority)
+  priority?: FeedbackPriority;
+
+  // For admin/update operations, you might want to allow clearing tags
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags?: string[];
+
+  @IsOptional()
+  @IsObject()
+  deviceInfo?: {
+    deviceModel?: string;
+    browser?: string;
+    browserVersion?: string;
+    screenResolution?: string;
+    language?: string;
+  };
 }

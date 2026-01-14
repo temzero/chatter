@@ -5,6 +5,7 @@ import {
   FeedbackPriority,
 } from "@/shared/types/enums/feedback.enum";
 import { UserResponse } from "./user.response";
+import { Platform } from "../enums/platform.enum";
 
 export interface FeedbackResponse {
   id: string;
@@ -12,17 +13,12 @@ export interface FeedbackResponse {
   sessionId?: string;
   rating?: number;
   category: FeedbackCategory;
-  message?: string;
+  message: string;
+  imageUrl?: string;
   tags?: string[];
   status: FeedbackStatus;
   priority?: FeedbackPriority;
-  assignedToId?: string;
-  team?: string;
-  adminResponse?: string;
-  respondedAt?: string;
-  appVersion?: string;
-  platform?: string;
-  osVersion?: string;
+  platform?: Platform;
   deviceInfo?: {
     deviceModel?: string;
     browser?: string;
@@ -30,14 +26,9 @@ export interface FeedbackResponse {
     screenResolution?: string;
     language?: string;
   };
-  imageUrl?: string;
-  pageUrl?: string;
   userAgent?: string;
-  ipAddress?: string;
+  appVersion?: string;
   createdAt: string;
   updatedAt: string;
   user?: UserResponse;
-  assignedTo?: UserResponse;
 }
-
-

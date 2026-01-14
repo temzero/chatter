@@ -22,3 +22,13 @@ export enum FeedbackPriority {
   HIGH = "high",
   CRITICAL = "critical",
 }
+
+export const FeedbackCategoryIcons: Record<FeedbackCategory, string> = {
+  [FeedbackCategory.BUG]: "bug_report",
+  [FeedbackCategory.INTERFACE]: "web",
+  [FeedbackCategory.FEATURE]: "add_circle",
+  [FeedbackCategory.IMPROVEMENT]: "upgrade",
+  [FeedbackCategory.PERFORMANCE]: "speed",
+  [FeedbackCategory.SECURITY]: "lock",
+  [FeedbackCategory.OTHER]: "more_horiz",
+} as const;

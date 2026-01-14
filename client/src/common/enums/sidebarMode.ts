@@ -16,8 +16,6 @@ export enum SidebarMode {
   FOLDER = "folder",
   NEW_FOLDER = "newFolder",
   BLOCKED_USERS = "blockedUsers",
-  // REPORT = "report",
-  FEEDBACK = "feedback",
 
   // Settings
   SETTINGS = "settings",

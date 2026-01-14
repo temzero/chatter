@@ -5,14 +5,15 @@ import { PaginationResponse } from "@/shared/types/responses/pagination.response
 import { CreateFeedbackRequest } from "@/shared/types/requests/create-feedback.request";
 import { FeedbackResponse } from "@/shared/types/responses/feedback.response";
 import { FeedbackStatsResponse } from "@/shared/types/responses/feedback-stats.response";
-import { UpdateFeedbackRequest } from "@/shared/types/requests/update-feedback.request";
+import { getCurrentUserId } from "@/stores/authStore";
+import { Platform } from "@/shared/types/enums/platform.enum";
 
 export const feedbackService = {
   /**
    * Submit new feedback
    */
   async createFeedback(
-    feedbackData: CreateFeedbackRequest
+    feedbackData: Partial<CreateFeedbackRequest>
   ): Promise<FeedbackResponse> {
     const deviceInfo = getDeviceInfo();
 
@@ -69,7 +70,7 @@ export const feedbackService = {
    */
   async updateFeedback(
     feedbackId: string,
-    updateData: UpdateFeedbackRequest
+    updateData: CreateFeedbackRequest
   ): Promise<FeedbackResponse> {
     const { data } = await API.patch(`/feedback/${feedbackId}`, updateData);
     return data;
@@ -83,11 +84,32 @@ export const feedbackService = {
   },
 };
 
+const getPlatform = (): Platform => {
+  const userAgent = navigator.userAgent.toLowerCase();
+
+  // Check for specific platforms
+  if (/android/.test(userAgent)) {
+    return Platform.ANDROID;
+  }
+
+  if (/iphone|ipad|ipod/.test(userAgent)) {
+    return Platform.IOS;
+  }
+
+  // More specific web platform detection
+  if (/windows/.test(userAgent)) return Platform.WINDOWS;
+  if (/macintosh|mac os x/.test(userAgent)) return Platform.MAC;
+  if (/linux/.test(userAgent)) return Platform.LINUX;
+
+  return Platform.WEB;
+};
+
 const getDeviceInfo = () => {
   const userAgent = navigator.userAgent;
 
   return {
-    pageUrl: window.location.href,
+    userId: getCurrentUserId(),
+    sessionId: sessionStorage.getItem("sessionId") || undefined,
     userAgent,
     deviceInfo: {
       deviceModel: userAgent,
@@ -98,10 +120,6 @@ const getDeviceInfo = () => {
       screenResolution: `${window.screen.width}x${window.screen.height}`,
       language: navigator.language,
     },
-    platform: /Android/.test(userAgent)
-      ? "ANDROID"
-      : /iPhone|iPad|iPod/.test(userAgent)
-      ? "IOS"
-      : "WEB",
+    platform: getPlatform(),
   };
 };

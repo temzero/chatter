@@ -1,3 +1,4 @@
+import * as dotenv from 'dotenv';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -15,7 +16,8 @@ import { CallModule } from './modules/call/call.module';
 import { BootstrapModule } from './modules/bootstrap/bootstrap.module';
 import { AttachmentModule } from './modules/attachment/attachment.module';
 import { EnvConfig } from './common/config/env.config';
-import * as dotenv from 'dotenv';
+import { MailModule } from './modules/auth/mail/mail.module';
+import { FeedbackModule } from './modules/feedback/feedback.module';
 
 dotenv.config();
 
@@ -29,7 +31,8 @@ dotenv.config();
       password: EnvConfig.database.password,
       database: EnvConfig.database.name,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: EnvConfig.nodeEnv !== 'production',
+      synchronize: true,
+      // synchronize: EnvConfig.nodeEnv !== 'production',
       ssl: EnvConfig.database.ssl
         ? { rejectUnauthorized: false } // required for Supabase
         : false,
@@ -54,6 +57,8 @@ dotenv.config();
     CallModule,
     SupabaseModule,
     WebSocketModule,
+    MailModule,
+    FeedbackModule,
   ],
   controllers: [AppController],
   providers: [AppService],

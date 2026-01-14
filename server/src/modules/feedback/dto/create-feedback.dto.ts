@@ -1,33 +1,82 @@
 // create-feedback.dto.ts
-import { IsNotEmpty, IsOptional, IsString, IsEnum } from 'class-validator';
-import { CreateFeedbackBaseDto } from './create-feedback-base.dto';
-import { FeedbackStatus } from '@/shared/types/enums/feedback.enum';
-import { CreateFeedbackRequest } from '@/shared/types/requests/create-feedback.request';
+import {
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Max,
+  Min,
+  IsArray,
+  ArrayNotEmpty,
+  IsUrl,
+  Length,
+} from 'class-validator';
+import {
+  FeedbackCategory,
+  FeedbackPriority,
+  FeedbackStatus,
+} from '@/shared/types/enums/feedback.enum';
+import { Platform } from '@/shared/types/enums/platform.enum';
+import { Type } from 'class-transformer';
+import { DeviceInfoDto } from './device-info.dto';
 
-export class CreateFeedbackDto
-  extends CreateFeedbackBaseDto
-  implements CreateFeedbackRequest
-{
-  // Either userId OR sessionId must be provided
-  @IsNotEmpty({ message: 'Either userId or sessionId is required' })
+export class CreateFeedbackDto {
+  @IsUUID()
+  userId: string;
+
+  @IsOptional()
   @IsString()
-  userId?: string;
+  sessionId?: string;
 
-  // Status should always be NEW for user submissions
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  @Type(() => Number)
+  rating?: number;
+
+  @IsEnum(FeedbackCategory)
+  category: FeedbackCategory;
+
+  @IsNotEmpty()
+  @IsString()
+  message: string;
+
+  @IsOptional()
+  @IsString()
+  @IsUrl({ require_protocol: true })
+  imageUrl?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsString({ each: true })
+  tags?: string[];
+
+  // Status is typically set by the system, not by user
   @IsOptional()
   @IsEnum(FeedbackStatus)
   status?: FeedbackStatus = FeedbackStatus.NEW;
 
-  // These fields should not be set by users
   @IsOptional()
-  assignedToId?: never;
+  @IsEnum(FeedbackPriority)
+  priority?: FeedbackPriority;
 
   @IsOptional()
-  team?: never;
+  @IsEnum(Platform)
+  platform?: Platform;
 
   @IsOptional()
-  adminResponse?: never;
+  @IsString()
+  userAgent?: string;
 
   @IsOptional()
-  respondedAt?: never;
+  deviceInfo?: DeviceInfoDto;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 20)
+  appVersion?: string;
 }

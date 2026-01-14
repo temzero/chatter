@@ -10,6 +10,7 @@ import { AuthModule } from '../auth/modules/auth.module';
 import { VerificationCode } from '../auth/entities/verification_code.entity';
 import { ChatModule } from '../chat/chat.module';
 import { BlockModule } from '../block/block.module';
+import { MailModule } from '../auth/mail/mail.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { BlockModule } from '../block/block.module';
     forwardRef(() => ChatModule),
     forwardRef(() => FriendshipModule),
     forwardRef(() => BlockModule),
+    forwardRef(() => MailModule),
     SupabaseModule,
   ],
   controllers: [UserController],

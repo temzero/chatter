@@ -133,6 +133,10 @@
     },
     "folder": {
       "deleted": "La carpeta \"{{name}}\" ha sido eliminada"
+    },
+    "feedback": {
+      "submitted": "¡Enviado! Gracias por tomarte el tiempo para compartir tus comentarios.",
+      "failed": "Lo sentimos, no pudimos enviar tus comentarios. Por favor, inténtalo de nuevo más tarde."
     }
   },
 

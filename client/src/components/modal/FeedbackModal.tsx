@@ -5,19 +5,10 @@ import { handleError } from "@/common/utils/error/handleError";
 import { toast } from "react-toastify";
 import ConfirmDialog from "./layout/ConfirmDialog";
 import StarRating from "../ui/StarRating";
-import { FeedbackCategory } from "@/shared/types/enums/feedback.enum";
+import { FeedbackCategory, FeedbackCategoryIcons } from "@/shared/types/enums/feedback.enum";
 import { feedbackService } from "@/services/http/feedbackService";
 
-// Define the icon mapping object
-export const FeedbackTypeIcons: Record<FeedbackCategory, string> = {
-  [FeedbackCategory.BUG]: "bug_report",
-  [FeedbackCategory.INTERFACE]: "web",
-  [FeedbackCategory.FEATURE]: "add_circle",
-  [FeedbackCategory.IMPROVEMENT]: "upgrade",
-  [FeedbackCategory.PERFORMANCE]: "speed",
-  [FeedbackCategory.SECURITY]: "lock",
-  [FeedbackCategory.OTHER]: "more_horiz",
-} as const;
+const email = "chatter.gateway@gmail.com";
 
 const FeedbackModal: React.FC = () => {
   const { t } = useTranslation();
@@ -41,13 +32,14 @@ const FeedbackModal: React.FC = () => {
       // Simple data - device info automatically added by service
       await feedbackService.createFeedback({
         rating: rating > 0 ? rating : undefined,
-        message: feedbackMessage,
         category: feedbackType,
+        message: feedbackMessage,
       });
 
       closeModal();
       toast.success(t("toast.feedback.submitted"));
     } catch (error) {
+      toast.error(t("toast.feedback.failed"));
       handleError(error, "Failed to submit feedback");
     } finally {
       setIsSubmitting(false);
@@ -55,8 +47,14 @@ const FeedbackModal: React.FC = () => {
   };
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setFeedbackMessage(e.target.value);
-    setCharCount(e.target.value.length);
+    const input = e.target.value;
+
+    // Capitalize first letter if it exists
+    const capitalizedText =
+      input.length > 0 ? input.charAt(0).toUpperCase() + input.slice(1) : input;
+
+    setFeedbackMessage(capitalizedText);
+    setCharCount(capitalizedText.length);
   };
 
   // Get all feedback types as an array for iteration
@@ -77,7 +75,7 @@ const FeedbackModal: React.FC = () => {
           } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
         >
           <span className="material-symbols-outlined text-base">
-            {FeedbackTypeIcons[type]}
+            {FeedbackCategoryIcons[type]}
           </span>
           {t(`modal.feedback.type.${type}`)}
         </button>
@@ -130,6 +128,27 @@ const FeedbackModal: React.FC = () => {
       <StarRating rating={rating} onRatingChange={setRating} size="lg" />
       {feedbackTypeSection}
       {messageForm}
+
+      {!confirmable && (
+        <div className="flex gap-2 items-center italic bg-(--hover-color) py-1 px-2 rounded mt-2">
+          <span className="material-symbols-outlined text-5xl! select-none">
+            mail
+          </span>
+          <div>
+            <p className="text-sm select-none">
+              {t("modal.feedback.via_email")}
+            </p>
+            <a
+              href={`mailto:${email}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline hover:text-(--primary-color)"
+            >
+              {email}
+            </a>
+          </div>
+        </div>
+      )}
     </ConfirmDialog>
   );
 };

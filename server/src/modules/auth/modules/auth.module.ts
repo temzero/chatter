@@ -14,13 +14,14 @@ import { RefreshToken } from '../entities/refresh-token.entity';
 import { JwtRefreshGuard } from '../guards/jwt-refresh.guard';
 import { JwtRefreshStrategy } from '../strategies/jwt-refresh.strategy';
 import { VerificationCodeService } from '../services/verification-code.service';
-import { MailService } from '../mail/mail.service';
 import { EnvConfig } from '@/common/config/env.config';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([RefreshToken]),
     forwardRef(() => UserModule),
+    forwardRef(() => MailModule),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: EnvConfig.jwt.access.secret,
@@ -38,7 +39,6 @@ import { EnvConfig } from '@/common/config/env.config';
     JwtRefreshStrategy,
     JwtRefreshGuard,
     VerificationCodeService,
-    MailService,
   ],
   exports: [
     AuthService,
@@ -46,7 +46,6 @@ import { EnvConfig } from '@/common/config/env.config';
     PassportModule,
     TokenService,
     VerificationCodeService,
-    MailService,
     TokenStorageService,
   ],
 })

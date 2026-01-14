@@ -4,17 +4,20 @@ import {
   FeedbackPriority,
 } from "@/shared/types/enums/feedback.enum";
 
+// shared/types/requests/create-feedback.request.ts
 export interface CreateFeedbackRequest {
-  userId?: string;
+  userId: string;
   sessionId?: string;
   rating?: number;
-  category?: FeedbackCategory;
-  message?: string;
+  category: FeedbackCategory;
+  message: string;
+  imageUrl?: string;
   tags?: string[];
+  status?: string;
   priority?: FeedbackPriority;
-  appVersion?: string;
   platform?: string;
-  osVersion?: string;
+  userAgent?: string;
+  appVersion?: string;
   deviceInfo?: {
     deviceModel?: string;
     browser?: string;
@@ -22,8 +25,4 @@ export interface CreateFeedbackRequest {
     screenResolution?: string;
     language?: string;
   };
-  imageUrl?: string;
-  pageUrl?: string;
-  userAgent?: string;
-  ipAddress?: string;
 }

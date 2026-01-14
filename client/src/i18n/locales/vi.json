@@ -133,6 +133,10 @@
     },
     "folder": {
       "deleted": "Đã xóa thư mục \"{{name}}\""
+    },
+    "feedback": {
+      "submitted": "Đã gửi! Cảm ơn bạn đã dành thời gian chia sẻ phản hồi.",
+      "failed": "Xin lỗi, chúng tôi không thể gửi phản hồi của bạn. Vui lòng thử lại sau."
     }
   },
 

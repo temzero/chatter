@@ -14,7 +14,8 @@ import { VerificationEmailVI } from './template/email-verification-code/verifica
 import { PasswordResetEmailEN } from './template/password-reset/password-reset.email.en';
 import { PasswordResetEmailVI } from './template/password-reset/password-reset.email.vi';
 import { formatSecondsToString } from '@/common/helpers/time.helper';
-import { DraftMessageOptions } from './constants/draft-message-options.constant';
+import { Feedback } from '@/modules/feedback/entities/feedback.entity';
+import { FeedbackEmailEN } from './template/feedback/feedback.email.en';
 
 @Injectable()
 export class MailService {
@@ -53,6 +54,16 @@ export class MailService {
         ErrorResponse.badRequest(BadRequestError.FAILED_TO_SEND_EMAIL);
       }
     }
+  }
+
+  // mail.service.ts
+  async sendFeedbackEmailToAdmin(feedback: Feedback): Promise<void> {
+    const adminEmail = EnvConfig.email.user; // send to yourself
+
+    const subject = FeedbackEmailEN.subject(feedback);
+    const html = FeedbackEmailEN.html({ feedback });
+
+    await this.sendMail(adminEmail, subject, html);
   }
 
   async sendWelcomeEmail(
@@ -105,47 +116,5 @@ export class MailService {
 
     const subject = content.subject();
     await this.sendMail(email, subject, html);
-  }
-
-  /**
-   * Creates a draft email message without sending it
-   * Useful for previewing, saving drafts, or queuing messages
-   */
-  createDraftMessage(options: DraftMessageOptions): nodemailer.SendMailOptions {
-    const { to, subject, html, cc, bcc, replyTo, attachments } = options;
-
-    const draftMessage: nodemailer.SendMailOptions = {
-      from: EnvConfig.email.user,
-      to,
-      subject,
-      html,
-    };
-
-    // Add optional fields if provided
-    if (cc) draftMessage.cc = cc;
-    if (bcc) draftMessage.bcc = bcc;
-    if (replyTo) draftMessage.replyTo = replyTo;
-    if (attachments && attachments.length > 0) {
-      draftMessage.attachments = attachments;
-    }
-
-    return draftMessage;
-  }
-
-  /**
-   * Sends a previously created draft message
-   */
-  async sendDraftMessage(
-    draftMessage: nodemailer.SendMailOptions,
-  ): Promise<void> {
-    try {
-      await this.transporter.sendMail(draftMessage);
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        ErrorResponse.throw(error, 'Failed to send email');
-      } else {
-        ErrorResponse.badRequest(BadRequestError.FAILED_TO_SEND_EMAIL);
-      }
-    }
   }
 }

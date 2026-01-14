@@ -60,11 +60,11 @@ const SidebarMore: React.FC = () => {
       text: t("common.messages.blocked"),
       onClick: () => setSidebar(SidebarMode.BLOCKED_USERS),
     },
-    {
-      icon: "feedback",
-      text: t("common.messages.feedback"),
-      onClick: () => openModal(ModalType.FEEDBACK),
-    },
+    // {
+    //   icon: "feedback",
+    //   text: t("common.messages.feedback"),
+    //   onClick: () => openModal(ModalType.FEEDBACK),
+    // },
   ];
 
   return (
@@ -163,6 +163,14 @@ const SidebarMore: React.FC = () => {
             </div>
           )
         )}
+      </div>
+
+      <div
+        className="flex gap-3 p-2 m-4 bg-(--border-color) hover:bg-(--primary-green) rounded custom-border cursor-pointer"
+        onClick={() => openModal(ModalType.FEEDBACK)}
+      >
+        <span className="material-symbols-outlined">feedback</span>
+        <h1>{t("common.messages.feedback")}</h1>
       </div>
 
       <div

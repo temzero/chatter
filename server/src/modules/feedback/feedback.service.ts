@@ -5,21 +5,28 @@ import { Repository } from 'typeorm';
 import { Feedback } from './entities/feedback.entity';
 import { CreateFeedbackDto } from './dto/create-feedback.dto';
 import { UpdateFeedbackDto } from './dto/update-feedback.dto';
+import { MailService } from '../auth/mail/mail.service';
 
 @Injectable()
 export class FeedbackService {
   constructor(
     @InjectRepository(Feedback)
     private feedbackRepo: Repository<Feedback>,
+    private readonly mailService: MailService,
   ) {}
 
-  // Create feedback
   async create(dto: CreateFeedbackDto): Promise<Feedback> {
     const feedback = this.feedbackRepo.create(dto);
-    return await this.feedbackRepo.save(feedback);
+    const savedFeedback = await this.feedbackRepo.save(feedback);
+
+    // Send email async (non-blocking)
+    this.mailService
+      .sendFeedbackEmailToAdmin(savedFeedback)
+      .catch((err) => console.error('Email failed:', err));
+
+    return savedFeedback;
   }
 
-  // Get all feedback
   async findAll(
     page: number = 1,
     limit: number = 10,
@@ -34,7 +41,6 @@ export class FeedbackService {
     return { data, total };
   }
 
-  // Get feedback by ID
   async findOne(id: string): Promise<Feedback> {
     const feedback = await this.feedbackRepo.findOne({
       where: { id },
@@ -48,18 +54,12 @@ export class FeedbackService {
     return feedback;
   }
 
-  // Update feedback
   async update(id: string, dto: UpdateFeedbackDto): Promise<Feedback> {
     const feedback = await this.findOne(id);
-
-    // If admin response is provided, set respondedAt
-    dto.respondedAt = new Date();
-
     Object.assign(feedback, dto);
     return await this.feedbackRepo.save(feedback);
   }
 
-  // Delete feedback
   async remove(id: string): Promise<void> {
     const result = await this.feedbackRepo.delete(id);
 
@@ -68,7 +68,6 @@ export class FeedbackService {
     }
   }
 
-  // Get user's feedback
   async findByUser(
     userId: string,
     page: number = 1,
@@ -84,13 +83,9 @@ export class FeedbackService {
     return { data, total };
   }
 
-  // Simple statistics
   async getStats(): Promise<any> {
-    // Get all feedback
     const allFeedback = await this.feedbackRepo.find();
-
     const total = allFeedback.length;
-    const withRating = allFeedback.filter((f) => f.rating !== null).length;
 
     const ratings = allFeedback
       .map((f) => f.rating)
@@ -105,7 +100,7 @@ export class FeedbackService {
 
     return {
       total,
-      withRating,
+      withRating: ratings.length,
       averageRating,
     };
   }

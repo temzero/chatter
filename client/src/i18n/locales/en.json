@@ -134,6 +134,10 @@
     },
     "folder": {
       "deleted": "\"{{name}}\" folder has been deleted"
+    },
+    "feedback": {
+      "submitted": "Submitted! Thank you for taking the time to share your feedback.",
+      "failed": "Sorry, we couldn’t submit your feedback. Please try again later."
     }
   },
 
