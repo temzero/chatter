@@ -16,6 +16,9 @@ import { PasswordResetEmailVI } from './template/password-reset/password-reset.e
 import { formatSecondsToString } from '@/common/helpers/time.helper';
 import { Feedback } from '@/modules/feedback/entities/feedback.entity';
 import { FeedbackEmailEN } from './template/feedback/feedback.email.en';
+import { User } from '@/modules/user/entities/user.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class MailService {
@@ -23,6 +26,8 @@ export class MailService {
   private verificationExpiration: string;
 
   constructor(
+    @InjectRepository(User) // <-- ADD THIS DECORATOR
+    private userRepo: Repository<User>,
     private readonly verificationCodeService: VerificationCodeService,
   ) {
     this.verificationExpiration = formatSecondsToString(
@@ -56,12 +61,29 @@ export class MailService {
     }
   }
 
-  // mail.service.ts
   async sendFeedbackEmailToAdmin(feedback: Feedback): Promise<void> {
-    const adminEmail = EnvConfig.email.user; // send to yourself
+    // Fetch fresh user data when actually needed
+    const user = await this.userRepo.findOne({
+      where: { id: feedback.userId },
+      select: ['id', 'email', 'firstName', 'username'], // Only what you need
+    });
 
-    const subject = FeedbackEmailEN.subject(feedback);
-    const html = FeedbackEmailEN.html({ feedback });
+    // Handle case where user might be deleted
+    if (!user) {
+      console.warn(
+        `User ${feedback.userId} not found for feedback ${feedback.id}`,
+      );
+      return;
+    }
+
+    const adminEmail = EnvConfig.email.user;
+    const subject = FeedbackEmailEN.subject({ feedback, user });
+
+    // Pass both feedback and fresh user data
+    const html = FeedbackEmailEN.html({
+      feedback,
+      user,
+    });
 
     await this.sendMail(adminEmail, subject, html);
   }

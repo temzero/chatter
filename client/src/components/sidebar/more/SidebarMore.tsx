@@ -9,14 +9,12 @@ import { Avatar } from "@/components/ui/avatar/Avatar";
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { useTranslation } from "react-i18next";
 import ThemeSwitcher from "@/components/ui/buttons/ThemeSwitcher";
-import { getOpenModal, ModalType } from "@/stores/modalStore";
 
 const SidebarMore: React.FC = () => {
   const { t } = useTranslation();
   const currentUser = getCurrentUser();
   const isCompact = useIsCompactSidebar();
   const setSidebar = getSetSidebar();
-  const openModal = getOpenModal();
 
   const pendingRequests = useFriendshipStore((state) => state.pendingRequests);
   const requestsCount = pendingRequests.length;
@@ -163,14 +161,6 @@ const SidebarMore: React.FC = () => {
             </div>
           )
         )}
-      </div>
-
-      <div
-        className="flex gap-3 p-2 m-4 bg-(--border-color) hover:bg-(--primary-green) rounded custom-border cursor-pointer"
-        onClick={() => openModal(ModalType.FEEDBACK)}
-      >
-        <span className="material-symbols-outlined">feedback</span>
-        <h1>{t("common.messages.feedback")}</h1>
       </div>
 
       <div

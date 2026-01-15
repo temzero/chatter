@@ -25,6 +25,7 @@
     "linkifyjs": "^4.3.2",
     "livekit-client": "^2.16.0",
     "lucide-react": "^0.562.0",
+    "material-symbols": "^0.40.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-i18next": "^16.3.5",

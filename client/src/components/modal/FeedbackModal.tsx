@@ -7,6 +7,7 @@ import ConfirmDialog from "./layout/ConfirmDialog";
 import StarRating from "../ui/StarRating";
 import { FeedbackCategory, FeedbackCategoryIcons } from "@/shared/types/enums/feedback.enum";
 import { feedbackService } from "@/services/http/feedbackService";
+import { audioManager, SoundType } from "@/services/media/audioManager";
 
 const email = "chatter.gateway@gmail.com";
 
@@ -37,6 +38,7 @@ const FeedbackModal: React.FC = () => {
       });
 
       closeModal();
+      audioManager.playSound(SoundType.PAGE);
       toast.success(t("toast.feedback.submitted"));
     } catch (error) {
       toast.error(t("toast.feedback.failed"));
