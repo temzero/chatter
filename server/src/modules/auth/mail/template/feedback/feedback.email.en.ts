@@ -15,49 +15,65 @@ export interface FeedbackEmailParams {
 }
 
 export const FeedbackEmailEN = {
-  subject: ({ feedback, user }: FeedbackEmailParams) =>
-    `📝${feedback.rating ? `${'⭐'.repeat(feedback.rating)}` : ''} From ${user.firstName || user.username || 'User'} (${FeedbackCategoryEmoji[feedback.category]})`,
+  subject: ({ feedback, user }: FeedbackEmailParams) => {
+    const displayName = user.firstName || user.username || 'User';
+    const stars = feedback.rating ? '⭐'.repeat(feedback.rating) : '';
+    const isRenderCategory =
+      feedback.category && feedback.category !== FeedbackCategory.OTHER;
+    const categoryEmoji = isRenderCategory
+      ? FeedbackCategoryEmoji[feedback.category]
+      : '';
 
-  html: ({ feedback, user }: FeedbackEmailParams) => `
+    return `📝${stars} From ${displayName} ${categoryEmoji}`;
+  },
+
+  html: ({ feedback, user }: FeedbackEmailParams) => {
+    const displayName = user.firstName || user.username || 'User';
+
+    const isRenderCategory =
+      feedback.category && feedback.category !== FeedbackCategory.OTHER;
+
+    const stars = feedback.rating
+      ? `<span class="star">
+        ${'★'.repeat(feedback.rating)}${'☆'.repeat(5 - feedback.rating)}
+      </span>`
+      : '';
+
+    const categoryLabel = isRenderCategory ? `${feedback.category} ` : '';
+
+    const categoryIcon = isRenderCategory
+      ? `
+      <div class="background-symbol">
+        ${FeedbackCategoryEmoji[feedback.category]}
+      </div>
+    `
+      : '';
+
+    return `
 <!DOCTYPE html>
-  <html>
-  <head>
-    <style>
-      ${EmailStyles.FEEDBACK}
-    </style>
-  </head>
+<html>
+<head>
+  <style>
+    ${EmailStyles.FEEDBACK}
+  </style>
+</head>
 
-  <body>
-    <div class="container">
-      <div class="feedback-header">
-        <div>
-          <h1>
-            ${user.firstName || user.username}'s 
-            ${
-              feedback.category && feedback.category !== FeedbackCategory.OTHER
-                ? `${feedback.category} `
-                : ''
-            }
-            feedback
-          </h1>
-          ${
-            feedback.rating
-              ? `<span class="star">
-                  ${'★'.repeat(feedback.rating)}${'☆'.repeat(5 - feedback.rating)}
-                </span>`
-              : ''
-          }
-        </div>
-
-        <div class="background-symbol">
-          ${FeedbackCategoryEmoji[feedback.category] || '💬'}
-        </div>
+<body>
+  <div class="container">
+    <div class="feedback-header">
+      <div>
+        <h1>
+          ${displayName}'s ${categoryLabel}feedback
+        </h1>
+        ${stars}
       </div>
 
-      <div class="content">
+      ${categoryIcon}
+    </div>
 
-      ${feedback.message && `<div class="message">${feedback.message}</div>`}
-      
+    <div class="content">
+      ${feedback.message ? `<div class="message">${feedback.message}</div>` : ''}
+
       ${
         feedback.imageUrl
           ? `
@@ -73,13 +89,14 @@ export const FeedbackEmailEN = {
 
       <div class="meta">
         <p><span class="label">From:</span> ${user?.firstName}</p>
-        <p><span class="label">username:</span> ${user?.username}</p>
-        <p><span class="label">email:</span> ${user?.email}</p>
+        <p><span class="label">Username:</span> ${user?.username}</p>
+        <p><span class="label">Email:</span> ${user?.email}</p>
 
-        <div class="divider"/>
+        <div class="divider"></div>
 
         <p><span class="label">ID:</span> ${feedback.id}</p>
         <p><span class="label">Category:</span> ${feedback.category}</p>
+
         ${
           feedback.priority
             ? `<p><span class="label">Priority:</span> ${feedback.priority}</p>`
@@ -95,26 +112,32 @@ export const FeedbackEmailEN = {
             ? `<p><span class="label">App Version:</span> ${feedback.appVersion}</p>`
             : ''
         }
-        <p><span class="label">Submitted At:</span> ${feedback.createdAt.toISOString()}</p>
+
+        <p>
+          <span class="label">Submitted At:</span>
+          ${feedback.createdAt.toISOString()}
+        </p>
 
         ${
           feedback.tags?.length
-            ? `<div>${feedback.tags
-                .map((tag) => `<span class="tag">${tag}</span>`)
-                .join('')}</div>`
+            ? `
+          <div>
+            ${feedback.tags
+              .map((tag) => `<span class="tag">${tag}</span>`)
+              .join('')}
+          </div>
+        `
             : ''
         }
-
       </div>
 
       <div class="footer-info">
         This email was generated automatically.
       </div>
-      </div>
-      
-     
     </div>
-  </body>
-  </html>
-  `,
+  </div>
+</body>
+</html>
+`;
+  },
 };

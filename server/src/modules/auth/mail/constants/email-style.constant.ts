@@ -150,7 +150,7 @@ h1 {
 .message {
   padding: 0;
   font-size: 20px;
-  margin-top: 10px;
+  margin-top: 12px;
   margin-bottom: 40px;
 }
 

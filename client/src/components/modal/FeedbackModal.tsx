@@ -20,7 +20,7 @@ const FeedbackModal: React.FC = () => {
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [rating, setRating] = useState(0);
   const [feedbackType, setFeedbackType] = useState<FeedbackCategory>(
-    FeedbackCategory.BUG
+    FeedbackCategory.OTHER
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const maxChar = 999;
