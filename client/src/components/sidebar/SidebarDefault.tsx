@@ -80,20 +80,20 @@ const SidebarDefault: React.FC = () => {
     >
       <header className="relative flex w-full items-center h-(--header-height) justify-between">
         <motion.a
-          className="flex items-center cursor-pointer -ml-16"
+          className="flex items-center cursor-pointer -ml-16 hover:text-(--primary-color) transition-colors"
           onClick={() => setSidebar(SidebarMode.MORE)}
           whileHover={{ x: 39 }}
           transition={{ type: "spring", stiffness: 600, damping: 30 }}
         >
           <span
-            className={`material-symbols-outlined text-6xl! cursor-pointer text-(--primary-green-glow) ${
+            className={`material-symbols-outlined text-6xl! cursor-pointer ${
               isCompact ? "mr-9" : "mr-3"
             }`}
           >
             trending_flat
           </span>
 
-<LogoWithText/>
+          <LogoWithText />
         </motion.a>
 
         {!isCompact && (

@@ -21,19 +21,23 @@ export const LogoWithText = ({
   const sizeConfig = {
     sm: {
       container: "w-6 h-6",
-      text: "text-lg",
+      text: "text-2xl",
+      gap: "gap-1",
     },
     md: {
       container: "w-8 h-8",
-      text: "text-2xl",
+      text: "text-3xl",
+      gap: "gap-1",
     },
     lg: {
       container: "w-12 h-12",
       text: "text-4xl",
+      gap: "gap-2",
     },
     xl: {
       container: "w-[56px] h-[56px]",
       text: "text-5xl",
+      gap: "gap-2",
     },
   };
 
@@ -42,17 +46,9 @@ export const LogoWithText = ({
   return (
     <div
       onClick={onClick}
-      className={clsx("flex items-center gap-1 cursor-pointer", className)}
+      className={clsx("flex items-center cursor-pointer hover:text-(--primary-color)", className, sizeConfig[size].gap)}
     >
-      {/* Logo Container */}
-      <div
-        className={clsx(
-          "flex items-center justify-center",
-          sizeConfig[size].container
-        )}
-      >
-        <Logo className="w-full h-full" />
-      </div>
+      <Logo className={sizeConfig[size].container} />
 
       {/* App Name Text */}
       {shouldShowText && (
