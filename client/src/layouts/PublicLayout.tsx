@@ -6,6 +6,7 @@ import { useIsMobile } from "@/stores/deviceStore";
 import { motion } from "framer-motion";
 import { publicLayoutAnimations } from "@/common/animations/publicLayoutAnimations";
 import { LogoWithText } from "@/components/ui/icons/LogoWithText";
+import { useCurrentWallpaper } from "@/stores/wallpaperStore";
 
 interface AuthenticationLayoutProps {
   children: ReactNode;
@@ -17,6 +18,8 @@ export const AuthenticationLayout = ({
 }: AuthenticationLayoutProps) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const currentWallpaper = useCurrentWallpaper();
+  console.log("currentWallpaper", currentWallpaper);
 
   const handleLogoClick = () => {
     navigate(ROUTES.PUBLIC.LOGIN);
@@ -30,7 +33,7 @@ export const AuthenticationLayout = ({
         <div
           className={clsx(
             "w-full h-full flex flex-col items-center",
-            "pt-12 gap-8"
+            "pt-12 gap-8",
           )}
         >
           <LogoWithText
@@ -44,7 +47,7 @@ export const AuthenticationLayout = ({
               containerClass,
               "w-full max-w-[460px]! min-h-screen",
               "p-2 flex justify-center items-start",
-              "rounded-t-4xl"
+              "rounded-t-4xl",
             )}
           >
             <div className={clsx("w-full")}>{children}</div>
@@ -54,7 +57,7 @@ export const AuthenticationLayout = ({
         <div
           className={clsx(
             "relative w-full h-full",
-            "flex flex-col items-center justify-center"
+            "flex flex-col items-center justify-center",
           )}
         >
           <LogoWithText
@@ -68,7 +71,7 @@ export const AuthenticationLayout = ({
             className={clsx(
               containerClass,
               "w-[400px]",
-              "rounded-lg flex items-center"
+              "rounded-lg flex items-center",
             )}
           >
             {children}
@@ -76,6 +79,15 @@ export const AuthenticationLayout = ({
         </div>
       )}
 
+      {!currentWallpaper.id && (
+        <div
+          className="fixed inset-0"
+          style={{
+            zIndex: -9,
+            background: "var(--primary-green-50)",
+          }}
+        />
+      )}
     </div>
   );
 };

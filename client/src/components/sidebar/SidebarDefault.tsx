@@ -12,7 +12,7 @@ import SidebarWellCome from "./SidebarWellCome";
 import { LogoWithText } from "../ui/icons/LogoWithText";
 
 const SidebarDefault: React.FC = () => {
-  console.log("[MOUNTED]", "SidebarDefault");
+  // console.log("[MOUNTED]", "SidebarDefault");
   // Much better approach - stable selectors
   const chatIds = useAllChatIds();
   const chatMap = useChatMap();

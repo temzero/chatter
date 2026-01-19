@@ -27,15 +27,15 @@ export const LogoWithText = ({
     md: {
       container: "w-8 h-8",
       text: "text-3xl",
-      gap: "gap-1",
+      gap: "gap-0.5",
     },
     lg: {
       container: "w-12 h-12",
       text: "text-4xl",
-      gap: "gap-2",
+      gap: "gap-1",
     },
     xl: {
-      container: "w-[56px] h-[56px]",
+      container: "w-[50px] h-[50px]",
       text: "text-5xl",
       gap: "gap-2",
     },
@@ -46,20 +46,20 @@ export const LogoWithText = ({
   return (
     <div
       onClick={onClick}
-      className={clsx("flex items-center cursor-pointer hover:text-(--primary-color)", className, sizeConfig[size].gap)}
+      className={clsx(
+        "flex items-center cursor-pointer hover:text-(--primary-color)",
+        className,
+        sizeConfig[size].gap,
+      )}
     >
       <Logo className={sizeConfig[size].container} />
 
       {/* App Name Text */}
       {shouldShowText && (
         <span
-          className={clsx(
-            "font-semibold tracking-tight text-gray-900 dark:text-white",
-            sizeConfig[size].text
-          )}
+          className={clsx("font-medium tracking-tight", sizeConfig[size].text)}
           style={{
-            fontFamily:
-              "'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', sans-serif",
+            fontFamily: "'Jost','Segoe UI', -apple-system, sans-serif",
           }}
         >
           {APP_NAME}

@@ -11,7 +11,7 @@ interface ChatListProps {
 
 const ChatList: React.FC<ChatListProps> = React.memo(
   ({ chatIds, isCompact = false }) => {
-    console.log("[MOUNTED]", "ChatList", chatIds.length);
+    // console.log("[MOUNTED]", "ChatList", chatIds.length);
     const currentUserId = getCurrentUserId();
     const hasMoreChats = useChatStore((state) => state.hasMoreChats);
     const fetchMoreChats = useChatStore.getState().fetchMoreChats;

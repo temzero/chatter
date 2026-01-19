@@ -42,8 +42,8 @@
   --primary-green: rgb(0, 174, 128);
   --primary-green-50: rgba(0, 174, 128, 0.5);
   --primary-green-glow: rgb(134, 239, 172);
+  --primary-green-dark: rgb(0, 90, 66);
   --primary-color: var(--primary-green);
-
 
   /* Colors - Light Theme */
   --text-color: rgb(0, 0, 0);

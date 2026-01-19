@@ -5,7 +5,7 @@ export const formatTimeAgo = (
   t: TFunction,
   dateString: string | Date
 ): string => {
-  console.log("dateString", dateString);
+  // console.log("dateString", dateString);
   const createdAt = new Date(dateString);
   const now = new Date();
 

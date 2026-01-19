@@ -100,8 +100,8 @@ export const useWallpaperStore = create<WallpaperState>()(
         lightWallpaperId: state.lightWallpaperId,
         darkWallpaperId: state.darkWallpaperId,
       }),
-    }
-  )
+    },
+  ),
 );
 
 export const useCurrentPattern = () => {

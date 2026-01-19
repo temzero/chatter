@@ -1,10 +1,18 @@
-import chatterLogoUrl from "/public/chatter-logo.svg";
-
-export const Logo = ({ className = "", color = "var(--text-color)" }) => (
-  <img
-    src={chatterLogoUrl}
-    alt="Chatter logo"
-    className={`w-10 ${className}`}
-    style={{ color, filter: "brightness(0) invert(1)" }}
-  />
+export const Logo = ({ className = ""}) => (
+  <div className={`w-10 ${className}`}>
+    <svg
+      width="1000"
+      height="1000"
+      viewBox="0 0 1000 1000"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ width: "100%", height: "100%" }}
+    >
+      <path
+        d="M500 0C850 0 1000 250 1000 400C1000 800 500 980 300 1000C300.188 999.745 429.977 823.89 400 750C370.001 675 260 710 199.5 699C80 680 -0.000122184 560 1.39959e-10 400C0.000122065 230 150 0 500 0ZM250 320C194.772 320 150 364.772 150 420C150 475.228 194.772 520 250 520C305.228 520 350 475.228 350 420C350 364.772 305.228 320 250 320ZM500 320C444.772 320 400 364.772 400 420C400 475.228 444.772 520 500 520C555.228 520 600 475.228 600 420C600 364.772 555.228 320 500 320ZM750 320C694.772 320 650 364.772 650 420C650 475.228 694.772 520 750 520C805.228 520 850 475.228 850 420C850 364.772 805.228 320 750 320Z"
+        // fill={color}
+        fill="currentColor"
+      />
+    </svg>
+  </div>
 );

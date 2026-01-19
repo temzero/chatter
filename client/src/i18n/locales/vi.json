@@ -96,12 +96,12 @@
 
   "time": {
     "now": "bây giờ",
-    "second": "giây",
-    "minute": "phút",
-    "hour": "giờ",
-    "day": "ngày",
-    "month": "tháng",
-    "year": "năm",
+    "second": " giây",
+    "minute": " phút",
+    "hour": " giờ",
+    "day": " ngày",
+    "month": " tháng",
+    "year": " năm",
     "future": "Trong tương lai"
   },
 
