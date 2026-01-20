@@ -5,8 +5,8 @@ import { ROUTES } from "@/common/constants/routes";
 import { useIsMobile } from "@/stores/deviceStore";
 import { motion } from "framer-motion";
 import { publicLayoutAnimations } from "@/common/animations/publicLayoutAnimations";
-import { LogoWithText } from "@/components/ui/icons/LogoWithText";
-import { useCurrentWallpaper } from "@/stores/wallpaperStore";
+import { LogoWithName } from "@/components/ui/icons/LogoWithName";
+import { useCurrentWallpaperId } from "@/stores/wallpaperStore";
 
 interface AuthenticationLayoutProps {
   children: ReactNode;
@@ -18,8 +18,7 @@ export const AuthenticationLayout = ({
 }: AuthenticationLayoutProps) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const currentWallpaper = useCurrentWallpaper();
-  console.log("currentWallpaper", currentWallpaper);
+  const currentWallpaperId = useCurrentWallpaperId();
 
   const handleLogoClick = () => {
     navigate(ROUTES.PUBLIC.LOGIN);
@@ -36,10 +35,7 @@ export const AuthenticationLayout = ({
             "pt-12 gap-8",
           )}
         >
-          <LogoWithText
-            onClick={handleLogoClick}
-            size="lg" // You can adjust the size if needed
-          />
+          <LogoWithName onClick={handleLogoClick} size="lg" />
 
           <motion.div
             {...publicLayoutAnimations.mobileContainer}
@@ -60,7 +56,7 @@ export const AuthenticationLayout = ({
             "flex flex-col items-center justify-center",
           )}
         >
-          <LogoWithText
+          <LogoWithName
             onClick={handleLogoClick}
             size="xl" // You can adjust the size if needed
             className="absolute top-16 z-10"
@@ -79,12 +75,12 @@ export const AuthenticationLayout = ({
         </div>
       )}
 
-      {!currentWallpaper.id && (
+      {!currentWallpaperId && (
         <div
           className="fixed inset-0"
           style={{
             zIndex: -9,
-            background: "var(--primary-green-50)",
+            background: "var(--primary-background-gradient)",
           }}
         />
       )}

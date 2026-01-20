@@ -2,7 +2,7 @@ import * as React from "react";
 import { motion } from "framer-motion";
 import { useAuthStore } from "@/stores/authStore";
 import { useTranslation } from "react-i18next";
-import { LogoWithText } from "@/components/ui/icons/LogoWithText";
+import { LogoWithName } from "@/components/ui/icons/LogoWithName";
 
 const LoadAppErrorPage: React.FC = () => {
   const { t } = useTranslation();
@@ -13,7 +13,7 @@ const LoadAppErrorPage: React.FC = () => {
 
   return (
     <div className="relative flex flex-col p-6 items-center justify-between h-screen bg-red-500 text-white">
-      <LogoWithText/>
+      <LogoWithName />
       <motion.span
         initial={{ scale: 1.6, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -26,7 +26,7 @@ const LoadAppErrorPage: React.FC = () => {
         <h1 className="text-lg font-medium">
           {t(
             "common.messages.load_app_error",
-            "Failed to load app. Please refresh."
+            "Failed to load app. Please refresh.",
           )}
         </h1>
       </motion.span>

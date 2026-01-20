@@ -1,78 +1,82 @@
-import { ResolvedTheme, ThemeMode } from "@/shared/types/enums/theme.enum";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import {
+  ThemeMode,
+  ResolvedTheme,
+} from "@/shared/types/enums/theme.enum";
 
 interface ThemeState {
-  themeMode: ThemeMode; // User's selection: AUTO, LIGHT, DARK
-  resolvedTheme: ResolvedTheme; // Actually applied theme: LIGHT or DARK
+  themeMode: ThemeMode;              // User preference
+  resolvedTheme: ResolvedTheme;      // Actually applied theme
 }
 
 interface ThemeActions {
-  setThemeMode: (themeMode: ThemeMode) => void;
-  detectSystemTheme: () => ResolvedTheme;
+  setThemeMode: (mode: ThemeMode) => void;
   initialize: () => void;
 }
 
-const initialState: ThemeState = {
-  themeMode: ThemeMode.AUTO,
-  resolvedTheme: ResolvedTheme.LIGHT,
-};
+let mediaQuery: MediaQueryList | null = null;
+let mediaQueryHandler: ((e: MediaQueryListEvent) => void) | null = null;
 
 export const useThemeStore = create<ThemeState & ThemeActions>()(
   persist(
     (set, get) => ({
-      ...initialState,
+      themeMode: ThemeMode.AUTO,
+      resolvedTheme: ResolvedTheme.LIGHT,
 
-      detectSystemTheme: () => {
-        return window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? ResolvedTheme.DARK
-          : ResolvedTheme.LIGHT;
+      setThemeMode: (mode) => {
+        set({ themeMode: mode });
+        get().initialize();
       },
 
       initialize: () => {
-        const { themeMode, detectSystemTheme } = get();
-        const resolved: ResolvedTheme =
-          themeMode === ThemeMode.AUTO
-            ? detectSystemTheme()
-            : themeMode === ThemeMode.LIGHT
-            ? ResolvedTheme.LIGHT
-            : ResolvedTheme.DARK;
+        if (typeof window === "undefined") return;
 
-        document.documentElement.setAttribute("data-theme", resolved);
-        set({ resolvedTheme: resolved });
-      },
+        const { themeMode } = get();
 
-      setThemeMode: (newThemeMode) => {
-        const { detectSystemTheme } = get();
-        const resolved: ResolvedTheme =
-          newThemeMode === ThemeMode.AUTO
-            ? detectSystemTheme()
-            : newThemeMode === ThemeMode.LIGHT
-            ? ResolvedTheme.LIGHT
-            : ResolvedTheme.DARK;
+        // Cleanup previous listener
+        if (mediaQuery && mediaQueryHandler) {
+          mediaQuery.removeEventListener("change", mediaQueryHandler);
+          mediaQueryHandler = null;
+          mediaQuery = null;
+        }
 
-        document.documentElement.setAttribute("data-theme", resolved);
-        set({ themeMode: newThemeMode, resolvedTheme: resolved });
+        const applyTheme = (theme: ResolvedTheme) => {
+          document.documentElement.setAttribute("data-theme", theme);
+          set({ resolvedTheme: theme });
+        };
 
-        // Setup system theme listener for AUTO mode
-        if (newThemeMode === ThemeMode.AUTO) {
-          const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-          const handler = (e: MediaQueryListEvent) => {
-            const resolvedTheme: ResolvedTheme = e.matches
-              ? ResolvedTheme.DARK
-              : ResolvedTheme.LIGHT;
-            document.documentElement.setAttribute("data-theme", resolvedTheme);
-            set({ resolvedTheme });
+        const detectSystemTheme = (): ResolvedTheme =>
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? ResolvedTheme.DARK
+            : ResolvedTheme.LIGHT;
+
+        if (themeMode === ThemeMode.AUTO) {
+          // Apply initial system theme
+          applyTheme(detectSystemTheme());
+
+          // Listen for system changes
+          mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+          mediaQueryHandler = (e) => {
+            applyTheme(
+              e.matches ? ResolvedTheme.DARK : ResolvedTheme.LIGHT
+            );
           };
-          mediaQuery.addEventListener("change", handler);
+
+          mediaQuery.addEventListener("change", mediaQueryHandler);
+        } else {
+          applyTheme(
+            themeMode === ThemeMode.DARK
+              ? ResolvedTheme.DARK
+              : ResolvedTheme.LIGHT
+          );
         }
       },
     }),
     {
       name: "theme-storage",
       partialize: (state) => ({
-        themeMode: state.themeMode,
-        resolvedTheme: state.resolvedTheme,
+        themeMode: state.themeMode, // 🔥 only persist preference
       }),
       onRehydrateStorage: () => (state) => {
         state?.initialize();
@@ -82,7 +86,10 @@ export const useThemeStore = create<ThemeState & ThemeActions>()(
 );
 
 // EXPORT HOOKS
+export const useThemeMode = () =>
+  useThemeStore((state) => state.themeMode);
+
 export const useResolvedTheme = () =>
   useThemeStore((state) => state.resolvedTheme);
-export const useThemeMode = () => useThemeStore((state) => state.themeMode);
+
 export const getSetTheme = () => useThemeStore.getState().setThemeMode;

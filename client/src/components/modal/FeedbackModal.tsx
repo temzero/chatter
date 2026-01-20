@@ -144,7 +144,7 @@ const FeedbackModal: React.FC = () => {
               href={`mailto:${email}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:underline hover:text-(--primary-color)"
+              className="hover:underline text-(--primary-color)"
             >
               {email}
             </a>

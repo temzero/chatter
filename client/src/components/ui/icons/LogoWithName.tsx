@@ -1,22 +1,22 @@
 import clsx from "clsx";
 import { Logo } from "./Logo";
 import { APP_NAME } from "@/common/constants/name";
+import { useIsCompactSidebar } from "@/stores/sidebarStore";
 
 interface LogoComponentProps {
-  isCompact?: boolean;
   showText?: boolean;
   size?: "sm" | "md" | "lg" | "xl";
   className?: string;
   onClick?: () => void;
 }
 
-export const LogoWithText = ({
-  isCompact = false,
+export const LogoWithName = ({
   showText = true,
   size = "md",
   className,
   onClick,
 }: LogoComponentProps) => {
+  const isCompact = useIsCompactSidebar();
   // Size configurations
   const sizeConfig = {
     sm: {
@@ -48,6 +48,7 @@ export const LogoWithText = ({
       onClick={onClick}
       className={clsx(
         "flex items-center cursor-pointer hover:text-(--primary-color)",
+        isCompact && "-ml-1",
         className,
         sizeConfig[size].gap,
       )}

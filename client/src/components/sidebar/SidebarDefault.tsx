@@ -9,10 +9,10 @@ import { FolderResponse } from "@/shared/types/responses/folder.response";
 import ChatList from "@/components/ui/chat/ChatList";
 import ChatFolderSelector from "@/components/ui/chat/ChatFolderSelector";
 import SidebarWellCome from "./SidebarWellCome";
-import { LogoWithText } from "../ui/icons/LogoWithText";
+import { LogoWithName } from "../ui/icons/LogoWithName";
 
 const SidebarDefault: React.FC = () => {
-  // console.log("[MOUNTED]", "SidebarDefault");
+  console.log("[MOUNTED]", "SidebarDefault");
   // Much better approach - stable selectors
   const chatIds = useAllChatIds();
   const chatMap = useChatMap();
@@ -31,13 +31,13 @@ const SidebarDefault: React.FC = () => {
       createdAt: "",
       updatedAt: "",
     }),
-    []
+    [],
   );
 
   // Memoize folder list
   const folderList = React.useMemo(
     () => [allFolder, ...folders],
-    [allFolder, folders]
+    [allFolder, folders],
   );
 
   // State for selected folder & scroll direction
@@ -64,7 +64,7 @@ const SidebarDefault: React.FC = () => {
     if (folder.id === selectedFolder.id) return;
 
     const currentIndex = folderList.findIndex(
-      (f) => f.id === selectedFolder.id
+      (f) => f.id === selectedFolder.id,
     );
     const newIndex = folderList.findIndex((f) => f.id === folder.id);
 
@@ -93,20 +93,20 @@ const SidebarDefault: React.FC = () => {
             trending_flat
           </span>
 
-          <LogoWithText />
+          <LogoWithName />
         </motion.a>
 
         {!isCompact && (
           <div className="flex">
             <a
-              className="cursor-pointer select-none nav-btn hover:scale-125 hover:text-(--primary-green) transition-all"
+              className="cursor-pointer select-none nav-btn hover:scale-125 hover:text-(--primary-color) transition-all"
               onClick={() => setSidebar(SidebarMode.NEW_CHAT)}
             >
               <i className="material-symbols-outlined text-2xl!">add</i>
             </a>
 
             <a
-              className="cursor-pointer select-none nav-btn hover:scale-125 hover:text-(--primary-green) transition-all -ml-2"
+              className="cursor-pointer select-none nav-btn hover:scale-125 hover:text-(--primary-color) transition-all -ml-2"
               onClick={() => setSidebar(SidebarMode.SEARCH)}
             >
               <i className="material-symbols-outlined text-2xl!">search</i>

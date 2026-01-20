@@ -22,57 +22,60 @@ import SidebarContacts from "./more/SidebarContacts";
 import SidebarFolders from "./more/sidebarFolders/SidebarFolders";
 import SidebarFriendRequests from "./more/SidebarFriendRequests";
 import { useIsMobile } from "@/stores/deviceStore";
+import { useCurrentWallpaperId } from "@/stores/wallpaperStore";
 
 const SidebarSettings = lazy(
-  () => import("@/components/sidebar/settings/SidebarSettings")
+  () => import("@/components/sidebar/settings/SidebarSettings"),
 );
 const SidebarSettingsAccount = lazy(
-  () => import("./settings/account/SidebarSettingsAccount")
+  () => import("./settings/account/SidebarSettingsAccount"),
 );
 const SidebarSettingsPassword = lazy(
-  () => import("./settings/account/sidebarSettingsPassword")
+  () => import("./settings/account/sidebarSettingsPassword"),
 );
 const SidebarSettingsPrivacy = lazy(
-  () => import("./settings/sidebarSettingsPrivacy")
+  () => import("./settings/sidebarSettingsPrivacy"),
 );
 const SidebarSettingsTheme = lazy(
-  () => import("./settings/sidebarSettingsTheme")
+  () => import("./settings/sidebarSettingsTheme"),
 );
 const SidebarSettingsDisplay = lazy(
-  () => import("./settings/sidebarSettingsDisplay")
+  () => import("./settings/sidebarSettingsDisplay"),
 );
 const SidebarSettingsKeyboard = lazy(
-  () => import("./settings/sidebarSettingsKeyboard")
+  () => import("./settings/sidebarSettingsKeyboard"),
 );
 const SidebarSettingsMessages = lazy(
-  () => import("./settings/sidebarSettingsMessages")
+  () => import("./settings/sidebarSettingsMessages"),
 );
 const SidebarSettingsFolders = lazy(
-  () => import("./settings/sidebarSettingsFolders")
+  () => import("./settings/sidebarSettingsFolders"),
 );
 const SidebarSettingsNotifications = lazy(
-  () => import("./settings/sidebarSettingsNotifications")
+  () => import("./settings/sidebarSettingsNotifications"),
 );
 const SidebarSettingsData = lazy(
-  () => import("./settings/sidebarSettingsData")
+  () => import("./settings/sidebarSettingsData"),
 );
 const SidebarSettingsLanguage = lazy(
-  () => import("./settings/sidebarSettingsLanguage")
+  () => import("./settings/sidebarSettingsLanguage"),
 );
 const SidebarSettingsEmail = lazy(
-  () => import("./settings/account/sidebarSettingsEmail")
+  () => import("./settings/account/sidebarSettingsEmail"),
 );
 const SidebarSettingsUsername = lazy(
-  () => import("./settings/account/sidebarSettingsUsername")
+  () => import("./settings/account/sidebarSettingsUsername"),
 );
 const SidebarSettingsPhoneNumber = lazy(
-  () => import("./settings/account/sidebarSettingsPhoneNumber")
+  () => import("./settings/account/sidebarSettingsPhoneNumber"),
 );
 
 const Sidebar = () => {
   const isMobile = useIsMobile();
   const currentSidebar = useCurrentSidebar();
   const sidebarWidthClass = useSidebarWidth();
+
+  const currentWallpaperId = useCurrentWallpaperId();
 
   const sidebars: Record<SidebarMode, JSX.Element> = {
     [SidebarMode.DEFAULT]: <SidebarDefault />,
@@ -124,7 +127,10 @@ const Sidebar = () => {
       className={clsx(
         "glass-panel h-full flex flex-col",
         !isMobile && "border-r-2",
-        sidebarWidthClass
+        currentWallpaperId
+          ? "bg-(--glass-panel-color)!"
+          : "bg-(--panel-color)!",
+        sidebarWidthClass,
       )}
       style={{ zIndex: 10 }}
     >

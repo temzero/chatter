@@ -113,3 +113,9 @@ export const useCurrentWallpaper = () => {
   const resolvedTheme = useResolvedTheme();
   return useWallpaperStore().getWallpaper(resolvedTheme);
 };
+
+export const useCurrentWallpaperId = () => {
+  const wallpaper = useCurrentWallpaper();
+  return wallpaper?.id || null;
+};
+

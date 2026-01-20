@@ -11,7 +11,7 @@ interface MessageTailProps {
 
 export function MessageTail({ isMe }: MessageTailProps) {
   const { messageTail } = useSettingsStore().messageSettings;
-  if (messageTail === MessageTailOptions.NONE) return null;
+  if (!messageTail || messageTail === MessageTailOptions.NONE) return null;
 
   const tailClass = messageTailClasses[messageTail];
 

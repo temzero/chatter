@@ -37,9 +37,6 @@ const OpenAttachmentBtn: React.FC = () => {
           keyboard_control_key
         </span>
         <div className="flex gap-2">
-          {/* <span className="flex flex-col justify-center items-center cursor-pointer">
-            <i className="material-symbols-outlined">attach_file</i>
-          </span> */}
           <h1>{t("sidebar_info.attachments.title")}</h1>
         </div>
       </div>

@@ -68,13 +68,13 @@ const Login = () => {
         <div className="flex items-center justify-between gap-4 mt-2">
           <Link
             to="/auth/register"
-            className="opacity-40 hover:opacity-100 hover:text-green-400"
+            className="opacity-40 hover:opacity-100 hover:text-(--primary-color)"
           >
             {t("common.actions.register")}
           </Link>
           <Link
             to="/auth/forgot-password"
-            className="opacity-40 hover:opacity-100 hover:text-green-400"
+            className="opacity-40 hover:opacity-100 hover:text-(--primary-color)"
           >
             {t("auth.login.forgot_password")}
           </Link>

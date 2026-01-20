@@ -62,7 +62,7 @@ const Header: React.FC<ChatHeaderProps> = ({
       openBroadCastPreview: state.openBroadCastPreview,
       joinCall: state.joinCall,
       getActiveCall: state.getActiveCall,
-    }))
+    })),
   );
 
   useEffect(() => {
@@ -89,7 +89,7 @@ const Header: React.FC<ChatHeaderProps> = ({
   let canCall = false;
   if (isDirect && chat.otherMemberUserIds && chatListMembers) {
     const partnerMember = chatListMembers.find(
-      (member) => member.userId === partnerId
+      (member) => member.userId === partnerId,
     ) as ChatMemberResponse;
     if (partnerMember?.friendshipStatus === FriendshipStatus.ACCEPTED) {
       canCall = true;
@@ -152,8 +152,7 @@ const Header: React.FC<ChatHeaderProps> = ({
         <motion.div
           key={chat.id}
           className={clsx(
-            "flex gap-2 items-center cursor-pointer hover:text-(--primary-green-glow)"
-
+            "flex gap-2 items-center cursor-pointer hover:text-(--primary-green-glow)",
           )}
           initial={{ opacity: 0.6, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -197,7 +196,13 @@ const Header: React.FC<ChatHeaderProps> = ({
                   (isCalling ? (
                     <button
                       onClick={handleJoinCall}
-                      className="hover:shadow-xl hover:border-4 hover:border-(--primary-green) hover:bg-white hover:scale-125 hover:text-(--primary-green) font-semibold flex items-center gap-1 custom-border rounded-full! px-3 bg-(--primary-green) opacity-100 transition"
+                      className={clsx(
+                        "font-semibold flex items-center gap-1 custom-border rounded-full! px-3",
+                        "bg-(--primary-green) opacity-100 transition",
+                        // Hover states
+                        "hover:shadow-xl hover:border-4 hover:border-(--primary-green)",
+                        "hover:bg-white hover:scale-125 hover:text-(--primary-green)",
+                      )}
                     >
                       {isChannel ? "Join Broadcast" : "Join Call"}
                       <i className="material-symbols-outlined filled text-3xl!">

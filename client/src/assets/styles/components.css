@@ -85,7 +85,7 @@ input[type="number"]::-webkit-inner-spin-button {
   border: 1px solid var(--border-color);
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(12px);
-
+  opacity: 85%;
 }
 
 .glass-button.active{
@@ -94,7 +94,10 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 .glass-button:hover {
+  opacity: 100%;
   transform: scale(1.1);
+  color: white;
+  background-color: var(--primary-green) !important;
 }
 
 .glass-button:active {

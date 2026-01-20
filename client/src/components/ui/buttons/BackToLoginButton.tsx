@@ -18,7 +18,7 @@ export const BackToLoginButton = ({
       className={clsx(
         "text-2xl!",
         "inline-flex items-center opacity-40 transition-all mt-2",
-        "hover:opacity-100 hover:text-green-400",
+        "hover:opacity-100 hover:text-(--primary-color)",
         "select-none",
         className
       )}
