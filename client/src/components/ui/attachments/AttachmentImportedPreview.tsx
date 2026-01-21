@@ -26,7 +26,7 @@ const AttachmentImportedPreview: React.FC<AttachmentImportedPreviewProps> = ({
   const textClass = "two-line-truncate text-xs break-words";
 
   return (
-    <div className="flex flex-wrap mb-1 gap-1 p-1.5 custom-border rounded-lg glass-panel">
+    <div className="flex flex-wrap mb-1 gap-1 p-1.5 custom-border rounded-lg glass-panel bg-(--primary-color)/25!">
       <AnimatePresence mode="popLayout">
         {filesWithMeta.map(({ file, url, type, originalIndex }) => (
           <motion.div

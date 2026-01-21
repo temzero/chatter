@@ -33,7 +33,7 @@ export const SelectionBar = <T extends string | number | symbol>({
 
   // Track which option is currently hovered by the slider (during drag)
   const [sliderHoveredIndex, setSliderHoveredIndex] = useState<number | null>(
-    null
+    null,
   );
 
   // Store button width in state to use in drag calculations
@@ -44,7 +44,7 @@ export const SelectionBar = <T extends string | number | symbol>({
 
   // Find index of selected option
   const selectedIndex = options.findIndex(
-    (option) => option.value === selected
+    (option) => option.value === selected,
   );
 
   // Calculate target position and slider width
@@ -81,11 +81,11 @@ export const SelectionBar = <T extends string | number | symbol>({
     const hoveredIndex = Math.floor(
       (Math.max(0, Math.min(currentX, containerWidth - buttonWidthPx)) +
         buttonWidthPx / 2) /
-        buttonWidthPx
+        buttonWidthPx,
     );
 
     setSliderHoveredIndex(
-      Math.max(0, Math.min(hoveredIndex, options.length - 1))
+      Math.max(0, Math.min(hoveredIndex, options.length - 1)),
     );
   };
 
@@ -97,7 +97,7 @@ export const SelectionBar = <T extends string | number | symbol>({
     const closestIndex = Math.round(currentX / buttonWidthPx);
     const boundedIndex = Math.max(
       0,
-      Math.min(closestIndex, options.length - 1)
+      Math.min(closestIndex, options.length - 1),
     );
 
     onSelect(options[boundedIndex].value);
@@ -151,29 +151,31 @@ export const SelectionBar = <T extends string | number | symbol>({
             height: "100%",
           }}
         >
-          <div className="flex flex-col items-center justify-center -mb-1 gap-1">
+          <div className="flex flex-col items-center justify-center gap-1">
             {option.icon && (
               <i
                 className={clsx(
-                  "material-symbols-outlined",
+                  "material-symbols-outlined leading-none",
                   option.value === selected && "filled",
                   option.fontClass,
-                  option.textSize
+                  option.textSize,
                 )}
               >
                 {option.icon}
               </i>
             )}
 
-            <span
-              className={clsx(
-                "truncate text-center px-1",
-                option.fontClass,
-                option.textSize
-              )}
-            >
-              {option.label}
-            </span>
+            {option.label && (
+              <h1
+                className={clsx(
+                  "truncate text-center px-1 leading-none",
+                  option.fontClass,
+                  option.textSize,
+                )}
+              >
+                {option.label}
+              </h1>
+            )}
           </div>
         </button>
       ))}

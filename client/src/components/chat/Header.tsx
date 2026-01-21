@@ -123,13 +123,7 @@ const Header: React.FC<ChatHeaderProps> = ({
   if (!chat) return null;
 
   return (
-    <header
-      className={clsx("chat-header", {
-        desktop: !isMobile,
-        mobile: isMobile,
-      })}
-      style={{ zIndex: 2 }}
-    >
+    <header className={clsx("chat-header")} style={{ zIndex: 2 }}>
       {isSearchMessages && <MessageSearchBar />}
 
       <AnimatePresence>
@@ -138,10 +132,7 @@ const Header: React.FC<ChatHeaderProps> = ({
         )}
       </AnimatePresence>
 
-      <div
-        id="chat-header"
-        className="flex items-center justify-between px-3 min-h-(--header-height) max-h-(--header-height)"
-      >
+      <div className="flex items-center justify-between px-3 min-h-(--header-height) max-h-(--header-height) ">
         {isMobile && (
           <GlassButton onClick={handleGoHome}>
             <i className="material-symbols-outlined filled ml-2">
@@ -152,7 +143,10 @@ const Header: React.FC<ChatHeaderProps> = ({
         <motion.div
           key={chat.id}
           className={clsx(
-            "flex gap-2 items-center cursor-pointer hover:text-(--primary-green-glow)",
+            "flex items-center cursor-pointer transition-all",
+            "hover:bg-(--primary-green) hover:text-white hover:p-0.5 hover:custom-border hover:shadow-2xl",
+            // "bg-(--background-color)/25 backdrop-blur ",
+            isDirect ? "rounded-full" : "rounded-xl",
           )}
           initial={{ opacity: 0.6, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -162,12 +156,9 @@ const Header: React.FC<ChatHeaderProps> = ({
           <ChatAvatar chat={chat} type="header" isBlocked={isBlockedByMe} />
           <div
             id="chat-name"
-            // className="glass-panel p-0.5 rounded-xl"
-            className={clsx({
-              "glass-panel px-1 rounded-xl": isMobile,
-            })}
+            className="px-2"
           >
-            <h1 className="text-xl font-medium">
+            <h1 className="text-xl font-semibold leading-tight">
               {chat.type === ChatType.SAVED ? "Saved" : chat.name}
             </h1>
             {isDirect && !isOnline && lastSeen && (

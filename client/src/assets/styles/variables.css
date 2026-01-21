@@ -44,12 +44,17 @@
   --primary-green-glow: rgb(134, 239, 172);
   --primary-green-dark: rgb(0, 90, 66);
   --primary-color: var(--primary-green);
-  --primary-background-gradient: linear-gradient(to top, var(--primary-green), var(--primary-green-50));
+  --primary-background-gradient: linear-gradient(
+    to top,
+    var(--primary-green),
+    var(--primary-green-50)
+  );
 
   /* Colors - Light Theme */
+  --solid-white-black: rgb(255, 255, 255);
   --text-color: rgb(0, 0, 0);
   --avatar-background: rgb(200, 200, 200);
-  --background-color: rgb(222, 222, 222);
+  --background-color: rgb(225, 225, 225);
   --panel-color: rgb(238, 238, 238);
   --glass-panel-color: rgba(255, 255, 255, 0.6);
   --input-color: rgba(255, 255, 255, 0.7);
@@ -85,7 +90,12 @@
 /* Dark mode styles */
 html[data-theme="dark"] {
   color-scheme: dark;
-  --primary-background-gradient: linear-gradient(to top, var(--primary-green-dark), var(--primary-green-50));
+  --solid-white-black: rgb(0, 0, 0);
+  --primary-background-gradient: linear-gradient(
+    to top,
+    var(--primary-green-dark),
+    var(--primary-green-50)
+  );
   --primary-color: var(--primary-green-glow);
   --text-color: rgb(255, 255, 255);
   --avatar-background: rgb(60, 60, 60);

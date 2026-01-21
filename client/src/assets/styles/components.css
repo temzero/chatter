@@ -88,9 +88,9 @@ input[type="number"]::-webkit-inner-spin-button {
   opacity: 85%;
 }
 
-.glass-button.active{
+.glass-button.active {
   background: var(--primary-color) !important;
-  color: var(--background-color)
+  color: var(--background-color);
 }
 
 .glass-button:hover {
@@ -118,6 +118,12 @@ input[type="number"]::-webkit-inner-spin-button {
   left: 0;
   user-select: none;
   z-index: 2;
+
+  background: linear-gradient(
+    to bottom,
+    var(--background-color) 30%,
+    transparent
+  );
 }
 
 .chat-bottom {
@@ -131,24 +137,25 @@ input[type="number"]::-webkit-inner-spin-button {
   padding: 0.75rem;
   user-select: none;
   z-index: 2;
+
+  background: linear-gradient(to top, var(--background-color) 30%, transparent);
 }
 
 .chat-bottom.has-reply {
   z-index: 100 !important;
 }
 
-.chat-bottom.desktop,
+/* .chat-bottom.desktop,
 .chat-header.desktop {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-}
-
-.chat-bottom.mobile {
-  background: linear-gradient(to top, var(--background-color), transparent);
-}
-.chat-header.mobile {
+} */
+/* .chat-header.mobile {
   background: linear-gradient(to bottom, var(--background-color), transparent);
 }
+.chat-bottom.mobile {
+ background: linear-gradient(to top, var(--background-color) 50%, transparent);
+} */
 
 /* Context Menu */
 .context-menu {
@@ -156,7 +163,8 @@ input[type="number"]::-webkit-inner-spin-button {
   z-index: 9999 !important;
   border-radius: 0.5rem;
   overflow: hidden;
-  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1),
+  box-shadow:
+    0 20px 25px -5px rgb(0 0 0 / 0.1),
     0 8px 10px -6px rgb(0 0 0 / 0.1);
   background: var(--background-color);
   border: 2px solid var(--border-color);
@@ -297,7 +305,8 @@ input[type="number"]::-webkit-inner-spin-button {
   padding: 1rem;
   cursor: pointer;
   user-select: none;
-  transition: color var(--transition-default),
+  transition:
+    color var(--transition-default),
     background-color var(--transition-default);
   border-bottom: 1px solid var(--border-color);
 }
