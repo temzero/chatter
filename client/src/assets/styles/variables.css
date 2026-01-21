@@ -41,8 +41,9 @@
   /* Colors - Primary */
   --primary-green: rgb(0, 174, 128);
   --primary-green-50: rgba(0, 174, 128, 0.5);
+  --primary-green-75: rgba(0, 174, 128, 0.75);
   --primary-green-glow: rgb(134, 239, 172);
-  --primary-green-dark: rgb(0, 90, 66);
+  --primary-green-dark: rgb(0, 49, 36);
   --primary-color: var(--primary-green);
   --primary-background-gradient: linear-gradient(
     to top,
@@ -94,7 +95,7 @@ html[data-theme="dark"] {
   --primary-background-gradient: linear-gradient(
     to top,
     var(--primary-green-dark),
-    var(--primary-green-50)
+    var(--primary-green-75)
   );
   --primary-color: var(--primary-green-glow);
   --text-color: rgb(255, 255, 255);

@@ -158,7 +158,7 @@ const Header: React.FC<ChatHeaderProps> = ({
             id="chat-name"
             className="px-2"
           >
-            <h1 className="text-xl font-semibold leading-tight">
+            <h1 className="text-xl font-bold leading-tight">
               {chat.type === ChatType.SAVED ? "Saved" : chat.name}
             </h1>
             {isDirect && !isOnline && lastSeen && (

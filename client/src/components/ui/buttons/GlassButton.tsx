@@ -1,6 +1,5 @@
 // GlassButton.tsx
 import clsx from "clsx";
-import { useIsMobile } from "@/stores/deviceStore";
 import { SizeEnum } from "../../../shared/types/enums/size.enum";
 
 interface GlassButtonProps {
@@ -20,8 +19,6 @@ const GlassButton: React.FC<GlassButtonProps> = ({
   size = SizeEnum.M,
   active = false,
 }) => {
-  const isMobile = useIsMobile();
-
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     onClick?.(e);
@@ -47,12 +44,7 @@ const GlassButton: React.FC<GlassButtonProps> = ({
     <button
       onClick={handleClick}
       onContextMenu={handleContextMenu}
-      className={clsx(
-        "glass-button",
-        isMobile ? "mobile" : "desktop",
-        { active: active },
-        className
-      )}
+      className={clsx("glass-button", { active: active }, className)}
       style={{
         width: sizeValues[size],
         height: sizeValues[size],

@@ -57,12 +57,12 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
   return (
     <motion.div
       className={clsx(
-        "absolute flex bg-black/50 rounded-full! custom-border",
+        "absolute -bottom-4 flex bg-black/50 rounded-full! border border-(--input-border-color)",
         isChannel
-          ? "left-2 -bottom-3"
+          ? "left-2"
           : isMe && !isSystemMessage
-          ? "-left-2 -bottom-3"
-          : "-right-2 -bottom-3 flex-row-reverse"
+          ? "-left-2"
+          : "-right-2 flex-row-reverse"
       )}
       style={{ zIndex: 1 }}
       {...messageAnimations.reaction}
@@ -82,7 +82,7 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
                 damping: 28,
               }}
               className={clsx(
-                "rounded-full! overflow-hidden text-sm flex items-center p-0.5 cursor-pointer",
+                "rounded-full! overflow-hidden text-sm! flex items-center p-0.5 cursor-pointer blur-bg",
                 {
                   "bg-blue-600/50": hasMyReaction,
                 }
@@ -91,7 +91,7 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
             >
               <span>{emoji}</span>
               {userIds.length > 1 && (
-                <span className="text-xs ml-0.5">{userIds.length}</span>
+                <span className="text-xs mx-0.5">{userIds.length}</span>
               )}
             </motion.button>
           );

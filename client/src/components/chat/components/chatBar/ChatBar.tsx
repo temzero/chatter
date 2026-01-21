@@ -198,10 +198,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
 
   return (
     <div
-      className={clsx("chat-bottom", replyToMessageId && "has-reply", {
-        mobile: isMobile,
-        desktop: !isMobile,
-      })}
+      className={clsx("chat-bottom", replyToMessageId && "has-reply")}
     >
       {/* File Attachment Previews */}
       {filePreviewUrls.length > 0 && (

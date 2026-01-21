@@ -36,7 +36,7 @@ export const GroupAvatar: React.FC<GroupAvatarProps> = ({
 
   return (
     <div
-      className={`relative group overflow-hidden bg-(--border-color) flex items-center justify-center ${parentScaleClass} ${styles.size} ${styles.rounded} `}
+      className={`relative group overflow-hidden  bg-(--input-border-color) backdrop-blur flex items-center justify-center ${parentScaleClass} ${styles.size} ${styles.rounded} `}
     >
       {chat.avatarUrl ? (
         <img

@@ -70,7 +70,10 @@ input[type="number"]::-webkit-inner-spin-button {
   background: var(--glass-panel-color);
   border-color: var(--border-color);
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
+
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important; /* Safari */
+  -moz-backdrop-filter: blur(10px) !important; /* Firefox */
 }
 
 /* GlassButton.css */
@@ -81,11 +84,14 @@ input[type="number"]::-webkit-inner-spin-button {
   border-radius: 9999px !important;
   transition: all 200ms ease;
 
-  background: var(--glass-panel-color);
-  border: 1px solid var(--border-color);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(12px);
   opacity: 85%;
+  background: var(--glass-panel-color);
+  border: 3px solid var(--input-border-color);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important; /* Safari */
+  -moz-backdrop-filter: blur(10px) !important; /* Firefox */
 }
 
 .glass-button.active {
@@ -104,13 +110,6 @@ input[type="number"]::-webkit-inner-spin-button {
   transform: scale(0.9);
 }
 
-/* Mobile styles */
-.glass-button.mobile {
-  background: var(--glass-panel-color);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
 .chat-header {
   width: 100%;
   position: absolute;
@@ -121,7 +120,7 @@ input[type="number"]::-webkit-inner-spin-button {
 
   background: linear-gradient(
     to bottom,
-    var(--background-color) 30%,
+    var(--background-color) 25%,
     transparent
   );
 }
@@ -138,24 +137,12 @@ input[type="number"]::-webkit-inner-spin-button {
   user-select: none;
   z-index: 2;
 
-  background: linear-gradient(to top, var(--background-color) 30%, transparent);
+  background: linear-gradient(to top, var(--background-color) 25%, transparent);
 }
 
 .chat-bottom.has-reply {
   z-index: 100 !important;
 }
-
-/* .chat-bottom.desktop,
-.chat-header.desktop {
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-} */
-/* .chat-header.mobile {
-  background: linear-gradient(to bottom, var(--background-color), transparent);
-}
-.chat-bottom.mobile {
- background: linear-gradient(to top, var(--background-color) 50%, transparent);
-} */
 
 /* Context Menu */
 .context-menu {
@@ -172,9 +159,10 @@ input[type="number"]::-webkit-inner-spin-button {
 
 /* Blur Effect */
 .blur-bg {
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important; /* Safari */
+  -moz-backdrop-filter: blur(10px) !important; /* Firefox */
 }
 
 /* Input Components */
@@ -203,7 +191,9 @@ input[type="number"]::-webkit-inner-spin-button {
   min-height: var(--chat-input-container-height);
   border-width: 3px;
   /* padding: 4px!important; */
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important; /* Safari */
+  -moz-backdrop-filter: blur(10px) !important; /* Firefox */
 }
 
 .input-container:focus-within,

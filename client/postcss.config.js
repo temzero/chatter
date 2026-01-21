@@ -1,6 +1,8 @@
 export default {
   plugins: {
     "@tailwindcss/postcss": {}, // ← New package required
-    autoprefixer: {},
+    autoprefixer: {
+      overrideBrowserslist: ["last 2 versions", "Firefox >= 103"],
+    },
   },
 };
