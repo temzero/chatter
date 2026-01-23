@@ -3,7 +3,7 @@ import { MotionProps } from "framer-motion";
 // Shared animation configurations
 export const messageAnimations: Record<string, MotionProps> = {
   sending: {
-    animate: { opacity: [0.3, 0.6, 0.3] },
+    animate: { opacity: [0.5, 0.8, 0.5] },
     exit: { opacity: 1 },
     transition: {
       duration: 2.5,
@@ -13,9 +13,10 @@ export const messageAnimations: Record<string, MotionProps> = {
     },
   },
   SystemMessage: {
-    initial: { scale: 0.5, y: 90 },
-    animate: { scale: 1, y: 0 },
+    initial: { opacity: 0, scale: 0.5, y: 90 },
+    animate: { opacity: 1, scale: 1, y: 0 },
     exit: { opacity: 0, scale: 1.5 },
+    transition: { type: "spring", stiffness: 500, damping: 28 },
   },
   pinMessage: {
     initial: { opacity: 0, scale: 1.5 },
@@ -53,63 +54,63 @@ export const messageAnimations: Record<string, MotionProps> = {
   },
 };
 
-// export const getMessageAnimation = (isMe: boolean): MotionProps => {
-//   return {
-//     initial: { opacity: 0, x: isMe ? 300 : -300 },
-//     animate: { opacity: 1, scale: 1, x: 0 },
-//     exit: { opacity: 0, scale: 2 },
-//     transition: {
-//       type: "spring",
-//       stiffness: 300,
-//       damping: 28,
-//     },
-//   };
-// };
+export const getMessageAnimation = (
+  isMe: boolean,
+  isSending?: boolean,
+): MotionProps => {
+  const baseAnimation: MotionProps = isMe
+    ? {
+        initial: { opacity: 0, y: 150, scale: 3 },
+        animate: { opacity: 1, y: 0, scale: 1 },
+        exit: { opacity: 0, x: 0, y: 0, scale: 2 },
+        transition: {
+          type: "spring" as const,
+          stiffness: 250,
+          damping: 25,
+        },
+      }
+    : {
+        initial: { opacity: 0, x: -300 },
+        animate: { opacity: 1, x: 0 },
+        exit: { opacity: 0, scale: 2 },
+        transition: {
+          type: "spring" as const,
+          stiffness: 300,
+          damping: 28,
+        },
+      };
 
-export const getMessageAnimation = (isMe: boolean): MotionProps => {
-  if (isMe) {
-    // ME → slide from bottom up
-    return {
-      initial: { opacity: 0, y: 150, scale: 3 },
-      animate: { opacity: 1, y: 0, scale: 1 },
-      exit: { opacity: 0, x: 0, y: 0, scale: 2 },
-      // transition: { duration: 0.3, ease: easeOut },
-      transition: {
-        type: "spring",
-        stiffness: 250,
-        damping: 22,
-      },
-    };
-  }
-
-  // NOT ME → slide from left
-  return {
-    initial: { opacity: 0, x: -300 },
-    animate: { opacity: 1, x: 0 },
-    exit: { opacity: 0, scale: 2 },
-    transition: {
-      type: "spring",
-      stiffness: 300,
-      damping: 28,
-    },
-  };
-};
-
-export const getMessageSendingAnimation = (isSending: boolean): MotionProps => {
   if (isSending) {
     return {
-      animate: { opacity: [0.3, 0.6, 0.3] },
+      ...baseAnimation,
+      animate: {
+        ...(baseAnimation.animate as object),
+        ...(messageAnimations.sending.animate as object),
+      },
       transition: {
-        duration: 2.5,
-        repeat: Infinity,
-        repeatType: "loop",
-        ease: "easeInOut",
+        ...baseAnimation.transition,
+        opacity: messageAnimations.sending.transition,
+      },
+    } as MotionProps;
+  }
+
+  return baseAnimation;
+};
+
+export const getSystemMessageAnimation = (isSending?: boolean): MotionProps => {
+  if (isSending) {
+    return {
+      ...messageAnimations.SystemMessage,
+      animate: {
+        ...(messageAnimations.SystemMessage.animate as object),
+        ...(messageAnimations.sending.animate as object),
+      },
+      transition: {
+        ...(messageAnimations.SystemMessage.transition as object),
+        opacity: messageAnimations.sending.transition,
       },
     };
-  } else {
-    return {
-      animate: { opacity: 1 },
-      transition: { duration: 0.3, ease: "easeInOut" },
-    };
   }
+
+  return messageAnimations.SystemMessage;
 };

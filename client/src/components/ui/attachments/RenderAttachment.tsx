@@ -168,9 +168,7 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
 
     case AttachmentType.LINK:
       return (
-        <div className="px-1 pb-1">
           <LinkPreviewAttachment attachment={attachment} />
-        </div>
       );
 
     default:

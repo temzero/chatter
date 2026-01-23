@@ -5,6 +5,7 @@ import { AttachmentResponse } from "@/shared/types/responses/message-attachment.
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { getMessageAttachments } from "@/stores/messageAttachmentStore";
 import { LinkPreviewAttachment } from "../attachments/LinkPreviewAttachment";
+import { useIsMobile } from "@/stores/deviceStore";
 
 interface RenderMultipleAttachmentsProps {
   chatId: string;
@@ -19,6 +20,8 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
   attachments,
   className = "",
 }) => {
+  const isMobile = useIsMobile();
+
   if (!attachments) {
     attachments = getMessageAttachments(chatId, messageId);
   }
@@ -116,12 +119,13 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
   };
 
   return (
-    <div key={messageId} className={`flex flex-col ${className}`}>
+    <div key={messageId} className={`flex flex-col w-full ${className}`}>
       {linkPreviews.map((attachment) => (
         <LinkPreviewAttachment
           attachment={attachment}
           isInitAnimation={true}
           key={attachment.id}
+          className={isMobile ? "min-w-[280px]" : "min-w-[400px]"}
         />
       ))}
 

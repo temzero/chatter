@@ -98,7 +98,6 @@ const SystemMessage = ({
         <MessageReactionDisplay
           isMe={false}
           isSystemMessage={true}
-          currentUserId={currentUserId}
           messageId={messageId}
           chatId={message.chatId}
         />

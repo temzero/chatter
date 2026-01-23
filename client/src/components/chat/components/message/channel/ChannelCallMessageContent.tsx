@@ -5,13 +5,17 @@ import { formatTime } from "@/common/utils/format/formatTime";
 import { useTranslation } from "react-i18next";
 import { CallLiteResponse } from "@/shared/types/responses/call-lite.response";
 import CallIcon from "@/components/ui/icons/CallIcon";
+import { handleQuickReaction } from "@/common/utils/message/quickReaction";
+import { MessageResponse } from "@/shared/types/responses/message.response";
 
 interface BroadcastMessageProps {
   call: CallLiteResponse;
+  message: MessageResponse;
 }
 
 export const ChannelCallMessageContent: React.FC<BroadcastMessageProps> = ({
   call,
+  message,
 }) => {
   const { t } = useTranslation();
   const { status, startedAt, endedAt } = call;
@@ -20,7 +24,10 @@ export const ChannelCallMessageContent: React.FC<BroadcastMessageProps> = ({
 
   return (
     <div
-      className={`w-full bg-(--message-color) flex items-center justify-between gap-3 p-2 rounded-lg shadow-sm truncate ${
+      onDoubleClick={() =>
+        message && handleQuickReaction(message.id, message.chatId)
+      }
+      className={`w-full rounded-xl bg-(--message-color) flex items-center justify-between gap-3 p-2 shadow-sm truncate ${
         isError && "text-red-500"
       }`}
     >

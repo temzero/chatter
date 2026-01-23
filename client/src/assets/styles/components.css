@@ -83,20 +83,18 @@ input[type="number"]::-webkit-inner-spin-button {
   justify-content: center;
   border-radius: 9999px !important;
   transition: all 200ms ease;
-
-  opacity: 85%;
   background: var(--glass-panel-color);
   border: 3px solid var(--input-border-color);
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
 
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important; /* Safari */
-  -moz-backdrop-filter: blur(10px) !important; /* Firefox */
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important; /* Safari */
+  -moz-backdrop-filter: blur(8px) !important; /* Firefox */
 }
 
 .glass-button.active {
-  background: var(--primary-color) !important;
   color: var(--background-color);
+  background: var(--primary-color) !important;
 }
 
 .glass-button:hover {
@@ -160,9 +158,9 @@ input[type="number"]::-webkit-inner-spin-button {
 /* Blur Effect */
 .blur-bg {
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important; /* Safari */
-  -moz-backdrop-filter: blur(10px) !important; /* Firefox */
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important; /* Safari */
+  -moz-backdrop-filter: blur(8px) !important; /* Firefox */
 }
 
 /* Input Components */
@@ -230,6 +228,7 @@ input[type="number"]::-webkit-inner-spin-button {
   align-items: center;
   overflow: hidden;
   min-width: calc(var(--message-tail-dimension) + 9px);
+  border: 1px solid transparent;
   border-radius: var(--message-border-radius);
   background-color: var(--message-color);
   word-break: break-word;
@@ -239,10 +238,6 @@ input[type="number"]::-webkit-inner-spin-button {
   transition: transform var(--transition-default);
   will-change: transform;
   /* box-shadow: 1px 1px 8px rgba(0, 0, 0, 0.2); */
-}
-
-.message-bubble p {
-  padding: 8px;
 }
 
 .message-bubble-reply {

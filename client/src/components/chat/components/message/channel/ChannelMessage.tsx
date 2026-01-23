@@ -1,11 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useRef, useMemo } from "react";
 import clsx from "clsx";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useMessageStore } from "@/stores/messageStore";
-import { MessageReactionDisplay } from "@/components/ui/messages/MessageReactionsDisplay";
 import { formatTime } from "@/common/utils/format/formatTime";
 import { getCurrentUserId } from "@/stores/authStore";
-import { handleQuickReaction } from "@/common/utils/message/quickReaction";
 import { scrollToMessageById } from "@/common/utils/message/scrollToMessageById";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
@@ -15,16 +13,14 @@ import { useIsMobile } from "@/stores/deviceStore";
 import {
   useIsMessageFocus,
   useIsReplyToThisMessage,
-  setOpenFocusMessageModal,
 } from "@/stores/modalStore";
-import { messageAnimations } from "@/common/animations/messageAnimations";
+import { getSystemMessageAnimation } from "@/common/animations/messageAnimations";
 import SystemMessage from "../SystemMessage";
 import ChannelMessageContent from "./ChannelMessageContent";
-import ChannelMessageBubbleWrapper from "../wrapper/ChannelMessageBubbleWrapper";
 import { SystemMessageJSONContent } from "../../../../ui/messages/content/SystemMessageContent";
 import { MessageHorizontalPreview } from "../preview/MessageHorizontalPreview";
 import { MessageReadInfo } from "@/components/chat/messagesContainer/MessageReadInfo";
-import { MessageContextMenu } from "@/components/ui/contextMenu/Message-contextMenu";
+import MessageBubbleWrapper from "../wrapper/MessageBubbleWrapper";
 
 interface ChannelMessageProps {
   messageId: string;
@@ -32,6 +28,7 @@ interface ChannelMessageProps {
 
 const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
   const message = useMessageStore((state) => state.messagesById[messageId]);
+  console.log("ChannelMessage:", message);
 
   const isMobile = useIsMobile();
   const currentUserId = getCurrentUserId();
@@ -42,21 +39,11 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
   const repliedMessage = message.replyToMessage;
 
   const messageRef = useRef<HTMLDivElement>(null);
-  const [contextMenuPosition, setContextMenuPosition] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault();
-    // Open your existing modal
-    setOpenFocusMessageModal(message.id);
-    // Set position for reaction picker
-    setContextMenuPosition({ x: e.clientX, y: e.clientY });
-  };
 
-  const closeContextMenu = () => {
-    setContextMenuPosition(null);
-  };
+  const systemMessageAnimation = useMemo(() => {
+    if (!message) return;
+    return getSystemMessageAnimation(message.status === MessageStatus.SENDING);
+  }, [message]);
 
   if (!currentUserId) {
     console.error("Not authenticated");
@@ -91,7 +78,7 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
         zIndex: isFocus ? 100 : "auto",
       }}
       layout="position"
-      {...messageAnimations.SystemMessage}
+      {...systemMessageAnimation}
     >
       {repliedMessage && (
         <div
@@ -106,13 +93,15 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
         </div>
       )}
 
-      <ChannelMessageBubbleWrapper
+      <MessageBubbleWrapper
         message={message}
-        onDoubleClick={() => handleQuickReaction(message.id, message.chatId)}
-        onContextMenu={handleContextMenu}
+        isChannel={true}
+        isReplyToThisMessage={isReplyToThisMessage}
+        isFocus={isFocus}
+        className="border-3!"
       >
         {message.call ? (
-          <ChannelCallMessageContent call={message.call} />
+          <ChannelCallMessageContent message={message} call={message.call} />
         ) : (
           <ChannelMessageContent
             message={message}
@@ -120,33 +109,13 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
             isMe={isMe}
           />
         )}
-        <MessageReactionDisplay
-          isChannel={true}
-          currentUserId={currentUserId}
-          messageId={message.id}
-          chatId={message.chatId}
-        />
-
         <div
           className="absolute bottom-1 right-1 text-xs italic opacity-0 group-hover:opacity-80 font-semibold bg-(--panel-color) p-0.5 px-1.5 rounded-full! backdrop-blur-lg"
           style={{ zIndex: 1 }}
         >
           {formatTime(message.createdAt)}
         </div>
-      </ChannelMessageBubbleWrapper>
-
-      <AnimatePresence>
-        {isFocus && !isReplyToThisMessage && (
-          <MessageContextMenu
-            message={message}
-            isMe={isMe}
-            isChannel={true}
-            isSystemMessage={!!message.call}
-            initialMousePosition={contextMenuPosition ?? undefined}
-            onClose={closeContextMenu}
-          />
-        )}
-      </AnimatePresence>
+      </MessageBubbleWrapper>
 
       {/* ✅ Added Read Info Section */}
       {message.status !== MessageStatus.SENDING &&

@@ -28,6 +28,7 @@ export const RenderModalAttachment = ({
   const [isHorizontalAspectRatio, setIsHorizontalAspectRatio] = useState<
     boolean | null
   >(null);
+  
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const audioPlayerRef = useRef<AudioPlayerRef | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -103,16 +104,6 @@ export const RenderModalAttachment = ({
 
     case AttachmentType.AUDIO:
       return (
-        // <motion.div
-        //   className="max-w-md rounded-lg border-4 border-(--border-color)"
-        //   animate={mediaViewerAnimations.rotation(rotation)}
-        // >
-        //   {/* <div className="p-4 custom-border-b flex items-center gap-1">
-        //     <i className="material-symbols-outlined">music_note</i>
-        //     {attachment.filename || "Audio file"}
-        //   </div> */}
-        // </motion.div>
-
         <CustomAudioDiskPlayer
           attachmentType={AttachmentType.AUDIO}
           mediaUrl={attachment.url}
@@ -151,7 +142,7 @@ export const RenderModalAttachment = ({
       );
 
     case AttachmentType.LINK:
-      return <LinkPreviewAttachment attachment={attachment} />;
+      return <LinkPreviewAttachment attachment={attachment} className="w-[50%]" />;
 
     default:
       return (

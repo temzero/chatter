@@ -33,7 +33,7 @@ export const LinkPreviewAttachment: React.FC<Props> = ({
     ? "video"
     : undefined;
 
-  const hasBothImageAndFavicon = Boolean(image && favicon);
+  // const hasBothImageAndFavicon = Boolean(image && favicon);
   const iconClass = "h-6 w-6";
 
   const animationProps = isInitAnimation ? messageAnimations.linkPreview : {};
@@ -47,12 +47,11 @@ export const LinkPreviewAttachment: React.FC<Props> = ({
       id={attachment.id}
       key={attachment.id}
       className={clsx(
-        "w-full flex-1",
-        "relative overflow-hidden rounded-lg shadow-xl flex flex-col gap-1 justify-between",
-        "bg-black/30 hover:bg-blue-500 border-3 border-transparent transition-all",
+        "relative aspect-video overflow-hidden rounded-lg shadow-xl flex flex-col gap-1 justify-between",
+        "bg-black/30 hover:border-3 hover:border-blue-500 transition-all",
         "group",
-        { "aspect-video": hasBothImageAndFavicon },
-        className
+        { "w-full": isMobile },
+        className,
       )}
       {...animationProps}
     >
@@ -100,7 +99,7 @@ export const LinkPreviewAttachment: React.FC<Props> = ({
               isMobile,
             "text-white": !isMobile,
           },
-          "group-hover:from-transparent group-hover:to-blue-800"
+          "group-hover:from-transparent group-hover:to-blue-800",
         )}
         style={{ zIndex: 1 }}
       >
@@ -110,7 +109,7 @@ export const LinkPreviewAttachment: React.FC<Props> = ({
         <h1
           className={clsx(
             "italic underline text-xs opacity-90 group-hover:block",
-            { hidden: !isMobile }
+            { hidden: !isMobile },
           )}
         >
           {url}
@@ -122,7 +121,7 @@ export const LinkPreviewAttachment: React.FC<Props> = ({
         className={clsx(
           "w-full p-2 mt-auto pointer-events-none text-white",
           "bg-linear-to-b from-transparent via-black/70 to-black",
-          "group-hover:from-transparent group-hover:via-blue-800/70 group-hover:to-blue-800"
+          "group-hover:from-transparent group-hover:via-blue-800/70 group-hover:to-blue-800",
         )}
         style={{ zIndex: 1 }}
       >

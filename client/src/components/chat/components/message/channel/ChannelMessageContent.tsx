@@ -1,9 +1,11 @@
 // components/ui/messages/content/ChannelMessageContent.tsx
 import * as React from "react";
-import clsx from "clsx";
 import RenderMultipleAttachments from "@/components/ui/attachments/RenderMultipleAttachments";
 import ForwardedMessagePreview from "@/components/ui/messages/ForwardMessagePreview";
 import { MessageResponse } from "@/shared/types/responses/message.response";
+import { handleQuickReaction } from "@/common/utils/message/quickReaction";
+import { getMessageAttachments } from "@/stores/messageAttachmentStore";
+import Linkify from "linkify-react";
 
 interface ChannelMessageContentProps {
   message: MessageResponse;
@@ -16,23 +18,38 @@ const ChannelMessageContent: React.FC<ChannelMessageContentProps> = ({
   currentUserId,
   isMe,
 }) => {
-  const attachments = message.attachments ?? [];
+  const attachments = getMessageAttachments(message.chatId, message.id);
 
   return (
     <>
-      {/* Attachments */}
-      {attachments.length > 0 && (
-        <div className="rounded overflow-hidden shadow-lg">
-          <RenderMultipleAttachments
-            chatId={message.chatId}
-            messageId={message.id}
-          />
-        </div>
-      )}
+      <RenderMultipleAttachments
+        chatId={message.chatId}
+        messageId={message.id}
+        attachments={attachments}
+      />
 
       {/* Text content */}
       {message.content && (
-        <p className={clsx("backdrop-blur p-4")}>{message.content}</p>
+        <p
+          onDoubleClick={() => handleQuickReaction(message.id, message.chatId)}
+          className="p-3 wrap-break-word overflow-wrap-break"
+          style={{ whiteSpace: "pre-wrap" }}
+        >
+          <Linkify
+            options={{
+              target: "_blank",
+              rel: "noopener noreferrer",
+              className:
+                "underline! opacity-70 hover:opacity-100 hover:text-blue-600 italic break-all",
+              attributes: {
+                onClick: (e: React.MouseEvent<HTMLAnchorElement>) =>
+                  e.stopPropagation(),
+              },
+            }}
+          >
+            {message.content}
+          </Linkify>
+        </p>
       )}
 
       {/* Forwarded message preview */}

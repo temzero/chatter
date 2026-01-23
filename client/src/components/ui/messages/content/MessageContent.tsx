@@ -9,7 +9,6 @@ import { handleQuickReaction } from "@/common/utils/message/quickReaction";
 interface MessageBubbleProps {
   message: MessageResponse;
   isMe: boolean;
-  isRelyToThisMessage?: boolean;
   currentUserId?: string;
 }
 
@@ -33,10 +32,11 @@ const MessageContent: React.FC<MessageBubbleProps> = ({
       {/* Text Content */}
       {message.content && !isForwardMessage && (
         <p
-          className="break-words overflow-wrap-break"
+          className="p-2 wrap-break-word overflow-wrap-break"
           onDoubleClick={() =>
             message && handleQuickReaction(message.id, message.chatId)
           }
+          style={{ whiteSpace: 'pre-wrap' }}
         >
           <Linkify
             options={{

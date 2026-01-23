@@ -1,72 +1,119 @@
 // components/ui/messages/MessageBubbleWrapper.tsx
 import * as React from "react";
+import { useState } from "react";
 import clsx from "clsx";
-import { motion } from "framer-motion";
-import { getMessageSendingAnimation } from "@/common/animations/messageAnimations";
 import { MessageResponse } from "@/shared/types/responses/message.response";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { MessageTail } from "../messageTail";
 import { MessageReactionDisplay } from "@/components/ui/messages/MessageReactionsDisplay";
 import MessagePinnedIcon from "../MessagePinnedIcon";
+import { setOpenFocusMessageModal } from "@/stores/modalStore";
+import { MessageContextMenu } from "@/components/ui/contextMenu/Message-contextMenu";
+import { AnimatePresence } from "framer-motion";
 
 interface MessageBubbleWrapperProps {
   message: MessageResponse;
-  isMe: boolean;
-  attachmentLength: number;
-  children: React.ReactNode;
+  isChannel?: boolean;
+  isMe?: boolean;
   idDisplayTail?: boolean;
-  isRelyToThisMessage?: boolean;
+  isReplyToThisMessage?: boolean;
+  isFocus?: boolean;
   className?: string;
   onClick?: () => void;
+  onDoubleClick?: () => void;
+  children: React.ReactNode;
 }
 
 const MessageBubbleWrapper: React.FC<MessageBubbleWrapperProps> = ({
   message,
-  isMe,
+  isMe = false,
+  isChannel = false,
+  isReplyToThisMessage = false,
   idDisplayTail = false,
-  isRelyToThisMessage,
-  children,
+  isFocus = false,
   className,
   onClick,
+  onDoubleClick,
+  children,
 }) => {
-  const isSending = message.status === MessageStatus.SENDING;
+  const [contextMenuMousePos, setContextMenuMousePos] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setOpenFocusMessageModal(message.id);
+    setContextMenuMousePos({ x: e.clientX, y: e.clientY });
+  };
+
+  const closeContextMenu = () => setContextMenuMousePos(null);
+
   const isFailed = message.status === MessageStatus.FAILED;
+  const isDirectMessage = !isChannel;
+  const showContextMenu = isFocus && !isReplyToThisMessage && contextMenuMousePos;
 
   return (
-    <motion.div
+    <div
       onClick={onClick}
-      {...getMessageSendingAnimation(isSending)}
+      onDoubleClick={onDoubleClick}
+      onContextMenu={handleContextMenu}
       className={clsx(
         "relative flex flex-col",
-        isMe ? "items-end" : "items-start"
+        isDirectMessage && (isMe ? "items-end" : "items-start"),
       )}
     >
       <div
         className={clsx(
-          "message-bubble opacity-100 object-cover",
+          isChannel
+            ? "custom-border bg-(--message-color) rounded-xl"
+            : "message-bubble w-full",
+          "overflow-hidden object-cover",
           {
-            "self-message": isMe,
+            "self-message": isDirectMessage && isMe,
             "border-6 rounded-xl! border-yellow-400": message.isImportant,
-            "message-bubble-reply": isRelyToThisMessage,
+            "message-bubble-reply": isReplyToThisMessage,
             "opacity-60 border-2 border-red-500": isFailed,
             "cursor-pointer": !!onClick,
           },
-          className
+          className,
         )}
       >
         {children}
       </div>
-      {idDisplayTail && <MessageTail isMe={isMe} />}
+
+      {idDisplayTail && isDirectMessage && <MessageTail isMe={isMe} />}
 
       {message.isPinned && (
-        <MessagePinnedIcon chatId={message.chatId} isMe={isMe} />
+        <MessagePinnedIcon
+          chatId={message.chatId}
+          isMe={isDirectMessage ? isMe : true}
+        />
       )}
+
       <MessageReactionDisplay
-        isMe={isMe}
+        isMe={isDirectMessage ? isMe : undefined}
+        isChannel={isChannel}
         messageId={message.id}
         chatId={message.chatId}
       />
-    </motion.div>
+
+      {/* Context Menu */}
+      <AnimatePresence>
+        {showContextMenu && (
+          <MessageContextMenu
+            key={message.id}
+            message={message}
+            isChannel={isChannel}
+            isMe={isMe}
+            isSystemMessage={!!message.systemEvent}
+            initialMousePosition={contextMenuMousePos}
+            onClose={closeContextMenu}
+          />
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 
