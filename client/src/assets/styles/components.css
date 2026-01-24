@@ -67,13 +67,9 @@ input[type="number"]::-webkit-inner-spin-button {
 .glass-panel,
 .glass-button,
 .chat-input-container {
+  backdrop-filter: blur(9px) !important;
   /* Force GPU rendering */
   transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-  /* Backdrop filter */
-  backdrop-filter: blur(9px) !important;
-  -webkit-backdrop-filter: blur(9px) !important; /* Safari */
-  -moz-backdrop-filter: blur(9px) !important; /* Firefox */
   /* Optimization hints */
   will-change: backdrop-filter;
   isolation: isolate;
