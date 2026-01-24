@@ -1,5 +1,4 @@
 import React, { useRef } from "react";
-import { motion } from "framer-motion";
 import { SizeEnum } from "@/shared/types/enums/size.enum";
 import GlassButton from "../buttons/GlassButton";
 
@@ -38,19 +37,14 @@ const AttachFile: React.FC<AttachFileProps> = ({
   };
 
   return (
-    <GlassButton
-      size={SizeEnum.S}
-      onClick={handleNormalClick}
-      onContextMenu={handleRightClick}
-      active={hasAttachment}
-    >
-      <motion.span
-        whileTap={{ scale: 1.2 }}
-        className="material-symbols-outlined text-3xl!"
-        aria-label="Attach file"
-      >
-        attach_file
-      </motion.span>
+    <>
+      <GlassButton
+        size={SizeEnum.S}
+        onClick={handleNormalClick}
+        onContextMenu={handleRightClick}
+        active={hasAttachment}
+        icon="attach_file"
+      />
 
       <input
         type="file"
@@ -60,7 +54,7 @@ const AttachFile: React.FC<AttachFileProps> = ({
         onChange={handleChange}
         style={{ display: "none" }}
       />
-    </GlassButton>
+    </>
   );
 };
 

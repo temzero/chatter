@@ -3,7 +3,9 @@ import clsx from "clsx";
 import { SizeEnum } from "../../../shared/types/enums/size.enum";
 
 interface GlassButtonProps {
-  children: React.ReactNode;
+  icon?: string; // Material icon name
+  reversedIcon?: string; // Material icon name
+  text?: string;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   onContextMenu?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   className?: string;
@@ -12,7 +14,9 @@ interface GlassButtonProps {
 }
 
 const GlassButton: React.FC<GlassButtonProps> = ({
-  children,
+  icon,
+  reversedIcon,
+  text,
   onClick,
   onContextMenu,
   className = "",
@@ -40,19 +44,44 @@ const GlassButton: React.FC<GlassButtonProps> = ({
     [SizeEnum.XXL]: "var(--glass-button-height-xl, 56px)",
   };
 
+  // Determine if button has text (either as prop or in children)
+  const hasOnlyOneIcon = Boolean(
+    (icon && !reversedIcon && !text) || (!icon && reversedIcon && !text),
+  );
+
   return (
     <button
       onClick={handleClick}
       onContextMenu={handleContextMenu}
-      className={clsx("glass-button", { active: active }, className)}
+      className={clsx(
+        "glass-button",
+        {
+          active: active,
+        },
+        className,
+      )}
       style={{
-        width: sizeValues[size],
+        // If only one icon, make it square (for perfect circle)
+        width: hasOnlyOneIcon ? sizeValues[size] : "auto",
         height: sizeValues[size],
-        minWidth: sizeValues[size],
+        minWidth: hasOnlyOneIcon ? sizeValues[size] : sizeValues[size],
         minHeight: sizeValues[size],
+        paddingLeft: hasOnlyOneIcon ? 0 : "1rem",
+        paddingRight: hasOnlyOneIcon ? 0 : "1rem",
       }}
     >
-      {children}
+      <div className="w-full h-full flex gap-2 items-center justify-center">
+        {icon && (
+          <i className="material-symbols-outlined filled text-3xl!">{icon}</i>
+        )}
+        {text && <span>{text}</span>}
+
+        {reversedIcon && (
+          <i className="material-symbols-outlined filled text-3xl! -scale-x-100">
+            {reversedIcon}
+          </i>
+        )}
+      </div>
     </button>
   );
 };

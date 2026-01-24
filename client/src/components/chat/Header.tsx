@@ -134,11 +134,7 @@ const Header: React.FC<ChatHeaderProps> = ({
 
       <div className="flex items-center justify-between px-3 min-h-(--header-height) max-h-(--header-height) ">
         {isMobile && (
-          <GlassButton onClick={handleGoHome}>
-            <i className="material-symbols-outlined filled ml-2">
-              arrow_back_ios
-            </i>
-          </GlassButton>
+          <GlassButton onClick={handleGoHome} icon="arrow_back_ios" />
         )}
         <motion.div
           key={chat.id}
@@ -153,10 +149,7 @@ const Header: React.FC<ChatHeaderProps> = ({
           onClick={toggleSidebarInfo}
         >
           <ChatAvatar chat={chat} type="header" isBlocked={isBlockedByMe} />
-          <div
-            id="chat-name"
-            className="px-2"
-          >
+          <div id="chat-name" className="px-2">
             <h1 className="text-xl font-bold leading-tight">
               {chat.type === ChatType.SAVED ? "Saved" : chat.name}
             </h1>
@@ -184,31 +177,27 @@ const Header: React.FC<ChatHeaderProps> = ({
                 {!isBlocked &&
                   !isBlockedByMe &&
                   (isCalling ? (
-                    <button
+                    <GlassButton
+                      active={isCalling}
                       onClick={handleJoinCall}
-                      className={clsx(
-                        "font-semibold flex items-center gap-1 custom-border rounded-full! px-3",
-                        "bg-(--primary-green) opacity-100 transition",
-                        // Hover states
-                        "hover:shadow-xl hover:border-4 hover:border-(--primary-green)",
-                        "hover:bg-white hover:scale-125 hover:text-(--primary-green)",
-                      )}
-                    >
-                      {isChannel ? "Join Broadcast" : "Join Call"}
-                      <i className="material-symbols-outlined filled text-3xl!">
-                        {isDirect && "phone"}
-                        {isVideoCall && "videocam"}
-                        {isChannel && "connected_tv"}
-                      </i>
-                    </button>
+                      text={isChannel ? "Join Broadcast" : "Join Call"}
+                      reversedIcon={
+                        isDirect
+                          ? "phone_callback"
+                          : isVideoCall
+                            ? "video_camera_front"
+                            : isChannel
+                              ? "live_tv"
+                              : undefined
+                      }
+                    />
                   ) : (
                     <>
                       {isDirect && canCall && (
-                        <GlassButton onClick={() => startCall(chat.id)}>
-                          <i className="material-symbols-outlined filled text-3xl!">
-                            phone_enabled
-                          </i>
-                        </GlassButton>
+                        <GlassButton
+                          onClick={() => startCall(chat.id)}
+                          icon="phone_enabled"
+                        />
                       )}
 
                       {isGroup && (
@@ -218,11 +207,8 @@ const Header: React.FC<ChatHeaderProps> = ({
                               isVideoCall: true,
                             })
                           }
-                        >
-                          <i className="material-symbols-outlined filled text-3xl!">
-                            videocam
-                          </i>
-                        </GlassButton>
+                          icon="videocam"
+                        />
                       )}
 
                       {isChannel &&
@@ -231,11 +217,8 @@ const Header: React.FC<ChatHeaderProps> = ({
                           <GlassButton
                             onClick={() => openBroadCastPreview(chat.id)}
                             className="opacity-60 hover:opacity-100"
-                          >
-                            <i className="material-symbols-outlined filled text-3xl!">
-                              connected_tv
-                            </i>
-                          </GlassButton>
+                            icon="connected_tv"
+                          />
                         )}
                     </>
                   ))}

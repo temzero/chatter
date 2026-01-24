@@ -104,6 +104,8 @@ input[type="number"]::-webkit-inner-spin-button {
 .glass-button.active {
   color: var(--background-color);
   background: var(--primary-color) !important;
+  border: 3px solid var(--glass-panel-color);
+  font-weight: bold !important;
 }
 
 .glass-button:hover {
@@ -127,7 +129,7 @@ input[type="number"]::-webkit-inner-spin-button {
 
   background: linear-gradient(
     to bottom,
-    var(--background-color) 25%,
+    var(--background-color) 9%,
     transparent
   );
 }
@@ -144,7 +146,7 @@ input[type="number"]::-webkit-inner-spin-button {
   user-select: none;
   z-index: 2;
 
-  background: linear-gradient(to top, var(--background-color) 25%, transparent);
+  background: linear-gradient(to top, var(--background-color) 9%, transparent);
 }
 
 .chat-bottom.has-reply {
