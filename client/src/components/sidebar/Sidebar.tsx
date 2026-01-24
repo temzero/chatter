@@ -127,9 +127,7 @@ const Sidebar = () => {
       className={clsx(
         "glass-panel h-full flex flex-col",
         !isMobile && "border-r-2",
-        currentWallpaperId
-          ? "bg-(--glass-panel-color)!"
-          : "bg-(--panel-color)!",
+        !currentWallpaperId && "bg-(--panel-color)!",
         sidebarWidthClass,
       )}
       style={{ zIndex: 10 }}

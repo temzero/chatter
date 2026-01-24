@@ -26,7 +26,7 @@ export const CallControls = ({
   return (
     <div
       className="flex justify-center gap-4 p-2 
-             bg-black/10 shadow-2xl border-4 border-white/5 backdrop-blur-lg 
+             bg-black/10 shadow-2xl border-4 border-white/5 backdrop-blur 
              rounded-full!"
     >
       {isEnableScreenshare && (

@@ -3,30 +3,56 @@ import { useEffect, useState } from "react";
 import { handleError } from "@/common/utils/error/handleError";
 import { AuthenticationLayout } from "@/layouts/PublicLayout";
 import { chatService } from "@/services/http/chatService";
-import { BarLoader } from "react-spinners";
+import { RingLoader } from "react-spinners";
 import { useTranslation } from "react-i18next";
+
+enum InviteStatus {
+  LOADING = "loading",
+  SUCCESS = "success",
+  FAILED = "failed",
+}
+
 function InvitePage() {
   const { t } = useTranslation();
   const { token } = useParams();
   const navigate = useNavigate();
 
-  const [status, setStatus] = useState(t("invite_page.joining"));
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSuccess, setIsSuccess] = useState<boolean | null>(null);
+  const [status, setStatus] = useState<InviteStatus>(InviteStatus.LOADING);
+  const [message, setMessage] = useState(t("invite_page.joining"));
+
+  // Status configuration based on status type
+  const statusConfig = {
+    [InviteStatus.LOADING]: {
+      color: null,
+      border: "border-(--border-color)",
+      icon: null,
+    },
+    [InviteStatus.SUCCESS]: {
+      color: "text-green-500",
+      border: "border-green-500/40",
+      icon: "check_circle",
+    },
+    [InviteStatus.FAILED]: {
+      color: "text-red-500",
+      border: "border-red-500/40",
+      icon: "error",
+    },
+  };
+
+  const currentStatus = statusConfig[status];
 
   useEffect(() => {
     const joinChat = async () => {
       if (!token) {
-        setStatus(t("invite_page.invalid_token"));
-        setIsLoading(false);
-        setIsSuccess(false);
+        setMessage(t("invite_page.invalid_token"));
+        setStatus(InviteStatus.FAILED);
         return;
       }
 
       try {
         const { chatId, message } = await chatService.joinChatWithInvite(token);
-        setStatus(message || t("invite_page.joined_success"));
-        setIsSuccess(true);
+        setMessage(message || t("invite_page.joined_success"));
+        setStatus(InviteStatus.SUCCESS);
 
         setTimeout(() => {
           navigate(`/${chatId}`);
@@ -35,17 +61,15 @@ function InvitePage() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         if (error?.response?.status === 404) {
-          setStatus(t("invite_page.not_found"));
+          setMessage(t("invite_page.not_found"));
         } else if (error?.response?.status === 403) {
-          setStatus(t("invite_page.access_denied"));
+          setMessage(t("invite_page.access_denied"));
         } else {
-          setStatus(t("invite_page.failed"));
+          setMessage(t("invite_page.failed"));
         }
 
-        setIsSuccess(false);
+        setStatus(InviteStatus.FAILED);
         handleError(error, "Failed to join chat");
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -53,29 +77,31 @@ function InvitePage() {
   }, [navigate, token, t]);
 
   return (
-    <AuthenticationLayout loading={isLoading}>
-      <div className="flex flex-col items-center gap-3">
-        {isSuccess !== null && (
-          <span
-            className={`material-symbols-outlined text-6xl! ${
-              isSuccess ? "text-green-500" : "text-red-500"
-            }`}
-          >
-            {isSuccess ? "check_circle" : "error"}
-          </span>
-        )}
-        <h1
-          className={`text-xl font-semibold ${
-            isSuccess
-              ? "text-green-600"
-              : isSuccess === false
-              ? "text-red-600"
-              : ""
-          }`}
+    <AuthenticationLayout>
+      <div className="relative w-full h-full p-6">
+        <div
+          className={`min-h-60 flex flex-col gap-8 items-center justify-center rounded border-2 ${currentStatus.border}`}
         >
-          {status}
-        </h1>
-        {isLoading && <BarLoader color="#6f6f6f" width={250} />}
+          {currentStatus.icon && (
+            <span
+              className={`material-symbols-outlined text-7xl! ${currentStatus.color}`}
+            >
+              {currentStatus.icon}
+            </span>
+          )}
+          {/* {status === InviteStatus.LOADING && (
+            <RingLoader color="var(--primary-color)" size={100} />
+          )} */}
+          {status === InviteStatus.LOADING && (
+            <div className="absolute inset-0 flex items-center justify-center opacity-30">
+              <RingLoader color="var(--primary-color)" size={160} />
+            </div>
+          )}
+
+          <h1 className={`text-2xl font-semibold ${currentStatus.color}`}>
+            {message}
+          </h1>
+        </div>
       </div>
     </AuthenticationLayout>
   );

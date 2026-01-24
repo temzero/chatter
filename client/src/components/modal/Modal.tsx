@@ -75,7 +75,7 @@ const ModalContent = ({
   return (
     <motion.div
       {...modalAnimations.modal}
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center"
+      className="fixed inset-0 bg-black/50 backdrop-blur flex items-center justify-center"
       onClick={(e) => {
         if (!isCustomAnimated && e.target === e.currentTarget) onClose();
       }}

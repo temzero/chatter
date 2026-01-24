@@ -57,7 +57,8 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
   return (
     <motion.div
       className={clsx(
-        "absolute -bottom-4 flex bg-black/50 rounded-full! border border-(--input-border-color)",
+        "blur-bg bg-(--glass-panel-color) custom-border",
+        "absolute -bottom-2 flex rounded-full",
         isChannel
           ? "left-2"
           : isMe && !isSystemMessage
@@ -82,14 +83,14 @@ export const MessageReactionDisplay: React.FC<MessageReactionDisplayProps> = ({
                 damping: 28,
               }}
               className={clsx(
-                "rounded-full! overflow-hidden text-sm! flex items-center p-0.5 cursor-pointer blur-bg",
+                "rounded-full! overflow-hidden text-sm! flex items-center p-0.5 cursor-pointer",
                 {
                   "bg-blue-600/50": hasMyReaction,
                 }
               )}
               onClick={() => handleClick(emoji)}
             >
-              <span>{emoji}</span>
+              <span className="hover:scale-125 transition-all">{emoji}</span>
               {userIds.length > 1 && (
                 <span className="text-xs mx-0.5">{userIds.length}</span>
               )}

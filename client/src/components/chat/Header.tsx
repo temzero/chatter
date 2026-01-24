@@ -145,7 +145,6 @@ const Header: React.FC<ChatHeaderProps> = ({
           className={clsx(
             "flex items-center cursor-pointer transition-all",
             "hover:bg-(--primary-green) hover:text-white hover:p-0.5 hover:custom-border hover:shadow-2xl",
-            // "bg-(--background-color)/25 backdrop-blur ",
             isDirect ? "rounded-full" : "rounded-xl",
           )}
           initial={{ opacity: 0.6, scale: 0.9 }}

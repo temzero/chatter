@@ -63,6 +63,27 @@ input[type="number"]::-webkit-inner-spin-button {
   margin: 0;
 }
 
+.blur-bg,
+.glass-panel,
+.glass-button,
+.chat-input-container {
+  /* Force GPU rendering */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  /* Backdrop filter */
+  backdrop-filter: blur(9px) !important;
+  -webkit-backdrop-filter: blur(9px) !important; /* Safari */
+  -moz-backdrop-filter: blur(9px) !important; /* Firefox */
+  /* Optimization hints */
+  will-change: backdrop-filter;
+  isolation: isolate;
+}
+
+/* Blur Effect */
+.blur-bg {
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+}
+
 /* Glass Panel Component */
 .glass-panel {
   position: relative;
@@ -70,10 +91,6 @@ input[type="number"]::-webkit-inner-spin-button {
   background: var(--glass-panel-color);
   border-color: var(--border-color);
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
-
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important; /* Safari */
-  -moz-backdrop-filter: blur(10px) !important; /* Firefox */
 }
 
 /* GlassButton.css */
@@ -86,10 +103,6 @@ input[type="number"]::-webkit-inner-spin-button {
   background: var(--glass-panel-color);
   border: 3px solid var(--input-border-color);
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
-
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important; /* Safari */
-  -moz-backdrop-filter: blur(8px) !important; /* Firefox */
 }
 
 .glass-button.active {
@@ -155,14 +168,6 @@ input[type="number"]::-webkit-inner-spin-button {
   border: 2px solid var(--border-color);
 }
 
-/* Blur Effect */
-.blur-bg {
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important; /* Safari */
-  -moz-backdrop-filter: blur(8px) !important; /* Firefox */
-}
-
 /* Input Components */
 .input-field,
 .input-container,
@@ -185,13 +190,8 @@ input[type="number"]::-webkit-inner-spin-button {
 .chat-input-container {
   display: flex;
   align-items: flex-end;
-  /* min-height: 100px; */
   min-height: var(--chat-input-container-height);
   border-width: 3px;
-  /* padding: 4px!important; */
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important; /* Safari */
-  -moz-backdrop-filter: blur(10px) !important; /* Firefox */
 }
 
 .input-container:focus-within,

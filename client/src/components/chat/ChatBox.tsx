@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import Header from "./Header";
 import MessagesContainer from "./messagesContainer/MessagesContainer";
 import ChatBar from "./components/chatBar/ChatBar";
+import Button from "../ui/buttons/Button";
 
 const ChatBox = React.memo(() => {
   console.log("[MOUNTED]", "ChatBox");
@@ -49,7 +50,7 @@ const ChatBox = React.memo(() => {
           {!isBlocked ? (
             isMember ? (
               !(
-                activeChat.type === "channel" &&
+                activeChat.type === ChatType.CHANNEL &&
                 activeChat.myRole !== ChatMemberRole.OWNER
               ) && (
                 <motion.div
@@ -69,21 +70,22 @@ const ChatBox = React.memo(() => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="backdrop-blur-xl w-full flex flex-col items-center p-1 justify-between shadow border-(--border-color)"
+                className="chat-bottom"
               >
-                <button
-                  className="text-(--primary-green) font-semibold rounded hover:text-white hover:bg-(--primary-green )px-2 py-1 text-lg"
+                <Button
+                  variant="primary"
+                  className="mx-auto"
                   onClick={async () => {
                     await chatMemberService.joinChat(activeChat.id);
                     window.location.reload();
                   }}
                 >
                   {t("chat_box.join_channel")}
-                </button>
+                </Button>
               </motion.div>
             )
           ) : (
-            <div className="absolute bottom-0 left-0 backdrop-blur-xl w-full flex flex-col items-center p-4 justify-between shadow border-(--border-color)">
+            <div className="chat-bottom">
               <h1 className="text-red-500 font-semibold text-center">
                 {isBlockedByMe &&
                   isBlockedMe &&

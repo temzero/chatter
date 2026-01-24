@@ -71,8 +71,8 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
       id={`message-${message.id}`}
       className={clsx("relative group mb-4", {
         "scale-[1.1]": isReplyToThisMessage,
-        "w-[60%]": !isMobile,
-        "w-[80%]": isMobile,
+        "w-[64%]": !isMobile,
+        "w-[90%]": isMobile,
       })}
       style={{
         zIndex: isFocus ? 100 : "auto",
@@ -110,7 +110,7 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
           />
         )}
         <div
-          className="absolute bottom-1 right-1 text-xs italic opacity-0 group-hover:opacity-80 font-semibold bg-(--panel-color) p-0.5 px-1.5 rounded-full! backdrop-blur-lg"
+          className="absolute bottom-1 right-1 text-xs italic opacity-0 group-hover:opacity-80 font-semibold bg-(--panel-color) p-0.5 px-1.5 rounded-full! backdrop-blur"
           style={{ zIndex: 1 }}
         >
           {formatTime(message.createdAt)}
