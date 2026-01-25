@@ -219,6 +219,14 @@
     "join_channel": "Tham gia kênh"
   },
 
+  "chat_header": {
+    "saved": "Đã lưu",
+    "has_left_chat": "Đã rời khỏi cuộc trò chuyện",
+    "last_seen": "Lần cuối hoạt động",
+    "join_broadcast": "Tham gia phát sóng",
+    "join_call": "Tham gia cuộc gọi"
+  },
+
   "chat_bar": {
     "placeholder": "Nhắn tin...",
     "attach_file": "Đính kèm"

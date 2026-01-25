@@ -220,6 +220,14 @@
     "join_channel": "Unirse al canal"
   },
 
+  "chat_header": {
+    "saved": "Guardado",
+    "has_left_chat": "Ha abandonado el chat",
+    "last_seen": "Visto por última vez",
+    "join_broadcast": "Unirse a la transmisión",
+    "join_call": "Unirse a la llamada"
+  },
+
   "chat_bar": {
     "placeholder": "Mensaje...",
     "attach_file": "Adjuntar archivo"

@@ -220,6 +220,14 @@
     "join_channel": "เข้าร่วมช่อง"
   },
 
+  "chat_header": {
+    "saved": "บันทึกแล้ว",
+    "has_left_chat": "ออกจากการแชทแล้ว",
+    "last_seen": "ออนไลน์ล่าสุด",
+    "join_broadcast": "เข้าร่วมการถ่ายทอดสด",
+    "join_call": "เข้าร่วมการโทร"
+  },
+
   "chat_bar": {
     "placeholder": "ข้อความ...",
     "attach_file": "แนบไฟล์"

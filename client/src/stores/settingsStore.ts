@@ -43,23 +43,27 @@ interface SettingsStore {
   setMessageTail: (style: MessageTailOptions) => void;
 }
 
+// Default values
+const DEFAULT_DISPLAY_SETTINGS: DisplaySettings = {
+  textSize: SizeEnum.M,
+  fontStyle: FontStyle.SANS,
+  reduceMotion: false,
+  reduceTransparency: false,
+  highContrast: false,
+};
+
+const DEFAULT_MESSAGE_SETTINGS: MessageSettings = {
+  hideTypingIndicator: false,
+  readInfo: MessageReadInfoOptions.OTHER,
+  messageStyle: MessageStyleOptions.CURVED,
+  messageTail: MessageTailOptions.CURVED,
+};
+
 export const useSettingsStore = create<SettingsStore>()(
   persist(
     (set) => ({
-      displaySettings: {
-        textSize: SizeEnum.M,
-        fontStyle: FontStyle.SANS,
-        reduceMotion: false,
-        reduceTransparency: false,
-        highContrast: false,
-      },
-
-      messageSettings: {
-        hideTypingIndicator: false,
-        readInfo: MessageReadInfoOptions.OTHER,
-        messageStyle: MessageStyleOptions.CURVED,
-        messageTail: MessageTailOptions.CURVED,
-      },
+      displaySettings: DEFAULT_DISPLAY_SETTINGS,
+      messageSettings: DEFAULT_MESSAGE_SETTINGS,
 
       updateDisplaySettings: (updates) =>
         set((state) => ({
@@ -101,6 +105,7 @@ export const useSettingsStore = create<SettingsStore>()(
         set((state) => ({
           messageSettings: { ...state.messageSettings, messageStyle: style },
         })),
+      
       setMessageTail: (style) =>
         set((state) => ({
           messageSettings: { ...state.messageSettings, messageTail: style },
@@ -112,6 +117,19 @@ export const useSettingsStore = create<SettingsStore>()(
         displaySettings: state.displaySettings,
         messageSettings: state.messageSettings,
       }),
+      // Merge strategy to ensure defaults are applied
+      merge: (persistedState, currentState) => ({
+        ...currentState,
+        ...(persistedState as Partial<SettingsStore>),
+        displaySettings: {
+          ...DEFAULT_DISPLAY_SETTINGS,
+          ...(persistedState as Partial<SettingsStore>)?.displaySettings,
+        },
+        messageSettings: {
+          ...DEFAULT_MESSAGE_SETTINGS,
+          ...(persistedState as Partial<SettingsStore>)?.messageSettings,
+        },
+      }),
     }
   )
 );
@@ -119,6 +137,7 @@ export const useSettingsStore = create<SettingsStore>()(
 export const useReadInfo = (): MessageReadInfoOptions => {
   return useSettingsStore((state) => state.messageSettings.readInfo);
 };
+
 export const useIsHideTypingIndicator = (): boolean => {
   return useSettingsStore((state) => state.messageSettings.hideTypingIndicator);
 };

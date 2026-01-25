@@ -11,6 +11,8 @@ const MessageTailSelector: React.FC = () => {
   const { messageSettings, setMessageTail } = useSettingsStore();
   const messageTailSetting = messageSettings.messageTail;
 
+  console.log("Current message tail setting:", messageTailSetting);
+
   // Get all message tail options from the enum
   const tailOptions = Object.values(MessageTailOptions);
 

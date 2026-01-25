@@ -220,6 +220,14 @@
     "join_channel": "채널 참가"
   },
 
+  "chat_header": {
+"saved": "저장됨",
+"has_left_chat": "채팅을 떠났습니다",
+"last_seen": "마지막 접속",
+"join_broadcast": "방송 참여",
+"join_call": "통화 참여"
+},
+
   "chat_bar": {
     "placeholder": "메시지...",
     "attach_file": "파일 첨부"

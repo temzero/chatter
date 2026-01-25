@@ -220,6 +220,14 @@
     "join_channel": "チャンネルに参加"
   },
 
+  "chat_header": {
+    "saved": "保存済み",
+    "has_left_chat": "チャットから退出しました",
+    "last_seen": "最終オンライン",
+    "join_broadcast": "放送に参加",
+    "join_call": "通話に参加"
+  },
+
   "chat_bar": {
     "placeholder": "メッセージ...",
     "attach_file": "ファイルを添付"

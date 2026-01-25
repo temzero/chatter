@@ -50,11 +50,11 @@ const BlockUserModal: React.FC = () => {
       title={t("modal.block_user.title", {
         name: userToBlock.firstName,
       })}
-      icon={
-        <i className="material-symbols-outlined text-4xl! rotate-90">
-          block
-        </i>
-      }
+      // icon={
+      //   <i className="material-symbols-outlined text-4xl! rotate-90">
+      //     block
+      //   </i>
+      // }
       description={t("modal.block_user.description")}
       confirmText={t("common.actions.block")}
       onRedAction={handleBlock}

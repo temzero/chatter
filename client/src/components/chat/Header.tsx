@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChatAvatar } from "@/components/ui/avatar/ChatAvatar";
@@ -18,7 +18,6 @@ import { useChatStore } from "@/stores/chatStore";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/stores/deviceStore";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
-import { ChatMemberResponse } from "@/shared/types/responses/chat-member.response";
 import { useTranslation } from "react-i18next";
 import { useIsSearchMessages } from "@/stores/messageStore";
 import MessageSearchBar from "../ui/messages/MessageSearchBar";
@@ -79,26 +78,28 @@ const Header: React.FC<ChatHeaderProps> = ({
   const isDirect = chat.type === ChatType.DIRECT;
   const isGroup = chat.type === ChatType.GROUP;
 
-  const partnerId =
-    isDirect && chat.otherMemberUserIds?.length
+  const partnerId = useMemo(() => {
+    return isDirect && chat.otherMemberUserIds?.length
       ? chat.otherMemberUserIds[0]
       : undefined;
+  }, [isDirect, chat.otherMemberUserIds]);
+
   const lastSeen = useUserLastSeen(partnerId);
 
   // Get chat partner's friendship status if DIRECT chat
-  let canCall = false;
-  if (isDirect && chat.otherMemberUserIds && chatListMembers) {
+  const canCall = useMemo(() => {
+    if (!isDirect || !partnerId || !chatListMembers) return false;
     const partnerMember = chatListMembers.find(
       (member) => member.userId === partnerId,
-    ) as ChatMemberResponse;
-    if (partnerMember?.friendshipStatus === FriendshipStatus.ACCEPTED) {
-      canCall = true;
-    }
-  }
+    );
+    return partnerMember?.friendshipStatus === FriendshipStatus.ACCEPTED;
+  }, [isDirect, partnerId, chatListMembers]);
 
   // Check if user can join the call (call is active and in progress for this chat)
   const isCalling =
     callChatId === chat.id && callId && callStatus === CallStatus.IN_PROGRESS;
+
+  if (!chat) return null;
 
   const handleJoinCall = () => {
     if (isChannel) {
@@ -119,8 +120,6 @@ const Header: React.FC<ChatHeaderProps> = ({
     setActiveChatId(null);
     navigate("/", { replace: true });
   };
-
-  if (!chat) return null;
 
   return (
     <header className={clsx("chat-header")} style={{ zIndex: 2 }}>
@@ -151,15 +150,19 @@ const Header: React.FC<ChatHeaderProps> = ({
           <ChatAvatar chat={chat} type="header" isBlocked={isBlockedByMe} />
           <div id="chat-name" className="px-2">
             <h1 className="text-xl font-bold leading-tight">
-              {chat.type === ChatType.SAVED ? "Saved" : chat.name}
+              {chat.type === ChatType.SAVED
+                ? t("chat_header.saved")
+                : chat.name}
             </h1>
             {isDirect && !isOnline && lastSeen && (
               <span className="text-xs text-gray-400">
-                Last seen {formatTimeAgo(t, lastSeen)}
+                {t("chat_header.last_seen")} {formatTimeAgo(t, lastSeen)}
               </span>
             )}
             {chat.isDeleted && (
-              <h1 className="text-yellow-500/80">Has left the chat</h1>
+              <h1 className="text-yellow-500/80">
+                {t("chat_header.has_left_chat")}
+              </h1>
             )}
           </div>
         </motion.div>
@@ -180,7 +183,7 @@ const Header: React.FC<ChatHeaderProps> = ({
                     <GlassButton
                       active={isCalling}
                       onClick={handleJoinCall}
-                      text={isChannel ? "Join Broadcast" : "Join Call"}
+                      text={isChannel ? t("chat_header.join_broadcast") : t("chat_header.join_call")}
                       reversedIcon={
                         isDirect
                           ? "phone_callback"

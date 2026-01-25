@@ -221,6 +221,14 @@
     "join_channel": "Join Channel"
   },
 
+  "chat_header": {
+    "saved": "Saved",
+    "has_left_chat": "Has left the chat",
+    "last_seen": "Last seen",
+    "join_broadcast": "Join Broadcast",
+    "join_call": "Join Call"
+  },
+
   "chat_bar": {
     "placeholder": "Message...",
     "attach_file": "Attach file"

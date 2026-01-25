@@ -219,6 +219,14 @@
     "join_channel": "चैनल में शामिल हों"
   },
 
+  "chat_header": {
+    "saved": "सहेजा गया",
+    "has_left_chat": "चैट छोड़ चुका है",
+    "last_seen": "अंतिम बार देखा गया",
+    "join_broadcast": "प्रसारण में शामिल हों",
+    "join_call": "कॉल में शामिल हों"
+  },
+
   "chat_bar": {
     "placeholder": "संदेश...",
     "attach_file": "फ़ाइल संलग्न करें"

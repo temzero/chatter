@@ -32,8 +32,6 @@ export const MessageReadInfo: React.FC<MessageReadInfoProps> = React.memo(
       )
     );
 
-    console.log("readMembers", readMembers);
-
     // Filter read members based on readInfo setting
     const filteredReadMembers = useMemo(() => {
       if (readInfoSetting === MessageReadInfoOptions.NONE) {
@@ -55,7 +53,6 @@ export const MessageReadInfo: React.FC<MessageReadInfoProps> = React.memo(
     }, [readMembers, readInfoSetting, currentUserId]);
 
     const readMemberCount = filteredReadMembers.length;
-    console.log('filteredReadMembers', filteredReadMembers)
     // Calculate how many avatars fit
     useEffect(() => {
       const calculateVisible = () => {

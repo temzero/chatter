@@ -56,12 +56,12 @@ const CreateNewChat: React.FC = () => {
   return (
     <div
       className={clsx(
-        "flex flex-col justify-between w-full h-full relative overflow-hidden"
+        "flex flex-col justify-between w-full h-full relative overflow-hidden",
       )}
     >
       <div className="w-full h-full p-2">
         <AnimatePresence mode="wait">
-          {user && (
+          {user ? (
             <motion.div
               key={user.id}
               initial={{ opacity: 0, scale: 1.1 }}
@@ -76,14 +76,14 @@ const CreateNewChat: React.FC = () => {
                 "bg-(--card-bg-color)",
                 "custom-border rounded-lg",
                 "flex flex-col justify-between",
-                "h-full overflow-hidden p-2"
+                "h-full overflow-hidden p-2",
               )}
             >
               {user.isBlockedMe ? (
                 <div
                   className={clsx(
                     "flex-1 flex flex-col gap-2 items-center justify-center text-center",
-                    "text-red-500 p-6"
+                    "text-red-500 p-6",
                   )}
                 >
                   <i className="material-symbols-outlined text-8xl! rotate-90 opacity-60 select-none">
@@ -95,13 +95,13 @@ const CreateNewChat: React.FC = () => {
                 <>
                   <div
                     className={clsx(
-                      "flex-1 flex flex-col items-center justify-start gap-2 p-2 pt-4 overflow-y-auto"
+                      "flex-1 flex flex-col items-center justify-start gap-2 p-2 pt-4 overflow-y-auto",
                     )}
                   >
                     <div
                       className={clsx(
                         "border rounded-full! hover:shadow-xl hover:scale-110 transition-all",
-                        isUserOnline && "border-2 border-(--primary-green)"
+                        isUserOnline && "border-2 border-(--primary-green)",
                       )}
                     >
                       <Avatar
@@ -133,7 +133,7 @@ const CreateNewChat: React.FC = () => {
                           "-mt-1",
                           user.isBlockedByMe
                             ? "text-red-500"
-                            : "text-(--primary-green)"
+                            : "text-(--primary-green)",
                         )}
                       >
                         {user.isBlockedByMe
@@ -147,7 +147,7 @@ const CreateNewChat: React.FC = () => {
                     <div
                       className={clsx(
                         "w-full flex flex-col font-light my-2",
-                        "custom-border-t custom-border-b"
+                        "custom-border-t custom-border-b",
                       )}
                     >
                       <ContactInfoItem
@@ -180,7 +180,7 @@ const CreateNewChat: React.FC = () => {
                   {!isMe && (
                     <div
                       className={clsx(
-                        "w-full border-t-2 border-(--border-color)"
+                        "w-full border-t-2 border-(--border-color)",
                       )}
                     >
                       {user.isBlockedByMe ? (
@@ -188,7 +188,7 @@ const CreateNewChat: React.FC = () => {
                           className={clsx(
                             "w-full py-1 flex gap-1 items-center justify-center",
                             "hover:bg-(--primary-green)",
-                            "bg-red-500 text-white"
+                            "bg-red-500 text-white",
                           )}
                           onClick={() =>
                             openModal(ModalType.UNBLOCK_USER, {
@@ -218,7 +218,7 @@ const CreateNewChat: React.FC = () => {
                             <button
                               className={clsx(
                                 "w-full py-1 flex gap-1 items-center justify-center",
-                                "hover:bg-(--primary-green)"
+                                "hover:bg-(--primary-green)",
                               )}
                               onClick={() => createOrGetDirectChat(user.id)}
                             >
@@ -235,6 +235,22 @@ const CreateNewChat: React.FC = () => {
                 </>
               )}
             </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, scale: 5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{
+                type: "spring",
+                stiffness: 300,
+                damping: 20,
+                mass: 0.6,
+              }}
+              className="w-full h-full flex items-center justify-center"
+            >
+              <span className="material-symbols-outlined filled text-7xl! opacity-40">
+                person_search
+              </span>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
@@ -244,7 +260,7 @@ const CreateNewChat: React.FC = () => {
         className={clsx(
           "flex flex-col p-3 gap-2",
           "border-2 border-b-0 border-(--border-color)",
-          "bg-(--card-bg-color) rounded-t-xl"
+          "bg-(--card-bg-color) rounded-t-xl",
         )}
       >
         {error && (
@@ -265,7 +281,7 @@ const CreateNewChat: React.FC = () => {
           className={clsx(
             "bg-(--primary-green) py-1 w-full",
             "flex gap-2 items-center justify-center",
-            "text-white rounded"
+            "text-white rounded",
           )}
           disabled={loading || !query}
         >
