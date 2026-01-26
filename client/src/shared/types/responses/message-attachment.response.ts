@@ -22,3 +22,7 @@ export interface AttachmentResponse {
   createdAt: Date | string;
   updatedAt: Date | string;
 }
+
+export interface ProcessedAttachment extends AttachmentResponse {
+  file?: File; // Keep reference to original file for upload
+}

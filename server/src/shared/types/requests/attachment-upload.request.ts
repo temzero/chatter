@@ -1,16 +1,17 @@
-import { AttachmentType } from '@shared/types/enums/attachment-type.enum';
+import { AttachmentType } from '@/shared/types/enums/attachment-type.enum';
 
 export interface AttachmentUploadRequest {
   url: string;
+  filename: string;
 
   type: AttachmentType;
-  filename: string;
-  size?: number;
+  size: number;
 
-  mimeType?: string;
-  width?: number;
-  height?: number;
-  duration?: number;
+  thumbnailUrl?: string | null;
+  mimeType?: string | null;
+  width?: number | null;
+  height?: number | null;
+  duration?: number | null;
 
   createdAt?: string;
 }

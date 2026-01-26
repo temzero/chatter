@@ -13,7 +13,6 @@ import { useAudioDiskDrag } from "@/common/hooks/keyEvent/useAudioDiskDrag";
 import musicDiskCover from "@/assets/image/disk.png";
 import mediaManager from "@/services/media/mediaManager";
 
-
 // -------------------- useReducer --------------------
 interface AudioState {
   isPlaying: boolean;
@@ -160,7 +159,7 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
 
       audioRef.current.currentTime = Math.min(
         Math.max(newTime, 0),
-        state.duration
+        state.duration,
       );
       dispatch({ type: "setTime", payload: audioRef.current.currentTime });
     };
@@ -196,7 +195,7 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
           ?.replace(/\.[^/.]+$/, "")
           .split("")
           .join(" ") || "",
-      [fileName]
+      [fileName],
     );
 
     // -------------------- JSX --------------------
@@ -245,8 +244,18 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
                     d="M100,100 m0,-85 a85,85 0 1,1 0,170 a85,85 0 1,1 0,-170"
                   />
                 </defs>
+                {/* <text
+                  fill="white"
+                  fontSize="11"
+                  opacity="0.8"
+                  textAnchor="start"
+                  transform="rotate(-90 100 100)"
+                > */}
                 <text
                   fill="white"
+                  stroke="black" /* Border color */
+                  strokeWidth="0.5" /* Border thickness */
+                  paintOrder="stroke" /* Draw stroke behind fill */
                   fontSize="11"
                   opacity="0.8"
                   textAnchor="start"
@@ -305,7 +314,7 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
         </audio>
       </div>
     );
-  }
+  },
 );
 
 export default CustomAudioDiskPlayer;

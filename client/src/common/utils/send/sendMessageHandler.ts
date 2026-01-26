@@ -1,8 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { chatWebSocketService } from "@/services/websocket/chatWebsocketService";
 import { useMessageStore } from "@/stores/messageStore";
-import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
-import { determineAttachmentType } from "@/common/utils/message/determineAttachmentType";
+import { AttachmentResponse, ProcessedAttachment } from "@/shared/types/responses/message-attachment.response";
 import { handleError } from "@/common/utils/error/handleError";
 import { uploadFilesToSupabase } from "@/services/supabase/uploadFilesToSupabase";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
@@ -10,47 +9,19 @@ import { CreateMessageRequest } from "@/shared/types/requests/send-message.reque
 import { AttachmentUploadRequest } from "@/shared/types/requests/attachment-upload.request";
 import { getCurrentUserId } from "@/stores/authStore";
 
-function toOptimisticAttachmentResponseFromFile(
-  file: File,
-  previewUrl: string,
-  messageId: string,
-  chatId: string,
-  now: string
-): AttachmentResponse {
-  return {
-    id: uuidv4(),
-    messageId,
-    chatId,
-    url: previewUrl,
-    type: determineAttachmentType(file),
-    filename: file.name,
-    size: file.size,
-    mimeType: file.type || null,
-    width: null,
-    height: null,
-    duration: null,
-    thumbnailUrl: null,
-    metadata: null,
-    createdAt: now,
-    updatedAt: now,
-  };
-}
-
-export async function handleSendMessage({
+export async function sendMessage({
   chatId,
   myMemberId,
-  inputRef,
-  attachments,
-  filePreviewUrls,
+  content,
+  processedAttachments,
   replyToMessageId,
   onSuccess,
   onError,
 }: {
   chatId: string;
   myMemberId: string;
-  inputRef: React.RefObject<HTMLTextAreaElement>;
-  attachments: File[];
-  filePreviewUrls: string[];
+  content?: string;
+  processedAttachments: ProcessedAttachment[];
   replyToMessageId?: string | null;
   onSuccess?: () => void;
   onError?: (error: unknown) => void;
@@ -70,27 +41,28 @@ export async function handleSendMessage({
     return;
   }
 
-  const inputValue = inputRef.current?.value || "";
-  const trimmedInput = inputValue.trim();
-
-  if (!(trimmedInput || attachments.length)) {
-    return;
-  }
-  if (inputRef.current) inputRef.current.value = "";
-
   const now = new Date().toISOString();
   const messageId = uuidv4();
 
-  // Create optimistic UI message
-  const optimisticAttachments: AttachmentResponse[] = attachments.map(
-    (file, index) =>
-      toOptimisticAttachmentResponseFromFile(
-        file,
-        filePreviewUrls[index],
-        messageId,
-        chatId,
-        new Date(Date.now() + index).toISOString()
-      )
+  // Process attachments in one operation
+  const { filesToUpload, optimisticAttachments } = processedAttachments.reduce(
+    (acc, attachment) => {
+      // Extract file for upload if present
+      if (attachment.file) {
+        acc.filesToUpload.push(attachment.file);
+      }
+
+      // Create optimistic attachment without the file reference
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { file, ...attachmentWithoutFile } = attachment;
+      acc.optimisticAttachments.push(attachmentWithoutFile);
+
+      return acc;
+    },
+    {
+      filesToUpload: [] as File[],
+      optimisticAttachments: [] as AttachmentResponse[],
+    },
   );
 
   const optimisticMessage = {
@@ -101,7 +73,7 @@ export async function handleSendMessage({
       displayName: "Me",
       avatarUrl: "",
     },
-    content: trimmedInput || null,
+    content,
     status: MessageStatus.SENDING,
     isPinned: false,
     pinnedAt: null,
@@ -123,21 +95,26 @@ export async function handleSendMessage({
   let uploadedAttachments: AttachmentUploadRequest[] = [];
 
   try {
-    uploadedAttachments = await uploadFilesToSupabase(attachments);
+    // Upload only the files that exist
+    if (filesToUpload.length > 0) {
+      uploadedAttachments = await uploadFilesToSupabase(filesToUpload);
+    }
 
     const messagePayload: CreateMessageRequest = {
       id: messageId,
       chatId,
       memberId: myMemberId,
-      content: trimmedInput || undefined,
+      content,
       replyToMessageId,
       attachments: uploadedAttachments,
     };
 
     chatWebSocketService.sendMessage(messagePayload);
 
-    // Revoke previews
-    filePreviewUrls.forEach((url) => URL.revokeObjectURL(url));
+    // Revoke thumbnail URLs from processed attachments
+    processedAttachments.forEach((attachment) => {
+      if (attachment.thumbnailUrl) URL.revokeObjectURL(attachment.thumbnailUrl);
+    });
 
     onSuccess?.();
   } catch (error) {
@@ -145,7 +122,11 @@ export async function handleSendMessage({
       status: MessageStatus.FAILED,
     });
 
-    filePreviewUrls.forEach((url) => URL.revokeObjectURL(url));
+    // Clean up URLs on error
+    processedAttachments.forEach((attachment) => {
+      if (attachment.thumbnailUrl) URL.revokeObjectURL(attachment.thumbnailUrl);
+    });
+
     onError?.(error);
 
     handleError(error, "Failed to send message");

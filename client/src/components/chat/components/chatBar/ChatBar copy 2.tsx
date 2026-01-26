@@ -14,7 +14,6 @@ import useTypingIndicator from "@/common/hooks/useTypingIndicator";
 import ChatBarLeftIcon from "./ChatBarLeftIcon";
 import ChatBarInput from "./ChatBarInput";
 import ChatBarSendButton from "./ChatBarSendButton";
-import { useAttachmentProcessor } from "@/common/hooks/useAttachmentProcessor";
 
 interface ChatBarProps {
   chatId: string;
@@ -30,25 +29,22 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
 
   const inputRef = useRef<HTMLTextAreaElement>(null!);
   const containerRef = useRef<HTMLDivElement>(null!);
-
+  
   const [isMessageSent, setIsMessageSent] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const [filePreviewUrls, setFilePreviewUrls] = useState<string[]>([]);
   const [hasTextContent, setHasTextContent] = useState(false);
 
-  // Use the attachment processor hook
-  const {
-    processedAttachments,
-    isProcessing,
-    processAttachments,
-    removeAttachment,
-  } = useAttachmentProcessor();
-
   const { clearTypingState } = useTypingIndicator(inputRef, chatId ?? null);
-  const hasAttachment = processedAttachments.length > 0;
-  const showSendButton = hasTextContent || hasAttachment || !isProcessing;
+  const hasAttachment = attachedFiles.length > 0;
+  const showSendButton = hasTextContent || hasAttachment;
 
   useEffect(() => {
     if (chatId && inputRef.current) {
       const draft = getDraftMessage(chatId);
+
+      if (draft) console.log("DRAFT", draft);
+
       inputRef.current.value = draft || "";
       setHasTextContent(!!draft?.trim());
       requestAnimationFrame(() => {
@@ -74,17 +70,19 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
     }
   }, [replyToMessageId]);
 
+  // Replace this useEffect for "/" focus
   useKeyDown(
     (e) => {
       if (document.activeElement !== inputRef.current) {
-        e.preventDefault();
+        e.preventDefault(); // prevent "/" when first focus
         inputRef.current?.focus();
       }
     },
     ["/"],
-    { preventDefault: false },
+    { preventDefault: false }, // will not block default typing
   );
 
+  // Replace this useEffect for ContextMenu key to open file input
   useKeyDown(() => {
     if (document.activeElement === inputRef.current) {
       const fileInput = document.querySelector(
@@ -115,36 +113,38 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
     setHasTextContent(!!value.trim());
     updateInputHeight();
 
-    if (hasAttachment) {
-      resetPreview();
-    } else {
-      detectFromText(value);
-    }
+    // 🔥 Let the hook handle URL detection + debounce
+    detectFromText(value);
 
     if (chatId) {
       setDraftMessage(chatId, value);
     }
   };
 
-  const handleSend = useCallback(async () => {
+  const handleSend = useCallback(() => {
     if (!(hasTextContent || hasAttachment)) return;
 
     resetPreview();
 
     // Get content before clearing
     const content = inputRef.current?.value || "";
+    const filesToSend = [...attachedFiles];
+    const previewUrlsToSend = [...filePreviewUrls];
 
     // Clear UI immediately for better UX
     if (inputRef.current) inputRef.current.value = "";
+    setAttachedFiles([]);
+    setFilePreviewUrls([]);
     setHasTextContent(false);
     updateInputHeight();
 
-    // Send message using handler directly with processed attachments
+    // Send message using handler directly
     sendMessage({
       chatId,
       myMemberId,
       content,
-      processedAttachments: processedAttachments, // Pass processed data
+      attachments: filesToSend,
+      filePreviewUrls: previewUrlsToSend,
       replyToMessageId,
       onSuccess: () => {
         clearTypingState();
@@ -158,7 +158,8 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
     hasTextContent,
     hasAttachment,
     resetPreview,
-    processedAttachments,
+    attachedFiles,
+    filePreviewUrls,
     chatId,
     myMemberId,
     replyToMessageId,
@@ -193,45 +194,45 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
     inputRef.current?.focus();
   }, []);
 
-  const handleFileSelect = useCallback(
-    async (fileList: FileList) => {
-      const newFiles = Array.from(fileList);
-      if (newFiles.length === 0) return;
+  const handleFileSelect = useCallback((fileList: FileList) => {
+    const newFiles = Array.from(fileList);
+    if (newFiles.length === 0) return;
 
-      try {
-        // Process the files using the attachment processor
-        await processAttachments(newFiles, chatId);
-      } catch (error) {
-        console.error("Error processing attachments:", error);
-        // Handle error (show toast, etc.)
+    setAttachedFiles((prev) => [...prev, ...newFiles]);
+
+    const previewPromises = newFiles.map((file) => {
+      if (file.type.startsWith("video/")) {
+        // ✅ Create a blob URL immediately (wrap in Promise for consistency)
+        return Promise.resolve(URL.createObjectURL(file));
+      } else {
+        // ✅ Read image or other file as Data URL
+        return new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        });
       }
-    },
-    [chatId, processAttachments],
-  );
+    });
 
-  // Update the paste handler to use processed attachments
+    Promise.all(previewPromises).then((urls) => {
+      setFilePreviewUrls((prev) => [...prev, ...urls]);
+    });
+  }, []);
+
   usePasteImage({ inputRef, onFileSelect: handleFileSelect });
 
   return (
     <div className={clsx("chat-bottom", replyToMessageId && "has-reply")}>
-      {/* File Attachment Previews using processed data */}
-      {processedAttachments.length > 0 && (
+      {/* File Attachment Previews */}
+      {filePreviewUrls.length > 0 && (
         <AttachmentImportedPreview
-          processedAttachments={processedAttachments}
+          files={attachedFiles}
+          urls={filePreviewUrls}
           onRemove={(index: number) => {
-            const attachment = processedAttachments[index];
-            if (attachment) {
-              removeAttachment(attachment.id);
-            }
+            setAttachedFiles((prev) => prev.filter((_, i) => i !== index));
+            setFilePreviewUrls((prev) => prev.filter((_, i) => i !== index));
           }}
         />
-      )}
-
-      {/* Processing indicator */}
-      {isProcessing && (
-        <div className="px-4 py-2 text-sm text-gray-500">
-          Processing attachments...
-        </div>
       )}
 
       <div className="flex w-full items-end">
@@ -240,10 +241,10 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
           hasAttachment={hasAttachment}
           onFileSelect={handleFileSelect}
         />
+        {/* avoid ChatBarInput expand beyond send button */}
         <div className="flex flex-col flex-1 min-w-0">
           <AnimatePresence>
-            {/* Only show link preview if there are no attachments */}
-            {showPreview && detectedUrl && !hasAttachment && (
+            {showPreview && detectedUrl && (
               <div className="px-1">
                 <LinkPreviewCard
                   url={detectedUrl || ""}

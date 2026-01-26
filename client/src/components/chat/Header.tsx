@@ -149,7 +149,7 @@ const Header: React.FC<ChatHeaderProps> = ({
         >
           <ChatAvatar chat={chat} type="header" isBlocked={isBlockedByMe} />
           <div id="chat-name" className="px-2">
-            <h1 className="text-xl font-bold leading-tight">
+            <h1 className="text-xl font-bold leading-none px-2 py-1 rounded-full backdrop-blur">
               {chat.type === ChatType.SAVED
                 ? t("chat_header.saved")
                 : chat.name}

@@ -8,6 +8,10 @@ import App from "./App";
 import bootstrapApp from "./common/hooks/app/bootstrap";
 import LoadAppErrorPage from "./pages/error/LoadAppErrorPage";
 
+// Add Buffer polyfill for music-metadata-browser
+import { Buffer } from 'buffer';
+globalThis.Buffer = Buffer;
+
 const currentPath = window.location.pathname;
 const isPublicRoute = currentPath.startsWith("/auth/");
 

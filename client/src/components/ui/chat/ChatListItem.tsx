@@ -73,7 +73,7 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
       const position = calculateContextMenuPosition(
         { x: e.clientX, y: e.clientY },
         menuWidth,
-        menuHeight
+        menuHeight,
       );
 
       setContextMenu(position.position);
@@ -95,131 +95,120 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
       }
     };
 
-    const getUserItemClass = () => {
-      const baseClasses =
-        "relative flex items-center w-full h-24 gap-3 p-3 transition-all duration-300 ease-in-out custom-border-b cursor-pointer";
-      const activeClasses = isActive
-        ? "bg-(--primary-green)"
-        : "hover:bg-(--hover-color)";
-      return `${baseClasses} ${activeClasses}`;
-    };
-
     return (
-      <>
-        <div
-          className={getUserItemClass()}
-          onClick={() => setActiveChatId(chatId)}
-          onMouseDown={handleMouseDown}
-          onContextMenu={handleContextMenu}
-        >
-          <OnlineDot
-            isOnline={isOnline}
-            className={`absolute top-1/2 left-[3px] -translate-y-1/2`}
-          />
-          <ChatAvatar chat={chat} type="sidebar" isBlocked={isBlockedByMe} />
+      <div
+        className={`chat-list-item ${isActive ? "active" : ""}`}
+        onClick={() => setActiveChatId(chatId)}
+        onMouseDown={handleMouseDown}
+        onContextMenu={handleContextMenu}
+      >
+        <OnlineDot
+          isOnline={isOnline}
+          className={`absolute top-1/2 left-[3px] -translate-y-1/2`}
+        />
+        <ChatAvatar chat={chat} type="sidebar" isBlocked={isBlockedByMe} />
 
-          {!isCompact && (
-            <div className="flex flex-col flex-1 min-w-0 gap-1">
-              <div className="flex items-center justify-between">
-                <h1
-                  className={`text-lg font-semibold whitespace-nowrap text-ellipsis flex-1 min-w-0 ${
-                    chat.isDeleted ? "text-yellow-500/80" : ""
-                  }`}
-                >
-                  {chat.isDeleted && <span className="font-bold mr-1">!</span>}
-                  {chat.name}
-                </h1>
+        {!isCompact && (
+          <div className="flex flex-col flex-1 min-w-0 gap-1">
+            <div className="flex items-center justify-between">
+              <h1
+                className={`text-lg font-semibold whitespace-nowrap text-ellipsis flex-1 min-w-0 ${
+                  chat.isDeleted ? "text-yellow-500/80" : ""
+                }`}
+              >
+                {chat.isDeleted && <span className="font-bold mr-1">!</span>}
+                {chat.name}
+              </h1>
 
-                <div className="flex gap-1 text-xs items-center shrink-0 ml-2">
-                  <p className="whitespace-nowrap opacity-50">
-                    {formatTimeAgo(
-                      t,
-                      (lastMessage?.createdAt as string | Date | undefined) ??
-                        (chat.updatedAt as string | Date)
+              <div className="flex gap-1 text-xs items-center shrink-0 ml-2">
+                <p className="whitespace-nowrap opacity-50">
+                  {formatTimeAgo(
+                    t,
+                    (lastMessage?.createdAt as string | Date | undefined) ??
+                      (chat.updatedAt as string | Date),
+                  )}
+                </p>
+                <div className="flex items-center absolute top-1.5 right-2">
+                  {/* Muted icon */}
+                  <AnimatePresence>
+                    {chat.mutedUntil && (
+                      <motion.div
+                        key="muted"
+                        initial={{ opacity: 0, scale: 3 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.1 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <span className="material-symbols-outlined filled text-[18px]! text-yellow-500">
+                          notifications_off
+                        </span>
+                      </motion.div>
                     )}
-                  </p>
-                  <div className="flex items-center absolute top-1.5 right-2">
-                    {/* Muted icon */}
+
+                    {/* Pinned icon */}
                     <AnimatePresence>
-                      {chat.mutedUntil && (
+                      {chat.pinnedAt && (
                         <motion.div
-                          key="muted"
+                          key="pinned"
                           initial={{ opacity: 0, scale: 3 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.1 }}
                           transition={{ duration: 0.3 }}
                         >
-                          <span className="material-symbols-outlined filled text-[18px]! text-yellow-500">
-                            notifications_off
+                          <span className="material-symbols-outlined filled text-[20px]! rotate-45 text-red-500">
+                            keep
                           </span>
                         </motion.div>
                       )}
-
-                      {/* Pinned icon */}
-                      <AnimatePresence>
-                        {chat.pinnedAt && (
-                          <motion.div
-                            key="pinned"
-                            initial={{ opacity: 0, scale: 3 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.1 }}
-                            transition={{ duration: 0.3 }}
-                          >
-                            <span className="material-symbols-outlined filled text-[20px]! rotate-45 text-red-500">
-                              keep
-                            </span>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
                     </AnimatePresence>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between min-h-6">
-                <div className="flex-1 min-w-0 mr-2">
-                  <AnimatePresence mode="wait" initial={false}>
-                    {typingUsers.length > 0 ? (
-                      <motion.div
-                        key="typing"
-                        initial={{ opacity: 0, y: 4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -4 }}
-                        transition={{ duration: 0.2 }}
-                        className="min-w-0"
-                      >
-                        <SimpleTypingIndicator
-                          chatId={chatId}
-                          userIds={typingUsers}
-                        />
-                      </motion.div>
-                    ) : (
-                      <ChatListItemMessage
-                        chatId={chatId}
-                        lastMessage={lastMessage}
-                        unreadMessagesCount={unreadMessagesCount}
-                        chatType={chat.type}
-                        currentUserId={currentUserId}
-                      />
-                    )}
                   </AnimatePresence>
                 </div>
+              </div>
+            </div>
 
-                <AnimatePresence>
-                  {!isActive && unreadMessagesCount > 0 && (
+            <div className="flex items-center justify-between min-h-6">
+              <div className="flex-1 min-w-0 mr-2">
+                <AnimatePresence mode="wait" initial={false}>
+                  {typingUsers.length > 0 ? (
                     <motion.div
-                      key="unread-count"
-                      className="shrink-0 font-semibold text-white bg-red-500 rounded-full! text-xs flex items-center justify-center p-1 h-4"
-                      {...messageAnimations.messagesCount}
+                      key="typing"
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.2 }}
+                      className="min-w-0"
                     >
-                      {unreadMessagesCount}
+                      <SimpleTypingIndicator
+                        chatId={chatId}
+                        userIds={typingUsers}
+                      />
                     </motion.div>
+                  ) : (
+                    <ChatListItemMessage
+                      chatId={chatId}
+                      lastMessage={lastMessage}
+                      unreadMessagesCount={unreadMessagesCount}
+                      chatType={chat.type}
+                      currentUserId={currentUserId}
+                    />
                   )}
                 </AnimatePresence>
               </div>
+
+              <AnimatePresence>
+                {!isActive && unreadMessagesCount > 0 && (
+                  <motion.div
+                    key="unread-count"
+                    className="shrink-0 font-semibold text-white bg-red-500 rounded-full! text-xs flex items-center justify-center p-1 h-4"
+                    {...messageAnimations.messagesCount}
+                  >
+                    {unreadMessagesCount}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {contextMenu && (
           <ChatListItemContextMenu
@@ -230,9 +219,9 @@ const ChatListItem: React.FC<ChatListItemProps> = React.memo(
             onClose={handleCloseContextMenu}
           />
         )}
-      </>
+      </div>
     );
-  }
+  },
 );
 
 export default React.memo(ChatListItem);

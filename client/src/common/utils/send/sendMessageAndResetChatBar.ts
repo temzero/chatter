@@ -1,13 +1,14 @@
 // --- helper function outside component ---
-import { handleSendMessage } from "@/common/utils/message/sendMessageHandler";
+import { sendMessage } from "@/common/utils/send/sendMessageHandler";
 import { getCloseModal } from "@/stores/modalStore";
 
 interface SendMessageAndResetParams {
   chatId: string;
   myMemberId: string;
-  inputRef: React.RefObject<HTMLTextAreaElement>;
+  content?: string;
   attachments: File[];
   filePreviewUrls: string[];
+  
   replyToMessageId?: string | null;
   clearTypingState: () => void;
   setDraftMessage: (chatId: string, message: string) => void;
@@ -21,7 +22,7 @@ interface SendMessageAndResetParams {
 export async function sendMessageAndReset({
   chatId,
   myMemberId,
-  inputRef,
+  content,
   attachments,
   filePreviewUrls,
   replyToMessageId,
@@ -36,10 +37,10 @@ export async function sendMessageAndReset({
   const closeModal = getCloseModal();
 
   try {
-    handleSendMessage({
+    sendMessage({
       chatId,
       myMemberId,
-      inputRef,
+      content,
       attachments,
       filePreviewUrls,
       replyToMessageId,
@@ -52,13 +53,10 @@ export async function sendMessageAndReset({
       },
     });
 
-    // reset UI state
-    if (inputRef.current) inputRef.current.value = "";
     setAttachedFiles([]);
     setFilePreviewUrls([]);
     setHasTextContent(false);
     updateInputHeight();
-    inputRef.current?.focus();
   } catch (err) {
     console.error("Failed to send message:", err);
   }
