@@ -117,6 +117,7 @@ const CustomVideoPlayer = ({
     >
       <video
         ref={videoRef}
+        poster={videoAttachment.thumbnailUrl || undefined}
         className="w-full h-full object-cover"
         controls={false}
         onClick={handleClick}

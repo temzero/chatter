@@ -28,7 +28,7 @@ export const RenderModalAttachment = ({
   const [isHorizontalAspectRatio, setIsHorizontalAspectRatio] = useState<
     boolean | null
   >(null);
-  
+
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const audioPlayerRef = useRef<AudioPlayerRef | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -82,6 +82,7 @@ export const RenderModalAttachment = ({
         <motion.video
           ref={videoRef}
           src={attachment.url}
+          poster={attachment.thumbnailUrl || undefined}
           controls
           onEnded={() => {
             if (onMediaEnd) onMediaEnd();
@@ -94,8 +95,8 @@ export const RenderModalAttachment = ({
             isHorizontalAspectRatio === null
               ? ""
               : isHorizontalAspectRatio
-              ? "w-[80vw] max-h-[80vh]"
-              : "h-[93vh] max-w-[80vw]"
+                ? "w-[80vw] max-h-[80vh]"
+                : "h-[93vh] max-w-[80vw]"
           }`}
           draggable="false"
           animate={mediaViewerAnimations.rotation(rotation)}
@@ -108,6 +109,7 @@ export const RenderModalAttachment = ({
           attachmentType={AttachmentType.AUDIO}
           mediaUrl={attachment.url}
           fileName={attachment.filename ?? ""}
+          cdImageUrl={attachment.thumbnailUrl ?? ""}
           ref={audioPlayerRef}
           goNext={onMediaEnd}
         />
@@ -142,7 +144,9 @@ export const RenderModalAttachment = ({
       );
 
     case AttachmentType.LINK:
-      return <LinkPreviewAttachment attachment={attachment} className="w-[50%]" />;
+      return (
+        <LinkPreviewAttachment attachment={attachment} className="w-[50%]" />
+      );
 
     default:
       return (

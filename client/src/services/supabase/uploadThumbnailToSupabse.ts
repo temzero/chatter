@@ -1,43 +1,41 @@
-import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import SupabaseService, { attachmentsBucket } from "./supabaseService";
 
-
-/**
- * Upload a single thumbnail to Supabase
- */
 export async function uploadThumbnailToSupabase(
-  thumbnailUrl: string,
-  filename: string,
+  fileName: string,
+  thumbnailBlobUrl?: string,
 ): Promise<string | null> {
+  if (!thumbnailBlobUrl) return null
+  console.log("uploadThumbnailToSupabase thumbnailBlobUrl", thumbnailBlobUrl);
   try {
-    // Convert blob URL to Blob
-    const response = await fetch(thumbnailUrl);
-    const thumbnailBlob = await response.blob();
-
-    // Convert Blob to File
-    const sanitizedFilename = filename.replace(/[^a-zA-Z0-9-_.]/g, "_");
+    const sanitizedFilename = fileName.replace(/[^a-zA-Z0-9-_.]/g, "_");
     const timestamp = Date.now();
-    const thumbnailFile = new File(
-      [thumbnailBlob],
-      `thumb-${sanitizedFilename}.jpg`,
-      {
-        type: thumbnailBlob.type || "image/jpeg",
-        lastModified: Date.now(),
-      },
-    );
 
-    const thumbnailPath = `${AttachmentType.IMAGE}/${timestamp}-thumb-${sanitizedFilename}.jpg`;
+    // Convert blob URL to Blob and detect actual type
+    const response = await fetch(thumbnailBlobUrl);
+    const blob = await response.blob();
 
-    const uploadedUrl = await SupabaseService.uploadFile(
-      thumbnailFile,
-      attachmentsBucket, // Same bucket as files
-      thumbnailPath,
+    // Get actual MIME type from blob
+    const mimeType = blob.type || "image/jpeg";
+    const extension = mimeType.split("/")[1] || "jpg"; // image/jpeg → jpeg
+
+    const file = new File([blob], `thumb-${sanitizedFilename}`, {
+      type: mimeType,
+      lastModified: timestamp,
+    });
+
+    // Use correct extension from actual blob type
+    const filePath = `thumbnails/${timestamp}-thumb-${sanitizedFilename}.${extension}`;
+
+    const url = await SupabaseService.uploadFile(
+      file,
+      attachmentsBucket,
+      filePath,
       false,
     );
 
-    return uploadedUrl;
-  } catch (thumbnailError) {
-    console.warn(`Failed to upload thumbnail for ${filename}:`, thumbnailError);
+    return url;
+  } catch (error) {
+    console.warn(`Failed to upload thumbnail for ${fileName}:`, error);
     return null;
   }
 }

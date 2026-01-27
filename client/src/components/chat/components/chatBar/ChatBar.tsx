@@ -40,11 +40,13 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
     isProcessing,
     processAttachments,
     removeAttachment,
+    clearAllAttachments,
+    setProcessedAttachments
   } = useAttachmentProcessor();
 
   const { clearTypingState } = useTypingIndicator(inputRef, chatId ?? null);
   const hasAttachment = processedAttachments.length > 0;
-  const showSendButton = hasTextContent || hasAttachment || !isProcessing;
+  const showSendButton = hasTextContent || hasAttachment;
 
   useEffect(() => {
     if (chatId && inputRef.current) {
@@ -133,20 +135,24 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
 
     // Get content before clearing
     const content = inputRef.current?.value || "";
+    const attachmentsToSend = [...processedAttachments];
 
     // Clear UI immediately for better UX
     if (inputRef.current) inputRef.current.value = "";
     setHasTextContent(false);
     updateInputHeight();
+    setProcessedAttachments([])
+    // clearAllAttachments();
 
     // Send message using handler directly with processed attachments
     sendMessage({
       chatId,
       myMemberId,
       content,
-      processedAttachments: processedAttachments, // Pass processed data
+      processedAttachments: attachmentsToSend, // Pass processed data
       replyToMessageId,
       onSuccess: () => {
+        // clearAllAttachments();
         clearTypingState();
         setDraftMessage(chatId, "");
         setIsMessageSent(true);
@@ -154,18 +160,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
         setTimeout(() => setIsMessageSent(false), 200);
       },
     });
-  }, [
-    hasTextContent,
-    hasAttachment,
-    resetPreview,
-    processedAttachments,
-    chatId,
-    myMemberId,
-    replyToMessageId,
-    clearTypingState,
-    setDraftMessage,
-    closeModal,
-  ]);
+  }, [hasTextContent, hasAttachment, resetPreview, processedAttachments, setProcessedAttachments, chatId, myMemberId, replyToMessageId, clearTypingState, setDraftMessage, closeModal]);
 
   const handleKeyDown = useCallback(
     async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -218,6 +213,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
       {processedAttachments.length > 0 && (
         <AttachmentImportedPreview
           processedAttachments={processedAttachments}
+          isProcessing={isProcessing}
           onRemove={(index: number) => {
             const attachment = processedAttachments[index];
             if (attachment) {
@@ -225,13 +221,6 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
             }
           }}
         />
-      )}
-
-      {/* Processing indicator */}
-      {isProcessing && (
-        <div className="px-4 py-2 text-sm text-gray-500">
-          Processing attachments...
-        </div>
       )}
 
       <div className="flex w-full items-end">
@@ -264,10 +253,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
           />
         </div>
 
-        <ChatBarSendButton
-          visible={showSendButton}
-          onClick={handleSend}
-        />
+        <ChatBarSendButton visible={showSendButton} onClick={handleSend} />
       </div>
     </div>
   );

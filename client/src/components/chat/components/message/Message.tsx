@@ -61,6 +61,7 @@ const Message: React.FC<MessageProps> = ({
   const readInfoSetting = useReadInfo();
 
   const attachments = getMessageAttachments(message.chatId, message.id);
+  // console.log("message's attachments", attachments);
   const attachmentLength = attachments.length;
 
   const isFocus = useIsMessageFocus(messageId);

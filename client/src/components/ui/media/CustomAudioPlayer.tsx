@@ -10,11 +10,11 @@ import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { formatDuration } from "@/common/utils/format/formatDuration";
 import mediaManager from "@/services/media/mediaManager";
 
-
 interface CustomAudioPlayerProps {
   mediaUrl: string;
-  fileName?: string;
   attachmentType: AttachmentType.AUDIO | AttachmentType.VOICE;
+  thumbnailUrl?: string;
+  fileName?: string;
   isDisplayName?: boolean;
   type?: string;
   isCompact?: boolean;
@@ -31,13 +31,14 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
   (
     {
       mediaUrl,
-      fileName,
       attachmentType,
+      thumbnailUrl,
+      fileName,
       isDisplayName = true,
       isCompact = false,
       onOpenModal,
     },
-    ref
+    ref,
   ) => {
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -124,20 +125,54 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
       <div
         className={clsx(
           "w-full p-2 flex items-center custom-border-b overflow-hidden",
-          isCompact ? "max-w-60px" : "gap-1"
+          isCompact ? "max-w-60px" : "gap-1",
         )}
       >
-        <button
+        {/* <button
           onClick={togglePlayPause}
-          className="rounded-full! hover:opacity-70"
+          className={clsx(
+            "relative overflow-hidden hover:opacity-70 w-12 h-12", // Added truncate, whitespace-nowrap, min-w-0
+            thumbnailUrl &&
+              "rounded-lg! border-2 border-(--input-border-color)",
+          )}
+          style={{
+            backgroundImage: `url(${thumbnailUrl})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
         >
           <i
             className={clsx(
               "material-symbols-outlined",
-              isCompact ? "text-3xl!" : "text-4xl!"
+              isCompact ? "text-3xl!" : "text-4xl!",
             )}
+            style={{ zIndex: 1 }}
           >
             {isPlaying ? "pause_circle" : "play_circle"}
+          </i>
+        </button> */}
+        <button
+          onClick={togglePlayPause}
+          className={clsx(
+            "relative w-12 h-12 rounded-full!",
+            "overflow-hidden hover:opacity-70 w-12 h-12 border-2 border-(--input-border-color)",
+          )}
+        >
+          {thumbnailUrl && (
+            <img
+              src={thumbnailUrl}
+              className="absolute inset-0 w-full h-full object-fill!"
+              alt=""
+            />
+          )}
+
+          <i
+            className={clsx(
+              "material-symbols-outlined filled relative z-10",
+              isCompact ? "text-3xl!" : "text-4xl!",
+            )}
+          >
+            {isPlaying ? "pause" : "play_arrow"}
           </i>
         </button>
 
@@ -150,8 +185,8 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
               {attachmentType === AttachmentType.AUDIO && (
                 <i
                   className={clsx(
-                    "material-symbols-outlined flex-shrink-0", // Added flex-shrink-0
-                    isCompact && "text-xl!"
+                    "material-symbols-outlined shrink-0", // Added flex-shrink-0
+                    isCompact && "text-xl!",
                   )}
                 >
                   music_note
@@ -160,7 +195,7 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
               <h1
                 className={clsx(
                   "truncate whitespace-nowrap min-w-0", // Added truncate, whitespace-nowrap, min-w-0
-                  isCompact && "text-xs"
+                  isCompact && "text-xs",
                 )}
                 title={fileName} // Add title for tooltip on hover
               >
@@ -193,7 +228,7 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
                   background: `linear-gradient(to right, var(--primary-green) ${progress}%, gray ${progress}%)`,
                 }}
               />
-              <div className="flex text-xs opacity-50 whitespace-nowrap flex-shrink-0">
+              <div className="flex text-xs opacity-50 whitespace-nowrap shrink-0">
                 {currentTime > 0 && (
                   <span>
                     {formatDuration(currentTime)}
@@ -207,7 +242,7 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
         </div>
       </div>
     );
-  }
+  },
 );
 
 const getAudioType = (fileName: string) => {

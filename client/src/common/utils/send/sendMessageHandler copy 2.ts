@@ -1,12 +1,9 @@
 import { v4 as uuidv4 } from "uuid";
 import { chatWebSocketService } from "@/services/websocket/chatWebsocketService";
 import { useMessageStore } from "@/stores/messageStore";
-import {
-  AttachmentResponse,
-  ProcessedAttachment,
-} from "@/shared/types/responses/message-attachment.response";
+import { AttachmentResponse, ProcessedAttachment } from "@/shared/types/responses/message-attachment.response";
 import { handleError } from "@/common/utils/error/handleError";
-import { uploadAttachmentsToSupabase } from "@/services/supabase/uploadAttachmentsToSupabase"; // Changed import
+import { uploadFilesToSupabase } from "@/services/supabase/uploadFilesToSupabase";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { CreateMessageRequest } from "@/shared/types/requests/send-message.request";
 import { AttachmentUploadRequest } from "@/shared/types/requests/attachment-upload.request";
@@ -48,11 +45,23 @@ export async function sendMessage({
   const messageId = uuidv4();
 
   // Process attachments in one operation
-  const optimisticAttachments: AttachmentResponse[] = processedAttachments.map(
-    (attachment) => {
+  const { filesToUpload, optimisticAttachments } = processedAttachments.reduce(
+    (acc, attachment) => {
+      // Extract file for upload if present
+      if (attachment.file) {
+        acc.filesToUpload.push(attachment.file);
+      }
+
+      // Create optimistic attachment without the file reference
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { file, ...attachmentWithoutFile } = attachment;
-      return attachmentWithoutFile;
+      acc.optimisticAttachments.push(attachmentWithoutFile);
+
+      return acc;
+    },
+    {
+      filesToUpload: [] as File[],
+      optimisticAttachments: [] as AttachmentResponse[],
     },
   );
 
@@ -86,14 +95,9 @@ export async function sendMessage({
   let uploadedAttachments: AttachmentUploadRequest[] = [];
 
   try {
-    // Upload attachments (files + thumbnails) using the new function
-    if (processedAttachments.length > 0) {
-      // This will:
-      // 1. Upload main files to Supabase
-      // 2. Upload thumbnails to Supabase
-      // 3. Return AttachmentUploadRequest[] with permanent thumbnail URLs
-      uploadedAttachments =
-        await uploadAttachmentsToSupabase(processedAttachments);
+    // Upload only the files that exist
+    if (filesToUpload.length > 0) {
+      uploadedAttachments = await uploadFilesToSupabase(filesToUpload);
     }
 
     const messagePayload: CreateMessageRequest = {
@@ -102,12 +106,12 @@ export async function sendMessage({
       memberId: myMemberId,
       content,
       replyToMessageId,
-      attachments: uploadedAttachments, // Now includes permanent thumbnail URLs from Supabase
+      attachments: uploadedAttachments,
     };
 
     chatWebSocketService.sendMessage(messagePayload);
 
-    // Revoke local blob URLs (RAM cleanup) - these were temporary
+    // Revoke thumbnail URLs from processed attachments
     processedAttachments.forEach((attachment) => {
       if (attachment.thumbnailUrl) URL.revokeObjectURL(attachment.thumbnailUrl);
     });
@@ -118,7 +122,7 @@ export async function sendMessage({
       status: MessageStatus.FAILED,
     });
 
-    // Clean up local blob URLs on error too
+    // Clean up URLs on error
     processedAttachments.forEach((attachment) => {
       if (attachment.thumbnailUrl) URL.revokeObjectURL(attachment.thumbnailUrl);
     });

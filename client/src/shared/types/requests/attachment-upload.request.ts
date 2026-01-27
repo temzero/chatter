@@ -5,7 +5,7 @@ export interface AttachmentUploadRequest {
   filename: string;
 
   type: AttachmentType;
-  size: number;
+  size?: number;
 
   thumbnailUrl?: string | null;
   mimeType?: string | null;

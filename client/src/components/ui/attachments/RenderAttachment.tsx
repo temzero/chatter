@@ -132,6 +132,7 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
         <CustomAudioPlayer
           type={type}
           mediaUrl={attachment.url}
+          thumbnailUrl={attachment.thumbnailUrl ?? undefined}
           fileName={attachment.filename ?? undefined}
           attachmentType={AttachmentType.AUDIO}
           onOpenModal={handleOpenModal}

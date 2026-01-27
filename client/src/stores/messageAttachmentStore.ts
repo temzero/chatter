@@ -18,16 +18,16 @@ interface AttachmentStoreActions {
   fetchAttachments: (
     chatId: string,
     type?: AttachmentType,
-    loadMore?: boolean
+    loadMore?: boolean,
   ) => Promise<number>;
   getChatAttachments: (
     chatId: string,
-    type?: AttachmentType
+    type?: AttachmentType,
   ) => AttachmentResponse[];
   addMessageAttachments: (
     chatId: string,
     messageId: string,
-    attachments: AttachmentResponse[]
+    attachments: AttachmentResponse[],
   ) => void;
   removeMessageAttachments: (messageId: string) => void;
   clearChatAttachments: (chatId: string) => void;
@@ -79,7 +79,7 @@ export const useAttachmentStore = create<
       const response = await attachmentService.fetchChatAttachments(
         chatId,
         type,
-        query
+        query,
       );
 
       if (response.items.length > 0) {
@@ -111,7 +111,7 @@ export const useAttachmentStore = create<
 
   addMessageAttachments: (chatId, messageId, attachments) => {
     if (!chatId || !attachments || attachments.length === 0) return;
-
+    console.log("addMessageAttachments", attachments);
     const attachmentsWithMessageId = attachments.map((att) => ({
       ...att,
       messageId: att.messageId || messageId,
@@ -125,7 +125,7 @@ export const useAttachmentStore = create<
       const newAttachmentsByChat = { ...state.attachmentsByChat };
       for (const chatId in newAttachmentsByChat) {
         newAttachmentsByChat[chatId] = newAttachmentsByChat[chatId].filter(
-          (att) => att.messageId !== messageId
+          (att) => att.messageId !== messageId,
         );
       }
       return { attachmentsByChat: newAttachmentsByChat };
@@ -159,7 +159,7 @@ export const useAttachmentStore = create<
 
 const addAttachmentsToState = (
   chatId: string,
-  newAttachments: AttachmentResponse[]
+  newAttachments: AttachmentResponse[],
 ) => {
   useAttachmentStore.setState((state) => {
     const current = state.attachmentsByChat[chatId] || [];
@@ -171,7 +171,7 @@ const addAttachmentsToState = (
 
     const merged = Array.from(map.values()).sort(
       (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
 
     return {

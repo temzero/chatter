@@ -205,7 +205,7 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
           <div
             id="disk"
             ref={diskRef}
-            className="relative aspect-square rounded-full! overflow-hidden border-4 border-(--border-color) flex items-center justify-center text-white cursor-grab"
+            className="relative aspect-square rounded-full! overflow-hidden border-4 border-(--border-color) flex items-center justify-center text-white cursor-grab bg-(--panel-color)"
             style={{
               width: diskSize,
               transform: `rotate(${(state.progress / 100) * 360}deg)`,
@@ -233,7 +233,7 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
             <img
               src={cdImageUrl ?? musicDiskCover}
               alt="CD"
-              className="w-full h-full object-cover rounded-full!"
+              className="w-full h-full object-fill! rounded-full!"
             />
 
             {fileName && (
@@ -244,20 +244,13 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
                     d="M100,100 m0,-85 a85,85 0 1,1 0,170 a85,85 0 1,1 0,-170"
                   />
                 </defs>
-                {/* <text
-                  fill="white"
-                  fontSize="11"
-                  opacity="0.8"
-                  textAnchor="start"
-                  transform="rotate(-90 100 100)"
-                > */}
                 <text
                   fill="white"
                   stroke="black" /* Border color */
-                  strokeWidth="0.5" /* Border thickness */
+                  strokeWidth="2" /* Border thickness */
                   paintOrder="stroke" /* Draw stroke behind fill */
-                  fontSize="11"
-                  opacity="0.8"
+                  fontSize="12"
+                  fontWeight="semibold"
                   textAnchor="start"
                   transform="rotate(-90 100 100)"
                 >
@@ -305,7 +298,7 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
 
         <audio
           ref={audioRef}
-          src={mediaUrl}
+          src={mediaUrl || undefined}
           onTimeUpdate={handleTimeUpdate}
           onLoadedMetadata={handleLoadedMetadata}
           onEnded={handleEnded}
