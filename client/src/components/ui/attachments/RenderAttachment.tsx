@@ -52,8 +52,8 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
         setAspectRatio(
           calculateAspectRatio(
             attachment.width || img.width,
-            attachment.height || img.height
-          )
+            attachment.height || img.height,
+          ),
         );
       };
       img.src = src;
@@ -67,7 +67,12 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
     attachment.height,
   ]);
 
-  if (!attachment) return null;
+  if (!attachment)
+    return (
+      <span className="material-symbols-outlined text-4xl!">
+        attach_file_off
+      </span>
+    );
 
   const renderContainer = (content: React.ReactNode) => (
     <div
@@ -78,7 +83,7 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
   );
 
   const handleVideoLoadedMetadata = (
-    e: React.SyntheticEvent<HTMLVideoElement>
+    e: React.SyntheticEvent<HTMLVideoElement>,
   ) => {
     const video = e.target as HTMLVideoElement;
     const width = video.videoWidth;
@@ -114,7 +119,7 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
                 ? `${attachment.width}/${attachment.height}`
                 : undefined),
           }}
-        />
+        />,
       );
 
     case AttachmentType.VIDEO:
@@ -124,7 +129,7 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
           previewMode={previewMode}
           onOpenModal={handleOpenModal}
           onLoadedMetadata={handleVideoLoadedMetadata}
-        />
+        />,
       );
 
     case AttachmentType.AUDIO:
@@ -164,20 +169,18 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
           <p className="opacity-70 ml-auto pointer-events-none">
             ({attachment.size ? formatFileSize(attachment.size) : "???"})
           </p>
-        </div>
+        </div>,
       );
 
     case AttachmentType.LINK:
-      return (
-          <LinkPreviewAttachment attachment={attachment} />
-      );
+      return <LinkPreviewAttachment attachment={attachment} />;
 
     default:
       return renderContainer(
         <div className="flex items-center p-2 rounded text-6xl!">
           <span className="material-symbols-outlined">attach_file</span>
           <p className="text-lg">Type not supported</p>
-        </div>
+        </div>,
       );
   }
 };

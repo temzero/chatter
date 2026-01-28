@@ -8,8 +8,8 @@ export class AttachmentResponseDto implements AttachmentResponse {
   @Expose() type: AttachmentType;
   @Expose() url: string;
 
-  @Expose() messageId?: string;
-  @Expose() chatId?: string;
+  @Expose() messageId: string;
+  @Expose() chatId: string;
 
   @Expose() thumbnailUrl?: string | null = null;
   @Expose() filename?: string | null = null;

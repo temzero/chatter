@@ -6,8 +6,8 @@ export interface AttachmentResponse {
   type: AttachmentType;
   url: string;
 
-  messageId?: string;
-  chatId?: string;
+  messageId: string;
+  chatId: string;
 
   thumbnailUrl?: string | null;
   filename?: string | null;
@@ -21,8 +21,4 @@ export interface AttachmentResponse {
 
   createdAt: Date | string;
   updatedAt: Date | string;
-}
-
-export interface ProcessedAttachment extends AttachmentResponse {
-  file?: File; // Keep reference to original file for upload
 }

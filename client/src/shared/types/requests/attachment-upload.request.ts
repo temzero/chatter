@@ -15,3 +15,8 @@ export interface AttachmentUploadRequest {
 
   createdAt?: string;
 }
+
+export interface ProcessedAttachment extends AttachmentUploadRequest {
+  id: string;
+  file: File; // Keep reference to original file for upload
+}

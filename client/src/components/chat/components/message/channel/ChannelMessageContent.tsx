@@ -4,22 +4,20 @@ import RenderMultipleAttachments from "@/components/ui/attachments/RenderMultipl
 import ForwardedMessagePreview from "@/components/ui/messages/ForwardMessagePreview";
 import { MessageResponse } from "@/shared/types/responses/message.response";
 import { handleQuickReaction } from "@/common/utils/message/quickReaction";
-import { getMessageAttachments } from "@/stores/messageAttachmentStore";
 import Linkify from "linkify-react";
+import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 
 interface ChannelMessageContentProps {
-  message: MessageResponse;
-  currentUserId?: string;
   isMe: boolean;
+  message: MessageResponse;
+  attachments: AttachmentResponse[];
 }
 
 const ChannelMessageContent: React.FC<ChannelMessageContentProps> = ({
-  message,
-  currentUserId,
   isMe,
+  message,
+  attachments,
 }) => {
-  const attachments = getMessageAttachments(message.chatId, message.id);
-
   return (
     <>
       <RenderMultipleAttachments
@@ -57,7 +55,6 @@ const ChannelMessageContent: React.FC<ChannelMessageContentProps> = ({
         <ForwardedMessagePreview
           message={message}
           originalSender={message.forwardedFromMessage?.sender}
-          currentUserId={currentUserId ?? undefined}
           isMe={isMe}
         />
       )}

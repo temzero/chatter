@@ -5,6 +5,7 @@ import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { handleError } from "@/common/utils/error/handleError";
 import { useActiveChatId } from "./chatStore";
 import { PaginationQuery } from "@/shared/types/queries/pagination-query";
+import { useShallow } from "zustand/shallow";
 
 const initialLimit = 30;
 
@@ -28,6 +29,10 @@ interface AttachmentStoreActions {
     chatId: string,
     messageId: string,
     attachments: AttachmentResponse[],
+  ) => void;
+  updateAttachment: (
+    chatId: string,
+    attachment: Partial<AttachmentResponse>,
   ) => void;
   removeMessageAttachments: (messageId: string) => void;
   clearChatAttachments: (chatId: string) => void;
@@ -120,6 +125,24 @@ export const useAttachmentStore = create<
     addAttachmentsToState(chatId, attachmentsWithMessageId);
   },
 
+  updateAttachment: (chatId, attachment) => {
+    if (!chatId || !attachment?.id) return;
+
+    set((state) => {
+      const currentAttachments = state.attachmentsByChat[chatId] || [];
+      const updatedAttachments = currentAttachments.map((att) =>
+        att.id === attachment.id ? { ...att, ...attachment } : att,
+      );
+
+      return {
+        attachmentsByChat: {
+          ...state.attachmentsByChat,
+          [chatId]: updatedAttachments,
+        },
+      };
+    });
+  },
+
   removeMessageAttachments: (messageId) => {
     set((state) => {
       const newAttachmentsByChat = { ...state.attachmentsByChat };
@@ -150,7 +173,6 @@ export const useAttachmentStore = create<
       return await attachmentService.fetchAttachmentsCountByType(chatId);
     } catch (error) {
       handleError(error, "Failed to fetch attachment counts");
-      return {};
     }
   },
 
@@ -190,10 +212,19 @@ export const useActiveChatAttachments = (): AttachmentResponse[] => {
   return activeChatId ? attachmentsByChat[activeChatId] || [] : [];
 };
 
+export const useMessageAttachments = (chatId: string, messageId: string): AttachmentResponse[] => {
+  return useAttachmentStore(
+    useShallow((state) => {
+      const attachments = state.attachmentsByChat[chatId] || [];
+      return attachments.filter((att) => att.messageId === messageId);
+    })
+  );
+};
+
 export const getMessageAttachments = (chatId: string, messageId: string) => {
   const state = useAttachmentStore.getState();
   const attachments = state.attachmentsByChat[chatId] || [];
-  return attachments.filter((att) => att.messageId === messageId).reverse();
+  return attachments.filter((att) => att.messageId === messageId);
 };
 
 export const useHasMore = (chatId: string) => {

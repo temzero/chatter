@@ -4,7 +4,6 @@ import { formatTime } from "@/common/utils/format/formatTime";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { MessageReadInfo } from "../../messagesContainer/MessageReadInfo";
 import { MessageReadInfoOptions } from "@/shared/types/enums/message-setting.enum";
-import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { MessageResponse } from "@/shared/types/responses/message.response";
 
 interface MessageInfoProps {
@@ -15,7 +14,6 @@ interface MessageInfoProps {
   senderDisplayName: string;
   showInfo: boolean;
   readInfoSetting: MessageReadInfoOptions;
-  chat: ChatResponse;
   currentUserId: string;
 }
 
@@ -27,7 +25,6 @@ const MessageInfo: React.FC<MessageInfoProps> = ({
   senderDisplayName,
   showInfo,
   readInfoSetting,
-  chat,
   currentUserId,
 }) => {
   const shouldShowSenderName = useMemo(
@@ -74,7 +71,7 @@ const MessageInfo: React.FC<MessageInfoProps> = ({
 
       {shouldShowReadInfo && (
         <MessageReadInfo
-          chatId={chat.id}
+          chatId={message.chatId}
           currentUserId={currentUserId}
           messageId={message.id}
           isMe={isMe}

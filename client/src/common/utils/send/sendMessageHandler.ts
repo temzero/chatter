@@ -1,15 +1,15 @@
 import { v4 as uuidv4 } from "uuid";
 import { chatWebSocketService } from "@/services/websocket/chatWebsocketService";
 import { useMessageStore } from "@/stores/messageStore";
-import {
-  AttachmentResponse,
-  ProcessedAttachment,
-} from "@/shared/types/responses/message-attachment.response";
+import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 import { handleError } from "@/common/utils/error/handleError";
 import { uploadAttachmentsToSupabase } from "@/services/supabase/uploadAttachmentsToSupabase"; // Changed import
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
 import { CreateMessageRequest } from "@/shared/types/requests/send-message.request";
-import { AttachmentUploadRequest } from "@/shared/types/requests/attachment-upload.request";
+import {
+  AttachmentUploadRequest,
+  ProcessedAttachment,
+} from "@/shared/types/requests/attachment-upload.request";
 import { getCurrentUserId } from "@/stores/authStore";
 
 export async function sendMessage({
@@ -44,15 +44,23 @@ export async function sendMessage({
     return;
   }
 
-  const now = new Date().toISOString();
+  const nowTimeStamp = new Date().toISOString();
   const messageId = uuidv4();
 
   // Process attachments in one operation
   const optimisticAttachments: AttachmentResponse[] = processedAttachments.map(
-    (attachment) => {
+    (attachment, index) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { file, ...attachmentWithoutFile } = attachment;
-      return attachmentWithoutFile;
+      const timestamp = new Date(Date.now() + index).toISOString();
+
+      return {
+        ...attachmentWithoutFile, // id, type, url, filename, etc.
+        messageId: messageId, // CRITICAL: Add real message ID
+        chatId: chatId, // CRITICAL: Add real chat ID
+        createdAt: timestamp, // Same timestamp for all
+        updatedAt: timestamp, // Same timestamp for all
+      };
     },
   );
 
@@ -76,8 +84,8 @@ export async function sendMessage({
     editedAt: null,
     isDeleted: false,
     deletedAt: null,
-    createdAt: now,
-    updatedAt: now,
+    createdAt: nowTimeStamp,
+    updatedAt: nowTimeStamp,
     reactions: {},
     attachments: optimisticAttachments,
   };
@@ -107,9 +115,8 @@ export async function sendMessage({
 
     chatWebSocketService.sendMessage(messagePayload);
 
-    // Revoke local blob URLs (RAM cleanup) - these were temporary
-    processedAttachments.forEach((attachment) => {
-      if (attachment.thumbnailUrl) URL.revokeObjectURL(attachment.thumbnailUrl);
+    useMessageStore.getState().updateMessageById(messageId, {
+      status: MessageStatus.SENT,
     });
 
     onSuccess?.();
@@ -118,13 +125,7 @@ export async function sendMessage({
       status: MessageStatus.FAILED,
     });
 
-    // Clean up local blob URLs on error too
-    processedAttachments.forEach((attachment) => {
-      if (attachment.thumbnailUrl) URL.revokeObjectURL(attachment.thumbnailUrl);
-    });
-
     onError?.(error);
-
     handleError(error, "Failed to send message");
   }
 }

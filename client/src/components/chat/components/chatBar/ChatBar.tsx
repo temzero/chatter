@@ -9,12 +9,12 @@ import { LinkPreviewCard } from "./LinkPreviewCard";
 import { useIsMobile } from "@/stores/deviceStore";
 import { useDetectUrl } from "@/common/hooks/useDetectUrl";
 import { sendMessage } from "@/common/utils/send/sendMessageHandler";
-import AttachmentImportedPreview from "@/components/ui/attachments/AttachmentImportedPreview";
+import { useAttachmentProcessor } from "@/common/hooks/useAttachmentProcessor";
+import AttachmentsImportedPreview from "@/components/ui/attachments/AttachmentsImportedPreview";
 import useTypingIndicator from "@/common/hooks/useTypingIndicator";
 import ChatBarLeftIcon from "./ChatBarLeftIcon";
 import ChatBarInput from "./ChatBarInput";
 import ChatBarSendButton from "./ChatBarSendButton";
-import { useAttachmentProcessor } from "@/common/hooks/useAttachmentProcessor";
 
 interface ChatBarProps {
   chatId: string;
@@ -40,14 +40,15 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
     isProcessing,
     processAttachments,
     removeAttachment,
+    clearAttachmentsInput,
     clearAllAttachments,
-    setProcessedAttachments
   } = useAttachmentProcessor();
 
   const { clearTypingState } = useTypingIndicator(inputRef, chatId ?? null);
   const hasAttachment = processedAttachments.length > 0;
   const showSendButton = hasTextContent || hasAttachment;
 
+  // reset chatBar when switch chat
   useEffect(() => {
     if (chatId && inputRef.current) {
       const draft = getDraftMessage(chatId);
@@ -56,8 +57,10 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
       requestAnimationFrame(() => {
         updateInputHeight();
       });
+      clearAllAttachments()
     }
-  }, [chatId, getDraftMessage]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chatId]);
 
   useEffect(() => {
     const inputValueAtMount = inputRef.current?.value;
@@ -135,21 +138,13 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
 
     // Get content before clearing
     const content = inputRef.current?.value || "";
-    const attachmentsToSend = [...processedAttachments];
-
-    // Clear UI immediately for better UX
-    if (inputRef.current) inputRef.current.value = "";
-    setHasTextContent(false);
-    updateInputHeight();
-    setProcessedAttachments([])
-    // clearAllAttachments();
 
     // Send message using handler directly with processed attachments
     sendMessage({
       chatId,
       myMemberId,
       content,
-      processedAttachments: attachmentsToSend, // Pass processed data
+      processedAttachments,
       replyToMessageId,
       onSuccess: () => {
         // clearAllAttachments();
@@ -159,8 +154,17 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
         closeModal();
         setTimeout(() => setIsMessageSent(false), 200);
       },
+      onError: () => {
+        clearAllAttachments();
+      },
     });
-  }, [hasTextContent, hasAttachment, resetPreview, processedAttachments, setProcessedAttachments, chatId, myMemberId, replyToMessageId, clearTypingState, setDraftMessage, closeModal]);
+
+    // Clear UI immediately for better UX
+    if (inputRef.current) inputRef.current.value = "";
+    setHasTextContent(false);
+    updateInputHeight();
+    clearAttachmentsInput();
+  }, [hasTextContent, hasAttachment, resetPreview, chatId, myMemberId, processedAttachments, replyToMessageId, clearAttachmentsInput, clearTypingState, setDraftMessage, closeModal, clearAllAttachments]);
 
   const handleKeyDown = useCallback(
     async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -211,7 +215,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
     <div className={clsx("chat-bottom", replyToMessageId && "has-reply")}>
       {/* File Attachment Previews using processed data */}
       {processedAttachments.length > 0 && (
-        <AttachmentImportedPreview
+        <AttachmentsImportedPreview
           processedAttachments={processedAttachments}
           isProcessing={isProcessing}
           onRemove={(index: number) => {

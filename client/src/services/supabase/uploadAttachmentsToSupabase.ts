@@ -1,8 +1,8 @@
-import { AttachmentUploadRequest } from "@/shared/types/requests/attachment-upload.request";
+import i18next from "i18next";
+import { AttachmentUploadRequest, ProcessedAttachment } from "@/shared/types/requests/attachment-upload.request";
 import { handleError } from "@/common/utils/error/handleError";
 import { toast } from "react-toastify";
-import i18next from "i18next";
-import { ProcessedAttachment } from "@/shared/types/responses/message-attachment.response";
+// import { useAttachmentStore } from "@/stores/messageAttachmentStore";
 import { uploadFileToSupabase } from "./uploadFileToSupabse";
 import { uploadThumbnailToSupabase } from "./uploadThumbnailToSupabse";
 
@@ -10,11 +10,12 @@ import { uploadThumbnailToSupabase } from "./uploadThumbnailToSupabse";
  * Upload processed attachments to Supabase (files + thumbnails)
  */
 export async function uploadAttachmentsToSupabase(
-  processedAttachments: ProcessedAttachment[],
+  processedAttachments: ProcessedAttachment[]
 ): Promise<AttachmentUploadRequest[]> {
-  console.log('processedAttachments:', processedAttachments)
+  console.log("processedAttachments:", processedAttachments);
 
   const t = i18next.t;
+  // const updateAttachment = useAttachmentStore.getState().updateAttachment;
 
   const uploadPromises = processedAttachments.map(async (attachment) => {
     const { file, thumbnailUrl } = attachment;
@@ -35,7 +36,23 @@ export async function uploadAttachmentsToSupabase(
       );
     }
 
+    // Update the attachment store with permanent URLs
+    // updateAttachment(attachment.chatId, {
+    //   id: attachment.id,
+    //   url: fileUrl,
+    //   thumbnailUrl: uploadedThumbnailUrl,
+    // } as Partial<AttachmentResponse>);
+
+    // Revoke local blob URLs immediately after upload
+    // if (thumbnailUrl?.startsWith("blob:")) {
+    //   URL.revokeObjectURL(thumbnailUrl);
+    // }
+    // if (attachment.url?.startsWith("blob:")) {
+    //   URL.revokeObjectURL(attachment.url);
+    // }
+
     return {
+      id: attachment.id, // Include id for tracking
       url: fileUrl,
       type,
       filename: file.name,
@@ -51,11 +68,10 @@ export async function uploadAttachmentsToSupabase(
 
   try {
     const results = await Promise.allSettled(uploadPromises);
-    
+
     // Check for failures
     const failedUploads = results.filter((r) => r.status === "rejected");
     if (failedUploads.length > 0) {
-      // No cleanup needed - failed uploads didn't create files
       const errors = failedUploads
         .map((r: PromiseRejectedResult) => r.reason?.message || "Unknown error")
         .join(", ");
@@ -71,5 +87,6 @@ export async function uploadAttachmentsToSupabase(
   } catch (error) {
     toast.error(t("common.messages.upload_failed"));
     handleError(error, t("common.messages.upload_failed"));
+    throw error; // Re-throw to handle in caller
   }
 }

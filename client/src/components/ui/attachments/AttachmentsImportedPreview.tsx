@@ -5,13 +5,13 @@ import { getFileIcon } from "@/common/utils/getFileIcon";
 import { ProcessedAttachment } from "@/shared/types/responses/message-attachment.response";
 import { PuffLoader } from "react-spinners";
 
-interface AttachmentImportedPreviewProps {
+interface AttachmentsImportedPreviewProps {
   processedAttachments: ProcessedAttachment[];
   isProcessing: boolean;
   onRemove: (index: number) => void;
 }
 
-const AttachmentImportedPreview: React.FC<AttachmentImportedPreviewProps> = ({
+const AttachmentsImportedPreview: React.FC<AttachmentsImportedPreviewProps> = ({
   processedAttachments,
   isProcessing,
   onRemove,
@@ -20,11 +20,8 @@ const AttachmentImportedPreview: React.FC<AttachmentImportedPreviewProps> = ({
     "w-full h-full border-2 border-(--border-color) bg-(--glass-panel-color) rounded";
   const textClass =
     "p-0.5 rounded-b truncate text-[10px] break-words bg-gradient-to-t from-black/100 to-transparent";
-  // const symbolClass =
-  //   "flex items-center justify-center absolute top-0.5 left-0.5 rounded-full! bg-black/30 backdrop-blur aspect-square w-7 h-7 overflow-hidden";
-const symbolClass =
-  "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full! bg-black/30 backdrop-blur aspect-square w-9 h-9 flex items-center justify-center overflow-hidden";
-
+  const symbolClass =
+    "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full! bg-black/30 backdrop-blur aspect-square w-9 h-9 flex items-center justify-center overflow-hidden";
 
   // Helper function to get thumbnail URL
   const getThumbnailUrl = (attachment: ProcessedAttachment) => {
@@ -115,7 +112,9 @@ const symbolClass =
             {renderPreview(attachment)}
 
             <button
-              onClick={() => onRemove(index)}
+              onClick={() => {
+                onRemove(index);
+              }}
               className="absolute inset-0 flex items-center justify-center bg-red-800/70 rounded opacity-0 group-hover:opacity-100 transition-opacity"
               aria-label={`Remove ${attachment.filename || "file"}`}
             >
@@ -128,4 +127,4 @@ const symbolClass =
   );
 };
 
-export default AttachmentImportedPreview;
+export default AttachmentsImportedPreview;

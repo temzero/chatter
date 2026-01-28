@@ -4,19 +4,27 @@ import { Avatar } from "@/components/ui/avatar/Avatar";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { motion } from "framer-motion";
 import { getMessageAnimation } from "@/common/animations/messageAnimations";
+import { useMessageStore } from "@/stores/messageStore";
 import { MESSAGE_AVATAR_WIDTH } from "@/common/constants/messageAvatarDimension";
+import { ChatResponse } from "@/shared/types/responses/chat.response";
+import { getMessageAttachments } from "@/stores/messageAttachmentStore";
 import { SystemMessageJSONContent } from "../../../ui/messages/content/SystemMessageContent";
 import { CallMessageContent } from "../../../ui/messages/content/CallMessageContent";
 import MessageBubbleWrapper from "./wrapper/MessageBubbleWrapper";
+import { useMessageSender } from "@/stores/chatMemberStore";
+import { useMessageFilter } from "@/common/hooks/message/useMessageFilter";
 import { useIsMobile } from "@/stores/deviceStore";
+import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { useReadInfo } from "@/stores/settingsStore";
 import MessageReplyPreview from "@/components/ui/messages/MessageReplyPreview";
 import SystemMessage from "./SystemMessage";
 import MessageContent from "../../../ui/messages/content/MessageContent";
+import {
+  useIsMessageFocus,
+  useIsReplyToThisMessage,
+} from "@/stores/modalStore";
 import MessageInfo from "./MessageInfo";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
-import { getMessageWidth } from "@/common/utils/message/getMessageWidth";
-import { useMessageData } from "@/common/hooks/message/useMessageData";
 
 interface MessageProps {
   messageId: string;
@@ -26,7 +34,8 @@ interface MessageProps {
   isRecent?: boolean;
   isRead?: boolean;
   readUserAvatars?: string[];
-  isMe: boolean;
+  isMe?: boolean;
+  chat: ChatResponse;
 }
 
 const Message: React.FC<MessageProps> = ({
@@ -36,69 +45,85 @@ const Message: React.FC<MessageProps> = ({
   showInfo = true,
   isRecent = false,
   isMe = false,
+  chat,
 }) => {
-  const messageRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
+  const message = useMessageStore((state) => state.messagesById[messageId]);
+  // console.log("message", message);
+  const sender = useMessageSender(message?.sender.id, message?.chatId);
+  const senderDisplayName =
+    sender?.nickname ||
+    [sender?.firstName, sender?.lastName].filter(Boolean).join(" ") ||
+    message.sender.displayName;
+
+  const call = message.call;
+
   const readInfoSetting = useReadInfo();
 
-  // ✅ Use the hook to get all message data
-  const messageData = useMessageData({
-    messageId,
-    currentUserId,
-  });
+  const attachments = getMessageAttachments(message.chatId, message.id);
+  const attachmentLength = attachments.length;
+  if (attachmentLength > 0) {
+    console.log("message's attachments", attachments);
+  }
 
+  const isFocus = useIsMessageFocus(messageId);
+  const isReplyToThisMessage = useIsReplyToThisMessage(messageId);
+
+  const messageRef = useRef<HTMLDivElement>(null);
+
+  const isGroupChat = chatType === ChatType.GROUP;
+
+  // Safe animation setup
   const messageAnimation = useMemo(() => {
-    const messageFromData = messageData?.message;
-    if (!messageFromData) return undefined;
-    return getMessageAnimation(
-      isMe,
-      messageFromData.status === MessageStatus.SENDING,
-    );
-  }, [isMe, messageData?.message]);
+    if (!message) return;
+    return getMessageAnimation(isMe, message.status === MessageStatus.SENDING);
+  }, [message, isMe]);
 
-  // Early return if messageData is null
-  if (!messageData) {
+  const isVisible = useMessageFilter({ message });
+
+  if (!isVisible) {
     return null;
   }
 
-  // Destructure all the data from the hook
-  const {
-    message,
-    sender,
-    senderDisplayName,
-    attachments,
-    attachmentLength,
-    hasLinkPreview,
-    isVisible,
-    isFocus,
-    isReplyToThisMessage,
-  } = messageData;
-
-  console.log("messageAttachments", message.content, attachments);
-
   // System message check
-  if (message?.systemEvent) {
+  if (message.systemEvent) {
     return (
       <div className="w-full flex items-center justify-center">
         <SystemMessage
           message={message}
           systemEvent={message.systemEvent}
           senderId={sender?.id ?? ""}
-          senderDisplayName={senderDisplayName}
+          senderDisplayName={senderDisplayName ?? ""}
           content={message.content as SystemMessageJSONContent}
         />
       </div>
     );
   }
 
-  // Early returns
-  if (!message || !isVisible) {
-    return null;
-  }
+  const repliedMessage = message.replyToMessage;
 
-  const isGroupChat = chatType === ChatType.GROUP;
-  const replyToMessage = message.replyToMessage
-  const call = message.call
+  const hasLinkPreview = attachments.some(
+    (a) => a.type === AttachmentType.LINK,
+  );
+
+  const getMessageWidth = (
+    isMobile: boolean,
+    hasLinkPreview: boolean,
+    attachmentLength: number,
+  ): string => {
+    if (isMobile) {
+      return hasLinkPreview
+        ? "w-[80%]"
+        : attachmentLength === 1
+          ? "w-[60%]"
+          : "w-[80%]";
+    }
+    return hasLinkPreview
+      ? "w-[60%]"
+      : attachmentLength === 1
+        ? "w-[40%]"
+        : "w-[60%]";
+  };
 
   return (
     <motion.div
@@ -125,7 +150,7 @@ const Message: React.FC<MessageProps> = ({
           {!isRecent && (
             <Avatar
               avatarUrl={sender?.avatarUrl}
-              name={senderDisplayName}
+              name={senderDisplayName ?? ""}
               className="w-full h-full"
             />
           )}
@@ -140,12 +165,12 @@ const Message: React.FC<MessageProps> = ({
             "origin-bottom-left items-start": !isMe,
           })}
         >
-          {replyToMessage && (
+          {repliedMessage && (
             <MessageReplyPreview
-              replyMessage={replyToMessage}
+              replyMessage={repliedMessage}
               chatType={chatType}
               isMe={isMe}
-              currentUserId={currentUserId}
+              currentUserId={currentUserId ?? ""}
               senderId={sender?.id ?? ""}
               isHidden={isFocus}
             />
@@ -169,9 +194,9 @@ const Message: React.FC<MessageProps> = ({
               />
             ) : (
               <MessageContent
-                isMe={isMe}
                 message={message}
-                attachments={attachments}
+                isMe={isMe}
+                currentUserId={currentUserId ?? ""}
               />
             )}
           </MessageBubbleWrapper>
@@ -185,6 +210,7 @@ const Message: React.FC<MessageProps> = ({
           senderDisplayName={senderDisplayName}
           showInfo={showInfo}
           readInfoSetting={readInfoSetting}
+          chat={chat}
           currentUserId={currentUserId}
         />
       </div>
@@ -192,16 +218,4 @@ const Message: React.FC<MessageProps> = ({
   );
 };
 
-// Add proper memoization with props comparison
-const areEqual = (prevProps: MessageProps, nextProps: MessageProps) => {
-  return (
-    prevProps.messageId === nextProps.messageId &&
-    prevProps.currentUserId === nextProps.currentUserId &&
-    prevProps.chatType === nextProps.chatType &&
-    prevProps.showInfo === nextProps.showInfo &&
-    prevProps.isRecent === nextProps.isRecent &&
-    prevProps.isMe === nextProps.isMe
-  );
-};
-
-export default React.memo(Message, areEqual);
+export default React.memo(Message);

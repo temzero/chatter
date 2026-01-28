@@ -149,16 +149,11 @@ export const useMessageStore = create<MessageStoreState & MessageStoreActions>(
       // Extract attachments before storing message
       const { attachments, ...messageWithoutAttachments } = newMessage;
 
-      const messageWithAnimation = {
-        ...messageWithoutAttachments,
-        shouldAnimate: true,
-      } as MessageResponse;
-
       const currentIds = messageIdsByChat[chatId] || [];
       set({
         messagesById: {
           ...messagesById,
-          [newMessage.id]: messageWithAnimation,
+          [newMessage.id]: messageWithoutAttachments,
         },
         messageIdsByChat: {
           ...messageIdsByChat,

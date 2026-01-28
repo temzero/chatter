@@ -1,10 +1,10 @@
 // hooks/useAttachmentProcessor.ts
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { parseBlob } from "music-metadata-browser";
-import { ProcessedAttachment } from "@/shared/types/responses/message-attachment.response";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { determineAttachmentType } from "../utils/message/determineAttachmentType";
+import { ProcessedAttachment } from "@/shared/types/requests/attachment-upload.request";
 
 export const useAttachmentProcessor = () => {
   const [processedAttachments, setProcessedAttachments] = useState<
@@ -39,24 +39,20 @@ export const useAttachmentProcessor = () => {
 
   // Helper function to process video files
   const processVideoAttachment = async (
-    file: File,
+    videoBlobUrl: string, // Use existing blob URL
     attachment: ProcessedAttachment,
   ) => {
-    // Video file is already stored in attachment.url
     try {
       const video = document.createElement("video");
-      const videoUrl = URL.createObjectURL(file);
-      video.src = videoUrl;
+      video.src = videoBlobUrl; // Use the main blob URL
 
       await new Promise<void>((resolve) => {
         video.onloadedmetadata = () => {
           attachment.duration = video.duration;
-          URL.revokeObjectURL(videoUrl);
           resolve();
         };
 
         video.onerror = () => {
-          URL.revokeObjectURL(videoUrl);
           resolve(); // Don't fail if metadata extraction fails
         };
       });
@@ -67,11 +63,11 @@ export const useAttachmentProcessor = () => {
 
   // Helper function to process image files
   const processImageAttachment = async (
-    file: File,
+    imageBlobUrl: string, // Use existing blob URL
     attachment: ProcessedAttachment,
   ) => {
     try {
-      const dimensions = await extractImageDimensions(file);
+      const dimensions = await extractImageDimensions(imageBlobUrl);
       attachment.width = dimensions.width;
       attachment.height = dimensions.height;
     } catch (error) {
@@ -79,41 +75,54 @@ export const useAttachmentProcessor = () => {
     }
   };
 
+  // Extract image dimensions using existing blob URL
+  const extractImageDimensions = (
+    imageBlobUrl: string,
+  ): Promise<{ width: number; height: number }> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = imageBlobUrl; // Use the main blob URL
+
+      img.onload = () => {
+        resolve({ width: img.width, height: img.height });
+        // DO NOT revoke the URL here - it's the main URL!
+      };
+
+      img.onerror = () => {
+        resolve({ width: 0, height: 0 });
+      };
+    });
+  };
+
   // Convert File to AttachmentResponse with proper URL handling
   const processSingleAttachment = async (
     file: File,
-    chatId?: string,
-    messageId?: string,
+    index: number,
   ): Promise<ProcessedAttachment> => {
     const tempId = uuidv4();
-
     // Determine attachment type
     const type = determineAttachmentType(file);
-
     // Create object URL for immediate preview (for all file types)
     const objectUrl = URL.createObjectURL(file);
 
     // Base attachment
     const baseAttachment: ProcessedAttachment = {
-      id: tempId,
+      id: `temp-${index}-${tempId}`, // Temporary ID for UI
+      file, // Keep original file
+
       type,
-      url: objectUrl, // Main URL for preview/playback
-      messageId: messageId || `temp-${tempId}`,
-      chatId: chatId || `temp-chat-${tempId}`,
-      thumbnailUrl: null, // Will only be set for audio files (album art)
+      url: objectUrl, // Blob URL
       filename: file.name,
       size: file.size,
       mimeType: file.type,
+      thumbnailUrl: null,
       width: null,
       height: null,
       duration: null,
-      metadata: null,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      file,
+      // REMOVED: messageId, chatId, metadata, createdAt, updatedAt
     };
 
-    // Handle different attachment types
+    // Handle different attachment types using existing blob URL
     try {
       switch (type) {
         case AttachmentType.AUDIO:
@@ -121,11 +130,11 @@ export const useAttachmentProcessor = () => {
           break;
 
         case AttachmentType.VIDEO:
-          await processVideoAttachment(file, baseAttachment);
+          await processVideoAttachment(baseAttachment.url, baseAttachment);
           break;
 
         case AttachmentType.IMAGE:
-          await processImageAttachment(file, baseAttachment);
+          await processImageAttachment(baseAttachment.url, baseAttachment);
           break;
 
         // For documents and other types, just keep the basic info
@@ -144,15 +153,13 @@ export const useAttachmentProcessor = () => {
   // Process multiple attachments
   const processAttachments = async (
     files: File[],
-    chatId?: string,
-    messageId?: string,
     append: boolean = true,
   ): Promise<ProcessedAttachment[]> => {
     setIsProcessing(true);
 
     try {
-      const processingPromises = files.map((file) =>
-        processSingleAttachment(file, chatId, messageId),
+      const processingPromises = files.map((file, index) =>
+        processSingleAttachment(file, index),
       );
 
       const attachments = await Promise.all(processingPromises);
@@ -183,19 +190,14 @@ export const useAttachmentProcessor = () => {
         if (attachment.thumbnailUrl) {
           URL.revokeObjectURL(attachment.thumbnailUrl);
         }
-
-        // Clean up video thumbnail from metadata if it exists
-        if (attachment.metadata && "videoThumbnail" in attachment.metadata) {
-          const videoThumbnailUrl = attachment.metadata
-            .videoThumbnail as string;
-          if (videoThumbnailUrl && videoThumbnailUrl.startsWith("blob:")) {
-            URL.revokeObjectURL(videoThumbnailUrl);
-          }
-        }
       }
       return prev.filter((a) => a.id !== attachmentId);
     });
   }, []);
+
+  const clearAttachmentsInput = () => {
+    setProcessedAttachments([]);
+  };
 
   const clearAllAttachments = useCallback(() => {
     // Clean up all URLs
@@ -209,44 +211,10 @@ export const useAttachmentProcessor = () => {
       if (attachment.thumbnailUrl) {
         URL.revokeObjectURL(attachment.thumbnailUrl);
       }
-
-      // Clean up video thumbnail from metadata
-      if (attachment.metadata && "videoThumbnail" in attachment.metadata) {
-        const videoThumbnailUrl = attachment.metadata.videoThumbnail as string;
-        if (videoThumbnailUrl && videoThumbnailUrl.startsWith("blob:")) {
-          URL.revokeObjectURL(videoThumbnailUrl);
-        }
-      }
     });
 
     // Clear the state
-    setProcessedAttachments([]);
-  }, [processedAttachments]);
-
-  // Clean up all URLs on unmount
-  useEffect(() => {
-    return () => {
-      processedAttachments.forEach((attachment) => {
-        // Clean up main object URL
-        if (attachment.url && attachment.url.startsWith("blob:")) {
-          URL.revokeObjectURL(attachment.url);
-        }
-
-        // Clean up thumbnail URL
-        if (attachment.thumbnailUrl) {
-          URL.revokeObjectURL(attachment.thumbnailUrl);
-        }
-
-        // Clean up video thumbnail from metadata
-        if (attachment.metadata && "videoThumbnail" in attachment.metadata) {
-          const videoThumbnailUrl = attachment.metadata
-            .videoThumbnail as string;
-          if (videoThumbnailUrl && videoThumbnailUrl.startsWith("blob:")) {
-            URL.revokeObjectURL(videoThumbnailUrl);
-          }
-        }
-      });
-    };
+    clearAttachmentsInput();
   }, [processedAttachments]);
 
   return {
@@ -254,27 +222,7 @@ export const useAttachmentProcessor = () => {
     isProcessing,
     processAttachments,
     removeAttachment,
+    clearAttachmentsInput,
     clearAllAttachments,
-    setProcessedAttachments,
   };
-};
-
-const extractImageDimensions = (
-  file: File,
-): Promise<{ width: number; height: number }> => {
-  return new Promise((resolve) => {
-    const img = new Image();
-    const imgUrl = URL.createObjectURL(file);
-    img.src = imgUrl;
-
-    img.onload = () => {
-      resolve({ width: img.width, height: img.height });
-      URL.revokeObjectURL(imgUrl);
-    };
-
-    img.onerror = () => {
-      resolve({ width: 0, height: 0 });
-      URL.revokeObjectURL(imgUrl);
-    };
-  });
 };

@@ -33,7 +33,6 @@ export interface MessageResponse {
   call?: CallLiteResponse;
 
   isMuted?: boolean;
-  shouldAnimate?: boolean;
 }
 
 export interface SenderResponse {

@@ -94,7 +94,6 @@ const Messages: React.FC<ChatMessagesProps> = ({
                       isRecent={isRecent}
                       chatType={chat.type}
                       currentUserId={currentUserId}
-                      chat={chat}
                     />
                   </div>
                 );

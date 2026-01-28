@@ -1,5 +1,5 @@
+import { scrollToBottom } from "@/common/utils/scrollToBottom";
 import { useEffect, useLayoutEffect, useRef } from "react";
-import { scrollToBottom } from "../utils/scrollToBottom";
 
 interface UseAutoScrollParams<T extends HTMLElement = HTMLElement> {
   containerRef: React.RefObject<T | null>;

@@ -1,6 +1,8 @@
 import React, { useRef, useMemo } from "react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
+import { useMessageStore } from "@/stores/messageStore";
+import { formatTime } from "@/common/utils/format/formatTime";
 import { getCurrentUserId } from "@/stores/authStore";
 import { scrollToMessageById } from "@/common/utils/message/scrollToMessageById";
 import { MessageStatus } from "@/shared/types/enums/message-status.enum";
@@ -19,49 +21,35 @@ import { SystemMessageJSONContent } from "../../../../ui/messages/content/System
 import { MessageHorizontalPreview } from "../preview/MessageHorizontalPreview";
 import { MessageReadInfo } from "@/components/chat/messagesContainer/MessageReadInfo";
 import MessageBubbleWrapper from "../wrapper/MessageBubbleWrapper";
-import { useMessageData } from "@/common/hooks/message/useMessageData";
-import { formatTime } from "@/common/utils/format/formatTime";
-import { getChannelMessageWidth } from "@/common/utils/message/getMessageWidth";
+import { getMessageAttachments } from "@/stores/messageAttachmentStore";
 
 interface ChannelMessageProps {
   messageId: string;
 }
 
 const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
-  const currentUserId = getCurrentUserId();
-
-  // ✅ Use the hook to get all message data
-  const messageData = useMessageData({
-    messageId,
-    currentUserId: currentUserId || "",
-  });
-
   const isMobile = useIsMobile();
+  const message = useMessageStore((state) => state.messagesById[messageId]);
+  const attachments = getMessageAttachments(message.chatId, messageId)
 
-  const isReplyToThisMessage = useIsReplyToThisMessage(messageId);
-  const isFocus = useIsMessageFocus(messageId);
+  const currentUserId = getCurrentUserId();
+  const isMe = message.sender.id === currentUserId;
+
+  const isReplyToThisMessage = useIsReplyToThisMessage(message.id);
+  const isFocus = useIsMessageFocus(message.id);
+  const repliedMessage = message.replyToMessage;
 
   const messageRef = useRef<HTMLDivElement>(null);
 
   const systemMessageAnimation = useMemo(() => {
-    const messageFromData = messageData?.message;
-    if (!messageFromData) return;
-    return getSystemMessageAnimation(
-      messageFromData.status === MessageStatus.SENDING,
-    );
-  }, [messageData?.message]);
+    if (!message) return;
+    return getSystemMessageAnimation(message.status === MessageStatus.SENDING);
+  }, [message]);
 
-  // Early return if no message data
-  if (!messageData || !currentUserId) {
-    console.error("Not authenticated or message not found");
-    return null;
+  if (!currentUserId) {
+    console.error("Not authenticated");
+    return;
   }
-
-  // Destructure the data from the hook
-  const { message, senderDisplayName, attachments, isVisible, isMe } =
-    messageData;
-
-  console.log("ChannelMessage:", message);
 
   // Check system message
   const isSystemMessage = !!message.systemEvent;
@@ -71,44 +59,35 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
         message={message}
         systemEvent={message.systemEvent}
         senderId={message.sender.id}
-        senderDisplayName={senderDisplayName}
+        senderDisplayName={message.sender.displayName}
         content={message.content as SystemMessageJSONContent}
       />
     );
   }
-
-  // Early return for invisible messages
-  if (!message || !isVisible) {
-    return null;
-  }
-
-  const replyToMessage = message.replyToMessage;
-  const call = message.call;
 
   return (
     <motion.div
       key={message.id}
       ref={messageRef}
       id={`message-${message.id}`}
-      className={clsx(
-        "relative group mb-4",
-        getChannelMessageWidth(isReplyToThisMessage, isMobile),
-      )}
+      className={clsx("relative group mb-4", {
+        "scale-[1.1]": isReplyToThisMessage,
+        "w-[64%]": !isMobile,
+        "w-[90%]": isMobile,
+      })}
       style={{
         zIndex: isFocus ? 100 : "auto",
       }}
       layout="position"
       {...systemMessageAnimation}
     >
-      {replyToMessage && (
+      {repliedMessage && (
         <div
-          onClick={() =>
-            replyToMessage?.id && scrollToMessageById(replyToMessage.id)
-          }
+          onClick={() => scrollToMessageById(repliedMessage.id)}
           className="w-[90%] mx-auto bg-(--panel-color) text-xs rounded-t-xl cursor-pointer p-2 pb-0 opacity-80 hover:opacity-100 custom-border"
         >
           <MessageHorizontalPreview
-            message={replyToMessage}
+            message={repliedMessage}
             chatType={ChatType.CHANNEL}
             type={MessageHorizontalPreviewTypes.REPLY_CHANNEL_MESSAGE}
           />
@@ -122,8 +101,8 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
         isFocus={isFocus}
         className="border-3!"
       >
-        {call ? (
-          <ChannelCallMessageContent message={message} call={call} />
+        {message.call ? (
+          <ChannelCallMessageContent message={message} call={message.call} />
         ) : (
           <ChannelMessageContent
             message={message}
@@ -147,7 +126,7 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
             currentUserId={currentUserId}
             messageId={message.id}
             isMe={isMe}
-            senderName={senderDisplayName}
+            senderName={message.sender.displayName}
           />
         )}
 

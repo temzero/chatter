@@ -6,8 +6,8 @@ export interface AttachmentResponse {
   type: AttachmentType;
   url: string;
 
-  messageId?: string;
-  chatId?: string;
+  messageId: string;
+  chatId: string;
 
   thumbnailUrl?: string | null;
   filename?: string | null;

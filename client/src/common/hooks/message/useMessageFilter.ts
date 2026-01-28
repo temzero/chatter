@@ -6,13 +6,15 @@ interface UseMessageFilterParams {
   message?: MessageResponse;
 }
 
-export const useMessageFilter = ({ message }: UseMessageFilterParams) => {
+export const useMessageFilter = ({
+  message,
+}: UseMessageFilterParams): boolean => {
   const searchQuery = useMessageStore((state) => state.searchQuery);
   const filterImportantMessages = useMessageStore(
-    (state) => state.filterImportantMessages
+    (state) => state.filterImportantMessages,
   );
 
-  return useMemo(() => {
+  return useMemo((): boolean => {
     if (!message) return false;
 
     const query = searchQuery.trim().toLowerCase();
@@ -31,7 +33,8 @@ export const useMessageFilter = ({ message }: UseMessageFilterParams) => {
     /* -------------------------------
      ⭐ IMPORTANT FILTER
      -------------------------------- */
-    const matchesImportant = !filterImportantMessages || message.isImportant;
+    const matchesImportant =
+      !filterImportantMessages || (message.isImportant ?? false);
 
     return matchesSearch && matchesImportant;
   }, [message, searchQuery, filterImportantMessages]);

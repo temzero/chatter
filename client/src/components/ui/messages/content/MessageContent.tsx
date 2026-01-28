@@ -3,22 +3,21 @@ import Linkify from "linkify-react";
 import RenderMultipleAttachments from "@/components/ui/attachments/RenderMultipleAttachments";
 import ForwardedMessagePreview from "@/components/ui/messages/ForwardMessagePreview";
 import { MessageResponse } from "@/shared/types/responses/message.response";
-import { getMessageAttachments } from "@/stores/messageAttachmentStore";
 import { handleQuickReaction } from "@/common/utils/message/quickReaction";
+import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 
 interface MessageBubbleProps {
-  message: MessageResponse;
   isMe: boolean;
-  currentUserId?: string;
+  message: MessageResponse;
+  attachments?: AttachmentResponse[];
 }
 
 const MessageContent: React.FC<MessageBubbleProps> = ({
-  message,
   isMe,
-  currentUserId,
+  message,
+  attachments,
 }) => {
   const isForwardMessage = message.forwardedFromMessage;
-  const attachments = getMessageAttachments(message.chatId, message.id);
 
   return (
     <>
@@ -60,7 +59,6 @@ const MessageContent: React.FC<MessageBubbleProps> = ({
         <ForwardedMessagePreview
           message={message}
           originalSender={message.forwardedFromMessage?.sender}
-          currentUserId={currentUserId}
           isMe={isMe}
         />
       )}

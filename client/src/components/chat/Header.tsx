@@ -138,7 +138,7 @@ const Header: React.FC<ChatHeaderProps> = ({
         <motion.div
           key={chat.id}
           className={clsx(
-            "flex items-center cursor-pointer transition-all",
+            "flex items-center gap-1 cursor-pointer transition-all",
             "hover:bg-(--primary-green) hover:text-white hover:p-0.5 hover:custom-border hover:shadow-2xl",
             isDirect ? "rounded-full" : "rounded-xl",
           )}
@@ -148,8 +148,8 @@ const Header: React.FC<ChatHeaderProps> = ({
           onClick={toggleSidebarInfo}
         >
           <ChatAvatar chat={chat} type="header" isBlocked={isBlockedByMe} />
-          <div id="chat-name" className="px-2">
-            <h1 className="text-xl font-bold leading-none px-2 py-1 rounded-full backdrop-blur">
+          <div id="chat-name" className="p-1 mr-1 rounded-full backdrop-blur custom-border">
+            <h1 className="text-xl font-bold leading-none">
               {chat.type === ChatType.SAVED
                 ? t("chat_header.saved")
                 : chat.name}

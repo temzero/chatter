@@ -11,7 +11,7 @@ import Messages from "./Messages";
 import ChannelMessages from "./ChannelMessages";
 import { ChatType } from "@/shared/types/enums/chat-type.enum";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
-import { useMessagesAutoScroll } from "@/common/hooks/useMessagesAutoScroll";
+import { useMessagesAutoScroll } from "@/common/hooks/message/useMessagesAutoScroll";
 import { useIsHideTypingIndicator } from "@/stores/settingsStore";
 
 interface ChatBoxProps {

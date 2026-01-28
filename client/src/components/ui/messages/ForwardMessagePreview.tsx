@@ -6,26 +6,27 @@ import type {
   MessageResponse,
   SenderResponse,
 } from "@/shared/types/responses/message.response";
+import { getCurrentUserId } from "@/stores/authStore";
+import { getMessageAttachments } from "@/stores/messageAttachmentStore";
 
 interface ForwardedMessagePreviewProps {
   message?: MessageResponse;
   originalSender?: SenderResponse;
-  currentUserId?: string;
   isMe: boolean;
 }
 
 const ForwardedMessagePreview: React.FC<ForwardedMessagePreviewProps> = ({
   message,
   originalSender,
-  currentUserId,
   isMe,
 }) => {
   const { t } = useTranslation();
   if (!message) return null;
+  const currentUserId = getCurrentUserId();
   const isOriginalFromMe = originalSender?.id === currentUserId;
 
   const content = message.forwardedFromMessage?.content ?? message.content;
-  const attachments = message.attachments;
+  const attachments = getMessageAttachments(message.chatId, message.id);
 
   return (
     <>
@@ -39,7 +40,7 @@ const ForwardedMessagePreview: React.FC<ForwardedMessagePreviewProps> = ({
           <RenderMultipleAttachments
             chatId={message.chatId}
             messageId={message.id}
-            // attachments={attachments}
+            attachments={attachments}
           />
         )}
         {content && <p className="italic">{content}</p>}

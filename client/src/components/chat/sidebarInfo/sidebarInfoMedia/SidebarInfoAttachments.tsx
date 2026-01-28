@@ -35,6 +35,7 @@ const SidebarInfoAttachments: React.FC = () => {
   const selectedAttachmentType = attachmentOptions[selectedIndex]
     ?.value as AttachmentType;
   const attachments = useActiveChatAttachments();
+  console.log('attachments', attachments)
 
   // Track hasMore per type
   const hasMoreAttachments = useHasMoreForType(
