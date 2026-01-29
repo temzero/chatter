@@ -11,6 +11,10 @@ export const SIDEBAR_INFO_ATTACHMENT_ITEMS = [
     icon: "movie",
   },
   {
+    id: AttachmentType.PDF,
+    icon: "picture_as_pdf",
+  },
+  {
     id: AttachmentType.FILE,
     icon: "description",
   },

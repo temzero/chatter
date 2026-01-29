@@ -11,6 +11,7 @@
       "cancel_request": "リクエストをキャンセル",
       "clear_selection": "選択をクリア",
       "close": "閉じる",
+      "download": "ダウンロード",
       "delete": "削除",
       "decline": "拒否",
       "edit": "編集",
@@ -68,7 +69,8 @@
       "from_user": "{{name}}から",
       "sent_at": "{{date}} に送信",
       "report": "レポート",
-      "feedback": "フィードバック"
+      "feedback": "フィードバック",
+      "file_not_supported": "サポートされていないファイルです！"
     },
     "options": {
       "all": "すべて",

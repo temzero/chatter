@@ -11,6 +11,7 @@
       "cancel_request": "Hủy yêu cầu",
       "clear_selection": "Xóa lựa chọn",
       "close": "Đóng",
+      "download": "Tải xuống",
       "delete": "Xóa",
       "decline": "Từ chối",
       "edit": "Chỉnh sửa",
@@ -68,7 +69,8 @@
       "from_user": "từ {{name}}",
       "sent_at": "Gửi lúc {{date}}",
       "report": "Báo cáo",
-      "feedback": "Phản hồi"
+      "feedback": "Phản hồi",
+      "file_not_supported": "Tệp không được hỗ trợ!"
     },
     "options": {
       "all": "Tất cả",

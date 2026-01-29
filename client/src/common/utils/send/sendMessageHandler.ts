@@ -115,9 +115,7 @@ export async function sendMessage({
 
     chatWebSocketService.sendMessage(messagePayload);
 
-    useMessageStore.getState().updateMessageById(messageId, {
-      status: MessageStatus.SENT,
-    });
+    // STATUS: SEND updated via chatSocketListener
 
     onSuccess?.();
   } catch (error) {

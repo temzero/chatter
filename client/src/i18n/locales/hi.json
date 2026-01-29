@@ -11,6 +11,7 @@
       "cancel_request": "अनुरोध रद्द करें",
       "clear_selection": "चयन साफ़ करें",
       "close": "बंद करें",
+      "download": "डाउनलोड",
       "delete": "हटाएं",
       "decline": "अस्वीकार करें",
       "edit": "संपादित करें",
@@ -68,7 +69,8 @@
       "from_user": "{{name}} की ओर से",
       "sent_at": "{{date}} पर भेजा गया",
       "report": "रिपोर्ट",
-      "feedback": "प्रतिक्रिया"
+      "feedback": "प्रतिक्रिया",
+      "file_not_supported": "फ़ाइल समर्थित नहीं है!"
     },
     "options": {
       "all": "सभी",

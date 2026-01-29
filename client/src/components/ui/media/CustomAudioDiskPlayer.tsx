@@ -200,7 +200,7 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
 
     // -------------------- JSX --------------------
     return (
-      <div className="relative flex flex-col items-center gap-10 p-2">
+      <div className="relative flex flex-col items-center gap-10 p-2 outline-none">
         <div className="relative">
           <div
             id="disk"
@@ -266,7 +266,7 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
           </div>
 
           <button
-            className="aspect-square absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full! border-16 border-(--border-color)"
+            className="aspect-square absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full! border-16 border-(--border-color) outline-none"
             style={{ width: diskHoleSize, zIndex: 1 }}
             onClick={(e) => {
               e.stopPropagation();

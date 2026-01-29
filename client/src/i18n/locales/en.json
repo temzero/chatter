@@ -11,6 +11,7 @@
       "cancel_request": "Cancel Request",
       "clear_selection": "Clear Selection",
       "close": "Close",
+      "download": "Download",
       "delete": "Delete",
       "decline": "Decline",
       "edit": "Edit",
@@ -69,7 +70,8 @@
       "from_user": "from {{name}}",
       "sent_at": "Sent at {{date}}",
       "report": "Report",
-      "feedback": "Feedback"
+      "feedback": "Feedback",
+      "file_not_supported": "File not supported!"
     },
     "options": {
       "all": "All",

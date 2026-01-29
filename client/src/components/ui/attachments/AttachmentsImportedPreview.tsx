@@ -2,8 +2,8 @@ import * as React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { getFileIcon } from "@/common/utils/getFileIcon";
-import { ProcessedAttachment } from "@/shared/types/responses/message-attachment.response";
 import { PuffLoader } from "react-spinners";
+import { ProcessedAttachment } from "@/shared/types/requests/attachment-upload.request";
 
 interface AttachmentsImportedPreviewProps {
   processedAttachments: ProcessedAttachment[];

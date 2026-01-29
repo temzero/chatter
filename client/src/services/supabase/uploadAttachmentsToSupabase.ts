@@ -1,5 +1,8 @@
 import i18next from "i18next";
-import { AttachmentUploadRequest, ProcessedAttachment } from "@/shared/types/requests/attachment-upload.request";
+import {
+  AttachmentUploadRequest,
+  ProcessedAttachment,
+} from "@/shared/types/requests/attachment-upload.request";
 import { handleError } from "@/common/utils/error/handleError";
 import { toast } from "react-toastify";
 // import { useAttachmentStore } from "@/stores/messageAttachmentStore";
@@ -10,7 +13,7 @@ import { uploadThumbnailToSupabase } from "./uploadThumbnailToSupabse";
  * Upload processed attachments to Supabase (files + thumbnails)
  */
 export async function uploadAttachmentsToSupabase(
-  processedAttachments: ProcessedAttachment[]
+  processedAttachments: ProcessedAttachment[],
 ): Promise<AttachmentUploadRequest[]> {
   console.log("processedAttachments:", processedAttachments);
 
@@ -51,8 +54,7 @@ export async function uploadAttachmentsToSupabase(
     //   URL.revokeObjectURL(attachment.url);
     // }
 
-    return {
-      id: attachment.id, // Include id for tracking
+    const attachmentToUpload: AttachmentUploadRequest = {
       url: fileUrl,
       type,
       filename: file.name,
@@ -64,6 +66,8 @@ export async function uploadAttachmentsToSupabase(
       height: attachment.height,
       duration: attachment.duration,
     };
+
+    return attachmentToUpload;
   });
 
   try {

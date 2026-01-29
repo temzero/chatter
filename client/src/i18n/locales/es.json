@@ -11,6 +11,7 @@
       "cancel_request": "Cancelar solicitud",
       "clear_selection": "Borrar selección",
       "close": "Cerrar",
+      "download": "Descargar",
       "delete": "Eliminar",
       "decline": "Rechazar",
       "edit": "Editar",
@@ -68,7 +69,8 @@
       "from_user": "de {{name}}",
       "sent_at": "Enviado el {{date}}",
       "report": "Informe",
-      "feedback": "Comentarios"
+      "feedback": "Comentarios",
+      "file_not_supported": "¡Archivo no compatible!"
     },
     "options": {
       "all": "Todo",

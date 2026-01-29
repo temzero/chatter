@@ -2,12 +2,12 @@ import React, { useState, useEffect } from "react";
 import { getCloseModal, setOpenMediaModal } from "@/stores/modalStore";
 import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
-import { formatFileSize } from "@/common/utils/format/formatFileSize";
-import { handleDownload } from "@/common/utils/handleDownload";
-import { getFileIcon } from "@/common/utils/getFileIcon";
 import CustomAudioPlayer from "@/components/ui/media/CustomAudioPlayer";
 import CustomVideoPlayer from "@/components/ui/media/CustomVideoPlayer";
 import { LinkPreviewAttachment } from "./LinkPreviewAttachment";
+import FileAttachment from "./FileAttachment";
+import PdfAttachment from "./PdfAttachment";
+import NotSupportedAttachment from "./NotSupportAttachment";
 
 // Helper function to calculate greatest common divisor (GCD)
 const gcd = (a: number, b: number): number => {
@@ -36,7 +36,6 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
   previewMode = true,
 }) => {
   const closeModal = getCloseModal();
-
   const [aspectRatio, setAspectRatio] = useState<string | null>(null);
 
   useEffect(() => {
@@ -144,43 +143,30 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
         />
       );
 
-    case AttachmentType.FILE:
-      return renderContainer(
-        <div
-          className={`w-full p-2 flex items-center gap-2 custom-border-b overflow-hidden ${
-            type === "info" ? "text-purple-400" : "text-black bg-purple-400"
-          }`}
-          onClick={handleOpenModal}
-        >
-          <div
-            className="flex items-center gap-2 group cursor-pointer transition-all pointer-events-auto"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDownload(attachment);
-            }}
-          >
-            <i className="material-symbols-outlined text-3xl! transition-all group-hover:scale-110 group-hover:font-bold">
-              {getFileIcon(attachment.filename)}
-            </i>
-            <h1 className="truncate transition-all group-hover:font-bold">
-              {attachment.filename || "Download File"}
-            </h1>
-          </div>
-          <p className="opacity-70 ml-auto pointer-events-none">
-            ({attachment.size ? formatFileSize(attachment.size) : "???"})
-          </p>
-        </div>,
-      );
-
     case AttachmentType.LINK:
       return <LinkPreviewAttachment attachment={attachment} />;
 
+    case AttachmentType.PDF:
+      return renderContainer(
+        <PdfAttachment
+          attachment={attachment}
+          type={type}
+          onOpenModal={handleOpenModal}
+        />,
+      );
+
+    case AttachmentType.FILE:
+      return renderContainer(
+        <FileAttachment
+          attachment={attachment}
+          type={type}
+          onOpenModal={handleOpenModal}
+        />,
+      );
+
     default:
       return renderContainer(
-        <div className="flex items-center p-2 rounded text-6xl!">
-          <span className="material-symbols-outlined">attach_file</span>
-          <p className="text-lg">Type not supported</p>
-        </div>,
+        <NotSupportedAttachment attachment={attachment} />,
       );
   }
 };

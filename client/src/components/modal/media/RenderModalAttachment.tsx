@@ -1,9 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
-import { formatFileSize } from "@/common/utils/format/formatFileSize";
-import { handleDownload } from "@/common/utils/handleDownload";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
-import { getFileIcon } from "@/common/utils/getFileIcon";
 import CustomAudioDiskPlayer, {
   AudioPlayerRef,
 } from "@/components/ui/media/CustomAudioDiskPlayer";
@@ -13,6 +10,9 @@ import { ModalImageViewer } from "./ModalImageViewer";
 import { useMediaAttachmentKeys } from "@/common/hooks/keyEvent/useMediaAttachmentKeys";
 import { LinkPreviewAttachment } from "@/components/ui/attachments/LinkPreviewAttachment";
 import mediaManager from "@/services/media/mediaManager";
+import { FilePreviewAttachment } from "@/components/ui/attachments/FilePreviewAttachment";
+import { PdfPreviewAttachment } from "@/components/ui/attachments/PdfPreviewAttachment";
+import NotSupportedAttachment from "@/components/ui/attachments/NotSupportAttachment";
 
 export const RenderModalAttachment = ({
   attachment,
@@ -115,32 +115,9 @@ export const RenderModalAttachment = ({
         />
       );
 
-    case AttachmentType.FILE:
+    case AttachmentType.PDF:
       return (
-        <motion.div
-          className="mx-auto my-auto rounded-lg flex flex-col items-center border-4 border-(--border-color)"
-          animate={mediaViewerAnimations.rotation(rotation)}
-        >
-          <div className="flex flex-col justify-center items-center px-4">
-            <i className="material-symbols-outlined text-8xl! px-4">
-              {getFileIcon(attachment.filename)}
-            </i>
-            <div className="text-lg font-medium text-center">
-              {attachment.filename || "File"}
-            </div>
-            <div className="text-sm text-gray-400">
-              {attachment.size
-                ? formatFileSize(attachment.size)
-                : "Unknown size"}
-            </div>
-          </div>
-          <button
-            onClick={() => handleDownload(attachment)}
-            className="mt-4 w-full py-2 text-blue-500 hover:underline font-semibold rounded-none border-t-2 border-(--border-color)"
-          >
-            Download
-          </button>
-        </motion.div>
+        <PdfPreviewAttachment attachment={attachment} rotation={rotation} />
       );
 
     case AttachmentType.LINK:
@@ -148,12 +125,11 @@ export const RenderModalAttachment = ({
         <LinkPreviewAttachment attachment={attachment} className="w-[50%]" />
       );
 
-    default:
+    case AttachmentType.FILE:
       return (
-        <div className="flex items-center p-2 rounded text-6xl!">
-          <span className="material-symbols-outlined">attach_file</span>
-          <p className="text-lg">Type not supported</p>
-        </div>
+        <FilePreviewAttachment attachment={attachment} rotation={rotation} />
       );
+    default:
+      return <NotSupportedAttachment attachment={attachment} />;
   }
 };

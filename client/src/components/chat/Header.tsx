@@ -148,7 +148,7 @@ const Header: React.FC<ChatHeaderProps> = ({
           onClick={toggleSidebarInfo}
         >
           <ChatAvatar chat={chat} type="header" isBlocked={isBlockedByMe} />
-          <div id="chat-name" className="p-1 mr-1 rounded-full backdrop-blur custom-border">
+          <div id="chat-name" className="p-1 mr-1 rounded-full backdrop-blur">
             <h1 className="text-xl font-bold leading-none">
               {chat.type === ChatType.SAVED
                 ? t("chat_header.saved")

@@ -74,8 +74,6 @@ const Message: React.FC<MessageProps> = ({
     isReplyToThisMessage,
   } = messageData;
 
-  console.log("messageAttachments", message.content, attachments);
-
   // System message check
   if (message?.systemEvent) {
     return (

@@ -11,6 +11,7 @@
       "cancel_request": "取消请求",
       "clear_selection": "清除选择",
       "close": "关闭",
+      "download": "下载",
       "delete": "删除",
       "decline": "拒绝",
       "edit": "编辑",
@@ -68,7 +69,8 @@
       "from_user": "来自{{name}}",
       "sent_at": "发送于 {{date}}",
       "report": "报告",
-      "feedback": "反馈"
+      "feedback": "反馈",
+      "file_not_supported": "不支持的文件！"
     },
     "options": {
       "all": "所有",

@@ -168,7 +168,7 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
 
           <i
             className={clsx(
-              "material-symbols-outlined filled relative z-10",
+              "material-symbols-outlined filled relative hover:text-(--primary-color) z-10",
               isCompact ? "text-3xl!" : "text-4xl!",
             )}
           >

@@ -62,6 +62,7 @@ export class MessageService {
     senderId: string,
     dto: CreateMessageDto & { call?: Call },
   ): Promise<Message> {
+    // console.log('create message', dto);
     if (dto.replyToMessageId) {
       ErrorResponse.badRequest(BadRequestError.USE_CREATE_REPLY_MESSAGE);
     }

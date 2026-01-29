@@ -11,6 +11,7 @@
       "cancel_request": "ยกเลิกคำขอ",
       "clear_selection": "ล้างการเลือก",
       "close": "ปิด",
+      "download": "ดาวน์โหลด",
       "delete": "ลบ",
       "decline": "ปฏิเสธ",
       "edit": "แก้ไข",
@@ -68,7 +69,8 @@
       "from_user": "จาก{{name}}",
       "sent_at": "ส่งเมื่อ {{date}}",
       "report": "รายงาน",
-      "feedback": "ข้อเสนอแนะ"
+      "feedback": "ข้อเสนอแนะ",
+      "file_not_supported": "ไฟล์ไม่ได้รับการรองรับ!"
     },
     "options": {
       "all": "ทั้งหมด",

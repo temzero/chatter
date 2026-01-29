@@ -25,48 +25,22 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
   if (!attachments) {
     attachments = getMessageAttachments(chatId, messageId);
   }
+  const attachmentLength = attachments.length;
 
-  const categorizedAttachments = React.useMemo(() => {
-    if (!attachments || attachments.length === 0) {
-      return null;
-    }
-
-    // Single-pass categorization
-    const categorized = {
-      links: [] as AttachmentResponse[],
-      visual: [] as AttachmentResponse[],
-      audio: [] as AttachmentResponse[],
-      pdf: [] as AttachmentResponse[],
-      file: [] as AttachmentResponse[],
-    };
-
-    for (const attachment of attachments) {
-      switch (attachment.type) {
-        case AttachmentType.LINK:
-          categorized.links.push(attachment);
-          break;
-        case AttachmentType.IMAGE:
-        case AttachmentType.VIDEO:
-          categorized.visual.push(attachment);
-          break;
-        case AttachmentType.AUDIO:
-          categorized.audio.push(attachment);
-          break;
-        case AttachmentType.PDF:
-          categorized.pdf.push(attachment);
-          break;
-        case AttachmentType.FILE:
-          categorized.file.push(attachment);
-          break;
-      }
-    }
-
-    return categorized;
-  }, [attachments]);
-
-  if (!categorizedAttachments) {
+  if (!attachments || attachmentLength === 0) {
     return null;
   }
+
+  // Categorize attachments by type
+  const linkPreviews = attachments.filter(
+    (a) => a.type === AttachmentType.LINK,
+  );
+  const visualMedia = attachments.filter(
+    (m) => m.type === AttachmentType.IMAGE || m.type === AttachmentType.VIDEO,
+  );
+  const audioMedia = attachments.filter((a) => a.type === AttachmentType.AUDIO);
+  const pdfMedia = attachments.filter((a) => a.type === AttachmentType.PDF);
+  const fileMedia = attachments.filter((a) => a.type === AttachmentType.FILE);
 
   const RenderAttachmentGrid = (items: AttachmentResponse[], cols: number) => (
     <div
@@ -84,7 +58,6 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
   );
 
   const renderVisualMedia = () => {
-    const visualMedia = categorizedAttachments.visual;
     const count = visualMedia.length;
 
     switch (count) {
@@ -148,7 +121,7 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
 
   return (
     <div key={messageId} className={`flex flex-col w-full ${className}`}>
-      {categorizedAttachments.links.map((attachment) => (
+      {linkPreviews.map((attachment) => (
         <LinkPreviewAttachment
           attachment={attachment}
           isInitAnimation={true}
@@ -160,11 +133,7 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
       {renderVisualMedia()}
 
       {/* Non-visual attachment */}
-      {[
-        ...categorizedAttachments.audio,
-        ...categorizedAttachments.pdf,
-        ...categorizedAttachments.file,
-      ].map((mediaItem) => (
+      {[...audioMedia, ...pdfMedia, ...fileMedia].map((mediaItem) => (
         <div key={mediaItem.id}>
           <RenderAttachment attachment={mediaItem} />
         </div>
@@ -173,4 +142,4 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
   );
 };
 
-export default React.memo(RenderMultipleAttachments);
+export default RenderMultipleAttachments;

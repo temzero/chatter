@@ -57,9 +57,9 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
       requestAnimationFrame(() => {
         updateInputHeight();
       });
-      clearAllAttachments()
+      clearAllAttachments();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatId]);
 
   useEffect(() => {
@@ -138,13 +138,20 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
 
     // Get content before clearing
     const content = inputRef.current?.value || "";
+    const reversedAttachments = [...processedAttachments].reverse();
+
+    // Clear UI immediately for better UX
+    if (inputRef.current) inputRef.current.value = "";
+    setHasTextContent(false);
+    updateInputHeight();
+    clearAttachmentsInput();
 
     // Send message using handler directly with processed attachments
     sendMessage({
       chatId,
       myMemberId,
       content,
-      processedAttachments,
+      processedAttachments: reversedAttachments,
       replyToMessageId,
       onSuccess: () => {
         // clearAllAttachments();
@@ -158,13 +165,20 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
         clearAllAttachments();
       },
     });
-
-    // Clear UI immediately for better UX
-    if (inputRef.current) inputRef.current.value = "";
-    setHasTextContent(false);
-    updateInputHeight();
-    clearAttachmentsInput();
-  }, [hasTextContent, hasAttachment, resetPreview, chatId, myMemberId, processedAttachments, replyToMessageId, clearAttachmentsInput, clearTypingState, setDraftMessage, closeModal, clearAllAttachments]);
+  }, [
+    hasTextContent,
+    hasAttachment,
+    resetPreview,
+    chatId,
+    myMemberId,
+    processedAttachments,
+    replyToMessageId,
+    clearAttachmentsInput,
+    clearTypingState,
+    setDraftMessage,
+    closeModal,
+    clearAllAttachments,
+  ]);
 
   const handleKeyDown = useCallback(
     async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -199,13 +213,13 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
 
       try {
         // Process the files using the attachment processor
-        await processAttachments(newFiles, chatId);
+        await processAttachments(newFiles);
       } catch (error) {
         console.error("Error processing attachments:", error);
         // Handle error (show toast, etc.)
       }
     },
-    [chatId, processAttachments],
+    [processAttachments],
   );
 
   // Update the paste handler to use processed attachments
