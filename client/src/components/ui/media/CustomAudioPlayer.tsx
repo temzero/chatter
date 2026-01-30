@@ -182,7 +182,7 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
               className="flex items-center hover:opacity-80 min-w-0" // Added min-w-0
               onClick={onOpenModal}
             >
-              {attachmentType === AttachmentType.AUDIO && (
+              {/* {attachmentType === AttachmentType.AUDIO && (
                 <i
                   className={clsx(
                     "material-symbols-outlined shrink-0", // Added flex-shrink-0
@@ -191,7 +191,7 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
                 >
                   music_note
                 </i>
-              )}
+              )} */}
               <h1
                 className={clsx(
                   "truncate whitespace-nowrap min-w-0", // Added truncate, whitespace-nowrap, min-w-0

@@ -44,10 +44,10 @@ export const PdfPreviewAttachment = ({
 
   return (
     <motion.div
-      className="mx-auto my-auto rounded-lg flex flex-col border-4 border-(--border-color) max-w-4xl w-full"
+      className="mx-auto my-auto rounded-lg overflow-hidden flex flex-col border-4 border-(--border-color) max-w-4xl w-full"
       animate={mediaViewerAnimations.rotation(rotation)}
     >
-      <div className="relative w-full h-[450px] rounded overflow-hidden">
+      <div className="relative w-full h-[500px] rounded overflow-hidden custom-border">
         {/* Loading/Error overlay - should be above iframe */}
         {(isLoading || isError) && (
           <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-black/20 z-10">
@@ -73,13 +73,13 @@ export const PdfPreviewAttachment = ({
       </div>
 
       {/* PDF Info */}
-      <div className="w-full flex items-center justify-between p-2 gap-2 bg-(--glass-panel-color)">
-        <div className="flex gap-2">
+      <div className="w-full rounded flex items-center justify-between p-1 text-(--text-color) bg-(--glass-panel-color)">
+        <div className="flex items-center gap-2">
           <i className="material-symbols-outlined text-3xl! select-none">
             picture_as_pdf
           </i>
-          <div className="truncate text-xl font-medium select-text">
-            {attachment.filename || "???"}
+          <div className="truncate text-xl select-text">
+            {(attachment.filename || "???").replace(/\.[^/.]+$/, "")}
           </div>
         </div>
 

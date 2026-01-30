@@ -19,7 +19,7 @@ export const FilePreviewAttachment = ({
 
   return (
     <motion.div
-      className="mx-auto my-auto p-4 rounded-lg flex flex-col gap-4 items-center border-4 border-(--border-color)"
+      className="mx-auto my-auto p-4 rounded-lg flex flex-col gap-5 items-center border-4 border-(--border-color)"
       animate={mediaViewerAnimations.rotation(rotation)}
     >
       <div className="flex flex-col justify-center items-center">

@@ -4,31 +4,14 @@ import {
   useImperativeHandle,
   useReducer,
   useMemo,
+  useState,
 } from "react";
 import { useIsMobile } from "@/stores/deviceStore";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { formatDuration } from "@/common/utils/format/formatDuration";
 import { useAudioDiskDrag } from "@/common/hooks/keyEvent/useAudioDiskDrag";
 import musicDiskCover from "@/assets/image/disk.png";
-
-// Audio manager
-let currentAudio: HTMLAudioElement | null = null;
-const playAudio = (audio: HTMLAudioElement) => {
-  if (currentAudio && currentAudio !== audio) {
-    currentAudio.pause();
-    currentAudio.currentTime = 0;
-    currentAudio.dispatchEvent(new Event("pause"));
-  }
-  currentAudio = audio;
-  audio.play();
-};
-
-const pauseAudio = (audio: HTMLAudioElement) => {
-  if (currentAudio === audio) {
-    audio.pause();
-    currentAudio = null;
-  }
-};
+import mediaManager from "@/services/media/mediaManager";
 
 // -------------------- useReducer --------------------
 interface AudioState {
@@ -91,33 +74,42 @@ export interface AudioPlayerRef {
 const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
   ({ mediaUrl, fileName, cdImageUrl, goNext }, ref) => {
     const isMobile = useIsMobile();
+    console.log("cdImageUrl", fileName, cdImageUrl);
 
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const diskRef = useRef<HTMLDivElement | null>(null);
 
     const [state, dispatch] = useReducer(audioReducer, initialState);
-
-    // Dragging state
+    const [isDraggingState, setIsDraggingState] = useState(false);
     const isDragging = useRef(false);
     const lastAngle = useRef(0);
+
+    const togglePlayPause = () => {
+      if (!audioRef.current) return;
+
+      if (state.isPlaying) {
+        mediaManager.stop(audioRef.current);
+        dispatch({ type: "pause" });
+      } else {
+        mediaManager.play(audioRef.current);
+        dispatch({ type: "play" });
+      }
+    };
 
     useImperativeHandle(ref, () => ({
       play: () => {
         if (audioRef.current) {
-          playAudio(audioRef.current);
+          mediaManager.play(audioRef.current);
           dispatch({ type: "play" });
         }
       },
       pause: () => {
         if (audioRef.current) {
-          pauseAudio(audioRef.current);
+          mediaManager.stop(audioRef.current);
           dispatch({ type: "pause" });
         }
       },
-      togglePlayPause: () => {
-        // eslint-disable-next-line react-hooks/immutability
-        togglePlayPause(); // just call the function above
-      },
+      togglePlayPause: () => togglePlayPause(),
     }));
 
     // -------------------- Handlers --------------------
@@ -132,18 +124,6 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
       dispatch({ type: "setTime", payload: audioRef.current.currentTime });
     };
 
-    const togglePlayPause = () => {
-      if (!audioRef.current) return;
-
-      if (state.isPlaying) {
-        pauseAudio(audioRef.current);
-        dispatch({ type: "pause" });
-      } else {
-        playAudio(audioRef.current);
-        dispatch({ type: "play" });
-      }
-    };
-
     const getAngle = (x: number, y: number) => {
       if (!diskRef.current) return 0;
       const rect = diskRef.current.getBoundingClientRect();
@@ -154,6 +134,7 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
 
     const handleDragStart = (clientX: number, clientY: number) => {
       isDragging.current = true;
+      setIsDraggingState(true);
       lastAngle.current = getAngle(clientX, clientY);
     };
 
@@ -179,22 +160,22 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
 
       audioRef.current.currentTime = Math.min(
         Math.max(newTime, 0),
-        state.duration
+        state.duration,
       );
       dispatch({ type: "setTime", payload: audioRef.current.currentTime });
     };
 
     const handleDragEnd = () => {
       isDragging.current = false;
-      if (audioRef.current && state.isPlaying) audioRef.current.play();
+      setIsDraggingState(false);
+      if (audioRef.current && state.isPlaying)
+        mediaManager.play(audioRef.current);
     };
 
     const handleEnded = () => {
       dispatch({ type: "reset" });
       if (audioRef.current) audioRef.current.currentTime = 0;
-      if (goNext) {
-        goNext();
-      }
+      if (goNext) goNext();
     };
 
     // -------------------- Event Listeners --------------------
@@ -215,22 +196,22 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
           ?.replace(/\.[^/.]+$/, "")
           .split("")
           .join(" ") || "",
-      [fileName]
+      [fileName],
     );
 
     // -------------------- JSX --------------------
     return (
-      <div className="relative flex flex-col items-center gap-10 p-2">
+      <div className="relative flex flex-col items-center gap-10 p-2 outline-none">
         <div className="relative">
           <div
             id="disk"
             ref={diskRef}
-            className="relative aspect-square rounded-full! overflow-hidden border-4 border-(--border-color) flex items-center justify-center text-white cursor-grab"
+            className="relative aspect-square rounded-full! overflow-hidden border-4 border-(--border-color) flex items-center justify-center text-white cursor-grab bg-(--panel-color) will-change-transform transform-gpu"
             style={{
               width: diskSize,
               transform: `rotate(${(state.progress / 100) * 360}deg)`,
               transition:
-                state.isPlaying && !isDragging.current
+                state.isPlaying && !isDraggingState
                   ? "transform 0.1s linear"
                   : "none",
               WebkitMaskImage: `radial-gradient(circle at center, transparent ${
@@ -251,9 +232,15 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
             }}
           >
             <img
-              src={cdImageUrl ?? musicDiskCover}
+              // src={cdImageUrl ?? musicDiskCover}
+              src={
+                cdImageUrl &&
+                /\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i.test(cdImageUrl)
+                  ? cdImageUrl
+                  : musicDiskCover
+              }
               alt="CD"
-              className="w-full h-full object-cover rounded-full!"
+              className="w-full h-full object-fill! rounded-full!"
             />
 
             {fileName && (
@@ -266,8 +253,11 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
                 </defs>
                 <text
                   fill="white"
-                  fontSize="11"
-                  opacity="0.8"
+                  stroke="black" /* Border color */
+                  strokeWidth="2" /* Border thickness */
+                  paintOrder="stroke" /* Draw stroke behind fill */
+                  fontSize="12"
+                  fontWeight="semibold"
                   textAnchor="start"
                   transform="rotate(-90 100 100)"
                 >
@@ -283,7 +273,7 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
           </div>
 
           <button
-            className="aspect-square absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full! border-16 border-(--border-color)"
+            className="aspect-square absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full! border-16 border-(--border-color) outline-none"
             style={{ width: diskHoleSize, zIndex: 1 }}
             onClick={(e) => {
               e.stopPropagation();
@@ -315,7 +305,7 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
 
         <audio
           ref={audioRef}
-          src={mediaUrl}
+          src={mediaUrl || undefined}
           onTimeUpdate={handleTimeUpdate}
           onLoadedMetadata={handleLoadedMetadata}
           onEnded={handleEnded}
@@ -324,7 +314,7 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
         </audio>
       </div>
     );
-  }
+  },
 );
 
 export default CustomAudioDiskPlayer;
