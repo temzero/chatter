@@ -10,33 +10,21 @@ import { formatDuration } from "@/common/utils/format/formatDuration";
 import mediaManager from "@/services/media/mediaManager";
 import { motion } from "framer-motion";
 
-interface CustomAudioPlayerProps {
+interface CustomVoicePlayerProps {
   mediaUrl: string;
-  thumbnailUrl?: string;
   fileName?: string;
-  isDisplayName?: boolean;
-  isCompact?: boolean;
+  showDuration?: boolean;
   onOpenModal?: () => void;
 }
 
-export interface AudioPlayerRef {
+export interface VoicePlayerRef {
   play: () => void;
   pause: () => void;
   togglePlayPause: () => void;
 }
 
-const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
-  (
-    {
-      mediaUrl,
-      thumbnailUrl,
-      fileName,
-      isDisplayName = true,
-      isCompact = false,
-      onOpenModal,
-    },
-    ref,
-  ) => {
+const CustomVoicePlayer = forwardRef<VoicePlayerRef, CustomVoicePlayerProps>(
+  ({ mediaUrl, showDuration = true, onOpenModal }, ref) => {
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -121,63 +109,74 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
     return (
       <div
         className={clsx(
-          "w-full p-2 flex items-center custom-border-b overflow-hidden",
-          isCompact ? "max-w-60px" : "gap-1",
+          "w-full flex items-center overflow-hidden p-1 min-w-[300px]",
         )}
       >
         <button
           onClick={togglePlayPause}
           className={clsx(
-            "relative w-12 h-12 rounded-full!",
-            "overflow-hidden hover:opacity-70 w-12 h-12 border-2 border-(--input-border-color)",
+            "relative rounded-full!",
+            "overflow-hidden hover:opacity-70 border-2 border-(--input-border-color) w-10 h-10",
           )}
         >
-          {thumbnailUrl && (
-            <motion.img
-              src={thumbnailUrl}
-              className="absolute inset-0 w-full h-full object-fill!"
-              alt=""
+          <motion.div
+            className="absolute inset-0 w-full h-full flex items-center justify-center"
+            animate={{
+              backgroundColor: isPlaying
+                ? [
+                    "var(--glass-panel-color)",
+                    "var(--primary-green-glow)",
+                    "var(--glass-panel-color)",
+                  ]
+                : "transparent",
+            }}
+            transition={{
+              duration: 3,
+              repeat: isPlaying ? Infinity : 0,
+              repeatType: "reverse",
+              ease: "easeInOut",
+            }}
+          >
+            <motion.i
+              className={clsx("material-symbols-outlined filled text-3xl!")}
               animate={{
-                rotate: isPlaying ? 360 : 0,
+                color: isPlaying ? "var(--primary-green-dark)" : "currentColor",
               }}
               transition={{
-                duration: 28,
-                ease: "linear",
-                repeat: Infinity,
+                duration: 0.3,
+                ease: "easeInOut",
               }}
-            />
-          )}
-
-          <div
-            style={{ zIndex: 9 }}
-            className={`w-7 h-7 flex items-center justify-center overflow-hidden rounded-full ${isPlaying ? "text-(--primary-color)" : "text-(--text-color)"} ${thumbnailUrl ? "bg-(--background-color)" : ""}`}
-          >
-            <i
-              className={clsx("material-symbols-outlined filled leading-none", {
-                "text-3xl!": thumbnailUrl,
-                "text-4xl!": !thumbnailUrl,
-              })}
             >
-              {isPlaying ? "pause" : "play_arrow"}
-            </i>
-          </div>
+              mic
+            </motion.i>
+          </motion.div>
         </button>
 
-        <div className="flex flex-col gap-2 flex-1 min-w-0 cursor-pointer">
-          {isDisplayName && (
+        <div className="flex flex-col gap-1 flex-1 min-w-0 ml-2">
+          <div className="flex items-center justify-between gap-2 w-full">
+            <input
+              type="range"
+              value={progress}
+              onChange={handleSeek}
+              className="w-full h-1.5 rounded-full! cursor-pointer appearance-none custom-slider"
+              style={{
+                background: `linear-gradient(to right, var(--primary-green-glow) ${progress}%, var(--input-border-color) ${progress}%)`,
+              }}
+            />
+          </div>
+
+          {showDuration && (
             <div
-              className="flex items-center hover:opacity-80 min-w-0"
               onClick={onOpenModal}
+              className="flex text-xs opacity-50 whitespace-nowrap shrink-0 hover:opacity-100"
             >
-              <h1
-                className={clsx(
-                  "truncate whitespace-nowrap min-w-0",
-                  isCompact && "text-xs",
-                )}
-                title={fileName}
-              >
-                {fileName || "Audio file"}
-              </h1>
+              {currentTime > 0 && (
+                <span>
+                  {formatDuration(currentTime)}
+                  <span className="px-0.5">/</span>
+                </span>
+              )}
+              {duration > 0 && formatDuration(duration)}
             </div>
           )}
 
@@ -190,44 +189,13 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
               setIsPlaying(false);
             }}
           >
-            <source src={mediaUrl} type={getAudioType(fileName || "")} />
+            <source src={mediaUrl} type="audio/mpeg" />
             Your browser does not support the audio element.
           </audio>
-
-          {!isCompact && (
-            <div className="flex items-center justify-between gap-2">
-              <input
-                type="range"
-                value={progress}
-                onChange={handleSeek}
-                className="w-full h-1 rounded-full! cursor-pointer appearance-none custom-slider"
-                style={{
-                  background: `linear-gradient(to right, var(--primary-green-glow) ${progress}%, gray ${progress}%)`,
-                }}
-              />
-              <div className="flex text-xs opacity-50 whitespace-nowrap shrink-0">
-                {currentTime > 0 && (
-                  <span>
-                    {formatDuration(currentTime)}
-                    <span className="px-0.5">/</span>
-                  </span>
-                )}
-                {duration > 0 && formatDuration(duration)}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     );
   },
 );
 
-const getAudioType = (fileName: string) => {
-  if (fileName.endsWith(".mp3")) return "audio/mpeg";
-  if (fileName.endsWith(".m4a")) return "audio/x-m4a";
-  if (fileName.endsWith(".wav")) return "audio/wav";
-  if (fileName.endsWith(".ogg")) return "audio/ogg";
-  return "audio/mpeg";
-};
-
-export default CustomAudioPlayer;
+export default CustomVoicePlayer;

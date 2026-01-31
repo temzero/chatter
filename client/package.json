@@ -16,6 +16,7 @@
     "@microlink/react": "^5.5.23",
     "@radix-ui/react-switch": "^1.2.6",
     "@supabase/supabase-js": "^2.86.0",
+    "@wavesurfer/react": "^1.0.12",
     "axios": "^1.13.2",
     "buffer": "^6.0.3",
     "dotenv": "^17.2.3",
@@ -37,6 +38,7 @@
     "socket.io-client": "^4.8.1",
     "tailwind-scrollbar-hide": "^4.0.0",
     "uuid": "^13.0.0",
+    "wavesurfer.js": "^7.12.1",
     "zustand": "^5.0.8"
   },
   "devDependencies": {

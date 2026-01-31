@@ -20,14 +20,16 @@ export const MediaViewerBottomInfo = ({
   return (
     <>
       {isMobile || (
-        <div className="absolute bottom-0 left-0 right-0 flex justify-between items-center p-2 pointer-events-none">
+        <div className="absolute bottom-0 left-0 right-0 flex justify-between items-center p-2"
+        style={{zIndex:9}}
+        >
           {attachment.filename && (
-            <div className="text-white/60 truncate max-w-[50%]">
+            <div className="text-white/60 truncate max-w-[50%] select-text!">
               {attachment.filename}
             </div>
           )}
           {attachment.size && (
-            <div className="text-white/60">
+            <div className="text-white/60 select-text!">
               {formatFileSize(attachment.size)}
             </div>
           )}

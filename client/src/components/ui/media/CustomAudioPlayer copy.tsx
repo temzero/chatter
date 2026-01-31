@@ -6,12 +6,14 @@ import React, {
   useImperativeHandle,
   useEffect,
 } from "react";
+import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { formatDuration } from "@/common/utils/format/formatDuration";
 import mediaManager from "@/services/media/mediaManager";
 import { motion } from "framer-motion";
 
 interface CustomAudioPlayerProps {
   mediaUrl: string;
+  attachmentType: AttachmentType.AUDIO | AttachmentType.VOICE;
   thumbnailUrl?: string;
   fileName?: string;
   isDisplayName?: boolean;
@@ -29,6 +31,7 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
   (
     {
       mediaUrl,
+      attachmentType,
       thumbnailUrl,
       fileName,
       isDisplayName = true,
@@ -148,33 +151,77 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
             />
           )}
 
-          <div
-            style={{ zIndex: 9 }}
-            className={`w-7 h-7 flex items-center justify-center overflow-hidden rounded-full ${isPlaying ? "text-(--primary-color)" : "text-(--text-color)"} ${thumbnailUrl ? "bg-(--background-color)" : ""}`}
-          >
-            <i
-              className={clsx("material-symbols-outlined filled leading-none", {
-                "text-3xl!": thumbnailUrl,
-                "text-4xl!": !thumbnailUrl,
-              })}
+          {attachmentType === AttachmentType.VOICE && (
+            <motion.div
+              className="absolute inset-0 w-full h-full flex items-center justify-center object-fill"
+              animate={{
+                backgroundColor: isPlaying
+                  ? [
+                      "var(--glass-panel-color)",
+                      "var(--primary-green-glow)",
+                      "var(--glass-panel-color)",
+                    ]
+                  : "transparent",
+              }}
+              transition={{
+                duration: 3,
+                repeat: isPlaying ? Infinity : 0,
+                repeatType: "reverse",
+                ease: "easeInOut",
+              }}
             >
-              {isPlaying ? "pause" : "play_arrow"}
-            </i>
-          </div>
+              <motion.i
+                className={clsx("material-symbols-outlined filled text-5xl! ", {
+                  "filled text-5xl! mt-3": isPlaying,
+                  "mt-2": !isPlaying,
+                })}
+                animate={{
+                  color: isPlaying
+                    ? "var(--primary-green-dark)"
+                    : "currentColor",
+                }}
+                transition={{
+                  duration: 0.3,
+                  ease: "easeInOut",
+                }}
+              >
+                mic
+              </motion.i>
+            </motion.div>
+          )}
+
+          {attachmentType !== AttachmentType.VOICE && (
+            <div
+              style={{ zIndex: 9 }}
+              className={`w-7 h-7 flex items-center justify-center overflow-hidden rounded-full ${isPlaying ? "text-(--primary-color)" : "text-(--text-color)"} ${thumbnailUrl ? "bg-(--background-color)" : ""}`}
+            >
+              <i
+                className={clsx(
+                  "material-symbols-outlined filled leading-none",
+                  {
+                    "text-3xl!": thumbnailUrl,
+                    "text-4xl!": !thumbnailUrl,
+                  },
+                )}
+              >
+                {isPlaying ? "pause" : "play_arrow"}
+              </i>
+            </div>
+          )}
         </button>
 
         <div className="flex flex-col gap-2 flex-1 min-w-0 cursor-pointer">
           {isDisplayName && (
             <div
-              className="flex items-center hover:opacity-80 min-w-0"
+              className="flex items-center hover:opacity-80 min-w-0" // Added min-w-0
               onClick={onOpenModal}
             >
               <h1
                 className={clsx(
-                  "truncate whitespace-nowrap min-w-0",
+                  "truncate whitespace-nowrap min-w-0", // Added truncate, whitespace-nowrap, min-w-0
                   isCompact && "text-xs",
                 )}
-                title={fileName}
+                title={fileName} // Add title for tooltip on hover
               >
                 {fileName || "Audio file"}
               </h1>

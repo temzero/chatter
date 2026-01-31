@@ -62,7 +62,7 @@ export const MediaViewerButtons = ({
         style={{ zIndex: 2 }}
       >
         {isMe ? (
-          <div className="text-(--primary-green) font-semibold">
+          <div className="bg-(--primary-green-glow) text-(--primary-green-dark) font-semibold custom-border rounded px-1">
             {t("common.you")}
           </div>
         ) : (

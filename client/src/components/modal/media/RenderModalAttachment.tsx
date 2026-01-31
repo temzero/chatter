@@ -13,6 +13,7 @@ import mediaManager from "@/services/media/mediaManager";
 import { FilePreviewAttachment } from "@/components/ui/attachments/FilePreviewAttachment";
 import { PdfPreviewAttachment } from "@/components/ui/attachments/PdfPreviewAttachment";
 import NotSupportedAttachment from "@/components/ui/attachments/NotSupportAttachment";
+import CustomAudioVoicePlayer from "@/components/ui/media/CustomAudioVoicePlayer";
 
 export const RenderModalAttachment = ({
   attachment,
@@ -103,17 +104,27 @@ export const RenderModalAttachment = ({
         />
       );
 
+    case AttachmentType.VOICE:
     case AttachmentType.AUDIO:
       return (
-        <CustomAudioDiskPlayer
-          attachmentType={AttachmentType.AUDIO}
+        <CustomAudioVoicePlayer
           mediaUrl={attachment.url}
           fileName={attachment.filename ?? ""}
-          cdImageUrl={attachment.thumbnailUrl ?? ""}
           ref={audioPlayerRef}
           goNext={onMediaEnd}
         />
       );
+
+    // case AttachmentType.AUDIO:
+    //   return (
+    //     <CustomAudioDiskPlayer
+    //       mediaUrl={attachment.url}
+    //       fileName={attachment.filename ?? ""}
+    //       cdImageUrl={attachment.thumbnailUrl ?? ""}
+    //       ref={audioPlayerRef}
+    //       goNext={onMediaEnd}
+    //     />
+    //   );
 
     case AttachmentType.PDF:
       return (

@@ -8,6 +8,7 @@ import { LinkPreviewAttachment } from "./LinkPreviewAttachment";
 import FileAttachment from "./FileAttachment";
 import PdfAttachment from "./PdfAttachment";
 import NotSupportedAttachment from "./NotSupportAttachment";
+import CustomVoicePlayer from "../media/CustomVoicePlayer";
 
 // Helper function to calculate greatest common divisor (GCD)
 const gcd = (a: number, b: number): number => {
@@ -131,17 +132,25 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
         />,
       );
 
+    case AttachmentType.VOICE:
     case AttachmentType.AUDIO:
       return (
-        <CustomAudioPlayer
-          type={type}
+        <CustomVoicePlayer
           mediaUrl={attachment.url}
-          thumbnailUrl={attachment.thumbnailUrl ?? undefined}
           fileName={attachment.filename ?? undefined}
-          attachmentType={AttachmentType.AUDIO}
           onOpenModal={handleOpenModal}
         />
       );
+
+    // case AttachmentType.AUDIO:
+    //   return (
+    //     <CustomAudioPlayer
+    //       mediaUrl={attachment.url}
+    //       thumbnailUrl={attachment.thumbnailUrl ?? undefined}
+    //       fileName={attachment.filename ?? undefined}
+    //       onOpenModal={handleOpenModal}
+    //     />
+    //   );
 
     case AttachmentType.LINK:
       return <LinkPreviewAttachment attachment={attachment} />;

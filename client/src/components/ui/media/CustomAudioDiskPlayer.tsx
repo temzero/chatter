@@ -10,7 +10,6 @@ import {
   useEffect,
 } from "react";
 import { useIsMobile } from "@/stores/deviceStore";
-import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { formatDuration } from "@/common/utils/format/formatDuration";
 import { useAudioDiskDrag } from "@/common/hooks/keyEvent/useAudioDiskDrag";
 import musicDiskCover from "@/assets/image/disk.png";
@@ -181,7 +180,7 @@ const DiskControls = memo(
           togglePlayPause();
         }}
       >
-        <i className="material-symbols-outlined filled text-6xl! opacity-80">
+        <i className="material-symbols-outlined filled text-6xl! opacity-80 leading-none">
           {isPlaying ? "pause" : "play_arrow"}
         </i>
       </button>
@@ -210,7 +209,6 @@ const TimeDisplay = memo(({ currentTime, duration }: TimeDisplayProps) => (
 interface AudioDiskPlayerProps {
   mediaUrl: string;
   fileName?: string;
-  attachmentType: AttachmentType.AUDIO | AttachmentType.VOICE;
   cdImageUrl?: string;
   goNext?: () => void;
 }
