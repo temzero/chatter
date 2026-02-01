@@ -1,21 +1,17 @@
 import {
-  useRef,
   forwardRef,
-  useState,
-  useEffect,
-  useCallback,
   useImperativeHandle,
+  useCallback,
+  useEffect,
 } from "react";
-import WaveSurfer from "wavesurfer.js";
 import { formatDuration } from "@/common/utils/format/formatDuration";
-import mediaManager from "@/services/media/mediaManager";
-
-const PROGRESS_COLOR = "rgb(134, 239, 172)"; // green
-const WAVE_COLOR = "#555";
+import AudioWaveVisualizer from "../AudioWaveVisualizer";
+import { useAudioPlayer } from "@/common/hooks/useAudioPlayer";
 
 interface AudioVoicePlayerProps {
   mediaUrl: string;
   fileName?: string;
+  initCurrentTime?: number;
   goNext?: () => void;
 }
 
@@ -23,6 +19,7 @@ export interface AudioPlayerRef {
   play: () => void;
   pause: () => void;
   togglePlayPause: () => void;
+  seekTo: (time: number) => void;
 }
 
 interface SkipButtonConfig {
@@ -36,113 +33,93 @@ interface SkipButtonConfig {
 const CustomAudioVoicePlayer = forwardRef<
   AudioPlayerRef,
   AudioVoicePlayerProps
->(({ mediaUrl, fileName, goNext }, ref) => {
-  const waveformRef = useRef<HTMLDivElement>(null);
-  const waveSurferRef = useRef<WaveSurfer | null>(null);
-
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-
-  /* -------------------- INIT WAVESURFER -------------------- */
-  useEffect(() => {
-    if (!waveformRef.current) return;
-
-    const ws = WaveSurfer.create({
-      container: waveformRef.current,
-      url: mediaUrl,
-      height: 120,
-      barWidth: 3,
-      barGap: 5,
-      barRadius: 3,
-      cursorWidth: 3,
-      normalize: true,
-      waveColor: WAVE_COLOR,
-      progressColor: PROGRESS_COLOR,
-    });
-
-    waveSurferRef.current = ws;
-
-    ws.on("ready", () => {
-      setDuration(ws.getDuration());
-    });
-
-    ws.on("timeupdate", (time) => {
-      setCurrentTime(time);
-    });
-
-    ws.on("play", () => {
-      setIsPlaying(true);
-      // Register with mediaManager when WaveSurfer starts playing
-      mediaManager.play(ws);
-    });
-
-    ws.on("pause", () => {
-      setIsPlaying(false);
-      // Remove from mediaManager when paused
-      if (mediaManager) {
-        // We'll handle this in togglePlayPause instead
-      }
-    });
-
-    ws.on("finish", () => {
-      setIsPlaying(false);
-      ws.seekTo(0);
-    });
-
-    return () => {
-      ws.destroy();
-      waveSurferRef.current = null;
-    };
-  }, [mediaUrl, goNext]);
-
-  /* -------------------- CONTROLS -------------------- */
-  const togglePlayPause = useCallback(() => {
-    const ws = waveSurferRef.current;
-    if (!ws) return;
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    ws.isPlaying() ? ws.pause() : ws.play();
-  }, []);
-
+>(({ mediaUrl, fileName, initCurrentTime = 0, goNext }, ref) => {
+  const {
+    audioRef,
+    isPlaying,
+    currentTime,
+    duration,
+    play,
+    pause,
+    togglePlayPause,
+    seekTo,
+    setDuration,
+    setCurrentTime,
+    setIsPlaying
+  } = useAudioPlayer({
+    onEnded: goNext,
+    initialCurrentTime: initCurrentTime,
+  });
+  // Expose methods to parent ref
   useImperativeHandle(
     ref,
     () => ({
-      play: () => {
-        const ws = waveSurferRef.current;
-        if (ws) {
-          mediaManager.play(ws);
-          ws.play();
-          setIsPlaying(true);
-        }
-      },
-      pause: () => {
-        const ws = waveSurferRef.current;
-        if (ws) {
-          mediaManager.stop(ws);
-          ws.pause();
-          setIsPlaying(false);
-        }
-      },
+      play,
+      pause,
       togglePlayPause,
+      seekTo,
+      get audioElement() {
+        return audioRef.current;
+      },
     }),
-    [togglePlayPause],
+    [play, pause, togglePlayPause, seekTo, audioRef],
   );
 
-  const skipTime = useCallback((seconds: number) => {
-    const ws = waveSurferRef.current;
-    if (!ws) return;
+  // -------------------- Event Handlers --------------------
+  const handleLoadedMetadata = useCallback(() => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
+      if (initCurrentTime > 0) {
+        audioRef.current.currentTime = initCurrentTime;
+        setCurrentTime(initCurrentTime);
+      }
+    }
+  }, [initCurrentTime]);
 
-    const newTime = Math.max(
-      0,
-      Math.min(ws.getCurrentTime() + seconds, ws.getDuration()),
-    );
-
-    ws.setTime(newTime);
-    setCurrentTime(newTime);
+  const handleTimeUpdate = useCallback(() => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+    }
   }, []);
 
-  /* -------------------- UI HELPERS -------------------- */
+  const handleEnded = useCallback(() => {
+    setIsPlaying(false);
+    setCurrentTime(0);
+    if (goNext) goNext();
+  }, [goNext]);
+
+  // Listen to audio events
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+
+    audio.addEventListener("play", handlePlay);
+    audio.addEventListener("pause", handlePause);
+    audio.addEventListener("timeupdate", handleTimeUpdate);
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audio.addEventListener("ended", handleEnded);
+
+    return () => {
+      audio.removeEventListener("play", handlePlay);
+      audio.removeEventListener("pause", handlePause);
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
+      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      audio.removeEventListener("ended", handleEnded);
+    };
+  }, [handleTimeUpdate, handleLoadedMetadata, handleEnded]);
+
+  // -------------------- Controls --------------------
+  const skipTime = (seconds: number) => {
+    if (!audioRef.current) return;
+    const newTime = Math.max(0, Math.min(currentTime + seconds, duration));
+    audioRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
+  };
+
+  // -------------------- UI Config --------------------
   const skipForwardButtons: SkipButtonConfig[] = [
     {
       seconds: 5,
@@ -181,7 +158,7 @@ const CustomAudioVoicePlayer = forwardRef<
     <button
       key={config.label}
       onClick={() => skipTime(config.seconds)}
-      className="w-14 h-14 rounded-full! flex items-center justify-center bg-black/50 text-white transition-colors"
+      className="w-14 h-14 rounded-full! flex items-center justify-center bg-black/50 text-white hover:text-(--primary-green-glow) hover:bg-black/70 transition-colors"
       aria-label={config.ariaLabel}
       title={config.title}
     >
@@ -191,28 +168,37 @@ const CustomAudioVoicePlayer = forwardRef<
 
   const displayName = fileName?.replace(/\.[^/.]+$/, "") || "Voice message";
 
-  /* -------------------- RENDER -------------------- */
+  // -------------------- RENDER --------------------
   return (
     <div className="flex flex-col justify-between gap-4 h-[80%] w-[60%]">
       {/* Header */}
       <div className="w-full flex flex-col items-center justify-center">
-        <span className={`material-symbols-outlined filled text-7xl!`}>
-          mic
-        </span>
-
+        <span className="material-symbols-outlined filled text-7xl!">mic</span>
         {fileName && (
-          <div className="truncate select-text" title={fileName}>
+          <div className="truncate select-text mt-2" title={fileName}>
             {displayName}
           </div>
         )}
       </div>
 
-      {/* Waveform */}
-      <div ref={waveformRef} className="w-full cursor-pointer" />
+      {/* AudioWave Visualizer - NO ref */}
+      <div className="w-full h-48">
+        <AudioWaveVisualizer
+          mediaUrl={mediaUrl}
+          isPlaying={isPlaying}
+          currentTime={currentTime}
+          duration={duration} // Pass duration to visualizer
+          height={192}
+          color="#00ffaa"
+          onSeek={seekTo}
+        />
+      </div>
 
-      {/* Time */}
-      <div className="text-3xl! whitespace-nowrap w-full flex justify-center mb-6 select-text leading-none">
-        {formatDuration(currentTime)} / {formatDuration(duration)}
+      {/* Time Display */}
+      <div className="text-3xl! whitespace-nowrap w-full flex justify-center mb-4 select-text leading-none">
+        <span className="text-gray-300">{formatDuration(currentTime)}</span>
+        <span className="mx-2 text-gray-500">/</span>
+        <span className="text-gray-400">{formatDuration(duration)}</span>
       </div>
 
       {/* Controls */}
@@ -223,10 +209,9 @@ const CustomAudioVoicePlayer = forwardRef<
 
         <button
           onClick={togglePlayPause}
-          className={`relative w-16 h-16 rounded-full! text-(--background-color)
-            flex items-center justify-center
-            hover:opacity-80 border border-(--border-color)
-            ${isPlaying ? "bg-(--primary-color)" : "bg-(--text-color)"}`}
+          className={`relative w-16 h-16 rounded-full! text-white hover:text-(--primary-green-glow)
+            flex items-center justify-center hover:opacity-90 
+            transition-all duration-200 bg-black/50`}
           aria-label={isPlaying ? "Pause" : "Play"}
         >
           <i className="material-symbols-outlined filled text-6xl!">
@@ -238,6 +223,17 @@ const CustomAudioVoicePlayer = forwardRef<
           {skipForwardButtons.map(renderSkipButton)}
         </div>
       </div>
+
+      {/* SINGLE Audio Element */}
+      <audio
+        ref={audioRef}
+        src={mediaUrl}
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+        onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={handleLoadedMetadata}
+        onEnded={handleEnded}
+      />
     </div>
   );
 });

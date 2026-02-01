@@ -37,6 +37,8 @@ export function getAttachmentIcons(
         ? "location_on"
         : att.type === AttachmentType.LINK
         ? "link"
+        : att.type === AttachmentType.VOICE
+        ? "mic"
         : getFileIcon(fileName);
 
     if (!seen.has(icon)) {

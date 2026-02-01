@@ -1,173 +1,142 @@
-import clsx from "clsx";
-import React, {
-  useState,
-  useRef,
+import {
   forwardRef,
   useImperativeHandle,
   useEffect,
-  useCallback,
 } from "react";
-import WaveSurfer from "wavesurfer.js";
+import clsx from "clsx";
 import { formatDuration } from "@/common/utils/format/formatDuration";
-import mediaManager from "@/services/media/mediaManager";
+import AudioWaveVisualizer from "../AudioWaveVisualizer";
+import { setOpenMediaModal } from "@/stores/modalStore";
+import { useAudioPlayer } from "@/common/hooks/useAudioPlayer";
 
 interface CustomVoicePlayerProps {
+  attachmentId: string;
   mediaUrl: string;
   fileName?: string;
   showDuration?: boolean;
-  onOpenModal?: () => void;
 }
 
 export interface VoicePlayerRef {
   play: () => void;
   pause: () => void;
   togglePlayPause: () => void;
+  seekTo: (time: number) => void;
 }
 
-const PROGRESS_COLOR = "rgb(134, 239, 172)"; // green
-const WAVE_COLOR = "#555";
-
 const CustomVoicePlayer = forwardRef<VoicePlayerRef, CustomVoicePlayerProps>(
-  ({ mediaUrl, showDuration = true, onOpenModal }, ref) => {
-    const waveformRef = useRef<HTMLDivElement>(null);
-    const waveSurferRef = useRef<WaveSurfer | null>(null);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [currentTime, setCurrentTime] = useState(0);
-    const [duration, setDuration] = useState(0);
+  ({ attachmentId, mediaUrl, showDuration = true }, ref) => {
+    const {
+      audioRef,
+      isPlaying,
+      currentTime,
+      duration,
+      play,
+      pause,
+      togglePlayPause,
+      seekTo,
+      setDuration,
+      setCurrentTime,
+      setIsPlaying,
+    } = useAudioPlayer();
 
-    /* -------------------- WAVESURFER INIT -------------------- */
-    useEffect(() => {
-      if (!waveformRef.current) return;
-
-      const ws = WaveSurfer.create({
-        container: waveformRef.current,
-        height: 32, // This controls the waveform height
-        barWidth: 2,
-        barGap: 1,
-        barRadius: 2,
-        cursorWidth: 1,
-        cursorColor: PROGRESS_COLOR,
-        normalize: true,
-        waveColor: WAVE_COLOR,
-        progressColor: PROGRESS_COLOR,
-        url: mediaUrl,
-        interact: true,
-        dragToSeek: true,
-      });
-
-      waveSurferRef.current = ws;
-
-      ws.on("ready", () => {
-        setDuration(ws.getDuration());
-      });
-
-      ws.on("timeupdate", (time) => {
-        setCurrentTime(time);
-      });
-
-      ws.on("play", () => {
-        setIsPlaying(true);
-        // Register with mediaManager when WaveSurfer starts playing
-        mediaManager.play(ws);
-      });
-
-      ws.on("pause", () => {
-        setIsPlaying(false);
-        // Remove from mediaManager when paused
-        if (mediaManager) {
-          // We'll handle this in togglePlayPause instead
-        }
-      });
-
-      ws.on("finish", () => {
-        setIsPlaying(false);
-        ws.seekTo(0);
-      });
-
-      return () => {
-        ws.destroy();
-        waveSurferRef.current = null;
-      };
-    }, [mediaUrl]);
-
-    const togglePlayPause = useCallback(
-      (e?: React.MouseEvent<HTMLButtonElement>) => {
-        e?.stopPropagation();
-        const ws = waveSurferRef.current;
-        if (!ws) return;
-
-        if (isPlaying) {
-          ws.pause();
-        } else {
-          ws.play();
-        }
-      },
-      [isPlaying],
+    // Expose methods to parent ref
+    useImperativeHandle(
+      ref,
+      () => ({
+        play,
+        pause,
+        togglePlayPause,
+        seekTo,
+        get audioElement() {
+          return audioRef.current;
+        },
+      }),
+      [play, pause, togglePlayPause, seekTo, audioRef],
     );
 
-    useImperativeHandle(ref, () => ({
-      play: () => {
-        const ws = waveSurferRef.current;
-        if (ws) {
-          mediaManager.play(ws);
-          ws.play();
-          setIsPlaying(true);
-        }
-      },
-      pause: () => {
-        const ws = waveSurferRef.current;
-        if (ws) {
-          mediaManager.stop(ws);
-          ws.pause();
-          setIsPlaying(false);
-        }
-      },
-      togglePlayPause,
-    }));
 
-    /* -------------------- RENDER -------------------- */
+
+    // Listen to audio events
+    useEffect(() => {
+      const audio = audioRef.current;
+      if (!audio) return;
+
+      const handlePlayEvent = () => setIsPlaying(true);
+      const handlePauseEvent = () => setIsPlaying(false);
+      const handleTimeUpdateEvent = () => setCurrentTime(audio.currentTime);
+      const handleLoadedMetadataEvent = () => setDuration(audio.duration || 0);
+      const handleEndedEvent = () => {
+        setIsPlaying(false);
+        setCurrentTime(0);
+      };
+
+      audio.addEventListener("play", handlePlayEvent);
+      audio.addEventListener("pause", handlePauseEvent);
+      audio.addEventListener("timeupdate", handleTimeUpdateEvent);
+      audio.addEventListener("loadedmetadata", handleLoadedMetadataEvent);
+      audio.addEventListener("ended", handleEndedEvent);
+
+      return () => {
+        audio.removeEventListener("play", handlePlayEvent);
+        audio.removeEventListener("pause", handlePauseEvent);
+        audio.removeEventListener("timeupdate", handleTimeUpdateEvent);
+        audio.removeEventListener("loadedmetadata", handleLoadedMetadataEvent);
+        audio.removeEventListener("ended", handleEndedEvent);
+      };
+    }, []);
+
+    const handleOpenModal = () => {
+      setOpenMediaModal(attachmentId, currentTime);
+    };
+
     return (
       <div
-        className={clsx(
-          "w-full flex items-center p-2 min-w-[300px] custom-border-b",
-          // "h-16", // Fixed overall height
-        )}
+        key={attachmentId}
+        onClick={handleOpenModal}
+        className={clsx("w-full flex p-1 items-center min-w-[300px]")}
       >
-        {/* Play/Pause Button */}
         <button
-          onClick={togglePlayPause}
+          onClick={(e) => {
+            e.stopPropagation();
+            togglePlayPause();
+          }}
           className={clsx(
             "relative rounded-full!",
-            "overflow-hidden hover:opacity-70 border-2 border-(--input-border-color)",
-            "w-10 h-10 shrink-0 flex items-center justify-center",
+            "overflow-hidden hover:opacity-70 border-2 border-(--input-border-color) bg-(--border-color)",
+            "w-10 h-10 ml-1 mr-2 shrink-0 flex items-center justify-center",
           )}
           aria-label={isPlaying ? "Pause" : "Play"}
         >
-          <i className="material-symbols-outlined filled text-3xl!">
+          <i className="material-symbols-outlined filled text-4xl!">
             {isPlaying ? "pause" : "play_arrow"}
           </i>
         </button>
 
+        <div className="relative flex flex-col w-[400px] h-12">
+          <AudioWaveVisualizer
+            mediaUrl={mediaUrl}
+            isPlaying={isPlaying}
+            currentTime={currentTime}
+            duration={duration}
+            height={48}
+            barCount={120}
+            barSpacing={1}
+            onSeek={seekTo}
+          />
 
-
-        <div className="flex flex-col w-full ml-3 relative">
-          {/* Waveform Container - FIXED with CSS */}
-          <div
-          ref={waveformRef}
-          className="w-full cursor-pointer border relative"
-          // style={{
-          //   height: "32px", // Fixed height that matches WaveSurfer height
-          //   minHeight: "32px",
-          //   maxHeight: "32px",
-          //   // overflow: "hidden", // Prevent any overflow
-          // }}
-        />
-
-          {/* Duration Display */}
-          {showDuration && (
+          {showDuration && duration > 1 && (
             <div
-              onClick={onOpenModal}
-              className="text-xs opacity-50 whitespace-nowrap shrink-0 hover:opacity-100 cursor-pointer select-none mt-1"
+              onClick={handleOpenModal}
+              className={clsx(
+                // base
+                "absolute -bottom-0.5 -right-0.5 shrink-0 whitespace-nowrap rounded-lg px-1 py-0.5 text-sm font-semibold",
+                "bg-black/30 text-white backdrop-blur-xl",
+                "transition-all",
+
+                // hover
+                "hover:text-lg hover:font-bold",
+                "hover:custom-border hover:bg-(--primary-green-glow) hover:text-black",
+              )}
             >
               {currentTime > 0 && (
                 <span>
@@ -175,10 +144,18 @@ const CustomVoicePlayer = forwardRef<VoicePlayerRef, CustomVoicePlayerProps>(
                   <span className="px-0.5">/</span>
                 </span>
               )}
-              {duration > 0 && formatDuration(duration)}
+              {duration > 0 ? formatDuration(duration) : "--:--"}
             </div>
           )}
         </div>
+
+        {/* AUDIO ELEMENT INSIDE COMPONENT */}
+        <audio
+          ref={audioRef}
+          src={mediaUrl}
+          preload="metadata"
+          style={{ display: "none" }}
+        />
       </div>
     );
   },

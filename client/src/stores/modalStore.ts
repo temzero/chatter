@@ -5,6 +5,7 @@ import { ModalType } from "@/common/enums/modalType";
 interface ModalState {
   type: ModalType | null;
   data: Record<string, unknown> | null;
+  attachmentId: string | null; // Separate from data
   focusMessageId: string | null;
   replyToMessageId: string | null;
 }
@@ -12,13 +13,13 @@ interface ModalState {
 interface ModalActions {
   openModal: (type: ModalType, data?: Record<string, unknown>) => void;
   closeModal: () => void;
-
   clearModalStore: () => void;
 }
 
 const initialState: ModalState = {
   type: null,
   data: null,
+  attachmentId: null,
   focusMessageId: null,
   replyToMessageId: null,
 };
@@ -30,7 +31,6 @@ export const useModalStore = create<ModalState & ModalActions>((set, get) => ({
   openModal: (type, data = {}) => set({ type, data }),
 
   closeModal: () => {
-    // ✅ use get() to access actions/state
     get().clearModalStore();
   },
 
@@ -47,11 +47,17 @@ export { ModalType };
 export const useModalType = () => useModalStore((state) => state.type);
 export const getModalType = () => useModalStore.getState().type;
 export const getModalData = () => useModalStore.getState().data;
+
 export const useReplyToMessageId = () =>
   useModalStore((state) => state.replyToMessageId);
+
 export const useMediaModalData = () => {
   const data = useModalStore((state) => state.data);
-  return data?.attachmentId as string | undefined;
+  const attachmentId = useModalStore((state) => state.attachmentId);
+  return {
+    attachmentId,
+    currentTime: data?.currentTime as number | undefined,
+  };
 };
 
 // ---- MESSAGE STATE HOOKS ----
@@ -65,10 +71,12 @@ export const useIsReplyToThisMessage = (messageId: string) =>
 export const getOpenModal = () => useModalStore.getState().openModal;
 export const getCloseModal = () => useModalStore.getState().closeModal;
 
-export const setOpenMediaModal = (attachmentId: string) => {
+export const setOpenMediaModal = (attachmentId: string, currentTime?: number) => {
+  useModalStore.getState().clearModalStore(); 
   useModalStore.setState({
     type: ModalType.MEDIA,
-    data: { attachmentId },
+    attachmentId,
+    data: { currentTime },
   });
 };
 

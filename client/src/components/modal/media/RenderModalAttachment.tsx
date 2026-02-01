@@ -19,11 +19,13 @@ export const RenderModalAttachment = ({
   attachment,
   rotation = 0,
   isCurrent = false,
+  initCurrentTime = 0,
   onMediaEnd,
 }: {
   attachment: AttachmentResponse;
   rotation?: number;
   isCurrent?: boolean;
+  initCurrentTime?: number;
   onMediaEnd?: () => void;
 }) => {
   const [isHorizontalAspectRatio, setIsHorizontalAspectRatio] = useState<
@@ -91,6 +93,11 @@ export const RenderModalAttachment = ({
           onLoadedMetadata={(e) => {
             const video = e.currentTarget;
             setIsHorizontalAspectRatio(video.videoWidth > video.videoHeight);
+
+            // Set the current time when metadata is loaded
+            if (initCurrentTime > 0) {
+              video.currentTime = initCurrentTime;
+            }
           }}
           className={`object-contain rounded ${
             isHorizontalAspectRatio === null
@@ -108,9 +115,10 @@ export const RenderModalAttachment = ({
     case AttachmentType.AUDIO:
       return (
         <CustomAudioVoicePlayer
+          ref={audioPlayerRef}
           mediaUrl={attachment.url}
           fileName={attachment.filename ?? ""}
-          ref={audioPlayerRef}
+          initCurrentTime={initCurrentTime}
           goNext={onMediaEnd}
         />
       );
@@ -118,10 +126,10 @@ export const RenderModalAttachment = ({
     // case AttachmentType.AUDIO:
     //   return (
     //     <CustomAudioDiskPlayer
+    //       ref={audioPlayerRef}
     //       mediaUrl={attachment.url}
     //       fileName={attachment.filename ?? ""}
     //       cdImageUrl={attachment.thumbnailUrl ?? ""}
-    //       ref={audioPlayerRef}
     //       goNext={onMediaEnd}
     //     />
     //   );

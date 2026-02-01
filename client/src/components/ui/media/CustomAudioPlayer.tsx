@@ -9,14 +9,16 @@ import React, {
 import { formatDuration } from "@/common/utils/format/formatDuration";
 import mediaManager from "@/services/media/mediaManager";
 import { motion } from "framer-motion";
+import { getAudioType } from "@/common/utils/getAudioType";
+import { setOpenMediaModal } from "@/stores/modalStore";
 
 interface CustomAudioPlayerProps {
+  attachmentId: string;
   mediaUrl: string;
   thumbnailUrl?: string;
   fileName?: string;
   isDisplayName?: boolean;
   isCompact?: boolean;
-  onOpenModal?: () => void;
 }
 
 export interface AudioPlayerRef {
@@ -28,12 +30,12 @@ export interface AudioPlayerRef {
 const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
   (
     {
+      attachmentId,
       mediaUrl,
       thumbnailUrl,
       fileName,
       isDisplayName = true,
       isCompact = false,
-      onOpenModal,
     },
     ref,
   ) => {
@@ -118,8 +120,14 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
       }
     };
 
+    const handleOpenModal = () => {
+      // Pass the currentTime to the onOpenModal callback
+      setOpenMediaModal(attachmentId, currentTime);
+    };
+
     return (
       <div
+        key={attachmentId}
         className={clsx(
           "w-full p-2 flex items-center custom-border-b overflow-hidden",
           isCompact ? "max-w-60px" : "gap-1",
@@ -167,7 +175,7 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
           {isDisplayName && (
             <div
               className="flex items-center hover:opacity-80 min-w-0"
-              onClick={onOpenModal}
+              onClick={handleOpenModal}
             >
               <h1
                 className={clsx(
@@ -221,13 +229,5 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
     );
   },
 );
-
-const getAudioType = (fileName: string) => {
-  if (fileName.endsWith(".mp3")) return "audio/mpeg";
-  if (fileName.endsWith(".m4a")) return "audio/x-m4a";
-  if (fileName.endsWith(".wav")) return "audio/wav";
-  if (fileName.endsWith(".ogg")) return "audio/ogg";
-  return "audio/mpeg";
-};
 
 export default CustomAudioPlayer;

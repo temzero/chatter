@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getCloseModal, setOpenMediaModal } from "@/stores/modalStore";
+import { setOpenMediaModal } from "@/stores/modalStore";
 import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import CustomAudioPlayer from "@/components/ui/media/CustomAudioPlayer";
@@ -36,7 +36,6 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
   type,
   previewMode = true,
 }) => {
-  const closeModal = getCloseModal();
   const [aspectRatio, setAspectRatio] = useState<string | null>(null);
 
   useEffect(() => {
@@ -91,17 +90,16 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
     setAspectRatio(calculateAspectRatio(width, height));
   };
 
-  const handleOpenModal = () => {
-    closeModal();
-    setOpenMediaModal(attachment.id);
-  };
-
   // Get appropriate source URL based on preview mode
   const getMediaUrl = () => {
     if (previewMode && attachment.thumbnailUrl) {
       return attachment.thumbnailUrl;
     }
     return attachment.url;
+  };
+
+  const handleOpenModal = () => {
+    setOpenMediaModal(attachment.id);
   };
 
   switch (attachment.type) {
@@ -136,15 +134,16 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
     case AttachmentType.AUDIO:
       return (
         <CustomVoicePlayer
+          attachmentId={attachment.id}
           mediaUrl={attachment.url}
           fileName={attachment.filename ?? undefined}
-          onOpenModal={handleOpenModal}
         />
       );
 
     // case AttachmentType.AUDIO:
     //   return (
     //     <CustomAudioPlayer
+    //         attachmentId={attachment.id}
     //       mediaUrl={attachment.url}
     //       thumbnailUrl={attachment.thumbnailUrl ?? undefined}
     //       fileName={attachment.filename ?? undefined}

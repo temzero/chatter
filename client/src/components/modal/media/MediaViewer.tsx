@@ -14,7 +14,10 @@ export const MediaViewer: React.FC = () => {
   const isMobile = useIsMobile();
   const closeModal = getCloseModal();
 
-  const currentAttachmentId = useMediaModalData();
+  const mediaModalData = useMediaModalData(); // Changed from currentAttachmentId
+  const currentAttachmentId = mediaModalData?.attachmentId; // Extract attachmentId
+  const initCurrentTime = mediaModalData?.currentTime; // Get duration
+  // const currentAttachmentId = useMediaModalData();
   const activeAttachments = useActiveChatAttachments();
 
   // ✅ Calculate initial index inline
@@ -202,6 +205,7 @@ export const MediaViewer: React.FC = () => {
               attachment={attachment}
               rotation={index === currentIndex ? rotation : 0}
               isCurrent={index === currentIndex}
+              initCurrentTime={initCurrentTime}
             />
           </motion.div>
         ))}

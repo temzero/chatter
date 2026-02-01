@@ -217,6 +217,7 @@ export interface AudioPlayerRef {
   play: () => void;
   pause: () => void;
   togglePlayPause: () => void;
+  seekTo: (time: number) => void;
 }
 
 const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
@@ -224,12 +225,6 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
     const isMobile = useIsMobile();
 
     const logRef = useRef<NodeJS.Timeout | null>(null);
-    // const logCdImageUrl = () => {
-    //   if (logRef.current) clearTimeout(logRef.current);
-    //   logRef.current = setTimeout(() => {
-    //     console.log("cdImageUrl", fileName, cdImageUrl);
-    //   }, 1000);
-    // };
 
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const diskRef = useRef<HTMLDivElement | null>(null); // =============== KEEP THIS ===============
@@ -251,6 +246,30 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
       }
     }, [state.isPlaying]);
 
+    // Add this function near your other handlers
+    const seekTo = useCallback(
+      (time: number) => {
+        if (!audioRef.current) return;
+
+        // Get current duration
+        const currentDuration = audioRef.current.duration || state.duration;
+
+        // Clamp time to valid range
+        const clampedTime = Math.max(
+          0,
+          Math.min(time, currentDuration || Infinity),
+        );
+
+        // Seek the audio element
+        audioRef.current.currentTime = clampedTime;
+
+        // Update state
+        dispatch({ type: "setTime", payload: clampedTime });
+      },
+      [state.duration],
+    );
+
+    // Then in useImperativeHandle:
     useImperativeHandle(
       ref,
       () => ({
@@ -267,8 +286,9 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
           }
         },
         togglePlayPause: () => togglePlayPause(),
+        seekTo: seekTo, // Use the seekTo function
       }),
-      [togglePlayPause],
+      [togglePlayPause, seekTo], // Add seekTo to dependencies
     );
 
     // -------------------- Handlers --------------------
