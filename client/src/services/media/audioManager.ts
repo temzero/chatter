@@ -11,6 +11,8 @@ import disconnectSound from "@/assets/sound/disconnect.mp3";
 import downloadSound from "@/assets/sound/download.mp3";
 import endCallSound from "@/assets/sound/end-call.mp3";
 import errorSound from "@/assets/sound/error.mp3";
+import recordStartSound from "@/assets/sound/record-start2.mp3";
+import recordEndSound from "@/assets/sound/record-end.mp3";
 import messageSound from "@/assets/sound/message-bubble.mp3";
 import myMessageSound from "@/assets/sound/message-own-bubble.mp3";
 import notificationSound from "@/assets/sound/bell.mp3";
@@ -37,6 +39,8 @@ export enum SoundType {
   CALL_CONNECTED = "call-connected",
   CALL_END = "call-end",
   DOWNLOAD = "download",
+  RECORD_START = "record-start",
+  RECORD_END = "record-end",
   USER_CONNECTED = "user-connected",
   USER_DISCONNECTED = "user-disconnected",
   NEW_MESSAGE = "new-message",
@@ -91,6 +95,8 @@ class AudioServiceImpl implements AudioService {
       [SoundType.CALL_CONNECTED]: activeSound,
       [SoundType.CALL_END]: endCallSound,
       [SoundType.DOWNLOAD]: downloadSound,
+      [SoundType.RECORD_START]: recordStartSound,
+      [SoundType.RECORD_END]: recordEndSound,
       [SoundType.USER_CONNECTED]: connectSound,
       [SoundType.USER_DISCONNECTED]: disconnectSound,
       [SoundType.NEW_MESSAGE]: messageSound,

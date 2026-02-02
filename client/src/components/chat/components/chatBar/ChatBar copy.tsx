@@ -1,266 +1,298 @@
-// import clsx from "clsx";
-// import React, { useRef, useEffect, useState, useCallback } from "react";
-// import { useMessageStore } from "@/stores/messageStore";
-// import { AnimatePresence } from "framer-motion";
-// import { useReplyToMessageId } from "@/stores/modalStore";
-// import { useKeyDown } from "@/common/hooks/keyEvent/useKeydown";
-// import { usePasteImage } from "@/common/hooks/keyEvent/usePasteImageListener";
-// import { LinkPreviewCard } from "./LinkPreviewCard";
-// import { useIsMobile } from "@/stores/deviceStore";
-// import { useDetectUrl } from "@/common/hooks/useDetectUrl";
-// import { sendMessageAndReset } from "@/common/utils/send/sendMessageAndResetChatBar";
-// import { sendMessageHandler } from "@/common/utils/send/sendMessageHandler";
-// import AttachmentImportedPreview from "@/components/ui/attachments/AttachmentImportedPreview";
-// import useTypingIndicator from "@/common/hooks/useTypingIndicator";
-// import ChatBarLeftIcon from "./ChatBarLeftIcon";
-// import ChatBarInput from "./ChatBarInput";
-// import ChatBarSendButton from "./ChatBarSendButton";
+import clsx from "clsx";
+import React, { useRef, useEffect, useState, useCallback } from "react";
+import { useMessageStore } from "@/stores/messageStore";
+import { AnimatePresence } from "framer-motion";
+import { getCloseModal, useReplyToMessageId } from "@/stores/modalStore";
+import { useKeyDown } from "@/common/hooks/keyEvent/useKeydown";
+import { usePasteImage } from "@/common/hooks/keyEvent/usePasteImageListener";
+import { LinkPreviewCard } from "./LinkPreviewCard";
+import { useIsMobile } from "@/stores/deviceStore";
+import { useDetectUrl } from "@/common/hooks/useDetectUrl";
+import { sendMessage } from "@/common/utils/send/sendMessageHandler";
+import { useAttachmentProcessor } from "@/common/hooks/useAttachmentProcessor";
+import AttachmentsImportedPreview from "@/components/ui/attachments/AttachmentsImportedPreview";
+import useTypingIndicator from "@/common/hooks/useTypingIndicator";
+import ChatBarLeftIcon from "./ChatBarLeftIcon";
+import ChatBarInput from "./ChatBarInput";
+import ChatBarSendButton from "./ChatBarSendButton";
+import { useVoiceRecorder } from "@/common/hooks/useVoiceRecorder";
+import ChatBarVoiceInput from "./ChatBarVoiceInput";
 
-// interface ChatBarProps {
-//   chatId: string;
-//   myMemberId: string;
-// }
+interface ChatBarProps {
+  chatId: string;
+  myMemberId: string;
+}
+const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
+  const isMobile = useIsMobile();
+  const closeModal = getCloseModal();
+  const setDraftMessage = useMessageStore.getState().setDraftMessage;
+  const getDraftMessage = useMessageStore.getState().getDraftMessage;
+  const replyToMessageId = useReplyToMessageId();
 
-// const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
-//   const isMobile = useIsMobile();
+  const inputRef = useRef<HTMLTextAreaElement>(null!);
+  const containerRef = useRef<HTMLDivElement>(null!);
 
-//   const setDraftMessage = useMessageStore.getState().setDraftMessage;
-//   const getDraftMessage = useMessageStore.getState().getDraftMessage;
-//   const replyToMessageId = useReplyToMessageId();
+  // Use the attachment processor hook
+  const {
+    processedAttachments,
+    isProcessing,
+    processAttachments,
+    removeAttachment,
+    clearAttachmentsInput,
+    clearAllAttachments,
+  } = useAttachmentProcessor();
 
-//   const inputRef = useRef<HTMLTextAreaElement>(null!);
-//   const containerRef = useRef<HTMLDivElement>(null!);
-//   const sendButtonRef = useRef<HTMLButtonElement>(null);
-//   const [isMessageSent, setIsMessageSent] = useState(false);
-//   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
-//   const [filePreviewUrls, setFilePreviewUrls] = useState<string[]>([]);
-//   const [hasTextContent, setHasTextContent] = useState(false);
+  const [isMessageSent, setIsMessageSent] = useState(false);
+  const [hasTextContent, setHasTextContent] = useState(false);
 
-//   const { clearTypingState } = useTypingIndicator(inputRef, chatId ?? null);
-//   const hasAttachment = attachedFiles.length > 0;
-//   const showSendButton = hasTextContent || hasAttachment;
+  const { clearTypingState } = useTypingIndicator(inputRef, chatId ?? null);
+  const hasAttachment = processedAttachments.length > 0;
+  const showSendButton = hasTextContent || hasAttachment;
 
-//   useEffect(() => {
-//     if (chatId && inputRef.current) {
-//       const draft = getDraftMessage(chatId);
+  const { isRecording, recordingTime, cancelRecording, stopRecording } = useVoiceRecorder({
+    disabled: showSendButton,
+  });
 
-//       if (draft) console.log("DRAFT", draft);
+  // reset chatBar when switch chat
+  useEffect(() => {
+    if (chatId && inputRef.current) {
+      const draft = getDraftMessage(chatId);
+      inputRef.current.value = draft || "";
+      setHasTextContent(!!draft?.trim());
+      requestAnimationFrame(() => {
+        updateInputHeight();
+      });
+      clearAllAttachments();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chatId]);
 
-//       inputRef.current.value = draft || "";
-//       setHasTextContent(!!draft?.trim());
-//       requestAnimationFrame(() => {
-//         updateInputHeight();
-//       });
-//     }
-//   }, [chatId, getDraftMessage]);
+  useEffect(() => {
+    const inputValueAtMount = inputRef.current?.value;
+    console.log("inputValueAtMount", inputValueAtMount);
+    return () => {
+      if (chatId && inputValueAtMount) {
+        setDraftMessage(chatId, inputValueAtMount);
+      }
+    };
+  }, [chatId, setDraftMessage]);
 
-//   useEffect(() => {
-//     const inputValueAtMount = inputRef.current?.value;
-//     console.log("inputValueAtMount", inputValueAtMount);
-//     return () => {
-//       if (chatId && inputValueAtMount) {
-//         setDraftMessage(chatId, inputValueAtMount);
-//       }
-//     };
-//   }, [chatId, setDraftMessage]);
+  useEffect(() => {
+    if (replyToMessageId && inputRef.current) {
+      inputRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      inputRef.current.focus();
+    }
+  }, [replyToMessageId]);
 
-//   useEffect(() => {
-//     if (replyToMessageId && inputRef.current) {
-//       inputRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-//       inputRef.current.focus();
-//     }
-//   }, [replyToMessageId]);
+  useKeyDown(
+    (e) => {
+      if (document.activeElement !== inputRef.current) {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+    },
+    ["/"],
+    { preventDefault: false },
+  );
 
-//   // Replace this useEffect for "/" focus
-//   useKeyDown(
-//     (e) => {
-//       if (document.activeElement !== inputRef.current) {
-//         e.preventDefault(); // prevent "/" when first focus
-//         inputRef.current?.focus();
-//       }
-//     },
-//     ["/"],
-//     { preventDefault: false }, // will not block default typing
-//   );
+  useKeyDown(() => {
+    if (document.activeElement === inputRef.current) {
+      const fileInput = document.querySelector(
+        'input[type="file"]',
+      ) as HTMLInputElement;
+      if (fileInput) {
+        fileInput.accept = "*";
+        fileInput.click();
+      }
+    }
+  }, ["ContextMenu"]);
 
-//   // Replace this useEffect for ContextMenu key to open file input
-//   useKeyDown(() => {
-//     if (document.activeElement === inputRef.current) {
-//       const fileInput = document.querySelector(
-//         'input[type="file"]',
-//       ) as HTMLInputElement;
-//       if (fileInput) {
-//         fileInput.accept = "*";
-//         fileInput.click();
-//       }
-//     }
-//   }, ["ContextMenu"]);
+  const { detectedUrl, showPreview, detectFromText, resetPreview } =
+    useDetectUrl(400);
 
-//   const { detectedUrl, showPreview, detectFromText, resetPreview } =
-//     useDetectUrl(400);
+  const updateInputHeight = () => {
+    if (inputRef.current && containerRef.current) {
+      inputRef.current.style.height = "auto";
+      const newHeight = Math.min(inputRef.current.scrollHeight, 100);
+      inputRef.current.style.height = `${newHeight}px`;
+      containerRef.current.style.height = `${newHeight + 14}px`;
+    }
+  };
 
-//   const updateInputHeight = () => {
-//     if (inputRef.current && containerRef.current) {
-//       inputRef.current.style.height = "auto";
-//       const newHeight = Math.min(inputRef.current.scrollHeight, 100);
-//       inputRef.current.style.height = `${newHeight}px`;
-//       containerRef.current.style.height = `${newHeight + 14}px`;
-//     }
-//   };
+  const handleInput = () => {
+    const value = inputRef.current?.value || "";
 
-//   const handleInput = () => {
-//     const value = inputRef.current?.value || "";
+    setHasTextContent(!!value.trim());
+    updateInputHeight();
 
-//     setHasTextContent(!!value.trim());
-//     updateInputHeight();
+    if (hasAttachment) {
+      resetPreview();
+    } else {
+      detectFromText(value);
+    }
 
-//     // 🔥 Let the hook handle URL detection + debounce
-//     detectFromText(value);
+    if (chatId) {
+      setDraftMessage(chatId, value);
+    }
+  };
 
-//     if (chatId) {
-//       setDraftMessage(chatId, value);
-//     }
-//   };
+  const handleSend = useCallback(async () => {
+    if (!(hasTextContent || hasAttachment)) return;
 
-//   const handleKeyDown = useCallback(
-//     async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-//       if (e.key === "Escape") {
-//         if (inputRef.current) inputRef.current.value = "";
-//         if (chatId) setDraftMessage(chatId, "");
-//         setHasTextContent(false);
-//         resetPreview();
-//         updateInputHeight();
-//       } else if (e.key === "Enter" && !e.shiftKey) {
-//         e.preventDefault();
-//         resetPreview();
-//         // sendMessageAndReset({
-//         //   chatId,
-//         //   myMemberId,
-//         //   inputRef,
-//         //   attachments: attachedFiles,
-//         //   filePreviewUrls,
-//         //   replyToMessageId,
-//         //   clearTypingState,
-//         //   setDraftMessage,
-//         //   setAttachedFiles,
-//         //   setFilePreviewUrls,
-//         //   setHasTextContent,
-//         //   setIsMessageSent,
-//         //   updateInputHeight,
-//         // });
-//         if (sendButtonRef.current && (hasTextContent || hasAttachment)) {
-//           sendButtonRef.current.click();
-//         }
-//       }
-//     },
-//     [chatId, setDraftMessage, resetPreview, hasTextContent, hasAttachment],
-//   );
+    resetPreview();
 
-//   const handleEmojiSelect = useCallback((emoji: string) => {
-//     if (inputRef.current) {
-//       inputRef.current.value += emoji;
-//       setHasTextContent(true);
-//       updateInputHeight();
-//     }
-//     inputRef.current?.focus();
-//   }, []);
+    // Get content before clearing
+    const content = inputRef.current?.value || "";
+    const reversedAttachments = [...processedAttachments].reverse();
 
-//   const handleFileSelect = useCallback((fileList: FileList) => {
-//     const newFiles = Array.from(fileList);
-//     if (newFiles.length === 0) return;
+    // Clear UI immediately for better UX
+    if (inputRef.current) inputRef.current.value = "";
+    setHasTextContent(false);
+    updateInputHeight();
+    clearAttachmentsInput();
 
-//     setAttachedFiles((prev) => [...prev, ...newFiles]);
+    // Send message using handler directly with processed attachments
+    sendMessage({
+      chatId,
+      myMemberId,
+      content,
+      processedAttachments: reversedAttachments,
+      replyToMessageId,
+      onSuccess: () => {
+        // clearAllAttachments();
+        clearTypingState();
+        setDraftMessage(chatId, "");
+        setIsMessageSent(true);
+        closeModal();
+        setTimeout(() => setIsMessageSent(false), 200);
+      },
+      onError: () => {
+        clearAllAttachments();
+      },
+    });
+  }, [
+    hasTextContent,
+    hasAttachment,
+    resetPreview,
+    chatId,
+    myMemberId,
+    processedAttachments,
+    replyToMessageId,
+    clearAttachmentsInput,
+    clearTypingState,
+    setDraftMessage,
+    closeModal,
+    clearAllAttachments,
+  ]);
 
-//     const previewPromises = newFiles.map((file) => {
-//       if (file.type.startsWith("video/")) {
-//         // ✅ Create a blob URL immediately (wrap in Promise for consistency)
-//         return Promise.resolve(URL.createObjectURL(file));
-//       } else {
-//         // ✅ Read image or other file as Data URL
-//         return new Promise<string>((resolve) => {
-//           const reader = new FileReader();
-//           reader.onloadend = () => resolve(reader.result as string);
-//           reader.readAsDataURL(file);
-//         });
-//       }
-//     });
+  const handleKeyDown = useCallback(
+    async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === "Escape") {
+        if (inputRef.current) inputRef.current.value = "";
+        if (chatId) setDraftMessage(chatId, "");
+        setHasTextContent(false);
+        resetPreview();
+        updateInputHeight();
+      } else if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        resetPreview();
+        handleSend();
+      }
+    },
+    [chatId, setDraftMessage, resetPreview, handleSend],
+  );
 
-//     Promise.all(previewPromises).then((urls) => {
-//       setFilePreviewUrls((prev) => [...prev, ...urls]);
-//     });
-//   }, []);
+  const handleEmojiSelect = useCallback((emoji: string) => {
+    if (inputRef.current) {
+      inputRef.current.value += emoji;
+      setHasTextContent(true);
+      updateInputHeight();
+    }
+    inputRef.current?.focus();
+  }, []);
 
-//   usePasteImage({ inputRef, onFileSelect: handleFileSelect });
+  const handleFileSelect = useCallback(
+    async (fileList: FileList) => {
+      const newFiles = Array.from(fileList);
+      if (newFiles.length === 0) return;
 
-//   return (
-//     <div className={clsx("chat-bottom", replyToMessageId && "has-reply")}>
-//       {/* File Attachment Previews */}
-//       {filePreviewUrls.length > 0 && (
-//         <AttachmentImportedPreview
-//           files={attachedFiles}
-//           urls={filePreviewUrls}
-//           onRemove={(index: number) => {
-//             setAttachedFiles((prev) => prev.filter((_, i) => i !== index));
-//             setFilePreviewUrls((prev) => prev.filter((_, i) => i !== index));
-//           }}
-//         />
-//       )}
+      try {
+        // Process the files using the attachment processor
+        await processAttachments(newFiles);
+      } catch (error) {
+        console.error("Error processing attachments:", error);
+        // Handle error (show toast, etc.)
+      }
+    },
+    [processAttachments],
+  );
 
-//       <div className="flex w-full items-end">
-//         <ChatBarLeftIcon
-//           replyToMessageId={replyToMessageId}
-//           hasAttachment={hasAttachment}
-//           onFileSelect={handleFileSelect}
-//         />
-//         {/* avoid ChatBarInput expand beyond send button */}
-//         <div className="flex flex-col flex-1 min-w-0">
-//           <AnimatePresence>
-//             {showPreview && detectedUrl && (
-//               <div className="px-1">
-//                 <LinkPreviewCard
-//                   url={detectedUrl || ""}
-//                   onClose={resetPreview}
-//                 />
-//               </div>
-//             )}
-//           </AnimatePresence>
+  // Update the paste handler to use processed attachments
+  usePasteImage({ inputRef, onFileSelect: handleFileSelect });
 
-//           <ChatBarInput
-//             inputRef={inputRef}
-//             containerRef={containerRef}
-//             isMessageSent={isMessageSent}
-//             isMobile={isMobile}
-//             onInput={handleInput}
-//             onKeyDown={handleKeyDown}
-//             onEmojiSelect={handleEmojiSelect}
-//           />
-//         </div>
+  return (
+    <div className={clsx("chat-bottom", replyToMessageId && "has-reply")}>
+      {/* File Attachment Previews using processed data */}
+      {processedAttachments.length > 0 && (
+        <AttachmentsImportedPreview
+          processedAttachments={processedAttachments}
+          isProcessing={isProcessing}
+          onRemove={(index: number) => {
+            const attachment = processedAttachments[index];
+            if (attachment) {
+              removeAttachment(attachment.id);
+            }
+          }}
+        />
+      )}
 
-//         <ChatBarSendButton
-//           ref={sendButtonRef}
-//           visible={showSendButton}
-//           onClick={() => {
-//             resetPreview();
-//             sendMessageAndReset({
-//               chatId,
-//               myMemberId,
-//               inputRef,
-//               attachments: attachedFiles,
-//               filePreviewUrls,
-//               replyToMessageId,
-//               clearTypingState,
-//               setDraftMessage,
-//               setAttachedFiles,
-//               setFilePreviewUrls,
-//               setHasTextContent,
-//               setIsMessageSent,
-//               updateInputHeight,
-//             });
-//           }}
-//         />
-//       </div>
-//     </div>
-//   );
-// };
+      <div className="flex w-full items-end">
+        <ChatBarLeftIcon
+          replyToMessageId={replyToMessageId}
+          isEnableMic={isRecording}
+          hasAttachment={hasAttachment}
+          onFileSelect={handleFileSelect}
+        />
+        <div className="flex flex-col flex-1 min-w-0">
+          <AnimatePresence>
+            {/* Only show link preview if there are no attachments */}
+            {showPreview && detectedUrl && !hasAttachment && (
+              <div className="px-1">
+                <LinkPreviewCard
+                  url={detectedUrl || ""}
+                  onClose={resetPreview}
+                />
+              </div>
+            )}
+          </AnimatePresence>
 
-// export default React.memo(ChatBar);
+          {isRecording ? (
+            <ChatBarVoiceInput
+              recordingTime={recordingTime}
+              isRecording={isRecording}
+              onCancel={cancelRecording}
+              onStop={() => {
+                // You might need to handle stop recording logic here
+                stopRecording();
+              }}
+            />
+          ) : (
+            <ChatBarInput
+              inputRef={inputRef}
+              containerRef={containerRef}
+              isMessageSent={isMessageSent}
+              isMobile={isMobile}
+              onInput={handleInput}
+              onKeyDown={handleKeyDown}
+              onEmojiSelect={handleEmojiSelect}
+            />
+          )}
+        </div>
+
+        <ChatBarSendButton visible={showSendButton} onClick={handleSend} />
+      </div>
+    </div>
+  );
+};
+
+export default React.memo(ChatBar);

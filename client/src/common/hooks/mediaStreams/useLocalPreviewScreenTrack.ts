@@ -69,8 +69,12 @@ export const useLocalPreviewScreenTrack = (
 
   // Auto-start if needed
   useEffect(() => {
-    if (startEnabled) startScreen();
-
+    if (startEnabled) {
+      queueMicrotask(() => {
+        startScreen();
+      });
+    }
+    
     return () => {
       if (opts.stopOnUnmount) cleanupStream();
     };

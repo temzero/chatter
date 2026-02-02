@@ -37,7 +37,7 @@ const GlassButton: React.FC<GlassButtonProps> = ({
   // Size values mapping to CSS variables
   const sizeValues: Record<SizeEnum, string> = {
     [SizeEnum.XS]: "var(--glass-button-height-xs, 32px)",
-    [SizeEnum.S]: "var(--glass-button-height-s, 36px)",
+    [SizeEnum.S]: "var(--glass-button-height-s, 38px)",
     [SizeEnum.M]: "var(--glass-button-height-m, 40px)",
     [SizeEnum.L]: "var(--glass-button-height-l, 44px)",
     [SizeEnum.XL]: "var(--glass-button-height-xl, 48px)",

@@ -194,6 +194,7 @@ input[type="number"]::-webkit-inner-spin-button {
 /* Input Components */
 .input-field,
 .input-container,
+.chat-voice-input-container,
 .chat-input-container {
   width: 100%;
   padding: 5px !important;
@@ -215,6 +216,19 @@ input[type="number"]::-webkit-inner-spin-button {
   align-items: flex-end;
   min-height: var(--chat-input-container-height);
   border-width: 3px;
+}
+
+.chat-voice-input-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--chat-input-container-height);
+  border-width: 3px;
+  padding: 8px !important;
+  /* border: none !important; */
+  /* background: var(--border-color); */
+  backdrop-filter: blur(8px);
+  overflow: hidden;
 }
 
 .input-container:focus-within,

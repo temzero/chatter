@@ -15,12 +15,14 @@ import useTypingIndicator from "@/common/hooks/useTypingIndicator";
 import ChatBarLeftIcon from "./ChatBarLeftIcon";
 import ChatBarInput from "./ChatBarInput";
 import ChatBarSendButton from "./ChatBarSendButton";
+import ChatBarVoiceInput from "./ChatBarVoiceInput";
+import { useKeyHold } from "@/common/hooks/useKeyHold";
+import { useChatBarStore } from "@/stores/chatbarStore";
 
 interface ChatBarProps {
   chatId: string;
   myMemberId: string;
 }
-
 const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
   const isMobile = useIsMobile();
   const closeModal = getCloseModal();
@@ -31,8 +33,14 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
   const inputRef = useRef<HTMLTextAreaElement>(null!);
   const containerRef = useRef<HTMLDivElement>(null!);
 
-  const [isMessageSent, setIsMessageSent] = useState(false);
-  const [hasTextContent, setHasTextContent] = useState(false);
+  const {
+    isRecordMode,
+    hasTextContent,
+    setIsRecordMode,
+    setIsRecording,
+    resetVoiceState,
+    setHasTextContent,
+  } = useChatBarStore();
 
   // Use the attachment processor hook
   const {
@@ -44,9 +52,14 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
     clearAllAttachments,
   } = useAttachmentProcessor();
 
+  const [isMessageSent, setIsMessageSent] = useState(false);
   const { clearTypingState } = useTypingIndicator(inputRef, chatId ?? null);
   const hasAttachment = processedAttachments.length > 0;
   const showSendButton = hasTextContent || hasAttachment;
+
+  // const { isRecording, recordingTime, cancelRecording, stopRecording } = useVoiceRecorder({
+  //   disabled: showSendButton,
+  // });
 
   // reset chatBar when switch chat
   useEffect(() => {
@@ -165,26 +178,35 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
         clearAllAttachments();
       },
     });
-  }, [
-    hasTextContent,
-    hasAttachment,
-    resetPreview,
-    chatId,
-    myMemberId,
-    processedAttachments,
-    replyToMessageId,
-    clearAttachmentsInput,
-    clearTypingState,
-    setDraftMessage,
-    closeModal,
-    clearAllAttachments,
-  ]);
+  }, [hasTextContent, hasAttachment, resetPreview, processedAttachments, setHasTextContent, clearAttachmentsInput, chatId, myMemberId, replyToMessageId, clearTypingState, setDraftMessage, closeModal, clearAllAttachments]);
 
-  const handleKeyDown = useCallback(
+  useKeyHold(
+    "`",
+    () => {
+      if (!showSendButton) {
+        setIsRecordMode(true);
+        setIsRecording(true);
+      }
+    },
+    () => {
+      setIsRecording(false);
+    },
+  );
+  // Escape key handler
+  useKeyDown(
+    () => {
+      resetVoiceState();
+    },
+    ["Escape"],
+    { preventDefault: false },
+  );
+
+  const handleInputKeyDown = useCallback(
     async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === "Escape") {
         if (inputRef.current) inputRef.current.value = "";
         if (chatId) setDraftMessage(chatId, "");
+        if (isRecordMode) setIsRecordMode(false);
         setHasTextContent(false);
         resetPreview();
         updateInputHeight();
@@ -194,7 +216,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
         handleSend();
       }
     },
-    [chatId, setDraftMessage, resetPreview, handleSend],
+    [chatId, setDraftMessage, isRecordMode, setIsRecordMode, setHasTextContent, resetPreview, handleSend],
   );
 
   const handleEmojiSelect = useCallback((emoji: string) => {
@@ -244,6 +266,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
       <div className="flex w-full items-end">
         <ChatBarLeftIcon
           replyToMessageId={replyToMessageId}
+          isEnableMic={isRecordMode}
           hasAttachment={hasAttachment}
           onFileSelect={handleFileSelect}
         />
@@ -260,15 +283,19 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
             )}
           </AnimatePresence>
 
-          <ChatBarInput
-            inputRef={inputRef}
-            containerRef={containerRef}
-            isMessageSent={isMessageSent}
-            isMobile={isMobile}
-            onInput={handleInput}
-            onKeyDown={handleKeyDown}
-            onEmojiSelect={handleEmojiSelect}
-          />
+          {isRecordMode ? (
+            <ChatBarVoiceInput />
+          ) : (
+            <ChatBarInput
+              inputRef={inputRef}
+              containerRef={containerRef}
+              isMessageSent={isMessageSent}
+              isMobile={isMobile}
+              onInput={handleInput}
+              onKeyDown={handleInputKeyDown}
+              onEmojiSelect={handleEmojiSelect}
+            />
+          )}
         </div>
 
         <ChatBarSendButton visible={showSendButton} onClick={handleSend} />

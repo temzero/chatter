@@ -42,8 +42,11 @@ export const useLocalPreviewVideoTrack = (
 
   useEffect(() => {
     if (startEnabled) {
-      startVideo();
+      queueMicrotask(() => {
+        startVideo();
+      });
     }
+    
     return () => {
       if (opts.stopOnUnmount) cleanupStream();
     };
