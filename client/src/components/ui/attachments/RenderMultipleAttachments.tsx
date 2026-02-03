@@ -2,10 +2,10 @@ import * as React from "react";
 import clsx from "clsx";
 import RenderAttachment from "./RenderAttachment";
 import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
-import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import { getMessageAttachments } from "@/stores/messageAttachmentStore";
 import { LinkPreviewAttachment } from "../attachments/LinkPreviewAttachment";
 import { useIsMobile } from "@/stores/deviceStore";
+import { sortAttachments } from "@/common/utils/attachmentSorter";
 
 interface RenderMultipleAttachmentsProps {
   chatId: string;
@@ -26,47 +26,19 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
     attachments = getMessageAttachments(chatId, messageId);
   }
 
-  const categorizedAttachments = React.useMemo(() => {
-    if (!attachments || attachments.length === 0) {
-      return null;
-    }
-
-    // Single-pass categorization
-    const categorized = {
-      links: [] as AttachmentResponse[],
-      visual: [] as AttachmentResponse[],
-      audio: [] as AttachmentResponse[],
-      pdf: [] as AttachmentResponse[],
-      file: [] as AttachmentResponse[],
-    };
-
-    for (const attachment of attachments) {
-      switch (attachment.type) {
-        case AttachmentType.LINK:
-          categorized.links.push(attachment);
-          break;
-        case AttachmentType.IMAGE:
-        case AttachmentType.VIDEO:
-          categorized.visual.push(attachment);
-          break;
-        case AttachmentType.AUDIO:
-          categorized.audio.push(attachment);
-          break;
-        case AttachmentType.PDF:
-          categorized.pdf.push(attachment);
-          break;
-        case AttachmentType.FILE:
-          categorized.file.push(attachment);
-          break;
-      }
-    }
-
-    return categorized;
+  const sortedAttachments = React.useMemo(() => {
+    if (!attachments?.length) return null;
+    return sortAttachments(attachments);
   }, [attachments]);
 
-  if (!categorizedAttachments) {
+  if (!sortedAttachments) {
     return null;
   }
+
+const { visual: visualAttachments, links: linkAttachments, ...remainingCategories } = sortedAttachments;
+
+// Combine all the remaining attachments into one array
+const otherAttachments = Object.values(remainingCategories).flat();
 
   const RenderAttachmentGrid = (items: AttachmentResponse[], cols: number) => (
     <div
@@ -83,26 +55,25 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
     </div>
   );
 
-  const renderVisualMedia = () => {
-    const visualMedia = categorizedAttachments.visual;
-    const count = visualMedia.length;
+  const renderVisualMedia = (attachments: AttachmentResponse[]) => {
+    const count = attachments.length;
 
     switch (count) {
       case 0:
         return null;
       case 1:
-        return <RenderAttachment attachment={visualMedia[0]} />;
+        return <RenderAttachment attachment={attachments[0]} />;
       case 3:
         return (
           <div className={`grid grid-cols-6 grid-rows-2 gap-px `}>
             <div className="col-span-4 row-span-2">
-              <RenderAttachment attachment={visualMedia[0]} />
+              <RenderAttachment attachment={attachments[0]} />
             </div>
             <div className="col-span-2">
-              <RenderAttachment attachment={visualMedia[1]} />
+              <RenderAttachment attachment={attachments[1]} />
             </div>
             <div className="col-span-2">
-              <RenderAttachment attachment={visualMedia[2]} />
+              <RenderAttachment attachment={attachments[2]} />
             </div>
           </div>
         );
@@ -111,7 +82,7 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
           <div className="grid grid-cols-4 grid-rows-1 gap-px">
             <div className="col-span-3 row-span-1">
               <RenderAttachment
-                attachment={visualMedia[0]}
+                attachment={attachments[0]}
                 className="w-full h-full rounded-l-lg"
               />
             </div>
@@ -119,7 +90,7 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
               {[1, 2, 3].map((i) => (
                 <div key={i} className="row-span-1">
                   <RenderAttachment
-                    attachment={visualMedia[i]}
+                    attachment={attachments[i]}
                     className="w-full h-full"
                   />
                 </div>
@@ -129,12 +100,12 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
         );
       default: {
         if (count % 3 === 0) {
-          return RenderAttachmentGrid(visualMedia, 3);
+          return RenderAttachmentGrid(attachments, 3);
         }
 
         // For other counts, show first 2 in 2 columns, then 3 columns for rest
-        const firstTwo = visualMedia.slice(0, 2);
-        const remaining = visualMedia.slice(2);
+        const firstTwo = attachments.slice(0, 2);
+        const remaining = attachments.slice(2);
 
         return (
           <div>
@@ -148,7 +119,7 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
 
   return (
     <div key={messageId} className={`flex flex-col w-full ${className}`}>
-      {categorizedAttachments.links.map((attachment) => (
+      {linkAttachments.map((attachment) => (
         <LinkPreviewAttachment
           attachment={attachment}
           isInitAnimation={true}
@@ -157,14 +128,10 @@ const RenderMultipleAttachments: React.FC<RenderMultipleAttachmentsProps> = ({
         />
       ))}
 
-      {renderVisualMedia()}
+      {renderVisualMedia(visualAttachments)}
 
       {/* Non-visual attachment */}
-      {[
-        ...categorizedAttachments.audio,
-        ...categorizedAttachments.pdf,
-        ...categorizedAttachments.file,
-      ].map((mediaItem) => (
+      {otherAttachments.map((mediaItem) => (
         <div key={mediaItem.id}>
           <RenderAttachment attachment={mediaItem} />
         </div>

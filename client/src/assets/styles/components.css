@@ -224,7 +224,6 @@ input[type="number"]::-webkit-inner-spin-button {
   justify-content: space-between;
   height: var(--chat-input-container-height);
   border-width: 3px;
-  padding: 8px !important;
   /* border: none !important; */
   /* background: var(--border-color); */
   backdrop-filter: blur(8px);

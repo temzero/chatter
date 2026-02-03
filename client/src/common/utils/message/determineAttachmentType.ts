@@ -42,7 +42,10 @@ const mimeTypeMap: Record<string, AttachmentType> = {
   "audio/aac": AttachmentType.AUDIO,
   "audio/x-aac": AttachmentType.AUDIO,
   "audio/webm": AttachmentType.AUDIO,
-  "audio/opus": AttachmentType.AUDIO,
+
+  "audio/webm;codecs=opus": AttachmentType.VOICE,
+  "audio/ogg;codecs=opus": AttachmentType.VOICE,
+  "audio/opus": AttachmentType.VOICE,
   
   // PDF - all PDF MIME types
   "application/pdf": AttachmentType.PDF,

@@ -112,7 +112,7 @@ export const RenderModalAttachment = ({
       );
 
     case AttachmentType.VOICE:
-    case AttachmentType.AUDIO:
+    // case AttachmentType.AUDIO:
       return (
         <CustomAudioVoicePlayer
           ref={audioPlayerRef}
@@ -123,16 +123,16 @@ export const RenderModalAttachment = ({
         />
       );
 
-    // case AttachmentType.AUDIO:
-    //   return (
-    //     <CustomAudioDiskPlayer
-    //       ref={audioPlayerRef}
-    //       mediaUrl={attachment.url}
-    //       fileName={attachment.filename ?? ""}
-    //       cdImageUrl={attachment.thumbnailUrl ?? ""}
-    //       goNext={onMediaEnd}
-    //     />
-    //   );
+    case AttachmentType.AUDIO:
+      return (
+        <CustomAudioDiskPlayer
+          ref={audioPlayerRef}
+          mediaUrl={attachment.url}
+          fileName={attachment.filename ?? ""}
+          cdImageUrl={attachment.thumbnailUrl ?? ""}
+          goNext={onMediaEnd}
+        />
+      );
 
     case AttachmentType.PDF:
       return (

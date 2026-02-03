@@ -1,7 +1,6 @@
 import {
   forwardRef,
   useImperativeHandle,
-  useEffect,
 } from "react";
 import clsx from "clsx";
 import { formatDuration } from "@/common/utils/format/formatDuration";
@@ -34,9 +33,6 @@ const CustomVoicePlayer = forwardRef<VoicePlayerRef, CustomVoicePlayerProps>(
       pause,
       togglePlayPause,
       seekTo,
-      setDuration,
-      setCurrentTime,
-      setIsPlaying,
     } = useAudioPlayer();
 
     // Expose methods to parent ref
@@ -54,46 +50,17 @@ const CustomVoicePlayer = forwardRef<VoicePlayerRef, CustomVoicePlayerProps>(
       [play, pause, togglePlayPause, seekTo, audioRef],
     );
 
-
-
-    // Listen to audio events
-    useEffect(() => {
-      const audio = audioRef.current;
-      if (!audio) return;
-
-      const handlePlayEvent = () => setIsPlaying(true);
-      const handlePauseEvent = () => setIsPlaying(false);
-      const handleTimeUpdateEvent = () => setCurrentTime(audio.currentTime);
-      const handleLoadedMetadataEvent = () => setDuration(audio.duration || 0);
-      const handleEndedEvent = () => {
-        setIsPlaying(false);
-        setCurrentTime(0);
-      };
-
-      audio.addEventListener("play", handlePlayEvent);
-      audio.addEventListener("pause", handlePauseEvent);
-      audio.addEventListener("timeupdate", handleTimeUpdateEvent);
-      audio.addEventListener("loadedmetadata", handleLoadedMetadataEvent);
-      audio.addEventListener("ended", handleEndedEvent);
-
-      return () => {
-        audio.removeEventListener("play", handlePlayEvent);
-        audio.removeEventListener("pause", handlePauseEvent);
-        audio.removeEventListener("timeupdate", handleTimeUpdateEvent);
-        audio.removeEventListener("loadedmetadata", handleLoadedMetadataEvent);
-        audio.removeEventListener("ended", handleEndedEvent);
-      };
-    }, []);
-
     const handleOpenModal = () => {
       setOpenMediaModal(attachmentId, currentTime);
     };
+
+    console.log('RENDER VOICE ATTACHMENT')
 
     return (
       <div
         key={attachmentId}
         onClick={handleOpenModal}
-        className={clsx("w-full flex p-1 items-center min-w-[300px]")}
+        className={clsx("w-[400px] flex p-1 items-center")}
       >
         <button
           onClick={(e) => {

@@ -166,7 +166,7 @@ const CustomAudioVoicePlayer = forwardRef<
     </button>
   );
 
-  const displayName = fileName?.replace(/\.[^/.]+$/, "") || "Voice message";
+  // const displayName = fileName?.replace(/\.[^/.]+$/, "") || "Voice message";
 
   // -------------------- RENDER --------------------
   return (
@@ -174,11 +174,11 @@ const CustomAudioVoicePlayer = forwardRef<
       {/* Header */}
       <div className="w-full flex flex-col items-center justify-center">
         <span className="material-symbols-outlined filled text-7xl!">mic</span>
-        {fileName && (
+        {/* {fileName && (
           <div className="truncate select-text mt-2" title={fileName}>
             {displayName}
           </div>
-        )}
+        )} */}
       </div>
 
       {/* AudioWave Visualizer - NO ref */}

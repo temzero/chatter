@@ -1,23 +1,31 @@
 // ChatBarVoiceInput.tsx
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { TimerDisplay } from "@/components/ui/TimerDisplay";
-import { audioManager, SoundType } from "@/services/media/audioManager";
 import { motion } from "framer-motion";
 import { useChatBarStore } from "@/stores/chatbarStore";
 import { useVoiceRecording } from "@/common/hooks/voice/useVoiceRecord";
 
 interface ChatBarVoiceInputProps {
-  onCancel: () => void;
+  onVoiceRecorded: (file: File) => Promise<void>;
 }
 
-const ChatBarVoiceInput: React.FC<ChatBarVoiceInputProps> = ({ onCancel }) => {
+const ChatBarVoiceInput: React.FC<ChatBarVoiceInputProps> = ({
+  onVoiceRecorded,
+}) => {
   const { isRecording, setIsRecording } = useChatBarStore();
+  const [recordingDuration, setRecordingDuration] = useState(0);
 
   // Use the recording hook
-  const { stopRecording, getCurrentRecording } = useVoiceRecording({
+  const {
+    stopRecording,
+    getCurrentRecording,
+    getCurrentRecordingDuration, // Get the duration function
+  } = useVoiceRecording({
     isRecording,
-    onRecordingComplete: () => onCancel(), // Just close, no playback
+    onRecordingComplete: () => {
+      console.log("voice record closed");
+    },
   });
 
   // Function to play paused audio
@@ -33,20 +41,38 @@ const ChatBarVoiceInput: React.FC<ChatBarVoiceInputProps> = ({ onCancel }) => {
     }
   };
 
+  // Update duration while recording
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if (isRecording) {
+      interval = setInterval(() => {
+        const duration = getCurrentRecordingDuration();
+        setRecordingDuration(duration);
+      }, 100); // Update every 100ms
+    } else {
+      // Update once when not recording
+      const duration = getCurrentRecordingDuration();
+      setRecordingDuration(duration);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isRecording, getCurrentRecordingDuration]);
+
   // Play start sound when recording starts
   useEffect(() => {
-    if (isRecording) {
-      audioManager.playSound(SoundType.RECORD_START);
-    } else if (!isRecording) {
+    if (!isRecording) {
       playPausedAudio();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRecording]);
 
   // Handle stop recording
   const handleStop = () => {
     setIsRecording(false);
-    stopRecording(); // This triggers onRecordingComplete with audio data
-    audioManager.playSound(SoundType.USER_DISCONNECTED);
+    stopRecording();
   };
 
   // Cleanup on unmount
@@ -75,7 +101,7 @@ const ChatBarVoiceInput: React.FC<ChatBarVoiceInputProps> = ({ onCancel }) => {
         animate={{ opacity: 1, scale: 1, x: 0 }}
         exit={{ opacity: 0, scale: 2, x: 32 }}
       >
-        <TimerDisplay isRunning={isRecording} runningClassName="text-white" />
+        <TimerDisplay durationMs={recordingDuration} />
       </motion.div>
     </div>
   );

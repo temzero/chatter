@@ -3,6 +3,7 @@ import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useMessageStore } from "@/stores/messageStore";
 import { AnimatePresence } from "framer-motion";
 import { getCloseModal, useReplyToMessageId } from "@/stores/modalStore";
+import { useKeyDown } from "@/common/hooks/keyEvent/useKeydown";
 import { usePasteImage } from "@/common/hooks/keyEvent/usePasteImageListener";
 import { LinkPreviewCard } from "./LinkPreviewCard";
 import { useIsMobile } from "@/stores/deviceStore";
@@ -14,15 +15,14 @@ import useTypingIndicator from "@/common/hooks/useTypingIndicator";
 import ChatBarLeftIcon from "./ChatBarLeftIcon";
 import ChatBarInput from "./ChatBarInput";
 import ChatBarSendButton from "./ChatBarSendButton";
-import ChatBarVoiceInput, { ChatBarVoiceInputRef } from "./ChatBarVoiceInput";
+import ChatBarVoiceInput from "./ChatBarVoiceInput";
+import { useKeyHold } from "@/common/hooks/useKeyHold";
 import { useChatBarStore } from "@/stores/chatbarStore";
-import { useChatBarKeydown } from "@/common/hooks/keyEvent/useChatbarKeydown";
 
 interface ChatBarProps {
   chatId: string;
   myMemberId: string;
 }
-
 const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
   const isMobile = useIsMobile();
   const closeModal = getCloseModal();
@@ -32,7 +32,6 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
 
   const inputRef = useRef<HTMLTextAreaElement>(null!);
   const containerRef = useRef<HTMLDivElement>(null!);
-  const voiceInputRef = useRef<ChatBarVoiceInputRef>(null);
 
   const {
     isRecordMode,
@@ -54,16 +53,15 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
   } = useAttachmentProcessor();
 
   const [isMessageSent, setIsMessageSent] = useState(false);
-  const [hasVoiceRecording, setHasVoiceRecording] = useState(false);
-
   const { clearTypingState } = useTypingIndicator(inputRef, chatId ?? null);
   const hasAttachment = processedAttachments.length > 0;
-  const canSend = hasTextContent || hasAttachment || hasVoiceRecording;
+  const showSendButton = hasTextContent || hasAttachment;
 
-  const { detectedUrl, showPreview, detectFromText, resetPreview } =
-    useDetectUrl(400);
+  // const { isRecording, recordingTime, cancelRecording, stopRecording } = useVoiceRecorder({
+  //   disabled: showSendButton,
+  // });
 
-  // Reset chatBar when switching chats
+  // reset chatBar when switch chat
   useEffect(() => {
     if (chatId && inputRef.current) {
       const draft = getDraftMessage(chatId);
@@ -73,12 +71,10 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
         updateInputHeight();
       });
       clearAllAttachments();
-      setHasVoiceRecording(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatId]);
 
-  // Save draft when unmounting
   useEffect(() => {
     const inputValueAtMount = inputRef.current?.value;
     console.log("inputValueAtMount", inputValueAtMount);
@@ -89,13 +85,38 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
     };
   }, [chatId, setDraftMessage]);
 
-  // Focus input when replying to a message
   useEffect(() => {
     if (replyToMessageId && inputRef.current) {
       inputRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
       inputRef.current.focus();
     }
   }, [replyToMessageId]);
+
+  useKeyDown(
+    (e) => {
+      if (document.activeElement !== inputRef.current) {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+    },
+    ["/"],
+    { preventDefault: false },
+  );
+
+  useKeyDown(() => {
+    if (document.activeElement === inputRef.current) {
+      const fileInput = document.querySelector(
+        'input[type="file"]',
+      ) as HTMLInputElement;
+      if (fileInput) {
+        fileInput.accept = "*";
+        fileInput.click();
+      }
+    }
+  }, ["ContextMenu"]);
+
+  const { detectedUrl, showPreview, detectFromText, resetPreview } =
+    useDetectUrl(400);
 
   const updateInputHeight = () => {
     if (inputRef.current && containerRef.current) {
@@ -123,47 +144,42 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
     }
   };
 
-  // Handler when voice recording data becomes available
-  const handleRecordingDataAvailable = useCallback(() => {
-    setHasVoiceRecording(true);
-  }, []);
+  const handleVoiceRecordingComplete = useCallback(
+    async (audioFile: File) => {
+      try {
+        // Process voice recording as attachment
+        await processAttachments([audioFile], true);
+      } catch (error) {
+        console.error("Error processing voice recording:", error);
+      }
+    },
+    [processAttachments],
+  );
 
   const handleSend = useCallback(async () => {
-    if (!canSend) return;
+    if (!(hasTextContent || hasAttachment)) return;
 
     resetPreview();
 
     // Get content before clearing
     const content = inputRef.current?.value || "";
-    let attachmentsToSend = [...processedAttachments].reverse();
-
-    // Get voice recording if exists
-    if (hasVoiceRecording && voiceInputRef.current) {
-      const voiceFile = voiceInputRef.current.getRecordingFile();
-      if (voiceFile) {
-        // Process the voice file
-        const voiceAttachments = await processAttachments([voiceFile], false);
-        // Add to attachments list
-        attachmentsToSend = [...attachmentsToSend, ...voiceAttachments];
-      }
-    }
+    const reversedAttachments = [...processedAttachments].reverse();
 
     // Clear UI immediately for better UX
     if (inputRef.current) inputRef.current.value = "";
     setHasTextContent(false);
-    setHasVoiceRecording(false);
     updateInputHeight();
     clearAttachmentsInput();
-    resetVoiceState();
 
     // Send message using handler directly with processed attachments
     sendMessage({
       chatId,
       myMemberId,
       content,
-      processedAttachments: attachmentsToSend,
+      processedAttachments: reversedAttachments,
       replyToMessageId,
       onSuccess: () => {
+        // clearAllAttachments();
         clearTypingState();
         setDraftMessage(chatId, "");
         setIsMessageSent(true);
@@ -175,10 +191,10 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
       },
     });
   }, [
-    canSend,
+    hasTextContent,
+    hasAttachment,
     resetPreview,
     processedAttachments,
-    hasVoiceRecording,
     setHasTextContent,
     clearAttachmentsInput,
     chatId,
@@ -188,32 +204,60 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
     setDraftMessage,
     closeModal,
     clearAllAttachments,
-    processAttachments,
-    resetVoiceState,
   ]);
+
+  useKeyHold(
+    "`",
+    () => {
+      if (!showSendButton) {
+        setIsRecordMode(true);
+        setIsRecording(true);
+      }
+    },
+    () => {
+      setIsRecording(false);
+    },
+  );
+  // Escape key handler
+  useKeyDown(
+    () => {
+      resetVoiceState();
+    },
+    ["Escape"],
+    { preventDefault: false },
+  );
+
+  const handleInputKeyDown = useCallback(
+    async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === "Escape") {
+        if (inputRef.current) inputRef.current.value = "";
+        if (chatId) setDraftMessage(chatId, "");
+        if (isRecordMode) setIsRecordMode(false);
+        setHasTextContent(false);
+        resetPreview();
+        updateInputHeight();
+      } else if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        resetPreview();
+        handleSend();
+      }
+    },
+    [
+      chatId,
+      setDraftMessage,
+      isRecordMode,
+      setIsRecordMode,
+      setHasTextContent,
+      resetPreview,
+      handleSend,
+    ],
+  );
 
   const handleEmojiSelect = useCallback((emoji: string) => {
     if (inputRef.current) {
-      const currentValue = inputRef.current.value;
-      const cursorPosition = inputRef.current.selectionStart || 0;
-
-      // Insert emoji at cursor position
-      const newValue =
-        currentValue.slice(0, cursorPosition) +
-        emoji +
-        currentValue.slice(cursorPosition);
-
-      inputRef.current.value = newValue;
+      inputRef.current.value += emoji;
       setHasTextContent(true);
       updateInputHeight();
-
-      // Move cursor after the inserted emoji
-      setTimeout(() => {
-        inputRef.current?.setSelectionRange(
-          cursorPosition + emoji.length,
-          cursorPosition + emoji.length,
-        );
-      }, 0);
     }
     inputRef.current?.focus();
   }, []);
@@ -236,22 +280,6 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
 
   // Update the paste handler to use processed attachments
   usePasteImage({ inputRef, onFileSelect: handleFileSelect });
-
-  // Use the consolidated keyboard hook
-  const { handleInputKeyDown } = useChatBarKeydown({
-    inputRef,
-    canSend,
-    isRecordMode,
-    chatId,
-    handleSend,
-    setIsRecordMode,
-    setIsRecording,
-    resetVoiceState,
-    setHasVoiceRecording,
-    setHasTextContent,
-    setDraftMessage,
-    resetPreview,
-  });
 
   return (
     <div className={clsx("chat-bottom", replyToMessageId && "has-reply")}>
@@ -290,10 +318,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
           </AnimatePresence>
 
           {isRecordMode ? (
-            <ChatBarVoiceInput
-              ref={voiceInputRef}
-              onRecordingDataAvailable={handleRecordingDataAvailable}
-            />
+            <ChatBarVoiceInput onVoiceRecorded={handleVoiceRecordingComplete} />
           ) : (
             <ChatBarInput
               inputRef={inputRef}
@@ -307,7 +332,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
           )}
         </div>
 
-        <ChatBarSendButton visible={canSend} onClick={handleSend} />
+        <ChatBarSendButton visible={showSendButton} onClick={handleSend} />
       </div>
     </div>
   );

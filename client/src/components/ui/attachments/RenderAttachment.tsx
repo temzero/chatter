@@ -38,6 +38,8 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
 }) => {
   const [aspectRatio, setAspectRatio] = useState<string | null>(null);
 
+  console.log('RenderAttachment', attachment)
+
   useEffect(() => {
     if (attachment.type === AttachmentType.IMAGE) {
       // Use thumbnail if available in preview mode
@@ -131,7 +133,7 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
       );
 
     case AttachmentType.VOICE:
-    case AttachmentType.AUDIO:
+      // case AttachmentType.AUDIO:
       return (
         <CustomVoicePlayer
           attachmentId={attachment.id}
@@ -140,16 +142,15 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
         />
       );
 
-    // case AttachmentType.AUDIO:
-    //   return (
-    //     <CustomAudioPlayer
-    //         attachmentId={attachment.id}
-    //       mediaUrl={attachment.url}
-    //       thumbnailUrl={attachment.thumbnailUrl ?? undefined}
-    //       fileName={attachment.filename ?? undefined}
-    //       onOpenModal={handleOpenModal}
-    //     />
-    //   );
+    case AttachmentType.AUDIO:
+      return (
+        <CustomAudioPlayer
+          attachmentId={attachment.id}
+          mediaUrl={attachment.url}
+          thumbnailUrl={attachment.thumbnailUrl ?? undefined}
+          fileName={attachment.filename ?? undefined}
+        />
+      );
 
     case AttachmentType.LINK:
       return <LinkPreviewAttachment attachment={attachment} />;

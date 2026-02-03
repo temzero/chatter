@@ -13,27 +13,73 @@ export const useAttachmentProcessor = () => {
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Helper function to process audio files
+  // Updated processAudioAttachment - NO extra parameter needed
   const processAudioAttachment = async (
     file: File,
     attachment: ProcessedAttachment,
   ) => {
-    try {
-      const metadata = await parseBlob(file);
-      const picture = metadata.common.picture?.[0];
+    // Auto-detect voice recordings by MIME type only
+    const isVoiceRecording =
+      file.type === "audio/webm" || file.type === "audio/webm;codecs=opus";
 
-      // Extract album art thumbnail for audio files
-      if (picture) {
-        const pictureData = new Uint8Array(picture.data);
-        const blob = new Blob([pictureData], { type: picture.format });
-        attachment.thumbnailUrl = URL.createObjectURL(blob); // Only audio gets thumbnailUrl
+    try {
+      // For voice recordings, use Audio API directly
+      if (isVoiceRecording) {
+        const audio = new Audio();
+        audio.src = attachment.url;
+
+        await new Promise<void>((resolve) => {
+          audio.onloadedmetadata = () => {
+            if (audio.duration && !isNaN(audio.duration)) {
+              attachment.duration = Math.round(audio.duration);
+            }
+            resolve();
+          };
+
+          audio.onerror = () => {
+            console.warn("Could not load audio metadata");
+            attachment.duration = null;
+            resolve();
+          };
+        });
+
+        return; // Exit early
       }
 
-      // Extract duration if available
-      if (metadata.format.duration) {
-        attachment.duration = Math.round(metadata.format.duration);
+      // For regular audio files, use music-metadata
+      try {
+        const metadata = await parseBlob(file);
+        const picture = metadata.common.picture?.[0];
+
+        if (picture) {
+          const pictureData = new Uint8Array(picture.data);
+          const blob = new Blob([pictureData], { type: picture.format });
+          attachment.thumbnailUrl = URL.createObjectURL(blob);
+        }
+
+        if (metadata.format.duration) {
+          attachment.duration = Math.round(metadata.format.duration);
+        }
+      } catch {
+        console.warn("music-metadata failed, using Audio API fallback");
+
+        const audio = new Audio();
+        audio.src = attachment.url;
+
+        await new Promise<void>((resolve) => {
+          audio.onloadedmetadata = () => {
+            if (audio.duration && !isNaN(audio.duration)) {
+              attachment.duration = Math.round(audio.duration);
+            }
+            resolve();
+          };
+          audio.onerror = () => resolve();
+        });
       }
     } catch (error) {
       console.error("Error processing audio file:", error);
+      attachment.duration = null;
+      attachment.thumbnailUrl = null;
     }
   };
 
@@ -119,7 +165,6 @@ export const useAttachmentProcessor = () => {
       width: null,
       height: null,
       duration: null,
-      // REMOVED: messageId, chatId, metadata, createdAt, updatedAt
     };
 
     // Handle different attachment types using existing blob URL

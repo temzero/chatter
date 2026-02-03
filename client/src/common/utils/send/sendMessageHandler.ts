@@ -104,6 +104,9 @@ export async function sendMessage({
         await uploadAttachmentsToSupabase(processedAttachments);
     }
 
+    console.log("processedAttachments", processedAttachments)
+    console.log("uploadedAttachments", uploadedAttachments)
+
     const messagePayload: CreateMessageRequest = {
       id: messageId,
       chatId,
@@ -112,6 +115,8 @@ export async function sendMessage({
       replyToMessageId,
       attachments: uploadedAttachments, // Now includes permanent thumbnail URLs from Supabase
     };
+
+    console.log('messagePayload before send', messagePayload)
 
     chatWebSocketService.sendMessage(messagePayload);
 
