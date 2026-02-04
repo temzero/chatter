@@ -1,4 +1,4 @@
-// ChatBarVoiceInput.tsx
+// ChatBarVoiceInput.tsx - FIXED VERSION
 import { useEffect, useState, forwardRef, useImperativeHandle, useRef } from "react";
 import clsx from "clsx";
 import { TimerDisplay } from "@/components/ui/TimerDisplay";
