@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 // import { useAttachmentStore } from "@/stores/messageAttachmentStore";
 import { uploadFileToSupabase } from "./uploadFileToSupabse";
 import { uploadThumbnailToSupabase } from "./uploadThumbnailToSupabse";
+import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 
 /**
  * Upload processed attachments to Supabase (files + thumbnails)
@@ -32,10 +33,10 @@ export async function uploadAttachmentsToSupabase(
 
     // Upload thumbnail
     let uploadedThumbnailUrl: string | null = null;
-    if (thumbnailUrl) {
+    if (thumbnailUrl && type === AttachmentType.AUDIO){
       uploadedThumbnailUrl = await uploadThumbnailToSupabase(
-        thumbnailUrl,
         file.name,
+        thumbnailUrl,
       );
     }
 

@@ -1,16 +1,19 @@
-// components/ui/streams/VoiceWaveform.tsx - FIXED PROPERLY
+// components/ui/streams/VoiceWaveform.tsx - UPDATED
 import { useRef, useEffect, useState } from "react";
+import {
+  calculateBarDimensions,
+  calculateProgressIndex,
+  decodeAudioBlob,
+  generateWaveformFromAudioBuffer,
+  normalizeWaveform,
+  createFakeWaveform,
+  WaveformConfig,
+} from "@/common/utils/audioWaveformUtils";
 
-interface VoiceWaveformProps {
+interface VoiceWaveformProps extends WaveformConfig {
   audioBlob: Blob | null;
   currentTime?: number;
   duration?: number;
-  height?: number;
-  color?: string;
-  barCount?: number;
-  barSpacing?: number;
-  barWidth?: number;
-  maxBarHeight?: number;
   className?: string;
 }
 
@@ -19,7 +22,8 @@ const VoiceWaveform = ({
   currentTime = 0,
   duration = 0,
   height = 40,
-  color = "#86EFAC",
+  color = "#ffffff",
+  processColor,
   barCount = 100,
   barSpacing = 1,
   barWidth,
@@ -50,14 +54,13 @@ const VoiceWaveform = ({
     };
   }, []);
 
-  // Decode audio into waveform - USING useCallback PATTERN
+  // Decode audio into waveform
   useEffect(() => {
     let isMounted = true;
     let animationFrameId: number;
 
     const processWaveform = async () => {
       if (!audioBlob) {
-        // Schedule the state update in the next animation frame instead of synchronously
         animationFrameId = requestAnimationFrame(() => {
           if (isMounted) {
             setWaveform([]);
@@ -67,41 +70,10 @@ const VoiceWaveform = ({
       }
 
       try {
-        const AudioContextClass =
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          window.AudioContext || (window as any).webkitAudioContext;
-        const audioContext = new AudioContextClass();
-        const arrayBuffer = await audioBlob.arrayBuffer();
-        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-        audioContext.close();
+        const audioBuffer = await decodeAudioBlob(audioBlob);
+        const waveformData = await generateWaveformFromAudioBuffer(audioBuffer, barCount);
+        const normalized = normalizeWaveform(waveformData, maxBarHeight);
 
-        const rawData = audioBuffer.getChannelData(0);
-        const chunkSize = Math.max(1, Math.floor(rawData.length / barCount));
-        const waveformData: number[] = [];
-
-        for (let i = 0; i < barCount; i++) {
-          let sum = 0;
-          const start = i * chunkSize;
-          const end = Math.min(start + chunkSize, rawData.length);
-
-          if (start >= end) {
-            waveformData.push(0);
-            continue;
-          }
-
-          for (let j = start; j < end; j++) {
-            sum += Math.abs(rawData[j]);
-          }
-          waveformData.push(sum / (end - start));
-        }
-
-        // Normalize
-        const max = Math.max(...waveformData);
-        const normalized = waveformData.map((v) =>
-          max > 0 ? (v / max) * maxBarHeight : 0.1,
-        );
-
-        // Schedule the state update
         animationFrameId = requestAnimationFrame(() => {
           if (isMounted) {
             setWaveform(normalized);
@@ -109,11 +81,8 @@ const VoiceWaveform = ({
         });
       } catch (error) {
         console.error("Failed to generate waveform:", error);
-        // Generate fake waveform
-        const fakeWaveform = Array(barCount)
-          .fill(0)
-          .map((_, i) => Math.abs(Math.sin(i * 0.1)) * 0.5 + 0.2);
-
+        const fakeWaveform = createFakeWaveform(barCount, maxBarHeight);
+        
         animationFrameId = requestAnimationFrame(() => {
           if (isMounted) {
             setWaveform(fakeWaveform);
@@ -134,7 +103,7 @@ const VoiceWaveform = ({
 
   // Draw waveform
   useEffect(() => {
-    if (!canvasRef.current || !containerWidth || containerWidth === 0) {
+    if (!canvasRef.current || !containerWidth || containerWidth === 0 || waveform.length === 0) {
       return;
     }
 
@@ -148,35 +117,29 @@ const VoiceWaveform = ({
     canvas.width = containerWidth;
     canvas.height = height;
 
-    const actualBarCount = Math.min(barCount, waveform.length);
+    const { actualBarCount, actualBarWidth } = calculateBarDimensions(
+      containerWidth,
+      barCount,
+      barSpacing,
+      barWidth
+    );
 
-    if (actualBarCount === 0) {
-      ctx.clearRect(0, 0, containerWidth, height);
-      return;
-    }
-
-    const actualBarWidth =
-      barWidth ||
-      Math.max(
-        1,
-        (containerWidth - (actualBarCount - 1) * barSpacing) / actualBarCount,
-      );
-    const progress = duration > 0 ? Math.min(1, currentTime / duration) : 0;
-    const progressIndex = Math.floor(progress * actualBarCount);
+    const progressIndex = calculateProgressIndex(currentTime, duration, actualBarCount);
 
     // Clear canvas
     ctx.clearRect(0, 0, containerWidth, height);
 
     // Draw each bar
-    for (let i = 0; i < actualBarCount; i++) {
+    for (let i = 0; i < Math.min(actualBarCount, waveform.length); i++) {
       const barHeight = Math.max(2, (waveform[i] || 0.1) * height);
       const x = i * (actualBarWidth + barSpacing);
       const y = height - barHeight;
 
       // Determine color: played vs unplayed
-      const barColor = i < progressIndex ? color : `${color}80`;
+      ctx.fillStyle = i < progressIndex
+        ? processColor || color
+        : `${color}60`; // Use color with 60% opacity
 
-      ctx.fillStyle = barColor;
       ctx.fillRect(x, y, actualBarWidth, barHeight);
     }
   }, [
@@ -184,6 +147,7 @@ const VoiceWaveform = ({
     containerWidth,
     height,
     color,
+    processColor,
     currentTime,
     duration,
     barSpacing,

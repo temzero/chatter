@@ -1,6 +1,7 @@
 // hooks/useVoiceRecording.ts - FIXED VERSION
 import { useRef, useEffect } from "react";
 import { audioManager, SoundType } from "@/services/media/audioManager";
+import { getCurrentUser } from "@/stores/authStore";
 
 interface RecordingData {
   blob: Blob;
@@ -10,9 +11,9 @@ interface RecordingData {
 interface UseVoiceRecordingReturn {
   stopRecording: () => void;
   getCurrentRecording: () => Blob | null;
+  getRecordingFile: () => File | null;
   clearRecording: () => void;
   getCurrentRecordingDuration: () => number;
-  stopAndGetRecordingData: () => RecordingData | null;
 }
 
 interface UseVoiceRecordingProps {
@@ -205,6 +206,19 @@ export const useVoiceRecording = ({
     return null;
   };
 
+  const getRecordingFile = (): File | null => {
+    const currentUser = getCurrentUser()
+    const recorderInfo = currentUser?.firstName ?? currentUser?.username ?? currentUser?.id ?? "voice"
+    const recording = getCurrentRecording();
+    if (recording) {
+      const filename = `${recorderInfo}-${Date.now()}.webm`; // Potential issue here
+      return new File([recording], filename, {
+        type: "audio/webm;codecs=opus",
+      });
+    }
+    return null;
+  };
+
   // Function to get current recording duration
   const getCurrentRecordingDuration = (): number => {
     let total = recordingDurationRef.current;
@@ -225,54 +239,11 @@ export const useVoiceRecording = ({
     recordingStartRef.current = 0;
   };
 
-  const stopAndGetRecordingData = (): RecordingData | null => {
-    if (!isInitializedRef.current) return null;
-
-    if (audioChunksRef.current.length > 0) {
-      // Stop recording if it's active
-      if (
-        mediaRecorderRef.current &&
-        (mediaRecorderRef.current.state === "recording" ||
-          mediaRecorderRef.current.state === "paused")
-      ) {
-        mediaRecorderRef.current.stop();
-      }
-
-      const audioBlob = new Blob(audioChunksRef.current, {
-        type: "audio/webm;codecs=opus",
-      });
-
-      const data = {
-        blob: audioBlob,
-        url: URL.createObjectURL(audioBlob),
-      };
-
-      // Clean up everything
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop());
-        streamRef.current = null;
-      }
-
-      audioChunksRef.current = [];
-      isInitializedRef.current = false;
-      wasRecordingRef.current = false;
-      recordingDurationRef.current = 0;
-      recordingStartRef.current = 0;
-
-      // Play end sound
-      audioManager.playSound(SoundType.RECORD_END);
-
-      return data;
-    }
-
-    return null;
-  };
-
   return {
     stopRecording,
     getCurrentRecording,
+    getRecordingFile,
     clearRecording,
     getCurrentRecordingDuration,
-    stopAndGetRecordingData,
   };
 };

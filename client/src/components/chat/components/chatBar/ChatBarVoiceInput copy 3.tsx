@@ -36,21 +36,25 @@ const ChatBarVoiceInput = forwardRef<
   const audioObjectURLRef = useRef<string | null>(null);
 
   // Use the recording hook
-  const {
-    stopRecording,
-    getCurrentRecording,
-    getRecordingFile,
-    getCurrentRecordingDuration,
-  } = useVoiceRecording({
-    isRecording,
-    onRecordingComplete: () => {
-      console.log("voice record closed");
-    },
-  });
+  const { stopRecording, getCurrentRecording, getCurrentRecordingDuration } =
+    useVoiceRecording({
+      isRecording,
+      onRecordingComplete: () => {
+        console.log("voice record closed");
+      },
+    });
 
   // Expose getRecordingFile method to parent
   useImperativeHandle(ref, () => ({
-    getRecordingFile: () => getRecordingFile(),
+    getRecordingFile: () => {
+      const recording = getCurrentRecording();
+      if (recording) {
+        return new File([recording], `voice-recording-${Date.now()}.webm`, {
+          type: "audio/webm;codecs=opus",
+        });
+      }
+      return null;
+    },
   }));
 
   // SIMPLE play/pause function
@@ -122,7 +126,6 @@ const ChatBarVoiceInput = forwardRef<
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRecording]); // No infinite loop!
 
   // Update duration while recording
@@ -140,11 +143,10 @@ const ChatBarVoiceInput = forwardRef<
         const duration = getCurrentRecordingDuration();
         setRecordingDuration(duration);
       }, 100);
+    } else {
+      const duration = getCurrentRecordingDuration();
+      setRecordingDuration(duration);
     }
-    //  else {
-    //   const duration = getCurrentRecordingDuration();
-    //   setRecordingDuration(duration);
-    // }
 
     return () => {
       if (interval) clearInterval(interval);

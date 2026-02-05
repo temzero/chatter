@@ -1,10 +1,19 @@
 // ChatBarVoiceInput.tsx
-import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
+import {
+  useEffect,
+  useState,
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useCallback,
+} from "react";
 import clsx from "clsx";
 import { TimerDisplay } from "@/components/ui/TimerDisplay";
 import { motion } from "framer-motion";
 import { useChatBarStore } from "@/stores/chatbarStore";
 import { useVoiceRecording } from "@/common/hooks/voice/useVoiceRecord";
+import VoiceWaveform from "@/components/ui/streams/VoiceWaveform";
+import { useResolvedTheme } from "@/stores/themeStore";
 
 interface ChatBarVoiceInputProps {
   onRecordingDataAvailable: () => void;
@@ -18,12 +27,18 @@ const ChatBarVoiceInput = forwardRef<
   ChatBarVoiceInputRef,
   ChatBarVoiceInputProps
 >(({ onRecordingDataAvailable }, ref) => {
+  const isDarkMode = useResolvedTheme();
+
   const { isRecording, setIsRecording } = useChatBarStore();
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(
-    null,
-  );
+  const [currentTime, setCurrentTime] = useState(0);
+  const [audioDuration, setAudioDuration] = useState(0);
+
+  const audioElementRef = useRef<HTMLAudioElement | null>(null);
+  const animationFrameRef = useRef<number>(0);
+  const audioObjectURLRef = useRef<string | null>(null);
+  const lastRecordingRef = useRef<Blob | null>(null);
 
   // Use the recording hook
   const { stopRecording, getCurrentRecording, getCurrentRecordingDuration } =
@@ -33,6 +48,14 @@ const ChatBarVoiceInput = forwardRef<
         console.log("voice record closed");
       },
     });
+
+  // Store the latest recording in ref
+  useEffect(() => {
+    const recording = getCurrentRecording();
+    if (recording) {
+      lastRecordingRef.current = recording;
+    }
+  }, [getCurrentRecording]);
 
   // Expose getRecordingFile method to parent
   useImperativeHandle(ref, () => ({
@@ -47,40 +70,96 @@ const ChatBarVoiceInput = forwardRef<
     },
   }));
 
-  // Function to play/pause audio
-  const playPausedAudio = () => {
-    if (!isRecording) {
-      const recording = getCurrentRecording();
-      if (recording) {
-        if (audioElement) {
-          // If audio exists, toggle play/pause
-          if (isPlaying) {
-            audioElement.pause();
-            setIsPlaying(false);
-          } else {
-            audioElement.play();
-            setIsPlaying(true);
-          }
-        } else {
-          // Create new audio element
-          const url = URL.createObjectURL(recording);
-          const audio = new Audio(url);
-          setAudioElement(audio);
-
-          audio.onended = () => {
-            setIsPlaying(false);
-            URL.revokeObjectURL(url);
-            setAudioElement(null);
-          };
-
-          audio.play();
-          setIsPlaying(true);
-        }
-      }
+  // Function to update current time for waveform
+  const updateCurrentTime = useCallback(() => {
+    if (audioElementRef.current && !audioElementRef.current.paused) {
+      setCurrentTime(audioElementRef.current.currentTime);
+      animationFrameRef.current = requestAnimationFrame(updateCurrentTime);
     }
-  };
+  }, []);
 
-  // Handle spacebar press for playback
+  // Cleanup audio resources
+  const cleanupAudio = useCallback(() => {
+    if (audioElementRef.current) {
+      audioElementRef.current.pause();
+      audioElementRef.current = null;
+    }
+    if (audioObjectURLRef.current) {
+      URL.revokeObjectURL(audioObjectURLRef.current);
+      audioObjectURLRef.current = null;
+    }
+    setIsPlaying(false);
+    setCurrentTime(0);
+    cancelAnimationFrame(animationFrameRef.current);
+  }, []); // No dependencies since it only uses refs
+
+  // Function to play/pause audio - FIXED VERSION
+  const playPausedAudio = useCallback(() => {
+    if (isRecording) return;
+
+    const recording = getCurrentRecording();
+    if (!recording) return;
+
+    // If we have an audio element and it's playing, pause it
+    if (audioElementRef.current && isPlaying) {
+      audioElementRef.current.pause();
+      setIsPlaying(false);
+      cancelAnimationFrame(animationFrameRef.current);
+      return;
+    }
+
+    // Clean up existing audio resources
+    cleanupAudio();
+
+    // Create new audio element with the LATEST recording
+    const url = URL.createObjectURL(recording);
+    audioObjectURLRef.current = url;
+    const audio = new Audio(url);
+    audioElementRef.current = audio;
+
+    // Set up event listeners
+    audio.onloadedmetadata = () => {
+      setAudioDuration(audio.duration || recordingDuration / 1000);
+    };
+
+    audio.onplay = () => {
+      setIsPlaying(true);
+      setAudioDuration(audio.duration || recordingDuration / 1000);
+      // Start animation frame for updating current time
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = requestAnimationFrame(updateCurrentTime);
+    };
+
+    audio.onpause = () => {
+      setIsPlaying(false);
+      cancelAnimationFrame(animationFrameRef.current);
+    };
+
+    audio.onended = () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+      cancelAnimationFrame(animationFrameRef.current);
+      // Don't revoke URL here, keep it for potential replay
+    };
+
+    audio.ontimeupdate = () => {
+      setCurrentTime(audio.currentTime);
+    };
+
+    audio.onerror = (error) => {
+      console.error("Audio playback error:", error);
+      cleanupAudio();
+    };
+
+    // Play the audio
+    audio.play().catch((error) => {
+      console.error("Failed to play audio:", error);
+      cleanupAudio();
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isRecording, getCurrentRecording, cleanupAudio]);
+
+  // Handle spaceBar press for playback
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === "Space" && !isRecording && getCurrentRecording()) {
@@ -94,13 +173,8 @@ const ChatBarVoiceInput = forwardRef<
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
-      if (audioElement) {
-        audioElement.pause();
-        URL.revokeObjectURL(audioElement.src);
-      }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRecording, audioElement, getCurrentRecording]);
+  }, [isRecording, getCurrentRecording, playPausedAudio]);
 
   // Update duration while recording
   useEffect(() => {
@@ -110,9 +184,11 @@ const ChatBarVoiceInput = forwardRef<
       interval = setInterval(() => {
         const duration = getCurrentRecordingDuration();
         setRecordingDuration(duration);
-      }, 100); // Update every 100ms
+      }, 100);
+
+      // Clean up audio when starting new recording
+      cleanupAudio();
     } else {
-      // Update once when not recording
       const duration = getCurrentRecordingDuration();
       setRecordingDuration(duration);
     }
@@ -120,19 +196,18 @@ const ChatBarVoiceInput = forwardRef<
     return () => {
       if (interval) clearInterval(interval);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRecording, getCurrentRecordingDuration]);
 
-  // Play audio and notify parent when paused
+  // Notify parent when recording becomes available
   useEffect(() => {
     if (!isRecording) {
-      // Notify ChatBar that we have recording data
       const recording = getCurrentRecording();
       if (recording) {
         onRecordingDataAvailable();
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRecording]);
+  }, [isRecording, getCurrentRecording, onRecordingDataAvailable]);
 
   // Handle stop recording
   const handleStop = () => {
@@ -146,13 +221,13 @@ const ChatBarVoiceInput = forwardRef<
       if (isRecording) {
         handleStop();
       }
-      if (audioElement) {
-        audioElement.pause();
-        URL.revokeObjectURL(audioElement.src);
-      }
+      cleanupAudio();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Calculate proper duration for waveform
+  const waveformDuration =
+    audioDuration > 0 ? audioDuration : recordingDuration / 1000;
 
   return (
     <div
@@ -161,32 +236,42 @@ const ChatBarVoiceInput = forwardRef<
         isRecording ? "bg-red-500/50!" : "bg-(--input-border-color)!",
       )}
     >
-      {!isRecording && getCurrentRecording() ? (
-        <button
-          id="play-back-btn"
-          className="rounded-full! bg-(--input-border-color)"
-          onClick={playPausedAudio}
-          disabled={isRecording || !getCurrentRecording()}
-          title={
-            isPlaying ? "Pause playback (Space)" : "Play recording (Space)"
-          }
-        >
-          <span className="material-symbols-outlined filled">
-            {isPlaying ? "pause" : "play_arrow"}
-          </span>
-        </button>
-      ) : 
-      <div></div>
-      }
+      <div className="flex flex-1 items-center justify-between gap-2">
+        {!isRecording && getCurrentRecording() && (
+          <button
+            id="play-back-btn"
+            className="rounded-full! bg-(--input-border-color) scale-110 hover:scale-125"
+            onClick={playPausedAudio}
+            disabled={isRecording || !getCurrentRecording()}
+            title={
+              isPlaying ? "Pause playback (Space)" : "Play recording (Space)"
+            }
+          >
+            <span className="material-symbols-outlined filled">
+              {isPlaying ? "pause" : "play_arrow"}
+            </span>
+          </button>
+        )}
 
-      {/* VOICE VISUALIZER HERE */}
-      <motion.div
-        initial={{ opacity: 0, scale: 2, x: 32 }}
-        animate={{ opacity: 1, scale: 1, x: 0 }}
-        exit={{ opacity: 0, scale: 2, x: 32 }}
-      >
-        <TimerDisplay durationMs={recordingDuration} />
-      </motion.div>
+        <VoiceWaveform
+          audioBlob={getCurrentRecording()}
+          currentTime={currentTime}
+          duration={waveformDuration}
+          height={34}
+          barCount={300}
+          color={isDarkMode ? "#ffffff" : "#000000"}
+          processColor={"#86EFAC"}
+          barSpacing={1}
+          className="flex-1"
+        />
+        <motion.div
+          initial={{ opacity: 0, scale: 2, x: 32 }}
+          animate={{ opacity: 1, scale: 1, x: 0 }}
+          exit={{ opacity: 0, scale: 2, x: 32 }}
+        >
+          <TimerDisplay durationMs={recordingDuration} />
+        </motion.div>
+      </div>
     </div>
   );
 });

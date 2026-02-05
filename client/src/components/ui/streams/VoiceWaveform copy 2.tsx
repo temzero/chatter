@@ -22,7 +22,6 @@ const VoiceWaveform = ({
   height = 40,
   color = "#ffffff",
   processColor, // <-- Receive the prop
-  // processColor = "#86EFAC", // <-- Receive the prop
   barCount = 100,
   barSpacing = 1,
   barWidth,

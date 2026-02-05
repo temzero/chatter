@@ -61,7 +61,7 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
   const { message, senderDisplayName, attachments, isVisible, isMe } =
     messageData;
 
-  console.log("ChannelMessage:", message);
+  // console.log("ChannelMessage:", message);
 
   // Check system message
   const isSystemMessage = !!message.systemEvent;
@@ -132,7 +132,7 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
           />
         )}
         <div
-          className="absolute bottom-1 right-1 text-xs italic opacity-0 group-hover:opacity-80 font-semibold bg-(--panel-color) p-0.5 px-1.5 rounded-full! backdrop-blur"
+          className="absolute -bottom-3 -right-1 text-xs italic opacity-0 group-hover:opacity-80 font-semibold bg-(--panel-color) p-0.5 px-1.5 rounded-full! backdrop-blur"
           style={{ zIndex: 1 }}
         >
           {formatTime(message.createdAt)}

@@ -55,10 +55,6 @@ const mimeTypeMap: Record<string, AttachmentType> = {
   "application/x-bzpdf": AttachmentType.PDF,
   "application/x-gzpdf": AttachmentType.PDF,
   
-  // Voice messages - specific to your app
-  "audio/ogg;codecs=opus": AttachmentType.VOICE,
-  "audio/webm;codecs=opus": AttachmentType.VOICE,
-  
   // Documents (if you want to handle them separately later)
   "application/msword": AttachmentType.FILE,
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document": AttachmentType.FILE,

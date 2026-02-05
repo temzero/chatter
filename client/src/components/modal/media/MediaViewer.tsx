@@ -205,7 +205,7 @@ export const MediaViewer: React.FC = () => {
               attachment={attachment}
               rotation={index === currentIndex ? rotation : 0}
               isCurrent={index === currentIndex}
-              initCurrentTime={initCurrentTime}
+              initCurrentTime={index === currentIndex ? initCurrentTime : undefined}
             />
           </motion.div>
         ))}

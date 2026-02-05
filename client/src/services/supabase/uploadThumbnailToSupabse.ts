@@ -24,7 +24,7 @@ export async function uploadThumbnailToSupabase(
     });
 
     // Use correct extension from actual blob type
-    const filePath = `thumbnails/${timestamp}-thumb-${sanitizedFilename}.${extension}`;
+    const filePath = `thumbnails/${sanitizedFilename}-thumb-${timestamp}.${extension}`;
 
     const url = await SupabaseService.uploadFile(
       file,

@@ -13,7 +13,7 @@ import { useAudioPlayer } from "@/common/hooks/useAudioPlayer";
 import musicDiskCover from "@/assets/image/disk.png";
 import PlayTimeDisplay from "../PlayTimeDisplay";
 
-const DRAG_SENSITIVITY = 0.25;
+const DRAG_SENSITIVITY = 0.4;
 
 interface AudioDiskPlayerProps {
   mediaUrl: string;
@@ -39,10 +39,7 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
     const [isDraggingState, setIsDraggingState] = useState(false);
     const lastDragUpdate = useRef(0);
 
-    // Track playback state
-    const wasPlayingBeforeDrag = useRef(false);
-
-    // Use the hook for ALL audio logic
+    // SIMPLIFIED: Use the hook for ALL audio logic
     const {
       audioRef,
       isPlaying,
@@ -51,7 +48,7 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
       play,
       pause,
       togglePlayPause,
-      seekTo,
+      seekTo: hookSeekTo,
     } = useAudioPlayer({
       onEnded: () => {
         if (goNext) goNext();
@@ -62,19 +59,19 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
     // Calculate progress for the disk rotation
     const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
-    // Expose methods to parent - JUST PASS THROUGH HOOK FUNCTIONS
+    // Expose methods to parent
     useImperativeHandle(
       ref,
       () => ({
         play,
         pause,
         togglePlayPause,
-        seekTo,
+        seekTo: hookSeekTo,
       }),
-      [play, pause, togglePlayPause, seekTo],
+      [play, pause, togglePlayPause, hookSeekTo],
     );
 
-    // =============== OPTIMIZED DRAG LOGIC ===============
+    // =============== DRAG LOGIC (SIMPLIFIED) ===============
     const getAngle = useCallback((x: number, y: number) => {
       if (!diskRef.current) return 0;
       const rect = diskRef.current.getBoundingClientRect();
@@ -87,25 +84,20 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
       (clientX: number, clientY: number) => {
         isDragging.current = true;
         setIsDraggingState(true);
-        wasPlayingBeforeDrag.current = isPlaying; // Save playback state
-
-        // Pause playback during drag USING HOOK
-        // if (isPlaying) {
-        //   pause();
-        // }
-
+        if (isPlaying) {
+          pause(); // Use hook's pause
+        }
         lastAngle.current = getAngle(clientX, clientY);
       },
-      [getAngle, isPlaying],
+      [getAngle, isPlaying, pause],
     );
 
     const handleDragMove = useCallback(
       (clientX: number, clientY: number) => {
-        if (!isDragging.current || !diskRef.current || !audioRef.current)
-          return;
+        if (!isDragging.current || !diskRef.current) return;
 
         const now = Date.now();
-        if (now - lastDragUpdate.current < 16) return; // ~60fps throttle
+        if (now - lastDragUpdate.current < 16) return; // ~60fps
         lastDragUpdate.current = now;
 
         const angle = getAngle(clientX, clientY);
@@ -114,41 +106,22 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
         if (delta < -180) delta += 360;
         lastAngle.current = angle;
 
-        // Calculate new time
         const timeDelta = ((delta * DRAG_SENSITIVITY) / 100) * duration;
-        const newTime = audioRef.current.currentTime + timeDelta;
+        const newTime = currentTime + timeDelta;
 
-        // Clamp to valid range
-        const clampedTime = Math.max(
-          0,
-          Math.min(newTime, duration || Infinity),
-        );
-
-        // ---------- DIRECT DOM ONLY ----------
-        // Update audio element IMMEDIATELY for instant feedback
-        audioRef.current.currentTime = clampedTime;
-
-        // DON'T update React state - hook will catch up via timeupdate event!
-        // This makes dragging super smooth!
+        // Use hook's seekTo which handles edge cases
+        hookSeekTo(Math.max(0, Math.min(newTime, duration)));
       },
-      [getAngle, duration, audioRef],
+      [getAngle, currentTime, duration, hookSeekTo],
     );
 
     const handleDragEnd = useCallback(() => {
-      if (!audioRef.current) return;
-
       isDragging.current = false;
       setIsDraggingState(false);
-
-      // SMART: Just use seekTo to sync final position
-      // seekTo() will update audioRef.currentTime AND currentTime state
-      seekTo(audioRef.current.currentTime);
-
-      // Resume playback if it WAS playing before drag USING HOOK
-      if (wasPlayingBeforeDrag.current) {
-        play();
+      if (isPlaying) {
+        play(); // Use hook's play
       }
-    }, [play, seekTo, audioRef]);
+    }, [isPlaying, play]);
 
     // Use drag hook
     useAudioDiskDrag({
@@ -158,6 +131,7 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
       handleDragEnd,
     });
 
+    // =============== REST OF YOUR COMPONENT STAYS THE SAME ===============
     const diskSize = isMobile ? 300 : 400;
     const diskHoleSize = diskSize / 3;
 
@@ -176,7 +150,7 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
           <DiskVisual
             diskRef={diskRef}
             diskSize={diskSize}
-            progress={progress}
+            progress={progress} // Now calculated from hook state
             isPlaying={isPlaying}
             isDraggingState={isDraggingState}
             diskHoleSize={diskHoleSize}
@@ -189,15 +163,11 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
           <DiskControls
             diskHoleSize={diskHoleSize}
             isPlaying={isPlaying}
-            togglePlayPause={togglePlayPause}
+            togglePlayPause={togglePlayPause} // Use hook's toggle
           />
         </div>
 
-        <PlayTimeDisplay
-          currentTime={currentTime}
-          duration={duration}
-          className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex flex-col gap-2 rounded px-2 py-1"
-        />
+        <PlayTimeDisplay currentTime={currentTime} duration={duration} className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex flex-col gap-2 rounded px-2 py-1" />
 
         <audio
           ref={audioRef}

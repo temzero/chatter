@@ -2,21 +2,18 @@ import { AttachmentResponse } from "@/shared/types/responses/message-attachment.
 import { useRef, useState, MouseEvent, useEffect } from "react";
 import { formatDuration } from "@/common/utils/format/formatDuration";
 import { ModalType } from "@/common/enums/modalType";
-import { useModalStore } from "@/stores/modalStore";
+import { setOpenMediaModal, useModalStore } from "@/stores/modalStore";
 import mediaManager from "@/services/media/mediaManager";
-
 
 interface CustomVideoPlayerProps {
   videoAttachment: AttachmentResponse;
   previewMode?: boolean;
-  onOpenModal?: () => void;
   onLoadedMetadata?: (event: React.SyntheticEvent<HTMLVideoElement>) => void;
 }
 
 const CustomVideoPlayer = ({
   videoAttachment,
   previewMode = false,
-  onOpenModal,
   onLoadedMetadata,
 }: CustomVideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -26,7 +23,7 @@ const CustomVideoPlayer = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [totalDuration, setTotalDuration] = useState(
-    videoAttachment.duration || 0
+    videoAttachment.duration || 0,
   );
 
   const url = videoAttachment.url;
@@ -37,7 +34,7 @@ const CustomVideoPlayer = ({
       const current = videoRef.current.currentTime;
       const total = videoRef.current.duration || totalDuration;
       displayRef.current.textContent = `${formatDuration(
-        current
+        current,
       )} / ${formatDuration(total)}`;
       rafId.current = requestAnimationFrame(updateTimeDisplay);
     }
@@ -84,10 +81,25 @@ const CustomVideoPlayer = ({
     }
   };
 
+  const handleOpenModal = () => {
+    // Store current time for modal
+    const currentTime = videoRef.current?.currentTime || 0;
+    // Open modal with current time
+    setOpenMediaModal(videoAttachment.id, currentTime);
+    // Stop and reset this player
+    if (isPlaying) {
+      togglePlayPause(); // This handles stop + state updates
+    }
+    // Reset to beginning
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+    }
+  };
+
   const handleClick = (e: MouseEvent) => {
     e.preventDefault();
     if (previewMode) togglePlayPause();
-    else if (onOpenModal) onOpenModal();
+    else handleOpenModal();
   };
 
   const handleRightClick = (e: MouseEvent) => {
@@ -98,7 +110,7 @@ const CustomVideoPlayer = ({
       mediaManager.stop(videoRef.current);
       setIsPlaying(false);
     }
-    if (onOpenModal) onOpenModal();
+    handleOpenModal();
   };
 
   const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLVideoElement>) => {
@@ -147,7 +159,7 @@ const CustomVideoPlayer = ({
       {previewMode && !isPlaying && (
         <div
           className="w-full h-full absolute inset-0 flex items-center justify-center cursor-pointer select-none"
-          onClick={onOpenModal}
+          onClick={handleOpenModal}
         >
           <button
             className="bg-black/70 rounded-full! opacity-70 hover:opacity-100 hover:scale-125 transition-all"

@@ -130,6 +130,7 @@ export const RenderModalAttachment = ({
           mediaUrl={attachment.url}
           fileName={attachment.filename ?? ""}
           cdImageUrl={attachment.thumbnailUrl ?? ""}
+          initCurrentTime={initCurrentTime}
           goNext={onMediaEnd}
         />
       );

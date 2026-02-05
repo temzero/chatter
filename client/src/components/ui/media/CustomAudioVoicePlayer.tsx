@@ -1,12 +1,7 @@
-import {
-  forwardRef,
-  useImperativeHandle,
-  useCallback,
-  useEffect,
-} from "react";
-import { formatDuration } from "@/common/utils/format/formatDuration";
-import AudioWaveVisualizer from "../AudioWaveVisualizer";
+import { forwardRef, useImperativeHandle, useCallback } from "react";
 import { useAudioPlayer } from "@/common/hooks/useAudioPlayer";
+import AudioWaveform from "../streams/AudioWaveform";
+import PlayTimeDisplay from "../PlayTimeDisplay";
 
 interface AudioVoicePlayerProps {
   mediaUrl: string;
@@ -45,7 +40,7 @@ const CustomAudioVoicePlayer = forwardRef<
     seekTo,
     setDuration,
     setCurrentTime,
-    setIsPlaying
+    setIsPlaying,
   } = useAudioPlayer({
     onEnded: goNext,
     initialCurrentTime: initCurrentTime,
@@ -74,6 +69,7 @@ const CustomAudioVoicePlayer = forwardRef<
         setCurrentTime(initCurrentTime);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initCurrentTime]);
 
   const handleTimeUpdate = useCallback(() => {
@@ -86,30 +82,7 @@ const CustomAudioVoicePlayer = forwardRef<
     setIsPlaying(false);
     setCurrentTime(0);
     if (goNext) goNext();
-  }, [goNext]);
-
-  // Listen to audio events
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
-
-    audio.addEventListener("play", handlePlay);
-    audio.addEventListener("pause", handlePause);
-    audio.addEventListener("timeupdate", handleTimeUpdate);
-    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
-    audio.addEventListener("ended", handleEnded);
-
-    return () => {
-      audio.removeEventListener("play", handlePlay);
-      audio.removeEventListener("pause", handlePause);
-      audio.removeEventListener("timeupdate", handleTimeUpdate);
-      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
-      audio.removeEventListener("ended", handleEnded);
-    };
-  }, [handleTimeUpdate, handleLoadedMetadata, handleEnded]);
+  }, [goNext, setCurrentTime, setIsPlaying]);
 
   // -------------------- Controls --------------------
   const skipTime = (seconds: number) => {
@@ -120,7 +93,8 @@ const CustomAudioVoicePlayer = forwardRef<
   };
 
   // -------------------- UI Config --------------------
-  const skipForwardButtons: SkipButtonConfig[] = [
+  // Define all possible skip forward buttons
+  const allSkipForwardButtons: SkipButtonConfig[] = [
     {
       seconds: 5,
       label: "Skip forward 5s",
@@ -137,7 +111,8 @@ const CustomAudioVoicePlayer = forwardRef<
     },
   ];
 
-  const skipBackwardButtons: SkipButtonConfig[] = [
+  // Define all possible skip backward buttons
+  const allSkipBackwardButtons: SkipButtonConfig[] = [
     {
       seconds: -5,
       label: "Skip back 5s",
@@ -153,6 +128,27 @@ const CustomAudioVoicePlayer = forwardRef<
       title: "Skip back 30 seconds",
     },
   ];
+
+  // Filter buttons based on duration
+  const skipForwardButtons = allSkipForwardButtons.filter((button) => {
+    if (button.seconds === 30) {
+      return duration > 30; // Only show 30s button if duration > 30s
+    }
+    if (button.seconds === 5) {
+      return duration > 5; // Only show 5s button if duration > 5s
+    }
+    return true;
+  });
+
+  const skipBackwardButtons = allSkipBackwardButtons.filter((button) => {
+    if (button.seconds === -30) {
+      return duration > 30; // Only show 30s button if duration > 30s
+    }
+    if (button.seconds === -5) {
+      return duration > 5; // Only show 5s button if duration > 5s
+    }
+    return true;
+  });
 
   const renderSkipButton = (config: SkipButtonConfig) => (
     <button
@@ -172,7 +168,10 @@ const CustomAudioVoicePlayer = forwardRef<
   return (
     <div className="flex flex-col justify-between gap-4 h-[80%] w-[60%]">
       {/* Header */}
-      <div className="w-full flex flex-col items-center justify-center">
+      <div
+        title={fileName}
+        className="w-full flex flex-col items-center justify-center"
+      >
         <span className="material-symbols-outlined filled text-7xl!">mic</span>
         {/* {fileName && (
           <div className="truncate select-text mt-2" title={fileName}>
@@ -183,7 +182,7 @@ const CustomAudioVoicePlayer = forwardRef<
 
       {/* AudioWave Visualizer - NO ref */}
       <div className="w-full h-48">
-        <AudioWaveVisualizer
+        <AudioWaveform
           mediaUrl={mediaUrl}
           isPlaying={isPlaying}
           currentTime={currentTime}
@@ -195,11 +194,11 @@ const CustomAudioVoicePlayer = forwardRef<
       </div>
 
       {/* Time Display */}
-      <div className="text-3xl! whitespace-nowrap w-full flex justify-center mb-4 select-text leading-none">
-        <span className="text-gray-300">{formatDuration(currentTime)}</span>
-        <span className="mx-2 text-gray-500">/</span>
-        <span className="text-gray-400">{formatDuration(duration)}</span>
-      </div>
+      <PlayTimeDisplay
+        currentTime={currentTime}
+        duration={duration}
+        className="text-3xl!"
+      />
 
       {/* Controls */}
       <div className="flex justify-center gap-6 items-center">

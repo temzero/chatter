@@ -1,18 +1,16 @@
-import {
-  forwardRef,
-  useImperativeHandle,
-} from "react";
+import { forwardRef, useImperativeHandle } from "react";
 import clsx from "clsx";
-import { formatDuration } from "@/common/utils/format/formatDuration";
-import AudioWaveVisualizer from "../AudioWaveVisualizer";
 import { setOpenMediaModal } from "@/stores/modalStore";
 import { useAudioPlayer } from "@/common/hooks/useAudioPlayer";
+import AudioWaveform from "../streams/AudioWaveform";
+import PlayTimeDisplay from "../PlayTimeDisplay";
 
 interface CustomVoicePlayerProps {
   attachmentId: string;
   mediaUrl: string;
   fileName?: string;
   showDuration?: boolean;
+  className?: string;
 }
 
 export interface VoicePlayerRef {
@@ -23,7 +21,7 @@ export interface VoicePlayerRef {
 }
 
 const CustomVoicePlayer = forwardRef<VoicePlayerRef, CustomVoicePlayerProps>(
-  ({ attachmentId, mediaUrl, showDuration = true }, ref) => {
+  ({ attachmentId, mediaUrl, showDuration = true, className }, ref) => {
     const {
       audioRef,
       isPlaying,
@@ -50,17 +48,31 @@ const CustomVoicePlayer = forwardRef<VoicePlayerRef, CustomVoicePlayerProps>(
       [play, pause, togglePlayPause, seekTo, audioRef],
     );
 
-    const handleOpenModal = () => {
-      setOpenMediaModal(attachmentId, currentTime);
-    };
+    // const handleOpenModal = () => {
+    //   setOpenMediaModal(attachmentId, currentTime);
+    // };
 
-    console.log('RENDER VOICE ATTACHMENT')
+    const handleOpenModal = () => {
+      // Pass currentTime to modal (so it continues playing from there)
+      setOpenMediaModal(attachmentId, currentTime);
+
+      // Stop and reset the mini player to 0
+      if (isPlaying) {
+        pause();
+      }
+
+      // Reset mini player position to 0
+      seekTo(0);
+    };
 
     return (
       <div
         key={attachmentId}
         onClick={handleOpenModal}
-        className={clsx("w-[400px] flex p-1 items-center")}
+        className={clsx(
+          className,
+          "flex flex-1 p-1 items-center min-w-[400px]",
+        )}
       >
         <button
           onClick={(e) => {
@@ -68,9 +80,9 @@ const CustomVoicePlayer = forwardRef<VoicePlayerRef, CustomVoicePlayerProps>(
             togglePlayPause();
           }}
           className={clsx(
-            "relative rounded-full!",
-            "overflow-hidden hover:opacity-70 border-2 border-(--input-border-color) bg-(--border-color)",
-            "w-10 h-10 ml-1 mr-2 shrink-0 flex items-center justify-center",
+            "relative w-10 h-10 rounded-full!",
+            "ml-1 mr-2 shrink-0 flex items-center justify-center",
+            "overflow-hidden hover:opacity-70 border-2 border-(--input-border-color) bg-(--glass-panel-color)",
           )}
           aria-label={isPlaying ? "Pause" : "Play"}
         >
@@ -79,8 +91,8 @@ const CustomVoicePlayer = forwardRef<VoicePlayerRef, CustomVoicePlayerProps>(
           </i>
         </button>
 
-        <div className="relative flex flex-col w-[400px] h-12">
-          <AudioWaveVisualizer
+        <div className="relative flex flex-col w-full h-12">
+          <AudioWaveform
             mediaUrl={mediaUrl}
             isPlaying={isPlaying}
             currentTime={currentTime}
@@ -92,27 +104,20 @@ const CustomVoicePlayer = forwardRef<VoicePlayerRef, CustomVoicePlayerProps>(
           />
 
           {showDuration && duration > 1 && (
-            <div
+            <PlayTimeDisplay
+              currentTime={currentTime}
+              duration={duration}
               onClick={handleOpenModal}
               className={clsx(
                 // base
-                "absolute -bottom-0.5 -right-0.5 shrink-0 whitespace-nowrap rounded-lg px-1 py-0.5 text-sm font-semibold",
+                "absolute -bottom-0.5 -right-0.5 shrink-0 whitespace-nowrap rounded-lg px-1 py-0.5 text-sm font-semibold cursor-pointer",
                 "bg-black/30 text-white backdrop-blur-xl",
                 "transition-all",
-
                 // hover
                 "hover:text-lg hover:font-bold",
                 "hover:custom-border hover:bg-(--primary-green-glow) hover:text-black",
               )}
-            >
-              {currentTime > 0 && (
-                <span>
-                  {formatDuration(currentTime)}
-                  <span className="px-0.5">/</span>
-                </span>
-              )}
-              {duration > 0 ? formatDuration(duration) : "--:--"}
-            </div>
+            />
           )}
         </div>
 

@@ -38,7 +38,7 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
 }) => {
   const [aspectRatio, setAspectRatio] = useState<string | null>(null);
 
-  console.log('RenderAttachment', attachment)
+  // console.log('RenderAttachment', attachment)
 
   useEffect(() => {
     if (attachment.type === AttachmentType.IMAGE) {
@@ -127,7 +127,6 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
         <CustomVideoPlayer
           videoAttachment={attachment}
           previewMode={previewMode}
-          onOpenModal={handleOpenModal}
           onLoadedMetadata={handleVideoLoadedMetadata}
         />,
       );

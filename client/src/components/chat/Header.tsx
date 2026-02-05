@@ -133,7 +133,7 @@ const Header: React.FC<ChatHeaderProps> = ({
 
       <div className="flex items-center justify-between px-3 min-h-(--header-height) max-h-(--header-height) ">
         {isMobile && (
-          <GlassButton onClick={handleGoHome} icon="arrow_back_ios" />
+          <GlassButton onClick={handleGoHome} icon="arrow_back" />
         )}
         <motion.div
           key={chat.id}

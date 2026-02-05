@@ -222,7 +222,7 @@ export class AttachmentService {
 
         // Delete the attachment record from database
         await this.attachmentRepo.delete(attachment.id);
-        console.log(`Deleted orphaned attachment: ${attachment.id}`);
+        // console.log(`Deleted orphaned attachment: ${attachment.id}`);
       } else {
         console.log(
           `Attachment ${attachment.id} is still used by ${messageCount - 1} other messages, keeping it.`,

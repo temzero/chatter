@@ -1,16 +1,11 @@
 import clsx from "clsx";
-import React, {
-  useState,
-  useRef,
-  forwardRef,
-  useImperativeHandle,
-  useEffect,
-} from "react";
-import { formatDuration } from "@/common/utils/format/formatDuration";
-import mediaManager from "@/services/media/mediaManager";
-import { motion } from "framer-motion";
-import { getAudioType } from "@/common/utils/getAudioType";
+import React, { forwardRef, useImperativeHandle } from "react";
 import { setOpenMediaModal } from "@/stores/modalStore";
+import { useAudioPlayer } from "@/common/hooks/useAudioPlayer";
+import { getAudioType } from "@/common/utils/getAudioType";
+import { motion } from "framer-motion";
+import musicDiskCover from "@/assets/image/disk.png";
+import PlayTimeDisplay from "../PlayTimeDisplay";
 
 interface CustomAudioPlayerProps {
   attachmentId: string;
@@ -25,6 +20,7 @@ export interface AudioPlayerRef {
   play: () => void;
   pause: () => void;
   togglePlayPause: () => void;
+  seekTo: (time: number) => void;
 }
 
 const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
@@ -39,90 +35,55 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
     },
     ref,
   ) => {
-    const audioRef = useRef<HTMLAudioElement | null>(null);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [progress, setProgress] = useState(0);
-    const [currentTime, setCurrentTime] = useState(0);
-    const [duration, setDuration] = useState(0);
+    const {
+      audioRef,
+      isPlaying,
+      currentTime,
+      duration,
+      play,
+      pause,
+      togglePlayPause,
+      seekTo,
+    } = useAudioPlayer();
 
-    const handleLoadedMetadata = () => {
-      if (audioRef.current) {
-        setDuration(audioRef.current.duration);
-        handleTimeUpdate();
-      }
-    };
-
-    const handleTimeUpdate = () => {
-      if (!audioRef.current) return;
-      const current = audioRef.current.currentTime;
-      const dur = audioRef.current.duration || duration;
-      setCurrentTime(current);
-      setProgress((current / dur) * 100);
-    };
+    // Expose methods to parent ref
+    useImperativeHandle(
+      ref,
+      () => ({
+        play,
+        pause,
+        togglePlayPause,
+        seekTo,
+        get audioElement() {
+          return audioRef.current;
+        },
+      }),
+      [play, pause, togglePlayPause, seekTo, audioRef],
+    );
 
     const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (!audioRef.current) return;
       const newTime = (Number(e.target.value) / 100) * duration;
-      audioRef.current.currentTime = newTime;
-      setCurrentTime(newTime);
-      setProgress(Number(e.target.value));
+      seekTo(newTime);
     };
 
-    // Stop audio if another audio starts (mediaManager handles this)
-    useEffect(() => {
-      const handleExternalPause = () => setIsPlaying(false);
-      const audioElement = audioRef.current;
-      if (audioElement) {
-        audioElement.addEventListener("pause", handleExternalPause);
-      }
-      return () => {
-        if (audioElement) {
-          audioElement.removeEventListener("pause", handleExternalPause);
-          mediaManager.stop(audioElement);
-        }
-      };
-    }, []);
-
-    useImperativeHandle(ref, () => ({
-      play: () => {
-        if (audioRef.current) {
-          mediaManager.play(audioRef.current);
-          setIsPlaying(true);
-        }
-      },
-      pause: () => {
-        if (audioRef.current) {
-          mediaManager.stop(audioRef.current);
-          setIsPlaying(false);
-        }
-      },
-      togglePlayPause: () => {
-        if (!audioRef.current) return;
-        if (isPlaying) {
-          mediaManager.stop(audioRef.current);
-          setIsPlaying(false);
-        } else {
-          mediaManager.play(audioRef.current);
-          setIsPlaying(true);
-        }
-      },
-    }));
-
-    const togglePlayPause = (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.stopPropagation();
-      if (!audioRef.current) return;
-      if (isPlaying) {
-        mediaManager.stop(audioRef.current);
-        setIsPlaying(false);
-      } else {
-        mediaManager.play(audioRef.current);
-        setIsPlaying(true);
-      }
-    };
+    const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
     const handleOpenModal = () => {
-      // Pass the currentTime to the onOpenModal callback
+      // Pass currentTime to modal (so it continues playing from there)
       setOpenMediaModal(attachmentId, currentTime);
+
+      // Stop and reset the mini player to 0
+      if (isPlaying) {
+        pause();
+      }
+
+      // Reset mini player position to 0
+      seekTo(0);
+    };
+
+    const handleTogglePlayPause = (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      togglePlayPause();
     };
 
     return (
@@ -134,17 +95,22 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
         )}
       >
         <button
-          onClick={togglePlayPause}
+          onClick={handleTogglePlayPause}
           className={clsx(
-            "relative w-12 h-12 rounded-full!",
-            "overflow-hidden hover:opacity-70 w-12 h-12 border-2 border-(--input-border-color)",
+            "relative aspect-square rounded-full!",
+            "overflow-hidden hover:opacity-70 bg-(--glass-panel-color)",
+            {
+              "w-12 h-12": thumbnailUrl,
+              "w-10 h-10": !thumbnailUrl,
+            },
           )}
+          aria-label={isPlaying ? "Pause" : "Play"}
         >
           {thumbnailUrl && (
             <motion.img
-              src={thumbnailUrl}
+              src={thumbnailUrl || musicDiskCover}
               className="absolute inset-0 w-full h-full object-fill!"
-              alt=""
+              loading="lazy"
               animate={{
                 rotate: isPlaying ? 360 : 0,
               }}
@@ -157,8 +123,8 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
           )}
 
           <div
-            style={{ zIndex: 9 }}
-            className={`w-7 h-7 flex items-center justify-center overflow-hidden rounded-full ${isPlaying ? "text-(--primary-color)" : "text-(--text-color)"} ${thumbnailUrl ? "bg-(--background-color)" : ""}`}
+            style={{ zIndex: 1 }}
+            className={`flex items-center justify-center overflow-hidden rounded-full border-2 border-(--input-border-color) ${thumbnailUrl ? "bg-(--background-color)" : ""}`}
           >
             <i
               className={clsx("material-symbols-outlined filled leading-none", {
@@ -189,15 +155,7 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
             </div>
           )}
 
-          <audio
-            ref={audioRef}
-            className="hidden"
-            onTimeUpdate={handleTimeUpdate}
-            onLoadedMetadata={handleLoadedMetadata}
-            onEnded={() => {
-              setIsPlaying(false);
-            }}
-          >
+          <audio ref={audioRef} className="hidden" preload="metadata">
             <source src={mediaUrl} type={getAudioType(fileName || "")} />
             Your browser does not support the audio element.
           </audio>
@@ -213,15 +171,11 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
                   background: `linear-gradient(to right, var(--primary-green-glow) ${progress}%, gray ${progress}%)`,
                 }}
               />
-              <div className="flex text-xs opacity-50 whitespace-nowrap shrink-0">
-                {currentTime > 0 && (
-                  <span>
-                    {formatDuration(currentTime)}
-                    <span className="px-0.5">/</span>
-                  </span>
-                )}
-                {duration > 0 && formatDuration(duration)}
-              </div>
+              <PlayTimeDisplay
+                currentTime={currentTime}
+                duration={duration}
+                className="text-xs opacity-50"
+              />
             </div>
           )}
         </div>

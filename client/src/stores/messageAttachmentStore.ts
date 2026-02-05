@@ -116,7 +116,7 @@ export const useAttachmentStore = create<
 
   addMessageAttachments: (chatId, messageId, attachments) => {
     if (!chatId || !attachments || attachments.length === 0) return;
-    console.log("addMessageAttachments", attachments);
+    // console.log("addMessageAttachments", attachments);
     const attachmentsWithMessageId = attachments.map((att) => ({
       ...att,
       messageId: att.messageId || messageId,
