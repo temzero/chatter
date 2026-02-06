@@ -5,7 +5,7 @@ export const getMessageWidth = (
 ): string => {
   if (isMobile) {
     return hasLinkPreview
-      ? "w-[80%]"
+      ? "w-[80%] min-w-(--sidebar-width)"
       : attachmentLength === 1
         ? "w-[60%]"
         : "w-[80%]";
@@ -27,7 +27,7 @@ export const getChannelMessageWidth = (
     classes += "scale-[1.1] ";
   }
   
-  classes += isMobile ? "w-[90%]" : "w-[64%]";
+  classes += isMobile ? "w-[90%] min-w-(--sidebar-width)" : "w-[64%]";
   
   return classes.trim();
 };

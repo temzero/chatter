@@ -108,6 +108,10 @@ export const useAudioPlayer = (options: UseAudioPlayerOptions = {}) => {
   const handleEnded = useCallback(() => {
     setIsPlaying(false);
     setCurrentTime(0);
+    // Reset audio position to start
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+    }
     onEnded?.();
   }, [onEnded]);
 

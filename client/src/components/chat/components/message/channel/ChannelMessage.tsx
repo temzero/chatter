@@ -91,7 +91,7 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
       ref={messageRef}
       id={`message-${message.id}`}
       className={clsx(
-        "relative group mb-4",
+        "relative group mb-4 min-",
         getChannelMessageWidth(isReplyToThisMessage, isMobile),
       )}
       style={{
@@ -132,7 +132,7 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
           />
         )}
         <div
-          className="absolute -bottom-3 -right-1 text-xs italic opacity-0 group-hover:opacity-80 font-semibold bg-(--panel-color) p-0.5 px-1.5 rounded-full! backdrop-blur"
+          className="absolute -bottom-2 -right-1 text-xs italic opacity-0 group-hover:opacity-80 font-semibold bg-(--background-color) p-0.5 px-1.5 rounded-full! backdrop-blur"
           style={{ zIndex: 1 }}
         >
           {formatTime(message.createdAt)}

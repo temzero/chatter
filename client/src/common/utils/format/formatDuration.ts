@@ -1,12 +1,16 @@
 import { TFunction } from "i18next";
 
-export const formatDuration = (seconds: number) => {
+export const formatDuration = (
+  time: number,
+  isMilliseconds: boolean = false,
+) => {
+  const seconds = isMilliseconds ? Math.floor(time / 1000) : time;
+
   if (!seconds || seconds <= 0) return "00:00";
 
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
 
-  // Pad numbers with leading zeros
   const minsStr = mins.toString().padStart(2, "0");
   const secsStr = secs.toString().padStart(2, "0");
 
@@ -16,7 +20,7 @@ export const formatDuration = (seconds: number) => {
 export function formatDurationByStartAndEnd(
   t: TFunction,
   start?: string | Date,
-  end?: string | Date | null
+  end?: string | Date | null,
 ) {
   if (!start || !end) return "-";
 

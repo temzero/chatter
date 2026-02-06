@@ -2,6 +2,7 @@
 import { useIsMobile } from "@/stores/deviceStore";
 import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
 import { formatFileSize } from "@/common/utils/format/formatFileSize";
+import { formatDateTime } from "@/common/utils/format/formatDateTime";
 
 interface MediaViewerBottomInfoProps {
   attachment: AttachmentResponse;
@@ -20,17 +21,22 @@ export const MediaViewerBottomInfo = ({
   return (
     <>
       {isMobile || (
-        <div className="absolute bottom-0 left-0 right-0 flex justify-between items-center p-2"
-        style={{zIndex:9}}
+        <div
+          className="absolute bottom-0 left-0 right-0 flex justify-between items-center p-2"
+          style={{ zIndex: 9 }}
         >
           {attachment.filename && (
             <div className="text-white/60 truncate max-w-[50%] select-text!">
               {attachment.filename}
+              {attachment?.size &&
+                attachment?.size > 0 &&
+                ` (${formatFileSize(attachment.size)})`}
             </div>
           )}
           {attachment.size && (
             <div className="text-white/60 select-text!">
-              {formatFileSize(attachment.size)}
+              {/* {formatFileSize(attachment.size)} */}
+              {formatDateTime(attachment.createdAt)}
             </div>
           )}
         </div>

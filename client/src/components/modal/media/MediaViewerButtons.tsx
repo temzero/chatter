@@ -9,6 +9,7 @@ import { getCurrentUserId } from "@/stores/authStore";
 import { useTranslation } from "react-i18next";
 import { useActiveChatId } from "@/stores/chatStore";
 import { useMessageSender } from "@/stores/chatMemberStore";
+import { formatFileSize } from "@/common/utils/format/formatFileSize";
 
 interface MediaViewerButtonsProps {
   attachment: AttachmentResponse;
@@ -90,7 +91,11 @@ export const MediaViewerButtons = ({
         <button onClick={handleForwardAttachment} className={buttonClasses}>
           <i className="material-symbols-outlined">send</i>
         </button>
-        <button onClick={handleDownloadClick} className={buttonClasses}>
+        <button
+          onClick={handleDownloadClick}
+          className={buttonClasses}
+          title={formatFileSize(attachment.size ?? 0)}
+        >
           <i className="material-symbols-outlined">download</i>
         </button>
         <button onClick={handleDeleteMessage} className={buttonClasses}>

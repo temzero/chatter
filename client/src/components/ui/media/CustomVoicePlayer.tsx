@@ -21,7 +21,10 @@ export interface VoicePlayerRef {
 }
 
 const CustomVoicePlayer = forwardRef<VoicePlayerRef, CustomVoicePlayerProps>(
-  ({ attachmentId, mediaUrl, showDuration = true, className }, ref) => {
+  (
+    { attachmentId, mediaUrl, fileName, showDuration = true, className },
+    ref,
+  ) => {
     const {
       audioRef,
       isPlaying,
@@ -32,6 +35,27 @@ const CustomVoicePlayer = forwardRef<VoicePlayerRef, CustomVoicePlayerProps>(
       togglePlayPause,
       seekTo,
     } = useAudioPlayer();
+
+    const getSenderName = (fileName?: string) => {
+      if (!fileName) return "";
+      // Remove file extension first
+      const nameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
+      // Try splitting by hyphen first, then by dot
+      const parts = nameWithoutExt.split("-");
+      if (parts.length > 1) {
+        return parts[0];
+      }
+      // If no hyphen, split by dot
+      const dotParts = nameWithoutExt.split(".");
+      if (dotParts.length > 1) {
+        return dotParts[0];
+      }
+      // If no separators found, return the full name without extension
+      return nameWithoutExt;
+    };
+
+    // Example usage:
+    const senderName = getSenderName(fileName); // "Nhan"
 
     // Expose methods to parent ref
     useImperativeHandle(
@@ -71,7 +95,7 @@ const CustomVoicePlayer = forwardRef<VoicePlayerRef, CustomVoicePlayerProps>(
         onClick={handleOpenModal}
         className={clsx(
           className,
-          "flex flex-1 p-1 items-center min-w-[400px]",
+          "flex flex-1 p-1 items-center min-w-(--sidebar-width)",
         )}
       >
         <button
@@ -92,6 +116,12 @@ const CustomVoicePlayer = forwardRef<VoicePlayerRef, CustomVoicePlayerProps>(
         </button>
 
         <div className="relative flex flex-col w-full h-12">
+          {senderName && (
+            <h1 className="absolute top-0 left-0 opacity-70 text-sm! italic">
+              {senderName}
+            </h1>
+          )}
+
           <AudioWaveform
             mediaUrl={mediaUrl}
             isPlaying={isPlaying}
@@ -110,7 +140,7 @@ const CustomVoicePlayer = forwardRef<VoicePlayerRef, CustomVoicePlayerProps>(
               onClick={handleOpenModal}
               className={clsx(
                 // base
-                "absolute -bottom-0.5 -right-0.5 shrink-0 whitespace-nowrap rounded-lg px-1 py-0.5 text-sm font-semibold cursor-pointer",
+                "absolute -top-0.5 -right-0.5 shrink-0 whitespace-nowrap rounded-lg px-1 py-0.5 text-sm font-semibold cursor-pointer",
                 "bg-black/30 text-white backdrop-blur-xl",
                 "transition-all",
                 // hover

@@ -2,10 +2,10 @@ import * as React from "react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { AttachmentResponse } from "@/shared/types/responses/message-attachment.response";
+import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 import InfiniteScroller from "@/components/ui/layout/InfiniteScroller";
 import RenderAttachment from "@/components/ui/attachments/RenderAttachment";
 import Button from "@/components/ui/buttons/Button";
-import { AttachmentType } from "@/shared/types/enums/attachment-type.enum";
 
 interface RenderMediaAttachmentsProps {
   attachments: AttachmentResponse[];

@@ -85,7 +85,7 @@ export const RenderModalAttachment = ({
         <motion.video
           ref={videoRef}
           src={attachment.url}
-          poster={attachment.thumbnailUrl || undefined}
+          poster={attachment.thumbnailUrl ? attachment.thumbnailUrl : undefined}
           controls
           onEnded={() => {
             if (onMediaEnd) onMediaEnd();

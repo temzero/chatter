@@ -2,19 +2,20 @@ import {
   useRef,
   forwardRef,
   useImperativeHandle,
+  useReducer,
   useMemo,
   useState,
   useCallback,
   memo,
+  useEffect,
 } from "react";
 import { useIsMobile } from "@/stores/deviceStore";
 import { useAudioDiskDrag } from "@/common/hooks/keyEvent/useAudioDiskDrag";
-import { useAudioPlayer } from "@/common/hooks/useAudioPlayer";
 import musicDiskCover from "@/assets/image/disk.png";
+import mediaManager from "@/services/media/mediaManager";
 import PlayTimeDisplay from "../PlayTimeDisplay";
 
-const DRAG_SENSITIVITY = 0.25;
-
+// -------------------- Component --------------------
 interface AudioDiskPlayerProps {
   mediaUrl: string;
   fileName?: string;
@@ -33,48 +34,122 @@ export interface AudioPlayerRef {
 const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
   ({ mediaUrl, fileName, cdImageUrl, initCurrentTime, goNext }, ref) => {
     const isMobile = useIsMobile();
+
+    // toast.info(`initCurrentTime: ${initCurrentTime}`);
+
+    const audioRef = useRef<HTMLAudioElement | null>(null);
     const diskRef = useRef<HTMLDivElement | null>(null);
+    const logRef = useRef<NodeJS.Timeout | null>(null);
+
+    // const initializedRef = useRef(false);
+
+    // // Create a memoized function to show the initial toast
+    // if (!initializedRef.current && initCurrentTime !== undefined) {
+    //   toast.info(`initCurrentTime: ${initCurrentTime}`);
+    //   initializedRef.current = true;
+    // }
+
+    const [state, dispatch] = useReducer(audioReducer, initialState);
+    const [isDraggingState, setIsDraggingState] = useState(false);
     const isDragging = useRef(false);
     const lastAngle = useRef(0);
-    const [isDraggingState, setIsDraggingState] = useState(false);
-    const lastDragUpdate = useRef(0);
 
-    // Track playback state
-    const wasPlayingBeforeDrag = useRef(false);
+    const togglePlayPause = useCallback(() => {
+      if (!audioRef.current) return;
 
-    // Use the hook for ALL audio logic
-    const {
-      audioRef,
-      isPlaying,
-      currentTime,
-      duration,
-      play,
-      pause,
-      togglePlayPause,
-      seekTo,
-    } = useAudioPlayer({
-      onEnded: () => {
-        if (goNext) goNext();
+      if (state.isPlaying) {
+        mediaManager.stop(audioRef.current);
+        dispatch({ type: "pause" });
+      } else {
+        mediaManager.play(audioRef.current);
+        dispatch({ type: "play" });
+      }
+    }, [state.isPlaying]);
+
+    // Add this function near your other handlers
+    const seekTo = useCallback(
+      (time: number) => {
+        if (!audioRef.current) return;
+
+        // Get current duration
+        const currentDuration = audioRef.current.duration || state.duration;
+
+        // Clamp time to valid range
+        const clampedTime = Math.max(
+          0,
+          Math.min(time, currentDuration || Infinity),
+        );
+
+        // Seek the audio element
+        audioRef.current.currentTime = clampedTime;
+
+        // Update state
+        dispatch({ type: "setTime", payload: clampedTime });
       },
-      initialCurrentTime: initCurrentTime,
-    });
+      [state.duration],
+    );
 
-    // Calculate progress for the disk rotation
-    const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
-
-    // Expose methods to parent - JUST PASS THROUGH HOOK FUNCTIONS
+    // Then in useImperativeHandle:
     useImperativeHandle(
       ref,
       () => ({
-        play,
-        pause,
-        togglePlayPause,
-        seekTo,
+        play: () => {
+          if (audioRef.current) {
+            mediaManager.play(audioRef.current);
+            dispatch({ type: "play" });
+          }
+        },
+        pause: () => {
+          if (audioRef.current) {
+            mediaManager.stop(audioRef.current);
+            dispatch({ type: "pause" });
+          }
+        },
+        togglePlayPause: () => togglePlayPause(),
+        seekTo: seekTo, // Use the seekTo function
       }),
-      [play, pause, togglePlayPause, seekTo],
+      [togglePlayPause, seekTo], // Add seekTo to dependencies
     );
 
-    // =============== OPTIMIZED DRAG LOGIC ===============
+    // -------------------- Handlers --------------------
+    // const handleLoadedMetadata = useCallback(() => {
+    //   if (audioRef.current) {
+    //     dispatch({ type: "setDuration", payload: audioRef.current.duration });
+    //   }
+    // }, []);
+    const handleLoadedMetadata = useCallback(() => {
+      if (audioRef.current) {
+        dispatch({ type: "setDuration", payload: audioRef.current.duration });
+
+        // Set initial time if provided and > 3 seconds
+        if (initCurrentTime !== undefined && initCurrentTime > 3) {
+          // console.log("Setting audio start time to:", initCurrentTime);
+          audioRef.current.currentTime = initCurrentTime;
+          dispatch({ type: "setTime", payload: initCurrentTime });
+
+          // Optional toast
+          // toast.info(`Resumed from ${formatDuration(initCurrentTime)}`);
+        }
+      }
+    }, [initCurrentTime]);
+
+    const handleTimeUpdate = useCallback(() => {
+      if (!audioRef.current) return;
+
+      const currentTime = audioRef.current.currentTime;
+      const progress = state.duration
+        ? (currentTime / state.duration) * 100
+        : 0;
+
+      if (
+        Math.abs(state.currentTime - currentTime) > 0.01 ||
+        Math.abs(state.progress - progress) > 0.1
+      ) {
+        dispatch({ type: "setTime", payload: currentTime });
+      }
+    }, [state.duration, state.currentTime, state.progress]);
+
+    // =============== FIXED: Keep getAngle function ===============
     const getAngle = useCallback((x: number, y: number) => {
       if (!diskRef.current) return 0;
       const rect = diskRef.current.getBoundingClientRect();
@@ -83,29 +158,27 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
       return (Math.atan2(y - cy, x - cx) * 180) / Math.PI;
     }, []);
 
+    // =============== FIXED: Drag handlers that work ===============
     const handleDragStart = useCallback(
       (clientX: number, clientY: number) => {
         isDragging.current = true;
         setIsDraggingState(true);
-        wasPlayingBeforeDrag.current = isPlaying; // Save playback state
-
-        // Pause playback during drag USING HOOK
-        // if (isPlaying) {
-        //   pause();
-        // }
-
+        if (audioRef.current && state.isPlaying) {
+          mediaManager.stop(audioRef.current);
+        }
         lastAngle.current = getAngle(clientX, clientY);
       },
-      [getAngle, isPlaying],
+      [getAngle, state.isPlaying],
     );
 
+    const lastDragUpdate = useRef(0);
     const handleDragMove = useCallback(
       (clientX: number, clientY: number) => {
-        if (!isDragging.current || !diskRef.current || !audioRef.current)
+        if (!isDragging.current || !audioRef.current || !diskRef.current)
           return;
 
         const now = Date.now();
-        if (now - lastDragUpdate.current < 16) return; // ~60fps throttle
+        if (now - lastDragUpdate.current < 16) return;
         lastDragUpdate.current = now;
 
         const angle = getAngle(clientX, clientY);
@@ -114,50 +187,52 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
         if (delta < -180) delta += 360;
         lastAngle.current = angle;
 
-        // Calculate new time
-        const timeDelta = ((delta * DRAG_SENSITIVITY) / 100) * duration;
-        const newTime = audioRef.current.currentTime + timeDelta;
+        const PERCENTAGE_PER_DEGREE = 0.25;
+        const newTime =
+          audioRef.current.currentTime +
+          ((delta * PERCENTAGE_PER_DEGREE) / 100) * state.duration;
 
-        // Clamp to valid range
-        const clampedTime = Math.max(
-          0,
-          Math.min(newTime, duration || Infinity),
-        );
+        if (newTime >= state.duration) {
+          audioRef.current.currentTime = state.duration;
+          dispatch({ type: "setTime", payload: state.duration });
+          return;
+        }
 
-        // ---------- DIRECT DOM ONLY ----------
-        // Update audio element IMMEDIATELY for instant feedback
-        audioRef.current.currentTime = clampedTime;
+        if (newTime <= 0) {
+          audioRef.current.currentTime = 0;
+          dispatch({ type: "setTime", payload: 0 });
+          return;
+        }
 
-        // DON'T update React state - hook will catch up via timeupdate event!
-        // This makes dragging super smooth!
+        audioRef.current.currentTime = newTime;
+        dispatch({ type: "setTime", payload: newTime });
       },
-      [getAngle, duration, audioRef],
+      [getAngle, state.duration],
     );
 
     const handleDragEnd = useCallback(() => {
-      if (!audioRef.current) return;
-
       isDragging.current = false;
       setIsDraggingState(false);
-
-      // SMART: Just use seekTo to sync final position
-      // seekTo() will update audioRef.currentTime AND currentTime state
-      seekTo(audioRef.current.currentTime);
-
-      // Resume playback if it WAS playing before drag USING HOOK
-      if (wasPlayingBeforeDrag.current) {
-        play();
+      if (audioRef.current && state.isPlaying) {
+        mediaManager.play(audioRef.current);
       }
-    }, [play, seekTo, audioRef]);
+    }, [state.isPlaying]);
 
-    // Use drag hook
+    const handleEnded = useCallback(() => {
+      dispatch({ type: "reset" });
+      if (audioRef.current) audioRef.current.currentTime = 0;
+      if (goNext) goNext();
+    }, [goNext]);
+
+    // =============== FIXED: Proper drag hook usage ===============
     useAudioDiskDrag({
-      isPlaying,
-      duration,
+      isPlaying: state.isPlaying,
+      duration: state.duration,
       handleDragMove,
       handleDragEnd,
     });
 
+    // -------------------- Memoized values --------------------
     const diskSize = isMobile ? 300 : 400;
     const diskHoleSize = diskSize / 3;
 
@@ -170,14 +245,22 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
       [fileName],
     );
 
+    // =============== FIXED: Pass diskRef to DiskVisual ===============
+    useEffect(() => {
+      return () => {
+        if (logRef.current) clearTimeout(logRef.current);
+      };
+    }, []);
+
+    // -------------------- JSX --------------------
     return (
       <div className="relative flex flex-col items-center gap-10 p-2 outline-none">
         <div className="relative">
           <DiskVisual
-            diskRef={diskRef}
+            diskRef={diskRef} // =============== PASS THE REF ===============
             diskSize={diskSize}
-            progress={progress}
-            isPlaying={isPlaying}
+            progress={state.progress}
+            isPlaying={state.isPlaying}
             isDraggingState={isDraggingState}
             diskHoleSize={diskHoleSize}
             cdImageUrl={cdImageUrl}
@@ -188,23 +271,26 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
 
           <DiskControls
             diskHoleSize={diskHoleSize}
-            isPlaying={isPlaying}
+            isPlaying={state.isPlaying}
             togglePlayPause={togglePlayPause}
           />
         </div>
 
         <PlayTimeDisplay
-          currentTime={currentTime}
-          duration={duration}
+          currentTime={state.currentTime}
+          duration={state.duration}
           className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex flex-col gap-2 rounded px-2 py-1"
         />
 
-        <audio
-          ref={audioRef}
-          src={mediaUrl}
-          preload="metadata"
-          style={{ display: "none" }}
-        />
+        {mediaUrl && (
+          <audio
+            ref={audioRef}
+            src={mediaUrl}
+            onTimeUpdate={handleTimeUpdate}
+            onLoadedMetadata={handleLoadedMetadata}
+            onEnded={handleEnded}
+          />
+        )}
       </div>
     );
   },
@@ -212,7 +298,50 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
 
 export default memo(CustomAudioDiskPlayer);
 
-// =============== SUB-COMPONENTS ===============
+// -------------------- useReducer --------------------
+interface AudioState {
+  isPlaying: boolean;
+  currentTime: number;
+  progress: number;
+  duration: number;
+}
+
+type AudioAction =
+  | { type: "play" }
+  | { type: "pause" }
+  | { type: "setTime"; payload: number }
+  | { type: "setDuration"; payload: number }
+  | { type: "reset" };
+
+const initialState: AudioState = {
+  isPlaying: false,
+  currentTime: 0,
+  progress: 0,
+  duration: 0,
+};
+
+function audioReducer(state: AudioState, action: AudioAction): AudioState {
+  switch (action.type) {
+    case "play":
+      return { ...state, isPlaying: true };
+    case "pause":
+      return { ...state, isPlaying: false };
+    case "setTime": {
+      const progress = state.duration
+        ? (action.payload / state.duration) * 100
+        : 0;
+      return { ...state, currentTime: action.payload, progress };
+    }
+    case "setDuration":
+      return { ...state, duration: action.payload };
+    case "reset":
+      return { ...state, isPlaying: false, currentTime: 0, progress: 0 };
+    default:
+      return state;
+  }
+}
+
+// =============== Keep diskRef accessible ===============
 interface DiskVisualProps {
   diskRef: React.RefObject<HTMLDivElement | null>;
   diskSize: number;
@@ -296,7 +425,7 @@ const DiskVisual = memo(
         }}
       >
         <img
-          src={cdImageUrl ?? musicDiskCover}
+          src={cdImageUrl ? cdImageUrl : musicDiskCover}
           alt="CD"
           className="w-full h-full object-fill! rounded-full!"
           loading="lazy"

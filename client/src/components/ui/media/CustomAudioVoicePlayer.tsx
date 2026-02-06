@@ -197,7 +197,7 @@ const CustomAudioVoicePlayer = forwardRef<
       <PlayTimeDisplay
         currentTime={currentTime}
         duration={duration}
-        className="text-3xl!"
+        className="text-2xl!"
       />
 
       {/* Controls */}

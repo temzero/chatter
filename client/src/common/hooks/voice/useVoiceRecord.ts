@@ -2,7 +2,6 @@
 import { useRef, useEffect } from "react";
 import { audioManager, SoundType } from "@/services/media/audioManager";
 import { getCurrentUser } from "@/stores/authStore";
-
 interface RecordingData {
   blob: Blob;
   url: string;
@@ -206,12 +205,35 @@ export const useVoiceRecording = ({
     return null;
   };
 
+  // const getRecordingFile = (): File | null => {
+  //   const currentUser = getCurrentUser()
+  //   const recorderInfo = currentUser?.firstName ?? currentUser?.username ?? currentUser?.id ?? "voice"
+  //   const recording = getCurrentRecording();
+  //   if (recording) {
+  //     const filename = `${recorderInfo}.webm`; // Potential issue here
+  //     return new File([recording], filename, {
+  //       type: "audio/webm;codecs=opus",
+  //     });
+  //   }
+  //   return null;
+  // };
   const getRecordingFile = (): File | null => {
-    const currentUser = getCurrentUser()
-    const recorderInfo = currentUser?.firstName ?? currentUser?.username ?? currentUser?.id ?? "voice"
+    const currentUser = getCurrentUser();
+    const recorderInfo =
+      currentUser?.firstName ??
+      currentUser?.username ??
+      currentUser?.id ??
+      "voice";
     const recording = getCurrentRecording();
+
     if (recording) {
-      const filename = `${recorderInfo}-${Date.now()}.webm`; // Potential issue here
+      // Get the duration in milliseconds
+      const durationMs = getCurrentRecordingDuration();
+      const durationSeconds = Math.round(durationMs / 1000);
+
+      // Create filename with duration
+      const filename = `${recorderInfo}-${durationSeconds}.webm`;
+
       return new File([recording], filename, {
         type: "audio/webm;codecs=opus",
       });

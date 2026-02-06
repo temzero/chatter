@@ -15,180 +15,6 @@ import musicDiskCover from "@/assets/image/disk.png";
 import mediaManager from "@/services/media/mediaManager";
 import PlayTimeDisplay from "../PlayTimeDisplay";
 
-// -------------------- useReducer --------------------
-interface AudioState {
-  isPlaying: boolean;
-  currentTime: number;
-  progress: number;
-  duration: number;
-}
-
-type AudioAction =
-  | { type: "play" }
-  | { type: "pause" }
-  | { type: "setTime"; payload: number }
-  | { type: "setDuration"; payload: number }
-  | { type: "reset" };
-
-const initialState: AudioState = {
-  isPlaying: false,
-  currentTime: 0,
-  progress: 0,
-  duration: 0,
-};
-
-function audioReducer(state: AudioState, action: AudioAction): AudioState {
-  switch (action.type) {
-    case "play":
-      return { ...state, isPlaying: true };
-    case "pause":
-      return { ...state, isPlaying: false };
-    case "setTime": {
-      const progress = state.duration
-        ? (action.payload / state.duration) * 100
-        : 0;
-      return { ...state, currentTime: action.payload, progress };
-    }
-    case "setDuration":
-      return { ...state, duration: action.payload };
-    case "reset":
-      return { ...state, isPlaying: false, currentTime: 0, progress: 0 };
-    default:
-      return state;
-  }
-}
-
-// =============== FIXED: Keep diskRef accessible ===============
-interface DiskVisualProps {
-  diskRef: React.RefObject<HTMLDivElement | null>;
-  diskSize: number;
-  progress: number;
-  isPlaying: boolean;
-  isDraggingState: boolean;
-  diskHoleSize: number;
-  cdImageUrl?: string;
-  fileName?: string;
-  processedFileName: string;
-  onDragStart: (clientX: number, clientY: number) => void;
-}
-
-// Add this BEFORE DiskVisual component
-const FileNameSVG = memo(({ fileName }: { fileName: string }) => (
-  <svg className="absolute w-full h-full" viewBox="0 0 200 200">
-    <defs>
-      <path
-        id="circlePath"
-        d="M100,100 m0,-85 a85,85 0 1,1 0,170 a85,85 0 1,1 0,-170"
-      />
-    </defs>
-    <text
-      fill="white"
-      stroke="black"
-      strokeWidth="2"
-      paintOrder="stroke"
-      fontSize="12"
-      fontWeight="semibold"
-      textAnchor="start"
-      transform="rotate(-90 100 100)"
-    >
-      <textPath href="#circlePath">{fileName}</textPath>
-    </text>
-  </svg>
-));
-
-const DiskVisual = memo(
-  ({
-    diskRef,
-    diskSize,
-    progress,
-    isPlaying,
-    isDraggingState,
-    diskHoleSize,
-    cdImageUrl,
-    fileName,
-    processedFileName,
-    onDragStart,
-  }: DiskVisualProps) => {
-    const diskStyle = useMemo(
-      () => ({
-        width: diskSize,
-        transform: `rotate(${(progress / 100) * 360}deg)`,
-        transition:
-          isPlaying && !isDraggingState ? "transform 0.1s linear" : "none",
-        WebkitMaskImage: `radial-gradient(circle at center, transparent ${
-          diskHoleSize / 2 - 1
-        }px, black ${diskHoleSize / 2}px)`,
-        maskImage: `radial-gradient(circle at center, transparent ${
-          diskHoleSize / 2 - 1
-        }px, black ${diskHoleSize / 2}px)`,
-        WebkitMaskComposite: "source-in" as const,
-        maskComposite: "intersect" as const,
-      }),
-      [diskSize, progress, isPlaying, isDraggingState, diskHoleSize],
-    );
-
-    return (
-      <div
-        id="disk"
-        ref={diskRef} // =============== FIXED: Keep ref here ===============
-        className="relative aspect-square rounded-full! overflow-hidden border-4 border-(--border-color) flex items-center justify-center text-white cursor-grab bg-(--panel-color) will-change-transform transform-gpu"
-        style={diskStyle}
-        onMouseDown={(e) => onDragStart(e.clientX, e.clientY)}
-        onTouchStart={(e) => {
-          if (e.touches.length > 0) {
-            const touch = e.touches[0];
-            onDragStart(touch.clientX, touch.clientY);
-          }
-        }}
-      >
-        <img
-          src={cdImageUrl ?? musicDiskCover}
-          alt="CD"
-          className="w-full h-full object-fill! rounded-full!"
-          loading="lazy"
-        />
-
-        {fileName && <FileNameSVG fileName={processedFileName} />}
-
-        <div
-          id="duration-indicator"
-          className="w-1 h-1 bg-red-500 absolute left-0 top-1/2 -translate-y-1/2"
-        />
-      </div>
-    );
-  },
-);
-
-interface DiskControlsProps {
-  diskHoleSize: number;
-  isPlaying: boolean;
-  togglePlayPause: () => void;
-}
-
-const DiskControls = memo(
-  ({ diskHoleSize, isPlaying, togglePlayPause }: DiskControlsProps) => (
-    <>
-      <button
-        className="aspect-square absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full! border-16 border-(--border-color) outline-none"
-        style={{ width: diskHoleSize, zIndex: 1 }}
-        onClick={(e) => {
-          e.stopPropagation();
-          togglePlayPause();
-        }}
-      >
-        <i className="material-symbols-outlined filled text-6xl! opacity-80 leading-none">
-          {isPlaying ? "pause" : "play_arrow"}
-        </i>
-      </button>
-
-      <div
-        id="start-indicator"
-        className="w-1 h-1 bg-red-500 absolute left-0 top-1/2 -translate-y-1/2"
-      />
-    </>
-  ),
-);
-
 // -------------------- Component --------------------
 interface AudioDiskPlayerProps {
   mediaUrl: string;
@@ -450,20 +276,198 @@ const CustomAudioDiskPlayer = forwardRef<AudioPlayerRef, AudioDiskPlayerProps>(
           />
         </div>
 
-        <PlayTimeDisplay currentTime={state.currentTime} duration={state.duration} className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex flex-col gap-2 rounded px-2 py-1" />
+        <PlayTimeDisplay
+          currentTime={state.currentTime}
+          duration={state.duration}
+          className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex flex-col gap-2 rounded px-2 py-1"
+        />
 
-        <audio
-          ref={audioRef}
-          src={mediaUrl || undefined}
-          onTimeUpdate={handleTimeUpdate}
-          onLoadedMetadata={handleLoadedMetadata}
-          onEnded={handleEnded}
-        >
-          Your browser does not support the audio element.
-        </audio>
+        {mediaUrl && (
+          <audio
+            ref={audioRef}
+            src={mediaUrl}
+            onTimeUpdate={handleTimeUpdate}
+            onLoadedMetadata={handleLoadedMetadata}
+            onEnded={handleEnded}
+          />
+        )}
       </div>
     );
   },
 );
 
 export default memo(CustomAudioDiskPlayer);
+
+// -------------------- useReducer --------------------
+interface AudioState {
+  isPlaying: boolean;
+  currentTime: number;
+  progress: number;
+  duration: number;
+}
+
+type AudioAction =
+  | { type: "play" }
+  | { type: "pause" }
+  | { type: "setTime"; payload: number }
+  | { type: "setDuration"; payload: number }
+  | { type: "reset" };
+
+const initialState: AudioState = {
+  isPlaying: false,
+  currentTime: 0,
+  progress: 0,
+  duration: 0,
+};
+
+function audioReducer(state: AudioState, action: AudioAction): AudioState {
+  switch (action.type) {
+    case "play":
+      return { ...state, isPlaying: true };
+    case "pause":
+      return { ...state, isPlaying: false };
+    case "setTime": {
+      const progress = state.duration
+        ? (action.payload / state.duration) * 100
+        : 0;
+      return { ...state, currentTime: action.payload, progress };
+    }
+    case "setDuration":
+      return { ...state, duration: action.payload };
+    case "reset":
+      return { ...state, isPlaying: false, currentTime: 0, progress: 0 };
+    default:
+      return state;
+  }
+}
+
+// =============== Keep diskRef accessible ===============
+interface DiskVisualProps {
+  diskRef: React.RefObject<HTMLDivElement | null>;
+  diskSize: number;
+  progress: number;
+  isPlaying: boolean;
+  isDraggingState: boolean;
+  diskHoleSize: number;
+  cdImageUrl?: string;
+  fileName?: string;
+  processedFileName: string;
+  onDragStart: (clientX: number, clientY: number) => void;
+}
+
+// Add this BEFORE DiskVisual component
+const FileNameSVG = memo(({ fileName }: { fileName: string }) => (
+  <svg className="absolute w-full h-full" viewBox="0 0 200 200">
+    <defs>
+      <path
+        id="circlePath"
+        d="M100,100 m0,-85 a85,85 0 1,1 0,170 a85,85 0 1,1 0,-170"
+      />
+    </defs>
+    <text
+      fill="white"
+      stroke="black"
+      strokeWidth="2"
+      paintOrder="stroke"
+      fontSize="12"
+      fontWeight="semibold"
+      textAnchor="start"
+      transform="rotate(-90 100 100)"
+    >
+      <textPath href="#circlePath">{fileName}</textPath>
+    </text>
+  </svg>
+));
+
+const DiskVisual = memo(
+  ({
+    diskRef,
+    diskSize,
+    progress,
+    isPlaying,
+    isDraggingState,
+    diskHoleSize,
+    cdImageUrl,
+    fileName,
+    processedFileName,
+    onDragStart,
+  }: DiskVisualProps) => {
+    const diskStyle = useMemo(
+      () => ({
+        width: diskSize,
+        transform: `rotate(${(progress / 100) * 360}deg)`,
+        transition:
+          isPlaying && !isDraggingState ? "transform 0.1s linear" : "none",
+        WebkitMaskImage: `radial-gradient(circle at center, transparent ${
+          diskHoleSize / 2 - 1
+        }px, black ${diskHoleSize / 2}px)`,
+        maskImage: `radial-gradient(circle at center, transparent ${
+          diskHoleSize / 2 - 1
+        }px, black ${diskHoleSize / 2}px)`,
+        WebkitMaskComposite: "source-in" as const,
+        maskComposite: "intersect" as const,
+      }),
+      [diskSize, progress, isPlaying, isDraggingState, diskHoleSize],
+    );
+
+    return (
+      <div
+        id="disk"
+        ref={diskRef} // =============== FIXED: Keep ref here ===============
+        className="relative aspect-square rounded-full! overflow-hidden border-4 border-(--border-color) flex items-center justify-center text-white cursor-grab bg-(--panel-color) will-change-transform transform-gpu"
+        style={diskStyle}
+        onMouseDown={(e) => onDragStart(e.clientX, e.clientY)}
+        onTouchStart={(e) => {
+          if (e.touches.length > 0) {
+            const touch = e.touches[0];
+            onDragStart(touch.clientX, touch.clientY);
+          }
+        }}
+      >
+        <img
+          src={cdImageUrl ? cdImageUrl : musicDiskCover}
+          alt="CD"
+          className="w-full h-full object-fill! rounded-full!"
+          loading="lazy"
+        />
+
+        {fileName && <FileNameSVG fileName={processedFileName} />}
+
+        <div
+          id="duration-indicator"
+          className="w-1 h-1 bg-red-500 absolute left-0 top-1/2 -translate-y-1/2"
+        />
+      </div>
+    );
+  },
+);
+
+interface DiskControlsProps {
+  diskHoleSize: number;
+  isPlaying: boolean;
+  togglePlayPause: () => void;
+}
+
+const DiskControls = memo(
+  ({ diskHoleSize, isPlaying, togglePlayPause }: DiskControlsProps) => (
+    <>
+      <button
+        className="aspect-square absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full! border-16 border-(--border-color) outline-none"
+        style={{ width: diskHoleSize, zIndex: 1 }}
+        onClick={(e) => {
+          e.stopPropagation();
+          togglePlayPause();
+        }}
+      >
+        <i className="material-symbols-outlined filled text-6xl! opacity-80 leading-none">
+          {isPlaying ? "pause" : "play_arrow"}
+        </i>
+      </button>
+
+      <div
+        id="start-indicator"
+        className="w-1 h-1 bg-red-500 absolute left-0 top-1/2 -translate-y-1/2"
+      />
+    </>
+  ),
+);

@@ -11,7 +11,7 @@ interface TimeDisplayProps {
 const PlayTimeDisplay = memo(
   ({ currentTime, duration, className = "", onClick }: TimeDisplayProps) => (
     <div
-      className={`text-center text-sm whitespace-nowrap shrink-0 ${className}`}
+      className={`text-center whitespace-nowrap shrink-0 ${className}`}
       onClick={(e) => {
         e.stopPropagation();
         onClick?.();

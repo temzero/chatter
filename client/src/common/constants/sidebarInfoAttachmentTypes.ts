@@ -15,8 +15,8 @@ export const SIDEBAR_INFO_ATTACHMENT_ITEMS = [
     icon: "picture_as_pdf",
   },
   {
-    id: AttachmentType.FILE,
-    icon: "description",
+    id: AttachmentType.VOICE,
+    icon: "mic",
   },
   {
     id: AttachmentType.AUDIO,
@@ -25,5 +25,9 @@ export const SIDEBAR_INFO_ATTACHMENT_ITEMS = [
   {
     id: AttachmentType.LINK,
     icon: "link",
+  },
+    {
+    id: AttachmentType.FILE,
+    icon: "description",
   },
 ] as const;

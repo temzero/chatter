@@ -137,7 +137,7 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
         <CustomVoicePlayer
           attachmentId={attachment.id}
           mediaUrl={attachment.url}
-          fileName={attachment.filename ?? undefined}
+          fileName={previewMode ? undefined : attachment.filename ?? undefined}
         />
       );
 
