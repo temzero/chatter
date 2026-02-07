@@ -227,12 +227,11 @@ export const useVoiceRecording = ({
     const recording = getCurrentRecording();
 
     if (recording) {
-      // Get the duration in milliseconds
       const durationMs = getCurrentRecordingDuration();
-      const durationSeconds = Math.round(durationMs / 1000);
+      const durationSeconds = (durationMs / 1000).toFixed(2);
 
-      // Create filename with duration
-      const filename = `${recorderInfo}-${durationSeconds}.webm`;
+      // Add parentheses around the duration
+      const filename = `${recorderInfo}-(${durationSeconds}).webm`;
 
       return new File([recording], filename, {
         type: "audio/webm;codecs=opus",

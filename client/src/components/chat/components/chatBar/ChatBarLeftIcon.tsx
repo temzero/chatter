@@ -30,7 +30,7 @@ const ChatBarLeftIcon: React.FC<ChatBarLeftIconProps> = ({
           {...chatBarAnimations.micButton}
           className={marginClass}
         >
-          <MicButton isRecording={true}/>
+          <MicButton/>
         </motion.div>
       ) : (
         <>

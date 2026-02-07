@@ -216,6 +216,7 @@ const ChatBar: React.FC<ChatBarProps> = ({ chatId, myMemberId }) => {
       }, 0);
     }
     inputRef.current?.focus();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleFileSelect = useCallback(
