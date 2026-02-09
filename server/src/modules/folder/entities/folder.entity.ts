@@ -27,6 +27,9 @@ export class Folder {
   @Column({ type: 'varchar', nullable: true })
   color: string | null;
 
+  @Column({ type: 'varchar', length: 32, nullable: true })
+  icon: string | null;
+
   @Column({ type: 'simple-array' })
   types: string[]; // ["direct", "group", "channel"]
 

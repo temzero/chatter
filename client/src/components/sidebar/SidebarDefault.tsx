@@ -24,6 +24,7 @@ const SidebarDefault: React.FC = () => {
     (): FolderResponse => ({
       id: "all",
       name: "all",
+      icon: "menu",
       chatIds: [],
       types: [],
       color: "",

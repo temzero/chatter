@@ -10,11 +10,12 @@ import {
 import { SidebarMode } from "@/common/enums/sidebarMode";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { APP_NAME } from "@/common/constants/name";
 import { getCurrentUser } from "@/stores/authStore";
+import { useAppName } from "@/common/hooks/app/useAppName";
 
 const SidebarWellCome: React.FC = () => {
   const { t } = useTranslation();
+  const appName = useAppName()
 
   const currentUser = getCurrentUser();
 
@@ -55,7 +56,7 @@ const SidebarWellCome: React.FC = () => {
                 })}
               </h1>
               <motion.p className="opacity-60 italic">
-                {t("sidebar_well_come.welcome", { appName: APP_NAME })}
+                {t("sidebar_well_come.welcome", { appName: appName })}
               </motion.p>
               <motion.p className="opacity-60 italic">
                 {t("sidebar_well_come.description")}

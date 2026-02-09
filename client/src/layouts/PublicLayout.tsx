@@ -35,7 +35,7 @@ export const AuthenticationLayout = ({
             "pt-12 gap-8",
           )}
         >
-          <LogoWithName onClick={handleLogoClick} size="lg" />
+          <LogoWithName onClick={handleLogoClick} size="xl" />
 
           <motion.div
             {...publicLayoutAnimations.mobileContainer}

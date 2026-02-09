@@ -20,6 +20,7 @@ const ChatFolderSelector: React.FC<Props> = ({
       folders.map((folder) => ({
         id: folder.id,
         name: folder.name.charAt(0).toUpperCase() + folder.name.slice(1),
+        icon: folder.icon,
         color: getColorFromPreset(folder.color),
       })),
     [folders]

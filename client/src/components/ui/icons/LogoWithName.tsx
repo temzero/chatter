@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { Logo } from "./Logo";
-import { APP_NAME } from "@/common/constants/name";
+import { AppName } from "./AppName";
 import { useIsCompactSidebar } from "@/stores/sidebarStore";
 
 interface LogoComponentProps {
@@ -21,22 +21,22 @@ export const LogoWithName = ({
   const sizeConfig = {
     sm: {
       container: "w-6 h-6",
-      text: "text-2xl",
+      text: "text-xl",
       gap: "gap-1",
     },
     md: {
       container: "w-8 h-8",
-      text: "text-3xl",
+      text: "text-2xl",
       gap: "gap-0.5",
     },
     lg: {
       container: "w-12 h-12",
-      text: "text-4xl",
+      text: "text-3xl",
       gap: "gap-1",
     },
     xl: {
       container: "w-[50px] h-[50px]",
-      text: "text-5xl",
+      text: "text-4xl",
       gap: "gap-2",
     },
   };
@@ -57,14 +57,9 @@ export const LogoWithName = ({
 
       {/* App Name Text */}
       {shouldShowText && (
-        <span
-          className={clsx("font-medium tracking-tight", sizeConfig[size].text)}
-          style={{
-            fontFamily: "'Jost','Segoe UI', -apple-system, sans-serif",
-          }}
-        >
-          {APP_NAME}
-        </span>
+        <AppName
+          className={clsx("font-medium", sizeConfig[size].text)}
+        />
       )}
     </div>
   );

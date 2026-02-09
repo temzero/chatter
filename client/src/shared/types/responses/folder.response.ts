@@ -3,6 +3,7 @@ import { ChatType } from "@/shared/types/enums/chat-type.enum";
 export interface FolderResponse {
   id: string;
   name: string;
+  icon?: string;
   color: string | null;
   types: ChatType[];
   chatIds: string[];

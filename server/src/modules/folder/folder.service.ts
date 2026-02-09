@@ -134,14 +134,17 @@ export class FolderService {
       ErrorResponse.notFound(NotFoundError.FOLDER_NOT_FOUND);
     }
 
-    // Update positions
-    const updateOps = newOrder.map((update) => {
-      const folder = folders.find((f) => f.id === update.id);
-      if (folder) {
-        folder.position = update.position;
+    // Create a Map for instant lookups
+    const folderMap = new Map(folders.map((f) => [f.id, f]));
+
+    // Update positions - no nested loops
+    const updateOps = newOrder
+      .map((update) => folderMap.get(update.id))
+      .filter((folder): folder is Folder => folder !== undefined)
+      .map((folder) => {
+        folder.position = newOrder.find((u) => u.id === folder.id)!.position;
         return this.folderRepository.save(folder);
-      }
-    });
+      });
 
     await Promise.all(updateOps);
     return folders.map((f) => this.toDto(f));

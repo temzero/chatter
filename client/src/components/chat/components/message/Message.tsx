@@ -49,10 +49,9 @@ const Message: React.FC<MessageProps> = ({
 
   const messageAnimation = useMemo(() => {
     const messageFromData = messageData?.message;
-    if (!messageFromData) return undefined;
     return getMessageAnimation(
       isMe,
-      messageFromData.status === MessageStatus.SENDING,
+      messageFromData?.status === MessageStatus.SENDING,
     );
   }, [isMe, messageData?.message]);
 
@@ -97,8 +96,8 @@ const Message: React.FC<MessageProps> = ({
   }
 
   const isGroupChat = chatType === ChatType.GROUP;
-  const replyToMessage = message.replyToMessage
-  const call = message.call
+  const replyToMessage = message.replyToMessage;
+  const call = message.call;
 
   return (
     <motion.div
@@ -192,16 +191,4 @@ const Message: React.FC<MessageProps> = ({
   );
 };
 
-// Add proper memoization with props comparison
-const areEqual = (prevProps: MessageProps, nextProps: MessageProps) => {
-  return (
-    prevProps.messageId === nextProps.messageId &&
-    prevProps.currentUserId === nextProps.currentUserId &&
-    prevProps.chatType === nextProps.chatType &&
-    prevProps.showInfo === nextProps.showInfo &&
-    prevProps.isRecent === nextProps.isRecent &&
-    prevProps.isMe === nextProps.isMe
-  );
-};
-
-export default React.memo(Message, areEqual);
+export default React.memo(Message);
