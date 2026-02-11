@@ -25,9 +25,13 @@ import { getChannelMessageWidth } from "@/common/utils/message/getMessageWidth";
 
 interface ChannelMessageProps {
   messageId: string;
+  disableAnimation?: boolean;
 }
 
-const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
+const ChannelMessage: React.FC<ChannelMessageProps> = ({
+  messageId,
+  disableAnimation = false,
+}) => {
   const currentUserId = getCurrentUserId();
 
   // ✅ Use the hook to get all message data
@@ -44,12 +48,12 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
   const messageRef = useRef<HTMLDivElement>(null);
 
   const systemMessageAnimation = useMemo(() => {
+    if (disableAnimation) return;
     const messageFromData = messageData?.message;
-    if (!messageFromData) return;
     return getSystemMessageAnimation(
-      messageFromData.status === MessageStatus.SENDING,
+      messageFromData?.status === MessageStatus.SENDING,
     );
-  }, [messageData?.message]);
+  }, [messageData?.message, disableAnimation]);
 
   // Early return if no message data
   if (!messageData || !currentUserId) {
@@ -87,9 +91,9 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
 
   return (
     <motion.div
-      key={message.id}
+      key={messageId}
       ref={messageRef}
-      id={`message-${message.id}`}
+      id={`message-${messageId}`}
       className={clsx(
         "relative group mb-4 min-",
         getChannelMessageWidth(isReplyToThisMessage, isMobile),
@@ -145,7 +149,7 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({ messageId }) => {
           <MessageReadInfo
             chatId={message.chatId}
             currentUserId={currentUserId}
-            messageId={message.id}
+            messageId={messageId}
             isMe={isMe}
             senderName={senderDisplayName}
           />

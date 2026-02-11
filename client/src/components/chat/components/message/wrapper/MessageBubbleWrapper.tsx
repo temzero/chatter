@@ -103,7 +103,7 @@ const MessageBubbleWrapper: React.FC<MessageBubbleWrapperProps> = ({
       <AnimatePresence>
         {showContextMenu && (
           <MessageContextMenu
-            key={message.id}
+            key={`contextmenu-${message.id}`}
             message={message}
             isChannel={isChannel}
             isMe={isMe}

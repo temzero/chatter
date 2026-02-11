@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import {
-  groupMessagesByDate,
+  flattenMessagesWithDates, // ✅ New helper
   isRecentMessage,
   shouldShowInfo,
 } from "@/common/utils/message/messageHelpers";
@@ -11,6 +11,8 @@ import { useMessageStore } from "@/stores/messageStore";
 import { MarkLastMessageRead } from "@/common/utils/message/markMessageRead";
 import Message from "../components/message/Message";
 import { useTranslation } from "react-i18next";
+import DateHeader from "@/components/ui/messages/DateHeader"; // ✅ Import DateHeader
+import { MessageResponse } from "@/shared/types/responses/message.response";
 
 interface ChatMessagesProps {
   chat: ChatResponse;
@@ -27,25 +29,40 @@ const Messages: React.FC<ChatMessagesProps> = ({
   const { t } = useTranslation();
 
   const chatId = chat.id;
-  const currentUserId = getCurrentUserId();
 
+  const currentUserId = getCurrentUserId();
   const messagesById = useMessageStore.getState().messagesById;
   const messages = messageIds.map((id) => messagesById[id]).filter(Boolean);
 
+  // HANDLE PREVENT ENTER MESSAGE ANIMATION ON FIRST OPEN CHAT 
+  // ✅ Store previous chat ID
+  const prevChatIdRef = useRef(chatId);
+  // ✅ Determine if this is initial load for THIS chat
+  const isInitialChatLoad = useMemo(() => {
+    const isNewChat = prevChatIdRef.current !== chatId;
+    if (isNewChat) {
+      prevChatIdRef.current = chatId;
+      return true;
+    }
+    return false;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chatId, messages.length]);
+
+  // MARK AS READ
   useEffect(() => {
     if (chat && messages.length > 0) {
       return MarkLastMessageRead({ chat, messages });
     }
   }, [chat, messages]);
 
-  // Group messageIds by date
-  const groupedIdsByDate = useMemo(() => {
-    return groupMessagesByDate(messages);
+  // ✅ Flatten messages with date headers
+  const flatItems = useMemo(() => {
+    return flattenMessagesWithDates(messages);
   }, [messages]);
 
   if (!currentUserId) {
     console.error("[AUTH]", "Not authenticated");
-    return;
+    return null;
   }
 
   if (messageIds.length === 0) {
@@ -57,52 +74,51 @@ const Messages: React.FC<ChatMessagesProps> = ({
   }
 
   return (
-    <>
-      {groupedIdsByDate.map((group) => {
-        const groupKey = `${group.date}-${chatId}`;
-        return (
-          <React.Fragment key={groupKey}>
-            {/* Sticky Date Header */}
-            {!isSearch && (
-              <div className="sticky top-0 flex justify-center z-1">
-                <div className="glass-panel text-xs px-2 py-1 rounded-full">
-                  {group.date || "Today"}
-                </div>
-              </div>
-            )}
+    <AnimatePresence initial={false}>
+      {flatItems.map((item) => {
+        if (item.type === "date") {
+          // Render date header
+          return !isSearch ? (
+            <DateHeader key={item.id} date={item.data as string} />
+          ) : null;
+        } else {
+          // Render message
+          const message = item.data as MessageResponse;
+          const isMe = message.sender.id === currentUserId;
 
-            <AnimatePresence initial={false}>
-              {group.messages.map((message, index) => {
-                const isMe = message.sender.id === currentUserId;
-                const prevMsg = group.messages[index - 1];
-                const nextMsg = group.messages[index + 1];
+          // Need context from previous/next messages for styling
+          // We can find them from the flatItems array
+          const currentIndex = flatItems.findIndex((i) => i.id === item.id);
+          const prevItem = flatItems[currentIndex - 1];
+          const nextItem = flatItems[currentIndex + 1];
 
-                const showInfo = shouldShowInfo(message, nextMsg);
-                const isRecent = isRecentMessage(message, prevMsg, nextMsg);
+          const prevMsg =
+            prevItem?.type === "message"
+              ? (prevItem.data as MessageResponse)
+              : undefined;
+          const nextMsg =
+            nextItem?.type === "message"
+              ? (nextItem.data as MessageResponse)
+              : undefined;
 
-                return (
-                  <div
-                    key={message.id}
-                    className={`flex flex-col my-0.5 ${
-                      isMe ? "items-end" : "items-start"
-                    }`}
-                  >
-                    <Message
-                      messageId={message.id}
-                      isMe={isMe}
-                      showInfo={showInfo}
-                      isRecent={isRecent}
-                      chatType={chat.type}
-                      currentUserId={currentUserId}
-                    />
-                  </div>
-                );
-              })}
-            </AnimatePresence>
-          </React.Fragment>
-        );
+          const showInfo = shouldShowInfo(message, nextMsg);
+          const isRecent = isRecentMessage(message, prevMsg, nextMsg);
+
+          return (
+            <Message
+              key={message.id}
+              messageId={message.id}
+              isMe={isMe}
+              showInfo={showInfo}
+              isRecent={isRecent}
+              chatType={chat.type}
+              currentUserId={currentUserId}
+              disableAnimation={isInitialChatLoad}
+            />
+          );
+        }
       })}
-    </>
+    </AnimatePresence>
   );
 };
 

@@ -27,6 +27,7 @@ interface MessageProps {
   isRead?: boolean;
   readUserAvatars?: string[];
   isMe: boolean;
+  disableAnimation?: boolean;
 }
 
 const Message: React.FC<MessageProps> = ({
@@ -36,6 +37,7 @@ const Message: React.FC<MessageProps> = ({
   showInfo = true,
   isRecent = false,
   isMe = false,
+  disableAnimation = false,
 }) => {
   const messageRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
@@ -48,12 +50,14 @@ const Message: React.FC<MessageProps> = ({
   });
 
   const messageAnimation = useMemo(() => {
+    if (disableAnimation) return;
     const messageFromData = messageData?.message;
     return getMessageAnimation(
       isMe,
       messageFromData?.status === MessageStatus.SENDING,
+      // false,
     );
-  }, [isMe, messageData?.message]);
+  }, [isMe, messageData?.message, disableAnimation]);
 
   // Early return if messageData is null
   if (!messageData) {
@@ -72,8 +76,6 @@ const Message: React.FC<MessageProps> = ({
     isFocus,
     isReplyToThisMessage,
   } = messageData;
-
-  // console.log('messageData attachments', attachments)
 
   // System message check
   if (message?.systemEvent) {
@@ -104,9 +106,8 @@ const Message: React.FC<MessageProps> = ({
       id={`message-${messageId}`}
       ref={messageRef}
       className={clsx(
-        "relative flex",
+        "relative flex flex-1 my-0.5",
         isMe ? "justify-end" : "justify-start",
-        getMessageWidth(isMobile, hasLinkPreview, attachmentLength),
       )}
       style={{ zIndex: isFocus || isReplyToThisMessage ? 100 : "auto" }}
       layout="position"
@@ -131,7 +132,12 @@ const Message: React.FC<MessageProps> = ({
         </div>
       )}
 
-      <div className="flex flex-col">
+      <div
+        className={clsx(
+          "flex flex-col",
+          getMessageWidth(isMobile, hasLinkPreview, attachmentLength),
+        )}
+      >
         <div
           className={clsx("relative flex flex-col transition-all", {
             "scale-(1.1)": isReplyToThisMessage,
@@ -155,7 +161,6 @@ const Message: React.FC<MessageProps> = ({
             isMe={isMe}
             isReplyToThisMessage={isReplyToThisMessage}
             isFocus={isFocus}
-            className={hasLinkPreview ? "w-full" : ""}
             idDisplayTail={!isRecent}
           >
             {call ? (

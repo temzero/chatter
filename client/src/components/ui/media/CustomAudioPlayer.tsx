@@ -90,7 +90,7 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
       <div
         key={attachmentId}
         className={clsx(
-          "w-full p-2 flex items-center custom-border-b overflow-hidden",
+          "w-full min-w-(--sidebar-width) p-2 flex items-center custom-border-b overflow-hidden",
           isCompact ? "max-w-60px" : "gap-1",
         )}
       >
@@ -137,15 +137,15 @@ const CustomAudioPlayer = forwardRef<AudioPlayerRef, CustomAudioPlayerProps>(
           </div>
         </button>
 
-        <div className="flex flex-col gap-2 flex-1 min-w-0 cursor-pointer">
+        <div className="flex flex-col gap-2 flex-1 min-w-0 w-full cursor-pointer">
           {isDisplayName && (
             <div
-              className="flex items-center hover:opacity-80 min-w-0"
+              className="flex flex-1 items-center hover:opacity-80 min-w-0"
               onClick={handleOpenModal}
             >
               <h1
                 className={clsx(
-                  "truncate whitespace-nowrap min-w-0",
+                  "line-clamp-1 w-full",
                   isCompact && "text-xs",
                 )}
                 title={fileName}

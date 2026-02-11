@@ -118,7 +118,7 @@ const otherAttachments = Object.values(remainingCategories).flat();
   };
 
   return (
-    <div key={messageId} className={`flex flex-col w-full ${className}`}>
+    <div key={`attachments-message-${messageId}`} className={`flex flex-col w-full ${className}`}>
       {linkAttachments.map((attachment) => (
         <LinkPreviewAttachment
           attachment={attachment}

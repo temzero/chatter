@@ -7,7 +7,7 @@ export interface MessagesByDateGroup {
 }
 
 export function groupMessagesByDate(
-  messages: MessageResponse[]
+  messages: MessageResponse[],
 ): MessagesByDateGroup[] {
   const groups: MessagesByDateGroup[] = [];
 
@@ -25,9 +25,56 @@ export function groupMessagesByDate(
   return groups;
 }
 
+export interface FlatListItem {
+  type: 'date' | 'message';
+  id: string;        // Unique React key
+  timestamp: number; // For sorting/stable keys
+  data: MessageResponse | string; // The actual content
+}
+
+export function flattenMessagesWithDates(
+  messages: MessageResponse[],
+): FlatListItem[] {
+  const items: FlatListItem[] = [];
+  let lastDateKey = "";
+
+  for (const msg of messages) {
+    const date = new Date(msg.createdAt);
+    const dateKey = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+
+    // Add date header if new date
+    if (dateKey !== lastDateKey) {
+      const dayStart = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate(),
+      ).getTime();
+
+      items.push({
+        type: "date",
+        id: `date-${msg.id}`, // Use message ID for uniqueness
+        timestamp: dayStart,
+        data: date.toLocaleDateString(), // Or pass timestamp and format in component
+      });
+
+      lastDateKey = dateKey;
+    }
+
+    // Add message
+    items.push({
+      type: "message",
+      id: msg.id,
+      timestamp: new Date(msg.createdAt).getTime(),
+      data: msg,
+    });
+  }
+
+  return items;
+}
+
 export function shouldShowInfo(
   currentMsg: MessageResponse,
-  nextMsg: MessageResponse | undefined
+  nextMsg: MessageResponse | undefined,
 ): boolean {
   const nextIsSystemEvent = !!nextMsg?.systemEvent;
 
@@ -44,7 +91,7 @@ export function isRecentMessage(
   currentMsg: MessageResponse,
   prevMsg: MessageResponse | undefined,
   nextMsg: MessageResponse | undefined,
-  periodMs: number = 10 * 60 * 1000
+  periodMs: number = 10 * 60 * 1000,
 ): boolean {
   const currentTime = new Date(currentMsg.createdAt).getTime();
 

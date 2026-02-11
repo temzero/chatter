@@ -1,10 +1,13 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
+import { flattenMessagesWithDates } from "@/common/utils/message/messageHelpers";
 import { AnimatePresence } from "framer-motion";
 import { useMessageStore } from "@/stores/messageStore";
 import { MarkLastMessageRead } from "@/common/utils/message/markMessageRead";
 import { useTranslation } from "react-i18next";
 import ChannelMessage from "../components/message/channel/ChannelMessage";
+import DateHeader from "@/components/ui/messages/DateHeader";
+import { MessageResponse } from "@/shared/types/responses/message.response";
 
 interface ChannelMessagesProps {
   chat: ChatResponse;
@@ -17,39 +20,37 @@ const ChannelMessages: React.FC<ChannelMessagesProps> = ({
   messageIds,
   isSearch = false,
 }) => {
-  console.log(
-    "[MOUNTED]",
-    "ChannelMessages:",
-    messageIds.length
-  );
+  console.log("[MOUNTED]", "ChannelMessages:", messageIds.length);
   const { t } = useTranslation();
 
   const chatId = chat.id;
   const messagesById = useMessageStore.getState().messagesById;
   const messages = messageIds.map((id) => messagesById[id]).filter(Boolean);
 
+  // ✅ Store previous chat ID
+  const prevChatIdRef = useRef(chatId);
+
+  // ✅ Determine if this is initial load for THIS chat
+  const isInitialChatLoad = useMemo(() => {
+    const isNewChat = prevChatIdRef.current !== chatId;
+    if (isNewChat) {
+      prevChatIdRef.current = chatId;
+      return true;
+    }
+    return false;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chatId, messages.length]);
+
+  // MARK AS READ
   useEffect(() => {
     if (chat && messages.length > 0) {
       return MarkLastMessageRead({ chat, messages });
     }
   }, [chat, messages]);
 
-  // Group messages by date
-  const messagesByDate = useMemo(() => {
-    const groups: { date: string; messages: typeof messages }[] = [];
-
-    messages.forEach((msg) => {
-      const date = new Date(msg.createdAt).toLocaleDateString();
-      const lastGroup = groups[groups.length - 1];
-
-      if (!lastGroup || lastGroup.date !== date) {
-        groups.push({ date, messages: [msg] });
-      } else {
-        lastGroup.messages.push(msg);
-      }
-    });
-
-    return groups;
+  // ✅ Flatten messages with date headers
+  const flatItems = useMemo(() => {
+    return flattenMessagesWithDates(messages);
   }, [messages]);
 
   if (messages.length === 0) {
@@ -61,32 +62,29 @@ const ChannelMessages: React.FC<ChannelMessagesProps> = ({
   }
 
   return (
-    <>
-      {messagesByDate.map((group) => (
-        <React.Fragment key={`${group.date}-${chatId}`}>
-          {!isSearch && (
-            <div
-              className="sticky top-0 flex justify-center my-2"
-              style={{ zIndex: 1 }}
-            >
-              <div className="bg-(--background-color) text-xs p-1 rounded">
-                {group.date || "Today"}
-              </div>
-            </div>
-          )}
+    <div className="flex flex-col items-center">
+      <AnimatePresence initial={false}>
+        {flatItems.map((item) => {
+          if (item.type === "date") {
+            // Render date header
+            return !isSearch ? (
+              <DateHeader key={item.id} date={item.data as string} />
+            ) : null;
+          } else {
+            // Render channel message
+            const message = item.data as MessageResponse;
 
-          <AnimatePresence initial={false}>
-            {group.messages.map((msg) => {
-              return (
-                <div key={msg.id} className="flex flex-col items-center">
-                  <ChannelMessage messageId={msg.id} />
-                </div>
-              );
-            })}
-          </AnimatePresence>
-        </React.Fragment>
-      ))}
-    </>
+            return (
+              <ChannelMessage
+                key={message.id}
+                messageId={message.id}
+                disableAnimation={isInitialChatLoad}
+              />
+            );
+          }
+        })}
+      </AnimatePresence>
+    </div>
   );
 };
 

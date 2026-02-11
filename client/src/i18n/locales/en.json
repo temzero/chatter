@@ -98,6 +98,8 @@
   },
 
   "time": {
+    "today": "Today",
+    "yesterday": "Yesterday",
     "now": "now",
     "second": "s",
     "minute": "m",

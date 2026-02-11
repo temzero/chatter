@@ -97,6 +97,8 @@
   },
 
   "time": {
+    "today": "Hoy",
+    "yesterday": "Ayer",
     "now": "ahora",
     "second": "s",
     "minute": "min",

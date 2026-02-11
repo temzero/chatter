@@ -98,6 +98,8 @@
   },
 
   "time": {
+    "today": "Hôm nay",
+    "yesterday": "Hôm qua",
     "now": "bây giờ",
     "second": " giây",
     "minute": " phút",

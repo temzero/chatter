@@ -97,6 +97,8 @@
   },
 
   "time": {
+    "today": "आज",
+    "yesterday": "कल",
     "now": "अभी",
     "second": "सेकंड",
     "minute": "मिनट",

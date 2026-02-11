@@ -97,6 +97,8 @@
   },
 
   "time": {
+    "today": "오늘",
+    "yesterday": "어제",
     "now": "지금",
     "second": "초",
     "minute": "분",

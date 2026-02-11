@@ -77,7 +77,7 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
 
   const renderContainer = (content: React.ReactNode) => (
     <div
-      className={`relative w-full h-full cursor-pointer overflow-hidden ${className}`}
+      className={`relative w-full h-full  cursor-pointer overflow-hidden ${className}`}
     >
       {content}
     </div>
