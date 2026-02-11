@@ -23,6 +23,7 @@ type Props = {
   senderId: string;
   senderDisplayName: string;
   content?: SystemMessageJSONContent | null;
+  disableAnimation?: boolean;
 };
 
 const SystemMessage = ({
@@ -31,6 +32,7 @@ const SystemMessage = ({
   senderId,
   senderDisplayName,
   content,
+  disableAnimation = false
 }: Props) => {
   const currentUserId = getCurrentUserId();
   const messageId = message.id;
@@ -54,6 +56,10 @@ const SystemMessage = ({
 
   if (!message || !currentUserId) return null;
 
+  const animationProps = disableAnimation
+  ? {}
+  : messageAnimations.SystemMessage;
+
   return (
     <motion.div
       ref={messageRef}
@@ -71,7 +77,7 @@ const SystemMessage = ({
         zIndex: isFocus || isRelyToThisMessage ? 100 : "auto",
       }}
       layout="position"
-      {...messageAnimations.SystemMessage}
+      {...animationProps}
     >
       {systemEvent === SystemEventType.CHAT_UPDATE_AVATAR &&
         content?.newValue && (

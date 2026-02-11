@@ -87,6 +87,7 @@ const Message: React.FC<MessageProps> = ({
           senderId={sender?.id ?? ""}
           senderDisplayName={senderDisplayName}
           content={message.content as SystemMessageJSONContent}
+          disableAnimation={disableAnimation}
         />
       </div>
     );

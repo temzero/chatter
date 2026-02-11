@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo } from "react";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import { flattenMessagesWithDates } from "@/common/utils/message/messageHelpers";
 import { AnimatePresence } from "framer-motion";
@@ -23,23 +23,8 @@ const ChannelMessages: React.FC<ChannelMessagesProps> = ({
   console.log("[MOUNTED]", "ChannelMessages:", messageIds.length);
   const { t } = useTranslation();
 
-  const chatId = chat.id;
   const messagesById = useMessageStore.getState().messagesById;
   const messages = messageIds.map((id) => messagesById[id]).filter(Boolean);
-
-  // ✅ Store previous chat ID
-  const prevChatIdRef = useRef(chatId);
-
-  // ✅ Determine if this is initial load for THIS chat
-  const isInitialChatLoad = useMemo(() => {
-    const isNewChat = prevChatIdRef.current !== chatId;
-    if (isNewChat) {
-      prevChatIdRef.current = chatId;
-      return true;
-    }
-    return false;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chatId, messages.length]);
 
   // MARK AS READ
   useEffect(() => {
@@ -78,7 +63,6 @@ const ChannelMessages: React.FC<ChannelMessagesProps> = ({
               <ChannelMessage
                 key={message.id}
                 messageId={message.id}
-                disableAnimation={isInitialChatLoad}
               />
             );
           }

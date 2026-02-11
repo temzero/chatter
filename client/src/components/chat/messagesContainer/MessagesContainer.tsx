@@ -35,7 +35,7 @@ const MessagesContainer: React.FC<ChatBoxProps> = ({ chat }) => {
 
   const isSearchMessages = useMessageStore((state) => state.isSearchMessages);
   const isShowImportant = useMessageStore(
-    (state) => state.filterImportantMessages
+    (state) => state.filterImportantMessages,
   );
 
   const scrollerRef = useRef<HTMLDivElement | null>(null);
@@ -53,6 +53,7 @@ const MessagesContainer: React.FC<ChatBoxProps> = ({ chat }) => {
       case ChatType.CHANNEL:
         return (
           <ChannelMessages
+            key={chat.id}
             chat={chat}
             messageIds={messageIds}
             isSearch={isSearchMessages}
@@ -61,6 +62,7 @@ const MessagesContainer: React.FC<ChatBoxProps> = ({ chat }) => {
       default:
         return (
           <Messages
+            key={chat.id}
             chat={chat}
             messageIds={messageIds}
             isSearch={isSearchMessages}
@@ -90,7 +92,7 @@ const MessagesContainer: React.FC<ChatBoxProps> = ({ chat }) => {
       }`}
     >
       {renderMessages()}
-      
+
       {!isHideTypingIndicator && (
         <TypingIndicator chatId={chatId} isMuted={isMuted ?? false} />
       )}

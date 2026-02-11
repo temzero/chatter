@@ -77,6 +77,7 @@ const ChannelMessage: React.FC<ChannelMessageProps> = ({
         senderId={message.sender.id}
         senderDisplayName={senderDisplayName}
         content={message.content as SystemMessageJSONContent}
+        disableAnimation={disableAnimation}
       />
     );
   }

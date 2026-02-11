@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo } from "react";
 import { ChatResponse } from "@/shared/types/responses/chat.response";
 import {
   flattenMessagesWithDates, // ✅ New helper
@@ -28,25 +28,9 @@ const Messages: React.FC<ChatMessagesProps> = ({
   console.log("[MOUNTED]", "Messages:", messageIds.length);
   const { t } = useTranslation();
 
-  const chatId = chat.id;
-
   const currentUserId = getCurrentUserId();
   const messagesById = useMessageStore.getState().messagesById;
   const messages = messageIds.map((id) => messagesById[id]).filter(Boolean);
-
-  // HANDLE PREVENT ENTER MESSAGE ANIMATION ON FIRST OPEN CHAT 
-  // ✅ Store previous chat ID
-  const prevChatIdRef = useRef(chatId);
-  // ✅ Determine if this is initial load for THIS chat
-  const isInitialChatLoad = useMemo(() => {
-    const isNewChat = prevChatIdRef.current !== chatId;
-    if (isNewChat) {
-      prevChatIdRef.current = chatId;
-      return true;
-    }
-    return false;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chatId, messages.length]);
 
   // MARK AS READ
   useEffect(() => {
@@ -113,7 +97,7 @@ const Messages: React.FC<ChatMessagesProps> = ({
               isRecent={isRecent}
               chatType={chat.type}
               currentUserId={currentUserId}
-              disableAnimation={isInitialChatLoad}
+              // disableAnimation={isInitialChatLoad}
             />
           );
         }
