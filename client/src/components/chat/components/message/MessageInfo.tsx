@@ -47,7 +47,7 @@ const MessageInfo: React.FC<MessageInfoProps> = ({
   const containerClasses = clsx({
     "ml-auto": isMe,
     "mr-auto": !isMe,
-    "mb-5": !isRecent,
+    // "mb-5": !isRecent,
   });
 
   const shouldShowReadInfo = readInfoSetting !== MessageReadInfoOptions.NONE;

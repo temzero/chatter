@@ -1,9 +1,13 @@
 // bootstrap.ts
 import { useAuthStore } from "@/stores/authStore";
 import { fetchInitialAppData } from "./fetchInitialAppData";
+import { detectLanguage } from "@/common/utils/detectLanguage";
 
 const bootstrapApp = async () => {
   try {
+    // STEP 0: Detect language on the first time app launch
+    detectLanguage();
+
     // STEP 1: Initialize auth first and get boolean result
     const isAuth = await useAuthStore.getState().initialize();
 
