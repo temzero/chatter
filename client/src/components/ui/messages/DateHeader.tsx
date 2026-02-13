@@ -10,7 +10,7 @@ const DateHeader: React.FC<DateHeaderProps> = ({ date }) => {
   const { t } = useTranslation();
   
   return (
-    <div className="sticky top-0 flex justify-center z-1">
+    <div className="sticky -top-3 flex justify-center z-1 mb-1">
       <div className="glass-panel text-xs px-2 py-1 rounded-full">
         {formatGroupDate(date, t)}
       </div>
