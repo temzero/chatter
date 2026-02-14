@@ -84,6 +84,10 @@ export class EnvConfig {
     };
   }
 
+  static get youTubeApiKey(): string {
+    return process.env.YOUTUBE_API_KEY || '';
+  }
+
   // -------------------- Utilities -------------------
   static get bcryptSaltRounds(): number {
     return parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10);

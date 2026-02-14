@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 // link-preview.service.ts
 import { Injectable, Logger } from '@nestjs/common';
 import { getLinkPreview } from 'link-preview-js';
 import { LinkPreviewResponseDto } from './dto/responses/link-preview-response';
+import { EnvConfig } from '@/common/config/env.config';
 
 @Injectable()
 export class LinkPreviewService {
@@ -10,9 +12,18 @@ export class LinkPreviewService {
 
   async fetchPreview(url: string): Promise<LinkPreviewResponseDto | null> {
     try {
-      // Add timeout and custom headers
+      // Check if it's a YouTube URL
+      if (this.isYouTubeUrl(url)) {
+        this.logger.debug(`Detected YouTube URL: ${url}`);
+        const youtubePreview = await this.fetchYouTubePreview(url);
+        if (youtubePreview) {
+          return youtubePreview;
+        }
+      }
+
+      // Regular link preview for non-YouTube URLs or if YouTube failed
       const data = await getLinkPreview(url, {
-        timeout: 5000, // 5 second timeout
+        timeout: 5000,
         headers: {
           'User-Agent':
             'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
@@ -20,7 +31,7 @@ export class LinkPreviewService {
             'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
           'Accept-Language': 'en-US,en;q=0.5',
         },
-        followRedirects: 'follow', // Follow redirects
+        followRedirects: 'follow',
       });
 
       this.logger.debug(`Successfully fetched preview for ${url}`);
@@ -46,7 +57,70 @@ export class LinkPreviewService {
     }
   }
 
-  // Fallback method using simple fetch for stubborn sites
+  private isYouTubeUrl(url: string): boolean {
+    const youtubeDomains = ['youtube.com', 'youtu.be', 'youtube.com/shorts'];
+    return youtubeDomains.some((domain) => url.includes(domain));
+  }
+
+  private extractYouTubeVideoId(url: string): string | null {
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([^&\n?#]+)/,
+      /youtube\.com\/embed\/([^&\n?#]+)/,
+    ];
+
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match) return match[1];
+    }
+    return null;
+  }
+
+  private async fetchYouTubePreview(
+    url: string,
+  ): Promise<LinkPreviewResponseDto | null> {
+    const videoId = this.extractYouTubeVideoId(url);
+    if (!videoId) return null;
+
+    const apiKey = EnvConfig.youTubeApiKey;
+    if (!apiKey) return null;
+
+    try {
+      const apiUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${apiKey}`;
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+      const response = await fetch(apiUrl, {
+        signal: controller.signal,
+        headers: { Accept: 'application/json' },
+      });
+
+      clearTimeout(timeoutId);
+      if (!response.ok) return null;
+
+      // Simple type assertion for the API response
+      const data: any = await response.json();
+
+      if (!data.items || !data.items.length) return null;
+
+      const snippet = data.items[0].snippet;
+      const thumbnail = snippet.thumbnails?.high || snippet.thumbnails?.default;
+
+      return {
+        url,
+        title: snippet.title || '',
+        description: snippet.description || '',
+        image: thumbnail?.url,
+        mediaType: 'video',
+        site_name: 'YouTube',
+        favicon: 'https://www.youtube.com/favicon.ico',
+      };
+    } catch (err) {
+      this.logger.debug(`YouTube fetch failed: ${err.message}`);
+      return null;
+    }
+  }
+
   private async fetchPreviewAlternative(
     url: string,
   ): Promise<LinkPreviewResponseDto | null> {
@@ -63,12 +137,10 @@ export class LinkPreviewService {
       });
 
       clearTimeout(timeoutId);
-
       if (!response.ok) return null;
 
       const html = await response.text();
 
-      // Basic metadata extraction
       return {
         url,
         title: this.extractTitle(html),
@@ -93,12 +165,10 @@ export class LinkPreviewService {
       /<meta[^>]*name=["']description["'][^>]*content=["']([^"']*)["']/i,
       /<meta[^>]*property=["']og:description["'][^>]*content=["']([^"']*)["']/i,
     ];
-
     for (const pattern of patterns) {
       const match = html.match(pattern);
       if (match) return match[1];
     }
-
     return undefined;
   }
 
@@ -114,8 +184,6 @@ export class LinkPreviewService {
       /<meta[^>]*property=["']og:site_name["'][^>]*content=["']([^"']*)["']/i,
     );
     if (match) return match[1];
-
-    // Fallback to domain name
     try {
       const { hostname } = new URL(url);
       return hostname.replace('www.', '').split('.')[0];
