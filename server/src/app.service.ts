@@ -1,15 +1,27 @@
 import { Injectable } from '@nestjs/common';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 @Injectable()
 export class AppService {
+  private svgContent: string;
+
+  constructor() {
+    // Read the SVG file at startup
+    this.svgContent = readFileSync(
+      join(__dirname, '..', 'public', 'chatter-logo.svg'),
+      'utf8',
+    );
+  }
+
   getHome(): string {
     return `
       <html>
         <head>
-         <meta charset="UTF-8">
+          <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Chatter API Server</title>
-          <link rel="icon" href="/logo.svg" type="image/svg+xml">
+          <link rel="icon" type="image/svg+xml" href="/chatter-logo.svg">
+          <title>Chatter Server</title>
           <style>
             body {
               background-color: black;
@@ -19,35 +31,29 @@ export class AppService {
               justify-content: center;
               align-items: center;
               height: 100vh;
-              font-family: Arial, sans-serif;
+              font-family: "Jost", "Segoe UI", -apple-system, sans-serif;
             }
             h1 {
-              color: white;
+              color: #00cf98d2;
               font-size: 2.4rem;
               font-weight: 500;
               margin: 6px;
             }
             span {
-              color: #00cf98d2;
-              font-weight: 700;
-
+              color: white;
+              font-weight: 500;
             }
-            svg {
-              width: 48px;
-              height: 48px;
-              fill: white;
+            .logo svg {
+              width: 52px;
+              height: 52px;
             }
           </style>
         </head>
         <body>
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path 
-              fill-rule="evenodd" 
-              clip-rule="evenodd" 
-              d="M12 3C7.85113 3 4 5.73396 4 10C4 11.5704 4.38842 12.7289 5.08252 13.6554C5.79003 14.5998 6.87746 15.3863 8.41627 16.0908L9.2326 16.4645L8.94868 17.3162C8.54129 18.5384 7.84997 19.6611 7.15156 20.5844C9.56467 19.8263 12.7167 18.6537 14.9453 17.1679C17.1551 15.6948 18.3969 14.5353 19.0991 13.455C19.7758 12.4139 20 11.371 20 10C20 5.73396 16.1489 3 12 3ZM2 10C2 4.26604 7.14887 1 12 1C16.8511 1 22 4.26604 22 10C22 11.629 21.7242 13.0861 20.7759 14.545C19.8531 15.9647 18.3449 17.3052 16.0547 18.8321C13.0781 20.8164 8.76589 22.2232 6.29772 22.9281C5.48665 23.1597 4.84055 22.6838 4.56243 22.1881C4.28848 21.6998 4.22087 20.9454 4.74413 20.3614C5.44439 19.5798 6.21203 18.5732 6.72616 17.4871C5.40034 16.7841 4.29326 15.9376 3.48189 14.8545C2.48785 13.5277 2 11.9296 2 10Z"
-            />
-          </svg>
-          <h1>Chatter <span>API Server</span></h1>
+          <div class="logo">
+            ${this.svgContent}
+          </div>
+          <h1>Chatter <span>Server</span></h1>
         </body>
       </html>
     `;

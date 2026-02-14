@@ -306,7 +306,7 @@
   },
 
   "sidebar_well_come": {
-    "greeting": "Chào {{name}} 👋",
+    "greeting": "👋 Chào {{name}}",
     "welcome": "Chào mừng đến với {{appName}}",
     "description": "Một nơi đơn giản để trò chuyện, chia sẻ ý tưởng và giữ kết nối.",
     "start_conversation": "Bắt đầu trò chuyện ngay!"

@@ -1,0 +1,19 @@
+/* Animations and effects */
+@keyframes highlight {
+  0% {
+    scale: 2;
+    opacity: 0.2;
+  }
+  75% {
+    scale: 0.94;
+    opacity: 0.8;
+  }
+  100% {
+    scale: 1;
+    opacity: 1;
+  }
+}
+
+.highlight-message {
+  animation: highlight 0.5s;
+}

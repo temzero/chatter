@@ -307,7 +307,7 @@
   },
 
   "sidebar_well_come": {
-    "greeting": "你好，{{name}} 👋",
+    "greeting": "👋 你好，{{name}}",
     "welcome": "欢迎来到 {{appName}}",
     "description": "一个简单的地方，可以聊天、分享想法并保持联系。",
     "start_conversation": "立即开始对话！"

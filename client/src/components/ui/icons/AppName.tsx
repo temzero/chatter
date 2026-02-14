@@ -19,7 +19,7 @@ export const AppName = ({ className }: AppNameProps) => {
         whiteSpace: "nowrap",
         overflow: "hidden",
         textOverflow: "ellipsis",
-        fontFamily: "'Jost','Segoe UI', -apple-system, sans-serif",
+        fontFamily: "Jost, Segoe UI, -apple-system, sans-serif",
       }}
     >
       {appName}

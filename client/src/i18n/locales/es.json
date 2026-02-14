@@ -306,7 +306,7 @@
   },
 
   "sidebar_well_come": {
-    "greeting": "Hola, {{name}} 👋",
+    "greeting": "👋 Hola, {{name}}",
     "welcome": "Bienvenido a {{appName}}",
     "description": "Un lugar sencillo para chatear, compartir ideas y mantenerse conectado.",
     "start_conversation": "¡Comienza una conversación ahora!"
