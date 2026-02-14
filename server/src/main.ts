@@ -36,7 +36,6 @@ async function bootstrap() {
     console.log('3️⃣ Middleware configured, setting up CORS...');
 
     app.enableCors({
-      // origin: [CLIENT_URL, CLIENT_URL_NETWORK],
       origin: true,
       credentials: true,
     });

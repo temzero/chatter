@@ -1,16 +1,36 @@
-// app.service.ts - Simplified version
 import { Injectable } from '@nestjs/common';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 @Injectable()
 export class AppService {
+  private svgContent: string;
+
+  constructor() {
+    try {
+      this.svgContent = readFileSync(
+        join(process.cwd(), 'public', 'chatter-logo.svg'),
+        'utf8',
+      );
+    } catch {
+      // Fallback to inline SVG
+      this.svgContent = `<svg width="1000" height="1000" viewBox="0 0 1000 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M500 40C827.909 40 960 272.091 960 400C960 580.935 847.429 715.213 703.2 808.962C596.643 878.224 476.786 922.498 383.539 944.725C387.841 937.336 392.18 929.638 396.448 921.73C411.438 893.963 426.301 862.281 435.384 831.617C443.952 802.69 449.858 766.692 437.138 735.145H437.14C412.845 674.406 355.292 662.719 313.246 660.553C291.751 659.445 269.057 660.552 250.967 661.079C231.304 661.652 217.083 661.542 206.655 659.646L206.219 659.565L205.781 659.496L204.698 659.32C112.737 644.046 39.9999 548.599 40 400C40.0001 253.261 170.904 40 500 40Z" stroke="#00AE80" stroke-width="80"/>
+        <circle cx="290" cy="410" r="80" fill="#00AE80"/>
+        <circle cx="500" cy="410" r="80" fill="#00AE80"/>
+        <circle cx="710" cy="410" r="80" fill="#00AE80"/>
+      </svg>`;
+    }
+  }
+
   getHome(): string {
     return `
       <html>
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <link rel="icon" type="image/svg+xml" href="/chatter-logo.svg">
           <title>Chatter Server</title>
+          <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,${encodeURIComponent(this.svgContent)}">
           <style>
             body {
               background-color: black;
@@ -24,7 +44,7 @@ export class AppService {
             }
             h1 {
               color: #00cf98d2;
-              font-size: 2.4rem;
+              font-size: 3.6rem;
               font-weight: 500;
               margin: 6px;
             }
@@ -33,14 +53,14 @@ export class AppService {
               font-weight: 500;
             }
             .logo svg {
-              width: 52px;
-              height: 52px;
+              width: 80px;
+              height: 80px;
             }
           </style>
         </head>
         <body>
           <div class="logo">
-            <img src="/chatter-logo.svg" alt="Chatter Logo" width="52" height="52">
+            ${this.svgContent}
           </div>
           <h1>Chatter <span>Server</span></h1>
         </body>
