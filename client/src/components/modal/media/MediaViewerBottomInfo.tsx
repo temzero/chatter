@@ -43,7 +43,7 @@ export const MediaViewerBottomInfo = ({
       )}
       {/* Dot Indicator */}
       <div
-        className={`absolute left-1/2 transform -translate-x-1/2 flex gap-2 z-20 pointer-events-none ${
+        className={`absolute left-1/2 transform -translate-x-1/2 flex mx-8 gap-2 z-20 pointer-events-none ${
           isMobile ? "top-4" : " bottom-3"
         }`}
       >

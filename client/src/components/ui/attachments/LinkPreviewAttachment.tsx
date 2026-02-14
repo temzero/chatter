@@ -50,7 +50,7 @@ export const LinkPreviewAttachment: React.FC<Props> = ({
         "relative aspect-video overflow-hidden rounded-lg shadow-xl flex flex-col gap-1 justify-between",
         "bg-black/30 hover:border-3 hover:border-blue-500 transition-all",
         "group",
-        { "w-full": isMobile },
+        "w-(--attachment-width)",
         className,
       )}
       {...animationProps}
@@ -136,9 +136,9 @@ export const LinkPreviewAttachment: React.FC<Props> = ({
                   loading="lazy"
                 />
               )}
-              <span className="line-clamp-1 text-xs">{site_name}</span>
+              <span className="line-clamp-2 text-xs">{site_name}</span>
             </div>
-            <div className="text-sm font-semibold line-clamp-2">{title}</div>
+            <div className="text-sm font-semibold line-clamp-1">{title}</div>
           </div>
         ) : (
           <div>

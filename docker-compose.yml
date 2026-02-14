@@ -7,7 +7,7 @@ services:
     ports:
       - "5173:5173"
     env_file:
-      - ./client/.env.development
+      - ./client/.env
     tty: true
 
   # NestJS Backend
@@ -18,7 +18,7 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - ./server/.env.development
+      - ./server/.env
     restart: unless-stopped
     tty: true
 

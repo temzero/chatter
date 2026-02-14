@@ -6,7 +6,7 @@ services:
     ports:
       - "5173:5173"
     env_file:
-      - .env.development
+      - .env
     tty: true
 
 networks:
