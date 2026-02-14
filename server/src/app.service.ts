@@ -1,19 +1,8 @@
+// app.service.ts - Simplified version
 import { Injectable } from '@nestjs/common';
-import { readFileSync } from 'fs';
-import { join } from 'path';
 
 @Injectable()
 export class AppService {
-  private svgContent: string;
-
-  constructor() {
-    // Read the SVG file at startup
-    this.svgContent = readFileSync(
-      join(__dirname, '..', 'public', 'chatter-logo.svg'),
-      'utf8',
-    );
-  }
-
   getHome(): string {
     return `
       <html>
@@ -51,7 +40,7 @@ export class AppService {
         </head>
         <body>
           <div class="logo">
-            ${this.svgContent}
+            <img src="/chatter-logo.svg" alt="Chatter Logo" width="52" height="52">
           </div>
           <h1>Chatter <span>Server</span></h1>
         </body>
